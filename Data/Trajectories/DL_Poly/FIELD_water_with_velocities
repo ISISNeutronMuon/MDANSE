@@ -1,0 +1,23 @@
+TIP4P/2005 heavy water model
+UNITS kJ
+
+MOLECULES 1
+TIP4P2005 water
+NUMMOLS 4000
+ATOMS 4
+OW           15.999         0.0000   1    0    1
+HW            2.014         0.5564   2    0    1
+OM            0.000        -1.1128   1    0    1
+RIGID BODIES 1
+    4    1    2    3    4
+FINISH
+VDW 1
+OW      OW        lj     0.7749     3.1589  
+CLOSE
+
+!From Abascal (2005): 
+!
+! V = 4E*((s/r)^12-(s/r)^6) with s = 3.1589  A
+!                                E = 93.2 K = 0.77490787 kJ/mol
+!
+!Water geometry: d(OH) = 0.9572 A, angle(HOH) = 104.52, d(OM) = 0.1546 A
