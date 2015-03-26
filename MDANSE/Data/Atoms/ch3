@@ -1,0 +1,12 @@
+name = 'CH3'
+symbol = 'C'
+
+atomic_number = 6 + 3
+atomic_number_deut = 6 + 3
+
+mass = 12.0110369031 + 3*1.00797597651
+mass_deut = 12.0110369031 + 3*2.014102
+
+color = 'black'
+
+vdW_radius = 0.17
