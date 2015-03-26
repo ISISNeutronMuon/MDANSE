@@ -1,16 +1,43 @@
+'''
+MDANSE : Molecular Dynamics Analysis for Neutron Scattering Experiments
+------------------------------------------------------------------------------------------
+Copyright (C)
+2015- Eric C. Pellegrini Institut Laue-Langevin
+BP 156
+6, rue Jules Horowitz
+38042 Grenoble Cedex 9
+France
+pellegrini[at]ill.fr
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ 
+Created on Mar 23, 2015
+
+@author: pellegrini
+'''
+
 import _abcoll
-import ast
 import copy
 import csv
 import numbers
 import os
 import xml.etree.ElementTree as etree
 
-from MMTK import Atom
-
-from nMOLDYN import PLATFORM
-from nMOLDYN.Core.Error import Error
-from nMOLDYN.Core.Singleton import Singleton
+from MDANSE.Core.Platform import PLATFORM
+from MDANSE.Core.Error import Error
+from MDANSE.Core.Singleton import Singleton
 
 class ElementsDatabaseError(Error):
     pass
@@ -137,6 +164,8 @@ class SortedCaselessDict(dict):
         return [self[key] for key in self._keys]
 
 class ElementsDatabase(object):
+    
+    __metaclass__ = Singleton
     
     _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__), "elements_database.csv")
 
@@ -350,10 +379,6 @@ class ElementsDatabase(object):
         
         return SortedCaselessDict([(k,self[k,pname]) for k in self._data.iterkeys()])
 
-    def get_property(self,pname):
-        
-        return SortedCaselessDict([(k,self[k,pname]) for k in self._data.iterkeys()])
-
     def get_property_settings(self,pname):
 
         return copy.deepcopy(self._properties[pname])
@@ -461,3 +486,4 @@ class ElementsDatabase(object):
             f.write('mass = %s' % props["atomic_weight"])
             f.close()
             
+ELEMENTS = ElementsDatabase()

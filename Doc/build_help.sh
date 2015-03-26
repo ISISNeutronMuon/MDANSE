@@ -2,7 +2,11 @@
 
 rm -rf ../Documentation
 
-sphinx-apidoc -o  ../Documentation -F --separate -d 5 -H nMoldyn -A "B. Aoun & G. Goret & E. Pellegrini, G.R. Kneller"  -V 4.0 -R 4.0 ../nMOLDYN/
-cp doc_utils/conf_help.py ../Documentation/conf.py
-cp doc_utils/layout.html ../Documentation/_templates/
-sphinx-build -b htmlhelp ../Documentation ../nMOLDYN/GUI/Help/
+setenv PYTHONPATH=/home/pellegrini/workspace/MDANSE
+
+sphinx-apidoc -o  . -F --separate -d 5 -H mdanse -A "G. Goret, B. Aoun  & E. Pellegrini"  -V 4.0 -R 4.0 ../MDANSE
+cp conf_help.py conf.py
+
+cp layout.html _templates/
+cp nMoldyn_logo.png _static/
+sphinx-build -b htmlhelp ./ ./Help/

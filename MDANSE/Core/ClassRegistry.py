@@ -24,7 +24,7 @@ class ClassRegistry(abc.ABCMeta):
     whose keys are the |type| class attribute of the subclasses and values are the corresponding 
     class instances.
 
-    Hence any base or child class that does not define |type| class attribute will not be registered.
+    Hence any base or child class that does not define |type| class attribute will not be resgistered.
     '''
     
     __metaclass__ = _Meta

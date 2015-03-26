@@ -17,7 +17,7 @@ import sys, os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-sys.path.append(os.path.abspath('../nMOLDYN'))
+sys.path.append(os.path.abspath('../MDANSE'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -42,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'nMoldyn'
-copyright = u'2014, B. Aoun & G. Goret & E. Pellegrini, G.R. Kneller'
+copyright = u'2014, G. Goret & B. Aoun & E. Pellegrini'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -57,10 +57,10 @@ release = '4.0'
 # for source files.
 exclude_patterns = ['Externals','_build', '**Tests**']
 
-html_logo = '_static/nMoldyn_logo.png'
+html_logo = '_static/mdanse_logo.png'
 
 inheritance_graph_attrs = dict(size='""')
-	
+
 inheritance_graph_attrs = dict(rankdir="TB", size='""')
 
 inheritance_node_attrs = dict(color='lightblue', style='filled')
@@ -82,16 +82,13 @@ html_show_copyright = False
 
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'nMoldyndoc'
+htmlhelp_basename = 'mdanseDoc'
 
 
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
-latex_documents = [
-  ('index', 'nMoldyn.tex', u'nMoldyn Documentation',
-   u'B. Aoun \\& G. Goret \\& E. Pellegrini, G.R. Kneller', 'manual'),
-]
+
 
 #pdf_documents = [
 #  ('index', 'nMoldyn', u'nMoldyn Documentation',
@@ -100,7 +97,7 @@ latex_documents = [
 
 
 
-exclude_patterns = ['nMOLDYN.Externals**', 'nMOLDYN.nMOLDYN.__pkginfo__']
+exclude_patterns = ['MDANSE.Externals**', 'MDANSE.__pkginfo__']
 
 members_to_watch = ['class']
 
