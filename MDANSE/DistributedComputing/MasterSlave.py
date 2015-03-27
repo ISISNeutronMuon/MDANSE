@@ -524,15 +524,15 @@ def initializeMasterProcess(label, slave_script=None, slave_module=None,
             source = file(slave_script).read()
         else:
             source = """
-import nMOLDYN.DistributedComputing.MasterSlave
+import MDANSE.DistributedComputing.MasterSlave
 from %s import *
 """ % slave_module
             if debug:
                 source += "print 'Slave definitions:'\n"
                 source += "print dir()\n"
-                source += "nMOLDYN.DistributedComputing.MasterSlave.debug=True\n"
+                source += "MDANSE.DistributedComputing.MasterSlave.debug=True\n"
             source += """
-nMOLDYN.DistributedComputing.MasterSlave.startSlaveProcess()
+MDANSE.DistributedComputing.MasterSlave.startSlaveProcess()
 """
         process.task_manager.storeData(slave_code = source,
                                        cwd = os.getcwd())

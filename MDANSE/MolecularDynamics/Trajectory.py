@@ -89,18 +89,18 @@ def build_connectivity(universe ,tolerance=0.05):
             covRadii[i] = ELEMENTS[at.symbol,'covalent_radius']
         
         bonds = []
-        fast_calculation.cpt_cluster_connectivity(coords,covRadii,tolerance,bonds)
-                 
-        for idx1,idx2 in bonds:
-            if hasattr(atoms[idx1],"bonded_to__"):
-                atoms[idx1].bonded_to__.append(atoms[idx2])
-            else:
-                atoms[idx1].bonded_to__ = [atoms[idx2]]
-                 
-            if hasattr(atoms[idx2],"bonded_to__"):
-                atoms[idx2].bonded_to__.append(atoms[idx1])
-            else:
-                atoms[idx2].bonded_to__ = [atoms[idx1]]
+#         fast_calculation.cpt_cluster_connectivity(coords,covRadii,tolerance,bonds)
+#                  
+#         for idx1,idx2 in bonds:
+#             if hasattr(atoms[idx1],"bonded_to__"):
+#                 atoms[idx1].bonded_to__.append(atoms[idx2])
+#             else:
+#                 atoms[idx1].bonded_to__ = [atoms[idx2]]
+#                  
+#             if hasattr(atoms[idx2],"bonded_to__"):
+#                 atoms[idx2].bonded_to__.append(atoms[idx1])
+#             else:
+#                 atoms[idx2].bonded_to__ = [atoms[idx1]]
 
 def find_atoms_in_molecule(universe, moleculeName, atomNames, indexes=False):
 

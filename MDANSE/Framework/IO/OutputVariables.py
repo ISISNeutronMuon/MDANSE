@@ -32,9 +32,8 @@ import collections
 
 import numpy
 
-from nMOLDYN import REGISTRY
-from nMOLDYN.Core.Error import Error
-from nMOLDYN.Framework.ExtendableObject import ExtendableObject
+from MDANSE import REGISTRY
+from MDANSE.Core.Error import Error
 
 class OutputVariableError(Error):
     pass
@@ -43,12 +42,12 @@ class OutputData(collections.OrderedDict):
     
     def add(self, dataName, dataType, data, **kwargs):
         
-        self[dataName] = REGISTRY["outputvariable"](dataType, data, dataName, **kwargs)
+        self[dataName] = REGISTRY["output_variable"][dataType](data, dataName, **kwargs)
     
     def write(self, basename, formats, header=None):
         
         for fmt in formats:  
-            REGISTRY["format"](fmt).write(basename, self, header)
+            REGISTRY["format"][fmt].write(basename, self, header)
             
             
 class OutputVariable(numpy.ndarray):
@@ -59,7 +58,9 @@ class OutputVariable(numpy.ndarray):
     Those extra attributes will be contain information necessary for the the nmoldyn plotter. 
     '''
 
-    __metaclass__ = ExtendableObject
+    __metaclass__ = REGISTRY
+    
+    type = "output_variable"
         
     def __new__(cls, value, name, axis=(), units="unitless"):
         '''

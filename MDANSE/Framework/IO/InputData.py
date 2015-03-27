@@ -36,16 +36,18 @@ import numpy
 
 from Scientific.IO.NetCDF import NetCDFFile
 
-from MDANSE.Core.ClassRegistry import ClassRegistry
+from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
-from nMOLDYN.Utilities.MolecularDynamics import get_chemical_objects_number, get_chemical_objects_size, MMTKTrajectory
+from MDANSE.MolecularDynamics.Trajectory import get_chemical_objects_number, get_chemical_objects_size, MMTKTrajectory
 
 class InputDataError(Error):
     pass
 
 class InputData(object):
     
-    __metaclass__ = ClassRegistry
+    __metaclass__ = REGISTRY
+    
+    type = "input_data"
 
     def __init__(self, *args, **kwargs):
         self._data = None

@@ -44,7 +44,7 @@ from Scientific.Geometry import Vector
 
 from MDANSE import ELEMENTS, PLATFORM, REGISTRY, USER_DEFINITIONS
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Configurables.Jobs.Selectors import SelectionParser
+from MDANSE.Framework.Selectors import SelectionParser
 from MDANSE.Mathematics.Arithmetic import ComplexNumber
 from MDANSE.Mathematics.Signal import INTERPOLATION_ORDER
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
@@ -66,7 +66,7 @@ class ConfiguratorError(Error):
     def __str__(self):
         
         if self._configurator is not None:
-            self._message = "%r --> %s" % (self._configurator.name,self._message)
+            self._message = "Configurator: %r --> %s" % (self._configurator.name,self._message)
         
         return self._message
     
@@ -81,7 +81,7 @@ class ConfiguratorsDict(collections.OrderedDict):
         try:
             self[name] = REGISTRY["configurator"][typ](name, *args, **kwargs)
         except KeyError:
-            raise ConfiguratorError("Invalid type for %r configurator" % name)
+            raise ConfiguratorError("invalid type for %r configurator" % name)
                                                 
     def build_doc(self):
         
@@ -130,6 +130,15 @@ class ConfiguratorsDict(collections.OrderedDict):
             table += '+%s+%s+%s+\n'%(s[0]*'-',s[1]*'-',s[2]*'-')
     
         return table
+    
+    def get_default_parameters(self):
+        
+        params = collections.OrderedDict()
+        for k,v in self.items():
+            params[k] = v.default
+            
+        return params
+        
                                                 
 class Configurator(dict):
     
@@ -185,7 +194,7 @@ class Configurator(dict):
     def add_dependency(self, name, conf):
         
         if self._dependencies.has_key(name):
-            raise ConfiguratorError("The configurator %s already has %s dependency" % (self._name,name))
+            raise ConfiguratorError("duplicate dependendy for configurator %s" % name, self)
                         
     def check_dependencies(self, configured):
         
@@ -213,7 +222,7 @@ class InputDirectoryConfigurator(Configurator):
         value = PLATFORM.get_path(value)
         
         if not os.path.exists(value):
-            raise ConfiguratorError('Invalid type for input value', self)
+            raise ConfiguratorError('invalid type for input value', self)
                                         
         self['value'] = value        
 
@@ -242,7 +251,7 @@ class OutputDirectoryConfigurator(Configurator):
         
         if self._new:
             if os.path.exists(value):
-                raise ConfiguratorError("The output directory must not exist", self)
+                raise ConfiguratorError("the output directory must not exist", self)
                                                 
         self['value'] = value        
         
@@ -297,12 +306,12 @@ class StringConfigurator(Configurator):
         
         if not self._acceptNullString:
             if not value:
-                raise ConfiguratorError("Null string not accepted", self)
+                raise ConfiguratorError("invalid null string", self)
             
         if self._evalType is not None:
             value = ast.literal_eval(value)
             if not isinstance(value,self._evalType):
-                raise ConfiguratorError("Invalid type for the evaluated string", self)
+                raise ConfiguratorError("the string can not be eval to %r type" % self._evalType.__name__, self)
                         
         self['value'] = value
         
@@ -339,7 +348,7 @@ class BooleanConfigurator(Configurator):
             value = value.lower()
 
             if not self._shortCuts.has_key(value):
-                raise ConfiguratorError('Invalid boolean string', self)
+                raise ConfiguratorError('invalid boolean string', self)
                         
         value = bool(value)
                         
@@ -403,7 +412,7 @@ class MultipleChoicesConfigurator(Configurator):
 
         if self._nChoices is not None:
             if len(value) != self._nChoices:
-                raise ConfiguratorError("Invalid number of choices.", self)
+                raise ConfiguratorError("invalid number of choices.", self)
 
         indexes = []
         for v in value:
@@ -457,15 +466,15 @@ class ComplexConfigurator(Configurator):
             
         if self._choices:
             if not value in self._choices:
-                raise ConfiguratorError('The input value is not a valid choice.', self)
+                raise ConfiguratorError('the input value is not a valid choice.', self)
                         
         if self._mini is not None:
             if value.modulus() < self._mini.modulus():
-                raise ConfiguratorError("The input value is lower than %r." % self._mini, self)
+                raise ConfiguratorError("the input value is lower than %r." % self._mini, self)
 
         if self._maxi is not None:
             if value.modulus() > self._maxi.modulus():
-                raise ConfiguratorError("The input value is higher than %r." % self._maxi, self)
+                raise ConfiguratorError("the input value is higher than %r." % self._maxi, self)
 
         self['value'] = value
         
@@ -517,15 +526,15 @@ class FloatConfigurator(Configurator):
             
         if self._choices:
             if not value in self._choices:
-                raise ConfiguratorError('The input value is not a valid choice.', self)
+                raise ConfiguratorError('the input value is not a valid choice.', self)
                         
         if self._mini is not None:
             if value < self._mini:
-                raise ConfiguratorError("The input value is lower than %r." % self._mini, self)
+                raise ConfiguratorError("the input value is lower than %r." % self._mini, self)
 
         if self._maxi is not None:
             if value > self._maxi:
-                raise ConfiguratorError("The input value is higher than %r." % self._maxi, self)
+                raise ConfiguratorError("the input value is higher than %r." % self._maxi, self)
 
         self['value'] = value
 
@@ -576,7 +585,7 @@ class QVectorsConfigurator(Configurator):
             data = generator.run()
                         
             if not data:
-                raise ConfiguratorError("No Q vectors could be generated", self)
+                raise ConfiguratorError("no Q vectors could be generated", self)
 
             self["parameters"] = parameters
             self["type"] = generator.type
@@ -671,7 +680,7 @@ class InputFileConfigurator(Configurator):
             value = PLATFORM.get_path(value)
                     
             if not os.path.exists(value):
-                raise ConfiguratorError("The input file %r does not exist." % value, self)
+                raise ConfiguratorError("the input file %r does not exist." % value, self)
         
         self["value"] = value 
         self["filename"] = value
@@ -719,15 +728,15 @@ class IntegerConfigurator(Configurator):
             
         if self._choices:
             if not value in self._choices:
-                raise ConfiguratorError('The input value is not a valid choice.', self)
+                raise ConfiguratorError('the input value is not a valid choice.', self)
                         
         if self._mini is not None:
             if value < self._mini:
-                raise ConfiguratorError("The input value is lower than %r." % self._mini, self)
+                raise ConfiguratorError("the input value is lower than %r." % self._mini, self)
 
         if self._maxi is not None:
             if value > self._maxi:
-                raise ConfiguratorError("The input value is higher than %r." % self._maxi, self)
+                raise ConfiguratorError("the input value is higher than %r." % self._maxi, self)
 
         self['value'] = value
 
@@ -775,13 +784,13 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
                 self['instance'] = NetCDFFile(self['value'], 'r')
                 
             except IOError:
-                raise ConfiguratorError("Can not open %r NetCDF file for reading" % self['value'])
+                raise ConfiguratorError("can not open %r NetCDF file for reading" % self['value'])
 
             for v in self._variables:
                 try:                
                     self[v] = self['instance'].variables[v]
                 except KeyError:
-                    raise ConfiguratorError("The variable %r was not  found in %r NetCDF file" % (v,self["value"]))
+                    raise ConfiguratorError("the variable %r was not  found in %r NetCDF file" % (v,self["value"]))
 
     @property
     def variables(self):
@@ -806,7 +815,7 @@ class MMTKNetCDFTrajectoryConfigurator(InputFileConfigurator):
                 
         InputFileConfigurator.configure(self, configuration, value)
         
-        inputTraj = REGISTRY["inputdata"]["mmtk_trajectory"](self['value'])
+        inputTraj = REGISTRY["input_data"]["mmtk_trajectory"](self['value'])
         
         self['instance'] = inputTraj.trajectory
                 
@@ -826,9 +835,9 @@ class MMTKNetCDFTrajectoryConfigurator(InputFileConfigurator):
         self['has_velocities'] = 'velocities' in self['instance'].variables()
                 
     def get_information(self):
-        
+                
         info = ["MMTK input trajectory: %r\n" % self["filename"]]
-        info.append("Number of steps: %d\n") % self["length"]
+        info.append("Number of steps: %d\n" % self["length"])
         info.append("Size of the universe: %d\n" % self["universe"].numberOfAtoms())
         if (self['has_velocities']):
             info.append("The trajectory contains atomic velocities\n")
@@ -859,25 +868,25 @@ class OutputFilesConfigurator(Configurator):
             dirname = os.getcwd()
                 
         if not basename:
-            raise ConfiguratorError("Empty basename for the output file.", self)
+            raise ConfiguratorError("empty basename for the output file.", self)
         
         root = os.path.join(dirname, basename)
         
         try:
             PLATFORM.create_directory(dirname)
         except:
-            raise ConfiguratorError("The directory %r is not writable" % dirname)
+            raise ConfiguratorError("the directory %r is not writable" % dirname)
                     
         if not formats:
-            raise ConfiguratorError("No output formats specified", self)
+            raise ConfiguratorError("no output formats specified", self)
 
         for fmt in formats:
             
             if not fmt in self._formats:
-                raise ConfiguratorError("The output file format %r is not a valid output format" % fmt, self)
+                raise ConfiguratorError("the output file format %r is not a valid output format" % fmt, self)
             
             if not REGISTRY["format"].has_key(fmt):
-                raise ConfiguratorError("The output file format %r is not registered as a valid file format." % fmt, self)
+                raise ConfiguratorError("the output file format %r is not registered as a valid file format." % fmt, self)
 
         self["root"] = root
         self["formats"] = formats
@@ -916,14 +925,14 @@ class ProjectionConfigurator(Configurator):
             raise ConfiguratorError(e)
 
         if not isinstance(mode,basestring):
-            raise ConfiguratorError("Invalid type for projection mode: must be a string")            
+            raise ConfiguratorError("invalid type for projection mode: must be a string")            
         
         mode = mode.lower()
                             
         try:
             self["projector"] = REGISTRY['projector'][mode]()
         except KeyError:
-            raise ConfiguratorError("The projector %r is unknow" % mode)
+            raise ConfiguratorError("the projector %r is unknown" % mode)
         else:
             self["projector"].set_axis(axis)
             self["axis"] = self["projector"].axis
@@ -956,7 +965,7 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
             trajConfig = configuration[self._dependencies['trajectory']]
 
             if not "velocities" in trajConfig['instance'].variables():
-                raise ConfiguratorError("The trajectory does not contain any velocities. Use an interpolation order higher than 0", self)
+                raise ConfiguratorError("the trajectory does not contain any velocities. Use an interpolation order higher than 0", self)
             
             self["variable"] = "velocities"
             
@@ -1013,7 +1022,7 @@ class RangeConfigurator(Configurator):
             value = value[value <= self._maxi]
         
         if value.size == 0:
-            raise ConfiguratorError("The input range is empty." , self)
+            raise ConfiguratorError("the input range is empty." , self)
         
         if self._sort:
             value = numpy.sort(value)
@@ -1115,7 +1124,7 @@ class FramesConfigurator(RangeConfigurator):
 
     def get_information(self):
         
-        return "%d frames selected from %s to %s (last value excluded) with a time step of %s" % \
+        return "%d frames selected (first=%.3f ; last = %.3f ; time step = %.3f)" % \
             (self["n_frames"],self["time"][0],self["time"][-1],self["time_step"])
                         
 class RunningModeConfigurator(Configurator):
@@ -1154,10 +1163,10 @@ class RunningModeConfigurator(Configurator):
                 maxSlots = multiprocessing.cpu_count()
                 del multiprocessing
                 if slots > maxSlots:   
-                    raise ConfiguratorError("Invalid number of allocated slots.", self)
+                    raise ConfiguratorError("invalid number of allocated slots.", self)
                       
             if slots <= 0:
-                raise ConfiguratorError("Invalid number of allocated slots.", self)
+                raise ConfiguratorError("invalid number of allocated slots.", self)
                
         self['mode'] = mode
         
@@ -1206,11 +1215,11 @@ class InstrumentResolutionConfigurator(Configurator):
         dmax = resolution.timeWindow.max()-1
         
         if dmax > 0.1:
-            raise ConfiguratorError('''The resolution function is too sharp for the available frequency step. 
+            raise ConfiguratorError('''the resolution function is too sharp for the available frequency step. 
 You can change your resolution function settings to make it broader or use "ideal" kernel if you do not want to smooth your signal.
 For a gaussian resolution function, this would correspond to a sigma at least equal to the frequency step (%s)''' % df,self)
         elif dmax < -0.1:
-            raise ConfiguratorError('''The resolution function is too broad.
+            raise ConfiguratorError('''the resolution function is too broad.
 You should change your resolution function settings to make it sharper.''',self)
             
         self["frequency_window"] = resolution.frequencyWindow
@@ -1269,7 +1278,7 @@ class AtomSelectionConfigurator(Configurator):
             value = "all"
         
         if not isinstance(value,basestring):
-            raise ConfiguratorError("Invalid type for atom selection. Must be a string", self)
+            raise ConfiguratorError("invalid type for atom selection. Must be a string", self)
         
         self["value"] = value
         
@@ -1288,11 +1297,11 @@ class AtomSelectionConfigurator(Configurator):
         self["elements"] = [[at.symbol] for at in selectedAtoms]
 
         if self._dependencies.has_key("grouping_level"):
-            self.group(configuration, selectedAtoms, configuration[self._dependencies['grouping_level']]['value'])
+            self.group(selectedAtoms, configuration[self._dependencies['grouping_level']]['value'])
         else:
             self.group(selectedAtoms)
                                  
-        self.set_contents(configuration)                                         
+        self.set_contents()
             
     @staticmethod                                                                                                                        
     def find_parent(atom, level):
@@ -1374,7 +1383,7 @@ class AtomTransmutationConfigurator(Configurator):
 
         self["atom_selection"] = configuration[self._dependencies['atom_selection']]
         if self["atom_selection"]["level"] != "atom":
-            raise ConfiguratorError("The atom transmutation can only be set with a grouping level set to %r" % 'atom', self)
+            raise ConfiguratorError("the atom transmutation can only be set with a grouping level set to %r" % 'atom', self)
 
         trajConfig = configuration[self._dependencies['trajectory']]
                                                                 
@@ -1535,7 +1544,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
 
     def get_information(self):
         
-        return "Grouping level: %d" % self["value"]
+        return "Grouping level: %r\n" % self["value"]
 
 class WeightsConfigurator(SingleChoiceConfigurator):
     """
@@ -1559,7 +1568,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         value = value.lower()
         
         if not value in ELEMENTS.numericProperties:
-            raise ConfiguratorError("Weight %r is not registered as a valid numeric property." % value, self)
+            raise ConfiguratorError("weight %r is not registered as a valid numeric property." % value, self)
                                          
         self['property'] = value
 

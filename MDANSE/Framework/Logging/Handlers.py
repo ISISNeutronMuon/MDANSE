@@ -30,12 +30,11 @@ Created on Mar 23, 2015
 
 import logging.handlers
 
-from MDANSE.Core.ClassRegistry import ClassRegistry
-from MDANSE.Framework.Logging.Formatters import Formatter
+from MDANSE import REGISTRY
 
 class Handler(object):
     
-    __metaclass__ = ClassRegistry
+    __metaclass__ = REGISTRY
 
     type = "handler"
 
@@ -46,9 +45,7 @@ class LogFileHandler(Handler,logging.handlers.RotatingFileHandler):
     def __init__(self, filename, mode='a', maxBytes=1e7, backupCount=9, delay=True):
                 
         logging.handlers.RotatingFileHandler.__init__(self,filename, mode=mode, maxBytes=maxBytes, backupCount=backupCount, delay=delay)
-        
-        self.setFormatter(Formatter())
-          
+                  
 class ColorizingStreamHandler(Handler,logging.StreamHandler):
     """
     A stream handler which supports colorizing of console streams

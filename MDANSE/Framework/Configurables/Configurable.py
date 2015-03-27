@@ -51,7 +51,7 @@ class Configurable(object):
         If not found raise a ConfigurationError. 
         """
         
-        if self._configurators.has_key(name):
+        if self.configurators.has_key(name):
             return self._configuration.setdefault(name,{})
         
         raise ConfigurationError("The item %r is not valid for this configuration." % name)
@@ -110,7 +110,7 @@ class Configurable(object):
         
         info = []
         
-        for configurator in self._configuration:
+        for configurator in self._configuration.values():
             
             info.append(configurator.get_information())
             

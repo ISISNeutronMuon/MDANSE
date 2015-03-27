@@ -36,8 +36,8 @@ import tarfile
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
-from MDANSE.Core.ClassRegistry import ClassRegistry
 from MDANSE.Externals.svgfig.svgfig import _hacks, Frame, Poly
 
 _hacks["inkscape-text-vertical-shift"] = True
@@ -54,7 +54,7 @@ class Format(object):
     This is the base class for nmoldyn data.
     '''
     
-    __metaclass__ = ClassRegistry
+    __metaclass__ = REGISTRY
     
     type = "format"
     
@@ -71,10 +71,11 @@ class ASCIIFormat(Format):
 
     extensions = ['.dat','.txt']
     
-    def write(self, filename, data, header=""):
+    @classmethod
+    def write(cls, filename, data, header=""):
                 
         filename = os.path.splitext(filename)[0]
-        filename = "%s_%s.tar" % (filename,self.type)
+        filename = "%s_%s.tar" % (filename,cls.type)
 
         tf = tarfile.open(filename,'w')
         
@@ -86,16 +87,17 @@ class ASCIIFormat(Format):
                 tempStr.write('\n\n')  
             tempStr.write(var.info())
             tempStr.write('\n\n')            
-            self.write_array(tempStr,var)
+            cls.write_array(tempStr,var)
             tempStr.seek(0)
 
-            info = tarfile.TarInfo(name='%s%s' % (var.name,self.extensions[0]))
+            info = tarfile.TarInfo(name='%s%s' % (var.name,cls.extensions[0]))
             info.size=tempStr.len
             tf.addfile(tarinfo=info, fileobj=tempStr)
                                     
         tf.close()
 
-    def write_array(self, fileobject, array, slices=None):
+    @classmethod
+    def write_array(cls, fileobject, array, slices=None):
         
         if slices is None:
             slices = [0]*array.ndim
@@ -104,7 +106,7 @@ class ASCIIFormat(Format):
         if array.ndim > 2:
         
             for a in array:
-                self.write_array(fileobject,a, slices)
+                cls.write_array(fileobject,a, slices)
                 slices[len(slices)-array.ndim] = slices[len(slices)-array.ndim] + 1
 
         else:
@@ -121,7 +123,8 @@ class NetCDFFormat(Format):
     
     extensions = ['.nc','.cdf','.netcdf']
     
-    def write(self, filename, data, header=""):
+    @classmethod
+    def write(cls, filename, data, header=""):
         '''
         This method writes (or append) a list of nMOLDYN.Job.Output.OutputVariable objects to a NetCDF file.
     
@@ -131,7 +134,7 @@ class NetCDFFormat(Format):
                 
         filename = os.path.splitext(filename)[0]
 
-        filename = "%s%s" % (filename,self.extensions[0])
+        filename = "%s%s" % (filename,cls.extensions[0])
        
         # Import the NetCDFFile function.
         from Scientific.IO.NetCDF import NetCDFFile
@@ -176,10 +179,11 @@ class SVGFormat(Format):
     
     extensions = ['.svg']
         
-    def write(self,filename,data, header=""):
+    @classmethod
+    def write(cls,filename,data, header=""):
 
         filename = os.path.splitext(filename)[0]
-        filename = "%s_%s.tar" % (filename,self.name)
+        filename = "%s.tar" % filename
 
         tf = tarfile.open(filename,'w')
                                 
@@ -199,11 +203,11 @@ class SVGFormat(Format):
                         
             pl = Poly(zip(axis,var),stroke='blue')
 
-            svgfilename = os.path.join(os.path.dirname(filename),'%s%s' % (var.name,self.extensions[0]))
+            svgfilename = os.path.join(os.path.dirname(filename),'%s%s' % (var.name,cls.extensions[0]))
             
             Frame(min(axis),max(axis),min(var),max(var),pl,xtitle=xtitle,ytitle=ytitle).SVG().save(svgfilename)
 
-            tf.add(svgfilename, arcname='%s%s' % (var.name,self.extensions[0]))
+            tf.add(svgfilename, arcname='%s%s' % (var.name,cls.extensions[0]))
             
             os.remove(svgfilename)
     

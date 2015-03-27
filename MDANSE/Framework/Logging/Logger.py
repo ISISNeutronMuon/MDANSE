@@ -99,11 +99,11 @@ class Logger(object):
 
         if logging.Logger.manager.loggerDict.has_key(name):
             return
-        
-        handler.setFormatter(Formatter())
-                
+                        
         logging.getLogger(name).addHandler(handler)
                 
         logging.getLogger(name).disabled = not start                
         
         self.set_level(level,loggers=[name])
+        
+LOGGER = Logger()
