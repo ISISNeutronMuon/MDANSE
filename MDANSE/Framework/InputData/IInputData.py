@@ -23,22 +23,43 @@
 #You should have received a copy of the GNU Lesser General Public
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- 
+
+''' 
+Created on Mar 27, 2015
+
+@author: pellegrini
 '''
-Created on Mar 26, 2015
 
-@author: Eric C. Pellegrini
-'''
+from MDANSE import REGISTRY
+from MDANSE.Core.Error import Error
 
-from __pkginfo__ import __version__, __author__, __date__
+class InputDataError(Error):
+    pass
 
-from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Data.ElementsDatabase import ELEMENTS
+class IInputData(object):
+    
+    __metaclass__ = REGISTRY
+    
+    type = "input_data"
 
-from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
+    def __init__(self, *args, **kwargs):
+        
+        self._data = None
+        
+        self._filename = None
 
-import MDANSE.Framework
-del MDANSE.Framework
+    @property
+    def filename(self):
+        return self._filename
+        
+    @property
+    def basename(self):
+        return self._basename    
 
-from MDANSE.Framework.Logging.Logger import LOGGER
-from MDANSE.Framework.UserDefinitions import USER_DEFINITIONS
+    @property
+    def data(self):
+        return self._data
+
+    def info(self):
+
+        return "No information available"

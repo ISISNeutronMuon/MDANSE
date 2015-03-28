@@ -23,22 +23,41 @@
 #You should have received a copy of the GNU Lesser General Public
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- 
+
+''' 
+Created on Mar 27, 2015
+
+@author: pellegrini
 '''
-Created on Mar 26, 2015
 
-@author: Eric C. Pellegrini
-'''
+from MDANSE import REGISTRY
+from MDANSE.Core.Error import Error
 
-from __pkginfo__ import __version__, __author__, __date__
+class ProjectorError(Error):
+    pass
 
-from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Data.ElementsDatabase import ELEMENTS
+class IProjector(object):
 
-from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
+    __metaclass__ = REGISTRY
+    
+    type = 'projector'
+        
+    def __init__(self):
+        
+        self._axis = None
+        
+        self._projectionMatrix = None
+                    
+    def __call__(self, value):
+        
+        raise NotImplementedError
+    
+    def set_axis(self, axis):
 
-import MDANSE.Framework
-del MDANSE.Framework
-
-from MDANSE.Framework.Logging.Logger import LOGGER
-from MDANSE.Framework.UserDefinitions import USER_DEFINITIONS
+        raise NotImplementedError
+    
+    @property
+    def axis(self):
+        
+        return self._axis
+        

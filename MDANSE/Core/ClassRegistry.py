@@ -51,15 +51,16 @@ class ClassRegistry(abc.ABCMeta):
             return
 
         metaClass = namespace.get("__metaclass__", None)
-                
+                       
         if metaClass is ClassRegistry:
+            if (ClassRegistry._registry.has_key(typ)):
+                return
             ClassRegistry.__interfaces.append(self)
             ClassRegistry._registry[typ] = {}
 
         else:
                                 
             for interface in ClassRegistry.__interfaces:
-                
                 if issubclass(self, interface):
                     ClassRegistry._registry[interface.type][typ] = self
                     break

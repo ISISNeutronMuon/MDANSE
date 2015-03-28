@@ -23,22 +23,40 @@
 #You should have received a copy of the GNU Lesser General Public
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- 
+
+''' 
+Created on Mar 27, 2015
+
+@author: pellegrini
 '''
-Created on Mar 26, 2015
 
-@author: Eric C. Pellegrini
-'''
+import numpy
 
-from __pkginfo__ import __version__, __author__, __date__
+from Scientific.Geometry import Vector
 
-from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Data.ElementsDatabase import ELEMENTS
+from MDANSE.Framework.Projectors.IProjector import IProjector, ProjectorError
 
-from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
+class AxialProjector(IProjector):
 
-import MDANSE.Framework
-del MDANSE.Framework
+    type = 'axial'
+    
+    def set_axis(self, axis):
+                
+        try:
+            self._axis = Vector(axis)
+        except (TypeError,ValueError):
+            raise ProjectorError('Wrong axis definition: must be a sequence of 3 floats')
+        
+        try:
+            self._axis = self._axis.normal()
+        except ZeroDivisionError:
+            raise ProjectorError('The axis vector can not be the null vector')
+        
+        self._projectionMatrix = numpy.outer(self._axis, self._axis)
 
-from MDANSE.Framework.Logging.Logger import LOGGER
-from MDANSE.Framework.UserDefinitions import USER_DEFINITIONS
+    def __call__(self, value):
+        
+        try:        
+            return numpy.dot(value,self._projectionMatrix.T)
+        except (TypeError,ValueError):
+            raise ProjectorError("Invalid data to apply projection on")

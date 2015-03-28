@@ -23,22 +23,39 @@
 #You should have received a copy of the GNU Lesser General Public
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- 
+
+''' 
+Created on Mar 27, 2015
+
+@author: pellegrini
 '''
-Created on Mar 26, 2015
 
-@author: Eric C. Pellegrini
-'''
+import abc
+import os
 
-from __pkginfo__ import __version__, __author__, __date__
+from MDANSE.Framework.InputData.IInputData import IInputData
 
-from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Data.ElementsDatabase import ELEMENTS
+class InputFileData(IInputData):
+    
+    def __init__(self, filename, *args, **kwargs):
+        
+        super(InputFileData, self).__init__()
+        
+        self._filename = filename
+        self._dirname = os.path.dirname(self._filename)
+        self._basename = os.path.basename(self._filename)
+        self._data = None
+    
+        self.load()
 
-from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
+    @property
+    def dirname(self):
+        return self._dirname    
 
-import MDANSE.Framework
-del MDANSE.Framework
+    @abc.abstractmethod
+    def load(self):
+        pass   
 
-from MDANSE.Framework.Logging.Logger import LOGGER
-from MDANSE.Framework.UserDefinitions import USER_DEFINITIONS
+    @abc.abstractmethod
+    def close(self):
+        pass    

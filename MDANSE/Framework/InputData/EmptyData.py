@@ -23,22 +23,31 @@
 #You should have received a copy of the GNU Lesser General Public
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- 
+
+''' 
+Created on Mar 27, 2015
+
+@author: pellegrini
 '''
-Created on Mar 26, 2015
 
-@author: Eric C. Pellegrini
-'''
+from MDANSE.Framework.InputData.IInputData import IInputData
 
-from __pkginfo__ import __version__, __author__, __date__
+class EmptyData(IInputData):
 
-from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Data.ElementsDatabase import ELEMENTS
+    type = "empty_data"
 
-from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
+    extension = None
+    
+    count = 0
+    
+    def __init__(self, filename, *args, **kwargs):
 
-import MDANSE.Framework
-del MDANSE.Framework
+        IInputData.__init__(self, filename, *args, **kwargs)
+        
+        self._data = None
 
-from MDANSE.Framework.Logging.Logger import LOGGER
-from MDANSE.Framework.UserDefinitions import USER_DEFINITIONS
+        if filename is None:
+            self._filename = self._basename = 'empty_' + str(EmptyData.count)
+            EmptyData.count +=  1
+        else:
+            self._filename = self._basename = filename

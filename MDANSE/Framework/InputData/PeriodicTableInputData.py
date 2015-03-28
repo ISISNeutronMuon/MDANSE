@@ -23,22 +23,23 @@
 #You should have received a copy of the GNU Lesser General Public
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- 
+
+''' 
+Created on Mar 27, 2015
+
+@author: pellegrini
 '''
-Created on Mar 26, 2015
 
-@author: Eric C. Pellegrini
-'''
+from MDANSE.Framework.InputData.IInputData import IInputData
 
-from __pkginfo__ import __version__, __author__, __date__
-
-from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Data.ElementsDatabase import ELEMENTS
-
-from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
-
-import MDANSE.Framework
-del MDANSE.Framework
-
-from MDANSE.Framework.Logging.Logger import LOGGER
-from MDANSE.Framework.UserDefinitions import USER_DEFINITIONS
+class PeriodicTableData(IInputData):
+    
+    type = "periodic_table"
+    
+    extension = None
+    
+    def load(self):
+        pass
+    
+    def close(self):
+        pass
