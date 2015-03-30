@@ -1,4 +1,38 @@
+#MDANSE : Molecular Dynamics Analysis for Neutron Scattering Experiments
+#------------------------------------------------------------------------------------------
+#Copyright (C)
+#2015- Eric C. Pellegrini Institut Laue-Langevin
+#BP 156
+#6, rue Jules Horowitz
+#38042 Grenoble Cedex 9
+#France
+#pellegrini[at]ill.fr
+#goret[at]ill.fr
+#aoun[at]ill.fr
+#
+#This library is free software; you can redistribute it and/or
+#modify it under the terms of the GNU Lesser General Public
+#License as published by the Free Software Foundation; either
+#version 2.1 of the License, or (at your option) any later version.
+#
+#This library is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#Lesser General Public License for more details.
+#
+#You should have received a copy of the GNU Lesser General Public
+#License along with this library; if not, write to the Free Software
+#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+''' 
+Created on Mar 30, 2015
+
+@author: pellegrini
+'''
+
 import abc
+import inspect
+import os
 
 class _Meta(type):
     '''
@@ -17,14 +51,11 @@ class _Meta(type):
     
 class ClassRegistry(abc.ABCMeta):
     '''
-    Metaclass that registers the subclasses of bases classes.
+    Metaclass that registers the subclasses of all the base classes used in MDANSE framework.
 
-    The internal registry is defined as a nested dictionary whose keys 
-    are the |type| class attribute of the base classes and values another dictionary 
-    whose keys are the |type| class attribute of the subclasses and values are the corresponding 
-    class instances.
-
-    Hence any base or child class that does not define |type| class attribute will not be resgistered.
+    The subclasses are stored internally in a nested dictionary whose primary key 
+    is the 'type' class attribute of the base class they are inheriting from and secondary key is 
+    their own 'type' class attribute.
     '''
     
     __metaclass__ = _Meta
@@ -38,8 +69,11 @@ class ClassRegistry(abc.ABCMeta):
         Constructor of a class metaclassed by ClassFactory
         
         :param name: the name of the class to be built by this metaclass
+        :type name: str
         :param bases: the base classes of the class to be built by this metaclass
+        :type bases: tuple 
         :param namespace: the attributes and methods of the class to be built by this metaclass
+        :type namespace: dict
         '''
         
         super(ClassRegistry, self).__init__(name, bases, namespace)
@@ -51,11 +85,11 @@ class ClassRegistry(abc.ABCMeta):
             return
 
         metaClass = namespace.get("__metaclass__", None)
-                       
+                              
         if metaClass is ClassRegistry:
+            ClassRegistry.__interfaces.append(self)
             if (ClassRegistry._registry.has_key(typ)):
                 return
-            ClassRegistry.__interfaces.append(self)
             ClassRegistry._registry[typ] = {}
 
         else:
@@ -64,21 +98,20 @@ class ClassRegistry(abc.ABCMeta):
                 if issubclass(self, interface):
                     ClassRegistry._registry[interface.type][typ] = self
                     break
-
+                
     @classmethod
     def info(cls, interface):
         '''
         Returns informations about the subclasses of a given base class  stored in the registry.
         
         :param cls: the ClassRegsitry instance
+        :type cls: ClassRegistry
         :param interface: the name of base class of whom information about its subclasses is requested
+        :type interface: str
         '''
                 
         if not cls._registry.has_key(interface):
             return "The interface " + interface + " is not registered"
-
-        import inspect
-        import os
 
         # Dictionnay whose keys are the package names and values and list of (job name, job path) stored in the corresponding package. 
         packages = {}
@@ -98,6 +131,8 @@ class ClassRegistry(abc.ABCMeta):
             # If no package could be found, guess a name using the directory name of the module file.
             if modPackage is None:
                 modPackage = os.path.split(os.path.dirname(modFilename))[1]
+                
+            modPackage = modPackage.split(".")[-1]
         
             # Update the packages dictionary.
             if packages.has_key(modPackage):
@@ -120,3 +155,14 @@ class ClassRegistry(abc.ABCMeta):
     
         return contents
 
+    @classmethod
+    def get_interfaces(cls):
+        '''
+        Returns the interfaces that are currently registered.
+        
+        :param cls: the ClassRegsitry instance
+        :type cls: ClassRegistry
+        '''
+        
+        
+        return sorted(cls._registry.keys())

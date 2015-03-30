@@ -3,11 +3,11 @@ include LICENCE
 
 recursive-include Extensions/qhull_lib *.h *c *.pxd
 
-recursive-include nMOLDYN/GUI/Resources/Icons *.png
+recursive-include MDANSE/GUI/Resources/Icons *.png
 
-include nMOLDYN/Data/elements_database.csv
+include MDANSEData/elements_database.csv
 
-include nMOLDYN/Data/Atoms/*
+include MDANSE/Data/Atoms/*
 
 recursive-include UserData *
 

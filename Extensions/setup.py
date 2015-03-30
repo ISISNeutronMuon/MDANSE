@@ -49,7 +49,7 @@ EXTENSIONS = [Extension('distance_histogram',
 
 
 
-setup (name = "nMolDyn_Extensions",
-           version = "0.1",
+setup (name = "MDANSE_Extensions",
+           version = "1.0",
            ext_modules = EXTENSIONS,                 
            cmdclass = {'build_ext': build_ext})

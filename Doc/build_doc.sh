@@ -1,14 +1,16 @@
 #!/bin/sh
 
+rm -rf Documentation
 
-sphinx-apidoc -o  ../Documentation -F --separate -d 5 -H nMoldyn -A "B. Aoun & G. Goret & E. Pellegrini, G.R. Kneller"  -V 4.0 -R 4.0 ../nMOLDYN/
+mkdir Documentation
 
-cp doc_utils/conf_html.py ../Documentation/conf.py
+sphinx-apidoc -o  ./Documentation -F --separate -d 5 -H MDANSE -A "B. Aoun & G. Goret & E. Pellegrini"  -V 1.0 -R 1.0 ../MDANSE/
 
+cp conf_html.py ./Documentation/conf.py
 
-cp doc_utils/nMoldyn_logo.png ../Documentation/_static/
+cp mdanse_logo.png ./Documentation/_static/
 
-sphinx-build -b html ../Documentation ../Documentation/_build/html/
+sphinx-build -b html ./Documentation ./Documentation/_build/html/
 
 
 

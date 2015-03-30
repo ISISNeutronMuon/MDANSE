@@ -36,7 +36,7 @@ from MDANSE import REGISTRY
 
 class IFormat(object):
     '''
-    This is the base class for nmoldyn data.
+    This is the base class for MDANSE data.
     '''
     
     __metaclass__ = REGISTRY

@@ -53,10 +53,10 @@ class OutputData(collections.OrderedDict):
 
 class IOutputVariable(numpy.ndarray):
     '''
-    Defines a nmoldyn output variable.
+    Defines a MDANSE output variable.
     
-    A nmoldyn output variable is defined as s subclass of Numpy array that stores additional attributes.
-    Those extra attributes will be contain information necessary for the the nmoldyn plotter. 
+    A MDANSE output variable is defined as s subclass of Numpy array that stores additional attributes.
+    Those extra attributes will be contain information necessary for the the MDANSE plotter. 
     '''
 
     __metaclass__ = REGISTRY
@@ -65,7 +65,7 @@ class IOutputVariable(numpy.ndarray):
         
     def __new__(cls, value, name, axis=(), units="unitless"):
         '''
-        Instanciate a new nmoldyn output variable.
+        Instanciate a new MDANSE output variable.
                 
         @param cls: the class to instantiate.
         @type cls: an OutputVariable object

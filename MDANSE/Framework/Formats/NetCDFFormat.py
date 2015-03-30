@@ -49,7 +49,7 @@ class NetCDFFormat(IFormat):
     @classmethod
     def write(cls, filename, data, header=""):
         '''
-        This method writes (or append) a list of nMOLDYN.Job.Output.OutputVariable objects to a NetCDF file.
+        This method writes (or append) a list of MDANSE.Job.Output.OutputVariable objects to a NetCDF file.
     
         @param filename: the path for the output NetCDF file.
         @type filename: string

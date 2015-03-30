@@ -101,8 +101,8 @@ class MainClass1(object):
 
         :Example:
 
-        >>> import template
-        >>> a = template.MainClass1()
+        >>> import Template
+        >>> a = Template.MainClass1()
         >>> a.function1(1,1,1)
         2
 

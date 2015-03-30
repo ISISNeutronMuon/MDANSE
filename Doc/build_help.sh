@@ -8,5 +8,5 @@ sphinx-apidoc -o  . -F --separate -d 5 -H mdanse -A "G. Goret, B. Aoun  & E. Pel
 cp conf_help.py conf.py
 
 cp layout.html _templates/
-cp nMoldyn_logo.png _static/
+cp mdanse_logo.png _static/
 sphinx-build -b htmlhelp ./ ./Help/
