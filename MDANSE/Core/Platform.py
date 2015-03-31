@@ -210,6 +210,14 @@ class Platform(object):
         
         return os.getpid()
 
+    def example_data_directory(self):
+        """Returns the path for mdanse data.
+        
+        @return: the path for mdanse package.
+        @rtype: string
+        """
+        
+        return os.path.dirname(self.package_directory())
 
     def package_directory(self):
         """Returns the path for mdanse package.

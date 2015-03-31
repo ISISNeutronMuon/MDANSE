@@ -244,11 +244,11 @@ class CommandLineParser(optparse.OptionParser):
         filename = os.path.abspath('template_%s.py' % name.lower())
         # Try to save the template for the job.
         try:
-            jobs[name].save_job(filename)    
+            jobs[name].save(filename)    
         # Case where an error occured when writing the template.
         except IOError:
             raise CommandLineParserError("Could not write the job template as %r" % filename)
-        # If the job class has no save_job method, thisis not a valid nMolDyn job.
+        # If the job class has no save method, thisis not a valid nMolDyn job.
         except KeyError:
             raise CommandLineParserError("The job %r is not a valid MDANSE job" % name)
         # Otherwise, print some information about the saved template.

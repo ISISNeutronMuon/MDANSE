@@ -164,5 +164,4 @@ class ClassRegistry(abc.ABCMeta):
         :type cls: ClassRegistry
         '''
         
-        
         return sorted(cls._registry.keys())
