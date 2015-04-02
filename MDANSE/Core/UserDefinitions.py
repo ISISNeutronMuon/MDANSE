@@ -184,6 +184,10 @@ class UserDefinitions(object):
         :type ud: MDANSE.Framework.UserDefinables.IUserDefinable derived object
         '''
 
+        from MDANSE.Framework.UserDefinables.IUserDefinable import IUserDefinable               
+        if not isinstance(ud,IUserDefinable):
+            raise UserDefinitionsError("Invalid user definition: must be a user definable object")
+
         targets = self.setdefault(unicode(target),{})
         
         categories = targets.setdefault(unicode(category),{})
