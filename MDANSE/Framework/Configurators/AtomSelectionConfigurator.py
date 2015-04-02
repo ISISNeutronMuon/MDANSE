@@ -35,7 +35,7 @@ import operator
 
 import numpy
 
-from MDANSE import USER_DEFINITIONS
+from MDANSE.Framework.UserDefinables.UserDefinitions import USER_DEFINITIONS
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 from MDANSE.Framework.Selectors.SelectionParser import SelectionParser
 

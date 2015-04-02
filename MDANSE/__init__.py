@@ -35,7 +35,6 @@ from __pkginfo__ import __version__, __author__, __date__
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
 from MDANSE.Core.MMTKDefinitions import MMTK_DEFINITIONS
-from MDANSE.Core.UserDefinitions import USER_DEFINITIONS
 
 from MDANSE.Data.ElementsDatabase import ELEMENTS
 

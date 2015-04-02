@@ -30,7 +30,8 @@ Created on Mar 30, 2015
 @author: pellegrini
 '''
 
-from MDANSE import ELEMENTS, USER_DEFINITIONS
+from MDANSE import ELEMENTS
+from MDANSE.Framework.UserDefinables.UserDefinitions import USER_DEFINITIONS
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 from MDANSE.Framework.Selectors.SelectionParser import SelectionParser
         

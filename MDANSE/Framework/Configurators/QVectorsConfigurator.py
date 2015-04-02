@@ -30,7 +30,8 @@ Created on Mar 30, 2015
 @author: pellegrini
 '''
 
-from MDANSE import REGISTRY, USER_DEFINITIONS
+from MDANSE import REGISTRY
+from MDANSE.Framework.UserDefinables.UserDefinitions import USER_DEFINITIONS
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
 class QVectorsConfigurator(IConfigurator):

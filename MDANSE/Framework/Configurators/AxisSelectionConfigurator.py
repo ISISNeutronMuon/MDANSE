@@ -30,7 +30,7 @@ Created on Mar 30, 2015
 @author: pellegrini
 '''
 
-from MDANSE import USER_DEFINITIONS
+from MDANSE.Framework.UserDefinables.UserDefinitions import USER_DEFINITIONS
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
         
