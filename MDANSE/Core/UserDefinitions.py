@@ -38,11 +38,26 @@ from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
 
 class UserDefinitionsError(Error):
-    pass
+    '''
+    This class handles exception related to UserDefinitions
+    '''
 
 class UnicodeDict(dict):
+    '''
+    This class implements a specification of python dict that converts automatically any string key in unicode.
+    
+    This kind of object is useful when exposed to package such as wxPython that implements string as unicode.
+    '''
 
     def __contains__(self, item):
+        '''
+        Returns True if a given key is found in the dictionary.
+        
+        If the key is basestring then it will be searched as a unicode string. 
+        
+        :param item: the key to search in the dictionary
+        :type item: any valid key
+        '''
 
         if isinstance(item,basestring):
             return super(UnicodeDict,self).__contains__(unicode(item))
@@ -51,6 +66,16 @@ class UnicodeDict(dict):
             return super(UnicodeDict,self).__contains__(item)
 
     def __setitem__(self, item, value):
+        '''
+        Sets the value of a given key.
+        
+        If the key is a basestirng, it will be converted internally in a unicode objet.
+        
+        :param item: the key to set in the dictionary
+        :type item: any valid key
+        :param value: the value to associate with the key
+        :type value: any python object
+        '''
 
         if isinstance(item,basestring):
 
@@ -59,21 +84,28 @@ class UnicodeDict(dict):
         else:
             super(UnicodeDict,self).__setitem__(item,value)
 
-class UserDefinitions(UnicodeDict):
+class UserDefinitions(object):
     '''
-    This class is used to register, save and delete UD (UD for User Definition).
+    This class is used to register, save and delete MDANSE user definitions (a.k.a. UD).
     
-    Basically a UD file is a cPickle file that must store a dictionary of definitions related to a target file. 
-    The target file can be any kind of file on which some extra information should be attached.
-    For instance, if the target file is a trajectory, the UD file may contains selected atoms, 
-    center or axis that can be used for further analysis in new MDANSE sessions.  
+    Basically, user definitions are used to keep track of definitions made on a given target. The target can 
+    be a file or any kind of object that has to be associated with the user definitions.
+    This definitions can be selections of atoms, Q vectors definitions, axis definitions ... The 
+    user definitions are loaded when MDANSE starts through a cPickle file that will store these definitions.
+    
+    They are stored internally as MDANSE.Framework.UserDefinables.IUserDefinable derived objects in a nested 
+    dictionary whose primary key is the target name, secondary key is the category of the user definition and 
+    tertiary key is the name of the user definition.  
     '''
     
     __metaclass__ = Singleton
         
     _path = os.path.join(PLATFORM.application_directory(),"user_definitions.ud")                                                      
                        
-    def restore_state(self):
+    def load(self):
+        '''
+        Load the user definitions.
+        '''
         
         if not os.path.exists(UserDefinitions._path):
             return
@@ -92,6 +124,12 @@ class UserDefinitions(UnicodeDict):
             f.close()
             
     def save(self, path=None):
+        '''
+        Save the user definitions.
+        
+        :param path: the path of the user definitions file.
+        :type path: str
+        '''
         
         if path is None:
             path = self._path
@@ -104,34 +142,52 @@ class UserDefinitions(UnicodeDict):
             cPickle.dump(self, f, protocol=2)
             f.close()
                         
-    def check_and_get(self, target, typ, name):
+    def get(self, target, category, name):
+        '''
+        Returns a user definition given its target, category and its name.
+        
+        :param target: the target related to the user definition
+        :type target: str
+        :param category: the category of the user definition
+        :type category: str
+        :param name: the name of the user definition
+        :type name: str
+        '''
         
         try:
-            ud = self[name]
-            
-        except (KeyError,TypeError):
+            ud = self[target][category][name]            
+        
+        # Any kind of error should be caught here.    
+        except:
             raise UserDefinitionsError('The item %r is not registered in the user definition' % str(name))
             
-        else:
-            
+        else:                
             if ud.target != target:
                 raise UserDefinitionsError('Target mismatch between %r and %r' % (target,ud.target))
         
-            if ud.type != typ:
-                raise UserDefinitionsError('Type mismatch between %r and %r' % (typ,ud.type))
-            
-            return ud
-                        
-    def __setitem__(self, item, value):
-                           
-        from MDANSE.Framework.UserDefinables.IUserDefinable import IUserDefinable               
-        if not isinstance(value,IUserDefinable):
-            raise UserDefinitionsError("Invalid value for user definition: must be a user definable object")
-        
-        super(UserDefinitions,self).__setitem__(item,value)
-                
-    def filter(self, basename,typ):
-        
-        return [k for k,v in self.iteritems() if (v.target==basename and v.type==typ)]
+            if ud.type != category:
+                raise UserDefinitionsError('Type mismatch between %r and %r' % (category,ud.type))
 
+            return ud
+                                           
+    def set(self, target, category, name, ud):
+        '''
+        Sets a new user definition.
+        
+        :param target: the name of the user definition to set
+        :type target: str
+        :param category: the category of the user definition to set
+        :type category: str
+        :param name: the name of the user definition to set
+        :type name: str
+        :param ud: the user definition to set
+        :type ud: MDANSE.Framework.UserDefinables.IUserDefinable derived object
+        '''
+
+        targets = self.setdefault(unicode(target),{})
+        
+        categories = targets.setdefault(unicode(category),{})
+
+        categories[unicode(name)] = ud
+                
 USER_DEFINITIONS = UserDefinitions()

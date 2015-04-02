@@ -88,7 +88,7 @@ class IUserDefinable(dict):
         
         return self._creationTime
 
-    def __setitem__(self, item,value):
+    def __setitem__(self, item, value):
 
         # It is not possible to set directly a key of a user definable object
         if item in self._keywords:
