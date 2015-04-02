@@ -26,7 +26,7 @@ class CommandLineParser(optparse.OptionParser):
         if len(parser.rargs) != 3:
             raise CommandLineParserError("Invalid number of arguments for %r option" % opt_str)
         
-        from MDANSE import MMTK_DEFINITIONS
+        from MDANSE.Framework.MMTKDefinitions import MMTK_DEFINITIONS
         
         MMTK_DEFINITIONS.add(*parser.rargs)
         
