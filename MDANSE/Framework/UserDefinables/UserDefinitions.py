@@ -41,10 +41,11 @@ class UserDefinitionsError(Error):
     '''
     This class handles exception related to UserDefinitions
     '''
+    pass
 
 class UnicodeDict(dict):
     '''
-    This class implements a specification of python dict that converts automatically any string key in unicode.
+    This class implements a specification of a python dict that converts automatically any string key in unicode.
     
     This kind of object is useful when exposed to package such as wxPython that implements string as unicode.
     '''
@@ -69,7 +70,7 @@ class UnicodeDict(dict):
         '''
         Sets the value of a given key.
         
-        If the key is a basestirng, it will be converted internally in a unicode objet.
+        If the key is a basestring, it will be converted internally in a unicode objet.
         
         :param item: the key to set in the dictionary
         :type item: any valid key
