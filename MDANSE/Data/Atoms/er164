@@ -1,5 +1,5 @@
-name = "erbium"
+name = 'erbium'
 
-symbol = "er164"
+symbol = 'Er164'
 
 mass = 163.929197

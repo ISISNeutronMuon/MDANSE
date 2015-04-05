@@ -1,5 +1,5 @@
-name = "lutetium"
+name = 'lutetium'
 
-symbol = "lu176"
+symbol = 'Lu176'
 
 mass = 175.9426824

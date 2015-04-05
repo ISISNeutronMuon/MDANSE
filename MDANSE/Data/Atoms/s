@@ -1,5 +1,5 @@
-name = "sulfur"
+name = 'sulfur'
 
-symbol = "s"
+symbol = 'S'
 
 mass = 32.065

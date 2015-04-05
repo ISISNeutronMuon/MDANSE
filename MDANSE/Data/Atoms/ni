@@ -1,5 +1,5 @@
-name = "nickel"
+name = 'nickel'
 
-symbol = "ni"
+symbol = 'Ni'
 
 mass = 58.6934

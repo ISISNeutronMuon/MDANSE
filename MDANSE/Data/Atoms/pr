@@ -1,5 +1,5 @@
-name = "praseodymium"
+name = 'praseodymium'
 
-symbol = "pr"
+symbol = 'Pr'
 
 mass = 140.907648

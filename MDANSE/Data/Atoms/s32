@@ -1,5 +1,5 @@
-name = "sulfur"
+name = 'sulfur'
 
-symbol = "s32"
+symbol = 'S32'
 
 mass = 31.97207069

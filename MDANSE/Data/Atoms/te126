@@ -1,5 +1,5 @@
-name = "tellurium"
+name = 'tellurium'
 
-symbol = "te126"
+symbol = 'Te126'
 
 mass = 125.9033055

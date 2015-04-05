@@ -1,5 +1,5 @@
-name = "argon"
+name = 'argon'
 
-symbol = "ar40"
+symbol = 'Ar40'
 
 mass = 39.96238312

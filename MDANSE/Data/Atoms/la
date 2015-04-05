@@ -1,5 +1,5 @@
-name = "lanthanum"
+name = 'lanthanum'
 
-symbol = "la"
+symbol = 'La'
 
 mass = 138.9055

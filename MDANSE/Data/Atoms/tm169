@@ -1,5 +1,5 @@
-name = "thulium"
+name = 'thulium'
 
-symbol = "tm169"
+symbol = 'Tm169'
 
 mass = 168.934211

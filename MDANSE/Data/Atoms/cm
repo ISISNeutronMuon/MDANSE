@@ -1,5 +1,5 @@
-name = "curium"
+name = 'curium'
 
-symbol = "cm"
+symbol = 'Cm'
 
 mass = 247.0

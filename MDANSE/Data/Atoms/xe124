@@ -1,5 +1,5 @@
-name = "xenon"
+name = 'xenon'
 
-symbol = "xe124"
+symbol = 'Xe124'
 
 mass = 123.9058958

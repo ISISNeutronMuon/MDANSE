@@ -1,5 +1,5 @@
-name = "magnesium"
+name = 'magnesium'
 
-symbol = "mg25"
+symbol = 'Mg25'
 
 mass = 24.98583702

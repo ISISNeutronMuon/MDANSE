@@ -1,5 +1,5 @@
-name = "vanadium"
+name = 'vanadium'
 
-symbol = "v50"
+symbol = 'V50'
 
 mass = 49.9471628

@@ -1,5 +1,5 @@
-name = "protactinium"
+name = 'protactinium'
 
-symbol = "pa"
+symbol = 'Pa'
 
 mass = 231.0359

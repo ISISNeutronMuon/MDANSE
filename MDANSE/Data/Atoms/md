@@ -1,5 +1,5 @@
-name = "mendelevium"
+name = 'mendelevium'
 
-symbol = "md"
+symbol = 'Md'
 
 mass = 258.0

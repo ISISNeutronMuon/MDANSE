@@ -1,5 +1,5 @@
-name = "ruthenium"
+name = 'ruthenium'
 
-symbol = "ru100"
+symbol = 'Ru100'
 
 mass = 99.9042197

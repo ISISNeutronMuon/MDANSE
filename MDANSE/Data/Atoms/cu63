@@ -1,5 +1,5 @@
-name = "copper"
+name = 'copper'
 
-symbol = "cu63"
+symbol = 'Cu63'
 
 mass = 62.9296011

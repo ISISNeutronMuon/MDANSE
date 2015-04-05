@@ -1,5 +1,5 @@
-name = "thallium"
+name = 'thallium'
 
-symbol = "tl203"
+symbol = 'Tl203'
 
 mass = 202.972329

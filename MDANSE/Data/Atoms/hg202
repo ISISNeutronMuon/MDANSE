@@ -1,5 +1,5 @@
-name = "mercury"
+name = 'mercury'
 
-symbol = "hg202"
+symbol = 'Hg202'
 
 mass = 201.970626

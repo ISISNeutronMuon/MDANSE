@@ -1,5 +1,5 @@
-name = "cobalt"
+name = 'cobalt'
 
-symbol = "co"
+symbol = 'Co'
 
 mass = 58.9332002

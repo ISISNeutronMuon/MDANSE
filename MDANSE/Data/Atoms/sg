@@ -1,5 +1,5 @@
-name = "seaborgium"
+name = 'seaborgium'
 
-symbol = "sg"
+symbol = 'Sg'
 
 mass = 266.12193

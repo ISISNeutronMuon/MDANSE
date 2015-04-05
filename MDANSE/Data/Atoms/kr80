@@ -1,5 +1,5 @@
-name = "krypton"
+name = 'krypton'
 
-symbol = "kr80"
+symbol = 'Kr80'
 
 mass = 79.916378

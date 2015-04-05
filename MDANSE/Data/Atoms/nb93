@@ -1,5 +1,5 @@
-name = "niobium"
+name = 'niobium'
 
-symbol = "nb93"
+symbol = 'Nb93'
 
 mass = 92.9063775

@@ -1,5 +1,5 @@
-name = "iodine"
+name = 'iodine'
 
-symbol = "i"
+symbol = 'I'
 
 mass = 126.904468

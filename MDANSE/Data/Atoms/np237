@@ -1,5 +1,5 @@
-name = "neptunium"
+name = 'neptunium'
 
-symbol = "np237"
+symbol = 'Np237'
 
 mass = 237.0

@@ -80,11 +80,10 @@ exclude_patterns = ['MDANSE.Externals','_build', '**Tests**']
 html_logo = '_static/mdanse_logo.png'
 
 inheritance_graph_attrs = dict(size='""')
-	
+
 inheritance_graph_attrs = dict(rankdir="TB", size='""')
 
 inheritance_node_attrs = dict(color='lightblue', style='filled')
-
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -103,7 +102,7 @@ htmlhelp_basename = 'MDANSE_doc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'MDANSE.tex', u'MDANSE Documentation',
-   u'B. Aoun \\& G. Goret \\& E. Pellegrini, G.R. Kneller', 'manual'),
+   u'B. Aoun \\& G. Goret \\& E. Pellegrini', 'manual'),
 ]
 
 pdf_documents = [('index', 'MDANSE', u'MDANSE Documentation', u'B. Aoun & G. Goret & E. Pellegrini'),]
@@ -124,17 +123,17 @@ exclude_patterns = ['MDANSE.Externals**', 'MDANSE.__pkginfo__']
 members_to_watch = ['class']
 
 def flag_onthefly(app, what, name, obj, options, lines):
-    from MDANSE import REGISTRY
-    for kls in REGISTRY["job"].values():
-    	kls.__doc__ += kls.configurators.build_doc()
-    if(what in members_to_watch):
-        # and modify the docstring so the rendered output is highlights the omission
-	    if lines:
-	        lines.insert(0,'**Description:**\n\n')
-	    lines.insert(0,'    .. inheritance-diagram:: %s\n'%name.split('.')[-1])
-	    lines.insert(0,'**inheritance-diagram:**\n\n')
-    	
+	from MDANSE import REGISTRY
+	for kls in REGISTRY["job"].values():
+		kls.__doc__ += kls.build_doc()
+	if(what in members_to_watch):
+		# and modify the docstring so the rendered output is highlights the omission
+		if lines:
+			lines.insert(0,'**Description:**\n\n')
+			lines.insert(0,'    .. inheritance-diagram:: %s\n'%name.split('.')[-1])
+			lines.insert(0,'**inheritance-diagram:**\n\n')
+
 def setup(app):
 
-    app.connect('autodoc-process-docstring', flag_onthefly)
+	app.connect('autodoc-process-docstring', flag_onthefly)
 	

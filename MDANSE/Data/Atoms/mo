@@ -1,5 +1,5 @@
-name = "molybdenum"
+name = 'molybdenum'
 
-symbol = "mo"
+symbol = 'Mo'
 
 mass = 95.94

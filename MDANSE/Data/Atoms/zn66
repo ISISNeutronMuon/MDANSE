@@ -1,5 +1,5 @@
-name = "zinc"
+name = 'zinc'
 
-symbol = "zn66"
+symbol = 'Zn66'
 
 mass = 65.9260368

@@ -9,7 +9,7 @@ import sys
 
 from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE.Core.Error import Error
-from MDANSE.Core.Configurable import Configurable
+from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Jobs.JobStatus import JobStatus
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 
@@ -245,7 +245,7 @@ class IJob(Configurable):
         f.write('parameters = {}\n')
         
         if parameters is None:
-            parameters = cls.configurators.get_default_parameters()
+            parameters = cls.get_default_parameters()
         
         for k, v in sorted(parameters.items()):
             f.write('parameters[%r] = %r\n' % (k, v))
@@ -299,7 +299,7 @@ class IJob(Configurable):
         f.write('        parameters = {}\n')
         
         if parameters is None:
-            parameters = cls.configurators.get_default_parameters()
+            parameters = cls.get_default_parameters()
         
         for k, v in sorted(parameters.items()):
             f.write('        parameters[%r] = %r\n' % (k, v))

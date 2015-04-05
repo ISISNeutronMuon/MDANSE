@@ -86,7 +86,7 @@ def build_connectivity(universe ,tolerance=0.05):
         coords = conf.array[indexes,:]
         covRadii = numpy.zeros((nAtoms,), dtype=numpy.float64)
         for i,at in enumerate(atoms):
-            covRadii[i] = ELEMENTS[at.symbol,'covalent_radius']
+            covRadii[i] = ELEMENTS[at.symbol.capitalize(),'covalent_radius']
         
         bonds = []
         fast_calculation.cpt_cluster_connectivity(coords,covRadii,tolerance,bonds)

@@ -1,5 +1,5 @@
-name = "fermium"
+name = 'fermium'
 
-symbol = "fm"
+symbol = 'Fm'
 
 mass = 257.095099

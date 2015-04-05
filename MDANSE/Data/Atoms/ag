@@ -1,5 +1,5 @@
-name = "silver"
+name = 'silver'
 
-symbol = "ag"
+symbol = 'Ag'
 
 mass = 107.8682

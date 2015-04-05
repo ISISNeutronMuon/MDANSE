@@ -1,5 +1,5 @@
-name = "rutherfordium"
+name = 'rutherfordium'
 
-symbol = "rf"
+symbol = 'Rf'
 
 mass = 261.10875

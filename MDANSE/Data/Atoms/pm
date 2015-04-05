@@ -1,5 +1,5 @@
-name = "promethium"
+name = 'promethium'
 
-symbol = "pm"
+symbol = 'Pm'
 
 mass = 145.0

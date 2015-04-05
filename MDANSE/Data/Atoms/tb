@@ -1,5 +1,5 @@
-name = "terbium"
+name = 'terbium'
 
-symbol = "tb"
+symbol = 'Tb'
 
 mass = 158.925343

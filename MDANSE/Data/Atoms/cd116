@@ -1,5 +1,5 @@
-name = "cadmium"
+name = 'cadmium'
 
-symbol = "cd116"
+symbol = 'Cd116'
 
 mass = 115.904755

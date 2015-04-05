@@ -1,5 +1,5 @@
-name = "roentgenium"
+name = 'roentgenium'
 
-symbol = "rg"
+symbol = 'Rg'
 
 mass = 272.15348

@@ -1,5 +1,5 @@
-name = "californium"
+name = 'californium'
 
-symbol = "cf"
+symbol = 'Cf'
 
 mass = 251.0

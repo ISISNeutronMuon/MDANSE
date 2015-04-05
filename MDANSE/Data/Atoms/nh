@@ -1,11 +1,5 @@
 name = 'NH'
+
 symbol = 'N'
 
-atomic_number = 7 + 1
-atomic_number_deut = 7 + 1
-
 mass = 15.014699
-mass_deut = 14.003074 + 2.014102
-
-color = 'blue'
-vdW_radius = 0.155000

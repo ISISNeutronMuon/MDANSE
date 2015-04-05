@@ -1,5 +1,5 @@
-name = "oxygen"
+name = 'oxygen'
 
-symbol = "o16"
+symbol = 'O16'
 
 mass = 15.99491462

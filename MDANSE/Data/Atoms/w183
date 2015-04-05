@@ -1,5 +1,5 @@
-name = "tungsten"
+name = 'tungsten'
 
-symbol = "w183"
+symbol = 'W183'
 
 mass = 182.9502245

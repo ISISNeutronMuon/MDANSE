@@ -142,7 +142,7 @@ class UserDefinitions(object):
         else:
             cPickle.dump(self, f, protocol=2)
             f.close()
-                        
+                                    
     def get(self, target, category, name):
         '''
         Returns a user definition given its target, category and its name.
@@ -153,6 +153,9 @@ class UserDefinitions(object):
         :type category: str
         :param name: the name of the user definition
         :type name: str
+        
+        :return: the user definition if it found or None otherwise
+        :rtype: a MDANSE.Framework.UserDefinables.UserDefinables.IUserDefinable derived class
         '''
         
         try:
@@ -160,7 +163,7 @@ class UserDefinitions(object):
         
         # Any kind of error should be caught here.    
         except:
-            raise UserDefinitionsError('The item %r is not registered in the user definition' % str(name))
+            return None
             
         else:                
             if ud.target != target:

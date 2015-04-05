@@ -1,5 +1,5 @@
-name = "fluorine"
+name = 'fluorine'
 
-symbol = "f19"
+symbol = 'F19'
 
 mass = 18.9984032

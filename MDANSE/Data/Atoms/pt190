@@ -1,5 +1,5 @@
-name = "platinum"
+name = 'platinum'
 
-symbol = "pt190"
+symbol = 'Pt190'
 
 mass = 189.95993

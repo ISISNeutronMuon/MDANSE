@@ -1,5 +1,5 @@
-name = "potassium"
+name = 'potassium'
 
-symbol = "k"
+symbol = 'K'
 
 mass = 39.0983

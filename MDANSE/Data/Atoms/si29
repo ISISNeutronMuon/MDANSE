@@ -1,5 +1,5 @@
-name = "silicon"
+name = 'silicon'
 
-symbol = "si29"
+symbol = 'Si29'
 
 mass = 28.97649472

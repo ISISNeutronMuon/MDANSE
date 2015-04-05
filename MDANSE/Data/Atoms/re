@@ -1,5 +1,5 @@
-name = "rhenium"
+name = 'rhenium'
 
-symbol = "re"
+symbol = 'Re'
 
 mass = 186.207

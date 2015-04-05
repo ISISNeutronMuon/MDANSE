@@ -1,5 +1,5 @@
-name = "zinc"
+name = 'zinc'
 
-symbol = "zn64"
+symbol = 'Zn64'
 
 mass = 63.9291466

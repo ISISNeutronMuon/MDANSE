@@ -1,5 +1,5 @@
-name = "plutonium"
+name = 'plutonium'
 
-symbol = "pu242"
+symbol = 'Pu242'
 
 mass = 242.0587368

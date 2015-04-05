@@ -1,5 +1,5 @@
-name = "radon"
+name = 'radon'
 
-symbol = "rn"
+symbol = 'Rn'
 
 mass = 222.0

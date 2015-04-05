@@ -1,5 +1,5 @@
-name = "copernicium"
+name = 'copernicium'
 
-symbol = "cn"
+symbol = 'Cn'
 
 mass = 285.0

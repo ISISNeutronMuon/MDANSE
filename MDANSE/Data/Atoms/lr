@@ -1,5 +1,5 @@
-name = "lawrencium"
+name = 'lawrencium'
 
-symbol = "lr"
+symbol = 'Lr'
 
 mass = 262.10969

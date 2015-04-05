@@ -1,5 +1,5 @@
-name = "neodymium"
+name = 'neodymium'
 
-symbol = "nd148"
+symbol = 'Nd148'
 
 mass = 147.916889

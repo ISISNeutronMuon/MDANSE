@@ -1,5 +1,5 @@
-name = "astatine"
+name = 'astatine'
 
-symbol = "at"
+symbol = 'At'
 
 mass = 210.0

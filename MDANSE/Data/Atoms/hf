@@ -1,5 +1,5 @@
-name = "hafnium"
+name = 'hafnium'
 
-symbol = "hf"
+symbol = 'Hf'
 
 mass = 178.49

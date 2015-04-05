@@ -1,5 +1,5 @@
-name = "helium"
+name = 'helium'
 
-symbol = "he4"
+symbol = 'He4'
 
 mass = 4.00260325

@@ -1,8 +1,5 @@
 name = 'lone-pair'
+
 symbol = 'Lp'
 
-atomic_number = 0
-
 mass = 0.0
-
-color = 'black'

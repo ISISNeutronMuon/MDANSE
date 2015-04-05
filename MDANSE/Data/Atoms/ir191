@@ -1,5 +1,5 @@
-name = "iridium"
+name = 'iridium'
 
-symbol = "ir191"
+symbol = 'Ir191'
 
 mass = 190.960591

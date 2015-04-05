@@ -1,5 +1,5 @@
-name = "palladium"
+name = 'palladium'
 
-symbol = "pd108"
+symbol = 'Pd108'
 
 mass = 107.903894

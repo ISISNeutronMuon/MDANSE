@@ -1,5 +1,5 @@
-name = "samarium"
+name = 'samarium'
 
-symbol = "sm148"
+symbol = 'Sm148'
 
 mass = 147.914818

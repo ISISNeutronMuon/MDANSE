@@ -1,5 +1,5 @@
-name = "sodium"
+name = 'sodium'
 
-symbol = "na23"
+symbol = 'Na23'
 
 mass = 22.98976967

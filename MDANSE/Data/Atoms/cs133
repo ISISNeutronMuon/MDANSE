@@ -1,5 +1,5 @@
-name = "caesium"
+name = 'caesium'
 
-symbol = "cs133"
+symbol = 'Cs133'
 
 mass = 132.905447

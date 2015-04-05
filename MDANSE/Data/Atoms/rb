@@ -1,5 +1,5 @@
-name = "rubidium"
+name = 'rubidium'
 
-symbol = "rb"
+symbol = 'Rb'
 
 mass = 85.4678

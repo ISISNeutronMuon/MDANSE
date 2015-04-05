@@ -1,5 +1,5 @@
-name = "germanium"
+name = 'germanium'
 
-symbol = "ge"
+symbol = 'Ge'
 
 mass = 72.64

@@ -1,5 +1,5 @@
-name = "lithium"
+name = 'lithium'
 
-symbol = "li"
+symbol = 'Li'
 
 mass = 6.941

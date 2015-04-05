@@ -1,5 +1,5 @@
-name = "thorium"
+name = 'thorium'
 
-symbol = "th"
+symbol = 'Th'
 
 mass = 232.0381

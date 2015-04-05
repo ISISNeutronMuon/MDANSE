@@ -1,5 +1,5 @@
-name = "americium"
+name = 'americium'
 
-symbol = "am243"
+symbol = 'Am243'
 
 mass = 243.0

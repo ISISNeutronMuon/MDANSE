@@ -1,5 +1,5 @@
-name = "rhodium"
+name = 'rhodium'
 
-symbol = "rh103"
+symbol = 'Rh103'
 
 mass = 102.905504

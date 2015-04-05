@@ -1,5 +1,5 @@
-name = "flerovium"
+name = 'flerovium'
 
-symbol = "fl"
+symbol = 'Fl'
 
 mass = 289.0

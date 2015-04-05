@@ -1,5 +1,5 @@
-name = "bismuth"
+name = 'bismuth'
 
-symbol = "bi"
+symbol = 'Bi'
 
 mass = 208.980383

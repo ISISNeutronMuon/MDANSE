@@ -1,5 +1,5 @@
-name = "strontium"
+name = 'strontium'
 
-symbol = "sr88"
+symbol = 'Sr88'
 
 mass = 87.9056143

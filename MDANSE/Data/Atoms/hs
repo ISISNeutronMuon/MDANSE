@@ -1,5 +1,5 @@
-name = "hassium"
+name = 'hassium'
 
-symbol = "hs"
+symbol = 'Hs'
 
 mass = 277.0

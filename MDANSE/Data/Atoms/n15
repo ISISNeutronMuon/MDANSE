@@ -1,5 +1,5 @@
-name = "nitrogen"
+name = 'nitrogen'
 
-symbol = "n15"
+symbol = 'N15'
 
 mass = 15.0001089

@@ -1,5 +1,5 @@
-name = "iron"
+name = 'iron'
 
-symbol = "fe"
+symbol = 'Fe'
 
 mass = 55.845

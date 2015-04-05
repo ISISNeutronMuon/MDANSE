@@ -1,5 +1,5 @@
-name = "livermorium"
+name = 'livermorium'
 
-symbol = "lv"
+symbol = 'Lv'
 
 mass = 293.0

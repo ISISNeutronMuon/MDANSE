@@ -1,5 +1,5 @@
-name = "chromium"
+name = 'chromium'
 
-symbol = "cr"
+symbol = 'Cr'
 
 mass = 51.9961

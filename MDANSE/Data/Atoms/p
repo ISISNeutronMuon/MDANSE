@@ -1,5 +1,5 @@
-name = "phosphorus"
+name = 'phosphorus'
 
-symbol = "p"
+symbol = 'P'
 
 mass = 30.97376151

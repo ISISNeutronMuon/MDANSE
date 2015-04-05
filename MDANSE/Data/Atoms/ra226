@@ -1,5 +1,5 @@
-name = "radium"
+name = 'radium'
 
-symbol = "ra226"
+symbol = 'Ra226'
 
 mass = 226.0

@@ -1,5 +1,5 @@
-name = "titanium"
+name = 'titanium'
 
-symbol = "ti46"
+symbol = 'Ti46'
 
 mass = 45.9526295

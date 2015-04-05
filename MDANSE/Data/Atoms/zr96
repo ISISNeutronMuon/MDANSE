@@ -1,5 +1,5 @@
-name = "zirconium"
+name = 'zirconium'
 
-symbol = "zr96"
+symbol = 'Zr96'
 
 mass = 95.908276

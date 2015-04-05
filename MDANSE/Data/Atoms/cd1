@@ -1,12 +1,5 @@
 name = 'CD1'
+
 symbol = 'C'
 
-atomic_number = 6 + 1
-atomic_number_deut = 6 + 1
-
-mass = 12.0110369031 + 2.014102
-mass_deut = 12.0110369031 + 2.014102
-
-color = 'black'
-
-vdW_radius = 0.17
+mass = 14.0251389031

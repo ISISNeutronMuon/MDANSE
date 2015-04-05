@@ -1,5 +1,5 @@
-name = "barium"
+name = 'barium'
 
-symbol = "ba134"
+symbol = 'Ba134'
 
 mass = 133.904503

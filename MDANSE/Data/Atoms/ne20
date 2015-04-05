@@ -1,5 +1,5 @@
-name = "neon"
+name = 'neon'
 
-symbol = "ne20"
+symbol = 'Ne20'
 
 mass = 19.99244018

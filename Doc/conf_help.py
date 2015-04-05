@@ -75,7 +75,7 @@ release = '1.0'
 
 # List of directories, relative to source directory, that shouldn't be searched
 # for source files.
-exclude_patterns = ['Externals','_build', '**Tests**']
+exclude_patterns = ['MDANSE.Externals','_build', '**Tests**']
 
 html_logo = '_static/mdanse_logo.png'
 
@@ -98,22 +98,25 @@ html_theme_options = {'sidebarwidth':250}#, 'nosidebar':True}
 html_show_copyright = False
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'mdanseDoc'
+htmlhelp_basename = 'MDANSE_doc'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
+latex_documents = [
+  ('index', 'MDANSE.tex', u'MDANSE Documentation',
+   u'B. Aoun \\& G. Goret \\& E. Pellegrini', 'manual'),
+]
 
-
-#pdf_documents = [
-#  ('index', 'MDANSE', u'MDANSE Documentation',
-#   u'B. Aoun & G. Goret & E. Pellegrini, G.R. Kneller'),
-#]
+pdf_documents = [('index', 'MDANSE', u'MDANSE Documentation', u'B. Aoun & G. Goret & E. Pellegrini'),]
 
 exclude_patterns = ['MDANSE.Externals**', 'MDANSE.__pkginfo__']
 
 members_to_watch = ['class']
 
 def flag_onthefly(app, what, name, obj, options, lines):
+    from MDANSE import REGISTRY
+    for kls in REGISTRY["job"].values():
+        kls.__doc__ += kls.build_doc()
     if(what in members_to_watch):
         # and modify the docstring so the rendered output is highlights the omission
         if lines:

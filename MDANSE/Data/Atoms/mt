@@ -1,5 +1,5 @@
-name = "meitnerium"
+name = 'meitnerium'
 
-symbol = "mt"
+symbol = 'Mt'
 
 mass = 268.13882

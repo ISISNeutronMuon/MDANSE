@@ -1,5 +1,5 @@
-name = "beryllium"
+name = 'beryllium'
 
-symbol = "be"
+symbol = 'Be'
 
 mass = 9.0121821

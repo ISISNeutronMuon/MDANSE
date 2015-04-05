@@ -1,5 +1,5 @@
-name = "ununpentium"
+name = 'ununpentium'
 
-symbol = "uup"
+symbol = 'Uup'
 
 mass = 288.0

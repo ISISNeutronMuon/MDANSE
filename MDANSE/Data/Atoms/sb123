@@ -1,5 +1,5 @@
-name = "antimony"
+name = 'antimony'
 
-symbol = "sb123"
+symbol = 'Sb123'
 
 mass = 122.9042157

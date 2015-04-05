@@ -1,5 +1,5 @@
-name = "tantalum"
+name = 'tantalum'
 
-symbol = "ta181"
+symbol = 'Ta181'
 
 mass = 180.947996

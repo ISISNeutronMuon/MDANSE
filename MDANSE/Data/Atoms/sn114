@@ -1,5 +1,5 @@
-name = "tin"
+name = 'tin'
 
-symbol = "sn114"
+symbol = 'Sn114'
 
 mass = 113.902782

@@ -1,5 +1,5 @@
-name = "osmium"
+name = 'osmium'
 
-symbol = "os"
+symbol = 'Os'
 
 mass = 190.23

@@ -1,5 +1,5 @@
-name = "darmstadtium"
+name = 'darmstadtium'
 
-symbol = "ds"
+symbol = 'Ds'
 
 mass = 281.0

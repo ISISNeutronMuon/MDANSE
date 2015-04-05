@@ -1,5 +1,5 @@
-name = "lead"
+name = 'lead'
 
-symbol = "pb206"
+symbol = 'Pb206'
 
 mass = 205.974449

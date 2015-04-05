@@ -55,15 +55,13 @@ class BasisSelection(IConfigurator):
 
     def configure(self, configuration, value):
         trajConfig = configuration[self._dependencies['trajectory']]
-                
-        target = trajConfig["basename"]
 
-        if USER_DEFINITIONS.has_key(value):
-            definition = USER_DEFINITIONS.check_and_get(target, "basis_selection", value)
-            self.update(definition)
+        ud = USER_DEFINITIONS.get(trajConfig["basename"],"basis_selection",value)        
+        if ud is not None:
+            self.update(ud)
         else:
             self.update(value)
-
+                
         e1 = find_atoms_in_molecule(trajConfig['instance'].universe,self['molecule'], self['origin'], True)
         e2 = find_atoms_in_molecule(trajConfig['instance'].universe,self['molecule'], self['x_axis'], True)
         e3 = find_atoms_in_molecule(trajConfig['instance'].universe,self['molecule'], self['y_axis'], True)

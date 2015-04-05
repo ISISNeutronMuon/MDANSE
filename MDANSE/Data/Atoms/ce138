@@ -1,5 +1,5 @@
-name = "cerium"
+name = 'cerium'
 
-symbol = "ce138"
+symbol = 'Ce138'
 
 mass = 137.905986

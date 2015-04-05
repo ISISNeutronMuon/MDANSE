@@ -1,5 +1,5 @@
-name = "technetium"
+name = 'technetium'
 
-symbol = "tc99"
+symbol = 'Tc99'
 
 mass = 98.0

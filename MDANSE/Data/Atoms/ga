@@ -1,5 +1,5 @@
-name = "gallium"
+name = 'gallium'
 
-symbol = "ga"
+symbol = 'Ga'
 
 mass = 69.723

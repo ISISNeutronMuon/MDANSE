@@ -1,5 +1,5 @@
-name = "boron"
+name = 'boron'
 
-symbol = "b10"
+symbol = 'B10'
 
 mass = 10.012937

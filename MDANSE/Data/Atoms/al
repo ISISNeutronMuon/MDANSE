@@ -1,5 +1,5 @@
-name = "aluminium"
+name = 'aluminium'
 
-symbol = "al"
+symbol = 'Al'
 
 mass = 26.98153844

@@ -1,5 +1,5 @@
-name = "arsenic"
+name = 'arsenic'
 
-symbol = "as"
+symbol = 'As'
 
 mass = 74.9215964

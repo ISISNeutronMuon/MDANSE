@@ -1,11 +1,5 @@
 name = 'OD1'
+
 symbol = 'O'
 
-atomic_number = 8 + 1
-atomic_number_deut = 8 + 1
-
-mass = 15.994915000000001 + 2.014102
-mass_deut = 15.994915000000001 + 2.014102
-
-color = 'red'
-vdW_radius = 0.152000
+mass = 18.009017

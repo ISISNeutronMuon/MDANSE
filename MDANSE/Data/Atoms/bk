@@ -1,5 +1,5 @@
-name = "berkelium"
+name = 'berkelium'
 
-symbol = "bk"
+symbol = 'Bk'
 
 mass = 247.0

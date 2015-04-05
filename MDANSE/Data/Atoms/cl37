@@ -1,5 +1,5 @@
-name = "chlorine"
+name = 'chlorine'
 
-symbol = "cl37"
+symbol = 'Cl37'
 
 mass = 36.9659026

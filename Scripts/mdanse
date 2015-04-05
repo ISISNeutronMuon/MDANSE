@@ -242,7 +242,9 @@ class CommandLineParser(optparse.OptionParser):
                     
         # A name for the template is built.
         filename = os.path.abspath('template_%s.py' % name.lower())
-        # Try to save the template for the job.
+        jobs[name].save(filename)    
+
+        # Try to save the template for the job.  
         try:
             jobs[name].save(filename)    
         # Case where an error occured when writing the template.

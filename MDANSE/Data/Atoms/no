@@ -1,5 +1,5 @@
-name = "nobelium"
+name = 'nobelium'
 
-symbol = "no"
+symbol = 'No'
 
 mass = 259.10102

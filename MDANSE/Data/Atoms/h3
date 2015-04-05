@@ -1,5 +1,5 @@
-name = "hydrogen"
+name = 'hydrogen'
 
-symbol = "h3"
+symbol = 'H3'
 
 mass = 3.016049268

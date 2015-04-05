@@ -654,7 +654,7 @@ class ElementsDatabase(object):
         :rtype: list
         '''
 
-        return [prop for prop in self._properties if issubclass(prop,numbers.Number)]
+        return [name for name,typ in self._properties.items() if issubclass(typ,numbers.Number)]
 
     def has_element(self,ename):
         '''

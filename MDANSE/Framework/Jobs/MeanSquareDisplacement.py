@@ -1,5 +1,4 @@
 from MDANSE import ELEMENTS
-from MDANSE.Framework.Configurators.ConfiguratorsDict import ConfiguratorsDict
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
@@ -35,16 +34,16 @@ class MeanSquareDisplacement(IJob):
     
     ancestor = "mmtk_trajectory"
     
-    configurators = ConfiguratorsDict()
-    configurators.add_item('trajectory','mmtk_trajectory')
-    configurators.add_item('frames', 'frames', dependencies={'trajectory':'trajectory'})
-    configurators.add_item('projection', 'projection', label="project coordinates")
-    configurators.add_item('atom_selection', 'atom_selection',dependencies={'trajectory':'trajectory','grouping_level':'grouping_level'})
-    configurators.add_item('grouping_level', 'grouping_level')
-    configurators.add_item('transmutated_atoms', 'atom_transmutation',dependencies={'trajectory':'trajectory', 'atom_selection':'atom_selection'})
-    configurators.add_item('weights', 'weights')
-    configurators.add_item('output_files', 'output_files', formats=["netcdf","ascii"])
-    configurators.add_item('running_mode', 'running_mode')
+    configurators = []
+    configurators.append(('trajectory','mmtk_trajectory',{}))
+    configurators.append(('frames', 'frames', {"dependencies":{'trajectory':'trajectory'}}))
+    configurators.append(('projection', 'projection', {"label":"project coordinates"}))
+    configurators.append(('atom_selection', 'atom_selection',{"dependencies":{'trajectory':'trajectory','grouping_level':'grouping_level'}}))
+    configurators.append(('grouping_level', 'grouping_level',{}))
+    configurators.append(('transmutated_atoms', 'atom_transmutation',{"dependencies":{'trajectory':'trajectory', 'atom_selection':'atom_selection'}}))
+    configurators.append(('weights', 'weights',{}))
+    configurators.append(('output_files', 'output_files', {"formats":["netcdf","ascii"]}))
+    configurators.append(('running_mode', 'running_mode',{}))
             
     def initialize(self):
         """

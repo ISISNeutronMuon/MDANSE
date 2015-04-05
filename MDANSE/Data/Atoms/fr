@@ -1,5 +1,5 @@
-name = "francium"
+name = 'francium'
 
-symbol = "fr"
+symbol = 'Fr'
 
 mass = 223.0

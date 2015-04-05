@@ -1,5 +1,5 @@
-name = "holmium"
+name = 'holmium'
 
-symbol = "ho165"
+symbol = 'Ho165'
 
 mass = 164.930319

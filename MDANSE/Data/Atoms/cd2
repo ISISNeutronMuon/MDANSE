@@ -1,12 +1,5 @@
 name = 'CD2'
+
 symbol = 'C'
 
-atomic_number = 6 + 2
-atomic_number_deut = 6 + 2
-
-mass = 12.0110369031 + 2*2.014102
-mass_deut = 12.0110369031 + 2*2.014102
-
-color = 'black'
-
-vdW_radius = 0.17
+mass = 16.0392409031

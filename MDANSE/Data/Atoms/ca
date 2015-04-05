@@ -1,5 +1,5 @@
-name = "calcium"
+name = 'calcium'
 
-symbol = "ca"
+symbol = 'Ca'
 
 mass = 40.078

@@ -45,19 +45,19 @@ class QVectorsConfigurator(IConfigurator):
 
     def configure(self, configuration, value):
 
-        # If the value is a basestring, it will treated as a user definition        
-        if isinstance(value,basestring):
-            trajConfig = configuration[self._dependencies['trajectory']]
-            target = trajConfig["basename"]
-            definition = USER_DEFINITIONS.check_and_get(target, "q_vectors", value)            
-            self["parameters"] = definition['parameters']
-            self["type"] = definition['generator']
-            self["is_lattice"] = definition['is_lattice']
-            self["q_vectors"] = definition['q_vectors']
+        trajConfig = configuration[self._dependencies['trajectory']]
+
+        ud = USER_DEFINITIONS.get(trajConfig["basename"],"q_vectors",value)        
+        if ud is not None:
+            
+            self["parameters"] = ud['parameters']
+            self["type"] = ud['generator']
+            self["is_lattice"] = ud['is_lattice']
+            self["q_vectors"] = ud['q_vectors']
         
         else:                        
             generator, parameters = value
-            generator = REGISTRY["qvectors"][generator](trajConfig["instance"].universe)
+            generator = REGISTRY["q_vectors"][generator](trajConfig["instance"].universe)
             generator.configure(parameters)
             data = generator.run()
                         

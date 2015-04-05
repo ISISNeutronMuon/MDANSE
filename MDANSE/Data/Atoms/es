@@ -1,5 +1,5 @@
-name = "einsteinium"
+name = 'einsteinium'
 
-symbol = "es"
+symbol = 'Es'
 
 mass = 252.08297

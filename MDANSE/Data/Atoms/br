@@ -1,5 +1,5 @@
-name = "bromine"
+name = 'bromine'
 
-symbol = "br"
+symbol = 'Br'
 
 mass = 79.904

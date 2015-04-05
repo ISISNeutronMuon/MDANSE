@@ -1,5 +1,5 @@
-name = "gadolinium"
+name = 'gadolinium'
 
-symbol = "gd157"
+symbol = 'Gd157'
 
 mass = 156.923957

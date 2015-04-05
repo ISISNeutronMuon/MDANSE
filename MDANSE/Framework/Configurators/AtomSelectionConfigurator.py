@@ -39,6 +39,7 @@ from MDANSE.Framework.UserDefinables.UserDefinitions import USER_DEFINITIONS
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 from MDANSE.Framework.Selectors.SelectionParser import SelectionParser
 
+# The granularities at which the selection will be performed
 LEVELS = collections.OrderedDict()
 LEVELS["atom"]     = {"atom" : 0, "atomcluster" : 0, "molecule" : 0, "nucleotidechain" : 0, "peptidechain" : 0, "protein" : 0}
 LEVELS["group"]    = {"atom" : 0, "atomcluster" : 1, "molecule" : 1, "nucleotidechain" : 1, "peptidechain" : 1, "protein" : 1}
@@ -47,16 +48,16 @@ LEVELS["chain"]    = {"atom" : 0, "atomcluster" : 1, "molecule" : 1, "nucleotide
 LEVELS["molecule"] = {"atom" : 0, "atomcluster" : 1, "molecule" : 1, "nucleotidechain" : 3, "peptidechain" : 3, "protein" : 4}
 
 class AtomSelectionConfigurator(IConfigurator):    
-    """
-    This configurator allow to select among the User Definitions, an atomic selection.
-    Without any selection, all the atoms records into the trajectory file will be take into account.
-    If a selection is define, the analysis will take into account only those sub-selection.
+    '''
+    This configurator allows the selection of a specific set of atoms on which the analysis will be performed.
+
+    Without any selection, all the atoms stored into the trajectory file will be selected.
     
     To Build an atom selection you have to :
-    - Create a workspace based on a mmtk_trajectory data,
-    - drag a molecular viewer on it,
-    - drag into the Molecular Viewer his "Atom selection" plugin
-    """
+    #. Create a workspace based on a mmtk_trajectory data,
+    #. drag a molecular viewer on it,
+    #. drag into the Molecular Viewer his "Atom selection" plugin
+    '''
 
     type = 'atom_selection'
     
@@ -65,8 +66,6 @@ class AtomSelectionConfigurator(IConfigurator):
     def configure(self, configuration, value):
                           
         trajConfig = configuration[self._dependencies['trajectory']]
-
-        target = trajConfig["basename"]
         
         if value is None:
             value = "all"
@@ -76,9 +75,9 @@ class AtomSelectionConfigurator(IConfigurator):
         
         self["value"] = value
         
-        if USER_DEFINITIONS.has_key(value):
-            definition = USER_DEFINITIONS.check_and_get(target, "atom_selection", value)
-            self.update(definition)
+        ud = USER_DEFINITIONS.get(trajConfig["basename"],"atom_selection",value)        
+        if ud is not None:
+            self.update(ud)
         else:
             parser = SelectionParser(trajConfig["instance"].universe)
             expression, selection = parser(value,True)

@@ -1,5 +1,5 @@
-name = "europium"
+name = 'europium'
 
-symbol = "eu153"
+symbol = 'Eu153'
 
 mass = 152.921226

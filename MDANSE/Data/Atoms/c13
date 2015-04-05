@@ -1,5 +1,5 @@
-name = "carbon"
+name = 'carbon'
 
-symbol = "c13"
+symbol = 'C13'
 
 mass = 13.00335484

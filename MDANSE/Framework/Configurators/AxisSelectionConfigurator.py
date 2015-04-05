@@ -54,11 +54,9 @@ class AxisSelection(IConfigurator):
         
         trajConfig = configuration[self._dependencies['trajectory']]
                 
-        target = trajConfig["basename"]
-
-        if USER_DEFINITIONS.has_key(value):
-            definition = USER_DEFINITIONS.check_and_get(target, "axis_selection", value)
-            self.update(definition)
+        ud = USER_DEFINITIONS.get(trajConfig["basename"],"axis_selection",value)        
+        if ud is not None:
+            self.update(ud)
         else:
             self.update(value)
 

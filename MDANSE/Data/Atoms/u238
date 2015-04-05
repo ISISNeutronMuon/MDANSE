@@ -1,5 +1,5 @@
-name = "uranium"
+name = 'uranium'
 
-symbol = "u238"
+symbol = 'U238'
 
 mass = 238.0507826

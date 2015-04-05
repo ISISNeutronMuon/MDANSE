@@ -1,5 +1,5 @@
-name = "dysprosium"
+name = 'dysprosium'
 
-symbol = "dy160"
+symbol = 'Dy160'
 
 mass = 159.925194

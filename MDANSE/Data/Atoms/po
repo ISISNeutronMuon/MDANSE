@@ -1,5 +1,5 @@
-name = "polonium"
+name = 'polonium'
 
-symbol = "po"
+symbol = 'Po'
 
 mass = 209.0

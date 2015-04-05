@@ -1,5 +1,5 @@
-name = "indium"
+name = 'indium'
 
-symbol = "in"
+symbol = 'In'
 
 mass = 114.818

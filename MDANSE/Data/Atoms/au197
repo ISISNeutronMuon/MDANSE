@@ -1,5 +1,5 @@
-name = "gold"
+name = 'gold'
 
-symbol = "au197"
+symbol = 'Au197'
 
 mass = 196.966552
