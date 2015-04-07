@@ -1,3 +1,5 @@
+import collections
+
 from MDANSE import ELEMENTS
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
@@ -34,16 +36,16 @@ class MeanSquareDisplacement(IJob):
     
     ancestor = "mmtk_trajectory"
     
-    configurators = []
-    configurators.append(('trajectory','mmtk_trajectory',{}))
-    configurators.append(('frames', 'frames', {"dependencies":{'trajectory':'trajectory'}}))
-    configurators.append(('projection', 'projection', {"label":"project coordinates"}))
-    configurators.append(('atom_selection', 'atom_selection',{"dependencies":{'trajectory':'trajectory','grouping_level':'grouping_level'}}))
-    configurators.append(('grouping_level', 'grouping_level',{}))
-    configurators.append(('transmutated_atoms', 'atom_transmutation',{"dependencies":{'trajectory':'trajectory', 'atom_selection':'atom_selection'}}))
-    configurators.append(('weights', 'weights',{}))
-    configurators.append(('output_files', 'output_files', {"formats":["netcdf","ascii"]}))
-    configurators.append(('running_mode', 'running_mode',{}))
+    configurators = collections.OrderedDict()
+    configurators['trajectory']=('mmtk_trajectory',{})
+    configurators['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
+    configurators['projection']=('projection', {"label":"project coordinates"})
+    configurators['atom_selection']=('atom_selection',{"dependencies":{'trajectory':'trajectory','grouping_level':'grouping_level'}})
+    configurators['grouping_level']=('grouping_level',{})
+    configurators['transmutated_atoms']=('atom_transmutation',{"dependencies":{'trajectory':'trajectory', 'atom_selection':'atom_selection'}})
+    configurators['weights']=('weights',{})
+    configurators['output_files']=('output_files', {"formats":["netcdf","ascii"]})
+    configurators['running_mode']=('running_mode',{})
             
     def initialize(self):
         """

@@ -36,8 +36,6 @@ import operator
 
 import numpy
 
-from MDANSE.Framework.Configurators.ConfiguratorsDict import ConfiguratorsDict
-
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 class ApproximatedDispersionQVectors(LatticeQVectors):
@@ -46,16 +44,12 @@ class ApproximatedDispersionQVectors(LatticeQVectors):
 
     type = 'approximated_dispersion'
     
-    configurators = ConfiguratorsDict()
-    configurators.add_item('q_start','vector', label="Q start (nm^-1)",valueType=float, notNull=False, default=[0,0,0])
-    configurators.add_item('q_end', 'vector', label="Q end (nm^-1)", valueType=float, notNull=False, default=[0,0,0])
-    configurators.add_item('q_step', 'float', label="Q step (nm^-1)", mini=1.0e-6, default=0.1)
-
-    __doc__ += configurators.build_doc()
+    configurators = collections.OrderedDict()
+    configurators['q_start'] = ('vector', {"label":"Q start (nm^-1)","valueType":float, "notNull":False, "default":[0,0,0]})
+    configurators['q_end'] = ('vector', {"label":"Q end (nm^-1)", "valueType":float, "notNull":False, "default":[0,0,0]})
+    configurators['q_step'] = ('float', {"label":"Q step (nm^-1)", "mini":1.0e-6, "default":0.1})
 
     def generate(self, status=None):
-
-        vectors = collections.OrderedDict()
 
         qStart = self._configuration["q_start"]["value"]
         qEnd = self._configuration["q_end"]["value"]
@@ -81,11 +75,11 @@ class ApproximatedDispersionQVectors(LatticeQVectors):
 
         for k,v in qGroups.iteritems():
 
-            vectors[k] = {}
-            vectors[k]['q']           = k
-            vectors[k]['q_vectors']   = vects[:,v]
-            vectors[k]['n_q_vectors'] = len(v)
-            vectors[k]['hkls']        = hkls[:,v]
+            self._definition["q_vectors"][k] = {}
+            self._definition["q_vectors"][k]['q']           = k
+            self._definition["q_vectors"][k]['q_vectors']   = vects[:,v]
+            self._definition["q_vectors"][k]['n_q_vectors'] = len(v)
+            self._definition["q_vectors"][k]['hkls']        = hkls[:,v]
 
             if status is not None:
                 if status.is_stopped():
@@ -96,4 +90,4 @@ class ApproximatedDispersionQVectors(LatticeQVectors):
         if status is not None:
             status.finish()
             
-        return vectors
+        return self._definition["q_vectors"]

@@ -57,9 +57,9 @@ class QVectorsConfigurator(IConfigurator):
         
         else:                        
             generator, parameters = value
-            generator = REGISTRY["q_vectors"][generator](trajConfig["instance"].universe)
-            generator.configure(parameters)
-            data = generator.run()
+            generator = REGISTRY["q_vectors"][generator](trajConfig["instance"])
+            generator.setup(parameters)
+            data = generator.generate()
                         
             if not data:
                 raise ConfiguratorError("no Q vectors could be generated", self)

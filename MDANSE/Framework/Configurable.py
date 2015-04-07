@@ -62,13 +62,13 @@ class Configurable(object):
                
         self._configuration = {}
 
-        configurators = getattr(self,"configurators",())
+        configurators = getattr(self,"configurators",{})
         
-        if not isinstance(configurators,_abcoll.Sequence):
-            raise ConfigurationError("Invalid type for configurators: must be a sequence-like object")
+        if not isinstance(configurators,_abcoll.Mapping):
+            raise ConfigurationError("Invalid type for configurators: must be a mapping-like object")
 
         self._configurators = {}
-        for name,typ,kwds in configurators:
+        for name,(typ,kwds) in configurators.items():
             try:
                 self._configurators[name] = REGISTRY["configurator"][typ](name, **kwds)
             # Any kind of error has to be caught
@@ -177,14 +177,14 @@ class Configurable(object):
         :rtype: str
         '''
               
-        configurators = getattr(cls,"configurators",())
+        configurators = getattr(cls,"configurators",{})
         
-        if not isinstance(configurators,_abcoll.Sequence):
-            raise ConfigurationError("Invalid type for configurators: must be a sequence-like object")
+        if not isinstance(configurators,_abcoll.Mapping):
+            raise ConfigurationError("Invalid type for configurators: must be a mapping-like object")
                                     
         doclist = []
         
-        for name,typ,kwds in configurators:
+        for name,(typ,kwds) in configurators.items():
             cfg=REGISTRY["configurator"][typ](name, **kwds)
             doclist.append({'Configurator' : name,'Default value' : repr(cfg.default),'Description' : str(cfg.__doc__)})
             
@@ -253,13 +253,13 @@ class Configurable(object):
         :rtype: dict
         '''
         
-        configurators = getattr(cls,"configurators",())
+        configurators = getattr(cls,"configurators",{})
         
-        if not isinstance(configurators,_abcoll.Sequence):
-            raise ConfigurationError("Invalid type for configurators: must be a sequence-like object")
+        if not isinstance(configurators,_abcoll.Mapping):
+            raise ConfigurationError("Invalid type for configurators: must be a mapping-like object")
                                     
         params = collections.OrderedDict()
-        for name,typ,kwds in configurators:
+        for name,(typ,kwds) in configurators.items():
             cfg=REGISTRY["configurator"][typ](name, **kwds)        
             params[name] = cfg.default
             

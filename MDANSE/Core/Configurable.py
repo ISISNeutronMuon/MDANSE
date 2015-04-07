@@ -57,6 +57,8 @@ class Configurable(object):
         
         self._configuration = {}
         
+        self._parameters = {}
+        
         self._configured=False
         
     def __getitem__(self, name):
@@ -74,6 +76,11 @@ class Configurable(object):
         
         return self._configuration.setdefault(name,{})
         
+    @property
+    def parameters(self):
+        
+        return self._parameters    
+    
     def setup(self,parameters):
         '''
         Setup the configuration according to a set of input parameters.
@@ -84,6 +91,7 @@ class Configurable(object):
                 
         # Cleans the previous configuration
         self._configuration.clear()
+        self._parameters.clear()
 
         self._configured=False
                 
@@ -101,6 +109,7 @@ class Configurable(object):
         else:
             raise ConfigurationError("Invalid type for configuration parameters")             
                         
+        self._parameters = parameters
         toBeConfigured = set(self.configurators.keys())
         configured = set()
                 

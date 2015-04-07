@@ -30,9 +30,10 @@ Created on Mar 30, 2015
 @author: pellegrini
 '''
 
+import collections
+
 import numpy
 
-from MDANSE.Framework.Configurators.ConfiguratorsDict import ConfiguratorsDict
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import IInstrumentResolution
 
 class PseudoVoigtInstrumentResolution(IInstrumentResolution):
@@ -41,15 +42,13 @@ class PseudoVoigtInstrumentResolution(IInstrumentResolution):
 
     type = 'pseudo-voigt'
 
-    configurators = ConfiguratorsDict()
-    configurators.add_item('eta','float', mini=0.0, maxi=1.0, default=0.5)
-    configurators.add_item('mu_lorentzian','float', default=0.0)
-    configurators.add_item('sigma_lorentzian','float', default=1.0)
-    configurators.add_item('mu_gaussian','float', default=0.0)
-    configurators.add_item('sigma_gaussian','float', default=1.0)
+    configurators = collections.OrderedDict()
+    configurators['eta'] = ('float', {"mini":0.0, "maxi":1.0, "default":0.5})
+    configurators['mu_lorentzian'] = ('float', {"default":0.0})
+    configurators['sigma_lorentzian'] = ('float', {"default":1.0})
+    configurators['mu_gaussian'] = ('float', {"default":0.0})
+    configurators['sigma_gaussian'] = ('float', {"default":1.0})
 
-    __doc__ += configurators.build_doc()
-            
     def set_kernel(self, frequencies, dt):
 
         eta = self._configuration["eta"]["value"]

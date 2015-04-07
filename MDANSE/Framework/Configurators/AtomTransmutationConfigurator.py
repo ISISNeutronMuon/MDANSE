@@ -33,7 +33,7 @@ Created on Mar 30, 2015
 from MDANSE import ELEMENTS
 from MDANSE.Framework.UserDefinables.UserDefinitions import USER_DEFINITIONS
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
-from MDANSE.Framework.Selectors.SelectionParser import SelectionParser
+from MDANSE.Framework.AtomTransmutationParser import AtomTransmutationParser
         
 class AtomTransmutationConfigurator(IConfigurator):
     """
@@ -62,14 +62,15 @@ class AtomTransmutationConfigurator(IConfigurator):
 
         trajConfig = configuration[self._dependencies['trajectory']]
                                                                 
-        parser = SelectionParser(trajConfig["universe"])
+        parser = AtomTransmutationParser(trajConfig["instance"])
         
         # If the input value is a dictionary, it must have a selection string or a python script as key and the element 
         # to be transmutated to as value 
         if isinstance(value,dict):
             for expression,element in value.items():
-                expression, selection = parser.select(expression, True)                    
-                self.transmutate(configuration, selection, element)
+                parser.parse(element,expression)
+                definition = parser.definition          
+                self.transmutate(configuration, definition["indexes"], definition["element"])
           
         # Otherwise, it must be a list of strings that will be found as user-definition keys
         elif isinstance(value,(list,tuple)):                        
@@ -100,7 +101,7 @@ class AtomTransmutationConfigurator(IConfigurator):
             else:
                 self["atom_selection"]["elements"][pos] = [element]
                 
-        configuration.configurators[self._dependencies['atom_selection']].set_contents(configuration)
+        configuration[self._dependencies['atom_selection']].set_contents()
 
     def get_information(self):
         

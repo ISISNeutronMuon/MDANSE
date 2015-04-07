@@ -30,28 +30,45 @@ Created on Mar 30, 2015
 @author: pellegrini
 '''
 
-import numpy
+import abc
 
-from MDANSE.Framework.Configurators.ConfiguratorsDict import ConfiguratorsDict
-from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import IInstrumentResolution
+from MDANSE import REGISTRY
+from MDANSE.Core.Error import Error
+from MDANSE.Framework.Configurable import Configurable
 
-class SquareInstrumentResolution(IInstrumentResolution):
-    """Defines an instrument resolution with a square response
-    """
+class InstrumentResolutionError(Error):
+    pass
+
+class IInstrumentResolution(Configurable):
+
+    __metaclass__ = REGISTRY
     
-    type = 'square'
-
-    configurators = ConfiguratorsDict()
-    configurators.add_item('mu', 'float', default=0.0)
-    configurators.add_item('sigma', 'float', default=1.0)
-
-    __doc__ += configurators.build_doc()
+    type = "instrument_resolution"
+    
+    def __init__(self):
         
-    def set_kernel(self, frequencies, dt):
-                                
-        mu = self._configuration["mu"]["value"]
-        sigma = self._configuration["sigma"]["value"]
-                                
-        self._frequencyWindow = numpy.where((numpy.abs(frequencies-mu)-sigma) > 0,0.0,1.0/(2.0*sigma))
+        Configurable.__init__(self)
                         
-        self._timeWindow = numpy.fft.fftshift(numpy.abs(numpy.fft.ifft(self._frequencyWindow))/dt)
+        self._frequencyWindow = None
+
+        self._timeWindow = None
+        
+    @abc.abstractmethod
+    def set_kernel(self, frequencies, dt, parameters=None):
+        pass    
+    
+    @property
+    def frequencyWindow(self):
+        
+        if self._frequencyWindow is None:
+            raise InstrumentResolutionError("Undefined frequency window")
+        
+        return self._frequencyWindow
+
+    @property
+    def timeWindow(self):
+        
+        if self._timeWindow is None:
+            raise InstrumentResolutionError("Undefined time window")
+        
+        return self._timeWindow

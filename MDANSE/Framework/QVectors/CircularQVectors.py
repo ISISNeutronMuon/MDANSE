@@ -34,7 +34,6 @@ import collections
 
 import numpy
 
-from MDANSE.Framework.Configurators.ConfiguratorsDict import ConfiguratorsDict
 from MDANSE.Framework.QVectors.IQVectors import IQVectors, QVectorsError
 from MDANSE.Mathematics.Geometry import random_points_on_circle
 
@@ -44,15 +43,13 @@ class CircularQVectors(IQVectors):
 
     type = "circular"
 
-    configurators = ConfiguratorsDict()
-    configurators.add_item('seed', 'integer', mini=0, default=0)
-    configurators.add_item('shells', 'range', valueType=float, includeLast=True, mini=0.0)
-    configurators.add_item('n_vectors', 'integer', mini=1, default=50)
-    configurators.add_item('width', 'float', mini=0.0, default=1.0)
-    configurators.add_item('axis_1', 'vector', normalize=True, notNull=True, default=[1,0,0])
-    configurators.add_item('axis_2', 'vector', normalize=True, notNull=True, default=[0,1,0])
-
-    __doc__ += configurators.build_doc()
+    configurators = collections.OrderedDict()
+    configurators['seed'] = ('integer', {"mini":0, "default":0})
+    configurators['shells'] = ('range', {"valueType":float, "includeLast":True, "mini":0.0})
+    configurators['n_vectors'] = ('integer', {"mini":1, "default":50})
+    configurators['width'] = ('float', {"mini":0.0, "default":1.0})
+    configurators['axis_1'] = ('vector', {"normalize":True, "notNull":True, "default":[1,0,0]})
+    configurators['axis_2'] = ('vector', {"normalize":True, "notNull":True, "default":[0,1,0]})
 
     def generate(self,status=None):
 
@@ -63,8 +60,6 @@ class CircularQVectors(IQVectors):
             axis = self._configuration["axis_1"]["vector"].cross(self._configuration["axis_2"]["vector"]).normal()
         except ZeroDivisionError as e:
             raise QVectorsError(str(e))
-
-        vectors = collections.OrderedDict()
 
         width = self._configuration["width"]["value"]
 
@@ -78,11 +73,11 @@ class CircularQVectors(IQVectors):
             fact = q*numpy.sign(numpy.random.uniform(-0.5,0.5,nVectors)) + width*numpy.random.uniform(-0.5,0.5,nVectors)
             v = random_points_on_circle(axis, radius=1.0, nPoints=nVectors)
 
-            vectors[q] = {}
-            vectors[q]['q_vectors'] = fact*v
-            vectors[q]['n_q_vectors'] = nVectors
-            vectors[q]['q'] = q
-            vectors[q]['hkls'] = None
+            self._definition["q_vectors"][q] = {}
+            self._definition["q_vectors"][q]['q_vectors'] = fact*v
+            self._definition["q_vectors"][q]['n_q_vectors'] = nVectors
+            self._definition["q_vectors"][q]['q'] = q
+            self._definition["q_vectors"][q]['hkls'] = None
 
             if status is not None:
                 if status.is_stopped():
@@ -93,4 +88,4 @@ class CircularQVectors(IQVectors):
         if status is not None:
             status.finish()
 
-        return vectors
+        return self._definition["q_vectors"]

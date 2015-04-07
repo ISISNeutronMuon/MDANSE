@@ -35,7 +35,6 @@ import random
 
 import numpy
 
-from MDANSE.Framework.Configurators.ConfiguratorsDict import ConfiguratorsDict
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 class SphericalLatticeQVectors(LatticeQVectors):
@@ -44,21 +43,17 @@ class SphericalLatticeQVectors(LatticeQVectors):
 
     type = 'spherical_lattice'
 
-    configurators = ConfiguratorsDict()
-    configurators.add_item('seed', 'integer', mini=0, default=0)
-    configurators.add_item('shells', 'range', valueType=float, includeLast=True, mini=0.0)
-    configurators.add_item('n_vectors', 'integer', mini=1, default=50)
-    configurators.add_item('width', 'float', mini=1.0e-6, default=1.0)
-
-    __doc__ += configurators.build_doc()
+    configurators = collections.OrderedDict()
+    configurators['seed'] = ('integer', {"mini":0, "default":0})
+    configurators['shells'] = ('range', {"valueType":float, "includeLast":True, "mini":0.0})
+    configurators['n_vectors'] = ('integer', {"mini":1, "default":50})
+    configurators['width'] = ('float', {"mini":1.0e-6, "default":1.0})
 
     def generate(self,status=None):
                      
         if self._configuration["seed"]["value"] != 0:           
             numpy.random.seed(self._configuration["seed"]["value"])
             random.seed(self._configuration["seed"]["value"])
-                
-        vectors = collections.OrderedDict()
                 
         qMax = self._configuration["shells"]["last"] + 0.5*self._configuration["width"]["value"]
         
@@ -97,11 +92,12 @@ class SphericalLatticeQVectors(LatticeQVectors):
                 if nHits > nVectors:
                     hits = random.sample(hits,nVectors)
 
-                vectors[q] = {}
-                vectors[q]['q_vectors'] = vects[:,hits]
-                vectors[q]['n_q_vectors'] = n
-                vectors[q]['q'] = q
-                vectors[q]['hkls'] = numpy.rint(numpy.dot(self._invReciprocalMatrix,vectors[q]['q_vectors']))
+                self._definition["q_vectors"][q] = {}
+                self._definition["q_vectors"][q]['q_vectors'] = vects[:,hits]
+                self._definition["q_vectors"][q]['n_q_vectors'] = n
+                self._definition["q_vectors"][q]['q'] = q
+                self._definition["q_vectors"][q]['hkls'] = numpy.rint(numpy.dot(self._invReciprocalMatrix,
+                                                                                self._definition["q_vectors"][q]['q_vectors']))
 
             if status is not None:
                 if status.is_stopped():
@@ -109,4 +105,4 @@ class SphericalLatticeQVectors(LatticeQVectors):
                 else:
                     status.update()
                                 
-        return vectors
+        return self._definition["q_vectors"]

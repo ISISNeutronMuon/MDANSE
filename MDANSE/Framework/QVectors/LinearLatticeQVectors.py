@@ -37,7 +37,6 @@ import numpy
 
 from Scientific.Geometry import Vector
 
-from MDANSE.Framework.Configurators.ConfiguratorsDict import ConfiguratorsDict
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 class LinearLatticeQVectors(LatticeQVectors):
@@ -46,14 +45,12 @@ class LinearLatticeQVectors(LatticeQVectors):
 
     type = 'linear_lattice'
 
-    configurators = ConfiguratorsDict()
-    configurators.add_item('seed', 'integer', mini=0, default=0)
-    configurators.add_item('shells', 'range', valueType=float, includeLast=True, mini=0.0)
-    configurators.add_item('n_vectors', 'integer', mini=1,default=50)
-    configurators.add_item('width', 'float', mini=1.0e-6, default=1.0)
-    configurators.add_item('axis', 'vector', normalize=False, notNull=True, valueType=int, default=[1,0,0])
-
-    __doc__ += configurators.build_doc()
+    configurators = collections.OrderedDict()
+    configurators['seed'] = ('integer', {"mini":0, "default":0})
+    configurators['shells'] = ('range', {"valueType":float, "includeLast":True, "mini":0.0})
+    configurators['n_vectors'] = ('integer', {"mini":1,"default":50})
+    configurators['width'] = ('float', {"mini":1.0e-6, "default":1.0})
+    configurators['axis'] = ('vector', {"normalize":False, "notNull":True, "valueType":int, "default":[1,0,0]})
 
     def generate(self, status=None):
 
@@ -61,8 +58,6 @@ class LinearLatticeQVectors(LatticeQVectors):
             numpy.random.seed(self._configuration["seed"]["value"])
             random.seed(self._configuration["seed"]["value"])
 
-        vectors = collections.OrderedDict()
-        
         # The Q vector corresponding to the input hkl.
         qVect = numpy.dot(self._reciprocalMatrix,self._configuration["axis"]["vector"])
 
@@ -101,11 +96,12 @@ class LinearLatticeQVectors(LatticeQVectors):
                 if nHits > nVectors:
                     hits = random.sample(hits,nVectors)
 
-                vectors[q] = {}
-                vectors[q]['q_vectors'] = vects[:,hits]
-                vectors[q]['n_q_vectors'] = n
-                vectors[q]['q'] = q
-                vectors[q]['hkls'] = numpy.rint(numpy.dot(self._invReciprocalMatrix,vectors[q]['q_vectors']))
+                self._definition["q_vectors"][q] = {}
+                self._definition["q_vectors"][q]['q_vectors'] = vects[:,hits]
+                self._definition["q_vectors"][q]['n_q_vectors'] = n
+                self._definition["q_vectors"][q]['q'] = q
+                self._definition["q_vectors"][q]['hkls'] = numpy.rint(numpy.dot(self._invReciprocalMatrix,
+                                                                                self._definition["q_vectors"][q]['q_vectors']))
                 
             if status is not None:
                 if status.is_stopped():
@@ -116,4 +112,4 @@ class LinearLatticeQVectors(LatticeQVectors):
         if status is not None:
             status.finish()
                 
-        return vectors
+        return self._definition["q_vectors"]

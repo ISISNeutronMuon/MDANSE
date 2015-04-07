@@ -30,27 +30,23 @@ Created on Mar 30, 2015
 @author: pellegrini
 '''
 
+import collections
+
 import numpy
 
-from MDANSE.Framework.Configurators.ConfiguratorsDict import ConfiguratorsDict
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import IInstrumentResolution
 
-class GaussianInstrumentResolution(IInstrumentResolution):
-    """Defines an instrument resolution with a gaussian response
+class IdealInstrumentResolution(IInstrumentResolution):
+    """Defines an ideal instrument resolution with a Dirac response 
     """
     
-    type = 'gaussian'
+    type = 'ideal'
+    
+    configurators = collections.OrderedDict()
 
-    configurators = ConfiguratorsDict()
-    configurators.add_item('mu', 'float', default=0.0)
-    configurators.add_item('sigma', 'float', default=1.0)
-
-    __doc__ += configurators.build_doc()
-                
     def set_kernel(self, frequencies, dt):
+                
+        self._frequencyWindow = numpy.zeros(len(frequencies), dtype=numpy.float64)
+        self._frequencyWindow[len(frequencies)/2] = 1.0
 
-        mu = self._configuration["mu"]["value"]
-        sigma = self._configuration["sigma"]["value"]
-        
-        self._frequencyWindow = (1.0/(sigma*numpy.sqrt(2.0*numpy.pi)))*numpy.exp(-0.5*((frequencies-mu)/sigma)**2)
-        self._timeWindow = numpy.fft.fftshift(numpy.abs(numpy.fft.ifft(self._frequencyWindow))/dt)
+        self._timeWindow = numpy.ones(len(frequencies), dtype=numpy.float64)

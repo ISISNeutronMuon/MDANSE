@@ -65,11 +65,13 @@ class InstrumentResolutionConfigurator(IConfigurator):
 
         kernel, parameters = value
                 
-        kernelCls = REGISTRY["instrumentresolution"][kernel]
+        kernelCls = REGISTRY["instrument_resolution"][kernel]
                 
         resolution = kernelCls()
         
-        resolution.set_kernel(self["frequencies"], self["time_step"], parameters)
+        resolution.setup(parameters)
+        
+        resolution.set_kernel(self["frequencies"], self["time_step"])
 
         dmax = resolution.timeWindow.max()-1
         

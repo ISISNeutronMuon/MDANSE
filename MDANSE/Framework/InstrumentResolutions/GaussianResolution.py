@@ -30,45 +30,26 @@ Created on Mar 30, 2015
 @author: pellegrini
 '''
 
-import abc
+import collections
 
-from MDANSE import REGISTRY
-from MDANSE.Core.Configurable import Configurable
-from MDANSE.Core.Error import Error
+import numpy
 
-class InstrumentResolutionError(Error):
-    pass
+from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import IInstrumentResolution
 
-class IInstrumentResolution(Configurable):
-
-    __metaclass__ = REGISTRY
+class GaussianInstrumentResolution(IInstrumentResolution):
+    """Defines an instrument resolution with a gaussian response
+    """
     
-    type = "instrument_resolution"
-    
-    def __init__(self):
-        
-        Configurable.__init__(self)
-                        
-        self._frequencyWindow = None
+    type = 'gaussian'
 
-        self._timeWindow = None
-        
-    @abc.abstractmethod
-    def set_kernel(self, frequencies, dt, parameters=None):
-        pass    
-    
-    @property
-    def frequencyWindow(self):
-        
-        if self._frequencyWindow is None:
-            raise InstrumentResolutionError("Undefined frequency window")
-        
-        return self._frequencyWindow
+    configurators = collections.OrderedDict()
+    configurators['mu'] = ('float', {"default":0.0})
+    configurators['sigma'] = ('float', {"default":1.0})
 
-    @property
-    def timeWindow(self):
+    def set_kernel(self, frequencies, dt):
+
+        mu = self._configuration["mu"]["value"]
+        sigma = self._configuration["sigma"]["value"]
         
-        if self._timeWindow is None:
-            raise InstrumentResolutionError("Undefined time window")
-        
-        return self._timeWindow
+        self._frequencyWindow = (1.0/(sigma*numpy.sqrt(2.0*numpy.pi)))*numpy.exp(-0.5*((frequencies-mu)/sigma)**2)
+        self._timeWindow = numpy.fft.fftshift(numpy.abs(numpy.fft.ifft(self._frequencyWindow))/dt)

@@ -34,7 +34,6 @@ import collections
 
 import numpy
 
-from MDANSE.Framework.Configurators.ConfiguratorsDict import ConfiguratorsDict
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 class DispersionLatticeQVectors(LatticeQVectors):
@@ -43,16 +42,12 @@ class DispersionLatticeQVectors(LatticeQVectors):
 
     type = 'dispersion_lattice'
 
-    configurators = ConfiguratorsDict()
-    configurators.add_item('start', 'vector', valueType=int, notNull=False, default=[0,0,0])
-    configurators.add_item('direction', 'vector', valueType=int, notNull=True, default=[1,0,0])
-    configurators.add_item('n_steps', 'integer', label="number of steps", mini=1, default=10)
-
-    __doc__ += configurators.build_doc()
+    configurators = collections.OrderedDict()
+    configurators['start'] = ('vector', {"valueType":int, "notNull":False, "default":[0,0,0]})
+    configurators['direction'] = ('vector', {"valueType":int, "notNull":True, "default":[1,0,0]})
+    configurators['n_steps'] = ('integer', {"label":"number of steps", "mini":1, "default":10})
 
     def generate(self, status=None):
-
-        vectors = collections.OrderedDict()
 
         start = self._configuration["start"]["value"]
         direction = self._configuration["direction"]["value"]
@@ -70,11 +65,11 @@ class DispersionLatticeQVectors(LatticeQVectors):
                                 
         for i,v in enumerate(dists):
 
-            vectors[v] = {}
-            vectors[v]['q_vectors'] = vects[:,i][:,numpy.newaxis]
-            vectors[v]['n_q_vectors'] = 1
-            vectors[v]['q'] = v
-            vectors[v]['hkls'] = hkls[:,i][:,numpy.newaxis]
+            self._definition["q_vectors"][v] = {}
+            self._definition["q_vectors"][v]['q_vectors'] = vects[:,i][:,numpy.newaxis]
+            self._definition["q_vectors"][v]['n_q_vectors'] = 1
+            self._definition["q_vectors"][v]['q'] = v
+            self._definition["q_vectors"][v]['hkls'] = hkls[:,i][:,numpy.newaxis]
 
             if status is not None:
                 if status.is_stopped():
@@ -85,4 +80,4 @@ class DispersionLatticeQVectors(LatticeQVectors):
         if status is not None:
             status.finish()
                 
-        return vectors
+        return self._definition["q_vectors"]

@@ -30,24 +30,27 @@ Created on Mar 30, 2015
 @author: pellegrini
 '''
 
+import collections
+
 import numpy
 
-from MDANSE.Framework.Configurators.ConfiguratorsDict import ConfiguratorsDict
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import IInstrumentResolution
 
-class IdealInstrumentResolution(IInstrumentResolution):
-    """Defines an ideal instrument resolution with a Dirac response 
+class SquareInstrumentResolution(IInstrumentResolution):
+    """Defines an instrument resolution with a square response
     """
     
-    type = 'ideal'
-    
-    configurators = ConfiguratorsDict()
+    type = 'square'
 
-    __doc__ += configurators.build_doc()
+    configurators = collections.OrderedDict()
+    configurators['mu'] = ('float', {"default":0.0})
+    configurators['sigma'] = ('float', {"default":1.0})
 
     def set_kernel(self, frequencies, dt):
-                
-        self._frequencyWindow = numpy.zeros(len(frequencies), dtype=numpy.float64)
-        self._frequencyWindow[len(frequencies)/2] = 1.0
-
-        self._timeWindow = numpy.ones(len(frequencies), dtype=numpy.float64)
+                                
+        mu = self._configuration["mu"]["value"]
+        sigma = self._configuration["sigma"]["value"]
+                                
+        self._frequencyWindow = numpy.where((numpy.abs(frequencies-mu)-sigma) > 0,0.0,1.0/(2.0*sigma))
+                        
+        self._timeWindow = numpy.fft.fftshift(numpy.abs(numpy.fft.ifft(self._frequencyWindow))/dt)

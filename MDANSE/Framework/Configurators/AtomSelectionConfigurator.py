@@ -37,7 +37,7 @@ import numpy
 
 from MDANSE.Framework.UserDefinables.UserDefinitions import USER_DEFINITIONS
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
-from MDANSE.Framework.Selectors.SelectionParser import SelectionParser
+from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
 
 # The granularities at which the selection will be performed
 LEVELS = collections.OrderedDict()
@@ -79,10 +79,9 @@ class AtomSelectionConfigurator(IConfigurator):
         if ud is not None:
             self.update(ud)
         else:
-            parser = SelectionParser(trajConfig["instance"].universe)
-            expression, selection = parser(value,True)
-            self["expression"] = expression
-            self["indexes"] = numpy.array(selection,dtype=numpy.int32)
+            parser = AtomSelectionParser(trajConfig["instance"])
+            parser.parse(value)
+            self.update(parser.definition)
 
         self["n_selected_atoms"] = len(self["indexes"])
         atoms = sorted(trajConfig["universe"].atomList(), key = operator.attrgetter('index'))
@@ -128,7 +127,7 @@ class AtomSelectionConfigurator(IConfigurator):
         self.set_contents()
                         
     def set_contents(self):
-        
+                
         self["contents"] = collections.OrderedDict()
         self['index_to_symbol'] = collections.OrderedDict()
         for i, group in enumerate(self["elements"]):
@@ -140,9 +139,8 @@ class AtomSelectionConfigurator(IConfigurator):
             self["contents"][k] = numpy.array(v)
             
         self["n_atoms_per_element"] = dict([(k,len(v)) for k,v in self["contents"].items()])              
-                    
         self['n_selected_elements'] = len(self["contents"])
-                
+                        
     def get_information(self):
         
         info = []

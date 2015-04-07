@@ -36,7 +36,6 @@ import operator
 
 import numpy
 
-from MDANSE.Framework.Configurators.ConfiguratorsDict import ConfiguratorsDict
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 class GridLatticeQVectors(LatticeQVectors):
@@ -45,17 +44,13 @@ class GridLatticeQVectors(LatticeQVectors):
     
     type = 'grid'
     
-    configurators = ConfiguratorsDict()
-    configurators.add_item('hrange', 'range', valueType=int, includeLast=True)
-    configurators.add_item('krange', 'range', valueType=int, includeLast=True)
-    configurators.add_item('lrange', 'range', valueType=int, includeLast=True)
-    configurators.add_item('qstep', 'float', mini=1.0e-6, default=0.01)
-    
-    __doc__ += configurators.build_doc()
+    configurators = collections.OrderedDict()
+    configurators['hrange'] = ('range', {"valueType":int, "includeLast":True})
+    configurators['krange'] = ('range', {"valueType":int, "includeLast":True})
+    configurators['lrange'] = ('range', {"valueType":int, "includeLast":True})
+    configurators['qstep'] = ('float', {"mini":1.0e-6, "default":0.01})
     
     def generate(self, status=None):
-
-        vectors = collections.OrderedDict()
 
         hrange = self._configuration["hrange"]["value"]
         krange = self._configuration["krange"]["value"]
@@ -92,11 +87,11 @@ class GridLatticeQVectors(LatticeQVectors):
 
         for q,v in qGroups.iteritems():
                         
-            vectors[q] = {}
-            vectors[q]['q']           = q
-            vectors[q]['q_vectors']   = vects[:,v]
-            vectors[q]['n_q_vectors'] = len(v)
-            vectors[q]['hkls']        = hkls[:,v]
+            self._definition["q_vectors"][q] = {}
+            self._definition["q_vectors"][q]['q'] = q
+            self._definition["q_vectors"][q]['q_vectors'] = vects[:,v]
+            self._definition["q_vectors"][q]['n_q_vectors'] = len(v)
+            self._definition["q_vectors"][q]['hkls'] = hkls[:,v]
 
             if status is not None:
                 if status.is_stopped():
@@ -107,4 +102,4 @@ class GridLatticeQVectors(LatticeQVectors):
         if status is not None:
             status.finish()
                 
-        return vectors
+        return self._definition["q_vectors"]

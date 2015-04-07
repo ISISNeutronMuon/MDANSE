@@ -25,48 +25,16 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 30, 2015
+Created on Mar 27, 2015
 
 @author: pellegrini
 '''
 
-import abc
-import collections
-
-from MDANSE import REGISTRY
-from MDANSE.Core.Error import Error
-from MDANSE.Framework.Configurable import Configurable
-from MDANSE.Framework.UserDefinable import UserDefinable
-
-class QVectorsError(Error):
-    pass
-
-class IQVectors(Configurable,UserDefinable):
+from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
     
-    __metaclass__ = REGISTRY
+class AtomTransmutationParser(AtomSelectionParser):
     
-    type = "q_vectors"
-
-    is_lattice = False
-            
-    def __init__(self, trajectory):
-        
-        Configurable.__init__(self)
-                
-        UserDefinable.__init__(self,trajectory.filename)
-                
-        self._universe = trajectory.universe
-        
-    @abc.abstractmethod
-    def generate(self, status=None):
-        pass
+    def parse(self, element, expression=None):
     
-    def setup(self,parameters):
-        
-        Configurable.setup(self, parameters)
-        self._definition.clear()
-        self._definition["generator"] = self.type
-        self._definition["is_lattice"] = self.is_lattice
-        self._definition["q_vectors"] = collections.OrderedDict()
-        self._definition["parameters"] = parameters
-        
+        AtomSelectionParser.parse(self,expression)
+        self._definition["element"] = element

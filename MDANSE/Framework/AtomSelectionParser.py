@@ -37,7 +37,7 @@ from MDANSE.Core.Error import Error
 from MDANSE.Externals.pyparsing.pyparsing import delimitedList, oneOf, opAssoc, operatorPrecedence, printables, Forward, OneOrMore, Optional, Word
 from MDANSE.Framework.UserDefinable import UserDefinable
 
-class SelectionParserError(Error):
+class AtomSelectionParserError(Error):
     pass
 
 class AtomSelectionParser(UserDefinable):
@@ -102,13 +102,13 @@ class AtomSelectionParser(UserDefinable):
             namespace={"REGISTRY":REGISTRY,"universe":self._universe}
             selection = eval(parsedExpression,namespace)
         except:
-            raise SelectionParserError("%r is not a valid selection string expression" % expression)
+            raise AtomSelectionParserError("%r is not a valid selection string expression" % expression)
         
         selection = sorted(selection, key=operator.attrgetter("index"))
                                 
         return selection 
                                                                                                         
-    def __call__(self, expression=None):
+    def parse(self, expression=None):
 
         self._definition.clear()
 
@@ -119,18 +119,9 @@ class AtomSelectionParser(UserDefinable):
         selection = self.parse_selection_expression(expression)
                             
         if not selection:
-            raise SelectionParserError("No atoms matched the selection %r." % expression)
+            raise AtomSelectionParserError("No atoms matched the selection %r." % expression)
         
         self._definition["expression"] = expression
         self._definition["indexes"] = [at.index for at in selection]
                 
-        return self._definition
-            
-    select = __call__
-    
-class AtomTransmutationParser(UserDefinable):
-    
-    def __call__(self, element, expression=None):
-    
-        AtomSelectionParser.__call__(expression)
-        self._definition["element"] = element
+        return self._definition    
