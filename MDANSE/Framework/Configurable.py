@@ -187,25 +187,7 @@ class Configurable(object):
         for name,(typ,kwds) in configurators.items():
             cfg=REGISTRY["configurator"][typ](name, **kwds)
             doclist.append({'Configurator' : name,'Default value' : repr(cfg.default),'Description' : str(cfg.__doc__)})
-            
-        l = ['Configurator','Default value','Description']
-        
-        sizes = []  
-        sizes.append([len(l[0])]) 
-        sizes.append([len(l[1])]) 
-        sizes.append([len(l[2])]) 
-        
-        for v in doclist:
-            sizes[0].append(len(v['Configurator']))
-            sizes[1].append(len(v['Default value']))
-            
-            v['Description'] = v['Description'].replace('\n',' ').replace('  ',' ').replace('  ',' ').replace('  ',' ')
-            sizes[2].append(len(v['Description']))
-            
-        maxSizes = [max(s) for s in sizes]
-            
-        s = (maxSizes[0]+2, maxSizes[1]+2, maxSizes[2]+2)
-                        
+                                    
         docstring = "\n:Example:\n\n"
         docstring += ">>> from MDANSE import REGISTRY\n"
         docstring += ">>> \n"
@@ -218,27 +200,35 @@ class Configurable(object):
         docstring += ">>> job.run()\n"
                                    
         docstring += '\n**Job input configurators:** \n\n'
+
+        columns = ['Configurator','Default value','Description']
+        
+        sizes = [len(v) for v in columns]
         
         for v in doclist:
-            docstring += "#. **%s**\n" % v["Configurator"]
-            docstring += "    #. **Description:**\n"
-            docstring += "    %s\n" % v["Description"]
-            docstring += "    #. **Default value:**\n"
-            docstring += "    %s\n" % v["Default value"]
+            sizes[0] = max(sizes[0],len(v['Configurator']))
+            sizes[1] = max(sizes[1],len(v['Default value']))
+            # Case of Description field: has to be splitted and parsed for inserting sphinx "|" keyword for multiline            
+            v['Description'] = v['Description'].strip()
+            v['Description'] = v["Description"].split("\n")
+            v['Description'] = ["| " + vv.strip() for vv in v['Description']]
+            sizes[2] = max(sizes[2],max([len(d) for d in v["Description"]]))
+
+        docstring += '+%s+%s+%s+\n'% ("-"*(sizes[0]+1),"-"*(sizes[1]+1),"-"*(sizes[2]+1))
+        docstring += '| %-*s| %-*s| %-*s|\n'% (sizes[0],columns[0],sizes[1],columns[1],sizes[2],columns[2])
+        docstring += '+%s+%s+%s+\n'% ("="*(sizes[0]+1),"="*(sizes[1]+1),"="*(sizes[2]+1))
         
-#         docstring += '+%s+%s+%s+\n'%(s[0]*'-',s[1]*'-',s[2]*'-')
-#         
-#         docstring += '| %s%s | %s%s | %s%s |\n' %(l[0], (s[0]-len(l[0])-2)*' ', l[1],(s[1]-len(l[1])-2)*' ', l[2],(s[2]-len(l[2])-2)*' ')            
-#         
-#         docstring += '+%s+%s+%s+\n'%(s[0]*'=',s[1]*'=',s[2]*'=') 
-#         
-#         for v in doclist:
-#             p = v['Configurator']
-#             df = v['Default value']
-#             ds = v['Description']
-#             docstring += '| %s%s | %s%s | %s%s |\n'%(p,(s[0]-len(p)-2)*' ', df,(s[1]-len(df)-2)*' ', ds,(s[2]-len(ds)-2)*' ')
-#             docstring += '+%s+%s+%s+\n'%(s[0]*'-',s[1]*'-',s[2]*'-')
-    
+        for v in doclist:
+            docstring += '| %-*s| %-*s| %-*s|\n'% (sizes[0],v["Configurator"],sizes[1],v["Default value"],sizes[2],v["Description"][0])
+            if len(v["Description"]) > 1:
+                for descr in v["Description"][1:]:
+                    docstring += '| %-*s| %-*s| %-*s|\n'% (sizes[0],"",sizes[1],"",sizes[2],descr)
+            docstring += '+%s+%s+%s+\n'% ("-"*(sizes[0]+1),"-"*(sizes[1]+1),"-"*(sizes[2]+1))
+            
+        docstring += "\n"
+        
+#         print docstring
+            
         return docstring
     
     @classmethod

@@ -52,11 +52,10 @@ class AtomSelectionConfigurator(IConfigurator):
     This configurator allows the selection of a specific set of atoms on which the analysis will be performed.
 
     Without any selection, all the atoms stored into the trajectory file will be selected.
-    
     To Build an atom selection you have to :
-    #. Create a workspace based on a mmtk_trajectory data,
-    #. drag a molecular viewer on it,
-    #. drag into the Molecular Viewer his "Atom selection" plugin
+    * Create a workspace based on a mmtk_trajectory data
+    * drag a molecular viewer on it
+    * drag into the Molecular Viewer his "Atom selection" plugin
     '''
 
     type = 'atom_selection'

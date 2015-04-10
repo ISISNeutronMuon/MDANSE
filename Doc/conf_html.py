@@ -62,7 +62,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'MDANSE'
-copyright = u'2014, B. Aoun & G. Goret & E. Pellegrini'
+copyright = u'2015, G. Goret & B. Aoun & E. Pellegrini'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -105,18 +105,18 @@ latex_documents = [
    u'B. Aoun \\& G. Goret \\& E. Pellegrini', 'manual'),
 ]
 
-pdf_documents = [('index', 'MDANSE', u'MDANSE Documentation', u'B. Aoun & G. Goret & E. Pellegrini'),]
+pdf_documents = [('index', 'MDANSE', u'MDANSE Documentation', u'G. Goret & B. Aoun & E. Pellegrini'),]
 
 # -- Options for manual page output --------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [('index', 'MDANSE', u'MDANSE Documentation', u'B. Aoun & G. Goret & E. Pellegrini'),]
+man_pages = [('index', 'MDANSE', u'MDANSE Documentation', u'G. Goret & B. Aoun & E. Pellegrini'),]
 
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
-texinfo_documents = [('index', 'MDANSE', u'MDANSE Documentation',u'B. Aoun & G. Goret & E. Pellegrini','MDANSE', 'One line description of project.','Miscellaneous'),]
+texinfo_documents = [('index', 'MDANSE', u'MDANSE Documentation',u'G. Goret & B. Aoun & E. Pellegrini','MDANSE', 'One line description of project.','Miscellaneous'),]
 
 exclude_patterns = ['MDANSE.Externals**', 'MDANSE.__pkginfo__']
 
