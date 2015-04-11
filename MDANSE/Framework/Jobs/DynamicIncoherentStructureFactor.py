@@ -34,7 +34,7 @@ import collections
 
 import numpy
 
-from MDANSE import ELEMENTS, REGISTRY
+from MDANSE import ELEMENTS
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation, get_spectrum
@@ -81,20 +81,20 @@ class DynamicIncoherentStructureFactor(IJob):
         
         self._nFrequencies = self._instrResolution['n_frequencies']
 
-        self._outputData.add("q","line", self.configuration["q_vectors"]["shells"], "q", units="inv_nm") 
+        self._outputData.add("q","line", self.configuration["q_vectors"]["shells"], units="inv_nm") 
 
-        self._outputData["time"] = REGISTRY["output_variable"]("line", self.configuration['frames']['time'], "time", units='ps')
-        self._outputData["time_window"] = REGISTRY["output_variable"]("line", self._instrResolution["time_window"], "time_window", axis="time", units="au") 
+        self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time_window","line", self._instrResolution["time_window"], axis="time", units="au") 
 
-        self._outputData["frequency"] = REGISTRY["output_variable"]("line", self._instrResolution["frequencies"], "frequency", units='THz')
-        self._outputData["frequency_window"] = REGISTRY["output_variable"]("line", self._instrResolution["frequency_window"], "frequency_window", axis="frequency", units="au") 
+        self._outputData.add("frequency","line", self._instrResolution["frequencies"], units='THz')
+        self._outputData.add("frequency_window","line", self._instrResolution["frequency_window"], axis="frequency", units="au") 
                         
         for element in self.configuration['atom_selection']['contents'].keys():
-            self._outputData["f(q,t)_%s" % element] = REGISTRY["output_variable"]("surface", (self._nQShells,self._nFrames)     , "f(q,t)_%s" % element, axis="q|time", units="au")                                                 
-            self._outputData["s(q,f)_%s" % element] = REGISTRY["output_variable"]("surface", (self._nQShells,self._nFrequencies), "s(q,f)_%s" % element, axis="q|frequency", units="nm2/ps") 
+            self._outputData.add("f(q,t)_%s" % element,"surface", (self._nQShells,self._nFrames)     , axis="q|time", units="au")                                                 
+            self._outputData.add("s(q,f)_%s" % element,"surface", (self._nQShells,self._nFrequencies), axis="q|frequency", units="nm2/ps") 
 
-        self._outputData["f(q,t)_total"] = REGISTRY["output_variable"]("surface", (self._nQShells,self._nFrames)     , "f(q,t)_total", axis="q|time", units="au")                                                 
-        self._outputData["s(q,f)_total"] = REGISTRY["output_variable"]("surface", (self._nQShells,self._nFrequencies), "s(q,f)_total", axis="q|frequency", units="nm2/ps") 
+        self._outputData.add("f(q,t)_total","surface", (self._nQShells,self._nFrames)     , axis="q|time", units="au")                                                 
+        self._outputData.add("s(q,f)_total","surface", (self._nQShells,self._nFrequencies), axis="q|frequency", units="nm2/ps") 
     
     def run_step(self, index):
         """

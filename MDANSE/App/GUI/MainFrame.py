@@ -9,7 +9,7 @@ from MDANSE import LOGGER, REGISTRY
 from MDANSE.App.GUI import DATA_CONTROLLER
 from MDANSE.App.GUI.ControllerPanel import ControllerPanel
 from MDANSE.App.GUI.DataTreePanel import DataTreePanel
-from MDANSE.App.GUI.Icons import ICONS, scaled_bitmap
+from MDANSE.App.GUI.Icons import ICONS
 from MDANSE.App.GUI.PluginsTreePanel import PluginsTreePanel
 from MDANSE.App.GUI.WorkingPanel import WorkingPanel
 
@@ -34,7 +34,7 @@ class MainFrame(wx.Frame):
         self.build_toolbar()
 
         icon = wx.EmptyIcon()
-        icon.CopyFromBitmap(scaled_bitmap(ICONS["nmoldyn"], 32, 32))
+        icon.CopyFromBitmap(ICONS["nmoldyn",32,32])
         self.SetIcon(icon) 
         
         # The main aui manager.
@@ -98,18 +98,18 @@ class MainFrame(wx.Frame):
         
         self._toolbar = self.CreateToolBar()
                 
-        loadDataButton = self._toolbar.AddSimpleTool(wx.ID_ANY, scaled_bitmap(ICONS["load"], 32, 32), 'Load a trajectory')
-        emptyDataButton = self._toolbar.AddSimpleTool(wx.ID_ANY, scaled_bitmap(ICONS["empty_data"], 32, 32), 'Open an empty data (converters ...)')
-        databaseButton = self._toolbar.AddSimpleTool(wx.ID_ANY, scaled_bitmap(ICONS["periodic_table"], 32, 32), 'Edit the nMolDyn elements database')
-        plotButton = self._toolbar.AddSimpleTool(wx.ID_ANY,scaled_bitmap(ICONS["plot"], 32, 32), 'Open nMolDyn plotter')
-        userButton = self._toolbar.AddSimpleTool(wx.ID_ANY,scaled_bitmap(ICONS["user"], 32, 32), 'Edit the user definitions')
-        preferencesButton = self._toolbar.AddSimpleTool(wx.ID_ANY, scaled_bitmap(ICONS["preferences"], 32, 32), 'Edit the preferences')
-        logfileButton = self._toolbar.AddSimpleTool(wx.ID_ANY, scaled_bitmap(ICONS["logfile"], 32, 32), 'Display nMOLDYN log file')
-        helpButton = self._toolbar.AddSimpleTool(wx.ID_ANY, scaled_bitmap(ICONS["help"], 32, 32), 'Help')
-        websiteButton = self._toolbar.AddSimpleTool(wx.ID_ANY, scaled_bitmap(ICONS["web"], 32, 32), 'Open nMoldyn website')
-        aboutButton = self._toolbar.AddSimpleTool(wx.ID_ANY, scaled_bitmap(ICONS["about"], 32, 32), 'About nMolDyn')
-        bugButton = self._toolbar.AddSimpleTool(wx.ID_ANY, scaled_bitmap(ICONS["bug"], 32, 32), 'Bug report')
-        quitButton = self._toolbar.AddSimpleTool(wx.ID_ANY, scaled_bitmap(ICONS["quit"], 32, 32), 'Quit nMoldyn')
+        loadDataButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["load",32,32], 'Load a trajectory')
+        emptyDataButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["empty_data",32,32], 'Open an empty data (converters ...)')
+        databaseButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["periodic_table",32,32], 'Edit the MDANSE elements database')
+        plotButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["plot",32,32], 'Open MDANSE plotter')
+        userButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["user",32,32], 'Edit the user definitions')
+        preferencesButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["preferences",32,32], 'Edit the preferences')
+        logfileButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["logfile",32,32], 'Display nMOLDYN log file')
+        helpButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["help",32,32], 'Help')
+        websiteButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["web",32,32], 'Open MDANSE website')
+        aboutButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["about",32,32], 'About MDANSE')
+        bugButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["bug",32,32], 'Bug report')
+        quitButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["quit",32,32], 'Quit MDANSE')
         
         self._toolbar.Realize()
         

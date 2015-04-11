@@ -31,8 +31,10 @@ Created on Mar 30, 2015
 '''
 
 import abc
+import glob
 import inspect
 import os
+import sys
 
 class _Meta(type):
     '''
@@ -98,13 +100,46 @@ class ClassRegistry(abc.ABCMeta):
                 if issubclass(self, interface):
                     ClassRegistry._registry[interface.type][typ] = self
                     break
+          
+    @classmethod      
+    def update_registry(cls,packageDir):
+        '''
+        Update the classes registry by importing all the modules contained in a given package.
+        
+        Only the classes that are metaclassed by ClassRegistry will be registered.
+        
+        :param cls: the ClassRegistry instance
+        :type: ClassRegistry
+        :param packageDir: the package for which all modules should be imported
+        :type packageDir: str
+        '''
                 
+        for module in glob.glob(os.path.join(packageDir,'*.py')):
+                             
+            moduleDir, moduleFile = os.path.split(module)
+     
+            if moduleFile == '__init__.py':
+                continue
+     
+            moduleName, moduleExt = os.path.splitext(moduleFile)
+            
+            print moduleName
+    
+            if moduleDir not in sys.path:        
+                sys.path.append(moduleDir)
+                      
+            # Any error that may occur here has to be caught. In such case the module is skipped.    
+            try:
+                __import__(moduleName, locals(), globals())
+            except:
+                continue
+    
     @classmethod
     def info(cls, interface):
         '''
         Returns informations about the subclasses of a given base class  stored in the registry.
         
-        :param cls: the ClassRegsitry instance
+        :param cls: the ClassRegistry instance
         :type cls: ClassRegistry
         :param interface: the name of base class of whom information about its subclasses is requested
         :type interface: str

@@ -5,7 +5,7 @@ import wx.aui as wxaui
 import wx.py as wxpy
 
 from MDANSE.App.GUI.JobControllerPanel import JobControllerPanel
-from MDANSE.App.GUI.Icons import ICONS, scaled_bitmap
+from MDANSE.App.GUI.Icons import ICONS
 
 class ControllerPanel(wx.Panel):
 
@@ -33,9 +33,9 @@ class ControllerPanel(wx.Panel):
         #wxpython 2.9 compatibility
         if wx.VERSION[:2] > (2,8):
             il = wx.ImageList(16, 16)
-            il.Add(scaled_bitmap(ICONS["log"], 16,16))
-            il.Add(scaled_bitmap(ICONS["shell"], 16,16))
-            il.Add(scaled_bitmap(ICONS["hourglass"], 16,16))
+            il.Add(ICONS["log",16,16])
+            il.Add(ICONS["shell",16,16])
+            il.Add(ICONS["hourglass",16,16])
             self._notebook.AssignImageList(il)
     
             self._notebook.AddPage(self._pages["logger"], 'Logger')                   
@@ -47,9 +47,9 @@ class ControllerPanel(wx.Panel):
             self._notebook.SetPageImage(2, 2)
 
         else:
-            self._notebook.AddPage(self._pages["logger"], 'Logger', bitmap=scaled_bitmap(ICONS["log"], 16,16))                   
-            self._notebook.AddPage(self._pages["console"], 'Console', bitmap=scaled_bitmap(ICONS["shell"], 16,16))
-            self._notebook.AddPage(self._pages["jobs"], 'Jobs', bitmap=scaled_bitmap(ICONS["hourglass"], 16,16))
+            self._notebook.AddPage(self._pages["logger"], 'Logger', bitmap=ICONS["log",16,16])                   
+            self._notebook.AddPage(self._pages["console"], 'Console', bitmap=ICONS["shell",16,16])
+            self._notebook.AddPage(self._pages["jobs"], 'Jobs', bitmap=ICONS["hourglass",16,16])
     
     def build_layout(self):
         

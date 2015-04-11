@@ -48,7 +48,7 @@ from MDANSE.Framework.Jobs.JobStatus import JobState
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Logging.Logger import LOGGER
 
-from MDANSE.App.GUI.Icons import ICONS, scaled_bitmap
+from MDANSE.App.GUI.Icons import ICONS
 from MDANSE.App.GUI.Events.JobControllerEvent import EVT_JOB_CONTROLLER, JobControllerEvent
         
 class JobController(threading.Thread):
@@ -196,7 +196,7 @@ class JobControllerPanel(wx.ScrolledWindow):
         state = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL)
         progress = wx.Gauge(self, wx.ID_ANY,range=100)
         eta = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL)
-        kill = wx.BitmapButton(self, wx.ID_ANY, scaled_bitmap(ICONS["stop"], 24, 24))
+        kill = wx.BitmapButton(self, wx.ID_ANY, ICONS["stop",24,24])
 
         self._gbSizer.Add(name    ,pos=(r,0),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
         self._gbSizer.Add(pid     ,pos=(r,1),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)

@@ -42,6 +42,9 @@ class OutputVariableError(Error):
 
 class OutputData(collections.OrderedDict):
     
+    def __setitem__(self,item):
+        pass
+    
     def add(self, dataName, dataType, data, **kwargs):
         
         self[dataName] = REGISTRY["output_variable"][dataType](data, dataName, **kwargs)
