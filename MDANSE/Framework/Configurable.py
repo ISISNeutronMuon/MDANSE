@@ -186,7 +186,9 @@ class Configurable(object):
         
         for name,(typ,kwds) in configurators.items():
             cfg=REGISTRY["configurator"][typ](name, **kwds)
-            doclist.append({'Configurator' : name,'Default value' : repr(cfg.default),'Description' : str(cfg.__doc__)})
+            descr = kwds.get("description","")
+            descr += "\n"+str(cfg.__doc__)
+            doclist.append({'Configurator' : name,'Default value' : repr(cfg.default),'Description' : descr})
                                     
         docstring = "\n:Example:\n\n"
         docstring += ">>> from MDANSE import REGISTRY\n"
@@ -227,8 +229,6 @@ class Configurable(object):
             
         docstring += "\n"
         
-#         print docstring
-            
         return docstring
     
     @classmethod

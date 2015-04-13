@@ -35,7 +35,7 @@ import collections
 from MDANSE import ELEMENTS
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import correlation, differentiate, normalize, get_spectrum
+from MDANSE.Mathematics.Signal import correlation, differentiate, get_spectrum
 from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
 class DensityOfStates(IJob):

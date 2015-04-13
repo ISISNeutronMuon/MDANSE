@@ -78,6 +78,8 @@ class ClassRegistry(abc.ABCMeta):
         :type namespace: dict
         '''
         
+        print name, bases, namespace
+        
         super(ClassRegistry, self).__init__(name, bases, namespace)
         
         # Get the typ of the class
@@ -123,8 +125,6 @@ class ClassRegistry(abc.ABCMeta):
      
             moduleName, moduleExt = os.path.splitext(moduleFile)
             
-            print moduleName
-    
             if moduleDir not in sys.path:        
                 sys.path.append(moduleDir)
                       

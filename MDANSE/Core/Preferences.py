@@ -204,6 +204,27 @@ class InputDirectory(PreferencesItem):
             raise PreferencesError('Error when setting input directory %r' % value)
         
         self._value = value
+
+class LoggingLevel(PreferencesItem):
+    
+    type = "logging_level"
+    
+    LOGGING_LEVELS = ["debug","info","warning","error","critical","fatal"]
+    
+    def set_value(self, value):
+        '''
+        Set the value of the logging level preferences item.
+        
+        :param value: the logging level
+        :type value: str
+        '''
+                
+        value = value.lower()
+        
+        if not value in LoggingLevel.LOGGING_LEVELS:
+            raise PreferencesError("Invalid logging level")
+                
+        self._value = value
                 
 class Preferences(collections.OrderedDict):
     '''
@@ -220,12 +241,14 @@ class Preferences(collections.OrderedDict):
         Constructs the preferences
         '''
         
+        collections.OrderedDict.__init__(self)
+        
         self["working_directory"] = InputDirectory("working_directory", "paths", PLATFORM.home_directory())
         self["macros_directory"] = InputDirectory("macros_directory", "paths", os.path.join(PLATFORM.home_directory(), "mdanse_macros"))
                 
         self._parser = ConfigParser.ConfigParser()
 
-        for s in self._items.values():
+        for s in self.values():
             try:
                 self._parser.add_section(s.section)
             except ConfigParser.DuplicateSectionError:
@@ -276,11 +299,11 @@ class Preferences(collections.OrderedDict):
         :type value: any
         '''
         
-        if not self._items.has_key(item):
+        if not self.has_key(item):
             return
 
         try:
-            self._items[item].value = value
+            self[item].value = value
 
         except KeyError:
             raise PreferencesError("The preferences item %r is not valid" % item)
@@ -320,7 +343,7 @@ class Preferences(collections.OrderedDict):
         except (IOError,TypeError) as e:
             raise PreferencesError(e)
 
-        for v in self._items.values():
+        for v in self.values():
             self._parser.set(v.section,v.name,v.value)
                 
         # Write the preferences.

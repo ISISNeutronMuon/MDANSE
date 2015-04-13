@@ -66,7 +66,6 @@ def create_mmtk_atom_entry(name, symbol=None, mass=0.0):
         symbol = name
 
     filename = os.path.join(PLATFORM.local_mmtk_database_directory(),"Atoms", name)
-    print filename
     f = open(filename, 'w')
     # This three entries are compulsory for a MMTK.Atom to be valid
     f.write('name = "%s"\n\n' % name)
@@ -275,19 +274,19 @@ class ElementsDatabase(object):
     
     >>> # Import the database
     >>> from MDANSE import ELEMENTS
-    >>>
+    >>> 
     >>> # Fetch the hydrogen natural element --> get a deep-copy of the its properties
     >>> hydrogen = ELEMENTS["H"]
-    >>>
+    >>> 
     >>> # Fetch the hydrogen H[1] isotope --> get a deep-copy of the its properties
     >>> h1 = ELEMENTS["H[1]"]
-    >>>
+    >>> 
     >>> # Return a list of the properties stored in the database
     >>> l = ELEMENTS.get_properties()
-    >>>
+    >>> 
     >>> # Return the atomic weight of U[235] element
     >>> w = ELEMENTS["U[235]","atomic_weight"]
-    >>>
+    >>> 
     >>> # Returns the elements stored currently in the database
     >>> elements = ELEMENTS.get_elements()
     '''

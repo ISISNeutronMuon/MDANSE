@@ -100,7 +100,6 @@ class MDFile(dict):
         
         self["instance"].seek(0)           
         
-        
     def read_step(self, step):
         """
         """
@@ -129,12 +128,10 @@ class MDFile(dict):
         
         return timeStep, basisVectors, config
 
-
     def close(self):
         self["instance"].close()
 
-
-class CASTEP_Converter(IJob):
+class CASTEPConverter(IJob):
     """
     Converts a Castep Trajectory into a MMTK NetCDFFile. 
     """
