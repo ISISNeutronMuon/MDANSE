@@ -9,7 +9,7 @@ from MDANSE.App.GUI.DataController import DATA_CONTROLLER
 
 from MDANSE import REGISTRY
 
-directories = sorted([x[0] for x in os.walk(os.path.dirname(__file__))][1:])
+directories = sorted([x[0] for x in os.walk(os.path.join(os.path.dirname(__file__),'Framework'))][1:])
 
 for d in directories:
     REGISTRY.update_registry(d)

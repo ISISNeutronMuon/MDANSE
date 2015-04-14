@@ -15,7 +15,7 @@ from MDANSE.App.GUI.WorkingPanel import WorkingPanel
 
 class MainFrame(wx.Frame):
 
-    def __init__(self, parent, title="nMoldyn"):
+    def __init__(self, parent, title="MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments"):
         
         wx.Frame.__init__(self, parent, wx.ID_ANY, title, size = (1200,800))
   
@@ -23,6 +23,7 @@ class MainFrame(wx.Frame):
 
         self.build_dialog()
         
+        # Add some handlers to the loggers
         LOGGER.add_handler("console", REGISTRY['handler']['console'](self._panels["controller"].pages["logger"]), level="info")
         LOGGER.add_handler("dialog", REGISTRY['handler']['dialog'], level="error")
         LOGGER.start()
@@ -34,7 +35,7 @@ class MainFrame(wx.Frame):
         self.build_toolbar()
 
         icon = wx.EmptyIcon()
-        icon.CopyFromBitmap(ICONS["nmoldyn",32,32])
+        icon.CopyFromBitmap(ICONS["mdanse",32,32])
         self.SetIcon(icon) 
         
         # The main aui manager.
@@ -131,7 +132,7 @@ class MainFrame(wx.Frame):
                                                                     
     def load_data(self,typ,filename):
         
-        data = REGISTRY["inputdata"][typ](filename)
+        data = REGISTRY["input_data"][typ](filename)
 
         DATA_CONTROLLER[data.filename] = data
 
