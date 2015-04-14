@@ -31,7 +31,7 @@ Created on Mar 30, 2015
 '''
 
 from MDANSE import REGISTRY
-from MDANSE.Framework.UserDefinables.UserDefinitions import USER_DEFINITIONS
+from MDANSE.Framework.UserDefinitions.IUserDefinition import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
 class QVectorsConfigurator(IConfigurator):
@@ -47,7 +47,7 @@ class QVectorsConfigurator(IConfigurator):
 
         trajConfig = configuration[self._dependencies['trajectory']]
 
-        ud = USER_DEFINITIONS.get(trajConfig["basename"],"q_vectors",value)        
+        ud = UD_STORE[trajConfig["basename"],"q_vectors",value]        
         if ud is not None:
             
             self["parameters"] = ud['parameters']

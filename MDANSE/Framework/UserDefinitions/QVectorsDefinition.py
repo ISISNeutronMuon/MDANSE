@@ -30,14 +30,14 @@ Created on Mar 27, 2015
 @author: pellegrini
 '''
 
-from MDANSE.Framework.UserDefinables.IUserDefinable import IUserDefinable
-    
-class AtomSelectionDefinable(IUserDefinable):
+from MDANSE.Framework.UserDefinitions.IUserDefinition import IUserDefinition
+
+class QVectorsDefinition(IUserDefinition):    
     '''
-    The user definable object used for storing atom selection.
+    The user definable object used for storing k vectors.
     '''
+
+    type = "q_vectors"
     
-    type = "atom_selection"
-    
-    _keywords = ['expression','indexes']
-                
+    _keywords = ['generator', 'parameters', 'q_vectors', 'is_lattice']
+        

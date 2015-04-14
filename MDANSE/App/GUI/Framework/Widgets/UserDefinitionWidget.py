@@ -34,7 +34,7 @@ import os
 
 import wx.combo
 
-from MDANSE.Framework.UserDefinables.UserDefinitions import USER_DEFINITIONS
+from MDANSE.Framework.UserDefinitions.IUserDefinition import UD_STORE
 
 from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
 from MDANSE.App.GUI.ComboWidgets.ComboCheckbox import ComboCheckbox
@@ -93,7 +93,7 @@ class UserDefinitionWidget(IWidget):
         self._basename = os.path.basename(self._filename)
         
         try:
-            names = USER_DEFINITIONS[self._basename][self.type].keys()
+            names = UD_STORE.filter(self._basename,self.type)
         except KeyError:
             names = []
         

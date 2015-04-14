@@ -30,7 +30,7 @@ Created on Mar 30, 2015
 @author: Gael Goret, Eric C. Pellegrini
 '''
 
-from MDANSE.App.GUI.Plugins.IPlugin import IPlugin 
+from MDANSE.App.GUI.Framework.Plugins.IPlugin import IPlugin 
              
 class ComponentPlugin(IPlugin):
     

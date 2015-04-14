@@ -7,8 +7,8 @@
 #38042 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
-#aoun[at]ill.fr
 #goret[at]ill.fr
+#aoun[at]ill.fr
 #
 #This library is free software; you can redistribute it and/or
 #modify it under the terms of the GNU Lesser General Public
@@ -25,24 +25,80 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 26, 2015
+Created on Mar 27, 2015
 
 @author: pellegrini
 '''
 
 import cPickle
 import os
+import time
 
-from MDANSE import PLATFORM
+from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
 
-class UserDefinitionsError(Error):
-    '''
-    This class handles exception related to UserDefinitions
-    '''
+class UserDefinitionError(Error):
     pass
 
+class IUserDefinition(object):
+    '''
+    Base class for user definable objects. User definable objects are objects used in MDANSE for 
+    storing information that can be reused later when setting up jobs (e.g. k-vectors defintion, 
+    atom selection ...). A user definable object is a dictionary with a predefined set of keys that 
+    depends on the user definable object. Object serialization is the underlying mechanism used to 
+    save those objets and is done using cPickle module. 
+    '''
+    
+    # Any user definable object will be registered at MDANSE startup.
+    __metaclass__ = REGISTRY
+
+    # The base class has no type (hence it will not be registered)    
+    type = "user_definition"
+    
+    # The base class has no predefined set keywords
+    _keywords = []
+    
+    def __init__(self, target):
+        '''
+        The constructor
+        '''
+        
+        self._target = target
+        
+        self._creationTime = time.ctime()
+        
+        self._definition = {}
+                                                                                        
+    @property
+    def target(self):
+        
+        return self._target
+
+    @classmethod
+    def keywords(self):
+        
+        return self._keywords
+
+    @property
+    def creationTime(self):
+        
+        return self._creationTime
+
+    def __setitem__(self, keyword, value):
+
+        if keyword in self._keywords:
+            self._definition[keyword] = value
+        
+    def __str__(self):
+        '''
+        Return the informal representation of a user definable object
+        '''
+        
+        info = ["Created on: %s\n" % self.creationTime] + ["%s:\n%s\n" % (k,self._definition[k]) for k in self._keywords] 
+        
+        return "".join(info)
+            
 class UnicodeDict(dict):
     '''
     This class implements a specification of a python dict that converts automatically any string key in unicode.
@@ -79,13 +135,12 @@ class UnicodeDict(dict):
         '''
 
         if isinstance(item,basestring):
-
-            super(UnicodeDict,self).__setitem__(unicode(item),value)
+            dict.__setitem__(self, unicode(item),value)
 
         else:
-            super(UnicodeDict,self).__setitem__(item,value)
+            raise KeyError("Invalid key type")
 
-class UserDefinitions(object):
+class UserDefinitionStore(UnicodeDict):
     '''
     This class is used to register, save and delete MDANSE user definitions (a.k.a. UD).
     
@@ -94,26 +149,26 @@ class UserDefinitions(object):
     This definitions can be selections of atoms, Q vectors definitions, axis definitions ... The 
     user definitions are loaded when MDANSE starts through a cPickle file that will store these definitions.
     
-    They are stored internally as MDANSE.Framework.UserDefinables.IUserDefinable derived objects in a nested 
+    They are stored internally as MDANSE.Framework.UserDefinition.IUserDefinition derived objects in a nested 
     dictionary whose primary key is the target name, secondary key is the category of the user definition and 
     tertiary key is the name of the user definition.  
     '''
     
     __metaclass__ = Singleton
         
-    _path = os.path.join(PLATFORM.application_directory(),"user_definitions.ud")                                                      
+    UD_PATH = os.path.join(PLATFORM.application_directory(),"user_definitions.ud")                                                      
                        
     def load(self):
         '''
         Load the user definitions.
         '''
         
-        if not os.path.exists(UserDefinitions._path):
+        if not os.path.exists(UserDefinitionStore.UD_PATH):
             return
 
         # Try to open the UD file.
         try:
-            f = open(UserDefinitions._path, "rb")
+            f = open(UserDefinitionStore.UD_PATH, "rb")
             UD = cPickle.load(f)        
 
         # If for whatever reason the pickle file loading failed do not even try to restore it
@@ -124,78 +179,60 @@ class UserDefinitions(object):
             self.update(UD)
             f.close()
             
-    def save(self, path=None):
+    def save(self):
         '''
         Save the user definitions.
         
         :param path: the path of the user definitions file.
         :type path: str
         '''
-        
-        if path is None:
-            path = self._path
-            
+                    
         try:                        
-            f = open(path, "wb")
+            f = open(UserDefinitionStore.UD_PATH, "wb")
         except IOError:
             return
         else:
             cPickle.dump(self, f, protocol=2)
             f.close()
                                     
-    def get(self, target, category, name):
+    def __getitem__(self, item):
         '''
         Returns a user definition given its target, category and its name.
-        
-        :param target: the target related to the user definition
-        :type target: str
-        :param category: the category of the user definition
-        :type category: str
-        :param name: the name of the user definition
-        :type name: str
-        
-        :return: the user definition if it found or None otherwise
-        :rtype: a MDANSE.Framework.UserDefinables.UserDefinables.IUserDefinable derived class
-        '''
-        
-        try:
-            ud = self[target][category][name]            
-        
-        # Any kind of error should be caught here.    
-        except:
-            return None
-            
-        else:                
-            if ud.target != target:
-                raise UserDefinitionsError('Target mismatch between %r and %r' % (target,ud.target))
-        
-            if ud.type != category:
-                raise UserDefinitionsError('Type mismatch between %r and %r' % (category,ud.type))
-
-            return ud
-                                           
-    def set(self, target, category, name, ud):
-        '''
-        Sets a new user definition.
-        
-        :param target: the name of the user definition to set
-        :type target: str
-        :param category: the category of the user definition to set
-        :type category: str
-        :param name: the name of the user definition to set
-        :type name: str
-        :param ud: the user definition to set
-        :type ud: MDANSE.Framework.UserDefinables.IUserDefinable derived object
-        '''
-
-        from MDANSE.Framework.UserDefinables.IUserDefinable import IUserDefinable               
-        if not isinstance(ud,IUserDefinable):
-            raise UserDefinitionsError("Invalid user definition: must be a user definable object")
-
-        targets = self.setdefault(unicode(target),{})
-        
-        categories = targets.setdefault(unicode(category),{})
-
-        categories[unicode(name)] = ud
                 
-USER_DEFINITIONS = UserDefinitions()
+        :return: the user definition if it found or None otherwise
+        :rtype: a MDANSE.Framework.UserDefinitions.IUserDefinition.IUserDefinition derived class
+        '''
+
+        try:
+            target, typ, name = item
+        except ValueError:
+            raise UserDefinitionError("Invalid key value: must be a 3-tuple")
+            
+        try:
+            ud = self[name]
+            
+        except (KeyError,TypeError):
+            raise UserDefinitionError('The item %r could not be found' % str(name))
+            
+        else:
+            
+            if ud.target != target:
+                raise UserDefinitionError('Target mismatch between %r and %r' % (target,ud.target))
+        
+            if ud.type != typ:
+                raise UserDefinitionError('Type mismatch between %r and %r' % (typ,ud.type))
+            
+            return ud
+                                                   
+    def __setitem__(self, item, value):
+                                          
+        if not isinstance(value,IUserDefinition):
+            raise IUserDefinition("Invalid value for user definition: must be a user definable object")
+        
+        UnicodeDict.__setitem__(self, item,value)
+
+    def filter(self,target,typ):
+        
+        return [k for k,v in self.iteritems() if (v.target==target and v.type==typ)]
+        
+UD_STORE = UserDefinitionStore()            

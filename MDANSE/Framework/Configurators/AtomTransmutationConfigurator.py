@@ -31,9 +31,9 @@ Created on Mar 30, 2015
 '''
 
 from MDANSE import ELEMENTS
-from MDANSE.Framework.UserDefinables.UserDefinitions import USER_DEFINITIONS
+from MDANSE.Framework.UserDefinitions.IUserDefinition import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
-from MDANSE.Framework.AtomTransmutationParser import AtomTransmutationParser
+from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
         
 class AtomTransmutationConfigurator(IConfigurator):
     """
@@ -62,21 +62,20 @@ class AtomTransmutationConfigurator(IConfigurator):
 
         trajConfig = configuration[self._dependencies['trajectory']]
                                                                 
-        parser = AtomTransmutationParser(trajConfig["instance"])
+        parser = AtomSelectionParser(trajConfig["instance"])
         
         # If the input value is a dictionary, it must have a selection string or a python script as key and the element 
         # to be transmutated to as value 
         if isinstance(value,dict):
             for expression,element in value.items():
-                parser.parse(element,expression)
-                definition = parser.definition          
-                self.transmutate(configuration, definition["indexes"], definition["element"])
+                indexes = parser.parse(element,expression)
+                self.transmutate(configuration, indexes, element)
           
         # Otherwise, it must be a list of strings that will be found as user-definition keys
         elif isinstance(value,(list,tuple)):                        
             for definition in value:
                 
-                ud = USER_DEFINITIONS.get(trajConfig["basename"],"atom_transmutation",definition)
+                ud = UD_STORE[trajConfig["basename"],"atom_transmutation",definition]
                 if ud is not None:
                     self.transmutate(configuration, ud["indexes"], ud["element"])
                 else:

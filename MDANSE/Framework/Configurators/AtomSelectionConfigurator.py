@@ -35,7 +35,7 @@ import operator
 
 import numpy
 
-from MDANSE.Framework.UserDefinables.UserDefinitions import USER_DEFINITIONS
+from MDANSE.Framework.UserDefinitions.IUserDefinition import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
 
@@ -65,22 +65,19 @@ class AtomSelectionConfigurator(IConfigurator):
     def configure(self, configuration, value):
                           
         trajConfig = configuration[self._dependencies['trajectory']]
-        
-        if value is None:
-            value = "all"
-        
+                
         if not isinstance(value,basestring):
             raise ConfiguratorError("invalid type for atom selection. Must be a string", self)
         
         self["value"] = value
         
-        ud = USER_DEFINITIONS.get(trajConfig["basename"],"atom_selection",value)        
+        ud = UD_STORE[trajConfig["basename"],"atom_selection",value]        
         if ud is not None:
             self.update(ud)
         else:
             parser = AtomSelectionParser(trajConfig["instance"])
-            parser.parse(value)
-            self.update(parser.definition)
+            self["indexes"] = parser.parse(value)
+            self["expression"] = value
 
         self["n_selected_atoms"] = len(self["indexes"])
         atoms = sorted(trajConfig["universe"].atomList(), key = operator.attrgetter('index'))

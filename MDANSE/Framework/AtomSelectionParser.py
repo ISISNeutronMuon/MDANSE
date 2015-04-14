@@ -35,16 +35,13 @@ import operator
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Externals.pyparsing.pyparsing import delimitedList, oneOf, opAssoc, operatorPrecedence, printables, Forward, OneOrMore, Optional, Word
-from MDANSE.Framework.UserDefinable import UserDefinable
 
 class AtomSelectionParserError(Error):
     pass
 
-class AtomSelectionParser(UserDefinable):
+class AtomSelectionParser(object):
         
     def __init__(self, trajectory):
-        
-        UserDefinable.__init__(self,trajectory.filename)
         
         self._universe = trajectory.universe
                 
@@ -108,12 +105,7 @@ class AtomSelectionParser(UserDefinable):
                                 
         return selection 
                                                                                                         
-    def parse(self, expression=None):
-
-        self._definition.clear()
-
-        if expression is None:
-            expression = "all()"
+    def parse(self, expression):
                                     
         # Perfom the actual selection.
         selection = self.parse_selection_expression(expression)
@@ -121,7 +113,6 @@ class AtomSelectionParser(UserDefinable):
         if not selection:
             raise AtomSelectionParserError("No atoms matched the selection %r." % expression)
         
-        self._definition["expression"] = expression
-        self._definition["indexes"] = [at.index for at in selection]
+        indexes = [at.index for at in selection]
                 
-        return self._definition    
+        return indexes    

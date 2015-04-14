@@ -30,7 +30,7 @@ Created on Mar 30, 2015
 @author: pellegrini
 '''
 
-from MDANSE.Framework.UserDefinables.UserDefinitions import USER_DEFINITIONS
+from MDANSE.Framework.UserDefinitions.IUserDefinition import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
 
@@ -56,7 +56,7 @@ class BasisSelection(IConfigurator):
     def configure(self, configuration, value):
         trajConfig = configuration[self._dependencies['trajectory']]
 
-        ud = USER_DEFINITIONS.get(trajConfig["basename"],"basis_selection",value)        
+        ud = UD_STORE[trajConfig["basename"],"basis_selection",value]        
         if ud is not None:
             self.update(ud)
         else:

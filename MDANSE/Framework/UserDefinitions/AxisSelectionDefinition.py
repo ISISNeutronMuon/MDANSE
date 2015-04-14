@@ -30,14 +30,13 @@ Created on Mar 27, 2015
 @author: pellegrini
 '''
 
-from MDANSE.Framework.UserDefinables.IUserDefinable import IUserDefinable
-
-class DefineQVectors(IUserDefinable):    
-    '''
-    The user definable object used for storing k vectors.
-    '''
-
-    type = "q_vectors"
-    
-    _keywords = ['generator', 'parameters', 'q_vectors', 'is_lattice']
+from MDANSE.Framework.UserDefinitions.IUserDefinition import IUserDefinition
         
+class AxisSelectionDefinition(IUserDefinition):    
+    '''
+    The user definable object used for storing axis selection.
+    '''
+
+    type = "axis_selection"
+    
+    _keywords = ['molecule','endpoint1','endpoint2']

@@ -30,9 +30,9 @@ Created on Mar 27, 2015
 @author: pellegrini
 '''
 
-from MDANSE.Framework.UserDefinables.IUserDefinable import IUserDefinable
+from MDANSE.Framework.UserDefinitions.IUserDefinition import IUserDefinition
     
-class AtomTransmutationDefinable(IUserDefinable):    
+class AtomTransmutationDefinition(IUserDefinition):    
     '''
     The user definable object used for storing atom transmutation.
     '''

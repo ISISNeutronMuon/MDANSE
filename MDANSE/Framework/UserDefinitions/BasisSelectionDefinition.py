@@ -30,13 +30,15 @@ Created on Mar 27, 2015
 @author: pellegrini
 '''
 
-from MDANSE.Framework.UserDefinables.IUserDefinable import IUserDefinable
-        
-class DefineAxisSelection(IUserDefinable):    
+from MDANSE.Framework.UserDefinitions.IUserDefinition import IUserDefinition
+
+class BasisSelectionDefinition(IUserDefinition):    
     '''
-    The user definable object used for storing axis selection.
+    The user definable object used for storing basis selection.
     '''
 
-    type = "axis_selection"
+    type = "basis_selection"
     
-    _keywords = ['molecule','endpoint1','endpoint2']
+    _keywords = ['molecule','origin','x_axis','y_axis']
+
+        

@@ -4,6 +4,7 @@ import webbrowser
 import wx
 import wx.aui as aui
 
+from MDANSE.__pkginfo__ import __version__, __revision__
 from MDANSE import LOGGER, REGISTRY
 
 from MDANSE.App.GUI import DATA_CONTROLLER
@@ -19,8 +20,6 @@ class MainFrame(wx.Frame):
         
         wx.Frame.__init__(self, parent, wx.ID_ANY, title, size = (1200,800))
   
-        self._wildcards = collections.OrderedDict([kls.type, "%s (*.%s)|*.%s" % (kls.type,kls.extension,kls.extension)] for kls in REGISTRY["input_data"].values() if kls.extension is not None)
-
         self.build_dialog()
         
         # Add some handlers to the loggers
@@ -47,11 +46,12 @@ class MainFrame(wx.Frame):
         self._panels["working"] = WorkingPanel(self)
         self._panels["controller"] = ControllerPanel(self)
         
-        # Add the panes corresponding to the tree control and the notebook. 
-        self._mgr.AddPane(self._panels["data"], aui.AuiPaneInfo().Caption("Data").Name("data").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
-        self._mgr.AddPane(self._panels["plugins"], aui.AuiPaneInfo().Caption("Plugins").Name("plugins").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
-        self._mgr.AddPane(self._panels["working"], aui.AuiPaneInfo().Name("working").Center().CloseButton(False))
-        self._mgr.AddPane(self._panels["controller"], aui.AuiPaneInfo().Name("controller").Name("controller").Floatable().Right().Bottom().CloseButton(True).DestroyOnClose(False).MinSize((-1,120)))
+        # Add the panes corresponding to the tree control and the notebook.
+        paneInfo=aui.AuiPaneInfo()
+        self._mgr.AddPane(self._panels["data"], paneInfo.Caption("Data").Name("data").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
+        self._mgr.AddPane(self._panels["plugins"], paneInfo.Caption("Plugins").Name("plugins").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
+        self._mgr.AddPane(self._panels["working"], paneInfo.Name("working").Center().CloseButton(False))
+        self._mgr.AddPane(self._panels["controller"], paneInfo.Name("controller").Name("controller").Floatable().Right().Bottom().CloseButton(True).DestroyOnClose(False).MinSize((-1,120)))
 
         self._mgr.Update()
 
@@ -138,14 +138,21 @@ class MainFrame(wx.Frame):
 
     def on_about(self, event=None):
         
-        from nMOLDYN.__pkginfo__ import __version__, __revision__
-        
+        if __revision__ is "undefined":
+            rev=""
+        else:
+            rev=" (%s)" % __revision__
+                        
         about_str = \
-"""nMOLDYN version %s (%s).
+"""MDANSE version %s%s.
 
-An interactive analysis program for Molecular Dynamics simulations.
-Designed for the computation and decomposition of neutron scattering spectra. 
-Extended with the calculation of properties that can be extracted from a molecular dynamics trajectory.""" % (__version__,__revision__)
+An interactive program for analyzing Molecular Dynamics simulations.
+
+Authors:
+\tEric C. Pellegrini
+\tGael Goret
+\tBachir Aoun
+""" % (__version__,rev)
         
         d = wx.MessageDialog(self, about_str, 'About', style=wx.OK|wx.ICON_INFORMATION)
         d.ShowModal()
@@ -153,16 +160,21 @@ Extended with the calculation of properties that can be extracted from a molecul
 
     def on_bug_report(self, event=None):
         report_str = \
-"""The version 4 of nMoldyn is currently under testing.
-In order to facilitate the integration of new features and bug fixes, we ask the users for registering on ILL Redmine application and to submit issues going through : 
+"""The version 1 of MDANSE is currently under testing.
+In order to facilitate the integration of new features and bug fixes, please send pull request to: 
 
-\t\thttp://forge.ill.fr/projects/nmoldyn/issues
+https://github.com/eurydyce/MDANSE/tree/master/MDANSE
 
-for any other request, do not hesitate to send an email to :
+for any other request, do not hesitate to send an email to:
 
-\t\tnmoldyn@ill.fr
+\tpellegrini@ill.fr
+\tjohnson@ill.fr
+\tgonzalezm@ill.fr
 
-Have fun with nMolDyn !"""
+or directly to the MDANSE mailing list:
+
+\tmdanse@ill.fr
+"""
         
         d = wx.MessageDialog(self, report_str, 'Bug report', style=wx.OK|wx.ICON_INFORMATION)
         d.ShowModal()
@@ -181,15 +193,17 @@ Have fun with nMolDyn !"""
         webbrowser.open('http://www.ill.eu/fileadmin/users_files/img/instruments_and_support/support_facilities/computing_for_science/Computing_for_Science/CS_Software/nMoldyn/documentation/index.html')
             
     def on_load_data(self, event=None):
+
+        wildcards = collections.OrderedDict([kls.type, "%s (*.%s)|*.%s" % (kls.type,kls.extension,kls.extension)] for kls in REGISTRY["input_data"].values() if kls.extension is not None)
                 
-        dialog = wx.FileDialog ( None, message='Open data ...', wildcard="|".join(self._wildcards.values()), style=wx.OPEN)
+        dialog = wx.FileDialog ( None, message='Open data ...', wildcard="|".join(wildcards.values()), style=wx.OPEN)
         
         if dialog.ShowModal() == wx.ID_CANCEL:
             return ""
                 
         idx = dialog.GetFilterIndex()
                                                 
-        dataType = self._wildcards.keys()[idx]
+        dataType = wildcards.keys()[idx]
                         
         filename = dialog.GetPath()
         

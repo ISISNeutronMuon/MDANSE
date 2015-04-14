@@ -37,7 +37,7 @@ from MDANSE import REGISTRY
 from MDANSE.Externals.pubsub import pub
 
 from MDANSE.App.GUI import DATA_CONTROLLER
-from MDANSE.App.GUI.Plugins.IPlugin import IPlugin, plugin_parent 
+from MDANSE.App.GUI.Framework.Plugins.IPlugin import IPlugin, plugin_parent 
                     
 class DataPlugin(IPlugin):
     

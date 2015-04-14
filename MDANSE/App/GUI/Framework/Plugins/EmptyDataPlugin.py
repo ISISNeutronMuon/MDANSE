@@ -25,16 +25,20 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 27, 2015
+Created on Apr 14, 2015
 
 @author: pellegrini
 '''
 
-from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
+from MDANSE.App.GUI.Framework.Plugins.Plugin import DataPlugin
+
+class EmptyDataPlugin(DataPlugin):
     
-class AtomTransmutationParser(AtomSelectionParser):
+    type = "empty_data"
     
-    def parse(self, element, expression=None):
+    label = "Empty data"
     
-        AtomSelectionParser.parse(self,expression)
-        self._definition["element"] = element
+    ancestor = ""
+    
+    def build_panel(self):
+        pass

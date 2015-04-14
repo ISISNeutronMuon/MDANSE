@@ -41,8 +41,7 @@ from MDANSE.Core.Preferences import PREFERENCES
 
 from MDANSE.Logging.Logger import LOGGER
 
-import Framework
-del Framework
+from MDANSE.Framework.UserDefinitions.IUserDefinition import UD_STORE
 
 import os
 

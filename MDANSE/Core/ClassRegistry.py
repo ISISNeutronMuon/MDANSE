@@ -78,8 +78,6 @@ class ClassRegistry(abc.ABCMeta):
         :type namespace: dict
         '''
         
-        print name, bases, namespace
-        
         super(ClassRegistry, self).__init__(name, bases, namespace)
         
         # Get the typ of the class

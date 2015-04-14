@@ -36,12 +36,11 @@ import collections
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Configurable import Configurable
-from MDANSE.Framework.UserDefinable import UserDefinable
 
 class QVectorsError(Error):
     pass
 
-class IQVectors(Configurable,UserDefinable):
+class IQVectors(Configurable):
     
     __metaclass__ = REGISTRY
     
@@ -52,21 +51,10 @@ class IQVectors(Configurable,UserDefinable):
     def __init__(self, trajectory):
         
         Configurable.__init__(self)
-                
-        UserDefinable.__init__(self,trajectory.filename)
-                
+                                
         self._universe = trajectory.universe
         
     @abc.abstractmethod
     def generate(self, status=None):
         pass
-    
-    def setup(self,parameters):
-        
-        Configurable.setup(self, parameters)
-        self._definition.clear()
-        self._definition["generator"] = self.type
-        self._definition["is_lattice"] = self.is_lattice
-        self._definition["q_vectors"] = collections.OrderedDict()
-        self._definition["parameters"] = parameters
         
