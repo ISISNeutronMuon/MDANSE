@@ -39,7 +39,7 @@ import numpy
 
 from Scientific.IO.NetCDF import NetCDFFile
 
-from MDANSE.App.GUI.Framework.Plugins.Plugin import ComponentPlugin
+from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 from MDANSE.Core.Error import Error
 
 class DensitySuperpositionError(Error):

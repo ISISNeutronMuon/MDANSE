@@ -69,13 +69,13 @@ class AngularCorrelation(IJob):
     
     ancestor = "mmtk_trajectory"
     
-    configurators = collections.OrderedDict()    
-    configurators['trajectory'] = ('mmtk_trajectory',{})
-    configurators['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
-    configurators['axis_selection'] = ('axis_selection',{"dependencies":{'trajectory':'trajectory'}})
-    configurators['per_axis'] = ('boolean', {"label":"output contribution per axis", "default":False})
-    configurators['output_files'] = ('output_files', {"formats":["netcdf","ascii"]})
-    configurators['running_mode'] = ('running_mode',{})
+    settings = collections.OrderedDict()    
+    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
+    settings['axis_selection'] = ('axis_selection',{"dependencies":{'trajectory':'trajectory'}})
+    settings['per_axis'] = ('boolean', {"label":"output contribution per axis", "default":False})
+    settings['output_files'] = ('output_files', {"formats":["netcdf","ascii"]})
+    settings['running_mode'] = ('running_mode',{})
         
     def initialize(self):
         """

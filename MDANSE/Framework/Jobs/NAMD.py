@@ -47,8 +47,8 @@ class NAMDConverter(DCDConverter):
     
     ancestor = "empty_data"
     
-    configurators = collections.OrderedDict()
-    configurators['pdb_file'] = ('input_file',{})
-    configurators['dcd_file'] = ('input_file',{})
-    configurators['output_file'] = ('output_files', {'formats':["netcdf"]})
-    configurators['fold'] = ('boolean', {'default':False, 'label':"Fold coordinates in to box"})
+    settings = collections.OrderedDict()
+    settings['pdb_file'] = ('input_file',{})
+    settings['dcd_file'] = ('input_file',{})
+    settings['output_file'] = ('output_files', {'formats':["netcdf"]})
+    settings['fold'] = ('boolean', {'default':False, 'label':"Fold coordinates in to box"})

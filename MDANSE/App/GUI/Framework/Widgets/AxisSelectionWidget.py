@@ -33,7 +33,7 @@ Created on Mar 30, 2015
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Configurable import ConfigurationError
 
-from MDANSE.App.GUI.ConfiguratorWidgets.UserDefinitionWidget import UserDefinitionWidget
+from MDANSE.App.GUI.Framework.Widgets.UserDefinitionWidget import UserDefinitionWidget
 
 class AxisSelectionWidget(UserDefinitionWidget):
         

@@ -112,7 +112,7 @@ class IJob(Configurable):
     def build_documentation(self):
                 
         doc = [self.__doc__]
-        for conf in self.configurators.values():
+        for conf in self.settings.values():
             if conf.__doc__ is None:
                 doc.append("%s : %s\n" % (conf.type,'undocumented'))
             else:

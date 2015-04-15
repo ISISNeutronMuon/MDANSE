@@ -1,20 +1,44 @@
-# Standards imports.
-import collections
+#MDANSE : Molecular Dynamics Analysis for Neutron Scattering Experiments
+#------------------------------------------------------------------------------------------
+#Copyright (C)
+#2015- Eric C. Pellegrini Institut Laue-Langevin
+#BP 156
+#6, rue Jules Horowitz
+#38042 Grenoble Cedex 9
+#France
+#pellegrini[at]ill.fr
+#goret[at]ill.fr
+#aoun[at]ill.fr
+#
+#This library is free software; you can redistribute it and/or
+#modify it under the terms of the GNU Lesser General Public
+#License as published by the Free Software Foundation; either
+#version 2.1 of the License, or (at your option) any later version.
+#
+#This library is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#Lesser General Public License for more details.
+#
+#You should have received a copy of the GNU Lesser General Public
+#License along with this library; if not, write to the Free Software
+#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-# The wx imports.
+''' 
+Created on Apr 14, 2015
+
+@author: Gael Goret, Eric C. pellegrini
+'''
+
 import wx
-import wx.aui as aui
+import wx.aui as wxaui
 
+from MDANSE import REGISTRY
+from MDANSE.Core.Error import Error
 
-# The numpy imports.
-import numpy as np
+from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 
-# The nmoldyn imports.
-from nMOLDYN import REGISTRY, USER_DEFINITIONS
-from nMOLDYN.Core.Error import Error
-from nMOLDYN.Framework.Plugins.Plugin import ComponentPlugin
-
-class RegistryViewerPluginError(Error):
+class RegistryViewerError(Error):
     pass
 
 class RegistryViewerPlugin(ComponentPlugin):
@@ -34,7 +58,6 @@ class RegistryViewerPlugin(ComponentPlugin):
         
         self.build_plugins_tree()
         
-
     def build_panel(self):
         
         self._treePanel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
@@ -47,7 +70,6 @@ class RegistryViewerPlugin(ComponentPlugin):
         
         self._treePanel.SetSizer(treeSizer)  
         
-        
         self._infoPanel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
         
         infoSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -58,19 +80,16 @@ class RegistryViewerPlugin(ComponentPlugin):
         
         self._infoPanel.SetSizer(infoSizer)   
         
-        
-        self._mgr.AddPane(self._infoPanel, aui.AuiPaneInfo().Center().Dock().CaptionVisible(False).CloseButton(False))
-        self._mgr.AddPane(self._treePanel, aui.AuiPaneInfo().Left().Dock().CaptionVisible(False).CloseButton(False))
+        self._mgr.AddPane(self._infoPanel, wxaui.AuiPaneInfo().Center().Dock().CaptionVisible(False).CloseButton(False))
+        self._mgr.AddPane(self._treePanel, wxaui.AuiPaneInfo().Left().Dock().CaptionVisible(False).CloseButton(False))
         self._mgr.Update()
         
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_double_click_data)
     
-         
     def build_plugins_tree(self):
  
         self._root = self._tree.AddRoot("root")
         self.set_plugins_tree(self._root, REGISTRY._registry)          
-            
             
     def set_plugins_tree(self, node, data):
         
@@ -107,7 +126,6 @@ class RegistryViewerPlugin(ComponentPlugin):
         self.parent.mgr.GetPane(self).Float().CloseButton(True).BestSize((800, 300))
         self.parent.mgr.Update()
 
-
 class RegistryViewerFrame(wx.Frame):
     
     def __init__(self, parent, title="Registry Viewer Plugin"):
@@ -116,9 +134,7 @@ class RegistryViewerFrame(wx.Frame):
 
         self.build_dialog()
 
-        
     def build_dialog(self):
-        
         
         mainPanel = wx.Panel(self, wx.ID_ANY, size = self.GetSize())
         
@@ -132,9 +148,6 @@ class RegistryViewerFrame(wx.Frame):
         mainPanel.SetSizer(mainSizer)        
         mainSizer.Fit(mainPanel)
         mainPanel.Layout()
-
-        
-
 
     def on_quit(self, event):
         

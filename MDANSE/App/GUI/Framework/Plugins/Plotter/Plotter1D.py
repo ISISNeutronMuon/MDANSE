@@ -34,22 +34,17 @@ import os
 
 import numpy
 
-# The matplotlib imports.
-import matplotlib
-from matplotlib.ticker import AutoMinorLocator, MultipleLocator, NullLocator, AutoLocator
-from matplotlib.widgets import Cursor
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg, NavigationToolbar2WxAgg
 from matplotlib.figure import Figure
-from matplotlib.colors import LogNorm, Normalize, NoNorm
+from matplotlib.colors import LogNorm, Normalize
 
 import wx
 
-# The VTK imports.
-import vtk
-from vtk.wx.wxVTKRenderWindowInteractor import wxVTKRenderWindowInteractor 
-
 from MDANSE.Core.Error import Error
 from MDANSE.Externals.magnitude import magnitude
+
+from MDANSE.App.GUI.Framework.Plugins.Plotter.Settings import LinesSettingsDialog, GeneralSettingsDialog, AxesSettingsDialog
+from MDANSE.App.GUI.Framework.Plugins.Plotter.Ticker import ScaledFormatter, ScaledLocator
 
 NORMALIZER = {'log': LogNorm(), 'auto' : Normalize()}
 
@@ -140,8 +135,6 @@ class Plotter1D(wx.Panel):
         self.legend_fancybox = False
 
         # add sliders
-        cutSizer = wx.BoxSizer(wx.HORIZONTAL)
-        offsetSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.offset_label = wx.StaticText(self, label="Offset Value" , style=wx.ALIGN_CENTER_VERTICAL)
         self.yAxisSliderOffset = wx.Slider(self, wx.ID_ANY, size = (60,27), style = wx.SL_HORIZONTAL)
         self.offset_multiplier_label = wx.StaticText(self, label="Modulation" , style=wx.ALIGN_CENTER_VERTICAL)
@@ -513,10 +506,10 @@ class Plotter1D(wx.Panel):
         self.figure.gca().yaxis.set_major_locator(ScaledLocator(dx = self.Yunit_conversion_factor))
         self.figure.gca().yaxis.set_major_formatter(ScaledFormatter(dx = self.Yunit_conversion_factor)) 
                                                     
-    def unique(self, key, dict):
+    def unique(self, key, dic):
         skey = key
         i = 0
-        while dict.has_key(key):
+        while dic.has_key(key):
             key = skey + '_%d'%i
             i += 1
         return key 

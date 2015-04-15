@@ -30,17 +30,9 @@ Created on Apr 10, 2015
 @author: Gael Goret
 '''
 
-import wx
-
 import matplotlib
-from matplotlib.ticker import AutoMinorLocator, MultipleLocator, NullLocator, AutoLocator
-from matplotlib.widgets import Cursor
-from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg, NavigationToolbar2WxAgg
-from matplotlib.figure import Figure
-from matplotlib.colors import LogNorm, Normalize, NoNorm
 
-import vtk
-from vtk.wx.wxVTKRenderWindowInteractor import wxVTKRenderWindowInteractor 
+import wx
 
 class ImageSettingsDialog(wx.Dialog):
     
@@ -603,7 +595,7 @@ class LinesSettingsDialog(wx.Dialog):
         _id = 0
         for k in self.parent.plots.keys():
             if type(self.parent.plots[k][0].get_color()) is str:
-                r,g,b = mpl.colors.colorConverter.colors[self.parent.plots[k][0].get_color()]
+                r,g,b = matplotlib.colors.colorConverter.colors[self.parent.plots[k][0].get_color()]
             else:
                 r,g,b = self.parent.plots[k][0].get_color()
             self.lines.InsertStringItem(index = _id, label = k)
@@ -626,7 +618,7 @@ class LinesSettingsDialog(wx.Dialog):
         self.parent.figure.canvas.draw()
         
         if type(self.current_line.get_color()) is str:
-            r,g,b = mpl.colors.colorConverter.colors[self.current_line.get_color()]
+            r,g,b = matplotlib.colors.colorConverter.colors[self.current_line.get_color()]
         else:
             r,g,b = self.current_line.get_color()
         color = wx.Colour(int(r*255), int(g*255), int(b*255))
@@ -641,7 +633,7 @@ class LinesSettingsDialog(wx.Dialog):
         
         color= self.color_picker.GetColour()
         self.current_line.set_color((color.Red()/255., color.Green()/255., color.Blue()/255.))
-        for k,v in self.parent.plots.items():
+        for v in self.parent.plots.values():
             if v[0] is self.current_line:
                 new_legend = self.legend.GetValue()
                 if new_legend != v[1]:

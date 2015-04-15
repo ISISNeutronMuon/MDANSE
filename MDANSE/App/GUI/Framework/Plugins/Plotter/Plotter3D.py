@@ -37,12 +37,6 @@ import wx.aui as wxaui
 
 import numpy
 
-from matplotlib.ticker import AutoMinorLocator, MultipleLocator, NullLocator, AutoLocator
-from matplotlib.widgets import Cursor
-from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg, NavigationToolbar2WxAgg
-from matplotlib.figure import Figure
-from matplotlib.colors import LogNorm, Normalize, NoNorm
-
 import vtk
 from vtk.wx.wxVTKRenderWindowInteractor import wxVTKRenderWindowInteractor 
 
@@ -170,7 +164,6 @@ class Plotter3D(wx.Panel):
         colorTransferFunction = vtk.vtkColorTransferFunction()
         colorTransferFunction.SetColorSpaceToRGB()
         colorTransferFunction.AddRGBPoint(self.data.min(), 0, 0, 1)
-#         colorTransferFunction.AddRGBPoint((self.data.min()+self.data.max())/2., 0, 1, 0)
         colorTransferFunction.AddRGBPoint(self.data.max(), 1, 0, 0)
         scalarBar = vtk.vtkScalarBarActor()
         # Must add this to avoid vtkTextActor error

@@ -125,12 +125,14 @@ class ClassRegistry(abc.ABCMeta):
             
             if moduleDir not in sys.path:        
                 sys.path.append(moduleDir)
+
+            __import__(moduleName, locals(), globals())
                       
-            # Any error that may occur here has to be caught. In such case the module is skipped.    
-            try:
-                __import__(moduleName, locals(), globals())
-            except:
-                continue
+#             # Any error that may occur here has to be caught. In such case the module is skipped.    
+#             try:
+#                 __import__(moduleName, locals(), globals())
+#             except:
+#                 continue
     
     @classmethod
     def info(cls, interface):

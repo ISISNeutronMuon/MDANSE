@@ -284,10 +284,10 @@ class ForciteConverter(IJob):
     
     ancestor = "empty_data"
 
-    configurators = collections.OrderedDict()
-    configurators['xtd_file'] = ('input_file',{})
-    configurators['trj_file'] = ('input_file',{})
-    configurators['output_file'] = ('output_files', {'formats':["netcdf"]})
+    settings = collections.OrderedDict()
+    settings['xtd_file'] = ('input_file',{})
+    settings['trj_file'] = ('input_file',{})
+    settings['output_file'] = ('output_files', {'formats':["netcdf"]})
                 
     def initialize(self):
         '''

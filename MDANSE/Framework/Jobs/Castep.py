@@ -144,9 +144,9 @@ class CASTEPConverter(IJob):
     
     ancestor = "empty_data"
 
-    configurators = collections.OrderedDict()
-    configurators['castep_file'] = ('input_file', {})
-    configurators['output_file'] = ('output_files', {'formats':["netcdf"]})
+    settings = collections.OrderedDict()
+    settings['castep_file'] = ('input_file', {})
+    settings['output_file'] = ('output_files', {'formats':["netcdf"]})
                 
     def initialize(self):
         """

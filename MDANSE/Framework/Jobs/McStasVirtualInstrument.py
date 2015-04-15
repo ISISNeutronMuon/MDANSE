@@ -64,9 +64,9 @@ class McStasOptions(Configurable):
     
     type = "mcstas_options"
                         
-    configurators = collections.OrderedDict()
-    configurators["ncount"] = ("integer", {"label":"neutron count", "mini":1})
-    configurators["dir"] =  ("output_directory", {"label":"McStas output directory"})
+    settings = collections.OrderedDict()
+    settings["ncount"] = ("integer", {"label":"neutron count", "mini":1})
+    settings["dir"] =  ("output_directory", {"label":"McStas output directory"})
 
 class McStasParameters(Configurable):
     
@@ -74,7 +74,7 @@ class McStasParameters(Configurable):
     
     type = "mcstas_parameters"
                         
-    configurators = collections.OrderedDict()
+    settings = collections.OrderedDict()
 
 class McStasVirtualInstrument(IJob):
     """
@@ -89,22 +89,22 @@ class McStasVirtualInstrument(IJob):
     
     ancestor = "mmtk_trajectory"
     
-    configurators = collections.OrderedDict()
-    configurators['trajectory'] = ('mmtk_trajectory', {})
-    configurators['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
-    configurators['sample_coh'] = ('netcdf_input_file', {"widget":'input_file', 
+    settings = collections.OrderedDict()
+    settings['trajectory'] = ('mmtk_trajectory', {})
+    settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
+    settings['sample_coh'] = ('netcdf_input_file', {"widget":'input_file', 
                                                          "label":'nMoldyn Coherent Structure Factor',
                                                          "checkExistence":True,
                                                          "variables":['q','frequency','s(q,f)_total']})
-    configurators['sample_inc'] = ('netcdf_input_file', {"widget":'input_file',
+    settings['sample_inc'] = ('netcdf_input_file', {"widget":'input_file',
                                                          "label":'nMoldyn Incoherent Structure Factor',
                                                          "checkExistence":True,
                                                          "variables" :['q','frequency','s(q,f)_total']})
-    configurators['temperature'] = ('float', {"default":298.0})
-    configurators['instrument'] = ('mcstas_instrument',{"label":'mcstas instrument'})
-    configurators['options'] = ('mcstas_options', {"label":'mcstas options'})
-    configurators['display'] = ('boolean', {'label':'trace the 3D view of the simulation'})
-    configurators['parameters'] = ('instrument_parameters', {'label':'instrument parameters', 
+    settings['temperature'] = ('float', {"default":298.0})
+    settings['instrument'] = ('mcstas_instrument',{"label":'mcstas instrument'})
+    settings['options'] = ('mcstas_options', {"label":'mcstas options'})
+    settings['display'] = ('boolean', {'label':'trace the 3D view of the simulation'})
+    settings['parameters'] = ('instrument_parameters', {'label':'instrument parameters', 
                                                              'dependencies':{"instrument":"instrument"}, 
                                                              'exclude':['sample_coh','sample_inc'], 
                                                              'default' :{'beam_wavelength_Angs': 2.0, 
@@ -118,7 +118,7 @@ class McStasVirtualInstrument(IJob):
                                                                          'sample_width_m': 0.02, 
                                                                          'sample_rotation_deg': 45.0, 
                                                                          'detector_height_m': 3.0}})        
-    configurators['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     
     def initialize(self):
         """
@@ -168,7 +168,7 @@ class McStasVirtualInstrument(IJob):
             fout.write('# Temperature %s \n'%self.configuration['temperature']['value']) 
             fout.write('# classical 1 \n\n') 
             
-            for var in self.configurators[typ].variables:
+            for var in self.settings[typ].variables:
                 fout.write("# %s\n" %var)
                 
                 data = self.configuration[typ][var].getValue()

@@ -38,8 +38,8 @@ import wx.lib.filebrowsebutton as wxfile
 from MDANSE.Externals.pubsub import pub
 
 from MDANSE.App.GUI.ComboWidgets.ComboCheckbox import ComboCheckbox
+from MDANSE.App.GUI.Framework.Plugins.IPlugin import plugin_parent
 from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
-from MDANSE.App.GUI.Plugins.IPlugin import plugin_parent
 
 class OutputFilesWidget(IWidget):
     
@@ -53,7 +53,9 @@ class OutputFilesWidget(IWidget):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         
-        startDirectory = os.path.dirname(plugin_parent(self).datakey)
+        plugin = plugin_parent(self)
+        
+        startDirectory = os.path.dirname(plugin.datakey)
 
         self._dirname = wxfile.DirBrowseButton(self._widgetPanel, wx.ID_ANY, startDirectory=startDirectory, newDirectory=True)
         self._dirname.SetValue(startDirectory)

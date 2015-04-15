@@ -52,13 +52,13 @@ class CenterOfMassesTrajectory(IJob):
     
     ancestor = "mmtk_trajectory"
 
-    configurators = collections.OrderedDict()
-    configurators['trajectory'] = ('mmtk_trajectory',{})
-    configurators['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}, 'default':(0,1,1)})
-    configurators['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory',
+    settings = collections.OrderedDict()
+    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}, 'default':(0,1,1)})
+    settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory',
                                                                          'grouping_level':'grouping_level'}})
-    configurators['grouping_level'] = ('grouping_level',{})
-    configurators['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['grouping_level'] = ('grouping_level',{})
+    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
                 
     def initialize(self):
         """

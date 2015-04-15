@@ -44,15 +44,15 @@ class DistanceHistogram(IJob):
     """
     Compute the Histogram of Distance
     """
-    configurators = collections.OrderedDict()    
-    configurators['trajectory'] = ('mmtk_trajectory',{})
-    configurators['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    configurators['r_values'] = ('range', {'valueType':float, 'includeLast':True, 'mini':0.0})
-    configurators['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    configurators['transmutated_atoms'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
-    configurators['weights'] = ('weights',{})
-    configurators['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
-    configurators['running_mode'] = ('running_mode',{})
+    settings = collections.OrderedDict()    
+    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
+    settings['r_values'] = ('range', {'valueType':float, 'includeLast':True, 'mini':0.0})
+    settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
+    settings['transmutated_atoms'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
+    settings['weights'] = ('weights',{})
+    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):
         """

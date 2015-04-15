@@ -30,7 +30,7 @@ Created on Mar 30, 2015
 @author: pellegrini
 '''
 
-from MDANSE.App.GUI.ConfiguratorWidgets.InputDirectoryWidget import InputDirectoryWidget
+from MDANSE.App.GUI.Framework.Widgets.InputDirectoryWidget import InputDirectoryWidget
 
 class OutputDirectoryWidget(InputDirectoryWidget):
     

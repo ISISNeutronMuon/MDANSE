@@ -90,13 +90,13 @@ class Eccentricity(IJob):
     
     ancestor = "mmtk_trajectory"
 
-    configurators = collections.OrderedDict()
-    configurators['trajectory'] = ('mmtk_trajectory',{})
-    configurators['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    configurators['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    configurators['center_of_mass'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    configurators['weights'] = ('weights',{})
-    configurators['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings = collections.OrderedDict()
+    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
+    settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
+    settings['center_of_mass'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
+    settings['weights'] = ('weights',{})
+    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
             
     def initialize(self):
         """

@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 14, 2015
 
-@author: pellegrini
+@author: Eric C. ellegrini
 '''
 
 import os
@@ -41,7 +41,9 @@ import wx.aui as aui
 
 from MDANSE import PLATFORM,REGISTRY
 from MDANSE.Externals.pubsub import pub
-from MDANSE.App.GUI.Framework.Plugins.Plugin import ComponentPlugin
+
+from MDANSE.App.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
+from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 
 class JobPlugin(ComponentPlugin):
         
@@ -51,17 +53,14 @@ class JobPlugin(ComponentPlugin):
         
         ComponentPlugin.__init__(self, parent, size=wx.Size(800,400), **kwargs)
                 
-                                
     def build_panel(self):
         
         self._main = wx.ScrolledWindow(self, wx.ID_ANY, size=self.GetSize())
         self._main.SetScrollbars(pixelsPerUnitX= 20, pixelsPerUnitY=20, noUnitsX=500, noUnitsY=500)
                 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-        
-        from nMOLDYN.GUI.Widgets.ConfigurationPanel import ConfigurationPanel
-        
-        self._parametersPanel = ConfigurationPanel(self._main, self._job.configuration)
+                
+        self._parametersPanel = ConfigurationPanel(self._main, self._job)
                     
         sb = wx.StaticBox(self._main, wx.ID_ANY)
         sbSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
@@ -93,7 +92,6 @@ class JobPlugin(ComponentPlugin):
         self.Bind(wx.EVT_BUTTON, self.on_save, saveButton)
         self.Bind(wx.EVT_BUTTON, self.on_run, runButton)
         
-                 
     def on_help(self, event):
                 
         from nMOLDYN.GUI.Widgets.JobHelpFrame import JobHelpFrame

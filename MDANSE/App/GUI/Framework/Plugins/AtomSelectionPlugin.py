@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 14, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import collections
@@ -40,10 +40,10 @@ from MDANSE import LOGGER, REGISTRY, UD_STORE
 from MDANSE.Core.Error import Error
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser, AtomSelectionParserError
-
-from MDANSE.App.GUI.Framework.Plugins.Plugin import ComponentPlugin
-from MDANSE.App.GUI.ComboWidgets.UserDefinitionsPanel import UserDefinitionsPanel
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
+
+from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
+from MDANSE.App.GUI.ComboWidgets.UserDefinitionsPanel import UserDefinitionsPanel
 
 class AtomSelectionPluginError(Error):
     pass
@@ -486,3 +486,4 @@ class AtomSelectionPlugin(ComponentPlugin):
         
         self._parent.show_selected_atoms(self._selection)
     
+print REGISTRY['plugin']

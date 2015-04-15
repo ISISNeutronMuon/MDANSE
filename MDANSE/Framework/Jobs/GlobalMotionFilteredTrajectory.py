@@ -72,13 +72,13 @@ class GlobalMotionFilteredTrajectory(IJob):
     
     ancestor = "mmtk_trajectory"
         
-    configurators = collections.OrderedDict()
-    configurators['trajectory'] = ('mmtk_trajectory',{})
-    configurators['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    configurators['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    configurators['reference_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    configurators['contiguous'] = ('boolean', {'default':False, 'label':"Make the chemical object contiguous"})
-    configurators['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings = collections.OrderedDict()
+    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
+    settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
+    settings['reference_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
+    settings['contiguous'] = ('boolean', {'default':False, 'label':"Make the chemical object contiguous"})
+    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
     
     def initialize(self):
         """

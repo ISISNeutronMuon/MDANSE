@@ -49,14 +49,14 @@ class RootMeanSquareFluctuation(IJob):
     
     ancestor = "mmtk_trajectory"
     
-    configurators = collections.OrderedDict()
-    configurators['trajectory'] = ('mmtk_trajectory',{})
-    configurators['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    configurators['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory',
+    settings = collections.OrderedDict()
+    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
+    settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory',
                                                                           'grouping_level':'grouping_level'}})
-    configurators['grouping_level'] = ('grouping_level',{})
-    configurators['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
-    configurators['running_mode'] = ('running_mode',{})
+    settings['grouping_level'] = ('grouping_level',{})
+    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):
         """

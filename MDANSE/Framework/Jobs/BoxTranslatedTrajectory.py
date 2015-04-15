@@ -55,11 +55,11 @@ class BoxCenteredTrajectory(IJob):
     
     ancestor = "mmtk_trajectory"
 
-    configurators = collections.OrderedDict()
-    configurators['trajectory'] = ('mmtk_trajectory',{})
-    configurators['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    configurators['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
-    configurators['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings = collections.OrderedDict()
+    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
+    settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
+    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
                 
     def initialize(self):
         """

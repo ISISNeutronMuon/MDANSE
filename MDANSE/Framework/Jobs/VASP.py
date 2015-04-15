@@ -127,10 +127,10 @@ class VASPConverter(IJob):
     
     ancestor = "empty_data"
 
-    configurators = collections.OrderedDict()           
-    configurators['xdatcar_file'] = ('input_file',{})
-    configurators['time_step'] = ('float', {'label':"time step", 'default':1.0, 'mini':1.0e-9})        
-    configurators['output_file'] = ('output_files', {'formats':["netcdf"]})
+    settings = collections.OrderedDict()           
+    settings['xdatcar_file'] = ('input_file',{})
+    settings['time_step'] = ('float', {'label':"time step", 'default':1.0, 'mini':1.0e-9})        
+    settings['output_file'] = ('output_files', {'formats':["netcdf"]})
                 
     def initialize(self):
         '''

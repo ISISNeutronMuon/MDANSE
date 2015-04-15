@@ -62,19 +62,20 @@ class Configurable(object):
                
         self._configuration = {}
 
-        configurators = getattr(self,"configurators",{})
+        settings = getattr(self,"settings",{})
         
-        if not isinstance(configurators,_abcoll.Mapping):
-            raise ConfigurationError("Invalid type for configurators: must be a mapping-like object")
+        if not isinstance(settings,_abcoll.Mapping):
+            raise ConfigurationError("Invalid type for settings: must be a mapping-like object")
 
         self._configurators = {}
-        for name,(typ,kwds) in configurators.items():
+        for name,(typ,kwds) in settings.items():
+
             try:
                 self._configurators[name] = REGISTRY["configurator"][typ](name, **kwds)
             # Any kind of error has to be caught
             except:
                 raise ConfigurationError("Invalid type for %r configurator" % name)
-                        
+                     
         self._configured=False
         
     def __getitem__(self, name):
@@ -84,12 +85,9 @@ class Configurable(object):
         :param name: the name of the configuration item
         :type name: str 
         
-        If not found raise a ConfigurationError. 
+        If not found return an empty dictionary. 
         """
-        
-        if not self._configurators.has_key(name):
-            raise ConfigurationError("The item %r is not valid for this configuration." % name)
-        
+                
         return self._configuration.setdefault(name,{})
         
     def setup(self,parameters):
@@ -253,4 +251,15 @@ class Configurable(object):
             cfg=REGISTRY["configurator"][typ](name, **kwds)        
             params[name] = cfg.default
             
-        return params    
+        return params
+    
+    @property
+    def configurators(self):
+        '''
+        Return the configurator objects of this Configurable object
+        
+        :return: a mapping between the name of the configurator object and its corresponding IConfigurator instance
+        :rtype: dict 
+        '''
+        
+        return self._configurators

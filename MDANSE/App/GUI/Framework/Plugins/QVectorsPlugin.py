@@ -1,26 +1,55 @@
-import abc
+#MDANSE : Molecular Dynamics Analysis for Neutron Scattering Experiments
+#------------------------------------------------------------------------------------------
+#Copyright (C)
+#2015- Eric C. Pellegrini Institut Laue-Langevin
+#BP 156
+#6, rue Jules Horowitz
+#38042 Grenoble Cedex 9
+#France
+#pellegrini[at]ill.fr
+#goret[at]ill.fr
+#aoun[at]ill.fr
+#
+#This library is free software; you can redistribute it and/or
+#modify it under the terms of the GNU Lesser General Public
+#License as published by the Free Software Foundation; either
+#version 2.1 of the License, or (at your option) any later version.
+#
+#This library is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#Lesser General Public License for more details.
+#
+#You should have received a copy of the GNU Lesser General Public
+#License along with this library; if not, write to the Free Software
+#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+''' 
+Created on Apr 14, 2015
+
+@author: Eric C. pellegrini
+'''
+
 import os
-import threading
 
 import wx
-import wx.aui as aui
-import wx.grid
+import wx.aui as wxaui
+import wx.grid as wxgrid
 from wx.lib.delayedresult import startWorker
 
-from nMOLDYN import LOGGER, REGISTRY, USER_DEFINITIONS
-from nMOLDYN.Core.Status import Status
-from nMOLDYN.Externals.pubsub import pub as Publisher
-from nMOLDYN.Framework.Configurators.Configurators import ConfiguratorError
-from nMOLDYN.Framework.Plugins.Plugin import DataPlugin, ComponentPlugin, plugin_parent
-from nMOLDYN.GUI.Resources.Icons import ICONS, scaled_bitmap
-from nMOLDYN.GUI.Widgets.ConfigurationPanel import ConfigurationPanel
-from nMOLDYN.GUI.Widgets.ProgressBar import ProgressBar
+from MDANSE import LOGGER, REGISTRY, UD_STORE
+from MDANSE.Externals.pubsub import pub
 
-class QVectorsData(wx.grid.PyGridTableBase):
+from MDANSE.App.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
+from MDANSE.App.GUI.ComboWidgets.ProgressBar import ProgressBar
+from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
+from MDANSE.App.GUI.Framework.Plugins.IPlugin import plugin_parent
+
+class QVectorsData(wxgrid.PyGridTableBase):
     
     def __init__(self, data=None):
         
-        wx.grid.PyGridTableBase.__init__(self)
+        wxgrid.PyGridTableBase.__init__(self)
 
         self._colLabels = ["Qx","Qy","Qz","|Q|","h","k","l"]
         
@@ -51,7 +80,7 @@ class QVectorsData(wx.grid.PyGridTableBase):
 
     def GetAttr(self, row, col, kind):
         
-        attr = wx.grid.GridCellAttr()
+        attr = wxgrid.GridCellAttr()
         attr.SetBackgroundColour(wx.NamedColour("LIGHT BLUE"))
         if col == 3:
             attr.SetTextColour(wx.RED)
@@ -94,7 +123,7 @@ class QVectorsPanel(wx.Panel):
         self._generator = generator
         self._parameters = parameters
                 
-        self._grid = wx.grid.Grid(self)
+        self._grid = wxgrid.Grid(self)
         self._grid.DisableCellEditControl()
         
         self._progress = ProgressBar(self)
@@ -128,7 +157,7 @@ class QVectorsPanel(wx.Panel):
             LOGGER("No Q vectors generated", "error")
             return
 
-        plugin = plugin_parent(self)
+        plugin = plugin_parent(self.Parent)
                     
         if plugin._trajectory is None:
             LOGGER("No trajectory loaded", "error", ["dialog"])
@@ -148,10 +177,10 @@ class QVectorsPanel(wx.Panel):
                                                     q_vectors=self._grid.GetTable().data,
                                                     is_lattice=self._generator.is_lattice)
         
-        USER_DEFINITIONS[name] = ud
-        USER_DEFINITIONS.save()
+        UD_STORE[name] = ud
+        UD_STORE.save()
         
-        Publisher.sendMessage("new_q_vectors", message = (target, name))
+        pub.sendMessage("new_q_vectors", message = (target, name))
 
     @property
     def parameters(self):
@@ -199,7 +228,7 @@ class QVectorsPlugin(ComponentPlugin):
         
         self._mainSizer = wx.BoxSizer(wx.VERTICAL)
         
-        self._notebook = aui.AuiNotebook(self._mainPanel, wx.ID_ANY, style=aui.AUI_NB_DEFAULT_STYLE^aui.AUI_NB_TAB_MOVE)
+        self._notebook = wxaui.AuiNotebook(self._mainPanel, wx.ID_ANY, style=wxaui.AUI_NB_DEFAULT_STYLE^wxaui.AUI_NB_TAB_MOVE)
 
         self._parametersPanel = wx.ScrolledWindow(self._mainPanel)
         self._parametersPanel.SetScrollbars(1,1,40,40)
@@ -227,11 +256,11 @@ class QVectorsPlugin(ComponentPlugin):
         
         self._mainPanel.SetSizer(self._mainSizer)
                 
-        self._mgr.AddPane(self._mainPanel, aui.AuiPaneInfo().Center().Dock().CaptionVisible(False).CloseButton(False))
+        self._mgr.AddPane(self._mainPanel, wxaui.AuiPaneInfo().Center().Dock().CaptionVisible(False).CloseButton(False))
 
         self._mgr.Update()
         
-        self.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_tab, self._notebook)
+        self.Bind(wxaui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_tab, self._notebook)
         self.Bind(wx.EVT_BUTTON, self.on_generate_q_vectors, generateButton)
         self.Bind(wx.EVT_CHOICE, self.on_select_generator, self._generatorsChoice)
                 
@@ -340,11 +369,11 @@ if __name__ == "__main__":
     
     f = wx.Frame(None,size=(1000,500))
     
-    mgr = aui.AuiManager(f)
+    mgr = wxaui.AuiManager(f)
     
     p = QVectorsPlugin(f)
 
-    mgr.AddPane(p, aui.AuiPaneInfo().Caption("Data").Name("data").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
+    mgr.AddPane(p, wxaui.AuiPaneInfo().Caption("Data").Name("data").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
     
     mgr.Update()
     
@@ -357,5 +386,3 @@ if __name__ == "__main__":
     f.Show()
     
     app.MainLoop()
-    
-    

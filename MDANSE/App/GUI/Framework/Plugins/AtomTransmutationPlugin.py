@@ -27,15 +27,16 @@
 ''' 
 Created on Apr 14, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 import os
 
 import wx
 
-from nMOLDYN import ELEMENTS, LOGGER, REGISTRY, USER_DEFINITIONS
-from nMOLDYN.Externals.pubsub import pub as Publisher
-from nMOLDYN.Framework.Plugins.AtomSelectionPlugin import AtomSelectionPlugin
+from MDANSE import ELEMENTS, LOGGER, REGISTRY
+from MDANSE.Externals.pubsub import pub as Publisher
+
+from MDANSE.App.GUI.Framework.Plugins.AtomSelectionPlugin import AtomSelectionPlugin
 
 class AtomTransmutationPlugin(AtomSelectionPlugin):
 
@@ -85,8 +86,8 @@ class AtomTransmutationPlugin(AtomSelectionPlugin):
                                                              expression=self._expression,
                                                              indexes=self._selection,
                                                              element=element)            
-        USER_DEFINITIONS[name] = ud
-        USER_DEFINITIONS.save()
+        UD_STORE[name] = ud
+        UD_STORE.save()
         
         Publisher.sendMessage("new_transmutation", message = (path, name))
         

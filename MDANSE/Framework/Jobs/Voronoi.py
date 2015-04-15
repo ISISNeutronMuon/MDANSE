@@ -63,13 +63,13 @@ class Voronoi(IJob):
     
     ancestor = "mmtk_trajectory"
 
-    configurators = collections.OrderedDict()   
-    configurators['trajectory'] = ('mmtk_trajectory',{})
-    configurators['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}, 'default':(0,5,1)})
-    configurators['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    configurators['pbc'] = ('boolean', {'label':'apply periodic_boundary_condition', 'default':True})
-    configurators['pbc_border_size'] = ('float', {'mini':0.0, 'default':0.})
-    configurators['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings = collections.OrderedDict()   
+    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}, 'default':(0,5,1)})
+    settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
+    settings['pbc'] = ('boolean', {'label':'apply periodic_boundary_condition', 'default':True})
+    settings['pbc_border_size'] = ('float', {'mini':0.0, 'default':0.})
+    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
                 
     def initialize(self):
 

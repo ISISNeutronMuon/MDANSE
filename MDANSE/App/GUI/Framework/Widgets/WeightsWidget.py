@@ -30,7 +30,7 @@ Created on Mar 30, 2015
 @author: pellegrini
 '''
 
-from MDANSE.App.GUI.ConfiguratorWidgets.SingleChoiceWidget import SingleChoiceWidget
+from MDANSE.App.GUI.Framework.Widgets.SingleChoiceWidget import SingleChoiceWidget
 
 class WeightsConfiguratorWidget(SingleChoiceWidget):
 

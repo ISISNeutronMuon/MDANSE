@@ -50,10 +50,10 @@ class StructureFactorFromScatteringFunction(IJob):
     
     ancestor = 'netcdf_data'
     
-    configurators = collections.OrderedDict()
-    configurators['netcdf_input_file'] = ('netcdf_input_file', {'variables':['time','f(q,t)_total']})
-    configurators['instrument_resolution'] = ('instrument_resolution', {'dependencies':{'frames' : 'netcdf_input_file'}})
-    configurators['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings = collections.OrderedDict()
+    settings['netcdf_input_file'] = ('netcdf_input_file', {'variables':['time','f(q,t)_total']})
+    settings['instrument_resolution'] = ('instrument_resolution', {'dependencies':{'frames' : 'netcdf_input_file'}})
+    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     
     def initialize(self):
         """

@@ -1,4 +1,36 @@
-import numpy as np
+#MDANSE : Molecular Dynamics Analysis for Neutron Scattering Experiments
+#------------------------------------------------------------------------------------------
+#Copyright (C)
+#2015- Eric C. Pellegrini Institut Laue-Langevin
+#BP 156
+#6, rue Jules Horowitz
+#38042 Grenoble Cedex 9
+#France
+#pellegrini[at]ill.fr
+#goret[at]ill.fr
+#aoun[at]ill.fr
+#
+#This library is free software; you can redistribute it and/or
+#modify it under the terms of the GNU Lesser General Public
+#License as published by the Free Software Foundation; either
+#version 2.1 of the License, or (at your option) any later version.
+#
+#This library is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#Lesser General Public License for more details.
+#
+#You should have received a copy of the GNU Lesser General Public
+#License along with this library; if not, write to the Free Software
+#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+''' 
+Created on Apr 15, 2015
+
+@author: Gael Goret
+'''
+
+import numpy
 
 import vtk
 from vtk.wx.wxVTKRenderWindowInteractor import wxVTKRenderWindowInteractor 
@@ -6,27 +38,23 @@ from vtk.wx.wxVTKRenderWindowInteractor import wxVTKRenderWindowInteractor
 import wx
 import wx.aui as aui
 
-from nMOLDYN import LOGGER
-from nMOLDYN.Core.Error import Error
-from nMOLDYN.Framework.Plugins.Plugin import ComponentPlugin
+from MDANSE.Core.Error import Error
+from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 
-UC_COMP = 'COMPONENT:'
-
+UC_COMP       = 'COMPONENT:'
 MC_COMP       = 'MCDISPLAY: component'
 MC_COMP_SHORT = 'COMP: '
-
-MC_LINE = 'MCDISPLAY: multiline'
-MC_CIRCLE = 'MCDISPLAY: circle'
-
-MC_ENTER = 'ENTER:'
-MC_LEAVE = 'LEAVE:'
-MC_STATE = 'STATE:'
-MC_SCATTER = 'SCATTER:'
-MC_ABSORB = 'ABSORB:'
-MC_MAGNIFY = 'MCDISPLAY: magnify'
-MC_START = 'MCDISPLAY: start'
-MC_END = 'MCDISPLAY: end'
-MC_STOP = 'INSTRUMENT END:'
+MC_LINE       = 'MCDISPLAY: multiline'
+MC_CIRCLE     = 'MCDISPLAY: circle'
+MC_ENTER      = 'ENTER:'
+MC_LEAVE      = 'LEAVE:'
+MC_STATE      = 'STATE:'
+MC_SCATTER    = 'SCATTER:'
+MC_ABSORB     = 'ABSORB:'
+MC_MAGNIFY    = 'MCDISPLAY: magnify'
+MC_START      = 'MCDISPLAY: start'
+MC_END        = 'MCDISPLAY: end'
+MC_STOP       = 'INSTRUMENT END:'
 
 POINTS_IN_CIRCLE = 128
 
@@ -50,7 +78,6 @@ class MviViewerPlugin(ComponentPlugin):
         
         ComponentPlugin.__init__(self, parent, *args, **kwargs)
    
-
     def build_panel(self):
                 
         self._iren = wxVTKRenderWindowInteractor(self, wx.ID_ANY, size=self.GetSize())
@@ -82,16 +109,13 @@ class MviViewerPlugin(ComponentPlugin):
         self._parent._mgr.Update()
                         
         self.parse_trace(self.dataproxy._filename)
-        
-        
+             
     def emulate_focus(self, obj, event):
         
         self.SetFocusIgnoringChildren()
-        
-        
+             
     def close(self):
         pass
-
 
     def parse_trace(self, fname):
         ''' 
@@ -104,10 +128,7 @@ class MviViewerPlugin(ComponentPlugin):
         comps = {}
     
         # active (position, rotation matrix)
-        comp = (np.array([0, 0, 0]),
-                np.array([1, 0, 0,
-                          0, 1, 0,
-                          0, 0, 1]).reshape(3,3))
+        comp = (numpy.array([0,0,0]),numpy.array([1,0,0,0,1,0,0,0,1]).reshape(3,3))
     
         # previous neutron position
         prev = None
@@ -145,9 +166,9 @@ class MviViewerPlugin(ComponentPlugin):
                 nums = [x.strip() for x in info[4:].split(',')]
                 # extract fields
                 name = line[len(UC_COMP):].strip(' "\n')
-                pos = np.array([float(x) for x in nums[:3]])
+                pos = numpy.array([float(x) for x in nums[:3]])
                 # read flat 3x3 rotation matrix
-                rot = np.array([float(x) for x in nums[3:3+9]]).reshape(3, 3)
+                rot = numpy.array([float(x) for x in nums[3:3+9]]).reshape(3, 3)
                 comps[name] = (pos, rot)
     
             # switch perspective
@@ -210,7 +231,7 @@ class MviViewerPlugin(ComponentPlugin):
             # deactivate neutron when it leaves
             elif line.startswith(MC_LEAVE):
                 
-                coords = np.column_stack([xstate, ystate, zstate])
+                coords = numpy.column_stack([xstate, ystate, zstate])
                 beg = neutron_pid
                 for p in coords:
                     neutronPoints.InsertNextPoint(p)
@@ -314,13 +335,11 @@ class MviViewerPlugin(ComponentPlugin):
         points.append(points[0])
         return points
 
-
     def rotate(self, point, (origin, rotm)):
         ''' 
         Rotate and move v according to origin and rotation matrix 
         '''
-        return np.dot(point, rotm) + origin
-
+        return numpy.dot(point, rotm) + origin
 
     def rotate_points(self, points, (origin, rotm)):
         ''' 
@@ -343,9 +362,8 @@ class MviViewerPlugin(ComponentPlugin):
         x.append(x[0]);
         y.append(y[0]);
         z.append(z[0]);
-        return np.column_stack([x,y,z])
+        return numpy.column_stack([x,y,z])
 
-    
     def draw_circle(self, plane, pos, radius, comp):
         ''' 
         Draw a circle in plane, at pos and with r radius, rotated by comp 
@@ -354,10 +372,10 @@ class MviViewerPlugin(ComponentPlugin):
         y=[]
         z=[]
         for i in xrange(0, POINTS_IN_CIRCLE):
-            walk = 2 * np.pi * i / POINTS_IN_CIRCLE
-            xyz = np.array(pos)
-            xyz[plane[0]] += np.cos(walk) * radius
-            xyz[plane[1]] += np.sin(walk) * radius
+            walk = 2 * numpy.pi * i / POINTS_IN_CIRCLE
+            xyz = numpy.array(pos)
+            xyz[plane[0]] += numpy.cos(walk) * radius
+            xyz[plane[1]] += numpy.sin(walk) * radius
             # rotate
             xyz = self.rotate(xyz, comp)
             x.append(xyz[0])
@@ -366,5 +384,4 @@ class MviViewerPlugin(ComponentPlugin):
         x.append(x[0]);
         y.append(y[0]);
         z.append(z[0]); 
-        return np.column_stack([x,y,z])
-
+        return numpy.column_stack([x,y,z])

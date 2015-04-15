@@ -32,6 +32,9 @@ Created on Apr 10, 2015
 
 import collections
 
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
+
 import wx
 import wx.aui as wxaui
 
@@ -40,6 +43,9 @@ from Scientific.IO.NetCDF import NetCDFFile
 from MDANSE.Core.Error import Error
 from MDANSE.App.GUI.Framework.Plugins import ComponentPlugin
 from MDANSE.App.GUI.Icons import ICONS
+from MDANSE.App.GUI.Framework.Plugins.Plotter.Plotter1D import Plotter1D
+from MDANSE.App.GUI.Framework.Plugins.Plotter.Plotter2D import Plotter2D
+from MDANSE.App.GUI.Framework.Plugins.Plotter.Plotter3D import Plotter3D
 
 class PlotterError(Error):
     pass
@@ -127,8 +133,6 @@ class DataPanel(wx.Panel):
             
             sizer0.Add(self.datasetlist, 1, wx.ALL|wx.EXPAND, 2)
             
-            sizer3 =  wx.BoxSizer(wx.HORIZONTAL)
-
             self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_dataset,  self.datasetlist) 
             self.Bind(wx.EVT_LIST_KEY_DOWN, self.delete_dataset, self.datasetlist)
 
@@ -286,17 +290,17 @@ class DataPanel(wx.Panel):
         data = self.dataproxy[self.selectedVar]['data']
         plot_type = self.plot_type.GetValue()
         if plot_type == 'Line':
-            Plotter = Plotter1d(self)
+            Plotter = Plotter1D(self)
             self.plotterNotebook.AddPage(Plotter, "%s(%s)"%(self.selectedVar,plot_type))
             Plotter.Plot(data, self.selectedVar)
             
         elif plot_type == 'Image':
-            Plotter = Plotter2d(self)
+            Plotter = Plotter2D(self)
             self.plotterNotebook.AddPage(Plotter, "%s(%s)"%(self.selectedVar,plot_type))
             Plotter.Plot(data, self.selectedVar)
             
         elif plot_type == 'Elevation':
-            Plotter = Plotter3d(self.parent)
+            Plotter = Plotter3D(self.parent)
             self.plotterNotebook.AddPage(Plotter, "%s(%s)"%(self.selectedVar,plot_type))
             Plotter.elevation(data)
             
@@ -350,8 +354,6 @@ class DataPanel(wx.Panel):
                 self.plotterNotebook.RemovePage(li_idx)
                 self.plotterNotebook.AddPage(multiplot, '*MultiView*(Image)', select=True)
        
-import pdb
-pdb.set_trace()     
 class PlotterPlugin(ComponentPlugin):
 
     type = "plotter"
@@ -362,7 +364,7 @@ class PlotterPlugin(ComponentPlugin):
     
     category = ("Plotter",)
     
-    def __init__(self, parent, mode = 'embeded'):
+    def __init__(self, parent, mode='embeded'):
         
         self.standalone = False
         
@@ -401,7 +403,7 @@ class PlotterFrame(wx.Frame):
         fileMenu = wx.Menu()
         loadData = fileMenu.Append(wx.ID_ANY, 'Load')
         fileMenu.AppendSeparator()
-        quit = fileMenu.Append(wx.ID_ANY, 'Quit')
+        _quit = fileMenu.Append(wx.ID_ANY, 'Quit')
 
         mainMenu.Append(fileMenu, 'File')
         
@@ -411,7 +413,7 @@ class PlotterFrame(wx.Frame):
         self.SetMenuBar(mainMenu)
         
         self.Bind(wx.EVT_MENU, self.on_load_data, loadData)
-        self.Bind(wx.EVT_MENU, self.on_quit, quit)
+        self.Bind(wx.EVT_MENU, self.on_quit, _quit)
         self.Bind(wx.EVT_CLOSE, self.on_quit)
    
     def on_quit(self, event=None):

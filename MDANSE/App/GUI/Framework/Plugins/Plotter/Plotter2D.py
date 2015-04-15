@@ -34,21 +34,17 @@ import collections
 
 import numpy
 
-import matplotlib
-from matplotlib.ticker import AutoMinorLocator, MultipleLocator, NullLocator, AutoLocator
-from matplotlib.widgets import Cursor
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg, NavigationToolbar2WxAgg
 from matplotlib.figure import Figure
-from matplotlib.colors import LogNorm, Normalize, NoNorm
+from matplotlib.colors import LogNorm, Normalize
 
 import wx
 
-import vtk
-from vtk.wx.wxVTKRenderWindowInteractor import wxVTKRenderWindowInteractor 
-
-# The nmoldyn imports.
 from MDANSE.Core.Error import Error
 from MDANSE.Externals.magnitude import magnitude
+
+from MDANSE.App.GUI.Framework.Plugins.Plotter.Settings import ImageSettingsDialog
+from MDANSE.App.GUI.Framework.Plugins.Plotter.Ticker import ScaledFormatter, ScaledLocator
 
 NORMALIZER = {'log': LogNorm(), 'auto' : Normalize()}
 
@@ -166,7 +162,6 @@ class Plotter2D(wx.Panel):
         ### set bindings ###
         self.Bind(wx.EVT_CHECKBOX, self.slice, id = self.slice_checkbox.GetId())
         self.menu_event_id = self.canvas.mpl_connect('button_press_event', self.on_click)
-        cursor = Cursor(self.axes)
         self.on_motion_id = self.canvas.mpl_connect('motion_notify_event', self.on_motion)
         #### sizer automatically fitting window size ####
         self.toolbar.Realize()
@@ -291,7 +286,7 @@ class Plotter2D(wx.Panel):
             dy = (self.Ymax - self.Ymin)/float(self.data.shape[0])
             X = numpy.floor((x - self.Xmin)/dx)
             Y = numpy.floor((y - self.Ymin)/dy)
-            vslice, hslice = self.extract_cross_slice(X, Y)
+            vslice, _ = self.extract_cross_slice(X, Y)
             
             if not self.parent.unique_slicer is None:
                 self.cross_slice_dialog = self.parent.unique_slicer.dialog
@@ -342,7 +337,6 @@ class Plotter2D(wx.Panel):
             self.slice_widget.append(self.subplot.axhline(y=y, linewidth=3, color='%s'%self.get_circular_color(self.cross_slice_color_index)))
             
             v_tmp_plot = self.v_cross_slice_plot.plot(self.Xaxis*self.Xunit_conversion_factor, vslice, color='%s'%self.get_circular_color(self.cross_slice_color_index))
-            h_tmp_plot = self.h_cross_slice_plot.plot(self.Yaxis*self.Yunit_conversion_factor, hslice, color='%s'%self.get_circular_color(self.cross_slice_color_index))
             
             self.v_cross_slice_legend.append([v_tmp_plot[0],'x = %d'%x])
             self.h_cross_slice_legend.append([v_tmp_plot[0],'y = %d'%y])

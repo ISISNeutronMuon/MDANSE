@@ -54,13 +54,13 @@ class RefoldedMembraneTrajectory(IJob):
     
     ancestor = "mmtk_trajectory"
 
-    configurators = collections.OrderedDict()
-    configurators['trajectory'] = ('mmtk_trajectory',{})
-    configurators['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    configurators['axis'] = ('single_choice', {'label':"membrane axis", 'choices':['a','b','c'], 'default':'c'})
-    configurators['upper_leaflet'] = ('string', {'label':"name of the lipid of the upper leaflet", 'default':"dmpcu"})
-    configurators['lower_leaflet'] = ('string', {'label':"name of the lipid of the lower leaflet", 'default':"dmpcl"})
-    configurators['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings = collections.OrderedDict()
+    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
+    settings['axis'] = ('single_choice', {'label':"membrane axis", 'choices':['a','b','c'], 'default':'c'})
+    settings['upper_leaflet'] = ('string', {'label':"name of the lipid of the upper leaflet", 'default':"dmpcu"})
+    settings['lower_leaflet'] = ('string', {'label':"name of the lipid of the lower leaflet", 'default':"dmpcl"})
+    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
                 
     def initialize(self):
         """

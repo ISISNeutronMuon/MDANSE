@@ -35,12 +35,15 @@ import abc
 import wx
 
 from MDANSE import REGISTRY
+from MDANSE.App.GUI.Framework.Plugins.IPlugin import IPlugin, plugin_parent
 
 class IWidget(wx.Panel):
     
     __metaclass__ = REGISTRY
+    
+    type = "widget"
 
-    def __init__(self, parent, name, configuration, *args, **kwargs):
+    def __init__(self, parent, name, configurable, *args, **kwargs):
         
         wx.Panel.__init__(self, parent, wx.ID_ANY, *args, **kwargs)
 
@@ -48,10 +51,10 @@ class IWidget(wx.Panel):
         
         self._name = name
         
-        self._configuration = configuration
+        self._configurable = configurable
         
-        self._configurator = self._configuration.configurators[name]
-                
+        self._configurator = self._configurable.configurators[name]
+                        
         self._label = self._configurator.label
                         
         self.initialize()
@@ -85,6 +88,16 @@ class IWidget(wx.Panel):
     @abc.abstractmethod
     def add_widgets(self):
         pass
+    
+    def has_parent(self, target):
+            
+        if self == target:
+            return True
+        
+        if self.TopLevelParent == self:
+            return False
+        
+        return self.has_parent(self.Parent, target)    
 
     def build_panel(self):        
 

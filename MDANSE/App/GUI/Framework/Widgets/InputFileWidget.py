@@ -35,6 +35,8 @@ import wx.lib.filebrowsebutton as wxfile
 
 from MDANSE.Framework.Configurable import ConfigurationError
 
+from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
+
 class InputFileWidget(IWidget):
     
     type = "input_file"

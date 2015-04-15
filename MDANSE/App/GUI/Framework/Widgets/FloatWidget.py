@@ -34,7 +34,7 @@ import wx
 
 from MDANSE.Framework.Configurable import ConfigurationError
 
-from MDANSE.App.GUI.ConfiguratorWidgets.StringWidget import StringWidget
+from MDANSE.App.GUI.Framework.Widgets.StringWidget import StringWidget
 
 class FloatWidget(StringWidget):
     

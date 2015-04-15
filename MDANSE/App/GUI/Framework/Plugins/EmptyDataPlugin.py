@@ -30,7 +30,7 @@ Created on Apr 14, 2015
 @author: pellegrini
 '''
 
-from MDANSE.App.GUI.Framework.Plugins.Plugin import DataPlugin
+from MDANSE.App.GUI.Framework.Plugins.DataPlugin import DataPlugin
 
 class EmptyDataPlugin(DataPlugin):
     

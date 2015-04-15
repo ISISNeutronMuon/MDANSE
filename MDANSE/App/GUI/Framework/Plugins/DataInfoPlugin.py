@@ -33,7 +33,7 @@ Created on Apr 14, 2015
 import wx
 import wx.aui as aui
 
-from MDANSE.App.GUI.Framework.Plugins.Plugin import ComponentPlugin
+from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 
 class DataInfoPlugin(ComponentPlugin):
     

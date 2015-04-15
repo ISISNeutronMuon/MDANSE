@@ -56,16 +56,16 @@ class AreaPerMolecule(IJob):
     
     ancestor = "mmtk_trajectory"
 
-    configurators = collections.OrderedDict()
-    configurators['trajectory'] = ('mmtk_trajectory',{})
-    configurators['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
-    configurators['axis'] = ('multiple_choices', {'label':'area vectors',
+    settings = collections.OrderedDict()
+    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
+    settings['axis'] = ('multiple_choices', {'label':'area vectors',
                                                   'choices':['a','b','c'],
                                                   'nChoices':2,
                                                   'default':['a','b']})
-    configurators['name'] = ('string', {'label':'molecule name'})    
-    configurators['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
-    configurators['running_mode'] = ('running_mode',{})
+    settings['name'] = ('string', {'label':'molecule name'})    
+    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):
         """

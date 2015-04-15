@@ -1,18 +1,49 @@
-# The standard imports.
+#MDANSE : Molecular Dynamics Analysis for Neutron Scattering Experiments
+#------------------------------------------------------------------------------------------
+#Copyright (C)
+#2015- Eric C. Pellegrini Institut Laue-Langevin
+#BP 156
+#6, rue Jules Horowitz
+#38042 Grenoble Cedex 9
+#France
+#pellegrini[at]ill.fr
+#goret[at]ill.fr
+#aoun[at]ill.fr
+#
+#This library is free software; you can redistribute it and/or
+#modify it under the terms of the GNU Lesser General Public
+#License as published by the Free Software Foundation; either
+#version 2.1 of the License, or (at your option) any later version.
+#
+#This library is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#Lesser General Public License for more details.
+#
+#You should have received a copy of the GNU Lesser General Public
+#License along with this library; if not, write to the Free Software
+#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+''' 
+Created on Apr 14, 2015
+
+@author: Eric C. pellegrini
+'''
+
 import ast
 import os
 
-# The wx imports.
-import wx.aui as aui
-import wx.grid
-import wx.lib.fancytext as fancytext
-from  wx.lib.stattext import GenStaticText 
+import wx
+import wx.aui as wxaui
+import wx.grid as wxgrid
+import wx.lib.fancytext as wxfancytext
+import wx.lib.stattext as wxstattext 
 
-# The nmoldyn imports.
-from nMOLDYN import LOGGER, ELEMENTS
-from nMOLDYN.Core.Singleton import Singleton
-from nMOLDYN.Framework.Plugins.Plugin import ComponentPlugin
-from nMOLDYN.Externals.pubsub import pub as Publisher
+from MDANSE import ELEMENTS
+from MDANSE.Core.Singleton import Singleton
+from MDANSE.Externals.pubsub import pub
+
+from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 
 _LAYOUT = {} 
 _LAYOUT["H"]   = (0,1) 
@@ -241,7 +272,7 @@ class PropertyDialog(wx.Dialog):
                         
         return pname,pdefault
 
-class StaticFancyText(fancytext.StaticFancyText):
+class StaticFancyText(wxfancytext.StaticFancyText):
     """
     StaticFancyText with SetLabel function.
     """
@@ -251,7 +282,7 @@ class StaticFancyText(fancytext.StaticFancyText):
         Overload of the StaticFancyText.SetLabel method
         """
                 
-        bmp = fancytext.RenderToBitmap(label, wx.Brush(self.GetParent().GetBackgroundColour(), wx.SOLID))
+        bmp = wxfancytext.RenderToBitmap(label, wx.Brush(self.GetParent().GetBackgroundColour(), wx.SOLID))
         
         self.SetBitmap(bmp)
 
@@ -443,7 +474,7 @@ class ElementShortInfoPanel(wx.Panel):
         self.Thaw()
  
                             
-class Database(wx.grid.PyGridTableBase):
+class Database(wxgrid.PyGridTableBase):
     
     __metaclass__ = Singleton
                                     
@@ -473,20 +504,20 @@ class Database(wx.grid.PyGridTableBase):
                                 
         ELEMENTS.add_property(pname, pdefault)
                                 
-        self.notify_grid(wx.grid.GRIDTABLE_NOTIFY_COLS_APPENDED, 1)
+        self.notify_grid(wxgrid.GRIDTABLE_NOTIFY_COLS_APPENDED, 1)
     
     def add_row(self, ename):
                                 
         ELEMENTS.add_element(ename)
                                         
-        self.notify_grid(wx.grid.GRIDTABLE_NOTIFY_ROWS_APPENDED, 1)
+        self.notify_grid(wxgrid.GRIDTABLE_NOTIFY_ROWS_APPENDED, 1)
         
-        Publisher.sendMessage(('new_element_added'), message=ename)
+        pub.sendMessage(('new_element_added'), message=ename)
 
     def notify_grid(self, msg, count):
         "Notifies the grid of the message and the affected count."
         
-        tbl_msg = wx.grid.GridTableMessage(self, msg, count)                      
+        tbl_msg = wxgrid.GridTableMessage(self, msg, count)                      
          
         self.GetView().ProcessTableMessage(tbl_msg)
         
@@ -521,10 +552,10 @@ class DatabasePanel(wx.Panel):
         boxsizer = wx.BoxSizer(wx.VERTICAL)
   
         # The wx grid that will store the database.            
-        self.grid = wx.grid.Grid(self)
+        self.grid = wxgrid.Grid(self)
   
         # The grid style is set. This will be a standard text editor.
-        self.grid.SetDefaultEditor(wx.grid.GridCellTextEditor())
+        self.grid.SetDefaultEditor(wxgrid.GridCellTextEditor())
                                                     
         self.grid.SetTable(self._database)
           
@@ -536,8 +567,8 @@ class DatabasePanel(wx.Panel):
   
         self.grid.SetColMinimalAcceptableWidth(100)
           
-        self.grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE,self.on_edit_cell)
-        self.grid.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.on_show_popup_menu)
+        self.grid.Bind(wxgrid.EVT_GRID_CELL_CHANGE,self.on_edit_cell)
+        self.grid.Bind(wxgrid.EVT_GRID_CELL_RIGHT_CLICK, self.on_show_popup_menu)
         boxsizer.Add(self.grid,1,wx.EXPAND|wx.ALL,5)
                                         
         self.SetSizer(boxsizer)
@@ -601,23 +632,23 @@ class PeriodicTablePanel(wx.Panel):
         self.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DFACE)) 
         
         for i in _COLS:
-            wid = GenStaticText(parent =self,ID = wx.ID_ANY, label=str(i), size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)   
+            wid = wxstattext.GenStaticText(parent =self,ID = wx.ID_ANY, label=str(i), size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)   
             sizer.Add(wid, (0,i), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
         for i,v in enumerate(_ROWS):
-            wid = GenStaticText(parent =self,ID = wx.ID_ANY, label=v, size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)   
+            wid = wxstattext.GenStaticText(parent =self,ID = wx.ID_ANY, label=v, size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)   
             sizer.Add(wid, (i+1,0), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
-        wid = GenStaticText(parent =self,ID = wx.ID_ANY, label="*", size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)   
+        wid = wxstattext.GenStaticText(parent =self,ID = wx.ID_ANY, label="*", size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)   
         sizer.Add(wid, (6,3), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
-        wid = GenStaticText(parent =self,ID = wx.ID_ANY, label="**", size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)   
+        wid = wxstattext.GenStaticText(parent =self,ID = wx.ID_ANY, label="**", size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)   
         sizer.Add(wid, (7,3), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
-        wid = GenStaticText(parent =self,ID = wx.ID_ANY, label="*", size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)   
+        wid = wxstattext.GenStaticText(parent =self,ID = wx.ID_ANY, label="*", size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)   
         sizer.Add(wid, (9,3), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
-        wid = GenStaticText(parent =self,ID = wx.ID_ANY, label="**", size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)   
+        wid = wxstattext.GenStaticText(parent =self,ID = wx.ID_ANY, label="**", size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)   
         sizer.Add(wid, (10,3), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
         wid = self.userDefinedElements = wx.ComboBox(self, size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND|wx.CB_READONLY)
@@ -636,7 +667,7 @@ class PeriodicTablePanel(wx.Panel):
             symbs.append(info['symbol'])
             try:
                 r,c = _LAYOUT[info['symbol']]
-                wid = GenStaticText(parent =self,ID = wx.ID_ANY, label=info["symbol"], size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)
+                wid = wxstattext.GenStaticText(parent =self,ID = wx.ID_ANY, label=info["symbol"], size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)
                 wid.SetToolTipString(info['name'])
                 bkg_color = _FAMILY[info['family']]
                 wid.SetBackgroundColour((bkg_color[0], bkg_color[1], bkg_color[2]))
@@ -645,7 +676,7 @@ class PeriodicTablePanel(wx.Panel):
                 wid.Bind(wx.EVT_LEFT_DOWN, self.on_select_element)
                 wid.Bind(wx.EVT_ENTER_WINDOW, self.on_display_element_short_info)
                 sizer.Add(wid, (r+1,c), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
-            except KeyError as e:
+            except KeyError:
                 self.userDefinedElements.Append(el)
             
         self.userDefinedElements.SetSelection(0)                                                                                    
@@ -658,10 +689,10 @@ class PeriodicTablePanel(wx.Panel):
 
         # The panel that will contain the short info about a selected element.
         self.shortInfo = ElementShortInfoPanel(self)
-        self._parent.mgr.AddPane(self.shortInfo, aui.AuiPaneInfo().Float().Right().CloseButton(False)) 
+        self._parent.mgr.AddPane(self.shortInfo, wxaui.AuiPaneInfo().Float().Right().CloseButton(False)) 
         self._parent.mgr.Update()        
         
-        Publisher.subscribe(self.msg_new_element_added, ('new_element_added')) 
+        pub.subscribe(self.msg_new_element_added, ('new_element_added')) 
                  
     def msg_new_element_added(self, message):
                   
@@ -725,7 +756,7 @@ class PeriodicTablePanel(wx.Panel):
                                                      
         # Pops up the information dialog about the selected isotope.
         elementPanel = ElementInfoPanel(self, element)
-        self._parent._mgr.AddPane(elementPanel, aui.AuiPaneInfo().Dockable(False).Float().CloseButton(True).DestroyOnClose(True)) 
+        self._parent._mgr.AddPane(elementPanel, wxaui.AuiPaneInfo().Dockable(False).Float().CloseButton(True).DestroyOnClose(True)) 
         self._parent._mgr.Update() 
       
 
@@ -744,27 +775,23 @@ class PeriodicTablePlugin(ComponentPlugin):
         self._databasePanel = DatabasePanel(self, self._database)
         self._periodicTablePanel = PeriodicTablePanel(self)
         
-        self._mgr.AddPane(self._databasePanel, aui.AuiPaneInfo().Dock().Center().CloseButton(False))  
-        self._mgr.AddPane(self._periodicTablePanel, aui.AuiPaneInfo().Float().Dockable().CloseButton(False))
+        self._mgr.AddPane(self._databasePanel, wxaui.AuiPaneInfo().Dock().Center().CloseButton(False))  
+        self._mgr.AddPane(self._periodicTablePanel, wxaui.AuiPaneInfo().Float().Dockable().CloseButton(False))
             
         self._mgr.Update()
-        
-        
+              
     @property
     def periodictablePanel(self):
         return self._periodicTablePanel
-        
-        
+               
     @property
     def databasePanel(self):
         return self._databasePanel
     
-    
     def plug(self, *args, **kwargs):
 
         self._parent._mgr.GetPane(self).Dock().Floatable(False).Center().CloseButton(True).Caption("Periodic table")
-        self._parent._mgr.Update()        
-            
+        self._parent._mgr.Update()                   
             
     def on_add_element(self, message):
         """
@@ -848,7 +875,6 @@ class PeriodicTableFrame(wx.Frame):
         
         self.build_menu()
 
-
     def build_menu(self):
 
         menubar = wx.MenuBar()
@@ -876,8 +902,7 @@ class PeriodicTableFrame(wx.Frame):
         self.Bind(wx.EVT_MENU,self._periodicTablePlugin.on_saveas_database, saveasItem)
 
         self.SetMenuBar(menubar)
-
-        
+       
     def build_dialog(self):
         
         mainPanel = wx.Panel(self, wx.ID_ANY)
@@ -893,7 +918,6 @@ class PeriodicTableFrame(wx.Frame):
         mainPanel.Layout()
 
         self.SetSize((900, 600))
-
 
     def on_quit(self, event):
         

@@ -50,11 +50,11 @@ class PDBConverter(IJob):
     
     ancestor = "empty_data"
 
-    configurators = collections.OrderedDict()  
-    configurators['pdb_file'] = ('input_file',{})
-    configurators['nb_frame'] = ('range', {'valueType':int, 'includeLast':True, 'mini':0.0, 'default':(0,1,1)})
-    configurators['time_step'] = ('float', {'mini':1.0e-6, 'default':1.0})
-    configurators['output_file'] = ('output_files', {'formats':["netcdf"]})
+    settings = collections.OrderedDict()  
+    settings['pdb_file'] = ('input_file',{})
+    settings['nb_frame'] = ('range', {'valueType':int, 'includeLast':True, 'mini':0.0, 'default':(0,1,1)})
+    settings['time_step'] = ('float', {'mini':1.0e-6, 'default':1.0})
+    settings['output_file'] = ('output_files', {'formats':["netcdf"]})
      
     def initialize(self):
         """

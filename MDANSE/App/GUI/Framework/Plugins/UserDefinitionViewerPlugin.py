@@ -1,19 +1,43 @@
-# Standards imports.
-import collections
+#MDANSE : Molecular Dynamics Analysis for Neutron Scattering Experiments
+#------------------------------------------------------------------------------------------
+#Copyright (C)
+#2015- Eric C. Pellegrini Institut Laue-Langevin
+#BP 156
+#6, rue Jules Horowitz
+#38042 Grenoble Cedex 9
+#France
+#pellegrini[at]ill.fr
+#goret[at]ill.fr
+#aoun[at]ill.fr
+#
+#This library is free software; you can redistribute it and/or
+#modify it under the terms of the GNU Lesser General Public
+#License as published by the Free Software Foundation; either
+#version 2.1 of the License, or (at your option) any later version.
+#
+#This library is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#Lesser General Public License for more details.
+#
+#You should have received a copy of the GNU Lesser General Public
+#License along with this library; if not, write to the Free Software
+#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-# The wx imports.
+''' 
+Created on Apr 14, 2015
+
+@author: Gael Goret
+'''
+
 import wx
-import wx.aui as aui
+import wx.aui as wxaui
 
+from MDANSE import UD_STORE
+from MDANSE.Core.Error import Error
+from MDANSE.Framework.UserDefinitions.IUserDefinition import IUserDefinition
 
-# The numpy imports.
-import numpy as np
-
-# The nmoldyn imports.
-from nMOLDYN import REGISTRY, USER_DEFINITIONS
-from nMOLDYN.Framework.Plugins.Plugin import ComponentPlugin
-from nMOLDYN.Framework.UserDefinable.UserDefinable import UserDefinable
-from nMOLDYN.Core.Error import Error
+from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 
 class UserDefinitionViewerPluginError(Error):
     pass
@@ -58,8 +82,8 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
         
         self._infoPanel.SetSizer(infoSizer)   
         
-        self._mgr.AddPane(self._infoPanel, aui.AuiPaneInfo().Center().Dock().CaptionVisible(False).CloseButton(False))
-        self._mgr.AddPane(self._treePanel, aui.AuiPaneInfo().Left().Dock().CaptionVisible(False).CloseButton(False))
+        self._mgr.AddPane(self._infoPanel, wxaui.AuiPaneInfo().Center().Dock().CaptionVisible(False).CloseButton(False))
+        self._mgr.AddPane(self._treePanel, wxaui.AuiPaneInfo().Left().Dock().CaptionVisible(False).CloseButton(False))
         self._mgr.Update()
         
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_show_info )
@@ -69,7 +93,7 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
     
     def build_plugins_tree(self):
         
-        for k,v in USER_DEFINITIONS.iteritems():
+        for k,v in UD_STORE.iteritems():
             self._udTree.setdefault(v.target,{}).setdefault(v.type,{})[k] = v
         
         self._root = self._tree.AddRoot("root")
@@ -80,7 +104,7 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
         
         for k, v in data.items():
             
-            if isinstance(v, UserDefinable):
+            if isinstance(v, IUserDefinition):
                 dataItem = wx.TreeItemData(v)
                 subnode = self._tree.AppendItem(node, str(k), data=dataItem)
                 self.set_plugins_tree(subnode, v) 
@@ -122,11 +146,11 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
                 return
             
             data  = itemData.GetData()
-            if isinstance(data, UserDefinable):
+            if isinstance(data, IUserDefinition):
                 d = wx.MessageDialog(None, 'Do you really want to delete this definition ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
                 if d.ShowModal() == wx.ID_YES:
-                    del  USER_DEFINITIONS[itemText]
-                    USER_DEFINITIONS.save()
+                    del  UD_STORE[itemText]
+                    UD_STORE.save()
                     self._tree.DeleteAllItems()
                     self._udTree.clear()
                     self.build_plugins_tree()
@@ -140,7 +164,7 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
             return
         
         data  = itemData.GetData()
-        if not isinstance(data, UserDefinable):
+        if not isinstance(data, IUserDefinition):
             event.Veto()
          
     def on_rename(self, event):
@@ -153,9 +177,9 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
             return
         
         data  = itemData.GetData()
-        if isinstance(data, UserDefinable):
-            USER_DEFINITIONS[newtext] = USER_DEFINITIONS.pop(oldtext)
-            USER_DEFINITIONS.save()
+        if isinstance(data, IUserDefinition):
+            UD_STORE[newtext] = UD_STORE.pop(oldtext)
+            UD_STORE.save()
             self.build_plugins_tree()
     
     def close(self):

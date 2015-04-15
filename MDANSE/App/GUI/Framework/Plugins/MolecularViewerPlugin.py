@@ -43,10 +43,10 @@ from MMTK.Trajectory import Trajectory
 from MDANSE import ELEMENTS, LOGGER
 from MDANSE.Core.Error import Error
 from MDANSE.Extensions import fast_calculation 
-from MDANSE.Externals.pubsub import pub as Publisher
+from MDANSE.Externals.pubsub import pub
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
-from MDANSE.App.GUI.Framework.Plugins.Plugin import ComponentPlugin
+from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 
 # The colour for a selected atom (R,G,B,Alpha).
 RGB_COLOURS = {}
@@ -145,12 +145,11 @@ class SelectionBox(vtk.vtkBoxWidget):
         
         self.viewer.pick_atoms(selection)
 
-    
 class MolecularViewerPanel(ComponentPlugin):
     '''
     This class sets up a molecular viewer using vtk functionnalities.
     '''
-    
+        
     type = "molecular_viewer"
     
     label = "Molecular Viewer"
@@ -166,7 +165,6 @@ class MolecularViewerPanel(ComponentPlugin):
         
         ComponentPlugin.__init__(self, parent, *args, **kwargs)
    
-
     def build_panel(self):
                 
         self._iren = MyRenderWindowInteractor(self, wx.ID_ANY, size=self.GetSize())
@@ -196,7 +194,7 @@ class MolecularViewerPanel(ComponentPlugin):
         self._iren.AddObserver("CharEvent", self.on_keyboard_input)
         self._iren.AddObserver("LeftButtonPressEvent", self.emulate_focus)
 
-        Publisher.subscribe(self.check_switch_consistancy, ('Switch'))
+        pub.subscribe(self.check_switch_consistancy, ('Switch'))
         
         self._iren.Bind(wx.EVT_CONTEXT_MENU, self.on_show_popup_menu)
                 
@@ -222,7 +220,6 @@ class MolecularViewerPanel(ComponentPlugin):
         
         self.SetFocusIgnoringChildren()
         
-
     def del_surface(self):
         del self._surface
         self._surface = None
@@ -240,15 +237,13 @@ class MolecularViewerPanel(ComponentPlugin):
     def emulate_focus(self, obj, event):
         
         self.SetFocusIgnoringChildren()
-        
-        
+           
     def close(self):
                 
         self.clear_universe()
         
-        Publisher.unsubscribe(self.check_switch_consistancy, "Switch")
+        pub.unsubscribe(self.check_switch_consistancy, "Switch")
         
-
     def set_trajectory(self, trajectory, selection=None, frame=0):
         
         if not isinstance(trajectory,Trajectory):
@@ -287,7 +282,7 @@ class MolecularViewerPanel(ComponentPlugin):
         
         self._trajectoryLoaded = True
 
-        Publisher.sendMessage(('Load trajectory'), message = self)
+        pub.sendMessage(('Load trajectory'), message = self)
 
     def color_string_to_RGB(self, s):
         
@@ -318,7 +313,6 @@ class MolecularViewerPanel(ComponentPlugin):
                     
         return colours, lut
         
-        
     def enable_picking(self):
 
         self.__pickerObserverId = self._iren.AddObserver("LeftButtonPressEvent", self.on_pick)
@@ -332,7 +326,6 @@ class MolecularViewerPanel(ComponentPlugin):
             return
         self._iren.RemoveObserver(self.__pickerObserverId)
         self.__pickerObserverId = None
-
 
     def on_show_popup_menu(self, event):
 
@@ -387,7 +380,6 @@ class MolecularViewerPanel(ComponentPlugin):
     def animation_loop(self):
         return self._animationLoop
 
-
     @property
     def surface(self):
         return self._surface
@@ -400,16 +392,13 @@ class MolecularViewerPanel(ComponentPlugin):
     def current_frame(self):
         return self._currentFrame
 
-
     @property
     def iren(self):
         return self._iren
 
-
     @property
     def max_laps(self):
         return self._maxLaps
-
 
     @property
     def n_frames(self):
@@ -419,23 +408,19 @@ class MolecularViewerPanel(ComponentPlugin):
     def n_atoms(self):
         return self._nAtoms
 
-
     @property
     def selection_box(self):
         return self.__selectionBox
-
 
     @property
     def timer_interval(self):
 
         return self._timerInterval
 
-
     @property
     def trajectory(self):
 
         return self._trajectory
-
 
     @property
     def trajectory_loaded(self):
@@ -447,7 +432,6 @@ class MolecularViewerPanel(ComponentPlugin):
         
         return self.__pickedAtoms
 
-
     def change_frame_rate(self, laps):
 
         if not self._trajectoryLoaded:
@@ -457,7 +441,6 @@ class MolecularViewerPanel(ComponentPlugin):
         if self._animationLoop:
             self._iren.CreateRepeatingTimer(self._timerInterval)
 
-
     def create_timer(self):
         
         self._iren.Initialize()    
@@ -465,7 +448,6 @@ class MolecularViewerPanel(ComponentPlugin):
         self._iren.Start()
 
         return timerId
-
 
     def set_frame(self, frame):
         
@@ -477,27 +459,21 @@ class MolecularViewerPanel(ComponentPlugin):
         self._timerCounter = frame
         
         self.set_configuration(frame)
-                
-                
+                                
     def on_clear_labels(self, event=None):
         pass
-
 
     def on_clear_selection(self, event=None):
         pass
 
-
     def on_export(self, event=None):
         pass
-
 
     def on_hide_labels(self, event=None):
         pass
 
-
     def on_select_all(self, event=None):
         pass
-
 
     def on_show_all_atoms(self, event=None):
         pass
@@ -506,18 +482,14 @@ class MolecularViewerPanel(ComponentPlugin):
     def on_show_labels(self, event=None):
         pass
 
-
     def on_show_unselected_atoms(self, event=None):
         pass
-
 
     def on_show_selected_atoms(self, event=None):
         pass
 
-
     def on_undo_exclude(self, event=None):
         pass
-
 
     def on_undo_include(self, event=None):
         pass
@@ -556,7 +528,6 @@ class MolecularViewerPanel(ComponentPlugin):
         elif key == " ":
             self.start_stop_animation()
 
-
     def on_timer(self, obj=None, event=None):
 
         if self._iren._timer.IsRunning():
@@ -565,8 +536,7 @@ class MolecularViewerPanel(ComponentPlugin):
         self.set_configuration(self._timerCounter)
         self._timerCounter += 1
         
-        Publisher.sendMessage(("On timer"), message = self)
-
+        pub.sendMessage(("On timer"), message = self)
 
     def set_rendering_mode(self, mode):
         if not self._trajectoryLoaded:
@@ -575,7 +545,6 @@ class MolecularViewerPanel(ComponentPlugin):
         if self._rendmod != mode:
             self._rendmod=mode
             self.set_configuration(self._currentFrame)
-
 
     def goto_first_frame(self):
 
@@ -586,8 +555,7 @@ class MolecularViewerPanel(ComponentPlugin):
 
         self._timerCounter = 0
         self.set_configuration(0)
-        
-                
+                   
     def goto_last_frame(self):
 
         if not self._trajectoryLoaded:
@@ -597,19 +565,16 @@ class MolecularViewerPanel(ComponentPlugin):
         last = self._nFrames-1
         self._timerCounter = last
         self.set_configuration(last)
-        
 
     def show_hide_selection_box(self):
 
         if self._trajectoryLoaded:
             self.__selectionBox.on_off()
-            
         
     def set_timer_interval(self, timerInterval):
 
         self._timerInterval = timerInterval
-        
-        
+          
     def on_pick(self, obj, evt=None):
         
         if not self._trajectoryLoaded:
@@ -647,14 +612,12 @@ class MolecularViewerPanel(ComponentPlugin):
                         
         self.__pickedAtoms.symmetric_difference_update(atomsList)
                         
-        Publisher.sendMessage(('select atoms'), message = list(self.__pickedAtoms))
+        pub.sendMessage(('select atoms'), message = list(self.__pickedAtoms))
             
-
     def show_selected_atoms(self, atomsList):
 
         self.show_selection(atomsList)
         
-
     def clear_selection(self):
         
         if not self._trajectoryLoaded:
@@ -669,7 +632,6 @@ class MolecularViewerPanel(ComponentPlugin):
         
         self._iren.Render()
         
-    
     def show_selection(self, selection):
         
         if not self._trajectoryLoaded:
@@ -696,12 +658,10 @@ class MolecularViewerPanel(ComponentPlugin):
             self._iren.TimerEventResetsTimerOn()
             self._animationLoop = True
 
-
     def stop_animation(self, event=None):
         if self._trajectoryLoaded:
             self._iren.TimerEventResetsTimerOff()
             self._animationLoop = False 
-
 
     def start_stop_animation(self, event=None, check=True):
         
@@ -716,9 +676,9 @@ class MolecularViewerPanel(ComponentPlugin):
         else:
             self.stop_animation()
         if check: 
-            Publisher.sendMessage(('Switch'), message = self)
+            pub.sendMessage(('Switch'), message = self)
             
-        Publisher.sendMessage(('Animation'), message = self)
+        pub.sendMessage(('Animation'), message = self)
     
     def check_switch_consistancy(self, message):
         
@@ -753,12 +713,10 @@ class MolecularViewerPanel(ComponentPlugin):
         
         return radius, color, int(idx)
     
-    
     def this_atom_is_selected(self,pid):
         _, _, pid = self.get_atom_props(pid)
         return self.atomsColours[pid]==RGB_COLOURS["selection"][0]
-    
-        
+       
     def pick_atom(self,pid):
         if self.this_atom_is_selected(pid):
             self.unpick_atom(pid)
@@ -980,8 +938,7 @@ class MolecularViewerPanel(ComponentPlugin):
         
         # rendering
         self._iren.Render()
-        
-        
+             
     def set_configuration(self, frame):
         '''
         Sets a new configuration.
@@ -1048,7 +1005,6 @@ def ndarray_to_vtkcellarray(array):
         bonds.InsertNextCell(line)
 
     return bonds
-
 
 def get_trajectory_filename():
 

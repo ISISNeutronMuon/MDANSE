@@ -127,12 +127,12 @@ class LAMMPSConverter(IJob):
     
     ancestor = "empty_data"
 
-    configurators = collections.OrderedDict()        
-    configurators['config_file'] = ('input_file', {'label':"LAMMPS configuration file"})
-    configurators['trajectory_file'] = ('input_file', {'label':"LAMMPS trajectory file"})
-    configurators['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
-    configurators['n_steps'] = ('integer', {'label':"number of time steps", 'default':1, 'mini':0})        
-    configurators['output_file'] = ('output_files', {'formats':["netcdf"]})
+    settings = collections.OrderedDict()        
+    settings['config_file'] = ('input_file', {'label':"LAMMPS configuration file"})
+    settings['trajectory_file'] = ('input_file', {'label':"LAMMPS trajectory file"})
+    settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
+    settings['n_steps'] = ('integer', {'label':"number of time steps", 'default':1, 'mini':0})        
+    settings['output_file'] = ('output_files', {'formats':["netcdf"]})
     
     def initialize(self):
         '''

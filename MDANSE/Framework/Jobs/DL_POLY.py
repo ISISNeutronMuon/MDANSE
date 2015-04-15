@@ -292,12 +292,12 @@ class DL_POLYConverter(IJob):
     
     ancestor = "empty_data"
 
-    configurators = collections.OrderedDict()   
-    configurators['field_file'] = ('input_file',{'wildcard':"FIELD files|FIELD*|All files|*"})
-    configurators['history_file'] = ('input_file',{'wildcard':"HISTORY files|HISTORY*|All files|*"})
-    configurators['atom_aliases'] = ('python_object',{'default':{}})
-    configurators['version'] = ('single_choice', {'choices':_HISTORY_FORMAT.keys(), 'default':'2'})
-    configurators['output_file'] = ('output_files', {'formats':["netcdf"]})
+    settings = collections.OrderedDict()   
+    settings['field_file'] = ('input_file',{'wildcard':"FIELD files|FIELD*|All files|*"})
+    settings['history_file'] = ('input_file',{'wildcard':"HISTORY files|HISTORY*|All files|*"})
+    settings['atom_aliases'] = ('python_object',{'default':{}})
+    settings['version'] = ('single_choice', {'choices':_HISTORY_FORMAT.keys(), 'default':'2'})
+    settings['output_file'] = ('output_files', {'formats':["netcdf"]})
                     
     def initialize(self):
         '''

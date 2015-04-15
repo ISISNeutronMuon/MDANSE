@@ -38,9 +38,9 @@ from MDANSE.Framework.Handlers.IHandler import IHandler
 from MDANSE.Logging.Formatters import Formatter
   
 class ConsoleHandler(IHandler, logging.Handler):
-    """Sets up a GUI handler for the nMOLDYN logger.
+    """Sets up a GUI handler for the MDANSE logger.
     
-    Emits the logging message to the nMOLDYN GUI console.
+    Emits the logging message to the MDANSE GUI console.
 
     @note: inherits from logging.Handler class that sets a generic handler.
     """

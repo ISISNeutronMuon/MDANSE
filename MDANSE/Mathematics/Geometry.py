@@ -1,6 +1,12 @@
 import numpy
+from numpy.linalg import det
 
 from Scientific.Geometry import Vector
+
+from MDANSE.Core.Error import Error
+
+class GeometryError(Error):
+    pass
 
 def get_basis_vectors_from_cell_parameters(parameters):
     """Returns the basis vectors for the simulation cell from the six crystallographic parameters.
@@ -125,9 +131,41 @@ def random_points_on_circle(axis, radius=1.0, nPoints=100):
                         
     return points    
 
+def almost(a, b, tolerance=1e-7):
+    return (abs(a-b)<tolerance) 
 
-
-    
-    
-    
-    
+def get_euler_angles(rotation,tolerance=1e-5):
+    """
+    R must be an indexable of shape (3,3) and represent and ORTHOGONAL POSITIVE
+    DEFINITE matrix.
+    """
+        
+    fuzz=1e-3
+    rotation=numpy.asarray(rotation,float)
+    if det(rotation) < 0. :
+        raise GeometryError("determinant is negative\n"+str(rotation))
+    if not numpy.allclose(numpy.mat(rotation)*rotation.T,numpy.identity(3),atol=tolerance):
+        raise Exception, "not an orthogonal matrix\n"+str(rotation)
+    cang = 2.0-numpy.sum(numpy.square([rotation[0,2],rotation[1,2],rotation[2,0],rotation[2,1],rotation[2,2] ]))
+    cang = numpy.sqrt(min(max(cang,0.0),1.0))
+    if (rotation[2,2]<0.0): cang=-cang
+    ang= numpy.arccos(cang)
+    beta=numpy.degrees(ang)
+    sang=numpy.sin(ang)
+    if(sang>fuzz):
+        alpha=numpy.degrees(numpy.arctan2(rotation[1,2], rotation[0,2]))
+        gamma=numpy.degrees(numpy.arctan2(rotation[2,1],-rotation[2,0]))
+    else:
+        alpha=numpy.degrees(numpy.arctan2(-rotation[0,1],rotation[0,0]*rotation[2,2]))
+        gamma=0.
+    if almost(beta,0.,fuzz):
+        alpha,beta,gamma = alpha+gamma,  0.,0.
+    elif almost(beta,180.,fuzz):
+        alpha,beta,gamma = alpha-gamma,180.,0.
+    alpha=numpy.mod(alpha,360.);
+    gamma=numpy.mod(gamma,360.)
+    if almost(alpha,360.,fuzz):
+        alpha=0.
+    if almost(gamma,360.,fuzz):
+        gamma=0.
+    return alpha,beta,gamma
