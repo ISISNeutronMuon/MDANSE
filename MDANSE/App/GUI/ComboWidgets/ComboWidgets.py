@@ -1,7 +1,6 @@
 import collections
 import os
 
-import wx
 import wx.combo
 import wx.lib.filebrowsebutton as wxfile
 
@@ -12,7 +11,6 @@ class CheckboxComboPopup(wx.combo.ComboPopup):
         wx.combo.ComboPopup.__init__(self)
         self._items = items
         self._maxNumberOfItems = maxNumberOfItems
-        
         
     @property
     def items(self):
@@ -31,11 +29,9 @@ class CheckboxComboPopup(wx.combo.ComboPopup):
                 
         return True
     
-    
     def GetControl(self):
         return self._checklistbox
     
-        
     def GetAdjustedSize(self, minWidth, prefHeight, maxHeight):
         return self._checklistbox.GetSize()
     
@@ -43,7 +39,6 @@ class CheckboxComboPopup(wx.combo.ComboPopup):
     def GetStringValue(self): 
         return self._checklistbox.GetCheckedStrings()
     
-
     def on_check_item(self, event):
         
         if self._maxNumberOfItems is None:
@@ -54,13 +49,11 @@ class CheckboxComboPopup(wx.combo.ComboPopup):
         if nCheckedItems > self._maxNumberOfItems:
             self._checklistbox.Check(event.GetInt(), False)
                 
-
 class ComboPanel(wx.Panel):
         
     def __init__(self, parent, *args, **kwargs):
         wx.Panel.__init__(self, parent, *args, **kwargs)
     
-
 class ComboCheckableMenu(ComboPanel):
     
     def __init__(self, parent, choices, exclusive=False, labelText="", menuText="", *args, **kwargs):
@@ -79,11 +72,9 @@ class ComboCheckableMenu(ComboPanel):
         
         self.build_layout()
                         
-        
     def build_panel(self):
     
         self._button = self.create_menubutton()
-        
     
     def build_layout(self):
         
@@ -93,7 +84,6 @@ class ComboCheckableMenu(ComboPanel):
         
         self.SetSizer(sizer)
 
-
     def create_menubutton(self):
         
         button = wx.Button(self, wx.ID_ANY, label=self._menuText)
@@ -101,13 +91,11 @@ class ComboCheckableMenu(ComboPanel):
         
         return button
         
-        
     def get_value(self):
         
         selection = [label for label,state in self._choices.items() if state]
         
         return selection
-        
     
     def on_check_menuitem(self, event):
 
@@ -118,7 +106,6 @@ class ComboCheckableMenu(ComboPanel):
             item = event.GetEventObject().FindItemById(event.GetId())
             self._button.SetLabel(item.GetLabel())
         
-                                        
     def on_display_menu(self, event):
 
         menu = wx.Menu()
@@ -137,7 +124,6 @@ class ComboCheckableMenu(ComboPanel):
 
         self._button.PopupMenu(menu, (x+w/2,y+h/2))
         
-
 class ComboCheckbox(ComboPanel):
 
     def __init__(self,
@@ -163,7 +149,6 @@ class ComboCheckbox(ComboPanel):
 
         self.on_toggle_checkbox_state()
         
-
     def build_panel(self):
 
         check = self._parameters.setdefault("check",{})
@@ -196,7 +181,6 @@ class ComboCheckbox(ComboPanel):
         
         self.SetSizer(sizer)
         
-        
     def get_value(self):
         
         checked = self._checkbox.GetValue()
@@ -216,7 +200,6 @@ class ComboCheckbox(ComboPanel):
             
         return (checked,value)
         
-    
     def on_toggle_checkbox_state(self, event=None):
         
         checked = self._checkbox.GetValue()
@@ -225,7 +208,6 @@ class ComboCheckbox(ComboPanel):
             self._widget.Enable(checked)
         except:
             pass
-
 
 class ComboOutputFile(ComboPanel):
     
@@ -243,17 +225,14 @@ class ComboOutputFile(ComboPanel):
         
         self.build_layout()
         
-    
     @property
     def directory(self):
         return self._directory
     
-
     @property
     def basename(self):
         return self._basename
     
-
     def build_panel(self):
         
         self._directory = wxfile.DirBrowseButton(self, labelText="Directory", startDirectory=os.getcwd(), newDirectory=True)
@@ -266,7 +245,6 @@ class ComboOutputFile(ComboPanel):
         
         self._formats = ComboCheckableMenu(self, self._formats, labelText="File formats", menuText="Formats")
         
-                
     def build_layout(self):
  
         sizer = wx.GridBagSizer(**self._sizerParameters)
@@ -283,7 +261,6 @@ class ComboOutputFile(ComboPanel):
  
         self.SetSizer(sizer)
         
-        
     def get_value(self):
         
         directory = self._directory.GetValue()
@@ -299,7 +276,6 @@ class ComboOutputFile(ComboPanel):
                             
         return (directory, basename, formats)
         
-
 class ComboRadioButtons(ComboPanel):
 
     def __init__(self,
@@ -326,7 +302,6 @@ class ComboRadioButtons(ComboPanel):
         
         self.build_layout()
         
-        
     def add_radiobutton(self, parameters):
         
         radio = parameters.setdefault("radio",{})
@@ -346,7 +321,6 @@ class ComboRadioButtons(ComboPanel):
         
         self._radios[-1].Bind(wx.EVT_RADIOBUTTON, self.on_select_radiobutton)
                 
-
     def build_panel(self):
         
         for params in self._parameters:
@@ -355,7 +329,6 @@ class ComboRadioButtons(ComboPanel):
         self._radios[0].SetWindowStyle(wx.RB_GROUP)
         self._radios[self._selected].SetValue(True)
         self.select_radiobutton(self._selected)
-            
         
     def build_layout(self):
 
@@ -372,13 +345,11 @@ class ComboRadioButtons(ComboPanel):
         
         self.SetSizer(sizer)
 
-
     def get_selected_radiobutton(self):
         
         idx = [i for i, r in enumerate(self._radios) if r.GetValue()][0]
         
         return idx
-
 
     def get_value(self):
         
@@ -394,13 +365,11 @@ class ComboRadioButtons(ComboPanel):
                 
         return (label,value)
         
-            
     def on_select_radiobutton(self, event=None):
 
         self._selected = self._radios.index(event.GetEventObject())
         
         self.select_radiobutton(self._selected)
-        
                 
     def select_radiobutton(self, idx):
 
@@ -410,34 +379,29 @@ class ComboRadioButtons(ComboPanel):
             except:
                 pass
             
-
 class ComboRange(ComboPanel):
         
-    def __init__(self, parent, type=int, *args, **kwargs):
+    def __init__(self, parent, typ=int, *args, **kwargs):
         
         ComboPanel.__init__(self, parent, *args, **kwargs)
         
-        self._type = type
+        self._type = typ
 
         self.build_panel()
         
         self.build_layout()
     
-    
     @property
     def first(self):
         return self._first
-    
 
     @property
     def last(self):
         return self._last
 
-
     @property
     def step(self):
         return self._step
-    
     
     def build_panel(self):
         
@@ -459,7 +423,6 @@ class ComboRange(ComboPanel):
                                  label="Step",
                                  labelSizerParameters = {"flag" : wx.ALIGN_CENTER_VERTICAL}) 
 
-
     def build_layout(self):
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -470,7 +433,6 @@ class ComboRange(ComboPanel):
 
         self.SetSizer(sizer)
         
-        
     def get_value(self):
         
         f = self._type(self._first.get_value())
@@ -479,7 +441,6 @@ class ComboRange(ComboPanel):
         
         return (f,l,s)
                 
-
 class ComboWidget(ComboPanel):
     
     def __init__(self, 
@@ -526,7 +487,6 @@ class ComboWidget(ComboPanel):
         
         self.build_layout()
         
-
     def build_panel(self):
         
         self._label = wx.StaticText(self, wx.ID_ANY, self._label, **self._labelParameters)
@@ -535,7 +495,6 @@ class ComboWidget(ComboPanel):
 
         if self._icon is not None:
             self._icon = wx.ArtProvider.GetBitmap(self._icon, wx.ID_ANY, **self._iconParameters)
-
 
     def build_layout(self):
 
@@ -552,7 +511,6 @@ class ComboWidget(ComboPanel):
         sizer.Fit(self)
         self.Layout()
         
-    
     @property
     def widget(self):
         return self._widget
@@ -562,12 +520,10 @@ class ComboWidget(ComboPanel):
     def label(self):
         return self._label
 
-
     @property
     def icon(self):
         
         return self._icon
-
 
     def get_value(self):
         
@@ -579,8 +535,6 @@ class ComboWidget(ComboPanel):
             
         return value
             
-
-                
 if __name__ == "__main__":
     
     app = wx.App(False)

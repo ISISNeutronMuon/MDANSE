@@ -458,10 +458,10 @@ class PlotterFrame(wx.Frame):
             self.plugin._dataDict[unique_name]={'data':data,'path':filename,'basename':basename}
             self.plugin._dataPanel.show_dataset()
     
-    def unique(self, key, dict):
+    def unique(self, key, dic):
         skey = key
         i = 0
-        while key in dict.keys():
+        while key in dic.keys():
             key = skey + '_%d'%i
             i += 1
         return key 

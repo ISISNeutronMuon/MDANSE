@@ -33,7 +33,7 @@ import os
 
 import wx
 
-from MDANSE import ELEMENTS, LOGGER, REGISTRY
+from MDANSE import ELEMENTS, LOGGER, REGISTRY, UD_STORE
 from MDANSE.Externals.pubsub import pub as Publisher
 
 from MDANSE.App.GUI.Framework.Plugins.AtomSelectionPlugin import AtomSelectionPlugin
