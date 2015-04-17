@@ -30,7 +30,7 @@ Created on Apr 13, 2015
 @author: Gael Goret, Eric C. Pellegrini
 '''
 
-import matplotlib
+import matplotlib.ticker
 
 class ScaledLocator(matplotlib.ticker.MaxNLocator):
     """
