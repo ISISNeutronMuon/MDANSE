@@ -175,14 +175,14 @@ class Configurable(object):
         :rtype: str
         '''
               
-        configurators = getattr(cls,"configurators",{})
+        settings = getattr(cls,"settings",{})
         
-        if not isinstance(configurators,_abcoll.Mapping):
-            raise ConfigurationError("Invalid type for configurators: must be a mapping-like object")
+        if not isinstance(settings,_abcoll.Mapping):
+            raise ConfigurationError("Invalid type for settings: must be a mapping-like object")
                                     
         doclist = []
         
-        for name,(typ,kwds) in configurators.items():
+        for name,(typ,kwds) in settings.items():
             cfg=REGISTRY["configurator"][typ](name, **kwds)
             descr = kwds.get("description","")
             descr += "\n"+str(cfg.__doc__)
@@ -241,13 +241,13 @@ class Configurable(object):
         :rtype: dict
         '''
         
-        configurators = getattr(cls,"configurators",{})
+        settings = getattr(cls,"settings",{})
         
-        if not isinstance(configurators,_abcoll.Mapping):
-            raise ConfigurationError("Invalid type for configurators: must be a mapping-like object")
+        if not isinstance(settings,_abcoll.Mapping):
+            raise ConfigurationError("Invalid type for settings: must be a mapping-like object")
                                     
         params = collections.OrderedDict()
-        for name,(typ,kwds) in configurators.items():
+        for name,(typ,kwds) in settings.items():
             cfg=REGISTRY["configurator"][typ](name, **kwds)        
             params[name] = cfg.default
             

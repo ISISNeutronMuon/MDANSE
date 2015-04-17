@@ -42,7 +42,6 @@ from MMTK.Trajectory import Trajectory
 
 from MDANSE import ELEMENTS, LOGGER
 from MDANSE.Core.Error import Error
-from MDANSE.Extensions import fast_calculation 
 from MDANSE.Externals.pubsub import pub
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 

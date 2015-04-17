@@ -1,8 +1,8 @@
 import wx
 import wx.lib.agw.pygauge as pygauge
 
-from nMOLDYN.Core.Status import StatusHandler
-from nMOLDYN.GUI.Resources.Icons import ICONS, scaled_bitmap
+from MDANSE.Framework.Status import StatusHandler
+from MDANSE.App.GUI.Icons import ICONS
         
 class ProgressBar(wx.Panel,StatusHandler):
     
@@ -14,7 +14,7 @@ class ProgressBar(wx.Panel,StatusHandler):
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         
         self._progress = pygauge.PyGauge(self, wx.ID_ANY)
-        self._stop = wx.BitmapButton(self, wx.ID_ANY, scaled_bitmap(ICONS["stop"], 24, 24))
+        self._stop = wx.BitmapButton(self, wx.ID_ANY, ICONS["stop",24,24])
         
         sizer.Add(self._progress,1,wx.ALL|wx.EXPAND,5)
         sizer.Add(self._stop,0,wx.ALL|wx.EXPAND,5)

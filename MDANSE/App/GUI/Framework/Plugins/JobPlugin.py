@@ -44,6 +44,7 @@ from MDANSE.Externals.pubsub import pub
 
 from MDANSE.App.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
+from MDANSE.App.GUI.ComboWidgets.JobHelpFrame import JobHelpFrame
 
 class JobPlugin(ComponentPlugin):
         
@@ -93,9 +94,7 @@ class JobPlugin(ComponentPlugin):
         self.Bind(wx.EVT_BUTTON, self.on_run, runButton)
         
     def on_help(self, event):
-                
-        from nMOLDYN.GUI.Widgets.JobHelpFrame import JobHelpFrame
-                
+                                
         d = JobHelpFrame(self,self._job)
 
         d.Show()

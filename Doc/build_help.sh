@@ -1,17 +1,19 @@
 #!/bin/sh
 
-rm -rf ./Documentation
+MDANSE_HELP="../MDANSE/Doc/Help"
 
-mkdir ./Documentation
-mkdir ./Documentation/_static
-mkdir ./Documentation/_templates
+rm -rf ${MDANSE_HELP}
 
-sphinx-apidoc -o  ./Documentation -F --separate -d 5 -H MDANSE -A "G. Goret, B. Aoun  & E. Pellegrini"  -V 1.0 -R 1.0 ../MDANSE
+mkdir -p ${MDANSE_HELP}
+mkdir ${MDANSE_HELP}/_static
+mkdir ${MDANSE_HELP}/_templates
 
-cp conf_help.py ./Documentation/conf.py
+sphinx-apidoc -o  ${MDANSE_HELP} -F --separate -d 5 -H MDANSE -A "G. Goret, B. Aoun  & E. Pellegrini"  -V 1.0 -R 1.0 ../MDANSE
 
-cp layout.html ./Documentation/_templates/
+cp conf_help.py ${MDANSE_HELP}/conf.py
 
-cp mdanse_logo.png ./Documentation/_static/
+cp layout.html ${MDANSE_HELP}/_templates/
 
-sphinx-build -b htmlhelp ./Documentation ./Documentation/Help/
+cp mdanse_logo.png ${MDANSE_HELP}/_static/
+
+sphinx-build -b htmlhelp ${MDANSE_HELP} ${MDANSE_HELP}

@@ -98,7 +98,7 @@ class Platform(object):
         :rtype: str
         '''
         
-        return os.path.join(self.package_directory(), 'GUI', 'Help')
+        return os.path.join(self.package_directory(), 'Doc', 'Help')
     
     def local_mmtk_database_directory(self):
         '''
