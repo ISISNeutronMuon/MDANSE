@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 from MDANSE import ELEMENTS
@@ -37,22 +37,39 @@ from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
         
 class AtomTransmutationConfigurator(IConfigurator):
     """
-    This configurator allow to select among the User Definitions, an atomic transmutation.
-    Without any transmutation, all the atoms records into the trajectory keep there own types.
-    If a transmutation is define, the analysis will consider atoms of a certain type 
-    exactly like if they have another type, respectfully to the transmutation definition.
+    This configurator allows to define a set of atoms to be transmutated to a given chemical
+    element.
+        
+    To Build an atomic transmutation from the GUI you have to :
+    #. Create a workspace based on a MMTK trajectory data,
+    #. Drag a molecular viewer on it,
+    #. Drag into the Molecular Viewer the Atom transmutation plugin
     
-    To Build an atomic transmutation definition you have to :
-    - Create a workspace based on a mmtk_trajectory data,
-    - drag a molecular viewer on it,
-    - drag into the Molecular Viewer his "Atom transmutation" plugin
+    :note: this configurator depends on 'trajectory' and 'atom_selection' configurators to be properly configured
     """
+    
     type = 'atom_transmutation'
+    
+    _default = None
                                 
     def configure(self, configuration, value):
+        '''
+        Configure this configurator with a given input value. The value can be:
+        #. None: no transmutation is performed
+        #. (str,str)-dict: for each (str,str) pair, a transmutation will be performed
+        by parsing the 1st element as an atom selection string and transmutating the 
+        corresponding atom selection to the target chemical element stored in the 2nd element
+        #. str: the transmutation will be performed by reading the corresponding user definition
+        
+        :param configuration: the current configuration
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the input value
+        :type value: None or (str,str)-dict or str 
+        '''
 
         self["value"] = value  
         
+        # if the input value is None, do not perform any transmutation
         if value is None:
             return
 
@@ -64,7 +81,7 @@ class AtomTransmutationConfigurator(IConfigurator):
                                                                 
         parser = AtomSelectionParser(trajConfig["instance"])
         
-        # If the input value is a dictionary, it must have a selection string or a python script as key and the element 
+        # If the input value is a dictionary, it must have a selection string as key and the element 
         # to be transmutated to as value 
         if isinstance(value,dict):
             for expression,element in value.items():
@@ -86,24 +103,37 @@ class AtomTransmutationConfigurator(IConfigurator):
             or a list of string that match an user definition",self)
 
     def transmutate(self, configuration, selection, element):
+        '''
+        Transmutates a set of atoms to a given element 
+        
+        :param configuration: the current configuration
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param selection: the indexes of the atoms to be transmutated
+        :type selection: list of int
+        :param element: the symbol of the element to which the selected atoms should
+        be transmutated
+        :type element: str
+        '''
         
         if element not in ELEMENTS:
             raise ConfiguratorError("the element %r is not registered in the database" % element, self)
                 
         for idx in selection:
-            try:
-                pos = self["atom_selection"]["groups"].index([idx])
-                
-            except ValueError:
-                continue
-            
-            else:
-                self["atom_selection"]["elements"][pos] = [element]
-                
+            pos = self["atom_selection"]["groups"].index([idx])
+            self["atom_selection"]["elements"][pos] = [element]
+
+        # Update the current configuration according to the changes triggered by
+        # atom transumutation                
         configuration[self._dependencies['atom_selection']].set_contents()
 
     def get_information(self):
+        '''
+        Returns some informations about this configurator
         
+        :return: the information about this configurator
+        :rtype: str
+        '''
+                
         if self["value"] is None:
             return "No atoms selected for deuteration"
         

@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini and Bachir Aoun
 '''
 
 from MDANSE.Framework.UserDefinitions.IUserDefinition import UD_STORE
@@ -36,14 +36,15 @@ from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
         
 class AxisSelection(IConfigurator):
     """
-    This configurator allow to select  an axis selection among the User Definitions.
-    This could be mandatory for the analysis, if not, some generic behavior will be setup.
-    An axis selection is defined using two atomic coordinates (or atomic cluster center of mass) 
+    This configurator allows to define an axis per molecule. For each molecule, the 
+    axis is basically defined using the coordinates of two of its atoms. 
     
-    To Build an axis selection definition you have to :
-    - Create a workspace based on a mmtk_trajectory data,
-    - drag a molecular viewer on it,
-    - drag into the Molecular Viewer his "Axis selection" plugin
+    To Build an axis selection from the GUI you have to :
+    #. Create a workspace based on a mmtk_trajectory data,
+    #. Drag a molecular viewer on it,
+    #. Drag into the Molecular Viewer the Axis selection plugin
+
+    :note: this configurator depends on 'trajectory' configurator to be configured
     """
     
     type = "axis_selection"
@@ -51,6 +52,19 @@ class AxisSelection(IConfigurator):
     _default = None
 
     def configure(self, configuration, value):
+        '''
+        Configure this configurator with a given input value. The value can be:
+        #. a dict with 'molecule', 'endpoint1' and 'endpoint2' keys. 'molecule' key 
+        is the molecule name for which the axis selection will be performed
+        and 'endpoint1' and 'endpoint2' keys are the names of two atoms of the molecule 
+        along which the axis will be defined  
+        #. str: the axis selection will be performed by reading the corresponding user definition
+        
+        :param configuration: the current configuration
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the input value
+        :type value: tuple or str 
+        '''
         
         trajConfig = configuration[self._dependencies['trajectory']]
                 
@@ -70,5 +84,11 @@ class AxisSelection(IConfigurator):
         self['n_axis'] = len(self['endpoints'])
 
     def get_information(self):
+        '''
+        Returns some informations about this configurator
+        
+        :return: the information about this configurator
+        :rtype: str
+        '''
         
         return "Axis vector:%s" % self["value"]

@@ -29,5 +29,5 @@ This package contains all the MDANSE cython extensions.
 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''

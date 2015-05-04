@@ -34,5 +34,5 @@ This package contains all the externals dependencies of MDANSE. It contains:
 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''

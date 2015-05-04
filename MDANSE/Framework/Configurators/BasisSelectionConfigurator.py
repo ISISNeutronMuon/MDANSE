@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini and Bachir Aoun
 '''
 
 from MDANSE.Framework.UserDefinitions.IUserDefinition import UD_STORE
@@ -36,17 +36,15 @@ from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
 
 class BasisSelection(IConfigurator):
     """
-    This configurator allow to select a basis selection among the User Definitions.
-    This could be mandatory for the analysis, if not, some generic behavior will be setup.
-    An axis selection is defined using :
-    - one origin, 
-    - two vector define using the origin and two atomic coordinates (or atomic cluster center of mass),
-    - the third direction, automatically taken as the vector product of the two precedent.  
+    This configurator allows to define basis per molecule. For each molecule, the 
+    basis is basically defined using the coordinates of three of its atoms. This coordinates 
+    will respectively define the origin the X axis and y axis of the basis, the Z axis
+    being defined in such a way that the basis is direct. 
     
-    To Build a basis selection definition you have to :
-    - Create a workspace based on a mmtk_trajectory data,
-    - drag a molecular viewer on it,
-    - drag into the Molecular Viewer his "Basis selection" plugin
+    To Build a basis selection from the GUI you have to :
+    #. Create a workspace based on a mmtk_trajectory data,
+    #. Drag a molecular viewer on it,
+    #. Drag into the Molecular Viewer the Basis selection plugin
     """
     
     type = 'basis_selection'
@@ -54,6 +52,22 @@ class BasisSelection(IConfigurator):
     _default = None
 
     def configure(self, configuration, value):
+        '''
+        Configure this configurator with a given input value. The value can be:
+        #. a dict with 'molecule', 'origin', 'x_axis' and 'y_axis' keys. 
+        'molecule' key is the molecule name for which the axis selection will be performed
+        and 'origin', 'x_axis' and 'y_axis' keys are the names of three atoms of the molecule 
+        that will be used to define respectively the origin, the X and Y axis of the basis  
+        #. str: the axis selection will be performed by reading the corresponding user definition
+        
+        :param configuration: the current configuration
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the input value
+        :type value: tuple or str 
+
+        :note: this configurator depends on 'trajectory' configurator to be configured
+        '''
+
         trajConfig = configuration[self._dependencies['trajectory']]
 
         ud = UD_STORE[trajConfig["basename"],"basis_selection",value]        
@@ -73,5 +87,11 @@ class BasisSelection(IConfigurator):
         self['n_basis'] = len(self['basis'])
 
     def get_information(self):
+        '''
+        Returns some informations about this configurator
+        
+        :return: the information about this configurator
+        :rtype: str
+        '''
         
         return "Basis vector:%s" % self["value"]

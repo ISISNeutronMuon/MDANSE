@@ -27,10 +27,9 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
-# Standards imports.
 import abc
 import ctypes
 import datetime
@@ -588,6 +587,7 @@ class PlatformWin(Platform):
      
 import platform
 system = platform.system()
+
 # Instantiate the proper platform class depending on the OS on which MDANSE runs
 if system == 'Linux':
     PLATFORM=PlatformLinux()

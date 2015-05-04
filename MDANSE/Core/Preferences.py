@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import abc
@@ -310,7 +310,7 @@ class Preferences(collections.OrderedDict):
         
     def load(self):
         '''
-        Load the preferences from a preferences file.
+        Load the preferences.
         '''
                     
         path = PLATFORM.preferences_file()
@@ -333,7 +333,7 @@ class Preferences(collections.OrderedDict):
                          
     def save(self):
         '''
-        Save the preferences to a file.        
+        Save the preferences.        
         '''
         
         path = PLATFORM.preferences_file()
