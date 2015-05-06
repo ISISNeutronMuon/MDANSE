@@ -27,28 +27,49 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 from MDANSE.Framework.Configurators.RangeConfigurator import RangeConfigurator
 
 class FramesConfigurator(RangeConfigurator):
     """
-    This frames configurator allow to select as input of the analysis a range of frame 
-    given 3 parameters : the first frame, the last frame, and the value of the step 
+    This configurator allows to input a frame selection for the analysis.
+    
+    The frame selection can be  be input as:
+    #. a 3-tuple where the 1st, 2nd will corresponds respectively to the indexes of the first and last (excluded) frames to be selected while the 3rd element
+    will correspond to the step number between two frames. For example (1,11,3) will give 1,4,7,10
+    #. 'all' keyword, in such case, all the frames of the trajectory are selected
+    #. None keyword, in such case, all the frames of the trajectory are selected
+
+    :note: this configurator depends on 'trajectory' configurator to be configured
     """
     
     type = 'frames'
     
     def __init__(self, name, **kwargs):
+        '''
+        Initializes the configurator.
+        
+        :param name: the name of the configurator as it will be appear in the configuration
+        :type name: str
+        '''
 
         RangeConfigurator.__init__(self, name, sort=True, **kwargs)
              
     def configure(self, configuration, value):
+        '''
+        Configure an input value.
+                
+        :param configuration: the current configuration
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the input value
+        :type value: 3-tuples, 'all' or None
+        '''
                                         
         trajConfig = configuration[self._dependencies['trajectory']]
 
-        if value == "all":
+        if value in ["all",None]:
             value = (0, trajConfig['length'], 1)
             
         self._mini = -1
@@ -69,6 +90,12 @@ class FramesConfigurator(RangeConfigurator):
             self['time_step'] = 1.0
 
     def get_information(self):
+        '''
+        Returns some informations about this configurator.
+        
+        :return: the information about this configurator
+        :rtype: str
+        '''
         
         return "%d frames selected (first=%.3f ; last = %.3f ; time step = %.3f)" % \
             (self["n_frames"],self["time"][0],self["time"][-1],self["time_step"])

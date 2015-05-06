@@ -58,7 +58,7 @@ class AtomSelectionConfigurator(IConfigurator):
     #. Drag a molecular viewer on it
     #. Drag into the Molecular Viewer the Atom selection plugin
     
-    :note: this configurator depends on 'trajectory' configurator to be configured
+    :note: this configurator depends on 'trajectory' and 'grouping_level' configurators to be configured
     '''
 
     type = 'atom_selection'

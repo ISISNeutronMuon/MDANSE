@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import collections
@@ -44,7 +44,20 @@ LEVELS["molecule"] = {"atom" : 0, "atomcluster" : 1, "molecule" : 1, "nucleotide
         
 class GroupingLevelConfigurator(SingleChoiceConfigurator):
     """
-    This configurator allow to choose the level of coarseness which will be apply into the calculation
+    This configurator allows to choose the level of granularity in the atom selection.
+    
+    The level of granularity will be applied, when reading the trajectory, by grouping the atoms of the selection according to 
+    their level of granularity to a single dummy-atoms located on the center of gravity of those atoms.
+    
+    The level of granularity currently supported are:
+    #. 'atom': no grouping will be performed
+    #. 'group': the atoms that belongs to a MMTK AtomCluster object will be grouped as a single atom per object while the ones that belongs to a MMTK Molecule, 
+    NucleotideChain, PeptideChain and Protein object will be grouped according to the chemical group they belong to (e.g. peptide group, methyl group ...).
+    #. 'residue': the atoms that belongs to a MMTK AtomCluster or Molecule object will be grouped as a single atom per object while the ones thta belongs to a
+    MMTK NucleotideChain, PeptideChain or Protein object will be grouped according to the residue to which they belong to (e.g. Histidine, Cytosyl ...)
+    #. 'chain': the atoms that belongs to a MMTK AtomCluster or Molecule object will be grouped as a single atom per object while the ones that belongs to a
+    MMTK NucleotideChain, PeptideChain or Protein object will be grouped according to the chain they belong to
+    #. 'molecule': the atoms that belongs to any MMTK chemical object will be grouped as a single atom per object
     """
     
     type = 'grouping_level'
@@ -52,20 +65,28 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
     _default = "atom"
     
     def __init__(self, name, choices=None, **kwargs):
+        '''
+        Initializes the configurator.
         
-        choices = choices if choices is not None else LEVELS.keys()
+        :param name: the name of the configurator as it will be appear in the configuration
+        :type name: str
+        :param choices: the level of granularities allowed for the input value. If None all levels are allowed.
+        :type choices: one of ['atom','group','residue','chain','molecule'] or None        
+        '''
+        
+        if choices is None:
+            choices = LEVELS.keys()
+        else:
+            choices = list(set(LEVELS.keys()).intersection(choices))
 
         SingleChoiceConfigurator.__init__(self, name, choices=choices, **kwargs)
     
-    def configure(self, configuration, value):
-        
-        value = value.lower()
-        
-        if not value in LEVELS.keys():
-            raise ConfiguratorError("%r is not a valid grouping level." % value, self)
-
-        self["value"] = value
-
     def get_information(self):
+        '''
+        Returns some informations about this configurator.
+        
+        :return: the information about this configurator
+        :rtype: str
+        '''
         
         return "Grouping level: %r\n" % self["value"]
