@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 from MDANSE.Mathematics.Arithmetic import ComplexNumber
@@ -35,8 +35,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, Configur
 
 class ComplexNumberConfigurator(IConfigurator):
     """
-    This Configurator allows to input a Complex Value a + bi, 
-    where a and b are real numbers and i is the imaginary unit.
+    This Configurator allows to input a complex number of the form a + bj.
     """
     
     type = 'complex_number'
@@ -44,17 +43,37 @@ class ComplexNumberConfigurator(IConfigurator):
     _default = 0
     
     def __init__(self, name, mini=None, maxi=None, choices=None, **kwargs):
+        '''
+        Initializes the configurator.
+        
+        :param name: the name of the configurator as it will be appear in the configuration
+        :type name: str
+        :param mini: the minimum modulus of the input value. If None, no restriction in the modulus minimum.
+        :type mini: float or None
+        :param maxi: the maximum modulus of the input value. If None, no restriction in the modulus maximum.
+        :type maxi: float or None
+        :param choices: the list of complex numbers allowed for the input value. If None, any value will be allowed.
+        :type choices: list of complex or None
+        '''
 
         # The base class constructor.
         IConfigurator.__init__(self, name, **kwargs)
         
-        self._mini = ComplexNumber(mini) if mini is not None else None
+        self._mini = float(mini) if mini is not None else None
 
-        self._maxi = ComplexNumber(maxi) if maxi is not None else None
+        self._maxi = float(maxi) if maxi is not None else None
         
         self._choices = choices if choices is not None else []
                     
     def configure(self, configuration, value):
+        '''
+        Configure an input value.
+                
+        :param configuration: the current configuration
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the input value
+        :type value: complex
+        '''
         
         value = ComplexNumber(value)
             
@@ -74,19 +93,43 @@ class ComplexNumberConfigurator(IConfigurator):
         
     @property
     def mini(self):
+        '''
+        Returns the minimum value allowed for an input value of this configurator.
+        
+        :return: the minimum value allowed for an input value of this configurator
+        :rtype: float or None
+        '''
         
         return self._mini
 
     @property
     def maxi(self):
+        '''
+        Returns the maximum value allowed for an input value of this configurator.
+        
+        :return: the maximum value allowed for an input value of this configurator
+        :rtype: float or None
+        '''
         
         return self._maxi
 
     @property
     def choices(self):
+        '''
+        Returns the list of floats allowed for an input value of this configurator.
+        
+        :return: the choices allowed for an input value of this configurator
+        :rtype: list of floats or None
+        '''
         
         return self._choices
 
     def get_information(self):
+        '''
+        Returns some informations about this configurator.
+        
+        :return: the information about this configurator
+        :rtype: str
+        '''
         
         return "Value: %r" % self['value']

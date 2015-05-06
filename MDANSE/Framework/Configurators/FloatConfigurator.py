@@ -27,14 +27,14 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
 class FloatConfigurator(IConfigurator):
     """
-    This Configurator allows to input a Floating point Value.
+    This Configurator allows to input a float.
     """
     
     type = 'float'
@@ -42,6 +42,18 @@ class FloatConfigurator(IConfigurator):
     _default = 0
     
     def __init__(self, name, mini=None, maxi=None, choices=None, **kwargs):
+        '''
+        Initializes the configurator.
+        
+        :param name: the name of the configurator as it will be appear in the configuration
+        :type name: str
+        :param mini: the minimum value of the input value. If None, no restriction in the modulus minimum.
+        :type mini: float or None
+        :param maxi: the maximum value of the input value. If None, no restriction in the modulus maximum.
+        :type maxi: float or None
+        :param choices: the list of complex numbers allowed for the input value. If None, any value will be allowed.
+        :type choices: list of float or None
+        '''
 
         # The base class constructor.
         IConfigurator.__init__(self, name, **kwargs)
@@ -53,6 +65,14 @@ class FloatConfigurator(IConfigurator):
         self._choices = choices if choices is not None else []
 
     def configure(self, configuration, value):
+        '''
+        Configure an input value.
+                
+        :param configuration: the current configuration
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the input value
+        :type value: float
+        '''
                         
         try:
             value = float(value)
@@ -75,19 +95,43 @@ class FloatConfigurator(IConfigurator):
 
     @property
     def mini(self):
+        '''
+        Returns the minimum value allowed for an input value of this configurator.
+        
+        :return: the minimum value allowed for an input value of this configurator
+        :rtype: float or None
+        '''
         
         return self._mini
 
     @property
     def maxi(self):
+        '''
+        Returns the maximum value allowed for an input value of this configurator.
+        
+        :return: the maximum value allowed for an input value of this configurator
+        :rtype: float or None
+        '''
         
         return self._maxi
 
     @property
     def choices(self):
+        '''
+        Returns the list of floats allowed for an input value of this configurator.
+        
+        :return: the choices allowed for an input value of this configurator
+        :rtype: list of floats or None
+        '''
         
         return self._choices
 
     def get_information(self):
+        '''
+        Returns some informations about this configurator.
+        
+        :return: the information about this configurator
+        :rtype: str
+        '''
         
         return "Value: %r" % self['value']

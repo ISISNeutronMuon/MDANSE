@@ -39,6 +39,12 @@ class AtomTransmutationConfigurator(IConfigurator):
     """
     This configurator allows to define a set of atoms to be transmutated to a given chemical
     element.
+    
+    For some analysis it can be necessary to change the nature of the chemical element of a given
+    part of the system to have results closer to experience. A good example is to change some 
+    hydrogen atoms to deuterium in order to fit with experiments where deuteration experiments have 
+    been performed for improving the contrast and having a better access to the dynamic of a specific part
+    of the molecular system.
         
     To Build an atomic transmutation from the GUI you have to :
     #. Create a workspace based on a MMTK trajectory data,
@@ -54,7 +60,9 @@ class AtomTransmutationConfigurator(IConfigurator):
                                 
     def configure(self, configuration, value):
         '''
-        Configure this configurator with a given input value. The value can be:
+        Configure an given input value. 
+        
+        The value can be:
         #. None: no transmutation is performed
         #. (str,str)-dict: for each (str,str) pair, a transmutation will be performed
         by parsing the 1st element as an atom selection string and transmutating the 
@@ -128,7 +136,7 @@ class AtomTransmutationConfigurator(IConfigurator):
 
     def get_information(self):
         '''
-        Returns some informations about this configurator
+        Returns some informations about this configurator.
         
         :return: the information about this configurator
         :rtype: str

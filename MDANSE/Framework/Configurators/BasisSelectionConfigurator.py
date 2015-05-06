@@ -36,10 +36,11 @@ from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
 
 class BasisSelection(IConfigurator):
     """
-    This configurator allows to define basis per molecule. For each molecule, the 
-    basis is basically defined using the coordinates of three of its atoms. This coordinates 
-    will respectively define the origin the X axis and y axis of the basis, the Z axis
-    being defined in such a way that the basis is direct. 
+    This configurator allows to define a local basis per molecule. 
+    
+    For each molecule, the basis is defined using the coordinates of three atoms of the molecule. 
+    These coordinates will respectively define the origin, the X axis and y axis of the basis, the 
+    Z axis being latter defined in such a way that the basis is direct. 
     
     To Build a basis selection from the GUI you have to :
     #. Create a workspace based on a mmtk_trajectory data,
@@ -53,7 +54,9 @@ class BasisSelection(IConfigurator):
 
     def configure(self, configuration, value):
         '''
-        Configure this configurator with a given input value. The value can be:
+        Configure an input value. 
+        
+        The value can be:
         #. a dict with 'molecule', 'origin', 'x_axis' and 'y_axis' keys. 
         'molecule' key is the molecule name for which the axis selection will be performed
         and 'origin', 'x_axis' and 'y_axis' keys are the names of three atoms of the molecule 
@@ -88,7 +91,7 @@ class BasisSelection(IConfigurator):
 
     def get_information(self):
         '''
-        Returns some informations about this configurator
+        Returns some informations about this configurator.
         
         :return: the information about this configurator
         :rtype: str

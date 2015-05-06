@@ -67,8 +67,9 @@ class AtomSelectionConfigurator(IConfigurator):
                     
     def configure(self, configuration, value):
         '''
-        Configure this configurator with a given input value. The value must be 
-        a string that can be either an atom selection string or a valid user 
+        Configure an input value. 
+        
+        The value must be a string that can be either an atom selection string or a valid user 
         definition.
         
         :param configuration: the current configuration
@@ -174,7 +175,7 @@ class AtomSelectionConfigurator(IConfigurator):
                         
     def get_information(self):
         '''
-        Returns some informations about this configurator
+        Returns some informations about this configurator.
         
         :return: the information about this configurator
         :rtype: str

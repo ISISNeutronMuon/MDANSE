@@ -36,8 +36,9 @@ from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
         
 class AxisSelection(IConfigurator):
     """
-    This configurator allows to define an axis per molecule. For each molecule, the 
-    axis is basically defined using the coordinates of two of its atoms. 
+    This configurator allows to define a local axis per molecule. 
+    
+    For each molecule, the axis is defined using the coordinates of two atoms of the molecule. 
     
     To Build an axis selection from the GUI you have to :
     #. Create a workspace based on a mmtk_trajectory data,
@@ -53,7 +54,9 @@ class AxisSelection(IConfigurator):
 
     def configure(self, configuration, value):
         '''
-        Configure this configurator with a given input value. The value can be:
+        Configure an input value. 
+        
+        The value can be:
         #. a dict with 'molecule', 'endpoint1' and 'endpoint2' keys. 'molecule' key 
         is the molecule name for which the axis selection will be performed
         and 'endpoint1' and 'endpoint2' keys are the names of two atoms of the molecule 
@@ -85,7 +88,7 @@ class AxisSelection(IConfigurator):
 
     def get_information(self):
         '''
-        Returns some informations about this configurator
+        Returns some informations about this configurator.
         
         :return: the information about this configurator
         :rtype: str
