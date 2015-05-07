@@ -200,7 +200,6 @@ class DensitySuperpositionPlugin(ComponentPlugin):
             self.surface.AddPosition(self.xyz[0]*s[0]/2., self.xyz[1]*s[1]/2., self.xyz[2]*s[2]/2.)
         elif key in ['-']:
             self.surface.AddPosition(-self.xyz[0]*s[0]/2., -self.xyz[1]*s[1]/2., -self.xyz[2]*s[2]/2.)
-        print 'current surf position : ', self.surface.GetPosition()
         self.iren.Render()
 
     def on_browse(self, event):

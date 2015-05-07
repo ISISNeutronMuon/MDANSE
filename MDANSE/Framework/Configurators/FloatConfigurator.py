@@ -64,7 +64,7 @@ class FloatConfigurator(IConfigurator):
         
         self._choices = choices if choices is not None else []
 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure an input value.
                 
@@ -77,7 +77,7 @@ class FloatConfigurator(IConfigurator):
         try:
             value = float(value)
         except (TypeError,ValueError) as e:
-            raise ConfiguratorError(e)
+            raise ConfiguratorError(e,self)
             
         if self._choices:
             if not value in self._choices:

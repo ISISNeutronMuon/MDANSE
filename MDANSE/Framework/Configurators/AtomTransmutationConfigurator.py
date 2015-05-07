@@ -47,9 +47,10 @@ class AtomTransmutationConfigurator(IConfigurator):
     of the molecular system.
         
     To Build an atomic transmutation from the GUI you have to :
-    #. Create a workspace based on a MMTK trajectory data,
-    #. Drag a molecular viewer on it,
-    #. Drag into the Molecular Viewer the Atom transmutation plugin
+    
+    * Create a workspace based on a MMTK trajectory data,
+    * Drag a molecular viewer on it,
+    * Drag into the Molecular Viewer the Atom transmutation plugin
     
     :note: this configurator depends on 'trajectory' and 'atom_selection' configurators to be properly configured
     """
@@ -60,14 +61,15 @@ class AtomTransmutationConfigurator(IConfigurator):
                                 
     def configure(self, configuration, value):
         '''
-        Configure an given input value. 
+        Configure an input value. 
         
         The value can be:
-        #. None: no transmutation is performed
-        #. (str,str)-dict: for each (str,str) pair, a transmutation will be performed
+        
+        * None: no transmutation is performed
+        * (str,str)-dict: for each (str,str) pair, a transmutation will be performed
         by parsing the 1st element as an atom selection string and transmutating the 
         corresponding atom selection to the target chemical element stored in the 2nd element
-        #. str: the transmutation will be performed by reading the corresponding user definition
+        * str: the transmutation will be performed by reading the corresponding user definition
         
         :param configuration: the current configuration
         :type configuration: a MDANSE.Framework.Configurable.Configurable object

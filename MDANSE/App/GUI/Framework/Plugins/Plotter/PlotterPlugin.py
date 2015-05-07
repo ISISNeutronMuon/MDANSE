@@ -41,11 +41,11 @@ import wx.aui as wxaui
 from Scientific.IO.NetCDF import NetCDFFile
 
 from MDANSE.Core.Error import Error
-from MDANSE.App.GUI.Framework.Plugins import ComponentPlugin
-from MDANSE.App.GUI.Icons import ICONS
+from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 from MDANSE.App.GUI.Framework.Plugins.Plotter.Plotter1D import Plotter1D
 from MDANSE.App.GUI.Framework.Plugins.Plotter.Plotter2D import Plotter2D
 from MDANSE.App.GUI.Framework.Plugins.Plotter.Plotter3D import Plotter3D
+from MDANSE.App.GUI.Icons import ICONS
 
 class PlotterError(Error):
     pass
@@ -371,7 +371,7 @@ class PlotterPlugin(ComponentPlugin):
         if mode == 'standalone':
             self.make_standalone()
         
-        ComponentPlugin.__init__(self, parent)
+        ComponentPlugin.__init__(self,parent)
         
     def build_panel(self):
         self._dataPanel = DataPanel(self)
@@ -384,12 +384,12 @@ class PlotterPlugin(ComponentPlugin):
         self.standalone = True
         self._dataDict = collections.OrderedDict()
         
-    def plug(self, *args, **kwargs):
+    def plug(self):
         self._data = self.dataproxy.data
         self._dataPanel.show_data()
 
         self._parent._mgr.GetPane(self).Dock().Floatable(False).Center().CloseButton(True).Caption("2D/3D Plotter")
-        self._parent._mgr.Update()        
+        self._parent._mgr.Update()
 
 class PlotterFrame(wx.Frame):
     
@@ -406,8 +406,9 @@ class PlotterFrame(wx.Frame):
         _quit = fileMenu.Append(wx.ID_ANY, 'Quit')
 
         mainMenu.Append(fileMenu, 'File')
-        
-        icon = wx.Icon(ICONS["plot"], wx.BITMAP_TYPE_PNG)
+
+        icon = wx.EmptyIcon()
+        icon.CopyFromBitmap(ICONS["plot",32,32])        
         self.SetIcon(icon) 
         
         self.SetMenuBar(mainMenu)
@@ -471,7 +472,7 @@ class PlotterFrame(wx.Frame):
         
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         
-        self.plugin = PlotterPlugin(mainPanel, mode = 'standalone')
+        self.plugin = PlotterPlugin(mainPanel, 'standalone')
          
         mainSizer.Add(self.plugin, 1, wx.ALL|wx.EXPAND, 5)
 

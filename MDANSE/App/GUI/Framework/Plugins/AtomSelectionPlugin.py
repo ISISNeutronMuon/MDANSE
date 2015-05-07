@@ -485,5 +485,3 @@ class AtomSelectionPlugin(ComponentPlugin):
         self._expression, self._selection = self._query.parse()
         
         self._parent.show_selected_atoms(self._selection)
-    
-print REGISTRY['plugin']

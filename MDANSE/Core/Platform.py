@@ -43,7 +43,7 @@ from MDANSE.Core.Error import Error
 
 class PlatformError(Error):
     '''
-    Handles error related to Platform derived classes.
+    This class handles error related to Platform derived classes.
     '''
     pass
 

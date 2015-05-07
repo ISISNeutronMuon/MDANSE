@@ -41,9 +41,10 @@ class AxisSelection(IConfigurator):
     For each molecule, the axis is defined using the coordinates of two atoms of the molecule. 
     
     To Build an axis selection from the GUI you have to :
-    #. Create a workspace based on a mmtk_trajectory data,
-    #. Drag a molecular viewer on it,
-    #. Drag into the Molecular Viewer the Axis selection plugin
+    
+    * Create a workspace based on a mmtk_trajectory data,
+    * Drag a molecular viewer on it,
+    * Drag into the Molecular Viewer the Axis selection plugin
 
     :note: this configurator depends on 'trajectory' configurator to be configured
     """
@@ -57,11 +58,12 @@ class AxisSelection(IConfigurator):
         Configure an input value. 
         
         The value can be:
-        #. a dict with 'molecule', 'endpoint1' and 'endpoint2' keys. 'molecule' key 
+        
+        * a dict with 'molecule', 'endpoint1' and 'endpoint2' keys. 'molecule' key 
         is the molecule name for which the axis selection will be performed
         and 'endpoint1' and 'endpoint2' keys are the names of two atoms of the molecule 
         along which the axis will be defined  
-        #. str: the axis selection will be performed by reading the corresponding user definition
+        * str: the axis selection will be performed by reading the corresponding user definition
         
         :param configuration: the current configuration
         :type configuration: a MDANSE.Framework.Configurable.Configurable object

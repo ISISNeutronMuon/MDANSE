@@ -43,9 +43,10 @@ class BasisSelection(IConfigurator):
     Z axis being latter defined in such a way that the basis is direct. 
     
     To Build a basis selection from the GUI you have to :
-    #. Create a workspace based on a mmtk_trajectory data,
-    #. Drag a molecular viewer on it,
-    #. Drag into the Molecular Viewer the Basis selection plugin
+    
+    * Create a workspace based on a mmtk_trajectory data,
+    * Drag a molecular viewer on it,
+    * Drag into the Molecular Viewer the Basis selection plugin
     """
     
     type = 'basis_selection'
@@ -57,11 +58,12 @@ class BasisSelection(IConfigurator):
         Configure an input value. 
         
         The value can be:
-        #. a dict with 'molecule', 'origin', 'x_axis' and 'y_axis' keys. 
+        
+        * a dict with 'molecule', 'origin', 'x_axis' and 'y_axis' keys. 
         'molecule' key is the molecule name for which the axis selection will be performed
         and 'origin', 'x_axis' and 'y_axis' keys are the names of three atoms of the molecule 
         that will be used to define respectively the origin, the X and Y axis of the basis  
-        #. str: the axis selection will be performed by reading the corresponding user definition
+        * str: the axis selection will be performed by reading the corresponding user definition
         
         :param configuration: the current configuration
         :type configuration: a MDANSE.Framework.Configurable.Configurable object
