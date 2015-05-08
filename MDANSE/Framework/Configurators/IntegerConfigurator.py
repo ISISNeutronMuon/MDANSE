@@ -34,7 +34,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, Configur
     
 class IntegerConfigurator(IConfigurator):
     """
-    This Configurator allow to input an Integer Value.
+    This Configurator allows to input an integer.
     """
     
     type = 'integer'
@@ -42,6 +42,18 @@ class IntegerConfigurator(IConfigurator):
     _default = 0
     
     def __init__(self, name, mini=None, maxi=None, choices=None, **kwargs):
+        '''
+        Initializes the configurator.
+        
+        :param name: the name of the configurator as it will be appear in the configuration.
+        :type name: str
+        :param mini: the minimum value allowed for the input value. If None, no restriction for the minimum.
+        :type mini: int or None
+        :param maxi: the maximum value allowed for the input value. If None, no restriction for the maximum.
+        :type maxi: int or None
+        :param choices: the list of integers allowed for the input value. If None, any value will be allowed.
+        :type choices: int-list or None
+        '''
         
         # The base class constructor.
         IConfigurator.__init__(self, name, **kwargs)
@@ -53,6 +65,14 @@ class IntegerConfigurator(IConfigurator):
         self._choices = choices if choices is not None else []          
                 
     def configure(self, configuration, value):
+        '''
+        Configure an integer value.
+                
+        :param configuration: the current configuration.
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the integer to be configured.
+        :type value: int
+        '''
 
         try:
             value = int(value)
@@ -75,19 +95,43 @@ class IntegerConfigurator(IConfigurator):
 
     @property
     def mini(self):
+        '''
+        Returns the minimum value allowed for an input integer.
         
+        :return: the minimum value allowed for an input value integer.
+        :rtype: int or None
+        '''
+                        
         return self._mini
 
     @property
     def maxi(self):
+        '''
+        Returns the maximum value allowed for an input integer.
         
+        :return: the maximum value allowed for an input value integer.
+        :rtype: int or None
+        '''
+                
         return self._maxi
 
     @property
     def choices(self):
+        '''
+        Returns the list of integers allowed for an input float.
+        
+        :return: the choices allowed for an input float.
+        :rtype: int-list or None
+        '''
         
         return self._choices
 
     def get_information(self):
+        '''
+        Returns some informations about this configurator.
+        
+        :return: the information about this configurator
+        :rtype: str
+        '''
         
         return "Value: %r" % self["value"]

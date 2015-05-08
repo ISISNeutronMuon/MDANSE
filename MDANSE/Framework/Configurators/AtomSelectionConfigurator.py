@@ -176,16 +176,19 @@ class AtomSelectionConfigurator(IConfigurator):
                         
     def get_information(self):
         '''
-        Returns some informations about this configurator.
+        Returns some informations the atom selection.
         
-        :return: the information about this configurator
+        :return: the information about the atom selection.
         :rtype: str
         '''
+
+        if not self.has_key("n_selected_atoms"):
+            return "No configured yet"
         
         info = []
-        info.append("Number of selected atoms:%d\n" % self["n_selected_atoms"])
-        info.append("Level of selection:%s\n" % self["level"])
-        info.append("Number of selected groups:%d\n" % self["n_groups"])
-        info.append("Selected elements:%s\n" % self["contents"].keys())
+        info.append("Number of selected atoms:%d" % self["n_selected_atoms"])
+        info.append("Level of selection:%s" % self["level"])
+        info.append("Number of selected groups:%d" % self["n_groups"])
+        info.append("Selected elements:%s" % self["contents"].keys())
         
-        return "".join(info)
+        return "\n".join(info)

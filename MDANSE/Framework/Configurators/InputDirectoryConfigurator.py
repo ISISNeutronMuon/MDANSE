@@ -27,17 +27,19 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import os
 
 from MDANSE import PLATFORM
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
     
 class InputDirectoryConfigurator(IConfigurator):
     """
-     This Configurator allows to set as input an (existing) directory.
+     This Configurator allows to set an input directory.
+     
+     The directory will be created at configuration time if it does not exist.
     """
     
     type = "input_directory"
@@ -45,14 +47,27 @@ class InputDirectoryConfigurator(IConfigurator):
     _default = os.getcwd()
 
     def configure(self, configuration, value):
+        '''
+        Configure an input directory. 
+                
+        :param configuration: the current configuration.
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the input directory.
+        :type value: str 
+        '''
         
         value = PLATFORM.get_path(value)
         
-        if not os.path.exists(value):
-            raise ConfiguratorError('invalid type for input value', self)
-                                        
+        PLATFORM.create_directory(value)
+                                                
         self['value'] = value        
 
     def get_information(self):
+        '''
+        Returns some informations about this configurator.
+        
+        :return: the information about this configurator
+        :rtype: str
+        '''
         
         return "Input directory: %r" % self['value']

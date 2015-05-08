@@ -94,11 +94,9 @@ class McStasVirtualInstrument(IJob):
     settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['sample_coh'] = ('netcdf_input_file', {"widget":'input_file', 
                                                          "label":'nMoldyn Coherent Structure Factor',
-                                                         "checkExistence":True,
                                                          "variables":['q','frequency','s(q,f)_total']})
     settings['sample_inc'] = ('netcdf_input_file', {"widget":'input_file',
                                                          "label":'nMoldyn Incoherent Structure Factor',
-                                                         "checkExistence":True,
                                                          "variables" :['q','frequency','s(q,f)_total']})
     settings['temperature'] = ('float', {"default":298.0})
     settings['instrument'] = ('mcstas_instrument',{"label":'mcstas instrument'})

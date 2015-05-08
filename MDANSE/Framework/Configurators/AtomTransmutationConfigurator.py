@@ -52,7 +52,7 @@ class AtomTransmutationConfigurator(IConfigurator):
     * Drag a molecular viewer on it,
     * Drag into the Molecular Viewer the Atom transmutation plugin
     
-    :note: this configurator depends on 'trajectory' and 'atom_selection' configurators to be properly configured
+    :note: this configurator depends on 'trajectory' and 'atom_selection' configurators to be configured
     """
     
     type = 'atom_transmutation'
@@ -138,11 +138,14 @@ class AtomTransmutationConfigurator(IConfigurator):
 
     def get_information(self):
         '''
-        Returns some informations about this configurator.
+        Returns some informations the atoms selected for being transmutated.
         
-        :return: the information about this configurator
+        :return: the information about the atoms selected for being transmutated.
         :rtype: str
         '''
+
+        if not self.has_key("value"):
+            return "Not configured yet"
                 
         if self["value"] is None:
             return "No atoms selected for deuteration"

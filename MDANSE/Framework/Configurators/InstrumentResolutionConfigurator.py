@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import numpy
@@ -37,17 +37,45 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, Configur
 
 class InstrumentResolutionConfigurator(IConfigurator):
     """
-    This configurator allow to set a simulated instrument resolution.
-    Clicking on the SET button open a widget allowing to select one function into 
-    a set of basics, and to parameterized it, then the resulting kernel will be 
-    automatically sampled and convoluted with the signal.
+    This configurator allows to set an instrument resolution.
+    
+    The instrument resolution will be used in frequency-dependant analysis (e.g. the vibrational density 
+    of states) when performing the fourier transform of its time-dependant counterpart. This allow to 
+    convolute of the signal with a resolution function to have a better match with experimental spectrum.
+    
+    In MDANSE, the instrument resolution are defined in frequency (energy) space and are internally 
+    inverse-fourier-transformed to get a time-dependant version. This time-dependant resolution function will then 
+    be multiplied by the time-dependant signal to get the resolution effect according to the Fourier Transform theorem:
+    
+    .. math:: TF(f(t) * r(t)) = F(\omega) \conv R(\omega) = G(\omega)
+
+    where f(t) and r(t) are respectively the time-dependant signal and instrument resolution and 
+    F(\omega) and R(\omega) are their corresponding spectrum. Hence, G(\omega) represents the signal 
+    convoluted by the instrument resolution and, as such, represents the quantity to be compared directly with 
+    experimental results. 
+    
+    An instrument resolution is represented in MDANSE by a kernel function and a sets of parameters for this function.
+    MDANSE currently supports the aussian, lorentzian, square, triangular and pseudo-voigt kernels.
+    
+    :note: this configurator depends on the 'frame' configurator to be configured
     """
+    
     
     type = "instrument_resolution"
         
     _default = ('gaussian', {'mu': 0.0, 'sigma': 0.0001})
         
     def configure(self, configuration, value):
+        '''
+        Configure the instrument resolution.
+                
+        :param configuration: the current configuration
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the instrument resolution. It must be input as a 2-tuple where the 1st element is the instrument resolution
+        kernel and the 2nd element is a dictionary that stores the parameters for this kernel.
+        is a string representing one of the supported instrument resolution 
+        :type value: 2-tuple
+        '''
 
         framesCfg = configuration[self._dependencies['frames']]
                 
@@ -87,6 +115,26 @@ You should change your resolution function settings to make it sharper.''',self)
 
         self["time_window"] = resolution.timeWindow
         
-    def get_information(self):
+        self["kernel"] = kernel
+        self["parameters"] = parameters
         
-        return "None yet" 
+    def get_information(self):
+        '''
+        Returns some informations the instrument resolution.
+        
+        :return: the information the instrument resolution.
+        :rtype: str
+        '''
+        
+        if not self.has_key("kernel"):
+            return "No configured yet"
+        
+        info = ["Instrument resolution kernel:" % self["kernel"]]
+        if self["parameters"]:
+            info.append("Parameters:")
+            for k,v in self["parameters"]:
+                info.append("%s = %s" % (k,v))
+                
+        info = "\n".join(info)
+                    
+        return info

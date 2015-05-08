@@ -55,18 +55,17 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
                 
         InputFileConfigurator.configure(self, configuration, value)
         
-        if self.checkExistence:
-            try:
-                self['instance'] = NetCDFFile(self['value'], 'r')
-                
-            except IOError:
-                raise ConfiguratorError("can not open %r NetCDF file for reading" % self['value'])
+        try:
+            self['instance'] = NetCDFFile(self['value'], 'r')
+            
+        except IOError:
+            raise ConfiguratorError("can not open %r NetCDF file for reading" % self['value'])
 
-            for v in self._variables:
-                try:                
-                    self[v] = self['instance'].variables[v]
-                except KeyError:
-                    raise ConfiguratorError("the variable %r was not  found in %r NetCDF file" % (v,self["value"]))
+        for v in self._variables:
+            try:                
+                self[v] = self['instance'].variables[v]
+            except KeyError:
+                raise ConfiguratorError("the variable %r was not  found in %r NetCDF file" % (v,self["value"]))
 
     @property
     def variables(self):

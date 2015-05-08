@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import os
@@ -37,42 +37,64 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, Configur
 
 class InputFileConfigurator(IConfigurator):
     """
-    This Configurator allows to set as input any existing file.
+    This Configurator allows to set an input file.    
     """
     
     type = 'input_file'
     
     _default = ""
     
-    def __init__(self, name, checkExistence=True, wildcard="All files|*.*", **kwargs):
+    def __init__(self, name, wildcard="All files|*.*",**kwargs):
+        '''
+        Initializes the configurator object.
+        
+        :param name: the name of the configurator as it will be appear in the configuration.
+        :type name: str
+        :param wildcard: the wildcard used to filter the file. This will be used in MDANSE GUI when
+        browsing for the input file.
+        :type wildcard: str
+        '''
         
         # The base class constructor.
         IConfigurator.__init__(self, name, **kwargs)
         
-        self._checkExistence = checkExistence
-        
         self._wildcard = wildcard
                 
     def configure(self, configuration, value):
-        if self.checkExistence:
-            value = PLATFORM.get_path(value)
-                    
-            if not os.path.exists(value):
-                raise ConfiguratorError("the input file %r does not exist." % value, self)
+        '''
+        Configure an input file. 
+                
+        :param configuration: the current configuration.
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the input file.
+        :type value: str 
+        '''
+                
+        value = PLATFORM.get_path(value)
+                
+        if not os.path.exists(value):
+            raise ConfiguratorError("the input file %r does not exist." % value, self)
         
         self["value"] = value 
         self["filename"] = value
-        
-    @property
-    def checkExistence(self):
-        
-        return self._checkExistence
-    
+            
     @property
     def wildcard(self):
+        '''
+        Returns the wildcard used to filter the input file.
+        
+        :return: the wildcard used to filter the input file.
+        :rtype: str
+        '''
         
         return self._wildcard
 
     def get_information(self):
+        '''
+        Returns some informations about this configurator.
+        
+        :return: the information about this configurator
+        :rtype: str
+        '''
         
         return "Input file: %r" % self["value"]

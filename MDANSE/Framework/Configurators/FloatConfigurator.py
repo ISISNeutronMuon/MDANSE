@@ -45,13 +45,13 @@ class FloatConfigurator(IConfigurator):
         '''
         Initializes the configurator.
         
-        :param name: the name of the configurator as it will be appear in the configuration
+        :param name: the name of the configurator as it will be appear in the configuration.
         :type name: str
-        :param mini: the minimum value of the input value. If None, no restriction in the modulus minimum.
+        :param mini: the minimum value allowed for the input value. If None, no restriction for the minimum.
         :type mini: float or None
-        :param maxi: the maximum value of the input value. If None, no restriction in the modulus maximum.
+        :param maxi: the maximum value allowed for the input value. If None, no restriction for the maximum.
         :type maxi: float or None
-        :param choices: the list of complex numbers allowed for the input value. If None, any value will be allowed.
+        :param choices: the list of floats allowed for the input value. If None, any value will be allowed.
         :type choices: list of float or None
         '''
 
@@ -96,9 +96,9 @@ class FloatConfigurator(IConfigurator):
     @property
     def mini(self):
         '''
-        Returns the minimum value allowed for an input value of this configurator.
+        Returns the minimum value allowed for an input float.
         
-        :return: the minimum value allowed for an input value of this configurator
+        :return: the minimum value allowed for an input float.
         :rtype: float or None
         '''
         
@@ -107,9 +107,9 @@ class FloatConfigurator(IConfigurator):
     @property
     def maxi(self):
         '''
-        Returns the maximum value allowed for an input value of this configurator.
+        Returns the maximum value allowed for an input float.
         
-        :return: the maximum value allowed for an input value of this configurator
+        :return: the maximum value allowed for an input float.
         :rtype: float or None
         '''
         
@@ -118,9 +118,9 @@ class FloatConfigurator(IConfigurator):
     @property
     def choices(self):
         '''
-        Returns the list of floats allowed for an input value of this configurator.
+        Returns the list of floats allowed for an input float.
         
-        :return: the choices allowed for an input value of this configurator
+        :return: the choices allowed for an input float.
         :rtype: list of floats or None
         '''
         
