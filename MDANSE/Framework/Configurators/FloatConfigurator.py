@@ -33,9 +33,9 @@ Created on Mar 30, 2015
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
 class FloatConfigurator(IConfigurator):
-    """
+    '''
     This Configurator allows to input a float.
-    """
+    '''
     
     type = 'float'
     

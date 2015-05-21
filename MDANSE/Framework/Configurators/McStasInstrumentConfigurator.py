@@ -33,5 +33,8 @@ Created on Mar 30, 2015
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
            
 class McStasInstrumentConfigurator(InputFileConfigurator):
+    """
+    This configurator allows to input a McStas executable file
+    """
 
     type = "mcstas_instrument"

@@ -36,15 +36,23 @@ import subprocess
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
         
 class McStasParametersConfigurator(IConfigurator):
-    """
-    This configurator allows to set in a string form the McStas command-line input parameters.
-    """
+    '''
+    This configurator allows to input the McStas instrument parameters that will be used to run a McStas executable file.
+    '''
 
     type = "instrument_parameters"
 
     _mcStasTypes = {'double' : float, 'int' : int, 'string' : str}
     
     def __init__(self, name, exclude=None, **kwargs):
+        '''
+        Initializes the configurator.
+        
+        :param name: the name of the configurator as it will be appear in the configuration.
+        :type name: str
+        :param exclude: the parameters that exclude when building the McStas instrument parameters list.
+        :type exclude: list of str
+        '''
         
         # The base class constructor.
         IConfigurator.__init__(self, name, **kwargs)
@@ -52,6 +60,14 @@ class McStasParametersConfigurator(IConfigurator):
         self._exclude = exclude if exclude is not None else []
         
     def configure(self, configuration, value):
+        '''
+        Configure the McStas instrument parameters command line. 
+                
+        :param configuration: the current configuration.
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the McStas instrument parameters. 
+        :type value: dict        
+        '''
         
         instrConfig = configuration[self._dependencies['instrument']]
         
@@ -71,9 +87,21 @@ class McStasParametersConfigurator(IConfigurator):
         
     @property
     def exclude(self):
+        '''
+        Returns the McStas instrument parameters to exclude from the McStas command-line.
+        
+        :return: the McStas instrument parameters to exclude from the McStas command-line.
+        :rtype: list of str
+        '''
         
         return self._exclude
 
     def get_information(self):
+        '''
+        Returns the McStas parameters as they would be input when using McStas in command line mode.
+        
+        :return: the McStas command-line parameters.
+        :rtype: str
+        '''
         
         return "McStas command line parameters:%s" % self["value"]

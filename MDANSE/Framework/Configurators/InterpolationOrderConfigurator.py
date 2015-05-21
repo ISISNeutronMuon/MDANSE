@@ -37,9 +37,15 @@ class InterpolationOrderConfigurator(SingleChoiceConfigurator):
     """
     This configurator allows to input the interpolation order to be applied when deriving velocities 
     from atomic coordinates.
-    The value should be higher than 0 if velocities are not provided with the trajectory.
 
-    :note: this configurator depends on 'trajectory' configurator to be configured
+    The allowed value are 'no interpolation','1st order','2nd order','3rd order','4th order' or '5th order', the former 
+    one will not interpolate the velocities from atomic coordinates but will directly use the velocities stored in the 
+    trajectory file.
+    
+    :attention: it is of paramount importance for the trajectory to be sampled with a very low time step to get accurate
+    velocities interpolated from atomic coordinates. 
+
+    :note: this configurator depends on 'trajectory' configurator to be configured.
     """
     
     type = "interpolation_order"

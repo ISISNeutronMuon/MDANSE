@@ -36,11 +36,11 @@ from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
     
 class InputDirectoryConfigurator(IConfigurator):
-    """
-     This Configurator allows to set an input directory.
+    '''
+    This Configurator allows to set an input directory.
      
-     The directory will be created at configuration time if it does not exist.
-    """
+    :attention: The directory will be created at configuration time if it does not exist.
+    '''
     
     type = "input_directory"
     
