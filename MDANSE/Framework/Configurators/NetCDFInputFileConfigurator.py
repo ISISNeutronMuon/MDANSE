@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 from Scientific.IO.NetCDF import NetCDFFile
@@ -37,7 +37,12 @@ from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfig
 
 class NetCDFInputFileConfigurator(InputFileConfigurator):
     """
-    This configurator allows to input a NetCDF file.
+    This configurator allows to input a NetCDF file as input file.
+    
+    NetCDF is a set of software libraries and self-describing, machine-independent data formats that 
+    support the creation, access, and sharing of array-oriented scientific data.
+    
+    For more information, please consult the NetCDF website: http://www.unidata.ucar.edu/software/netcdf/
     """
     
     type = 'netcdf_input_file'
@@ -45,13 +50,29 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
     _default = ''
         
     def __init__(self, name, variables=None, **kwargs):
+        '''
+        Initializes the configurator.
         
+        :param name: the name of the configurator as it will be appear in the configuration.
+        :type name: str
+        :param variables: the list of NetCDF variables that must be present in the input NetCDF file or None if there is no compulsory variable.
+        :type variables: list of str or None
+        '''        
+
         # The base class constructor.
         InputFileConfigurator.__init__(self, name, **kwargs)
         
         self._variables = variables if variables is not None else []
            
     def configure(self, configuration, value):
+        '''
+        Configure a MMTK trajectory file. 
+                
+        :param configuration: the current configuration.
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the path for the MMTK trajectory file.
+        :type value: str 
+        '''
                 
         InputFileConfigurator.configure(self, configuration, value)
         
@@ -69,9 +90,28 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
 
     @property
     def variables(self):
+        '''
+        Returns the list of NetCDF variables that must be present in the NetCDF file.
+        
+        :return: the list of NetCDF variables that must be present in the NetCDF file.
+        :rtype: list of str
+        '''
         
         return self._variables
 
     def get_information(self):
+        '''
+        Returns some basic informations about the contents of the MMTK trajectory file.
         
-        return "NetCDF input file: %r" % self["value"]
+        :return: the informations about the contents of the MMTK trajectory file.
+        :rtype: str
+        '''
+        
+        info = ["NetCDF input file: %r" % self["value"]]
+        
+        if self.has_key('instance'):
+            info.append("Contains the following variables:")
+            for v in self['instance'].variables:
+                info.append(v)
+            
+        return "\n".join(info)

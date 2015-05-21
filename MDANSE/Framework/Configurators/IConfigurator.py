@@ -79,8 +79,8 @@ class ConfiguratorError(Error):
 class IConfigurator(dict):
     '''
     This class implements the base class for configurator objects. A configurator object is a dictionary-derived object that is used 
-    to configure one input value of a given configuration. Once the input value is configured, the dictionary is updated with keys/values 
-    that depend on the type of configurator type in use.
+    to configure one item of a given configuration. Once the input value given for that item is configured, the dictionary is updated 
+    with keys/values providing information about this item.
     
     A configurator is not designed to be used as a stand-alone object. It should be used within the scope of a Configurable object that 
     will store a complete configuration for a given task (e.g. job, Q vectors, instrument resolution ...).

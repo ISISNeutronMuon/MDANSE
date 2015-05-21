@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import os
@@ -37,8 +37,14 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, Configur
                 
 class OutputFilesConfigurator(IConfigurator):
     """
-    The output file configurator allow to select : the output directory, 
-    the basename, and the format of the file resulting from the analysis.
+    This configurator allows to define the output directory, the basename, and the format(s) of the output file(s) resulting from an 
+    analysis.
+    
+    Once configured, this configurator will provide a list of files built by joining the given output directory, the basename and the 
+    extensions corresponding to the input file formats.
+    
+    Currently MDANSE supports ASCII, NetCDF and SVG file formats. To define a new output file format for an analysis, you must inherit from
+    MDANSE.Framework.Formats.IFormat.IFormat interface.   
     """
     
     type = 'output_files'
@@ -46,12 +52,29 @@ class OutputFilesConfigurator(IConfigurator):
     _default = (os.getcwd(), "output", ["netcdf"])
                     
     def __init__(self, name, formats=None, **kwargs):
+        '''
+        Initializes the configurator.
+        
+        :param name: the name of the configurator as it will be appear in the configuration.
+        :type name: str
+        :param formats: the list of output file formats suported.  
+        :type formats: list of str
+        '''        
                         
         IConfigurator.__init__(self, name, **kwargs)
 
         self._formats = formats if formats is not None else ["netcdf"]
     
     def configure(self, configuration, value):
+        '''
+        Configure a set of output files for an analysis. 
+                
+        :param configuration: the current configuration.
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the output files specifications. Must be a 3-tuple whose 1st element if the output directory, 2nd element the basename and 3rd element
+        a list of file formats.
+        :type value: 3-tuple
+        '''
         
         dirname, basename, formats = value
                 
@@ -85,9 +108,21 @@ class OutputFilesConfigurator(IConfigurator):
 
     @property
     def formats(self):
+        '''
+        Returns the list of output file formats suported.
+        
+        :return: the list of file formats suported.
+        :rtype: list of str
+        '''
         return self._formats
 
     def get_information(self):
+        '''
+        Returns string information about this configurator.
+        
+        :return: the information about this configurator.
+        :rtype: str
+        '''
         
         info = ["Input files:\n"]
         for f in self["files"]:

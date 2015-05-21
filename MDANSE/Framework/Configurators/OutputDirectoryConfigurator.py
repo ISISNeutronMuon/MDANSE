@@ -45,12 +45,28 @@ class OutputDirectoryConfigurator(IConfigurator):
     _default = os.getcwd()
 
     def __init__(self, name, new=False, **kwargs):
+        '''
+        Initializes the configurator.
+        
+        :param name: the name of the configurator as it will be appear in the configuration.
+        :type name: str
+        :param new: if True the output directory path will be checked for being new. 
+        :type new: bool
+        '''        
                 
         IConfigurator.__init__(self, name, **kwargs)
         
         self._new = new
 
     def configure(self, configuration, value):
+        '''
+        Configure an output directory. 
+                
+        :param configuration: the current configuration.
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the path for the output directory.
+        :type value: str 
+        '''
         
         value = PLATFORM.get_path(value)
         
@@ -59,12 +75,13 @@ class OutputDirectoryConfigurator(IConfigurator):
                 raise ConfiguratorError("the output directory must not exist", self)
                                                 
         self['value'] = value        
-        
-    @property
-    def new(self):
-        
-        return self._new
-    
+            
     def get_information(self):
+        '''
+        Returns string information about this configurator.
+        
+        :return: the information about this configurator.
+        :rtype: str
+        '''
         
         return "Output directory: %r" % self['value']

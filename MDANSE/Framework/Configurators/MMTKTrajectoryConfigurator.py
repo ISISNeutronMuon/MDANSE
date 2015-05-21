@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import os
@@ -37,16 +37,30 @@ from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 
 class MMTKNetCDFTrajectoryConfigurator(InputFileConfigurator):
-    """
-    MMTK trajectory file is a NetCDF file that store various data related to 
-    molecular dynamics : atomic positions, velocities, energies, energy gradients etc. 
-    """
+    '''
+    This configurator allow to input a MMTK trajectory file.
+    
+    MMTK trajectory file is the format used in MDANSE to store Molecular Dynamics trajectories. It is a NetCDF file 
+    that store various data related to the molecular dynamics : atomic positions, velocities, energies, energy gradients etc...
+    
+    To use trajectories derived from MD packages different from MMTK, it is compulsory to convert them before to a MMTK trajectory file.
+    
+    :attention: once configured, the MMTK trajectory file will be opened for reading.    
+    '''
     
     type = 'mmtk_trajectory'
     
-    _default = os.path.join('waterbox_in_periodic_universe.nc')
+    _default = 'waterbox_in_periodic_universe.nc'
                         
     def configure(self, configuration, value):
+        '''
+        Configure a MMTK trajectory file. 
+                
+        :param configuration: the current configuration.
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the path for the MMTK trajectory file.
+        :type value: str 
+        '''
                 
         InputFileConfigurator.configure(self, configuration, value)
         
@@ -70,6 +84,12 @@ class MMTKNetCDFTrajectoryConfigurator(InputFileConfigurator):
         self['has_velocities'] = 'velocities' in self['instance'].variables()
                 
     def get_information(self):
+        '''
+        Returns some basic informations about the contents of the MMTK trajectory file.
+        
+        :return: the informations about the contents of the MMTK trajectory file.
+        :rtype: str
+        '''
                 
         info = ["MMTK input trajectory: %r\n" % self["filename"]]
         info.append("Number of steps: %d\n" % self["length"])

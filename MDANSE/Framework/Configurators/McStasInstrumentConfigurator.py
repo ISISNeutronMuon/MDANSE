@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
