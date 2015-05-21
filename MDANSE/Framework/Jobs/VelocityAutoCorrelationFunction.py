@@ -25,9 +25,9 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Apr 10, 2015
+Created on May 21, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import collections
@@ -35,19 +35,38 @@ import collections
 from MDANSE import ELEMENTS
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import correlation, differentiate, get_spectrum
+from MDANSE.Mathematics.Signal import correlation, differentiate, normalize
 from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
-class DensityOfStates(IJob):
+class VelocityAutoCorrelationFunction(IJob):
     """
-    The Density Of States correspond, for a set of atoms, to the calculation of the 
-    power spectrum of the Velocity AutoCorrelation Function (VACF), which in case of 
-    the mass-weighted VACF defines the phonon discrete Density Of States.
+    The Velocity AutoCorrelation Function (VACF) is a property describing
+    the dynamics of a molecular system. It reveals the underlying nature of the forces acting
+    on the system by computing the cartesian density of states for a set of atoms.
+
+    In a molecular system that would be made of non interacting particles, the velocities would
+    be constant at any time triggering the VACF to be a constant value. Now, if we think about a
+    system with small interactions such as in a gas-phase, the magnitude and direction of the velocity
+    of a particle will change gradually over time due to its collision with the other particles of the
+    molecular system. In such a system, the VACF will be represented by a decaying exponential.
+    
+    In the case of solid phase, the interaction are much stronger and, as a results, the atoms
+    are bound to a given position from which they will move backwards and forwards oscillating
+    between positive and negative values of their velocity. The oscillations will not be of equal
+    magnitude however, but will decay in time, because there are still perturbative forces acting on
+    the atoms to disrupt the perfection of their oscillatory motion. So, in that case the VACF will
+    look like a damped harmonic motion.
+    
+    Finally, in the case of liquid phase, the atoms have more freedom than in solid phase and
+    because of the diffusion process, the oscillatory motion seen in solid phase will be cancelled quite
+    rapidly depending on the density of the system. So, the VACF will just have one very damped
+    oscillation before decaying to zero. This decaying time can be considered as the average time
+    for a collision between two atoms to occur before they diffuse away.
     """
 
-    type = 'dos'
+    type = 'vacf'
     
-    label = "Density Of States"
+    label = "Velocity AutoCorrelation Function"
 
     category = ('Dynamics',)
     
@@ -56,11 +75,10 @@ class DensityOfStates(IJob):
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['instrument_resolution'] = ('instrument_resolution',{'dependencies':{'trajectory':'trajectory',
-                                                                                       'frames' : 'frames'}})
     settings['interpolation_order'] = ('interpolation_order', {'label':"velocities",
                                                                     'dependencies':{'trajectory':'trajectory'}})
     settings['projection'] = ('projection', {'label':"project coordinates"})
+    settings['normalize'] = ('boolean', {'default':False})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory',
                                                                          'grouping_level':'grouping_level'}})
     settings['grouping_level'] = ('grouping_level',{})
@@ -76,21 +94,16 @@ class DensityOfStates(IJob):
         """
 
         self.numberOfSteps = self.configuration['atom_selection']['n_groups']
-
-        instrResolution = self.configuration["instrument_resolution"]        
-                
+                        
+        # Will store the time.
         self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
-        self._outputData.add("time_window","line", instrResolution["time_window"], axis="time", units="au") 
-
-        self._outputData.add("frequency","line", instrResolution["frequencies"], units='THz')
-        self._outputData.add("frequency_window","line", instrResolution["frequency_window"], axis="frequency", units="au") 
             
+        # Will store the mean square displacement evolution.
         for element in self.configuration['atom_selection']['contents'].keys():
             self._outputData.add("vacf_%s" % element,"line", (self.configuration['frames']['number'],), axis="time", units="nm2/ps2") 
-            self._outputData.add("dos_%s" % element,"line", (instrResolution['n_frequencies'],), axis="frequency", units="nm2/ps") 
+
         self._outputData.add("vacf_total","line", (self.configuration['frames']['number'],), axis="time", units="nm2/ps2")         
-        self._outputData.add("dos_total","line", (instrResolution['n_frequencies'],), axis="frequency", units="nm2/ps")        
-        
+                
     def run_step(self, index):
         """
         Runs a single step of the job.\n
@@ -104,27 +117,27 @@ class DensityOfStates(IJob):
         """
 
         # get atom index
-        indexes = self.configuration['atom_selection']["groups"][index]    
-                        
+        indexes = self.configuration['atom_selection']["groups"][index]
+                                
         series = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
                                        indexes,
                                        first=self.configuration['frames']['first'],
                                        last=self.configuration['frames']['last']+1,
                                        step=self.configuration['frames']['step'],
                                        variable=self.configuration['interpolation_order']["variable"])
-
+             
         val = self.configuration["interpolation_order"]["value"]
         
-        if val != "no interpolation":     
+        if val != "no interpolation":
             for axis in range(3):
                 series[:,axis] = differentiate(series[:,axis], order=val, dt=self.configuration['frames']['time_step'])
 
-        if self.configuration["projection"]["projector"] is not None:
-            series = self.configuration['projection']["projector"](series)
-            
+        series = self.configuration['projection']["projector"](series)
+                        
         atomicVACF = correlation(series,axis=0,reduce=1)
-
+        
         return index, atomicVACF
+
 
     def combine(self, index, x):
         """
@@ -138,34 +151,33 @@ class DensityOfStates(IJob):
         element = self.configuration['atom_selection']['elements'][index][0]
         
         self._outputData["vacf_%s" % element] += x
-                
+        
+        
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
-        """
-        
-        for element, number in self.configuration['atom_selection']['n_atoms_per_element'].items():
-            self._outputData["vacf_%s" % element][:] /= number
-            self._outputData["dos_%s" % element][:] = get_spectrum(self._outputData["vacf_%s" % element],
-                                                                   self.configuration["instrument_resolution"]["time_window"],
-                                                                   self.configuration["instrument_resolution"]["time_step"])
+        """      
 
+        # The MSDs per element are averaged.
+        for element, number in self.configuration['atom_selection']['n_atoms_per_element'].items():
+            self._outputData["vacf_%s" % element] /= number
+
+        if self.configuration['normalize']["value"]:
+            for element in self.configuration['atom_selection']['n_atoms_per_element'].keys():
+                self._outputData["vacf_%s" % element] = normalize(self._outputData["vacf_%s" % element], axis=0)
+                    
         props = dict([[k,ELEMENTS[k,self.configuration["weights"]["property"]]] for k in self.configuration['atom_selection']['n_atoms_per_element'].keys()])
-        
+                    
         vacfTotal = weight(props,
                            self._outputData,
                            self.configuration['atom_selection']['n_atoms_per_element'],
                            1,
                            "vacf_%s")
         self._outputData["vacf_total"][:] = vacfTotal
-        
-        dosTotal = weight(props,
-                          self._outputData,
-                          self.configuration['atom_selection']['n_atoms_per_element'],
-                          1,
-                          "dos_%s")
-        self._outputData["dos_total"][:] = dosTotal        
-        
+                
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
         
         self.configuration['trajectory']['instance'].close()     
+  
+        
+    

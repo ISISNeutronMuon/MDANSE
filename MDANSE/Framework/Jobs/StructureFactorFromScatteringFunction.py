@@ -31,9 +31,7 @@ Created on Apr 10, 2015
 '''
 
 import collections
-import os
 
-from MDANSE import PREFERENCES, REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import get_spectrum
 
@@ -88,8 +86,8 @@ class StructureFactorFromScatteringFunction(IJob):
                 self._outputData["s(q,f)_%s" % suffix][:] = get_spectrum(v.getValue(),
                                                                          self.configuration["instrument_resolution"]["time_window"],
                                                                          self.configuration["instrument_resolution"]["time_step"],
-                                                                         axis=1)        
-                
+                                                                         axis=1)
+                        
     def run_step(self, index):
         """
         Runs a single step of the job.\n
@@ -100,9 +98,7 @@ class StructureFactorFromScatteringFunction(IJob):
             #. index (int): The index of the step. 
         """
         
-
         return index, None
-
 
     def combine(self, index, x):
         """
@@ -113,7 +109,6 @@ class StructureFactorFromScatteringFunction(IJob):
         """
         pass
 
-
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
@@ -122,5 +117,3 @@ class StructureFactorFromScatteringFunction(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
         
         self.configuration['netcdf_input_file']['instance'].close()
-        
-                

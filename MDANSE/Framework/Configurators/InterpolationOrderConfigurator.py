@@ -31,29 +31,46 @@ Created on Mar 30, 2015
 '''
 
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
-from MDANSE.Framework.Configurators.IntegerConfigurator import IntegerConfigurator
-from MDANSE.Mathematics.Signal import INTERPOLATION_ORDER
+from MDANSE.Framework.Configurators.SingleChoiceConfigurator import SingleChoiceConfigurator
             
-class InterpolationOrderConfigurator(IntegerConfigurator):
+class InterpolationOrderConfigurator(SingleChoiceConfigurator):
     """
-    This configurator allows to set as input the order of the interpolation apply when deriving velocities 
-    from atomic coordinates to the atomic trajectories.
+    This configurator allows to input the interpolation order to be applied when deriving velocities 
+    from atomic coordinates.
     The value should be higher than 0 if velocities are not provided with the trajectory.
+
+    :note: this configurator depends on 'trajectory' configurator to be configured
     """
     
     type = "interpolation_order"
     
-    _default = 0
-
+    _default = "no interpolation"
+    
+    orders = ["no interpolation","1st order","2nd order","3rd order","4th order","5th order"] 
+    
     def __init__(self, name, **kwargs):
+        '''
+        Initializes the configurator.
+        
+        :param name: the name of the configurator as it will be appear in the configuration.
+        :type name: str.
+        '''
                 
-        IntegerConfigurator.__init__(self, name, choices=range(-1,len(INTERPOLATION_ORDER)), **kwargs)
+        SingleChoiceConfigurator.__init__(self, name, choices=InterpolationOrderConfigurator.orders, **kwargs)
 
     def configure(self, configuration, value):
+        '''
+        Configure the input interpolation order.
+                
+        :param configuration: the current configuration.
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object.
+        :param value: the interpolation order to be configured.
+        :type value: str one of 'no interpolation','1st order','2nd order','3rd order','4th order' or '5th order'.
+        '''
         
-        IntegerConfigurator.configure(self, configuration, value)
+        SingleChoiceConfigurator.configure(self, configuration, value)
         
-        if value == -1:
+        if value == "no interpolation":
 
             trajConfig = configuration[self._dependencies['trajectory']]
 
@@ -65,10 +82,3 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
         else:
 
             self["variable"] = "configuration"
-            
-    def get_information(self):
-        
-        if self["value"] == -1:
-            return "No velocities interpolation"
-        else:
-            return "Velocities interpolated from atomic coordinates"

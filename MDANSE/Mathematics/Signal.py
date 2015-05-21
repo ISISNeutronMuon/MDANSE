@@ -7,34 +7,34 @@ from MDANSE.Core.Error import Error
 class SignalError(Error):
     pass
 
-INTERPOLATION_ORDER = []
+INTERPOLATION_ORDER = {}
 
-INTERPOLATION_ORDER.append(numpy.array([[-3., 4.,-1.],
-                                        [-1., 0., 1.],
-                                        [ 1.,-4., 3.]], dtype=numpy.float64))
+INTERPOLATION_ORDER["1st order"] = numpy.array([[-3., 4.,-1.],
+                                                [-1., 0., 1.],
+                                                [ 1.,-4., 3.]], dtype=numpy.float64)
 
 
-INTERPOLATION_ORDER.append(numpy.array([[-3., 4.,-1.],
-                                        [-1., 0., 1.],
-                                        [ 1.,-4., 3.]], dtype=numpy.float64))
+INTERPOLATION_ORDER["2nd order"] = numpy.array([[-3., 4.,-1.],
+                                                [-1., 0., 1.],
+                                                [ 1.,-4., 3.]], dtype=numpy.float64)
 
-INTERPOLATION_ORDER.append(numpy.array([[-11., 18., -9., 2.],
-                                        [ -2., -3.,  6.,-1.],
-                                        [  1., -6.,  3., 2.],
-                                        [ -2.,  9.,-18.,11.]], dtype=numpy.float64))
+INTERPOLATION_ORDER["3rd order"] = numpy.array([[-11., 18., -9., 2.],
+                                                [ -2., -3.,  6.,-1.],
+                                                [  1., -6.,  3., 2.],
+                                                [ -2.,  9.,-18.,11.]], dtype=numpy.float64)
 
-INTERPOLATION_ORDER.append(numpy.array([[-50., 96.,-72., 32.,-6.],
-                                        [ -6.,-20., 36.,-12., 2.],
-                                        [  2.,-16.,  0., 16.,-2.],
-                                        [ -2., 12.,-36., 20., 6.],
-                                        [  6.,-32., 72.,-96.,50.]], dtype=numpy.float64))
+INTERPOLATION_ORDER["4th order"] = numpy.array([[-50., 96.,-72., 32.,-6.],
+                                                [ -6.,-20., 36.,-12., 2.],
+                                                [  2.,-16.,  0., 16.,-2.],
+                                                [ -2., 12.,-36., 20., 6.],
+                                                [  6.,-32., 72.,-96.,50.]], dtype=numpy.float64)
 
-INTERPOLATION_ORDER.append(numpy.array([[-274., 600.,-600., 400.,-150., 24.],
-                                        [ -24.,-130., 240.,-120.,  40., -6.],
-                                        [   6., -60., -40., 120., -30.,  4.],
-                                        [  -4.,  30.,-120.,  40.,  60., -6.],
-                                        [   6., -40., 120.,-240., 130., 24.],
-                                        [ -24., 150.,-400., 600.,-600.,274.]], dtype=numpy.float64))
+INTERPOLATION_ORDER["5th order"] = numpy.array([[-274., 600.,-600., 400.,-150., 24.],
+                                                [ -24.,-130., 240.,-120.,  40., -6.],
+                                                [   6., -60., -40., 120., -30.,  4.],
+                                                [  -4.,  30.,-120.,  40.,  60., -6.],
+                                                [   6., -40., 120.,-240., 130., 24.],
+                                                [ -24., 150.,-400., 600.,-600.,274.]], dtype=numpy.float64)
 
 
 def correlation(x, y=None, axis=0, sumOverAxis=None, average=None):
@@ -96,19 +96,19 @@ def normalize(x, axis=0):
     return nx
     
 
-def differentiate(a, dt=1.0, order=0):
+def differentiate(a, dt=1.0, order="1st order"):
         
-    try:
-        coefs = INTERPOLATION_ORDER[order]
-    except TypeError:
-        raise SignalError("Invalid type for differentiation order")
-    except IndexError:
+    if not INTERPOLATION_ORDER.has_key(order):
         raise SignalError("Invalid differentiation order")
+        
+    coefs = INTERPOLATION_ORDER[order]
         
     # outputSeries is the output resulting from the differentiation
     ts = numpy.zeros(a.shape, dtype=numpy.float)
+    
+    fact = 1.0/dt
         
-    if order == 0:
+    if order == "1st order":
                         
         ts[0] = numpy.add.reduce(coefs[0,:]*a[:3])
         ts[-1] = numpy.add.reduce(coefs[2,:]*a[-3:])
@@ -116,8 +116,10 @@ def differentiate(a, dt=1.0, order=0):
         gj = a[1:] - a[:-1]
         ts[1:-1] = (gj[1:]+gj[:-1])
 
+        fact /= 2.0
+
     # Case of the order 2
-    elif order == 1:
+    elif order == "2nd order":
 
         ts[0]  = numpy.add.reduce(coefs[0,:]*a[:3])
         ts[-1] = numpy.add.reduce(coefs[2,:]*a[-3:])
@@ -128,8 +130,10 @@ def differentiate(a, dt=1.0, order=0):
         gj[:,2] = coefs[1,2]*a[2:]
         ts[1:-1] = numpy.add.reduce(gj,-1)
 
+        fact /= 2.0
+
     # Case of the order 3
-    elif order == 2:
+    elif order == "3rd order":
 
         # Special case for the first and last elements
         ts[0]  = numpy.add.reduce(coefs[0,:]*a[:4])
@@ -144,8 +148,10 @@ def differentiate(a, dt=1.0, order=0):
         gj[:,3] = coefs[2,3]*a[3:]
         ts[2:-1] = numpy.add.reduce(gj,-1)
 
+        fact /= 6.0
+
     # Case of the order 4
-    elif order == 3:
+    elif order == "4th order":
 
         # Special case for the first and last elements
         ts[0]  = numpy.add.reduce(coefs[0,:]*a[:5])
@@ -162,8 +168,10 @@ def differentiate(a, dt=1.0, order=0):
         gj[:,4] = coefs[2,4]*a[4:]
         ts[2:-2] = numpy.add.reduce(gj,-1)
 
+        fact /= 24.0
+
     # Case of the order 5
-    elif order == 4:
+    elif order == "5th order":
 
         # Special case for the first and last elements
         ts[0]  = numpy.add.reduce(coefs[0,:]*a[:6])
@@ -182,9 +190,8 @@ def differentiate(a, dt=1.0, order=0):
         gj[:,5] = coefs[3,5]*a[5:]
         ts[3:-2] = numpy.add.reduce(gj,-1)
 
+        fact /= 120.0
 
-    fact = 1.0/(dt*math.factorial(max(order+1,2)))
-    
     ts *= fact
         
     return ts        
