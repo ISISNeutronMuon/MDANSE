@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 
@@ -35,15 +35,29 @@ from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
         
 class ProjectionConfigurator(IConfigurator):
-    """
-    This configurator allows to define a projection axis. 
-    """
+    '''
+    This configurator allows to define a projector for atomic coordinates.
+    
+    Planar and axial projections are supported by MDANSE while a null projector, that does not project the coordinates, has been introduced 
+    in MDANSE.Framework.Projectors.IProjector.IProjector for the sake of homogeneity.
+    '''
 
     type = 'projection'
 
     _default = None
                         
     def configure(self, configuration, value):
+        '''
+        Configure a projector. 
+                
+        :param configuration: the current configuration.
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the input projector definition. It must be a 2-tuple whose 1st element if the name of the projector (one of 'null','axial' or 'planar')
+        and the 2nd element the parameters for hte selected projector (None for 'null', a Scientific.Vector for 'axial' and a list of two Scientific.Vector for 
+        'planar').
+        a list of file formats.
+        :type value: 2-tuple
+        '''
         
         if value is None:
             value = ('null',None)
@@ -67,5 +81,11 @@ class ProjectionConfigurator(IConfigurator):
             self["axis"] = self["projector"].axis
 
     def get_information(self):
+        '''
+        Returns string information about this configurator.
+        
+        :return: the information about this configurator.
+        :rtype: str
+        '''
         
         return "Projection along %r axis:" % self["axis"] 

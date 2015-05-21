@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import ast
@@ -36,7 +36,11 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
         
 class PythonObjectConfigurator(IConfigurator):
     """
-    This Configurator allows to input any kind of basic python object.
+    This Configurator allows to input and evaluate basic python object.
+    
+    The python object supported are strings, numbers, tuples, lists, dicts, booleans and None type.
+    
+    :note: this configurator is based on a literal and safe evaluation of the input using ast standard library module.
     """
     
     type = 'python_object'
@@ -44,11 +48,25 @@ class PythonObjectConfigurator(IConfigurator):
     _default = '""'
 
     def configure(self, configuration, value):
+        '''
+        Configure a python object. 
+                
+        :param configuration: the current configuration.
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the python object to be configured and evaluated.
+        :type value: strings, numbers, tuples, lists, dicts, booleans or None type.
+        '''
         
         value = ast.literal_eval(repr(value))
                                 
         self['value'] = value
 
     def get_information(self):
+        '''
+        Returns string information about this configurator.
+        
+        :return: the information about this configurator.
+        :rtype: str
+        '''
         
         return "Python object: %r" % self['value']
