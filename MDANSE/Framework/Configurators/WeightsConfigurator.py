@@ -66,6 +66,9 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         :type value: one of the numeric properties of MDANSE.Data.ElementsDatabase.ElementsDatabase
         '''
         
+        if not isinstance(value,basestring):
+            raise ConfiguratorError("Invalid type for weight. Must be a string.", self)
+        
         value = value.lower()
         
         if not value in ELEMENTS.numericProperties:
