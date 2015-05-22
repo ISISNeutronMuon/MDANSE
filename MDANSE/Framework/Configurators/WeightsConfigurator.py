@@ -25,9 +25,9 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 30, 2015
+Created on May 22, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 from MDANSE import ELEMENTS
@@ -36,22 +36,35 @@ from MDANSE.Framework.Configurators.SingleChoiceConfigurator import SingleChoice
 
 class WeightsConfigurator(SingleChoiceConfigurator):
     """
-    This configurator allows to choose the way the relevant quantities will be weighted during the calculation
-    The most frequently used weights are defined as constant into the periodic table database.
-    you can access to the table by clicking into the "atom" icon on the main toolbar
+    This configurator allows to select how the properties that depends on atom type will be weighted when computing
+    the total contribution of all atoms.
+    
+    Any numeric property defined in MDANSE.Data.ElementsDatabase.ElementsDatabase can be used as a weigh.
     """
     
     type = 'weights'
     
     _default = "equal"
            
-    def __init__(self, name, choices=None, **kwargs):
-        
-        choices = choices if choices is not None else ELEMENTS.numericProperties
-        
-        SingleChoiceConfigurator.__init__(self, name, choices=choices, **kwargs)
+    def __init__(self, name, **kwargs):
+        '''
+        Initializes the configurator.
+
+        :param name: the name of the configurator as it will appear in the configuration.
+        :type name: str
+        '''
+                
+        SingleChoiceConfigurator.__init__(self, name, choices=ELEMENTS.numericProperties, **kwargs)
 
     def configure(self, configuration, value):
+        '''
+        Configure the weight.
+                
+        :param configuration: the current configuration.
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the name of the weight to use.
+        :type value: one of the numeric properties of MDANSE.Data.ElementsDatabase.ElementsDatabase
+        '''
         
         value = value.lower()
         
@@ -61,5 +74,11 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         self['property'] = value
 
     def get_information(self):
+        '''
+        Returns string information about this configurator.
         
-        return "Weighting scheme:%s" % self["property"]
+        :return: the information about this configurator.
+        :rtype: str
+        '''
+        
+        return "selected weight: %s" % self["property"]

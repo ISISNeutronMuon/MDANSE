@@ -48,7 +48,7 @@ class InputFileConfigurator(IConfigurator):
         '''
         Initializes the configurator object.
         
-        :param name: the name of the configurator as it will be appear in the configuration.
+        :param name: the name of the configurator as it will appear in the configuration.
         :type name: str
         :param wildcard: the wildcard used to filter the file. This will be used in MDANSE GUI when
         browsing for the input file.

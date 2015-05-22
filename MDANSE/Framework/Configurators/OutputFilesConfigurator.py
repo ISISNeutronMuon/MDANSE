@@ -25,7 +25,7 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 30, 2015
+Created on May 21, 2015
 
 @author: Eric C. Pellegrini
 '''
@@ -55,7 +55,7 @@ class OutputFilesConfigurator(IConfigurator):
         '''
         Initializes the configurator.
         
-        :param name: the name of the configurator as it will be appear in the configuration.
+        :param name: the name of the configurator as it will appear in the configuration.
         :type name: str
         :param formats: the list of output file formats suported.  
         :type formats: list of str

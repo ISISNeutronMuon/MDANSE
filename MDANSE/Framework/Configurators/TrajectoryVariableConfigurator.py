@@ -25,16 +25,18 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 30, 2015
+Created on May 22, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
           
 class TrajectoryVariableConfigurator(IConfigurator):
     """
-    This configurator allows to get a variable stored in a MMTK trajectory
+    This configurator allows to check that a given variable is actually present in a MMTK trajectory file.
+
+    :note: this configurator depends on 'trajectory' configurator to be configured
     """
         
     type = 'trajectory_variable'
@@ -42,6 +44,14 @@ class TrajectoryVariableConfigurator(IConfigurator):
     _default = "velocities"
         
     def configure(self, configuration, value):
+        '''
+        Configure the MMTK trajectory variable.
+                
+        :param configuration: the current configuration
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the name of the trajectory variable as it should appear in the MMTK trajectory file.
+        :type value: str
+        '''
                 
         trajConfig = configuration[self._dependencies['trajectory']]
        
@@ -51,5 +61,11 @@ class TrajectoryVariableConfigurator(IConfigurator):
         self['value'] = value
 
     def get_information(self):
+        '''
+        Returns string information about this configurator.
+        
+        :return: the information about this configurator.
+        :rtype: str
+        '''
         
         return "Selected variable: %r" % self["value"]

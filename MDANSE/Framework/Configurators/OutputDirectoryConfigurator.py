@@ -25,7 +25,7 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 30, 2015
+Created on May 21, 2015
 
 @author: pellegrini
 '''
@@ -48,7 +48,7 @@ class OutputDirectoryConfigurator(IConfigurator):
         '''
         Initializes the configurator.
         
-        :param name: the name of the configurator as it will be appear in the configuration.
+        :param name: the name of the configurator as it will appear in the configuration.
         :type name: str
         :param new: if True the output directory path will be checked for being new. 
         :type new: bool

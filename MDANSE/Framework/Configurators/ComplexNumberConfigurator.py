@@ -46,7 +46,7 @@ class ComplexNumberConfigurator(IConfigurator):
         '''
         Initializes the configurator.
         
-        :param name: the name of the configurator as it will be appear in the configuration
+        :param name: the name of the configurator as it will appear in the configuration
         :type name: str
         :param mini: the minimum modulus allowed for the input value. If None, no restriction for the minimum.
         :type mini: float or None

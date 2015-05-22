@@ -52,7 +52,7 @@ class FramesConfigurator(RangeConfigurator):
         '''
         Initializes the configurator.
         
-        :param name: the name of the configurator as it will be appear in the configuration
+        :param name: the name of the configurator as it will appear in the configuration.
         :type name: str
         '''
 
@@ -60,12 +60,12 @@ class FramesConfigurator(RangeConfigurator):
              
     def configure(self, configuration, value):
         '''
-        Configure an input value.
+        Configure the frames range that will be used to perform an analysis.
                 
         :param configuration: the current configuration
         :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the input value
-        :type value: 3-tuples, 'all' or None
+        :type value: 3-tuple, 'all' or None
         '''
                                         
         trajConfig = configuration[self._dependencies['trajectory']]

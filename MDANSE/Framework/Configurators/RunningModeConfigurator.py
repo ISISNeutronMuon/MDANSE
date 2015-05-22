@@ -25,9 +25,9 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 30, 2015
+Created on May 22, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 from MDANSE import PLATFORM
@@ -35,22 +35,34 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, Configur
                         
 class RunningModeConfigurator(IConfigurator):
     """
-    This configurator allow to choose the mode use to run the calculation.
-    choose among "monoprocessor" or "multiprocessor", 
-    and also, in the second case, the number of processors getting involve.
-    the option "remote", is not yet available.
+    This configurator allows to choose the mode used to run the calculation.
+    
+    MDANSE currently support monoprocessor or multiprocessor (SMP) running modes. In the laster case, you have to specify
+    the number of slots used for running the analysis.
     """
 
     type = 'running_mode'
     
-    availablesModes = ["monoprocessor","multiprocessor","remote"]
+    availablesModes = ["monoprocessor","multiprocessor"]
     
     _default = ("monoprocessor", 1)                
 
     def configure(self, configuration, value):
+        '''
+        Configure the running mode.
                 
-        mode = value[0].lower()
-        
+        :param configuration: the current configuration
+        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :param value: the running mode specification. It can be "monoprocessor" string or a 2-tuple whose first element must 
+        be "multiprocessor" string and 2nd element the number of slots allocated for running the analysis.
+        :type value: "monoprocessor" or 2-tuple
+        '''
+                
+        if isinstance(value,basestring):
+            mode = value
+        else:            
+            mode = value[0].lower()
+                    
         if not mode in self.availablesModes:
             raise ConfiguratorError("%r is not a valid running mode." % mode, self)
 
@@ -79,5 +91,11 @@ class RunningModeConfigurator(IConfigurator):
         self['slots'] = slots
 
     def get_information(self):
+        '''
+        Returns string information about this configurator.
+        
+        :return: the information about this configurator.
+        :rtype: str
+        '''
         
         return "Run in %s mode (%d slots)" % (self["mode"],self["slots"])

@@ -48,7 +48,7 @@ class McStasParametersConfigurator(IConfigurator):
         '''
         Initializes the configurator.
         
-        :param name: the name of the configurator as it will be appear in the configuration.
+        :param name: the name of the configurator as it will appear in the configuration.
         :type name: str
         :param exclude: the parameters that exclude when building the McStas instrument parameters list.
         :type exclude: list of str

@@ -25,7 +25,7 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 30, 2015
+Created on May 21, 2015
 
 @author: Eric C. Pellegrini
 '''
@@ -53,7 +53,7 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
         '''
         Initializes the configurator.
         
-        :param name: the name of the configurator as it will be appear in the configuration.
+        :param name: the name of the configurator as it will appear in the configuration.
         :type name: str
         :param variables: the list of NetCDF variables that must be present in the input NetCDF file or None if there is no compulsory variable.
         :type variables: list of str or None

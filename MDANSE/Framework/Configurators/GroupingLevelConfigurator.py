@@ -65,7 +65,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         '''
         Initializes the configurator.
         
-        :param name: the name of the configurator as it will be appear in the configuration
+        :param name: the name of the configurator as it will appear in the configuration
         :type name: str
         :param choices: the level of granularities allowed for the input value. If None all levels are allowed.
         :type choices: one of ['atom','group','residue','chain','molecule'] or None        

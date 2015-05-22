@@ -58,7 +58,7 @@ class InterpolationOrderConfigurator(SingleChoiceConfigurator):
         '''
         Initializes the configurator.
         
-        :param name: the name of the configurator as it will be appear in the configuration.
+        :param name: the name of the configurator as it will appear in the configuration.
         :type name: str.
         '''
                 
