@@ -25,14 +25,17 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 30, 2015
+Created on May 26, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 from MDANSE import REGISTRY
 
 class IHandler(object):
+    '''
+    Base class for the handlers of MDANSE logger.
+    '''
     
     __metaclass__ = REGISTRY
 

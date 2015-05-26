@@ -32,51 +32,45 @@ Created on Mar 30, 2015
 
 import ctypes
 import logging
+import os
 
 from MDANSE.Framework.Handlers.IHandler import IHandler
 
 class ColorizingStreamHandler(IHandler,logging.StreamHandler):
-    """
-    A stream handler which supports colorizing of console streams
-    under Windows, Linux and Mac OS X.
-
-    :param strm: The stream to colorize - typically ``sys.stdout``
-                 or ``sys.stderr``.
-    """
+    '''
+    This class implements a logging.Handler subclass that will log message on a terminal with a color scheme depending on the logging level.
+    
+    :copyright: 2010, 2011 Vinay Sajip
+    '''
 
     type = "terminal"
     
     # color names to indices
-    color_map = {
-        'black': 0,
-        'red': 1,
-        'green': 2,
-        'yellow': 3,
-        'blue': 4,
-        'magenta': 5,
-        'cyan': 6,
-        'white': 7,
+    color_map = {'black'   : 0,
+                 'red'     : 1,
+                 'green'   : 2,
+                 'yellow'  : 3,
+                 'blue'    : 4,
+                 'magenta' : 5,
+                 'cyan'    : 6,
+                 'white'   : 7,
     }
     
-    import os
-
     #levels to (background, foreground, bold/intense)
     if os.name == 'nt':
-        level_map = {
-            logging.DEBUG: (None, 'blue', True),
-            logging.INFO: (None, 'white', False),
-            logging.WARNING: (None, 'yellow', True),
-            logging.ERROR: (None, 'red', True),
-            logging.CRITICAL: ('red', 'white', True),
+        level_map = {logging.DEBUG    : (None, 'blue', True),
+                     logging.INFO     : (None, 'white', False),
+                     logging.WARNING  : (None, 'yellow', True),
+                     logging.ERROR    : (None, 'red', True),
+                     logging.CRITICAL : ('red', 'white', True),
         }
     else:
         "Maps levels to colour/intensity settings."
-        level_map = {
-            logging.DEBUG: (None, 'blue', False),
-            logging.INFO: (None, 'white', False),
-            logging.WARNING: (None, 'yellow', False),
-            logging.ERROR: (None, 'red', False),
-            logging.CRITICAL: ('red', 'white', True),
+        level_map = {logging.DEBUG    : (None, 'blue', False),
+                     logging.INFO     : (None, 'white', False),
+                     logging.WARNING  : (None, 'yellow', False),
+                     logging.ERROR    : (None, 'red', False),
+                     logging.CRITICAL : ('red', 'white', True),
         }
 
     csi = '\x1b['
@@ -84,11 +78,25 @@ class ColorizingStreamHandler(IHandler,logging.StreamHandler):
 
     @property
     def is_tty(self):
-        "Returns true if the handler's stream is a terminal."
+        '''
+        Returns True if the handler's stream is a terminal.
+        
+        :return: True if the handler's stream is a terminal.
+        :rtype: bool
+        '''
+        
+        
         isatty = getattr(self.stream, 'isatty', None)
+        
         return isatty and isatty()
 
     def emit(self, record):
+        '''
+        Log the specified logging record to this handler.
+        
+        :param record: the record to be logged.
+        :type record: logging.LogRecord
+        '''
         try:
             message = self.format(record)
             stream = self.stream
@@ -108,7 +116,7 @@ class ColorizingStreamHandler(IHandler,logging.StreamHandler):
 
     if os.name != 'nt':
         def output_colorized(self, message):
-            """
+            '''
             Output a colorized message.
 
             On Linux and Mac OS X, this method just writes the
@@ -119,26 +127,27 @@ class ColorizingStreamHandler(IHandler,logging.StreamHandler):
             message, extracting the sequences and making Win32 API
             calls to colorize the output.
 
-            :param message: The message to colorize and output.
-            """
+            :param message: the message to colorize and output.
+            :type message: str
+            '''
+
             self.stream.write(message)
     else:
         import re
         ansi_esc = re.compile(r'\x1b\[((?:\d+)(?:;(?:\d+))*)m')
 
-        nt_color_map = {
-            0: 0x00,    # black
-            1: 0x04,    # red
-            2: 0x02,    # green
-            3: 0x06,    # yellow
-            4: 0x01,    # blue
-            5: 0x05,    # magenta
-            6: 0x03,    # cyan
-            7: 0x07,    # white
-        }
+        nt_color_map = {0: 0x00,    # black
+                        1: 0x04,    # red
+                        2: 0x02,    # green
+                        3: 0x06,    # yellow
+                        4: 0x01,    # blue
+                        5: 0x05,    # magenta
+                        6: 0x03,    # cyan
+                        7: 0x07,    # white
+                        }
 
         def output_colorized(self, message):
-            """
+            '''
             Output a colorized message.
 
             On Linux and Mac OS X, this method just writes the
@@ -148,7 +157,10 @@ class ColorizingStreamHandler(IHandler,logging.StreamHandler):
             subset of ANSI escape sequence handling by parsing the
             message, extracting the sequences and making Win32 API
             calls to colorize the output.
-            """
+
+            :param message: the message to colorize and output.
+            :type message: str
+            '''
             
             parts = self.ansi_esc.split(message)
             write = self.stream.write
@@ -181,16 +193,19 @@ class ColorizingStreamHandler(IHandler,logging.StreamHandler):
                         ctypes.windll.kernel32.SetConsoleTextAttribute(h, color)
 
     def colorize(self, message, record):
-        """
+        '''
         Colorize a message for a logging event.
 
         This implementation uses the ``level_map`` class attribute to
         map the LogRecord's level to a colour/intensity setting, which is
         then applied to the whole message.
 
-        :param message: The message to colorize.
-        :param record: The ``LogRecord`` for the message.
-        """
+        :param message: the message to colorize.
+        :type message: str
+        :param record: the ``LogRecord`` for the message.
+        :type record: logging.Record
+        '''
+        
         if record.levelno in self.level_map:
             bg, fg, bold = self.level_map[record.levelno]
             params = []
@@ -206,15 +221,15 @@ class ColorizingStreamHandler(IHandler,logging.StreamHandler):
         return message
 
     def format(self, record):
-        """
+        '''
         Formats a record for output.
         
-        @param record: the logging record to be formated
-        @type record:logging.LogRecord  
+        :param record: the logging record to be formated.
+        :type record: logging.LogRecord  
 
-        @note: this implementation colorizes the message line, but leaves
+        :note: this implementation colorizes the message line, but leaves
         any traceback unolorized.
-        """
+        '''
                         
         message = logging.StreamHandler.format(self, record)
         if self.is_tty:
