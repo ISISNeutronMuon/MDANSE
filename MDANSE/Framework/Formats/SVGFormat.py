@@ -25,9 +25,9 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 27, 2015
+Created on May 26, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import os
@@ -46,6 +46,12 @@ def format_unit_string(unitString):
     return re.sub('[%()]','',unitString)
 
 class SVGFormat(IFormat):
+    '''
+    This class handles the writing of output variables in SVG format. Each output variable is written into separate SVG files which are further
+    added to a single archive file.
+    
+    :attention: only the 1D output variables can be written in SVG file format.
+    '''
 
     type = 'svg'
     
@@ -55,6 +61,18 @@ class SVGFormat(IFormat):
         
     @classmethod
     def write(cls,filename,data, header=""):
+        '''
+        Write a set of output variables into a set of SVG files.
+        
+        Each output variable will be output in a separate SVG file. All the SVG files will be compressed into a tar file.
+        
+        :param filename: the path to the output archive file that will contain the SVG files written for each output variable.
+        :type filename: str
+        :param data: the data to be written out.
+        :type data: dict of Framework.OutputVariables.IOutputVariable
+        :param header: the header to add to the output file.
+        :type header: str
+        '''
 
         filename = os.path.splitext(filename)[0]
         filename = "%s.tar" % filename

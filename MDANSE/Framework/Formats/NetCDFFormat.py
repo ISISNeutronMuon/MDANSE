@@ -25,9 +25,9 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 27, 2015
+Created on May 26, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import os
@@ -39,6 +39,9 @@ from Scientific.IO.NetCDF import NetCDFFile
 from MDANSE.Framework.Formats.IFormat import IFormat
 
 class NetCDFFormat(IFormat):
+    '''
+    This class handles the writing of output variables in NetCDF file format.
+    '''
 
     type = 'netcdf'
 
@@ -49,10 +52,14 @@ class NetCDFFormat(IFormat):
     @classmethod
     def write(cls, filename, data, header=""):
         '''
-        This method writes (or append) a list of MDANSE.Job.Output.OutputVariable objects to a NetCDF file.
-    
-        @param filename: the path for the output NetCDF file.
-        @type filename: string
+        Write a set of output variables into a NetCDF file.
+                
+        :param filename: the path to the output NetCDF file.
+        :type filename: str
+        :param data: the data to be written out.
+        :type data: dict of Framework.OutputVariables.IOutputVariable
+        :param header: the header to add to the output file.
+        :type header: str
         '''
                 
         filename = os.path.splitext(filename)[0]
