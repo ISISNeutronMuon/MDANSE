@@ -43,7 +43,7 @@ class GlobalMotionFilteredTrajectory(IJob):
     It is often of interest to separate global motion from internal motion, both for quantitative
     analysis and for visualization by animated display. Obviously, this can be done under the
     hypothesis that global and internal motions are decoupled within the length and timescales of
-    the analysis. nMoldyn can create Global Motion Filtered Trajectory (GMFT) by filtering
+    the analysis. MDANSE can create Global Motion Filtered Trajectory (GMFT) by filtering
     out global motions (made of the three translational and rotational degrees of freedom), either
     on the whole system or on an user-defined subset, by fitting it to a reference structure (usually
     the first frame of the MD). Global motion filtering uses a straightforward algorithm:

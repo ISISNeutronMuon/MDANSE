@@ -79,7 +79,7 @@ def databasePath(filename, directory, try_direct = False):
 
     if entries is  None:
         if directory == "Atoms":
-            LOGGER("Atom %r not found in the MMTK database. nMolDyn will create a default one." % basename,"warning")
+            LOGGER("Atom %r not found in the MMTK database. MDANSE will create a default one." % basename,"warning")
             ELEMENTS.add_element(basename,save=True)
             return os.path.join(PLATFORM.local_mmtk_database_directory(),"Atoms", basename)
         else:
@@ -87,7 +87,7 @@ def databasePath(filename, directory, try_direct = False):
     else:
         return entries
 
-# Add the path to the nmoldyn database to complete the MMTK database.
+# Add the path to the MDANSE database to complete the MMTK database.
 Database.databasePath = databasePath
 Database.path.insert(0,os.path.join(PLATFORM.package_directory(), 'Data'))
 Database.path.insert(0,PLATFORM.local_mmtk_database_directory())

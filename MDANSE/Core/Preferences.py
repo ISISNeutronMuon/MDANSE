@@ -316,10 +316,10 @@ class Preferences(object):
             raise PreferencesError("Invalid type for preferences filename: %s" % path)
         
         if not os.path.exists(path):
-            raise PreferencesError("The preferences files %s does not exists. nMolDyn will use the default preferences." % path)
+            raise PreferencesError("The preferences files %s does not exists. MDANSE will use the default preferences." % path)
                 
         try:
-            # Read the preferences and overwrites the nmoldyn default preferences.
+            # Read the preferences and overwrites the MDANSE default preferences.
             self._parser.read(path)
         except ConfigParser.ParsingError as e:
             raise PreferencesError(e)

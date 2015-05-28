@@ -93,10 +93,10 @@ class McStasVirtualInstrument(IJob):
     settings['trajectory'] = ('mmtk_trajectory', {})
     settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['sample_coh'] = ('netcdf_input_file', {"widget":'input_file', 
-                                                         "label":'nMoldyn Coherent Structure Factor',
+                                                         "label":'MDANSE Coherent Structure Factor',
                                                          "variables":['q','frequency','s(q,f)_total']})
     settings['sample_inc'] = ('netcdf_input_file', {"widget":'input_file',
-                                                         "label":'nMoldyn Incoherent Structure Factor',
+                                                         "label":'MDANSE Incoherent Structure Factor',
                                                          "variables" :['q','frequency','s(q,f)_total']})
     settings['temperature'] = ('float', {"default":298.0})
     settings['instrument'] = ('mcstas_instrument',{"label":'mcstas instrument'})
@@ -202,7 +202,7 @@ class McStasVirtualInstrument(IJob):
             if "ERROR" in line:
                 raise McStasError("An error occured during McStas run: %s" % line)
                 
-        with open(os.path.join(self.configuration["options"]["mcstas_output_directory"],"mcstas_nmoldyn.mvi"),"w") as f:
+        with open(os.path.join(self.configuration["options"]["mcstas_output_directory"],"mcstas_mdanse.mvi"),"w") as f:
             f.write(out)
             
         return index, None

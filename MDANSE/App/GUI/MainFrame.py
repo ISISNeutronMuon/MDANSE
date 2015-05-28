@@ -238,7 +238,7 @@ or directly to the MDANSE mailing list:
 
     def on_help(self, event):
 
-        webbrowser.open('http://www.ill.eu/fileadmin/users_files/img/instruments_and_support/support_facilities/computing_for_science/Computing_for_Science/CS_Software/nMoldyn/documentation/index.html')
+        webbrowser.open('https://github.com/eurydyce/MDANSE/tree/master/MDANSE')
             
     def on_load_data(self, event=None):
 
@@ -289,9 +289,10 @@ or directly to the MDANSE mailing list:
 
     def on_open_mdanse_url(self, event):
 
-        webbrowser.open('http://www.ill.eu/fr/instruments-support/computing-for-science/cs-software/all-software/nmoldyn/')
+        webbrowser.open('https://github.com/eurydyce/MDANSE/tree/master/MDANSE')
 
     def on_quit(self, event=None):
+        
         d = wx.MessageDialog(None, 'Do you really want to quit ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
         if d.ShowModal() == wx.ID_YES:
             self.Destroy()
@@ -308,7 +309,7 @@ or directly to the MDANSE mailing list:
                                                                          
     def on_start_plotter(self, event = None):
 
-        from nMOLDYN.Framework.Plugins.PlotterPlugin import PlotterFrame
+        from MDANSE.App.GUI.Framework.Plugins.Plotter.PlotterPlugin import PlotterFrame
         
         f = PlotterFrame(None)
         

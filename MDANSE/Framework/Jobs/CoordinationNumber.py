@@ -41,7 +41,7 @@ class CoordinationNumber(DistanceHistogram):
     """
     The Coordination Number computes the pair distribution function for a set of atoms, 
     it could be defined has the total number of neighbours of a central atom in a molecule or ion. 
-    In nMoldyn the definition of the Coordination Number can be seen as an extension of this previous definition, 
+    In MDANSE the definition of the Coordination Number can be seen as an extension of this previous definition, 
     indeed, we are not only defining central atom but also centers of gravity of a set of group of atoms as center.
     """
 

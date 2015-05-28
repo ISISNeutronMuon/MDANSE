@@ -266,9 +266,9 @@ class LAMMPSConverter(Converter):
 
         if self._lammpsConfig["n_bonds"] is not None:
             netcdf = self._trajectory.trajectory.file
-            netcdf.createDimension("NMOLDYN_NBONDS",self._lammpsConfig["n_bonds"])
-            netcdf.createDimension("NMOLDYN_TWO",2)
-            VAR = netcdf.createVariable("nmoldyn_bonds", numpy.dtype(numpy.int32).char, ("NMOLDYN_NBONDS","NMOLDYN_TWO"))
+            netcdf.createDimension("MDANSE_NBONDS",self._lammpsConfig["n_bonds"])
+            netcdf.createDimension("MDANSE_TWO",2)
+            VAR = netcdf.createVariable("mdanse_bonds", numpy.dtype(numpy.int32).char, ("MDANSE_NBONDS","MDANSE_TWO"))
             VAR.assignValue(self._lammpsConfig["bonds"]) 
                 
         # Close the output trajectory.

@@ -131,19 +131,17 @@ def find_data(where=".", exclude=EXCLUDE, exclude_directories=EXCLUDE_DIRECTORIE
 #################################
 
 PACKAGE_INFO = {}
-execfile('nMOLDYN/__pkginfo__.py', PACKAGE_INFO)
+execfile('MDANSE/__pkginfo__.py', PACKAGE_INFO)
 
-PACKAGES = find_packages(path=".", exclude=os.path.join("nMOLDYN","GUI"))
+PACKAGES = find_packages(path=".", exclude=os.path.join("MDANSE","App","GUI"))
 PACKAGES = PACKAGES.keys()
 
 #################################
 # Package data section
 #################################
 
-# Retrieve all the data related to the nMoldyn package.
-PACKAGE_DATA = find_package_data(where='nMOLDYN',
-                                 package='nMOLDYN',
-                                 show_ignored=False)
+# Retrieve all the data related to the MDANSE package.
+PACKAGE_DATA = find_package_data(where='MDANSE', package='MDANSE', show_ignored=False)
 
 #################################
 # User data section
@@ -156,7 +154,7 @@ DATA_FILES = []
 #################################
 
 SCRIPTS = []
-SCRIPTS.append(os.path.join(SCRIPTS_PATH,'nmoldyn_console'))
+SCRIPTS.append(os.path.join(SCRIPTS_PATH,'mdanse'))
 
 #################################
 # Extensions section
@@ -166,26 +164,26 @@ if 'linux' in sys.platform:
     (opt,) = get_config_vars('OPT')
     os.environ['OPT'] = " ".join(flag for flag in opt.split() if flag != '-Wstrict-prototypes')
 
-EXTENSIONS = [Extension('nMOLDYN.Extensions.distance_histogram',
+EXTENSIONS = [Extension('MDANSE.Extensions.distance_histogram',
                         include_dirs=INCLUDE_DIR,
                         sources = [os.path.join("Extensions",'distance_histogram.pyx')]),
-              Extension('nMOLDYN.Extensions.fast_calculation',
+              Extension('MDANSE.Extensions.fast_calculation',
                         include_dirs=INCLUDE_DIR,
                         sources = [os.path.join("Extensions",'fast_calculation.pyx')]),
-              Extension('nMOLDYN.Extensions.sas_fast_calc',
+              Extension('MDANSE.Extensions.sas_fast_calc',
                         include_dirs=INCLUDE_DIR,
                         sources = [os.path.join("Extensions",'sas_fast_calc.pyx')]),
-              Extension('nMOLDYN.Extensions.mt_fast_calc',
+              Extension('MDANSE.Extensions.mt_fast_calc',
                         include_dirs=INCLUDE_DIR,
                         sources = [os.path.join("Extensions",'mt_fast_calc.pyx')]),
-              Extension('nMOLDYN.Extensions.sd_fast_calc',
+              Extension('MDANSE.Extensions.sd_fast_calc',
                         include_dirs=INCLUDE_DIR,
                         sources = [os.path.join("Extensions",'sd_fast_calc.pyx')]),
-              Extension('nMOLDYN.Extensions.mic_fast_calc', 
+              Extension('MDANSE.Extensions.mic_fast_calc', 
                         include_dirs=INCLUDE_DIR,
                         sources = [os.path.join("Extensions",'mic_fast_calc.pyx')],
                         language="c++"),
-              Extension('nMOLDYN.Extensions.qhull',
+              Extension('MDANSE.Extensions.qhull',
                         include_dirs  = QHULL_INCLUDE_DIR,
                         sources =  glob.glob(os.path.join(QHULL_DIR, 'src','*.c')) + [os.path.join("Extensions",'qhull.pyx')],
                         define_macros = [('qh_QHpointer','1')])
@@ -198,7 +196,7 @@ class ModifiedBuildScripts(build_scripts):
         build_scripts.finalize_options(self)
 
         if self.distribution.command_obj['build'].gui:
-            self.scripts.append(os.path.join(SCRIPTS_PATH,'nmoldyn_gui'))
+            self.scripts.append(os.path.join(SCRIPTS_PATH,'mdanse_gui'))
                     
 
 class ModifiedBuildPy(build_py):
@@ -208,16 +206,16 @@ class ModifiedBuildPy(build_py):
         build_py.finalize_options(self)
 
         if self.distribution.command_obj['build'].gui:
-            self.packages.append('nMOLDYN.GUI')
-            self.packages.extend(find_packages(path=os.path.join("nMOLDYN","GUI"), base="nMOLDYN.GUI").keys())
+            self.packages.append('MDANSE.App.GUI')
+            self.packages.extend(find_packages(path=os.path.join("MDANSE","App","GUI"), base="MDANSE.App.GUI").keys())
              
         self.data_files = self.get_data_files()
 
 
 class ModifiedBuild(build):
     
-    user_options = build.user_options + [('gui',None,'Build nMOLDYN with GUI [default]'),
-                                         ('no-gui', None, "Build nMOLDYN without GUI")]
+    user_options = build.user_options + [('gui',None,'Build MDANSE with GUI [default]'),
+                                         ('no-gui', None, "Build MDANSE without GUI")]
     
     boolean_options = build.boolean_options + ['gui']
 
@@ -232,11 +230,11 @@ class ModifiedBuild(build):
 # The setup section
 #################################
 
-setup (name             = "nMOLDYN",
+setup (name             = "MDANSE",
        version          = PACKAGE_INFO["__version__"],
        description      = "Analysis of Molecular Dynamics trajectories",
        long_description =
-"""nMOLDYN is an interactive program for the analysis of Molecular
+"""MDANSE is an interactive program for the analysis of Molecular
 Dynamics simulations. It is especially designed for the computation
 and decomposition of neutron scattering spectra. The structure and
 dynamics of the simulated systems can be characterized in terms of
@@ -244,11 +242,11 @@ various space and time correlation functions. To analyze the dynamics
 of complex systems, rigid-body motions of arbitrarily chosen molecular
 subunits can be studied.
 """,
-       author           = "B. Aoun & G. Goret & E. Pellegrini, G.R. Kneller",
-       author_email     = "aoun.ill.fr, goretg@ill.fr, pellegrini@ill.fr, kneller@cnrs-orleans.fr",
+       author           = "B. Aoun & G. Goret & E. Pellegrini",
+       author_email     = "aoun.ill.fr, goretg@ill.fr, pellegrini@ill.fr",
        maintainer       = "B. Aoun, G. Goret, E. Pellegrini",
        maintainer_email = "aoun.ill.fr, goretg.ill.fr, pellegrini@ill.fr",
-       url              = "https://forge.epn-campus.eu/projects/nmoldyn/",
+       url              = "https://github.com/eurydyce/MDANSE/tree/master/MDANSE",
        license          = "CeCILL",
        packages         = PACKAGES,
        package_data     = PACKAGE_DATA,

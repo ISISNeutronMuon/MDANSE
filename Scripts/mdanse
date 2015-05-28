@@ -250,7 +250,7 @@ class CommandLineParser(optparse.OptionParser):
         # Case where an error occured when writing the template.
         except IOError:
             raise CommandLineParserError("Could not write the job template as %r" % filename)
-        # If the job class has no save method, thisis not a valid nMolDyn job.
+        # If the job class has no save method, thisis not a valid MDANSE job.
         except KeyError:
             raise CommandLineParserError("The job %r is not a valid MDANSE job" % name)
         # Otherwise, print some information about the saved template.
@@ -268,7 +268,7 @@ if __name__ == "__main__":
     group = optparse.OptionGroup(parser, "General options")
     group.add_option('--add-mmtk-def', action='callback', callback=parser.add_mmtk_definition, help='Add a definition to the MMTK database.')
     group.add_option('-d', '--database', action='callback', callback=parser.display_element_info, help='Display chemical informations about a given element.')
-    group.add_option('-r', '--registry', action='callback', callback=parser.query_classes_registry, help='Display the contents of nmoldyn classes registry.')
+    group.add_option('-r', '--registry', action='callback', callback=parser.query_classes_registry, help='Display the contents of MDANSE classes registry.')
     group.add_option('-t', '--traj', action='callback', callback=parser.display_trajectory_contents, help='Display the chemical contents of a trajectory.')
 
     # Add the goup to the parser.
@@ -283,7 +283,7 @@ if __name__ == "__main__":
     group.add_option('--jcheck', action='callback', callback=parser.check_job, help='Check the status of a given job.')
     group.add_option('--jlist', action='callback', callback=parser.display_jobs_list, help='Display the jobs list.')
     group.add_option('--jrun' , action='callback', callback=parser.run_job, help='Run MDANSE job(s).')
-    group.add_option('--jsave', action='callback', callback=parser.save_job_template, help='Save a template for a job.', metavar = "nMOLDYNSCRIPT")
+    group.add_option('--jsave', action='callback', callback=parser.save_job_template, help='Save a template for a job.', metavar = "MDANSE_SCRIPT")
     
     # The command line is parsed.        
     options, _ = parser.parse_args()

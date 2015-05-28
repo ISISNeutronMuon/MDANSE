@@ -43,7 +43,7 @@ class RadiusOfGyration(IJob):
     Radius Of Gyration (ROG) is the name of several related measures of the size of an object,
     a surface, or an ensemble of points. It is calculated as the Root Mean Square Distance between
     the system and a reference that can be either the center of gravity of the system either a given
-    axis. In nMOLDYN, the reference is choosen to be the center of gravity of the system under
+    axis. In MDANSE, the reference is choosen to be the center of gravity of the system under
     study.
     """ 
 
