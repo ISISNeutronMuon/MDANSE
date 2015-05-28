@@ -45,7 +45,7 @@ from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
 from MMTK.Universe import ParallelepipedicPeriodicUniverse
 
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.Converters.Converter import Converter
 
 HARTREE_TIME = Units.hbar/Units.Hartree
 
@@ -131,9 +131,9 @@ class MDFile(dict):
     def close(self):
         self["instance"].close()
 
-class CASTEPConverter(IJob):
+class CASTEPConverter(Converter):
     """
-    Converts a Castep Trajectory into a MMTK NetCDFFile. 
+    Converts a Castep Trajectory into a MMTK trajectory file. 
     """
 
     type = 'castep'
@@ -142,7 +142,7 @@ class CASTEPConverter(IJob):
 
     category = ('Converters',)
     
-    ancestor = "empty_data"
+    ancestor = None
 
     settings = collections.OrderedDict()
     settings['castep_file'] = ('input_file', {})

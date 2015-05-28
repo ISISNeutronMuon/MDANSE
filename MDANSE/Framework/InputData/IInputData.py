@@ -25,24 +25,32 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 27, 2015
+Created on May 27, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 
 class InputDataError(Error):
-    pass
+    '''
+    This class handles exception related to ``IInputData`` interface.
+    '''
 
 class IInputData(object):
+    '''
+    This is the base class for handling MDANSE input data.    
+    '''
     
     __metaclass__ = REGISTRY
     
     type = "input_data"
 
     def __init__(self, *args, **kwargs):
+        '''
+        Builds an ``IInputData`` object.
+        '''
         
         self._data = None
         
@@ -50,16 +58,43 @@ class IInputData(object):
 
     @property
     def filename(self):
+        '''
+        Returns the filename associated with the input data.
+        
+        :return: the filename associated with the input data.
+        :rtype: str
+        '''
+        
         return self._filename
         
     @property
     def basename(self):
+        '''
+        Returns the basename of the file associated with the input data.
+        
+        :return: the basename of the file associated with the input data.
+        :rtype: str
+        '''
+
         return self._basename    
 
     @property
     def data(self):
+        '''
+        Return the input data.
+        
+        :return: the input data.
+        :rtype: depends on the concrete ``IInputData`` subclass
+        '''
+        
         return self._data
 
     def info(self):
+        '''
+        Returns information as a string about the input data.
+        
+        :return:
+        :rtype: str
+        '''
 
         return "No information available"

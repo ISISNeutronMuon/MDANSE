@@ -41,7 +41,7 @@ from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
 from MMTK.Universe import ParallelepipedicPeriodicUniverse
 
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.Converters.Converter import Converter
 
 class XDATCARFileError(Error):
     pass
@@ -114,7 +114,7 @@ class XDATCARFile(dict):
     def close(self):
         self["instance"].close()
 
-class VASPConverter(IJob):
+class VASPConverter(Converter):
     """
     Converts a VASP trajectory to a MMTK trajectory.
     """
@@ -125,7 +125,7 @@ class VASPConverter(IJob):
 
     category = ('Converters',)
     
-    ancestor = "empty_data"
+    ancestor = None
 
     settings = collections.OrderedDict()           
     settings['xdatcar_file'] = ('input_file',{})

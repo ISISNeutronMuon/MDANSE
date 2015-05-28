@@ -44,6 +44,9 @@ class DistanceHistogram(IJob):
     """
     Compute the Histogram of Distance
     """
+    
+    type = None
+    
     settings = collections.OrderedDict()    
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})

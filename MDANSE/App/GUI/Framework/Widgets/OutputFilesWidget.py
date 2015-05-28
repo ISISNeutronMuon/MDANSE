@@ -52,11 +52,9 @@ class OutputFilesWidget(IWidget):
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
+                
+        startDirectory = os.getcwd()
         
-        plugin = plugin_parent(self)
-        
-        startDirectory = os.path.dirname(plugin.datakey)
-
         self._dirname = wxfile.DirBrowseButton(self._widgetPanel, wx.ID_ANY, startDirectory=startDirectory, newDirectory=True)
         self._dirname.SetValue(startDirectory)
 

@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 14, 2015
 
-@author: Bachir Aoun, Eric C. pellegrini
+@author: Bachir Aoun, Gael Goret and Eric C. pellegrini
 '''
 
 import collections
@@ -38,6 +38,7 @@ import wx.aui as aui
 
 from MDANSE.__pkginfo__ import __version__, __revision__
 from MDANSE import LOGGER, REGISTRY
+from MDANSE.Framework.Jobs.Converters.Converter import Converter
 
 from MDANSE.App.GUI import DATA_CONTROLLER
 from MDANSE.App.GUI.ControllerPanel import ControllerPanel
@@ -93,7 +94,16 @@ class MainFrame(wx.Frame):
 
         fileMenu = wx.Menu()
         loadDataItem = fileMenu.Append(wx.ID_ANY, 'Load data')
-        emptyDataItem = fileMenu.Append(wx.ID_ANY, 'Open empty data')
+        fileMenu.AppendSeparator()
+        converterMenu = wx.Menu()
+        self._converters = {}
+        for job in REGISTRY["job"].values():
+            if issubclass(job, Converter):
+                item = converterMenu.Append(wx.ID_ANY,job.label)
+                self._converters[job.label] = job.type
+                self.Bind(wx.EVT_MENU, self.on_open_converter, item)
+
+        fileMenu.AppendMenu(wx.ID_ANY,'Trajectory converters',converterMenu)
         fileMenu.AppendSeparator()
         quitItem = fileMenu.Append(wx.ID_ANY, 'Quit')
 
@@ -118,7 +128,6 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.on_quit)
         
         self.Bind(wx.EVT_MENU, self.on_load_data, loadDataItem)
-        self.Bind(wx.EVT_MENU, self.on_load_empty_data, emptyDataItem)
         self.Bind(wx.EVT_MENU, self.on_quit, quitItem)
         self.Bind(wx.EVT_MENU, self.on_about, aboutItem)
         self.Bind(wx.EVT_MENU, self.on_toggle_data_tree, showDataTreeItem)
@@ -132,12 +141,12 @@ class MainFrame(wx.Frame):
         self._toolbar = self.CreateToolBar()
                 
         loadDataButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["load",32,32], 'Load a trajectory')
-        emptyDataButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["empty_data",32,32], 'Open an empty data (converters ...)')
         databaseButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["periodic_table",32,32], 'Edit the MDANSE elements database')
         plotButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["plot",32,32], 'Open MDANSE plotter')
-        userButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["user",32,32], 'Edit the user definitions')
+        udButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["user",32,32], 'Edit the user definitions')
         preferencesButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["preferences",32,32], 'Edit the preferences')
-        logfileButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["logfile",32,32], 'Display nMOLDYN log file')
+        logfileButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["logfile",32,32], 'Display MDANSE log file')
+        registryButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["registry",32,32], 'Inspect MDANSE classes registry')
         helpButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["help",32,32], 'Help')
         websiteButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["web",32,32], 'Open MDANSE website')
         aboutButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["about",32,32], 'About MDANSE')
@@ -150,16 +159,16 @@ class MainFrame(wx.Frame):
 
         # The toolbar-related events handlers.
         self.Bind(wx.EVT_MENU, self.on_load_data, loadDataButton)
-        self.Bind(wx.EVT_MENU, self.on_load_empty_data, emptyDataButton)
-        self.Bind(wx.EVT_MENU, self.on_open_nmoldyn_elements_database, databaseButton)
+        self.Bind(wx.EVT_MENU, self.on_open_mdanse_elements_database, databaseButton)
         self.Bind(wx.EVT_MENU, self.on_start_plotter, plotButton)
-        self.Bind(wx.EVT_MENU, self.on_start_UDviewer, userButton)
         self.Bind(wx.EVT_MENU, self.on_set_preferences, preferencesButton)
         self.Bind(wx.EVT_MENU, self.on_display_logfile, logfileButton)
+        self.Bind(wx.EVT_MENU, self.on_open_user_definitions, udButton)
+        self.Bind(wx.EVT_MENU, self.on_open_classes_registry, registryButton)
         self.Bind(wx.EVT_MENU, self.on_about, aboutButton)
         self.Bind(wx.EVT_MENU, self.on_quit, quitButton)
         self.Bind(wx.EVT_MENU, self.on_help, helpButton)
-        self.Bind(wx.EVT_MENU, self.on_open_nmoldyn_url, websiteButton)
+        self.Bind(wx.EVT_MENU, self.on_open_mdanse_url, websiteButton)
         self.Bind(wx.EVT_MENU, self.on_bug_report, bugButton)
                                                                     
     def load_data(self,typ,filename):
@@ -197,11 +206,10 @@ In order to facilitate the integration of new features and bug fixes, please sen
 
 https://github.com/eurydyce/MDANSE/tree/master/MDANSE
 
-for any other request, do not hesitate to send an email to:
+for any other request, please send an email to:
 
 \tpellegrini@ill.fr
 \tjohnson@ill.fr
-\tgonzalezm@ill.fr
 
 or directly to the MDANSE mailing list:
 
@@ -214,9 +222,17 @@ or directly to the MDANSE mailing list:
         
     def on_display_logfile(self,event):
         
-        from nMOLDYN.GUI.Widgets.LogfileFrame import LogfileFrame
+        from MDANSE.App.GUI.LogfileFrame import LogfileFrame
         
         f = LogfileFrame(self)
+        
+        f.Show()
+
+    def on_open_classes_registry(self,event):
+        
+        from MDANSE.App.GUI.Framework.Plugins.RegistryViewerPlugin import RegistryViewerFrame
+        
+        f = RegistryViewerFrame(self)
         
         f.Show()
 
@@ -246,19 +262,32 @@ or directly to the MDANSE mailing list:
                 
         LOGGER("Data %r successfully loaded" % filename, "info")
                                                             
-    def on_load_empty_data(self,event):
+    def on_open_user_definitions(self,event):
         
-        self.load_data('empty_data', None)
+        from MDANSE.App.GUI.Framework.Plugins.UserDefinitionViewerPlugin import UserDefinitionViewerFrame
+        
+        f = UserDefinitionViewerFrame(self)
+        f.Show()
 
-    def on_open_nmoldyn_elements_database(self, event):
+    def on_open_converter(self,event):
 
-        from nMOLDYN.Framework.Plugins.PeriodicTablePlugin import PeriodicTableFrame
+        item = self.GetMenuBar().FindItemById(event.GetId())
+        convLabel = item.GetText()
+        
+        from MDANSE.App.GUI.Framework.Plugins.JobPlugin import JobFrame
+        
+        f = JobFrame(self,self._converters[convLabel])
+        f.Show()
+
+    def on_open_mdanse_elements_database(self, event):
+
+        from MDANSE.App.GUI.Framework.Plugins.PeriodicTablePlugin import PeriodicTableFrame
                 
         f = PeriodicTableFrame(None)
         
         f.Show()
 
-    def on_open_nmoldyn_url(self, event):
+    def on_open_mdanse_url(self, event):
 
         webbrowser.open('http://www.ill.eu/fr/instruments-support/computing-for-science/cs-software/all-software/nmoldyn/')
 
@@ -269,7 +298,7 @@ or directly to the MDANSE mailing list:
 
     def on_set_preferences(self, event):
 
-        from nMOLDYN.GUI.Widgets.PreferencesSettingsDialog import PreferencesSettingsDialog
+        from MDANSE.App.GUI.PreferencesSettingsDialog import PreferencesSettingsDialog
         
         d = PreferencesSettingsDialog(self)
         
@@ -284,15 +313,7 @@ or directly to the MDANSE mailing list:
         f = PlotterFrame(None)
         
         f.Show()                                               
-        
-    def on_start_UDviewer(self, event = None):
-
-        from nMOLDYN.Framework.Plugins.UserDefinitionViewerPlugin import UserDefinitionViewerFrame
-        
-        f = UserDefinitionViewerFrame(None)
-        
-        f.Show()        
-        
+                
     def on_toggle_controller(self, event=None):
 
         pane = self._mgr.GetPane("controller")        

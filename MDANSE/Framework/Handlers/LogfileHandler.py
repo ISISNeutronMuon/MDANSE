@@ -52,7 +52,7 @@ class LogFileHandler(IHandler,logging.handlers.RotatingFileHandler):
         The maxBytes and backupCount values allows the file to rollover at a predetermined size. When the size is about to be exceeded, the file 
         is closed and a new file is silently opened for output. Rollover occurs whenever the current log file is nearly maxBytes in length; if 
         either of maxBytes or backupCount is zero, rollover never occurs. If backupCount is non-zero, the system will save old log files by appending 
-        the extensions ‘.1’, ‘.2’ etc., to the filename. For example, with a backupCount of 5 and a base file name of app.log, you would get app.log, 
+        the extensions '.1', '.2' etc., to the filename. For example, with a backupCount of 5 and a base file name of app.log, you would get app.log, 
         app.log.1, app.log.2, up to app.log.5. The file being written to is always app.log. When this file is filled, it is closed and renamed to app.log.1, and if files app.log.1, app.log.2, etc. exist, then they are renamed to app.log.2, app.log.3 etc. respectively.     
         
         :param filename: the path for the log file.

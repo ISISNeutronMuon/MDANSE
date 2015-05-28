@@ -47,11 +47,10 @@ class RegistryViewerPlugin(ComponentPlugin):
     
     label = "Registry Viewer"
     
-    ancestor = "empty_data"
+    ancestor = None
     
     def __init__(self, parent, *args, **kwargs):
 
-        self.currentFilename = None        
         self._udTree = {}
 
         ComponentPlugin.__init__(self, parent, size = parent.GetSize(), *args, **kwargs)
@@ -140,7 +139,6 @@ class RegistryViewerFrame(wx.Frame):
         
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         
-        
         self._registryViewerPlugin = RegistryViewerPlugin(mainPanel, wx.ID_ANY)
         
         mainSizer.Add(self._registryViewerPlugin, 1, wx.ALL|wx.EXPAND)
@@ -148,6 +146,8 @@ class RegistryViewerFrame(wx.Frame):
         mainPanel.SetSizer(mainSizer)        
         mainSizer.Fit(mainPanel)
         mainPanel.Layout()
+
+        self.Bind(wx.EVT_CLOSE, self.on_quit)
 
     def on_quit(self, event):
         

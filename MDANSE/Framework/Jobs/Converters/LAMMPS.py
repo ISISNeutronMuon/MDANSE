@@ -42,7 +42,7 @@ from MMTK.Universe import ParallelepipedicPeriodicUniverse
 
 from MDANSE import ELEMENTS
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.Converters.Converter import Converter
 from MDANSE.Mathematics.Graph import Graph
 
 class LAMMPSConfigFileError(Error):
@@ -114,7 +114,7 @@ class LAMMPSConfigFile(dict):
         unit.close()
 
                 
-class LAMMPSConverter(IJob):
+class LAMMPSConverter(Converter):
     """
     Converts a LAMMPS trajectory to a MMTK trajectory.
     """
@@ -125,7 +125,7 @@ class LAMMPSConverter(IJob):
 
     category = ('Converters',)
     
-    ancestor = "empty_data"
+    ancestor = None
 
     settings = collections.OrderedDict()        
     settings['config_file'] = ('input_file', {'label':"LAMMPS configuration file"})

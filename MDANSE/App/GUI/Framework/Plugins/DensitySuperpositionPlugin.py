@@ -59,7 +59,6 @@ class DensitySuperpositionPlugin(ComponentPlugin):
 
         ComponentPlugin.__init__(self, parent, size = parent.GetSize(), *args, **kwargs)
      
-     
     def build_panel(self):
         self._mainPanel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
         

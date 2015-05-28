@@ -36,9 +36,9 @@ from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
 from MMTK.PDB import PDBFile
 from MMTK.ParticleProperties import Configuration
 
-from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.Converters.Converter import Converter
 
-class PDBConverter(IJob):
+class PDBConverter(Converter):
     """
     Converts a PDB trajectory to a MMTK trajectory.
     """
@@ -48,7 +48,7 @@ class PDBConverter(IJob):
 
     category = ('Converters',)
     
-    ancestor = "empty_data"
+    ancestor = None
 
     settings = collections.OrderedDict()  
     settings['pdb_file'] = ('input_file',{})

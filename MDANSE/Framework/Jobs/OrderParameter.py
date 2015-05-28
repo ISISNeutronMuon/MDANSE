@@ -31,7 +31,6 @@ Created on Apr 10, 2015
 '''
 
 import collections
-import os
 
 import numpy
 

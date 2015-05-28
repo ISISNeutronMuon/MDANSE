@@ -48,11 +48,11 @@ from MDANSE.App.GUI.ComboWidgets.JobHelpFrame import JobHelpFrame
 
 class JobPlugin(ComponentPlugin):
         
-    def __init__(self, parent, **kwargs):
+    def __init__(self, parent, *args, **kwargs):
                 
         self._job = REGISTRY["job"][self.type]()
         
-        ComponentPlugin.__init__(self, parent, size=wx.Size(800,400), **kwargs)
+        ComponentPlugin.__init__(self, parent, size=wx.Size(800,400), *args, **kwargs)
                 
     def build_panel(self):
         
@@ -103,7 +103,7 @@ class JobPlugin(ComponentPlugin):
 
         parameters = self._parametersPanel.get_value()
         
-        t = tempfile.mkstemp(prefix = "nMOLDYN_%s_" % self._job.type, text = True)
+        t = tempfile.mkstemp(prefix = "MDANSE_%s_" % self._job.type, text = True)
         os.close(t[0])
                 
         self._job.save_job(t[1], parameters)
@@ -132,7 +132,7 @@ class JobPlugin(ComponentPlugin):
 
         parameters = self._parametersPanel.get_value()
         
-        d = wx.FileDialog(self, "Save nMOLDYN python script", style = wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT, wildcard = "Python files (*.py)|*.py")
+        d = wx.FileDialog(self, "Save MDANSE python script", style = wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT, wildcard = "Python files (*.py)|*.py")
         
         if d.ShowModal() == wx.ID_CANCEL:
             return
@@ -158,3 +158,46 @@ class JobPlugin(ComponentPlugin):
     def on_close(self, event):
         
         self.parent.mgr.ClosePane(self.parent.mgr.GetPane(self))
+        
+class JobFrame(wx.Frame):
+    
+    def __init__(self, parent, jobType):
+                
+        wx.Frame.__init__(self, parent, wx.ID_ANY, size = (800,400), style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
+
+        self._jobType = jobType
+
+        self.build_dialog()
+
+    def build_dialog(self):
+                
+        mainPanel = wx.Panel(self, wx.ID_ANY, size = self.GetSize())
+        
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        
+        self._jobPlugin = REGISTRY['plugin'][self._jobType](mainPanel, wx.ID_ANY)
+                
+        mainSizer.Add(self._jobPlugin, 1, wx.ALL|wx.EXPAND)
+
+        mainPanel.SetSizer(mainSizer)        
+        mainSizer.Fit(mainPanel)
+        mainPanel.Layout()
+        
+        self.SetTitle("Run %s job" % self._jobPlugin._job.label)
+        
+        self.Bind(wx.EVT_CLOSE, self.on_quit)
+        
+    def on_quit(self, event):
+        
+        d = wx.MessageDialog(None,
+                             'Do you really want to quit ?',
+                             'Question',
+                             wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
+        if d.ShowModal() == wx.ID_YES:
+            self.Destroy()           
+        
+if __name__ == "__main__":
+    app = wx.App(False)
+    f = JobFrame(None,'discover')
+    f.Show()
+    app.MainLoop()            

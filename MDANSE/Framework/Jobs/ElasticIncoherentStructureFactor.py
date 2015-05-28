@@ -158,5 +158,4 @@ class ElasticIncoherentStructureFactor(IJob):
             
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
         
-        self.configuration['trajectory']['instance'].close()     
-  
+        self.configuration['trajectory']['instance'].close()

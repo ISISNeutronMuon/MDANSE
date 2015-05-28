@@ -30,9 +30,7 @@ Created on Apr 10, 2015
 @author: Eric C. Pellegrini
 '''
 
-import collections
-
-from MDANSE.Framework.Jobs.DCDConverter import DCDConverter
+from MDANSE.Framework.Jobs.Converters.DCDConverter import DCDConverter
 
 class NAMDConverter(DCDConverter):
     """
@@ -45,10 +43,4 @@ class NAMDConverter(DCDConverter):
 
     category = ('Converters',)
     
-    ancestor = "empty_data"
-    
-    settings = collections.OrderedDict()
-    settings['pdb_file'] = ('input_file',{})
-    settings['dcd_file'] = ('input_file',{})
-    settings['output_file'] = ('output_files', {'formats':["netcdf"]})
-    settings['fold'] = ('boolean', {'default':False, 'label':"Fold coordinates in to box"})
+    ancestor = None

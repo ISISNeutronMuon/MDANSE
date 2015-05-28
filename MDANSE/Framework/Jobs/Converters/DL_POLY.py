@@ -43,7 +43,7 @@ from MMTK.Universe import InfiniteUniverse, ParallelepipedicPeriodicUniverse
 
 from MDANSE import ELEMENTS
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.Converters.Converter import Converter
        
 _HISTORY_FORMAT = {}
 _HISTORY_FORMAT["2"] = {"rec1" : 81, "rec2" : 31, "reci" : 61, "recii" : 37, "reciii" : 37, "reciv" : 37, "reca" : 43, "recb" : 37, "recc" : 37, "recd" : 37}
@@ -279,7 +279,7 @@ class HistoryFile(dict):
     def close(self):
         self["instance"].close()
                                            
-class DL_POLYConverter(IJob):
+class DL_POLYConverter(Converter):
     """
     Converts a DL_POLY trajectory to a MMTK trajectory.
     """
@@ -290,7 +290,7 @@ class DL_POLYConverter(IJob):
 
     category = ('Converters',)
     
-    ancestor = "empty_data"
+    ancestor = None
 
     settings = collections.OrderedDict()   
     settings['field_file'] = ('input_file',{'wildcard':"FIELD files|FIELD*|All files|*"})

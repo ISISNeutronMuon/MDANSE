@@ -30,6 +30,7 @@ Created on Apr 10, 2015
 @author: pellegrini
 '''
 
+import collections
 import struct
 
 import numpy
@@ -41,7 +42,7 @@ from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
 from MMTK.Universe import InfiniteUniverse, ParallelepipedicPeriodicUniverse
 
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.Converters.Converter import Converter
 from MDANSE.Mathematics.Geometry import get_basis_vectors_from_cell_parameters
 from MDANSE.MolecularDynamics.Trajectory import resolve_undefined_molecules_name
 
@@ -270,10 +271,18 @@ class DCDFile(FortranBinaryFile, dict):
         except EndOfFile:
             raise StopIteration
 
-class DCDConverter(IJob):
+class DCDConverter(Converter):
     """
     Converts a DCD trajectory to a MMTK trajectory.
     """
+    
+    type = None
+
+    settings = collections.OrderedDict()
+    settings['pdb_file'] = ('input_file',{})
+    settings['dcd_file'] = ('input_file',{})
+    settings['output_file'] = ('output_files', {'formats':["netcdf"]})
+    settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
 
     def initialize(self):
         """

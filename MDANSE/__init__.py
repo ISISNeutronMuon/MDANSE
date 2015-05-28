@@ -37,9 +37,9 @@ from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
 
 from MDANSE.Data.ElementsDatabase import ELEMENTS
 
-from MDANSE.Core.Preferences import PREFERENCES
-
 from MDANSE.Logging.Logger import LOGGER
+
+from MDANSE.Core.Preferences import PREFERENCES
 
 from MDANSE.Framework.UserDefinitions.IUserDefinition import UD_STORE
 

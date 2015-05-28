@@ -40,8 +40,8 @@ from MMTK import Units
 from MMTK.ParticleProperties import Configuration, ParticleVector
 from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
 
-from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.Jobs.MaterialsStudio import XTDFile
+from MDANSE.Framework.Jobs.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.Converters.MaterialsStudio import XTDFile
 
 class HisFile(dict):
 
@@ -221,7 +221,7 @@ class HisFile(dict):
     def close(self):
         self["instance"].close()
         
-class DiscoverConverter(IJob):
+class DiscoverConverter(Converter):
     """
     Converts a DL_POLY trajectory to a MMTK trajectory.
     """
@@ -232,7 +232,7 @@ class DiscoverConverter(IJob):
 
     category = ('Converters',)
     
-    ancestor = "empty_data"
+    ancestor = None
 
     settings = collections.OrderedDict()
     settings['xtd_file'] = ('input_file',{})

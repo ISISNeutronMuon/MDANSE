@@ -31,7 +31,6 @@ Created on Mar 30, 2015
 '''
 
 import abc
-import collections
 
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error

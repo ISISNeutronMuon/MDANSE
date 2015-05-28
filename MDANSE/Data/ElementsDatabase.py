@@ -30,7 +30,7 @@ Created on Mar 30, 2015
 @author: Eric C. Pellegrini
 '''
 
-import _abcoll
+import collections
 import copy
 import csv
 import numbers
@@ -100,160 +100,6 @@ def indent(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
-class SortedDict(dict):
-    '''
-    This class implements a specification of a python dict that sorts automatically its keys when inserted.    
-    '''
-
-    def __init__(self, *args, **kwds):
-        '''
-        Constructor
-        '''
-
-        # This list will store the sorted keys of the dict
-        self._keys = []
-
-        self.__update(*args, **kwds)
-
-    def __contains__(self,item):
-        '''
-        Returns True if a given key is found in the dictionary.
-                
-        :param item: the key to search in the dictionary
-        :type item: any valid key
-        '''
-
-        return self.has_key(item)
-
-    def __deepcopy__(self,memo):
-        '''
-        Returns a deep-copy of this object.
-        
-        :param memo: a memo dictionary of objects already copied during the current copying pass
-        :type memo: dict
-        '''
-
-        return SortedDict(copy.deepcopy(dict(self)))
-    
-    def __getitem__(self,key):
-        '''
-        Returns the value of the dictionary associated to a given key.
-                
-        :param key: the key to be searched
-        :type key: str
-        '''
-
-        if not isinstance(key,basestring):
-            raise ValueError("Invalid key type")
-                
-        return dict.__getitem__(self,key)
-
-    def __setitem__(self,key,value):
-        '''
-        Sets the value of a given key.
-                
-        :param key: the key to set in the dictionary
-        :type key: str
-        :param value: the value to associate with the key
-        :type value: any python object
-        '''
-
-        if not isinstance(key,basestring):
-            raise ValueError("Invalid key type")
-
-        dict.__setitem__(self,key,value)
-
-        if not key in self._keys:
-            self._keys.append(key)
-            self._keys.sort()
-            
-    def __update(self, *args, **kwds):
-        '''
-        Updates the dictionary with another one.
-        '''
-                
-        if len(args) > 1:
-            raise TypeError("update() takes at most 2 positional arguments ({} given)".format(len(args)))
-        
-        other = args[0] if len(args) >= 1 else ()
-
-        if isinstance(other, _abcoll.Mapping):
-            for key in other:
-                self[key] = other[key]
-        elif hasattr(other, "keys"):
-            for key in other.keys():
-                self[key] = other[key]
-        else:
-            for key, value in other:
-                self[key] = value
-        for key, value in kwds.items():
-            self[key] = value
-            
-    def clear(self):
-        '''
-        Removes all the entries of the dictionary.
-        '''
-        
-        dict.clear(self)
-        
-        self._keys = []
-
-    def has_key(self, key):
-        '''
-        Return True if the dictionary containsa given key.
-        
-        :param key: the key to search in the dictionary
-        :type key: str
-        '''
-        
-        if not isinstance(key,basestring):
-            return False
-
-        return dict.has_key(self,key)
-
-    def items(self):
-        '''
-        Returns the items stored in the dictionary.
-        '''
-        return [(key, self[key]) for key in self._keys]
-
-    def keys(self):
-        '''
-        Returns the keys stored in the dictionary.
-        '''
-
-        return self._keys
-
-    def iteritems(self):
-        '''
-        Return a generator over the items stored in the dictionary.
-        '''
-        
-        for k in self._keys:
-            yield (k, self[k])
-
-    def iterkeys(self):
-        '''
-        Return a generator over the keys stored in the dictionary.
-        '''
-
-        return iter(self._keys)
-
-    def itervalues(self):
-        '''
-        Return a generator over the values stored in the dictionary.
-        '''
-
-        for k in self._keys:
-            yield self[k]        
-
-    def values(self):
-        '''
-        Returns the values stored in the dictionary.
-        '''
-
-        return [self[key] for key in self._keys]
-
 class ElementsDatabase(object):
     '''
     This class implements the elements database of MDANSE.
@@ -299,7 +145,7 @@ class ElementsDatabase(object):
     # The user path
     _USER_DATABASE = os.path.join(PLATFORM.application_directory(), "elements_database.csv")
     
-    # The properties supported python types
+    # The python types supported by the database
     _TYPES = {"str" : str, "int" : int, "float" : float}
 
     def __init__(self):
@@ -307,9 +153,9 @@ class ElementsDatabase(object):
         Constructor
         '''
 
-        self._data = SortedDict()
+        self._data = collections.OrderedDict()
 
-        self._properties = SortedDict()
+        self._properties = collections.OrderedDict()
 
         self._reset()
 
@@ -331,7 +177,7 @@ class ElementsDatabase(object):
 
     def __getitem__(self,item):
         '''
-        Return the entry of the database that matches a given item.
+        Return an entry of the database.
         
         If the item is a basestring, then the return value will be the list of properties 
         related to element of the databse base that matches this item. If the item is a 
@@ -359,6 +205,30 @@ class ElementsDatabase(object):
                 return element[pname]
             except KeyError:
                 raise ElementsDatabaseError("The property %r is not registered in the database." % pname)
+
+    def __setitem__(self,item,value):
+        '''
+        Set an entry of the database.
+        
+        The item must be a 2-tuple whose elements are respectively the name of the element and the name of the property.
+        
+        :param item: the entry to be set
+        :type item: 2-tuple
+        
+        :param value: the value to set.
+        :type: one of 'str', 'int', 'float'
+        '''
+
+        try:            
+            ename,pname = item
+        except ValueError:
+            raise ElementsDatabaseError("Invalid database entry")
+        
+        # Any error has to be caught here
+        try:
+            self._data[ename][pname] = self._properties[pname](value)
+        except:
+            raise ElementsDatabaseError("Invalid value for database entry")
 
     def __iter__(self):
         '''
@@ -476,7 +346,7 @@ class ElementsDatabase(object):
             # Reads the next lines of the CSV that correspond to the database entries
             for r in reader:
                 ename = r.pop(0)
-                props = SortedDict()
+                props = collections.OrderedDict()
                 # Loop over the contents of the current line
                 for i,v in enumerate(r):
                     pname = properties[i]
@@ -504,7 +374,7 @@ class ElementsDatabase(object):
         '''
 
         if not self._data.has_key(ename):
-            self._data[ename] = SortedDict([(pname,prop()) for pname,prop in self._properties.iteritems()])
+            self._data[ename] = collections.OrderedDict([(pname,prop()) for pname,prop in self._properties.iteritems()])
         
         # Create the corresponding MMTK entry
         create_mmtk_atom_entry(ename,symbol=self._data[ename]["symbol"],mass=self._data[ename]["atomic_weight"])
@@ -533,7 +403,10 @@ class ElementsDatabase(object):
             raise ElementsDatabaseError("Invalid type for %r property" % pname)
 
         self._properties[pname] = self._TYPES[typ]
-
+        
+        for v in self._data.values():
+            v[pname] = self._properties[pname]()
+        
         if save:
             self.save()
                 
@@ -630,7 +503,7 @@ class ElementsDatabase(object):
         if not self._properties.has_key(pname):
             raise ElementsDatabaseError("The property %r is not registered in the elements database" % pname)
         
-        return SortedDict([(k,self[k,pname]) for k in self._data.iterkeys()])
+        return collections.OrderedDict([(k,self[k,pname]) for k in self._data.iterkeys()])
 
     def get_property_type(self,pname):
         '''

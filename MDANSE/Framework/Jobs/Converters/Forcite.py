@@ -40,8 +40,8 @@ from MMTK.ParticleProperties import ParticleVector
 from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
 
 from MDANSE.Externals.magnitude.magnitude import mg
-from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.Jobs.MaterialsStudio import XTDFile
+from MDANSE.Framework.Jobs.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.Converters.MaterialsStudio import XTDFile
 
 FORCE_FACTOR = mg(1.0,"kcal_per_mole/ang","uma nm/ps2").toval()
 
@@ -271,7 +271,7 @@ class TrjFile(dict):
     def close(self):
         self["instance"].close()
         
-class ForciteConverter(IJob):
+class ForciteConverter(Converter):
     """
     Converts a Forcite trajectory to a MMTK trajectory.
     """
@@ -282,7 +282,7 @@ class ForciteConverter(IJob):
 
     category = ('Converters',)
     
-    ancestor = "empty_data"
+    ancestor = None
 
     settings = collections.OrderedDict()
     settings['xtd_file'] = ('input_file',{})

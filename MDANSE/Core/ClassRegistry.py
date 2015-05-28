@@ -79,10 +79,10 @@ class ClassRegistry(abc.ABCMeta):
         '''
         
         super(ClassRegistry, self).__init__(name, bases, namespace)
-        
+                
         # Get the typ of the class
         typ = getattr(self, 'type', None)
-                
+
         if typ is None:
             return
 
@@ -95,7 +95,7 @@ class ClassRegistry(abc.ABCMeta):
             ClassRegistry._registry[typ] = {}
 
         else:
-                                
+                                            
             for interface in ClassRegistry.__interfaces:
                 if issubclass(self, interface):
                     ClassRegistry._registry[interface.type][typ] = self
@@ -115,7 +115,7 @@ class ClassRegistry(abc.ABCMeta):
         '''
                 
         for module in glob.glob(os.path.join(packageDir,'*.py')):
-                             
+                                             
             moduleDir, moduleFile = os.path.split(module)
      
             if moduleFile == '__init__.py':

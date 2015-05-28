@@ -173,8 +173,6 @@ _LAYOUT["Md"]  = (9,16)
 _LAYOUT["No"]  = (9,17)
 _LAYOUT["Lr"]  = (9,18)
 
-_LAYOUT["ud"]  = (2,5)
-
 _COLS = range(1,19)
 _ROWS = ["i","ii","iii","iv","v","vi","vii"]
 
@@ -221,9 +219,9 @@ class PropertyDialog(wx.Dialog):
         
         subPanel = wx.Panel(panel,wx.ID_ANY)
         staticLabel1 = wx.StaticText(subPanel, wx.ID_ANY, "Name")
-        self.name = wx.TextCtrl(subPanel, wx.ID_ANY)
+        self.name = wx.TextCtrl(subPanel, wx.ID_ANY)        
         staticLabel2 = wx.StaticText(subPanel, wx.ID_ANY, "Default value")
-        self.default = wx.TextCtrl(subPanel, wx.ID_ANY)
+        self.propertyType = wx.ComboBox(subPanel, id = wx.ID_ANY, choices=ELEMENTS._TYPES.keys(), style=wx.CB_READONLY)
         
         staticLine = wx.StaticLine(self, wx.ID_ANY)
 
@@ -239,7 +237,7 @@ class PropertyDialog(wx.Dialog):
         subsizer.Add(staticLabel1,pos=(0,0),flag=wx.ALIGN_CENTER_VERTICAL)
         subsizer.Add(self.name   ,pos=(0,1),flag=wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
         subsizer.Add(staticLabel2,pos=(1,0),flag=wx.ALIGN_CENTER_VERTICAL)
-        subsizer.Add(self.default,pos=(1,1),flag=wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
+        subsizer.Add(self.propertyType,pos=(1,1),flag=wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
         subPanel.SetSizer(subsizer)
         panelSizer.Add(subPanel, 0, wx.ALL|wx.EXPAND, 5)
         panel.SetSizer(panelSizer)
@@ -268,8 +266,8 @@ class PropertyDialog(wx.Dialog):
         
         pname = str(self.name.GetValue().strip())
         
-        pdefault = ast.literal_eval(self.default.GetValue().strip())
-                        
+        pdefault = str(self.propertyType.GetValue())
+                                
         return pname,pdefault
 
 class StaticFancyText(wxfancytext.StaticFancyText):
@@ -501,9 +499,9 @@ class Database(wxgrid.PyGridTableBase):
         ELEMENTS[ELEMENTS.elements[row],ELEMENTS.properties[col]] = val                                           
 
     def add_column(self, pname,pdefault):
-                                
+        
         ELEMENTS.add_property(pname, pdefault)
-                                
+        
         self.notify_grid(wxgrid.GRIDTABLE_NOTIFY_COLS_APPENDED, 1)
     
     def add_row(self, ename):
@@ -512,8 +510,6 @@ class Database(wxgrid.PyGridTableBase):
                                         
         self.notify_grid(wxgrid.GRIDTABLE_NOTIFY_ROWS_APPENDED, 1)
         
-        pub.sendMessage(('new_element_added'), message=ename)
-
     def notify_grid(self, msg, count):
         "Notifies the grid of the message and the affected count."
         
@@ -651,13 +647,9 @@ class PeriodicTablePanel(wx.Panel):
         wid = wxstattext.GenStaticText(parent =self,ID = wx.ID_ANY, label="**", size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND)   
         sizer.Add(wid, (10,3), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
-        wid = self.userDefinedElements = wx.ComboBox(self, size=(40,40), style = wx.ALIGN_CENTRE|wx.EXPAND|wx.CB_READONLY)
-        sizer.Add(wid, _LAYOUT["ud"], (1,3), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
-        bkg_color = _FAMILY['user-defined']
-        self.userDefinedElements.SetBackgroundColour((bkg_color[0], bkg_color[1], bkg_color[2]))
-        fg_color = _STATE['user-defined']
-        self.userDefinedElements.SetForegroundColour((fg_color[0], fg_color[1], fg_color[2]))
-        self.userDefinedElements.SetToolTipString('User-defined')
+        # The panel that will contain the short info about a selected element.
+        self.shortInfo = ElementShortInfoPanel(self)
+        sizer.Add(self.shortInfo, (1,5), (3,6), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
         symbs = []
         for el in ELEMENTS.elements:
@@ -677,28 +669,14 @@ class PeriodicTablePanel(wx.Panel):
                 wid.Bind(wx.EVT_ENTER_WINDOW, self.on_display_element_short_info)
                 sizer.Add(wid, (r+1,c), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
             except KeyError:
-                self.userDefinedElements.Append(el)
-            
-        self.userDefinedElements.SetSelection(0)                                                                                    
-        
+                continue
+                    
         general_sizer.Add(sizer,0,wx.ALL|wx.EXPAND,5)
         
         self.SetSizer(general_sizer)
         general_sizer.Fit(self)
         self.Layout()
-
-        # The panel that will contain the short info about a selected element.
-        self.shortInfo = ElementShortInfoPanel(self)
-        self._parent.mgr.AddPane(self.shortInfo, wxaui.AuiPaneInfo().Float().Right().CloseButton(False)) 
-        self._parent.mgr.Update()        
-        
-        pub.subscribe(self.msg_new_element_added, ('new_element_added')) 
-                 
-    def msg_new_element_added(self, message):
-                  
-        self.userDefinedElements.Append(message)
-        self.userDefinedElements.SetSelection(0)
-                            
+                                    
     def on_quit(self, event):
 
         d = wx.MessageDialog(None,
@@ -766,7 +744,7 @@ class PeriodicTablePlugin(ComponentPlugin):
     
     label = "Periodic Table"
     
-    ancestor = "empty_data"
+    ancestor = None
 
     def build_panel(self):
         
@@ -823,7 +801,7 @@ class PeriodicTablePlugin(ComponentPlugin):
 
         pname,pdefault = d.GetValue()
                     
-        if (not pname) or (not pdefault):
+        if not pname:
             return    
                                     
         self._database.add_column(pname,pdefault)      

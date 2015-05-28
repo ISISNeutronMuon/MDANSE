@@ -35,6 +35,7 @@ import collections
 import ConfigParser
 import os
 
+from MDANSE import LOGGER
 from MDANSE.Core.Platform import PLATFORM, PlatformError
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
@@ -208,9 +209,7 @@ class InputDirectory(PreferencesItem):
 class LoggingLevel(PreferencesItem):
     
     type = "logging_level"
-    
-    LOGGING_LEVELS = ["debug","info","warning","error","critical","fatal"]
-    
+        
     def set_value(self, value):
         '''
         Set the value of the logging level preferences item.
@@ -221,16 +220,16 @@ class LoggingLevel(PreferencesItem):
                 
         value = value.lower()
         
-        if not value in LoggingLevel.LOGGING_LEVELS:
+        if not value in LOGGER.levels.keys():
             raise PreferencesError("Invalid logging level")
                 
         self._value = value
                 
-class Preferences(collections.OrderedDict):
+class Preferences(object):
     '''
     This class implements the MDANSE preferences.
     
-    Preferences are defined using the ConfigParser python module that allows to read and write 
+    :note: Preferences are defined using the ConfigParser python module that allows to read and write 
     preferences stored in a formatted INI file (RFC822).
     '''
     
@@ -241,14 +240,13 @@ class Preferences(collections.OrderedDict):
         Constructs the preferences
         '''
         
-        collections.OrderedDict.__init__(self)
-        
-        self["working_directory"] = InputDirectory("working_directory", "paths", PLATFORM.home_directory())
-        self["macros_directory"] = InputDirectory("macros_directory", "paths", os.path.join(PLATFORM.home_directory(), "mdanse_macros"))
-                
+        self._items = collections.OrderedDict()
+        self._items["working_directory"] = InputDirectory("working_directory", "paths", PLATFORM.home_directory()) 
+        self._items["macros_directory"] = InputDirectory("macros_directory", "paths", os.path.join(PLATFORM.home_directory(), "mdanse_macros")) 
+                                
         self._parser = ConfigParser.ConfigParser()
 
-        for s in self.values():
+        for s in self._items.values():
             try:
                 self._parser.add_section(s.section)
             except ConfigParser.DuplicateSectionError:
@@ -269,8 +267,12 @@ class Preferences(collections.OrderedDict):
         :rtype: ConfigParser.ConfigParser
         '''
         return self._parser
-    
-    def __getitem__(self, item):
+
+    @property
+    def items(self):
+        return self._items
+
+    def get_preferences_item(self, item):
         '''
         Get the value of a selected preferences item.
         
@@ -278,17 +280,15 @@ class Preferences(collections.OrderedDict):
         :type item: str
 
         :return: the values of the preferences item.
-        :rtype: str
+        :rtype: ``PreferencesItem`` subclass
         '''
         
         try:
-            value = self[item].value
+            return self._items[item]
         except KeyError:
-            raise PreferencesError("The preferences item %r is not valid" % item)
-        else:
-            return value
+            raise PreferencesError("Unknown preferences item")
                 
-    def __setitem__(self, item, value):
+    def set_preferences_item(self, item, value):
         '''
         Set the value of a preferences item.
         
@@ -296,17 +296,14 @@ class Preferences(collections.OrderedDict):
         :type item: str
         
         :param value: the value to set for the preferences item.
-        :type value: any
+        :type value: depends on the ``PreferencesItem`` subclass
         '''
         
-        if not self.has_key(item):
-            return
-
         try:
-            self[item].value = value
-
+            self._items[item].set_value(value)
+            return self._items[item]
         except KeyError:
-            raise PreferencesError("The preferences item %r is not valid" % item)
+            raise PreferencesError("Unknown preferences item")
         
     def load(self):
         '''
@@ -329,7 +326,7 @@ class Preferences(collections.OrderedDict):
         
         for s in self._parser.sections():
             for k, v in self._parser.items(s):
-                self[k] = v 
+                self.set_preferences_item(k,v) 
                          
     def save(self):
         '''

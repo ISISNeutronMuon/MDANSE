@@ -49,11 +49,10 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
     
     label = "User Definition Viewer"
     
-    ancestor = "empty_data"
+    ancestor = None
     
     def __init__(self, parent, *args, **kwargs):
 
-        self.currentFilename = None        
         self._udTree = {}
 
         ComponentPlugin.__init__(self, parent, size = parent.GetSize(), *args, **kwargs)
@@ -198,14 +197,12 @@ class UserDefinitionViewerFrame(wx.Frame):
 
         self.build_dialog()
 
-        
     def build_dialog(self):
         
         
         mainPanel = wx.Panel(self, wx.ID_ANY, size = self.GetSize())
         
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-        
         
         self._userDefinitionViewerPlugin = UserDefinitionViewerPlugin(mainPanel, wx.ID_ANY)
         
@@ -215,6 +212,7 @@ class UserDefinitionViewerFrame(wx.Frame):
         mainSizer.Fit(mainPanel)
         mainPanel.Layout()
 
+        self.Bind(wx.EVT_CLOSE, self.on_quit)
 
     def on_quit(self, event):
         
