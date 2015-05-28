@@ -30,7 +30,6 @@ Created on Apr 14, 2015
 @author: Eric C. pellegrini
 '''
 
-import ast
 import os
 
 import wx
@@ -41,7 +40,6 @@ import wx.lib.stattext as wxstattext
 
 from MDANSE import ELEMENTS
 from MDANSE.Core.Singleton import Singleton
-from MDANSE.Externals.pubsub import pub
 
 from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 
