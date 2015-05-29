@@ -305,12 +305,18 @@ class Preferences(object):
         except KeyError:
             raise PreferencesError("Unknown preferences item")
         
-    def load(self):
+    def load(self, path=None):
         '''
-        Load the preferences.
+        Load the preferences from an existing Preferences file.
+
+        The default value is the default location for loading Preferences file.
+        
+        :param path: the path for the preferences file
+        :type path: str   
         '''
                     
-        path = PLATFORM.preferences_file()
+        if path is None:
+            path = PLATFORM.preferences_file()
 
         if not isinstance(path,basestring):
             raise PreferencesError("Invalid type for preferences filename: %s" % path)
@@ -328,12 +334,18 @@ class Preferences(object):
             for k, v in self._parser.items(s):
                 self.set_preferences_item(k,v) 
                          
-    def save(self):
+    def save(self,path=None):
         '''
-        Save the preferences.        
+        Save the preferences to a file.
+        
+        The default value is the default location for loading Preferences file.
+        
+        :param path: the path for the preferences file
+        :type path: str   
         '''
         
-        path = PLATFORM.preferences_file()
+        if path is None:
+            path = PLATFORM.preferences_file()
             
         try:
             f = open(path, "w")
