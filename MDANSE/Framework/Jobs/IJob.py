@@ -46,7 +46,31 @@ from MDANSE.Framework.Jobs.JobStatus import JobStatus
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 
 class JobError(Error):
-    pass
+    '''
+    This class handles any exception related to IJob-derived objects
+    '''
+    
+    def __init__(self,job,message=None):
+        '''
+        Initializes the the object.
+        
+        :param job: the configurator in which the exception was raised
+        :type job: IJob derived object
+        '''
+
+        if message is None:
+            message = sys.exc_info()[1]
+            
+        self._message = str(message)
+        
+        if job._status is not None:
+            job._status._state["state"] = "crashed"
+            job._status._state["info"] += "ERROR: %s" % self._message
+            job._status.update(force=True)
+            
+    def __str__(self):
+        
+        return self._message
 
 def key_generator(size=4, chars=None, prefix=""):
     
@@ -130,12 +154,7 @@ class IJob(Configurable):
             #. parameters (dict): optional. If not None, the parameters with which the job file will be built.
         """
          
-        # Try to open the output test file to see whether it is allowed.
-        try:
-            f = open(testFile, 'w')
-        # Case where for whatever reason, the file could not be opened for writing. Return.        
-        except IOError as e:
-            raise JobError(["Error when saving python batch file.",e])
+        f = open(testFile, 'w')
            
         # The first line contains the call to the python executable. This is necessary for the file to
         # be autostartable.
@@ -249,14 +268,8 @@ class IJob(Configurable):
             #. parameters (dict): optional. If not None, the parameters with which the job file will be built.
         """
                          
-        # Try to open the output job file to see whether it is allowed.
-        try:
-            f = open(jobFile, 'w')
-        
-        # Case where for whatever reason, the file could not be opened for writing. Return.        
-        except IOError as e:
-            raise JobError(["Error when saving python batch file.",e])
-           
+        f = open(jobFile, 'w')
+                   
         # The first line contains the call to the python executable. This is necessary for the file to
         # be autostartable.
         f.write('#!%s\n\n' % sys.executable)
@@ -290,8 +303,7 @@ class IJob(Configurable):
     
         # Sets |analysis| variable to an instance analysis to save. 
         f.write('job = REGISTRY[%r][%r](status=False)\n' % ('job',cls.type))
-        f.write('job.setup(parameters)\n')
-        f.write('job.run()')
+        f.write('job.run(parameters)')
          
         f.close()
         
@@ -305,12 +317,7 @@ class IJob(Configurable):
             #. parameters (dict): optional. If not None, the parameters with which the job file will be built.
         """
                 
-        # Try to open the output test file to see whether it is allowed.
-        try:
-            f = open(testFile, 'w')
-        # Case where for whatever reason, the file could not be opened for writing. Return.        
-        except IOError as e:
-            raise JobError(["Error when saving python batch file.",e])
+        f = open(testFile, 'w')
            
         # The first line contains the call to the python executable. This is necessary for the file to
         # be autostartable.
@@ -427,35 +434,34 @@ class IJob(Configurable):
             
     _runner = {"monoprocessor" : _run_monoprocessor, "multiprocessor" : _run_multiprocessor, "remote" : _run_remote}
 
-    def run(self, parameters=None):
+    def run(self, parameters):
         """
         Run the job.
         """
         
-        if parameters is not None:
-            self.setup(parameters)
-        
-        self.initialize()
-
-        self._info = 'Information about %s job.\n' % self._name
-        self._info += str(self)
-                                                  
-        LOGGER(self._info)
-                  
-        if getattr(self,'numberOfSteps', 0) <= 0:
-            raise JobError("Invalid number of steps for job %s" % self)
-
         try:
+            self.setup(parameters)
+            
+            self.initialize()
+    
+            self._info = 'Information about %s job.\n' % self._name
+            self._info += str(self)
+                                                      
+            LOGGER(self._info)
+                      
+            if getattr(self,'numberOfSteps', 0) <= 0:
+                raise JobError(self,"Invalid number of steps for job %s" % self._name)
+    
             mode = self.configuration['running_mode']['mode']
-        except:
-            raise JobError("Invalid running mode")
-        else:                        
+    
             IJob._runner[mode](self)
-
-        self.finalize()
-
-        if self._status is not None:
-            self._status.finish()
+    
+            self.finalize()
+    
+            if self._status is not None:
+                self._status.finish()
+        except:
+            raise JobError(self)
 
     @property
     def info(self):

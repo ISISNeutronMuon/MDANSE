@@ -1,5 +1,3 @@
-import math
-
 import numpy
 
 from MDANSE.Core.Error import Error

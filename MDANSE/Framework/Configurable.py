@@ -30,7 +30,6 @@ Created on Mar 30, 2015
 @author: pellegrini
 '''
 
-import _abcoll
 import collections
 
 from MDANSE.Core.Error import Error
@@ -55,20 +54,20 @@ class Configurable(object):
             #.. 2-value is the dictionary of the keywords used when initializing the configurator.  
     '''
     
+    settings = collections.OrderedDict()
+    
     def __init__(self):
         '''
         Constructor
         '''
                
         self._configuration = {}
-
-        settings = getattr(self,"settings",{})
         
-        if not isinstance(settings,_abcoll.Mapping):
+        if not isinstance(self.settings,dict):
             raise ConfigurationError("Invalid type for settings: must be a mapping-like object")
 
         self._configurators = {}
-        for name,(typ,kwds) in settings.items():
+        for name,(typ,kwds) in self.settings.items():
 
             try:
                 self._configurators[name] = REGISTRY["configurator"][typ](name, **kwds)
@@ -89,7 +88,15 @@ class Configurable(object):
         """
                 
         return self._configuration.setdefault(name,{})
+    
+    @classmethod
+    def set_settings(cls, settings):
         
+        cls.settings.clear()
+        
+        if isinstance(settings,dict):
+            cls.settings.update(settings)        
+    
     def setup(self,parameters):
         '''
         Setup the configuration according to a set of input parameters.
@@ -102,7 +109,7 @@ class Configurable(object):
         self._configuration.clear()
 
         self._configured=False
-                
+                        
         # If no configurator has to be configured, just return
         if not self._configurators:
             self._configured=True
@@ -121,7 +128,7 @@ class Configurable(object):
         configured = set()
                 
         while toBeConfigured != configured:
-            
+                        
             progress = False
 
             for name,conf in self._configurators.items():
@@ -177,7 +184,7 @@ class Configurable(object):
               
         settings = getattr(cls,"settings",{})
         
-        if not isinstance(settings,_abcoll.Mapping):
+        if not isinstance(settings,dict):
             raise ConfigurationError("Invalid type for settings: must be a mapping-like object")
                                     
         doclist = []
@@ -243,7 +250,7 @@ class Configurable(object):
         
         settings = getattr(cls,"settings",{})
         
-        if not isinstance(settings,_abcoll.Mapping):
+        if not isinstance(settings,dict):
             raise ConfigurationError("Invalid type for settings: must be a mapping-like object")
                                     
         params = collections.OrderedDict()

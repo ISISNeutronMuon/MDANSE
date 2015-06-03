@@ -209,7 +209,7 @@ class UserDefinitionStore(UnicodeDict):
             raise UserDefinitionError("Invalid key value: must be a 3-tuple")
             
         try:
-            ud = self[name]
+            ud = UnicodeDict.__getitem__(name)
             
         except (KeyError,TypeError):
             raise UserDefinitionError('The item %r could not be found' % str(name))

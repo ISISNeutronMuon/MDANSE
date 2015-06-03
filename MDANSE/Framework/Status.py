@@ -135,7 +135,7 @@ class Status(object):
         self._stopped = True
         Publisher.sendMessage("status_stop",message=self)        
                 
-    def update(self):
+    def update(self,force=False):
         
         if self._updateStep == 0:
             return
@@ -145,8 +145,8 @@ class Status(object):
         lastUpdate = datetime.datetime.today()
 
         self._deltas.append(lastUpdate)
-                        
-        if (not self._currentStep % self._updateStep) or (total_seconds(lastUpdate-self._lastRefresh) > 10):
+                                
+        if force or (not self._currentStep % self._updateStep) or (total_seconds(lastUpdate-self._lastRefresh) > 10):
             
             self._lastRefresh = lastUpdate
             

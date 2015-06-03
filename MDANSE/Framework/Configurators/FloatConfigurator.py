@@ -64,7 +64,7 @@ class FloatConfigurator(IConfigurator):
         
         self._choices = choices if choices is not None else []
 
-    def configure(self, value):
+    def configure(self, configuration, value):
         '''
         Configure an input value.
                 
