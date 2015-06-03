@@ -106,12 +106,8 @@ class JobPlugin(ComponentPlugin):
         t = tempfile.mkstemp(prefix = "MDANSE_%s_" % self._job.type, text = True)
         os.close(t[0])
                 
-        self._job.save_job(t[1], parameters)
-                
-        self._job.configuration.set_parameters(parameters)
-                
-        self._job.configuration.configure()
-                
+        self._job.save(t[1], parameters)
+                                
         if PLATFORM.name == "windows":
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -119,7 +115,7 @@ class JobPlugin(ComponentPlugin):
         else:
             startupinfo = None
         
-        subprocess.Popen([sys.executable, t[1]], startupinfo=startupinfo)
+        subprocess.Popen([sys.executable, t[1]], startupinfo=startupinfo, stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         time.sleep(1)
 
@@ -145,7 +141,7 @@ class JobPlugin(ComponentPlugin):
         if os.path.splitext(path)[1] != ".py":
             path += ".py"
                         
-        self._job.save_job(path, parameters)
+        self._job.save(path, parameters)
 
     def plug(self):
         

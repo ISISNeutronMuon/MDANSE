@@ -99,9 +99,6 @@ class DataPlugin(IPlugin):
         plugin.plug()
         
         plugin.SetFocus()
-
-    def has_parent(self, window):
-        return False
     
     def on_changing_pane(self, event):
                         

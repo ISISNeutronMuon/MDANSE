@@ -76,11 +76,10 @@ class RunningModeConfigurator(IConfigurator):
             import Pyro
 
             Pyro.config.PYRO_STORAGE = PLATFORM.home_directory()
-            Pyro.config.PYRO_STORAGE = PLATFORM.home_directory()
             Pyro.config.PYRO_NS_URIFILE = os.path.join(Pyro.config.PYRO_STORAGE,'Pyro_NS_URI')
-            Pyro.config.PYRO_LOGFILE = os.path.join(Pyro.config.PYRO_STORAGE,'Pyro_NS_URI')
-            Pyro.config.PYRO_USER_LOGFILE = os.path.join(Pyro.config.PYRO_STORAGE,'Pyro_NS_URI')
-            Pyro.config.PYROSSL_CERTDIR = os.path.join(Pyro.config.PYRO_STORAGE,'Pyro_NS_URI')
+            Pyro.config.PYRO_LOGFILE = os.path.join(Pyro.config.PYRO_STORAGE,'Pyro_log')
+            Pyro.config.PYRO_USER_LOGFILE = os.path.join(Pyro.config.PYRO_STORAGE,'Pyro_userlog')
+            Pyro.config.PYROSSL_CERTDIR = os.path.join(Pyro.config.PYRO_STORAGE,'certs')
 
             slots = int(value[1])
                         

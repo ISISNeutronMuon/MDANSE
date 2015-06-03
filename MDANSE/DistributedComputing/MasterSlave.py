@@ -81,6 +81,8 @@ import Pyro.naming
 
 from Scientific.DistributedComputing.TaskManager import TaskManager, TaskManagerTermination
 
+from MDANSE import PLATFORM
+
 debug = False
 
 class MasterProcessError(Exception):
@@ -559,7 +561,7 @@ from %s import *
 MDANSE.DistributedComputing.MasterSlave.startSlaveProcess()
 """
         process.task_manager.storeData(slave_code = source,
-                                       cwd = os.getcwd())
+                                       cwd = PLATFORM.home_directory())
         if debug:
             print "Slave source code:"
             print 50*'-'

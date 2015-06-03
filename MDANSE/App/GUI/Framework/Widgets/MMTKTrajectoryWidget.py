@@ -38,6 +38,7 @@ from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Configurable import ConfigurationError
 
 from MDANSE.App.GUI import DATA_CONTROLLER
+from MDANSE.App.GUI.Framework import has_parent
 from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
 
 class MMTKTrajectoryWidget(IWidget):
@@ -71,7 +72,7 @@ class MMTKTrajectoryWidget(IWidget):
         
         window, filename = message
         
-        if not self.has_parent(window):
+        if not has_parent(self,window):
             return
                 
         data = DATA_CONTROLLER[filename].data

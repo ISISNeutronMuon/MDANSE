@@ -145,7 +145,6 @@ class MainFrame(wx.Frame):
         plotButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["plot",32,32], 'Open MDANSE plotter')
         udButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["user",32,32], 'Edit the user definitions')
         preferencesButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["preferences",32,32], 'Edit the preferences')
-        logfileButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["logfile",32,32], 'Display MDANSE log file')
         registryButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["registry",32,32], 'Inspect MDANSE classes registry')
         helpButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["help",32,32], 'Help')
         websiteButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["web",32,32], 'Open MDANSE website')
@@ -162,7 +161,6 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_open_mdanse_elements_database, databaseButton)
         self.Bind(wx.EVT_MENU, self.on_start_plotter, plotButton)
         self.Bind(wx.EVT_MENU, self.on_set_preferences, preferencesButton)
-        self.Bind(wx.EVT_MENU, self.on_display_logfile, logfileButton)
         self.Bind(wx.EVT_MENU, self.on_open_user_definitions, udButton)
         self.Bind(wx.EVT_MENU, self.on_open_classes_registry, registryButton)
         self.Bind(wx.EVT_MENU, self.on_about, aboutButton)
@@ -220,14 +218,6 @@ or directly to the MDANSE mailing list:
         d.ShowModal()
         d.Destroy()
         
-    def on_display_logfile(self,event):
-        
-        from MDANSE.App.GUI.LogfileFrame import LogfileFrame
-        
-        f = LogfileFrame(self)
-        
-        f.Show()
-
     def on_open_classes_registry(self,event):
         
         from MDANSE.App.GUI.Framework.Plugins.RegistryViewerPlugin import RegistryViewerFrame

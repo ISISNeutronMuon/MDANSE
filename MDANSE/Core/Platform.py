@@ -288,6 +288,20 @@ class Platform(object):
         '''    
         pass
 
+    def logfiles_directory(self):
+        '''
+        Returns the path of the directory where the MDANSE job logfiles are stored.
+                
+        :return: the path of the directory where the MDANSE job logfiles are stored..
+        :rtype: str
+        '''
+       
+        path = os.path.join(self.application_directory(), 'logfiles')
+        
+        self.create_directory(path)
+                       
+        return path
+
     def temporary_files_directory(self):
         '''
         Returns the path of the directory where the temporary MDANSE job status files are stored.
