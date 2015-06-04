@@ -207,6 +207,7 @@ https://github.com/eurydyce/MDANSE/tree/master/MDANSE
 for any other request, please send an email to:
 
 \tpellegrini@ill.fr
+\tgonzalezm@ill.fr
 \tjohnson@ill.fr
 
 or directly to the MDANSE mailing list:

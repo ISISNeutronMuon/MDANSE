@@ -89,7 +89,7 @@ class AtomTransmutationConfigurator(IConfigurator):
 
         trajConfig = configuration[self._dependencies['trajectory']]
                                                                 
-        parser = AtomSelectionParser(trajConfig["instance"])
+        parser = AtomSelectionParser(trajConfig["instance"].universe)
         
         # If the input value is a dictionary, it must have a selection string as key and the element 
         # to be transmutated to as value 

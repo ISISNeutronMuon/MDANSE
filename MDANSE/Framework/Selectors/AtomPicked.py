@@ -34,6 +34,6 @@ from MDANSE.Framework.Selectors.AtomIndex import AtomIndex
         
 class AtomPicked(AtomIndex):
 
-    type = "atompicked"
+    type = "atom_picked"
 
     section = "miscellaneous"

@@ -34,7 +34,7 @@ from MDANSE.Framework.Selectors.ISelector import ISelector
                 
 class PythonScript(ISelector):
     
-    type = "pythonscript"
+    type = "python_script"
     
     section = None
 

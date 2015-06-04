@@ -36,7 +36,7 @@ from MDANSE.Framework.Selectors.ISelector import ISelector
         
 class ResType(ISelector):
 
-    type = "restype"
+    type = "residue_type"
 
     section = "proteins"
 

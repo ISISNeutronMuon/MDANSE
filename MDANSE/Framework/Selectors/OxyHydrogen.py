@@ -34,7 +34,7 @@ from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class OxyHydrogen(ISelector):
     
-    type = "O-H"
+    type = "oxy_hydrogen"
     
     section = "hydrogens"
 

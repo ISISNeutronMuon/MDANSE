@@ -265,7 +265,7 @@ class TestConfigurator(UnitTest):
   
         # Test a valid atom selection string
         self._parameters["trajectory"] = self._validTrajectory.filename
-        self._parameters["atom_selection"] = 'atomtype carbon'
+        self._parameters["atom_selection"] = 'atom_type carbon'
         self.assertNotRaises(configurable.setup,self._parameters)
         self.assertEqual(configurable['atom_selection']['n_selected_atoms'],sum([True for at in configurable['trajectory']['instance'].universe.atomList() if at.symbol=='C']))
   
@@ -291,7 +291,7 @@ class TestConfigurator(UnitTest):
   
         # Test that an empty selection selection raises a SelectionParserError
         self._parameters["trajectory"] = self._validTrajectory.filename
-        self._parameters["atom_transmutation"] = 'atomtype(["fsfsd"])'
+        self._parameters["atom_transmutation"] = 'atom_type(["fsfsd"])'
         self.assertRaises(ConfiguratorError,configurable.setup,self._parameters)
   
         # Test that None parameters selects everything

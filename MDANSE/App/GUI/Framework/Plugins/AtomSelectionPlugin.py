@@ -139,12 +139,13 @@ class Query(object):
             return []
                             
         try:
-            selection = self._parser(self.get_expression(),True)
+            expression = self.get_expression()
+            selection = self._parser.parse(expression)
         except AtomSelectionParserError:
-            selection = ("",[])
-
-        return selection       
-                
+            return ("",[])
+        else:
+            return (expression,selection)
+            
     def pop(self):
         return self._list.pop()
     
@@ -178,7 +179,7 @@ class AtomSelectionPlugin(ComponentPlugin):
                                                 
         self._mainPanel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
 
-        self._notebook = wxaui.AuiNotebook(self._mainPanel, wx.ID_ANY, style=wxaui.AUI_NB_DEFAULT_STYLE^wxaui.AUI_NB_TAB_MOVE)
+        self._notebook = wxaui.AuiNotebook(self._mainPanel, wx.ID_ANY, style=wxaui.AUI_NB_DEFAULT_STYLE&~wxaui.AUI_NB_CLOSE_ON_ACTIVE_TAB&~wxaui.AUI_NB_TAB_MOVE)
         
         settingsPanel = wx.Panel(self._mainPanel,wx.ID_ANY)
                 
@@ -321,7 +322,7 @@ class AtomSelectionPlugin(ComponentPlugin):
         
         self._selectionSummary.AppendText("List of selected atoms:\n")
         for idx in self._selection:
-            self._selectionSummary.AppendText("\t%s\n" % self._atoms[idx].fullName())
+            self._selectionSummary.AppendText("\t%s (MMTK index: %d)\n" % self._atoms[idx].fullName(),self._atoms[idx].index)
 
     def insert_keyword_values(self, keyword, values):
 
@@ -378,7 +379,7 @@ class AtomSelectionPlugin(ComponentPlugin):
             return
                                 
         if not self._selectors.has_key(selectionFilter):
-            self._selectors[selectionFilter] = [str(v) for v in REGISTRY["selector"](selectionFilter, self._parent.trajectory.universe).choices]
+            self._selectors[selectionFilter] = [str(v) for v in REGISTRY["selector"][selectionFilter](self._parent.trajectory.universe).choices]
         
         self.values.Set(self._selectors[selectionFilter])
 

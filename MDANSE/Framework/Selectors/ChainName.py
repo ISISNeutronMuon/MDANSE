@@ -36,7 +36,7 @@ from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class ChainName(ISelector):
 
-    type = "chainname"
+    type = "chain_name"
 
     section = "proteins"
 

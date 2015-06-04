@@ -34,7 +34,7 @@ from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class AtomName(ISelector):
 
-    type = "atomname"
+    type = "atom_name"
 
     section = "atoms"
 
