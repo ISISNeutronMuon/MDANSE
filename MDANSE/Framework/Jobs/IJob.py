@@ -85,12 +85,12 @@ class JobError(Error):
         
         return self._message
 
-def key_generator(size=4, chars=None, prefix=""):
+def key_generator(keySize, chars=None, prefix=""):
     
     if chars is None:
         chars = string.ascii_lowercase + string.digits
     
-    key = ''.join(random.choice(chars) for _ in range(size))
+    key = ''.join(random.choice(chars) for _ in range(keySize))
     if prefix:
         key = "%s_%s" % (prefix,key)
     
@@ -121,7 +121,7 @@ class IJob(Configurable):
         while True:     
     
             # Followed by 4 random letters.
-            name = key_generator(4, prefix=prefix)
+            name = key_generator(6, prefix=prefix)
             
             if not name in registeredJobs:
                 break

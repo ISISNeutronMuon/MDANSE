@@ -103,10 +103,9 @@ class JobPlugin(ComponentPlugin):
 
         parameters = self._parametersPanel.get_value()
         
-        t = tempfile.mkstemp(prefix = "MDANSE_%s_" % self._job.type, text = True)
-        os.close(t[0])
+        script = os.path.join(PLATFORM.jobscripts_directory(),self._job._name)+'.py'
                 
-        self._job.save(t[1], parameters)
+        self._job.save(script, parameters)
                                 
         if PLATFORM.name == "windows":
             startupinfo = subprocess.STARTUPINFO()
@@ -115,7 +114,7 @@ class JobPlugin(ComponentPlugin):
         else:
             startupinfo = None
         
-        subprocess.Popen([sys.executable, t[1]], startupinfo=startupinfo, stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.Popen([sys.executable, script], startupinfo=startupinfo, stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         time.sleep(1)
 

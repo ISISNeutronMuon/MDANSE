@@ -302,6 +302,20 @@ class Platform(object):
                        
         return path
 
+    def jobscripts_directory(self):
+        '''
+        Returns the path of the directory where the MDANSE job  script files are stored.
+                
+        :return: the path of the directory where the MDANSE job script files are stored.
+        :rtype: str
+        '''
+       
+        path = os.path.join(self.application_directory(), 'jobscripts')
+        
+        self.create_directory(path)
+                       
+        return path
+
     def temporary_files_directory(self):
         '''
         Returns the path of the directory where the temporary MDANSE job status files are stored.
