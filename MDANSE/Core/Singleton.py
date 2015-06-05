@@ -42,7 +42,7 @@ class Singleton(type):
         Creates (or returns if it has already been instanciated) an instance of the class.
         '''
     
-        if self not in self.__instances:
-            self.__instances[self] = super(Singleton, self).__call__(*args, **kwargs)
+        if self.__name__ not in self.__instances:
+            self.__instances[self.__name__] = super(Singleton, self).__call__(*args, **kwargs)
             
-        return self.__instances[self]
+        return self.__instances[self.__name__]

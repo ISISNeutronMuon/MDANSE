@@ -322,7 +322,7 @@ class AtomSelectionPlugin(ComponentPlugin):
         
         self._selectionSummary.AppendText("List of selected atoms:\n")
         for idx in self._selection:
-            self._selectionSummary.AppendText("\t%s (MMTK index: %d)\n" % self._atoms[idx].fullName(),self._atoms[idx].index)
+            self._selectionSummary.AppendText("\t%s (MMTK index: %d)\n" % (self._atoms[idx].fullName(),self._atoms[idx].index))
 
     def insert_keyword_values(self, keyword, values):
 
@@ -414,7 +414,7 @@ class AtomSelectionPlugin(ComponentPlugin):
         
         path = os.path.basename(self.parent.trajectory.filename)
                     
-        ud = REGISTRY['userdefinable']['atom_selection'](path,expression=self._expression,indexes=self._selection)
+        ud = REGISTRY['user_definition']['atom_selection'](path,expression=self._expression,indexes=self._selection)
             
         UD_STORE[name] = ud
         

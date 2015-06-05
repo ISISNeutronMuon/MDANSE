@@ -223,7 +223,7 @@ class HisFile(dict):
         
 class DiscoverConverter(Converter):
     """
-    Converts a DL_POLY trajectory to a MMTK trajectory.
+    Converts a Discover trajectory to a MMTK trajectory.
     """
 
     type = 'discover'

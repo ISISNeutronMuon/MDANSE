@@ -149,10 +149,7 @@ class AxisSelectionPlugin(ComponentPlugin):
         atomNames1 = tuple([self._atomNames1.GetString(idx) for idx in atomIndexes1])
         atomNames2 = tuple([self._atomNames2.GetString(idx) for idx in atomIndexes2])
         
-        ud = REGISTRY['userdefinable']['axis_selection'](path,
-                                                         molecule=molName,
-                                                         endpoint1=atomNames1,
-                                                         endpoint2=atomNames2)            
+        ud = REGISTRY['user_definition']['axis_selection'](path,molecule=molName,endpoint1=atomNames1,endpoint2=atomNames2)            
             
         UD_STORE[name] = ud
         UD_STORE.save()

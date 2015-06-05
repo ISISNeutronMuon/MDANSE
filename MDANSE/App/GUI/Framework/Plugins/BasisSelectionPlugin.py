@@ -157,11 +157,7 @@ class BasisSelectionPlugin(ComponentPlugin):
         xAxis = tuple([self._xAxis.GetString(idx) for idx in xAxis])
         yAxis = tuple([self._yAxis.GetString(idx) for idx in yAxis])
 
-        ud = REGISTRY['userdefinable']['basis_selection'](path,
-                                                          molecule=molName,
-                                                          origin=origin,
-                                                          x_axis=xAxis,
-                                                          y_axis=yAxis)            
+        ud = REGISTRY['user_definition']['basis_selection'](path,molecule=molName,origin=origin,x_axis=xAxis,y_axis=yAxis)            
                     
         UD_STORE[name] = ud
         UD_STORE.save()
