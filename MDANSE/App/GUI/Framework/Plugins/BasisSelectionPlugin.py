@@ -35,8 +35,10 @@ import os
 import wx
 import wx.aui as wxaui
 
-from MDANSE import LOGGER, REGISTRY, UD_STORE
+from MDANSE import LOGGER, REGISTRY
 from MDANSE.Externals.pubsub import pub
+from MDANSE.Framework.UserDefinitionsStore import UD_STORE
+
 from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 from MDANSE.App.GUI.ComboWidgets.UserDefinitionsPanel import UserDefinitionsPanel
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule, get_chemical_objects_dict
@@ -124,7 +126,7 @@ class BasisSelectionPlugin(ComponentPlugin):
                 
         self._moleculeNames.SetItems(sorted(self._molecularContents.keys()))        
         
-    def on_close(self, event):
+    def on_close(self, event=None):
         
         self.parent.clear_selection()
         self.parent.mgr.ClosePane(self.parent.mgr.GetPane(self))
@@ -138,7 +140,6 @@ class BasisSelectionPlugin(ComponentPlugin):
         if (not origin) or (not xAxis) or (not yAxis):
             LOGGER("One of the atom selection is empty. Please select some values.", "error", ["dialog"])
             return
-
         
         if (origin == xAxis) or (origin == yAxis) or (xAxis == yAxis):
             LOGGER("A basis can not be set from identical atom selections.", "error", ["dialog"])

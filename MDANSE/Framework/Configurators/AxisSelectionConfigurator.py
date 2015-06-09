@@ -30,7 +30,7 @@ Created on Mar 30, 2015
 @author: Eric C. Pellegrini and Bachir Aoun
 '''
 
-from MDANSE.Framework.UserDefinitions.IUserDefinition import UD_STORE
+from MDANSE.Framework.UserDefinitionsStore import UD_STORE, UserDefinitionsStoreError
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
         
@@ -73,11 +73,12 @@ class AxisSelection(IConfigurator):
         
         trajConfig = configuration[self._dependencies['trajectory']]
                 
-        ud = UD_STORE[trajConfig["basename"],"axis_selection",value]        
-        if ud is not None:
-            self.update(ud)
-        else:
+        try: 
+            ud = UD_STORE[trajConfig["basename"],"axis_selection",value]
+        except UserDefinitionsStoreError:
             self.update(value)
+        else:
+            self.update(ud)
 
         e1 = find_atoms_in_molecule(trajConfig['instance'].universe,self['molecule'], self['endpoint1'], True)
         e2 = find_atoms_in_molecule(trajConfig['instance'].universe,self['molecule'], self['endpoint2'], True)

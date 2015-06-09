@@ -34,7 +34,7 @@ import os
 
 import wx.combo
 
-from MDANSE.Framework.UserDefinitions.IUserDefinition import UD_STORE
+from MDANSE.Framework.UserDefinitionsStore import UD_STORE
 
 from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
 from MDANSE.App.GUI.ComboWidgets.ComboCheckbox import ComboCheckbox

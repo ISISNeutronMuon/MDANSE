@@ -29,6 +29,8 @@ class Status(object):
         
     def __init__(self):
         
+        self._updateStep = 1
+        
         self._currentStep = 0
         self._nSteps = None
         self._finished = False
@@ -121,10 +123,8 @@ class Status(object):
             return
          
         self._nSteps = nSteps
-         
-        if rate is None:
-            self._updateStep = 1
-        else:
+                 
+        if rate is not None:
             self._updateStep = max(0,int(rate*nSteps))
                   
         Publisher.sendMessage("status_start",message=self)
@@ -136,6 +136,9 @@ class Status(object):
         Publisher.sendMessage("status_stop",message=self)        
                 
     def update(self,force=False):
+        
+        if self._nSteps is None:
+            return
         
         if self._updateStep == 0:
             return

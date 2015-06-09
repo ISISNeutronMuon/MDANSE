@@ -33,7 +33,6 @@ Created on Apr 14, 2015
 import os
 import subprocess               
 import sys
-import tempfile
 import time
 
 import wx

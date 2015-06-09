@@ -4,7 +4,6 @@ import os
 from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
-from MDANSE.Framework.UserDefinitions.AtomSelectionDefinition import AtomSelectionDefinition
 
 class UserDefinitionsStoreError(Error):
     pass
@@ -82,23 +81,18 @@ class UserDefinitionsStore(UnicodeDict):
         if not os.path.exists(UserDefinitionsStore.UD_PATH):
             return
         
-#         # Try to open the UD file.
-#         try:
-#             f = open(UserDefinitionsStore.UD_PATH, "rb")
-#             UD = cPickle.load(f)        
-# 
-#         # If for whatever reason the pickle file loading failed do not even try to restore it
-#         except:
-#             return
-#         
-#         else:
-#             UnicodeDict.update(self,UD)
-#             f.close()
-
-        f = open(UserDefinitionsStore.UD_PATH, "rb")
-        UD = cPickle.load(f)        
-        UnicodeDict.update(self,UD)
-        f.close()
+        # Try to open the UD file.
+        try:
+            f = open(UserDefinitionsStore.UD_PATH, "rb")
+            UD = cPickle.load(f)        
+ 
+        # If for whatever reason the pickle file loading failed do not even try to restore it
+        except:
+            return
+         
+        else:
+            UnicodeDict.update(self,UD)
+            f.close()
                         
     def save(self):
         '''

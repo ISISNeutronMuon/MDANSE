@@ -31,7 +31,7 @@ Created on May 22, 2015
 '''
 
 from MDANSE import REGISTRY
-from MDANSE.Framework.UserDefinitions.IUserDefinition import UD_STORE
+from MDANSE.Framework.UserDefinitionsStore import UD_STORE, UserDefinitionsStoreError
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
 class QVectorsConfigurator(IConfigurator):
@@ -70,15 +70,11 @@ class QVectorsConfigurator(IConfigurator):
 
         trajConfig = configuration[self._dependencies['trajectory']]
 
-        ud = UD_STORE[trajConfig["basename"],"q_vectors",value]        
-        if ud is not None:
+        try:        
+            ud = UD_STORE[trajConfig["basename"],"q_vectors",value]
             
-            self["parameters"] = ud['parameters']
-            self["type"] = ud['generator']
-            self["is_lattice"] = ud['is_lattice']
-            self["q_vectors"] = ud['q_vectors']
-        
-        else:                        
+        except UserDefinitionsStoreError:
+
             generator, parameters = value
             generator = REGISTRY["q_vectors"][generator](trajConfig["instance"])
             generator.setup(parameters)
@@ -86,6 +82,12 @@ class QVectorsConfigurator(IConfigurator):
                         
             if not data:
                 raise ConfiguratorError("no Q vectors could be generated", self)
+        
+        else:                        
+            self["parameters"] = ud['parameters']
+            self["type"] = ud['generator']
+            self["is_lattice"] = ud['is_lattice']
+            self["q_vectors"] = ud['q_vectors']
 
             self["parameters"] = parameters
             self["type"] = generator.type

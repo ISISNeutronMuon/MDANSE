@@ -13,7 +13,6 @@ class MainApplication(wx.App):
         f.Show()
         self.SetTopWindow(f)
         return True
-        
 
 class PeriodicTableApplication(wx.App):
     
@@ -24,7 +23,6 @@ class PeriodicTableApplication(wx.App):
         self.SetTopWindow(f)
         return True
 
-        
 class PlotterApplication(wx.App):
     
     def OnInit(self):
@@ -42,4 +40,9 @@ class UserDefinitionViewerApplication(wx.App):
         f.Show()
         self.SetTopWindow(f)
         return True
+    
+if __name__ == "__main__":
+    
+    app = MainApplication()
+    app.MainLoop()
     

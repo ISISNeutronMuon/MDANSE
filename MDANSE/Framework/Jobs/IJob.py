@@ -74,7 +74,7 @@ class JobError(Error):
         trace.append("\n%s" % self._message)
 
         trace = '\n'.join(trace)
-        
+                
         LOGGER(trace,'error',[job._name])
 
         if job._status is not None:
@@ -128,7 +128,7 @@ class IJob(Configurable):
                         
         return name
         
-    def __init__(self, status=None):
+    def __init__(self, status=False):
         """
         The base class constructor.        
         """
@@ -143,7 +143,7 @@ class IJob(Configurable):
         
         self._info = ""
                                         
-        if status is not None:
+        if status:
             self._status = JobStatus(self)
         else:
             self._status = None
@@ -467,7 +467,10 @@ class IJob(Configurable):
             if getattr(self,'numberOfSteps', 0) <= 0:
                 raise JobError(self,"Invalid number of steps for job %s" % self._name)
     
-            mode = self.configuration['running_mode']['mode']
+            if self.configuration.has_key('running_mode'):
+                mode = self.configuration['running_mode']['mode']
+            else:
+                mode = 'monoprocessor'
     
             IJob._runner[mode](self)
     

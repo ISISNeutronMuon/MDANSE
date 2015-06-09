@@ -36,9 +36,10 @@ import os
 import wx
 import wx.aui as wxaui
 
-from MDANSE import LOGGER, REGISTRY, UD_STORE
+from MDANSE import LOGGER, REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Externals.pubsub import pub
+from MDANSE.Framework.UserDefinitionsStore import UD_STORE
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser, AtomSelectionParserError
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 

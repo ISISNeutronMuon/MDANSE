@@ -37,8 +37,10 @@ import wx.aui as wxaui
 import wx.grid as wxgrid
 from wx.lib.delayedresult import startWorker
 
-from MDANSE import LOGGER, REGISTRY, UD_STORE
+from MDANSE import LOGGER, REGISTRY
 from MDANSE.Externals.pubsub import pub
+
+from MDANSE.Framework.UserDefinitionsStore import UD_STORE
 
 from MDANSE.App.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.App.GUI.ComboWidgets.ProgressBar import ProgressBar

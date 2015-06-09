@@ -57,7 +57,7 @@ class MainFrame(wx.Frame):
         
         # Add some handlers to the loggers
         LOGGER.add_handler("console", REGISTRY['handler']['console'](self._panels["controller"].pages["logger"]), level="info")
-        LOGGER.add_handler("dialog", REGISTRY['handler']['dialog'], level="error")
+        LOGGER.add_handler("dialog", REGISTRY['handler']['dialog'](), level="error")
         LOGGER.start()
                                 
     def build_dialog(self):

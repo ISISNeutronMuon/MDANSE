@@ -35,8 +35,10 @@ import os
 import wx
 import wx.aui as wxaui
 
-from MDANSE import LOGGER, REGISTRY, UD_STORE
+from MDANSE import LOGGER, REGISTRY
 from MDANSE.Externals.pubsub import pub
+from MDANSE.Framework.UserDefinitionsStore import UD_STORE
+
 from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 from MDANSE.App.GUI.ComboWidgets.UserDefinitionsPanel import UserDefinitionsPanel
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule, get_chemical_objects_dict

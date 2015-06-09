@@ -35,7 +35,7 @@ import operator
 
 import numpy
 
-from MDANSE.Framework.UserDefinitions.IUserDefinition import UD_STORE, UserDefinitionError
+from MDANSE.Framework.UserDefinitionsStore import UD_STORE, UserDefinitionsStoreError
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
 
@@ -91,7 +91,7 @@ class AtomSelectionConfigurator(IConfigurator):
         try:
             ud = UD_STORE[trajConfig["basename"],"atom_selection",value]        
         # The input value is an atom selection string: parse it and update the configuration
-        except UserDefinitionError:
+        except UserDefinitionsStoreError:
             parser = AtomSelectionParser(trajConfig["instance"].universe)
             self["indexes"] = parser.parse(value)
             self["expression"] = value
