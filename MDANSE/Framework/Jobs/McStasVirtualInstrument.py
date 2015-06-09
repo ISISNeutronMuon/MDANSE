@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -78,7 +78,12 @@ class McStasParameters(Configurable):
 
 class McStasVirtualInstrument(IJob):
     """
-    Performs a virtual experiment using McStas binding.
+    Performs a virtual neutron scattering experiment using a binding to the McStas, neutron ray-tracing code.
+	
+	This analysis requires the coherent and incoherent dynamic structure factors to have been calculated
+	and an instrument to be chosen.
+	The result is the instrument-dependent perturbation of the sum of the scattering contributions including 
+	instrument resolution, self-shielding and multiple scattering.
     """
     
     type = 'mvi'

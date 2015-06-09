@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -46,9 +46,11 @@ def no_exc_min(l):
     
 class Voronoi(IJob):
     """
-    Computes the volume of each Voronoi regions and neighborhood statistics for 3d systems. 
+    Computes the volume of each Voronoi cell and corresponding 'neighbourhood' statistics for 3d systems. 
     Delaunay triangulation is used for the decomposition of polytops into simplexes,
-    Voronoi and Delaunay tessellation are calculated using a cython wrapping of the Qhull library (scipy wrapping used as Externals) 
+    Voronoi and Delaunay tessellation are calculated using a cython wrapping of the Qhull library (scipy wrapping used as Externals)
+
+    Voronoi analysis is another commonly-used, complementary method for characterising the local structure of a system.	
     
     **Acknowledgement:**\n
     Gael Goret, PELLEGRINI Eric

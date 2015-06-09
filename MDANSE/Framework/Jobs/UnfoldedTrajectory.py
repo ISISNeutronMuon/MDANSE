@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -55,6 +55,9 @@ def contiguous_configuration(seed,atoms,boxCoords):
 
 class UnfoldedTrajectory(IJob):
     """
+	Tries to make a contiguous trajectory for a whole molecule e.g. a protein.
+	The routine may fail if the molecule is bigger than half of the box side (L/2)
+    and or the initial structure is not in itself contiguous.	
     """
     
     type = 'ut'

@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -44,13 +44,9 @@ class ElasticIncoherentStructureFactor(IJob):
     The Elastic Incoherent Structure Factor (EISF ) is defined as the limit of the incoherent
     intermediate scattering function for infinite time.
 
-    The EISF appears as the amplitude of the elastic line in the neutron scattering spectrum.
+    The EISF appears as the incoherent amplitude of the elastic line in the neutron scattering spectrum.
     Elastic scattering is only present for systems in which the atomic motion is confined in space, as
-    for solids. To understand which information is contained in the EISF we consider for simplicity
-    a system where only one sort of atoms is visible to the neutrons. To a very good approximation
-    this is the case for all systems containing a large amount of hydrogen atoms, as biological
-    systems. Incoherent scattering from hydrogen dominates by far all other contributions. Using
-    the definition of the van Hove self-correlation function G(r,t)
+    in solids. The Q-dependence of the EISF indicates e.g. the fraction of static/mobile atoms and the spatial dependence of the dynamics.
     """
 
     type = 'eisf'

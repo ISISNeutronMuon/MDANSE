@@ -39,10 +39,8 @@ from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 
 class CoordinationNumber(DistanceHistogram):
     """
-    The Coordination Number computes the pair distribution function for a set of atoms, 
-    it could be defined has the total number of neighbours of a central atom in a molecule or ion. 
-    In MDANSE the definition of the Coordination Number can be seen as an extension of this previous definition, 
-    indeed, we are not only defining central atom but also centers of gravity of a set of group of atoms as center.
+    The Coordination Number is computed from the pair distribution function for a set of atoms. 
+    It describes the total number of neighbours, as a function of distance, from a central atom, or the centre of a group of atoms.
     """
 
     type = 'cn'

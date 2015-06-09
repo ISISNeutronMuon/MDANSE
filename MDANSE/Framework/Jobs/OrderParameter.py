@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -43,23 +43,23 @@ from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
 class OrderParameter(IJob):
     """
-    Adequate and accurate cross comparison of the NMR and MD simulation data is of crucial
-    importance in versatile studies conformational dynamics of proteins. NMR relaxation spectroscopy 
-    has proven to be a unique approach for a site-specific investigation of both global
-    tumbling and internal motions of proteins. The molecular motions modulate the magnetic in-
-    teractions between the nuclear spins and lead for each nuclear spin to a relaxation behavior
-    which reflects its environment. The relationship between microscopic motions and
-    measured spin relaxation rates is given by Redfield's theory. 
-    
-    The Redfield theory shows that relaxation measurements probe the relaxation dynamics of a selected nuclear
-    spin only at a few frequencies. Moreover, only a limited number of independent observables
-    are accessible. Hence, to relate relaxation data to protein dynamics one has to postulate either
-    a dynamical model for molecular motions or a functional form depending on a
-    limited number of adjustable parameters. 
+    The combination of NMR and MD simulation data is very powerful in the 
+	study of conformational dynamics of proteins. NMR relaxation spectroscopy 
+    is a unique approach for a site-specific investigation of both global
+    tumbling and internal motions of proteins. The molecular motions modulate the magnetic interactions 
+	between the nuclear spins and lead for each nuclear spin to a relaxation behaviour
+    which reflects its environment. 
+	
+	The relationship between microscopic motions and measured spin relaxation rates is given by Redfield's theory. 
+    The relaxation measurements probe the relaxation dynamics of a selected nuclear
+    spin at only a few frequencies. Moreover, only a limited number of independent observables
+    are accessible. Hence, to relate relaxation data to protein dynamics, 
+    a dynamical model for molecular motions or a functional form, depending on a
+    limited number of adjustable parameters, are required. 
     
     The generalized order parameter, indicates the degree of spatial restriction of the internal motions of a bond vector, 
     while the characteristic time is an effective correlation time, setting the time scale of the internal
-    relaxation processes. The resulting values ranging from 0 (completely disordered) to 1 (fully ordered). 
+    relaxation processes. The resulting values range from 0 (completely disordered) to 1 (fully ordered). 
     
     **Calculation:** \n
     angle at time T is calculated as the following: \n   
@@ -70,8 +70,6 @@ class OrderParameter(IJob):
     #. angular_correlation_legendre_1st: :math:`<cos(\phi(T))>`
     #. angular_correlation_legendre_2nd: :math:`<\\frac{1}{2}(3cos(\phi(T))^{2}-1)>`
     
-    **Usage:** \n
-    This analysis is used to study molecule's orientation and rotation relaxation.
     
     **Acknowledgement**\n
     AOUN Bachir, PELLEGRINI Eric

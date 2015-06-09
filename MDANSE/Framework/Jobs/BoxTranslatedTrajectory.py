@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -44,7 +44,7 @@ from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
 class BoxCenteredTrajectory(IJob):
     """
-    Build a new trajectory by translating a given atom selection on the center of the simulation box. 
+    Build a new trajectory by translating the contents of the simulation box such that a given atom selection is at the centre of the simulation box. 
     """
     
     type = 'btt'

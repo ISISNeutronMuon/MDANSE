@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -40,7 +40,7 @@ from MDANSE.Mathematics.Arithmetic import weight
 
 class StaticStructureFactor(DistanceHistogram):
     """
-    Computes the pair distribution function for a set of atoms.
+    Computes the static structure factor from the pair distribution function for a set of atoms.
     """
 
     type = 'ssf'

@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -41,11 +41,11 @@ from MDANSE.MolecularDynamics.Analysis import mean_square_deviation
 
 class RootMeanSquareDeviation(IJob):
     """
-    The Root Mean-Square Deviation (RMSD) is maybe the most popular estimator of structural similarity. 
+    The Root Mean-Square Deviation (RMSD) is one of the most popular measures of structural similarity. 
     It is a numerical measure of the difference between two structures. Typically, the RMSD is used to 
     quantify the structural evolution of the system during the simulation. 
-    It can provide precious information about the system especially if it reached equilibrium or conversely 
-    if major structural changes occured during the simulation.
+    It can provide essential information about the structure, if it reached equilibrium or conversely 
+    if major structural changes occurred during the simulation.
     """
 
     type = 'rmsd'

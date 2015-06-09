@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -38,7 +38,7 @@ from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
 class Density(IJob):
     """
-    Computes the time-dependent density for a given trajectory.
+    Computes the atom and mass densities for a given trajectory. These are time dependent if the simulation box volume fluctuates.
     """
 
     type = 'den'

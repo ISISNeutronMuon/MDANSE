@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -40,12 +40,12 @@ from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
 class AngularCorrelation(IJob):
     '''
-    Computes the angular correlation for a set of molecules.
+    Computes the angular correlation for a vector defined with respect to a molecule or set of molecules.
     
-    Vector defined by user, starting at the origin pointing towards the direction.
-    Origin and direction can either be an atom or a center definition. In this particular case the origin
-    is the head group geometric center designated with the sphere and the direction is simply the last atom
-    of the tail chain. The correlation is calculated for the angle formed between the same vector at 
+    Vector defined by user, starting at the origin pointing in a particular direction.
+    Origin and direction can either be an atom or a centre definition (centre of a group of atoms). For example, the origin
+    could be defined by the geometric centre of the head group of a surfactant molecule and the direction simply by the last atom
+    of the tail or chain. The correlation is calculated for the angle formed by the same vector at 
     different times
 
     **Calculation:** \n
