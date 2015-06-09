@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -40,7 +40,7 @@ from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
 class CroppedTrajectory(IJob):
     """
-    Crop a trajectory as well in term of universe contents as in trajectory length..
+    Crop a trajectory in terms of the contents of the simulation box (selected atoms or molecules) and the trajectory length.
     """
     
     type = 'ct'

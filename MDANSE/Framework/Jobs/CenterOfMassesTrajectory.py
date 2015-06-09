@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -41,7 +41,8 @@ from MDANSE.MolecularDynamics.Trajectory import partition_universe
 
 class CenterOfMassesTrajectory(IJob):
     """
-    Creates a trajectory out of the center of masses motions for a selection of atoms of a given input trajectory
+    Creates a trajectory from the centre of masses for selected groups of atoms in a given input trajectory.
+	For a molecular system, the centre of mass trajectory will contain only the molecular translations, which are therefore separated from the rotations.
     """
     
     type = 'comt'

@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -40,15 +40,15 @@ class PairDistributionFunction(DistanceHistogram):
     """
     The Pair-Distribution Function (PDF) is an example of a pair correlation function, which
     describes how, on average, the atoms in a system are radially packed around each other. 
-    This proves to be a particularly effective way of describing the average structure of disordered 
+    This is a particularly effective way of describing the average structure of disordered 
     molecular systems such as liquids. Also in systems like liquids, where there is continual movement
     of the atoms and a single snapshot of the system shows only the instantaneous disorder, it is
-    extremely useful to be able to deal with the average structure.
+    essential to determine the average structure.
     
-    The PDF is useful in other ways. For example, it is something that can be deduced experimentally 
-    from x-ray or neutron diffraction studies, thus providing a direct comparison between
-    experiment and simulation. It can also be used in conjunction with the inter-atomic pair potential 
+    The PDF can be compared with experimental data from x-ray or neutron diffraction. 
+	It can be used in conjunction with the inter-atomic pair potential 
     function to calculate the internal energy of the system, usually quite accurately.
+	Finally it can even be used to derive the inter-atomic potentials of mean force.
     """
 
     type = 'pdf'

@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -44,8 +44,9 @@ class AreaPerMolecule(IJob):
     '''
     Computes the area per molecule.
     
-    The area per molecule is computed by simply dividing the surface of one of the simulation box face (ab, bc or ac) by the
-    number of molecule with a given name. This property should be a constant unless the simulation performed was in NPT ensemble.
+    The area per molecule is computed by simply dividing the surface of one of the simulation box faces (ab, bc or ac) by the
+    number of molecules with a given name. This property should be a constant unless the simulation performed was in the NPT ensemble.
+	This analysis is relevant for oriented structures like lipid membranes.
     '''
     
     type = 'apm'

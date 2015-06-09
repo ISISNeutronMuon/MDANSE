@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -38,7 +38,10 @@ from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
 class RootMeanSquareFluctuation(IJob):
     """
-    Computes the root mean square fluctuation for a set of atoms.
+    The root mean square fluctuation (RMSF) for a set of atoms is similar to the square root
+	of the mean square displacement (MSD), except that it is spatially resolved (by atom/residue/etc)
+	rather than time resolved. It reveals the dynamical heterogeneity of the molecule over the course
+	of a MD simulation.
     """
 
     type = 'rmsf'

@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -41,9 +41,10 @@ from MDANSE.Mathematics.Geometry import center
 
 class RefoldedMembraneTrajectory(IJob):
     """
-    Rebuild the trajectory of a membrane such as the lipid compising the upper leaflet are actually on the up side of the simulation
-    box and conversely the lipids that composes the lower leaflet are actually on the down side of the leaflet.
-    The normal to the membrane is assumed to be parallel to z axis. 
+    Rebuild the trajectory of a membrane such that the lipids in the upper leaflet are actually in the upper half of the simulation
+    box and therefore the lipids in the lower leaflet are in the lower half of the box 
+	i.e. the membrane is centred in the simulation box.
+    The normal to the membrane is assumed to be parallel to the z axis. 
     """
     
     type = 'rmt'

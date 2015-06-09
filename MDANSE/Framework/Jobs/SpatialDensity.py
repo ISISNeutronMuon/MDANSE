@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -41,16 +41,17 @@ from MDANSE.Mathematics.Geometry import build_cartesian_axes, center_of_mass
 class SpatialDensity(IJob):
     """
     The Spatial Density (SD) can be seen as an generalization of the pair distribution function.
-    Indeed, pair distribution functions are defined as orientionally averaged distribution functions.
-    are in the sense that, Altough these correlation functions reflects many key features of the
-    short-range order in molecular systems, it should be realized that an average spatial assembly of
-    non-spherical particles can not be uniquely characterized from these one-dimensionals functions.
-    So, structural models postulated for the molecular ordering in nonsimple systems based only
-    on one-dimensional PDF will always be somewhat ambiguous.
+    Indeed, pair distribution functions (PDF) are defined as orientionally averaged distribution functions.
+    Although these correlation functions reflect many key features of the
+    short-range order in molecular systems, an average spatial assembly of
+    non-spherical particles can not be uniquely characterized from these one-dimensional functions.
+    Structural models postulated for the molecular ordering in non-simple systems based only
+    on one-dimensional PDFs will always be somewhat ambiguous.
     
-    The goal of SD analysis is to provide greater clarity in the structual analysis of molecular systems by utilizing distribution
-    function which span both the radial and angular coordinates of the separation vector. 
-    This can provide useful information about the average local structure in a complex system.
+    SD analysis provides more information through a distribution
+    function which spans both the radial and angular coordinates of the separation vector. 
+    This can provide useful information about the local structure in a complex system 
+	such as the relative orientation of neighbouring molecules in a liquid.
      """
     
     type = 'sd'

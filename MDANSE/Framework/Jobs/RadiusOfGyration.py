@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -40,11 +40,9 @@ from MDANSE.MolecularDynamics.Analysis import radius_of_gyration
 
 class RadiusOfGyration(IJob):
     """
-    Radius Of Gyration (ROG) is the name of several related measures of the size of an object,
+    Radius Of Gyration (ROG) is a measure of the size of an object,
     a surface, or an ensemble of points. It is calculated as the Root Mean Square Distance between
-    the system and a reference that can be either the center of gravity of the system either a given
-    axis. In MDANSE, the reference is choosen to be the center of gravity of the system under
-    study.
+    the system and a reference which, in MDANSE, is the centre of gravity of the system. 
     """ 
 
     type = 'rog'

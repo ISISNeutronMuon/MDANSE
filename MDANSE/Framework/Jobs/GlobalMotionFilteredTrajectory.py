@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -40,28 +40,28 @@ from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
 class GlobalMotionFilteredTrajectory(IJob):
     """
-    It is often of interest to separate global motion from internal motion, both for quantitative
-    analysis and for visualization by animated display. Obviously, this can be done under the
+    It is often of interest to separate global translation and rotation motion from internal motion, both for quantitative
+    analysis and for visualization by animated display. Obviously, this can only be done under the
     hypothesis that global and internal motions are decoupled within the length and timescales of
-    the analysis. MDANSE can create Global Motion Filtered Trajectory (GMFT) by filtering
-    out global motions (made of the three translational and rotational degrees of freedom), either
+    the analysis. MDANSE creates a Global Motion Filtered Trajectory (GMFT) by filtering
+    out global motions (made of the three translational and three rotational degrees of freedom), either
     on the whole system or on an user-defined subset, by fitting it to a reference structure (usually
     the first frame of the MD). Global motion filtering uses a straightforward algorithm:
     
     * for the first frame, find the linear transformation such that the coordinate origin becomes
-    the center of mass of the system and its principal axes of inertia are parallel to the three
+    the centre of mass of the system and its principal axes of inertia are parallel to the three
     coordinates axes (also called principal axes transformation),
     
     * this provides a reference configuration C ref ,
     
-    * for any other frames f, finds and applies the linear transformation that minimizes the
-    RMS distance between frame f and C ref .
+    * for any other frames f, find and apply the linear transformation that minimizes the
+    RMS 'distance' between frame f and C ref .
     
     The result is stored in a new trajectory file that contains only internal motions. This analysis
-    can be useful in case where diffusive motions are not of interest or simply not accessible to the
-    experiment (time resolution, powder analysis ... ).
+    can be useful in case where overall diffusive motions are not of interest e.g. for a protein in solution
+	and the internal protein dynamics fall within the dynamical range of the instrument.
 
-    To do so, the universe has to be made infinite and all its configuration contiguous.
+    In the global motion filtered trajectory, the universe is made infinite and all the configurations contiguous.
     """
     
     type = 'gmft'

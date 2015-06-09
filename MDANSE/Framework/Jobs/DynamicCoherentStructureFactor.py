@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -46,7 +46,9 @@ class DynamicCoherentStructureFactorError(Error):
 
 class DynamicCoherentStructureFactor(IJob):
     """
-    Computes the dynamic coherent structure factor for a set of atoms.
+    Computes the dynamic coherent structure factor S_coh(Q,w) for a set of atoms.
+	It can be compared to experimental data e.g. the energy-integrated, static structure factor S_coh(Q)
+	or the dispersion and intensity of phonons.
     """
 
     type = 'dcsf'

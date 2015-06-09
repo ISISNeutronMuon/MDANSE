@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -40,13 +40,13 @@ from MDANSE.Mathematics.Geometry import center_of_mass
 
 class Eccentricity(IJob):
     """
-    Computes the eccentricity for a set of atoms.\n
+    Computes the eccentricity for a set of atoms e.g. in a micelle.\n
 
     **Calculation:** \n
-    Eccentricity is calculated using the inertia principal axes 'I' along x, y and z: \n   
+    Eccentricity is calculated using the principal axes of inertia 'I' along x, y and z: \n   
     .. math:: Eccentricity = 1-\\frac{I_{min}}{I_{average}}
     
-    The ratio of largest to smallest is between the biggest inertia to the smallest \n
+    The ratio of largest to smallest is  \n
     .. math:: ratio = \\frac{Imax}{Imin}
     
     The semiaxes a,b and c are those of an ellipsoid \n
@@ -56,7 +56,7 @@ class Eccentricity(IJob):
     
     Where:\n
         - M is the total mass of all the selected atoms
-        - :math:`I_{min}` , :math:`I_{mid}` and :math:`I_{max}` are respectively the smallest, the middle and the biggest inertia moment value
+        - :math:`I_{min}` , :math:`I_{mid}` and :math:`I_{max}` are respectively the smallest, middle and biggest inertia moment values
         
 
     **Output:** \n   
@@ -75,8 +75,8 @@ class Eccentricity(IJob):
     
    
     **Usage:** \n
-    This analysis can be used to study macro-molecules geometry and sphericity .
-    Originally conceived to calculate the sphericity of micelles.
+    This analysis can be used to study macro-molecular geometry and sphericity .
+    It was originally conceived to calculate the ellipticity of micelles.
     
     **Acknowledgement and publication:**\n
     AOUN Bachir, PELLEGRINI Eric

@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -39,11 +39,13 @@ from MDANSE.Extensions import mt_fast_calc
 
 class MolecularTrace(IJob):
     """
-    Molecular Trace is a structural analysis allowing to computes the trace of atoms in terms of coordinates.
+    A Molecular Trace is a time-integrated trace of selected atoms in terms of their coordinates.
     
-    * firstly, we compute the minimal and maximal coordinates including the atomic trajectories define as input.
-    * then, based on these min/max and on a spatial resolution given (as float) as spacing, we build a cartesian grid.
-    * finally, for each atom and for each frame of the selections, we sum a constant into the grid, like an histogram of presence, called the spatial density   
+    * the minimal and maximal coordinates from the selected atomic trajectories are computed.
+    * based on these min/max and a spatial resolution, a cartesian grid is constructed.
+    * for each atom and for each frame of the selected trajectories, a histogram of presence, called the spatial density, is constructed.
+
+    The molecular trace can reveal anisotropic vibrations and diffusion pathways.	
     
     **Acknowledgement and publication:**\n
     Gael Goret, PELLEGRINI Eric

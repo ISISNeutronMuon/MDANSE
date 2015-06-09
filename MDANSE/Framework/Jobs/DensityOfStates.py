@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -40,10 +40,10 @@ from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
 class DensityOfStates(IJob):
     """
-    The Density Of States correspond, for a set of atoms, to the calculation of the 
-    power spectrum of the Velocity AutoCorrelation Function (VACF), which in case of 
-    the mass-weighted VACF defines the phonon discrete Density Of States.
-    """
+    The Density Of States describes the number of vibrations per unit frequency. 
+	It is determined as the power spectrum (Fourier transform) of the Velocity AutoCorrelation Function (VACF).
+	The partial Density of States corresponds to selected sets of atoms or molecules.
+	"""
 
     type = 'dos'
     

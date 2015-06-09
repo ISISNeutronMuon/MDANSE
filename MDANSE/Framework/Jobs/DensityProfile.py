@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -44,8 +44,9 @@ class DensityProfileError(Error):
 
 class DensityProfile(IJob):
     """
-    The Density Profile analysis can be used to characterize the density heterogeneity in order to study 
-    atoms segregation and cluster order formation in long chained molecules systems such as polymers, lipids, etc. 
+    The Density Profile analysis shows the weighted atomic density heterogeneity in the directions of the simulation box axes.
+    For a lipid membrane, the density variation in the direction perpendicular to the membrane is probed in reflectometry measurements.	
+    The Density Profile Analysis can show segregation or cluster order formation, for example during the formation of micelles. 
     """
     type = 'dp'
 

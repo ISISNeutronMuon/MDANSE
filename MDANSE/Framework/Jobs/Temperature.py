@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -44,6 +44,11 @@ from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory, sorted_at
 class Temperature(IJob):
     """
     Computes the time-dependent temperature for a given trajectory.
+	The temperature is determined from the kinetic energy i.e. the atomic velocities
+	which are in turn calculated from the time-dependence of the atomic coordinates.
+	Note that if the time step between frames saved in the trajectory is long (~ps) 
+	compared to the time step in the MD simulations (~fs) the 
+	velocities are averaged over many configurations and will not give accurate temperatures.
     """
 
     type = 'temp'

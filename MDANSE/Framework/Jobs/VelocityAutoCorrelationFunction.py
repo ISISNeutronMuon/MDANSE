@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -42,26 +42,25 @@ class VelocityAutoCorrelationFunction(IJob):
     """
     The Velocity AutoCorrelation Function (VACF) is a property describing
     the dynamics of a molecular system. It reveals the underlying nature of the forces acting
-    on the system by computing the cartesian density of states for a set of atoms.
+    on the system. Its Fourier Transform gives the cartesian density of states for a set of atoms.
 
     In a molecular system that would be made of non interacting particles, the velocities would
-    be constant at any time triggering the VACF to be a constant value. Now, if we think about a
-    system with small interactions such as in a gas-phase, the magnitude and direction of the velocity
-    of a particle will change gradually over time due to its collision with the other particles of the
-    molecular system. In such a system, the VACF will be represented by a decaying exponential.
+    be constant at any time giving a VACF of constant value. In the gas-phase, the magnitude and direction of the velocity
+    of a particle will change gradually over time due collisions with other particles. 
+	In this case, the VACF is represented by a decaying exponential.
     
-    In the case of solid phase, the interaction are much stronger and, as a results, the atoms
-    are bound to a given position from which they will move backwards and forwards oscillating
-    between positive and negative values of their velocity. The oscillations will not be of equal
-    magnitude however, but will decay in time, because there are still perturbative forces acting on
-    the atoms to disrupt the perfection of their oscillatory motion. So, in that case the VACF will
-    look like a damped harmonic motion.
+    In the solid phase, the interactions are much stronger and, as a result, the atoms
+    are bound to a given, equilibrium position from which they move backwards and forwards. 
+	The oscillations are not be of equal
+    magnitude however, but decay in time, because there are anharmonic, perturbative forces which
+	disrupt the oscillatory motion. In this case, the VACF 
+    looks like a damped harmonic motion.
     
-    Finally, in the case of liquid phase, the atoms have more freedom than in solid phase and
-    because of the diffusion process, the oscillatory motion seen in solid phase will be cancelled quite
-    rapidly depending on the density of the system. So, the VACF will just have one very damped
-    oscillation before decaying to zero. This decaying time can be considered as the average time
-    for a collision between two atoms to occur before they diffuse away.
+    In the liquid phase, the atoms have more freedom than in the solid phase and
+    because of the diffusion process, the oscillatory motion seen in solid phase is damped
+    rapidly depending on the density of the system. So, the VACF tends to have one very damped
+    oscillation before decaying to zero. The decaying time can be considered as the average time
+    for a collision between two atoms. The integral of the VACF is proportional to the diffusion constant (D/3).
     """
 
     type = 'vacf'

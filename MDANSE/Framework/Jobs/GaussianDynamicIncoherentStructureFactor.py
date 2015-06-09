@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -43,7 +43,7 @@ from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
 class GaussianDynamicIncoherentStructureFactor(IJob):
     """
-    Computes the dynamic incoherent structure factor for a set of atoms with the gaussian approximation.
+    Computes the dynamic incoherent structure factor S_inc(Q,w) for a set of atoms in the Gaussian approximation.
     """
     
     type = 'gdisf'

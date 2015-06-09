@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -43,10 +43,10 @@ from MDANSE.Mathematics.Signal import correlation, normalize, get_spectrum
 class CurrentCorrelationFunction(IJob):
     """
     Computes the current correlation function for a set of atoms.
-    the transversal and longitudinal current correlation function are typically use to study propagation of excitations in disordered system.
-    longitudinal current are directly coupled to density fluctuation and transversal current are link to propagating 'shear modes'.
+    The transverse and longitudinal current correlation functions are typically used to study the propagation of excitations in disordered systems.
+    The longitudinal current is directly related to density fluctuations and the transverse current is linked to propagating 'shear modes'.
     
-    For more information, read 'J.-P. Hansen and I. R. McDonald, Theory of Simple Liquids (3rd ed., Elsevier), chapter 7.4: Correlations
+    For more information, see e.g. 'J.-P. Hansen and I. R. McDonald, Theory of Simple Liquids (3rd ed., Elsevier), chapter 7.4: Correlations
     in space and time)' 
     """
 

@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -46,18 +46,18 @@ class SolventAccessibleSurface(IJob):
     
     * Shrake, A., and J. A. Rupley. JMB (1973) 79:351-371.
     
-    Basically This algorithm uses a sphere (of solvent) of a particular radius to 'probe' the surface of the molecule.
+    This algorithm uses a sphere (of solvent) of a particular radius to 'probe' the surface of the molecule.
    
-    In more detail, the algorithm consists in drawing a mesh of points equidistant from each atom of the molecule 
+    It involves constructing a mesh of points equidistant from each atom of the molecule 
     and uses the number of these points that are solvent accessible to determine the surface area. 
     The points are drawn at a water molecule's estimated radius beyond the van der Waals radius, 
     which is effectively similar to 'rolling a ball' along the surface.
     All points are checked against the surface of neighboring atoms to determine whether they are buried or accessible. 
     The number of points accessible is multiplied by the portion of surface area each point represents to calculate the SAS. 
-    The choice of the 'probe radius' does have an effect on the observed surface area, 
-    as using a smaller probe radius detects more surface details and therefore reports a larger surface. 
-    A typical value is 0.14 nm, which approximates the radius of a water molecule. 
-    Another factor that affects the results is the definition of the VDW radii of the atoms in the molecule under study.     
+    The choice of the 'probe radius' has an effect on the observed surface area - 
+    using a smaller probe radius detects more surface details and therefore reports a larger surface. 
+    A typical value is 0.14 nm, which is approximately the radius of a water molecule. 
+    Another factor that affects the result is the definition of the VDW radii of the atoms in the molecule under study.     
     """
 
     type = 'sas'

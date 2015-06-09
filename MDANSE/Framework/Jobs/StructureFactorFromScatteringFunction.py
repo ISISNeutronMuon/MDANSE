@@ -3,8 +3,8 @@
 #Copyright (C)
 #2015- Eric C. Pellegrini Institut Laue-Langevin
 #BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
+#71 avenue des Martyrs
+#38000 Grenoble Cedex 9
 #France
 #pellegrini[at]ill.fr
 #goret[at]ill.fr
@@ -37,7 +37,7 @@ from MDANSE.Mathematics.Signal import get_spectrum
 
 class StructureFactorFromScatteringFunction(IJob):
     """
-    Compute the structure factor from a NetCDF file containing an intermediate scattering function.
+    Computes the structure factor from a NetCDF file containing an intermediate scattering function.
     """
     
     type = 'sffsf'
