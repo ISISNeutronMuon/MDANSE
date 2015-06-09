@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import abc
@@ -38,6 +38,7 @@ import stat
 import string
 import subprocess
 import sys
+import traceback
 
 from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE.Core.Error import Error
@@ -58,26 +59,38 @@ class JobError(Error):
         :type job: IJob derived object
         '''
 
+        trace = []                        
+
+        tback = traceback.extract_stack()
+
+        for tb in tback:
+            trace.append(' -- '.join([str(t) for t in tb]))
+
         if message is None:
             message = sys.exc_info()[1]
-            
+
         self._message = str(message)
+
+        trace.append("\n%s" % self._message)
+
+        trace = '\n'.join(trace)
         
+        LOGGER(trace,'error',[job._name])
+
         if job._status is not None:
-            job._status._state["state"] = "crashed"
-            job._status._state["info"] += "ERROR: %s" % self._message
+            job._status._state["state"] = "aborted"
             job._status.update(force=True)
             
     def __str__(self):
         
         return self._message
 
-def key_generator(size=4, chars=None, prefix=""):
+def key_generator(keySize, chars=None, prefix=""):
     
     if chars is None:
         chars = string.ascii_lowercase + string.digits
     
-    key = ''.join(random.choice(chars) for _ in range(size))
+    key = ''.join(random.choice(chars) for _ in range(keySize))
     if prefix:
         key = "%s_%s" % (prefix,key)
     
@@ -108,7 +121,7 @@ class IJob(Configurable):
         while True:     
     
             # Followed by 4 random letters.
-            name = key_generator(4, prefix=prefix)
+            name = key_generator(6, prefix=prefix)
             
             if not name in registeredJobs:
                 break
@@ -121,10 +134,12 @@ class IJob(Configurable):
         """
 
         Configurable.__init__(self)
-                
-        self._outputData = OutputData()
-
+        
         self._name = IJob.set_name()
+
+        LOGGER.add_handler(self._name, REGISTRY['handler']['logfile'](os.path.join(PLATFORM.logfiles_directory(),self._name)+'.txt'), level="info")
+        
+        self._outputData = OutputData()
         
         self._info = ""
                                         
@@ -441,14 +456,14 @@ class IJob(Configurable):
         
         try:
             self.setup(parameters)
-            
+                                    
             self.initialize()
     
             self._info = 'Information about %s job.\n' % self._name
             self._info += str(self)
-                                                      
-            LOGGER(self._info)
-                      
+            
+            LOGGER(self._info,'info',[self._name])
+                                                                                                    
             if getattr(self,'numberOfSteps', 0) <= 0:
                 raise JobError(self,"Invalid number of steps for job %s" % self._name)
     

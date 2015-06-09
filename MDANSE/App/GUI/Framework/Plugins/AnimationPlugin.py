@@ -36,6 +36,7 @@ import wx.aui as wxaui
 from MDANSE.Externals.pubsub import pub as Publisher
 
 from MDANSE.App.GUI.Icons import ICONS
+from MDANSE.App.GUI.Framework import has_parent
 from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 
 class AnimationPlugin(ComponentPlugin):
@@ -154,7 +155,7 @@ class AnimationPlugin(ComponentPlugin):
         
         mv = message
 
-        if not self.has_parent(mv):
+        if not has_parent(self,mv):
             return
         
         frame = mv.current_frame
@@ -177,8 +178,10 @@ class AnimationPlugin(ComponentPlugin):
 
 
     def on_update_animation_icon(self, message):
+        
         mv = message
-        if not self.has_parent(mv):
+        
+        if not has_parent(self,mv):
             return
         
         if mv.animation_loop:
@@ -187,7 +190,9 @@ class AnimationPlugin(ComponentPlugin):
             self.playPause.SetBitmapLabel(ICONS["play",32,32])
 
     def on_set_up_frame_slider(self, message):
+        
         mv = message
-        if not self.has_parent(mv):
+        
+        if not has_parent(self,mv):
             return
         self.frameSlider.SetRange(0,self._parent.n_frames-1)    

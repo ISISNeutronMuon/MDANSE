@@ -92,7 +92,7 @@ class AtomSelectionConfigurator(IConfigurator):
             ud = UD_STORE[trajConfig["basename"],"atom_selection",value]        
         # The input value is an atom selection string: parse it and update the configuration
         except UserDefinitionError:
-            parser = AtomSelectionParser(trajConfig["instance"])
+            parser = AtomSelectionParser(trajConfig["instance"].universe)
             self["indexes"] = parser.parse(value)
             self["expression"] = value
         else:

@@ -38,9 +38,11 @@ from MDANSE import PLATFORM
 
 class LogfileFrame(wx.Frame):
     
-    def __init__(self,parent,*args,**kwargs):
+    def __init__(self,parent,jobName,*args,**kwargs):
         
         wx.Frame.__init__(self,parent,size=(800,500),*args,**kwargs)
+        
+        self._logfile = os.path.join(PLATFORM.logfiles_directory(),jobName)+'.txt'
         
         panel = wx.Panel(self,wx.ID_ANY)
         
@@ -61,12 +63,12 @@ class LogfileFrame(wx.Frame):
         
     def update(self):
         
-        logfile = os.path.join(PLATFORM.application_directory(),"mdanse.log")
-        
-        if os.path.exists(logfile):        
-            with open(logfile,"r") as f:
-                
-                self._logFileContents.SetValue(f.read())
+        try:
+            f = open(self._logfile,"r")
+        except IOError:
+            self._logFileContents.SetValue("Error opening %r file." % self._logfile)
+        else:
+            self._logFileContents.SetValue(f.read())
             
     def on_update(self,event):
         

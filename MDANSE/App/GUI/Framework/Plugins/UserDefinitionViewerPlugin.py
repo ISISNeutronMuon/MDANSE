@@ -33,15 +33,14 @@ Created on Apr 14, 2015
 import wx
 import wx.aui as wxaui
 
-from MDANSE import UD_STORE
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.UserDefinitions.IUserDefinition import IUserDefinition
+from MDANSE.Framework.UserDefinitionsStore import UD_STORE
 
 from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 
 class UserDefinitionViewerPluginError(Error):
     pass
-
 
 class UserDefinitionViewerPlugin(ComponentPlugin):
 
@@ -60,7 +59,7 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
         self.build_plugins_tree()
      
     def build_panel(self):
-        
+                
         self._treePanel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
         
         treeSizer = wx.BoxSizer(wx.VERTICAL)
@@ -102,22 +101,19 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
     def set_plugins_tree(self, node, data):
         
         for k, v in data.items():
+
+            dataItem = wx.TreeItemData(v)
+            subnode = self._tree.AppendItem(node, str(k), data=dataItem)
             
             if isinstance(v, IUserDefinition):
-                dataItem = wx.TreeItemData(v)
-                subnode = self._tree.AppendItem(node, str(k), data=dataItem)
                 self.set_plugins_tree(subnode, v) 
                 self._tree.SetItemTextColour(subnode, 'red') 
             
             elif isinstance(v, dict):
-                dataItem = wx.TreeItemData(v)
-                subnode = self._tree.AppendItem(node, str(k), data=dataItem)
                 self.set_plugins_tree(subnode, v)
                 self._tree.SetItemTextColour(subnode, 'blue')  
             
             else:
-                dataItem = wx.TreeItemData(v)
-                subnode = self._tree.AppendItem(node, str(k), data=dataItem)
                 self._tree.SetItemTextColour(subnode, 'green')
                
     def on_show_info(self, event):

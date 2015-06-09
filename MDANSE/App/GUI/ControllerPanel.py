@@ -23,7 +23,7 @@ class ControllerPanel(wx.Panel):
     
     def build_panel(self):
 
-        self._notebook = wxaui.AuiNotebook(self)
+        self._notebook = wxaui.AuiNotebook(self, style=wxaui.AUI_NB_DEFAULT_STYLE & ~wxaui.AUI_NB_CLOSE_ON_ACTIVE_TAB)
 
         self._pages = collections.OrderedDict()
         self._pages["logger"] = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_BESTWRAP|wx.HSCROLL|wx.TE_AUTO_URL)

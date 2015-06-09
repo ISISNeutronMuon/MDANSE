@@ -171,11 +171,11 @@ class QVectorsPanel(wx.Panel):
         
         target = os.path.basename(plugin._trajectory.filename)
         
-        ud = REGISTRY['userdefinable']['q_vectors'](target,
-                                                    generator=self._generator.type,
-                                                    parameters=self._parameters,
-                                                    q_vectors=self._grid.GetTable().data,
-                                                    is_lattice=self._generator.is_lattice)
+        ud = REGISTRY['user_definition']['q_vectors'](target,
+                                                      generator=self._generator.type,
+                                                      parameters=self._parameters,
+                                                      q_vectors=self._grid.GetTable().data,
+                                                      is_lattice=self._generator.is_lattice)
         
         UD_STORE[name] = ud
         UD_STORE.save()

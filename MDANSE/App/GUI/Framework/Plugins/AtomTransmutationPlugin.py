@@ -82,10 +82,7 @@ class AtomTransmutationPlugin(AtomSelectionPlugin):
 
         element = self._elements.GetStringSelection()
         
-        ud = REGISTRY['userdefinable']['atom_transmutation'](path,
-                                                             expression=self._expression,
-                                                             indexes=self._selection,
-                                                             element=element)            
+        ud = REGISTRY['user_definition']['atom_transmutation'](path,expression=self._expression,indexes=self._selection,element=element)            
         UD_STORE[name] = ud
         UD_STORE.save()
         

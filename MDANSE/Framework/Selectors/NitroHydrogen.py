@@ -34,7 +34,7 @@ from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class NitroHydrogen(ISelector):
     
-    type = "nitrohydrogen"
+    type = "nitro_hydrogen"
     
     section = "hydrogens"
 

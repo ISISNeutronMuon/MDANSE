@@ -34,12 +34,12 @@ from MDANSE.Framework.Selectors.ISelector import ISelector
                 
 class AtomFullName(ISelector):
 
-    type = "atomfullname"
+    type = "atom_fullname"
 
     section = "atoms"
 
     def __init__(self, universe):
-
+        
         ISelector.__init__(self,universe)
                 
         self._choices.extend(sorted(set([at.fullName().strip().lower() for at in self._universe.atomList()])))

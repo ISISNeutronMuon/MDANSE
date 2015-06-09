@@ -41,9 +41,9 @@ class AtomSelectionParserError(Error):
 
 class AtomSelectionParser(object):
         
-    def __init__(self, trajectory):
+    def __init__(self, universe):
         
-        self._universe = trajectory.universe
+        self._universe = universe
                 
     def operator_and(self, token):
         

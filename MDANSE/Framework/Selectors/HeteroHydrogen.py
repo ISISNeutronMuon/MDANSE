@@ -34,7 +34,7 @@ from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class HeteroHydrogenBound(ISelector):
     
-    type = "heterohydrogen"
+    type = "hetero_hydrogen"
     
     section = "hydrogens"
 

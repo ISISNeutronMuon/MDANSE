@@ -25,30 +25,18 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 27, 2015
+Created on Jun 4, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
-from MDANSE.Framework.Selectors.ISelector import ISelector
-    
-class CarboHydrogen(ISelector):
-    
-    type = "carbo_hydrogen"
-    
-    section = "hydrogens"
+from MDANSE.Framework.Jobs.Converters.Discover import DiscoverConverter
+        
+class DMolConverter(DiscoverConverter):
+    """
+    Converts a DMol trajectory to a MMTK trajectory.
+    """
 
-    def select(self, *args):
-
-        sel = set()
-            
-        for obj in self._universe.objectList():
-                                        
-            carbons = [at for at in obj.atomList() if at.type.name.strip().lower() == 'carbon']
-            
-            for car in carbons:
-                neighbours = car.bondedTo()
-                hydrogens = [neigh for neigh in neighbours if neigh.type.name.strip().lower() == 'hydrogen']
-                sel.update(hydrogens)
-                    
-        return sel
+    type = 'dmol'
+    
+    label = "DMol"

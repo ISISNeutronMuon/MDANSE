@@ -35,7 +35,6 @@ import abc
 import wx
 
 from MDANSE import REGISTRY
-from MDANSE.App.GUI.Framework.Plugins.IPlugin import IPlugin, plugin_parent
 
 class IWidget(wx.Panel):
     
@@ -89,16 +88,6 @@ class IWidget(wx.Panel):
     def add_widgets(self):
         pass
     
-    def has_parent(self, target):
-            
-        if self == target:
-            return True
-        
-        if self.TopLevelParent == self:
-            return False
-        
-        return self.has_parent(self.Parent, target)    
-
     def build_panel(self):        
 
         self._staticBox = wx.StaticBox(self, wx.ID_ANY, label=self.label)

@@ -34,7 +34,7 @@ from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class AtomSymbol(ISelector):
 
-    type = "atomsymbol"
+    type = "atom_symbol"
 
     section = "atoms"
 
