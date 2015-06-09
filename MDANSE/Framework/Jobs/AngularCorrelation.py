@@ -148,6 +148,6 @@ class AngularCorrelation(IJob):
              
         self._outputData['ac'] /= self.configuration['axis_selection']['n_axis']
                 
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()  

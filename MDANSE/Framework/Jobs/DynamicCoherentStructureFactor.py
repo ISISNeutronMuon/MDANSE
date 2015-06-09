@@ -188,7 +188,7 @@ class DynamicCoherentStructureFactor(IJob):
         sqfTotal = weight(props,self._outputData,self.configuration['atom_selection']['n_atoms_per_element'],2,"s(q,f)_%s%s")
         self._outputData["s(q,f)_total"][:] = sqfTotal
     
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     
   

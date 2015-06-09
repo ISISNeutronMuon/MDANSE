@@ -233,7 +233,7 @@ class McStasVirtualInstrument(IJob):
         # Convert McStas output files into NetCDF format
         self.convert(self.configuration["options"]["mcstas_output_directory"])
         
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
                 
     def treat_str_var(self, s):
         return s.strip().replace(' ', '_')

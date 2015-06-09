@@ -187,6 +187,6 @@ class SpatialDensity(IJob):
         self._outputData.add("inter_spatial_density","volume",self.hist)          
         
         # Write the output variables.
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()

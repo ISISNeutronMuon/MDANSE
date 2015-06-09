@@ -157,7 +157,7 @@ class MolecularTrace(IJob):
         self._outputData['molecular_trace'][:] = self.grid
                 
         # Write the output variables.
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     
   

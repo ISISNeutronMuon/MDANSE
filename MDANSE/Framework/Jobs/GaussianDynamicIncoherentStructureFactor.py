@@ -169,6 +169,6 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         
         self._outputData["s(q,f)_total"][:] = weight(props,self._outputData,self.configuration['atom_selection']['n_atoms_per_element'],1,"s(q,f)_%s")
     
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()

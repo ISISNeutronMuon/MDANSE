@@ -166,6 +166,6 @@ class DensityOfStates(IJob):
                           "dos_%s")
         self._outputData["dos_total"][:] = dosTotal        
         
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     

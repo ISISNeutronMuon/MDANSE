@@ -129,7 +129,7 @@ class CoordinationNumber(DistanceHistogram):
             self._outputData["cn_inter_%s%s" % invPair][:] = self.averageDensity*cAlpha*cnInter        
             self._outputData["cn_total_%s%s" % invPair][:] = self.averageDensity*cAlpha*cnTotal 
 
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     
   

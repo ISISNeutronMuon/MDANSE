@@ -48,6 +48,116 @@ class GenericConverterError(Error):
                                                   
 class GenericConverter(Converter):
     """
+    Converts a trajectory written in ASCII to a MMTK trajectory file.
+    
+    This converter can be useful when using MD packages that are currently not supported by MDANSE. 
+    
+    Here is an example of ASCII trajectory that can be converted using this converter to a MMTk trajectory.
+    
+    MOLECULAR_CONTENTS
+    2
+    
+    ETHYNE
+    C1 C
+    C2 C
+    H2 H
+    H2 H
+    
+    WATER
+    O1 O
+    H1 H
+    H2 H
+    
+    MOLECULES
+    ETHYNE 1
+    WATER 2
+    
+    NSTEPS
+    4
+    
+    TIMESTEP
+    10
+    
+    STEP
+    10
+    
+    CELL
+    10,0,0
+    0,10,0
+    0,0,10
+    
+    CONFIGURATION
+    0,0,0
+    0,0,1
+    0,1,0
+    0,1,1
+    1,0,0
+    1,0,1
+    1,1,0
+    1,1,1
+    2,2,2
+    3,3,3
+    
+    STEP
+    20
+    
+    CELL
+    10,0,0
+    0,10,0
+    0,0,10
+    
+    CONFIGURATION
+    0,0,0
+    0,0,1
+    0,1,0
+    0,1,1
+    1,0,0
+    1,0,1
+    1,1,0
+    1,1,1
+    2,2,2
+    3,3,3
+    
+    STEP
+    30
+    
+    CELL
+    10,0,0
+    0,10,0
+    0,0,10
+    
+    CONFIGURATION
+    0,0,0
+    0,0,1
+    0,1,0
+    0,1,1
+    1,0,0
+    1,0,1
+    1,1,0
+    1,1,1
+    2,2,2
+    3,3,3
+    
+    STEP
+    40
+    
+    CELL
+    10,0,0
+    0,10,0
+    0,0,10
+    
+    CONFIGURATION
+    0,0,0
+    0,0,1
+    0,1,0
+    0,1,1
+    1,0,0
+    1,0,1
+    1,1,0
+    1,1,1
+    2,2,2
+    3,3,3
+
     """
 
     type = 'generic'
@@ -115,53 +225,69 @@ class GenericConverter(Converter):
             line=self._gtFile.readline().strip()
                                  
         # Read the number of steps
-        if self._gtFile.readline().strip() != "NSTEPS":
-            raise GenericConverterError("Invalid keyword#4: must be 'NSTEPS'")         
+        if self._gtFile.readline().strip() != "NFRAMES":
+            raise GenericConverterError("Invalid keyword#3: must be 'NFRAMES'")         
         try:
             self.numberOfSteps=int(self._gtFile.readline())
         except ValueError:
-            raise GenericConverterError("Invalid type for 'NSTEPS' keyword. Must be an integer corresponding to the number of steps of the simulation.")
+            raise GenericConverterError("Invalid type for 'NFRAMES' keyword. Must be an integer corresponding to the number of frames of the simulation.")
 
         # Read a blank line
         self._gtFile.readline()
 
-        # Read the number of steps
-        if self._gtFile.readline().strip() != "TIMESTEP":
-            raise GenericConverterError("Invalid keyword#5: must be 'TIMESTEP'")
-         
-        # Read the time step        
+        # Read the time step
+        if self._gtFile.readline().strip() != "FRAMETIME":
+            raise GenericConverterError("Invalid keyword#4: must be 'FRAMETIME'")
         try:
             self._timeStep=float(self._gtFile.readline())
         except ValueError:
-            raise GenericConverterError("Invalid type for 'TIMESTEP' keyword. Must be a float corresponding to the actual timestep of the simulation.")
+            raise GenericConverterError("Invalid type for 'FRAMETIME' keyword. Must be a float corresponding to the time between two frames of the simulation.")
 
+        # Read a blank line
+        self._gtFile.readline()
+
+        # Read the box coordinates
+        if self._gtFile.readline().strip() != "BOX_COORDINATES":
+            raise GenericConverterError("Invalid keyword#5: must be 'BOX_COORDINATES'")
+        try:
+            self._box=bool(self._gtFile.readline())
+        except ValueError:
+            raise GenericConverterError("Invalid type for 'BOX_COORDINATES' keyword. Must be a boolean indicating whether or not the coordinates are in box.")
+        
         # Read a blank line
         self._gtFile.readline()
 
         self._headerBlockSize=self._gtFile.tell()
         
-        # Read the first frame to define the size of various data block
-
-        # Read the current step number
-        if self._gtFile.readline().strip() != "STEP":
-            raise GenericConverterError("Invalid frame block. Must start with 'STEP' keyword.")
-        try:
-            _=int(self._gtFile.readline())
-        except ValueError:
-            raise GenericConverterError("Invalid type for 'STEP' keyword. Must be a in corresponding to the current step number of the simulation.")
+        # Read the beginning of the first frame to define the size of various data block
+        
+        self._pbc = []
+        if self._gtFile.readline().strip() == "CELL":
+            
+            for _ in range(self.numberOfSteps):
+                cell = numpy.array([self._gtFile.readline().strip().split(",") for _ in range(3)],dtype=numpy.float64)
+                if cell.shape != (3,3):
+                    raise GenericConverterError('Invalid cell shape. Must be a 3x3 matrix.')
+                self._pbc.append(cell)
                     
-        # Read a blank line
-        self._gtFile.readline()
-
-        self._pbc = (self._gtFile.readline().strip() == "CELL")
-                        
-        if self._pbc:
+                # Read a blank line
+                self._gtFile.readline()
+                
+                pos = self._gtFile.tell()
+                            
+                if self._gtFile.readline().strip == "CONFIGURATION":
+                    break
+                else:
+                    self._gtFile.seek(pos,0)
+                    
+        if self._pbc:                         
             self._universe = ParallelepipedicPeriodicUniverse()
-            pos = self._gtFile.tell()
-            self._gtFile.readline()
-            self._gtFile.readline()
-            self._gtFile.readline()
-            self._cellBlockSize=self._gtFile.tell()-pos
+            # Case of NVT simulation
+            if len(self._pbc)==1:
+                self._universe.setShape(self._pbc.pop(0))
+            else:
+                if len(self._pbc) != self.numberOfSteps:
+                    raise GenericConverterError('Invalid number of cell definitions. Must be equal to the number of frames for a NPT simulation.')      
         else:
             self._universe = InfiniteUniverse()
 
@@ -176,51 +302,44 @@ class GenericConverter(Converter):
                     self._universe.addObject(temp[0])
                 else:
                     self._universe.addObject(AtomCluster(temp,name=molName))
-                    
-        # Read a blank line
-        self._gtFile.readline()
-        
+                            
         # Read the current configuration
         if self._gtFile.readline().strip() != "CONFIGURATION":
             raise GenericConverterError("Invalid frame block. Must contain 'CONFIGURATION' keyword.")
-        
+
         pos = self._gtFile.tell()
         
-        for _ in range(self._universe.numberOfAtoms()):
-            line=self._gtFile.readline()
-        self._dataBlockSize=self._gtFile.tell()-pos
+        line=self._gtFile.readline()
         line=line.split(',')
         n=len(line)
-        if n==3:
-            self._hasVelocities=False
-            self._hasForces=False
-        elif n==6:
+        self._hasVelocities=False
+        self._hasForces=False
+        if n==6:
             self._hasVelocities=True
             self._hasForces=False
         elif n==9:
             self._hasVelocities=True
             self._hasForces=True          
-        else:
-            raise GenericConverterError("Invalid configuration line. Must contain3, 6 0r 9 comma-separated fixed-formatted floats.")
         
-        # Read a blank line
-        self._gtFile.readline()
+        self._gtFile.seek(pos,0)
         
-        if (self._hasVelocities or self._hasForces):
+        if self._hasVelocities:
             self._universe.initializeVelocitiesToTemperature(0.0)
             self._velocities = ParticleVector(self._universe)
-        
-        if self._hasForces:
-            self._forces = ParticleVector(self._universe)
+            if self._hasForces:        
+                self._forces = ParticleVector(self._universe)
+                self._dataShape=(self._universe.numberOfAtoms(),9)
+            else:
+                self._dataShape=(self._universe.numberOfAtoms(),6)
+        else:
+            self._dataShape=(self._universe.numberOfAtoms(),3)
                                     
         # A MMTK trajectory is opened for writing.
         self._trajectory = Trajectory(self._universe, self.configuration['output_file']['files'][0], mode='w')
  
         # A frame generator is created.
         self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
-        
-        self._frameBlockSize = self._gtFile.tell() - self._headerBlockSize
-    
+            
     def run_step(self, index):
         """Runs a single step of the job.
         
@@ -229,39 +348,27 @@ class GenericConverter(Converter):
 
         @note: the argument index is the index of the loop note the index of the frame.      
         """
-        
-        self._gtFile.seek(self._headerBlockSize+index*self._frameBlockSize)
-        
-        # Read a blank line
-        self._gtFile.readline()
-        try:
-            step=int(self._gtFile.readline())
-        except ValueError:
-            raise GenericConverterError('Invalid step number value.')
+                        
+        if self._pbc:                    
+            self._universe.setShape(self._pbc[index])
+                        
+        config = numpy.array([self._gtFile.readline().split(",") for _ in range(self._universe.numberOfAtoms())],dtype=numpy.float64)
+        if config.shape != self._dataShape:
+            raise GenericConverterError('Invalid data shape. Must be a %s matrix.' % (self._dataShape,))
 
-        if self._pbc:        
-            # Read two junk lines
-            self._gtFile.readline()
-            self._gtFile.readline()
-            
-            cell = numpy.array([v.split(",") for v in self._gtFile.read(self._cellBlockSize).splitlines()],dtype=numpy.float64)
-            
-            if cell.shape != (3,3):
-                raise GenericConverterError('Invalid cell data.')
-            
-            self._universe.setShape(cell)
-            
-        # Read two junk lines
+        # Read a junk line
         self._gtFile.readline()
-        self._gtFile.readline()
-            
-        config = numpy.array([v.split(",") for v in self._gtFile.read(self._dataBlockSize).splitlines()],dtype=numpy.float64)
         
-        self._universe.setConfiguration(Configuration(self._universe, config[:,0:3]))
+        
+        conf = Configuration(self._universe, config[:,0:3])
+        if self._box:
+            conf.convertFromBoxCoordinates()
+        
+        self._universe.setConfiguration(conf)
         
         self._universe.foldCoordinatesIntoBox()
-        
-        data = {"time" : step*self._timeStep}
+                
+        data = {"time" : index*self._timeStep}
         
         if self._hasVelocities:
             self._velocities.array = config[:,3:6]

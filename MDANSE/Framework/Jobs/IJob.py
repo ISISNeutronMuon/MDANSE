@@ -62,7 +62,7 @@ class JobError(Error):
         trace = []                        
 
         tback = traceback.extract_stack()
-
+        
         for tb in tback:
             trace.append(' -- '.join([str(t) for t in tb]))
 
@@ -479,7 +479,8 @@ class IJob(Configurable):
             if self._status is not None:
                 self._status.finish()
         except:
-            raise JobError(self)
+            tb = traceback.format_exc()
+            raise JobError(self,tb)
 
     @property
     def info(self):

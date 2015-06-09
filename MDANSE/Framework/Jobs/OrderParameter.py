@@ -220,6 +220,6 @@ class OrderParameter(IJob):
         self._outputData['p1'] /= self._nAxis
         self._outputData['p2'] /= self._nAxis
                 
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     

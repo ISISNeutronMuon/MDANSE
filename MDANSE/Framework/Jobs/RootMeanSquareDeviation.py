@@ -137,7 +137,7 @@ class RootMeanSquareDeviation(IJob):
         
         # Write the output variables.
          
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     
   

@@ -133,7 +133,7 @@ class VelocityAutoCorrelationFunction(IJob):
 
         series = self.configuration['projection']["projector"](series)
                         
-        atomicVACF = correlation(series,axis=0,reduce=1)
+        atomicVACF = correlation(series,axis=0,average=1)
         
         return index, atomicVACF
 
@@ -150,8 +150,7 @@ class VelocityAutoCorrelationFunction(IJob):
         element = self.configuration['atom_selection']['elements'][index][0]
         
         self._outputData["vacf_%s" % element] += x
-        
-        
+                
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
@@ -174,7 +173,7 @@ class VelocityAutoCorrelationFunction(IJob):
                            "vacf_%s")
         self._outputData["vacf_total"][:] = vacfTotal
                 
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     
   

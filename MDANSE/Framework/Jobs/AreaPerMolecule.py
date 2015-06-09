@@ -125,5 +125,5 @@ class AreaPerMolecule(IJob):
         Finalize the analysis (close trajectory, write output data ...)
         """
         
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         self.configuration['trajectory']['instance'].close()     

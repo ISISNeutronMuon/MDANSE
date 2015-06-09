@@ -160,6 +160,6 @@ class DensityProfile(IJob):
         rValues = self._extent*numpy.linspace(0,1,self._nBins+1)
         self._outputData["r"][:] = (rValues[1:]+rValues[:-1])/2
 
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
          
         self.configuration['trajectory']['instance'].close()

@@ -114,6 +114,6 @@ class StructureFactorFromScatteringFunction(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """ 
 
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['netcdf_input_file']['instance'].close()

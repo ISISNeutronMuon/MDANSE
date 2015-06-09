@@ -235,6 +235,6 @@ class CurrentCorrelationFunction(IJob):
         sqfTransTotal = weight(props,self._outputData,self.configuration['atom_selection']['n_atoms_per_element'],2,"J(q,f)_trans_%s%s")
         self._outputData["J(q,f)_trans_total"][:] = sqfTransTotal
     
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self.header)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()
