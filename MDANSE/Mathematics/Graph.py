@@ -27,11 +27,11 @@
 ''' 
 Created on Apr 13, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
-# The graph nodes.
 class Node(object):
+    
     def __init__(self, name, **kwargs):
         self._name  = name
         self._links = set()

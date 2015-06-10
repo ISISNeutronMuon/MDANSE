@@ -42,12 +42,12 @@ class PseudoVoigtInstrumentResolution(IInstrumentResolution):
 
     type = 'pseudo-voigt'
 
-    configurators = collections.OrderedDict()
-    configurators['eta'] = ('float', {"mini":0.0, "maxi":1.0, "default":0.5})
-    configurators['mu_lorentzian'] = ('float', {"default":0.0})
-    configurators['sigma_lorentzian'] = ('float', {"default":1.0})
-    configurators['mu_gaussian'] = ('float', {"default":0.0})
-    configurators['sigma_gaussian'] = ('float', {"default":1.0})
+    settings = collections.OrderedDict()
+    settings['eta'] = ('float', {"mini":0.0, "maxi":1.0, "default":0.5})
+    settings['mu_lorentzian'] = ('float', {"default":0.0})
+    settings['sigma_lorentzian'] = ('float', {"default":1.0})
+    settings['mu_gaussian'] = ('float', {"default":0.0})
+    settings['sigma_gaussian'] = ('float', {"default":1.0})
 
     def set_kernel(self, frequencies, dt):
 

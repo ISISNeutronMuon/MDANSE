@@ -62,7 +62,9 @@ class Temperature(IJob):
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['interpolation_order'] = ('interpolation_order', {'label':"velocities", 'dependencies':{'trajectory':'trajectory'}})
+    settings['interpolation_order'] = ('interpolation_order', {'label':"velocities",
+                                                               'dependencies':{'trajectory':'trajectory'},
+                                                               'default':'no interpolation'})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
             
     def initialize(self):
@@ -105,8 +107,8 @@ class Temperature(IJob):
                                        variable=self.configuration['interpolation_order']["variable"])
              
         order = self.configuration["interpolation_order"]["value"]
-        
-        if order != -1:
+                
+        if order != "no interpolation":
             for axis in range(3):
                 series[:,axis] = differentiate(series[:,axis], order=order, dt=self.configuration['frames']['time_step'])
         
@@ -128,13 +130,11 @@ class Temperature(IJob):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
-        
-        fact = 3.0*Units.k_B*(self.configuration['trajectory']['instance'].universe.numberOfAtoms()-1)
-                        
-        self._outputData['temperature'][:] = 2.0*Units.eV*self._outputData['kinetic_energy']/fact
-                        
+
+        self._outputData['kinetic_energy'] /= (self.configuration['trajectory']['instance'].universe.numberOfAtoms()-1)
+                                
+        self._outputData['temperature'][:] = 2.0*self._outputData['kinetic_energy']/(3.0*Units.k_B)
+                                
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     
-  
-        

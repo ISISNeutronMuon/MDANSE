@@ -27,10 +27,11 @@
 ''' 
 Created on Apr 10, 2015
 
-@author: pellegrini
+@author: Bachir Aoun and Eric C. Pellegrini
 '''
 
 import collections
+import os
 
 import numpy
 
@@ -58,13 +59,10 @@ class AreaPerMolecule(IJob):
     ancestor = "mmtk_trajectory"
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('mmtk_trajectory',{'default':os.path.join('..','..','..','Data','Trajectories','MMTK','dmpc_in_periodic_universe.nc')})
     settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
-    settings['axis'] = ('multiple_choices', {'label':'area vectors',
-                                                  'choices':['a','b','c'],
-                                                  'nChoices':2,
-                                                  'default':['a','b']})
-    settings['name'] = ('string', {'label':'molecule name'})    
+    settings['axis'] = ('multiple_choices', {'label':'area vectors','choices':['a','b','c'],'nChoices':2,'default':['a','b']})
+    settings['name'] = ('string', {'label':'molecule name','default':'DMPC'})    
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
     

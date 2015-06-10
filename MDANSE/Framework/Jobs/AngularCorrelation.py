@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 10, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import collections
@@ -72,7 +72,8 @@ class AngularCorrelation(IJob):
     settings = collections.OrderedDict()    
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
-    settings['axis_selection'] = ('axis_selection',{"dependencies":{'trajectory':'trajectory'}})
+    settings['axis_selection'] = ('axis_selection',{"dependencies":{'trajectory':'trajectory'},
+                                                    'default' : {'molecule':'Water', 'endpoint1':('OW',), 'endpoint2':('HW',)}})
     settings['per_axis'] = ('boolean', {"label":"output contribution per axis", "default":False})
     settings['output_files'] = ('output_files', {"formats":["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
@@ -124,7 +125,7 @@ class AngularCorrelation(IJob):
                                 
         diff /= modulus[:,numpy.newaxis]
 
-        ac = correlation(diff,axis=0,reduce=1)
+        ac = correlation(diff,axis=0,average=1)
                         
         return index, ac
 

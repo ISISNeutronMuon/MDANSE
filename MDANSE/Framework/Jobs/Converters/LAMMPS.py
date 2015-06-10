@@ -27,10 +27,11 @@
 ''' 
 Created on Apr 10, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import collections
+import os
 import re
 
 import numpy
@@ -128,8 +129,10 @@ class LAMMPSConverter(Converter):
     ancestor = None
 
     settings = collections.OrderedDict()        
-    settings['config_file'] = ('input_file', {'label':"LAMMPS configuration file"})
-    settings['trajectory_file'] = ('input_file', {'label':"LAMMPS trajectory file"})
+    settings['config_file'] = ('input_file', {'label':"LAMMPS configuration file",
+                                              'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.config')})
+    settings['trajectory_file'] = ('input_file', {'label':"LAMMPS trajectory file",
+                                                  'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.lammps')})
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
     settings['n_steps'] = ('integer', {'label':"number of time steps", 'default':1, 'mini':0})        
     settings['output_file'] = ('output_files', {'formats':["netcdf"]})
@@ -334,7 +337,7 @@ class LAMMPSConverter(Converter):
                     ty = temp[self._type]
                     name = "%s%s" % (self._lammpsConfig["elements"][ty],idx)
                     self._rankToName[i] = name
-                    g.add_node(idx, element=self._lammpsConfig["elements"][ty], name=name)
+                    g.add_node(idx, element=self._lammpsConfig["elements"][ty], atomName=name)
                     
                 if self._lammpsConfig["n_bonds"] is not None:
                     for idx1,idx2 in self._lammpsConfig["bonds"]:
@@ -342,13 +345,13 @@ class LAMMPSConverter(Converter):
                 
                 for cluster in g.build_connected_components():
                     if len(cluster) == 1:
-                        at = cluster.pop()
-                        obj = Atom(at.element, name=at.name)
-                        obj.index = at.id
+                        node = cluster.pop()
+                        obj = Atom(node.element, name=node.atomName)
+                        obj.index = node.name
                     else:
                         atList = []
                         for atom in cluster:
-                            at = Atom(atom.element, name=atom.name)
+                            at = Atom(atom.element, name=atom.atomName)
                             atList.append(at) 
                         c = collections.Counter([at.element for at in cluster])
                         name = "".join(["%s%d" % (k,v) for k,v in sorted(c.items())])

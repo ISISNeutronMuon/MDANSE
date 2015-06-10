@@ -72,7 +72,7 @@ class RootMeanSquareFluctuation(IJob):
         self._outputData.add('indexes',"line",self.configuration['atom_selection']['indexes'])
             
         # Will store the mean square fluctuation evolution.
-        self._outputData.add('rmsf',"line",(self.configuration['atom_selection']['n_selected_atoms'],),'indexes')
+        self._outputData.add('rmsf',"line",(self.configuration['atom_selection']['n_selected_atoms'],),axis='indexes',units='nm')
         
     def run_step(self, index):
         """

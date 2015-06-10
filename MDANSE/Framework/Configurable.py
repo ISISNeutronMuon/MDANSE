@@ -97,6 +97,17 @@ class Configurable(object):
         if isinstance(settings,dict):
             cls.settings.update(settings)        
     
+    @property
+    def configuration(self):
+        '''
+        Return the configuration bound to the Configurable object.
+        
+        :return: the configuration bound to the Configurable object.
+        :rtype: dict
+        '''
+        
+        return self._configuration
+    
     def setup(self,parameters):
         '''
         Setup the configuration according to a set of input parameters.

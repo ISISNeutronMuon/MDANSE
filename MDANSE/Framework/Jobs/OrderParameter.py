@@ -27,10 +27,11 @@
 ''' 
 Created on Apr 10, 2015
 
-@author: Bachir Aoun 
+@author: Bachir Aoun and Eric C. Pellegrini
 '''
 
 import collections
+import os
 
 import numpy
 
@@ -85,9 +86,10 @@ class OrderParameter(IJob):
     ancestor = "mmtk_trajectory"
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory', {})
+    settings['trajectory'] = ('mmtk_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'MMTK', 'protein_in_periodic_universe.nc')})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['axis_selection'] = ('axis_selection', {'dependencies':{'trajectory':'trajectory'}})
+    settings['axis_selection'] = ('axis_selection', {'dependencies':{'trajectory':'trajectory'},
+                                                     'default':{'molecule':'C284H438N84O79S7', 'endpoint1':('C',), 'endpoint2':('C_beta',)}})
     settings['reference_direction'] = ('vector', {'default':[0,0,1], 'notNull':True, 'normalize':True})
     settings['per_axis'] = ('boolean', {'label':"output contribution per axis", 'default':False})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})

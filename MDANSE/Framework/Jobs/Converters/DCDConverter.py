@@ -31,6 +31,7 @@ Created on Apr 10, 2015
 '''
 
 import collections
+import os
 import struct
 
 import numpy
@@ -279,8 +280,8 @@ class DCDConverter(Converter):
     type = None
 
     settings = collections.OrderedDict()
-    settings['pdb_file'] = ('input_file',{})
-    settings['dcd_file'] = ('input_file',{})
+    settings['pdb_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.pdb')})
+    settings['dcd_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.dcd')})
     settings['output_file'] = ('output_files', {'formats':["netcdf"]})
     settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
 

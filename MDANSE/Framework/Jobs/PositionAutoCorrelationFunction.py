@@ -100,7 +100,7 @@ class PositionAutoCorrelationFunction(IJob):
 
         series = self.configuration['projection']["projector"](series)
         
-        atomicPACF = correlation(series,axis=0,reduce=1)
+        atomicPACF = correlation(series,axis=0,average=1)
         
         return index, atomicPACF
     

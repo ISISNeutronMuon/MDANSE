@@ -30,8 +30,6 @@ Created on Jun 9, 2015
 @author: Eric C. Pellegrini
 '''
 
-from Scientific.IO.NetCDF import NetCDFFile
-
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 

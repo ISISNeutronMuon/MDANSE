@@ -78,22 +78,22 @@ class QVectorsConfigurator(IConfigurator):
             generator, parameters = value
             generator = REGISTRY["q_vectors"][generator](trajConfig["instance"])
             generator.setup(parameters)
-            data = generator.generate()
+            generator.generate()
                         
-            if not data:
+            if not generator.configuration['q_vectors']:
                 raise ConfiguratorError("no Q vectors could be generated", self)
+
+            self["parameters"] = parameters
+            self["type"] = generator.type
+            self["is_lattice"] = generator.is_lattice
+            self["q_vectors"] = generator.configuration['q_vectors']
         
         else:                        
             self["parameters"] = ud['parameters']
             self["type"] = ud['generator']
             self["is_lattice"] = ud['is_lattice']
             self["q_vectors"] = ud['q_vectors']
-
-            self["parameters"] = parameters
-            self["type"] = generator.type
-            self["is_lattice"] = generator.is_lattice
-            self["q_vectors"] = data
-                                                
+                                
         self["shells"] = self["q_vectors"].keys()
         self["n_shells"] = len(self["q_vectors"])    
         self["value"] = self["q_vectors"]

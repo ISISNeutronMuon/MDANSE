@@ -31,6 +31,7 @@ Created on Apr 10, 2015
 '''
 
 import collections
+import os
 import itertools
 import re
 
@@ -145,7 +146,7 @@ class CASTEPConverter(Converter):
     ancestor = None
 
     settings = collections.OrderedDict()
-    settings['castep_file'] = ('input_file', {})
+    settings['castep_file'] = ('input_file', {'default':os.path.join('..','..','..','Data','Trajectories','CASTEP','PBAnew.md')})
     settings['output_file'] = ('output_files', {'formats':["netcdf"]})
                 
     def initialize(self):

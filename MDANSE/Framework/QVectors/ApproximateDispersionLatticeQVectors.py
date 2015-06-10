@@ -44,12 +44,12 @@ class ApproximatedDispersionQVectors(LatticeQVectors):
 
     type = 'approximated_dispersion'
     
-    configurators = collections.OrderedDict()
-    configurators['q_start'] = ('vector', {"label":"Q start (nm^-1)","valueType":float, "notNull":False, "default":[0,0,0]})
-    configurators['q_end'] = ('vector', {"label":"Q end (nm^-1)", "valueType":float, "notNull":False, "default":[0,0,0]})
-    configurators['q_step'] = ('float', {"label":"Q step (nm^-1)", "mini":1.0e-6, "default":0.1})
+    settings = collections.OrderedDict()
+    settings['q_start'] = ('vector', {"label":"Q start (nm^-1)","valueType":float, "notNull":False, "default":[0,0,0]})
+    settings['q_end'] = ('vector', {"label":"Q end (nm^-1)", "valueType":float, "notNull":False, "default":[0,0,0]})
+    settings['q_step'] = ('float', {"label":"Q step (nm^-1)", "mini":1.0e-6, "default":0.1})
 
-    def generate(self, status=None):
+    def _generate(self):
 
         qStart = self._configuration["q_start"]["value"]
         qEnd = self._configuration["q_end"]["value"]
@@ -70,24 +70,21 @@ class ApproximatedDispersionQVectors(LatticeQVectors):
         qGroups = itertools.groupby(dists, key=operator.itemgetter(1))
         qGroups = collections.OrderedDict([(k,[item[0] for item in v]) for k,v in qGroups])
 
-        if status is not None:
-            status.start(len(qGroups))
+        if self._status is not None:
+            self._status.start(len(qGroups))
+
+        self._configuration["q_vectors"] = {}
 
         for k,v in qGroups.iteritems():
 
-            self._definition["q_vectors"][k] = {}
-            self._definition["q_vectors"][k]['q']           = k
-            self._definition["q_vectors"][k]['q_vectors']   = vects[:,v]
-            self._definition["q_vectors"][k]['n_q_vectors'] = len(v)
-            self._definition["q_vectors"][k]['hkls']        = hkls[:,v]
+            self._configuration["q_vectors"][k] = {}
+            self._configuration["q_vectors"][k]['q']           = k
+            self._configuration["q_vectors"][k]['q_vectors']   = vects[:,v]
+            self._configuration["q_vectors"][k]['n_q_vectors'] = len(v)
+            self._configuration["q_vectors"][k]['hkls']        = hkls[:,v]
 
-            if status is not None:
-                if status.is_stopped():
-                    return None
+            if self._status is not None:
+                if self._status.is_stopped():
+                    return
                 else:
-                    status.update()
-
-        if status is not None:
-            status.finish()
-            
-        return self._definition["q_vectors"]
+                    self._status.update()

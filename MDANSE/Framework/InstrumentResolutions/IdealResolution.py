@@ -42,7 +42,7 @@ class IdealInstrumentResolution(IInstrumentResolution):
     
     type = 'ideal'
     
-    configurators = collections.OrderedDict()
+    settings = collections.OrderedDict()
 
     def set_kernel(self, frequencies, dt):
                 

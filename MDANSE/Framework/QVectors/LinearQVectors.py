@@ -42,14 +42,14 @@ class LinearQVectors(IQVectors):
 
     type = "linear"
 
-    configurators = collections.OrderedDict()
-    configurators['seed'] = ('integer', {"mini":0, "default":0})
-    configurators['shells'] = ('range', {"valueType":float, "includeLast":True, "mini":0.0})
-    configurators['n_vectors'] = ('integer', {"mini":1, "default":50})
-    configurators['width'] = ('float', {"mini":1.0e-6, "default":1.0})
-    configurators['axis'] = ('vector', {"normalize":True, "notNull":True, "default":[1,0,0]})
+    settings = collections.OrderedDict()
+    settings['seed'] = ('integer', {"mini":0, "default":0})
+    settings['shells'] = ('range', {"valueType":float, "includeLast":True, "mini":0.0})
+    settings['n_vectors'] = ('integer', {"mini":1, "default":50})
+    settings['width'] = ('float', {"mini":1.0e-6, "default":1.0})
+    settings['axis'] = ('vector', {"normalize":True, "notNull":True, "default":[1,0,0]})
 
-    def generate(self,status=None):
+    def _generate(self):
 
         if self._configuration["seed"]["value"] != 0:           
             numpy.random.seed(self._configuration["seed"]["value"])
@@ -60,26 +60,23 @@ class LinearQVectors(IQVectors):
         
         nVectors = self._configuration["n_vectors"]["value"]
 
-        if status is not None:
-            status.start(self._configuration["shells"]['number'])
+        if self._status is not None:
+            self._status.start(self._configuration["shells"]['number'])
+
+        self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
 
             fact = q*numpy.sign(numpy.random.uniform(-0.5,0.5,nVectors)) + width*numpy.random.uniform(-0.5,0.5,nVectors)
 
-            self._definition["q_vectors"][q] = {}
-            self._definition["q_vectors"][q]['q_vectors'] = axis.array[:,numpy.newaxis]*fact
-            self._definition["q_vectors"][q]['n_q_vectors'] = nVectors
-            self._definition["q_vectors"][q]['q'] = q
-            self._definition["q_vectors"][q]['hkls'] = None
+            self._configuration["q_vectors"][q] = {}
+            self._configuration["q_vectors"][q]['q_vectors'] = axis.array[:,numpy.newaxis]*fact
+            self._configuration["q_vectors"][q]['n_q_vectors'] = nVectors
+            self._configuration["q_vectors"][q]['q'] = q
+            self._configuration["q_vectors"][q]['hkls'] = None
 
-            if status is not None:
-                if status.is_stopped():
-                    return None
+            if self._status is not None:
+                if self._status.is_stopped():
+                    return
                 else:
-                    status.update()
-
-        if status is not None:
-            status.finish()
-                                    
-        return self._definition["q_vectors"]
+                    self._status.update()

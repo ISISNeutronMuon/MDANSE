@@ -376,9 +376,6 @@ class IJob(Configurable):
         
     def _run_monoprocessor(self):
 
-        if self._status is not None:
-            self._status.start(self.numberOfSteps,rate=0.1)
-
         for index in range(self.numberOfSteps):
             idx, x = self.run_step(index)                            
             self.combine(idx, x)
@@ -400,9 +397,6 @@ class IJob(Configurable):
 
         master.setGlobalState(job=self)
         master.launchSlaveJobs(n=self.configuration['running_mode']['slots'],port=master.pyro_daemon.port)
-
-        if self._status is not None:
-            self._status.start(self.numberOfSteps,rate=0.1)
 
         for index in range(self.numberOfSteps):
             master.requestTask('run_step',MasterSlave.GlobalStateValue(1,'job'),index)
@@ -458,7 +452,10 @@ class IJob(Configurable):
             self.setup(parameters)
                                     
             self.initialize()
-    
+            
+            if self._status is not None:
+                self._status.start(self.numberOfSteps,rate=0.1)
+                
             self._info = 'Information about %s job.\n' % self._name
             self._info += str(self)
             

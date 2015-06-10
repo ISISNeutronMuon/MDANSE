@@ -35,9 +35,8 @@ def spatial_density(ndarray[np.float64_t, ndim=2]  config not None,
 
     cdef double x, y, z, sdx, sdy, sdz, minix, miniy, miniz
     cdef double xorigin, yorigin, zorigin, orthx, orthy, orthz
-    cdef double aa, bb, cc, dd, ee, ff, gg, hh, ii,  denum, micx, micy, micz, xscaledOrigin, yscaledOrigin, zscaledOrigin
+    cdef double aa, bb, cc, dd, ee, ff, gg, hh, ii,  denum, micx, micy, micz, xscaledOrigin, yscaledOrigin, zscaledOrigin, xscaledMin, yscaledMin, zscaledMin
     cdef int i, j,k, bin, nbins, nbases, nindexes, xind, yind, zind
-    
     
     nbases = bases.shape[0]
     nindexes = indexes.shape[0]
@@ -49,7 +48,7 @@ def spatial_density(ndarray[np.float64_t, ndim=2]  config not None,
     cdef ndarray[np.float64_t, ndim=2] invBasis = np.zeros((3,3), dtype = np.float64)
     cdef ndarray[np.float64_t, ndim=2] basis = np.zeros((3,3), dtype = np.float64)
     cdef ndarray[np.float64_t, ndim=2] scaleconfig = np.zeros((nindexes,3), dtype = np.float64)
-    
+        
     for 0 <= i < nindexes:
 
         x = <float> config[i,0]
@@ -72,33 +71,36 @@ def spatial_density(ndarray[np.float64_t, ndim=2]  config not None,
         
         basis = bases[i,:,:]
 
-        aa = <float>basis[0,0]
-        bb = <float>basis[0,1]
-        cc = <float>basis[0,2]
+        m00 = <float>basis[0,0]
+        m01 = <float>basis[0,1]
+        m02 = <float>basis[0,2]
         
-        dd = <float>basis[1,0]
-        ee = <float>basis[1,1]
-        ff = <float>basis[1,2]
+        m10 = <float>basis[1,0]
+        m11 = <float>basis[1,1]
+        m12 = <float>basis[1,2]
         
-        gg = <float>basis[2,0]
-        hh = <float>basis[2,1]
-        ii = <float>basis[2,2]
+        m20 = <float>basis[2,0]
+        m21 = <float>basis[2,1]
+        m22 = <float>basis[2,2]
         
-        denum = -cc*ee*gg+bb*ff*gg+cc*dd*hh-aa*ff*hh-bb*dd*ii+aa*ee*ii
+        denum = -m02*m11*m20 + m01*m12*m20 + m02*m10*m21 - m00*m12*m21- m01*m10*m22 + m00*m11*m22
         
-        invBasis[0,0] = (-ff*hh+ee*ii)/denum
-        invBasis[0,1] = (cc*hh-bb*ii)/denum
-        invBasis[0,2] = (-cc*ee+bb*ff)/denum
+        invBasis[0,0] = (-m12*m21+m11*m22)/denum
+        invBasis[0,1] = ( m02*m21-m01*m22)/denum
+        invBasis[0,2] = (-m02*m11+m01*m12)/denum
         
-        invBasis[1,0] = (ff*gg-dd*ii)/denum
-        invBasis[1,1] = (-cc*gg+aa*ii)/denum
-        invBasis[1,2] = (cc*dd-aa*ff)/denum
+        invBasis[1,0] = ( m12*m20-m10*m22)/denum
+        invBasis[1,1] = (-m02*m20+m00*m22)/denum
+        invBasis[1,2] = ( m02*m10-m00*m12)/denum
         
-        invBasis[2,0] = (-ee*gg+dd*hh)/denum
-        invBasis[2,1] = (bb*gg-aa*hh)/denum
-        invBasis[2,2] = (-bb*dd+aa*ee)/denum
-        
-        
+        invBasis[2,0] = (-m11*m20+m10*m21)/denum
+        invBasis[2,1] = ( m02*m20-m00*m21)/denum
+        invBasis[2,2] = (-m02*m10+m00*m11)/denum
+                
+        xscaledMin = <float> (invBasis[0,0]*minix + invBasis[0,1]*miniy + invBasis[0,2]*miniz) 
+        yscaledMin = <float> (invBasis[1,0]*minix + invBasis[1,1]*miniy + invBasis[1,2]*miniz)
+        zscaledMin = <float> (invBasis[2,0]*minix + invBasis[2,1]*miniy + invBasis[2,2]*miniz)
+                
         for 0 <= j < nindexes:
  
             sdx = scaleconfig[j,0] - xscaledOrigin
@@ -113,23 +115,18 @@ def spatial_density(ndarray[np.float64_t, ndim=2]  config not None,
             micy =  sdx*cell[1,0] + sdy*cell[1,1] + sdz*cell[1,2]
             micz =  sdx*cell[2,0] + sdy*cell[2,1] + sdz*cell[2,2]
             
-            orthx = <float> (invBasis[0,0]*micx + invBasis[0,1]*micy  + invBasis[0,2]*micz) 
-            orthy = <float> (invBasis[1,0]*micx + invBasis[1,1]*micy  + invBasis[1,2]*micz)
-            orthz = <float> (invBasis[2,0]*micx + invBasis[2,1]*micy  + invBasis[2,2]*micz)
+            orthx = <float> (invBasis[0,0]*micx + invBasis[0,1]*micy + invBasis[0,2]*micz) 
+            orthy = <float> (invBasis[1,0]*micx + invBasis[1,1]*micy + invBasis[1,2]*micz)
+            orthz = <float> (invBasis[2,0]*micx + invBasis[2,1]*micy + invBasis[2,2]*micz)
             
-            x = (orthx-minix)/resolution
-            y = (orthy-miniy)/resolution
-            z = (orthz-miniz)/resolution
+            x = (orthx-xscaledMin)/resolution
+            y = (orthy-yscaledMin)/resolution
+            z = (orthz-zscaledMin)/resolution
             
             xind = <int> x
             yind = <int> y
             zind = <int> z
-
+            
             hist[xind,yind,zind] += 1
 
     return hist
-        
-        
-        
-        
-        

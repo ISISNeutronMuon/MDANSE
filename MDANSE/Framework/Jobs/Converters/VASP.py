@@ -31,6 +31,7 @@ Created on Apr 10, 2015
 '''
 
 import collections
+import os
 
 import numpy
 
@@ -128,7 +129,7 @@ class VASPConverter(Converter):
     ancestor = None
 
     settings = collections.OrderedDict()           
-    settings['xdatcar_file'] = ('input_file',{})
+    settings['xdatcar_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})
     settings['time_step'] = ('float', {'label':"time step", 'default':1.0, 'mini':1.0e-9})        
     settings['output_file'] = ('output_files', {'formats':["netcdf"]})
                 

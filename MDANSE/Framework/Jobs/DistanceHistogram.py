@@ -120,11 +120,13 @@ class DistanceHistogram(IJob):
             
         hIntraTemp = numpy.zeros(self.hIntra.shape, dtype=numpy.float64)
         hInterTemp = numpy.zeros(self.hInter.shape, dtype=numpy.float64)
+        
+        indexes = numpy.array(self.configuration['atom_selection']['indexes'],dtype=numpy.int32)
                 
-        distance_histogram.distance_histogram(universe.configuration().array[self.configuration['atom_selection']['indexes'],:],
+        distance_histogram.distance_histogram(universe.configuration().array[indexes,:],
                                               directCell,
                                               reverseCell,
-                                              self.configuration['atom_selection']['indexes'],
+                                              indexes,
                                               self.indexToMolecule,
                                               self.indexToSymbol,
                                               hIntraTemp,

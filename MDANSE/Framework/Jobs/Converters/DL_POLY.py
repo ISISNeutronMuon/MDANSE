@@ -27,10 +27,11 @@
 ''' 
 Created on Apr 10, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import collections
+import os
 import re
 
 import numpy
@@ -293,8 +294,10 @@ class DL_POLYConverter(Converter):
     ancestor = None
 
     settings = collections.OrderedDict()   
-    settings['field_file'] = ('input_file',{'wildcard':"FIELD files|FIELD*|All files|*"})
-    settings['history_file'] = ('input_file',{'wildcard':"HISTORY files|HISTORY*|All files|*"})
+    settings['field_file'] = ('input_file',{'wildcard':"FIELD files|FIELD*|All files|*",
+                                            'default':os.path.join('..','..','..','Data','Trajectories','DL_Poly','FIELD_cumen')})
+    settings['history_file'] = ('input_file',{'wildcard':"HISTORY files|HISTORY*|All files|*",
+                                              'default':os.path.join('..','..','..','Data','Trajectories','DL_Poly','HISTORY_cumen')})
     settings['atom_aliases'] = ('python_object',{'default':{}})
     settings['version'] = ('single_choice', {'choices':_HISTORY_FORMAT.keys(), 'default':'2'})
     settings['output_file'] = ('output_files', {'formats':["netcdf"]})

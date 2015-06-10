@@ -42,9 +42,9 @@ class SquareInstrumentResolution(IInstrumentResolution):
     
     type = 'square'
 
-    configurators = collections.OrderedDict()
-    configurators['mu'] = ('float', {"default":0.0})
-    configurators['sigma'] = ('float', {"default":1.0})
+    settings = collections.OrderedDict()
+    settings['mu'] = ('float', {"default":0.0})
+    settings['sigma'] = ('float', {"default":1.0})
 
     def set_kernel(self, frequencies, dt):
                                 

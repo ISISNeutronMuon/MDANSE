@@ -201,7 +201,7 @@ class RangeConfigurator(IConfigurator):
         :rtype: str
         '''
         
-        info = "$d values from %s to %s" % (self['number'],self['first'],self['last'])
+        info = "%d values from %s to %s" % (self['number'],self['first'],self['last'])
         
         if self._includeLast:
             info += ("last value included")

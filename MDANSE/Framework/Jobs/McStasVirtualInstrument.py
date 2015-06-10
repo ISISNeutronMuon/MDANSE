@@ -95,16 +95,19 @@ class McStasVirtualInstrument(IJob):
     ancestor = "mmtk_trajectory"
     
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory', {})
+    settings['trajectory'] = ('mmtk_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'MMTK', 'protein_in_periodic_universe.nc')})
     settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
-    settings['sample_coh'] = ('netcdf_input_file', {"widget":'input_file', 
-                                                         "label":'MDANSE Coherent Structure Factor',
-                                                         "variables":['q','frequency','s(q,f)_total']})
+    settings['sample_coh'] = ('netcdf_input_file', {"widget":'input_file',
+                                                    "label":'MDANSE Coherent Structure Factor',
+                                                    "variables":['q','frequency','s(q,f)_total'],
+                                                    'default' : os.path.join('..','..','..','Data','NetCDF','dcsf_prot.nc')})
     settings['sample_inc'] = ('netcdf_input_file', {"widget":'input_file',
-                                                         "label":'MDANSE Incoherent Structure Factor',
-                                                         "variables" :['q','frequency','s(q,f)_total']})
+                                                    "label":'MDANSE Incoherent Structure Factor',
+                                                    "variables" :['q','frequency','s(q,f)_total'],
+                                                    'default':os.path.join('..','..','..','Data','NetCDF','disf_prot.nc')})
     settings['temperature'] = ('float', {"default":298.0})
-    settings['instrument'] = ('mcstas_instrument',{"label":'mcstas instrument'})
+    settings['instrument'] = ('mcstas_instrument',{"label":'mcstas instrument',
+                                                   'default' : os.path.join('..','..','..','Data','McStas','Instruments','Simple_ToF_Flat_Sample.out')})
     settings['options'] = ('mcstas_options', {"label":'mcstas options'})
     settings['display'] = ('boolean', {'label':'trace the 3D view of the simulation'})
     settings['parameters'] = ('instrument_parameters', {'label':'instrument parameters', 
@@ -113,8 +116,10 @@ class McStasVirtualInstrument(IJob):
                                                              'default' :{'beam_wavelength_Angs': 2.0, 
                                                                          'environment_thickness_m': 0.002, 
                                                                          'beam_resolution_meV': 0.1, 
+                                                                         'container':os.path.join('..','..','..','Data','McStas','Samples','Al.laz'),
                                                                          'container_thickness_m': 5e-05, 
                                                                          'sample_height_m': 0.05, 
+                                                                         'environment':os.path.join('..','..','..','Data','McStas','Samples','Al.laz'),
                                                                          'environment_radius_m': 0.025, 
                                                                          'sample_thickness_m': 0.001, 
                                                                          'sample_detector_distance_m': 4.0, 
@@ -171,7 +176,7 @@ class McStasVirtualInstrument(IJob):
             fout.write('# Temperature %s \n'%self.configuration['temperature']['value']) 
             fout.write('# classical 1 \n\n') 
             
-            for var in self.settings[typ].variables:
+            for var in self.configuration[typ].variables:
                 fout.write("# %s\n" %var)
                 
                 data = self.configuration[typ][var].getValue()
@@ -350,13 +355,13 @@ class McStasVirtualInstrument(IJob):
             x = numpy.linspace(Xmin,Xmax,mysize[1])
             y = numpy.linspace(Ymin,Ymax,mysize[0])
 
-            Title = self.unique(self.treat_str_var(FileStruct['component']), self._outputData)
+            title = self.unique(self.treat_str_var(FileStruct['component']), self._outputData)
             xlabel = self.unique(self.treat_str_var(FileStruct['xlabel']), self._outputData, x)
             ylabel = self.unique(self.treat_str_var(FileStruct['ylabel']), self._outputData, y)
 
-            self._outputData[xlabel] = REGISTRY["outputvariable"]("line", x, xlabel, units="au")
-            self._outputData[ylabel] = REGISTRY["outputvariable"]("line", y, ylabel, units="au")
-            self._outputData[Title] = REGISTRY["outputvariable"]("surface", I, Title, axis="%s|%s"%(xlabel, ylabel), units="au")                 
+            self._outputData.add(xlabel,'line', x, units="au")
+            self._outputData.add(ylabel,'line', y, units="au")
+            self._outputData.add(title,'surface', I, axis="%s|%s" % (xlabel, ylabel), units="au")                 
 
         return FileStruct
         
@@ -382,8 +387,8 @@ class McStasVirtualInstrument(IJob):
             Line = Line.split(':')
             Field = Line[0]
             Value = ""
-            Value = string.join(string.join(Line[1:len(Line)], ':').split("'"), '')
-            strStruct = str + "'" + Field + "':'" + Value + "'"
+            Value = string.join(string.join(Line[1:len(Line)], ':').split("'"), '')            
+            strStruct = strStruct + "'" + Field + "':'" + Value + "'"
             if j<len(Header)-1:
                 strStruct += ","
         strStruct = strStruct + "}"
@@ -408,7 +413,7 @@ class McStasVirtualInstrument(IJob):
                 data.append(l)
         
         
-        Filestruct['data'] = numpy.genfromtxt(StringIO(' '.join(data)))
+        Filestruct['data'] = numpy.genfromtxt(StringIO.StringIO(' '.join(data)))
         Filestruct['fullpath'] = sim_File
         
         return Filestruct

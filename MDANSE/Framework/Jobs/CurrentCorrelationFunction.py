@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import collections
@@ -61,8 +61,7 @@ class CurrentCorrelationFunction(IJob):
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['instrument_resolution'] = ('instrument_resolution',{'dependencies':{'trajectory':'trajectory',
-                                                                                       'frames' : 'frames'}})
+    settings['instrument_resolution'] = ('instrument_resolution',{'dependencies':{'trajectory':'trajectory','frames' : 'frames'}})
     settings['q_vectors'] = ('q_vectors',{'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
     settings['normalize'] = ('boolean', {'default':False})
@@ -159,10 +158,9 @@ class CurrentCorrelationFunction(IJob):
                     rho[element][i,:,:] = numpy.add.reduce(selectedVelocities*tmp,1)
 
             Q2 = numpy.sum(qVectors**2,axis=0)
-
+            
             for element in self.configuration['atom_selection']['contents'].keys():
                 qj = numpy.sum(rho[element]*qVectors,axis=1)
-                
                 rhoLong[element] = (qj[:,numpy.newaxis,:]*qVectors[numpy.newaxis,:,:])/Q2
                 rhoTrans[element] = rho[element] - rhoLong[element]
 
@@ -187,8 +185,8 @@ class CurrentCorrelationFunction(IJob):
             corrTrans = numpy.zeros((self._nFrames,),dtype=numpy.float64)
             
             for i in range(3):
-                corrLong += correlation(jLong[pair[0]][:,i,:],jLong[pair[1]][:,i,:], axis=0, reduce=1)
-                corrTrans += correlation(jTrans[pair[0]][:,i,:],jTrans[pair[1]][:,i,:], axis=0, reduce=1)
+                corrLong += correlation(jLong[pair[0]][:,i,:],jLong[pair[1]][:,i,:], axis=0, average=1)
+                corrTrans += correlation(jTrans[pair[0]][:,i,:],jTrans[pair[1]][:,i,:], axis=0, average=1)
                             
             self._outputData["j(q,t)_long_%s%s" % pair][index,:] += corrLong
             self._outputData["j(q,t)_trans_%s%s" % pair][index,:] += corrTrans

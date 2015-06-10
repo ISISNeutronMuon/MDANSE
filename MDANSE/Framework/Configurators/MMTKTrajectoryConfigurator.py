@@ -50,7 +50,7 @@ class MMTKNetCDFTrajectoryConfigurator(InputFileConfigurator):
     
     type = 'mmtk_trajectory'
     
-    _default = 'waterbox_in_periodic_universe.nc'
+    _default = os.path.join('..','..','..','Data','Trajectories','MMTK','waterbox_in_periodic_universe.nc')
                         
     def configure(self, configuration, value):
         '''

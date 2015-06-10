@@ -122,7 +122,7 @@ class DensityOfStates(IJob):
         if self.configuration["projection"]["projector"] is not None:
             series = self.configuration['projection']["projector"](series)
             
-        atomicVACF = correlation(series,axis=0,reduce=1)
+        atomicVACF = correlation(series,axis=0,average=1)
 
         return index, atomicVACF
 

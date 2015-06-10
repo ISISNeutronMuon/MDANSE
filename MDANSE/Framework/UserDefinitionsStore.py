@@ -4,52 +4,13 @@ import os
 from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
+from MDANSE.Framework.UserDefinitions.IUserDefinition import IUserDefinition
 
 class UserDefinitionsStoreError(Error):
     pass
 
-class UnicodeDict(dict):
-    '''
-    This class implements a specification of a python dict that converts automatically any string key in unicode.
-    
-    This kind of object is useful when exposed to package such as wxPython that implements string as unicode.
-    '''
 
-    def __contains__(self, item):
-        '''
-        Returns True if a given key is found in the dictionary.
-        
-        If the key is basestring then it will be searched as a unicode string. 
-        
-        :param item: the key to search in the dictionary
-        :type item: any valid key
-        '''
-
-        if isinstance(item,basestring):
-            return super(UnicodeDict,self).__contains__(unicode(item))
-
-        else:
-            return super(UnicodeDict,self).__contains__(item)
-
-    def __setitem__(self, item, value):
-        '''
-        Sets the value of a given key.
-        
-        If the key is a basestring, it will be converted internally in a unicode objet.
-        
-        :param item: the key to set in the dictionary
-        :type item: any valid key
-        :param value: the value to associate with the key
-        :type value: any python object
-        '''
-
-        if isinstance(item,basestring):
-            dict.__setitem__(self, unicode(item),value)
-
-        else:
-            raise KeyError("Invalid key type")
-
-class UserDefinitionsStore(UnicodeDict):
+class UserDefinitionsStore(dict):
     '''
     This class is used to register, save and delete MDANSE user definitions (a.k.a. UD).
     
@@ -69,7 +30,7 @@ class UserDefinitionsStore(UnicodeDict):
     
     def __init__(self):
         
-        UnicodeDict.__init__(self)
+        dict.__init__(self)
         
         self.load()                                               
                        
@@ -91,7 +52,7 @@ class UserDefinitionsStore(UnicodeDict):
             return
          
         else:
-            UnicodeDict.update(self,UD)
+            self.update(UD)
             f.close()
                         
     def save(self):
@@ -119,33 +80,63 @@ class UserDefinitionsStore(UnicodeDict):
         '''
 
         try:
-            target, typ, name = item
+            target, section, name = item
         except ValueError:
-            raise UserDefinitionsStoreError("Invalid key value: must be a 3-tuple")
+            raise UserDefinitionsStoreError("Invalid key value: must be a 3-tuple containing resp. the target, the section and the name of the user definition.")
             
-        try:
-            ud = UnicodeDict.__getitem__(name)
+        if not self.has_definition(target,section,name):
+            raise UserDefinitionsStoreError('The item %r could not be found' % (item,))
+
+        ud = self[target][section][name]
+                        
+        if ud.target != target:
+            raise UserDefinitionsStoreError('Target mismatch between %r and %r' % (target,ud.target))
+    
+        if ud.type != section:
+            raise UserDefinitionsStoreError('Type mismatch between %r and %r' % (section,ud.type))
             
-        except (KeyError,TypeError):
-            raise UserDefinitionsStoreError('The item %r could not be found' % str(name))
-            
-        else:
-            
-            if ud.target != target:
-                raise UserDefinitionsStoreError('Target mismatch between %r and %r' % (target,ud.target))
+        return ud
         
-            if ud.type != typ:
-                raise UserDefinitionsStoreError('Type mismatch between %r and %r' % (typ,ud.type))
+    def __delitem(self,item):
+
+        try:            
+            target,section,name = item
             
-            return ud
+        except ValueError:
+            raise UserDefinitionsStoreError("Invalid key value: must be a 3-tuple containing resp. the target, the section and the name of the user definition.")
+        
+        else:
+            if self.has_definition(target, section, name):
+                del self[target][section][name]
                                                    
     def __setitem__(self, item, value):
-                                          
         
-        UnicodeDict.__setitem__(self, item,value)
+        try:
+            target,section,name = item
+            
+        except ValueError:
+            raise UserDefinitionsStoreError("Invalid key value: must be a 3-tuple containing resp. the target, the section and the name of the user definition.")
+        
+        if not isinstance(value,IUserDefinition):
+            raise UserDefinitionsStore('The input value is not a User definition.')
+        
+        if self.has_definition(target, section, name):
+            raise UserDefinitionsStoreError('Item %s is already registered as an user definition. You must delete it before setting it.' % item)
+
+        self.setdefault(target,{}).setdefault(section,{})[name] = value                                          
 
     def filter(self,target,typ):
         
         return [k for k,v in self.iteritems() if (v.target==target and v.type==typ)]
+    
+    def has_definition(self,target,section,name):
+        
+        if not self.has_key(target):
+            return False
+        
+        if self[target].has_key(section):
+            return False
+        
+        return self[target][section].has_key(name)
         
 UD_STORE = UserDefinitionsStore()

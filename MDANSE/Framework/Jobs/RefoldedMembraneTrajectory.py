@@ -31,12 +31,13 @@ Created on Apr 10, 2015
 '''
 
 import collections
+import os
 
 from MMTK.Collections import Collection
 from MMTK.ParticleProperties import Configuration
 from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
 
-from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.Mathematics.Geometry import center
 
 class RefoldedMembraneTrajectory(IJob):
@@ -56,11 +57,11 @@ class RefoldedMembraneTrajectory(IJob):
     ancestor = "mmtk_trajectory"
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('mmtk_trajectory',{'default':os.path.join('..','..','..','Data','Trajectories','MMTK','dmpc_in_periodic_universe.nc')})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['axis'] = ('single_choice', {'label':"membrane axis", 'choices':['a','b','c'], 'default':'c'})
-    settings['upper_leaflet'] = ('string', {'label':"name of the lipid of the upper leaflet", 'default':"dmpcu"})
-    settings['lower_leaflet'] = ('string', {'label':"name of the lipid of the lower leaflet", 'default':"dmpcl"})
+    settings['upper_leaflet'] = ('string', {'label':"name of the lipid of the upper leaflet", 'default':"DMPC"})
+    settings['lower_leaflet'] = ('string', {'label':"name of the lipid of the lower leaflet", 'default':"DMPC"})
     settings['output_files'] = ('output_files', {'formats':["netcdf"]})
                 
     def initialize(self):
@@ -71,15 +72,18 @@ class RefoldedMembraneTrajectory(IJob):
         self.numberOfSteps = self.configuration['frames']['number']
         
         self._universe = self.configuration['trajectory']['instance'].universe
-
+        
         self._upperLeaflet = Collection([obj for obj in self._universe.objectList() if obj.name == self.configuration["upper_leaflet"]["value"]])
         self._lowerLeaflet = Collection([obj for obj in self._universe.objectList() if obj.name == self.configuration["lower_leaflet"]["value"]])
         self._membrane = Collection(self._upperLeaflet,self._lowerLeaflet)
-
+        
+        if (not self._membrane):
+            raise JobError('No objects matching a lipid membrane could be found in the universe.')
+            
         self._upperLeafletIndexes = [at.index for at in self._upperLeaflet.atomList()]
         self._lowerLeafletIndexes = [at.index for at in self._lowerLeaflet.atomList()]
         self._membraneIndexes = [at.index for at in self._membrane.atomList()]
-                        
+        
         # The output trajectory is opened for writing.
         self._rmt = Trajectory(self._membrane, self.configuration['output_files']['files'][0], "w")
         

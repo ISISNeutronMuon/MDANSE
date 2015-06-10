@@ -35,6 +35,7 @@ import abc
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Configurable import Configurable
+from MDANSE.Framework.Status import Status
 
 class QVectorsError(Error):
     pass
@@ -47,13 +48,26 @@ class IQVectors(Configurable):
 
     is_lattice = False
             
-    def __init__(self, trajectory):
+    def __init__(self, trajectory, status=False):
         
         Configurable.__init__(self)
                                 
         self._universe = trajectory.universe
         
+        if status:
+            self._status = Status()
+        else:
+            self._status = None
+            
     @abc.abstractmethod
-    def generate(self, status=None):
+    def _generate(self):
         pass
+    
+    def generate(self):
+        
+        self._generate()
+
+        if self._status is not None:
+            self._status.finish()        
+        
         

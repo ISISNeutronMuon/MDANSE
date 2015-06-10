@@ -34,7 +34,6 @@ import collections
 
 import numpy
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 
 class CoordinationNumber(DistanceHistogram):
@@ -68,16 +67,16 @@ class CoordinationNumber(DistanceHistogram):
 
         npoints = len(self.configuration['r_values']['mid_points'])
 
-        self._outputData['r'] = REGISTRY["outputvariable"]("line", self.configuration['r_values']['mid_points'], "r", units="nm") 
+        self._outputData.add('r','line', self.configuration['r_values']['mid_points'], units="nm") 
         
         for pair in self._elementsPairs:
             invPair = pair[::-1]
-            self._outputData.add("cn_intra_%s%s" % pair,"line", (npoints,), 'r', units="au")                                                 
-            self._outputData.add("cn_inter_%s%s" % pair,"line", (npoints,), 'r', units="au",)                                                 
-            self._outputData.add("cn_total_%s%s" % pair,"line", (npoints,), 'r', units="au")                                                 
-            self._outputData.add("cn_intra_%s%s" % invPair,"line", (npoints,), 'r', units="au")                                                 
-            self._outputData.add("cn_inter_%s%s" % invPair,"line", (npoints,), 'r', units="au",)                                                 
-            self._outputData.add("cn_total_%s%s" % invPair,"line", (npoints,), 'r', units="au")                                                 
+            self._outputData.add("cn_intra_%s%s" % pair,"line", (npoints,), axis='r',units="au")                                                 
+            self._outputData.add("cn_inter_%s%s" % pair,"line", (npoints,), axis='r', units="au",)                                                 
+            self._outputData.add("cn_total_%s%s" % pair,"line", (npoints,), axis='r', units="au")                                                 
+            self._outputData.add("cn_intra_%s%s" % invPair,"line", (npoints,), axis='r', units="au")                                                 
+            self._outputData.add("cn_inter_%s%s" % invPair,"line", (npoints,), axis='r', units="au",)                                                 
+            self._outputData.add("cn_total_%s%s" % invPair,"line", (npoints,), axis='r', units="au")                                                 
         
         nFrames = self.configuration['frames']['number']
         

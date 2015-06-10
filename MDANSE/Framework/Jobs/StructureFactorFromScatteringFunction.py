@@ -31,6 +31,7 @@ Created on Apr 10, 2015
 '''
 
 import collections
+import os
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import get_spectrum
@@ -49,7 +50,8 @@ class StructureFactorFromScatteringFunction(IJob):
     ancestor = 'netcdf_data'
     
     settings = collections.OrderedDict()
-    settings['netcdf_input_file'] = ('netcdf_input_file', {'variables':['time','f(q,t)_total']})
+    settings['netcdf_input_file'] = ('netcdf_input_file', {'variables':['time','f(q,t)_total'],
+                                                           'default':os.path.join('..','..','..','Data','NetCDF','disf_prot.nc')})
     settings['instrument_resolution'] = ('instrument_resolution', {'dependencies':{'frames' : 'netcdf_input_file'}})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     

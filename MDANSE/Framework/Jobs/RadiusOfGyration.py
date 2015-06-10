@@ -70,7 +70,7 @@ class RadiusOfGyration(IJob):
         # Will store the time.
         self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
         
-        self._outputData.add('rog',"line", (self.configuration['frames']['number'],),'time', units="nm")
+        self._outputData.add('rog',"line", (self.configuration['frames']['number'],),axis='time', units="nm")
 
         self._indexes = self.configuration['atom_selection']['indexes']
 

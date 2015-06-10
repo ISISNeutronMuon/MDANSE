@@ -27,10 +27,11 @@
 ''' 
 Created on Apr 10, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import collections
+import os
 import struct
 
 import numpy
@@ -285,8 +286,8 @@ class ForciteConverter(Converter):
     ancestor = None
 
     settings = collections.OrderedDict()
-    settings['xtd_file'] = ('input_file',{})
-    settings['trj_file'] = ('input_file',{})
+    settings['xtd_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Forcite','nylon66_rho100_500K_v300K.xtd')})
+    settings['trj_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Forcite','nylon66_rho100_500K_v300K.trj')})
     settings['output_file'] = ('output_files', {'formats':["netcdf"]})
                 
     def initialize(self):

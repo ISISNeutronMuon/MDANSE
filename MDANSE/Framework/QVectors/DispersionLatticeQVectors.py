@@ -42,12 +42,12 @@ class DispersionLatticeQVectors(LatticeQVectors):
 
     type = 'dispersion_lattice'
 
-    configurators = collections.OrderedDict()
-    configurators['start'] = ('vector', {"valueType":int, "notNull":False, "default":[0,0,0]})
-    configurators['direction'] = ('vector', {"valueType":int, "notNull":True, "default":[1,0,0]})
-    configurators['n_steps'] = ('integer', {"label":"number of steps", "mini":1, "default":10})
+    settings = collections.OrderedDict()
+    settings['start'] = ('vector', {"valueType":int, "notNull":False, "default":[0,0,0]})
+    settings['direction'] = ('vector', {"valueType":int, "notNull":True, "default":[1,0,0]})
+    settings['n_steps'] = ('integer', {"label":"number of steps", "mini":1, "default":10})
 
-    def generate(self, status=None):
+    def _generate(self):
 
         start = self._configuration["start"]["value"]
         direction = self._configuration["direction"]["value"]
@@ -60,24 +60,21 @@ class DispersionLatticeQVectors(LatticeQVectors):
                 
         dists = numpy.sqrt(numpy.sum(vects**2,axis=0))
 
-        if status is not None:
-            status.start(len(dists))
+        if self._status is not None:
+            self._status.start(len(dists))
+
+        self._configuration["q_vectors"] = {}
                                 
         for i,v in enumerate(dists):
 
-            self._definition["q_vectors"][v] = {}
-            self._definition["q_vectors"][v]['q_vectors'] = vects[:,i][:,numpy.newaxis]
-            self._definition["q_vectors"][v]['n_q_vectors'] = 1
-            self._definition["q_vectors"][v]['q'] = v
-            self._definition["q_vectors"][v]['hkls'] = hkls[:,i][:,numpy.newaxis]
+            self._configuration["q_vectors"][v] = {}
+            self._configuration["q_vectors"][v]['q_vectors'] = vects[:,i][:,numpy.newaxis]
+            self._configuration["q_vectors"][v]['n_q_vectors'] = 1
+            self._configuration["q_vectors"][v]['q'] = v
+            self._configuration["q_vectors"][v]['hkls'] = hkls[:,i][:,numpy.newaxis]
 
-            if status is not None:
-                if status.is_stopped():
-                    return None
+            if self._status is not None:
+                if self._status.is_stopped():
+                    return
                 else:
-                    status.update()
-
-        if status is not None:
-            status.finish()
-                
-        return self._definition["q_vectors"]
+                    self._status.update()

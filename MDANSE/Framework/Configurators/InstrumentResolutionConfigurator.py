@@ -63,7 +63,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
     
     type = "instrument_resolution"
         
-    _default = ('gaussian', {'mu': 0.0, 'sigma': 0.0001})
+    _default = ('gaussian', {'mu': 0.0, 'sigma': 10.0})
         
     def configure(self, configuration, value):
         '''
@@ -129,10 +129,10 @@ You should change your resolution function settings to make it sharper.''',self)
         if not self.has_key("kernel"):
             return "No configured yet"
         
-        info = ["Instrument resolution kernel:" % self["kernel"]]
+        info = ["Instrument resolution kernel: %s" % self["kernel"]]
         if self["parameters"]:
             info.append("Parameters:")
-            for k,v in self["parameters"]:
+            for k,v in self["parameters"].items():
                 info.append("%s = %s" % (k,v))
                 
         info = "\n".join(info)

@@ -31,6 +31,7 @@ Created on Jun 08, 2015
 '''
 
 import collections
+import os
 
 import numpy
 
@@ -169,7 +170,8 @@ class GenericConverter(Converter):
     ancestor = None
 
     settings = collections.OrderedDict()   
-    settings['gt_file'] = ('input_file',{'wildcard':"Generic trajectory files|*.gtf|All files|*"})
+    settings['gt_file'] = ('input_file',{'wildcard':"Generic trajectory files|*.gtf|All files|*",
+                                         'default':os.path.join('..','..','..','Data','Trajectories','Generic','test.gtf')})
     settings['output_file'] = ('output_files', {'formats':["netcdf"]})
                     
     def initialize(self):
@@ -358,7 +360,6 @@ class GenericConverter(Converter):
 
         # Read a junk line
         self._gtFile.readline()
-        
         
         conf = Configuration(self._universe, config[:,0:3])
         if self._box:

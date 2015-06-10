@@ -44,13 +44,13 @@ class GridLatticeQVectors(LatticeQVectors):
     
     type = 'grid'
     
-    configurators = collections.OrderedDict()
-    configurators['hrange'] = ('range', {"valueType":int, "includeLast":True})
-    configurators['krange'] = ('range', {"valueType":int, "includeLast":True})
-    configurators['lrange'] = ('range', {"valueType":int, "includeLast":True})
-    configurators['qstep'] = ('float', {"mini":1.0e-6, "default":0.01})
+    settings = collections.OrderedDict()
+    settings['hrange'] = ('range', {"valueType":int, "includeLast":True})
+    settings['krange'] = ('range', {"valueType":int, "includeLast":True})
+    settings['lrange'] = ('range', {"valueType":int, "includeLast":True})
+    settings['qstep'] = ('float', {"mini":1.0e-6, "default":0.01})
     
-    def generate(self, status=None):
+    def _generate(self):
 
         hrange = self._configuration["hrange"]["value"]
         krange = self._configuration["krange"]["value"]
@@ -82,24 +82,21 @@ class GridLatticeQVectors(LatticeQVectors):
         qGroups = itertools.groupby(dists, key=operator.itemgetter(1))
         qGroups = collections.OrderedDict([(k,[item[0] for item in v]) for k,v in qGroups])
 
-        if status is not None:
-            status.start(len(qGroups))
+        if self._status is not None:
+            self._status.start(len(qGroups))
+
+        self._configuration["q_vectors"] = {}
 
         for q,v in qGroups.iteritems():
                         
-            self._definition["q_vectors"][q] = {}
-            self._definition["q_vectors"][q]['q'] = q
-            self._definition["q_vectors"][q]['q_vectors'] = vects[:,v]
-            self._definition["q_vectors"][q]['n_q_vectors'] = len(v)
-            self._definition["q_vectors"][q]['hkls'] = hkls[:,v]
+            self._configuration["q_vectors"][q] = {}
+            self._configuration["q_vectors"][q]['q'] = q
+            self._configuration["q_vectors"][q]['q_vectors'] = vects[:,v]
+            self._configuration["q_vectors"][q]['n_q_vectors'] = len(v)
+            self._configuration["q_vectors"][q]['hkls'] = hkls[:,v]
 
-            if status is not None:
-                if status.is_stopped():
-                    return None
+            if self._status is not None:
+                if self._status.is_stopped():
+                    return
                 else:
-                    status.update()
-
-        if status is not None:
-            status.finish()
-                
-        return self._definition["q_vectors"]
+                    self._status.update()

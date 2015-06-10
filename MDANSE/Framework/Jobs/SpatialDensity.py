@@ -27,10 +27,11 @@
 ''' 
 Created on Apr 10, 2015
 
-@author: Bachir Aoun, Gael Goret, Eric C. Pellegrini
+@author: Bachir Aoun, Gael Goret and Eric C. Pellegrini
 '''
 
 import collections
+import os
 
 import numpy
 
@@ -63,11 +64,13 @@ class SpatialDensity(IJob):
     ancestor = "mmtk_trajectory"
     
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory', {})
+    settings['trajectory'] = ('mmtk_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'MMTK', 'protein_in_periodic_universe.nc')})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['spatial_resolution'] = ('float', {'mini':0.01, 'default':0.1})
-    settings['reference_basis'] = ('basis_selection', {'dependencies':{'trajectory':'trajectory'}})
-    settings['target_molecule'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
+    settings['reference_basis'] = ('basis_selection', {'dependencies':{'trajectory':'trajectory'},
+                                                       'default':{'molecule':'C284H438N84O79S7','origin':('O',),'x_axis':('C_beta',),'y_axis':('C_delta',)}})
+    settings['target_molecule'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'},
+                                                      'default':'atom_index 151'})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
@@ -108,8 +111,8 @@ class SpatialDensity(IJob):
         # orthonomalisation in 3d can project coords out of the box, sqrt(3) prevent out of bounds
         self.gdim = numpy.ceil(numpy.sqrt(3)*numpy.array([dimx, dimy, dimz])/self.resolution)+1
 
-        self.hist = numpy.zeros(self.gdim, dtype = numpy.float64)
-        
+        self.hist = numpy.zeros(self.gdim.astype(numpy.int32), dtype = numpy.float64)
+                
         self.rX = numpy.linspace(minx, maxx, self.gdim[0])
         self.rY = numpy.linspace(miny, maxy, self.gdim[1])
         self.rZ = numpy.linspace(minz, maxz, self.gdim[2])

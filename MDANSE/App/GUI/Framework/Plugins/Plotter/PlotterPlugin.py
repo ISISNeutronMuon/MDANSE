@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 10, 2015
 
-@author: Gael Goret, Eric C. Pellegrini
+@author: Gael Goret and Eric C. Pellegrini
 '''
 
 import collections
@@ -444,7 +444,7 @@ class PlotterFrame(wx.Frame):
             data = collections.OrderedDict()
             for k in _vars:
                 data[k]={}
-                if hasattr(vars[k], 'axis'):
+                if hasattr(_vars[k], 'axis'):
                     if _vars[k].axis:
                         data[k]['axis'] =  _vars[k].axis.split('|')
                     else:

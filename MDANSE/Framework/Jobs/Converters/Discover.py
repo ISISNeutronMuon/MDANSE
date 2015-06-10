@@ -30,6 +30,7 @@ Created on Apr 10, 2015
 @author: Eric C. Pellegrini
 '''
 
+import os
 import collections
 
 import struct
@@ -235,8 +236,8 @@ class DiscoverConverter(Converter):
     ancestor = None
 
     settings = collections.OrderedDict()
-    settings['xtd_file'] = ('input_file',{})
-    settings['his_file'] = ('input_file',{})
+    settings['xtd_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.xtd')})
+    settings['his_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.his')})
     settings['output_file'] = ('output_files', {'formats':["netcdf"]})
     
     def initialize(self):

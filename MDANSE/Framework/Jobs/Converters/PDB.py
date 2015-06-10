@@ -31,6 +31,7 @@ Created on Apr 10, 2015
 '''
 
 import collections
+import os
 
 from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
 from MMTK.PDB import PDBFile
@@ -51,8 +52,8 @@ class PDBConverter(Converter):
     ancestor = None
 
     settings = collections.OrderedDict()  
-    settings['pdb_file'] = ('input_file',{})
-    settings['nb_frame'] = ('range', {'valueType':int, 'includeLast':True, 'mini':0.0, 'default':(0,1,1)})
+    settings['pdb_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','PDB','2f58_nma.pdb')})
+    settings['nb_frame'] = ('range', {'valueType':int, 'includeLast':True, 'mini':0.0, 'default':(0,2,1)})
     settings['time_step'] = ('float', {'mini':1.0e-6, 'default':1.0})
     settings['output_file'] = ('output_files', {'formats':["netcdf"]})
      
@@ -90,10 +91,11 @@ class PDBConverter(Converter):
         """
     
         frame = self.frame_list[index]
-
-        pdb_config = PDBFile(self.configuration['pdb_file']['filename'], model = frame)
+        
+        pdb_config = PDBFile(self.configuration['pdb_file']['filename'], model=frame)
         uni = pdb_config.createUnitCellUniverse()
         uni.addObject(pdb_config.createAll(None, 1))
+        
         univ_config  = Configuration(self._universe, uni.configuration().array)
         
         self._universe.setConfiguration(univ_config)

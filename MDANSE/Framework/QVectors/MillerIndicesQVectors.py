@@ -42,14 +42,14 @@ class MillerIndicesLatticeQVectors(LatticeQVectors):
 
     type = 'miller_indices_lattice'
     
-    configurators = collections.OrderedDict()
-    configurators['shells'] = ('range', {"valueType":float, "includeLast":True, "mini":0.0})
-    configurators['width'] = ('float', {"mini":1.0e-6, "default":1.0})
-    configurators['h'] = ('range', {"includeLast":True})
-    configurators['k'] = ('range', {"includeLast":True})
-    configurators['l'] = ('range', {"includeLast":True})
+    settings = collections.OrderedDict()
+    settings['shells'] = ('range', {"valueType":float, "includeLast":True, "mini":0.0})
+    settings['width'] = ('float', {"mini":1.0e-6, "default":1.0})
+    settings['h'] = ('range', {"includeLast":True})
+    settings['k'] = ('range', {"includeLast":True})
+    settings['l'] = ('range', {"includeLast":True})
 
-    def generate(self, status=None):
+    def _generate(self):
                 
         hSlice = slice(self._configuration["h"]["first"],self._configuration["h"]["last"]+1,self._configuration["h"]["step"])
         kSlice = slice(self._configuration["k"]["first"],self._configuration["k"]["last"]+1,self._configuration["k"]["step"])
@@ -66,8 +66,10 @@ class MillerIndicesLatticeQVectors(LatticeQVectors):
                 
         halfWidth = self._configuration["width"]["value"]/2
 
-        if status is not None:
-            status.start(len(self._configuration["shells"]["value"]))
+        if self._status is not None:
+            self._status.start(len(self._configuration["shells"]["value"]))
+
+        self._configuration["q_vectors"] = {}
         
         for q in self._configuration["shells"]["value"]:
 
@@ -81,20 +83,14 @@ class MillerIndicesLatticeQVectors(LatticeQVectors):
             nHits = len(hits)
 
             if nHits != 0:         
-                self._definition["q_vectors"][q] = {}
-                self._definition["q_vectors"][q]['q_vectors'] = vects[:,hits]
-                self._definition["q_vectors"][q]['n_q_vectors'] = nHits
-                self._definition["q_vectors"][q]['q'] = q
-                self._definition["q_vectors"][q]['hkls'] = numpy.rint(numpy.dot(self._invReciprocalMatrix,
-                                                                                self._definition["q_vectors"][q]['q_vectors']))
+                self._configuration["q_vectors"][q] = {}
+                self._configuration["q_vectors"][q]['q_vectors'] = vects[:,hits]
+                self._configuration["q_vectors"][q]['n_q_vectors'] = nHits
+                self._configuration["q_vectors"][q]['q'] = q
+                self._configuration["q_vectors"][q]['hkls'] = numpy.rint(numpy.dot(self._invReciprocalMatrix,self._configuration["q_vectors"][q]['q_vectors']))
 
-            if status is not None:
-                if status.is_stopped():
-                    return None
+            if self._status is not None:
+                if self._status.is_stopped():
+                    return
                 else:
-                    status.update()
-
-        if status is not None:
-            status.finish()
-                                
-        return self._definition["q_vectors"]
+                    self._status.update()

@@ -65,11 +65,9 @@ class IUserDefinition(dict):
         
         self._creationTime = time.ctime()
         
-        self._definition = {}
-
         for k in self._keywords:
             try:
-                self._definition[k] = kwargs[k]
+                self[k] = kwargs[k]
             except KeyError:
                 raise UserDefinitionError("Incomplete user definable object: missing %r key" % k)
                                                                                         
@@ -88,16 +86,16 @@ class IUserDefinition(dict):
         
         return self._creationTime
 
-    def __setitem__(self, keyword, value):
-
-        if keyword in self._keywords:
-            self._definition[keyword] = value
+    def __setitem__(self, item, value):
+        
+        if item in self._keyword:
+            dict.__setitem__(item,value)
         
     def __str__(self):
         '''
         Return the informal representation of a user definable object
         '''
         
-        info = ["Created on: %s\n" % self.creationTime] + ["%s:\n%s\n" % (k,self._definition[k]) for k in self._keywords] 
+        info = ["Created on: %s\n" % self.creationTime] + ["%s:\n%s\n" % (k,self[k]) for k in self._keywords] 
         
         return "".join(info)
