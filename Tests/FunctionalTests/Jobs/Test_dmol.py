@@ -1,23 +1,24 @@
 #!/usr/bin/python
 
-########################################################
-# This is an automatically generated MDANSE run script #
-#######################################################
-
+import unittest
+from Tests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
-################################################################
-# Job parameters                                               #
-################################################################
+class TestDMOL(UnitTest):
 
-parameters = {}
-parameters['his_file'] = '../../../Data/Trajectories/Discover/sushi.his'
-parameters['output_file'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
-parameters['xtd_file'] = '../../../Data/Trajectories/Discover/sushi.xtd'
+    def test(self):
+        parameters = {}
+        parameters['his_file'] = '../../../Data/Trajectories/Discover/sushi.his'
+        parameters['output_file'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['xtd_file'] = '../../../Data/Trajectories/Discover/sushi.xtd'
+        job = REGISTRY['job']['dmol'](status=False)
+        self.assertNotRaises(job.run, parameters)
 
-################################################################
-# Setup and run the analysis                                   #
-################################################################
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(TestDMOL))
+    return s
 
-job = REGISTRY['job']['dmol'](status=False)
-job.run(parameters)
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

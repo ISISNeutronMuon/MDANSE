@@ -1,24 +1,25 @@
 #!/usr/bin/python
 
-########################################################
-# This is an automatically generated MDANSE run script #
-#######################################################
-
+import unittest
+from Tests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
-################################################################
-# Job parameters                                               #
-################################################################
+class TestXPLOR(UnitTest):
 
-parameters = {}
-parameters['dcd_file'] = '../../../Data/Trajectories/CHARMM/2vb1.dcd'
-parameters['fold'] = False
-parameters['output_file'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
-parameters['pdb_file'] = '../../../Data/Trajectories/CHARMM/2vb1.pdb'
+    def test(self):
+        parameters = {}
+        parameters['dcd_file'] = '../../../Data/Trajectories/CHARMM/2vb1.dcd'
+        parameters['fold'] = False
+        parameters['output_file'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['pdb_file'] = '../../../Data/Trajectories/CHARMM/2vb1.pdb'
+        job = REGISTRY['job']['xplor'](status=False)
+        self.assertNotRaises(job.run, parameters)
 
-################################################################
-# Setup and run the analysis                                   #
-################################################################
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(TestXPLOR))
+    return s
 
-job = REGISTRY['job']['xplor'](status=False)
-job.run(parameters)
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

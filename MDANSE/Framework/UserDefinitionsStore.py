@@ -42,18 +42,15 @@ class UserDefinitionsStore(dict):
         if not os.path.exists(UserDefinitionsStore.UD_PATH):
             return
 
-        f = open(UserDefinitionsStore.UD_PATH, "rb")
-        UD = cPickle.load(f)
-        
         # Try to open the UD file.
         try:
             f = open(UserDefinitionsStore.UD_PATH, "rb")
             UD = cPickle.load(f)
- 
+  
         # If for whatever reason the pickle file loading failed do not even try to restore it
         except:
             return
-         
+          
         else:
             self.update(UD)
             f.close()

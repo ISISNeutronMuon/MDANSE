@@ -1,25 +1,26 @@
 #!/usr/bin/python
 
-########################################################
-# This is an automatically generated MDANSE run script #
-#######################################################
-
+import unittest
+from Tests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
-################################################################
-# Job parameters                                               #
-################################################################
+class TestCOMT(UnitTest):
 
-parameters = {}
-parameters['atom_selection'] = 'all'
-parameters['frames'] = (0, 1, 1)
-parameters['grouping_level'] = 'atom'
-parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
-parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
+    def test(self):
+        parameters = {}
+        parameters['atom_selection'] = 'all'
+        parameters['frames'] = (0, 1, 1)
+        parameters['grouping_level'] = 'atom'
+        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
+        job = REGISTRY['job']['comt'](status=False)
+        self.assertNotRaises(job.run, parameters)
 
-################################################################
-# Setup and run the analysis                                   #
-################################################################
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(TestCOMT))
+    return s
 
-job = REGISTRY['job']['comt'](status=False)
-job.run(parameters)
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

@@ -1,23 +1,24 @@
 #!/usr/bin/python
 
-########################################################
-# This is an automatically generated MDANSE run script #
-#######################################################
-
+import unittest
+from Tests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
-################################################################
-# Job parameters                                               #
-################################################################
+class TestFORCITE(UnitTest):
 
-parameters = {}
-parameters['output_file'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
-parameters['trj_file'] = '../../../Data/Trajectories/Forcite/nylon66_rho100_500K_v300K.trj'
-parameters['xtd_file'] = '../../../Data/Trajectories/Forcite/nylon66_rho100_500K_v300K.xtd'
+    def test(self):
+        parameters = {}
+        parameters['output_file'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['trj_file'] = '../../../Data/Trajectories/Forcite/nylon66_rho100_500K_v300K.trj'
+        parameters['xtd_file'] = '../../../Data/Trajectories/Forcite/nylon66_rho100_500K_v300K.xtd'
+        job = REGISTRY['job']['forcite'](status=False)
+        self.assertNotRaises(job.run, parameters)
 
-################################################################
-# Setup and run the analysis                                   #
-################################################################
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(TestFORCITE))
+    return s
 
-job = REGISTRY['job']['forcite'](status=False)
-job.run(parameters)
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

@@ -1,23 +1,24 @@
 #!/usr/bin/python
 
-########################################################
-# This is an automatically generated MDANSE run script #
-#######################################################
-
+import unittest
+from Tests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
-################################################################
-# Job parameters                                               #
-################################################################
+class TestSFFSF(UnitTest):
 
-parameters = {}
-parameters['instrument_resolution'] = ('gaussian', {'mu': 0.0, 'sigma': 10.0})
-parameters['netcdf_input_file'] = '../../../Data/NetCDF/disf_prot.nc'
-parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+    def test(self):
+        parameters = {}
+        parameters['instrument_resolution'] = ('gaussian', {'mu': 0.0, 'sigma': 10.0})
+        parameters['netcdf_input_file'] = '../../../Data/NetCDF/disf_prot.nc'
+        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        job = REGISTRY['job']['sffsf'](status=False)
+        self.assertNotRaises(job.run, parameters)
 
-################################################################
-# Setup and run the analysis                                   #
-################################################################
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(TestSFFSF))
+    return s
 
-job = REGISTRY['job']['sffsf'](status=False)
-job.run(parameters)
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

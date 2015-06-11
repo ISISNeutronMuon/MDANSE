@@ -31,7 +31,7 @@ Created on May 22, 2015
 '''
 
 from MDANSE import REGISTRY
-from MDANSE.Framework.UserDefinitionsStore import UD_STORE, UserDefinitionsStoreError
+from MDANSE.Framework.UserDefinitionsStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
 class QVectorsConfigurator(IConfigurator):

@@ -343,9 +343,6 @@ class IJob(Configurable):
         f.write('from MDANSE import REGISTRY\n\n')
                 
         f.write('class Test%s(UnitTest):\n\n' % cls.type.upper())
-        f.write('    def setUp(self):\n')
-        f.write('        from MDANSE import LOGGER\n')
-        f.write('        LOGGER.stop()\n\n')
         
         f.write('    def test(self):\n')      
 
@@ -359,8 +356,8 @@ class IJob(Configurable):
             f.write('        parameters[%r] = %r\n' % (k, v))
     
         # Sets |analysis| variable to an instance analysis to save. 
-        f.write('        job = REGISTRY[%r](%r)\n' % ('job',cls.type))
-        f.write('        self.assertNotRaises(job.run, parameters,False)\n\n')
+        f.write('        job = REGISTRY[%r][%r](status=False)\n' % ('job',cls.type))
+        f.write('        self.assertNotRaises(job.run, parameters)\n\n')
         
         f.write('def suite():\n')
         f.write('    loader = unittest.TestLoader()\n')

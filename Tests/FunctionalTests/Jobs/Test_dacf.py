@@ -1,26 +1,27 @@
 #!/usr/bin/python
 
-########################################################
-# This is an automatically generated MDANSE run script #
-#######################################################
-
+import unittest
+from Tests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
-################################################################
-# Job parameters                                               #
-################################################################
+class TestDACF(UnitTest):
 
-parameters = {}
-parameters['atom_charges'] = {0: 0.5, 1: 1.2, 2: -0.2}
-parameters['atom_selection'] = 'atom_index 0,1,2'
-parameters['frames'] = (0, 10, 1)
-parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
-parameters['running_mode'] = ('monoprocessor', 1)
-parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
+    def test(self):
+        parameters = {}
+        parameters['atom_charges'] = {0: 0.5, 1: 1.2, 2: -0.2}
+        parameters['atom_selection'] = 'atom_index 0,1,2'
+        parameters['frames'] = (0, 10, 1)
+        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['running_mode'] = ('monoprocessor', 1)
+        parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
+        job = REGISTRY['job']['dacf'](status=False)
+        self.assertNotRaises(job.run, parameters)
 
-################################################################
-# Setup and run the analysis                                   #
-################################################################
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(TestDACF))
+    return s
 
-job = REGISTRY['job']['dacf'](status=False)
-job.run(parameters)
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

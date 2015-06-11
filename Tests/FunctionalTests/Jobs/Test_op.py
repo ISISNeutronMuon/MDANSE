@@ -1,27 +1,28 @@
 #!/usr/bin/python
 
-########################################################
-# This is an automatically generated MDANSE run script #
-#######################################################
-
+import unittest
+from Tests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
-################################################################
-# Job parameters                                               #
-################################################################
+class TestOP(UnitTest):
 
-parameters = {}
-parameters['axis_selection'] = {'endpoint1': ('C',), 'endpoint2': ('C_beta',), 'molecule': 'C284H438N84O79S7'}
-parameters['frames'] = (0, 10, 1)
-parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
-parameters['per_axis'] = False
-parameters['reference_direction'] = [0, 0, 1]
-parameters['running_mode'] = ('monoprocessor', 1)
-parameters['trajectory'] = '../../../Data/Trajectories/MMTK/protein_in_periodic_universe.nc'
+    def test(self):
+        parameters = {}
+        parameters['axis_selection'] = {'endpoint1': ('C',), 'endpoint2': ('C_beta',), 'molecule': 'C284H438N84O79S7'}
+        parameters['frames'] = (0, 10, 1)
+        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['per_axis'] = False
+        parameters['reference_direction'] = [0, 0, 1]
+        parameters['running_mode'] = ('monoprocessor', 1)
+        parameters['trajectory'] = '../../../Data/Trajectories/MMTK/protein_in_periodic_universe.nc'
+        job = REGISTRY['job']['op'](status=False)
+        self.assertNotRaises(job.run, parameters)
 
-################################################################
-# Setup and run the analysis                                   #
-################################################################
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(TestOP))
+    return s
 
-job = REGISTRY['job']['op'](status=False)
-job.run(parameters)
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

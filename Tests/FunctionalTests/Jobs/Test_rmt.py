@@ -1,26 +1,27 @@
 #!/usr/bin/python
 
-########################################################
-# This is an automatically generated MDANSE run script #
-#######################################################
-
+import unittest
+from Tests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
-################################################################
-# Job parameters                                               #
-################################################################
+class TestRMT(UnitTest):
 
-parameters = {}
-parameters['axis'] = 'c'
-parameters['frames'] = (0, 10, 1)
-parameters['lower_leaflet'] = 'DMPC'
-parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
-parameters['trajectory'] = '../../../Data/Trajectories/MMTK/dmpc_in_periodic_universe.nc'
-parameters['upper_leaflet'] = 'DMPC'
+    def test(self):
+        parameters = {}
+        parameters['axis'] = 'c'
+        parameters['frames'] = (0, 10, 1)
+        parameters['lower_leaflet'] = 'DMPC'
+        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['trajectory'] = '../../../Data/Trajectories/MMTK/dmpc_in_periodic_universe.nc'
+        parameters['upper_leaflet'] = 'DMPC'
+        job = REGISTRY['job']['rmt'](status=False)
+        self.assertNotRaises(job.run, parameters)
 
-################################################################
-# Setup and run the analysis                                   #
-################################################################
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(TestRMT))
+    return s
 
-job = REGISTRY['job']['rmt'](status=False)
-job.run(parameters)
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
