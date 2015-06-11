@@ -75,13 +75,11 @@ class BasisSelection(IConfigurator):
 
         trajConfig = configuration[self._dependencies['trajectory']]
             
-        try: 
-            ud = UD_STORE[trajConfig["basename"],"basis_selection",value]
-        except UserDefinitionsStoreError:
-            self.update(value)
-        else:
+        if UD_STORE.has_definition(trajConfig["basename"],"basis_selection",value): 
+            ud = UD_STORE.get_definition(trajConfig["basename"],"basis_selection",value)
             self.update(ud)
-            
+        else:
+            self.update(value)
                 
         e1 = find_atoms_in_molecule(trajConfig['instance'].universe,self['molecule'], self['origin'], True)
         e2 = find_atoms_in_molecule(trajConfig['instance'].universe,self['molecule'], self['x_axis'], True)

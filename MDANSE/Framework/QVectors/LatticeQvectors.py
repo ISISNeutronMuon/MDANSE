@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+@author: Eric C. Pellegrini
 '''
 
 import numpy
@@ -40,10 +40,10 @@ class LatticeQVectors(IQVectors):
 
     type = None
     
-    def __init__(self, universe):
+    def __init__(self, universe,status=None):
         
-        super(LatticeQVectors,self).__init__(universe)
-        
+        super(LatticeQVectors,self).__init__(universe,status)
+                
         if not self._universe.is_periodic:
             raise QVectorsError("The universe must be periodic for building lattice-based Q vectors")
 

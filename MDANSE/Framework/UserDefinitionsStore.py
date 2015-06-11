@@ -41,11 +41,14 @@ class UserDefinitionsStore(dict):
 
         if not os.path.exists(UserDefinitionsStore.UD_PATH):
             return
+
+        f = open(UserDefinitionsStore.UD_PATH, "rb")
+        UD = cPickle.load(f)
         
         # Try to open the UD file.
         try:
             f = open(UserDefinitionsStore.UD_PATH, "rb")
-            UD = cPickle.load(f)        
+            UD = cPickle.load(f)
  
         # If for whatever reason the pickle file loading failed do not even try to restore it
         except:
@@ -71,21 +74,16 @@ class UserDefinitionsStore(dict):
             cPickle.dump(self, f, protocol=2)
             f.close()
                                     
-    def __getitem__(self, item):
+    def get_definition(self, target, section, name):
         '''
         Returns a user definition given its target, category and its name.
                 
         :return: the user definition if it found or None otherwise
         :rtype: a MDANSE.Framework.UserDefinitions.IUserDefinition.IUserDefinition derived class
         '''
-
-        try:
-            target, section, name = item
-        except ValueError:
-            raise UserDefinitionsStoreError("Invalid key value: must be a 3-tuple containing resp. the target, the section and the name of the user definition.")
             
         if not self.has_definition(target,section,name):
-            raise UserDefinitionsStoreError('The item %r could not be found' % (item,))
+            raise UserDefinitionsStoreError('The item %r could not be found' % (target,section,name))
 
         ud = self[target][section][name]
                         
@@ -97,31 +95,18 @@ class UserDefinitionsStore(dict):
             
         return ud
         
-    def __delitem(self,item):
-
-        try:            
-            target,section,name = item
-            
-        except ValueError:
-            raise UserDefinitionsStoreError("Invalid key value: must be a 3-tuple containing resp. the target, the section and the name of the user definition.")
+    def remove_definition(self,target,section,name):
         
-        else:
-            if self.has_definition(target, section, name):
-                del self[target][section][name]
+        if self.has_definition(target, section, name):
+            del self[target][section][name]
                                                    
-    def __setitem__(self, item, value):
-        
-        try:
-            target,section,name = item
-            
-        except ValueError:
-            raise UserDefinitionsStoreError("Invalid key value: must be a 3-tuple containing resp. the target, the section and the name of the user definition.")
-        
+    def set_definition(self, target, section, name, value):
+                
         if not isinstance(value,IUserDefinition):
             raise UserDefinitionsStore('The input value is not a User definition.')
         
         if self.has_definition(target, section, name):
-            raise UserDefinitionsStoreError('Item %s is already registered as an user definition. You must delete it before setting it.' % item)
+            raise UserDefinitionsStoreError('Item %s is already registered as an user definition. You must delete it before setting it.' % (target,section,name))
 
         self.setdefault(target,{}).setdefault(section,{})[name] = value                                          
 
@@ -133,8 +118,8 @@ class UserDefinitionsStore(dict):
         
         if not self.has_key(target):
             return False
-        
-        if self[target].has_key(section):
+                
+        if not self[target].has_key(section):
             return False
         
         return self[target][section].has_key(name)

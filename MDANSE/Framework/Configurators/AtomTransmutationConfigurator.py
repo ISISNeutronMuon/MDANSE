@@ -102,8 +102,8 @@ class AtomTransmutationConfigurator(IConfigurator):
         elif isinstance(value,(list,tuple)):                        
             for definition in value:
                 
-                ud = UD_STORE[trajConfig["basename"],"atom_transmutation",definition]
-                if ud is not None:
+                if UD_STORE.has_definition(trajConfig["basename"],"atom_transmutation",value):                
+                    ud = UD_STORE.get_definition(trajConfig["basename"],"atom_transmutation",definition)
                     self.transmutate(configuration, ud["indexes"], ud["element"])
                 else:
                     raise ConfiguratorError("wrong parameters type:  must be either a dictionary whose keys are an atom selection string and values are the target element \

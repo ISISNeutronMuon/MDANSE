@@ -139,7 +139,7 @@ class AxisSelectionPlugin(ComponentPlugin):
             LOGGER("An axis can not be set from identical endpoints selections.", "error", ["dialog"])
             return
         
-        path = os.path.basename(self._trajectory.filename)
+        target = os.path.basename(self._trajectory.filename)
         
         name = self._udPanel.get_selection_name()
 
@@ -151,12 +151,12 @@ class AxisSelectionPlugin(ComponentPlugin):
         atomNames1 = tuple([self._atomNames1.GetString(idx) for idx in atomIndexes1])
         atomNames2 = tuple([self._atomNames2.GetString(idx) for idx in atomIndexes2])
         
-        ud = REGISTRY['user_definition']['axis_selection'](path,molecule=molName,endpoint1=atomNames1,endpoint2=atomNames2)            
+        ud = REGISTRY['user_definition']['axis_selection'](target,molecule=molName,endpoint1=atomNames1,endpoint2=atomNames2)            
             
-        UD_STORE[name] = ud
+        UD_STORE.set_definition(target,ud.type,name,ud)
         UD_STORE.save()
         
-        pub.sendMessage("new_axis", message = (path, name))        
+        pub.sendMessage("new_axis", message = (target, name))        
         
     def on_select_atom(self, event):
         

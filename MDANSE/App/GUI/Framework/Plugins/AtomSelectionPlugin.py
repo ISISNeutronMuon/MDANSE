@@ -413,15 +413,15 @@ class AtomSelectionPlugin(ComponentPlugin):
             LOGGER("You must enter a value for the user definition", "error", ["dialog"])
             return
         
-        path = os.path.basename(self.parent.trajectory.filename)
+        target = os.path.basename(self.parent.trajectory.filename)
                     
-        ud = REGISTRY['user_definition']['atom_selection'](path,expression=self._expression,indexes=self._selection)
+        ud = REGISTRY['user_definition']['atom_selection'](target,expression=self._expression,indexes=self._selection)
             
-        UD_STORE[name] = ud
+        UD_STORE.set_definition(target,ud.type,name,ud)
         
         UD_STORE.save()
         
-        pub.sendMessage("new_selection", message = (path, name))
+        pub.sendMessage("new_selection", message = (target, name))
 
     def on_select_atoms(self, message):
                 

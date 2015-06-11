@@ -54,11 +54,6 @@ class Status(object):
     def start_status(self):
         pass
 
-    @property
-    def status(self):
-        
-        return self._status
-
     @abc.abstractmethod
     def stop_status(self):
         pass
@@ -161,36 +156,36 @@ class Status(object):
             self._eta = '%02dd:%02dh:%02dm:%02ds' % duration
             Publisher.sendMessage("status_update",message=self)
                         
-class StatusHandler(object):
-    
-    __metaclass__ = abc.ABCMeta
-    
-    def __init__(self):
-        
-        self._status = Status()
-
-        Publisher.subscribe(self.finish_status, "status_finish")
-        Publisher.subscribe(self.start_status, "status_start")
-        Publisher.subscribe(self.stop_status, "status_stop")
-        Publisher.subscribe(self.update_status, "status_update")
-    
-    @abc.abstractmethod
-    def finish_status(self):
-        pass
-
-    @abc.abstractmethod
-    def start_status(self):
-        pass
-
-    @property
-    def status(self):
-        
-        return self._status
-
-    @abc.abstractmethod
-    def stop_status(self):
-        pass
-        
-    @abc.abstractmethod
-    def update_status(self):
-        pass
+# class StatusHandler(object):
+#     
+#     __metaclass__ = abc.ABCMeta
+#     
+#     def __init__(self):
+#         
+#         self._status = Status()
+# 
+#         Publisher.subscribe(self.finish_status, "status_finish")
+#         Publisher.subscribe(self.start_status, "status_start")
+#         Publisher.subscribe(self.stop_status, "status_stop")
+#         Publisher.subscribe(self.update_status, "status_update")
+#     
+#     @abc.abstractmethod
+#     def finish_status(self):
+#         pass
+# 
+#     @abc.abstractmethod
+#     def start_status(self):
+#         pass
+# 
+#     @property
+#     def status(self):
+#         
+#         return self._status
+# 
+#     @abc.abstractmethod
+#     def stop_status(self):
+#         pass
+#         
+#     @abc.abstractmethod
+#     def update_status(self):
+#         pass

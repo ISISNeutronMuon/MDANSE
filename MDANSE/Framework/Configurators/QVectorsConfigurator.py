@@ -70,13 +70,17 @@ class QVectorsConfigurator(IConfigurator):
 
         trajConfig = configuration[self._dependencies['trajectory']]
 
-        try:        
-            ud = UD_STORE[trajConfig["basename"],"q_vectors",value]
+        if UD_STORE.has_definition(trajConfig["basename"],"q_vectors",value):        
+            ud = UD_STORE.get_definition(trajConfig["basename"],"q_vectors",value)
+            self["parameters"] = ud['parameters']
+            self["type"] = ud['generator']
+            self["is_lattice"] = ud['is_lattice']
+            self["q_vectors"] = ud['q_vectors']
             
-        except UserDefinitionsStoreError:
+        else:
 
             generator, parameters = value
-            generator = REGISTRY["q_vectors"][generator](trajConfig["instance"])
+            generator = REGISTRY["q_vectors"][generator](trajConfig["universe"])
             generator.setup(parameters)
             generator.generate()
                         
@@ -87,13 +91,7 @@ class QVectorsConfigurator(IConfigurator):
             self["type"] = generator.type
             self["is_lattice"] = generator.is_lattice
             self["q_vectors"] = generator.configuration['q_vectors']
-        
-        else:                        
-            self["parameters"] = ud['parameters']
-            self["type"] = ud['generator']
-            self["is_lattice"] = ud['is_lattice']
-            self["q_vectors"] = ud['q_vectors']
-                                
+                                        
         self["shells"] = self["q_vectors"].keys()
         self["n_shells"] = len(self["q_vectors"])    
         self["value"] = self["q_vectors"]

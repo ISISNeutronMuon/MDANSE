@@ -73,12 +73,11 @@ class AxisSelection(IConfigurator):
         
         trajConfig = configuration[self._dependencies['trajectory']]
                 
-        try: 
-            ud = UD_STORE[trajConfig["basename"],"axis_selection",value]
-        except UserDefinitionsStoreError:
-            self.update(value)
-        else:
+        if UD_STORE.has_definition(trajConfig["basename"],"axis_selection",value): 
+            ud = UD_STORE.get_definition(trajConfig["basename"],"axis_selection",value)
             self.update(ud)
+        else:
+            self.update(value)
 
         e1 = find_atoms_in_molecule(trajConfig['instance'].universe,self['molecule'], self['endpoint1'], True)
         e2 = find_atoms_in_molecule(trajConfig['instance'].universe,self['molecule'], self['endpoint2'], True)

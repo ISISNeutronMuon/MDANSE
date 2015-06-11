@@ -79,13 +79,13 @@ class AtomTransmutationPlugin(AtomSelectionPlugin):
             LOGGER("You must enter a value for the user definition", "error", ["dialog"])
             return
 
-        path = os.path.basename(self.parent.trajectory.filename)
+        target = os.path.basename(self.parent.trajectory.filename)
 
         element = self._elements.GetStringSelection()
         
-        ud = REGISTRY['user_definition']['atom_transmutation'](path,expression=self._expression,indexes=self._selection,element=element)            
-        UD_STORE[name] = ud
+        ud = REGISTRY['user_definition']['atom_transmutation'](target,expression=self._expression,indexes=self._selection,element=element)            
+        UD_STORE.set_definition(target,ud.type,name,ud)
         UD_STORE.save()
         
-        Publisher.sendMessage("new_transmutation", message = (path, name))
+        Publisher.sendMessage("new_transmutation", message = (target, name))
         

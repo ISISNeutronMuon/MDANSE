@@ -179,7 +179,7 @@ class QVectorsPanel(wx.Panel):
                                                       q_vectors=self._grid.GetTable().data,
                                                       is_lattice=self._generator.is_lattice)
         
-        UD_STORE[name] = ud
+        UD_STORE.set_definition(target,ud.type,name,ud)
         UD_STORE.save()
         
         pub.sendMessage("new_q_vectors", message = (target, name))
@@ -276,17 +276,17 @@ class QVectorsPlugin(ComponentPlugin):
             event.Veto()
         else:
             qPanel = event.GetEventObject().GetPage(event.GetSelection())
-            if qPanel.progress.status.is_running():
+            if qPanel.progress.is_running():
                 d = wx.MessageDialog(None, 'The background task is still running. You must cancel it before closing this tab.', 'Warning', wx.OK|wx.ICON_WARNING)
                 d.ShowModal()
                 event.Veto()
                 return            
                     
-    def generate_q_vectors(self,generator,status):
+    def generate_q_vectors(self,generator):
                                 
-        data = generator.run(status)
-                 
-        return data
+        generator.generate()
+                         
+        return generator['q_vectors']
     
     def generate_q_vectors_done(self,result,qPanel):
                 
@@ -301,17 +301,19 @@ class QVectorsPlugin(ComponentPlugin):
     def on_generate_q_vectors(self, event):
 
         generator = self._generatorsChoice.GetStringSelection()
-        generator = REGISTRY["qvectors"][generator](self._trajectory.universe)
+        generator = REGISTRY["q_vectors"][generator](self._trajectory.universe)
         parameters = self._configurationPanel.get_value()
-        generator.configure(parameters)
+        generator.setup(parameters)
         
         qPanel = QVectorsPanel(generator,parameters,self._mainPanel,wx.ID_ANY)
         self._notebook.AddPage(qPanel, "Q Vectors")
         
+        generator.setStatus(qPanel.progress)
+        
         qPanel.udName.Disable()
         qPanel.saveButton.Disable()
         
-        startWorker(self.generate_q_vectors_done, self.generate_q_vectors, cargs=(qPanel,),wargs=(generator,qPanel.progress.status))                                          
+        startWorker(self.generate_q_vectors_done, self.generate_q_vectors, cargs=(qPanel,),wargs=(generator,))                                          
                 
     def on_select_generator(self, event):
                                 
@@ -320,9 +322,9 @@ class QVectorsPlugin(ComponentPlugin):
     def set_generators(self):
 
         if self._trajectory.universe.is_periodic:
-            choices = REGISTRY["qvectors"].keys()
+            choices = REGISTRY["q_vectors"].keys()
         else:
-            choices = [k for k,v in REGISTRY["qvectors"].items() if not v.is_lattice]
+            choices = [k for k,v in REGISTRY["q_vectors"].items() if not v.is_lattice]
         
         self._generatorsChoice.SetItems(choices)
         self._generatorsChoice.SetSelection(0)
@@ -343,13 +345,13 @@ class QVectorsPlugin(ComponentPlugin):
         if generatorName == self._currentGenerator:
             return
                               
-        self._currentGenerator = REGISTRY["qvectors"][generatorName](self._trajectory.universe)
+        self._currentGenerator = REGISTRY["q_vectors"][generatorName](self._trajectory.universe)
         
         self._parametersSizer.Clear(deleteWindows=True)
 
         self.Freeze()
                 
-        self._configurationPanel = ConfigurationPanel(self._parametersPanel, self._currentGenerator.configuration)
+        self._configurationPanel = ConfigurationPanel(self._parametersPanel, self._currentGenerator)
 
         self._parametersSizer.Add(self._configurationPanel, 1, wx.ALL|wx.EXPAND, 5)
                                 
@@ -365,7 +367,7 @@ if __name__ == "__main__":
     
     from MMTK.Trajectory import Trajectory
     
-    t = Trajectory(None,"../../../UserData/Trajectories/mmtk/protein_in_periodic_universe.nc","r")
+    t = Trajectory(None,"../../../../../Data/Trajectories/MMTK/protein_in_periodic_universe.nc","r")
     
     app = wx.App(False)
     

@@ -88,8 +88,8 @@ class IUserDefinition(dict):
 
     def __setitem__(self, item, value):
         
-        if item in self._keyword:
-            dict.__setitem__(item,value)
+        if item in self._keywords:
+            dict.__setitem__(self,item,value)
         
     def __str__(self):
         '''

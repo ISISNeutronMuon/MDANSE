@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 14, 2015
 
-@author: Gael Goret
+@author: Gael Goret and Eric C. Pellegrini
 '''
 
 import wx
@@ -90,32 +90,22 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
         self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.on_try_rename, self._tree)
     
     def build_plugins_tree(self):
-        
-        for k,v in UD_STORE.iteritems():
-            self._udTree.setdefault(v.target,{}).setdefault(v.type,{})[k] = v
-        
+                
         self._root = self._tree.AddRoot("root")
-        self.set_plugins_tree(self._root, self._udTree)     
+        self.set_plugins_tree(self._root, UD_STORE)     
         
-            
     def set_plugins_tree(self, node, data):
         
         for k, v in data.items():
 
             dataItem = wx.TreeItemData(v)
             subnode = self._tree.AppendItem(node, str(k), data=dataItem)
+
+            self._tree.SetItemTextColour(subnode, 'blue')  
             
-            if isinstance(v, IUserDefinition):
-                self.set_plugins_tree(subnode, v) 
-                self._tree.SetItemTextColour(subnode, 'red') 
-            
-            elif isinstance(v, dict):
+            if isinstance(v, dict):
                 self.set_plugins_tree(subnode, v)
-                self._tree.SetItemTextColour(subnode, 'blue')  
             
-            else:
-                self._tree.SetItemTextColour(subnode, 'green')
-               
     def on_show_info(self, event):
         
         ItemData = self._tree.GetItemData(event.GetItem())
@@ -144,7 +134,7 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
             if isinstance(data, IUserDefinition):
                 d = wx.MessageDialog(None, 'Do you really want to delete this definition ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
                 if d.ShowModal() == wx.ID_YES:
-                    del  UD_STORE[itemText]
+                    UD_STORE.remove_definition(data.target,data.type,itemText)
                     UD_STORE.save()
                     self._tree.DeleteAllItems()
                     self._udTree.clear()
@@ -173,7 +163,8 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
         
         data  = itemData.GetData()
         if isinstance(data, IUserDefinition):
-            UD_STORE[newtext] = UD_STORE.pop(oldtext)
+            UD_STORE.set_definition(data.target,data.type,newtext,data)
+            UD_STORE.remove_definition(data.target,data.type,oldtext)
             UD_STORE.save()
             self.build_plugins_tree()
     

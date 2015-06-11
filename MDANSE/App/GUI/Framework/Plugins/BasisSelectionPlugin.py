@@ -151,19 +151,19 @@ class BasisSelectionPlugin(ComponentPlugin):
             LOGGER("You must enter a value for the user definition", "error", ["dialog"])
             return
 
-        path = os.path.basename(self._trajectory.filename)
+        target = os.path.basename(self._trajectory.filename)
             
         molName = self._moleculeNames.GetStringSelection()        
         origin = tuple([self._origin.GetString(idx) for idx in origin])
         xAxis = tuple([self._xAxis.GetString(idx) for idx in xAxis])
         yAxis = tuple([self._yAxis.GetString(idx) for idx in yAxis])
 
-        ud = REGISTRY['user_definition']['basis_selection'](path,molecule=molName,origin=origin,x_axis=xAxis,y_axis=yAxis)            
+        ud = REGISTRY['user_definition']['basis_selection'](target,molecule=molName,origin=origin,x_axis=xAxis,y_axis=yAxis)            
                     
-        UD_STORE[name] = ud
+        UD_STORE.set_definition(target,ud.type,name,ud)
         UD_STORE.save()
         
-        pub.sendMessage("new_basis", message = (path, name))
+        pub.sendMessage("new_basis", message = (target, name))
 
     def on_select_atom(self, event):
 

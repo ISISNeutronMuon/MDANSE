@@ -1,15 +1,15 @@
 import wx
 import wx.lib.agw.pygauge as pygauge
 
-from MDANSE.Framework.Status import StatusHandler
+from MDANSE.Framework.Status import Status
 from MDANSE.App.GUI.Icons import ICONS
         
-class ProgressBar(wx.Panel,StatusHandler):
+class ProgressBar(wx.Panel,Status):
     
     def __init__(self, *args, **kwargs):
         
         wx.Panel.__init__(self,*args, **kwargs)
-        StatusHandler.__init__(self)
+        Status.__init__(self)
                                 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -29,7 +29,7 @@ class ProgressBar(wx.Panel,StatusHandler):
 
         status = message
         
-        if status != self._status:
+        if status != self:
             return
         
         self._progress.SetBarColor(wx.BLUE)
@@ -44,25 +44,25 @@ class ProgressBar(wx.Panel,StatusHandler):
             return
          
         self._stop.Disable()        
-        self._status.stop()
+        self.stop()
                         
     def start_status(self, message):
         
         status = message
         
-        if status != self._status:
+        if status != self:
             return
 
         self._stop.Enable()        
-        self._progress.SetValue(self._status.currentStep)
-        self._progress.SetRange(self._status.nSteps)
+        self._progress.SetValue(self.currentStep)
+        self._progress.SetRange(self.nSteps)
         self._progress.SetBarColor(wx.GREEN)    
 
     def stop_status(self, message):
         
         status = message
         
-        if status != self._status:
+        if status != self:
             return
         
         self._progress.SetBarColor(wx.RED)
@@ -72,8 +72,8 @@ class ProgressBar(wx.Panel,StatusHandler):
         
         status = message
         
-        if status != self._status:
+        if status != self:
             return
         
-        self._progress.SetValue(self._status.currentStep)
+        self._progress.SetValue(self.currentStep)
         self._progress.Refresh()   

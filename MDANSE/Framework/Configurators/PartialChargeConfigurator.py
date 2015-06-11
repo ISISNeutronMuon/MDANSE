@@ -57,7 +57,7 @@ class PartialChargeConfigurator(IConfigurator):
         trajConfig = configuration[self._dependencies['trajectory']]
         
         if UD_STORE.has_definition(trajConfig["basename"],'partial_charges',value):
-            self['charges'] = UD_STORE[trajConfig["basename"],'partial_charges',value]
+            self['charges'] = UD_STORE.get_definition(trajConfig["basename"],'partial_charges',value)
         else:
             if isinstance(value,basestring):                
                 # Case of a python script
