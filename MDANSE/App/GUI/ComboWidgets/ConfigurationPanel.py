@@ -48,7 +48,7 @@ class ConfigurationPanel(wx.Panel):
             w.Refresh()
              
         try:
-            self._configuration.parameters = self.get_value()
+            self._configurable.parameters = self.get_value()
         except ConfiguratorError as e:
             d = wx.MessageDialog(self, str(e), style=wx.ICON_ERROR|wx.STAY_ON_TOP|wx.CENTRE)
             d.ShowModal()

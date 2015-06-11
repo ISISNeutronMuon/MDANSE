@@ -107,10 +107,10 @@ class UserDefinitionsStore(dict):
 
         self.setdefault(target,{}).setdefault(section,{})[name] = value                                          
 
-    def filter(self,target,typ):
+    def filter(self,target,section):
         
-        return [k for k,v in self.iteritems() if (v.target==target and v.type==typ)]
-    
+        return self.get(target,{}).get(section,{}).keys()
+            
     def has_definition(self,target,section,name):
         
         if not self.has_key(target):

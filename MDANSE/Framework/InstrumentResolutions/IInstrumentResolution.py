@@ -54,7 +54,7 @@ class IInstrumentResolution(Configurable):
         self._timeWindow = None
         
     @abc.abstractmethod
-    def set_kernel(self, frequencies, dt, parameters=None):
+    def set_kernel(self, frequencies, dt):
         pass    
     
     @property

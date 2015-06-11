@@ -73,7 +73,7 @@ class InstrumentResolutionDialog(wx.Dialog):
         
         sb = wx.StaticBox(self, wx.ID_ANY, label="kernel")
         sbSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
-        self._kernelChoice = wx.Choice(self, wx.ID_ANY, choices=REGISTRY["instrumentresolution"].keys())
+        self._kernelChoice = wx.Choice(self, wx.ID_ANY, choices=REGISTRY["instrument_resolution"].keys())
         self._kernelChoice.SetSelection(0)
         sbSizer.Add(self._kernelChoice, 1, wx.ALL|wx.EXPAND, 5)
         sizer.Add(sbSizer, (0,0), flag=wx.EXPAND)
@@ -142,11 +142,13 @@ class InstrumentResolutionDialog(wx.Dialog):
         if not self._parametersPanel.validate():
             return
                             
-        kernelClass = REGISTRY["instrumentresolution"][self._currentKernel]
+        kernelClass = REGISTRY["instrument_resolution"][self._currentKernel]
         
         resolution = kernelClass()
         
-        resolution.set_kernel(self._frequencies, self._timeStep,self._parametersPanel.get_value())
+        resolution.setup(self._parametersPanel.get_value())
+        
+        resolution.set_kernel(self._frequencies, self._timeStep)
         
         self._axis.clear()
                         
@@ -169,11 +171,11 @@ class InstrumentResolutionDialog(wx.Dialog):
         
         self._parametersSizer.Clear(deleteWindows=True)
 
-        resolution = REGISTRY["instrumentresolution"][kernelName]()
+        resolution = REGISTRY["instrument_resolution"][kernelName]()
         
         self.Freeze()
         
-        self._parametersPanel = ConfigurationPanel(self, resolution.configuration)
+        self._parametersPanel = ConfigurationPanel(self, resolution)
         
         self._parametersSizer.Add(self._parametersPanel, 0, wx.ALL|wx.EXPAND, 5)
                 
