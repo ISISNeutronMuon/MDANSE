@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import abc
@@ -103,9 +103,9 @@ class IConfigurator(dict):
         
         :param name: the name of this configurator.
         :type name: str
-        :param dependencies: the other configurators on which this configurator depends on to be configured. This has to be input as a 
-        dictionary that maps the name under which the dependency will be used within the configurator implementation to the actual name 
-        of the configurator on which this configurator is depending on.  
+        :param dependencies: the other configurators on which this configurator depends on to be configured. \
+        This has to be input as a dictionary that maps the name under which the dependency will be used within \
+        the configurator implementation to the actual name of the configurator on which this configurator is depending on.  
         :type dependencies: (str,str)-dict
         :param default: the default value of this configurator.
         :type default: any python object
@@ -185,8 +185,8 @@ class IConfigurator(dict):
         '''
         Configures this configurator with a given value.
         
-        :param configuration: the current configuration. The configuration is passed at configuration time because it can be used in the case where
-        the configurator depends on other configurators to be comfigured.
+        :param configuration: the current configuration. The configuration is passed at configuration time \
+        because it can be used in the case where the configurator depends on other configurators to be comfigured.
         :type configuration: Framework.Configurable.Configurable object
         :param value: the input value to be configured.
         :type value: depends on the configurator

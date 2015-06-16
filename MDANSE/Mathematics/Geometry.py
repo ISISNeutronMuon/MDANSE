@@ -11,12 +11,11 @@ class GeometryError(Error):
 def get_basis_vectors_from_cell_parameters(parameters):
     """Returns the basis vectors for the simulation cell from the six crystallographic parameters.
     
-    @param parameters: the a, b, c, alpha, bete and gamma of the simulation cell.
-    @type: parameters: list of 6 floats
+    :param parameters: the a, b, c, alpha, bete and gamma of the simulation cell.
+    :type: parameters: list of 6 floats
     
-    @return: a list of three Scientific.Geometry.Vector objects representing respectively a, b and c 
-        basis vectors.
-    @rtype: list
+    :return: a list of three Scientific.Geometry.Vector objects representing respectively a, b and c basis vectors.
+    :rtype: list
     """
 
     # The simulation cell parameters.
@@ -38,17 +37,18 @@ def get_basis_vectors_from_cell_parameters(parameters):
         
 def center_of_mass(coords, masses=None):
     """Computes the center of massfor a set of coordinates and masses 
-    :Parameters:
-        #. coords  ((n,3)-numpy.array): the input coordinates
-        #. masses  ((n, )-numpy.array): the input masses
-    :Returns:
-        #. (3,)-numpy.array: the center of mass
+    :param coords: the n input coordinates.
+    :type coords: (n,3)-NumPy.array
+    :param masses: it not None, the n input masses. If None, the center of gravity is computed.
+    :type masses: (n,)-NumPy.array
+    :return: the center of mass.
+    :rtype: (3,)-NumPy.array
     """
         
     return numpy.average(coords,weights=masses,axis=0)
-    
+
 center = center_of_mass
-    
+
 def build_cartesian_axes(origin, p1, p2, dtype = numpy.float64):
     
     origin = numpy.array(origin, dtype = dtype)

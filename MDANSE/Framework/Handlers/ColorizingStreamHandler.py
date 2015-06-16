@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import ctypes
@@ -227,8 +227,7 @@ class ColorizingStreamHandler(IHandler,logging.StreamHandler):
         :param record: the logging record to be formated.
         :type record: logging.LogRecord  
 
-        :note: this implementation colorizes the message line, but leaves
-        any traceback unolorized.
+        :note: this implementation colorizes the message line, but leaves any traceback unolorized.
         '''
                         
         message = logging.StreamHandler.format(self, record)

@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import numpy
@@ -47,7 +47,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
     inverse-fourier-transformed to get a time-dependant version. This time-dependant resolution function will then 
     be multiplied by the time-dependant signal to get the resolution effect according to the Fourier Transform theorem:
     
-    .. math:: TF(f(t) * r(t)) = F(\omega) \conv R(\omega) = G(\omega)
+    .. math:: TF(f(t) * r(t)) = F(\omega) \otimes R(\omega) = G(\omega)
 
     where f(t) and r(t) are respectively the time-dependant signal and instrument resolution and 
     F(\omega) and R(\omega) are their corresponding spectrum. Hence, G(\omega) represents the signal 
@@ -57,7 +57,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
     An instrument resolution is represented in MDANSE by a kernel function and a sets of parameters for this function.
     MDANSE currently supports the aussian, lorentzian, square, triangular and pseudo-voigt kernels.
     
-    :note: this configurator depends on the 'frame' configurator to be configured
+    :note: this configurator depends on the 'frame' configurator to be configured.
     """
     
     
@@ -70,10 +70,10 @@ class InstrumentResolutionConfigurator(IConfigurator):
         Configure the instrument resolution.
                 
         :param configuration: the current configuration
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
-        :param value: the instrument resolution. It must be input as a 2-tuple where the 1st element is the instrument resolution
-        kernel and the 2nd element is a dictionary that stores the parameters for this kernel.
-        is a string representing one of the supported instrument resolution 
+        :type configuration: subclass of :class: MDANSE.Framework.Configurable.Configurable
+        :param value: the instrument resolution. It must a 2-tuple where the 1st element is the \
+        is a string representing one of the supported instrument resolution and the 2nd element \
+        is a dictionary that stores the parameters for this kernel.
         :type value: 2-tuple
         '''
 

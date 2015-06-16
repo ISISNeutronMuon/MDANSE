@@ -27,7 +27,7 @@
 ''' 
 Created on May 21, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import os
@@ -71,8 +71,8 @@ class OutputFilesConfigurator(IConfigurator):
                 
         :param configuration: the current configuration.
         :type configuration: a MDANSE.Framework.Configurable.Configurable object
-        :param value: the output files specifications. Must be a 3-tuple whose 1st element if the output directory, 2nd element the basename and 3rd element
-        a list of file formats.
+        :param value: the output files specifications. Must be a 3-tuple whose 1st element \
+        if the output directory, 2nd element the basename and 3rd element a list of file formats.
         :type value: 3-tuple
         '''
         

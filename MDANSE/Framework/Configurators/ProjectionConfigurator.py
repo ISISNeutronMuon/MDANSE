@@ -27,7 +27,7 @@
 ''' 
 Created on May 21, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 
@@ -52,9 +52,10 @@ class ProjectionConfigurator(IConfigurator):
                 
         :param configuration: the current configuration.
         :type configuration: a MDANSE.Framework.Configurable.Configurable object
-        :param value: the input projector definition. It can be a 2-tuple whose 1st element if the name of the projector (one of 'null','axial' or 'planar')
-        and the 2nd element the parameters for the selected projector (None for 'null', a Scientific.Vector for 'axial' and a list of two Scientific.Vector for 
-        'planar') or None in the case where no projection is needed.
+        :param value: the input projector definition. It can be a 2-tuple whose 1st element if the name \
+        of the projector (one of *'null'*,*'axial'* or *'planar'*) and the 2nd element the parameters for the selected \
+        projector (None for *'null'*, a Scientific.Vector for *'axial'* and a list of two Scientific.Vector for *'planar'*) \
+        or ``None`` in the case where no projection is needed.
         :type value: 2-tuple
         '''
         

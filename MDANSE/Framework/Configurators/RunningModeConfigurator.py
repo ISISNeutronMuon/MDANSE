@@ -27,7 +27,7 @@
 ''' 
 Created on May 22, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import os
@@ -39,8 +39,8 @@ class RunningModeConfigurator(IConfigurator):
     """
     This configurator allows to choose the mode used to run the calculation.
     
-    MDANSE currently support monoprocessor or multiprocessor (SMP) running modes. In the laster case, you have to specify
-    the number of slots used for running the analysis.
+    MDANSE currently support monoprocessor or multiprocessor (SMP) running modes. In the laster case, you have to 
+    specify the number of slots used for running the analysis.
     """
 
     type = 'running_mode'
@@ -52,12 +52,12 @@ class RunningModeConfigurator(IConfigurator):
     def configure(self, configuration, value):
         '''
         Configure the running mode.
-                
+     
         :param configuration: the current configuration
         :type configuration: a MDANSE.Framework.Configurable.Configurable object
-        :param value: the running mode specification. It can be "monoprocessor" string or a 2-tuple whose first element must 
-        be "multiprocessor" string and 2nd element the number of slots allocated for running the analysis.
-        :type value: "monoprocessor" or 2-tuple
+        :param value: the running mode specification. It can be *'monoprocessor'* or a 2-tuple whose first element \
+        must be *'multiprocessor'* and 2nd element the number of slots allocated for running the analysis.
+        :type value: *'monoprocessor'* or 2-tuple
         '''
                 
         if isinstance(value,basestring):

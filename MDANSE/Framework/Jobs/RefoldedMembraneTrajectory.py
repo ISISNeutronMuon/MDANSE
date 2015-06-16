@@ -42,10 +42,10 @@ from MDANSE.Mathematics.Geometry import center
 
 class RefoldedMembraneTrajectory(IJob):
     """
-    Rebuild the trajectory of a membrane such that the lipids in the upper leaflet are actually in the upper half of the simulation
-    box and therefore the lipids in the lower leaflet are in the lower half of the box 
-	i.e. the membrane is centred in the simulation box.
-    The normal to the membrane is assumed to be parallel to the z axis. 
+    Rebuild the trajectory of a membrane such that the lipids in the upper leaflet are actually in the upper half of the simulation box 
+    and therefore the lipids in the lower leaflet are in the lower half of the box i.e. the membrane is centred in the simulation box.
+    
+    :note: The normal to the membrane is assumed to be parallel to the z axis. 
     """
     
     type = 'rmt'

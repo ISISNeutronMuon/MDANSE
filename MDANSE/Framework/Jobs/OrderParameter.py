@@ -44,23 +44,19 @@ from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
 class OrderParameter(IJob):
     """
-    The combination of NMR and MD simulation data is very powerful in the 
-	study of conformational dynamics of proteins. NMR relaxation spectroscopy 
-    is a unique approach for a site-specific investigation of both global
-    tumbling and internal motions of proteins. The molecular motions modulate the magnetic interactions 
-	between the nuclear spins and lead for each nuclear spin to a relaxation behaviour
-    which reflects its environment. 
+    The combination of NMR and MD simulation data is very powerful in the study of conformational dynamics of proteins. NMR relaxation 
+    spectroscopy is a unique approach for a site-specific investigation of both global tumbling and internal motions of proteins. 
+    The molecular motions modulate the magnetic interactions  between the nuclear spins and lead for each nuclear spin to a relaxation 
+    behaviour which reflects its environment. 
 	
-	The relationship between microscopic motions and measured spin relaxation rates is given by Redfield's theory. 
-    The relaxation measurements probe the relaxation dynamics of a selected nuclear
-    spin at only a few frequencies. Moreover, only a limited number of independent observables
-    are accessible. Hence, to relate relaxation data to protein dynamics, 
-    a dynamical model for molecular motions or a functional form, depending on a
-    limited number of adjustable parameters, are required. 
+	The relationship between microscopic motions and measured spin relaxation rates is given by Redfield's theory. The relaxation 
+	measurements probe the relaxation dynamics of a selected nuclear spin at only a few frequencies. Moreover, only a limited number 
+	of independent observables are accessible. Hence, to relate relaxation data to protein dynamics,  a dynamical model for molecular 
+	motions or a functional form, depending on a limited number of adjustable parameters, are required. 
     
-    The generalized order parameter, indicates the degree of spatial restriction of the internal motions of a bond vector, 
-    while the characteristic time is an effective correlation time, setting the time scale of the internal
-    relaxation processes. The resulting values range from 0 (completely disordered) to 1 (fully ordered). 
+    The generalized order parameter, indicates the degree of spatial restriction of the internal motions of a bond vector, while the 
+    characteristic time is an effective correlation time, setting the time scale of the internal relaxation processes. The resulting 
+    values range from 0 (completely disordered) to 1 (fully ordered). 
     
     **Calculation:** \n
     angle at time T is calculated as the following: \n   
@@ -71,10 +67,8 @@ class OrderParameter(IJob):
     #. angular_correlation_legendre_1st: :math:`<cos(\phi(T))>`
     #. angular_correlation_legendre_2nd: :math:`<\\frac{1}{2}(3cos(\phi(T))^{2}-1)>`
     
-    
     **Acknowledgement**\n
     AOUN Bachir, PELLEGRINI Eric
-    
     """
     
     type = 'op'
@@ -132,13 +126,12 @@ class OrderParameter(IJob):
 
     def run_step(self, index):
         """
-        Runs a single step of the job.\n
+        Runs a single step of the job.
  
-        :Parameters:
-            #. index (int): The index of the step.
-        :Returns:
-            #. index (int): The index of the step. 
-            #. vectors (numpy.array): The calculated vectors 
+        :param index: the index of the step.
+        :type index: int
+        :return: a 2-tuple whose 1st element is the index of the step and 2nd element resp. p1, p2, s2 vectors.
+        :rtype: 2-tuple
         """
 
         e1, e2 = self.configuration['axis_selection']['endpoints'][index]
@@ -198,11 +191,13 @@ class OrderParameter(IJob):
 
     def combine(self, index, x):
         """
-        Combines returned results of run_step.\n
-        :Parameters:
-            #. index (int): The index of the step.\n
-            #. x (any): The returned result(s) of run_step
-        """
+        Combines/synchronizes the output of `run_step` method.
+        
+        :param index: the index of the step.
+        :type index: int
+        :param x: the output of `run_step` method.
+        :type x: any python object
+        """     
         
         p1, p2, s2 = x
         

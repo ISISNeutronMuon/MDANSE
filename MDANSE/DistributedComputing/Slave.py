@@ -22,7 +22,7 @@
 #
 #You should have received a copy of the GNU Lesser General Public
 #License along with this library; if not, write to the Free Software
-#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 ''' 
 Created on Mar 30, 2015
@@ -56,8 +56,9 @@ def do_run_step(job, step):
              
     return job.run_step(step)
 
-from MDANSE.DistributedComputing.MasterSlave import startSlaveProcess
-# Start the slave process
-startSlaveProcess(master_host="localhost:%d")
+if __name__ == "__builtin__":
+    from MDANSE.DistributedComputing.MasterSlave import startSlaveProcess
+    # Start the slave process
+    startSlaveProcess(master_host="localhost:%d")
     
 

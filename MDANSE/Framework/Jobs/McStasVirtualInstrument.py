@@ -365,16 +365,20 @@ class McStasVirtualInstrument(IJob):
 
         return FileStruct
         
-    def read_monitor(self, sim_File):
+    def read_monitor(self, simFile):
         """
-        Read a monitor file (McCode format) using loadtxt numpy module
-          called from: convert
-          input: sim_File file name as a string
-          output: FileStruct data structure
+        Read a monitor file (McCode format).
+        
+        :param simFile: the path for the monitor file.
+        :type simFile: str
+        
+        :return: a dictionary built from the evaluation of McStas monitor file header that will contains the data and metadata about the monitor.
+        :rtype: dict
         """
+        
         # Read header
         isHeader = lambda line: line.startswith('#')
-        f = open(sim_File)
+        f = open(simFile)
         Lines= f.readlines()
         Header = filter(isHeader, Lines)
         f.close()
@@ -396,7 +400,7 @@ class McStasVirtualInstrument(IJob):
         # Add the data block
 
         data = []
-        f = open(sim_File, 'r')
+        f = open(simFile, 'r')
         lines = f.readlines()
         f.close()
         
@@ -414,23 +418,33 @@ class McStasVirtualInstrument(IJob):
         
         
         Filestruct['data'] = numpy.genfromtxt(StringIO.StringIO(' '.join(data)))
-        Filestruct['fullpath'] = sim_File
+        Filestruct['fullpath'] = simFile
         
         return Filestruct
 
-    def get_monitor(self, FS,j):
+    def get_monitor(self, monitor, col):
         """
-        Extract one of the monitor in scan steps
-          called from: display
-          input:  FileStruct obtained from read_monitor(scan data file) 
-                  j          index of monitor column to extract
-          output: FileStruct with selected monitor 'j'
+        Extract one of the monitor in scan steps called from: display
+        
+        :param monitor:  the dictionary that contains data and metadata about the monitor (obtained from `read_monitor`)
+        :type monitor: dict
+        :param col: index of the monitor column to extract.
+        :type col: int
+        :return: a dictionary that contains data and metadata about monitor `j`.
+        :rtype: dict
         """
+        
         # Ugly, hard-coded...
-        data=FS['data'][:,(0,2*j+1,2*j+2)]
-        variables=FS['variables'].split()   
-        FSsingle={'xlimits':FS['xlimits'],'data':data,'component':variables[j+1],'values':'',
+        data=monitor['data'][:,(0,2*col+1,2*col+2)]
+        variables=monitor['variables'].split()   
+        FSsingle={'xlimits':monitor['xlimits'],
+                  'data':data,'component':variables[col+1],
+                  'values':'',
                   'type':'array_1d(100)',
-                  'xlabel':FS['xlabel'],'ylabel':FS['ylabel'],'File':'Scan','title':''}
+                  'xlabel':monitor['xlabel'],
+                  'ylabel':monitor['ylabel'],
+                  'File':'Scan',
+                  'title':''}
+        
         return FSsingle
         

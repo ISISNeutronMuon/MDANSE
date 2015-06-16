@@ -27,7 +27,7 @@
 ''' 
 Created on May 22, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 from MDANSE import REGISTRY
@@ -50,7 +50,7 @@ class QVectorsConfigurator(IConfigurator):
     
     To define a new Q vectors generator, you must inherit from MDANSE.Framework.QVectors.QVectors.QVector interface.
     
-    :note: this configurator depends on 'trajectory' configurator to be configured
+    :note: this configurator depends on 'trajectory' configurator to be configured.
     """
     
     type = "q_vectors"
@@ -63,7 +63,7 @@ class QVectorsConfigurator(IConfigurator):
                 
         :param configuration: the current configuration.
         :type configuration: a MDANSE.Framework.Configurable.Configurable object
-        :param value: the Q vectors generator definition. It can be a 2-tuple, whose 1st element is the name of the Q vector generator 
+        :param value: the Q vectors generator definition. It can be a 2-tuple, whose 1st element is the name of the Q vector generator \
         and 2nd element the parameters for this configurator or a string that matches a Q vectors user definition.
         :type value: 2-tuple or str
         '''

@@ -89,7 +89,6 @@ class MasterProcessError(Exception):
     pass
 
 class MasterProcess(object):
-
     """
     Master process in a master-slave setup
     
@@ -163,9 +162,9 @@ class MasterProcess(object):
                 pass
 
     def requestTask(self, tag, *parameters):
-        """
+        '''
         Launches a task request. The task will be executed by a slave
-        process in a method called "do_"+tag that is called with the
+        process in a method called 'do\_'+tag that is called with the
         parameters given in the task request. Note that the order of
         task executions is not defined.
 
@@ -179,7 +178,8 @@ class MasterProcess(object):
 
         :return: a unique task id
         :rtype: C{str}
-        """
+        '''
+        
         return self.task_manager.addTaskRequest(tag, parameters)
 
     def retrieveResult(self, tag=None):
@@ -285,15 +285,14 @@ exec slave_code % port in namespace
             process.stdin.close()
 
 class SlaveProcess(object):
-
     """
     Slave process in a master-slave setup
     
     A concrete slave process in a program is implemented by subclassing
     this class and adding the methods that handle the computational
-    tasks. Such a method has the name "do_" followed by the tag of the
+    tasks. Such a method has the name 'do\_' followed by the tag of the
     computational task. The process is then launched by calling the
-    method "start".
+    method 'start'.
     """
 
     def __init__(self, label, master_host=None, watchdog_period=120.):
@@ -542,7 +541,7 @@ def initializeMasterProcess(label, slave_script=None, slave_module=None,
     :rtype: L{MasterProcess}
     """
     import atexit
-    import os
+
     process = MasterProcess(label, use_name_server)
     atexit.register(process.shutdown)
     if slave_script is not None or slave_module is not None:

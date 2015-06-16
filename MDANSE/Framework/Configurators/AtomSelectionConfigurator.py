@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import collections
@@ -55,9 +55,9 @@ class AtomSelectionConfigurator(IConfigurator):
     
     To Build an atom selection from the GUI you have to:
     
-    * Create a workspace based on a MMTK trajectory data
-    * Drag a molecular viewer on it
-    * Drag into the Molecular Viewer the Atom selection plugin
+    #. Create a workspace based on a MMTK trajectory data
+    #. Drag a molecular viewer on it
+    #. Drag into the Molecular Viewer the Atom selection plugin
     
     :note: this configurator depends on 'trajectory' and 'grouping_level' configurators to be configured
     '''

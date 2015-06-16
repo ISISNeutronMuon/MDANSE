@@ -8,7 +8,7 @@ MDANSE_API="../MDANSE/Doc/API"
 #mkdir ${MDANSE_API}/_static
 #mkdir ${MDANSE_API}/_templates
 
-sphinx-apidoc -o  ${MDANSE_API} -F --separate -d 5 -H MDANSE -A "G. Goret & E. Pellegrini"  -V 1.0 -R 1.0 ../MDANSE
+sphinx-apidoc -o ${MDANSE_API} -F --separate -d 5 -H MDANSE -A "G. Goret & E. Pellegrini"  -V 1.0 -R 1.0 ../MDANSE ../MDANSE/Externals
 
 cp conf_html.py ${MDANSE_API}/conf.py
 

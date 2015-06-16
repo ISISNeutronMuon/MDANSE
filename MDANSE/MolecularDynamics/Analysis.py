@@ -38,15 +38,19 @@ class AnalysisError(Error):
     pass
                                               
 def mean_square_deviation(coords1, coords2, masses=None, root=False):
-    """Computes the mean square deviation between two sets of coordinates 
-    :Parameters:
-        #. coords1 ((n,3)-numpy.array): the first set of coordinates
-        #. coords2 ((n,3)-numpy.array): the second set of coordinates
-        #. masses  ((n, )-numpy.array): the input masses
-        #. root    bool: if True, return the square root of the mean square deviation (the so-called RMSD)
-    :Returns:
-        #. float: the radius of gyration
-    """
+    '''
+    Computes the mean square deviation between two sets of coordinates 
+    :param coords1: the first set of n coordinates.
+    :type coords1: (n,3) numpy array
+    :param coords2: the second set of n coordinates.
+    :type coords2: (n,3) numpy array
+    :param masses: the n input masses. If None the center of gravity is computed.
+    :type masses: n-numpy array
+    :param root: if True, return the square root of the radius of gyration.
+    :type root: bool
+    :return: the mean square deviation.
+    :rtype: float
+    '''
 
     if coords1.shape != coords2.shape:
         raise AnalysisError("The input coordinates shapes do not match")
@@ -61,9 +65,16 @@ def mean_square_deviation(coords1, coords2, masses=None, root=False):
     
     return rmsd
 
-def mean_square_displacement(coordinates):
+def mean_square_displacement(coords):
+    '''
+    Computes the mean square displacement of a set of coordinates 
+    :param coords: the set of n coordinates.
+    :type coords: (n,3) numpy array
+    :return: the mean square displacement.
+    :rtype: float
+    '''
     
-    dsq = numpy.add.reduce(coordinates**2,1)
+    dsq = numpy.add.reduce(coords**2,1)
 
     # sum_dsq1 is the cumulative sum of dsq
     sum_dsq1 = numpy.add.accumulate(dsq)
@@ -82,7 +93,7 @@ def mean_square_displacement(coordinates):
     # Saabb refers to SAA+BB/(N-m) in the published algorithm
     # Sab refers to SAB(m)/(N-m) in the published algorithm
     Saabb = Saabb / (len(dsq) - numpy.arange(len(dsq)))
-    Sab   = 2.0*correlation(coordinates, axis=0, sumOverAxis=1)
+    Sab   = 2.0*correlation(coords, axis=0, sumOverAxis=1)
 
     # The atomic MSD.
     msd = Saabb - Sab
@@ -99,14 +110,17 @@ def mean_square_fluctuation(coords, root=False):
     return msf    
 
 def radius_of_gyration(coords, masses=None, root=False):
-    """Computes the radius of gyration for a set of coordinates
-    :Parameters:
-        #. coords  ((n,3)-numpy.array): the set of  coordinates
-        #. masses  ((n, )-numpy.array): the input masses
-        #. root    bool: if True, return the square root of the radius of gyration
-    :Returns:
-        #. float: the radius of gyration
-    """
+    '''
+    Computes the radius of gyration for a set of coordinates
+    :param coords: the set of n coordinates.
+    :type coords: (n,3) numpy array
+    :param masses: the n input masses. If None the center of gravity is computed.
+    :type masses: n-numpy array
+    :param root: if True, return the square root of the radius of gyration.
+    :type root: bool
+    :return: the radius of gyration
+    :rtype: float
+    '''
     
     if masses is None:
         masses = numpy.ones((coords.shape[0]),dtype=numpy.float64)

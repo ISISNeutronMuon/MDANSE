@@ -38,19 +38,25 @@ INTERPOLATION_ORDER["5th order"] = numpy.array([[-274., 600.,-600., 400.,-150., 
 def correlation(x, y=None, axis=0, sumOverAxis=None, average=None):
     """Returns the numerical correlation between two signals.
 
-    @param inputSeries1: the first signal.
-    @type inputSeries1: NumPy array   
+    :param x: the first signal.
+    :type x: NumPy array   
     
-    @param inputSeries2: if not None, the second signal otherwise the correlation will be an autocorrelation.
-    @type inputSeries2: NumPy array or None
+    :param y: if not None, the correlation is performed between `x` and `y`. If None, the autocorrelation of `x` will be computed.
+    :type y: NumPy array or None
+
+    :param axis: the axis along which the correlation will be computed.
+    :type axis: int
+
+    :param sumOverAxis: if not None, the computed correlations will be sum over a given axis.
+    :type sumOverAxis: int or None
+
+    :param average: if not None, the computed correlations will be averaged over a given axis.
+    :type average: int or None
     
-    @return: the result of the numerical correlation.
-    @rtype: NumPy array
+    :return: the result of the numerical correlation.
+    :rtype: NumPy array
 
-    @note: if |inputSeries1| is a multidimensional array the correlation calculation is performed on
-    the first dimension.
-
-    @note: The correlation is computed using the FCA algorithm.
+    :note: The correlation is computed using the FCA algorithm.
     """
     
     x = numpy.array(x)

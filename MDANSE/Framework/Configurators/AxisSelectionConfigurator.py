@@ -27,10 +27,10 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: Eric C. Pellegrini and Bachir Aoun
+:author: Bachir Aoun and Eric C. Pellegrini
 '''
 
-from MDANSE.Framework.UserDefinitionsStore import UD_STORE, UserDefinitionsStoreError
+from MDANSE.Framework.UserDefinitionsStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
         
@@ -42,11 +42,11 @@ class AxisSelection(IConfigurator):
     
     To Build an axis selection from the GUI you have to :
     
-    * Create a workspace based on a mmtk_trajectory data,
-    * Drag a molecular viewer on it,
-    * Drag into the Molecular Viewer the Axis selection plugin
+    #. Create a workspace based on a mmtk_trajectory data,
+    #. Drag a molecular viewer on it,
+    #. Drag into the Molecular Viewer the Axis selection plugin
 
-    :note: this configurator depends on 'trajectory' configurator to be configured
+    :note: this configurator depends on 'trajectory' configurator to be configured.
     """
     
     type = "axis_selection"
@@ -59,14 +59,13 @@ class AxisSelection(IConfigurator):
         
         The value can be:
         
-        * a dict with 'molecule', 'endpoint1' and 'endpoint2' keys. 'molecule' key 
-        is the molecule name for which the axis selection will be performed
-        and 'endpoint1' and 'endpoint2' keys are the names of two atoms of the molecule 
-        along which the axis will be defined  
-        * str: the axis selection will be performed by reading the corresponding user definition
+        #. a dict with *'molecule'*, *'endpoint1'* and *'endpoint2'* keys. *'molecule'* key \
+        is the name of the molecule for which the axis selection will be performed and *'endpoint1'* \
+        and *'endpoint2'* keys are the names of two atoms of the molecule along which the axis will be defined  
+        #. str: the axis selection will be performed by reading the corresponding user definition.
         
         :param configuration: the current configuration
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :type configuration: MDANSE.Framework.Configurable.Configurable
         :param value: the input value
         :type value: tuple or str 
         '''

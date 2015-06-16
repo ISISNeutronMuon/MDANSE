@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import abc
@@ -108,8 +108,6 @@ class ClassRegistry(abc.ABCMeta):
         
         Only the classes that are metaclassed by ClassRegistry will be registered.
         
-        :param cls: the ClassRegistry instance
-        :type: ClassRegistry
         :param packageDir: the package for which all modules should be imported
         :type packageDir: str
         '''
@@ -135,12 +133,13 @@ class ClassRegistry(abc.ABCMeta):
     @classmethod
     def info(cls, interface):
         '''
-        Returns informations about the subclasses of a given base class  stored in the registry.
+        Returns informations about the subclasses of a given base class stored in the registry.
         
-        :param cls: the ClassRegistry instance
-        :type cls: ClassRegistry
         :param interface: the name of base class of whom information about its subclasses is requested
         :type interface: str
+        
+        :return: return the stringified list of subclasses of a given registered interface.
+        :rtype: str
         '''
                 
         if not cls._registry.has_key(interface):
@@ -193,8 +192,8 @@ class ClassRegistry(abc.ABCMeta):
         '''
         Returns the interfaces that are currently registered.
         
-        :param cls: the ClassRegsitry instance
-        :type cls: ClassRegistry
+        :return: the interfaces currently registered.
+        :rtype: list of str
         '''
         
         return sorted(cls._registry.keys())

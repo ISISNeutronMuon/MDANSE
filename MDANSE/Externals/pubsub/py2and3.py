@@ -309,8 +309,9 @@ sys.modules[__name__ + ".moves.urllib.response"] = Module_six_moves_urllib_respo
 
 
 class Module_six_moves_urllib_robotparser(types.ModuleType):
-    """Lazy loading of moved objects in six.moves.urllib_robotparser"""
-
+    '''Lazy loading of moved objects in six.moves.urllib_robotparser.
+    
+    '''
 
 _urllib_robotparser_moved_attributes = [
     MovedAttribute("RobotFileParser", "robotparser", "urllib.robotparser"),

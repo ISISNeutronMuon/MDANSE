@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import abc
@@ -51,7 +51,7 @@ class PreferencesItem(object):
     '''
     This is the base class for defining a preferences item.
     
-    A preferences item implements is a light object used to check preferences before setting them
+    A preferences item implements is a light object used to check preferences before setting them 
     but also classify preferences according to their section for a further use in MDANSE GUI.
     '''
     
@@ -229,7 +229,7 @@ class Preferences(object):
     '''
     This class implements the MDANSE preferences.
     
-    :note: Preferences are defined using the ConfigParser python module that allows to read and write 
+    :note: Preferences are defined using the ConfigParser python module that allows to read and write \
     preferences stored in a formatted INI file (RFC822).
     '''
     

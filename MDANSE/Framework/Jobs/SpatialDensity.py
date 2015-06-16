@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 10, 2015
 
-@author: Bachir Aoun, Gael Goret and Eric C. Pellegrini
+:author: Bachir Aoun, Gael Goret and Eric C. Pellegrini
 '''
 
 import collections
@@ -40,20 +40,19 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import build_cartesian_axes, center_of_mass
 
 class SpatialDensity(IJob):
-    """
-    The Spatial Density (SD) can be seen as an generalization of the pair distribution function.
-    Indeed, pair distribution functions (PDF) are defined as orientionally averaged distribution functions.
-    Although these correlation functions reflect many key features of the
-    short-range order in molecular systems, an average spatial assembly of
-    non-spherical particles can not be uniquely characterized from these one-dimensional functions.
-    Structural models postulated for the molecular ordering in non-simple systems based only
-    on one-dimensional PDFs will always be somewhat ambiguous.
+    """The Spatial Density (SD) computes the 3D histograms of atomic coordinates of the a given set of target molecules 
+    within the a basis defined on a reference molecule. 
     
-    SD analysis provides more information through a distribution
-    function which spans both the radial and angular coordinates of the separation vector. 
-    This can provide useful information about the local structure in a complex system 
-	such as the relative orientation of neighbouring molecules in a liquid.
-     """
+    It can be seen as a generalization of the pair distribution function.
+    
+    Indeed, pair distribution functions (PDF) are defined as orientionally averaged distribution functions.
+    Although these correlation functions reflect many key features of the short-range order in molecular systems, 
+    an average spatial assembly of non-spherical particles can not be uniquely characterized from these one-dimensional functions.
+    Structural models postulated for the molecular ordering in non-simple systems based only on one-dimensional PDFs will always be 
+    somewhat ambiguous. SD analysis provides more information through a distribution function which spans both the radial and angular 
+    coordinates of the separation vector. This can provide useful information about the local structure in a complex system such as the 
+    relative orientation of neighbouring molecules in a liquid.
+    """
     
     type = 'sd'
     
@@ -76,8 +75,9 @@ class SpatialDensity(IJob):
                 
     def initialize(self):
         """
-        Initialize the input parameters and analysis self variables
+        Initialize the input parameters and analysis self variables.
         """
+        
         self.numberOfSteps = self.configuration['frames']['number']
         
         self.resolution = self.configuration['spatial_resolution']['value'] 
@@ -119,13 +119,12 @@ class SpatialDensity(IJob):
         
     def run_step(self, index):
         """
-        Runs a single step of the job.\n
+        Runs a single step of the job.
  
-        :Parameters:
-            #. index (int): The index of the step.
-        :Returns:
-            #. index (int): The index of the step. 
-            #. histogram (numpy.array): The calculated distance histogram
+        :param index: the index of the step.
+        :type index: int
+        :return: a 2-tuple whose 1st element is the index of the step and 2nd element the distance histogram.
+        :rtype: 2-tuple
         """
         
         # This is the actual index of the frame corresponding to the loop index.
@@ -170,10 +169,12 @@ class SpatialDensity(IJob):
     
     def combine(self, index, x):
         """
-        Combines returned results of run_step.\n
-        :Parameters:
-            #. index (int): The index of the step.\n
-            #. x (any): The returned result(s) of run_step
+        Combines/synchronizes the output of `run_step` method.
+        
+        :param index: the index of the step.
+        :type index: int
+        :param x: the output of `run_step` method.
+        :type x: any python object
         """     
 
         # updating histogram

@@ -56,8 +56,8 @@ def contiguous_configuration(seed,atoms,boxCoords):
 class UnfoldedTrajectory(IJob):
     """
 	Tries to make a contiguous trajectory for a whole molecule e.g. a protein.
-	The routine may fail if the molecule is bigger than half of the box side (L/2)
-    and or the initial structure is not in itself contiguous.	
+	
+	The routine may fail if the molecule is bigger than half of the box side (L/2) and or the initial structure is not in itself contiguous.	
     """
     
     type = 'ut'

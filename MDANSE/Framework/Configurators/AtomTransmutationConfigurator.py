@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 from MDANSE import ELEMENTS
@@ -48,9 +48,9 @@ class AtomTransmutationConfigurator(IConfigurator):
         
     To Build an atomic transmutation from the GUI you have to :
     
-    * Create a workspace based on a MMTK trajectory data,
-    * Drag a molecular viewer on it,
-    * Drag into the Molecular Viewer the Atom transmutation plugin
+    #. Create a workspace based on a MMTK trajectory data,
+    #. Drag a molecular viewer on it,
+    #. Drag into the Molecular Viewer the Atom transmutation plugin
     
     :note: this configurator depends on 'trajectory' and 'atom_selection' configurators to be configured
     """
@@ -65,14 +65,14 @@ class AtomTransmutationConfigurator(IConfigurator):
         
         The value can be:
         
-        * None: no transmutation is performed
-        * (str,str)-dict: for each (str,str) pair, a transmutation will be performed
-        by parsing the 1st element as an atom selection string and transmutating the 
-        corresponding atom selection to the target chemical element stored in the 2nd element
-        * str: the transmutation will be performed by reading the corresponding user definition
+        #. ``None``: no transmutation is performed
+        #. (str,str)-dict: for each (str,str) pair, a transmutation will be performed by parsing \
+        the 1st element as an atom selection string and transmutating the corresponding atom \
+        selection to the target chemical element stored in the 2nd element
+        #. str: the transmutation will be performed by reading the corresponding user definition
         
         :param configuration: the current configuration
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :type configuration: MDANSE.Framework.Configurable.Configurable
         :param value: the input value
         :type value: None or (str,str)-dict or str 
         '''
@@ -117,11 +117,10 @@ class AtomTransmutationConfigurator(IConfigurator):
         Transmutates a set of atoms to a given element 
         
         :param configuration: the current configuration
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        :type configuration: MDANSE.Framework.Configurable.Configurable
         :param selection: the indexes of the atoms to be transmutated
         :type selection: list of int
-        :param element: the symbol of the element to which the selected atoms should
-        be transmutated
+        :param element: the symbol of the element to which the selected atoms should be transmutated
         :type element: str
         '''
         

@@ -45,9 +45,9 @@ class AreaPerMolecule(IJob):
     '''
     Computes the area per molecule.
     
-    The area per molecule is computed by simply dividing the surface of one of the simulation box faces (ab, bc or ac) by the
-    number of molecules with a given name. This property should be a constant unless the simulation performed was in the NPT ensemble.
-	This analysis is relevant for oriented structures like lipid membranes.
+    The area per molecule is computed by simply dividing the surface of one of the simulation box faces 
+    (*ab*, *bc* or *ac*) by the number of molecules with a given name. This property should be a constant unless 
+    the simulation performed was in the NPT ensemble. This analysis is relevant for oriented structures like lipid membranes.
     '''
     
     type = 'apm'

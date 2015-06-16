@@ -157,6 +157,44 @@ SCRIPTS = []
 SCRIPTS.append(os.path.join(SCRIPTS_PATH,'mdanse'))
 
 #################################
+# Documentation
+#################################
+
+import sphinx.apidoc
+from sphinx.setup_command import BuildDoc as _BuildDoc
+
+class BuildDoc(_BuildDoc):
+
+    def run(self):
+        build = self.get_finalized_command('build')
+        
+#         sys.path.insert(0, os.path.abspath(build.build_lib))
+                
+        # metadata contains information supplied in setup()
+        metadata = self.distribution.metadata
+        # Run sphinx by calling the main method, '--full' also adds a conf.py
+        sphinx.apidoc.main(['', '-F','--separate', '-H', metadata.name, '-A', metadata.author,
+             '-V', metadata.version, '-R', metadata.version,
+             '-o', 'fuck', os.path.join(os.path.abspath(build.build_lib),'MDANSE'),os.path.join(os.path.abspath(build.build_lib),'MDANSE','Externals')])
+        
+        import shutil
+        shutil.copy(os.path.join('Doc','conf.py'),'fuck')
+        shutil.copy(os.path.join('Doc','mdanse_logo.png'),os.path.join('fuck','_static'))
+        shutil.copy(os.path.join('Doc','layout.html'),os.path.join('fuck','_templates'))
+
+        self.source_dir = 'fuck'
+        self.config_dir = self.source_dir
+        self.build_dir = os.path.join(os.path.abspath(build.build_lib),'MDANSE','Doc')        
+
+        try:
+#             import pdb
+#             pdb.set_trace()
+            _BuildDoc.run(self)
+        except UnicodeDecodeError:
+            print >>sys.stderr, "ERROR: unable to build documentation because Sphinx do not handle source path with non-ASCII characters. Please try to move the source package to another location (path with *only* ASCII characters)."            
+        sys.path.pop(0)
+
+#################################
 # Extensions section
 #################################
 
@@ -224,8 +262,13 @@ class ModifiedBuild(build):
     def initialize_options(self):
         build.initialize_options(self)
         self.gui = 1
+
+CMDCLASS = {'build_ext'     : build_ext,
+            'build'         : ModifiedBuild,
+            'build_py'      : ModifiedBuildPy,
+            'build_scripts' : ModifiedBuildScripts,
+            'build_doc'  : BuildDoc}
  
-         
 #################################
 # The setup section
 #################################
@@ -254,8 +297,6 @@ subunits can be studied.
        platforms        = ['Unix','Windows'],
        ext_modules      = EXTENSIONS,
        scripts          = SCRIPTS,
-        cmdclass         = {'build_ext'     : build_ext,
-                            'build'         : ModifiedBuild,
-                            'build_py'      : ModifiedBuildPy,
-                            'build_scripts' : ModifiedBuildScripts}
+       cmdclass         = CMDCLASS,
+#        command_options = {'build_sphinx': {'source_dir' : ('setup.py', 'Doc')}}
        )

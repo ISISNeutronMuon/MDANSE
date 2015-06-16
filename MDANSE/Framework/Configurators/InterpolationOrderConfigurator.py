@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
@@ -35,15 +35,13 @@ from MDANSE.Framework.Configurators.SingleChoiceConfigurator import SingleChoice
             
 class InterpolationOrderConfigurator(SingleChoiceConfigurator):
     """
-    This configurator allows to input the interpolation order to be applied when deriving velocities 
-    from atomic coordinates.
+    This configurator allows to input the interpolation order to be applied when deriving velocities from atomic coordinates.
 
-    The allowed value are 'no interpolation','1st order','2nd order','3rd order','4th order' or '5th order', the former 
-    one will not interpolate the velocities from atomic coordinates but will directly use the velocities stored in the 
-    trajectory file.
+    The allowed value are *'no interpolation'*,*'1st order'*,*'2nd order'*,*'3rd order'*,*'4th order'* or *'5th order'*, the 
+    former one will not interpolate the velocities from atomic coordinates but will directly use the velocities stored in the trajectory file.
     
-    :attention: it is of paramount importance for the trajectory to be sampled with a very low time step to get accurate
-    velocities interpolated from atomic coordinates. 
+    :attention: it is of paramount importance for the trajectory to be sampled with a very low time \
+    step to get accurate velocities interpolated from atomic coordinates. 
 
     :note: this configurator depends on 'trajectory' configurator to be configured.
     """
@@ -69,9 +67,9 @@ class InterpolationOrderConfigurator(SingleChoiceConfigurator):
         Configure the input interpolation order.
                 
         :param configuration: the current configuration.
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object.
+        :type configuration: MDANSE.Framework.Configurable.Configurable
         :param value: the interpolation order to be configured.
-        :type value: str one of 'no interpolation','1st order','2nd order','3rd order','4th order' or '5th order'.
+        :type value: str one of *'no interpolation'*,*'1st order'*,*'2nd order'*,*'3rd order'*,*'4th order'* or *'5th order'*.
         '''
         
         SingleChoiceConfigurator.configure(self, configuration, value)
