@@ -40,12 +40,6 @@ class AxisSelection(IConfigurator):
     
     For each molecule, the axis is defined using the coordinates of two atoms of the molecule. 
     
-    To Build an axis selection from the GUI you have to :
-    
-    #. Create a workspace based on a mmtk_trajectory data,
-    #. Drag a molecular viewer on it,
-    #. Drag into the Molecular Viewer the Axis selection plugin
-
     :note: this configurator depends on 'trajectory' configurator to be configured.
     """
     

@@ -27,7 +27,7 @@
 ''' 
 Created on Jun 9, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError

@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 27, 2015
 
-@author: pellegrini
+:author: Eric C. Pellegrini
 '''
 
 from MDANSE.Framework.InputData.InputFileData import InputFileData

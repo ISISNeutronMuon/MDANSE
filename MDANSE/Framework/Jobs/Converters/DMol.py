@@ -27,7 +27,7 @@
 ''' 
 Created on Jun 4, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 from MDANSE.Framework.Jobs.Converters.Discover import DiscoverConverter

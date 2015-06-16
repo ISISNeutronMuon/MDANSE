@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 13, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 class Node(object):

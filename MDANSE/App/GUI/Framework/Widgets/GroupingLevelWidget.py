@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+:author: Eric C. Pellegrini
 '''
 
 from MDANSE.App.GUI.Framework.Widgets.SingleChoiceWidget import SingleChoiceWidget

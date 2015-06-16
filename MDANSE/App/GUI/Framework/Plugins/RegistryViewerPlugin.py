@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 14, 2015
 
-@author: Gael Goret, Eric C. pellegrini
+:author: Gael Goret, Eric C. Pellegrini
 '''
 
 import wx

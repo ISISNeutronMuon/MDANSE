@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: Bachir Aoun and Eric C. Pellegrini
+:author: Bachir Aoun and Eric C. Pellegrini
 '''
 
 from MDANSE.Framework.UserDefinitionsStore import UD_STORE
@@ -40,13 +40,7 @@ class BasisSelection(IConfigurator):
     
     For each molecule, the basis is defined using the coordinates of three atoms of the molecule. 
     These coordinates will respectively define the origin, the X axis and y axis of the basis, the 
-    Z axis being latter defined in such a way that the basis is direct. 
-    
-    To Build a basis selection from the GUI you have to :
-    
-    #. Create a workspace based on a mmtk_trajectory data,
-    #. Drag a molecular viewer on it,
-    #. Drag into the Molecular Viewer the Basis selection plugin
+    Z axis being latter defined in such a way that the basis is direct.     
     """
     
     type = 'basis_selection'

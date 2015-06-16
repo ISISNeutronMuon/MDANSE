@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 10, 2015
 
-@author: Bachir Aoun, Eric C. Pellegrini
+:author: Bachir Aoun, Eric C. Pellegrini
 '''
 
 import collections

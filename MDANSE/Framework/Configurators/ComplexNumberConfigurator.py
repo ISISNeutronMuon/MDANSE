@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 from MDANSE.Mathematics.Arithmetic import ComplexNumber

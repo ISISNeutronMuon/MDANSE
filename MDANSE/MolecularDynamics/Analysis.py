@@ -26,7 +26,7 @@
 # 
 #Created on ${date}
 #
-#@author: ${user}
+#:author: ${user}
 
 import numpy
 

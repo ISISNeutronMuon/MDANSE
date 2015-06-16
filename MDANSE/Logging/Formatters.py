@@ -1,47 +1,48 @@
+#MDANSE : Molecular Dynamics Analysis for Neutron Scattering Experiments
+#------------------------------------------------------------------------------------------
+#Copyright (C)
+#2015- Eric C. Pellegrini Institut Laue-Langevin
+#BP 156
+#6, rue Jules Horowitz
+#38042 Grenoble Cedex 9
+#France
+#pellegrini[at]ill.fr
+#goret[at]ill.fr
+#aoun[at]ill.fr
+#
+#This library is free software; you can redistribute it and/or
+#modify it under the terms of the GNU Lesser General Public
+#License as published by the Free Software Foundation; either
+#version 2.1 of the License, or (at your option) any later version.
+#
+#This library is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#Lesser General Public License for more details.
+#
+#You should have received a copy of the GNU Lesser General Public
+#License along with this library; if not, write to the Free Software
+#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
 '''
-MDANSE : Molecular Dynamics Analysis for Neutron Scattering Experiments
-------------------------------------------------------------------------------------------
-Copyright (C)
-2015- Eric C. Pellegrini Institut Laue-Langevin
-BP 156
-6, rue Jules Horowitz
-38042 Grenoble Cedex 9
-France
-pellegrini[at]ill.fr
-
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- 
 Created on Mar 23, 2015
 
-@author: pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import logging
 
 class Formatter(logging.Formatter):
     '''
-    Converts the log record to a string. 
+    Converts the log record to a string.
     '''
-    
+
     FORMATS = {'DEBUG'    : '%(asctime)s - %(levelname)-8s - %(message)s --- %(pathname)s %(funcName)s line %(lineno)s',
                'INFO'     : '%(asctime)s - %(levelname)-8s - %(message)s',
                'WARNING'  : '%(asctime)s - %(levelname)-8s - %(message)s',
                'ERROR'    : '%(asctime)s - %(levelname)-8s - %(message)s',
                'CRITICAL' : '%(asctime)s - %(levelname)-8s - %(message)s',
                'FATAL'    : '%(asctime)s - %(levelname)-8s - %(message)s'}
-
                                             
     def formatTime(self, record, datefmt=None):
         '''
@@ -61,11 +62,11 @@ class Formatter(logging.Formatter):
         for example if you want all logging times to be shown in GMT,
         set the 'converter' attribute in the Formatter class.
         
-        @param record: the log record.
-        @type record: logging.LogRecord
+        :param record: the log record.
+        :type record: logging.LogRecord
         
-        @param datefmt: the date format.
-        @type datefmt: string.
+        :param datefmt: the format that will be used to produce the stringified date.
+        :type datefmt: str
         '''
 
         import time

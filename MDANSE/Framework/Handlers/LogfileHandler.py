@@ -27,7 +27,7 @@
 ''' 
 Created on May 26, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import logging.handlers

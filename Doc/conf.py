@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: goret
+@author: Gael Goret and Eric C. Pellegrini
 '''
 
 
@@ -130,24 +130,28 @@ man_pages = [('index', 'MDANSE', u'MDANSE Documentation', u'Gael Goret & Eric C.
 #  dir menu entry, description, category)
 texinfo_documents = [('index', 'MDANSE', u'MDANSE Documentation',u'Gael Goret & Eric C. Pellegrini','MDANSE', 'One line description of project.','Miscellaneous'),]
 
-# List of directories, relative to source directory, that shouldn't be searched
-# for source files.
+# List of directories, relative to source directory, that shouldn't be searched for source files.
 exclude_patterns = ['Externals']
 
 members_to_watch = ['class']
 
-def flag_onthefly(app, what, name, obj, options, lines):
-	from MDANSE import REGISTRY
-	for kls in REGISTRY["job"].values():
-		kls.__doc__ += kls.build_doc()
-	if(what in members_to_watch):
-		# and modify the docstring so the rendered output is highlights the omission
-		if lines:
-			lines.insert(0,'**Description:**\n\n')
-			lines.insert(0,'    .. inheritance-diagram:: %s\n'%name.split('.')[-1])
-			lines.insert(0,'**inheritance-diagram:**\n\n')
+from MDANSE import REGISTRY
 
-# def setup(app):
-# 
-# 	app.connect('autodoc-process-docstring', flag_onthefly)
-	
+klsNames = [kls.__name__ for kls in REGISTRY["job"].values()]
+
+def flag_onthefly(app, what, name, obj, options, lines):
+        
+    if getattr(obj,'__name__',None) in klsNames:
+        lines.extend(obj.build_doc().splitlines())
+        
+    if what in members_to_watch:
+        # modify the docstring so the rendered output is highlights the omission
+        if lines:
+            lines.insert(0,'\n:Description:\n\n')
+#             lines.insert(0,'    .. inheritance-diagram:: %s' % name.split('.')[-1])
+#             lines.insert(0,'**inheritance-diagram:**')
+            
+def setup(app):
+  
+    app.connect('autodoc-process-docstring', flag_onthefly)
+

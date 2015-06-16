@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 10, 2015
 
-@author: Gael Goret
+:author: Gael Goret
 '''
 
 import matplotlib

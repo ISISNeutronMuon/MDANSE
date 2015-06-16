@@ -27,7 +27,7 @@
 ''' 
 Created on May 21, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 from Scientific.IO.NetCDF import NetCDFFile

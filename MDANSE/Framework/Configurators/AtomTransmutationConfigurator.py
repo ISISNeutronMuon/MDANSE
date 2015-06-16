@@ -45,13 +45,7 @@ class AtomTransmutationConfigurator(IConfigurator):
     hydrogen atoms to deuterium in order to fit with experiments where deuteration experiments have 
     been performed for improving the contrast and having a better access to the dynamic of a specific part
     of the molecular system.
-        
-    To Build an atomic transmutation from the GUI you have to :
-    
-    #. Create a workspace based on a MMTK trajectory data,
-    #. Drag a molecular viewer on it,
-    #. Drag into the Molecular Viewer the Atom transmutation plugin
-    
+            
     :note: this configurator depends on 'trajectory' and 'atom_selection' configurators to be configured
     """
     

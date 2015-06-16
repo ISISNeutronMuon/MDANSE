@@ -27,7 +27,7 @@
 ''' 
 Created on May 22, 2015
 
-@author: pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import ast

@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 15, 2015
 
-@author: Gael Goret
+:author: Gael Goret
 '''
 
 import numpy

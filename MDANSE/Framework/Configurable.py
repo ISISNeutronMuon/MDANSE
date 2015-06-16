@@ -206,7 +206,7 @@ class Configurable(object):
             descr += "\n"+str(cfg.__doc__)
             doclist.append({'Configurator' : name,'Default value' : repr(cfg.default),'Description' : descr})
                                     
-        docstring = "\n:Example:\n\n"
+        docstring = ":Example:\n\n"
         docstring += ">>> from MDANSE import REGISTRY\n"
         docstring += ">>> \n"
         docstring += ">>> parameters = {}\n"

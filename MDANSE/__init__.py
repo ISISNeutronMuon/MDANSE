@@ -27,7 +27,7 @@
 '''
 Created on Mar 26, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 from __pkginfo__ import __version__, __author__, __date__

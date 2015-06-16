@@ -27,7 +27,7 @@
 '''
 Created on Jun 9, 2015
 
-@author: Erc C. Pellegrini
+:author: Erc C. Pellegrini
 '''
 
 import collections

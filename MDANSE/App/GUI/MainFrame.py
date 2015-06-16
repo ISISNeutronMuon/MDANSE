@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 14, 2015
 
-@author: Bachir Aoun, Gael Goret and Eric C. pellegrini
+:author: Bachir Aoun, Gael Goret and Eric C. Pellegrini
 '''
 
 import collections

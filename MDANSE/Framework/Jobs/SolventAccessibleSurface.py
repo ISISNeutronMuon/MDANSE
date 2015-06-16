@@ -27,7 +27,7 @@
 ''' 
 Created on Apr 10, 2015
 
-@author: Gael Goret, Eric C. Pellegrini
+:author: Gael Goret, Eric C. Pellegrini
 '''
 
 import collections

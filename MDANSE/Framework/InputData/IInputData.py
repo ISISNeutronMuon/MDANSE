@@ -27,7 +27,7 @@
 ''' 
 Created on May 27, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 from MDANSE import REGISTRY

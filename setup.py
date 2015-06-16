@@ -184,11 +184,9 @@ class BuildDoc(_BuildDoc):
 
         self.source_dir = 'fuck'
         self.config_dir = self.source_dir
-        self.build_dir = os.path.join(os.path.abspath(build.build_lib),'MDANSE','Doc')        
+        self.build_dir = os.path.join(os.path.abspath(build.build_lib),'MDANSE','Doc')
 
         try:
-#             import pdb
-#             pdb.set_trace()
             _BuildDoc.run(self)
         except UnicodeDecodeError:
             print >>sys.stderr, "ERROR: unable to build documentation because Sphinx do not handle source path with non-ASCII characters. Please try to move the source package to another location (path with *only* ASCII characters)."            
@@ -298,5 +296,4 @@ subunits can be studied.
        ext_modules      = EXTENSIONS,
        scripts          = SCRIPTS,
        cmdclass         = CMDCLASS,
-#        command_options = {'build_sphinx': {'source_dir' : ('setup.py', 'Doc')}}
        )

@@ -27,7 +27,7 @@
 ''' 
 Created on May 21, 2015
 
-@author: pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import os

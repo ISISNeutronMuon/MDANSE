@@ -27,7 +27,7 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import wx.combo

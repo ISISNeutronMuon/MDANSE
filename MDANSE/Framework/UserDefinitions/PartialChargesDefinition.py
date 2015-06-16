@@ -27,7 +27,7 @@
 ''' 
 Created on Jun 10, 2015
 
-@author: Eric C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 from MDANSE.Framework.UserDefinitions.IUserDefinition import IUserDefinition
