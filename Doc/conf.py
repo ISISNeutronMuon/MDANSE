@@ -147,9 +147,13 @@ def flag_onthefly(app, what, name, obj, options, lines):
     if what in members_to_watch:
         # modify the docstring so the rendered output is highlights the omission
         if lines:
-            lines.insert(0,'\n:Description:\n\n')
-#             lines.insert(0,'    .. inheritance-diagram:: %s' % name.split('.')[-1])
-#             lines.insert(0,'**inheritance-diagram:**')
+            lines.insert(0,'')
+            lines.insert(0,':Description:')
+            lines.insert(0,'')
+            lines.insert(0,'.. inheritance-diagram:: %s' % name.split('.')[-1])
+            lines.insert(0,'')
+            lines.insert(0,'**Inheritance-diagram:**')
+            lines.insert(0,'')
             
 def setup(app):
   

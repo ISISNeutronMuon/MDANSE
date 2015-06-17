@@ -175,14 +175,14 @@ class BuildDoc(_BuildDoc):
         # Run sphinx by calling the main method, '--full' also adds a conf.py
         sphinx.apidoc.main(['', '-F','--separate', '-H', metadata.name, '-A', metadata.author,
              '-V', metadata.version, '-R', metadata.version,
-             '-o', 'fuck', os.path.join(os.path.abspath(build.build_lib),'MDANSE'),os.path.join(os.path.abspath(build.build_lib),'MDANSE','Externals')])
+             '-o', 'sphinx_temp_rst', os.path.join(os.path.abspath(build.build_lib),'MDANSE'),os.path.join(os.path.abspath(build.build_lib),'MDANSE','Externals')])
         
         import shutil
-        shutil.copy(os.path.join('Doc','conf.py'),'fuck')
-        shutil.copy(os.path.join('Doc','mdanse_logo.png'),os.path.join('fuck','_static'))
-        shutil.copy(os.path.join('Doc','layout.html'),os.path.join('fuck','_templates'))
+        shutil.copy(os.path.join('Doc','conf.py'),'sphinx_temp_rst')
+        shutil.copy(os.path.join('Doc','mdanse_logo.png'),os.path.join('sphinx_temp_rst','_static'))
+        shutil.copy(os.path.join('Doc','layout.html'),os.path.join('sphinx_temp_rst','_templates'))
 
-        self.source_dir = 'fuck'
+        self.source_dir = 'sphinx_temp_rst'
         self.config_dir = self.source_dir
         self.build_dir = os.path.join(os.path.abspath(build.build_lib),'MDANSE','Doc')
 

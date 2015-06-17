@@ -53,8 +53,17 @@ class VelocityAutoCorrelationFunction(IJob):
     
     In the liquid phase, the atoms have more freedom than in the solid phase and because of the diffusion process, the oscillatory motion 
     seen in solid phase is damped rapidly depending on the density of the system. So, the VACF tends to have one very damped oscillation 
-    before decaying to zero. The decaying time can be considered as the average time for a collision between two atoms. The integral of 
-    the VACF is proportional to the diffusion constant (D/3).
+    before decaying to zero. The decaying time can be considered as the average time for a collision between two atoms.
+    
+    As well as revealing the dynamical processes in a system, the VACF has other interesting properties. Firstly, its Fourier transform, 
+    a.k.a as vibrational Density Of States (vDOS) can be used to reveal the underlying frequencies of the molecular processes. This is closely 
+    related to the infra-red spectrum of the system, which is also concerned with vibration on the molecular scale. Secondly, provided the VACF 
+    decays to zero at long time, the function may be integrated mathematically to calculate the diffusion coefficient D, as in: 
+
+    .. math:: D = \\frac{1}{3}\int_{0}^{+\infty}{<v(0) \cdot v(t)>dt}
+
+    This is a special case of a more general relationship between the VACF and the mean square displacement, and belongs to a class of properties 
+    known as the Green-Kubo relations, which relate correlation functions to so-called transport coefficients. 
     """
 
     type = 'vacf'

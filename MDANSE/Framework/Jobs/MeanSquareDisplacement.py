@@ -54,11 +54,11 @@ class MeanSquareDisplacement(IJob):
     
     .. math:: <r^{2}> = 6Dt + C 
     
-    where <r^2> is the MSD and t is the time. D and C are constants. The constant D is
+    where :math:`<r^{2}>` is the MSD and t is the time. D and C are constants. The constant D is
     the so-called diffusion coefficient.
 	
 	More generally the MSD reveals the distance or volume explored by atoms and molecules as a function of time.
-	In crystals the MSD quickly saturates at a constant value which corresponds to the vibrational amplitude.
+	In crystals, the MSD quickly saturates at a constant value which corresponds to the vibrational amplitude.
 	Diffusion in a volume will also have a limiting value of the MSD  which corresponds to the diameter of the volume
 	and the saturation value is reached more slowly.
 	The MSD can also reveal e.g. sub-diffusion regimes for the translational diffusion of lipids in membranes.
