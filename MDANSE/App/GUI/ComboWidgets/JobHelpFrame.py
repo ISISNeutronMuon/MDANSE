@@ -15,7 +15,7 @@ class JobHelpFrame(wx.Frame):
                 
         fully_qualified_name = 'MDANSE.Framework.Jobs' + '.' + job.__class__.__name__
                 
-        self._doc =  PLATFORM.get_path(os.path.join(PLATFORM.documentation_path(), fully_qualified_name + '.html'))
+        self._doc =  PLATFORM.get_path(os.path.join(PLATFORM.help_path(), fully_qualified_name + '.html'))
         
         self.build()
         

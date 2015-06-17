@@ -30,29 +30,6 @@ Created on Mar 30, 2015
 @author: Gael Goret and Eric C. Pellegrini
 '''
 
-
-# import os
-# import shutil
-# import sys
-# 
-# import MDANSE
-
-# MDANSE_PATH = os.path.abspath('../MDANSE')
-
-# sys.path.append(os.path.dirname(__file__))
-
-#
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-# sys.path.append(MDANSE_PATH)
-
-# DOC_PATH = os.path.join(MDANSE_PATH,'Doc')
-# if not os.path.exists(DOC_PATH):
-#     os.makedirs(DOC_PATH)
-# 
-# shutil.copy('mdanse_logo.png',DOC_PATH)
-
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.

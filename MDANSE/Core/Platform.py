@@ -89,15 +89,25 @@ class Platform(object):
         '''
         pass
     
-    def documentation_path(self):
+    def api_path(self):
         '''
-        Returns the path for MDANSE HTML documentation.
+        Returns the path for MDANSE HTML API.
         
         :return: the path for MDANSE HTML documentation
         :rtype: str
         '''
         
-        return os.path.join(self.package_directory(), 'Doc', 'Help')
+        return os.path.join(self.package_directory(), 'Doc', 'api','html')
+
+    def help_path(self):
+        '''
+        Returns the path for MDANSE HTML help.
+        
+        :return: the path for MDANSE HTML documentation
+        :rtype: str
+        '''
+        
+        return os.path.join(self.package_directory(), 'Doc', 'help','html')
     
     def local_mmtk_database_directory(self):
         '''

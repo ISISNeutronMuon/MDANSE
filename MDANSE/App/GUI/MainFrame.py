@@ -31,13 +31,14 @@ Created on Apr 14, 2015
 '''
 
 import collections
+import os
 import webbrowser
 
 import wx
 import wx.aui as aui
 
 from MDANSE.__pkginfo__ import __version__, __revision__
-from MDANSE import LOGGER, REGISTRY
+from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE.Framework.Jobs.Converters.Converter import Converter
 
 from MDANSE.App.GUI import DATA_CONTROLLER
@@ -146,7 +147,7 @@ class MainFrame(wx.Frame):
         udButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["user",32,32], 'Edit the user definitions')
         preferencesButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["preferences",32,32], 'Edit the preferences')
         registryButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["registry",32,32], 'Inspect MDANSE classes registry')
-        helpButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["help",32,32], 'Help')
+        apiButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["api",32,32], 'Open MDANSE API')
         websiteButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["web",32,32], 'Open MDANSE website')
         aboutButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["about",32,32], 'About MDANSE')
         bugButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["bug",32,32], 'Bug report')
@@ -165,7 +166,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_open_classes_registry, registryButton)
         self.Bind(wx.EVT_MENU, self.on_about, aboutButton)
         self.Bind(wx.EVT_MENU, self.on_quit, quitButton)
-        self.Bind(wx.EVT_MENU, self.on_help, helpButton)
+        self.Bind(wx.EVT_MENU, self.on_open_api, apiButton)
         self.Bind(wx.EVT_MENU, self.on_open_mdanse_url, websiteButton)
         self.Bind(wx.EVT_MENU, self.on_bug_report, bugButton)
                                                                     
@@ -227,9 +228,14 @@ or directly to the MDANSE mailing list:
         
         f.Show()
 
-    def on_help(self, event):
+    def on_open_api(self, event):
+        
+        mainHTML = os.path.join(PLATFORM.api_path(),'MDANSE.html')
 
-        webbrowser.open('https://github.com/eurydyce/MDANSE/tree/master/MDANSE')
+        if os.path.exists(mainHTML):
+            webbrowser.open(mainHTML)
+        else:
+            LOGGER("Can not open MDANSE API. Maybe the documentation was not properly installed.", "error",['dialog'])
             
     def on_load_data(self, event=None):
 

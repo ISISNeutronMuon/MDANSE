@@ -27,19 +27,8 @@
 ''' 
 Created on Mar 30, 2015
 
-@author: goret
+@author: Gael Goret and Eric C. Pellegrini
 '''
-
-import sys, os
-
-#
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-
-sys.path.append(os.path.abspath('../MDANSE'))
-
-# -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 needs_sphinx = '1.0'
@@ -55,14 +44,14 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # The encoding of source files.
-#source_encoding = 'utf-8-sig'
+source_encoding = 'utf-8-sig'
 
 # The master toctree document.
 master_doc = 'index'
 
 # General information about the project.
 project = u'MDANSE'
-copyright = u'2015, G. Goret & B. Aoun & E. Pellegrini'
+copyright = u'2015, Gael Goret & Eric C. Pellegrini'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -72,10 +61,6 @@ copyright = u'2015, G. Goret & B. Aoun & E. Pellegrini'
 version = '1.0'
 # The full version, including alpha/beta/rc tags.
 release = '1.0'
-
-# List of directories, relative to source directory, that shouldn't be searched
-# for source files.
-exclude_patterns = ['MDANSE.Externals','_build', '**Tests**']
 
 html_logo = '_static/mdanse_logo.png'
 
@@ -92,8 +77,8 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "default"
-html_theme_options = {'sidebarwidth':250}#, 'nosidebar':True}
+html_theme = "classic"
+html_theme_options = {'sidebarwidth':250}
 
 html_show_copyright = False
 
@@ -102,35 +87,39 @@ htmlhelp_basename = 'MDANSE_doc'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
-latex_documents = [
-  ('index', 'MDANSE.tex', u'MDANSE Documentation',
-   u'B. Aoun \\& G. Goret \\& E. Pellegrini', 'manual'),
-]
+latex_documents = [('index', 'MDANSE.tex', u'MDANSE Documentation',u'Gael Goret & Eric C. Pellegrini', 'manual'),]
 
-pdf_documents = [('index', 'MDANSE', u'MDANSE Documentation', u'B. Aoun & G. Goret & E. Pellegrini'),]
+pdf_documents = [('index', 'MDANSE', u'MDANSE Documentation', u'Gael Goret & Eric C. Pellegrini'),]
 
-exclude_patterns = ['MDANSE.Externals**', 'MDANSE.__pkginfo__']
+# List of directories, relative to source directory, that shouldn't be searched
+# for source files.
+exclude_patterns = ['Externals']
 
 members_to_watch = ['class']
 
+from MDANSE import REGISTRY
+
+klsNames = [kls.__name__ for kls in REGISTRY["job"].values()]
+
 def flag_onthefly(app, what, name, obj, options, lines):
-    from MDANSE import REGISTRY
-    for kls in REGISTRY["job"].values():
-        kls.__doc__ += kls.build_doc()
-    if(what in members_to_watch):
-        # and modify the docstring so the rendered output is highlights the omission
+        
+    if getattr(obj,'__name__',None) in klsNames:
+        lines.extend(obj.build_doc().splitlines())
+        
+    if what in members_to_watch:
+        # modify the docstring so the rendered output is highlights the omission
         if lines:
-            lines.insert(0,'    **Description:**\n\n\n')
-#    	lines.insert(0,'    .. inheritance-diagram:: %s\n'%name.split('.')[-1])
-#    	lines.insert(0,'**inheritance-diagram:**\n\n')
+            lines.insert(0,'')
+            lines.insert(0,':Description:')
+            lines.insert(0,'')
+
+exclusions = ('__weakref__','__doc__', '__module__', '__dict__',)
 
 def autodoc_skip_member(app, what, name, obj, skip, options):
     
     if what in ['method','attribut','function','exception']:
         return True
-    exclusions = ('__weakref__',  # special-members
-                  '__doc__', '__module__', '__dict__',  # undoc-members
-                  )
+    
     if name in exclusions:
         return True
         

@@ -161,35 +161,106 @@ SCRIPTS.append(os.path.join(SCRIPTS_PATH,'mdanse'))
 #################################
 
 import sphinx.apidoc
-from sphinx.setup_command import BuildDoc as _BuildDoc
+import sphinx.setup_command
 
-class BuildDoc(_BuildDoc):
+class BuildDoc(sphinx.setup_command.BuildDoc):
 
-    def run(self):
-        build = self.get_finalized_command('build')
+    user_options = sphinx.setup_command.BuildDoc.user_options + [('doctype=',None,'specify the type of documentation to build ("api" or "help")'),]
+
+    def initialize_options(self):
         
-#         sys.path.insert(0, os.path.abspath(build.build_lib))
+        sphinx.setup_command.BuildDoc.initialize_options(self)
+        
+        self.doctype='api'
+     
+    def run(self):
+        
+        build = self.get_finalized_command('build')
                 
-        # metadata contains information supplied in setup()
+        buildDir = os.path.abspath(build.build_lib)
+        
+        sphinxDir = os.path.join(build.build_base,'sphinx',self.doctype)
+        
+        sys.path.insert(0,buildDir)
+        
         metadata = self.distribution.metadata
-        # Run sphinx by calling the main method, '--full' also adds a conf.py
-        sphinx.apidoc.main(['', '-F','--separate', '-H', metadata.name, '-A', metadata.author,
-             '-V', metadata.version, '-R', metadata.version,
-             '-o', 'sphinx_temp_rst', os.path.join(os.path.abspath(build.build_lib),'MDANSE'),os.path.join(os.path.abspath(build.build_lib),'MDANSE','Externals')])
+
+        sphinx.apidoc.main(['',
+                            '-F',
+                            '--separate',
+                            '-H', metadata.name,
+                            '-A', metadata.author,
+                            '-V', metadata.version,
+                            '-R', metadata.version,
+                            '-o', sphinxDir,
+                            os.path.join(buildDir,'MDANSE'),
+                            os.path.join(buildDir,'MDANSE','Externals')])
         
         import shutil
-        shutil.copy(os.path.join('Doc','conf.py'),'sphinx_temp_rst')
-        shutil.copy(os.path.join('Doc','mdanse_logo.png'),os.path.join('sphinx_temp_rst','_static'))
-        shutil.copy(os.path.join('Doc','layout.html'),os.path.join('sphinx_temp_rst','_templates'))
+        shutil.copy(os.path.join('Doc','conf_%s.py' % self.doctype),os.path.join(sphinxDir,'conf.py'))
+        shutil.copy(os.path.join('Doc','mdanse_logo.png'),os.path.join(sphinxDir,'_static'))
+        shutil.copy(os.path.join('Doc','layout.html'),os.path.join(sphinxDir,'_templates'))
 
-        self.source_dir = 'sphinx_temp_rst'
+        # The directory where the rst files are located.
+        self.source_dir = sphinxDir
+        # The directory where the conf.py file is located.
         self.config_dir = self.source_dir
-        self.build_dir = os.path.join(os.path.abspath(build.build_lib),'MDANSE','Doc')
 
+        # The directory where the documentation will be built
+        self.build_dir = os.path.join(buildDir,'MDANSE','Doc',self.doctype)
+
+        self.finalize_options()
+                        
         try:
-            _BuildDoc.run(self)
+            sphinx.setup_command.BuildDoc.run(self)
         except UnicodeDecodeError:
             print >>sys.stderr, "ERROR: unable to build documentation because Sphinx do not handle source path with non-ASCII characters. Please try to move the source package to another location (path with *only* ASCII characters)."            
+        
+        sys.path.pop(0)
+
+class BuildHelp(sphinx.setup_command.BuildDoc):
+
+    def run(self):
+        
+        build = self.get_finalized_command('build')
+        
+        buildDir = os.path.abspath(build.build_lib)
+        
+        HelpDir = os.path.join(build.build_base,'sphinx','Help')
+        
+        sys.path.insert(0,buildDir)
+        
+        metadata = self.distribution.metadata
+
+        sphinx.apidoc.main(['',
+                            '-F',
+                            '--separate',
+                            '-d', '5',
+                            '-H', metadata.name,
+                            '-A', metadata.author,
+                            '-V', metadata.version,
+                            '-R', metadata.version,
+                            '-o', HelpDir,
+                            os.path.join(buildDir,'MDANSE'),
+                            os.path.join(buildDir,'MDANSE','Externals')])
+        
+        import shutil
+        shutil.copy(os.path.join('Doc','conf_help.py'),os.path.join(HelpDir,'conf.py'))
+        shutil.copy(os.path.join('Doc','mdanse_logo.png'),os.path.join(HelpDir,'_static'))
+        shutil.copy(os.path.join('Doc','layout.html'),os.path.join(HelpDir,'_templates'))
+
+        # The directory where the rst files are located.
+        self.source_dir = HelpDir
+        # The directory where the conf.py file is located.
+        self.config_dir = self.source_dir
+        # The directory where the documentation will be built
+        self.build_dir = os.path.join(buildDir,'MDANSE','Doc','Help')
+
+        try:
+            sphinx.setup_command.BuildDoc.run(self)
+        except UnicodeDecodeError:
+            print >>sys.stderr, "ERROR: unable to build documentation because Sphinx do not handle source path with non-ASCII characters. Please try to move the source package to another location (path with *only* ASCII characters)."            
+        
         sys.path.pop(0)
 
 #################################
@@ -265,7 +336,7 @@ CMDCLASS = {'build_ext'     : build_ext,
             'build'         : ModifiedBuild,
             'build_py'      : ModifiedBuildPy,
             'build_scripts' : ModifiedBuildScripts,
-            'build_doc'  : BuildDoc}
+            'build_doc'     : BuildDoc}
  
 #################################
 # The setup section
@@ -296,4 +367,5 @@ subunits can be studied.
        ext_modules      = EXTENSIONS,
        scripts          = SCRIPTS,
        cmdclass         = CMDCLASS,
+       command_options  = {'build_doc'  : {'builder':('setup.py','html')}}
        )
