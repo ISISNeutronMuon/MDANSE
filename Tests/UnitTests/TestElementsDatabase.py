@@ -39,7 +39,7 @@ from MDANSE.Data.ElementsDatabase import ElementsDatabaseError
 
 class TestElementsDatabase(UnitTest):
     '''
-    Unittest for the configurators used to setup an analysis in nMolDyn
+    Unittest for the configurators used to setup an analysis in MDANSE
     '''
     
     def setUp(self):

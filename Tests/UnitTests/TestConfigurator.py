@@ -47,7 +47,7 @@ TRAJECTORIES_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath
 
 class TestConfigurator(UnitTest):
     '''
-    Unittest for the configurators used to setup an analysis in nMolDyn
+    Unittest for the configurators used to setup an analysis in MDANSE
     '''
 
     def setUp(self):

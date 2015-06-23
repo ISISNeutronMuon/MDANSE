@@ -33,7 +33,6 @@ Created on May 29, 2015
 import os
 import unittest
 
-# The nmoldyn imports
 from MDANSE import PREFERENCES
 from MDANSE.Core.Preferences import PreferencesError
 from UnitTest import UnitTest
