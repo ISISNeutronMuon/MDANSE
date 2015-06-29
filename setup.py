@@ -141,7 +141,7 @@ def find_data(where=".", exclude=EXCLUDE, exclude_directories=EXCLUDE_DIRECTORIE
 PACKAGE_INFO = {}
 execfile('MDANSE/__pkginfo__.py', PACKAGE_INFO)
 
-PACKAGES = find_packages(path=".", exclude=os.path.join("MDANSE","App","GUI"))
+PACKAGES = find_packages(path=".")
 PACKAGES = PACKAGES.keys()
 
 #################################
