@@ -31,6 +31,7 @@ Created on Apr 14, 2015
 '''
 
 import collections
+import operator
 import os
 import webbrowser
 
@@ -98,11 +99,13 @@ class MainFrame(wx.Frame):
         fileMenu.AppendSeparator()
         converterMenu = wx.Menu()
         self._converters = {}
-        for job in REGISTRY["job"].values():
-            if issubclass(job, Converter):
-                item = converterMenu.Append(wx.ID_ANY,job.label)
-                self._converters[job.label] = job.type
-                self.Bind(wx.EVT_MENU, self.on_open_converter, item)
+
+        converters = [job for job in REGISTRY["job"].values() if issubclass(job,Converter)]
+        converters = sorted(converters, key = operator.attrgetter('label'))
+        for job in converters:
+            item = converterMenu.Append(wx.ID_ANY,job.label)
+            self._converters[job.label] = job.type
+            self.Bind(wx.EVT_MENU, self.on_open_converter, item)
 
         fileMenu.AppendMenu(wx.ID_ANY,'Trajectory converters',converterMenu)
         fileMenu.AppendSeparator()

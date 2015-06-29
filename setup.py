@@ -5,14 +5,22 @@ import sys
 
 import numpy
 
-from Cython.Distutils import build_ext
+from Cython.Distutils import build_ext as cython_build_ext
 
-from distutils.core import setup, Extension
 from distutils.command.build import build
-from distutils.command.build_py import build_py
-from distutils.command.build_scripts import build_scripts 
+from distutils.core import setup, Extension
 from distutils.sysconfig import get_config_vars
 from distutils.util import convert_path
+
+try:
+    import sphinx
+except ImportError:
+    sphinx = None
+
+try:
+    import stdeb
+except ImportError:
+    stdeb = None
 
 #################################
 # Modules variables
@@ -148,6 +156,7 @@ PACKAGE_DATA = find_package_data(where='MDANSE', package='MDANSE', show_ignored=
 #################################
 
 DATA_FILES = []
+DATA_FILES.extend(find_data('Doc',exclude=[],prefix='conf_'))
 
 #################################
 # Scripts section
@@ -155,114 +164,84 @@ DATA_FILES = []
 
 SCRIPTS = []
 SCRIPTS.append(os.path.join(SCRIPTS_PATH,'mdanse'))
+SCRIPTS.append(os.path.join(SCRIPTS_PATH,'mdanse_gui'))
 
 #################################
 # Documentation
 #################################
 
-import sphinx.apidoc
-import sphinx.setup_command
+if sphinx:
+    import sphinx.apidoc
+    import sphinx.setup_command
 
-class BuildDoc(sphinx.setup_command.BuildDoc):
+    class mdanse_build_doc(sphinx.setup_command.BuildDoc):
+                              
+        def run(self):
+            
+            build = self.get_finalized_command('build')
+                    
+            buildDir = os.path.abspath(build.build_lib)
 
-    user_options = sphinx.setup_command.BuildDoc.user_options + [('doctype=',None,'specify the type of documentation to build ("api" or "help")'),]
+            sys.path.insert(0,buildDir)
 
-    def initialize_options(self):
-        
-        sphinx.setup_command.BuildDoc.initialize_options(self)
-        
-        self.doctype='api'
+            sphinxDir = os.path.join(build.build_base,'sphinx',self.doctype)
+                                 
+            metadata = self.distribution.metadata
      
-    def run(self):
+            sphinx.apidoc.main(['',
+                                '-F',
+                                '--separate',
+                                '-H', metadata.name,
+                                '-A', metadata.author,
+                                '-V', metadata.version,
+                                '-R', metadata.version,
+                                '-o', sphinxDir,
+                                os.path.join(buildDir,'MDANSE'),
+                                os.path.join(buildDir,'MDANSE','Externals')])
+                 
+            curDir = os.getcwd()
+                 
+            import shutil
+            shutil.copy(os.path.join(curDir,'Doc','conf_%s.py' % self.doctype),os.path.join(sphinxDir,'conf.py'))
+            shutil.copy(os.path.join(curDir,'Doc','mdanse_logo.png'),os.path.join(sphinxDir,'_static'))
+            shutil.copy(os.path.join(curDir,'Doc','layout.html'),os.path.join(sphinxDir,'_templates'))
+     
+            # The directory where the rst files are located.
+            self.source_dir = sphinxDir
+            # The directory where the conf.py file is located.
+            self.config_dir = self.source_dir
+     
+            # The directory where the documentation will be built
+            self.build_dir = os.path.join(buildDir,'MDANSE','Doc',self.doctype)
+            
+            self.finalize_options()
+                                                     
+            sphinx.setup_command.BuildDoc.run(self)
+                 
+            sys.path.pop(0)
+            
+    class mdanse_build_help(mdanse_build_doc):
         
-        build = self.get_finalized_command('build')
-                
-        buildDir = os.path.abspath(build.build_lib)
-        
-        sphinxDir = os.path.join(build.build_base,'sphinx',self.doctype)
-        
-        sys.path.insert(0,buildDir)
-        
-        metadata = self.distribution.metadata
+        doctype = 'help'
 
-        sphinx.apidoc.main(['',
-                            '-F',
-                            '--separate',
-                            '-H', metadata.name,
-                            '-A', metadata.author,
-                            '-V', metadata.version,
-                            '-R', metadata.version,
-                            '-o', sphinxDir,
-                            os.path.join(buildDir,'MDANSE'),
-                            os.path.join(buildDir,'MDANSE','Externals')])
+    class mdanse_build_api(mdanse_build_doc):
         
-        import shutil
-        shutil.copy(os.path.join('Doc','conf_%s.py' % self.doctype),os.path.join(sphinxDir,'conf.py'))
-        shutil.copy(os.path.join('Doc','mdanse_logo.png'),os.path.join(sphinxDir,'_static'))
-        shutil.copy(os.path.join('Doc','layout.html'),os.path.join(sphinxDir,'_templates'))
+        doctype = 'api'
 
-        # The directory where the rst files are located.
-        self.source_dir = sphinxDir
-        # The directory where the conf.py file is located.
-        self.config_dir = self.source_dir
+#################################
+# Debian packaging
+#################################
 
-        # The directory where the documentation will be built
-        self.build_dir = os.path.join(buildDir,'MDANSE','Doc',self.doctype)
+class mdanse_build(build):
 
-        self.finalize_options()
+    def has_sphinx(self):
+        if sphinx is None:
+            return False
+        setup_dir = os.path.dirname(os.path.abspath(__file__))
+        return os.path.isdir(os.path.join(setup_dir, 'Doc'))
+    
+    sub_commands = build.sub_commands + [('build_api', has_sphinx),('build_help',has_sphinx)]
                         
-        try:
-            sphinx.setup_command.BuildDoc.run(self)
-        except UnicodeDecodeError:
-            print >>sys.stderr, "ERROR: unable to build documentation because Sphinx do not handle source path with non-ASCII characters. Please try to move the source package to another location (path with *only* ASCII characters)."            
-        
-        sys.path.pop(0)
-
-class BuildHelp(sphinx.setup_command.BuildDoc):
-
-    def run(self):
-        
-        build = self.get_finalized_command('build')
-        
-        buildDir = os.path.abspath(build.build_lib)
-        
-        HelpDir = os.path.join(build.build_base,'sphinx','Help')
-        
-        sys.path.insert(0,buildDir)
-        
-        metadata = self.distribution.metadata
-
-        sphinx.apidoc.main(['',
-                            '-F',
-                            '--separate',
-                            '-d', '5',
-                            '-H', metadata.name,
-                            '-A', metadata.author,
-                            '-V', metadata.version,
-                            '-R', metadata.version,
-                            '-o', HelpDir,
-                            os.path.join(buildDir,'MDANSE'),
-                            os.path.join(buildDir,'MDANSE','Externals')])
-        
-        import shutil
-        shutil.copy(os.path.join('Doc','conf_help.py'),os.path.join(HelpDir,'conf.py'))
-        shutil.copy(os.path.join('Doc','mdanse_logo.png'),os.path.join(HelpDir,'_static'))
-        shutil.copy(os.path.join('Doc','layout.html'),os.path.join(HelpDir,'_templates'))
-
-        # The directory where the rst files are located.
-        self.source_dir = HelpDir
-        # The directory where the conf.py file is located.
-        self.config_dir = self.source_dir
-        # The directory where the documentation will be built
-        self.build_dir = os.path.join(buildDir,'MDANSE','Doc','Help')
-
-        try:
-            sphinx.setup_command.BuildDoc.run(self)
-        except UnicodeDecodeError:
-            print >>sys.stderr, "ERROR: unable to build documentation because Sphinx do not handle source path with non-ASCII characters. Please try to move the source package to another location (path with *only* ASCII characters)."            
-        
-        sys.path.pop(0)
-
 #################################
 # Extensions section
 #################################
@@ -296,48 +275,13 @@ EXTENSIONS = [Extension('MDANSE.Extensions.distance_histogram',
                         define_macros = [('qh_QHpointer','1')])
               ]
 
-class ModifiedBuildScripts(build_scripts):
-    
-    def finalize_options (self):
+CMDCLASS = {'build'     : mdanse_build,
+            'build_ext' : cython_build_ext}
 
-        build_scripts.finalize_options(self)
-
-        if self.distribution.command_obj['build'].gui:
-            self.scripts.append(os.path.join(SCRIPTS_PATH,'mdanse_gui'))
-                    
-
-class ModifiedBuildPy(build_py):
-
-    def finalize_options(self):
-
-        build_py.finalize_options(self)
-
-        if self.distribution.command_obj['build'].gui:
-            self.packages.append('MDANSE.App.GUI')
-            self.packages.extend(find_packages(path=os.path.join("MDANSE","App","GUI"), base="MDANSE.App.GUI").keys())
+if sphinx:
+    CMDCLASS['build_api'] = mdanse_build_api
+    CMDCLASS['build_help'] = mdanse_build_help
              
-        self.data_files = self.get_data_files()
-
-
-class ModifiedBuild(build):
-    
-    user_options = build.user_options + [('gui',None,'Build MDANSE with GUI [default]'),
-                                         ('no-gui', None, "Build MDANSE without GUI")]
-    
-    boolean_options = build.boolean_options + ['gui']
-
-    negative_opt = {'no-gui' : 'gui'}
-
-    def initialize_options(self):
-        build.initialize_options(self)
-        self.gui = 1
-
-CMDCLASS = {'build_ext'     : build_ext,
-            'build'         : ModifiedBuild,
-            'build_py'      : ModifiedBuildPy,
-            'build_scripts' : ModifiedBuildScripts,
-            'build_doc'     : BuildDoc}
- 
 #################################
 # The setup section
 #################################
@@ -367,5 +311,4 @@ subunits can be studied.
        ext_modules      = EXTENSIONS,
        scripts          = SCRIPTS,
        cmdclass         = CMDCLASS,
-       command_options  = {'build_doc'  : {'builder':('setup.py','html')}}
-       )
+       install_requires = ['Jinja2'])

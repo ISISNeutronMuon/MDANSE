@@ -281,7 +281,7 @@ class ForciteConverter(Converter):
     
     label = "Forcite"
 
-    category = ('Converters',)
+    category = ('Converters','Materials Studio')
     
     ancestor = None
 

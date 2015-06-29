@@ -231,7 +231,7 @@ class DiscoverConverter(Converter):
     
     label = "Discover"
 
-    category = ('Converters',)
+    category = ('Converters','Materials Studio')
     
     ancestor = None
 
