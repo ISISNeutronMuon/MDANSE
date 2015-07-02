@@ -174,10 +174,9 @@ class Configurable(object):
             return "Not yet configured"
         
         info = []
-        
-        for configurator in self._configuration.values():
+        for configurator in self._configurators.keys():
             
-            info.append(configurator.get_information())
+            info.append(self._configuration[configurator].get_information())
             
         return "\n".join(info)
     
