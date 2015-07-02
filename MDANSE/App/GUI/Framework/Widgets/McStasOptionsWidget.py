@@ -40,9 +40,6 @@ class McStasOptionsConfiguratorWidget(IWidget):
      
     type = "mcstas_options"
  
-    def initialize(self):
-        pass
- 
     def add_widgets(self):
          
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -60,6 +57,3 @@ class McStasOptionsConfiguratorWidget(IWidget):
         val = self._panel.get_value()
          
         return val
-         
-    def set_widget_value(self):
-        pass

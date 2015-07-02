@@ -46,9 +46,6 @@ class McStasInstrumentWidget(IWidget):
     
     _mcStasTypes = {'double' : float, 'int' : int, 'string' : str}
 
-    def initialize(self):
-        pass
-
     def add_widgets(self):
         
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -95,7 +92,3 @@ class McStasInstrumentWidget(IWidget):
     def get_widget_value(self):
         
         return self._instrument.GetStringSelection()
-
-    def set_widget_value(self):
-        
-        pass

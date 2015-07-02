@@ -40,7 +40,7 @@ class McStasParametersConfigurator(IConfigurator):
     This configurator allows to input the McStas instrument parameters that will be used to run a McStas executable file.
     '''
 
-    type = "instrument_parameters"
+    type = "mcstas_parameters"
 
     _mcStasTypes = {'double' : float, 'int' : int, 'string' : str}
     

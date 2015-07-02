@@ -46,9 +46,8 @@ class McStasParametersWidget(IWidget):
     _mcStasTypes = {'double' : 'float', 'int' : 'integer', 'string' : 'input_file'}
  
     def initialize(self):
- 
         self._configurationPanel = None
- 
+  
     def add_widgets(self):
          
         self._sizer = wx.BoxSizer(wx.VERTICAL)
@@ -89,7 +88,7 @@ class McStasParametersWidget(IWidget):
          
         self.Parent.Layout()
          
-        # Trick to show the escrollbar after updating the configuration panel.
+        # Trick to show the scrollbar after updating the configuration panel.
         self.Parent.Parent.SendSizeEvent()
           
     def get_widget_value(self):
@@ -99,7 +98,3 @@ class McStasParametersWidget(IWidget):
         val = self._configurationPanel.get_value()
          
         return val 
-
-         
-    def set_widget_value(self):
-        pass

@@ -59,19 +59,15 @@ class McStasError(Error):
     pass
 
 class McStasOptions(Configurable):
-    
-    __metaclass__ = REGISTRY
-    
+        
     type = "mcstas_options"
                         
     settings = collections.OrderedDict()
-    settings["ncount"] = ("integer", {"label":"neutron count", "mini":1})
+    settings["ncount"] = ("integer", {"label":"neutron count", "mini":0})
     settings["dir"] =  ("output_directory", {"label":"McStas output directory"})
 
 class McStasParameters(Configurable):
-    
-    __metaclass__ = REGISTRY
-    
+        
     type = "mcstas_parameters"
                         
     settings = collections.OrderedDict()
@@ -110,7 +106,7 @@ class McStasVirtualInstrument(IJob):
                                                    'default' : os.path.join('..','..','..','Data','McStas','Instruments','Simple_ToF_Flat_Sample.out')})
     settings['options'] = ('mcstas_options', {"label":'mcstas options'})
     settings['display'] = ('boolean', {'label':'trace the 3D view of the simulation'})
-    settings['parameters'] = ('instrument_parameters', {'label':'instrument parameters', 
+    settings['parameters'] = ('mcstas_parameters', {'label':'instrument parameters', 
                                                              'dependencies':{"instrument":"instrument"}, 
                                                              'exclude':['sample_coh','sample_inc'], 
                                                              'default' :{'beam_wavelength_Angs': 2.0, 
