@@ -45,6 +45,7 @@ from MDANSE.Core.Error import Error
 from MDANSE.Externals.pubsub import pub
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
+from MDANSE.App.GUI.Framework.Plugins.DataPlugin import get_data_plugin 
 from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
 
 # The colour for a selected atom (R,G,B,Alpha).
@@ -141,8 +142,8 @@ class SelectionBox(vtk.vtkBoxWidget):
             x, y, z = self.viewer._polydata.GetPoint(i)
             if x >= xmin and x <= xmax and y >= ymin and y <= ymax and z >= zmin and z <= zmax:
                 selection.append(i)
-        
-        self.viewer.pick_atoms(selection)
+
+        self.viewer.pick_atoms(selection,True)
 
 class MolecularViewerPanel(ComponentPlugin):
     '''
@@ -163,6 +164,13 @@ class MolecularViewerPanel(ComponentPlugin):
     def __init__(self, parent, *args, **kwargs):
         
         ComponentPlugin.__init__(self, parent, *args, **kwargs)
+        
+        self.enable_picking(True)
+        
+        pub.subscribe(self.on_set_selection, ('set_selection'))       
+#         pub.subscribe(self.on_clear_selection, ('clear_selection'))       
+#         pub.subscribe(self.on_show_selection_box, ('show_selection_box'))       
+#         pub.subscribe(self.on_enable_picking, ('enable_picking'))
    
     def build_panel(self):
                 
@@ -222,6 +230,33 @@ class MolecularViewerPanel(ComponentPlugin):
     def del_surface(self):
         del self._surface
         self._surface = None
+
+    def on_set_selection(self,message):
+        
+        window,selection = message
+        
+        if self.dataplugin != get_data_plugin(window):
+            return
+        
+        self.show_selection(selection)
+        
+    def on_show_selection_box(self,message):
+
+        window,show = message
+        
+        if get_data_plugin(self) != get_data_plugin(window):
+            return
+        
+        self.show_selection_box(show)
+
+    def on_enable_picking(self,message):
+
+        window,state = message
+        
+        if get_data_plugin(self) != get_data_plugin(window):
+            return
+        
+        self.enable_picking(state)
 
     def plug(self):
         
@@ -312,19 +347,20 @@ class MolecularViewerPanel(ComponentPlugin):
                     
         return colours, lut
         
-    def enable_picking(self):
+    def enable_picking(self,state):
 
-        self.__pickerObserverId = self._iren.AddObserver("LeftButtonPressEvent", self.on_pick)
+        if state:
+            self.__pickerObserverId = self._iren.AddObserver("LeftButtonPressEvent", self.on_pick)
+        else:
+            if self.__pickerObserverId is None:
+                return
+
+            self._iren.RemoveObserver(self.__pickerObserverId)
+            self.__pickerObserverId = None
         
     def enable_info_picking(self):
 
         self._iren.AddObserver("LeftButtonPressEvent", self.on_info_pick)
-
-    def disable_picking(self):
-        if self.__pickerObserverId is None:
-            return
-        self._iren.RemoveObserver(self.__pickerObserverId)
-        self.__pickerObserverId = None
 
     def on_show_popup_menu(self, event):
 
@@ -359,21 +395,28 @@ class MolecularViewerPanel(ComponentPlugin):
         popupMenu.AppendMenu(wx.ID_ANY, "Rendering", renderingMenu)
 
         popupMenu.AppendSeparator()
+        selectionBox = popupMenu.Append(wx.ID_ANY, 'Show/hide selection box',kind=wx.ITEM_CHECK)
+        clearSelection = popupMenu.Append(wx.ID_ANY, 'Clear selection')
+
+        popupMenu.AppendSeparator()
         
-        parallel = popupMenu.Append(wx.ID_ANY, 'Parallel Projection', 
-            'Parallel Projection', kind=wx.ITEM_CHECK)
+        parallelProjection = popupMenu.Append(wx.ID_ANY, 'Parallel projection',kind=wx.ITEM_CHECK)
         
-        popupMenu.Bind(wx.EVT_MENU, self.parallel_proj_onoff, parallel)
-        popupMenu.Check(parallel.GetId(), self.camera.GetParallelProjection())
+        popupMenu.Bind(wx.EVT_MENU, self.on_toggle_selection_box, selectionBox)
+        popupMenu.Bind(wx.EVT_MENU, self.on_clear_selection, clearSelection)
+        popupMenu.Bind(wx.EVT_MENU, self.parallel_proj_onoff, parallelProjection)
+        popupMenu.Check(parallelProjection.GetId(), self.camera.GetParallelProjection())
         
-        display_bbox = popupMenu.Append(wx.ID_ANY, 'Cell', 'Bounding Box', kind=wx.ITEM_CHECK)
+        boundingBox = popupMenu.Append(wx.ID_ANY, 'Show/hide bounding box', kind=wx.ITEM_CHECK)
         
-        popupMenu.Bind(wx.EVT_MENU, self.bbox_onoff, display_bbox)
-        popupMenu.Check(display_bbox.GetId(), self.display_bbox)
+        popupMenu.Bind(wx.EVT_MENU, self.bbox_onoff, boundingBox)
+        popupMenu.Check(boundingBox.GetId(), self.display_bbox)
+        popupMenu.Check(selectionBox.GetId(), False)
 
         self.PopupMenu(popupMenu)
         
-        self.iren.RightButtonReleaseEvent() # Give to vtkinteractor the event that Wx has stoled
+        # Give to vtkinteractor the event that Wx has stoled
+        self.iren.RightButtonReleaseEvent() 
 
     @property
     def animation_loop(self):
@@ -462,9 +505,6 @@ class MolecularViewerPanel(ComponentPlugin):
     def on_clear_labels(self, event=None):
         pass
 
-    def on_clear_selection(self, event=None):
-        pass
-
     def on_export(self, event=None):
         pass
 
@@ -476,7 +516,6 @@ class MolecularViewerPanel(ComponentPlugin):
 
     def on_show_all_atoms(self, event=None):
         pass
-
 
     def on_show_labels(self, event=None):
         pass
@@ -512,6 +551,11 @@ class MolecularViewerPanel(ComponentPlugin):
             self.camera.ParallelProjectionOn() 
         # rendering
         self._iren.Render()
+        
+    def on_toggle_selection_box(self,event):
+
+        if self._trajectoryLoaded:
+            self.__selectionBox.on_off()
         
     def on_keyboard_input(self, obj=None, event=None):
 
@@ -565,20 +609,20 @@ class MolecularViewerPanel(ComponentPlugin):
         self._timerCounter = last
         self.set_configuration(last)
 
-    def show_hide_selection_box(self):
+    def show_selection_box(self,show):
 
         if self._trajectoryLoaded:
-            self.__selectionBox.on_off()
+            self.__selectionBox.SetEnabled(show)
         
     def set_timer_interval(self, timerInterval):
 
         self._timerInterval = timerInterval
           
-    def on_pick(self, obj, evt=None):
+    def on_pick(self, obj, event=None):
         
         if not self._trajectoryLoaded:
             return
-        
+                                
         pos = obj.GetEventPosition()
         self.picker.AddPickList(self.picking_domain)
         self.picker.PickFromListOn()
@@ -586,7 +630,7 @@ class MolecularViewerPanel(ComponentPlugin):
         pid = self.picker.GetPointId()
         if pid > 0:
             idx = self.get_atom_index(pid)
-            self.pick_atoms([idx])
+            self.pick_atoms([idx],new=(not obj.GetShiftKey()))
 
     def on_info_pick(self, obj, evt = None):
         if not self._trajectoryLoaded:
@@ -604,20 +648,28 @@ class MolecularViewerPanel(ComponentPlugin):
             LOGGER(info, "info")
         self.picker.InitializePickList()
                 
-    def pick_atoms(self, atomsList):
-        
-        if not atomsList:
-            return
+    def pick_atoms(self, atomsList, new=False):
+                
+        if new:        
+            self.__pickedAtoms = set(atomsList)
+        else:
+            self.__pickedAtoms.symmetric_difference_update(atomsList)
+
+        self.show_selection(list(self.__pickedAtoms))
                         
-        self.__pickedAtoms.symmetric_difference_update(atomsList)
-                        
-        pub.sendMessage(('select atoms'), message = list(self.__pickedAtoms))
-            
+        pub.sendMessage(('select_atoms_from_viewer'), message = (self.dataplugin,list(self.__pickedAtoms)))
+
+    def box_atoms(self, atomsList):
+                                
+        self.__pickedAtoms = set(atomsList)
+
+        self.show_selection(list(self.__pickedAtoms))
+                                    
     def show_selected_atoms(self, atomsList):
 
         self.show_selection(atomsList)
         
-    def clear_selection(self):
+    def on_clear_selection(self,event):
         
         if not self._trajectoryLoaded:
             return
