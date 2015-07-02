@@ -21,7 +21,7 @@ class ConfigurationPanel(wx.Panel):
 
         for cfgName, cfg in self._configurable.settings.items():
 
-            widgetClass = REGISTRY["widget"][cfg[0]]
+            widgetClass = REGISTRY["widget"][cfg[1].get('widget',cfg[0])]
                         
             self._widgets[cfgName] = widgetClass(self, cfgName, self._configurable)
             
