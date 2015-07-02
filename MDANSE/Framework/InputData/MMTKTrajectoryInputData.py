@@ -51,7 +51,7 @@ class MMTKTrajectoryInputData(InputFileData):
             raise InputDataError("The MMTK trajectory %r could not be loaded property." % self._filename)
         
         self._data = traj
-
+        
     def close(self):
         self._data.close()
         
@@ -93,3 +93,7 @@ class MMTKTrajectoryInputData(InputFileData):
     @property
     def universe(self):
         return self._data.universe
+    
+    @property
+    def netcdf(self):
+        return self._data.trajectory.file
