@@ -82,8 +82,9 @@ class OrderParameter(IJob):
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'MMTK', 'protein_in_periodic_universe.nc')})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['axis_selection'] = ('axis_selection', {'dependencies':{'trajectory':'trajectory'},
-                                                     'default':{'molecule':'C284H438N84O79S7', 'endpoint1':('C',), 'endpoint2':('C_beta',)}})
+    settings['axis_selection'] = ('atoms_list', {'dependencies':{'trajectory':'trajectory'},
+                                                 'nAtoms':2,
+                                                 'default':('C284H438N84O79S7',('C','C_beta'))})
     settings['reference_direction'] = ('vector', {'default':[0,0,1], 'notNull':True, 'normalize':True})
     settings['per_axis'] = ('boolean', {'label':"output contribution per axis", 'default':False})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
@@ -95,13 +96,13 @@ class OrderParameter(IJob):
         """
 
         self._nFrames = self.configuration['frames']['number']
-        self._nAxis = self.configuration['axis_selection']['n_axis']
+        self._nAxis = self.configuration['axis_selection']['n_values']
         
         self.numberOfSteps = self._nAxis
 
         self._outputData.add("times","line", self.configuration['frames']['time'], units='ps')
 
-        self._outputData.add("axis_index","line", numpy.arange(self.configuration['axis_selection']['n_axis']), units='au')
+        self._outputData.add("axis_index","line", numpy.arange(self.configuration['axis_selection']['n_values']), units='au')
                         
         self._zAxis = Vector([0,0,1])
         refAxis = self.configuration['reference_direction']['value']
@@ -134,7 +135,7 @@ class OrderParameter(IJob):
         :rtype: 2-tuple
         """
 
-        e1, e2 = self.configuration['axis_selection']['endpoints'][index]
+        e1, e2 = self.configuration['axis_selection']['atoms'][index]
         
         e1 = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
                                    e1,

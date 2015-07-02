@@ -67,7 +67,8 @@ class SpatialDensity(IJob):
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['spatial_resolution'] = ('float', {'mini':0.01, 'default':0.1})
     settings['reference_basis'] = ('basis_selection', {'dependencies':{'trajectory':'trajectory'},
-                                                       'default':{'molecule':'C284H438N84O79S7','origin':('O',),'x_axis':('C_beta',),'y_axis':('C_delta',)}})
+                                                       'nAtoms':3,
+                                                       'default':('C284H438N84O79S7',('O','C_beta','C_delta'))})
     settings['target_molecule'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'},
                                                       'default':'atom_index 151'})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
@@ -139,12 +140,12 @@ class SpatialDensity(IJob):
         
         conf = self.configuration['trajectory']['instance'].universe.contiguousObjectConfiguration()
 
-        origins = numpy.zeros((self.configuration['reference_basis']['n_basis'],3), dtype = numpy.float64)
-        bases = numpy.zeros((self.configuration['reference_basis']['n_basis'],3,3), dtype = numpy.float64)
+        origins = numpy.zeros((self.configuration['reference_basis']['n_values'],3), dtype = numpy.float64)
+        bases = numpy.zeros((self.configuration['reference_basis']['n_values'],3,3), dtype = numpy.float64)
         
         indexes = numpy.array(self.configuration['target_molecule']['indexes']).astype(numpy.int32)
         
-        for i, basis in enumerate(self.configuration['reference_basis']['basis']):
+        for i, basis in enumerate(self.configuration['reference_basis']['atoms']):
             originIndexes, xIndexes, yIndexes = basis
             origins[i,:] = center_of_mass(conf.array[originIndexes], None)
             

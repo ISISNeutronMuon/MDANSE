@@ -72,8 +72,9 @@ class AngularCorrelation(IJob):
     settings = collections.OrderedDict()    
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
-    settings['axis_selection'] = ('axis_selection',{"dependencies":{'trajectory':'trajectory'},
-                                                    'default' : {'molecule':'Water', 'endpoint1':('OW',), 'endpoint2':('HW',)}})
+    settings['axis_selection'] = ('atoms_list',{"nAtoms" : 2,
+                                                "dependencies":{'trajectory':'trajectory'},
+                                                'default' : ('Water',('OW','HW'))})
     settings['per_axis'] = ('boolean', {"label":"output contribution per axis", "default":False})
     settings['output_files'] = ('output_files', {"formats":["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
@@ -83,16 +84,16 @@ class AngularCorrelation(IJob):
         Initialize the input parameters and analysis self variables
         """
                 
-        self.numberOfSteps = self.configuration['axis_selection']['n_axis']
+        self.numberOfSteps = self.configuration['axis_selection']['n_values']
 
         self._outputData.add("times","line", self.configuration['frames']['time'],units='ps')
 
-        self._outputData.add("axis_index","line", numpy.arange(self.configuration['axis_selection']['n_axis']), units='au')
+        self._outputData.add("axis_index","line", numpy.arange(self.configuration['axis_selection']['n_values']), units='au')
                         
         self._outputData.add('ac',"line", (self.configuration['frames']['number'],), axis="times", units="au") 
 
         if self.configuration['per_axis']['value']:
-            self._outputData.add('ac_per_axis',"surface", (self.configuration['axis_selection']['n_axis'],self.configuration['frames']['number'],), axis='axis_index|times', units="au") 
+            self._outputData.add('ac_per_axis',"surface", (self.configuration['axis_selection']['n_values'],self.configuration['frames']['number'],), axis='axis_index|times', units="au") 
 
     def run_step(self, index):
         """
@@ -105,7 +106,7 @@ class AngularCorrelation(IJob):
             #. vectors (numpy.array): The calculated vectors 
         """
 
-        e1, e2 = self.configuration['axis_selection']['endpoints'][index]
+        e1, e2 = self.configuration['axis_selection']['atoms'][index]
         
         e1 = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
                                    e1,
@@ -147,7 +148,7 @@ class AngularCorrelation(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """ 
              
-        self._outputData['ac'] /= self.configuration['axis_selection']['n_axis']
+        self._outputData['ac'] /= self.configuration['axis_selection']['n_values']
                 
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
