@@ -41,15 +41,13 @@ def build_connectivity(universe ,tolerance=0.05):
     bonds = []
     
     conf = universe.contiguousObjectConfiguration()
+
+    scannedObjects = [obj for obj in universe.objectList() if isinstance(obj,AtomCluster)]
+    singleAtomsObjects = [obj for obj in universe.objectList() if isinstance(obj,Atom) or obj.numberOfAtoms()==1]
+    scannedObjects.append(Collection(singleAtomsObjects))
                 
-    for obj in universe.objectList():
-                                    
-        if not isinstance(obj, AtomCluster):
-            continue
-        
-        if (obj.numberOfAtoms()==1):
-            continue
-                    
+    for obj in scannedObjects:
+                                                        
         atoms = sorted(obj.atomList(), key = operator.attrgetter('index'))
         nAtoms = len(atoms)
         indexes = [at.index for at in atoms]
@@ -70,7 +68,7 @@ def build_connectivity(universe ,tolerance=0.05):
             if hasattr(atoms[idx2],"bonded_to__"):
                 atoms[idx2].bonded_to__.append(atoms[idx1])
             else:
-                atoms[idx2].bonded_to__ = [atoms[idx1]]
+                atoms[idx2].bonded_to__ = [atoms[idx1]]    
 
 def find_atoms_in_molecule(universe, moleculeName, atomNames, indexes=False):
 
@@ -84,7 +82,6 @@ def find_atoms_in_molecule(universe, moleculeName, atomNames, indexes=False):
     for mol in molecules:
         atoms = mol.atomList()
         names = [at.name for at in mol.atomList()]
-        
         l = [atoms[names.index(atName)] for atName in atomNames]
 
         match.append(l)
