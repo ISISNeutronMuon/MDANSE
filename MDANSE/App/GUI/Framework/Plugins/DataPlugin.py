@@ -38,6 +38,18 @@ from MDANSE.Externals.pubsub import pub
 
 from MDANSE.App.GUI import DATA_CONTROLLER
 from MDANSE.App.GUI.Framework.Plugins.IPlugin import IPlugin, plugin_parent 
+
+def get_data_plugin(window):
+                               
+    if isinstance(window,DataPlugin):
+        return window
+     
+    else:
+        
+        try:                
+            return get_data_plugin(window.Parent)
+        except AttributeError:
+            return None
                     
 class DataPlugin(IPlugin):
     
@@ -80,6 +92,10 @@ class DataPlugin(IPlugin):
         
         return self._dataProxy
     
+    @property
+    def dataplugin(self):
+        return self
+    
     def drop(self, pluginName):
                                         
         # If no plugin match the name of the dropped plugin, do nothing.
@@ -101,9 +117,9 @@ class DataPlugin(IPlugin):
         plugin.SetFocus()
     
     def on_changing_pane(self, event):
-                        
+        
         window = plugin_parent(event.GetWindow())
-                                        
+        
         if window is None:
             return
         

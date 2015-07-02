@@ -43,4 +43,8 @@ class ComponentPlugin(IPlugin):
     @property
     def dataproxy(self):
         return self.parent.dataproxy
+    
+    @property
+    def dataplugin(self):
+        return self.parent.dataplugin
 
