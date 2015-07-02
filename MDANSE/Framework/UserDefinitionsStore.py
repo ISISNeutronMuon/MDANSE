@@ -16,11 +16,7 @@ class UserDefinitionsStore(dict):
     Basically, user definitions are used to keep track of definitions made on a given target. The target can 
     be a file or any kind of object that has to be associated with the user definitions.
     This definitions can be selections of atoms, Q vectors definitions, axis definitions ... The 
-    user definitions are loaded when MDANSE starts through a cPickle file that will store these definitions.
-    
-    They are stored internally as MDANSE.Framework.UserDefinition.IUserDefinition derived objects in a nested 
-    dictionary whose primary key is the target name, secondary key is the category of the user definition and 
-    tertiary key is the name of the user definition.  
+    user definitions are loaded when MDANSE starts through a cPickle file that will store these definitions.    
     '''
     
     __metaclass__ = Singleton
@@ -84,6 +80,16 @@ class UserDefinitionsStore(dict):
         ud = self[target][section][name]
             
         return ud
+
+    def remove_target(self,target):
+        
+        if self.has_target(target):
+            del self[target]
+
+    def remove_section(self,target,section):
+        
+        if self.has_section(target, section):
+            del self[target][section]
         
     def remove_definition(self,target,section,name):
         
@@ -100,6 +106,17 @@ class UserDefinitionsStore(dict):
     def filter(self,target,section):
         
         return self.get(target,{}).get(section,{}).keys()
+
+    def has_target(self,target):
+                
+        return self.has_key(target)
+
+    def has_section(self,target,section):
+        
+        if not self.has_key(target):
+            return False
+                
+        return self[target].has_key(section)
             
     def has_definition(self,target,section,name):
         

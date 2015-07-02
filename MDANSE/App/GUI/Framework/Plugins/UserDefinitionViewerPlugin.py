@@ -34,7 +34,6 @@ import wx
 import wx.aui as wxaui
 
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.UserDefinitions.IUserDefinition import IUserDefinition
 from MDANSE.Framework.UserDefinitionsStore import UD_STORE
 
 from MDANSE.App.GUI.Framework.Plugins.ComponentPlugin import ComponentPlugin
@@ -57,7 +56,7 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
         ComponentPlugin.__init__(self, parent, size = parent.GetSize(), *args, **kwargs)
         
         self.build_plugins_tree()
-     
+        
     def build_panel(self):
                 
         self._treePanel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
@@ -123,57 +122,84 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
         
         if keycode == wx.WXK_DELETE:
             
-            item = self._tree.GetSelection()
-            itemData = self._tree.GetItemData(item)
-            itemText = str(self._tree.GetItemText(item))
+            currentItem = self._tree.GetSelection()
+
+            level = self.get_item_level(currentItem)
             
-            if itemData is None:
+            if level > 3:
                 return
-            
-            data  = itemData.GetData()
-            if isinstance(data, IUserDefinition):
-                d = wx.MessageDialog(None, 'Do you really want to delete this definition ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
-                if d.ShowModal() == wx.ID_YES:
-                    UD_STORE.remove_definition(data.target,data.type,itemText)
-                    UD_STORE.save()
-                    self._tree.DeleteAllItems()
-                    self._udTree.clear()
-                    self.build_plugins_tree()
-                    self._info.Clear()
+                                                                        
+            d = wx.MessageDialog(None, 'Do you really want to delete this definition ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
+            if d.ShowModal() == wx.ID_YES:
+
+                currentItemName = str(self._tree.GetItemText(currentItem))
+
+                if level == 1:
+                    UD_STORE.remove_target(currentItemName)                
+                elif level == 2:
+                    targetItem = self._tree.GetParent(currentItem)
+                    targetItemName = str(self._tree.GetItemText(targetItem))
+                    UD_STORE.remove_section(targetItemName,currentItemName)
+                elif level == 3:
+                    sectionItem = self._tree.GetParent(currentItem)
+                    sectionItemName = str(self._tree.GetItemText(sectionItem))
+                    targetItem = self._tree.GetParent(sectionItem)
+                    targetItemName = str(self._tree.GetItemText(targetItem))
+                    UD_STORE.remove_definition(targetItemName,sectionItemName,currentItemName)
+                else:
+                    return
+                
+                UD_STORE.save()
+                self._tree.DeleteAllItems()
+                self._udTree.clear()
+                self.build_plugins_tree()
+                self._info.Clear()
    
     def on_try_rename(self, event):
-        item = self._tree.GetSelection()
-        itemData = self._tree.GetItemData(item)
-        if itemData is None:
+
+        currentItem = self._tree.GetSelection()
+        level = self.get_item_level(currentItem)
+
+        if level != 3:
             event.Veto()
             return
         
-        data  = itemData.GetData()
-        if not isinstance(data, IUserDefinition):
-            event.Veto()
-         
     def on_rename(self, event):
-        newtext = self._tree.GetEditControl().GetValue()
-        item = self._tree.GetSelection()
-        oldtext = str(self._tree.GetItemText(item))
-        itemData = self._tree.GetItemData(item)
-               
-        if itemData is None:
+        
+        currentItem = self._tree.GetSelection()
+        
+        currentItemName = str(self._tree.GetItemText(currentItem))   
+        newItemName = self._tree.GetEditControl().GetValue()
+        
+        if currentItemName == newItemName:
             return
         
-        data  = itemData.GetData()
-        if isinstance(data, IUserDefinition):
-            UD_STORE.set_definition(data.target,data.type,newtext,data)
-            UD_STORE.remove_definition(data.target,data.type,oldtext)
-            UD_STORE.save()
-            self.build_plugins_tree()
-    
+        sectionItem = self._tree.GetItemParent(currentItem)
+        sectionItemName = str(self._tree.GetItemText(sectionItem))
+        targetItem = self._tree.GetItemParent(sectionItem)
+        targetItemName = str(self._tree.GetItemText(targetItem))
+
+        currentItemData = self._tree.GetItemData(currentItem)
+                
+        UD_STORE.set_definition(targetItemName,sectionItemName,newItemName,currentItemData.GetData())
+        UD_STORE.remove_definition(targetItemName,sectionItemName,currentItemName)
+        UD_STORE.save()
+            
     def close(self):
         pass
     
     def plug(self):
         self.parent.mgr.GetPane(self).Float().CloseButton(True).BestSize((800, 300))
         self.parent.mgr.Update()
+        
+    def get_item_level(self,item):
+        
+        parent = self._tree.GetItemParent(item)
+        
+        if parent == self._tree.GetRootItem():
+            return 1
+        else: 
+            return 1 + self.get_item_level(parent)
 
 
 class UserDefinitionViewerFrame(wx.Frame):
