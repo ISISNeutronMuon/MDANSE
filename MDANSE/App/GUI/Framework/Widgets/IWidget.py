@@ -72,7 +72,6 @@ class IWidget(wx.Panel):
     def name(self):
         return self._name
 
-    @abc.abstractmethod
     def initialize(self):
         pass
 
@@ -80,10 +79,6 @@ class IWidget(wx.Panel):
     def get_widget_value(self):
         pass
                 
-    @abc.abstractmethod
-    def set_widget_value(self, value):
-        pass
-
     @abc.abstractmethod
     def add_widgets(self):
         pass

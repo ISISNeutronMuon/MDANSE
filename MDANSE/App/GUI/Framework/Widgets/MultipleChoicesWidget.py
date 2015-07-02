@@ -39,9 +39,6 @@ class MultipleChoicesWidget(IWidget):
     
     type = "multiple_choices"
 
-    def initialize(self):
-        pass
-
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -58,7 +55,3 @@ class MultipleChoicesWidget(IWidget):
     def get_widget_value(self):
         
         return self._choices.GetStringSelection()
-
-
-    def set_widget_value(self, value):
-        pass

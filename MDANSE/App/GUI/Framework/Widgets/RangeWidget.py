@@ -40,10 +40,6 @@ class RangeWidget(IWidget):
 
     type = "range"
 
-    def initialize(self):
-        pass
-    
-    
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -86,6 +82,3 @@ class RangeWidget(IWidget):
             raise ConfigurationError("Invalid value for %r entry" % self.configurator.name)
         else:
             return val
-
-    def set_widget_value(self, value):
-        pass

@@ -43,8 +43,7 @@ class RunningModeWidget(IWidget):
     def initialize(self):
 
         self._totalNumberOfProcessors = multiprocessing.cpu_count()
-
-    
+        
     def add_widgets(self):
         
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -87,11 +86,6 @@ class RunningModeWidget(IWidget):
                                 
         return value
 
-
-    def set_widget_value(self, value):
-        pass
-    
-    
     def on_select_running_mode(self, event):
         
         btn = event.GetEventObject()

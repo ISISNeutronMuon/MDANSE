@@ -41,9 +41,6 @@ class InputFileWidget(IWidget):
     
     type = "input_file"
     
-    def initialize(self):        
-        pass
-
     def add_widgets(self):
         
         cfg = self.configurator
@@ -64,6 +61,3 @@ class InputFileWidget(IWidget):
             raise ConfigurationError("No input file selected", self)
 
         return filename
-    
-    def set_widget_value(self, value):
-        pass

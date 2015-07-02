@@ -40,9 +40,6 @@ class VectorConfigurator(IWidget):
     
     type = "vector"
     
-    def initialize(self):
-        pass
-
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -86,6 +83,3 @@ class VectorConfigurator(IWidget):
             raise ConfigurationError("Invalid value for %r entry" % self.configurator.name)
         else:        
             return val
-
-    def set_widget_value(self, value):
-        pass

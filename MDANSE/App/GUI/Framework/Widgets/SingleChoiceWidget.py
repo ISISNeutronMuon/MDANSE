@@ -38,9 +38,6 @@ class SingleChoiceWidget(IWidget):
     
     type = "single_choice"
 
-    def initialize(self):
-        pass
-
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -55,6 +52,3 @@ class SingleChoiceWidget(IWidget):
     def get_widget_value(self):
         
         return self._choices.GetStringSelection()
-
-    def set_widget_value(self, value):
-        pass

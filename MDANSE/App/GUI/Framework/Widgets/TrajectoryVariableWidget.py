@@ -43,9 +43,6 @@ class TrajectoryVariableWidget(IWidget):
     
     type = "trajectory_variable"
 
-    def initialize(self):
-        pass
-    
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -54,7 +51,7 @@ class TrajectoryVariableWidget(IWidget):
                 
         sizer.Add(self._variable, 1, wx.ALL|wx.EXPAND, 5)
 
-        pub.subscribe(self.set_widget_value, ("set_trajectory"))
+        pub.subscribe(self.on_set_trajectory, ("set_trajectory"))
         
         return sizer
         
@@ -62,7 +59,7 @@ class TrajectoryVariableWidget(IWidget):
         
         return self._variable.GetStringSelection()
 
-    def set_widget_value(self, message):
+    def on_set_trajectory(self, message):
 
         window, filename = message
                         

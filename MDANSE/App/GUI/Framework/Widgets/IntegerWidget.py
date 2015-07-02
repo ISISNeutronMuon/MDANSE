@@ -38,9 +38,6 @@ from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
 class IntegerWidget(IWidget):
     
     type = "integer"
-
-    def initialize(self):
-        pass
     
     def add_widgets(self):
         
@@ -62,7 +59,3 @@ class IntegerWidget(IWidget):
         val = self._integer.GetValue()
 
         return val
-
-    def set_widget_value(self, value):
-        pass
-

@@ -39,9 +39,6 @@ class InputDirectoryWidget(IWidget):
     
     type = "input_directory"
     
-    def initialize(self):
-        pass
-
     def add_widgets(self):
         
         cfg = self.configurator
@@ -60,6 +57,3 @@ class InputDirectoryWidget(IWidget):
         dirname = self._dirname.GetValue()
                                             
         return dirname
-
-    def set_widget_value(self):
-        pass

@@ -40,9 +40,6 @@ class FloatWidget(StringWidget):
     
     type = "float"
 
-    def initialize(self):
-        pass
-
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -52,9 +49,6 @@ class FloatWidget(StringWidget):
         sizer.Add(self._float, 0, wx.ALL, 5)
         
         return sizer
-        
-    def set_widget_value(self, value):
-        pass
 
     def get_widget_value(self):
                 

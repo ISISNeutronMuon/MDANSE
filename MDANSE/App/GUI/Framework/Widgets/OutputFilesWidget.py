@@ -38,7 +38,6 @@ import wx.lib.filebrowsebutton as wxfile
 from MDANSE.Externals.pubsub import pub
 
 from MDANSE.App.GUI.ComboWidgets.ComboCheckbox import ComboCheckbox
-from MDANSE.App.GUI.Framework.Plugins.IPlugin import plugin_parent
 from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
 
 class OutputFilesWidget(IWidget):
@@ -46,9 +45,9 @@ class OutputFilesWidget(IWidget):
     type = "output_files"
 
     def initialize(self):
-        
+
         self._availableFormats = self.configurator.formats
-                
+        
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -77,7 +76,7 @@ class OutputFilesWidget(IWidget):
         sizer.Add(self._dirname, 0, wx.ALL|wx.EXPAND)
         sizer.Add(hSizer, 0, wx.ALL|wx.EXPAND, 0)
 
-        pub.subscribe(self.set_widget_value, ("set_trajectory"))
+        pub.subscribe(self.on_set_trajectory, ("set_trajectory"))
         
         return sizer
 
@@ -91,8 +90,7 @@ class OutputFilesWidget(IWidget):
                                     
         return (dirname, basename, formats)
     
-    
-    def set_widget_value(self, message):
+    def on_set_trajectory(self, message):
         
         window, filename = message
                         

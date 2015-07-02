@@ -38,9 +38,6 @@ class BooleanWidget(IWidget):
     
     type = "boolean"
     
-    def initialize(self):
-        pass
-    
     def add_widgets(self):
         
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -57,6 +54,3 @@ class BooleanWidget(IWidget):
     def get_widget_value(self):
                 
         return self._boolean.GetValue()
-
-    def set_widget_value(self, value):
-        pass

@@ -41,9 +41,6 @@ class InterpolationOrderWidget(IWidget):
     
     type = "interpolation_order"
 
-    def initialize(self):
-        pass
-
     def add_widgets(self):
         
         sizer = wx.BoxSizer(wx.HORIZONTAL)

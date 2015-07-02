@@ -40,10 +40,6 @@ class ProjectionWidget(IWidget):
     
     type = "projection"
 
-    def initialize(self):
-        pass
-    
-    
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -125,9 +121,6 @@ class ProjectionWidget(IWidget):
                 raise ConfigurationError("Invalid value for %r entry" % self.configurator.name)
             else:
                 return val            
-
-    def set_widget_value(self, value):
-        pass
     
     def on_select_projection_mode(self, event):
         

@@ -32,7 +32,6 @@ Created on Mar 30, 2015
 
 import numpy
 
-# The matplotlib imports
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigCanvas
 from matplotlib.backends.backend_wxagg import NavigationToolbar2WxAgg as NavigationToolbar
@@ -65,7 +64,6 @@ class InstrumentResolutionDialog(wx.Dialog):
         self._value = None
                                 
         self.build_dialog()
-                
         
     def build_dialog(self):
 
@@ -203,14 +201,11 @@ class InstrumentResolutionConfigurator(IWidget):
         
         self.Bind(wx.EVT_BUTTON, self.on_set_instrument_resolution, self._setResolution)
 
-        pub.subscribe(self.set_widget_value, ("set_trajectory"))
-        pub.subscribe(self.set_widget_value, ("set_netcdf"))
+        pub.subscribe(self.on_set_trajectory, ("set_trajectory"))
+        pub.subscribe(self.on_set_trajectory, ("set_netcdf"))
 
         return sizer
         
-    def initialize(self):
-        pass
-
     def get_widget_value(self):
         
         return eval(self._resolution.GetValue())
@@ -233,8 +228,7 @@ class InstrumentResolutionConfigurator(IWidget):
         
         self._instrumentResolutionDialog.Destroy()
 
-
-    def set_widget_value(self, message):
+    def on_set_trajectory(self, message):
         
         window, filename = message
                         

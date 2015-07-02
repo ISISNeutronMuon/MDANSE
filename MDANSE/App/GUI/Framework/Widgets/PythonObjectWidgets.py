@@ -40,9 +40,6 @@ class PythonObjectWidget(IWidget):
     
     type = "python_object"
 
-    def initialize(self):
-        pass
-
     def add_widgets(self):
         
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -52,9 +49,6 @@ class PythonObjectWidget(IWidget):
         sizer.Add(self._string, 0, wx.ALL, 5)
 
         return sizer
-
-    def set_widget_value(self, value):
-        pass
             
     def get_widget_value(self):
                 

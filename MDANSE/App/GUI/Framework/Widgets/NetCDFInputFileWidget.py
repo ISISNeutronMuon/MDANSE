@@ -49,9 +49,6 @@ class NetCDFInputWidget(IWidget):
         
         return self._netcdf.variables[attr].getValue()
 
-    def initialize(self):        
-        pass
-
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -92,7 +89,6 @@ class NetCDFInputWidget(IWidget):
         
         pub.sendMessage("set_netcdf", message = (self,filename))
                 
-                
     def get_widget_value(self):
         
         filename = self._selectNetCDF.GetStringSelection()
@@ -101,7 +97,3 @@ class NetCDFInputWidget(IWidget):
             raise ConfigurationError("No NetCDF file selected", self)
         
         return filename
-    
-
-    def set_widget_value(self, value):
-        pass

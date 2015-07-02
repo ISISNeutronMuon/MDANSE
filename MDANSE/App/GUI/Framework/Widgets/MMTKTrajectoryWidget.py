@@ -44,9 +44,6 @@ from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
 class MMTKTrajectoryWidget(IWidget):
     
     type = "mmtk_trajectory"
-
-    def initialize(self):        
-        pass
         
     def add_widgets(self):
 
@@ -94,6 +91,3 @@ class MMTKTrajectoryWidget(IWidget):
             raise ConfigurationError("No MMTK trajectory file selected", self)
         
         return filename
-
-    def set_widget_value(self, value):
-        pass
