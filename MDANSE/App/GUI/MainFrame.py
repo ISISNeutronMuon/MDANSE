@@ -321,13 +321,11 @@ or directly to the MDANSE mailing list:
         
         self.toggle_window(pane)
 
-
     def on_toggle_data_tree(self, event=None):
 
         pane = self._mgr.GetPane("data")        
         
         self.toggle_window(pane)
-        
         
     def on_toggle_plugins_tree(self, event = None):
         
@@ -335,7 +333,6 @@ or directly to the MDANSE mailing list:
         
         self.toggle_window(pane)    
 
-    
     def on_toggle_toolbar(self, event=None):
 
         if self.GetToolBar():
@@ -358,7 +355,6 @@ or directly to the MDANSE mailing list:
 
         self._mgr.Update()
         
-
 if __name__ == "__main__":
     
     app = wx.App(False)
