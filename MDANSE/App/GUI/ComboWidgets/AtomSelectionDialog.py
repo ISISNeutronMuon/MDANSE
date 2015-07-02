@@ -25,7 +25,7 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 30, 2015
+Created on Apr 14, 2015
 
 :author: Eric C. Pellegrini
 '''
@@ -38,10 +38,9 @@ import wx
 from MDANSE import LOGGER, REGISTRY
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser, AtomSelectionParserError
-from MDANSE.Framework.Configurable import ConfigurationError
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
-from MDANSE.App.GUI.Framework.Widgets.UserDefinitionWidget import UserDefinitionsDialog, UserDefinitionWidget
+from MDANSE.App.GUI.ComboWidgets.UserDefinitionsDialog import UserDefinitionsDialog
 from MDANSE.App.GUI.Framework.Plugins.DataPlugin import get_data_plugin 
 
 class Query(object):
@@ -178,12 +177,12 @@ class AtomSelectionDialog(UserDefinitionsDialog):
                  
     def build_dialog(self):
                                                 
-        self._mainPanel = wx.ScrolledWindow(self, wx.ID_ANY, size=self.GetSize())
-        self._mainPanel.SetScrollbars(20,20,50,50)
+        panel = wx.ScrolledWindow(self, wx.ID_ANY, size=self.GetSize())
+        panel.SetScrollbars(20,20,50,50)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         
-        settingsPanel = wx.Panel(self._mainPanel,wx.ID_ANY)
+        settingsPanel = wx.Panel(panel,wx.ID_ANY)
                 
         # Build the widgets used to build a selection from selection strings and operators
         self._queryPanel = wx.Panel(settingsPanel)
@@ -234,11 +233,11 @@ class AtomSelectionDialog(UserDefinitionsDialog):
         settingsPanel.SetSizer(selectionSizer)
 
         # The widgets related to the selection being performed        
-        selectionExpressionStaticBox = wx.StaticBox(self._mainPanel, wx.ID_ANY, label = "Selection")                
+        selectionExpressionStaticBox = wx.StaticBox(panel, wx.ID_ANY, label = "Selection")                
         selectionExpressionStaticBoxSizer = wx.StaticBoxSizer(selectionExpressionStaticBox, wx.HORIZONTAL)
 
-        self.selectionTextCtrl = wx.TextCtrl(self._mainPanel, wx.ID_ANY, style = wx.TE_READONLY)
-        clearButton = wx.Button(self._mainPanel, wx.ID_ANY, label="Clear")
+        self.selectionTextCtrl = wx.TextCtrl(panel, wx.ID_ANY, style = wx.TE_READONLY)
+        clearButton  = wx.Button(panel, wx.ID_ANY, label="Clear")
         
         self._selectionExpressionSizer = wx.GridBagSizer(5,5)        
         self._selectionExpressionSizer.AddGrowableCol(0)
@@ -246,15 +245,15 @@ class AtomSelectionDialog(UserDefinitionsDialog):
         self._selectionExpressionSizer.Add(clearButton, pos=(0,2), flag=wx.ALL)
         selectionExpressionStaticBoxSizer.Add(self._selectionExpressionSizer,1,wx.ALL|wx.EXPAND,5)
                     
-        self._selectionSummary = wx.TextCtrl(self._mainPanel,wx.ID_ANY,style=wx.TE_LINEWRAP|wx.TE_MULTILINE|wx.TE_READONLY)  
+        self._selectionSummary = wx.TextCtrl(panel,wx.ID_ANY,style=wx.TE_LINEWRAP|wx.TE_MULTILINE|wx.TE_READONLY)  
                                                    
         sizer.Add(settingsPanel, 2, wx.ALL|wx.EXPAND, 5)
         sizer.Add(selectionExpressionStaticBoxSizer, 0, wx.ALL|wx.EXPAND, 5)
         sizer.Add(self._selectionSummary, 1, wx.ALL|wx.EXPAND, 5)
 
-        self._mainPanel.SetSizer(sizer)
+        panel.SetSizer(sizer)
                                                                               
-        self._mainSizer.Add(self._mainPanel, 1, wx.EXPAND|wx.ALL, 5)
+        self._mainSizer.Add(panel, 1, wx.EXPAND|wx.ALL, 5)
                                                                               
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_display_keyword_values, self.filterTree)
         self.Bind(wx.EVT_LISTBOX, self.on_insert_keyword_values, self.values)
@@ -383,38 +382,18 @@ class AtomSelectionDialog(UserDefinitionsDialog):
             return None
         
         return self._selection
-
-class AtomSelectionWidget(UserDefinitionWidget):
-        
-    type = "atom_selection"
-
-    def on_new_user_definition(self,event):
-        
-        dlg = AtomSelectionDialog(self,self._trajectory)
-        
-        dlg.Show()
- 
-    def get_widget_value(self):
-
-        names = self._selections.GetControl().GetCheckedStrings()
-        
-        if not names:
-            return None
-        
-        if len(names) != 1:
-            raise ConfigurationError("Invalid number of atom selection definitions selected")
-                    
-        return names[0]
         
 if __name__ == "__main__":
     
     from MMTK.Trajectory import Trajectory
     
-    t = Trajectory(None,"../../../../../Data/Trajectories/MMTK/protein_in_periodic_universe.nc","r")
+    t = Trajectory(None,"../../../../Data/Trajectories/MMTK/protein_in_periodic_universe.nc","r")
     
     app = wx.App(False)
     
-    p = AtomSelectionDialog(None,t)
+    f = wx.Frame(None)
+            
+    p = AtomSelectionDialog(f,t)
         
     p.SetSize((800,800))
             
@@ -423,4 +402,4 @@ if __name__ == "__main__":
     p.Destroy()
     
     app.MainLoop()
-        
+    

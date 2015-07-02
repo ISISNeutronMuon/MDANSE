@@ -30,71 +30,158 @@ Created on Mar 30, 2015
 :author: Eric C. Pellegrini
 '''
 
+import abc
 import os
 
-import wx.combo
+import wx
 
+from MDANSE import LOGGER
+from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.UserDefinitionsStore import UD_STORE
 
+from MDANSE.App.GUI import DATA_CONTROLLER
 from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
-from MDANSE.App.GUI.ComboWidgets.ComboCheckbox import ComboCheckbox
+
+class UserDefinitionsDialog(wx.Dialog):
+    
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, parent, target, section, *args, **kwargs):
+        
+        wx.Dialog.__init__(self, parent, *args, **kwargs)
+
+        self._parent = parent
+        
+        self._target = target
+        
+        self._section = section
+
+        self._ud = {}
+
+        self._mainSizer = wx.BoxSizer(wx.VERTICAL)
+                                
+        self.build_dialog()
+
+        udPanel = wx.Panel(self,wx.ID_ANY)
+                
+        sb = wx.StaticBox(udPanel, wx.ID_ANY)
+        actionsSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
+                        
+        cancelButton  = wx.Button(udPanel, wx.ID_ANY, label="Cancel")
+        self._udName = wx.TextCtrl(udPanel, wx.ID_ANY, style = wx.TE_PROCESS_ENTER)
+        saveButton  = wx.Button(udPanel, wx.ID_ANY, label="Save")
+        
+        actionsSizer.Add(cancelButton, 0, wx.ALL, 5)
+        actionsSizer.Add(self._udName, 1, wx.ALL|wx.EXPAND, 5)
+        actionsSizer.Add(saveButton, 0, wx.ALL, 5)
+        
+        udPanel.SetSizer(actionsSizer)
+                 
+        self._mainSizer.Add(udPanel,0,wx.EXPAND|wx.ALL,5)
+        
+        self.SetSizer(self._mainSizer)            
+
+        self.Bind(wx.EVT_CLOSE, self.on_close)
+        self.Bind(wx.EVT_BUTTON, self.on_close, cancelButton)
+        self.Bind(wx.EVT_BUTTON, self.on_save, saveButton)
+
+    @abc.abstractmethod
+    def build_dialog(self):
+        pass
+        
+    @abc.abstractmethod
+    def validate(self):
+        pass
+
+    def getUserDefinitionName(self):
+        
+        return str(self._udName.GetValue())
+
+    def on_save(self, event):
+
+        name = str(self._udName.GetValue().strip())
+        
+        if not name:
+            LOGGER('Empty user definition name.','error',['dialog'])
+            return
+
+        value = self.validate()        
+        if value is None:
+            return 
+                
+        if UD_STORE.has_definition(self._target,self._section,name):
+            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,self._section,name),'error',['dialog'])
+            self.EndModal(wx.ID_CANCEL)
+            return
+                  
+        UD_STORE.set_definition(self._target,self._section,name,value)
+        UD_STORE.save()
+                 
+        pub.sendMessage("save_definition", message = (self._target, name))
+                         
+        self.EndModal(wx.ID_OK)
+                
+    def on_close(self, event):
+        
+        self.EndModal(wx.ID_CANCEL)
 
 class UserDefinitionWidget(IWidget):
     
-    type = None    
+    __metaclass__ = abc.ABCMeta
     
-    def __init__(self, *args, **kwargs):
+    type = None    
         
-        IWidget.__init__(self, *args, **kwargs)
+    def initialize(self):
         
         self._filename = None
         self._basename = None
-    
-    def initialize(self):
-        pass
-    
+        
     def add_widgets(self):
 
-        sizer = wx.BoxSizer(wx.VERTICAL)
-
-        comboCtrl = wx.combo.ComboCtrl(self._widgetPanel, value="Available definitions", style=wx.CB_READONLY)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
         
-        self._selections = ComboCheckbox(items=[])
+        self._availableUDs = wx.Choice(self._widgetPanel, wx.ID_ANY,style=wx.CB_SORT)
+        self._newUD = wx.Button(self._widgetPanel, wx.ID_ANY, label="New")
+        sizer.Add(self._availableUDs, 1, wx.ALL|wx.EXPAND, 5)
+        sizer.Add(self._newUD, 0, wx.ALL|wx.EXPAND, 5)
 
-        comboCtrl.SetPopupControl(self._selections)
-        
-        sizer.Add(comboCtrl, 1, wx.ALL|wx.EXPAND, 5)
+        pub.subscribe(self.on_set_trajectory, ("set_trajectory"))
+        pub.subscribe(self.on_save_definition, ("save_definition",))
+
+        self.Bind(wx.EVT_BUTTON, self.on_new_user_definition, self._newUD)
 
         return sizer
-
-    def msg_new_definition(self, message):
+    
+    @abc.abstractmethod
+    def on_new_user_definition(self):
+        pass
+    
+    def get_widget_value(self):
         
-        filename, name = message
-        
-        if filename != self._basename:
-            return
-        
-        if name in self._selections.items:
-            idx = self._selections.items.index(name)
-            self._selections.GetControl().Check(idx,False)
-        else:
-            self._selections.GetControl().AppendItems([name])   
+        return str(self._availableUDs.GetStringSelection())    
 
+    def on_set_trajectory(self, message):
 
-    def msg_set_trajectory(self, message):
-
-        window, self._filename = message
-                        
+        window, filename = message
+                                
         if not window in self.Parent.widgets.values():
             return
 
-        self._selections.GetControl().Clear()
-        
+        self._filename = filename
+
+        self._trajectory = DATA_CONTROLLER[filename]
+
         self._basename = os.path.basename(self._filename)
         
-        try:
-            names = UD_STORE.filter(self._basename,self.type)
-        except KeyError:
-            names = []
+        uds = UD_STORE.filter(self._basename, self.type)
         
-        self._selections.GetControl().SetItems(names)
+        self._availableUDs.SetItems(uds)
+
+    def on_save_definition(self, message):
+         
+        filename, name = message
+         
+        if filename != self._basename:
+            return
+
+        self._availableUDs.Append(name)

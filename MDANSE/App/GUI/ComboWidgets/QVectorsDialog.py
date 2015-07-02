@@ -25,7 +25,7 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Mar 30, 2015
+Created on Apr 14, 2015
 
 :author: Eric C. Pellegrini
 '''
@@ -42,8 +42,7 @@ from MDANSE import LOGGER, REGISTRY
 from MDANSE.App.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.App.GUI.ComboWidgets.ProgressBar import ProgressBar
 
-from MDANSE.App.GUI.Framework.Widgets.UserDefinitionWidget import UserDefinitionsDialog,UserDefinitionWidget
-from MDANSE.App.GUI.ComboWidgets.QVectorsDialog import QVectorsDialog
+from MDANSE.App.GUI.ComboWidgets.UserDefinitionsDialog import UserDefinitionsDialog
 
 class QVectorsData(wxgrid.PyGridTableBase):
     
@@ -300,24 +299,12 @@ class QVectorsDialog(UserDefinitionsDialog):
         self.Thaw()
                          
         self._parametersSizer.Layout()
-        
-class QVectorsWidget(UserDefinitionWidget):
-        
-    type = "q_vectors"
-
-    def on_new_user_definition(self,event):
-        
-        qVectorsDlg = QVectorsDialog(self,self._trajectory)
-        
-        qVectorsDlg.ShowModal()
-
-        qVectorsDlg.Destroy()
-        
+                          
 if __name__ == "__main__":
     
     from MMTK.Trajectory import Trajectory
     
-    t = Trajectory(None,"../../../../../Data/Trajectories/MMTK/protein_in_periodic_universe.nc","r")
+    t = Trajectory(None,"../../../../Data/Trajectories/MMTK/protein_in_periodic_universe.nc","r")
     
     app = wx.App(False)
             
@@ -327,4 +314,4 @@ if __name__ == "__main__":
     
     p.Destroy()
     
-    app.MainLoop()        
+    app.MainLoop()

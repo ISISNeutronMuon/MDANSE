@@ -41,7 +41,7 @@ class AxisSelectionWidget(UserDefinitionWidget):
         
     def __init__(self, parent, name, configuration, *args, **kwargs):
         
-        super(AxisSelectionWidget,self).__init__(parent, name, configuration, *args, **kwargs)
+        UserDefinitionWidget.__init__(self,parent, name, configuration, *args, **kwargs)
                             
         pub.subscribe(self.msg_set_trajectory, ("set_trajectory"))
         pub.subscribe(self.msg_new_definition, ("new_axis",))
@@ -53,7 +53,4 @@ class AxisSelectionWidget(UserDefinitionWidget):
         if len(names) != 1:
             raise ConfigurationError("Invalid number of axis definitions selected")
         
-        return names[0]                
-
-    def set_widget_value(self, value):
-        pass
+        return names[0]
