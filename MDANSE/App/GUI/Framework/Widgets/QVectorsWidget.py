@@ -43,7 +43,6 @@ from MDANSE.App.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.App.GUI.ComboWidgets.ProgressBar import ProgressBar
 
 from MDANSE.App.GUI.Framework.Widgets.UserDefinitionWidget import UserDefinitionsDialog,UserDefinitionWidget
-from MDANSE.App.GUI.ComboWidgets.QVectorsDialog import QVectorsDialog
 
 class QVectorsData(wxgrid.PyGridTableBase):
     
@@ -162,11 +161,15 @@ class QVectorsDialog(UserDefinitionsDialog):
 
         self._value = None
         
+        self._qVectors = {}
+        
         self._trajectory = trajectory
         
         target = os.path.basename(self._trajectory.filename)
 
         UserDefinitionsDialog.__init__(self, parent, target, 'q_vectors', wx.ID_ANY, title="Q vectors generator dialog",style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
+        
+        self.SetSize((800,700))
                                                                   
     def build_dialog(self):   
 
@@ -196,7 +199,7 @@ class QVectorsDialog(UserDefinitionsDialog):
 
         self._notebook = wxaui.AuiNotebook(self._panel, wx.ID_ANY, style=wxaui.AUI_NB_DEFAULT_STYLE^wxaui.AUI_NB_TAB_MOVE)
 
-        sizer.Add(self._notebook, 2, wx.ALL|wx.EXPAND, 5)
+        sizer.Add(self._notebook, 3, wx.ALL|wx.EXPAND, 5)
                  
         self._panel.SetSizer(sizer)
 
@@ -220,10 +223,10 @@ class QVectorsDialog(UserDefinitionsDialog):
             LOGGER("No data is the selected Q vectors tab", "error")
             return
         
-        self._ud.clear()
-        self._ud['parameters'] = (qPanel.generator.type,qPanel.parameters)
-        self._ud['q_vectors'] = qPanel.grid.GetTable().data
-        self._ud['is_lattice'] = qPanel.generator.is_lattice
+        self._qVectors.clear()
+        self._qVectors['parameters'] = (qPanel.generator.type,qPanel.parameters)
+        self._qVectors['q_vectors'] = qPanel.grid.GetTable().data
+        self._qVectors['is_lattice'] = qPanel.generator.is_lattice
                 
     def on_close(self, event):
         
@@ -277,10 +280,10 @@ class QVectorsDialog(UserDefinitionsDialog):
 
         self.set_user_definition()
         
-        if not self._ud:
+        if not self._qVectors:
             return None
         
-        return self._ud
+        return self._qVectors
                 
     def select_generator(self, generatorName):
                          

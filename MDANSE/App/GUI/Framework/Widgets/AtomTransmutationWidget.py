@@ -34,8 +34,7 @@ import wx
 
 from MDANSE import ELEMENTS, LOGGER
 
-from MDANSE.App.GUI.Framework.Widgets.UserDefinitionWidget import UserDefinitionWidget
-from MDANSE.App.GUI.Framework.Widgets.AtomSelectionWidget import AtomSelectionDialog
+from MDANSE.App.GUI.Framework.Widgets.AtomSelectionWidget import AtomSelectionDialog, AtomSelectionWidget
 
 class AtomTransmutationDialog(AtomSelectionDialog):
     
@@ -59,28 +58,18 @@ class AtomTransmutationDialog(AtomSelectionDialog):
 
         element = self._elements.GetStringSelection()
         
-        return (element,self._selection)
+        return {'transmutation' : {'element' : element, 'selection' : self._selection}}
         
-class AtomTransmutationWidget(UserDefinitionWidget):
+class AtomTransmutationWidget(AtomSelectionWidget):
         
     type = "atom_transmutation"
 
-    def __init__(self, parent, name, configuration, *args, **kwargs):
-        
-        UserDefinitionWidget.__init__(self, parent, name, configuration, *args, **kwargs)
-                                            
-    def get_widget_value(self):
-        
-        names = self._selections.GetControl().GetCheckedStrings()
-        
-        if not names:
-            return None
-                    
-        return names
-    
     def on_new_user_definition(self,event):
-        pass
-
+        
+        dlg = AtomTransmutationDialog(self,self._trajectory)
+        
+        dlg.Show()
+                                            
 if __name__ == "__main__":
     
     from MMTK.Trajectory import Trajectory

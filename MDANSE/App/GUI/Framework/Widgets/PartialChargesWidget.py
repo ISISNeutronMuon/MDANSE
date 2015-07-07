@@ -55,8 +55,6 @@ class PartialChargesDialog(UserDefinitionsDialog):
                         
     def build_dialog(self):
 
-        #panel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
-
         self._grid = wxgrid.Grid(self)
         
         self._grid.CreateGrid(self._trajectory.universe.numberOfAtoms(),3)
@@ -101,7 +99,7 @@ class PartialChargesDialog(UserDefinitionsDialog):
             LOGGER("No partial charges defined.", "error", ["dialog"])
             return None
         
-        return charges 
+        return {'charges' : charges} 
 
 
 class PartialChargesWidget(UserDefinitionWidget):

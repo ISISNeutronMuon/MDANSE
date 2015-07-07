@@ -56,8 +56,6 @@ class UserDefinitionsDialog(wx.Dialog):
         
         self._section = section
 
-        self._ud = {}
-
         self._mainSizer = wx.BoxSizer(wx.VERTICAL)
                                 
         self.build_dialog()

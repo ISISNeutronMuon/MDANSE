@@ -158,11 +158,7 @@ class AtomSelectionDialog(UserDefinitionsDialog):
 
         self._selectors = {}
                                         
-        self._expression = None
-
-        self._selection = None
-
-        self._selectionParser = None
+        self._selection = []
 
         self._trajectory = trajectory
         
@@ -372,17 +368,17 @@ class AtomSelectionDialog(UserDefinitionsDialog):
                 
     def set_selection(self):
 
-        self._expression, self._selection = self._query.parse()
+        _, selection = self._query.parse()
                 
-        pub.sendMessage("set_selection", message = (self,self._selection))
+        pub.sendMessage("set_selection", message = (self,selection))
         
     def validate(self):
 
-        if not self._selection:
+        if not self._ud:
             LOGGER("The current selection is empty", "error", ["dialog"])
             return None
         
-        return self._selection
+        return self._ud
 
 class AtomSelectionWidget(UserDefinitionWidget):
         
@@ -393,19 +389,7 @@ class AtomSelectionWidget(UserDefinitionWidget):
         dlg = AtomSelectionDialog(self,self._trajectory)
         
         dlg.Show()
- 
-    def get_widget_value(self):
-
-        names = self._selections.GetControl().GetCheckedStrings()
-        
-        if not names:
-            return None
-        
-        if len(names) != 1:
-            raise ConfigurationError("Invalid number of atom selection definitions selected")
-                    
-        return names[0]
-        
+         
 if __name__ == "__main__":
     
     from MMTK.Trajectory import Trajectory

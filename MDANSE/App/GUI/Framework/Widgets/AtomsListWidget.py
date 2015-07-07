@@ -49,6 +49,8 @@ class AtomsListDialog(UserDefinitionsDialog):
         self._nAtoms = nAtoms
         
         self._selectedAtoms = []
+        
+        self._selection = []
                 
         target = os.path.basename(self._trajectory.filename)
         
@@ -106,7 +108,7 @@ class AtomsListDialog(UserDefinitionsDialog):
 
     def set_user_definition(self):
 
-        self._ud.clear()
+        self._selection = []
 
         if len(self._selectedAtoms) != self._nAtoms:
             LOGGER('You must select %d atoms.' % self._nAtoms,'error',['dialog'])
@@ -115,22 +117,18 @@ class AtomsListDialog(UserDefinitionsDialog):
         molecule = str(self._molecules.GetStringSelection())
         atoms = tuple(str(self._atoms.GetString(idx)) for idx in self._selectedAtoms)
 
-        self._ud = {}
-        self._ud['parameters'] = (molecule,atoms)
-        self._ud['indexes'] = find_atoms_in_molecule(self._trajectory.universe,molecule, atoms, True)
+        self._selection = find_atoms_in_molecule(self._trajectory.universe,molecule, atoms, True)
                         
     def on_set_user_definition(self,event=None):
 
         self._resultsTextCtrl.Clear()
         
         self.set_user_definition()
-        if not self._ud:
+        if not self._selection:
             return
             
-        molecule,atoms = self._ud['parameters']
-            
-        self._resultsTextCtrl.AppendText('Molecule = %s ; Atoms = %s\nIndexes:\n' % (molecule,atoms))
-        for idxs in self._ud['indexes']:
+        self._resultsTextCtrl.AppendText('Number of selected %d-tuplets: %d\n' % (self._nAtoms,len(self._selection)))
+        for idxs in self._selection:
             line = "   ;   ".join(["Atom %d : %s" % (i,v) for i,v in enumerate(idxs)])
             self._resultsTextCtrl.AppendText(line)
             self._resultsTextCtrl.AppendText('\n')
@@ -155,10 +153,10 @@ class AtomsListDialog(UserDefinitionsDialog):
             
     def validate(self):
 
-        if not self._ud:
+        if not self._selection:
             return None
                         
-        return self._ud
+        return {'selection' : self._selection}
 
 class AtomListWidget(UserDefinitionWidget):
         
