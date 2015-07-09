@@ -49,7 +49,7 @@ class JobPlugin(ComponentPlugin):
         
     def __init__(self, parent, *args, **kwargs):
                 
-        self._job = REGISTRY["job"][self.type]()
+        self._jobClass = REGISTRY["job"][self.type]
         
         ComponentPlugin.__init__(self, parent, size=wx.Size(800,400), *args, **kwargs)
                 
@@ -60,7 +60,7 @@ class JobPlugin(ComponentPlugin):
                 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
                 
-        self._parametersPanel = ConfigurationPanel(self._main, self._job)
+        self._parametersPanel = ConfigurationPanel(self._main, self._jobClass)
                     
         sb = wx.StaticBox(self._main, wx.ID_ANY)
         sbSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
@@ -94,7 +94,7 @@ class JobPlugin(ComponentPlugin):
         
     def on_help(self, event):
                                 
-        d = JobHelpFrame(self,self._job)
+        d = JobHelpFrame(self,self._jobClass)
 
         d.Show()
                          
@@ -102,9 +102,11 @@ class JobPlugin(ComponentPlugin):
 
         parameters = self._parametersPanel.get_value()
         
-        script = os.path.join(PLATFORM.jobscripts_directory(),self._job._name)+'.py'
+        name = self._jobClass.set_name()
+        
+        script = os.path.join(PLATFORM.jobscripts_directory(),name)+'.py'
                 
-        self._job.save(script, parameters)
+        self._jobClass.save(script, parameters)
                                 
         if PLATFORM.name == "windows":
             startupinfo = subprocess.STARTUPINFO()
@@ -139,7 +141,7 @@ class JobPlugin(ComponentPlugin):
         if os.path.splitext(path)[1] != ".py":
             path += ".py"
                         
-        self._job.save(path, parameters)
+        self._jobClass.save(path, parameters)
 
     def plug(self):
         
@@ -177,7 +179,7 @@ class JobFrame(wx.Frame):
         mainSizer.Fit(mainPanel)
         mainPanel.Layout()
         
-        self.SetTitle("Run %s job" % self._jobPlugin._job.label)
+        self.SetTitle("Run %s job" % self._jobPlugin._jobClass.label)
         
         self.Bind(wx.EVT_CLOSE, self.on_quit)
         
@@ -191,7 +193,25 @@ class JobFrame(wx.Frame):
             self.Destroy()           
         
 if __name__ == "__main__":
+
+    from MMTK.Trajectory import Trajectory
+    from MDANSE.App.GUI import DATA_CONTROLLER
+    
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))))
+    
+    filename = os.path.join(root,'Data','Trajectories','MMTK','protein_in_periodic_universe.nc')
+
+    data = REGISTRY['input_data']['mmtk_trajectory'](filename)
+
+    basename = os.path.basename(filename)
+        
+    t = Trajectory(None,filename,"r")
+
+    DATA_CONTROLLER[filename] = data
+    
     app = wx.App(False)
-    f = JobFrame(None,'discover')
+    f = JobFrame(None,'msd')
+    f._jobPlugin._datakey = filename
+    pub.sendMessage("on_set_data", message = (f._jobPlugin,filename))
     f.Show()
     app.MainLoop()            
