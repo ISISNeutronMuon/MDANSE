@@ -42,10 +42,8 @@ class BooleanWidget(IWidget):
         
         sizer = wx.BoxSizer(wx.VERTICAL)
         
-        default = self.configurator.default
-
         self._boolean = wx.CheckBox(self._widgetPanel, wx.ID_ANY, label="Yes")
-        self._boolean.SetValue(default)
+        self._boolean.SetValue(self._configurator.default)
 
         sizer.Add(self._boolean, 1, wx.ALL|wx.EXPAND, 5)
         

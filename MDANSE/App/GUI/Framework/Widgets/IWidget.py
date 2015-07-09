@@ -42,28 +42,22 @@ class IWidget(wx.Panel):
     
     type = "widget"
 
-    def __init__(self, parent, name, configurable, *args, **kwargs):
+    def __init__(self, parent, name, configurator, *args, **kwargs):
         
         wx.Panel.__init__(self, parent, wx.ID_ANY, *args, **kwargs)
 
         self._parent = parent
         
         self._name = name
-        
-        self._configurable = configurable
-        
-        self._configurator = self._configurable.configurators[name]
-                        
-        self._label = self._configurator.label
+                                
+        self._configurator = configurator
+                                                        
+        self._label = name
                         
         self.initialize()
                         
         self.build_panel()
-        
-    @property
-    def configurator(self):
-        return self._configurator
-
+                
     @property
     def label(self):
         return self._label

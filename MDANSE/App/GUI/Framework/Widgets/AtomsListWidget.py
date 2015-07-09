@@ -166,11 +166,11 @@ class AtomListWidget(UserDefinitionWidget):
         
         UserDefinitionWidget.initialize(self)
         
-        self.type = "%d_atoms_list" % self.configurator.nAtoms
+        self.type = "%d_atoms_list" % self._configurator.nAtoms
         
     def on_new_user_definition(self,event):
         
-        atomsListDlg = AtomsListDialog(self,self._trajectory,self.configurator.nAtoms)
+        atomsListDlg = AtomsListDialog(self,self._trajectory,self.configuration[self._name].nAtoms)
         
         atomsListDlg.ShowModal()
             

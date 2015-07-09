@@ -42,8 +42,8 @@ class SingleChoiceWidget(IWidget):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self._choices = wx.Choice(self._widgetPanel, wx.ID_ANY, choices=self.configurator.choices)
-        self._choices.SetStringSelection(self.configurator.default)
+        self._choices = wx.Choice(self._widgetPanel, wx.ID_ANY, choices=self._configurator.choices)
+        self._choices.SetStringSelection(self._configurator.default)
                 
         sizer.Add(self._choices, 1, wx.ALL|wx.EXPAND, 5)
 

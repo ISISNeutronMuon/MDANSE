@@ -47,19 +47,16 @@ class InterpolationOrderWidget(IWidget):
         
         label = wx.StaticText(self._widgetPanel, wx.ID_ANY, label="interpolation order")
         
-        self._interpolationOrder = wx.Choice(self._widgetPanel, wx.ID_ANY, choices=self.configurator.orders)
-        self._interpolationOrder.SetStringSelection(InterpolationOrderWidget.orders[self.configurator.default])
+        self._interpolationOrder = wx.Choice(self._widgetPanel, wx.ID_ANY)
                 
         sizer.Add(label, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
         sizer.Add(self._interpolationOrder, 0, wx.ALL, 5)
                         
-        pub.subscribe(self.set_wigdet_value, ("set_trajectory"))
+        pub.subscribe(self.on_set_trajectory, ("set_trajectory"))
         
-        self._interpolationOrder.SetValue(self.configurator.orders[0])
-
         return sizer
                                                             
-    def set_wigdet_value(self, message):                
+    def on_set_trajectory(self, message):                
 
         window, filename = message
                         
@@ -69,9 +66,11 @@ class InterpolationOrderWidget(IWidget):
         trajectory = DATA_CONTROLLER[filename]
                 
         if "velocities" in trajectory.data.variables():
-            self._interpolationOrder.SetStringSelection(self.configurator.orders)
+            self._interpolationOrder.SetItems(self._configurator.choices)
         else:
-            self._interpolationOrder.SetStringSelection(self.configurator.orders[1:])
+            self._interpolationOrder.SetItems(self._configurator.choices[1:])
+            
+        self._interpolationOrder.SetStringSelection(self._configurator.choices[0])
                     
     def get_widget_value(self):
              

@@ -41,12 +41,12 @@ class InputDirectoryWidget(IWidget):
     
     def add_widgets(self):
         
-        cfg = self.configurator
+        default = self._configurator.default
 
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self._dirname = wxfile.DirBrowseButton(self._widgetPanel, wx.ID_ANY, startDirectory=cfg.default, newDirectory=True)
-        self._dirname.SetValue(cfg.default)
+        self._dirname = wxfile.DirBrowseButton(self._widgetPanel, wx.ID_ANY, startDirectory=default, newDirectory=True)
+        self._dirname.SetValue(default)
 
         sizer.Add(self._dirname, 1, wx.ALL|wx.EXPAND, 0)
         

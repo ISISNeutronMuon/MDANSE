@@ -191,7 +191,7 @@ class InstrumentResolutionConfigurator(IWidget):
         
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         
-        self._resolution = wx.TextCtrl(self._widgetPanel, wx.ID_ANY, value=str(self.configurator.default))
+        self._resolution = wx.TextCtrl(self._widgetPanel, wx.ID_ANY, value=str(self._configurator.default))
 
         self._setResolution = wx.Button(self._widgetPanel, wx.ID_ANY, label="Set")
         self._setResolution.Enable(False)
@@ -212,7 +212,7 @@ class InstrumentResolutionConfigurator(IWidget):
 
     def on_set_instrument_resolution(self, event):
                 
-        frameCfgName = self.configurator.dependencies["frames"]
+        frameCfgName = self._configurator.dependencies["frames"]
         time = self.Parent.widgets[frameCfgName].time
         timeStep = time[1] - time[0]
         nSteps = len(time)

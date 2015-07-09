@@ -36,7 +36,7 @@ from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Configurable import ConfigurationError
 from MDANSE.Framework.Jobs.McStasVirtualInstrument import McStasParameters
 
-from MDANSE.App.GUI.ConfigurationPanel import ConfigurationPanel
+from MDANSE.App.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
 
 class McStasParametersWidget(IWidget):
@@ -63,14 +63,14 @@ class McStasParametersWidget(IWidget):
         if not window in self.Parent.widgets.values():
             return
  
-        for k in self.configurator.exclude:
+        for k in self._configurator.exclude:
             parameters.pop(k)
         
         self._mcstasParameters = McStasParameters()
          
         for name, value in parameters.items():
             typ, default = value
-            self._mcstasParameters.configurators[name] = (self._mcStasTypes[typ], {"default":default})
+            self._mcstasParameters.settings[name] = (self._mcStasTypes[typ], {"default":default})
  
         self._sizer.Clear(deleteWindows=True)
  

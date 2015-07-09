@@ -34,7 +34,7 @@ import wx
 
 from MDANSE.Framework.Jobs.McStasVirtualInstrument import McStasOptions
 from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
-from MDANSE.App.GUI.ConfigurationPanel import ConfigurationPanel
+from MDANSE.App.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 
 class McStasOptionsConfiguratorWidget(IWidget):
      

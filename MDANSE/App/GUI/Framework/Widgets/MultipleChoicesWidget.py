@@ -42,11 +42,13 @@ class MultipleChoicesWidget(IWidget):
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        cfg = self._configurator
 
-        self._choices = wx.combo.ComboCtrl(self._widgetPanel, value=self.configurator.label, style=wx.CB_READONLY)        
-        tcp = ComboCheckbox(self.configurator.choices,self.configurator.nChoices)
+        self._choices = wx.combo.ComboCtrl(self._widgetPanel, value=cfg.label, style=wx.CB_READONLY)        
+        tcp = ComboCheckbox(cfg.choices,cfg.nChoices)
         self._choices.SetPopupControl(tcp)
-        tcp.checklistbox.SetCheckedStrings(self.configurator.default)
+        tcp.checklistbox.SetCheckedStrings(cfg.default)
                 
         sizer.Add(self._choices, 1, wx.ALL|wx.EXPAND, 5)
 

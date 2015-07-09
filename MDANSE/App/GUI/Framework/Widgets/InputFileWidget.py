@@ -43,11 +43,12 @@ class InputFileWidget(IWidget):
     
     def add_widgets(self):
         
-        cfg = self.configurator
+        default = self._configurator.default
+        wildcard = self._configurator.wildcard
 
         sizer = wx.BoxSizer(wx.VERTICAL)
                 
-        self._browser = wxfile.FileBrowseButton(self._widgetPanel, wx.ID_ANY, labelText="", initialValue=cfg.default, startDirectory=cfg.default,fileMask=cfg.wildcard)
+        self._browser = wxfile.FileBrowseButton(self._widgetPanel, wx.ID_ANY, labelText="", initialValue=default, startDirectory=default,fileMask=wildcard)
 
         sizer.Add(self._browser, 1, wx.ALL|wx.EXPAND, 5)
 

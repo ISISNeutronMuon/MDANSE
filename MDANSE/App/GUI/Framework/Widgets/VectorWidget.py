@@ -76,10 +76,10 @@ class VectorConfigurator(IWidget):
         
         try:
             
-            val = (self.configurator.valueType(self._x.GetValue()),
-                   self.configurator.valueType(self._y.GetValue()),
-                   self.configurator.valueType(self._z.GetValue()))
+            val = (self._configurator.valueType(self._x.GetValue()),
+                   self._configurator.valueType(self._y.GetValue()),
+                   self._configurator.valueType(self._z.GetValue()))
         except ValueError:
-            raise ConfigurationError("Invalid value for %r entry" % self.configurator.name)
+            raise ConfigurationError("Invalid value for %r entry" % self.name)
         else:        
             return val

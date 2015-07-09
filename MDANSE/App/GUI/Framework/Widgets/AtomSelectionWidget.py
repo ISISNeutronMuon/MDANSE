@@ -38,7 +38,6 @@ import wx
 from MDANSE import LOGGER, REGISTRY
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser, AtomSelectionParserError
-from MDANSE.Framework.Configurable import ConfigurationError
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
 from MDANSE.App.GUI.Framework.Widgets.UserDefinitionWidget import UserDefinitionsDialog, UserDefinitionWidget
@@ -389,6 +388,15 @@ class AtomSelectionWidget(UserDefinitionWidget):
         dlg = AtomSelectionDialog(self,self._trajectory)
         
         dlg.Show()
+        
+    def get_widget_value(self):
+        
+        ud = self._availableUDs.GetStringSelection()
+        
+        if not ud:
+            return 'all'
+        else:
+            return str(ud)    
          
 if __name__ == "__main__":
     

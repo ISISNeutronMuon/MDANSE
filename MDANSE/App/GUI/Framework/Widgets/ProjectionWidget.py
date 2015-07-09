@@ -110,7 +110,7 @@ class ProjectionWidget(IWidget):
             try:
                 val = ("axial", tuple([float(v.GetValue()) for v in (self._ax,self._ay,self._az)]))
             except ValueError:
-                raise ConfigurationError("Invalid value for %r entry" % self.configurator.name)
+                raise ConfigurationError("Invalid value for %r entry" % self.name)
             else:
                 return val
             
@@ -118,7 +118,7 @@ class ProjectionWidget(IWidget):
             try:
                 val = ("planar", tuple([v.GetValue() for v in (self._px,self._py,self._pz)]))
             except ValueError:
-                raise ConfigurationError("Invalid value for %r entry" % self.configurator.name)
+                raise ConfigurationError("Invalid value for %r entry" % self.name)
             else:
                 return val            
     

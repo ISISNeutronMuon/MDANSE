@@ -54,11 +54,11 @@ class RangeWidget(IWidget):
         self._last  = wx.TextCtrl(self._widgetPanel, wx.ID_ANY)
         self._step  = wx.TextCtrl(self._widgetPanel, wx.ID_ANY)
                     
-        cfg = self.configurator
+        first, last, step = self._configurator.default
         
-        self._first.SetValue(str(cfg.default[0]))
-        self._last.SetValue(str(cfg.default[1]))
-        self._step.SetValue(str(cfg.default[2]))
+        self._first.SetValue(str(first))
+        self._last.SetValue(str(last))
+        self._step.SetValue(str(step))
 
         gbSizer.Add(firstLabel, (0,0), flag=wx.ALIGN_CENTER_VERTICAL)
         gbSizer.Add(labelLabel, (0,3), flag=wx.ALIGN_CENTER_VERTICAL)
@@ -75,10 +75,10 @@ class RangeWidget(IWidget):
     def get_widget_value(self):
         
         try:
-            val = (self.configurator.valueType(self._first.GetValue()),
-                   self.configurator.valueType(self._last.GetValue()),
-                   self.configurator.valueType(self._step.GetValue()))
+            val = (self._configurator.valueType(self._first.GetValue()),
+                   self._configurator.valueType(self._last.GetValue()),
+                   self._configurator.valueType(self._step.GetValue()))
         except ValueError:
-            raise ConfigurationError("Invalid value for %r entry" % self.configurator.name)
+            raise ConfigurationError("Invalid value for %r entry" % self.name)
         else:
             return val

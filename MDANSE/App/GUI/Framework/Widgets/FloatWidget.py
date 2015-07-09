@@ -44,7 +44,7 @@ class FloatWidget(StringWidget):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self._float = wx.TextCtrl(self._widgetPanel, wx.ID_ANY, value=str(self.configurator.default))
+        self._float = wx.TextCtrl(self._widgetPanel, wx.ID_ANY, value=str(self._configurator.default))
         
         sizer.Add(self._float, 0, wx.ALL, 5)
         
@@ -53,9 +53,8 @@ class FloatWidget(StringWidget):
     def get_widget_value(self):
                 
         try:
-            _ = float(self._float.GetValue())            
+            val = float(self._float.GetValue())            
         except ValueError:
-            raise ConfigurationError("Invalid value for %r entry" % self.configurator.name)
-        val = self._float.GetValue()
-
-        return val
+            raise ConfigurationError("Invalid value for %r entry" % self.name)
+        else:
+            return val

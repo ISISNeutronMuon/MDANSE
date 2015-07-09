@@ -44,7 +44,7 @@ class PythonObjectWidget(IWidget):
         
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self._string = wx.TextCtrl(self._widgetPanel, wx.ID_ANY, value=repr(self.configurator.default))
+        self._string = wx.TextCtrl(self._widgetPanel, wx.ID_ANY, value=repr(self._configurator[self._name].default))
 
         sizer.Add(self._string, 0, wx.ALL, 5)
 
