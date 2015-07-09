@@ -61,21 +61,24 @@ class Configurable(object):
         Constructor
         '''
                
-        self._configuration = {}
+        self._configuration = self.build_configuration()
+                                     
+        self._configured=False
         
-        if not isinstance(self.settings,dict):
-            raise ConfigurationError("Invalid type for settings: must be a mapping-like object")
+    @classmethod
+    def build_configuration(cls):
+        
+        configuration = collections.OrderedDict()
 
-        self._configurators = {}
-        for name,(typ,kwds) in self.settings.items():
-
+        for name,(typ,kwds) in cls.settings.items():
+            
             try:
-                self._configurators[name] = REGISTRY["configurator"][typ](name, **kwds)
+                configuration[name] = REGISTRY["configurator"][typ](name, **kwds)
             # Any kind of error has to be caught
             except:
                 raise ConfigurationError("Invalid type for %r configurator" % name)
-                     
-        self._configured=False
+        
+        return configuration
         
     def __getitem__(self, name):
         """
@@ -88,15 +91,7 @@ class Configurable(object):
         """
                 
         return self._configuration.setdefault(name,{})
-    
-    @classmethod
-    def set_settings(cls, settings):
         
-        cls.settings.clear()
-        
-        if isinstance(settings,dict):
-            cls.settings.update(settings)        
-    
     @property
     def configuration(self):
         '''
@@ -116,33 +111,30 @@ class Configurable(object):
         :type parameters: dict
         '''
                 
-        # Cleans the previous configuration
-        self._configuration.clear()
-
         self._configured=False
-                        
+                                
         # If no configurator has to be configured, just return
-        if not self._configurators:
+        if not self._configuration:
             self._configured=True
             return
         
         if isinstance(parameters,dict):
             # Loop over the configuration items          
-            for k,v in self._configurators.items():
+            for k,v in self._configuration.items():
                 # If no input parameter has been set for this item, use its default value.
                 if not parameters.has_key(k):
                     parameters[k] = v.default
         else:
             raise ConfigurationError("Invalid type for configuration parameters")             
                         
-        toBeConfigured = set(self._configurators.keys())
+        toBeConfigured = set(self._configuration.keys())
         configured = set()
                 
         while toBeConfigured != configured:
                         
             progress = False
 
-            for name,conf in self._configurators.items():
+            for name,conf in self._configuration.items():
                                                                                 
                 if name in configured:
                     continue
@@ -174,11 +166,11 @@ class Configurable(object):
             return "Not yet configured"
         
         info = []
-        for configurator in self._configurators.keys():
+        for configurator in self._configuration.values():            
+            info.append(configurator.get_information())
+            info.append('\n')
             
-            info.append(self._configuration[configurator].get_information())
-            
-        return "\n".join(info)
+        return "".join(info)
     
     @classmethod
     def build_doc(cls):
@@ -269,14 +261,3 @@ class Configurable(object):
             params[name] = cfg.default
             
         return params
-    
-    @property
-    def configurators(self):
-        '''
-        Return the configurator objects of this Configurable object
-        
-        :return: a mapping between the name of the configurator object and its corresponding IConfigurator instance
-        :rtype: dict 
-        '''
-        
-        return self._configurators
