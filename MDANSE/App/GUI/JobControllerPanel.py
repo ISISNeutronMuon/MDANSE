@@ -41,15 +41,14 @@ import time
 import wx
 import wx.lib.intctrl as intctrl
 
+from MDANSE import LOGGER
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
 from MDANSE.Framework.Status import convert_duration, total_seconds
-from MDANSE.Framework.Jobs.JobStatus import JobState
 from MDANSE.Externals.pubsub import pub
 
 from MDANSE.App.GUI.Icons import ICONS
-from MDANSE.App.GUI.Events.JobControllerEvent import EVT_JOB_CONTROLLER, JobControllerEvent
-from MDANSE.App.GUI.LogfileFrame import LogfileFrame
+from MDANSE.App.GUI.Events.JobControllerEvent import EVT_JOB_CONTROLLER, EVT_JOB_CRASH, JobControllerEvent, JobCrashEvent
         
 class JobController(threading.Thread):
     
@@ -76,26 +75,22 @@ class JobController(threading.Thread):
         return self._registry
 
     def kill_job(self, job):
+                
+        if self._registry.has_key(job):
 
-        if not self._registry.has_key(job):
-            return
+            if self._registry[job]['state'] == 'running':
+                try:
+                    PLATFORM.kill_process(self._registry[job]['pid'])
+                except:
+                    pass
+                else:
+                    del self._registry[job]
 
-        if self._registry[job]['state'] == 'running':
+        if os.path.exists(job):            
             try:
-                PLATFORM.kill_process(self._registry[job]['pid'])
+                os.unlink(job)
             except:
-                return
-
-        if os.path.exists(self._registry[job]['temporary_file']):
-            try:
-                os.unlink(self._registry[job]['temporary_file'])
-            except:
-                return
-
-        try:
-            del self._registry[job]
-        except KeyError:
-            return
+                pass
         
         self.update()
 
@@ -145,9 +140,6 @@ class JobController(threading.Thread):
 
             # The job file could be opened and unpickled properly
             else:
-                # Check that the unpickled object is a JobStatus object
-                if not isinstance(info,JobState):
-                    continue
                 
                 name = info['name']
                 
@@ -160,15 +152,15 @@ class JobController(threading.Thread):
                     jobStartingTime = datetime.datetime.strptime(info["start"],"%d-%m-%Y %H:%M:%S")
                     procStartingTime = datetime.datetime.strptime(pids[info['pid']],"%d-%m-%Y %H:%M:%S")
                     running = (jobStartingTime >= procStartingTime)
-                        
-                # Case where the job is running, update the registry with the new status    
-                if running:
-                    self._registry[name] = info
                     
-                # Case where the job is not running 
-                else:
-                    self._registry[name] = info          
+                # If the job was aborted, display the traceback on the dialog logger and remove the corresponding job temporary file
+                if info['state'] == 'aborted':
+                    wx.PostEvent(self._window, JobCrashEvent(info['traceback']))
+                    self.kill_job(j)
+                    continue
 
+                self._registry[name] = info
+                
         wx.PostEvent(self._window, JobControllerEvent(self._registry))
                                               
 class JobControllerPanel(wx.ScrolledWindow):
@@ -182,9 +174,7 @@ class JobControllerPanel(wx.ScrolledWindow):
         self.SetScrollbars(pixelsPerUnitX=1, pixelsPerUnitY=1, noUnitsX=50, noUnitsY=50)
         
         self.parent = parent
-                        
-        self._jobs = collections.OrderedDict()
-        
+                                
         self._gbSizer = wx.GridBagSizer(0,0)
                         
         self.SetSizer(self._gbSizer)
@@ -192,6 +182,7 @@ class JobControllerPanel(wx.ScrolledWindow):
         self._jobsController = JobController(self,True)
 
         EVT_JOB_CONTROLLER(self,self.on_update)
+        EVT_JOB_CRASH(self,self.on_crash_summary)
         
         pub.subscribe(self.on_start_job,"on_start_job")
 
@@ -228,18 +219,29 @@ class JobControllerPanel(wx.ScrolledWindow):
         self._gbSizer.Add(eta     ,pos=(r,6),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
         self._gbSizer.Add(kill    ,pos=(r,7),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
 
-        name.Bind(wx.EVT_LEFT_DCLICK,self.on_display_logfile)
+        name.Bind(wx.EVT_LEFT_DCLICK,self.on_display_info)
 
         self._gbSizer.Layout()
 
         kill.Bind(wx.EVT_BUTTON, self.on_kill_job)
 
-    def on_display_logfile(self,event):
+    def on_display_info(self,event):
         
         row = self._gbSizer.GetItemPosition(event.GetEventObject())[0]
         name = self._gbSizer.FindItemAtPosition((row,0)).Window.GetValue() 
 
-        f = LogfileFrame(self,name)
+        f = wx.Frame(self,size=(800,500))
+                
+        panel = wx.Panel(f,wx.ID_ANY)
+        
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        self._info = wx.TextCtrl(panel,wx.ID_ANY,style=wx.TE_AUTO_SCROLL|wx.TE_READONLY|wx.TE_MULTILINE)
+        self._info.SetValue(self._jobsController.registry[name]['info'])
+        
+        sizer.Add(self._info,1,wx.ALL|wx.EXPAND,5)
+        
+        panel.SetSizer(sizer)
         
         f.Show()
                                     
@@ -251,6 +253,11 @@ class JobControllerPanel(wx.ScrolledWindow):
         d = wx.MessageDialog(None, 'Do you really want to kill job %r ?' % name, 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_EXCLAMATION)
         if d.ShowModal() == wx.ID_YES:
             self._jobsController.kill_job(name)
+
+    def on_crash_summary(self,event):
+
+        LOGGER(event.traceback,'error',['console'])
+
                         
     def on_update(self, event):
                                         
