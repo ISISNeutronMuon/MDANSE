@@ -32,6 +32,7 @@ Created on May 26, 2015
 
 import os
 import re
+import StringIO
 import tarfile
 
 import numpy
@@ -102,5 +103,14 @@ class SVGFormat(IFormat):
             tf.add(svgfilename, arcname='%s%s' % (var.name,cls.extensions[0]))
             
             os.remove(svgfilename)
-    
+            
+        if header:
+            tempStr = StringIO.StringIO()
+            tempStr.write(header)
+            tempStr.write('\n\n')  
+            tempStr.seek(0)
+            info = tarfile.TarInfo(name='jobinfo.txt')
+            info.size=tempStr.len
+            tf.addfile(tarinfo=info, fileobj=tempStr)
+                
         tf.close()

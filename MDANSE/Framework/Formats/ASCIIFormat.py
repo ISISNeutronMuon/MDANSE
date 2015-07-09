@@ -66,22 +66,28 @@ class ASCIIFormat(IFormat):
         '''
                 
         filename = os.path.splitext(filename)[0]
-        filename = "%s_%s.tar" % (filename,cls.type)
+        filename = "%s.tar" % filename
 
         tf = tarfile.open(filename,'w')
         
         for var in data.values():
 
             tempStr = StringIO.StringIO()
-            if header:
-                tempStr.write(header)
-                tempStr.write('\n\n')  
             tempStr.write(var.info())
             tempStr.write('\n\n')            
             cls.write_array(tempStr,var)
             tempStr.seek(0)
 
             info = tarfile.TarInfo(name='%s%s' % (var.name,cls.extensions[0]))
+            info.size=tempStr.len
+            tf.addfile(tarinfo=info, fileobj=tempStr)
+            
+        if header:
+            tempStr = StringIO.StringIO()
+            tempStr.write(header)
+            tempStr.write('\n\n')  
+            tempStr.seek(0)
+            info = tarfile.TarInfo(name='jobinfo.txt')
             info.size=tempStr.len
             tf.addfile(tarinfo=info, fileobj=tempStr)
                                     
