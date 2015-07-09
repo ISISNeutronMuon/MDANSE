@@ -80,7 +80,7 @@ class MeanSquareDisplacement(IJob):
     settings['grouping_level']=('grouping_level',{})
     settings['transmutated_atoms']=('atom_transmutation',{"dependencies":{'trajectory':'trajectory', 'atom_selection':'atom_selection'}})
     settings['weights']=('weights',{})
-    settings['output_files']=('output_files', {"formats":["netcdf","ascii"]})
+    settings['output_files']=('output_files', {"formats":["netcdf","ascii","svg"]})
     settings['running_mode']=('running_mode',{})
             
     def initialize(self):
@@ -119,7 +119,9 @@ class MeanSquareDisplacement(IJob):
                                        step=self.configuration['frames']['step'])
          
         series = self.configuration['projection']["projector"](series)
- 
+        
+        1/0
+         
         msd = mean_square_displacement(series)
                 
         return index, msd

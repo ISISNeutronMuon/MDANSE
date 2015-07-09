@@ -66,9 +66,9 @@ class SpatialDensity(IJob):
     settings['trajectory'] = ('mmtk_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'MMTK', 'protein_in_periodic_universe.nc')})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['spatial_resolution'] = ('float', {'mini':0.01, 'default':0.1})
-    settings['reference_basis'] = ('basis_selection', {'dependencies':{'trajectory':'trajectory'},
-                                                       'nAtoms':3,
-                                                       'default':('C284H438N84O79S7',('O','C_beta','C_delta'))})
+    settings['reference_basis'] = ('atoms_list', {'dependencies':{'trajectory':'trajectory'},
+                                                  'nAtoms':3,
+                                                  'default':('C284H438N84O79S7',('O','C_beta','C_delta'))})
     settings['target_molecule'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'},
                                                       'default':'atom_index 151'})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
