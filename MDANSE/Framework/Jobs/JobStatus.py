@@ -26,7 +26,9 @@ class JobStatus(Status):
         self._state['progress'] = 0 
         self._state['state'] = "running"
         self._state['name'] = job.name
+        self._state['traceback'] = ''
         self._state['temporary_file'] = os.path.join(PLATFORM.temporary_files_directory(), self._state['name'])
+        self._state['info'] = ''
         
         self.save_status()
                     
@@ -45,6 +47,8 @@ class JobStatus(Status):
         return self._state    
 
     def cleanup(self):
+        
+        return
                 
         try:
             os.unlink(self._state['temporary_file'])
