@@ -40,7 +40,7 @@ import subprocess
 import sys
 import traceback
 
-from MDANSE import LOGGER, PLATFORM, REGISTRY
+from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Jobs.JobStatus import JobStatus
@@ -75,10 +75,10 @@ class JobError(Error):
 
         trace = '\n'.join(trace)
                 
-        LOGGER(trace,'error',[job._name])
-
         if job._status is not None:
             job._status._state["state"] = "aborted"
+            job._status._state['traceback'] = trace
+            job._status._state['info'] += trace
             job._status.update(force=True)
             
     def __str__(self):
@@ -128,39 +128,19 @@ class IJob(Configurable):
                         
         return name
         
-    def __init__(self, status=False):
+    def __init__(self):
         """
         The base class constructor.        
         """
 
         Configurable.__init__(self)
-        
-        self._name = IJob.set_name()
 
-        LOGGER.add_handler(self._name, REGISTRY['handler']['logfile'](os.path.join(PLATFORM.logfiles_directory(),self._name)+'.txt'), level="info")
-        
         self._outputData = OutputData()
         
+        self._status = None
+
         self._info = ""
-                                        
-        if status:
-            self._status = JobStatus(self)
-        else:
-            self._status = None
-                                
-    def build_documentation(self):
-                
-        doc = [self.__doc__]
-        for conf in self.settings.values():
-            if conf.__doc__ is None:
-                doc.append("%s : %s\n" % (conf.type,'undocumented'))
-            else:
-                doc.append("%s : %s\n" % (conf.type,conf.__doc__))
-                
-        doc = '\n'.join(doc)
-           
-        return doc
-    
+                                            
     @classmethod
     def build_parallelization_test(cls, testFile, parameters=None):
         """
@@ -183,9 +163,6 @@ class IJob(Configurable):
         f.write('from MDANSE import REGISTRY\n\n')
                 
         f.write('class Test%sParallel(UnitTest):\n\n' % cls.type.upper())
-        f.write('    def setUp(self):\n')
-        f.write('        from MDANSE import LOGGER\n')
-        f.write('        LOGGER.stop()\n\n')
                     
         f.write('    def test(self):\n')      
 
@@ -282,7 +259,7 @@ class IJob(Configurable):
             #. jobFile (str): The name of the output job file.\n
             #. parameters (dict): optional. If not None, the parameters with which the job file will be built.
         """
-                         
+        
         f = open(jobFile, 'w')
                    
         # The first line contains the call to the python executable. This is necessary for the file to
@@ -292,7 +269,7 @@ class IJob(Configurable):
         # Writes the input file header.
         f.write('########################################################\n')
         f.write('# This is an automatically generated MDANSE run script #\n')
-        f.write('#######################################################\n\n')
+        f.write('########################################################\n\n')
                                     
         # Write the import.
         f.write("from MDANSE import REGISTRY\n\n")
@@ -316,9 +293,8 @@ class IJob(Configurable):
         f.write('################################################################\n')
         f.write('\n')
     
-        # Sets |analysis| variable to an instance analysis to save. 
-        f.write('job = REGISTRY[%r][%r](status=False)\n' % ('job',cls.type))
-        f.write('job.run(parameters)')
+        f.write('job = REGISTRY[%r][%r]()\n' % ('job',cls.type))
+        f.write('job.run(parameters,status=False)')
          
         f.close()
         
@@ -356,8 +332,8 @@ class IJob(Configurable):
             f.write('        parameters[%r] = %r\n' % (k, v))
     
         # Sets |analysis| variable to an instance analysis to save. 
-        f.write('        job = REGISTRY[%r][%r](status=False)\n' % ('job',cls.type))
-        f.write('        self.assertNotRaises(job.run, parameters)\n\n')
+        f.write('        job = REGISTRY[%r][%r]()\n' % ('job',cls.type))
+        f.write('        self.assertNotRaises(job.run, parameters, status=False)\n\n')
         
         f.write('def suite():\n')
         f.write('    loader = unittest.TestLoader()\n')
@@ -440,24 +416,29 @@ class IJob(Configurable):
             
     _runner = {"monoprocessor" : _run_monoprocessor, "multiprocessor" : _run_multiprocessor, "remote" : _run_remote}
 
-    def run(self, parameters):
+    def run(self,parameters,status=False):
         """
         Run the job.
         """
         
         try:
+            
+            self._name = IJob.set_name()
+                                                        
+            if status:
+                self._status = JobStatus(self)
+            
             self.setup(parameters)
                                     
             self.initialize()
-            
-            if self._status is not None:
-                self._status.start(self.numberOfSteps,rate=0.1)
-                
+
             self._info = 'Information about %s job.\n' % self._name
             self._info += str(self)
             
-            LOGGER(self._info,'info',[self._name])
-                                                                                                    
+            if self._status is not None:
+                self._status.start(self.numberOfSteps,rate=0.1)
+                self._status.state['info'] = self._info
+                                        
             if getattr(self,'numberOfSteps', 0) <= 0:
                 raise JobError(self,"Invalid number of steps for job %s" % self._name)
     
