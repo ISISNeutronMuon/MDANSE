@@ -49,18 +49,19 @@ class InterpolationOrderConfigurator(SingleChoiceConfigurator):
     type = "interpolation_order"
     
     _default = "no interpolation"
-    
-    orders = ["no interpolation","1st order","2nd order","3rd order","4th order","5th order"] 
-    
-    def __init__(self, name, **kwargs):
+        
+    def __init__(self, name, orders=None,**kwargs):
         '''
         Initializes the configurator.
         
         :param name: the name of the configurator as it will appear in the configuration.
         :type name: str.
         '''
+
+        if orders is None:
+            orders = ["no interpolation","1st order","2nd order","3rd order","4th order","5th order"] 
                 
-        SingleChoiceConfigurator.__init__(self, name, choices=InterpolationOrderConfigurator.orders, **kwargs)
+        SingleChoiceConfigurator.__init__(self, name, choices=orders, **kwargs)
 
     def configure(self, configuration, value):
         '''

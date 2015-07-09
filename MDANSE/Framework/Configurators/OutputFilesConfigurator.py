@@ -59,11 +59,11 @@ class OutputFilesConfigurator(IConfigurator):
         :type name: str
         :param formats: the list of output file formats suported.  
         :type formats: list of str
-        '''        
+        '''
                         
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._formats = formats if formats is not None else ["netcdf"]
+        self._formats = formats if formats is not None else OutputFilesConfigurator._default[2]
     
     def configure(self, configuration, value):
         '''
