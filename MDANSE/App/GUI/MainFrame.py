@@ -33,6 +33,7 @@ Created on Apr 14, 2015
 import collections
 import operator
 import os
+import sys
 import webbrowser
 
 import wx
@@ -49,19 +50,55 @@ from MDANSE.App.GUI.Icons import ICONS
 from MDANSE.App.GUI.WorkingPanel import WorkingPanel
 from MDANSE.App.GUI.PluginsTreePanel import PluginsTreePanel
 
+def excepthook(error, message, tback):
+    '''
+    Called when an exception is raised and uncaught.
+    
+    Redirect the exception information to the nMolDyn logger at the ERROR level.
+        
+    @param typ: the exception class.
+    @type typ: exception
+    
+    @param value: the exception instance.
+    @type value: exception
+    
+    @param tback: the traceback.
+    @type tback: traceback instance  
+    '''
+    
+    import traceback
+    
+    from MDANSE.Core.Error import Error
+
+    tback = traceback.extract_tb(tback)
+
+    trace = []                        
+
+    if not issubclass(error, Error):
+        for tb in tback:
+            trace.append(' -- '.join([str(t) for t in tb]))
+    
+    trace.append("\n%s: %s" % (error.__name__,message))
+
+    trace = '\n'.join(trace)
+                
+    LOGGER(trace,'error',['console'])
+        
 class MainFrame(wx.Frame):
 
     def __init__(self, parent, title="MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments"):
         
         wx.Frame.__init__(self, parent, wx.ID_ANY, title, size = (1200,800))
-  
+    
         self.build_dialog()
         
         # Add some handlers to the loggers
         LOGGER.add_handler("console", REGISTRY['handler']['console'](self._panels["controller"].pages["logger"]), level="info")
         LOGGER.add_handler("dialog", REGISTRY['handler']['dialog'](), level="error")
         LOGGER.start()
-                                
+        
+        sys.excepthook = excepthook
+         
     def build_dialog(self):
         
         self.build_menu()
