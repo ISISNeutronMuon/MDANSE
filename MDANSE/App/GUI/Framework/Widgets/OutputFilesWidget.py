@@ -43,10 +43,6 @@ from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
 class OutputFilesWidget(IWidget):
     
     type = "output_files"
-
-    def initialize(self):
-
-        self._availableFormats = self.configurator.formats
         
     def add_widgets(self):
 
@@ -63,7 +59,7 @@ class OutputFilesWidget(IWidget):
 
         self._formats = wx.combo.ComboCtrl(self._widgetPanel, value="output formats", style=wx.CB_READONLY)
         
-        tcp = ComboCheckbox(self._availableFormats)
+        tcp = ComboCheckbox(self._configurator.formats)
 
         self._formats.SetPopupControl(tcp)
         
