@@ -35,7 +35,6 @@ import collections
 import ConfigParser
 import os
 
-from MDANSE import LOGGER
 from MDANSE.Core.Platform import PLATFORM, PlatformError
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
@@ -204,25 +203,6 @@ class InputDirectory(PreferencesItem):
         except PlatformError:
             raise PreferencesError('Error when setting input directory %r' % value)
         
-        self._value = value
-
-class LoggingLevel(PreferencesItem):
-    
-    type = "logging_level"
-        
-    def set_value(self, value):
-        '''
-        Set the value of the logging level preferences item.
-        
-        :param value: the logging level
-        :type value: str
-        '''
-                
-        value = value.lower()
-        
-        if not value in LOGGER.levels.keys():
-            raise PreferencesError("Invalid logging level")
-                
         self._value = value
                 
 class Preferences(object):
