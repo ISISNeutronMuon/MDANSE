@@ -154,20 +154,20 @@ class QVectorsPanel(wx.Panel):
         return self._progress
                             
 class QVectorsDialog(UserDefinitionsDialog):
+    
+    type = 'q_vectors'
             
     def __init__(self, parent, trajectory):
 
         self._currentGenerator = None
 
         self._value = None
-        
-        self._qVectors = {}
-        
+                
         self._trajectory = trajectory
         
         target = os.path.basename(self._trajectory.filename)
 
-        UserDefinitionsDialog.__init__(self, parent, target, 'q_vectors', wx.ID_ANY, title="Q vectors generator dialog",style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
+        UserDefinitionsDialog.__init__(self, parent, target, wx.ID_ANY, title="Q vectors generator dialog",style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
         
         self.SetSize((800,700))
                                                                   
@@ -223,10 +223,9 @@ class QVectorsDialog(UserDefinitionsDialog):
             LOGGER("No data is the selected Q vectors tab", "error")
             return
         
-        self._qVectors.clear()
-        self._qVectors['parameters'] = (qPanel.generator.type,qPanel.parameters)
-        self._qVectors['q_vectors'] = qPanel.grid.GetTable().data
-        self._qVectors['is_lattice'] = qPanel.generator.is_lattice
+        self._ud['parameters'] = (qPanel.generator.type,qPanel.parameters)
+        self._ud['q_vectors'] = qPanel.grid.GetTable().data
+        self._ud['is_lattice'] = qPanel.generator.is_lattice
                 
     def on_close(self, event):
         
@@ -280,10 +279,11 @@ class QVectorsDialog(UserDefinitionsDialog):
 
         self.set_user_definition()
         
-        if not self._qVectors:
+        if not self._ud['q_vectors']:
+            LOGGER("No Q vectors generated.", "error", ["dialog"])
             return None
         
-        return self._qVectors
+        return self._ud
                 
     def select_generator(self, generatorName):
                          

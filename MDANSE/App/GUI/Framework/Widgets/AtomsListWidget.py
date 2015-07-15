@@ -39,7 +39,7 @@ from MDANSE.App.GUI.Framework.Widgets.UserDefinitionWidget import UserDefinition
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule, get_chemical_objects_dict
 
 class AtomsListDialog(UserDefinitionsDialog):
-
+    
     def __init__(self, parent, trajectory, nAtoms):
         
         self._parent = parent
@@ -53,10 +53,10 @@ class AtomsListDialog(UserDefinitionsDialog):
         self._selection = []
                 
         target = os.path.basename(self._trajectory.filename)
-        
-        section = "%d_atoms_list" % self._nAtoms
 
-        UserDefinitionsDialog.__init__(self, parent, target, section, wx.ID_ANY, title="%d Atoms selection dialog" % nAtoms,style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
+        self.type = "%d_atoms_list" % self._nAtoms
+        
+        UserDefinitionsDialog.__init__(self, parent, target, wx.ID_ANY, title="%d Atoms selection dialog" % nAtoms,style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
                         
     def build_dialog(self):
 
@@ -154,23 +154,26 @@ class AtomsListDialog(UserDefinitionsDialog):
     def validate(self):
 
         if not self._selection:
+            LOGGER("The current selection is empty", "error", ["dialog"])
             return None
+        
+        self._ud['indexes'] = self._selection
                         
-        return {'selection' : self._selection}
+        return self._ud
 
 class AtomListWidget(UserDefinitionWidget):
-        
-    type = "atoms_list"
     
+    type = 'atoms_list'
+            
     def initialize(self):
+
+        self.type = "%d_atoms_list" % self._configurator._nAtoms
         
         UserDefinitionWidget.initialize(self)
-        
-        self.type = "%d_atoms_list" % self._configurator.nAtoms
-        
+                
     def on_new_user_definition(self,event):
         
-        atomsListDlg = AtomsListDialog(self,self._trajectory,self.configuration[self._name].nAtoms)
+        atomsListDlg = AtomsListDialog(self,self._trajectory,self._configurator._nAtoms)
         
         atomsListDlg.ShowModal()
             

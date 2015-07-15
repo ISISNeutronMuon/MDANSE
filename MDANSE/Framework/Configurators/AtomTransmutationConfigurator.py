@@ -92,16 +92,14 @@ class AtomTransmutationConfigurator(IConfigurator):
                 indexes = parser.parse(element,expression)
                 self.transmutate(configuration, indexes, element)
           
-        # Otherwise, it must be a list of strings that will be found as user-definition keys
-        elif isinstance(value,(list,tuple)):                        
-            for definition in value:
-                
-                if UD_STORE.has_definition(trajConfig["basename"],"atom_transmutation",value):                
-                    ud = UD_STORE.get_definition(trajConfig["basename"],"atom_transmutation",definition)
-                    self.transmutate(configuration, ud["indexes"], ud["element"])
-                else:
-                    raise ConfiguratorError("wrong parameters type:  must be either a dictionary whose keys are an atom selection string and values are the target element \
-                    or a list of string that match an user definition",self)
+        # Otherwise, it must be a string that will be found as a user-definition keys
+        elif isinstance(value,basestring):
+            if UD_STORE.has_definition(trajConfig["basename"],"atom_transmutation",value):                
+                ud = UD_STORE.get_definition(trajConfig["basename"],"atom_transmutation",value)
+                self.transmutate(configuration, ud["indexes"], ud["element"])
+            else:
+                raise ConfiguratorError("wrong parameters type:  must be either a dictionary whose keys are an atom selection string and values are the target element \
+                or a list of string that match an user definition",self)
         else:
             raise ConfiguratorError("wrong parameters type:  must be either a dictionary whose keys are an atom selection string and values are the target element \
             or a list of string that match an user definition",self)

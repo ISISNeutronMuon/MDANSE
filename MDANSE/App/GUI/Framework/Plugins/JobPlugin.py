@@ -100,7 +100,10 @@ class JobPlugin(ComponentPlugin):
                          
     def on_run(self, event=None):
 
-        parameters = self._parametersPanel.get_value()
+        parameters = self._parametersPanel.validate()
+        
+        if not parameters:
+            return
         
         name = self._jobClass.set_name()
         
@@ -123,10 +126,10 @@ class JobPlugin(ComponentPlugin):
         
     def on_save(self, event=None):
 
-        if not self._parametersPanel.validate():
+        parameters = self._parametersPanel.validate()
+        
+        if not parameters:
             return
-
-        parameters = self._parametersPanel.get_value()
         
         d = wx.FileDialog(self, "Save MDANSE python script", style = wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT, wildcard = "Python files (*.py)|*.py")
         

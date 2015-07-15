@@ -39,6 +39,8 @@ from MDANSE.App.GUI.Framework.Widgets.AtomSelectionWidget import AtomSelectionDi
 
 class AtomTransmutationDialog(AtomSelectionDialog):
     
+    type = 'atom_transmutation'
+    
     def build_dialog(self):
         
         AtomSelectionDialog.build_dialog(self)
@@ -54,12 +56,15 @@ class AtomTransmutationDialog(AtomSelectionDialog):
     def validate(self):
         
         if not self._selection:
-            LOGGER("No atoms selected.", "error", ["dialog"])
+            LOGGER("The current selection is empty", "error", ["dialog"])
             return None
 
         element = self._elements.GetStringSelection()
         
-        return {'transmutation' : {'element' : element, 'selection' : self._selection}}
+        self._ud['element'] = element
+        self._ud['indexes'] = self._selection
+        
+        return self._ud
         
 class AtomTransmutationWidget(UserDefinitionWidget):
         

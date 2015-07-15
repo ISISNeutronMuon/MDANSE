@@ -46,7 +46,7 @@ class UserDefinitionsDialog(wx.Dialog):
     
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, parent, target, section, *args, **kwargs):
+    def __init__(self, parent, target, *args, **kwargs):
         
         wx.Dialog.__init__(self, parent, *args, **kwargs)
 
@@ -54,9 +54,9 @@ class UserDefinitionsDialog(wx.Dialog):
         
         self._target = target
         
-        self._section = section
-
         self._mainSizer = wx.BoxSizer(wx.VERTICAL)
+        
+        self._ud = {}
                                 
         self.build_dialog()
 
@@ -107,15 +107,15 @@ class UserDefinitionsDialog(wx.Dialog):
         if value is None:
             return 
                 
-        if UD_STORE.has_definition(self._target,self._section,name):
-            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,self._section,name),'error',['dialog'])
+        if UD_STORE.has_definition(self._target,self.type,name):
+            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,self.type,name),'error',['dialog'])
             self.EndModal(wx.ID_CANCEL)
             return
                   
-        UD_STORE.set_definition(self._target,self._section,name,value)
+        UD_STORE.set_definition(self._target,self.type,name,value)
         UD_STORE.save()
                  
-        pub.sendMessage("save_definition", message = (self._target, name))
+        pub.sendMessage("save_definition", message = (self._target, self.type, name))
                          
         self.EndModal(wx.ID_OK)
                 
@@ -177,9 +177,12 @@ class UserDefinitionWidget(IWidget):
 
     def on_save_definition(self, message):
          
-        filename, name = message
+        filename, section, name = message
+         
+        if section is not self.type:
+            return
          
         if filename != self._basename:
             return
-
+        
         self._availableUDs.Append(name)

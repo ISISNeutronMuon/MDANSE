@@ -151,6 +151,8 @@ class Query(object):
 
 class AtomSelectionDialog(UserDefinitionsDialog):
     
+    type = 'atom_selection'
+    
     def __init__(self, parent, trajectory, *args, **kwargs):
 
         self._query = Query()
@@ -167,7 +169,7 @@ class AtomSelectionDialog(UserDefinitionsDialog):
         
         target = os.path.basename(self._trajectory.filename)
         
-        UserDefinitionsDialog.__init__(self, parent, target, 'atom_selection', wx.ID_ANY, title="Atom selection dialog",style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
+        UserDefinitionsDialog.__init__(self, parent, target, wx.ID_ANY, title="Atom selection dialog",style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
 
         pub.subscribe(self.on_select_atoms_from_viewer, ('select_atoms_from_viewer'))       
                  
@@ -367,15 +369,17 @@ class AtomSelectionDialog(UserDefinitionsDialog):
                 
     def set_selection(self):
 
-        _, selection = self._query.parse()
+        _, self._selection = self._query.parse()
                 
-        pub.sendMessage("set_selection", message = (self,selection))
+        pub.sendMessage("set_selection", message = (self,self._selection))
         
     def validate(self):
 
-        if not self._ud:
+        if not self._selection:
             LOGGER("The current selection is empty", "error", ["dialog"])
             return None
+        
+        self._ud['indexes'] = self._selection
         
         return self._ud
 
