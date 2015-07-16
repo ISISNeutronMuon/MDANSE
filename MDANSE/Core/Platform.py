@@ -89,6 +89,16 @@ class Platform(object):
         '''
         pass
     
+    def doc_path(self):
+        '''
+        Returns the path for MDANSE documentation root directory.
+        
+        :return: the path for MDANSE documentation root directory
+        :rtype: str
+        '''
+
+        return os.path.join(self.package_directory(), 'Doc')
+    
     def api_path(self):
         '''
         Returns the path for MDANSE HTML API.

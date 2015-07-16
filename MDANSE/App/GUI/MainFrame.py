@@ -161,6 +161,10 @@ class MainFrame(wx.Frame):
 
         helpMenu = wx.Menu()
         aboutItem = helpMenu.Append(wx.ID_ANY, 'About')
+        helpMenu.AppendSeparator()
+        simpleHelpItem = helpMenu.Append(wx.ID_ANY, 'Simple help')
+        theoryHelpItem = helpMenu.Append(wx.ID_ANY, 'Theoretical background')
+        helpMenu.AppendSeparator()
         bugReportItem = helpMenu.Append(wx.ID_ANY, 'Bug report')
         self._mainMenu.Append(helpMenu, 'Help')
 
@@ -176,6 +180,8 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_toggle_controller, showControllerItem)
         self.Bind(wx.EVT_MENU, self.on_toggle_toolbar, showToolbarItem)
         self.Bind(wx.EVT_MENU, self.on_bug_report, bugReportItem)
+        self.Bind(wx.EVT_MENU, self.on_simple_help, simpleHelpItem)
+        self.Bind(wx.EVT_MENU, self.on_theory_help, theoryHelpItem)
 
     def build_toolbar(self):
         
@@ -243,7 +249,7 @@ Authors:
 """The version 1 of MDANSE is currently under testing.
 In order to facilitate the integration of new features and bug fixes, please send pull request to: 
 
-https://github.com/eurydyce/MDANSE/tree/master/MDANSE
+https://github.com/mdanseproject/MDANSE/tree/master/MDANSE
 
 for any other request, please send an email to:
 
@@ -259,7 +265,26 @@ or directly to the MDANSE mailing list:
         d = wx.MessageDialog(self, report_str, 'Bug report', style=wx.OK|wx.ICON_INFORMATION)
         d.ShowModal()
         d.Destroy()
-        
+
+    def on_simple_help(self,event):
+
+        path = os.path.join(PLATFORM.doc_path(),'simple_help.txt')
+                
+        with open(path,'r') as f:
+            info = f.read()
+            frame = wx.Frame(self, style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
+            panel = wx.Panel(frame,wx.ID_ANY)
+            sizer = wx.BoxSizer(wx.VERTICAL)
+            text = wx.TextCtrl(panel,wx.ID_ANY,style=wx.TE_MULTILINE|wx.TE_WORDWRAP|wx.TE_READONLY)
+            text.SetValue(info)
+            sizer.Add(text,1,wx.ALL|wx.EXPAND,5)
+            panel.SetSizer(sizer)
+            frame.Show()
+
+    def on_theory_help(self,event):
+
+        webbrowser.open(os.path.join(PLATFORM.doc_path(),'theory_help.pdf'))
+                
     def on_open_classes_registry(self,event):
         
         from MDANSE.App.GUI.Framework.Plugins.RegistryViewerPlugin import RegistryViewerFrame
