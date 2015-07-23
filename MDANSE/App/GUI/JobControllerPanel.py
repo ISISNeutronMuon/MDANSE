@@ -184,7 +184,7 @@ class JobControllerPanel(wx.ScrolledWindow):
         EVT_JOB_CONTROLLER(self,self.on_update)
         EVT_JOB_CRASH(self,self.on_crash_summary)
         
-        pub.subscribe(self.on_start_job,"on_start_job")
+        pub.subscribe(self.on_start_job,"msg_start_job")
 
     def __del__(self):
 

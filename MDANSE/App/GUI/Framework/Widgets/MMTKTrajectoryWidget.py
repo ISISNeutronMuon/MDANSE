@@ -34,11 +34,9 @@ import wx
 
 from MMTK.Trajectory import Trajectory
 
-from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Configurable import ConfigurationError
 
 from MDANSE.App.GUI import DATA_CONTROLLER
-from MDANSE.App.GUI.Framework import has_parent
 from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
 
 class MMTKTrajectoryWidget(IWidget):
@@ -49,43 +47,24 @@ class MMTKTrajectoryWidget(IWidget):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self._trajectory = wx.Choice(self._widgetPanel, wx.ID_ANY)
+        self._trajectory = wx.StaticText(self._widgetPanel, wx.ID_ANY)
 
         sizer.Add(self._trajectory, 1, wx.ALL|wx.EXPAND, 5)
-        
-        self.Bind(wx.EVT_CHOICE, self.on_select_trajectory, self._trajectory)
-        
-        pub.subscribe(self.set_trajectory, ('on_set_data'))
-        
+                        
         return sizer
             
-    def on_select_trajectory(self, event):
-        
-        filename = event.GetString()
-                
-        pub.sendMessage("set_trajectory", message=(self,filename))
-
-    def set_trajectory(self, message):
-        
-        window, filename = message
-        
-        if not has_parent(self,window):
-            return
-                
-        data = DATA_CONTROLLER[filename].data
+    def set_data(self, datakey):
+                        
+        data = DATA_CONTROLLER[datakey].data
         
         if not isinstance(data, Trajectory):
             return
 
-        self._trajectory.SetItems(DATA_CONTROLLER.keys())
-        
-        self._trajectory.SetStringSelection(filename)
-        
-        pub.sendMessage("set_trajectory", message = (self,filename))
-                
+        self._trajectory.SetLabel(datakey)
+                        
     def get_widget_value(self):
         
-        filename = self._trajectory.GetStringSelection()
+        filename = self._trajectory.GetLabelText()
         
         if not filename:
             raise ConfigurationError("No MMTK trajectory file selected", self)

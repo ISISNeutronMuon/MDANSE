@@ -57,8 +57,8 @@ class DataTreePanel(wx.Panel):
         self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_drag_data)
         self.Bind(wx.EVT_TREE_KEY_DOWN, self.on_delete_data, self._tree)
 
-        pub.subscribe(self.msg_load_input_data, ('load_input_data'))       
-        pub.subscribe(self.msg_delete_input_data, ('delete_input_data'))       
+        pub.subscribe(self.msg_load_input_data, ('msg_load_input_data'))       
+        pub.subscribe(self.msg_delete_input_data, ('msg_delete_input_data'))       
         
     @property
     def tree(self):

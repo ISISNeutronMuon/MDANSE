@@ -80,7 +80,7 @@ class McStasInstrumentWidget(IWidget):
         self._instrument.Append(path)
         self._instrument.Select(self._instrument.GetCount()-1)
             
-        pub.sendMessage("set_instrument", message = (self, instrParams))
+        pub.sendMessage("msg_set_instrument", message = (self, instrParams))
         
     def on_select_instrument(self, event):
         

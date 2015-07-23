@@ -52,7 +52,7 @@ class McStasParametersWidget(IWidget):
          
         self._sizer = wx.BoxSizer(wx.VERTICAL)
  
-        pub.subscribe(self.set_layout, ("set_instrument"))
+        pub.subscribe(self.set_layout, ("msg_set_instrument"))
          
         return self._sizer
   

@@ -34,8 +34,6 @@ import wx
 
 from MMTK.Trajectory import TrajectoryVariable
 
-from MDANSE.Externals.pubsub import pub
-
 from MDANSE.App.GUI import DATA_CONTROLLER
 from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
                             
@@ -50,8 +48,6 @@ class TrajectoryVariableWidget(IWidget):
         self._variable = wx.Choice(self._widgetPanel, wx.ID_ANY, choices=[])
                 
         sizer.Add(self._variable, 1, wx.ALL|wx.EXPAND, 5)
-
-        pub.subscribe(self.on_set_trajectory, ("set_trajectory"))
         
         return sizer
         
@@ -59,13 +55,9 @@ class TrajectoryVariableWidget(IWidget):
         
         return self._variable.GetStringSelection()
 
-    def on_set_trajectory(self, message):
+    def set_data(self, datakey):
 
-        window, filename = message
-                        
-        if not window in self.Parent.widgets.values():
-            return
 
-        trajectory = DATA_CONTROLLER[filename].data
+        trajectory = DATA_CONTROLLER[datakey].data
         self._variable.SetItems([v for v in trajectory.variables() if isinstance(getattr(trajectory,v),TrajectoryVariable)])
         self._variable.SetSelection(0)

@@ -35,6 +35,7 @@ import abc
 import wx
 
 from MDANSE import REGISTRY
+from MDANSE.Externals.pubsub import pub
 
 class IWidget(wx.Panel):
     
@@ -57,7 +58,9 @@ class IWidget(wx.Panel):
         self.initialize()
                         
         self.build_panel()
-                
+        
+        pub.subscribe(self._set_data, ('msg_set_data'))
+                        
     @property
     def label(self):
         return self._label
@@ -96,3 +99,13 @@ class IWidget(wx.Panel):
     def get_value(self):
         
         return self.get_widget_value()
+
+    def set_data(self,datakey):
+        pass
+
+    def _set_data(self,plugin):
+                
+        if not plugin.is_parent(self):
+            return
+        
+        self.set_data(plugin.datakey)

@@ -41,10 +41,10 @@ class Status(object):
         self._elapsedTime = "N/A"
         self._lastRefresh = self._startTime
 
-        Publisher.subscribe(self.finish_status, "status_finish")
-        Publisher.subscribe(self.start_status, "status_start")
-        Publisher.subscribe(self.stop_status, "status_stop")
-        Publisher.subscribe(self.update_status, "status_update")
+#         Publisher.subscribe(self.finish_status, "msg_status_finish")
+#         Publisher.subscribe(self.start_status, "msg_status_start")
+#         Publisher.subscribe(self.stop_status, "msg_status_stop")
+#         Publisher.subscribe(self.update_status, "msg_status_update")
 
     @abc.abstractmethod
     def finish_status(self):
@@ -80,8 +80,10 @@ class Status(object):
     def finish(self):
 
         self._finished = True
+        
+        self.finish_status()
                     
-        Publisher.sendMessage("status_finish",message=self)
+#         Publisher.sendMessage("msg_status_finish",message=self)
             
     def get_current_step(self):
         
@@ -121,14 +123,17 @@ class Status(object):
                  
         if rate is not None:
             self._updateStep = max(0,int(rate*nSteps))
+            
+        self.start_status()
                   
-        Publisher.sendMessage("status_start",message=self)
+#         Publisher.sendMessage("msg_status_start",message=self)
                 
     def stop(self):
         
         self._eta = "N/A"
         self._stopped = True
-        Publisher.sendMessage("status_stop",message=self)        
+        self.stop_status()
+#         Publisher.sendMessage("msg_status_stop",message=self)        
                 
     def update(self,force=False):
         
@@ -154,38 +159,5 @@ class Status(object):
             duration = datetime.timedelta(seconds=round(duration))
             duration = convert_duration(total_seconds(duration))            
             self._eta = '%02dd:%02dh:%02dm:%02ds' % duration
-            Publisher.sendMessage("status_update",message=self)
-                        
-# class StatusHandler(object):
-#     
-#     __metaclass__ = abc.ABCMeta
-#     
-#     def __init__(self):
-#         
-#         self._status = Status()
-# 
-#         Publisher.subscribe(self.finish_status, "status_finish")
-#         Publisher.subscribe(self.start_status, "status_start")
-#         Publisher.subscribe(self.stop_status, "status_stop")
-#         Publisher.subscribe(self.update_status, "status_update")
-#     
-#     @abc.abstractmethod
-#     def finish_status(self):
-#         pass
-# 
-#     @abc.abstractmethod
-#     def start_status(self):
-#         pass
-# 
-#     @property
-#     def status(self):
-#         
-#         return self._status
-# 
-#     @abc.abstractmethod
-#     def stop_status(self):
-#         pass
-#         
-#     @abc.abstractmethod
-#     def update_status(self):
-#         pass
+            self.update_status()
+#             Publisher.sendMessage("msg_status_update",message=self)

@@ -38,7 +38,6 @@ from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Configurable import ConfigurationError
 
 from MDANSE.App.GUI import DATA_CONTROLLER
-from MDANSE.App.GUI.Framework import has_parent
 from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
     
 class NetCDFInputWidget(IWidget):
@@ -58,36 +57,27 @@ class NetCDFInputWidget(IWidget):
         sizer.Add(self._selectNetCDF, 1, wx.ALL|wx.EXPAND, 5)
         
         self.Bind(wx.EVT_CHOICE, self.on_select_netcdf, self._selectNetCDF)
-        
-        pub.subscribe(self.set_netcdf, ('on_set_data'))
-        
+                
         return sizer
-
 
     def on_select_netcdf(self, event):
         
         filename = event.GetString()
                 
-        pub.sendMessage("set_netcdf", message=(self,filename))
+        pub.sendMessage("msg_set_netcdf", message=(self,filename))
 
-    
-    def set_netcdf(self, message):
-        
-        window, filename = message
-                
-        if not has_parent(self,window):
-            return
-                
-        self._netcdf = DATA_CONTROLLER[filename].netcdf
+    def set_data(self, datakey):
+                        
+        self._netcdf = DATA_CONTROLLER[datakey].netcdf
                         
         if not isinstance(self._netcdf, _NetCDFFile):
             return
 
         self._selectNetCDF.SetItems(DATA_CONTROLLER.keys())
         
-        self._selectNetCDF.SetStringSelection(filename)
+        self._selectNetCDF.SetStringSelection(datakey)
         
-        pub.sendMessage("set_netcdf", message = (self,filename))
+        pub.sendMessage("msg_set_netcdf", message = (self,datakey))
                 
     def get_widget_value(self):
         

@@ -115,7 +115,7 @@ class UserDefinitionsDialog(wx.Dialog):
         UD_STORE.set_definition(self._target,self.type,name,value)
         UD_STORE.save()
                  
-        pub.sendMessage("save_definition", message = (self._target, self.type, name))
+        pub.sendMessage("msg_save_definition", message = (self._target, self.type, name))
                          
         self.EndModal(wx.ID_OK)
                 
@@ -143,8 +143,7 @@ class UserDefinitionWidget(IWidget):
         sizer.Add(self._availableUDs, 1, wx.ALL|wx.EXPAND, 5)
         sizer.Add(self._newUD, 0, wx.ALL|wx.EXPAND, 5)
 
-        pub.subscribe(self.on_set_trajectory, ("set_trajectory"))
-        pub.subscribe(self.on_save_definition, ("save_definition",))
+        pub.subscribe(self.on_save_definition, ("msg_save_definition",))
 
         self.Bind(wx.EVT_BUTTON, self.on_new_user_definition, self._newUD)
 
@@ -158,16 +157,11 @@ class UserDefinitionWidget(IWidget):
         
         return str(self._availableUDs.GetStringSelection())    
 
-    def on_set_trajectory(self, message):
+    def set_data(self, datakey):
 
-        window, filename = message
-                                
-        if not window in self.Parent.widgets.values():
-            return
+        self._filename = datakey
 
-        self._filename = filename
-
-        self._trajectory = DATA_CONTROLLER[filename]
+        self._trajectory = DATA_CONTROLLER[datakey]
 
         self._basename = os.path.basename(self._filename)
         

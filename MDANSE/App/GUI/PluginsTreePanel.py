@@ -60,7 +60,7 @@ class PluginsTreePanel(wx.Panel):
         self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_drag, self._tree)
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_double_click)
         
-        pub.subscribe(self.on_set_plugins_tree, ('set_plugins_tree'))  
+        pub.subscribe(self.on_set_plugins_tree, ('msg_set_plugins_tree'))  
         
     @property
     def tree(self):

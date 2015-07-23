@@ -201,8 +201,7 @@ class InstrumentResolutionConfigurator(IWidget):
         
         self.Bind(wx.EVT_BUTTON, self.on_set_instrument_resolution, self._setResolution)
 
-        pub.subscribe(self.on_set_trajectory, ("set_trajectory"))
-        pub.subscribe(self.on_set_trajectory, ("set_netcdf"))
+        pub.subscribe(self.set_data, ("msg_set_netcdf"))
 
         return sizer
         
@@ -228,16 +227,8 @@ class InstrumentResolutionConfigurator(IWidget):
         
         self._instrumentResolutionDialog.Destroy()
 
-    def on_set_trajectory(self, message):
-        
-        window, filename = message
-                        
-        if not window in self.Parent.widgets.values():
-            return
-        
-        if not DATA_CONTROLLER:
-            return
-        
-        self._trajectory = DATA_CONTROLLER[filename]
+    def set_data(self, datakey):
+                
+        self._trajectory = DATA_CONTROLLER[datakey]
                         
         self._setResolution.Enable(True)

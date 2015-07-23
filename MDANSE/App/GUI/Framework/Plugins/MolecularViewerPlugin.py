@@ -167,10 +167,7 @@ class MolecularViewerPanel(ComponentPlugin):
         
         self.enable_picking(True)
         
-        pub.subscribe(self.on_set_selection, ('set_selection'))       
-#         pub.subscribe(self.on_clear_selection, ('clear_selection'))       
-#         pub.subscribe(self.on_show_selection_box, ('show_selection_box'))       
-#         pub.subscribe(self.on_enable_picking, ('enable_picking'))
+        pub.subscribe(self.on_set_selection, ('msg_set_selection'))       
    
     def build_panel(self):
                 
@@ -201,7 +198,7 @@ class MolecularViewerPanel(ComponentPlugin):
         self._iren.AddObserver("CharEvent", self.on_keyboard_input)
         self._iren.AddObserver("LeftButtonPressEvent", self.emulate_focus)
 
-        pub.subscribe(self.check_switch_consistancy, ('Switch'))
+        pub.subscribe(self.check_switch_consistancy, ('msg_switch'))
         
         self._iren.Bind(wx.EVT_CONTEXT_MENU, self.on_show_popup_menu)
                 
@@ -276,7 +273,7 @@ class MolecularViewerPanel(ComponentPlugin):
                 
         self.clear_universe()
         
-        pub.unsubscribe(self.check_switch_consistancy, "Switch")
+        pub.unsubscribe(self.check_switch_consistancy, "msg_switch")
         
     def set_trajectory(self, trajectory, selection=None, frame=0):
         
@@ -316,7 +313,7 @@ class MolecularViewerPanel(ComponentPlugin):
         
         self._trajectoryLoaded = True
 
-        pub.sendMessage(('Load trajectory'), message = self)
+        pub.sendMessage(('msg_load_trajectory'), message = self)
 
     def color_string_to_RGB(self, s):
         
@@ -579,7 +576,7 @@ class MolecularViewerPanel(ComponentPlugin):
         self.set_configuration(self._timerCounter)
         self._timerCounter += 1
         
-        pub.sendMessage(("On timer"), message = self)
+        pub.sendMessage(("msg_timer"), plugin=self)
 
     def set_rendering_mode(self, mode):
         if not self._trajectoryLoaded:
@@ -657,7 +654,7 @@ class MolecularViewerPanel(ComponentPlugin):
 
         self.show_selection(list(self.__pickedAtoms))
                         
-        pub.sendMessage(('select_atoms_from_viewer'), message = (self.dataplugin,list(self.__pickedAtoms)))
+        pub.sendMessage(('msg_select_atoms_from_viewer'), message = (self.dataplugin,list(self.__pickedAtoms)))
 
     def box_atoms(self, atomsList):
                                 
@@ -727,9 +724,9 @@ class MolecularViewerPanel(ComponentPlugin):
         else:
             self.stop_animation()
         if check: 
-            pub.sendMessage(('Switch'), message = self)
+            pub.sendMessage(('msg_switch'), message = self)
             
-        pub.sendMessage(('Animation'), message = self)
+        pub.sendMessage(('msg_animate_trajectory'), message = self)
     
     def check_switch_consistancy(self, message):
         

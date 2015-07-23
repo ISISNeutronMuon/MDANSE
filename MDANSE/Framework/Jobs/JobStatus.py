@@ -55,13 +55,8 @@ class JobStatus(Status):
         except:
             pass
                  
-    def start_status(self, message):
-        
-        status = message
-        
-        if status != self:
-            return
-                
+    def start_status(self):
+                        
         self._state["n_steps"] = self.nSteps
 
         self.save_status()
@@ -71,15 +66,10 @@ class JobStatus(Status):
         with open(self._state['temporary_file'], 'wb') as f:
             cPickle.dump(self._state, f, protocol=2)
 
-    def stop_status(self,message):
+    def stop_status(self):
         pass
                     
-    def update_status(self, message):
-
-        status = message
-        
-        if status != self:
-            return
+    def update_status(self):
         
         self._state['elapsed'] = self.elapsedTime
         self._state['current_step'] = self.currentStep

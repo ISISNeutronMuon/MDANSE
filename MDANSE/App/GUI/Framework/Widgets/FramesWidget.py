@@ -33,8 +33,6 @@ Created on Mar 30, 2015
 import wx
 import wx.lib.intctrl as wxintctrl
 
-from MDANSE.Externals.pubsub import pub
-
 from MDANSE.App.GUI import DATA_CONTROLLER
 from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
         
@@ -71,8 +69,6 @@ class FramesWidget(IWidget):
 
         sizer.Add(gbSizer, 1, wx.ALL|wx.EXPAND, 5)
 
-        pub.subscribe(self.on_set_trajectory, ("set_trajectory"))
-        
         return sizer
 
     def get_widget_value(self):
@@ -81,17 +77,9 @@ class FramesWidget(IWidget):
         
         return val
     
-    def on_set_trajectory(self, message):
-
-        window, filename = message
-                                
-        if not window in self.Parent.widgets.values():
-            return
+    def set_data(self, datakey):
         
-        if not DATA_CONTROLLER:
-            return
-        
-        self._trajectory = DATA_CONTROLLER[filename]
+        self._trajectory = DATA_CONTROLLER[datakey]
         
         nFrames = len(self._trajectory.data) - 1
                 

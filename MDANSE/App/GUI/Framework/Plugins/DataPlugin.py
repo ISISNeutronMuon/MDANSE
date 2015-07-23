@@ -57,9 +57,9 @@ class DataPlugin(IPlugin):
         
     ancestor = None
     
-    def __init__(self, parent, datakey):
+    def __init__(self, parent, datakey, **kwargs):
         
-        IPlugin.__init__(self, parent, wx.ID_ANY)
+        IPlugin.__init__(self, parent, wx.ID_ANY, **kwargs)
 
         self._datakey = datakey
         
@@ -115,14 +115,16 @@ class DataPlugin(IPlugin):
         plugin.plug()
         
         plugin.SetFocus()
+        
+        self._currentWindow = plugin
     
     def on_changing_pane(self, event):
         
         window = plugin_parent(event.GetWindow())
-        
+                
         if window is None:
             return
         
         self._currentWindow = window
                                     
-        pub.sendMessage(('set_plugins_tree'), message= window)
+        pub.sendMessage(('msg_set_plugins_tree'), message=window)

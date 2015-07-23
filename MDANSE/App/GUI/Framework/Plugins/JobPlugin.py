@@ -122,7 +122,7 @@ class JobPlugin(ComponentPlugin):
 
         time.sleep(1)
 
-        pub.sendMessage("on_start_job",message=None)
+        pub.sendMessage("msg_start_job",message=None)
         
     def on_save(self, event=None):
 
@@ -131,8 +131,7 @@ class JobPlugin(ComponentPlugin):
         if not parameters:
             return
         
-        d = wx.FileDialog(self, "Save MDANSE python script", style = wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT, wildcard = "Python files (*.py)|*.py")
-        
+        d = wx.FileDialog(self, "Save MDANSE python script", style = wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT, wildcard = "Python files (*.py)|*.py")        
         if d.ShowModal() == wx.ID_CANCEL:
             return
         
@@ -147,12 +146,12 @@ class JobPlugin(ComponentPlugin):
         self._jobClass.save(path, parameters)
 
     def plug(self):
-        
-        pub.sendMessage("on_set_data", message = (self,self.datakey))
-        
-        self._parent._mgr.GetPane(self).Float().Center().Dockable(False).CloseButton(True).BestSize((800,600))
-
+                
+        self._parent._mgr.GetPane(self).Float().Center().Floatable(True).Dockable(True).CloseButton(True).BestSize((800,600))
+                
         self._parent.mgr.Update()
+                    
+        pub.sendMessage("msg_set_data", plugin=self)
                         
     def on_close(self, event):
         
@@ -160,61 +159,52 @@ class JobPlugin(ComponentPlugin):
         
 class JobFrame(wx.Frame):
     
-    def __init__(self, parent, jobType):
+    def __init__(self, parent, jobType, datakey):
                 
         wx.Frame.__init__(self, parent, wx.ID_ANY, size = (800,400), style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
 
         self._jobType = jobType
+        
+        self._datakey = datakey
+
+        data = REGISTRY['input_data']['mmtk_trajectory'](self._datakey)
+                                    
+        DATA_CONTROLLER[filename] = data
 
         self.build_dialog()
 
     def build_dialog(self):
-                
-        mainPanel = wx.Panel(self, wx.ID_ANY, size = self.GetSize())
-        
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
-        
-        self._jobPlugin = REGISTRY['plugin'][self._jobType](mainPanel, wx.ID_ANY)
-                
-        mainSizer.Add(self._jobPlugin, 1, wx.ALL|wx.EXPAND)
 
-        mainPanel.SetSizer(mainSizer)        
-        mainSizer.Fit(mainPanel)
-        mainPanel.Layout()
+        workingPanel = WorkingPanel(self)
         
-        self.SetTitle("Run %s job" % self._jobPlugin._jobClass.label)
+        workingPanel.drop(self._datakey)
+        
+        workingPanel.active_page.drop(self._jobType)
+        
+        workingPanel.active_page.mgr.GetPane(workingPanel.active_page.currentWindow).Dock()
+        
+        workingPanel.active_page.mgr.Update()
+                
+        self.SetTitle("Run %s job" % self._jobType)
         
         self.Bind(wx.EVT_CLOSE, self.on_quit)
         
     def on_quit(self, event):
         
-        d = wx.MessageDialog(None,
-                             'Do you really want to quit ?',
-                             'Question',
-                             wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
+        d = wx.MessageDialog(None,'Do you really want to quit ?','Question',wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
         if d.ShowModal() == wx.ID_YES:
             self.Destroy()           
         
 if __name__ == "__main__":
 
-    from MMTK.Trajectory import Trajectory
     from MDANSE.App.GUI import DATA_CONTROLLER
+    from MDANSE.App.GUI.WorkingPanel import WorkingPanel
     
     root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))))
     
     filename = os.path.join(root,'Data','Trajectories','MMTK','protein_in_periodic_universe.nc')
-
-    data = REGISTRY['input_data']['mmtk_trajectory'](filename)
-
-    basename = os.path.basename(filename)
-        
-    t = Trajectory(None,filename,"r")
-
-    DATA_CONTROLLER[filename] = data
     
     app = wx.App(False)
-    f = JobFrame(None,'msd')
-    f._jobPlugin._datakey = filename
-    pub.sendMessage("on_set_data", message = (f._jobPlugin,filename))
+    f = JobFrame(None,'msd',filename)
     f.Show()
     app.MainLoop()            

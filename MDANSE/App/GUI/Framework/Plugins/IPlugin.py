@@ -124,6 +124,16 @@ class IPlugin(wx.Panel):
                 continue
             
         self.close()
+
+    def is_parent(self,window):
+            
+        if window == self:
+            return True
+    
+        if window.TopLevelParent == window:
+            return False
+    
+        return self.is_parent(window.Parent)    
         
     def close(self):
         pass

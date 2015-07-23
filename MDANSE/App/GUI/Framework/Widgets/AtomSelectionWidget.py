@@ -171,7 +171,7 @@ class AtomSelectionDialog(UserDefinitionsDialog):
         
         UserDefinitionsDialog.__init__(self, parent, target, wx.ID_ANY, title="Atom selection dialog",style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
 
-        pub.subscribe(self.on_select_atoms_from_viewer, ('select_atoms_from_viewer'))       
+        pub.subscribe(self.on_select_atoms_from_viewer, ('msg_select_atoms_from_viewer'))       
                  
     def build_dialog(self):
                                                 
@@ -316,7 +316,7 @@ class AtomSelectionDialog(UserDefinitionsDialog):
         
         self._selectionSummary.Clear()
 
-        pub.sendMessage('clear_selection',message=self)                                
+        pub.sendMessage('msg_clear_selection',message=self)                                
 
     def on_close(self, event=None):
         
@@ -371,7 +371,7 @@ class AtomSelectionDialog(UserDefinitionsDialog):
 
         _, self._selection = self._query.parse()
                 
-        pub.sendMessage("set_selection", message = (self,self._selection))
+        pub.sendMessage("msg_set_selection", message = (self,self._selection))
         
     def validate(self):
 

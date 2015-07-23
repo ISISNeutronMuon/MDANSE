@@ -25,12 +25,7 @@ class ProgressBar(wx.Panel,Status):
                 
         self.Bind(wx.EVT_BUTTON,self.on_stop,self._stop)
                 
-    def finish_status(self,message):
-
-        status = message
-        
-        if status != self:
-            return
+    def finish_status(self):
         
         self._progress.SetBarColor(wx.BLUE)
         self._progress.Refresh()
@@ -46,34 +41,19 @@ class ProgressBar(wx.Panel,Status):
         self._stop.Disable()        
         self.stop()
                         
-    def start_status(self, message):
+    def start_status(self):
         
-        status = message
-        
-        if status != self:
-            return
-
         self._stop.Enable()        
         self._progress.SetValue(self.currentStep)
         self._progress.SetRange(self.nSteps)
         self._progress.SetBarColor(wx.GREEN)    
 
-    def stop_status(self, message):
-        
-        status = message
-        
-        if status != self:
-            return
-        
+    def stop_status(self):
+                
         self._progress.SetBarColor(wx.RED)
         self._progress.Refresh()   
         
-    def update_status(self,message):
-        
-        status = message
-        
-        if status != self:
-            return
-        
+    def update_status(self):
+                
         self._progress.SetValue(self.currentStep)
         self._progress.Refresh()   

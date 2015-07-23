@@ -32,8 +32,6 @@ Created on Mar 30, 2015
 
 import wx
 
-from MDANSE.Externals.pubsub import pub
-
 from MDANSE.App.GUI import DATA_CONTROLLER
 from MDANSE.App.GUI.Framework.Widgets.IWidget import IWidget
 
@@ -51,19 +49,12 @@ class InterpolationOrderWidget(IWidget):
                 
         sizer.Add(label, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
         sizer.Add(self._interpolationOrder, 0, wx.ALL, 5)
-                        
-        pub.subscribe(self.on_set_trajectory, ("set_trajectory"))
-        
+                                
         return sizer
                                                             
-    def on_set_trajectory(self, message):                
+    def set_data(self, datakey):                
 
-        window, filename = message
-                        
-        if not window in self.Parent.widgets.values():
-            return
-
-        trajectory = DATA_CONTROLLER[filename]
+        trajectory = DATA_CONTROLLER[datakey]
                 
         if "velocities" in trajectory.data.variables():
             self._interpolationOrder.SetItems(self._configurator.choices)

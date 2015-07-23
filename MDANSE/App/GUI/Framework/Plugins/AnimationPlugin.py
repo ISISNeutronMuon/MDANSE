@@ -102,16 +102,14 @@ class AnimationPlugin(ComponentPlugin):
         self.Bind(wx.EVT_BUTTON, self.on_goto_first_frame, firstButton)
         self.Bind(wx.EVT_BUTTON, self.on_goto_last_frame, lastButton)
                 
-        Publisher.subscribe(self.on_update_animation_icon, ('Animation'))       
-        Publisher.subscribe(self.on_set_up_frame_slider, ('Load trajectory'))       
-        Publisher.subscribe(self.on_timer, ('On timer'))       
+        Publisher.subscribe(self.on_update_animation_icon, ('msg_animate_trajectory'))       
+        Publisher.subscribe(self.on_set_up_frame_slider, ('msg_load_trajectory'))       
+        Publisher.subscribe(self.on_timer, ('msg_timer'))       
                 
     def plug(self):
         self._parent._mgr.GetPane(self).LeftDockable(False).RightDockable(False).Dock().Bottom().CloseButton(True)
         
         self._parent._mgr.Update()        
-
-        Publisher.sendMessage(('Load trajectory'), message = self.parent)
 
     def on_change_frame_rate(self, event=None):
 
@@ -151,14 +149,12 @@ class AnimationPlugin(ComponentPlugin):
         self.speedSlider.SetValue(int(self.speedEntry.GetValue()))        
         self._parent.change_frame_rate()
                 
-    def on_timer(self, message):
+    def on_timer(self, plugin):
         
-        mv = message
-
-        if not has_parent(self,mv):
+        if not plugin.is_parent(self):
             return
         
-        frame = mv.current_frame
+        frame = plugin.current_frame
         
         self.frameEntry.SetValue(str(frame))
         self.frameSlider.SetValue(int(frame))
