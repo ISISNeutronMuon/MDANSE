@@ -1,0 +1,18 @@
+#!python
+
+import wx
+
+from MDANSE.Framework.Plugins.Plotter.PlotterPlugin import PlotterFrame
+
+class Plotter(wx.App):
+    
+    def OnInit(self):
+        
+        f = PlotterFrame(None)
+        f.Show()
+        return True
+
+if __name__ == "__main__":
+    app = Plotter()
+    app.MainLoop()
+    

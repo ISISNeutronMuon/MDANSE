@@ -1,112 +1,20 @@
 #!python
 
-import optparse
+import wx
 
-from MDANSE.Core.Error import Error
-from MDANSE.App.HelpFormatter import IndentedHelp
-from MDANSE.App.GUI.Main import MainApplication, PeriodicTableApplication, PlotterApplication
+from MDANSE.GUI.MainFrame import MainFrame
 
-class CommandLineParserError(Error):
-    pass
-
-
-class CommandLineParser(optparse.OptionParser):
-    '''A sublcass of OptionParser.    
-    '''
-
-    def start(self):
-        '''Starts the MDANSE plotter directly from the command line.
-        
-        @param option: the option that triggered the callback.
-        @type option: str
-        
-        @param opt_str: the option string seen on the command line.
-        @type opt_str: str
+class MainApplication(wx.App):
     
-        @param value: the argument for the option.
-        @type value: str
-    
-        @param parser: the MDANSE option parser.
-        @type parser: instance of MDANSEOptionParser
-        '''
+    def OnInit(self):
         
-        app = MainApplication(None)
-        app.MainLoop()
-        
-        self.exit()
-
-
-    def start_periodictable(self):
-        '''Starts the MDANSE database directly from the command line.
-        
-        @param option: the option that triggered the callback.
-        @type option: str
-        
-        @param opt_str: the option string seen on the command line.
-        @type opt_str: str
-    
-        @param value: the argument for the option.
-        @type value: str
-    
-        @param parser: the MDANSE option parser.
-        @type parser: instance of MDANSEOptionParser
-        '''
-        
-        app = PeriodicTableApplication()
-        app.MainLoop()
-        
-        self.exit()
-
-    
-    def start_plotter(self):
-        '''Starts the MDANSE plotter directly from the command line.
-        
-        @param option: the option that triggered the callback.
-        @type option: str
-        
-        @param opt_str: the option string seen on the command line.
-        @type opt_str: str
-    
-        @param value: the argument for the option.
-        @type value: str
-    
-        @param parser: the MDANSE option parser.
-        @type parser: instance of MDANSEOptionParser
-        '''
-        
-        app = PlotterApplication()
-        app.MainLoop()
-        
-        self.exit()
+        f = MainFrame(None)
+        f.Show()
+        return True
 
 if __name__ == "__main__":
 
-    from MDANSE.__pkginfo__ import __version__, __date__
+    app = MainApplication(None)
+    app.MainLoop()
 
-    # Creates the option parser.
-    parser = CommandLineParser(formatter=IndentedHelp(), version = 'MDANSE %s (%s)' % (__version__, __date__))        
-
-    # Creates a first the group of general options.
-    group = optparse.OptionGroup(parser, "General options")
-    group.add_option("-d", "--database", action="store_true", dest="database", help='Start MDANSE database application')
-    group.add_option("-m", "--main", action="store_true", dest="main", help='Start MDANSE main application')
-    group.add_option("-p", "--plot", action="store_true", dest="plot", help='Start the MDANSE plotting application')
-
-    # Add the goup to the parser.
-    parser.add_option_group(group)
-        
-    # The command line is parsed.        
-    options, args = parser.parse_args()
-    
-    if options.main:
-        parser.start()
-
-    elif options.database:
-        parser.start_periodictable()
-    
-    elif options.plot:
-        parser.start_plotter()
-
-    else:
-        parser.start()
     

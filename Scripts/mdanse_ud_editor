@@ -1,0 +1,20 @@
+#!python
+
+import wx
+
+from MDANSE.Framework.Plugins.UserDefinitionViewerPlugin import UserDefinitionViewerFrame
+
+class UserDefinitionEditor(wx.App):  
+      
+    def OnInit(self):
+        
+        f = UserDefinitionViewerFrame(None)
+        f.Show()
+        self.SetTopWindow(f)
+        return True
+
+if __name__ == "__main__":
+
+    app = UserDefinitionEditor(None)
+    app.MainLoop()
+    

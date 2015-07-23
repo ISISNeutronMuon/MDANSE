@@ -1,0 +1,19 @@
+#!python
+
+import wx
+
+from MDANSE.Framework.Plugins.PeriodicTablePlugin import PeriodicTableFrame
+
+class PeriodicTable(wx.App):
+    
+    def OnInit(self):
+        
+        f = PeriodicTableFrame(None)
+        f.Show()
+        self.SetTopWindow(f)
+        return True
+
+if __name__ == "__main__":
+    app = PeriodicTable()
+    app.MainLoop()
+    
