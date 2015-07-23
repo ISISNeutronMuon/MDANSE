@@ -75,16 +75,13 @@ class OutputFilesConfigurator(IConfigurator):
         if the output directory, 2nd element the basename and 3rd element a list of file formats.
         :type value: 3-tuple
         '''
-        
-        dirname, basename, formats = value
                 
-        if not dirname:
-            dirname = os.getcwd()
+        root, formats = value
                 
-        if not basename:
-            raise ConfiguratorError("empty basename for the output file.", self)
-        
-        root = os.path.join(dirname, basename)
+        if not root:
+            raise ConfiguratorError("empty root name for the output file.", self)
+                
+        dirname = os.path.dirname(root)        
         
         try:
             PLATFORM.create_directory(dirname)
@@ -102,7 +99,7 @@ class OutputFilesConfigurator(IConfigurator):
             if not REGISTRY["format"].has_key(fmt):
                 raise ConfiguratorError("the output file format %r is not registered as a valid file format." % fmt, self)
 
-        self["root"] = root
+        self['root'] = root
         self["formats"] = formats
         self["files"] = ["%s%s" % (root,REGISTRY["format"][f].extension) for f in formats]
 

@@ -47,16 +47,9 @@ class OutputFilesWidget(IWidget):
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-                
-        startDirectory = os.getcwd()
+                        
+        self._filename = wxfile.FileBrowseButton(self._widgetPanel, wx.ID_ANY, fileMode=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT, labelText="Basename")
         
-        self._dirname = wxfile.DirBrowseButton(self._widgetPanel, wx.ID_ANY, startDirectory=startDirectory, newDirectory=True)
-        self._dirname.SetValue(startDirectory)
-
-        label = wx.StaticText(self._widgetPanel, label="Basename", style=wx.ALIGN_LEFT)
-        
-        self._basename = wx.TextCtrl(self._widgetPanel, value="")
-
         self._formats = wx.combo.ComboCtrl(self._widgetPanel, value="output formats", style=wx.CB_READONLY)
         
         tcp = ComboCheckbox(self._configurator.formats)
@@ -65,11 +58,9 @@ class OutputFilesWidget(IWidget):
         
         hSizer = wx.BoxSizer(wx.HORIZONTAL)
         
-        hSizer.Add(label, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-        hSizer.Add(self._basename, 1, wx.EXPAND|wx.ALL, 5)
-        hSizer.Add(self._formats, 0, wx.ALL, 5)
+        hSizer.Add(self._filename, 1, wx.EXPAND|wx.ALL, 5)
+        hSizer.Add(self._formats, 0, wx.EXPAND|wx.ALL, 5)
 
-        sizer.Add(self._dirname, 0, wx.ALL|wx.EXPAND)
         sizer.Add(hSizer, 0, wx.ALL|wx.EXPAND, 0)
 
         pub.subscribe(self.on_set_trajectory, ("set_trajectory"))
@@ -78,13 +69,11 @@ class OutputFilesWidget(IWidget):
 
     def get_widget_value(self):
         
-        dirname = self._dirname.GetValue()
-        
-        basename = self._basename.GetValue().strip()
-                
+        filename = self._filename.GetValue()
+                        
         formats = self._formats.GetPopupControl().GetControl().GetCheckedStrings()
                                     
-        return (dirname, basename, formats)
+        return (filename, formats)
     
     def on_set_trajectory(self, message):
         
@@ -92,5 +81,9 @@ class OutputFilesWidget(IWidget):
                         
         if not window in self.Parent.widgets.values():
             return
-                
-        self._basename.SetValue("output_%s" % (os.path.splitext(os.path.basename(filename))[0]))
+        
+        trajectoryDir = os.path.dirname(filename)
+        basename = "output_%s" % os.path.splitext(os.path.basename(filename))[0]
+        
+        self._filename.SetValue(os.path.join(trajectoryDir,basename))
+                        
