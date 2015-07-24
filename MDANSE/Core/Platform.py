@@ -34,10 +34,12 @@ import abc
 import ctypes
 import datetime
 import getpass
+import inspect
 import os
 import re
 import subprocess
 import tempfile
+import types
 
 from MDANSE.Core.Error import Error
 
@@ -136,6 +138,32 @@ class Platform(object):
                 os.makedirs(os.path.join(path, mmtkDatabaseType))
                         
         return path
+        
+    def full_dotted_module(self,obj):
+        '''
+        Returns the fully dotted name of a module given the module object itself or a class stored in this module.
+        
+        :param obj: the module object or a class stored in stored in this module.
+        :type obj: module or class
+        
+        :return: the fully dotted name of the module.
+        :rtype: str
+        '''
+        
+        if inspect.ismodule(obj):
+            path = obj.__file__
+        elif inspect.isclass(obj):
+            path = inspect.getmodule(obj).__file__
+        else:
+            raise PlatformError('Invalid query object type.')
+                    
+        basepath = os.path.join(os.path.dirname(self.package_directory()),'')
+                
+        _,relativePath = path.split(basepath)
+        
+        relativePath = os.path.splitext(relativePath)[0]
+                        
+        return '.'.join(relativePath.split(os.path.sep))
         
     def change_directory(self, directory):
         '''

@@ -53,22 +53,28 @@ class _Meta(type):
     
 class ClassRegistry(abc.ABCMeta):
     '''
-    Metaclass that registers the subclasses of all the base classes used in MDANSE framework.
+    Metaclass that registers the classes that make the MDANSE framework.
 
-    The subclasses are stored internally in a nested dictionary whose primary key 
-    is the 'type' class attribute of the base class they are inheriting from and secondary key is 
-    their own 'type' class attribute.
+    The MDANSE framework is based on a set of interfaces that covers different aspects of the framework such 
+    as the analysis, the input data, the output file formats ... By metaclassing each base class of these interfaces 
+    with :class:`ClassRegistry` object, their corresponding concrete class instances will be automatically registered at import time in 
+    a data structure that can be further used all over the framework.
+        
+    The data structure used to store the concrete classes is a nested dictionary whose primary key 
+    is the :py:attr:`type` class attribute of the base class they are inheriting from and secondary key is 
+    their own :py:attr:`type` class attribute. Any concrete class of those interfaces that does not define the
+    :py:attr:`type` class attribute will not be registered.    
     '''
     
     __metaclass__ = _Meta
 
-    __interfaces = []
+    __interfaces = set()
 
     _registry = {}
                 
     def __init__(self, name, bases, namespace):
         '''
-        Constructor of a class metaclassed by ClassFactory
+        Constructor
         
         :param name: the name of the class to be built by this metaclass
         :type name: str
@@ -80,16 +86,16 @@ class ClassRegistry(abc.ABCMeta):
         
         super(ClassRegistry, self).__init__(name, bases, namespace)
                 
-        # Get the typ of the class
+        # Any class 
         typ = getattr(self, 'type', None)
 
         if typ is None:
             return
 
-        metaClass = namespace.get("__metaclass__", None)
-                              
+        # A class metaclassed by ClassRegistry will define a new section of the registry. 
+        metaClass = namespace.get("__metaclass__", None)                              
         if metaClass is ClassRegistry:
-            ClassRegistry.__interfaces.append(self)
+            ClassRegistry.__interfaces.add(self)
             if (ClassRegistry._registry.has_key(typ)):
                 return
             ClassRegistry._registry[typ] = {}

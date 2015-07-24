@@ -30,10 +30,13 @@ Created on Apr 14, 2015
 :author: Gael Goret, Eric C. Pellegrini
 '''
 
+import os
+
 import wx
 import wx.aui as wxaui
+import wx.html as wxhtml
 
-from MDANSE import REGISTRY
+from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Core.Error import Error
 
 from MDANSE.Framework.Plugins.ComponentPlugin import ComponentPlugin
@@ -70,10 +73,10 @@ class RegistryViewerPlugin(ComponentPlugin):
         self._treePanel.SetSizer(treeSizer)  
         
         self._infoPanel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
-        
+                
         infoSizer = wx.BoxSizer(wx.HORIZONTAL)
-        
-        self._info = wx.TextCtrl(self._infoPanel, wx.ID_ANY, style=wx.TE_MULTILINE|wx.TE_READONLY)
+
+        self._info = wxhtml.HtmlWindow(self._infoPanel, wx.ID_ANY, size=self.GetSize())        
 
         infoSizer.Add(self._info, 1, wx.ALL|wx.EXPAND, 5)
         
@@ -92,7 +95,7 @@ class RegistryViewerPlugin(ComponentPlugin):
             
     def set_plugins_tree(self, node, data):
         
-        for k, v in data.items():
+        for k, v in sorted(data.items()):
             
             if isinstance(v, dict):
                 subnode = self._tree.AppendItem(node, str(k), data=None)
@@ -111,12 +114,12 @@ class RegistryViewerPlugin(ComponentPlugin):
         
         if ItemData.GetData() is None:
             return
+
+        moduleFullName = PLATFORM.full_dotted_module(ItemData.GetData())
         
-        containerStr = ''
-        containerStr += str(ItemData.GetData()) + '\n'
-        containerStr += str(ItemData.GetData().__doc__)
-       
-        self._info.SetValue(containerStr)       
+        moduleDocPath = os.path.join(PLATFORM.help_path(), moduleFullName+'.html')
+                
+        self._info.LoadPage(moduleDocPath)
     
     def close(self):
         pass
