@@ -262,7 +262,7 @@ class CommandLineParser(optparse.OptionParser):
         subprocess.Popen([sys.executable, filename])
 
 
-    def save_job_template(self, option, opt_str, value, parser):
+    def save_job(self, option, opt_str, value, parser):
         '''
         Save job templates.
             
@@ -287,7 +287,7 @@ class CommandLineParser(optparse.OptionParser):
         name = parser.rargs[0]
                     
         # A name for the template is built.
-        filename = os.path.abspath('template_%s.py' % name.lower())
+        filename = os.path.abspath('default_%s.py' % name.lower())
         jobs[name].save(filename)    
 
         # Try to save the template for the job.  
@@ -303,6 +303,38 @@ class CommandLineParser(optparse.OptionParser):
         else:
             print "Saved template for job %r as %r" % (name, filename)
 
+    def save_job_template(self, option, opt_str, value, parser):
+        '''
+        Save job templates.
+            
+        @param option: the option that triggered the callback.
+        @type option: optparse.Option instance
+        
+        @param opt_str: the option string seen on the command line.
+        @type opt_str: str
+    
+        @param value: the argument for the option.
+        @type value: str
+    
+        @param parser: the MDANSE option parser.
+        @type parser: instance of MDANSEOptionParser
+        '''
+
+        nargs = len(parser.rargs)
+
+        from MDANSE.Framework.Jobs.IJob import IJob        
+
+        if nargs == 1:
+            shortname = longname = parser.rargs[0]
+        elif nargs == 2:
+            shortname,longname = parser.rargs
+        else:
+            raise CommandLineParserError("Invalid number of arguments for %r option" % opt_str)
+                
+        filename = IJob.save_template(shortname,longname)
+
+        print "Template for job %r saved in %r" % (shortname, filename)
+                    
 if __name__ == "__main__":
 
     from MDANSE.__pkginfo__ import __version__, __date__
@@ -326,10 +358,11 @@ if __name__ == "__main__":
     # Add the goup to the parser.
     parser.add_option_group(group)
 
-    group.add_option('--jcheck', action='callback', callback=parser.check_job, help='Check the status of a given job.')
-    group.add_option('--jlist', action='callback', callback=parser.display_jobs_list, help='Display the jobs list.')
-    group.add_option('--jrun' , action='callback', callback=parser.run_job, help='Run MDANSE job(s).')
-    group.add_option('--jsave', action='callback', callback=parser.save_job_template, help='Save a template for a job.', metavar = "MDANSE_SCRIPT")
+    group.add_option('--jc', action='callback', callback=parser.check_job, help='Check the status of a given job.')
+    group.add_option('--jl', action='callback', callback=parser.display_jobs_list, help='Display the jobs list.')
+    group.add_option('--jr', action='callback', callback=parser.run_job, help='Run MDANSE job(s).')
+    group.add_option('--js', action='callback', callback=parser.save_job, help='Save a job script with default patameters.', metavar = "MDANSE_SCRIPT")
+    group.add_option('--jt', action='callback', callback=parser.save_job_template, help='Save a job template.', metavar = "MDANSE_SCRIPT")
     
     # The command line is parsed.        
     options, _ = parser.parse_args()

@@ -145,47 +145,32 @@ class ClassRegistry(abc.ABCMeta):
         if not cls._registry.has_key(interface):
             return "The interface " + interface + " is not registered"
 
-        # Dictionnay whose keys are the package names and values and list of (job name, job path) stored in the corresponding package. 
-        packages = {}
+        words = ["Name", "Class","File"]
 
+        contents = []
+        contents.append("="*130)
+        contents.append("{1:{0}s} {2:50s} {3}")
+        contents.append("="*130)
+        
+        maxlength = -1
+        
         # Loop over the registry items.
-        for k, v in cls._registry[interface].items():
+        for i, (k, v) in enumerate(sorted(cls._registry[interface].items())):
             
             # Get the module corresponding to the job class.
             mod = inspect.getmodule(v)
 
-            # The package hosting the module.
-            modPackage = mod.__package__
+            words.extend([k, v.__name__,mod.__file__])
+
+            contents.append("{%d:{0}s} {%d:50} {%d}" % (3*i+4,3*i+5,3*i+6))
+            
+            maxlength = max(len(k),maxlength)
+                        
+        contents.append('-' * 130)
         
-            # The module file.
-            modFilename = mod.__file__
-        
-            # If no package could be found, guess a name using the directory name of the module file.
-            if modPackage is None:
-                modPackage = os.path.split(os.path.dirname(modFilename))[1]
-                
-            modPackage = modPackage.split(".")[-1]
-        
-            # Update the packages dictionary.
-            if packages.has_key(modPackage):
-                packages[modPackage].append([k, v.__name__])
-            else:
-                packages[modPackage] = [[k, v.__name__]]
-    
-        contents = []
-        
-        # Print the contents of the packages dictionary.
-        contents.append("="*130)
-        contents.append("%-50s %-40s %-s" % ("Package", "Name", "Class"))
-        contents.append("="*130)
-        for k, v in sorted(packages.items()):
-            for vv in sorted(v): 
-                contents.append("%-50s %-40s %-s" % (k, vv[0], vv[1]))
-            contents.append('-' * 130)
-        
-        contents = "\n".join(contents)
-    
-        return contents
+        contents = "\n".join(contents)        
+                    
+        return contents.format(maxlength,*words)
 
     @classmethod
     def get_interfaces(cls):

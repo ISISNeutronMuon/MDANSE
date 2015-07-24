@@ -1,3 +1,4 @@
+import glob
 import os
 import platform
 
@@ -7,9 +8,29 @@ if platform.dist()[0].lower() == "ubuntu":
         
 from MDANSE.GUI.DataController import DATA_CONTROLLER
 
+
 from MDANSE import REGISTRY
+from MDANSE.Framework.Plugins.DataPlugin import DataPlugin 
+from MDANSE.Framework.Plugins.JobPlugin import JobPlugin
 
-directories = sorted([x[0] for x in os.walk(os.path.join(os.path.dirname(__file__),'Framework'))][1:])
+for job in REGISTRY["job"].values():
 
-for d in directories:
-    REGISTRY.update_registry(d)
+    if not hasattr(job, "type"):
+        continue
+                
+    attrs = {"type"      : job.type,
+             "ancestor"  : getattr(job,"ancestor",""),
+             "category"  : ('Analysis',) + getattr(job, "category", ("Miscellaneous",)),
+             "label"     : getattr(job, "label", job.__name__)}
+            
+    kls = type("%sPlugin" % job.__name__, (JobPlugin,), attrs)
+
+for data in REGISTRY["input_data"].values():
+
+    if not hasattr(data, "type"):
+        continue
+
+    attrs = {"type"     : data.type, 
+             "label"    : " ".join("".split("_")).capitalize(),
+             "ancestor" : ""}
+    kls = type("%sPlugin" % data.__name__, (DataPlugin,), attrs)

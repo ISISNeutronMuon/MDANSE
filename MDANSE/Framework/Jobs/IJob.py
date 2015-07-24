@@ -461,3 +461,89 @@ class IJob(Configurable):
     def info(self):
             
         return self._info
+
+    @classmethod
+    def save_template(cls, shortname,longname=None):
+        
+        if longname is None:
+            longname = shortname
+            
+        if REGISTRY['job'].has_key(shortname):
+            raise IOError("A job with %r name is already stored in the registry" % shortname)
+                        
+        from MDANSE import PREFERENCES
+        macrosDir =  PREFERENCES.get_preferences_item("macros_directory").get_value()
+        
+        templateFile = os.path.join(macrosDir,"%s.py" % longname)
+                
+        f = open(templateFile,'w')
+        
+        f.write(
+'''import collections
+
+from MDANSE.Framework.Jobs.IJob import IJob
+
+class %s(IJob):
+    """
+    You should enter the description of your job here ...
+    """
+    
+    type = %r
+    
+    # You should enter the label under which your job will be referenced from the gui.
+    label = %r
+
+    # You should enter the category under which your job will be references.
+    category = ('My jobs',)
+    
+    ancestor = "mmtk_trajectory"
+
+    # You should enter the configuration of your job here
+    # Here a basic example of a job that will use a MMTK trajectory, a frame selection and an output file in NetCDF and ASCII file formats
+    settings = collections.OrderedDict()
+    settings['trajectory']=('mmtk_trajectory',{})
+    settings['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
+    settings['output_files']=('output_files', {"formats":["netcdf","ascii"]})
+            
+    def initialize(self):
+        """
+        Initialize the input parameters and analysis self variables
+        """
+
+        # Compulsory. You must enter the number of steps of your job.
+        # Here for example the number of selected frames
+        self.numberOfSteps = self.configuration['frames']['number']
+                        
+        # Create an output data for the selected frames.
+        self._outputData.add("times", "line", self.configuration['frames']['time'], units='ps')
+
+
+    def run_step(self, index):
+        """
+        Runs a single step of the job.
+        """
+                                
+        return index, None
+    
+    
+    def combine(self, index, x):
+        """
+        Synchronize the output of each individual run_step output.
+        """     
+                    
+    def finalize(self):
+        """
+        Finalizes the job (e.g. averaging the total term, output files creations ...).
+        """ 
+
+        # The output data are written
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
+        
+        # The trajectory is closed
+        self.configuration['trajectory']['instance'].close()        
+''' % (longname,shortname,longname))
+        
+        
+        f.close()
+        
+        return templateFile

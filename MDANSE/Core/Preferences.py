@@ -204,6 +204,12 @@ class InputDirectory(PreferencesItem):
             raise PreferencesError('Error when setting input directory %r' % value)
         
         self._value = value
+        
+    def get_value(self):
+        
+        PLATFORM.create_directory(self._value)
+        
+        return self._value
                 
 class Preferences(object):
     '''
