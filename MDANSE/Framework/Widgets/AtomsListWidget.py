@@ -61,8 +61,7 @@ class AtomNameDropTarget(wx.TextDropTarget):
         
         if self._atoms.GetItemCount() > 0:
             if (molname != self._currentMolecule):
-                d = wx.MessageDialog(self._atoms, "The dragged atoms does not belong to the same molecule than the current selection.", style=wx.ICON_ERROR|wx.STAY_ON_TOP|wx.CENTRE)
-                d.ShowModal()
+                LOGGER("The dragged atoms does not belong to the same molecule than the current selection.",'error',['dialog'])
                 return
         else:
             self._currentMolecule = molname
@@ -238,7 +237,9 @@ if __name__ == "__main__":
     
     from MMTK.Trajectory import Trajectory
     
-    from MDANSE import PLATFORM
+    from MDANSE import PLATFORM,REGISTRY
+    
+    LOGGER.add_handler("dialog", REGISTRY['handler']['dialog'](), level="error", start=True)
             
     t = Trajectory(None,os.path.join(os.path.dirname(PLATFORM.package_directory()),"Data","Trajectories","MMTK","nagma_in_periodic_universe.nc"),"r")
     
