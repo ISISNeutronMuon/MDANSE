@@ -16,7 +16,6 @@ class TestSD(UnitTest):
         parameters['target_molecule'] = 'atom_index 151'
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/protein_in_periodic_universe.nc'
         job = REGISTRY['job']['sd']()
-        job.run(parameters,False)
         self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():

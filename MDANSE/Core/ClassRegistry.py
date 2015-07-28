@@ -57,7 +57,7 @@ class ClassRegistry(abc.ABCMeta):
 
     The MDANSE framework is based on a set of interfaces that covers different aspects of the framework such 
     as the analysis, the input data, the output file formats ... By metaclassing each base class of these interfaces 
-    with :class:`ClassRegistry` object, their corresponding concrete class instances will be automatically registered at import time in 
+    with :py:class:`~MDANSE.Core.ClassRegistry.ClassRegistry` object, their corresponding concrete class instances will be automatically registered at import time in 
     a data structure that can be further used all over the framework.
         
     The data structure used to store the concrete classes is a nested dictionary whose primary key 
@@ -85,14 +85,14 @@ class ClassRegistry(abc.ABCMeta):
         '''
         
         super(ClassRegistry, self).__init__(name, bases, namespace)
-                
-        # Any class 
+            
+        # If the class objet does not have a type attribute, it will not be registered.    
         typ = getattr(self, 'type', None)
-
         if typ is None:
             return
 
-        # A class metaclassed by ClassRegistry will define a new section of the registry. 
+        # If the class object is metaclassed by ClassRegistry then a new section of the registry will
+        # be created with its type attribute.
         metaClass = namespace.get("__metaclass__", None)                              
         if metaClass is ClassRegistry:
             ClassRegistry.__interfaces.add(self)

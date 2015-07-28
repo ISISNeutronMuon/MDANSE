@@ -49,7 +49,7 @@ class JobPlugin(ComponentPlugin):
         
     def __init__(self, parent, *args, **kwargs):
                 
-        self._jobClass = REGISTRY["job"][self.type]
+        self._job = REGISTRY["job"][self.type]()
         
         ComponentPlugin.__init__(self, parent, size=wx.Size(800,400), *args, **kwargs)
                 
@@ -60,7 +60,7 @@ class JobPlugin(ComponentPlugin):
                 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
                 
-        self._parametersPanel = ConfigurationPanel(self._main, self._jobClass)
+        self._parametersPanel = ConfigurationPanel(self._main, self._job)
                     
         sb = wx.StaticBox(self._main, wx.ID_ANY)
         sbSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
@@ -94,7 +94,7 @@ class JobPlugin(ComponentPlugin):
         
     def on_help(self, event):
                                 
-        d = JobHelpFrame(self,self._jobClass)
+        d = JobHelpFrame(self,self._job)
 
         d.Show()
                          
@@ -105,11 +105,11 @@ class JobPlugin(ComponentPlugin):
         if not parameters:
             return
         
-        name = self._jobClass.set_name()
+        name = self._job.define_unique_name()
         
         script = os.path.join(PLATFORM.jobscripts_directory(),name)+'.py'
                 
-        self._jobClass.save(script, parameters)
+        self._job.save(script, parameters)
                                 
         if PLATFORM.name == "windows":
             startupinfo = subprocess.STARTUPINFO()
@@ -143,7 +143,7 @@ class JobPlugin(ComponentPlugin):
         if os.path.splitext(path)[1] != ".py":
             path += ".py"
                         
-        self._jobClass.save(path, parameters)
+        self._job.save(path, parameters)
 
     def plug(self):
                 
@@ -203,6 +203,6 @@ if __name__ == "__main__":
     filename = os.path.join(os.path.dirname(PLATFORM.package_directory()),'Data','Trajectories','MMTK','protein_in_periodic_universe.nc')
     
     app = wx.App(False)
-    f = JobFrame(None,'msd',filename)
+    f = JobFrame(None,'mvi',filename)
     f.Show()
     app.MainLoop()            

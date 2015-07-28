@@ -10,7 +10,7 @@ class ConfigurationPanel(wx.Panel):
         
         wx.Panel.__init__(self, parent, wx.ID_ANY)
         
-        self._configurable = configurable()
+        self._configurable = configurable
         
         self._widgets = {}
         

@@ -312,7 +312,17 @@ class Platform(object):
         :rtype: str
         '''
         
-        return os.path.dirname(self.package_directory())
+        return os.path.join(os.path.dirname(self.package_directory()),'Data')
+
+    def base_directory(self):
+        '''
+        Returns the path for MDANSE base directory.
+        
+        @return: the path for MDANSE base directory.
+        @rtype: str        
+        '''
+        
+        return os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
     def package_directory(self):
         '''

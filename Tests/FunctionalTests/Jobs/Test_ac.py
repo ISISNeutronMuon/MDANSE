@@ -15,7 +15,6 @@ class TestAC(UnitTest):
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
         job = REGISTRY['job']['ac']()
-        job.run(parameters,False)
         self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():

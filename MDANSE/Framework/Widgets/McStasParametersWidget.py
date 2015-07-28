@@ -29,14 +29,16 @@ Created on Mar 30, 2015
  
 :author: Eric C. Pellegrini
 '''
+
+import collections 
  
 import wx
  
-from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Configurable import ConfigurationError
-from MDANSE.Framework.Jobs.McStasVirtualInstrument import McStasParameters
+from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 
 class McStasParametersWidget(IWidget):
  
@@ -56,25 +58,28 @@ class McStasParametersWidget(IWidget):
         return self._sizer
   
     def set_layout(self, message):
- 
-        window, parameters = message
-                             
-        if not window in self.Parent.widgets.values():
+
+        widget, parameters = message
+        
+        if not widget.Parent == self.Parent:
             return
- 
+
         for k in self._configurator.exclude:
             parameters.pop(k)
-        
-        self._mcstasParameters = McStasParameters()
+
+        self._parameters = Configurable()
          
+        settings = collections.OrderedDict()
         for name, value in parameters.items():
             typ, default = value
-            self._mcstasParameters.settings[name] = (self._mcStasTypes[typ], {"default":default})
+            settings[name] = (self._mcStasTypes[typ], {"default":default})
+            
+        self._parameters.set_settings(settings)
  
         self._sizer.Clear(deleteWindows=True)
  
         self._widgetPanel.Freeze()
-        self._configurationPanel = ConfigurationPanel(self._widgetPanel, self._mcstasParameters)
+        self._configurationPanel = ConfigurationPanel(self._widgetPanel, self._parameters)
          
         for name, value in parameters.items():
             typ, default = value

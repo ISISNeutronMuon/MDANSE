@@ -30,9 +30,11 @@ Created on Mar 30, 2015
 :author: Eric C. Pellegrini
 '''
 
+import os
 import re
 import subprocess
 
+from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
         
 class McStasParametersConfigurator(IConfigurator):
@@ -43,6 +45,20 @@ class McStasParametersConfigurator(IConfigurator):
     type = "mcstas_parameters"
 
     _mcStasTypes = {'double' : float, 'int' : int, 'string' : str}
+
+    _default = {'beam_wavelength_Angs': 2.0,
+                'environment_thickness_m': 0.002,
+                'beam_resolution_meV': 0.1,
+                'container':os.path.join(PLATFORM.example_data_directory(),'McStas','Samples','Al.laz'),
+                'container_thickness_m': 5e-05,
+                'sample_height_m': 0.05,
+                'environment':os.path.join(PLATFORM.example_data_directory(),'McStas','Samples','Al.laz'),
+                'environment_radius_m': 0.025,
+                'sample_thickness_m': 0.001,
+                'sample_detector_distance_m': 4.0,
+                'sample_width_m': 0.02,
+                'sample_rotation_deg': 45.0,
+                'detector_height_m': 3.0}        
     
     def __init__(self, name, exclude=None, **kwargs):
         '''

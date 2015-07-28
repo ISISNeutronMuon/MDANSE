@@ -30,23 +30,33 @@ Created on Mar 30, 2015
 :author: Eric C. Pellegrini
 '''
 
+import collections
+
 import wx
 
 from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
-from MDANSE.Framework.Jobs.McStasVirtualInstrument import McStasOptions
+from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Widgets.IWidget import IWidget
 
 class McStasOptionsConfiguratorWidget(IWidget):
      
     type = "mcstas_options"
+
+    _mcStasTypes = {'double' : 'float', 'int' : 'integer', 'str' : 'input_file'}
  
     def add_widgets(self):
          
         sizer = wx.BoxSizer(wx.VERTICAL)
   
-        self._mcstasOptions = McStasOptions()
+        options = Configurable()
+        
+        settings = collections.OrderedDict()
+        for name,value in self._configurator.default.items():
+            settings[name] = (self._mcStasTypes[type(value).__name__],{'default':value})
+        
+        options.set_settings(settings)                    
          
-        self._panel = ConfigurationPanel(self._widgetPanel, self._mcstasOptions)
+        self._panel = ConfigurationPanel(self._widgetPanel, options)
          
         sizer.Add(self._panel, 0, wx.ALL|wx.EXPAND, 5)
          

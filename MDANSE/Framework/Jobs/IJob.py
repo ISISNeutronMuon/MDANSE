@@ -108,7 +108,7 @@ class IJob(Configurable):
     section = "job"
         
     @staticmethod
-    def set_name():
+    def define_unique_name():
         """
         Sets a name for the job that is not already in use by another running job.
         """
@@ -423,7 +423,7 @@ class IJob(Configurable):
         
         try:
             
-            self._name = IJob.set_name()
+            self._name = IJob.define_unique_name()
                                                         
             if status:
                 self._status = JobStatus(self)
