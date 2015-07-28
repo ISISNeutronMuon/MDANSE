@@ -136,23 +136,20 @@ class SpatialDensity(IJob):
         
         directCell = numpy.array(self.configuration['trajectory']['instance'].universe.basisVectors()).astype(numpy.float64)
         reverseCell = numpy.array(self.configuration['trajectory']['instance'].universe.reciprocalBasisVectors()).astype(numpy.float64)
+
         # The configuration is made contiguous.
-        
         conf = self.configuration['trajectory']['instance'].universe.contiguousObjectConfiguration()
 
         origins = numpy.zeros((self.configuration['reference_basis']['n_values'],3), dtype = numpy.float64)
         bases = numpy.zeros((self.configuration['reference_basis']['n_values'],3,3), dtype = numpy.float64)
         
         indexes = numpy.array(self.configuration['target_molecule']['indexes']).astype(numpy.int32)
-        
+                
         for i, basis in enumerate(self.configuration['reference_basis']['atoms']):
-            originIndexes, xIndexes, yIndexes = basis
-            origins[i,:] = center_of_mass(conf.array[originIndexes], None)
             
-            x = center_of_mass(conf.array[xIndexes,:], None)
-            y = center_of_mass(conf.array[yIndexes,:], None)
-
-            bases[i,:,:] = numpy.array(build_cartesian_axes(origins[i,:],x,y)).T
+            origin, x, y = basis
+            
+            bases[i,:,:] = numpy.array(build_cartesian_axes(conf.array[origin,:],conf.array[x,:],conf.array[y,:])).T
         
         hist = numpy.zeros_like(self.hist, dtype=numpy.int32)
         

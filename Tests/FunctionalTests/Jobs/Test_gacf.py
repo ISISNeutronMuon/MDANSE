@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from Tests.UnitTest import UnitTest
+from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
 class TestGACF(UnitTest):
@@ -12,14 +12,14 @@ class TestGACF(UnitTest):
         parameters['frames'] = (0, 10, 1)
         parameters['grouping_level'] = 'atom'
         parameters['normalize'] = False
-        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['output_files'] = ('output', ['netcdf'])
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
         parameters['trajectory_variable'] = 'velocities'
         parameters['transmutated_atoms'] = None
         parameters['weights'] = 'equal'
-        job = REGISTRY['job']['gacf'](status=False)
-        self.assertNotRaises(job.run, parameters)
+        job = REGISTRY['job']['gacf']()
+        self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()

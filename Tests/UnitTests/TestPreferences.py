@@ -31,6 +31,7 @@ Created on May 29, 2015
 '''
 
 import os
+import shutil
 import unittest
 
 from MDANSE import PREFERENCES
@@ -50,10 +51,12 @@ class TestPreferences(UnitTest):
 
     def test_set_item(self):
         
-        val = PREFERENCES.get_preferences_item("working_directory")
+        val = PREFERENCES.get_preferences_item("working_directory").get_value()
         PREFERENCES.set_preferences_item("working_directory","test")
         self.assertEqual(PREFERENCES.get_preferences_item("working_directory").value,os.path.join(os.getcwd(),"test"))
         PREFERENCES.set_preferences_item("working_directory",val)
+        
+        shutil.rmtree("test")
                 
     def test_load_preferences(self):
         '''

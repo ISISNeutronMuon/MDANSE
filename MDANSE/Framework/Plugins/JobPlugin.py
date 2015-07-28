@@ -199,10 +199,8 @@ if __name__ == "__main__":
 
     from MDANSE.GUI import DATA_CONTROLLER
     from MDANSE.GUI.WorkingPanel import WorkingPanel
-    
-    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))))
-    
-    filename = os.path.join(root,'Data','Trajectories','MMTK','protein_in_periodic_universe.nc')
+            
+    filename = os.path.join(os.path.dirname(PLATFORM.package_directory()),'Data','Trajectories','MMTK','protein_in_periodic_universe.nc')
     
     app = wx.App(False)
     f = JobFrame(None,'msd',filename)

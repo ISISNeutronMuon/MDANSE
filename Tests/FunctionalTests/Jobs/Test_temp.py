@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from Tests.UnitTest import UnitTest
+from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
 class TestTEMP(UnitTest):
@@ -10,10 +10,10 @@ class TestTEMP(UnitTest):
         parameters = {}
         parameters['frames'] = (0, 10, 1)
         parameters['interpolation_order'] = 'no interpolation'
-        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['output_files'] = ('output', ['netcdf'])
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
-        job = REGISTRY['job']['temp'](status=False)
-        self.assertNotRaises(job.run, parameters)
+        job = REGISTRY['job']['temp']()
+        self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()

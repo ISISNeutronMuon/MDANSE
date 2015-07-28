@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from Tests.UnitTest import UnitTest
+from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
 class TestDL_POLY(UnitTest):
@@ -11,10 +11,10 @@ class TestDL_POLY(UnitTest):
         parameters['atom_aliases'] = {}
         parameters['field_file'] = '../../../Data/Trajectories/DL_Poly/FIELD_cumen'
         parameters['history_file'] = '../../../Data/Trajectories/DL_Poly/HISTORY_cumen'
-        parameters['output_file'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['output_file'] = ('output', ['netcdf'])
         parameters['version'] = '2'
-        job = REGISTRY['job']['dl_poly'](status=False)
-        self.assertNotRaises(job.run, parameters)
+        job = REGISTRY['job']['dl_poly']()
+        self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()

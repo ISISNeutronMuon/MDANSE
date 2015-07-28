@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from Tests.UnitTest import UnitTest
+from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
 class TestGENERIC(UnitTest):
@@ -9,9 +9,9 @@ class TestGENERIC(UnitTest):
     def test(self):
         parameters = {}
         parameters['gt_file'] = '../../../Data/Trajectories/Generic/test.gtf'
-        parameters['output_file'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
-        job = REGISTRY['job']['generic'](status=False)
-        self.assertNotRaises(job.run, parameters)
+        parameters['output_file'] = ('output', ['netcdf'])
+        job = REGISTRY['job']['generic']()
+        self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()

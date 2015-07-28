@@ -4,22 +4,20 @@ import unittest
 from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
-class TestLAMMPS(UnitTest):
+class TestDFTB(UnitTest):
 
     def test(self):
         parameters = {}
-        parameters['config_file'] = '../../../Data/Trajectories/LAMMPS/glycyl_L_alanine_charmm.config'
-        parameters['n_steps'] = 1
         parameters['output_file'] = ('output', ['netcdf'])
-        parameters['time_step'] = 1.0
-        parameters['trajectory_file'] = '../../../Data/Trajectories/LAMMPS/glycyl_L_alanine_charmm.lammps'
-        job = REGISTRY['job']['lammps']()
+        parameters['trj_file'] = '../../../Data/Trajectories/Forcite/nylon66_rho100_500K_v300K.trj'
+        parameters['xtd_file'] = '../../../Data/Trajectories/Forcite/nylon66_rho100_500K_v300K.xtd'
+        job = REGISTRY['job']['dftb']()
         self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(TestLAMMPS))
+    s.addTest(loader.loadTestsFromTestCase(TestDFTB))
     return s
 
 if __name__ == '__main__':

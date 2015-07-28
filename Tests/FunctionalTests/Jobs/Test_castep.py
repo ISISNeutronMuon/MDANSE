@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from Tests.UnitTest import UnitTest
+from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
 class TestCASTEP(UnitTest):
@@ -9,9 +9,9 @@ class TestCASTEP(UnitTest):
     def test(self):
         parameters = {}
         parameters['castep_file'] = '../../../Data/Trajectories/CASTEP/PBAnew.md'
-        parameters['output_file'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
-        job = REGISTRY['job']['castep'](status=False)
-        self.assertNotRaises(job.run, parameters)
+        parameters['output_file'] = ('output', ['netcdf'])
+        job = REGISTRY['job']['castep']()
+        self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()

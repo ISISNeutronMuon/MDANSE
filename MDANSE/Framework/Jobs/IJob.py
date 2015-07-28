@@ -315,7 +315,7 @@ class IJob(Configurable):
         f.write('#!%s\n\n' % sys.executable)
 
         f.write('import unittest\n')
-        f.write('from Tests.UnitTest import UnitTest\n')
+        f.write('from Tests.UnitTests.UnitTest import UnitTest\n')
         f.write('from MDANSE import REGISTRY\n\n')
                 
         f.write('class Test%s(UnitTest):\n\n' % cls.type.upper())

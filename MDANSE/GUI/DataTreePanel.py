@@ -172,4 +172,4 @@ class DataTreePanel(wx.Panel):
         
         dropSource.SetData(data)
         
-        dropSource.DoDragDrop(wx.Drag_AllowMove)
+        dropSource.DoDragDrop(wx.Drag_CopyOnly)

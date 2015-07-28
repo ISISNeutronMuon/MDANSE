@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from Tests.UnitTest import UnitTest
+from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
 class TestCHARMM(UnitTest):
@@ -10,10 +10,10 @@ class TestCHARMM(UnitTest):
         parameters = {}
         parameters['dcd_file'] = '../../../Data/Trajectories/CHARMM/2vb1.dcd'
         parameters['fold'] = False
-        parameters['output_file'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['output_file'] = ('output', ['netcdf'])
         parameters['pdb_file'] = '../../../Data/Trajectories/CHARMM/2vb1.pdb'
-        job = REGISTRY['job']['charmm'](status=False)
-        self.assertNotRaises(job.run, parameters)
+        job = REGISTRY['job']['charmm']()
+        self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()

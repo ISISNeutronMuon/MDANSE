@@ -53,15 +53,14 @@ def build_cartesian_axes(origin, p1, p2, dtype = numpy.float64):
     
     origin = numpy.array(origin, dtype = dtype)
     p1 = numpy.array(p1, dtype = dtype)
-    p2 = numpy.array(p2, dtype = dtype)
-    
+    p2 = numpy.array(p2, dtype = dtype)    
     
     v1 = p1 - origin
     v2 = p2 - origin
-    
+        
     n1 = (v1 + v2)
     n1 /= numpy.linalg.norm(n1)
-    
+        
     n3 = numpy.cross(v1,n1)
     n3 /= numpy.linalg.norm(n3)
     

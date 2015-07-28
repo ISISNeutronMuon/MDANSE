@@ -107,7 +107,7 @@ class AngularCorrelation(IJob):
         """
 
         e1, e2 = self.configuration['axis_selection']['atoms'][index]
-        
+                
         e1 = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
                                    e1,
                                    first=self.configuration['frames']['first'],

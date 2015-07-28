@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from Tests.UnitTest import UnitTest
+from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
 class TestSFFSF(UnitTest):
@@ -10,9 +10,9 @@ class TestSFFSF(UnitTest):
         parameters = {}
         parameters['instrument_resolution'] = ('gaussian', {'mu': 0.0, 'sigma': 10.0})
         parameters['netcdf_input_file'] = '../../../Data/NetCDF/disf_prot.nc'
-        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
-        job = REGISTRY['job']['sffsf'](status=False)
-        self.assertNotRaises(job.run, parameters)
+        parameters['output_files'] = ('output', ['netcdf'])
+        job = REGISTRY['job']['sffsf']()
+        self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()

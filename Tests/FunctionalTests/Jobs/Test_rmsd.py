@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from Tests.UnitTest import UnitTest
+from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
 class TestRMSD(UnitTest):
@@ -11,14 +11,14 @@ class TestRMSD(UnitTest):
         parameters['atom_selection'] = 'all'
         parameters['frames'] = (0, 10, 1)
         parameters['grouping_level'] = 'atom'
-        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['output_files'] = ('output', ['netcdf'])
         parameters['reference_frame'] = 0
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
         parameters['transmutated_atoms'] = None
         parameters['weights'] = 'equal'
-        job = REGISTRY['job']['rmsd'](status=False)
-        self.assertNotRaises(job.run, parameters)
+        job = REGISTRY['job']['rmsd']()
+        self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()

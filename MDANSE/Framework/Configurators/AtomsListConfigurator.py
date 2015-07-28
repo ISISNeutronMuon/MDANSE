@@ -87,11 +87,9 @@ class AtomsListConfigurator(IConfigurator):
             molecule,atoms=value
 
         self["value"] = value
-
-        indexes = [find_atoms_in_molecule(trajConfig['instance'].universe,molecule, at, True) for at in atoms]
-          
-        self['atoms'] = zip(*indexes)      
         
+        self['atoms'] = find_atoms_in_molecule(trajConfig['instance'].universe,molecule, atoms, True)
+                        
         self['n_values'] = len(self['atoms'])
                                     
     def get_information(self):

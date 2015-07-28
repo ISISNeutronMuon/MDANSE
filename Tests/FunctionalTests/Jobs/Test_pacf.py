@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from Tests.UnitTest import UnitTest
+from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
 class TestPACF(UnitTest):
@@ -12,14 +12,14 @@ class TestPACF(UnitTest):
         parameters['frames'] = (0, 10, 1)
         parameters['grouping_level'] = 'atom'
         parameters['normalize'] = False
-        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['output_files'] = ('output', ['netcdf'])
         parameters['projection'] = None
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
         parameters['transmutated_atoms'] = None
         parameters['weights'] = 'equal'
-        job = REGISTRY['job']['pacf'](status=False)
-        self.assertNotRaises(job.run, parameters)
+        job = REGISTRY['job']['pacf']()
+        self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()

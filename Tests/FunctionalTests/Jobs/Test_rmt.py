@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from Tests.UnitTest import UnitTest
+from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
 class TestRMT(UnitTest):
@@ -11,11 +11,11 @@ class TestRMT(UnitTest):
         parameters['axis'] = 'c'
         parameters['frames'] = (0, 10, 1)
         parameters['lower_leaflet'] = 'DMPC'
-        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['output_files'] = ('output', ['netcdf'])
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/dmpc_in_periodic_universe.nc'
         parameters['upper_leaflet'] = 'DMPC'
-        job = REGISTRY['job']['rmt'](status=False)
-        self.assertNotRaises(job.run, parameters)
+        job = REGISTRY['job']['rmt']()
+        self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()

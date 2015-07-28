@@ -61,25 +61,30 @@ class Configurable(object):
         Constructor
         '''
                
-        self._configuration = self.build_configuration()
+        self._configuration = collections.OrderedDict()
                                      
         self._configured=False
         
-    @classmethod
-    def build_configuration(cls):
+        self.build_configuration()
         
-        configuration = collections.OrderedDict()
+    def build_configuration(self):
+        
+        self._configuration.clear()
 
-        for name,(typ,kwds) in cls.settings.items():
+        for name,(typ,kwds) in self.settings.items():
             
             try:
-                configuration[name] = REGISTRY["configurator"][typ](name, **kwds)
+                self._configuration[name] = REGISTRY["configurator"][typ](name, **kwds)
             # Any kind of error has to be caught
             except:
                 raise ConfigurationError("Invalid type for %r configurator" % name)
+            
+    def set_settings(self,settings):
         
-        return configuration
+        self.settings = settings
         
+        self.build_configuration()
+                
     def __getitem__(self, name):
         """
         Returns a configuration item given its name.
@@ -112,6 +117,8 @@ class Configurable(object):
         '''
                 
         self._configured=False
+        
+        self.build_configuration()
                                 
         # If no configurator has to be configured, just return
         if not self._configuration:

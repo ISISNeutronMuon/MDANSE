@@ -49,7 +49,7 @@ class OutputFilesConfigurator(IConfigurator):
     
     type = 'output_files'
     
-    _default = ('.', "output", ["netcdf"])
+    _default = ("output", ["netcdf"])
                     
     def __init__(self, name, formats=None, **kwargs):
         '''

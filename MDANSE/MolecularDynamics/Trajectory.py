@@ -132,6 +132,9 @@ def partition_universe(universe,groups):
     return coll
 
 def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable="configuration", dtype=numpy.float64):
+    
+    if not isinstance(atoms,(list,tuple)):
+        atoms = [atoms]
         
     if last is None:
         last = len(trajectory)
@@ -141,8 +144,6 @@ def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable=
     serie = numpy.zeros((nFrames,3), dtype=dtype)
 
     for at in atoms:
-        if not isinstance(at,Atom):
-            at = int(at)
         serie += trajectory.readParticleTrajectory(at, first, last, step, variable).array
                 
     serie /= len(atoms)

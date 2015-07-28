@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from Tests.UnitTest import UnitTest
+from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
 class TestDOS(UnitTest):
@@ -14,13 +14,13 @@ class TestDOS(UnitTest):
         parameters['grouping_level'] = 'atom'
         parameters['instrument_resolution'] = ('gaussian', {'mu': 0.0, 'sigma': 10.0})
         parameters['interpolation_order'] = 'no interpolation'
-        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['output_files'] = ('output', ['netcdf'])
         parameters['projection'] = None
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
         parameters['weights'] = 'equal'
-        job = REGISTRY['job']['dos'](status=False)
-        self.assertNotRaises(job.run, parameters)
+        job = REGISTRY['job']['dos']()
+        self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()

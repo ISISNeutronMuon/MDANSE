@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from Tests.UnitTest import UnitTest
+from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
 class TestDACF(UnitTest):
@@ -11,11 +11,11 @@ class TestDACF(UnitTest):
         parameters['atom_charges'] = {0: 0.5, 1: 1.2, 2: -0.2}
         parameters['atom_selection'] = 'atom_index 0,1,2'
         parameters['frames'] = (0, 10, 1)
-        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['output_files'] = ('output', ['netcdf'])
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
-        job = REGISTRY['job']['dacf'](status=False)
-        self.assertNotRaises(job.run, parameters)
+        job = REGISTRY['job']['dacf']()
+        self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()

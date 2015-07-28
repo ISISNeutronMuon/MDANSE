@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from Tests.UnitTest import UnitTest
+from Tests.UnitTests.UnitTest import UnitTest
 from MDANSE import REGISTRY
 
 class TestBTT(UnitTest):
@@ -10,10 +10,10 @@ class TestBTT(UnitTest):
         parameters = {}
         parameters['atom_selection'] = 'all'
         parameters['frames'] = (0, 10, 1)
-        parameters['output_files'] = ('/users/pellegrini/workspace/MDANSE/Tests/FunctionalTests/Jobs', 'output', ['netcdf'])
+        parameters['output_files'] = ('output', ['netcdf'])
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
-        job = REGISTRY['job']['btt'](status=False)
-        self.assertNotRaises(job.run, parameters)
+        job = REGISTRY['job']['btt']()
+        self.assertNotRaises(job.run, parameters, status=False)
 
 def suite():
     loader = unittest.TestLoader()
