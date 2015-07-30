@@ -32,7 +32,7 @@ Created on Mar 30, 2015
 
 class Error(Exception):
     '''
-    Base class for handling exception occuring in MDANSE.
+    Base class for handling exception occurring in MDANSE.
     
     Any exception defined in MDANSE should derive from it in order to be properly handled
     in the GUI application.

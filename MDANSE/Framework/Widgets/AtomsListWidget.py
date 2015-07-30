@@ -245,7 +245,7 @@ if __name__ == "__main__":
     
     app = wx.App(False)
                 
-    p = AtomsListDialog(None,t,3)
+    p = AtomsListDialog(None,t,10)
                 
     p.ShowModal()
     

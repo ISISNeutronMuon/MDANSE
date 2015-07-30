@@ -44,7 +44,8 @@ def build_connectivity(universe ,tolerance=0.05):
 
     scannedObjects = [obj for obj in universe.objectList() if isinstance(obj,AtomCluster)]
     singleAtomsObjects = [obj for obj in universe.objectList() if isinstance(obj,Atom) or obj.numberOfAtoms()==1]
-    scannedObjects.append(Collection(singleAtomsObjects))
+    if singleAtomsObjects:
+        scannedObjects.append(Collection(singleAtomsObjects))
                 
     for obj in scannedObjects:
                                                         

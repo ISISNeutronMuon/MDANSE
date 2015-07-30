@@ -56,7 +56,7 @@ class Configurable(object):
     
     settings = collections.OrderedDict()
     
-    def __init__(self):
+    def __init__(self,settings=None):
         '''
         Constructor
         '''
@@ -64,6 +64,9 @@ class Configurable(object):
         self._configuration = collections.OrderedDict()
                                      
         self._configured=False
+        
+        if settings is not None:
+            self.settings = settings
         
         self.build_configuration()
         

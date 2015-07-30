@@ -106,6 +106,8 @@ class IJob(Configurable):
     type = "job"
     
     section = "job"
+    
+    ancestor = 'molecular_viewer'
         
     @staticmethod
     def define_unique_name():
@@ -294,7 +296,7 @@ class IJob(Configurable):
         f.write('\n')
     
         f.write('job = REGISTRY[%r][%r]()\n' % ('job',cls.type))
-        f.write('job.run(parameters,status=False)')
+        f.write('job.run(parameters,status=True)')
          
         f.close()
         

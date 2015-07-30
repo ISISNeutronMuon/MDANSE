@@ -66,11 +66,11 @@ class PDBConverter(Converter):
         self.numberOfSteps = self.configuration['nb_frame']["number"]
 
         # Create all objects from the PDB file.  
-        pdb_config = PDBFile(self.configuration['pdb_file']['filename'], model =  0)
+        pdb_config = PDBFile(self.configuration['pdb_file']['filename'], model=0)
 
         # Create the universe.
         self._universe = pdb_config.createUnitCellUniverse()
-        
+                
         # Construct system
         self._universe.addObject(pdb_config.createAll(None, 1))
         
@@ -95,7 +95,7 @@ class PDBConverter(Converter):
         pdb_config = PDBFile(self.configuration['pdb_file']['filename'], model=frame)
         uni = pdb_config.createUnitCellUniverse()
         uni.addObject(pdb_config.createAll(None, 1))
-        
+                
         univ_config  = Configuration(self._universe, uni.configuration().array)
         
         self._universe.setConfiguration(univ_config)

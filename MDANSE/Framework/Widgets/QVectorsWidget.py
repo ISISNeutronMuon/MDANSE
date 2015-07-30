@@ -222,6 +222,7 @@ class QVectorsDialog(UserDefinitionsDialog):
             return
         
         self._ud['parameters'] = (qPanel.generator.type,qPanel.parameters)
+        self._ud['generator'] = qPanel.generator.type
         self._ud['q_vectors'] = qPanel.grid.GetTable().data
         self._ud['is_lattice'] = qPanel.generator.is_lattice
                 

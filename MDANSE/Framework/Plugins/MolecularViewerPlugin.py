@@ -94,7 +94,7 @@ class SelectionBox(vtk.vtkBoxWidget):
                     
         outlineMapper = vtk.vtkPolyDataMapper()
         outlineMapper.SetInputConnection(outline.GetOutputPort())
-        self.box=vtk.vtkActor()
+        self.box=vtk.vtkLODActor()
         self.box.SetMapper( outlineMapper )
         self.box.GetProperty().SetColor(1,1,1)
         self.box.PickableOff()
@@ -159,7 +159,7 @@ class MolecularViewerPanel(ComponentPlugin):
     category = ("Viewer",)
                 
     # 0 line / 1 sphere / 2 tube / 3 sphere + tube / 4 sphere + line
-    _rendmod = 3
+    _rendmod = 0
     
     def __init__(self, parent, *args, **kwargs):
         
@@ -290,21 +290,41 @@ class MolecularViewerPanel(ComponentPlugin):
         
         # The number of atoms of the universe stored by the trajectory.
         self._nAtoms = trajectory.universe.numberOfAtoms()
-                                   
-        self.coords = trajectory.universe.contiguousObjectConfiguration().array
-
+        
+        self._resolution = int(numpy.sqrt(300000.0 / self._nAtoms))
+        if self._resolution > 10:
+            self._resolution = 10
+        
+        if self._resolution < 4:
+            self._resolution = 4
+                             
         # The array that will store the color and alpha scale for all the atoms.
         self._atomsColours , self._lut= self.build_ColorTransferFunction()
         self.atomsColours = numpy.copy(self._atomsColours)
                         
         # The array that will store the scale for all the atoms.
         self._atomsScales = numpy.array([ELEMENTS[at.symbol,'vdw_radius'] for at in self._atoms]).astype(numpy.float32)
+
+        scalars = ndarray_to_vtkarray(self.atomsColours, self._atomsScales, self._nAtoms) 
+
+        bonds = vtk.vtkCellArray()
+        for at in self._atoms:
+            idx1 = at.index
+            for bat in at.bondedTo():
+                idx2 = bat.index
+                line = vtk.vtkLine()
+                line.GetPointIds().SetId(0,idx1)
+                line.GetPointIds().SetId(1,idx2)
+                bonds.InsertNextCell(line)
+
+        self._polydata = vtk.vtkPolyData()
+        self._polydata.GetPointData().SetScalars(scalars)
+        self._polydata.SetLines(bonds)
              
         self.clear_universe()
         
         self._trajectory = trajectory
-        
-        # Set the configuration and display it.        
+
         self.set_configuration(frame)
         
         self.enable_info_picking()
@@ -803,7 +823,7 @@ class MolecularViewerPanel(ComponentPlugin):
         outline_mapper = vtk.vtkPolyDataMapper()
         outline_mapper.SetInputConnection(outline.GetOutputPort())
         
-        outline_actor = vtk.vtkActor()
+        outline_actor = vtk.vtkLODActor()
         outline_actor.SetMapper(outline_mapper)
         outline_actor.GetProperty().SetColor(1,0,0)
         outline_actor.GetProperty().SetLineWidth(3)
@@ -834,45 +854,25 @@ class MolecularViewerPanel(ComponentPlugin):
         outline_mapper = vtk.vtkPolyDataMapper()
         outline_mapper.SetInputConnection(outline.GetOutputPort())
         
-        outline_actor = vtk.vtkActor()
+        outline_actor = vtk.vtkLODActor()
         outline_actor.SetMapper(outline_mapper)
         outline_actor.GetProperty().SetColor(1,1,1)
         outline_actor.GetProperty().SetLineWidth(3)
         
         return outline_actor
      
-    def build_polydata(self):   
+    def build_scene(self):   
         '''
         build a vtkPolyData object for a given frame of the trajectory
         '''
         
-        self._polydata = vtk.vtkPolyData()
-        
-        # Converts the numpy coordinates into a vtk array
-        coords, self.vtkids = ndarray_to_vtkpoints(self.coords)
-        self._polydata.SetPoints(coords)
-        del coords
-        
-        scalars = ndarray_to_vtkarray(self.atomsColours, self._atomsScales, self._nAtoms) 
-        self._polydata.GetPointData().SetScalars(scalars) 
-        del scalars
-        
-        bonds = []
-        for at in self._atoms:
-            for bat in at.bondedTo():
-                if set([at.index,bat.index]) not in bonds:
-                    bonds.append([at.index,bat.index])
-        bonds = ndarray_to_vtkcellarray(bonds)
-        self._polydata.SetLines(bonds)
-        del bonds
-        
         rendmod = self._rendmod
         
-        actor_list = []
-        line_acteur=None
-        ball_acteur=None
-        tube_acteur=None
-        
+        actorList = []
+        lineActor=None
+        ballActor=None
+        tubeActor=None
+                
         if rendmod in [0,4] :
             line_mapper = vtk.vtkPolyDataMapper()
             if vtk.vtkVersion.GetVTKMajorVersion()<6:
@@ -883,15 +883,17 @@ class MolecularViewerPanel(ComponentPlugin):
             line_mapper.SetLookupTable(self._lut)
             line_mapper.ScalarVisibilityOn()
             line_mapper.ColorByArrayComponent("scalars", 1)
-            line_acteur = vtk.vtkActor()
-            line_acteur.GetProperty().SetLineWidth(3)
-            line_acteur.SetMapper(line_mapper)
-            actor_list.append(line_acteur)
+            lineActor = vtk.vtkLODActor()
+            lineActor.GetProperty().SetLineWidth(3)
+            lineActor.SetMapper(line_mapper)
+            actorList.append(lineActor)
             
         if rendmod in [1,3,4]:
             sphere = vtk.vtkSphereSource()
             sphere.SetCenter(0, 0, 0)
             sphere.SetRadius(0.2)
+            sphere.SetThetaResolution(self._resolution)
+            sphere.SetPhiResolution(self._resolution)
             glyph = vtk.vtkGlyph3D()
             if vtk.vtkVersion.GetVTKMajorVersion()<6:
                 glyph.SetInput(self._polydata)
@@ -909,13 +911,15 @@ class MolecularViewerPanel(ComponentPlugin):
             sphere_mapper.SetInputConnection(glyph.GetOutputPort())            
             sphere_mapper.ScalarVisibilityOn()
             sphere_mapper.ColorByArrayComponent("scalars", 1)
-            ball_acteur = vtk.vtkActor()
-            ball_acteur.SetMapper(sphere_mapper)
-            ball_acteur.GetProperty().SetAmbient(0.2)
-            ball_acteur.GetProperty().SetDiffuse(0.5)
-            ball_acteur.GetProperty().SetSpecular(0.3)
-            actor_list.append(ball_acteur)
+            ballActor = vtk.vtkLODActor()
+            ballActor.SetMapper(sphere_mapper)
+            ballActor.GetProperty().SetAmbient(0.2)
+            ballActor.GetProperty().SetDiffuse(0.5)
+            ballActor.GetProperty().SetSpecular(0.3)
+            ballActor.SetNumberOfCloudPoints(30000)
+            actorList.append(ballActor)
             self.glyph = glyph
+            
         if rendmod in [2,3] :
             tubes = vtk.vtkTubeFilter()
             if vtk.vtkVersion.GetVTKMajorVersion()<6:
@@ -930,46 +934,45 @@ class MolecularViewerPanel(ComponentPlugin):
             else:
                 tubes.SetCapping(0)
                 tubes.SetRadius(0.01)
+            tubes.SetNumberOfSides(self._resolution)
             tube_mapper = vtk.vtkPolyDataMapper()
             tube_mapper.SetLookupTable(self._lut)
             tube_mapper.SetInputConnection(tubes.GetOutputPort())
             tube_mapper.ScalarVisibilityOn()
             tube_mapper.ColorByArrayComponent("scalars", 1)
-            tube_acteur = vtk.vtkActor()
-            tube_acteur.SetMapper(tube_mapper)
-            tube_acteur.GetProperty().SetAmbient(0.2)
-            tube_acteur.GetProperty().SetDiffuse(0.5)
-            tube_acteur.GetProperty().SetSpecular(0.3)
-            actor_list.append(tube_acteur)
+            tubeActor = vtk.vtkLODActor()
+            tubeActor.SetMapper(tube_mapper)
+            tubeActor.GetProperty().SetAmbient(0.2)
+            tubeActor.GetProperty().SetDiffuse(0.5)
+            tubeActor.GetProperty().SetSpecular(0.3)
+            actorList.append(tubeActor)
             self.tubes = tubes
         
-        self.picking_domain = {0:line_acteur,1:ball_acteur,2:tube_acteur,3:ball_acteur,4:ball_acteur}[rendmod]
+        self.picking_domain = [lineActor,ballActor,tubeActor,ballActor,ballActor][rendmod]
         
         basis_vector = self._trajectory.universe.basisVectors()
         if not basis_vector is None:
             self.bbox = self.build_bbox(basis_vector)
             if not self.display_bbox:
                 self.bbox.VisibilityOff()
-            actor_list.append(self.bbox)
+            actorList.append(self.bbox)
             
         assembly = vtk.vtkAssembly()
-        for actor in actor_list:
+        for actor in actorList:
             assembly.AddPart(actor)
-        
-        #self.build_real_bbox(assembly)
-        
+                
         return assembly
     
     def clear_universe(self):
 
-        if not hasattr(self, "molecule"):
+        if not hasattr(self, "_actors"):
             return 
         
-        self.molecule.VisibilityOff()
-        self.molecule.ReleaseGraphicsResources(self.get_renwin())
-        self._renderer.RemoveActor(self.molecule)
+        self._actors.VisibilityOff()
+        self._actors.ReleaseGraphicsResources(self.get_renwin())
+        self._renderer.RemoveActor(self._actors)
         
-        del self.molecule 
+        del self._actors
   
     def show_universe(self):
         '''
@@ -979,10 +982,10 @@ class MolecularViewerPanel(ComponentPlugin):
         self.clear_universe()
         
         # creating new polydata
-        self.molecule = self.build_polydata()
+        self._actors = self.build_scene()
 
         # adding polydata to renderer
-        self._renderer.AddActor(self.molecule)
+        self._renderer.AddActor(self._actors)
         
         # rendering
         self._iren.Render()
@@ -997,8 +1000,17 @@ class MolecularViewerPanel(ComponentPlugin):
         
         self._currentFrame = frame % len(self._trajectory)
         self._trajectory.universe.setConfiguration(self._trajectory.configuration[self._currentFrame])
-        self.coords = self._trajectory.universe.contiguousObjectConfiguration().array
-                        
+
+        coords = self._trajectory.universe.contiguousObjectConfiguration().array
+
+        points = vtk.vtkPoints()
+        points.SetNumberOfPoints(self._nAtoms)
+        for i in range(self._nAtoms):
+            x,y,z = coords[i]
+            points.SetPoint(i,x,y,z)
+
+        self._polydata.SetPoints(points)
+                                
         # Reset the view.                        
         self.show_universe()        
 
@@ -1018,7 +1030,7 @@ def ndarray_to_vtkarray(colors, radius, nbat):
     color_scalars = vtk.vtkFloatArray()
     color_scalars.SetNumberOfValues(colors.shape[0])
     for i,c in enumerate(colors):
-            color_scalars.SetValue(i,c)
+        color_scalars.SetValue(i,c)
     color_scalars.SetName("colors")
     
     # some radii

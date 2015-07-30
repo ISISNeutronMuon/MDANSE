@@ -47,7 +47,7 @@ class Logger(object):
     def __call__(self,message,level="info",loggers=None):
 
         lvl = Logger.levels.get(level,None)
-
+        
         # If the logging level is unkwnown, skip that log
         if lvl is None:
             return

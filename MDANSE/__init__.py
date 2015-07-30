@@ -32,12 +32,12 @@ Created on Mar 26, 2015
 
 from __pkginfo__ import __version__, __author__, __date__
 
+from MDANSE.Logging.Logger import LOGGER
+
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
 
 from MDANSE.Data.ElementsDatabase import ELEMENTS
-
-from MDANSE.Logging.Logger import LOGGER
 
 from MDANSE.Core.Preferences import PREFERENCES
 

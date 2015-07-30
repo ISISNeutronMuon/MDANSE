@@ -32,6 +32,7 @@ Created on Mar 30, 2015
 
 import abc
 import glob
+import imp
 import inspect
 import os
 import sys
@@ -112,7 +113,7 @@ class ClassRegistry(abc.ABCMeta):
         '''
         Update the classes registry by importing all the modules contained in a given package.
         
-        Only the classes that are metaclassed by ClassRegistry will be registered.
+        Only the classes metaclassed by :py:class:`~MDANSE.Core.ClassRegistry.ClassRegistry` will be registered.
         
         :param packageDir: the package for which all modules should be imported
         :type packageDir: str
@@ -125,16 +126,22 @@ class ClassRegistry(abc.ABCMeta):
             if moduleFile == '__init__.py':
                 continue
      
-            moduleName, moduleExt = os.path.splitext(moduleFile)
+            moduleName, _ = os.path.splitext(moduleFile)
             
             if moduleDir not in sys.path:        
                 sys.path.append(moduleDir)
 
+
             # Any error that may occur here has to be caught. In such case the module is skipped.    
             try:
-                __import__(moduleName, locals(), globals())
+                filehandler,path,description = imp.find_module(moduleName, [moduleDir])
+                mod = imp.load_module(moduleName,filehandler,path,description)
             except:
                 continue
+            else:
+                if not os.path.samefile(os.path.dirname(mod.__file__),moduleDir):
+                    print "A module with name %s is already present in your distribution with %s path." % (moduleName,)
+
     
     @classmethod
     def info(cls, interface):

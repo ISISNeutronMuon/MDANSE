@@ -27,12 +27,13 @@
 ''' 
 Created on Apr 14, 2015
 
-:author: Eric C. ellegrini
+:author: Eric C. Pellegrini
 '''
 
 import os
 import subprocess               
 import sys
+import tempfile
 import time
 
 import wx
@@ -40,8 +41,9 @@ import wx.aui as aui
 
 from MDANSE import PLATFORM,REGISTRY
 from MDANSE.Externals.pubsub import pub
-
 from MDANSE.Framework.Plugins.ComponentPlugin import ComponentPlugin
+from MDANSE.GUI import DATA_CONTROLLER
+from MDANSE.GUI.WorkingPanel import WorkingPanel
 from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.GUI.ComboWidgets.JobHelpFrame import JobHelpFrame
 
@@ -106,10 +108,11 @@ class JobPlugin(ComponentPlugin):
             return
         
         name = self._job.define_unique_name()
-        
-        script = os.path.join(PLATFORM.jobscripts_directory(),name)+'.py'
-                
-        self._job.save(script, parameters)
+
+        handle,filename = tempfile.mkstemp(prefix="MDANSE_%s.py" % name, text=True)
+        os.close(handle)
+                        
+        self._job.save(filename, parameters)
                                 
         if PLATFORM.name == "windows":
             startupinfo = subprocess.STARTUPINFO()
@@ -118,7 +121,7 @@ class JobPlugin(ComponentPlugin):
         else:
             startupinfo = None
         
-        subprocess.Popen([sys.executable, script], startupinfo=startupinfo, stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.Popen([sys.executable, filename], startupinfo=startupinfo, stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         time.sleep(1)
 
@@ -159,7 +162,7 @@ class JobPlugin(ComponentPlugin):
         
 class JobFrame(wx.Frame):
     
-    def __init__(self, parent, jobType, datakey):
+    def __init__(self, parent, jobType, datakey=None):
                 
         wx.Frame.__init__(self, parent, wx.ID_ANY, size = (800,400), style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
 
@@ -167,9 +170,10 @@ class JobFrame(wx.Frame):
         
         self._datakey = datakey
 
-        data = REGISTRY['input_data']['mmtk_trajectory'](self._datakey)
-                                    
-        DATA_CONTROLLER[filename] = data
+        if self._datakey is not None:
+            data = REGISTRY['input_data']['mmtk_trajectory'](self._datakey)
+                                        
+            DATA_CONTROLLER[filename] = data
 
         self.build_dialog()
 
@@ -196,13 +200,10 @@ class JobFrame(wx.Frame):
             self.Destroy()           
         
 if __name__ == "__main__":
-
-    from MDANSE.GUI import DATA_CONTROLLER
-    from MDANSE.GUI.WorkingPanel import WorkingPanel
             
     filename = os.path.join(os.path.dirname(PLATFORM.package_directory()),'Data','Trajectories','MMTK','protein_in_periodic_universe.nc')
     
     app = wx.App(False)
-    f = JobFrame(None,'mvi',filename)
+    f = JobFrame(None,'msd',filename)
     f.Show()
     app.MainLoop()            

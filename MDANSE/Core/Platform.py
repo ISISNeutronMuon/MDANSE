@@ -39,7 +39,6 @@ import os
 import re
 import subprocess
 import tempfile
-import types
 
 from MDANSE.Core.Error import Error
 
