@@ -47,7 +47,7 @@ class UserDefinitionViewerPlugin(ComponentPlugin):
     
     label = "User Definition Viewer"
     
-    ancestor = None
+    ancestor = []
     
     def __init__(self, parent, *args, **kwargs):
 

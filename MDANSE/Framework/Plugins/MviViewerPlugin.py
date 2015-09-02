@@ -70,7 +70,7 @@ class MviViewerPlugin(ComponentPlugin):
     
     label = "McStas Virtual Instrument Viewer"
     
-    ancestor = "mvi_trace"
+    ancestor = ["mvi_trace"]
     
     category = ("Viewer",)
             

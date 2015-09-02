@@ -86,24 +86,27 @@ class PluginsTreePanel(wx.Panel):
             
         for kls in REGISTRY["plugin"].values():
             
-            ancestor = getattr(kls,"ancestor","")
+            ancestor = getattr(kls,"ancestor",[])
 
             if not ancestor:
                 continue
             
             category = getattr(kls, "category", ("Miscellaneous",))
+                            
+            ancestors = []
+            for anc in ancestor:
+                ancestors.append(anc)
+                ancestors.extend([c.type for c in REGISTRY['plugin'][anc].__subclasses__()])
             
-            ancestors = [ancestor] + [c.type for c in REGISTRY['plugin'][ancestor].__subclasses__()]
-            
-            for a in ancestors:            
+            for a in ancestors:
+
                 d = self._hierarchy.setdefault(a,collections.OrderedDict())
-                    
+                
                 for cat in category:
-                        
-                    d = d.setdefault(cat,{})
+                    d = d.setdefault(cat,collections.OrderedDict())
                         
                 d[kls.type] = True
-                
+                            
     def on_double_click(self, event):
         
         data = self._tree.GetPyData(event.GetItem())

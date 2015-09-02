@@ -233,7 +233,7 @@ class DiscoverConverter(Converter):
 
     category = ('Converters','Materials Studio')
     
-    ancestor = None
+    ancestor = []
 
     settings = collections.OrderedDict()
     settings['xtd_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.xtd')})

@@ -51,7 +51,7 @@ class RadiusOfGyration(IJob):
     
     category = ('Structure',)
     
-    ancestor = "mmtk_trajectory"
+    ancestor = ["mmtk_trajectory"]
 
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})

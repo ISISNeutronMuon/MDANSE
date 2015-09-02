@@ -126,7 +126,7 @@ class LAMMPSConverter(Converter):
 
     category = ('Converters',)
     
-    ancestor = None
+    ancestor = []
 
     settings = collections.OrderedDict()        
     settings['config_file'] = ('input_file', {'label':"LAMMPS configuration file",

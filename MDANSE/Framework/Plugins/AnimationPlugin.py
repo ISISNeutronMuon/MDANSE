@@ -33,7 +33,7 @@ Created on Apr 14, 2015
 import wx
 import wx.aui as wxaui
 
-from MDANSE.Externals.pubsub import pub as Publisher
+from MDANSE.Externals.pubsub import pub
 
 from MDANSE.GUI.Icons import ICONS
 from MDANSE.Framework.Plugins.ComponentPlugin import ComponentPlugin
@@ -44,7 +44,7 @@ class AnimationPlugin(ComponentPlugin):
     
     label = "Animation"
     
-    ancestor = "molecular_viewer"
+    ancestor = ["molecular_viewer"]
         
     def __init__(self, parent, *args, **kwargs):
         
@@ -57,9 +57,10 @@ class AnimationPlugin(ComponentPlugin):
         controlSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         firstButton = wx.BitmapButton(panel, wx.ID_ANY, ICONS["first",32,32])
-        self.playPause = wx.BitmapButton(panel, wx.ID_ANY, ICONS["play",32,32])
+        self.startStop = wx.BitmapButton(panel, wx.ID_ANY, ICONS["play",32,32])
         lastButton = wx.BitmapButton(panel, wx.ID_ANY, ICONS["last",32,32])
         self.frameSlider = wx.Slider(panel,id=wx.ID_ANY, value=0, minValue=0, maxValue=1, style=wx.SL_HORIZONTAL)
+        self.frameSlider.SetRange(0,self._parent.n_frames-1)            
         self.frameEntry = wx.TextCtrl(panel,id=wx.ID_ANY,value="0", size=(60,20), style= wx.SL_HORIZONTAL|wx.TE_PROCESS_ENTER)        
         speedBitmap = wx.StaticBitmap(panel,-1, ICONS["clock",42,42])
         self.speedSlider = wx.Slider(panel,id=wx.ID_ANY,value=0,minValue=0,maxValue=1,style=wx.SL_HORIZONTAL)
@@ -69,7 +70,7 @@ class AnimationPlugin(ComponentPlugin):
         self.speedEntry = wx.TextCtrl(panel,id=wx.ID_ANY,value=str(speed), size=(60,20), style= wx.SL_HORIZONTAL|wx.TE_PROCESS_ENTER)
 
         controlSizer.Add(firstButton, 0, wx.LEFT|wx.ALIGN_CENTER_VERTICAL,5)
-        controlSizer.Add(self.playPause, 0,  wx.ALIGN_CENTER_VERTICAL)
+        controlSizer.Add(self.startStop, 0,  wx.ALIGN_CENTER_VERTICAL)
         controlSizer.Add(lastButton, 0, wx.ALIGN_CENTER_VERTICAL)
         controlSizer.Add((5, -1), 0, wx.ALIGN_RIGHT)
 
@@ -97,13 +98,13 @@ class AnimationPlugin(ComponentPlugin):
         self.Bind(wx.EVT_SLIDER, self.on_change_frame_rate, self.speedSlider)
         self.Bind(wx.EVT_TEXT_ENTER, self.on_set_speed, self.speedEntry)
         
-        self.Bind(wx.EVT_BUTTON, self.on_start_stop_animation, self.playPause)
+        self.Bind(wx.EVT_BUTTON, self.on_start_stop_animation, self.startStop)
         self.Bind(wx.EVT_BUTTON, self.on_goto_first_frame, firstButton)
         self.Bind(wx.EVT_BUTTON, self.on_goto_last_frame, lastButton)
                 
-        Publisher.subscribe(self.on_update_animation_icon, ('msg_animate_trajectory'))       
-        Publisher.subscribe(self.on_set_up_frame_slider, ('msg_load_trajectory'))       
-        Publisher.subscribe(self.on_timer, ('msg_timer'))       
+#         pub.subscribe(self.on_update_animation_icon, ('msg_animate_trajectory'))       
+#         pub.subscribe(self.on_set_up_frame_slider, ('msg_load_trajectory'))       
+        pub.subscribe(self.on_timer, ('msg_timer'))       
                 
     def plug(self):
         self._parent._mgr.GetPane(self).LeftDockable(False).RightDockable(False).Dock().Bottom().CloseButton(True)
@@ -170,20 +171,24 @@ class AnimationPlugin(ComponentPlugin):
         
         self._parent.start_stop_animation()
 
-
-    def on_update_animation_icon(self, plugin):
-
-        if not plugin.is_parent(self):
-            return
-                
-        if plugin.animation_loop:
-            self.playPause.SetBitmapLabel(ICONS["pause",32,32])
+        if self._parent.animation_loop:
+            self.startStop.SetBitmapLabel(ICONS["pause",32,32])
         else:
-            self.playPause.SetBitmapLabel(ICONS["play",32,32])
+            self.startStop.SetBitmapLabel(ICONS["play",32,32])
 
-    def on_set_up_frame_slider(self, plugin):
-        
-        if not plugin.is_parent(self):
-            return
+#     def on_update_animation_icon(self, plugin):
+# 
+#         if not plugin.is_parent(self):
+#             return
+#                 
+#         if plugin.animation_loop:
+#             self.startStop.SetBitmapLabel(ICONS["pause",32,32])
+#         else:
+#             self.startStop.SetBitmapLabel(ICONS["play",32,32])
 
-        self.frameSlider.SetRange(0,self._parent.n_frames-1)    
+#     def on_set_up_frame_slider(self, plugin):
+#         
+#         if not plugin.is_parent(self):
+#             return
+# 
+#         self.frameSlider.SetRange(0,self._parent.n_frames-1)    

@@ -47,7 +47,7 @@ class StructureFactorFromScatteringFunction(IJob):
 
     category = ('Scattering',)
     
-    ancestor = 'netcdf_data'
+    ancestor = ["netcdf_data"]
     
     settings = collections.OrderedDict()
     settings['netcdf_input_file'] = ('netcdf_input_file', {'variables':['time','f(q,t)_total'],

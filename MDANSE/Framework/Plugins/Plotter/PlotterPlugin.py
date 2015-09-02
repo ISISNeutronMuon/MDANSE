@@ -360,7 +360,7 @@ class PlotterPlugin(ComponentPlugin):
     
     label = "2D/3D Plotter"
     
-    ancestor = 'netcdf_data'
+    ancestor = ["netcdf_data"]
     
     category = ("Plotter",)
     

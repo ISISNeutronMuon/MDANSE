@@ -72,7 +72,7 @@ class McStasVirtualInstrument(IJob):
 
     category = ('Virtual Instruments',)
     
-    ancestor = "mmtk_trajectory"
+    ancestor = ["mmtk_trajectory"]
     
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'MMTK', 'protein_in_periodic_universe.nc')})

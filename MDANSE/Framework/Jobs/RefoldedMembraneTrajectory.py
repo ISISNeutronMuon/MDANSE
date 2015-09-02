@@ -54,7 +54,7 @@ class RefoldedMembraneTrajectory(IJob):
 
     category = ('Macromolecules','Lipids')
     
-    ancestor = "mmtk_trajectory"
+    ancestor = ["mmtk_trajectory"]
 
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{'default':os.path.join('..','..','..','Data','Trajectories','MMTK','dmpc_in_periodic_universe.nc')})

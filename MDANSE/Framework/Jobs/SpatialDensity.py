@@ -60,7 +60,7 @@ class SpatialDensity(IJob):
     
     category = ('Structure',)
     
-    ancestor = "mmtk_trajectory"
+    ancestor = ["mmtk_trajectory"]
     
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'MMTK', 'protein_in_periodic_universe.nc')})

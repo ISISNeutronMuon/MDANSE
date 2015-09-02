@@ -33,7 +33,7 @@ Created on Apr 10, 2015
 import wx
 import wx.aui as wxaui
 
-from MDANSE.Externals.pubsub import pub as Publisher
+from MDANSE.Externals.pubsub import pub
 
 from MDANSE import REGISTRY
 from MDANSE.GUI import DATA_CONTROLLER
@@ -102,6 +102,8 @@ class WorkingPanel(wx.Panel):
         
         self._notebook.SetFocus()
         
+        self._notebook.SetSelection(self._notebook.GetPageCount()-1)
+                
     def add_empty_data(self):
         
         container = REGISTRY["plugin"].get("empty_data")
@@ -119,7 +121,7 @@ class WorkingPanel(wx.Panel):
         
         dataPlugin = self._notebook.GetPage(self._notebook.GetSelection())
                
-        Publisher.sendMessage(('msg_set_plugins_tree'), message=dataPlugin)
+        pub.sendMessage('msg_set_plugins_tree', message=dataPlugin)
         
     def on_close_page(self, event):
 
@@ -128,5 +130,5 @@ class WorkingPanel(wx.Panel):
         dataPlugin.close_children()
         
         if self._notebook.GetPageCount() == 1:
-            Publisher.sendMessage(('msg_set_plugins_tree'), message=None)
+            pub.sendMessage('msg_set_plugins_tree', message=None)
         

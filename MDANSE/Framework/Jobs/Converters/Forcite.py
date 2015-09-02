@@ -283,7 +283,7 @@ class ForciteConverter(Converter):
 
     category = ('Converters','Materials Studio')
     
-    ancestor = None
+    ancestor = []
 
     settings = collections.OrderedDict()
     settings['xtd_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Forcite','nylon66_rho100_500K_v300K.xtd')})

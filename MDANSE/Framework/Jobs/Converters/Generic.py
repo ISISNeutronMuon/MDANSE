@@ -167,7 +167,7 @@ class GenericConverter(Converter):
 
     category = ('Converters',)
     
-    ancestor = None
+    ancestor = []
 
     settings = collections.OrderedDict()   
     settings['gt_file'] = ('input_file',{'wildcard':"Generic trajectory files|*.gtf|All files|*",

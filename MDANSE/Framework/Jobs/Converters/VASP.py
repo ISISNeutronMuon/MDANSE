@@ -126,7 +126,7 @@ class VASPConverter(Converter):
 
     category = ('Converters',)
     
-    ancestor = None
+    ancestor = []
 
     settings = collections.OrderedDict()           
     settings['xdatcar_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})

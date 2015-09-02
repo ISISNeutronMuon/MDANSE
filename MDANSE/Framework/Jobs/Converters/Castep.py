@@ -143,7 +143,7 @@ class CASTEPConverter(Converter):
 
     category = ('Converters',)
     
-    ancestor = None
+    ancestor = []
 
     settings = collections.OrderedDict()
     settings['castep_file'] = ('input_file', {'default':os.path.join('..','..','..','Data','Trajectories','CASTEP','PBAnew.md')})

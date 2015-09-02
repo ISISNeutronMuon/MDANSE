@@ -83,7 +83,7 @@ class IPlugin(wx.Panel):
     
     type = "plugin"
         
-    ancestor = None
+    ancestor = []
     
     def __init__(self, parent, *args, **kwargs):
         
@@ -146,7 +146,9 @@ class IPlugin(wx.Panel):
             plugin.close_children()
         except AttributeError:
             plugin.Close()
-                                
+            
+        self._parent.SetFocus()
+                                            
     def build_dialog(self):
 
         self.Freeze()
@@ -165,8 +167,9 @@ class IPlugin(wx.Panel):
         plugin = REGISTRY["plugin"].get(pluginName,None)        
         if plugin is None:
             return
-        
-        if not issubclass(self.__class__,REGISTRY['plugin'][plugin.ancestor]):
+
+        klasses = tuple([REGISTRY['plugin'][anc] for anc in plugin.ancestor])        
+        if not issubclass(self.__class__,klasses):
             self.parent.drop(pluginName)
             return
                                                

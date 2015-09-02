@@ -291,7 +291,7 @@ class DL_POLYConverter(Converter):
 
     category = ('Converters',)
     
-    ancestor = None
+    ancestor = []
 
     settings = collections.OrderedDict()   
     settings['field_file'] = ('input_file',{'wildcard':"FIELD files|FIELD*|All files|*",

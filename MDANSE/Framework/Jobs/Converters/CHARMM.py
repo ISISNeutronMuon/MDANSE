@@ -43,4 +43,4 @@ class CHARMMConverter(DCDConverter):
 
     category = ('Converters',)
     
-    ancestor = None
+    ancestor = []

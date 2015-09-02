@@ -51,7 +51,7 @@ class DensitySuperpositionPlugin(ComponentPlugin):
     
     label = "Density superposition"
     
-    ancestor = "molecular_viewer"
+    ancestor = ["molecular_viewer"]
     
     def __init__(self, parent, *args, **kwargs):
 

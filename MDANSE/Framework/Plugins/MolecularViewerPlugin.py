@@ -154,7 +154,7 @@ class MolecularViewerPanel(ComponentPlugin):
     
     label = "Molecular Viewer"
     
-    ancestor = "mmtk_trajectory"
+    ancestor = ["mmtk_trajectory"]
     
     category = ("Viewer",)
                 
@@ -197,8 +197,6 @@ class MolecularViewerPanel(ComponentPlugin):
         self._iren.RemoveObservers("CharEvent")
         self._iren.AddObserver("CharEvent", self.on_keyboard_input)
         self._iren.AddObserver("LeftButtonPressEvent", self.emulate_focus)
-
-        pub.subscribe(self.check_switch_consistancy, ('msg_switch'))
         
         self._iren.Bind(wx.EVT_CONTEXT_MENU, self.on_show_popup_menu)
                 
@@ -272,9 +270,7 @@ class MolecularViewerPanel(ComponentPlugin):
     def close(self):
                 
         self.clear_universe()
-        
-        pub.unsubscribe(self.check_switch_consistancy, "msg_switch")
-        
+                
     def set_trajectory(self, trajectory, selection=None, frame=0):
         
         if not isinstance(trajectory,Trajectory):
@@ -291,12 +287,10 @@ class MolecularViewerPanel(ComponentPlugin):
         # The number of atoms of the universe stored by the trajectory.
         self._nAtoms = trajectory.universe.numberOfAtoms()
         
+        # Hack for reducing objects resolution when the system is big
         self._resolution = int(numpy.sqrt(300000.0 / self._nAtoms))
-        if self._resolution > 10:
-            self._resolution = 10
-        
-        if self._resolution < 4:
-            self._resolution = 4
+        self._resolution = 10 if self._resolution > 10 else self._resolution
+        self._resolution = 4 if self._resolution < 4 else self._resolution
                              
         # The array that will store the color and alpha scale for all the atoms.
         self._atomsColours , self._lut= self.build_ColorTransferFunction()
@@ -333,7 +327,7 @@ class MolecularViewerPanel(ComponentPlugin):
         
         self._trajectoryLoaded = True
 
-        pub.sendMessage(('msg_load_trajectory'), message = self)
+#         pub.sendMessage('msg_load_trajectory', plugin=self)
 
     def color_string_to_RGB(self, s):
         
@@ -382,16 +376,6 @@ class MolecularViewerPanel(ComponentPlugin):
     def on_show_popup_menu(self, event):
 
         popupMenu = wx.Menu()
-
-        if self._animationLoop:
-            animationLabel = "Stop animation"
-        else:
-            animationLabel = "Start animation"
-
-        item = popupMenu.Append(wx.ID_ANY, animationLabel)
-        popupMenu.Bind(wx.EVT_MENU, self.start_stop_animation, item)
-
-        popupMenu.AppendSeparator()
 
         renderingMenu = wx.Menu()
         item = renderingMenu.Append(wx.ID_ANY, "Line")
@@ -592,11 +576,11 @@ class MolecularViewerPanel(ComponentPlugin):
 
         if self._iren._timer.IsRunning():
             return
-        
+                
         self.set_configuration(self._timerCounter)
         self._timerCounter += 1
         
-        pub.sendMessage(("msg_timer"), plugin=self)
+        pub.sendMessage("msg_timer", plugin=self)
 
     def set_rendering_mode(self, mode):
         if not self._trajectoryLoaded:
@@ -674,7 +658,7 @@ class MolecularViewerPanel(ComponentPlugin):
 
         self.show_selection(list(self.__pickedAtoms))
                         
-        pub.sendMessage(('msg_select_atoms_from_viewer'), message = (self.dataplugin,list(self.__pickedAtoms)))
+        pub.sendMessage('msg_select_atoms_from_viewer', message = (self.dataplugin,list(self.__pickedAtoms)))
 
     def box_atoms(self, atomsList):
                                 
@@ -721,12 +705,14 @@ class MolecularViewerPanel(ComponentPlugin):
         self._iren.Render()
         
     def start_animation(self, event=None):
+        
         if self._trajectoryLoaded:
             self._timerId = self.create_timer()
             self._iren.TimerEventResetsTimerOn()
             self._animationLoop = True
 
     def stop_animation(self, event=None):
+        
         if self._trajectoryLoaded:
             self._iren.TimerEventResetsTimerOff()
             self._animationLoop = False 
@@ -738,26 +724,23 @@ class MolecularViewerPanel(ComponentPlugin):
 
         if self._first:
             self._first = False
-            
+                    
         if not self._animationLoop:
             self.start_animation()
         else:
             self.stop_animation()
-        if check: 
-            pub.sendMessage(('msg_switch'), message = self)
             
-        pub.sendMessage(('msg_animate_trajectory'), message = self)
+#         if check:
+#             self.check_switch_consistancy() 
+            
+#         pub.sendMessage('msg_animate_trajectory', plugin=self)
     
-    def check_switch_consistancy(self, message):
-        
-        if not self._animationLoop:
-            return
-
-        mv = message
-        if self == mv:
-            return
-        
-        self.start_stop_animation(check = False)
+#     def check_switch_consistancy(self):
+#         
+#         if not self._animationLoop:
+#             return
+#         
+#         self.start_stop_animation(check = False)
             
     def get_atom_index(self,pid):
         

@@ -43,4 +43,4 @@ class NAMDConverter(DCDConverter):
 
     category = ('Converters',)
     
-    ancestor = None
+    ancestor = []

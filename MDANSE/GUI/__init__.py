@@ -17,9 +17,9 @@ for job in REGISTRY["job"].values():
 
     if not hasattr(job, "type"):
         continue
-                
+                    
     attrs = {"type"      : job.type,
-             "ancestor"  : getattr(job,"ancestor",""),
+             "ancestor"  : getattr(job,'ancestor',[]),
              "category"  : ('Analysis',) + getattr(job, "category", ("Miscellaneous",)),
              "label"     : getattr(job, "label", job.__name__)}
             

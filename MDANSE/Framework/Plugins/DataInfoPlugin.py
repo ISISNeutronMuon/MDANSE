@@ -33,6 +33,7 @@ Created on Apr 14, 2015
 import wx
 import wx.aui as aui
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Plugins.ComponentPlugin import ComponentPlugin
 
 class DataInfoPlugin(ComponentPlugin):
@@ -41,13 +42,12 @@ class DataInfoPlugin(ComponentPlugin):
     
     label = "Data info"
     
-    ancestor = "data"
-    
+    ancestor = [data.type for data in REGISTRY["input_data"].values()]
+
     def __init__(self, parent, *args, **kwargs):
         
         ComponentPlugin.__init__(self, parent, size=(-1,50), *args, **kwargs)
                            
-                                                  
     def build_panel(self):
         
         panel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
@@ -66,11 +66,9 @@ class DataInfoPlugin(ComponentPlugin):
 
         self._mgr.Update()
 
-
     def on_close(self, event):
         
         self.parent.mgr.ClosePane(self.parent.mgr.GetPane(self))
-
 
     def plug(self):
         

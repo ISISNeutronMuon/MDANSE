@@ -107,7 +107,7 @@ class IJob(Configurable):
     
     section = "job"
     
-    ancestor = 'molecular_viewer'
+    ancestor = ["molecular_viewer"]
         
     @staticmethod
     def define_unique_name():
@@ -498,7 +498,7 @@ class %s(IJob):
     # You should enter the category under which your job will be references.
     category = ('My jobs',)
     
-    ancestor = "mmtk_trajectory"
+    ancestor = ["mmtk_trajectory"]
 
     # You should enter the configuration of your job here
     # Here a basic example of a job that will use a MMTK trajectory, a frame selection and an output file in NetCDF and ASCII file formats

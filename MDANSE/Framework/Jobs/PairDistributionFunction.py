@@ -57,7 +57,7 @@ class PairDistributionFunction(DistanceHistogram):
     
     category = ('Structure',)
     
-    ancestor = "mmtk_trajectory"  
+    ancestor = ["mmtk_trajectory"]  
     
     def finalize(self):
         """

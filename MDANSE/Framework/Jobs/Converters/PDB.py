@@ -49,7 +49,7 @@ class PDBConverter(Converter):
 
     category = ('Converters',)
     
-    ancestor = None
+    ancestor = []
 
     settings = collections.OrderedDict()  
     settings['pdb_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','PDB','2f58_nma.pdb')})

@@ -117,7 +117,7 @@ class AtomsListDialog(UserDefinitionsDialog):
             for aname in atomNames:
                 self._molecules.AppendItem(molnode,aname)
 
-        self._atoms = wx.ListCtrl(panel, wx.ID_ANY, style=wx.LC_LIST)
+        self._atoms = wx.ListCtrl(panel, wx.ID_ANY)
         
         dt = AtomNameDropTarget(self._molecules,self._atoms)
         self._atoms.SetDropTarget(dt)
@@ -147,21 +147,26 @@ class AtomsListDialog(UserDefinitionsDialog):
     def on_delete_atom_name(self,event):
         
         keycode = event.GetKeyCode()
-        if keycode != wx.WXK_DELETE:
-            return
+        if keycode == wx.WXK_DELETE:
         
-        item = self._atoms.GetFirstSelected()        
-        selectedItems = []
-        while item != -1:
-            selectedItems.append(item)
-            item = self._atoms.GetNextSelected(item)
+            item = self._atoms.GetFirstSelected()        
+            selectedItems = []
+            while item != -1:
+                selectedItems.append(item)
+                item = self._atoms.GetNextSelected(item)
+                
+            if not selectedItems:
+                return
             
-        if not selectedItems:
-            return
+            selectedItems.reverse()
+            for it in selectedItems:
+                self._atoms.DeleteItem(it)
         
-        selectedItems.reverse()
-        for it in selectedItems:
-            self._atoms.DeleteItem(it)
+        # This is the ASCII value for Ctrl+A key
+        elif keycode == 1:
+            for i in range(self._atoms.GetItemCount()):
+                item = self._atoms.GetItem(i)
+                self._atoms.SetItemState(item.GetId(),wx.LIST_STATE_SELECTED,wx.LIST_STATE_SELECTED)
             
     def on_drag_atom_name(self,event):
                         
@@ -170,7 +175,10 @@ class AtomsListDialog(UserDefinitionsDialog):
         parentItem = self._molecules.GetItemParent(item)
         if parentItem == self._molecules.GetRootItem():
             return            
-                        
+
+        if self._atoms.GetItemCount() >= self._nAtoms:
+            return
+                    
         text = self._molecules.GetItemText(item)        
         tdo = wx.TextDataObject(text)
         tds = wx.DropSource(self._molecules)
@@ -182,7 +190,7 @@ class AtomsListDialog(UserDefinitionsDialog):
         self._selection = []
 
         if self._atoms.GetItemCount() != self._nAtoms:
-            LOGGER('You must select %d atoms.' % self._nAtoms,'error',['dialog'])
+            LOGGER('You must select exactly %d atoms.' % self._nAtoms,'error',['dialog'])
             return
 
         atTreeItem = self._molecules.GetSelection()
@@ -245,7 +253,7 @@ if __name__ == "__main__":
     
     app = wx.App(False)
                 
-    p = AtomsListDialog(None,t,10)
+    p = AtomsListDialog(None,t,4)
                 
     p.ShowModal()
     

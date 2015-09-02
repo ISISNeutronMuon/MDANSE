@@ -742,7 +742,7 @@ class PeriodicTablePlugin(ComponentPlugin):
     
     label = "Periodic Table"
     
-    ancestor = None
+    ancestor = []
 
     def build_panel(self):
         

@@ -50,7 +50,7 @@ class RegistryViewerPlugin(ComponentPlugin):
     
     label = "Registry Viewer"
     
-    ancestor = None
+    ancestor = []
     
     def __init__(self, parent, *args, **kwargs):
 

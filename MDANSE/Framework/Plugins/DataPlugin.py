@@ -55,7 +55,7 @@ class DataPlugin(IPlugin):
     
     type = 'data'
         
-    ancestor = None
+    ancestor = []
     
     def __init__(self, parent, datakey, **kwargs):
         
@@ -103,11 +103,12 @@ class DataPlugin(IPlugin):
         if plugin is None:
             return
         
-        if not issubclass(self.__class__,REGISTRY['plugin'][plugin.ancestor]):
+        klasses = tuple([REGISTRY['plugin'][anc] for anc in plugin.ancestor])
+        if not issubclass(self.__class__,klasses):
             return
                                                     
         plugin = plugin(self)
-
+        
         self._mgr.AddPane(plugin, wxaui.AuiPaneInfo().Caption(getattr(plugin, "label", pluginName)))
 
         self._mgr.Update()
