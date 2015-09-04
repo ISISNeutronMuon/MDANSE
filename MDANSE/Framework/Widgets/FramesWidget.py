@@ -80,7 +80,7 @@ class FramesWidget(IWidget):
     def set_data(self, datakey):
         
         self._trajectory = DATA_CONTROLLER[datakey]
-        
+                
         nFrames = len(self._trajectory.data) - 1
                 
         self._first.SetMin(0)
