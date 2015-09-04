@@ -337,7 +337,7 @@ or directly to the MDANSE mailing list:
         
         from MDANSE.Framework.Plugins.JobPlugin import JobFrame
         
-        f = JobFrame(self,self._converters[convLabel])
+        f = JobFrame(self,self._converters[convLabel],"Trajectory converter")
         f.Show()
 
     def on_open_mdanse_elements_database(self, event):
