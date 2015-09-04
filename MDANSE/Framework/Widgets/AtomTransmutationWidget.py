@@ -35,18 +35,20 @@ import wx
 from MDANSE import ELEMENTS, LOGGER
 
 from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionWidget
-from MDANSE.Framework.Widgets.AtomSelectionWidget import AtomSelectionDialog
+from MDANSE.Framework.Widgets.AtomSelectionWidget import AtomSelectionPlugin
 
-class AtomTransmutationDialog(AtomSelectionDialog):
+class AtomTransmutationPlugin(AtomSelectionPlugin):
     
     type = 'atom_transmutation'
+
+    label = "Atom transmutation"
+    
+    ancestor = ["molecular_viewer"]
     
     def build_dialog(self):
         
-        AtomSelectionDialog.build_dialog(self)
-        
-        self.SetTitle("Atom transmutation dialog")
-        
+        AtomSelectionPlugin.build_dialog(self)
+                
         self._elements = wx.ComboBox(self._mainPanel, wx.ID_ANY, value="Transmutate to", choices=ELEMENTS.elements)
         
         self._selectionExpressionSizer.Add(self._elements, pos=(0,3), flag=wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
@@ -67,39 +69,14 @@ class AtomTransmutationDialog(AtomSelectionDialog):
         return self._ud
         
 class AtomTransmutationWidget(UserDefinitionWidget):
-        
+         
     type = "atom_transmutation"
-
-    def on_new_user_definition(self,event):
-        
-        dlg = AtomTransmutationDialog(self,self._trajectory)
-        
-        dlg.Show()
-
+  
     def get_widget_value(self):
-        
+         
         ud = self._availableUDs.GetStringSelection()
-        
+         
         if not ud:
             return None
         else:
             return str(ud)    
-                                            
-if __name__ == "__main__":
-    
-    from MMTK.Trajectory import Trajectory
-    
-    t = Trajectory(None,"../../../../../Data/Trajectories/MMTK/protein_in_periodic_universe.nc","r")
-    
-    app = wx.App(False)
-                
-    p = AtomTransmutationDialog(None,t)
-        
-    p.SetSize((800,800))
-            
-    p.ShowModal()
-    
-    p.Destroy()
-    
-    app.MainLoop()
-            

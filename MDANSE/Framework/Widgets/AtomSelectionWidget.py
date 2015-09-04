@@ -34,13 +34,14 @@ import collections
 import os
 
 import wx
+import wx.aui as wxaui
 
 from MDANSE import LOGGER, REGISTRY
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser, AtomSelectionParserError
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionsDialog, UserDefinitionWidget
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UDDialog, UDPlugin, UserDefinitionWidget
 from MDANSE.Framework.Plugins.DataPlugin import get_data_plugin 
 
 class Query(object):
@@ -148,12 +149,16 @@ class Query(object):
     def set_parser(self, parser):
         
         self._parser = parser
-
-class AtomSelectionDialog(UserDefinitionsDialog):
+                            
+class AtomSelectionPlugin(UDPlugin):
     
     type = 'atom_selection'
     
-    def __init__(self, parent, trajectory, *args, **kwargs):
+    label = "Atom selection"
+    
+    ancestor = ["molecular_viewer"]
+    
+    def __init__(self, parent, *args, **kwargs):
 
         self._query = Query()
 
@@ -161,19 +166,11 @@ class AtomSelectionDialog(UserDefinitionsDialog):
                                         
         self._selection = []
 
-        self._trajectory = trajectory
-        
-        self._query.set_parser(AtomSelectionParser(self._trajectory.universe))
+        pub.subscribe(self.on_select_atoms_from_viewer, ('msg_select_atoms_from_viewer'))
 
-        self._atoms = sorted_atoms(self._trajectory.universe)  
+        UDPlugin.__init__(self,parent,size=(800,500))
         
-        target = os.path.basename(self._trajectory.filename)
-        
-        UserDefinitionsDialog.__init__(self, parent, target, wx.ID_ANY, title="Atom selection dialog",style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
-
-        pub.subscribe(self.on_select_atoms_from_viewer, ('msg_select_atoms_from_viewer'))       
-                 
-    def build_dialog(self):
+    def build_panel(self):
                                                 
         self._mainPanel = wx.ScrolledWindow(self, wx.ID_ANY, size=self.GetSize())
         self._mainPanel.SetScrollbars(20,20,50,50)
@@ -250,9 +247,14 @@ class AtomSelectionDialog(UserDefinitionsDialog):
         sizer.Add(self._selectionSummary, 1, wx.ALL|wx.EXPAND, 5)
 
         self._mainPanel.SetSizer(sizer)
-                                                                              
-        self._mainSizer.Add(self._mainPanel, 1, wx.EXPAND|wx.ALL, 5)
-                                                                              
+
+        self._mainSizer = wx.BoxSizer(wx.VERTICAL)                                                                              
+        self._mainSizer.Add(self._mainPanel, 1, wx.EXPAND|wx.ALL, 5)        
+        self.SetSizer(self._mainSizer)            
+        
+        self._mgr.AddPane(self._mainPanel, wxaui.AuiPaneInfo().DestroyOnClose().Center().Dock().CaptionVisible(False).CloseButton(False).BestSize(self.GetSize()))
+        self._mgr.Update()
+                                                                                      
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_display_keyword_values, self.filterTree)
         self.Bind(wx.EVT_LISTBOX, self.on_insert_keyword_values, self.values)
   
@@ -263,7 +265,25 @@ class AtomSelectionDialog(UserDefinitionsDialog):
         self.Bind(wx.EVT_BUTTON, self.on_add_operator, notLinker)
             
         self.Bind(wx.EVT_BUTTON, self.on_clear, clearButton)
-                        
+        
+    def plug(self):
+        
+        self.parent.mgr.GetPane(self).Float().Dockable(False).CloseButton(True).BestSize((600,600))
+        
+        self.parent.mgr.Update()
+        
+        self.set_trajectory(self.dataproxy.data)
+                                
+    def set_trajectory(self,trajectory):
+
+        self._trajectory = trajectory 
+
+        self._query.set_parser(AtomSelectionParser(self._trajectory.universe))
+
+        self._atoms = sorted_atoms(self._trajectory.universe)        
+
+        self._target = os.path.basename(self._trajectory.filename)
+
     def display_selection_summary(self):
         
         self._selectionSummary.Clear()
@@ -317,10 +337,6 @@ class AtomSelectionDialog(UserDefinitionsDialog):
         self._selectionSummary.Clear()
 
         pub.sendMessage('msg_clear_selection',message=self)                                
-
-    def on_close(self, event=None):
-        
-        self.Destroy()
                 
     def on_display_keyword_values(self, event=None):
         
@@ -378,25 +394,17 @@ class AtomSelectionDialog(UserDefinitionsDialog):
         if not self._selection:
             LOGGER("The current selection is empty", "error", ["dialog"])
             return None
-        
-        self._ud['indexes'] = self._selection
-        
-        return self._ud
+                
+        return {'indexes':self._selection}
 
 class AtomSelectionWidget(UserDefinitionWidget):
-        
+         
     type = "atom_selection"
-
-    def on_new_user_definition(self,event):
-        
-        dlg = AtomSelectionDialog(self,self._trajectory)
-        
-        dlg.Show()
-        
+          
     def get_widget_value(self):
-        
+         
         ud = self._availableUDs.GetStringSelection()
-        
+         
         if not ud:
             return 'all'
         else:
@@ -406,11 +414,13 @@ if __name__ == "__main__":
     
     from MMTK.Trajectory import Trajectory
     
-    t = Trajectory(None,"../../../../../Data/Trajectories/MMTK/protein_in_periodic_universe.nc","r")
+    from MDANSE import PLATFORM
+    
+    t = Trajectory(None,os.path.join(PLATFORM.example_data_directory(),"Trajectories","MMTK","protein_in_periodic_universe.nc"),"r")
     
     app = wx.App(False)
     
-    p = AtomSelectionDialog(None,t)
+    p = UDDialog(None,t,'atom_selection')
         
     p.SetSize((800,800))
             

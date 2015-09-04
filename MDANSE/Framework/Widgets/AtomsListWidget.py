@@ -33,9 +33,10 @@ Created on Jun 30, 2015
 import os
 
 import wx
+import wx.aui as wxaui
 
 from MDANSE import LOGGER
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionsDialog, UserDefinitionWidget
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UDPlugin, UserDefinitionWidget, UDDialog
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule, get_chemical_objects_dict
 
 class AtomNameDropTarget(wx.TextDropTarget):
@@ -68,56 +69,57 @@ class AtomNameDropTarget(wx.TextDropTarget):
                 
         self._atoms.Append([data])
                 
-class AtomsListDialog(UserDefinitionsDialog):
+class AtomsListPlugin(UDPlugin):
     
-    def __init__(self, parent, trajectory, nAtoms):
+    type = 'atoms_list'
+    
+    label = "Atoms list"
+    
+    ancestor = ["molecular_viewer"]
+    
+    def __init__(self, parent, *args, **kwargs):
         
         self._parent = parent
 
-        self._trajectory = trajectory
-    
-        self._nAtoms = nAtoms
-        
+        self._nAtoms = 1
+            
         self._selectedAtoms = []
         
         self._selection = []
-                
-        target = os.path.basename(self._trajectory.filename)
-
-        self.type = "%d_atoms_list" % self._nAtoms
-        
-        UserDefinitionsDialog.__init__(self, parent, target, wx.ID_ANY, title="%d Atoms selection dialog" % nAtoms,style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
+                                
+        UDPlugin.__init__(self,parent,size=(800,500))
         
         self.SetSize((400,400))
-                                
-    def build_dialog(self):
+                                        
+    def build_panel(self):
 
-        panel = wx.ScrolledWindow(self, wx.ID_ANY, size=self.GetSize())
-        panel.SetScrollbars(20,20,50,50)
+        self._mainPanel = wx.ScrolledWindow(self, wx.ID_ANY, size=self.GetSize())
+        self._mainPanel.SetScrollbars(20,20,50,50)
         
         sizer = wx.BoxSizer(wx.VERTICAL)
-                
+        
+        self._nAtomsSelectionSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        label = wx.StaticText(self._mainPanel, wx.ID_ANY, label="Number of atoms")
+        
+        self._nAtomsSpinCtrl = wx.SpinCtrl(self._mainPanel,wx.ID_ANY,style=wx.SP_ARROW_KEYS|wx.SP_WRAP)
+        self._nAtomsSpinCtrl.SetRange(1,100)
+        self._nAtomsSpinCtrl.SetValue(self._nAtoms)
+        
+        self._nAtomsSelectionSizer.Add(label,0,wx.ALL|wx.ALIGN_CENTRE_VERTICAL,5)
+        self._nAtomsSelectionSizer.Add(self._nAtomsSpinCtrl,1,wx.ALL|wx.EXPAND,5)
+                                    
         gbSizer = wx.GridBagSizer(5,5)
         
-        label1 = wx.StaticText(panel, wx.ID_ANY, label="Molecules")
-        label2 = wx.StaticText(panel, wx.ID_ANY, label="Selected atoms")
+        label1 = wx.StaticText(self._mainPanel, wx.ID_ANY, label="Molecules")
+        label2 = wx.StaticText(self._mainPanel, wx.ID_ANY, label="Selected atoms")
 
         gbSizer.Add(label1, (0,0), flag=wx.EXPAND)
         gbSizer.Add(label2, (0,1), flag=wx.EXPAND)
     
-        self._molecules = wx.TreeCtrl(panel, wx.ID_ANY, style=wx.TR_DEFAULT_STYLE|wx.LB_HSCROLL|wx.LB_NEEDED_SB^wx.TR_HIDE_ROOT)
-        self._molecularContents = get_chemical_objects_dict(self._trajectory.universe)
-        
-        root = self._molecules.AddRoot('')
-        
-        for mname in sorted(self._molecularContents.keys()):
-            molnode = self._molecules.AppendItem(root,mname)
-            atomsList = self._molecularContents[mname][0].atomList()
-            atomNames = sorted(set([at.name for at in atomsList]))
-            for aname in atomNames:
-                self._molecules.AppendItem(molnode,aname)
-
-        self._atoms = wx.ListCtrl(panel, wx.ID_ANY)
+        self._molecules = wx.TreeCtrl(self._mainPanel, wx.ID_ANY, style=wx.TR_DEFAULT_STYLE|wx.LB_HSCROLL|wx.LB_NEEDED_SB^wx.TR_HIDE_ROOT)
+                
+        self._atoms = wx.ListCtrl(self._mainPanel, wx.ID_ANY)
         
         dt = AtomNameDropTarget(self._molecules,self._atoms)
         self._atoms.SetDropTarget(dt)
@@ -129,21 +131,71 @@ class AtomsListDialog(UserDefinitionsDialog):
         gbSizer.AddGrowableCol(0)
         gbSizer.AddGrowableCol(1)
 
-        setButton  = wx.Button(panel, wx.ID_ANY, label="Set")
-        self._resultsTextCtrl  = wx.TextCtrl(panel, wx.ID_ANY, style=wx.TE_READONLY|wx.TE_MULTILINE)
+        setButton  = wx.Button(self._mainPanel, wx.ID_ANY, label="Set")
+        self._resultsTextCtrl  = wx.TextCtrl(self._mainPanel, wx.ID_ANY, style=wx.TE_READONLY|wx.TE_MULTILINE)
 
+        sizer.Add(self._nAtomsSelectionSizer, 0, wx.EXPAND|wx.ALL, 5)
         sizer.Add(gbSizer, 1, wx.EXPAND|wx.ALL, 5)
         sizer.Add(setButton,0,wx.EXPAND|wx.ALL,5)
         sizer.Add(self._resultsTextCtrl,1,wx.EXPAND|wx.ALL,5)
 
-        panel.SetSizer(sizer)
+        self._mainPanel.SetSizer(sizer)
 
-        self._mainSizer.Add(panel, 1, wx.EXPAND|wx.ALL, 5)
-                
+        self._mainSizer = wx.BoxSizer(wx.VERTICAL)                                                                              
+        self._mainSizer.Add(self._mainPanel, 1, wx.EXPAND|wx.ALL, 5)        
+        self.SetSizer(self._mainSizer)            
+        
+        self._mgr.AddPane(self._mainPanel, wxaui.AuiPaneInfo().DestroyOnClose().Center().Dock().CaptionVisible(False).CloseButton(False).BestSize(self.GetSize()))
+        self._mgr.Update()
+
+        self.Bind(wx.EVT_SPINCTRL,self.on_select_natoms,self._nAtomsSpinCtrl)                
         self.Bind(wx.EVT_BUTTON, self.on_set_user_definition, setButton)
         self.Bind(wx.EVT_TREE_BEGIN_DRAG,self.on_drag_atom_name,self._molecules)
         self.Bind(wx.EVT_LIST_KEY_DOWN,self.on_delete_atom_name,self._atoms)
 
+    def plug(self):
+        
+        self.parent.mgr.GetPane(self).Float().Dockable(False).CloseButton(True).BestSize((600,600))
+        
+        self.parent.mgr.Update()
+        
+        self.set_trajectory(self.dataproxy.data)
+        
+    def enable_natoms_selection(self,state):
+        
+        self._nAtomsSelectionSizer.ShowItems(state)
+
+    def set_natoms(self,nAtoms):
+        
+        self._nAtoms = nAtoms
+        
+        self._nAtomsSpinCtrl.SetValue(nAtoms)
+                                
+    def set_trajectory(self,trajectory):
+
+        self._trajectory = trajectory 
+
+        self._target = os.path.basename(self._trajectory.filename)
+        
+        self._molecularContents = get_chemical_objects_dict(self._trajectory.universe)
+
+        root = self._molecules.AddRoot('')
+        
+        for mname in sorted(self._molecularContents.keys()):
+            molnode = self._molecules.AppendItem(root,mname)
+            atomsList = self._molecularContents[mname][0].atomList()
+            atomNames = sorted(set([at.name for at in atomsList]))
+            for aname in atomNames:
+                self._molecules.AppendItem(molnode,aname)
+        
+    def on_select_natoms(self,event):
+
+        self._nAtoms = event.GetInt()
+        
+        self._atoms.ClearAll()
+        
+        self._resultsTextCtrl.Clear()      
+    
     def on_delete_atom_name(self,event):
         
         keycode = event.GetKeyCode()
@@ -226,38 +278,35 @@ class AtomsListDialog(UserDefinitionsDialog):
 class AtomListWidget(UserDefinitionWidget):
     
     type = 'atoms_list'
-            
-    def initialize(self):
 
-        self.type = "%d_atoms_list" % self._configurator._nAtoms
-        
-        UserDefinitionWidget.initialize(self)
-                
     def on_new_user_definition(self,event):
+
+        dlg = UDDialog(self,self._trajectory,self.type)
         
-        atomsListDlg = AtomsListDialog(self,self._trajectory,self._configurator._nAtoms)
+        dlg.plugin.set_natoms(self._configurator._nAtoms)
                 
-        atomsListDlg.ShowModal()
-            
-        atomsListDlg.Destroy()
+        dlg.plugin.enable_natoms_selection(False)
         
-if __name__ == "__main__":
-    
-    from MMTK.Trajectory import Trajectory
-    
-    from MDANSE import PLATFORM,REGISTRY
-    
-    LOGGER.add_handler("dialog", REGISTRY['handler']['dialog'](), level="error", start=True)
+        dlg.ShowModal()
             
-    t = Trajectory(None,os.path.join(os.path.dirname(PLATFORM.package_directory()),"Data","Trajectories","MMTK","nagma_in_periodic_universe.nc"),"r")
-    
-    app = wx.App(False)
-                
-    p = AtomsListDialog(None,t,4)
-                
-    p.ShowModal()
-    
-    p.Destroy()
-    
-    app.MainLoop()            
+                        
+# if __name__ == "__main__":
+#     
+#     from MMTK.Trajectory import Trajectory
+#     
+#     from MDANSE import PLATFORM,REGISTRY
+#     
+#     LOGGER.add_handler("dialog", REGISTRY['handler']['dialog'](), level="error", start=True)
+#             
+#     t = Trajectory(None,os.path.join(os.path.dirname(PLATFORM.package_directory()),"Data","Trajectories","MMTK","nagma_in_periodic_universe.nc"),"r")
+#     
+#     app = wx.App(False)
+#                 
+#     p = AtomsListDialog(None,t,4)
+#                 
+#     p.ShowModal()
+#     
+#     p.Destroy()
+#     
+#     app.MainLoop()            
                     

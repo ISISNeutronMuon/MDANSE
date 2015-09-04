@@ -38,7 +38,7 @@ import wx.grid as wxgrid
 from wx.lib.delayedresult import startWorker
 
 from MDANSE import LOGGER, REGISTRY
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionsDialog,UserDefinitionWidget
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UDDialog,UDPlugin,UserDefinitionWidget
 from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.GUI.ComboWidgets.ProgressBar import ProgressBar
 
@@ -151,63 +151,81 @@ class QVectorsPanel(wx.Panel):
         
         return self._progress
                             
-class QVectorsDialog(UserDefinitionsDialog):
+class QVectorsPlugin(UDPlugin):
     
     type = 'q_vectors'
+
+    label = "Q vectors settings"
+    
+    ancestor = ["molecular_viewer"]
             
-    def __init__(self, parent, trajectory):
+    def __init__(self, parent, *args, **kwargs):
 
         self._currentGenerator = None
 
         self._value = None
-                
-        self._trajectory = trajectory
-        
-        target = os.path.basename(self._trajectory.filename)
-
-        UserDefinitionsDialog.__init__(self, parent, target, wx.ID_ANY, title="Q vectors generator dialog",style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
-        
-        self.SetSize((800,700))
-                                                                  
-    def build_dialog(self):   
+                        
+        UDPlugin.__init__(self, parent,size=(800,700))
+                                                                          
+    def build_panel(self):   
 
         sizer = wx.BoxSizer(wx.VERTICAL)
                  
         # Widgets and sizers related to generator section        
-        self._panel = wx.ScrolledWindow(self, wx.ID_ANY, size=self.GetSize())
-        self._panel.SetScrollbars(20,20,50,50)
-        sb1 = wx.StaticBox(self._panel, wx.ID_ANY, label="generator")
+        self._mainPanel = wx.ScrolledWindow(self, wx.ID_ANY, size=self.GetSize())
+        self._mainPanel.SetScrollbars(20,20,50,50)
+        sb1 = wx.StaticBox(self._mainPanel, wx.ID_ANY, label="generator")
         sbSizer1 = wx.StaticBoxSizer(sb1, wx.VERTICAL)
-        self._availableGenerators = wx.Choice(self._panel, wx.ID_ANY)
+        self._availableGenerators = wx.Choice(self._mainPanel, wx.ID_ANY)
+        generateButton  = wx.Button(self._mainPanel, wx.ID_ANY, label="Generate")
+        sbSizer1.Add(self._availableGenerators, 1, wx.ALL|wx.EXPAND, 5)        
+        sbSizer1.Add(generateButton, 1, wx.ALL|wx.EXPAND, 5)        
+        sizer.Add(sbSizer1, 0, wx.ALL|wx.EXPAND, 5)
+    
+        # Widgets and sizers related to parameters section        
+        sb2 = wx.StaticBox(self._mainPanel, wx.ID_ANY, label="parameters")
+        self._parametersSizer = wx.StaticBoxSizer(sb2, wx.VERTICAL)
+        sizer.Add(self._parametersSizer, 0, wx.ALL|wx.EXPAND, 5)
+
+        self._notebook = wxaui.AuiNotebook(self._mainPanel, wx.ID_ANY, style=wxaui.AUI_NB_DEFAULT_STYLE^wxaui.AUI_NB_TAB_MOVE)
+
+        sizer.Add(self._notebook, 3, wx.ALL|wx.EXPAND, 5)
+                 
+        self._mainPanel.SetSizer(sizer)
+
+#         self._mainSizer = wx.BoxSizer(wx.VERTICAL)                                                                              
+#         self._mainSizer.Add(self._mainPanel, 1, wx.ALL|wx.EXPAND, 5)
+#         self.SetSizer(self._mainSizer)            
+
+        self._mgr.AddPane(self._mainPanel, wxaui.AuiPaneInfo().DestroyOnClose().Center().Dock().CaptionVisible(False).CloseButton(False).BestSize(self.GetSize()))
+        self._mgr.Update()
+                                 
+        self.Bind(wxaui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_tab, self._notebook)
+        self.Bind(wx.EVT_BUTTON, self.on_generate_q_vectors, generateButton)
+        self.Bind(wx.EVT_CHOICE, self.on_select_generator, self._availableGenerators)
+
+    def plug(self):
+        
+        self.parent.mgr.GetPane(self).Float().Dockable(False).CloseButton(True).BestSize((600,600))
+        
+        self.parent.mgr.Update()
+        
+        self.set_trajectory(self.dataproxy.data)
+
+    def set_trajectory(self,trajectory):
+
+        self._trajectory = trajectory 
+
+        self._target = os.path.basename(self._trajectory.filename)
+
         if self._trajectory.universe.is_periodic:
             choices = REGISTRY["q_vectors"].keys()
         else:
             choices = [k for k,v in REGISTRY["q_vectors"].items() if not v.is_lattice]        
         self._availableGenerators.SetItems(choices)
         self._availableGenerators.SetSelection(0)
-        generateButton  = wx.Button(self._panel, wx.ID_ANY, label="Generate")
-        sbSizer1.Add(self._availableGenerators, 1, wx.ALL|wx.EXPAND, 5)        
-        sbSizer1.Add(generateButton, 1, wx.ALL|wx.EXPAND, 5)        
-        sizer.Add(sbSizer1, 0, wx.ALL|wx.EXPAND, 5)
-    
-        # Widgets and sizers related to parameters section        
-        sb2 = wx.StaticBox(self._panel, wx.ID_ANY, label="parameters")
-        self._parametersSizer = wx.StaticBoxSizer(sb2, wx.VERTICAL)
-        sizer.Add(self._parametersSizer, 0, wx.ALL|wx.EXPAND, 5)
-
-        self._notebook = wxaui.AuiNotebook(self._panel, wx.ID_ANY, style=wxaui.AUI_NB_DEFAULT_STYLE^wxaui.AUI_NB_TAB_MOVE)
-
-        sizer.Add(self._notebook, 3, wx.ALL|wx.EXPAND, 5)
-                 
-        self._panel.SetSizer(sizer)
-
-        self._mainSizer.Add(self._panel, 1, wx.ALL|wx.EXPAND, 5)
 
         self.select_generator(self._availableGenerators.GetStringSelection())
-                                 
-        self.Bind(wxaui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_tab, self._notebook)
-        self.Bind(wx.EVT_BUTTON, self.on_generate_q_vectors, generateButton)
-        self.Bind(wx.EVT_CHOICE, self.on_select_generator, self._availableGenerators)
 
     def set_user_definition(self):
 
@@ -295,7 +313,7 @@ class QVectorsDialog(UserDefinitionsDialog):
  
         self.Freeze()
                  
-        self._configurationPanel = ConfigurationPanel(self._panel, self._currentGenerator)
+        self._configurationPanel = ConfigurationPanel(self._mainPanel, self._currentGenerator)
  
         self._parametersSizer.Add(self._configurationPanel, 1, wx.ALL|wx.EXPAND, 5)
                                  
@@ -306,27 +324,24 @@ class QVectorsDialog(UserDefinitionsDialog):
 class QVectorsWidget(UserDefinitionWidget):
         
     type = "q_vectors"
-
-    def on_new_user_definition(self,event):
-        
-        qVectorsDlg = QVectorsDialog(self,self._trajectory)
-        
-        qVectorsDlg.ShowModal()
-
-        qVectorsDlg.Destroy()
         
 if __name__ == "__main__":
     
     from MMTK.Trajectory import Trajectory
     
-    t = Trajectory(None,"../../../../../Data/Trajectories/MMTK/protein_in_periodic_universe.nc","r")
+    from MDANSE import PLATFORM
+    
+    t = Trajectory(None,os.path.join(PLATFORM.example_data_directory(),"Trajectories","MMTK","protein_in_periodic_universe.nc"),"r")
     
     app = wx.App(False)
-            
-    p = QVectorsDialog(None,t)
+    
+    p = UDDialog(None,t,'q_vectors')
         
+    p.SetSize((800,800))
+            
     p.ShowModal()
     
     p.Destroy()
     
-    app.MainLoop()        
+    app.MainLoop()
+        

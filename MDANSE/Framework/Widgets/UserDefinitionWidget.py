@@ -34,12 +34,84 @@ import abc
 import os
 
 import wx
+import wx.aui as wxaui
 
-from MDANSE import LOGGER
+from MDANSE import LOGGER, REGISTRY
 from MDANSE.Externals.pubsub import pub
+from MDANSE.Framework.Plugins.ComponentPlugin import ComponentPlugin
 from MDANSE.Framework.UserDefinitionsStore import UD_STORE
 from MDANSE.Framework.Widgets.IWidget import IWidget
 from MDANSE.GUI import DATA_CONTROLLER
+
+class UserDefinitionsPanel(wx.Panel):
+    
+    def __init__(self,udType,*args,**kwargs):
+
+        wx.Panel.__init__(self,*args,**kwargs)
+
+        self._udType = udType
+                
+        sb = wx.StaticBox(self, wx.ID_ANY)
+        actionsSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
+                        
+        cancelButton  = wx.Button(self, wx.ID_ANY, label="Cancel")
+        self._udName = wx.TextCtrl(self, wx.ID_ANY, style = wx.TE_PROCESS_ENTER)
+        saveButton  = wx.Button(self, wx.ID_ANY, label="Save")
+        
+        actionsSizer.Add(cancelButton, 0, wx.ALL, 5)
+        actionsSizer.Add(self._udName, 1, wx.ALL|wx.EXPAND, 5)
+        actionsSizer.Add(saveButton, 0, wx.ALL, 5)
+        
+        self.SetSizer(actionsSizer)
+                
+        self._validator = None
+                 
+        self.Bind(wx.EVT_CLOSE, self.on_close)
+        self.Bind(wx.EVT_BUTTON, self.on_close, cancelButton)
+        self.Bind(wx.EVT_BUTTON, self.on_save, saveButton)
+
+    def set_validator(self,validator):
+        
+        self._validator = validator
+
+    def validate(self):
+        
+        if self._validator is not None:
+            return self._validator()
+        else:
+            return None
+        
+    def getUserDefinitionName(self):
+        
+        return str(self._udName.GetValue())
+
+    def on_save(self, event):
+
+        name = str(self._udName.GetValue().strip())
+        
+        if not name:
+            LOGGER('Empty user definition name.','error',['dialog'])
+            return
+
+        value = self.validate()        
+        if value is None:
+            return 
+                
+        if UD_STORE.has_definition(self._target,self.type,name):
+            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,self.type,name),'error',['dialog'])
+            self.EndModal(wx.ID_CANCEL)
+            return
+                  
+        UD_STORE.set_definition(self._target,self.type,name,value)
+        UD_STORE.save()
+                 
+        pub.sendMessage("msg_save_definition", message = (self._target, self.type, name))
+                         
+        self.EndModal(wx.ID_OK)
+                
+    def on_close(self, event):
+        
+        self.EndModal(wx.ID_CANCEL)
 
 class UserDefinitionsDialog(wx.Dialog):
     
@@ -56,7 +128,7 @@ class UserDefinitionsDialog(wx.Dialog):
         self._mainSizer = wx.BoxSizer(wx.VERTICAL)
         
         self._ud = {}
-                                
+                                                                
         self.build_dialog()
 
         udPanel = wx.Panel(self,wx.ID_ANY)
@@ -148,10 +220,12 @@ class UserDefinitionWidget(IWidget):
 
         return sizer
     
-    @abc.abstractmethod
-    def on_new_user_definition(self):
-        pass
-    
+    def on_new_user_definition(self,event):
+        
+        dlg = UDDialog(self,self._trajectory,self.type)
+        
+        dlg.ShowModal()
+        
     def get_widget_value(self):
         
         return str(self._availableUDs.GetStringSelection())    
@@ -179,3 +253,83 @@ class UserDefinitionWidget(IWidget):
             return
         
         self._availableUDs.Append(name)
+
+class UDDialog(wx.Dialog):
+    
+    def __init__(self,parent,trajectory,udType,*args,**kwargs):
+
+        wx.Dialog.__init__(self, parent)
+        
+        self._mgr = wxaui.AuiManager(self)
+
+        self.datakey = trajectory.filename
+         
+        self._plugin = REGISTRY['plugin'][udType](self,*args,**kwargs)
+        
+        self.SetTitle(self._plugin.label)
+        
+        self._plugin.set_trajectory(trajectory)
+                
+        pub.sendMessage("msg_set_data", plugin=self._plugin)
+        
+        self.Bind(wx.EVT_CLOSE, self.on_quit)
+
+    def on_quit(self, event):
+        
+        d = wx.MessageDialog(None,'Do you really want to quit ?','Question',wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
+        if d.ShowModal() == wx.ID_YES:
+            self.Destroy()           
+
+    @property
+    def plugin(self):
+        
+        return self._plugin
+
+class UDPlugin(ComponentPlugin):
+    
+    def __init__(self,parent,*args,**kwargs):
+        
+        ComponentPlugin.__init__(self,parent,size=(800,500))
+        
+        self.add_ud_panel()
+                
+    def add_ud_panel(self):
+
+        udPanel = wx.Panel(self._mainPanel,wx.ID_ANY)
+                
+        sb = wx.StaticBox(udPanel, wx.ID_ANY)
+        actionsSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
+                        
+        self._udName = wx.TextCtrl(udPanel, wx.ID_ANY, style = wx.TE_PROCESS_ENTER)
+        saveButton  = wx.Button(udPanel, wx.ID_ANY, label="Save")
+        
+        actionsSizer.Add(self._udName, 1, wx.ALL|wx.EXPAND, 5)
+        actionsSizer.Add(saveButton, 0, wx.ALL, 5)
+        
+        udPanel.SetSizer(actionsSizer)
+        
+        self._mainPanel.GetSizer().Add(udPanel,0,wx.EXPAND|wx.ALL,5)
+
+        self.Bind(wx.EVT_BUTTON, self.on_save, saveButton)
+
+    def on_save(self, event):
+
+        name = str(self._udName.GetValue().strip())
+        
+        if not name:
+            LOGGER('Empty user definition name.','error',['dialog'])
+            return
+
+        value = self.validate()        
+        if value is None:
+            return 
+                
+        if UD_STORE.has_definition(self._target,self.type,name):
+            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,self.type,name),'error',['dialog'])
+            self.EndModal(wx.ID_CANCEL)
+            return
+                  
+        UD_STORE.set_definition(self._target,self.type,name,value)
+        UD_STORE.save()
+                 
+        pub.sendMessage("msg_save_definition", message=(self._target,self.type,name))

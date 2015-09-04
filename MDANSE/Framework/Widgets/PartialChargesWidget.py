@@ -34,37 +34,65 @@ import operator
 import os
 
 import wx
+import wx.aui as wxaui
 import wx.grid as wxgrid
 
 from MDANSE import LOGGER
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionsDialog, UserDefinitionWidget
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UDPlugin, UDDialog, UserDefinitionWidget
 
-class PartialChargesDialog(UserDefinitionsDialog):
+class PartialChargesPlugin(UDPlugin):
 
-    def __init__(self, parent, trajectory):
+    type = 'partial_charges'
+
+    label = "Partial charges settings"
+    
+    ancestor = ["molecular_viewer"]
+
+    def __init__(self, parent, *args, **kwargs):
         
         self._parent = parent
-
-        self._trajectory = trajectory
     
         self._selectedAtoms = []
-                
-        target = os.path.basename(self._trajectory.filename)
-        
-        UserDefinitionsDialog.__init__(self, parent, target, 'partial_charges', wx.ID_ANY, title="Partial charges dialog",style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
                         
-    def build_dialog(self):
+        UDPlugin.__init__(self, parent)
+                        
+    def build_panel(self):
 
-        self._grid = wxgrid.Grid(self)
+        self._mainPanel = wx.Panel(self,wx.ID_ANY)
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        self._grid = wxgrid.Grid(self._mainPanel)
+
+        sizer.Add(self._grid, 1, wx.ALL|wx.EXPAND, 5)
+
+        self._mainPanel.SetSizer(sizer)
+                                                
+        self._mgr.AddPane(self._mainPanel, wxaui.AuiPaneInfo().DestroyOnClose().Center().Dock().CaptionVisible(False).CloseButton(False).BestSize(self.GetSize()))
+        self._mgr.Update()
+
+    def plug(self):
+                
+        self.parent.mgr.GetPane(self).Float().Dockable(False).CloseButton(True).BestSize((600,600))
         
+        self.parent.mgr.Update()
+        
+        self.set_trajectory(self.dataproxy.data)
+
+    def set_trajectory(self,trajectory):
+
+        self._trajectory = trajectory 
+
+        self._target = os.path.basename(self._trajectory.filename)
+
         self._grid.CreateGrid(self._trajectory.universe.numberOfAtoms(),3)
-        
+
         self._grid.SetRowLabelSize(1)
         
         self._grid.SetColFormatNumber(0)
         self._grid.SetColFormatNumber(1)
         self._grid.SetColFormatNumber(2)
-        
+                
         roAttr = wxgrid.GridCellAttr()
         roAttr.SetReadOnly(True)
         roAttr.SetBackgroundColour(wx.Colour(220,220,220))
@@ -84,9 +112,7 @@ class PartialChargesDialog(UserDefinitionsDialog):
         for idx, at in enumerate(atoms):
             self._grid.SetCellValue(idx,0,str(idx))
             self._grid.SetCellValue(idx,1,at.name)
-                
-        self._mainSizer.Add(self._grid, 1, wx.EXPAND|wx.ALL, 5)
-                            
+        
     def validate(self):
         
         charges = {}
@@ -105,32 +131,23 @@ class PartialChargesDialog(UserDefinitionsDialog):
 class PartialChargesWidget(UserDefinitionWidget):
         
     type = "partial_charges"
-    
-    def initialize(self):
-        
-        UserDefinitionWidget.initialize(self)
-                
-    def on_new_user_definition(self,event):
-        
-        dlg = PartialChargesDialog(self,self._trajectory)
-        
-        dlg.ShowModal()
-            
-        dlg.Destroy()
-        
+                            
 if __name__ == "__main__":
     
     from MMTK.Trajectory import Trajectory
     
-    t = Trajectory(None,"../../../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc","r")
+    from MDANSE import PLATFORM
+    
+    t = Trajectory(None,os.path.join(PLATFORM.example_data_directory(),"Trajectories","MMTK","protein_in_periodic_universe.nc"),"r")
     
     app = wx.App(False)
-                
-    p = PartialChargesDialog(None,t)
-                
+    
+    p = UDDialog(None,t,'partial_charges')
+        
+    p.SetSize((800,800))
+            
     p.ShowModal()
     
     p.Destroy()
     
-    app.MainLoop()            
-                    
+    app.MainLoop()                    
