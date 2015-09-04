@@ -37,6 +37,7 @@ import wx
 import wx.aui as aui
 
 from MDANSE import REGISTRY
+from MDANSE.Externals.pubsub import pub
 
 def plugin_parent(window):
                           
@@ -136,6 +137,7 @@ class IPlugin(wx.Panel):
         return self.is_parent(window.Parent)    
         
     def close(self):
+        
         pass
         
     def on_close_pane(self, event):
@@ -147,7 +149,9 @@ class IPlugin(wx.Panel):
         except AttributeError:
             plugin.Close()
             
-        self._parent.SetFocus()
+        self.SetFocus()
+        
+        pub.sendMessage(('msg_set_plugins_tree'), message=self)
                                             
     def build_dialog(self):
 
@@ -164,10 +168,10 @@ class IPlugin(wx.Panel):
     def drop(self, pluginName):
                                         
         # If no plugin match the name of the dropped plugin, do nothing.
-        plugin = REGISTRY["plugin"].get(pluginName,None)        
+        plugin = REGISTRY["plugin"].get(pluginName,None)  
         if plugin is None:
             return
-
+        
         klasses = tuple([REGISTRY['plugin'][anc] for anc in plugin.ancestor])        
         if not issubclass(self.__class__,klasses):
             self.parent.drop(pluginName)
