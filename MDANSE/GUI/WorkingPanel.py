@@ -95,10 +95,10 @@ class WorkingPanel(wx.Panel):
                         
         if container is None:
             return
-                
+
         container = container(self, filename)
-                        
-        self._notebook.AddPage(container, data.basename)
+
+        self._notebook.AddPage(container, data.shortname)
         
         self._notebook.SetFocus()
         
