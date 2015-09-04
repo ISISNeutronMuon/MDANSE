@@ -106,7 +106,7 @@ class DataTreePanel(wx.Panel):
                 
     def add_data(self, data):
                 
-        dataItem = wx.TreeItemData(data.filename)
+        dataItem = wx.TreeItemData(data.name)
 
         item = None
         for cItem in self.get_children(self._root):
@@ -116,7 +116,7 @@ class DataTreePanel(wx.Panel):
         if item is None:    
             item = self._tree.AppendItem(self._root, data.type, data=None)
 
-        self._tree.AppendItem(item, data.basename, data=dataItem)
+        self._tree.AppendItem(item, data.shortname, data=dataItem)
 
         self._tree.ExpandAll()
           
