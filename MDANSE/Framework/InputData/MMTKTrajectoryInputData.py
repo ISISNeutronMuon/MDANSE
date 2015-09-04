@@ -45,10 +45,10 @@ class MMTKTrajectoryInputData(InputFileData):
     def load(self):
         
         try:
-            traj = MMTKTrajectory(None, self._filename, "r")
+            traj = MMTKTrajectory(None, self._name, "r")
             
         except IOError:        
-            raise InputDataError("The MMTK trajectory %r could not be loaded property." % self._filename)
+            raise InputDataError("The MMTK trajectory %r could not be loaded property." % self._name)
         
         self._data = traj
         
@@ -60,7 +60,7 @@ class MMTKTrajectoryInputData(InputFileData):
         val = []
         
         val.append("Path:")
-        val.append("%s\n" % self._filename)
+        val.append("%s\n" % self._name)
         val.append("Number of steps:")
         val.append("%s\n" % len(self._data))
         val.append("Universe:")

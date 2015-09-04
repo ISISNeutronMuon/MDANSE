@@ -47,37 +47,31 @@ class IInputData(object):
     
     type = "input_data"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self,name, *args):
         '''
         Builds an ``IInputData`` object.
         '''
+
+        self._name = name
         
         self._data = None
-        
-        self._filename = None
 
     @property
-    def filename(self):
+    def name(self):
         '''
-        Returns the filename associated with the input data.
+        Returns the name associated with the input data.
         
-        :return: the filename associated with the input data.
+        :return: the name associated with the input data.
         :rtype: str
         '''
         
-        return self._filename
-        
+        return self._name
+    
     @property
-    def basename(self):
-        '''
-        Returns the basename of the file associated with the input data.
+    def shortname(self):
         
-        :return: the basename of the file associated with the input data.
-        :rtype: str
-        '''
-
-        return self._basename    
-
+        return self._name
+            
     @property
     def data(self):
         '''

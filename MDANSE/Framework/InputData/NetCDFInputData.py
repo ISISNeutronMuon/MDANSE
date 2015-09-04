@@ -46,10 +46,10 @@ class NetCDFInputData(InputFileData):
     def load(self):
         
         try:
-            self._netcdf = NetCDFFile(self._filename,"r")
+            self._netcdf = NetCDFFile(self._name,"r")
             
         except IOError:
-            raise InputDataError("The data stored in %r filename could not be loaded property." % self._filename)
+            raise InputDataError("The data stored in %r filename could not be loaded property." % self._name)
 
         else:
             self._data = collections.OrderedDict()

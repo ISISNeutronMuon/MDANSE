@@ -36,18 +36,4 @@ class EmptyData(IInputData):
 
     type = "empty_data"
 
-    extension = None
-    
-    count = 0
-    
-    def __init__(self, filename, *args, **kwargs):
-
-        IInputData.__init__(self, filename, *args, **kwargs)
-        
-        self._data = None
-
-        if filename is None:
-            self._filename = self._basename = 'empty_' + str(EmptyData.count)
-            EmptyData.count +=  1
-        else:
-            self._filename = self._basename = filename
+    extension = None    
