@@ -43,7 +43,6 @@ from MDANSE import PLATFORM,REGISTRY
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Plugins.ComponentPlugin import ComponentPlugin
 from MDANSE.GUI import DATA_CONTROLLER
-from MDANSE.GUI.WorkingPanel import WorkingPanel
 from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.GUI.ComboWidgets.JobHelpFrame import JobHelpFrame
 
@@ -167,29 +166,20 @@ class JobFrame(wx.Frame):
         wx.Frame.__init__(self, parent, wx.ID_ANY, size = (800,400), style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
 
         self._jobType = jobType
-        
-        self._datakey = datakey
 
-        if self._datakey is not None:
-            data = REGISTRY['input_data']['mmtk_trajectory'](self._datakey)
-                                        
-            DATA_CONTROLLER[filename] = data
+        job = REGISTRY['job'][self._jobType]
+        
+        self.SetTitle(job.label)
+        
+        data = REGISTRY['input_data'][job.ancestor[0]](datakey,True)
 
-        self.build_dialog()
-
-    def build_dialog(self):
-
-        workingPanel = WorkingPanel(self)
+        self.datakey = data.name
+                          
+        DATA_CONTROLLER[data.name] = data
+                        
+        plugin = REGISTRY['plugin'][self._jobType](self)
         
-        workingPanel.drop(self._datakey)
-        
-        workingPanel.active_page.drop(self._jobType)
-        
-        workingPanel.active_page.mgr.GetPane(workingPanel.active_page.currentWindow).Dock()
-        
-        workingPanel.active_page.mgr.Update()
-                
-        self.SetTitle("Run %s job" % self._jobType)
+        pub.sendMessage("msg_set_data", plugin=plugin)
         
         self.Bind(wx.EVT_CLOSE, self.on_quit)
         
