@@ -98,7 +98,7 @@ def key_generator(keySize, chars=None, prefix=""):
         
 class IJob(Configurable):
     """
-    This class handles a MDANSE job. In MDANSE any task modeled by a loop can be considered a MDANSE job. 
+    This class handles a MDANSE job. In MDANSE any task modeled by a loop can be considered as a MDANSE job. 
     """
             
     __metaclass__ = REGISTRY
@@ -107,7 +107,7 @@ class IJob(Configurable):
     
     section = "job"
     
-    ancestor = ["molecular_viewer"]
+    ancestor = []
         
     @staticmethod
     def define_unique_name():
