@@ -199,6 +199,8 @@ class MolecularViewerPanel(ComponentPlugin):
         self._iren.AddObserver("LeftButtonPressEvent", self.emulate_focus)
         
         self._iren.Bind(wx.EVT_CONTEXT_MENU, self.on_show_popup_menu)
+
+        pub.subscribe(self.switch_other_viewers_state, "switch_other_viewers_state")
                 
         self._mgr.AddPane(self._iren, aui.AuiPaneInfo().Dock().Center().CaptionVisible(False).CloseButton(False))
                 
@@ -263,13 +265,15 @@ class MolecularViewerPanel(ComponentPlugin):
                                 
         self.set_trajectory(self._trajectory)
         
-    def emulate_focus(self, obj, event):
+    def emulate_focus(self, obj=None, event=None):
         
         self.SetFocusIgnoringChildren()
            
     def close(self):
                 
         self.clear_universe()
+
+        pub.unsubscribe(self.switch_other_viewers_state, "switch_other_viewers_state")
                 
     def set_trajectory(self, trajectory, selection=None, frame=0):
         
@@ -730,17 +734,20 @@ class MolecularViewerPanel(ComponentPlugin):
         else:
             self.stop_animation()
             
-#         if check:
-#             self.check_switch_consistancy() 
+        if check:
+            pub.sendMessage("switch_other_viewers_state", viewer=self) 
             
-#         pub.sendMessage('msg_animate_trajectory', plugin=self)
+        pub.sendMessage('msg_animate_trajectory', plugin=self)
     
-#     def check_switch_consistancy(self):
-#         
-#         if not self._animationLoop:
-#             return
-#         
-#         self.start_stop_animation(check = False)
+    def switch_other_viewers_state(self, viewer):
+                 
+        if not self._animationLoop:
+            return
+        
+        if viewer==self:
+            return
+         
+        self.start_stop_animation(check=False)
             
     def get_atom_index(self,pid):
         
