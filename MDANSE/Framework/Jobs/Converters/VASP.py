@@ -124,10 +124,6 @@ class VASPConverter(Converter):
     
     label = "VASP (>=5)"
 
-    category = ('Converters',)
-    
-    ancestor = []
-
     settings = collections.OrderedDict()           
     settings['xdatcar_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})
     settings['time_step'] = ('float', {'label':"time step", 'default':1.0, 'mini':1.0e-9})        

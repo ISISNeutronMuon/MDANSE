@@ -47,10 +47,6 @@ class PDBConverter(Converter):
     
     label = "PDB"
 
-    category = ('Converters',)
-    
-    ancestor = []
-
     settings = collections.OrderedDict()  
     settings['pdb_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','PDB','2f58_nma.pdb')})
     settings['nb_frame'] = ('range', {'valueType':int, 'includeLast':True, 'mini':0.0, 'default':(0,2,1)})

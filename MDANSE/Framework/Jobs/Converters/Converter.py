@@ -35,3 +35,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 class Converter(IJob):
     
     type = None
+
+    category = ('Converters',)
+    
+    ancestor = ['empty_data']

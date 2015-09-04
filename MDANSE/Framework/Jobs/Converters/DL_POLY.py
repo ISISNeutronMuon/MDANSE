@@ -289,10 +289,6 @@ class DL_POLYConverter(Converter):
     
     label = "DL_POLY"
 
-    category = ('Converters',)
-    
-    ancestor = []
-
     settings = collections.OrderedDict()   
     settings['field_file'] = ('input_file',{'wildcard':"FIELD files|FIELD*|All files|*",
                                             'default':os.path.join('..','..','..','Data','Trajectories','DL_Poly','FIELD_cumen')})

@@ -40,7 +40,3 @@ class XPLORConverter(DCDConverter):
     type = 'xplor'
     
     label = "XPLOR"
-
-    category = ('Converters',)
-    
-    ancestor = []

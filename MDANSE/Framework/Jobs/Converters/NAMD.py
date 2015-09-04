@@ -40,7 +40,3 @@ class NAMDConverter(DCDConverter):
     type = 'namd'
     
     label = "NAMD"
-
-    category = ('Converters',)
-    
-    ancestor = []

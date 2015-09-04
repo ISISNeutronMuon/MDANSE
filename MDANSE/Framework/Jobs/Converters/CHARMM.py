@@ -40,7 +40,3 @@ class CHARMMConverter(DCDConverter):
     type = 'charmm'
     
     label = "CHARMM"
-
-    category = ('Converters',)
-    
-    ancestor = []

@@ -165,10 +165,6 @@ class GenericConverter(Converter):
     
     label = "Generic"
 
-    category = ('Converters',)
-    
-    ancestor = []
-
     settings = collections.OrderedDict()   
     settings['gt_file'] = ('input_file',{'wildcard':"Generic trajectory files|*.gtf|All files|*",
                                          'default':os.path.join('..','..','..','Data','Trajectories','Generic','test.gtf')})

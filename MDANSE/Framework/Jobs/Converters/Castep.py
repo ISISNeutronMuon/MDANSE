@@ -140,11 +140,7 @@ class CASTEPConverter(Converter):
     type = 'castep'
     
     label = "CASTEP"
-
-    category = ('Converters',)
-    
-    ancestor = []
-
+        
     settings = collections.OrderedDict()
     settings['castep_file'] = ('input_file', {'default':os.path.join('..','..','..','Data','Trajectories','CASTEP','PBAnew.md')})
     settings['output_file'] = ('output_files', {'formats':["netcdf"]})

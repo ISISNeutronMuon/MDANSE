@@ -124,10 +124,6 @@ class LAMMPSConverter(Converter):
     
     label = "LAMMPS"
 
-    category = ('Converters',)
-    
-    ancestor = []
-
     settings = collections.OrderedDict()        
     settings['config_file'] = ('input_file', {'label':"LAMMPS configuration file",
                                               'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.config')})
