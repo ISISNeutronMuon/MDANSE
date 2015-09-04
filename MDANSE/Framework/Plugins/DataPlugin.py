@@ -99,14 +99,15 @@ class DataPlugin(IPlugin):
     def drop(self, pluginName):
                                         
         # If no plugin match the name of the dropped plugin, do nothing.
-        plugin = REGISTRY["plugin"].get(pluginName,None)        
+        plugin = REGISTRY["plugin"].get(pluginName,None)
+        
         if plugin is None:
             return
         
         klasses = tuple([REGISTRY['plugin'][anc] for anc in plugin.ancestor])
         if not issubclass(self.__class__,klasses):
             return
-                                                    
+                                                            
         plugin = plugin(self)
         
         self._mgr.AddPane(plugin, wxaui.AuiPaneInfo().Caption(getattr(plugin, "label", pluginName)))
