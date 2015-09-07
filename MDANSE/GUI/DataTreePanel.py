@@ -57,24 +57,24 @@ class DataTreePanel(wx.Panel):
         self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_drag_data)
         self.Bind(wx.EVT_TREE_KEY_DOWN, self.on_delete_data, self._tree)
 
-        pub.subscribe(self.msg_load_input_data, ('msg_load_input_data'))       
-        pub.subscribe(self.msg_delete_input_data, ('msg_delete_input_data'))       
+        pub.subscribe(self.msg_load_input_data, 'msg_load_input_data')       
+        pub.subscribe(self.msg_delete_input_data, 'msg_delete_input_data')       
         
     @property
     def tree(self):
         return self._tree
     
-    def msg_load_input_data(self, message):
+    def msg_load_input_data(self, data):
         
-        if message is None:
+        if data is None:
             return
         
-        self.add_data(message)
+        self.add_data(data)
 
-    def msg_delete_input_data(self, message):
+    def msg_delete_input_data(self, data):
 
         
-        item = self.get_tree_item(self._root, message)
+        item = self.get_tree_item(self._root,data)
         
         if item is None:
             return

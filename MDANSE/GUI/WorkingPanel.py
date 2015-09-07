@@ -121,7 +121,7 @@ class WorkingPanel(wx.Panel):
         
         dataPlugin = self._notebook.GetPage(self._notebook.GetSelection())
                
-        pub.sendMessage('msg_set_plugins_tree', message=dataPlugin)
+        pub.sendMessage('msg_set_plugins_tree', plugin=dataPlugin)
         
     def on_close_page(self, event):
 
@@ -130,5 +130,5 @@ class WorkingPanel(wx.Panel):
         dataPlugin.close_children()
         
         if self._notebook.GetPageCount() == 1:
-            pub.sendMessage('msg_set_plugins_tree', message=None)
+            pub.sendMessage('msg_set_plugins_tree', plugin=None)
         

@@ -102,9 +102,9 @@ class AnimationPlugin(ComponentPlugin):
         self.Bind(wx.EVT_BUTTON, self.on_goto_first_frame, firstButton)
         self.Bind(wx.EVT_BUTTON, self.on_goto_last_frame, lastButton)
                 
-#         pub.subscribe(self.on_update_animation_icon, ('msg_animate_trajectory'))       
-#         pub.subscribe(self.on_set_up_frame_slider, ('msg_load_trajectory'))       
-        pub.subscribe(self.on_timer, ('msg_timer'))       
+        pub.subscribe(self.msg_update_animation_icon, 'msg_animate_trajectory')
+        pub.subscribe(self.msg_set_trajectory, 'msg_set_trajectory')
+        pub.subscribe(self.msg_timer, 'msg_timer')
                 
     def plug(self):
         self._parent._mgr.GetPane(self).LeftDockable(False).RightDockable(False).Dock().Bottom().CloseButton(True)
@@ -149,7 +149,7 @@ class AnimationPlugin(ComponentPlugin):
         self.speedSlider.SetValue(int(self.speedEntry.GetValue()))        
         self._parent.change_frame_rate()
                 
-    def on_timer(self, plugin):
+    def msg_timer(self, plugin):
         
         if not plugin.is_parent(self):
             return
@@ -171,24 +171,19 @@ class AnimationPlugin(ComponentPlugin):
         
         self._parent.start_stop_animation()
 
-        if self._parent.animation_loop:
+    def msg_update_animation_icon(self, plugin):
+ 
+        if not plugin.is_parent(self):
+            return
+                 
+        if plugin.animation_loop:
             self.startStop.SetBitmapLabel(ICONS["pause",32,32])
         else:
             self.startStop.SetBitmapLabel(ICONS["play",32,32])
 
-#     def on_update_animation_icon(self, plugin):
-# 
-#         if not plugin.is_parent(self):
-#             return
-#                 
-#         if plugin.animation_loop:
-#             self.startStop.SetBitmapLabel(ICONS["pause",32,32])
-#         else:
-#             self.startStop.SetBitmapLabel(ICONS["play",32,32])
-
-#     def on_set_up_frame_slider(self, plugin):
-#         
-#         if not plugin.is_parent(self):
-#             return
-# 
-#         self.frameSlider.SetRange(0,self._parent.n_frames-1)    
+    def msg_set_trajectory(self, plugin):
+         
+        if not plugin.is_parent(self):
+            return
+ 
+        self.frameSlider.SetRange(0,self._parent.n_frames-1)    

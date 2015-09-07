@@ -166,7 +166,7 @@ class AtomSelectionPlugin(UDPlugin):
                                         
         self._selection = []
 
-        pub.subscribe(self.on_select_atoms_from_viewer, ('msg_select_atoms_from_viewer'))
+        pub.subscribe(self.msg_select_atoms_from_viewer, 'msg_select_atoms_from_viewer')
 
         UDPlugin.__init__(self,parent,size=(800,500))
         
@@ -308,7 +308,11 @@ class AtomSelectionPlugin(UDPlugin):
         self.selectionTextCtrl.SetValue(self._query.get_expression())
         
         self.display_selection_summary()
-
+        
+    def close(self):
+        
+        pub.sendMessage('msg_clear_selection',plugin=self)                                
+        
     def on_add_operator(self, event=None):
 
         operator = event.GetEventObject().GetLabel()
@@ -336,7 +340,7 @@ class AtomSelectionPlugin(UDPlugin):
         
         self._selectionSummary.Clear()
 
-        pub.sendMessage('msg_clear_selection',message=self)                                
+        pub.sendMessage('msg_clear_selection',plugin=self)                                
                 
     def on_display_keyword_values(self, event=None):
         
@@ -372,7 +376,7 @@ class AtomSelectionPlugin(UDPlugin):
         self.keywords.DeselectAll()
         self.values.DeselectAll()
 
-    def on_select_atoms_from_viewer(self, message):
+    def msg_select_atoms_from_viewer(self, message):
 
         dataPlugin,selection = message
         
@@ -387,8 +391,13 @@ class AtomSelectionPlugin(UDPlugin):
 
         _, self._selection = self._query.parse()
                 
-        pub.sendMessage("msg_set_selection", message = (self,self._selection))
+        pub.sendMessage("msg_set_selection", plugin=self)
+    
+    @property
+    def selection(self):
         
+        return self._selection
+    
     def validate(self):
 
         if not self._selection:

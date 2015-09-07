@@ -167,7 +167,7 @@ class MolecularViewerPanel(ComponentPlugin):
         
         self.enable_picking(True)
         
-        pub.subscribe(self.on_set_selection, ('msg_set_selection'))       
+        pub.subscribe(self.msg_set_selection, 'msg_set_selection')       
    
     def build_panel(self):
                 
@@ -200,7 +200,8 @@ class MolecularViewerPanel(ComponentPlugin):
         
         self._iren.Bind(wx.EVT_CONTEXT_MENU, self.on_show_popup_menu)
 
-        pub.subscribe(self.switch_other_viewers_state, "switch_other_viewers_state")
+        pub.subscribe(self.msg_switch_viewers_state, "msg_switch_viewers_state")
+        pub.subscribe(self.msg_clear_selection,'msg_clear_selection')                                
                 
         self._mgr.AddPane(self._iren, aui.AuiPaneInfo().Dock().Center().CaptionVisible(False).CloseButton(False))
                 
@@ -228,14 +229,12 @@ class MolecularViewerPanel(ComponentPlugin):
         del self._surface
         self._surface = None
 
-    def on_set_selection(self,message):
+    def msg_set_selection(self,plugin):
         
-        window,selection = message
-        
-        if self.dataplugin != get_data_plugin(window):
+        if not self.is_parent(plugin):
             return
-        
-        self.show_selection(selection)
+                
+        self.show_selection(plugin.selection)
         
     def on_show_selection_box(self,message):
 
@@ -273,7 +272,8 @@ class MolecularViewerPanel(ComponentPlugin):
                 
         self.clear_universe()
 
-        pub.unsubscribe(self.switch_other_viewers_state, "switch_other_viewers_state")
+        pub.unsubscribe(self.msg_switch_viewers_state, "msg_switch_viewers_state")
+        pub.unsubscribe(self.msg_clear_selection,'msg_clear_selection')                                
                 
     def set_trajectory(self, trajectory, selection=None, frame=0):
         
@@ -331,7 +331,7 @@ class MolecularViewerPanel(ComponentPlugin):
         
         self._trajectoryLoaded = True
 
-#         pub.sendMessage('msg_load_trajectory', plugin=self)
+        pub.sendMessage('msg_set_trajectory', plugin=self)
 
     def color_string_to_RGB(self, s):
         
@@ -674,7 +674,7 @@ class MolecularViewerPanel(ComponentPlugin):
 
         self.show_selection(atomsList)
         
-    def on_clear_selection(self,event):
+    def on_clear_selection(self,event=None):
         
         if not self._trajectoryLoaded:
             return
@@ -735,11 +735,11 @@ class MolecularViewerPanel(ComponentPlugin):
             self.stop_animation()
             
         if check:
-            pub.sendMessage("switch_other_viewers_state", viewer=self) 
+            pub.sendMessage("msg_switch_viewers_state", viewer=self) 
             
         pub.sendMessage('msg_animate_trajectory', plugin=self)
     
-    def switch_other_viewers_state(self, viewer):
+    def msg_switch_viewers_state(self, viewer):
                  
         if not self._animationLoop:
             return
@@ -953,6 +953,13 @@ class MolecularViewerPanel(ComponentPlugin):
                 
         return assembly
     
+    def msg_clear_selection(self,plugin):
+
+        if not self.is_parent(plugin):
+            return
+        
+        self.on_clear_selection()
+            
     def clear_universe(self):
 
         if not hasattr(self, "_actors"):

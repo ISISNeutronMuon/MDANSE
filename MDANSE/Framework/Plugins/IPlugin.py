@@ -131,9 +131,6 @@ class IPlugin(wx.Panel):
         if window == self:
             return True
     
-        if window.TopLevelParent == window:
-            return False
-    
         return self.is_parent(window.Parent)    
         
     def close(self):
@@ -151,7 +148,7 @@ class IPlugin(wx.Panel):
             
         self.SetFocus()
         
-        pub.sendMessage(('msg_set_plugins_tree'), message=self)
+        pub.sendMessage('msg_set_plugins_tree', plugin=self)
                                             
     def build_dialog(self):
 

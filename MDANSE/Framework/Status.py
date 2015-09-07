@@ -41,11 +41,6 @@ class Status(object):
         self._elapsedTime = "N/A"
         self._lastRefresh = self._startTime
 
-#         Publisher.subscribe(self.finish_status, "msg_status_finish")
-#         Publisher.subscribe(self.start_status, "msg_status_start")
-#         Publisher.subscribe(self.stop_status, "msg_status_stop")
-#         Publisher.subscribe(self.update_status, "msg_status_update")
-
     @abc.abstractmethod
     def finish_status(self):
         pass
@@ -82,9 +77,7 @@ class Status(object):
         self._finished = True
         
         self.finish_status()
-                    
-#         Publisher.sendMessage("msg_status_finish",message=self)
-            
+                                
     def get_current_step(self):
         
         return self._currentStep
@@ -126,14 +119,11 @@ class Status(object):
             
         self.start_status()
                   
-#         Publisher.sendMessage("msg_status_start",message=self)
-                
     def stop(self):
         
         self._eta = "N/A"
         self._stopped = True
         self.stop_status()
-#         Publisher.sendMessage("msg_status_stop",message=self)        
                 
     def update(self,force=False):
         
@@ -160,4 +150,3 @@ class Status(object):
             duration = convert_duration(total_seconds(duration))            
             self._eta = '%02dd:%02dh:%02dm:%02ds' % duration
             self.update_status()
-#             Publisher.sendMessage("msg_status_update",message=self)

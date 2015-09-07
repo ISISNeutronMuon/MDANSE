@@ -39,7 +39,6 @@ from matplotlib.backends.backend_wxagg import NavigationToolbar2WxAgg as Navigat
 import wx
 
 from MDANSE import REGISTRY
-from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Widgets.IWidget import IWidget
 from MDANSE.GUI import DATA_CONTROLLER
 from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
@@ -199,8 +198,6 @@ class InstrumentResolutionConfigurator(IWidget):
         sizer.Add(self._setResolution, 0, wx.ALL|wx.EXPAND, 5)
         
         self.Bind(wx.EVT_BUTTON, self.on_set_instrument_resolution, self._setResolution)
-
-        pub.subscribe(self.set_data, ("msg_set_netcdf"))
 
         return sizer
         

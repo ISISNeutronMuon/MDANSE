@@ -53,11 +53,11 @@ class McStasParametersWidget(IWidget):
          
         self._sizer = wx.BoxSizer(wx.VERTICAL)
  
-        pub.subscribe(self.set_layout, ("msg_set_instrument"))
+        pub.subscribe(self.msg_set_instrument, "msg_set_instrument")
          
         return self._sizer
   
-    def set_layout(self, message):
+    def msg_set_instrument(self, message):
 
         widget, parameters = message
         

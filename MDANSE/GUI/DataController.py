@@ -34,7 +34,7 @@ import collections
 import weakref
 
 from MDANSE.Core.Singleton import Singleton
-from MDANSE.Externals.pubsub import pub as Publisher
+from MDANSE.Externals.pubsub import pub
 
 class DataController(collections.OrderedDict):
     
@@ -49,7 +49,7 @@ class DataController(collections.OrderedDict):
             return
         else:
             collections.OrderedDict.__delitem__(self,item)
-            Publisher.sendMessage("msg_delete_input_data", message = item)
+            pub.sendMessage("msg_delete_input_data", data=item)
     
     def __getitem__(self, key):
         
@@ -64,7 +64,7 @@ class DataController(collections.OrderedDict):
         
         collections.OrderedDict.__setitem__(self, item,value)
         
-        Publisher.sendMessage("msg_load_input_data", message = value)
+        pub.sendMessage("msg_load_input_data", data=value)
                     
     def has_proxy(self, item):
         '''

@@ -129,4 +129,4 @@ class DataPlugin(IPlugin):
         
         self._currentWindow = window
                                     
-        pub.sendMessage(('msg_set_plugins_tree'), message=window)
+        pub.sendMessage('msg_set_plugins_tree', plugin=window)

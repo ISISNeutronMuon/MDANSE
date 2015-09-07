@@ -59,7 +59,7 @@ class IWidget(wx.Panel):
                         
         self.build_panel()
         
-        pub.subscribe(self._set_data, ('msg_set_data'))
+        pub.subscribe(self._set_data, 'msg_set_data')
                         
     @property
     def label(self):

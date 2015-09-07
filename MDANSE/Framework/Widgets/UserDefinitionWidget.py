@@ -214,7 +214,7 @@ class UserDefinitionWidget(IWidget):
         sizer.Add(self._availableUDs, 1, wx.ALL|wx.EXPAND, 5)
         sizer.Add(self._newUD, 0, wx.ALL|wx.EXPAND, 5)
 
-        pub.subscribe(self.on_save_definition, ("msg_save_definition",))
+        pub.subscribe(self.msg_save_definition, "msg_save_definition")
 
         self.Bind(wx.EVT_BUTTON, self.on_new_user_definition, self._newUD)
 
@@ -242,7 +242,7 @@ class UserDefinitionWidget(IWidget):
         
         self._availableUDs.SetItems(uds)
 
-    def on_save_definition(self, message):
+    def msg_save_definition(self, message):
          
         filename, section, name = message
          
