@@ -63,10 +63,15 @@ class AtomTransmutationPlugin(AtomSelectionPlugin):
 
         element = self._elements.GetStringSelection()
         
-        self._ud['element'] = element
-        self._ud['indexes'] = self._selection
+        if not element:
+            LOGGER("No target element selected to be transmutated to", "error", ["dialog"])
+            return None
         
-        return self._ud
+        ud = {}
+        ud['element'] = element
+        ud['indexes'] = self._selection
+        
+        return ud
         
 class AtomTransmutationWidget(UserDefinitionWidget):
          

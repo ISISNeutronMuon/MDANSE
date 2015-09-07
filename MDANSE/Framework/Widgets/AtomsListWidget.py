@@ -270,10 +270,8 @@ class AtomsListPlugin(UDPlugin):
         if not self._selection:
             LOGGER("The current selection is empty", "error", ["dialog"])
             return None
-        
-        self._ud['indexes'] = self._selection
-                        
-        return self._ud
+                                
+        return {'indexes' : self._selection}
 
 class AtomListWidget(UserDefinitionWidget):
     

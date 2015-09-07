@@ -193,10 +193,6 @@ class QVectorsPlugin(UDPlugin):
                  
         self._mainPanel.SetSizer(sizer)
 
-#         self._mainSizer = wx.BoxSizer(wx.VERTICAL)                                                                              
-#         self._mainSizer.Add(self._mainPanel, 1, wx.ALL|wx.EXPAND, 5)
-#         self.SetSizer(self._mainSizer)            
-
         self._mgr.AddPane(self._mainPanel, wxaui.AuiPaneInfo().DestroyOnClose().Center().Dock().CaptionVisible(False).CloseButton(False).BestSize(self.GetSize()))
         self._mgr.Update()
                                  
@@ -226,23 +222,6 @@ class QVectorsPlugin(UDPlugin):
         self._availableGenerators.SetSelection(0)
 
         self.select_generator(self._availableGenerators.GetStringSelection())
-
-    def set_user_definition(self):
-
-        if self._notebook.GetPageCount() == 0:
-            LOGGER("No Q vectors generated.", "error")
-            return
-
-        qPanel = self._notebook.GetPage(self._notebook.GetSelection())
-
-        if qPanel._grid.GetTable().data is None:
-            LOGGER("No data is the selected Q vectors tab", "error")
-            return
-        
-        self._ud['parameters'] = (qPanel.generator.type,qPanel.parameters)
-        self._ud['generator'] = qPanel.generator.type
-        self._ud['q_vectors'] = qPanel.grid.GetTable().data
-        self._ud['is_lattice'] = qPanel.generator.is_lattice
                 
     def on_close(self, event):
         
@@ -281,7 +260,7 @@ class QVectorsPlugin(UDPlugin):
         parameters = self._configurationPanel.get_value()
         generator.setup(parameters)
         
-        qPanel = QVectorsPanel(generator,parameters,self._panel,wx.ID_ANY)
+        qPanel = QVectorsPanel(generator,parameters,self._mainPanel,wx.ID_ANY)
         self._notebook.AddPage(qPanel, "Q Vectors")
         
         generator.setStatus(qPanel.progress)
@@ -294,13 +273,27 @@ class QVectorsPlugin(UDPlugin):
             
     def validate(self):
 
-        self.set_user_definition()
+        if self._notebook.GetPageCount() == 0:
+            LOGGER("No Q vectors generated.", "error")
+            return
+
+        qPanel = self._notebook.GetPage(self._notebook.GetSelection())
+
+        if qPanel._grid.GetTable().data is None:
+            LOGGER("No data is the selected Q vectors tab", "error")
+            return
         
-        if not self._ud['q_vectors']:
+        ud = {}
+        ud['parameters'] = (qPanel.generator.type,qPanel.parameters)
+        ud['generator'] = qPanel.generator.type
+        ud['q_vectors'] = qPanel.grid.GetTable().data
+        ud['is_lattice'] = qPanel.generator.is_lattice
+        
+        if not ud['q_vectors']:
             LOGGER("No Q vectors generated.", "error", ["dialog"])
             return None
         
-        return self._ud
+        return ud
                 
     def select_generator(self, generatorName):
                          
