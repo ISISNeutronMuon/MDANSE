@@ -47,9 +47,9 @@ class PositionAutoCorrelationFunction(IJob):
     
     label = "Position AutoCorrelation Function"
 
-    category = ('Dynamics',)
+    category = ('Analysis','Dynamics',)
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["mmtk_trajectory","molecular_viewer"]
     
     settings = collections.OrderedDict()      
     settings['trajectory'] = ('mmtk_trajectory',{})

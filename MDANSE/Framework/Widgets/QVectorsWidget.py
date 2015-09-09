@@ -38,7 +38,7 @@ import wx.grid as wxgrid
 from wx.lib.delayedresult import startWorker
 
 from MDANSE import LOGGER, REGISTRY
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UDDialog,UDPlugin,UserDefinitionWidget
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionsDialog, UserDefinitionsPlugin, UserDefinitionWidget
 from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.GUI.ComboWidgets.ProgressBar import ProgressBar
 
@@ -151,7 +151,7 @@ class QVectorsPanel(wx.Panel):
         
         return self._progress
                             
-class QVectorsPlugin(UDPlugin):
+class QVectorsPlugin(UserDefinitionsPlugin):
     
     type = 'q_vectors'
 
@@ -165,7 +165,7 @@ class QVectorsPlugin(UDPlugin):
 
         self._value = None
                         
-        UDPlugin.__init__(self, parent,size=(800,700))
+        UserDefinitionsPlugin.__init__(self, parent,size=(800,700))
                                                                           
     def build_panel(self):   
 
@@ -328,7 +328,7 @@ if __name__ == "__main__":
     
     app = wx.App(False)
     
-    p = UDDialog(None,t,'q_vectors')
+    p = UserDefinitionsDialog(None,t,'q_vectors')
         
     p.SetSize((800,800))
             

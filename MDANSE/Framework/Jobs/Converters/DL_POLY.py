@@ -287,7 +287,7 @@ class DL_POLYConverter(Converter):
 
     type = 'dl_poly'
     
-    label = "DL_POLY"
+    label = "DL-POLY"
 
     settings = collections.OrderedDict()   
     settings['field_file'] = ('input_file',{'wildcard':"FIELD files|FIELD*|All files|*",

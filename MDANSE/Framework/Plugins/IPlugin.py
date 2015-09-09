@@ -114,22 +114,13 @@ class IPlugin(wx.Panel):
     def parent(self):
         return self._parent
     
-    def close_children(self):
-
-        childrenPlugins = [p.window for p in self._mgr.GetAllPanes()]
-        
-        for plugin in childrenPlugins:
-            try:
-                plugin.close_children()
-            except AttributeError:
-                continue
-            
-        self.close()
-
     def is_parent(self,window):
             
         if window == self:
             return True
+
+        if window is None:
+            return False
     
         return self.is_parent(window.Parent)    
         
@@ -138,13 +129,19 @@ class IPlugin(wx.Panel):
         pass
         
     def on_close_pane(self, event):
+
+        d = wx.MessageDialog(None, 'Closing this plugin will also close all the other ones you plugged in in so far. Do you really want to close ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
+        if d.ShowModal() == wx.ID_NO:
+            return
         
-        plugin = event.GetPane().window
+        window = event.GetPane().window
+
+#         if isinstance(window,IPlugin):        
+#             window.close_children()
         
-        try:
-            plugin.close_children()
-        except AttributeError:
-            plugin.Close()
+        self._mgr.DetachPane(window)
+        window.Destroy()
+        self._mgr.Update()
             
         self.SetFocus()
         
@@ -168,10 +165,15 @@ class IPlugin(wx.Panel):
         plugin = REGISTRY["plugin"].get(pluginName,None)  
         if plugin is None:
             return
-        
-        klasses = tuple([REGISTRY['plugin'][anc] for anc in plugin.ancestor])        
-        if not issubclass(self.__class__,klasses):
-            self.parent.drop(pluginName)
+                
+        # Get the list of ancestors of the plugin that will host the plugin to be dropped in.
+        ancestors = IPlugin.get_ancestors(plugin)
+#         klasses = tuple([REGISTRY['plugin'][anc] for anc in plugin.ancestor])        
+#         if not issubclass(self.__class__,klasses):
+#             self.parent.drop(pluginName)
+#             return
+
+        if not plugin.ancestor[0] in ancestors:
             return
                                                
         plugin = plugin(self)
@@ -183,3 +185,15 @@ class IPlugin(wx.Panel):
         plugin.plug()
         
         plugin.SetFocus()
+        
+    @staticmethod
+    def get_ancestors(plugin):
+        
+        if plugin.ancestor == ['empty_data']:
+            return [plugin.type]
+        
+        parentPlugin = REGISTRY['plugin'][plugin.ancestor[0]]
+        
+        return [plugin.type] + IPlugin.get_ancestors(parentPlugin)
+                
+        

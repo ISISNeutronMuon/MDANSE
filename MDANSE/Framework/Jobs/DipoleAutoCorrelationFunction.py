@@ -45,9 +45,9 @@ class DipoleAutoCorrelationFunction(IJob):
 
     label = "Dipole AutoCorrelation Function"
     
-    category = ('Infrared',)
+    category = ('Analysis','Infrared',)
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["mmtk_trajectory","molecular_viewer"]
     
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})

@@ -43,157 +43,6 @@ from MDANSE.Framework.UserDefinitionsStore import UD_STORE
 from MDANSE.Framework.Widgets.IWidget import IWidget
 from MDANSE.GUI import DATA_CONTROLLER
 
-class UserDefinitionsPanel(wx.Panel):
-    
-    def __init__(self,udType,*args,**kwargs):
-
-        wx.Panel.__init__(self,*args,**kwargs)
-
-        self._udType = udType
-                
-        sb = wx.StaticBox(self, wx.ID_ANY)
-        actionsSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
-                        
-        cancelButton  = wx.Button(self, wx.ID_ANY, label="Cancel")
-        self._udName = wx.TextCtrl(self, wx.ID_ANY, style = wx.TE_PROCESS_ENTER)
-        saveButton  = wx.Button(self, wx.ID_ANY, label="Save")
-        
-        actionsSizer.Add(cancelButton, 0, wx.ALL, 5)
-        actionsSizer.Add(self._udName, 1, wx.ALL|wx.EXPAND, 5)
-        actionsSizer.Add(saveButton, 0, wx.ALL, 5)
-        
-        self.SetSizer(actionsSizer)
-                
-        self._validator = None
-                 
-        self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.Bind(wx.EVT_BUTTON, self.on_close, cancelButton)
-        self.Bind(wx.EVT_BUTTON, self.on_save, saveButton)
-
-    def set_validator(self,validator):
-        
-        self._validator = validator
-
-    def validate(self):
-        
-        if self._validator is not None:
-            return self._validator()
-        else:
-            return None
-        
-    def getUserDefinitionName(self):
-        
-        return str(self._udName.GetValue())
-
-    def on_save(self, event):
-
-        name = str(self._udName.GetValue().strip())
-        
-        if not name:
-            LOGGER('Empty user definition name.','error',['dialog'])
-            return
-
-        value = self.validate()        
-        if value is None:
-            return 
-                
-        if UD_STORE.has_definition(self._target,self.type,name):
-            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,self.type,name),'error',['dialog'])
-            self.EndModal(wx.ID_CANCEL)
-            return
-                  
-        UD_STORE.set_definition(self._target,self.type,name,value)
-        UD_STORE.save()
-                 
-        pub.sendMessage("msg_save_definition", message = (self._target, self.type, name))
-                         
-        self.EndModal(wx.ID_OK)
-                
-    def on_close(self, event):
-        
-        self.EndModal(wx.ID_CANCEL)
-
-class UserDefinitionsDialog(wx.Dialog):
-    
-    __metaclass__ = abc.ABCMeta
-
-    def __init__(self, parent, target, *args, **kwargs):
-        
-        wx.Dialog.__init__(self, parent, *args, **kwargs)
-
-        self._parent = parent
-        
-        self._target = target
-        
-        self._mainSizer = wx.BoxSizer(wx.VERTICAL)
-        
-        self._ud = {}
-                                                                
-        self.build_dialog()
-
-        udPanel = wx.Panel(self,wx.ID_ANY)
-                
-        sb = wx.StaticBox(udPanel, wx.ID_ANY)
-        actionsSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
-                        
-        cancelButton  = wx.Button(udPanel, wx.ID_ANY, label="Cancel")
-        self._udName = wx.TextCtrl(udPanel, wx.ID_ANY, style = wx.TE_PROCESS_ENTER)
-        saveButton  = wx.Button(udPanel, wx.ID_ANY, label="Save")
-        
-        actionsSizer.Add(cancelButton, 0, wx.ALL, 5)
-        actionsSizer.Add(self._udName, 1, wx.ALL|wx.EXPAND, 5)
-        actionsSizer.Add(saveButton, 0, wx.ALL, 5)
-        
-        udPanel.SetSizer(actionsSizer)
-                 
-        self._mainSizer.Add(udPanel,0,wx.EXPAND|wx.ALL,5)
-        
-        self.SetSizer(self._mainSizer)            
-
-        self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.Bind(wx.EVT_BUTTON, self.on_close, cancelButton)
-        self.Bind(wx.EVT_BUTTON, self.on_save, saveButton)
-
-    @abc.abstractmethod
-    def build_dialog(self):
-        pass
-        
-    @abc.abstractmethod
-    def validate(self):
-        pass
-
-    def getUserDefinitionName(self):
-        
-        return str(self._udName.GetValue())
-
-    def on_save(self, event):
-
-        name = str(self._udName.GetValue().strip())
-        
-        if not name:
-            LOGGER('Empty user definition name.','error',['dialog'])
-            return
-
-        value = self.validate()        
-        if value is None:
-            return 
-                
-        if UD_STORE.has_definition(self._target,self.type,name):
-            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,self.type,name),'error',['dialog'])
-            self.EndModal(wx.ID_CANCEL)
-            return
-                  
-        UD_STORE.set_definition(self._target,self.type,name,value)
-        UD_STORE.save()
-                 
-        pub.sendMessage("msg_save_definition", message = (self._target, self.type, name))
-                         
-        self.EndModal(wx.ID_OK)
-                
-    def on_close(self, event):
-        
-        self.EndModal(wx.ID_CANCEL)
-
 class UserDefinitionWidget(IWidget):
     
     __metaclass__ = abc.ABCMeta
@@ -222,7 +71,7 @@ class UserDefinitionWidget(IWidget):
     
     def on_new_user_definition(self,event):
         
-        dlg = UDDialog(self,self._trajectory,self.type)
+        dlg = UserDefinitionsDialog(self,self._trajectory,self.type)
         
         dlg.ShowModal()
         
@@ -254,7 +103,7 @@ class UserDefinitionWidget(IWidget):
         
         self._availableUDs.Append(name)
 
-class UDDialog(wx.Dialog):
+class UserDefinitionsDialog(wx.Dialog):
     
     def __init__(self,parent,trajectory,udType,*args,**kwargs):
 
@@ -285,7 +134,9 @@ class UDDialog(wx.Dialog):
         
         return self._plugin
 
-class UDPlugin(ComponentPlugin):
+class UserDefinitionsPlugin(ComponentPlugin):
+    
+    category = ('User definition',)
     
     def __init__(self,parent,*args,**kwargs):
         
@@ -317,7 +168,7 @@ class UDPlugin(ComponentPlugin):
         name = str(self._udName.GetValue().strip())
         
         if not name:
-            LOGGER('Empty user definition name.','error',['dialog'])
+            LOGGER('Empty user definition name.','error',['console'])
             return
 
         value = self.validate()        
@@ -325,11 +176,12 @@ class UDPlugin(ComponentPlugin):
             return 
                 
         if UD_STORE.has_definition(self._target,self.type,name):
-            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,self.type,name),'error',['dialog'])
-            self.EndModal(wx.ID_CANCEL)
+            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,self.type,name),'error',['console'])
             return
                   
         UD_STORE.set_definition(self._target,self.type,name,value)
         UD_STORE.save()
                  
         pub.sendMessage("msg_save_definition", message=(self._target,self.type,name))
+
+        LOGGER('User definition %r successfully saved.' % name,'info',['console'])

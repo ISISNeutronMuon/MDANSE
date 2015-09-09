@@ -42,6 +42,7 @@ import wx.aui as aui
 from MDANSE import PLATFORM,REGISTRY
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Plugins.ComponentPlugin import ComponentPlugin
+from MDANSE.Framework.InputData.EmptyData import EmptyData
 from MDANSE.GUI import DATA_CONTROLLER
 from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.GUI.ComboWidgets.JobHelpFrame import JobHelpFrame
@@ -175,7 +176,8 @@ class JobFrame(wx.Frame):
 
         self.datakey = data.name
                           
-        DATA_CONTROLLER[data.name] = data
+        if not isinstance(data,EmptyData):
+            DATA_CONTROLLER[data.name] = data
                         
         plugin = REGISTRY['plugin'][self._jobType](self)
         
@@ -194,6 +196,6 @@ if __name__ == "__main__":
     filename = os.path.join(os.path.dirname(PLATFORM.package_directory()),'Data','Trajectories','MMTK','protein_in_periodic_universe.nc')
     
     app = wx.App(False)
-    f = JobFrame(None,'msd',filename)
+    f = JobFrame(None,'dl_poly')
     f.Show()
     app.MainLoop()            

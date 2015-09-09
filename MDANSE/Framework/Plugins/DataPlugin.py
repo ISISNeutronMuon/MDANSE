@@ -31,9 +31,7 @@ Created on Mar 30, 2015
 '''
 
 import wx
-import wx.aui as wxaui
 
-from MDANSE import REGISTRY
 from MDANSE.Externals.pubsub import pub
 
 from MDANSE.GUI import DATA_CONTROLLER
@@ -53,7 +51,7 @@ def get_data_plugin(window):
                     
 class DataPlugin(IPlugin):
     
-    type = 'data'
+    type = None
         
     ancestor = []
     
@@ -95,31 +93,7 @@ class DataPlugin(IPlugin):
     @property
     def dataplugin(self):
         return self
-    
-    def drop(self, pluginName):
-                                        
-        # If no plugin match the name of the dropped plugin, do nothing.
-        plugin = REGISTRY["plugin"].get(pluginName,None)
         
-        if plugin is None:
-            return
-        
-        klasses = tuple([REGISTRY['plugin'][anc] for anc in plugin.ancestor])
-        if not issubclass(self.__class__,klasses):
-            return
-                                                            
-        plugin = plugin(self)
-        
-        self._mgr.AddPane(plugin, wxaui.AuiPaneInfo().Caption(getattr(plugin, "label", pluginName)))
-
-        self._mgr.Update()
-        
-        plugin.plug()
-        
-        plugin.SetFocus()
-        
-        self._currentWindow = plugin
-    
     def on_changing_pane(self, event):
         
         window = plugin_parent(event.GetWindow())
@@ -128,5 +102,5 @@ class DataPlugin(IPlugin):
             return
         
         self._currentWindow = window
-                                    
+
         pub.sendMessage('msg_set_plugins_tree', plugin=window)

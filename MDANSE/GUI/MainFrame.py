@@ -333,11 +333,11 @@ or directly to the MDANSE mailing list:
     def on_open_converter(self,event):
 
         item = self.GetMenuBar().FindItemById(event.GetId())
-        convLabel = item.GetText()
-        
+        converter = item.GetText()
+                
         from MDANSE.Framework.Plugins.JobPlugin import JobFrame
         
-        f = JobFrame(self,self._converters[convLabel],"Trajectory converter")
+        f = JobFrame(self,self._converters[converter],"Trajectory converter")
         f.Show()
 
     def on_open_mdanse_elements_database(self, event):

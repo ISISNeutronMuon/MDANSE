@@ -87,7 +87,7 @@ class WorkingPanel(wx.Panel):
     def drop(self, filename):
                 
         data = DATA_CONTROLLER.get(filename, None)
-        
+                
         if data is None:
             return
                                         
@@ -124,6 +124,10 @@ class WorkingPanel(wx.Panel):
         pub.sendMessage('msg_set_plugins_tree', plugin=dataPlugin)
         
     def on_close_page(self, event):
+
+        d = wx.MessageDialog(None, 'Closing this data will also close all the other plugins you plugged in in so far. Do you really want to close ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
+        if d.ShowModal() == wx.ID_NO:
+            return
 
         dataPlugin = self._notebook.GetPage(event.GetSelection())
         

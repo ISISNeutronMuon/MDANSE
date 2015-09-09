@@ -64,9 +64,9 @@ class UnfoldedTrajectory(IJob):
     
     label = "Unfolded Trajectory"
 
-    category = ('Trajectory',)
+    category = ('Analysis','Trajectory',)
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["mmtk_trajectory","molecular_viewer"]
         
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})

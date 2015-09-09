@@ -50,9 +50,9 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
     
     label = "Gaussian Dynamic Incoherent Structure Factor"
 
-    category = ('Scattering',)
+    category = ('Analysis','Scattering',)
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["mmtk_trajectory","molecular_viewer"]
     
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})

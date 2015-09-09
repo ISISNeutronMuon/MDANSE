@@ -66,9 +66,9 @@ class StaticStructureFactor(DistanceHistogram):
 
     label = "XRay Static Structure Factor"
     
-    category = ('Structure',)
+    category = ('Analysis','Structure',)
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["mmtk_trajectory","molecular_viewer"]
     
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})

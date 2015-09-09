@@ -54,9 +54,9 @@ class AreaPerMolecule(IJob):
 
     label = "Area Per Molecule"
     
-    category = ('Structure',)
+    category = ('Analysis','Structure',)
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{'default':os.path.join('..','..','..','Data','Trajectories','MMTK','dmpc_in_periodic_universe.nc')})

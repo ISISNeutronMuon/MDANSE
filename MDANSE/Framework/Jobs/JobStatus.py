@@ -32,12 +32,7 @@ class JobStatus(Status):
         
         self.save_status()
                     
-    def finish_status(self,message):
-
-        status = message
-
-        if status != self:
-            return
+    def finish_status(self):
 
         self.cleanup()
                     
@@ -47,9 +42,7 @@ class JobStatus(Status):
         return self._state    
 
     def cleanup(self):
-        
-        return
-                
+                        
         try:
             os.unlink(self._state['temporary_file'])
         except:

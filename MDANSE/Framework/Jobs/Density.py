@@ -45,9 +45,9 @@ class Density(IJob):
     
     label = "Density"
 
-    category = ('Thermodynamics',)
+    category = ('Analysis','Thermodynamics',)
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})

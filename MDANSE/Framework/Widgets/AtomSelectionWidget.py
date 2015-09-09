@@ -41,7 +41,7 @@ from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser, AtomSelectionParserError
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UDDialog, UDPlugin, UserDefinitionWidget
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionsDialog, UserDefinitionsPlugin, UserDefinitionWidget
 from MDANSE.Framework.Plugins.DataPlugin import get_data_plugin 
 
 class Query(object):
@@ -150,7 +150,7 @@ class Query(object):
         
         self._parser = parser
                             
-class AtomSelectionPlugin(UDPlugin):
+class AtomSelectionPlugin(UserDefinitionsPlugin):
     
     type = 'atom_selection'
     
@@ -168,7 +168,7 @@ class AtomSelectionPlugin(UDPlugin):
 
         pub.subscribe(self.msg_select_atoms_from_viewer, 'msg_select_atoms_from_viewer')
 
-        UDPlugin.__init__(self,parent,size=(800,500))
+        UserDefinitionsPlugin.__init__(self,parent,size=(800,500))
         
     def build_panel(self):
                                                 
@@ -429,7 +429,7 @@ if __name__ == "__main__":
     
     app = wx.App(False)
     
-    p = UDDialog(None,t,'atom_selection')
+    p = UserDefinitionsDialog(None,t,'atoms_list')
         
     p.SetSize((800,800))
             

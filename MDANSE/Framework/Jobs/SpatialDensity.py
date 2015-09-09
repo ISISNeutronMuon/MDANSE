@@ -37,7 +37,7 @@ import numpy
 
 from MDANSE.Extensions import sd_fast_calc
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Geometry import build_cartesian_axes, center_of_mass
+from MDANSE.Mathematics.Geometry import build_cartesian_axes
 
 class SpatialDensity(IJob):
     """The Spatial Density (SD) computes the 3D histograms of atomic coordinates of the a given set of target molecules 
@@ -58,9 +58,9 @@ class SpatialDensity(IJob):
     
     label = "Spatial Density"
     
-    category = ('Structure',)
+    category = ('Analysis','Structure',)
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["mmtk_trajectory","molecular_viewer"]
     
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'MMTK', 'protein_in_periodic_universe.nc')})

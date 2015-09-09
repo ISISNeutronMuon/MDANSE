@@ -115,6 +115,7 @@ class JobController(threading.Thread):
 
             # Case where a job has finished during two controller check points (i.e. its temporary file has been deleted)
             if self._registry[j]['state'] == 'finished':
+                del self._registry[j]
                 continue
             
             if not j in jobs:

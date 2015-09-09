@@ -19,8 +19,8 @@ for job in REGISTRY["job"].values():
         continue
                     
     attrs = {"type"      : job.type,
-             "ancestor"  : getattr(job,'ancestor',[]),
-             "category"  : ('Analysis',) + getattr(job, "category", ("Miscellaneous",)),
+             "ancestor"  : getattr(job,'ancestor',job.ancestor),
+             "category"  : getattr(job, "category", ("Miscellaneous",)),
              "label"     : getattr(job, "label", job.__name__)}
             
     kls = type("%sPlugin" % job.__name__, (JobPlugin,), attrs)
@@ -32,5 +32,5 @@ for data in REGISTRY["input_data"].values():
 
     attrs = {"type"     : data.type, 
              "label"    : " ".join("".split("_")).capitalize(),
-             "ancestor" : ""}
+             "ancestor" : ['empty_data']}
     kls = type("%sPlugin" % data.__name__, (DataPlugin,), attrs)

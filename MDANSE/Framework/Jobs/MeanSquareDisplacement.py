@@ -48,7 +48,7 @@ class MeanSquareDisplacement(IJob):
     since molecules undergo collisions. The path is to a good approximation to a random walk. 
     
     Mathematically, a random walk is a series of steps where each step is taken in a completely 
-    random direction from the one before, as analysed by Albert Einstein 
+    random direction from the one before, as analyzed by Albert Einstein 
     in a study of Brownian motion. The MSD of a particle in this case 
     is proportional to the time elapsed:
     
@@ -68,7 +68,7 @@ class MeanSquareDisplacement(IJob):
     
     label = "Mean Square Displacement"
 
-    category = ('Dynamics',)
+    category = ('Analysis','Dynamics',)
     
     ancestor = ["mmtk_trajectory","molecular_viewer"]
     

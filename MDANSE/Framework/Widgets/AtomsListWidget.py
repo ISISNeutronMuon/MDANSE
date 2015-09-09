@@ -36,7 +36,7 @@ import wx
 import wx.aui as wxaui
 
 from MDANSE import LOGGER
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UDPlugin, UserDefinitionWidget, UDDialog
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionsPlugin, UserDefinitionWidget, UserDefinitionsDialog
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule, get_chemical_objects_dict
 
 class AtomNameDropTarget(wx.TextDropTarget):
@@ -69,7 +69,7 @@ class AtomNameDropTarget(wx.TextDropTarget):
                 
         self._atoms.Append([data])
                 
-class AtomsListPlugin(UDPlugin):
+class AtomsListPlugin(UserDefinitionsPlugin):
     
     type = 'atoms_list'
     
@@ -87,10 +87,8 @@ class AtomsListPlugin(UDPlugin):
         
         self._selection = []
                                 
-        UDPlugin.__init__(self,parent,size=(800,500))
-        
-        self.SetSize((400,400))
-                                        
+        UserDefinitionsPlugin.__init__(self,parent,size=(800,500))
+                                                
     def build_panel(self):
 
         self._mainPanel = wx.ScrolledWindow(self, wx.ID_ANY, size=self.GetSize())
@@ -121,8 +119,8 @@ class AtomsListPlugin(UDPlugin):
                 
         self._atoms = wx.ListCtrl(self._mainPanel, wx.ID_ANY)
         
-        dt = AtomNameDropTarget(self._molecules,self._atoms)
-        self._atoms.SetDropTarget(dt)
+        self._dt = AtomNameDropTarget(self._molecules,self._atoms)
+        self._atoms.SetDropTarget(self._dt)
                 
         gbSizer.Add(self._molecules, (1,0), flag=wx.EXPAND)
         gbSizer.Add(self._atoms    , (1,1), flag=wx.EXPAND)
@@ -148,10 +146,11 @@ class AtomsListPlugin(UDPlugin):
         self._mgr.AddPane(self._mainPanel, wxaui.AuiPaneInfo().DestroyOnClose().Center().Dock().CaptionVisible(False).CloseButton(False).BestSize(self.GetSize()))
         self._mgr.Update()
 
-        self.Bind(wx.EVT_SPINCTRL,self.on_select_natoms,self._nAtomsSpinCtrl)                
+        self.Bind(wx.EVT_SPINCTRL,self.on_define_list_size,self._nAtomsSpinCtrl)                
         self.Bind(wx.EVT_BUTTON, self.on_set_user_definition, setButton)
-        self.Bind(wx.EVT_TREE_BEGIN_DRAG,self.on_drag_atom_name,self._molecules)
-        self.Bind(wx.EVT_LIST_KEY_DOWN,self.on_delete_atom_name,self._atoms)
+        self.Bind(wx.EVT_TREE_BEGIN_DRAG,self.on_add_atom,self._molecules)
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_add_atom)
+        self.Bind(wx.EVT_LIST_KEY_DOWN,self.on_delete_atom,self._atoms)
 
     def plug(self):
         
@@ -188,7 +187,7 @@ class AtomsListPlugin(UDPlugin):
             for aname in atomNames:
                 self._molecules.AppendItem(molnode,aname)
         
-    def on_select_natoms(self,event):
+    def on_define_list_size(self,event):
 
         self._nAtoms = event.GetInt()
         
@@ -196,7 +195,7 @@ class AtomsListPlugin(UDPlugin):
         
         self._resultsTextCtrl.Clear()      
     
-    def on_delete_atom_name(self,event):
+    def on_delete_atom(self,event):
         
         keycode = event.GetKeyCode()
         if keycode == wx.WXK_DELETE:
@@ -220,7 +219,7 @@ class AtomsListPlugin(UDPlugin):
                 item = self._atoms.GetItem(i)
                 self._atoms.SetItemState(item.GetId(),wx.LIST_STATE_SELECTED,wx.LIST_STATE_SELECTED)
             
-    def on_drag_atom_name(self,event):
+    def on_add_atom(self,event):
                         
         item = event.GetItem()
         
@@ -231,12 +230,18 @@ class AtomsListPlugin(UDPlugin):
         if self._atoms.GetItemCount() >= self._nAtoms:
             return
                     
-        text = self._molecules.GetItemText(item)        
+        text = self._molecules.GetItemText(item)
         tdo = wx.TextDataObject(text)
         tds = wx.DropSource(self._molecules)
         tds.SetData(tdo)
-        tds.DoDragDrop(wx.Drag_CopyOnly)                        
         
+        # Case of a drag and drop event
+        if event.GetEventType() == wx.wxEVT_COMMAND_TREE_BEGIN_DRAG:
+            tds.DoDragDrop(wx.Drag_CopyOnly)
+        # Case of a double click event
+        else:
+            self._dt.OnDropText(-1,-1,text)
+                        
     def set_user_definition(self):
 
         self._selection = []
@@ -279,32 +284,10 @@ class AtomListWidget(UserDefinitionWidget):
 
     def on_new_user_definition(self,event):
 
-        dlg = UDDialog(self,self._trajectory,self.type)
+        dlg = UserDefinitionsDialog(self,self._trajectory,self.type)
         
         dlg.plugin.set_natoms(self._configurator._nAtoms)
                 
         dlg.plugin.enable_natoms_selection(False)
         
         dlg.ShowModal()
-            
-                        
-# if __name__ == "__main__":
-#     
-#     from MMTK.Trajectory import Trajectory
-#     
-#     from MDANSE import PLATFORM,REGISTRY
-#     
-#     LOGGER.add_handler("dialog", REGISTRY['handler']['dialog'](), level="error", start=True)
-#             
-#     t = Trajectory(None,os.path.join(os.path.dirname(PLATFORM.package_directory()),"Data","Trajectories","MMTK","nagma_in_periodic_universe.nc"),"r")
-#     
-#     app = wx.App(False)
-#                 
-#     p = AtomsListDialog(None,t,4)
-#                 
-#     p.ShowModal()
-#     
-#     p.Destroy()
-#     
-#     app.MainLoop()            
-                    

@@ -65,9 +65,9 @@ class AngularCorrelation(IJob):
     
     label = "Angular Correlation"
 
-    category = ('Dynamics',)
+    category = ('Analysis','Dynamics',)
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["mmtk_trajectory","molecular_viewer"]
     
     settings = collections.OrderedDict()    
     settings['trajectory'] = ('mmtk_trajectory',{})

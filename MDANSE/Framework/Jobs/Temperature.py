@@ -55,9 +55,9 @@ class Temperature(IJob):
     
     label = "Temperature"
 
-    category = ('Thermodynamics',)
+    category = ('Analysis','Thermodynamics',)
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["mmtk_trajectory","molecular_viewer"]
             
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})
