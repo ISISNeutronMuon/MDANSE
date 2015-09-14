@@ -32,10 +32,8 @@ Created on Mar 30, 2015
 
 import wx
 
-from MDANSE.Externals.pubsub import pub
-
 from MDANSE.GUI import DATA_CONTROLLER
-from MDANSE.Framework.Plugins.IPlugin import IPlugin, plugin_parent 
+from MDANSE.Framework.Plugins.IPlugin import IPlugin 
 
 def get_data_plugin(window):
                                
@@ -62,20 +60,12 @@ class DataPlugin(IPlugin):
         self._datakey = datakey
         
         self._dataProxy = DATA_CONTROLLER[self._datakey]
-                                                
-        self._mgr.Bind(wx.EVT_CHILD_FOCUS, self.on_changing_pane)
-        
-        self._currentWindow = self
-         
+                                                                 
     def build_panel(self):
         pass
 
     def plug(self, standalone=False):
         pass
-
-    @property
-    def currentWindow(self):
-        return self._currentWindow
 
     @property
     def datakey(self):
@@ -94,13 +84,3 @@ class DataPlugin(IPlugin):
     def dataplugin(self):
         return self
         
-    def on_changing_pane(self, event):
-        
-        window = plugin_parent(event.GetWindow())
-                
-        if window is None:
-            return
-        
-        self._currentWindow = window
-
-        pub.sendMessage('msg_set_plugins_tree', plugin=window)

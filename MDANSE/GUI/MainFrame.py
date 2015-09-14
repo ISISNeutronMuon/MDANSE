@@ -321,7 +321,7 @@ or directly to the MDANSE mailing list:
         
         self.load_data(dataType,filename)
                 
-        LOGGER("Data %r successfully loaded" % filename, "info")
+        LOGGER("Data %r successfully loaded." % filename, "info", ["console"])
                                                             
     def on_open_user_definitions(self,event):
         

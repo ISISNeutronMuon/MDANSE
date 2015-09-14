@@ -110,7 +110,7 @@ class PluginsTreePanel(wx.Panel):
     def on_double_click(self, event):
         
         data = self._tree.GetPyData(event.GetItem())
-                
+        
         self.TopLevelParent.panels["working"].active_page.currentWindow.drop(data)
         
     def on_drag(self, event=None):

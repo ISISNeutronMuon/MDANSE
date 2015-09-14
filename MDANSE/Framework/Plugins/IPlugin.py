@@ -91,11 +91,15 @@ class IPlugin(wx.Panel):
         wx.Panel.__init__(self, parent, *args, **kwargs)
         
         self._parent = parent
+
+        self._currentWindow = self
         
         self.SetDropTarget(PluginDropTarget(self))
         
         self.build_dialog()
         
+        self._mgr.Bind(wx.EVT_CHILD_FOCUS, self.on_changing_pane)
+                
         self._mgr.Bind(aui.EVT_AUI_PANE_CLOSE, self.on_close_pane)
                                                         
     @abc.abstractmethod
@@ -123,11 +127,12 @@ class IPlugin(wx.Panel):
             return False
     
         return self.is_parent(window.Parent)    
+
+    @property
+    def currentWindow(self):
         
-    def close(self):
-        
-        pass
-        
+        return self._currentWindow
+                
     def on_close_pane(self, event):
 
         d = wx.MessageDialog(None, 'Closing this plugin will also close all the other ones you plugged in in so far. Do you really want to close ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
@@ -135,15 +140,14 @@ class IPlugin(wx.Panel):
             return
         
         window = event.GetPane().window
-
-#         if isinstance(window,IPlugin):        
-#             window.close_children()
         
         self._mgr.DetachPane(window)
         window.Destroy()
         self._mgr.Update()
             
         self.SetFocus()
+        
+        self._currentWindow = self
         
         pub.sendMessage('msg_set_plugins_tree', plugin=self)
                                             
@@ -165,17 +169,7 @@ class IPlugin(wx.Panel):
         plugin = REGISTRY["plugin"].get(pluginName,None)  
         if plugin is None:
             return
-                
-        # Get the list of ancestors of the plugin that will host the plugin to be dropped in.
-        ancestors = IPlugin.get_ancestors(plugin)
-#         klasses = tuple([REGISTRY['plugin'][anc] for anc in plugin.ancestor])        
-#         if not issubclass(self.__class__,klasses):
-#             self.parent.drop(pluginName)
-#             return
-
-        if not plugin.ancestor[0] in ancestors:
-            return
-                                               
+                                                               
         plugin = plugin(self)
 
         self._mgr.AddPane(plugin, aui.AuiPaneInfo().Caption(getattr(plugin, "label", pluginName)))
@@ -186,14 +180,15 @@ class IPlugin(wx.Panel):
         
         plugin.SetFocus()
         
-    @staticmethod
-    def get_ancestors(plugin):
+    def on_changing_pane(self, event):
         
-        if plugin.ancestor == ['empty_data']:
-            return [plugin.type]
+        window = plugin_parent(event.GetWindow())
+                
+        if window is None:
+            return
         
-        parentPlugin = REGISTRY['plugin'][plugin.ancestor[0]]
-        
-        return [plugin.type] + IPlugin.get_ancestors(parentPlugin)
+        self._currentWindow = window
+
+        pub.sendMessage('msg_set_plugins_tree', plugin=window)
                 
         

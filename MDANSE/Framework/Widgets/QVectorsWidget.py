@@ -155,7 +155,7 @@ class QVectorsPlugin(UserDefinitionsPlugin):
     
     type = 'q_vectors'
 
-    label = "Q vectors settings"
+    label = "Q vectors"
     
     ancestor = ["molecular_viewer"]
             

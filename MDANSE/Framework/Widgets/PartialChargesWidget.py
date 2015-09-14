@@ -44,7 +44,7 @@ class PartialChargesPlugin(UserDefinitionsPlugin):
 
     type = 'partial_charges'
 
-    label = "Partial charges settings"
+    label = "Partial charges"
     
     ancestor = ["molecular_viewer"]
 

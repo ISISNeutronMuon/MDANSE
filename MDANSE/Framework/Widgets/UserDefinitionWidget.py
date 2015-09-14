@@ -48,26 +48,37 @@ class UserDefinitionWidget(IWidget):
     __metaclass__ = abc.ABCMeta
     
     type = None    
-        
-    def initialize(self):
-        
-        self._filename = None
-        self._basename = None
-        
+                
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         
         self._availableUDs = wx.Choice(self._widgetPanel, wx.ID_ANY,style=wx.CB_SORT)
-        self._newUD = wx.Button(self._widgetPanel, wx.ID_ANY, label="New")
+        viewUD = wx.Button(self._widgetPanel, wx.ID_ANY, label="View selected definition")
+        newUD = wx.Button(self._widgetPanel, wx.ID_ANY, label="New definition")
         sizer.Add(self._availableUDs, 1, wx.ALL|wx.EXPAND, 5)
-        sizer.Add(self._newUD, 0, wx.ALL|wx.EXPAND, 5)
+        sizer.Add(viewUD, 0, wx.ALL|wx.EXPAND, 5)
+        sizer.Add(newUD, 0, wx.ALL|wx.EXPAND, 5)
 
-        pub.subscribe(self.msg_save_definition, "msg_save_definition")
+        pub.subscribe(self.msg_set_ud, "msg_set_ud")
 
-        self.Bind(wx.EVT_BUTTON, self.on_new_user_definition, self._newUD)
+        self.Bind(wx.EVT_BUTTON, self.on_view_user_definition, viewUD)
+        self.Bind(wx.EVT_BUTTON, self.on_new_user_definition, newUD)
 
         return sizer
+    
+    def on_view_user_definition(self,event):
+        
+        ud = self._availableUDs.GetStringSelection()
+        if not ud:
+            LOGGER("Please select a user definition","error",["dialog"])
+            return
+        
+        from MDANSE.Framework.Plugins.UserDefinitionViewerPlugin import UserDefinitionViewerFrame
+        
+        f = UserDefinitionViewerFrame(self,ud=[self._basename,self.type,ud])
+        
+        f.Show()
     
     def on_new_user_definition(self,event):
         
@@ -87,21 +98,17 @@ class UserDefinitionWidget(IWidget):
 
         self._basename = os.path.basename(self._filename)
         
+        self.msg_set_ud()
+        
         uds = UD_STORE.filter(self._basename, self.type)
         
         self._availableUDs.SetItems(uds)
 
-    def msg_save_definition(self, message):
+    def msg_set_ud(self):
          
-        filename, section, name = message
-         
-        if section is not self.type:
-            return
-         
-        if filename != self._basename:
-            return
+        uds = UD_STORE.filter(self._basename, self.type)
         
-        self._availableUDs.Append(name)
+        self._availableUDs.SetItems(uds)
 
 class UserDefinitionsDialog(wx.Dialog):
     
@@ -152,7 +159,7 @@ class UserDefinitionsPlugin(ComponentPlugin):
         actionsSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
                         
         self._udName = wx.TextCtrl(udPanel, wx.ID_ANY, style = wx.TE_PROCESS_ENTER)
-        saveButton  = wx.Button(udPanel, wx.ID_ANY, label="Save")
+        saveButton  = wx.Button(udPanel, wx.ID_ANY, label="Set")
         
         actionsSizer.Add(self._udName, 1, wx.ALL|wx.EXPAND, 5)
         actionsSizer.Add(saveButton, 0, wx.ALL, 5)
@@ -161,9 +168,9 @@ class UserDefinitionsPlugin(ComponentPlugin):
         
         self._mainPanel.GetSizer().Add(udPanel,0,wx.EXPAND|wx.ALL,5)
 
-        self.Bind(wx.EVT_BUTTON, self.on_save, saveButton)
+        self.Bind(wx.EVT_BUTTON, self.on_set_ud, saveButton)
 
-    def on_save(self, event):
+    def on_set_ud(self, event):
 
         name = str(self._udName.GetValue().strip())
         
@@ -180,8 +187,7 @@ class UserDefinitionsPlugin(ComponentPlugin):
             return
                   
         UD_STORE.set_definition(self._target,self.type,name,value)
-        UD_STORE.save()
                  
-        pub.sendMessage("msg_save_definition", message=(self._target,self.type,name))
+        pub.sendMessage("msg_set_ud")
 
-        LOGGER('User definition %r successfully saved.' % name,'info',['console'])
+        LOGGER('User definition %r successfully set.' % name,'info',['console'])

@@ -49,7 +49,7 @@ class UserDefinitionsStore(dict):
         else:
             self.update(UD)
             f.close()
-                        
+                                    
     def save(self):
         '''
         Save the user definitions.
