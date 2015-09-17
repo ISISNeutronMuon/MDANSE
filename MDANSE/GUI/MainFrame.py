@@ -187,11 +187,12 @@ class MainFrame(wx.Frame):
         self._toolbar = self.CreateToolBar()
                 
         loadDataButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["load",32,32], 'Load a trajectory')
-        databaseButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["periodic_table",32,32], 'Edit the MDANSE elements database')
-        plotButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["plot",32,32], 'Open MDANSE plotter')
-        udButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["user",32,32], 'Edit the user definitions')
-        preferencesButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["preferences",32,32], 'Edit the preferences')
-        registryButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["registry",32,32], 'Inspect MDANSE classes registry')
+        periodicTableButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["periodic_table",32,32], 'Launch the periodic table viewer')
+        elementsDatabaseButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["element",32,32], 'Launch the elements database editor')
+        plotButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["plot",32,32], 'Launch the NetCDF plotter')
+        udButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["user",32,32], 'Launch the user definitions editor')
+        preferencesButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["preferences",32,32], 'Launch the preferences editor')
+        registryButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["registry",32,32], 'Inspect MDANSE classes framework')
         apiButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["api",32,32], 'Open MDANSE API')
         websiteButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["web",32,32], 'Open MDANSE website')
         aboutButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["about",32,32], 'About MDANSE')
@@ -204,7 +205,8 @@ class MainFrame(wx.Frame):
 
         # The toolbar-related events handlers.
         self.Bind(wx.EVT_MENU, self.on_load_data, loadDataButton)
-        self.Bind(wx.EVT_MENU, self.on_open_mdanse_elements_database, databaseButton)
+        self.Bind(wx.EVT_MENU, self.on_open_periodic_table, periodicTableButton)
+        self.Bind(wx.EVT_MENU, self.on_open_elements_database, elementsDatabaseButton)
         self.Bind(wx.EVT_MENU, self.on_start_plotter, plotButton)
         self.Bind(wx.EVT_MENU, self.on_set_preferences, preferencesButton)
         self.Bind(wx.EVT_MENU, self.on_open_user_definitions, udButton)
@@ -340,11 +342,19 @@ or directly to the MDANSE mailing list:
         f = JobFrame(self,self._converters[converter],"Trajectory converter")
         f.Show()
 
-    def on_open_mdanse_elements_database(self, event):
+    def on_open_periodic_table(self, event):
 
         from MDANSE.GUI.PeriodicTableViewer import PeriodicTableViewer
                 
         f = PeriodicTableViewer(self)
+        
+        f.Show()
+
+    def on_open_elements_database(self, event):
+
+        from MDANSE.GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
+                
+        f = ElementsDatabaseEditor(self)
         
         f.Show()
 
