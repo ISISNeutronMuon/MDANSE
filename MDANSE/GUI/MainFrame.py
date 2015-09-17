@@ -53,7 +53,7 @@ def excepthook(error, message, tback):
     '''
     Called when an exception is raised and uncaught.
     
-    Redirect the exception information to the nMolDyn logger at the ERROR level.
+    Redirect the exception information to the MDANSE logger at the ERROR level.
         
     @param typ: the exception class.
     @type typ: exception
