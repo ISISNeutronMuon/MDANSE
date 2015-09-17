@@ -373,8 +373,10 @@ class ElementsDatabase(object):
         :type save: bool
         '''
 
-        if not self._data.has_key(ename):
-            self._data[ename] = collections.OrderedDict([(pname,prop()) for pname,prop in self._properties.iteritems()])
+        if self._data.has_key(ename):
+            raise ElementsDatabaseError("The element %r is already registered in the database." % ename)
+            
+        self._data[ename] = collections.OrderedDict([(pname,prop()) for pname,prop in self._properties.iteritems()])
         
         # Create the corresponding MMTK entry
         create_mmtk_atom_entry(ename,symbol=self._data[ename]["symbol"],mass=self._data[ename]["atomic_weight"])

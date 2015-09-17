@@ -81,7 +81,7 @@ def excepthook(error, message, tback):
 
     trace = '\n'.join(trace)
                 
-    LOGGER(trace,'error',['console'])
+    LOGGER(trace,'error',['console','dialog'])
         
 class MainFrame(wx.Frame):
 

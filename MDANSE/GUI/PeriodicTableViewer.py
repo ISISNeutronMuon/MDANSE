@@ -426,29 +426,23 @@ class PeriodicTableViewer(wx.Frame):
         for i in _COLS:
             wid = wx.TextCtrl(mainPanel,wx.ID_ANY, value=str(i), size=(40,40), style = wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.TE_READONLY|wx.NO_BORDER)
             wid.SetBackgroundColour((230,230,220))
-            wid.Bind(wx.EVT_LEFT_DOWN, self.on_select_element)
             mainSizer.Add(wid, (0,i), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
         for i,v in enumerate(_ROWS):
             wid = wx.TextCtrl(mainPanel,wx.ID_ANY, value=str(v), size=(40,40), style = wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.TE_READONLY|wx.NO_BORDER)
             wid.SetBackgroundColour((230,230,220))
-            wid.Bind(wx.EVT_LEFT_DOWN, self.on_select_element)
             mainSizer.Add(wid, (i+1,0), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
         wid = wx.TextCtrl(mainPanel,wx.ID_ANY, value="*", size=(40,40), style = wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.TE_READONLY|wx.NO_BORDER)
-        wid.Bind(wx.EVT_LEFT_DOWN, self.on_select_element)
         mainSizer.Add(wid, (6,3), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
         wid = wx.TextCtrl(mainPanel,wx.ID_ANY, value="**", size=(40,40), style = wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.TE_READONLY|wx.NO_BORDER)
-        wid.Bind(wx.EVT_LEFT_DOWN, self.on_select_element)
         mainSizer.Add(wid, (7,3), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
         wid = wx.TextCtrl(mainPanel,wx.ID_ANY, value="*", size=(40,40), style = wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.TE_READONLY|wx.NO_BORDER)
-        wid.Bind(wx.EVT_LEFT_DOWN, self.on_select_element)
         mainSizer.Add(wid, (9,3), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
         wid = wx.TextCtrl(mainPanel,wx.ID_ANY, value="**", size=(40,40), style = wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.TE_READONLY|wx.NO_BORDER)
-        wid.Bind(wx.EVT_LEFT_DOWN, self.on_select_element)
         mainSizer.Add(wid, (10,3), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
         # The panel that will contain the short info about a selected element.
@@ -484,9 +478,6 @@ class PeriodicTableViewer(wx.Frame):
         self.Bind(wx.EVT_CLOSE,self.on_quit)        
         self.Bind(wx.EVT_BUTTON,self.on_open_database,edit)
                    
-    def on_fake_event(self,event):
-        pass
-                     
     def on_quit(self, event):
 
         d = wx.MessageDialog(None,'Do you really want to quit ?','Question',wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)

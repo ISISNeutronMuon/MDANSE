@@ -35,7 +35,7 @@ import os
 import wx
 import wx.grid as wxgrid
 
-from MDANSE import ELEMENTS
+from MDANSE import ELEMENTS, LOGGER
 from MDANSE.Core.Singleton import Singleton
 
 class PropertyDialog(wx.Dialog):
@@ -289,7 +289,8 @@ class ElementsDatabaseEditor(wx.Frame):
         if d.ShowModal() == wx.ID_CANCEL:
             return
  
-        ename = d.GetValue()
+        # Get rid of wxpython unicode string formatting
+        ename = str(d.GetValue())
                          
         if not ename:
             return
@@ -309,7 +310,10 @@ class ElementsDatabaseEditor(wx.Frame):
         pname,pdefault = d.GetValue()
                      
         if not pname:
-            return    
+            return
+        
+        # Get rid of wxpython unicode string formatting
+        pname = str(pname)
                                      
         self._database.add_column(pname,pdefault)      
   
