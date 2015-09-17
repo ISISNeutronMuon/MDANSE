@@ -68,7 +68,7 @@ class PluginsTreePanel(wx.Panel):
 
     def build_panel(self):
         
-        self._tree = wx.TreeCtrl(self, wx.ID_ANY, style=wx.TR_DEFAULT_STYLE^wx.TR_HIDE_ROOT)
+        self._tree = wx.TreeCtrl(self, wx.ID_ANY, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT)
         
         self._root = self._tree.AddRoot("root")
          

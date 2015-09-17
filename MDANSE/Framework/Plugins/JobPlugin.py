@@ -164,7 +164,7 @@ class JobFrame(wx.Frame):
     
     def __init__(self, parent, jobType, datakey=None):
                 
-        wx.Frame.__init__(self, parent, wx.ID_ANY, size = (800,400), style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
+        wx.Frame.__init__(self, parent, wx.ID_ANY, size = (800,800), style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
 
         self._jobType = jobType
 
@@ -196,6 +196,6 @@ if __name__ == "__main__":
     filename = os.path.join(os.path.dirname(PLATFORM.package_directory()),'Data','Trajectories','MMTK','protein_in_periodic_universe.nc')
     
     app = wx.App(False)
-    f = JobFrame(None,'dl_poly')
+    f = JobFrame(None,'ac',filename)
     f.Show()
     app.MainLoop()            

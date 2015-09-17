@@ -32,56 +32,64 @@ Created on Mar 30, 2015
 
 import wx
 
-from MDANSE import ELEMENTS, LOGGER
+from MDANSE import ELEMENTS
 
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionWidget
-from MDANSE.Framework.Widgets.AtomSelectionWidget import AtomSelectionPlugin
+from MDANSE.Framework.UserDefinitionsStore import UD_STORE
+from MDANSE.Framework.Widgets.AtomSelectionWidget import AtomSelectionWidget
+from MDANSE.GUI.Icons import ICONS
 
-class AtomTransmutationPlugin(AtomSelectionPlugin):
-    
-    type = 'atom_transmutation'
-
-    label = "Atom transmutation"
-    
-    ancestor = ["molecular_viewer"]
-    
-    def build_dialog(self):
-        
-        AtomSelectionPlugin.build_dialog(self)
-                
-        self._elements = wx.ComboBox(self._mainPanel, wx.ID_ANY, value="Transmutate to", choices=ELEMENTS.elements)
-        
-        self._selectionExpressionSizer.Add(self._elements, pos=(0,3), flag=wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
-        
-        self._mainPanel.Layout()
-        
-    def validate(self):
-        
-        if not self._selection:
-            LOGGER("The current selection is empty", "error", ["dialog"])
-            return None
-
-        element = self._elements.GetStringSelection()
-        
-        if not element:
-            LOGGER("No target element selected to be transmutated to", "error", ["dialog"])
-            return None
-        
-        ud = {}
-        ud['element'] = element
-        ud['indexes'] = self._selection
-        
-        return ud
-        
-class AtomTransmutationWidget(UserDefinitionWidget):
+class AtomTransmutationWidget(AtomSelectionWidget):
          
     type = "atom_transmutation"
+    
+    udType = "atom_selection"
   
+    def on_add_definition(self,event):
+        
+        panel = wx.Panel(self._widgetPanel,wx.ID_ANY)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+ 
+        availableUDs = wx.Choice(panel, wx.ID_ANY,style=wx.CB_SORT)
+        uds = UD_STORE.filter(self._basename, "atom_selection")
+        availableUDs.SetItems(uds)
+         
+        view = wx.Button(panel, wx.ID_ANY, label="View selected definition")
+        elements = wx.ComboBox(panel, wx.ID_ANY, value="Transmutate to", choices=ELEMENTS.elements)
+        remove = wx.BitmapButton(panel, wx.ID_ANY, ICONS["minus",16,16])
+ 
+        sizer.Add(availableUDs, 1, wx.ALL|wx.EXPAND, 5)
+        sizer.Add(view, 0, wx.ALL|wx.EXPAND, 5)
+        sizer.Add(elements, 0, wx.ALL|wx.EXPAND, 5)
+        sizer.Add(remove, 0, wx.ALL|wx.EXPAND, 5)
+         
+        panel.SetSizer(sizer)
+         
+        self._sizer.Add(panel,1,wx.ALL|wx.EXPAND,5)
+         
+        self._widgetPanel.GrandParent.Layout()
+ 
+        self.Bind(wx.EVT_BUTTON, self.on_view_definition, view)
+        self.Bind(wx.EVT_BUTTON, self.on_remove_definition, remove)
+          
     def get_widget_value(self):
-         
-        ud = self._availableUDs.GetStringSelection()
-         
-        if not ud:
+
+        sizerItemList = list(self._sizer.GetChildren())
+        del sizerItemList[0]
+
+        uds = []
+        for sizerItem in self._sizer.GetChildren():
+            
+            panel = sizerItem.GetWindow()
+            children = panel.GetChildren()
+            udName = children[0]
+            element = children[1]
+            oldSelection = udName.GetStringSelection()            
+            udName.SetItems(uds)
+            udName.SetStringSelection(oldSelection)
+            
+            uds.append([udName,element.GetStringSelection])
+                  
+        if not uds:
             return None
         else:
-            return str(ud)    
+            return uds

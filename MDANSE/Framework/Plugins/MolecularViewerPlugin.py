@@ -166,9 +166,7 @@ class MolecularViewerPanel(ComponentPlugin):
         ComponentPlugin.__init__(self, parent, *args, **kwargs)
         
         self.enable_picking(True)
-        
-        pub.subscribe(self.msg_set_selection, 'msg_set_selection')       
-   
+           
     def build_panel(self):
                 
         self._iren = MyRenderWindowInteractor(self, wx.ID_ANY, size=self.GetSize())
@@ -200,6 +198,7 @@ class MolecularViewerPanel(ComponentPlugin):
         
         self._iren.Bind(wx.EVT_CONTEXT_MENU, self.on_show_popup_menu)
 
+        pub.subscribe(self.msg_set_selection, 'msg_set_selection')   
         pub.subscribe(self.msg_switch_viewers_state, "msg_switch_viewers_state")
         pub.subscribe(self.msg_clear_selection,'msg_clear_selection')                                
                 

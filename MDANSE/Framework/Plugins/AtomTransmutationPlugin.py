@@ -25,33 +25,19 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ''' 
-Created on Jun 30, 2015
+Created on Mar 30, 2015
 
 :author: Eric C. Pellegrini
 '''
 
-from MDANSE.Framework.UserDefinitionsStore import UD_STORE
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionWidget, UserDefinitionsDialog
+from MDANSE.Framework.Plugins.AtomSelectionPlugin import AtomSelectionPlugin
 
-class AtomListWidget(UserDefinitionWidget):
+class AtomTransmutationPlugin(AtomSelectionPlugin):
     
-    type = 'atoms_list'
+    type = 'atom_transmutation'
 
-    def on_new_user_definition(self,event):
-
-        dlg = UserDefinitionsDialog(self,self._trajectory,self.type)
-        
-        dlg.plugin.set_natoms(self._configurator._nAtoms)
-                
-        dlg.plugin.enable_natoms_selection(False)
-        
-        dlg.ShowModal()
-        
-    def msg_set_ud(self):
-         
-        uds = UD_STORE.filter(self._basename, self.type)
-                
-        uds = [v for v in uds if UD_STORE.get_definition(self._basename, self.type,v)["natoms"]==self._configurator._nAtoms] 
-        
-        self._availableUDs.SetItems(uds)
-        
+    label = "Atom transmutation"
+    
+    ancestor = ["molecular_viewer"]
+    
+    udType = "atom_selection"

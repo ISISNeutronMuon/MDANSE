@@ -36,9 +36,9 @@ from MDANSE import LOGGER
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.UserDefinitionsStore import UD_STORE
 
-class UserDefinitionViewerFrame(wx.Frame):
+class UserDefinitionViewer(wx.Frame):
     
-    def __init__(self, parent, title="User Definition Viewer", ud=None):
+    def __init__(self, parent, title="User Definition Viewer", ud=None,editable=True):
         
         wx.Frame.__init__(self, parent, wx.ID_ANY, size = (800,400), title = title, style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
 
@@ -46,8 +46,8 @@ class UserDefinitionViewerFrame(wx.Frame):
         
         mainPanel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
         
-        self._tree = wx.TreeCtrl(mainPanel, wx.ID_ANY, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT|wx.TR_EDIT_LABELS)        
-
+        self._tree = wx.TreeCtrl(mainPanel, wx.ID_ANY, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT|wx.TR_EDIT_LABELS)
+        
         self._root = self._tree.AddRoot("root")
 
         self.set_plugins_tree(self._root, UD_STORE)     
@@ -67,7 +67,7 @@ class UserDefinitionViewerFrame(wx.Frame):
         mainPanel.SetSizer(mainSizer)
                 
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_show_info )
-        self.Bind(wx.EVT_TREE_KEY_DOWN, self.on_delete_from_key, self._tree)
+        self.Bind(wx.EVT_TREE_KEY_DOWN, self.on_delete, self._tree)
         self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.on_rename, self._tree)
         self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.on_try_rename, self._tree)
 
@@ -77,7 +77,15 @@ class UserDefinitionViewerFrame(wx.Frame):
         
         if ud is not None:
             self.expand_ud(ud)
-
+        
+        self.set_editable(editable)
+            
+    def set_editable(self,editable=True):
+        
+        self._editable = editable
+        
+        self._save.Show(self._editable)
+                                        
     def get_item_level(self,item):
         
         parent = self._tree.GetItemParent(item)
@@ -140,7 +148,10 @@ class UserDefinitionViewerFrame(wx.Frame):
        
         self._info.SetValue(containerStr)       
 
-    def on_delete_from_key(self, event):
+    def on_delete(self, event):
+
+        if not self._editable:
+            return
 
         keycode = event.GetKeyCode()
         
@@ -188,6 +199,10 @@ class UserDefinitionViewerFrame(wx.Frame):
         LOGGER('User definitions successfully saved.','info',['console'])
         
     def on_try_rename(self, event):
+        
+        if not self._editable:
+            event.Veto()
+            return
 
         currentItem = self._tree.GetSelection()
         level = self.get_item_level(currentItem)
@@ -197,6 +212,9 @@ class UserDefinitionViewerFrame(wx.Frame):
             return
 
     def on_rename(self, event):
+        
+        if not self._editable:
+            return
         
         currentItem = self._tree.GetSelection()
         
@@ -224,6 +242,6 @@ class UserDefinitionViewerFrame(wx.Frame):
 
 if __name__ == "__main__":
     app = wx.App(False)
-    f = UserDefinitionViewerFrame(None,ud=['protein_in_periodic_universe.nc','atom_selection',"sfdfdfsd"])
+    f = UserDefinitionViewer(None,ud=['protein_in_periodic_universe.nc','atom_selection',"sfdfdfsd"],editable=False)
     f.Show()
     app.MainLoop()    

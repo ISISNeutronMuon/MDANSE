@@ -43,78 +43,11 @@ from MDANSE.Framework.UserDefinitionsStore import UD_STORE
 from MDANSE.Framework.Widgets.IWidget import IWidget
 from MDANSE.GUI import DATA_CONTROLLER
 
-class UserDefinitionWidget(IWidget):
-    
-    __metaclass__ = abc.ABCMeta
-    
-    type = None    
-                
-    def add_widgets(self):
-
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
-        
-        self._availableUDs = wx.Choice(self._widgetPanel, wx.ID_ANY,style=wx.CB_SORT)
-        viewUD = wx.Button(self._widgetPanel, wx.ID_ANY, label="View selected definition")
-        newUD = wx.Button(self._widgetPanel, wx.ID_ANY, label="New definition")
-        sizer.Add(self._availableUDs, 1, wx.ALL|wx.EXPAND, 5)
-        sizer.Add(viewUD, 0, wx.ALL|wx.EXPAND, 5)
-        sizer.Add(newUD, 0, wx.ALL|wx.EXPAND, 5)
-
-        pub.subscribe(self.msg_set_ud, "msg_set_ud")
-
-        self.Bind(wx.EVT_BUTTON, self.on_view_user_definition, viewUD)
-        self.Bind(wx.EVT_BUTTON, self.on_new_user_definition, newUD)
-
-        return sizer
-    
-    def on_view_user_definition(self,event):
-        
-        ud = self._availableUDs.GetStringSelection()
-        if not ud:
-            LOGGER("Please select a user definition","error",["dialog"])
-            return
-        
-        from MDANSE.Framework.Plugins.UserDefinitionViewerPlugin import UserDefinitionViewerFrame
-        
-        f = UserDefinitionViewerFrame(self,ud=[self._basename,self.type,ud])
-        
-        f.Show()
-    
-    def on_new_user_definition(self,event):
-        
-        dlg = UserDefinitionsDialog(self,self._trajectory,self.type)
-        
-        dlg.ShowModal()
-        
-    def get_widget_value(self):
-        
-        return str(self._availableUDs.GetStringSelection())    
-
-    def set_data(self, datakey):
-
-        self._filename = datakey
-
-        self._trajectory = DATA_CONTROLLER[datakey]
-
-        self._basename = os.path.basename(self._filename)
-        
-        self.msg_set_ud()
-        
-        uds = UD_STORE.filter(self._basename, self.type)
-        
-        self._availableUDs.SetItems(uds)
-
-    def msg_set_ud(self):
-         
-        uds = UD_STORE.filter(self._basename, self.type)
-        
-        self._availableUDs.SetItems(uds)
-
 class UserDefinitionsDialog(wx.Dialog):
     
     def __init__(self,parent,trajectory,udType,*args,**kwargs):
 
-        wx.Dialog.__init__(self, parent)
+        wx.Dialog.__init__(self, parent, style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
         
         self._mgr = wxaui.AuiManager(self)
 
@@ -140,6 +73,70 @@ class UserDefinitionsDialog(wx.Dialog):
     def plugin(self):
         
         return self._plugin
+
+class UserDefinitionWidget(IWidget):
+    
+    __metaclass__ = abc.ABCMeta
+    
+    type = None    
+                
+    def add_widgets(self):
+
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        
+        self._availableUDs = wx.Choice(self._widgetPanel, wx.ID_ANY,style=wx.CB_SORT)
+        viewUD = wx.Button(self._widgetPanel, wx.ID_ANY, label="View selected definition")
+        newUD = wx.Button(self._widgetPanel, wx.ID_ANY, label="New definition")
+        sizer.Add(self._availableUDs, 1, wx.ALL|wx.EXPAND, 5)
+        sizer.Add(viewUD, 0, wx.ALL|wx.EXPAND, 5)
+        sizer.Add(newUD, 0, wx.ALL|wx.EXPAND, 5)
+
+        pub.subscribe(self.msg_set_ud, "msg_set_ud")
+
+        self.Bind(wx.EVT_BUTTON, self.on_view_definition, viewUD)
+        self.Bind(wx.EVT_BUTTON, self.on_new_definition, newUD)
+
+        return sizer
+    
+    def on_view_definition(self,event):
+        
+        viewUD = event.GetEventObject()
+        ud = viewUD.Parent.GetChildren()[0].GetStringSelection()       
+        if not ud:
+            LOGGER("Please select a user definition","error",["dialog"])
+            return
+        
+        from MDANSE.GUI.UserDefinitionViewer import UserDefinitionViewer
+        
+        f = UserDefinitionViewer(self,ud=[self._basename,self.type,ud])
+        
+        f.Show()
+    
+    def on_new_definition(self,event):
+        
+        dlg = UserDefinitionsDialog(None,self._trajectory,self.type)
+        
+        dlg.ShowModal()
+        
+    def get_widget_value(self):
+        
+        return str(self._availableUDs.GetStringSelection())    
+
+    def set_data(self, datakey):
+
+        self._filename = datakey
+
+        self._trajectory = DATA_CONTROLLER[datakey]
+
+        self._basename = os.path.basename(self._filename)
+        
+        self.msg_set_ud()
+
+    def msg_set_ud(self):
+         
+        uds = UD_STORE.filter(self._basename, self.type)
+        
+        self._availableUDs.SetItems(uds)
 
 class UserDefinitionsPlugin(ComponentPlugin):
     
@@ -180,10 +177,12 @@ class UserDefinitionsPlugin(ComponentPlugin):
 
         value = self.validate()        
         if value is None:
-            return 
+            return
+        
+        udType = getattr(self,'udType','type')
                 
         if UD_STORE.has_definition(self._target,self.type,name):
-            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,self.type,name),'error',['console'])
+            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,udType,name),'error',['console'])
             return
                   
         UD_STORE.set_definition(self._target,self.type,name,value)

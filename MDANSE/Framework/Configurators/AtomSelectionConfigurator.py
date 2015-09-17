@@ -36,7 +36,7 @@ import operator
 import numpy
 
 from MDANSE.Framework.UserDefinitionsStore import UD_STORE
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
 
 # The granularities at which the selection will be performed
@@ -76,20 +76,26 @@ class AtomSelectionConfigurator(IConfigurator):
         trajConfig = configuration[self._dependencies['trajectory']]
         
         if value is None:
-            value = 'all'
-        elif not isinstance(value,basestring):
-            raise ConfiguratorError("invalid type for atom selection. Must be a string", self)
+            value = ['all']
+        
+        if isinstance(value,basestring):
+            value = [value]
         
         self["value"] = value
         
-        if UD_STORE.has_definition(trajConfig["basename"],"atom_selection",value):
-            ud = UD_STORE.get_definition(trajConfig["basename"],"atom_selection",value)
-            self.update(ud)
-        else:        
-            parser = AtomSelectionParser(trajConfig["instance"].universe)
-            self["indexes"] = parser.parse(value)
-            self["expression"] = value
+        self["indexes"] = []
 
+        for v in value:
+        
+            if UD_STORE.has_definition(trajConfig["basename"],"atom_selection",v):
+                ud = UD_STORE.get_definition(trajConfig["basename"],"atom_selection",v)
+                self["indexes"].append(ud["indexes"])
+            else:        
+                parser = AtomSelectionParser(trajConfig["instance"].universe)
+                self["indexes"].append(parser.parse(v))
+
+        self["indexes"].sort()
+        
         self["n_selected_atoms"] = len(self["indexes"])
         atoms = sorted(trajConfig["universe"].atomList(), key = operator.attrgetter('index'))
         selectedAtoms = [atoms[idx] for idx in self["indexes"]]

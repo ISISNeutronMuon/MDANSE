@@ -84,25 +84,19 @@ class AtomTransmutationConfigurator(IConfigurator):
         trajConfig = configuration[self._dependencies['trajectory']]
                                                                 
         parser = AtomSelectionParser(trajConfig["instance"].universe)
-        
-        # If the input value is a dictionary, it must have a selection string as key and the element 
-        # to be transmutated to as value 
-        if isinstance(value,dict):
-            for expression,element in value.items():
-                indexes = parser.parse(element,expression)
-                self.transmutate(configuration, indexes, element)
-          
-        # Otherwise, it must be a string that will be found as a user-definition keys
-        elif isinstance(value,basestring):
-            if UD_STORE.has_definition(trajConfig["basename"],"atom_transmutation",value):                
-                ud = UD_STORE.get_definition(trajConfig["basename"],"atom_transmutation",value)
-                self.transmutate(configuration, ud["indexes"], ud["element"])
+
+        for expression,element in value:
+                  
+            # Otherwise, it must be a string that will be found as a user-definition keys
+            if not isinstance(expression,basestring):
+                raise ConfiguratorError("Wrong format for atom transmutation configurator.",self)
+                
+            if UD_STORE.has_definition(trajConfig["basename"],"atom_transmutation",expression):                
+                ud = UD_STORE.get_definition(trajConfig["basename"],"atom_selection",expression)
+                self.transmutate(configuration, ud["indexes"], element)
             else:
-                raise ConfiguratorError("wrong parameters type:  must be either a dictionary whose keys are an atom selection string and values are the target element \
-                or a list of string that match an user definition",self)
-        else:
-            raise ConfiguratorError("wrong parameters type:  must be either a dictionary whose keys are an atom selection string and values are the target element \
-            or a list of string that match an user definition",self)
+                indexes = parser.parse(expression)
+                self.transmutate(configuration, indexes, element)                    
 
     def transmutate(self, configuration, selection, element):
         '''

@@ -132,14 +132,21 @@ class IPlugin(wx.Panel):
     def currentWindow(self):
         
         return self._currentWindow
+    
+    def close(self):
+        
+        pass
                 
     def on_close_pane(self, event):
 
         d = wx.MessageDialog(None, 'Closing this plugin will also close all the other ones you plugged in in so far. Do you really want to close ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
         if d.ShowModal() == wx.ID_NO:
             return
-        
+                
         window = event.GetPane().window
+        
+        # Call the 'close' method the plugin to be closed
+        window.close()
         
         self._mgr.DetachPane(window)
         window.Destroy()

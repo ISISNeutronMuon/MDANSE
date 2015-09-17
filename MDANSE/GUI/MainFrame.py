@@ -286,9 +286,9 @@ or directly to the MDANSE mailing list:
                 
     def on_open_classes_registry(self,event):
         
-        from MDANSE.Framework.Plugins.RegistryViewerPlugin import RegistryViewerFrame
+        from MDANSE.GUI.RegistryViewer import RegistryViewer
         
-        f = RegistryViewerFrame(self)
+        f = RegistryViewer(self)
         
         f.Show()
 
@@ -325,26 +325,26 @@ or directly to the MDANSE mailing list:
                                                             
     def on_open_user_definitions(self,event):
         
-        from MDANSE.Framework.Plugins.UserDefinitionViewerPlugin import UserDefinitionViewerFrame
+        from MDANSE.GUI.UserDefinitionViewer import UserDefinitionViewer
         
-        f = UserDefinitionViewerFrame(self)
+        f = UserDefinitionViewer(self)
         f.Show()
 
     def on_open_converter(self,event):
 
+        from MDANSE.Framework.Plugins.JobPlugin import JobFrame
+
         item = self.GetMenuBar().FindItemById(event.GetId())
         converter = item.GetText()
-                
-        from MDANSE.Framework.Plugins.JobPlugin import JobFrame
-        
+                        
         f = JobFrame(self,self._converters[converter],"Trajectory converter")
         f.Show()
 
     def on_open_mdanse_elements_database(self, event):
 
-        from MDANSE.Framework.Plugins.PeriodicTablePlugin import PeriodicTableFrame
+        from MDANSE.GUI.PeriodicTableViewer import PeriodicTableViewer
                 
-        f = PeriodicTableFrame(self)
+        f = PeriodicTableViewer(self)
         
         f.Show()
 
