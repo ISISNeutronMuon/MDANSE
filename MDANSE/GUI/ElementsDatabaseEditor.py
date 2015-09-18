@@ -35,7 +35,7 @@ import os
 import wx
 import wx.grid as wxgrid
 
-from MDANSE import ELEMENTS, LOGGER
+from MDANSE import ELEMENTS
 from MDANSE.Core.Singleton import Singleton
 
 class PropertyDialog(wx.Dialog):

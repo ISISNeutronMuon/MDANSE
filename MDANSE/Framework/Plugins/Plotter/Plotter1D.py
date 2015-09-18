@@ -445,7 +445,7 @@ class Plotter1D(wx.Panel):
         self.figure.gca().legend(tuple(legend[0]), tuple(legend[1]), loc = self.legend_location, frameon = self.legend_frameon, shadow = self.legend_shadow, fancybox = self.legend_fancybox) 
         self.show_legend = True
         
-    def Plot(self, data, varname):
+    def plot(self, data, varname):
         if data is None:
             return
         self.set_axis_property(varname, data)

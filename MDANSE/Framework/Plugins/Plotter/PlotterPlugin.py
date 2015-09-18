@@ -170,10 +170,10 @@ class DataPanel(wx.Panel):
         qviewPanel = wx.Panel(self)
         sb_sizer2 =  wx.BoxSizer(wx.VERTICAL)
                       
-        self.QV_Figure = Figure(figsize=(1,1))
-        self.QV_Canvas = FigureCanvasWxAgg(qviewPanel, wx.ID_ANY, self.QV_Figure)
-        self.QV_Plot = self.QV_Figure.add_axes([0.01,0.01,0.98,0.98])
-        sb_sizer2.Add(self.QV_Canvas, 1, wx.ALL|wx.EXPAND, 2)
+        self.qvFigure = Figure(figsize=(1,1))
+        self.qvCanvas = FigureCanvasWxAgg(qviewPanel, wx.ID_ANY, self.qvFigure)
+        self.qvPlot = self.qvFigure.add_axes([0.01,0.01,0.98,0.98])
+        sb_sizer2.Add(self.qvCanvas, 1, wx.ALL|wx.EXPAND, 2)
         
         qviewPanel.SetSizer(sb_sizer2)        
         sb_sizer2.Fit(qviewPanel)
@@ -265,23 +265,23 @@ class DataPanel(wx.Panel):
             self.plot_type.SetStringSelection(types[-1])
 
         self.selectedVar = var
-        self.QV_plot(data)            
+        self.plot_quickview(data)            
     
-    def QV_plot(self, data):
-        self.QV_Plot.clear()
+    def plot_quickview(self, data):
+        self.qvPlot.clear()
         ndim = data.ndim
 
         if ndim == 1:
-            self.QV_Plot.plot(data)
-            self.QV_Figure.gca().legend((self.selectedVar,None), loc = 'best', frameon = True, shadow = True, fancybox = False) 
+            self.qvPlot.plot(data)
+            self.qvFigure.gca().legend((self.selectedVar,None), loc = 'best', frameon = True, shadow = True, fancybox = False) 
         elif ndim == 2:
-            self.QV_Plot.imshow(data.T, interpolation='nearest', origin='lower')
+            self.qvPlot.imshow(data.T, interpolation='nearest', origin='lower')
             
         else:
-            self.QV_Plot.text(0.1, 0.5, 'No QuickView for data with dimension > 2 ')
-        self.QV_Plot.set_aspect('auto', 'datalim')
+            self.qvPlot.text(0.1, 0.5, 'No QuickView for data with dimension > 2 ')
+        self.qvPlot.set_aspect('auto')
 
-        self.QV_Canvas.draw()
+        self.qvCanvas.draw()
 
     def on_plot(self, event=None):
         if self.selectedVar is None:
@@ -292,12 +292,12 @@ class DataPanel(wx.Panel):
         if plot_type == 'Line':
             Plotter = Plotter1D(self)
             self.plotterNotebook.AddPage(Plotter, "%s(%s)"%(self.selectedVar,plot_type))
-            Plotter.Plot(data, self.selectedVar)
+            Plotter.plot(data, self.selectedVar)
             
         elif plot_type == 'Image':
             Plotter = Plotter2D(self)
             self.plotterNotebook.AddPage(Plotter, "%s(%s)"%(self.selectedVar,plot_type))
-            Plotter.Plot(data, self.selectedVar)
+            Plotter.plot(data, self.selectedVar)
             
         elif plot_type == 'Elevation':
             Plotter = Plotter3D(self.parent)
@@ -325,13 +325,13 @@ class DataPanel(wx.Panel):
         plot_type = self.plot_type.GetValue()
         if plot_type == 'Line' and self.selectedPlot.type == 'line':     
             data = self.dataproxy[self.selectedVar]['data']
-            self.selectedPlot.Plot(data, self.selectedVar)
+            self.selectedPlot.plot(data, self.selectedVar)
             
         if plot_type == 'Image' and self.selectedPlot.type == 'image': 
             data = self.dataproxy[self.selectedVar]['data']
             if hasattr(self.selectedPlot, 'AddPane'):
                 Plotter = Plotter2D(self.selectedPlot)
-                Plotter.Plot(data, self.selectedVar)
+                Plotter.plot(data, self.selectedVar)
                 self.selectedPlot.AddPane(Plotter, wxaui.AuiPaneInfo().Right().CloseButton(True).CaptionVisible(True).Caption(self.selectedVar).MinSize((200,-1)))
                 self.selectedPlot.Update()
             else:
@@ -340,10 +340,10 @@ class DataPanel(wx.Panel):
                 multiplot = MultiViewPanel(self)
                 
                 NewPlotter = Plotter2D(multiplot)
-                NewPlotter.Plot(data, self.selectedVar)
+                NewPlotter.plot(data, self.selectedVar)
                 
                 OldPlotter = Plotter2D(multiplot)
-                OldPlotter.rePlot(self.selectedPlot)
+                OldPlotter.replot(self.selectedPlot)
 
                 multiplot.AddPane(NewPlotter, wxaui.AuiPaneInfo().Right().CloseButton(True).CaptionVisible(True).Caption(self.selectedVar).MinSize((200,-1)))
                 multiplot.AddPane(OldPlotter, wxaui.AuiPaneInfo().Center().CloseButton(True).CaptionVisible(True).Caption(self.selectedPlot.varname))

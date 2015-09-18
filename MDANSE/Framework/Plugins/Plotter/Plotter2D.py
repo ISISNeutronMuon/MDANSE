@@ -104,14 +104,7 @@ class Plotter2D(wx.Panel):
         
         self.slice_coords = []
         self.slice_widget = []
-        
-#         self.segment_slice_canvas = None        
-#         self.segment_slice_dialog = None
-#         self.segment_slice_plot = None
-#         self.segment_slice_fig = None 
-#         self.segment_slice_color_index = 0
-#         self.segment_slice_legend = []
-        
+                
         self.cross_slice_canvas = None 
         self.cross_slice_dialog = None
         self.h_cross_slice_plot = None
@@ -429,19 +422,27 @@ class Plotter2D(wx.Panel):
         return vslice, hslice
         
     def set_lim(self):
+        
         self.Xmin, self.Xmax = self.Xaxis[0], self.Xaxis[-1]
+        if self.Xmin == self.Xmax:
+            self.Xmin -= 1.0e-9
+            self.Xmax += 1.0e-9
+        
         self.Ymin, self.Ymax = self.Yaxis[0], self.Yaxis[-1]
+        if self.Ymin == self.Ymax:
+            self.Ymin -= 1.0e-9
+            self.Ymax += 1.0e-9
     
     def reset_axis(self):
-        self.set_lim()
-        self.figure.gca().axis([self.Xmin, self.Xmax, self.Ymin, self.Ymax]) 
+                
+        self.figure.gca().axis([self.Xmin, self.Xmax, self.Ymin, self.Ymax])
         self.canvas.draw()
     
-    def Plot(self, data, varname, Xaxis = None, Xunit = None, Yaxis = None, Yunit = None, transposition = True):
+    def plot(self, data, varname, Xaxis = None, Xunit = None, Yaxis = None, Yunit = None, transposition = True):
         if data is None:
             return
         
-        if not (Xaxis != None and Xunit != None and Yaxis != None and Yunit != None):
+        if ((Xaxis is None) or (Xunit is None) or (Yaxis is None) or (Yunit is None)):
             self.set_axis_property(varname,data)
         else:
             self.Xaxis = Xaxis
@@ -457,9 +458,8 @@ class Plotter2D(wx.Panel):
         self.varname = varname
         
         self.subplot = self.figure.add_subplot( 111 )   
-        
+                
         self.ax = self.subplot.imshow(self.data, interpolation=self.interpolation, origin='lower')
-
 
         self.subplot.set_aspect('auto')
         self.aspect = 'auto'
@@ -468,7 +468,8 @@ class Plotter2D(wx.Panel):
         self.Ylabel = self.Yaxis_label
         self.figure.gca().set_xlabel(self.Xlabel + self.fmt_Xunit )
         self.figure.gca().set_ylabel(self.Ylabel + self.fmt_Yunit )
-        
+         
+        self.set_lim()
         self.set_ticks()
         self.reset_axis()
         
@@ -476,7 +477,7 @@ class Plotter2D(wx.Panel):
         
         self.canvas.draw()
     
-    def rePlot(self, oldinstance):
+    def replot(self, oldinstance):
         
         self.data = oldinstance.data
         self.Xaxis = oldinstance.Xaxis
@@ -529,9 +530,10 @@ class Plotter2D(wx.Panel):
             
              
     def compute_conversion_factor(self):
+
         try:
             self.Xunit_conversion_factor = magnitude.mg(1., self.Xinit_unit, self.Xunit).toval()
-        except magnitude.MagnitudeError:
+        except magnitude.MagnitudeError:            
             self.Xunit_conversion_factor = 1.0
 
         try:
@@ -543,14 +545,14 @@ class Plotter2D(wx.Panel):
     def set_ticks(self):
 
         self.compute_conversion_factor()
-        
+                
         self.figure.gca().xaxis.set_major_locator(ScaledLocator(dx = self.Xunit_conversion_factor))
         self.figure.gca().xaxis.set_major_formatter(ScaledFormatter(dx = self.Xunit_conversion_factor))      
         
         self.figure.gca().yaxis.set_major_locator(ScaledLocator(dx = self.Yunit_conversion_factor))
         self.figure.gca().yaxis.set_major_formatter(ScaledFormatter(dx = self.Yunit_conversion_factor)) 
         
-        self.ax.set_extent([self.Xaxis[0], self.Xaxis[-1], self.Yaxis[0], self.Yaxis[-1]])
+        self.ax.set_extent([self.Xmin, self.Xmax, self.Ymin, self.Ymax])
         
     def set_axis_property(self, varname, data):
         oldXunit = self.Xinit_unit
