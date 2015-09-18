@@ -274,12 +274,12 @@ class Plotter2D(wx.Panel):
                 
         elif event.button == 1: # CROSS SLICING CASE
             
-            x, y = event.xdata , event.ydata 
+            x, y = event.xdata , event.ydata
             dx = (self.Xmax - self.Xmin)/float(self.data.shape[1])
             dy = (self.Ymax - self.Ymin)/float(self.data.shape[0])
             X = numpy.floor((x - self.Xmin)/dx)
             Y = numpy.floor((y - self.Ymin)/dy)
-            vslice, _ = self.extract_cross_slice(X, Y)
+            vslice, hslice = self.extract_cross_slice(X, Y)
             
             if not self.parent.unique_slicer is None:
                 self.cross_slice_dialog = self.parent.unique_slicer.dialog
@@ -330,9 +330,10 @@ class Plotter2D(wx.Panel):
             self.slice_widget.append(self.subplot.axhline(y=y, linewidth=3, color='%s'%self.get_circular_color(self.cross_slice_color_index)))
             
             v_tmp_plot = self.v_cross_slice_plot.plot(self.Xaxis*self.Xunit_conversion_factor, vslice, color='%s'%self.get_circular_color(self.cross_slice_color_index))
+            h_tmp_plot = self.h_cross_slice_plot.plot(self.Yaxis*self.Yunit_conversion_factor, hslice, color='%s'%self.get_circular_color(self.cross_slice_color_index))
             
-            self.v_cross_slice_legend.append([v_tmp_plot[0],'x = %d'%x])
-            self.h_cross_slice_legend.append([v_tmp_plot[0],'y = %d'%y])
+            self.v_cross_slice_legend.append([v_tmp_plot[0],'%s = %8.3f' % (self.Xlabel,x)])
+            self.h_cross_slice_legend.append([h_tmp_plot[0],'%s = %8.3f' % (self.Ylabel,y)])
             
             self.v_cross_slice_plot.set_xlabel(self.Xlabel + self.fmt_Xunit)
             self.h_cross_slice_plot.set_xlabel(self.Ylabel + self.fmt_Yunit)
@@ -401,19 +402,7 @@ class Plotter2D(wx.Panel):
     def get_circular_color(self, idx):
         circ_idx = idx%len(self.color_list)
         return self.color_list.values()[circ_idx]
-                
-    def extract_segment_slice(self, coords):
-        x, y = coords[0]
-        xp, yp = coords[1]
-        dist =  numpy.sqrt((x-xp)**2+(y-yp)**2)
-        
-        RX = numpy.linspace(x, xp, dist)
-        RY = numpy.linspace(y, yp, dist)
-        X, Y = RX.astype(numpy.int), RY.astype(numpy.int)
-        # Extract the values along the line
-        slic = self.data[X, Y]
-        return slic, RX, RY
-    
+                    
     def extract_cross_slice(self, x, y):
         x = int(x)
         y = int(y)
