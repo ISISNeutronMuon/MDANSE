@@ -30,8 +30,8 @@ Created on Jun 30, 2015
 :author: Eric C. Pellegrini
 '''
 
-from MDANSE.Framework.UserDefinitionsStore import UD_STORE
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionWidget, UserDefinitionsDialog
+from MDANSE.Framework.UserDefinitionStore import UD_STORE
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionWidget, UserDefinitionDialog
 
 class AtomListWidget(UserDefinitionWidget):
     
@@ -39,7 +39,7 @@ class AtomListWidget(UserDefinitionWidget):
 
     def on_new_user_definition(self,event):
 
-        dlg = UserDefinitionsDialog(self,self._trajectory,self.type)
+        dlg = UserDefinitionDialog(self,self._trajectory,self.type)
         
         dlg.plugin.set_natoms(self._configurator._nAtoms)
                 

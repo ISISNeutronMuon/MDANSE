@@ -39,11 +39,11 @@ import wx.aui as wxaui
 from MDANSE import LOGGER, REGISTRY
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Plugins.ComponentPlugin import ComponentPlugin
-from MDANSE.Framework.UserDefinitionsStore import UD_STORE
+from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Widgets.IWidget import IWidget
 from MDANSE.GUI import DATA_CONTROLLER
 
-class UserDefinitionsDialog(wx.Dialog):
+class UserDefinitionDialog(wx.Dialog):
     
     def __init__(self,parent,trajectory,udType,*args,**kwargs):
 
@@ -114,7 +114,7 @@ class UserDefinitionWidget(IWidget):
     
     def on_new_definition(self,event):
         
-        dlg = UserDefinitionsDialog(None,self._trajectory,self.type)
+        dlg = UserDefinitionDialog(None,self._trajectory,self.type)
         
         dlg.ShowModal()
         
@@ -138,7 +138,7 @@ class UserDefinitionWidget(IWidget):
         
         self._availableUDs.SetItems(uds)
 
-class UserDefinitionsPlugin(ComponentPlugin):
+class UserDefinitionPlugin(ComponentPlugin):
     
     category = ('User definition',)
     

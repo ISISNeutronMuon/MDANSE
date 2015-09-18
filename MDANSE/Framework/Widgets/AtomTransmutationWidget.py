@@ -34,7 +34,7 @@ import wx
 
 from MDANSE import ELEMENTS
 
-from MDANSE.Framework.UserDefinitionsStore import UD_STORE
+from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Widgets.AtomSelectionWidget import AtomSelectionWidget
 from MDANSE.GUI.Icons import ICONS
 

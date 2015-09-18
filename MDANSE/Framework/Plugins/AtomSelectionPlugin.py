@@ -40,7 +40,7 @@ from MDANSE import LOGGER, REGISTRY
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser, AtomSelectionParserError
 from MDANSE.Framework.Plugins.DataPlugin import get_data_plugin 
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionsPlugin
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionPlugin
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
 class Query(object):
@@ -149,7 +149,7 @@ class Query(object):
         
         self._parser = parser
                             
-class AtomSelectionPlugin(UserDefinitionsPlugin):
+class AtomSelectionPlugin(UserDefinitionPlugin):
     
     type = 'atom_selection'
     
@@ -167,7 +167,7 @@ class AtomSelectionPlugin(UserDefinitionsPlugin):
 
         pub.subscribe(self.msg_select_atoms_from_viewer, 'msg_select_atoms_from_viewer')
 
-        UserDefinitionsPlugin.__init__(self,parent,size=(800,500))
+        UserDefinitionPlugin.__init__(self,parent,size=(800,500))
         
     def build_panel(self):
                                                 

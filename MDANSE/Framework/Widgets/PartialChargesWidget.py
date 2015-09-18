@@ -34,7 +34,7 @@ import os
 
 import wx
 
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionsDialog, UserDefinitionWidget
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionDialog, UserDefinitionWidget
 
 class PartialChargesWidget(UserDefinitionWidget):
         
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     
     app = wx.App(False)
     
-    p = UserDefinitionsDialog(None,t,'partial_charges')
+    p = UserDefinitionDialog(None,t,'partial_charges')
         
     p.SetSize((800,800))
             

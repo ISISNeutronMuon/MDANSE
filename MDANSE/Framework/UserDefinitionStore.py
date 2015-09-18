@@ -5,11 +5,11 @@ from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
 
-class UserDefinitionsStoreError(Error):
+class UserDefinitionStoreError(Error):
     pass
 
 
-class UserDefinitionsStore(dict):
+class UserDefinitionStore(dict):
     '''
     This class is used to register, save and delete MDANSE user definitions (a.k.a. UD).
     
@@ -34,12 +34,12 @@ class UserDefinitionsStore(dict):
         Load the user definitions.
         '''
 
-        if not os.path.exists(UserDefinitionsStore.UD_PATH):
+        if not os.path.exists(UserDefinitionStore.UD_PATH):
             return
 
         # Try to open the UD file.
         try:
-            f = open(UserDefinitionsStore.UD_PATH, "rb")
+            f = open(UserDefinitionStore.UD_PATH, "rb")
             UD = cPickle.load(f)
   
         # If for whatever reason the pickle file loading failed do not even try to restore it
@@ -59,7 +59,7 @@ class UserDefinitionsStore(dict):
         '''
                     
         try:                        
-            f = open(UserDefinitionsStore.UD_PATH, "wb")
+            f = open(UserDefinitionStore.UD_PATH, "wb")
         except IOError:
             return
         else:
@@ -75,7 +75,7 @@ class UserDefinitionsStore(dict):
         '''
             
         if not self.has_definition(target,section,name):
-            raise UserDefinitionsStoreError('The item %r could not be found' % (target,section,name))
+            raise UserDefinitionStoreError('The item %r could not be found' % (target,section,name))
 
         ud = self[target][section][name]
             
@@ -99,7 +99,7 @@ class UserDefinitionsStore(dict):
     def set_definition(self, target, section, name, value):
                         
         if self.has_definition(target, section, name):
-            raise UserDefinitionsStoreError('Item %s is already registered as an user definition. You must delete it before setting it.' % (target,section,name))
+            raise UserDefinitionStoreError('Item %s is already registered as an user definition. You must delete it before setting it.' % (target,section,name))
 
         self.setdefault(target,{}).setdefault(section,{})[name] = value                                          
 
@@ -128,4 +128,4 @@ class UserDefinitionsStore(dict):
         
         return self[target][section].has_key(name)
         
-UD_STORE = UserDefinitionsStore()
+UD_STORE = UserDefinitionStore()

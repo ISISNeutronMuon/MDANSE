@@ -36,7 +36,7 @@ import wx
 import wx.aui as wxaui
 
 from MDANSE import LOGGER
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionsPlugin
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionPlugin
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule, get_chemical_objects_dict
 
 class AtomNameDropTarget(wx.TextDropTarget):
@@ -69,7 +69,7 @@ class AtomNameDropTarget(wx.TextDropTarget):
                 
         self._atoms.Append([data])
                 
-class AtomsListPlugin(UserDefinitionsPlugin):
+class AtomsListPlugin(UserDefinitionPlugin):
     
     type = 'atoms_list'
     
@@ -87,7 +87,7 @@ class AtomsListPlugin(UserDefinitionsPlugin):
         
         self._selection = []
                                 
-        UserDefinitionsPlugin.__init__(self,parent,size=(800,500))
+        UserDefinitionPlugin.__init__(self,parent,size=(800,500))
                                                 
     def build_panel(self):
 

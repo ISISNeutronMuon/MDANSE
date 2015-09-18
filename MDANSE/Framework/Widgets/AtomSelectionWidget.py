@@ -35,8 +35,8 @@ import os
 import wx
 
 from MDANSE.Externals.pubsub import pub
-from MDANSE.Framework.UserDefinitionsStore import UD_STORE
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionsDialog, UserDefinitionWidget
+from MDANSE.Framework.UserDefinitionStore import UD_STORE
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionDialog, UserDefinitionWidget
 from MDANSE.GUI.Icons import ICONS
 
 class AtomSelectionWidget(UserDefinitionWidget):
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     
     app = wx.App(False)
     
-    p = UserDefinitionsDialog(None,t,'atoms_list')
+    p = UserDefinitionDialog(None,t,'atoms_list')
         
     p.SetSize((800,800))
             

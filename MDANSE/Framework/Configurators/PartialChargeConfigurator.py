@@ -33,7 +33,7 @@ Created on Jun 9, 2015
 import os
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator,ConfiguratorError
-from MDANSE.Framework.UserDefinitionsStore import UD_STORE
+from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
 class PartialChargeConfigurator(IConfigurator):
     """

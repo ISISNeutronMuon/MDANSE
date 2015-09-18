@@ -34,7 +34,7 @@ import wx
 
 from MDANSE import LOGGER
 from MDANSE.Externals.pubsub import pub
-from MDANSE.Framework.UserDefinitionsStore import UD_STORE
+from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
 class UserDefinitionViewer(wx.Frame):
     

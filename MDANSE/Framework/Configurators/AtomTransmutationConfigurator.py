@@ -31,7 +31,7 @@ Created on Mar 30, 2015
 '''
 
 from MDANSE import ELEMENTS
-from MDANSE.Framework.UserDefinitionsStore import UD_STORE
+from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
         

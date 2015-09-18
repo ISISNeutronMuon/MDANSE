@@ -34,7 +34,7 @@ import os
 
 import wx
 
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionsDialog, UserDefinitionWidget
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionDialog, UserDefinitionWidget
         
 class QVectorsWidget(UserDefinitionWidget):
         
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     
     app = wx.App(False)
     
-    p = UserDefinitionsDialog(None,t,'q_vectors')
+    p = UserDefinitionDialog(None,t,'q_vectors')
         
     p.SetSize((800,800))
             

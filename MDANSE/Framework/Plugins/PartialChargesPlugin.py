@@ -38,9 +38,9 @@ import wx.aui as wxaui
 import wx.grid as wxgrid
 
 from MDANSE import LOGGER
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionsPlugin
+from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionPlugin
 
-class PartialChargesPlugin(UserDefinitionsPlugin):
+class PartialChargesPlugin(UserDefinitionPlugin):
 
     type = 'partial_charges'
 
@@ -54,7 +54,7 @@ class PartialChargesPlugin(UserDefinitionsPlugin):
     
         self._selectedAtoms = []
                         
-        UserDefinitionsPlugin.__init__(self, parent)
+        UserDefinitionPlugin.__init__(self, parent)
                         
     def build_panel(self):
 

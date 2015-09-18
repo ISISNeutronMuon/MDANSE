@@ -30,7 +30,7 @@ Created on Mar 30, 2015
 :author: Bachir Aoun and Eric C. Pellegrini
 '''
 
-from MDANSE.Framework.UserDefinitionsStore import UD_STORE
+from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
         
