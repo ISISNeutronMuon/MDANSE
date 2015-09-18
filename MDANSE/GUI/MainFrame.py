@@ -55,8 +55,8 @@ def excepthook(error, message, tback):
     
     Redirect the exception information to the MDANSE logger at the ERROR level.
         
-    @param typ: the exception class.
-    @type typ: exception
+    :param typ: the exception class.
+    :type typ: exception
     
     @param value: the exception instance.
     @type value: exception
