@@ -158,7 +158,7 @@ class UserDefinitionViewer(wx.Frame):
         if keycode == wx.WXK_DELETE:
             
             currentItem = self._tree.GetSelection()
-
+            
             level = self.get_item_level(currentItem)
             
             if level > 3:
@@ -169,25 +169,27 @@ class UserDefinitionViewer(wx.Frame):
                 return
 
             currentItemName = str(self._tree.GetItemText(currentItem))
+            
+            print "on_delete", currentItemName
 
             if level == 1:
                 UD_STORE.remove_target(currentItemName)                
             elif level == 2:
-                targetItem = self._tree.GetParent(currentItem)
+                targetItem = self._tree.GetItemParent(currentItem)
                 targetItemName = str(self._tree.GetItemText(targetItem))
                 UD_STORE.remove_section(targetItemName,currentItemName)
             elif level == 3:
-                sectionItem = self._tree.GetParent(currentItem)
+                sectionItem = self._tree.GetItemParent(currentItem)
                 sectionItemName = str(self._tree.GetItemText(sectionItem))
-                targetItem = self._tree.GetParent(sectionItem)
+                targetItem = self._tree.GetItemParent(sectionItem)
                 targetItemName = str(self._tree.GetItemText(targetItem))
                 UD_STORE.remove_definition(targetItemName,sectionItemName,currentItemName)
             else:
                 return
             
-            self._tree.DeleteAllItems()
+            self._tree.DeleteChildren(currentItem)
+            self._tree.Delete(currentItem)
             self._udTree.clear()
-            self.build_plugins_tree()
             self._info.Clear()
             
             pub.sendMessage("msg_set_ud")
@@ -216,11 +218,11 @@ class UserDefinitionViewer(wx.Frame):
         if not self._editable:
             return
         
-        currentItem = self._tree.GetSelection()
+        currentItem = event.GetItem()
         
         currentItemName = str(self._tree.GetItemText(currentItem))   
         newItemName = self._tree.GetEditControl().GetValue()
-        
+
         if currentItemName == newItemName:
             return
         
@@ -230,7 +232,7 @@ class UserDefinitionViewer(wx.Frame):
         targetItemName = str(self._tree.GetItemText(targetItem))
 
         currentItemData = self._tree.GetItemData(currentItem)
-                
+        
         UD_STORE.set_definition(targetItemName,sectionItemName,newItemName,currentItemData.GetData())
         UD_STORE.remove_definition(targetItemName,sectionItemName,currentItemName)
 
@@ -242,6 +244,6 @@ class UserDefinitionViewer(wx.Frame):
 
 if __name__ == "__main__":
     app = wx.App(False)
-    f = UserDefinitionViewer(None,ud=['protein_in_periodic_universe.nc','atom_selection',"sfdfdfsd"],editable=False)
+    f = UserDefinitionViewer(None,ud=['protein_in_periodic_universe.nc','atom_selection',"sfdfdfsd"],editable=True)
     f.Show()
     app.MainLoop()    
