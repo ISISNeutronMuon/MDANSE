@@ -38,7 +38,6 @@ import wx.aui as wxaui
 
 from MDANSE import LOGGER, REGISTRY
 from MDANSE.Externals.pubsub import pub
-from MDANSE.Framework.Plugins.ComponentPlugin import ComponentPlugin
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Widgets.IWidget import IWidget
 from MDANSE.GUI import DATA_CONTROLLER
@@ -61,14 +60,6 @@ class UserDefinitionDialog(wx.Dialog):
                 
         pub.sendMessage("msg_set_data", plugin=self._plugin)
         
-        self.Bind(wx.EVT_CLOSE, self.on_quit)
-
-    def on_quit(self, event):
-        
-        d = wx.MessageDialog(None,'Do you really want to quit ?','Question',wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
-        if d.ShowModal() == wx.ID_YES:
-            self.Destroy()           
-
     @property
     def plugin(self):
         
@@ -137,56 +128,3 @@ class UserDefinitionWidget(IWidget):
         uds = UD_STORE.filter(self._basename, self.type)
         
         self._availableUDs.SetItems(uds)
-
-class UserDefinitionPlugin(ComponentPlugin):
-    
-    category = ('User definition',)
-    
-    def __init__(self,parent,*args,**kwargs):
-        
-        ComponentPlugin.__init__(self,parent,size=(800,500))
-        
-        self.add_ud_panel()
-                
-    def add_ud_panel(self):
-
-        udPanel = wx.Panel(self._mainPanel,wx.ID_ANY)
-                
-        sb = wx.StaticBox(udPanel, wx.ID_ANY)
-        actionsSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
-                        
-        self._udName = wx.TextCtrl(udPanel, wx.ID_ANY, style = wx.TE_PROCESS_ENTER)
-        saveButton  = wx.Button(udPanel, wx.ID_ANY, label="Set")
-        
-        actionsSizer.Add(self._udName, 1, wx.ALL|wx.EXPAND, 5)
-        actionsSizer.Add(saveButton, 0, wx.ALL, 5)
-        
-        udPanel.SetSizer(actionsSizer)
-        
-        self._mainPanel.GetSizer().Add(udPanel,0,wx.EXPAND|wx.ALL,5)
-
-        self.Bind(wx.EVT_BUTTON, self.on_set_ud, saveButton)
-
-    def on_set_ud(self, event):
-
-        name = str(self._udName.GetValue().strip())
-        
-        if not name:
-            LOGGER('Empty user definition name.','error',['console'])
-            return
-
-        value = self.validate()        
-        if value is None:
-            return
-        
-        udType = getattr(self,'udType','type')
-                
-        if UD_STORE.has_definition(self._target,self.type,name):
-            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,udType,name),'error',['console'])
-            return
-                  
-        UD_STORE.set_definition(self._target,self.type,name,value)
-                 
-        pub.sendMessage("msg_set_ud")
-
-        LOGGER('User definition %r successfully set.' % name,'info',['console'])
