@@ -475,15 +475,8 @@ class PeriodicTableViewer(wx.Frame):
         mainPanel.SetSizer(mainSizer)
         self.SetSize(mainPanel.GetBestSize())
 
-        self.Bind(wx.EVT_CLOSE,self.on_quit)        
         self.Bind(wx.EVT_BUTTON,self.on_open_database,edit)
-                   
-    def on_quit(self, event):
-
-        d = wx.MessageDialog(None,'Do you really want to quit ?','Question',wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
-        if d.ShowModal() == wx.ID_YES:
-            self.Destroy()
-            
+                               
     def on_open_database(self,event):
         
         f = ElementsDatabaseEditor(self)
