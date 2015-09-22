@@ -119,7 +119,7 @@ class InputDirectoryWidget(PreferencesItemWidget):
                         
 WIDGETS = dict([(v.type,v) for v in PreferencesItemWidget.__subclasses__()])    
 
-class PreferencesSettingsDialog(wx.Dialog):
+class PreferencesSettings(wx.Dialog):
     
     def __init__(self, parent=None):
         
@@ -156,14 +156,12 @@ class PreferencesSettingsDialog(wx.Dialog):
         sb = wx.StaticBox(self, wx.ID_ANY)
         sbSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
         
-        cancelButton = wx.Button(self, wx.ID_ANY, label="Cancel")
         defaultButton = wx.Button(self, wx.ID_ANY, label="Default")
         applyButton = wx.Button(self, wx.ID_ANY, label="Apply")
         okButton = wx.Button(self, wx.ID_ANY, label="OK")
         
-        sbSizer.Add(cancelButton, 0, wx.ALL, 5)
-        sbSizer.Add((-1,-1), 1, wx.ALL|wx.EXPAND, 5)
         sbSizer.Add(defaultButton, 0, wx.ALL, 5)
+        sbSizer.Add((-1,-1), 1, wx.ALL|wx.EXPAND, 5)
         sbSizer.Add(applyButton, 0, wx.ALL, 5)
         sbSizer.Add(okButton, 0, wx.ALL, 5)
                     
@@ -176,7 +174,6 @@ class PreferencesSettingsDialog(wx.Dialog):
         self.SetSizer(self._sizer)
                     
         self.Bind(wx.EVT_CLOSE, self.on_cancel)
-        self.Bind(wx.EVT_BUTTON, self.on_cancel, cancelButton)
         self.Bind(wx.EVT_BUTTON, self.on_default, defaultButton)
         self.Bind(wx.EVT_BUTTON, self.on_apply, applyButton)
         self.Bind(wx.EVT_BUTTON, self.on_ok, okButton)
@@ -223,7 +220,7 @@ if __name__ == "__main__":
     
     app = wx.App(False)
     
-    d = PreferencesSettingsDialog(None)
+    d = PreferencesSettings(None)
     
     d.ShowModal()
         

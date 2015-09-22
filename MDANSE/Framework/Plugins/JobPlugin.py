@@ -67,14 +67,12 @@ class JobPlugin(ComponentPlugin):
         sb = wx.StaticBox(self._main, wx.ID_ANY)
         sbSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
 
-        cancelButton = wx.Button(self._main, label = "Cancel")                                                        
         helpButton = wx.Button(self._main, label = "Help")                                                        
         saveButton = wx.Button(self._main, label = "Save")
         runButton = wx.Button(self._main, label = "Run")
 
-        sbSizer.Add(cancelButton, 0, wx.ALL|wx.EXPAND, 5)
-        sbSizer.Add((-1,-1), 1, wx.ALL|wx.EXPAND, 5)
         sbSizer.Add(helpButton, 0, wx.ALL|wx.EXPAND, 5)
+        sbSizer.Add((-1,-1), 1, wx.ALL|wx.EXPAND, 5)
         sbSizer.Add(saveButton, 0, wx.ALL|wx.EXPAND, 5)
         sbSizer.Add(runButton, 0, wx.ALL|wx.EXPAND, 5)
 
@@ -89,7 +87,6 @@ class JobPlugin(ComponentPlugin):
 
         self._mgr.Update()
         
-        self.Bind(wx.EVT_BUTTON, self.on_close, cancelButton)
         self.Bind(wx.EVT_BUTTON, self.on_help, helpButton)
         self.Bind(wx.EVT_BUTTON, self.on_save, saveButton)
         self.Bind(wx.EVT_BUTTON, self.on_run, runButton)
@@ -182,20 +179,12 @@ class JobFrame(wx.Frame):
         plugin = REGISTRY['plugin'][self._jobType](self)
         
         pub.sendMessage("msg_set_data", plugin=plugin)
-        
-        self.Bind(wx.EVT_CLOSE, self.on_quit)
-        
-    def on_quit(self, event):
-        
-        d = wx.MessageDialog(None,'Do you really want to quit ?','Question',wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
-        if d.ShowModal() == wx.ID_YES:
-            self.Destroy()           
-        
+                        
 if __name__ == "__main__":
             
     filename = os.path.join(os.path.dirname(PLATFORM.package_directory()),'Data','Trajectories','MMTK','protein_in_periodic_universe.nc')
     
     app = wx.App(False)
-    f = JobFrame(None,'ac',filename)
+    f = JobFrame(None,'msd',filename)
     f.Show()
     app.MainLoop()            
