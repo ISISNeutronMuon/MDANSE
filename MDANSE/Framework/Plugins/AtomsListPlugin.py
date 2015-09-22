@@ -36,7 +36,7 @@ import wx
 import wx.aui as wxaui
 
 from MDANSE import LOGGER
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionPlugin
+from MDANSE.Framework.Plugins.UserDefinitionPlugin import UserDefinitionPlugin
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule, get_chemical_objects_dict
 
 class AtomNameDropTarget(wx.TextDropTarget):
@@ -115,7 +115,7 @@ class AtomsListPlugin(UserDefinitionPlugin):
         gbSizer.Add(label1, (0,0), flag=wx.EXPAND)
         gbSizer.Add(label2, (0,1), flag=wx.EXPAND)
     
-        self._molecules = wx.TreeCtrl(self._mainPanel, wx.ID_ANY, style=wx.TR_DEFAULT_STYLE|wx.LB_HSCROLL|wx.LB_NEEDED_SB)
+        self._molecules = wx.TreeCtrl(self._mainPanel, wx.ID_ANY, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT)
                 
         self._atoms = wx.ListCtrl(self._mainPanel, wx.ID_ANY)
         

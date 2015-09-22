@@ -38,7 +38,7 @@ import wx.aui as wxaui
 import wx.grid as wxgrid
 
 from MDANSE import LOGGER
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionPlugin
+from MDANSE.Framework.Plugins.UserDefinitionPlugin import UserDefinitionPlugin
 
 class PartialChargesPlugin(UserDefinitionPlugin):
 

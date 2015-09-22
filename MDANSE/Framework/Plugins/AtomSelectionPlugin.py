@@ -40,7 +40,7 @@ from MDANSE import LOGGER, REGISTRY
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser, AtomSelectionParserError
 from MDANSE.Framework.Plugins.DataPlugin import get_data_plugin 
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionPlugin
+from MDANSE.Framework.Plugins.UserDefinitionPlugin import UserDefinitionPlugin
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
 class Query(object):

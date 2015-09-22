@@ -38,7 +38,7 @@ import wx.grid as wxgrid
 from wx.lib.delayedresult import startWorker
 
 from MDANSE import LOGGER, REGISTRY
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionPlugin
+from MDANSE.Framework.Plugins.UserDefinitionPlugin import UserDefinitionPlugin
 from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.GUI.ComboWidgets.ProgressBar import ProgressBar
 
