@@ -37,11 +37,11 @@ import wx.html as wxhtml
 
 from MDANSE import PLATFORM, REGISTRY
 
-class RegistryViewer(wx.Frame):
+class RegistryViewer(wx.Dialog):
     
     def __init__(self, parent, *args, **kwargs):
 
-        wx.Frame.__init__(self, parent, wx.ID_ANY, size = (800,400), title="Registry viewer", style=wx.DEFAULT_FRAME_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, size = (800,400), title="Registry viewer", style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
 
         mainPanel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
 
@@ -58,7 +58,6 @@ class RegistryViewer(wx.Frame):
         
         mainPanel.SetSizer(mainSizer)        
 
-        self.Bind(wx.EVT_CLOSE, self.on_quit)                
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_double_click_data)
 
         self.set_plugins_tree(self._root, REGISTRY._registry)           
@@ -90,15 +89,10 @@ class RegistryViewer(wx.Frame):
         moduleDocPath = os.path.join(PLATFORM.help_path(), moduleFullName+'.html')
                 
         self._info.LoadPage(moduleDocPath)
-
-    def on_quit(self, event):
-        
-        d = wx.MessageDialog(None,'Do you really want to quit ?','Question',wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
-        if d.ShowModal() == wx.ID_YES:
-            self.Destroy()   
         
 if __name__ == "__main__":
     app = wx.App(False)
     f = RegistryViewer(None)
-    f.Show()
+    f.ShowModal()
+    f.Destroy()
     app.MainLoop()    

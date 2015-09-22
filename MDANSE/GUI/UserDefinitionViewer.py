@@ -36,11 +36,11 @@ from MDANSE import LOGGER
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
-class UserDefinitionViewer(wx.Frame):
+class UserDefinitionViewer(wx.Dialog):
     
     def __init__(self, parent, title="User Definition Viewer", ud=None,editable=True):
         
-        wx.Frame.__init__(self, parent, wx.ID_ANY, size = (800,400), title = title, style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, size = (800,400), title = title, style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
 
         self._udTree = {}
         
@@ -50,7 +50,7 @@ class UserDefinitionViewer(wx.Frame):
         
         self._root = self._tree.AddRoot("root")
 
-        self.set_plugins_tree(self._root, UD_STORE)     
+        self.build_tree(self._root, UD_STORE.definitions)     
 
         self._info = wx.TextCtrl(mainPanel, wx.ID_ANY, style=wx.TE_MULTILINE|wx.TE_READONLY)
         
@@ -72,8 +72,6 @@ class UserDefinitionViewer(wx.Frame):
         self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.on_try_rename, self._tree)
 
         self.Bind(wx.EVT_BUTTON, self.on_save_ud, self._save)
-
-        self.Bind(wx.EVT_CLOSE, self.on_quit)
         
         if ud is not None:
             self.expand_ud(ud)
@@ -95,8 +93,8 @@ class UserDefinitionViewer(wx.Frame):
         else: 
             return 1 + self.get_item_level(parent)
 
-    def set_plugins_tree(self, node, data):
-        
+    def build_tree(self, node, data):
+                
         for k, v in data.items():
             
             dataItem = wx.TreeItemData(v)
@@ -105,7 +103,7 @@ class UserDefinitionViewer(wx.Frame):
             self._tree.SetItemTextColour(subnode, 'blue')  
             
             if isinstance(v, dict):
-                self.set_plugins_tree(subnode, v)
+                self.build_tree(subnode, v)
                 
     def find_ud(self,baseitem,itemNames):
 
@@ -170,14 +168,12 @@ class UserDefinitionViewer(wx.Frame):
 
             currentItemName = str(self._tree.GetItemText(currentItem))
             
-            print "on_delete", currentItemName
-
             if level == 1:
-                UD_STORE.remove_target(currentItemName)                
+                UD_STORE.remove_definition(currentItemName)                
             elif level == 2:
                 targetItem = self._tree.GetItemParent(currentItem)
                 targetItemName = str(self._tree.GetItemText(targetItem))
-                UD_STORE.remove_section(targetItemName,currentItemName)
+                UD_STORE.remove_definition(targetItemName,currentItemName)
             elif level == 3:
                 sectionItem = self._tree.GetItemParent(currentItem)
                 sectionItemName = str(self._tree.GetItemText(sectionItem))
@@ -236,14 +232,9 @@ class UserDefinitionViewer(wx.Frame):
         UD_STORE.set_definition(targetItemName,sectionItemName,newItemName,currentItemData.GetData())
         UD_STORE.remove_definition(targetItemName,sectionItemName,currentItemName)
 
-    def on_quit(self, event):
-        
-        d = wx.MessageDialog(None,'Do you really want to quit ?','Question',wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
-        if d.ShowModal() == wx.ID_YES:
-            self.Destroy()   
-
 if __name__ == "__main__":
     app = wx.App(False)
     f = UserDefinitionViewer(None,ud=['protein_in_periodic_universe.nc','atom_selection',"sfdfdfsd"],editable=True)
-    f.Show()
+    f.ShowModal()
+    f.Destroy()
     app.MainLoop()    
