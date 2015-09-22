@@ -35,6 +35,7 @@ import collections
 import ConfigParser
 import os
 
+from MDANSE import LOGGER
 from MDANSE.Core.Platform import PLATFORM, PlatformError
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
@@ -168,6 +169,17 @@ class PreferencesItem(object):
         return self._value
 
     @abc.abstractmethod
+    def check_value(self,value):
+        '''
+        Set the value of the preferences item.
+        
+        :param value: the value of the preferences item
+        :type value: str
+        '''
+        
+        pass
+
+    @abc.abstractmethod
     def set_value(self,value):
         '''
         Set the value of the preferences item.
@@ -187,7 +199,26 @@ class InputDirectory(PreferencesItem):
     
     type = "input_directory"
 
-
+    def check_value(self,value):
+        '''
+        Check the value of the preferences item.
+        
+        :param value: the value of the preferences item
+        :type value: str
+        
+        :return: True if the value is correct, False otherwise.
+        :rtype: bool
+        '''
+        
+        value = PLATFORM.get_path(value)
+        
+        try:
+            PLATFORM.create_directory(value)
+        except PlatformError:
+            return False
+        else:        
+            return True
+    
     def set_value(self, value):
         '''
         Set the value of the input directory preferences item.
@@ -201,17 +232,16 @@ class InputDirectory(PreferencesItem):
         try:
             PLATFORM.create_directory(value)
         except PlatformError:
-            raise PreferencesError('Error when setting input directory %r' % value)
-        
-        self._value = value
+            LOGGER("Invalid value for %r preferences item. Set the default value instead." % self._name,"warning")
+            self._value = self._default
+        else:        
+            self._value = value
         
     def get_value(self):
         
-        PLATFORM.create_directory(self._value)
-        
         return self._value
                 
-class Preferences(object):
+class Preferences(collections.OrderedDict):
     '''
     This class implements the MDANSE preferences.
     
@@ -221,18 +251,19 @@ class Preferences(object):
     
     __metaclass__ = Singleton
     
-    def __init__(self):
+    def __init__(self,*args,**kwargs):
         '''
         Constructs the preferences
         '''
         
-        self._items = collections.OrderedDict()
-        self._items["working_directory"] = InputDirectory("working_directory", "paths", PLATFORM.home_directory()) 
-        self._items["macros_directory"] = InputDirectory("macros_directory", "paths", os.path.join(PLATFORM.home_directory(), "mdanse_macros")) 
+        collections.OrderedDict.__init__(self,*args,**kwargs)
+        
+        collections.OrderedDict.__setitem__(self,"working_directory",InputDirectory("working_directory", "paths", PLATFORM.home_directory())) 
+        collections.OrderedDict.__setitem__(self,"macros_directory",InputDirectory("macros_directory", "paths", os.path.join(PLATFORM.home_directory(), "mdanse_macros"))) 
                                 
         self._parser = ConfigParser.ConfigParser()
 
-        for s in self._items.values():
+        for s in self.values():
             try:
                 self._parser.add_section(s.section)
             except ConfigParser.DuplicateSectionError:
@@ -253,12 +284,16 @@ class Preferences(object):
         :rtype: ConfigParser.ConfigParser
         '''
         return self._parser
-
-    @property
-    def items(self):
-        return self._items
-
-    def get_preferences_item(self, item):
+    
+    def __setitem__(self,item,value):
+        
+        pass
+    
+    def clear(self):
+        
+        pass
+    
+    def __getitem__(self, item):
         '''
         Get the value of a selected preferences item.
         
@@ -270,27 +305,10 @@ class Preferences(object):
         '''
         
         try:
-            return self._items[item]
+            return collections.OrderedDict.__getitem__(self,item)
         except KeyError:
             raise PreferencesError("Unknown preferences item")
-                
-    def set_preferences_item(self, item, value):
-        '''
-        Set the value of a preferences item.
-        
-        :param item: the preferences item
-        :type item: str
-        
-        :param value: the value to set for the preferences item.
-        :type value: depends on the ``PreferencesItem`` subclass
-        '''
-        
-        try:
-            self._items[item].set_value(value)
-            return self._items[item]
-        except KeyError:
-            raise PreferencesError("Unknown preferences item")
-        
+                        
     def load(self, path=None):
         '''
         Load the preferences from an existing Preferences file.
@@ -318,8 +336,13 @@ class Preferences(object):
         
         for s in self._parser.sections():
             for k, v in self._parser.items(s):
-                self.set_preferences_item(k,v) 
-                         
+                if self.has_key(k):
+                    self[k].set_value(v)
+                else:
+                    self._parser.remove_option(s,k)
+            if not self._parser.items(s):
+                self._parser.remove_section(s)
+                                                                 
     def save(self,path=None):
         '''
         Save the preferences to a file.

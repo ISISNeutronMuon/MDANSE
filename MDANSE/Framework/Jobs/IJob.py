@@ -474,7 +474,7 @@ class IJob(Configurable):
             raise IOError("A job with %r name is already stored in the registry" % shortname)
                         
         from MDANSE import PREFERENCES
-        macrosDir =  PREFERENCES.get_preferences_item("macros_directory").get_value()
+        macrosDir =  PREFERENCES["macros_directory"].get_value()
         
         templateFile = os.path.join(macrosDir,"%s.py" % longname)
                 

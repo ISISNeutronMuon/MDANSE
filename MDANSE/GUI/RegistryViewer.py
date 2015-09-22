@@ -41,7 +41,7 @@ class RegistryViewer(wx.Frame):
     
     def __init__(self, parent, *args, **kwargs):
 
-        wx.Frame.__init__(self, parent, wx.ID_ANY, size = (800,400), title="Registry viewer", style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
+        wx.Frame.__init__(self, parent, wx.ID_ANY, size = (800,400), title="Registry viewer", style=wx.DEFAULT_FRAME_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
 
         mainPanel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
 

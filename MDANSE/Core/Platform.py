@@ -187,33 +187,9 @@ class Platform(object):
 
         # Gets an absolute version of the path to check
         path = self.get_path(path)
-                
-        # Case where the path to be checked does not exist
-        if not os.path.exists(path):
         
-            # Try to make the directory.
-            try:
-                os.makedirs(path)
-        
-            # An error occured, hence the path is not writable, return false
-            except OSError:
-                return False
-            # No error occured, the user has permission to create the directory, so it will be writable
-            else:
-                return True
-            
-        # The directory to be checked already exists
-        else:
-            # Try to create a temporary file inside this directory             
-            try:
-                tempfile.TemporaryFile("w", path)
-            # Failure, this directory is not writable
-            except OSError:
-                return False
-            # Success, this directory is writable
-            else: 
-                return True    
-                    
+        return os.access(path, os.W_OK|os.X_OK)
+                                    
     def create_directory(self, path):
         '''
         Creates a directory.

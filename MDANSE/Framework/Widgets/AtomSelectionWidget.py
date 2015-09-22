@@ -158,7 +158,5 @@ if __name__ == "__main__":
             
     p.ShowModal()
     
-    p.Destroy()
-    
     app.MainLoop()
         

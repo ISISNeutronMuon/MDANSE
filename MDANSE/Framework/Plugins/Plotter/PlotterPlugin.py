@@ -480,7 +480,7 @@ class PlotterFrame(wx.Frame):
         mainSizer.Fit(mainPanel)
         mainPanel.Layout()
 
-        self.SetSize((1000, 600))
+        self.SetSize((1000, 700))
 
 if __name__ == "__main__":
     app = wx.App(False)
