@@ -50,7 +50,7 @@ class AtomListWidget(UserDefinitionWidget):
     def msg_set_ud(self):
          
         uds = UD_STORE.filter(self._basename, self.type)
-                
+                                
         uds = [v for v in uds if UD_STORE.get_definition(self._basename, self.type,v)["natoms"]==self._configurator._nAtoms] 
         
         self._availableUDs.SetItems(uds)
