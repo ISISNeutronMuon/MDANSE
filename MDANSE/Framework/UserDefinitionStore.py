@@ -9,7 +9,7 @@ class UserDefinitionStoreError(Error):
     pass
 
 
-class UserDefinitionStore(dict):
+class UserDefinitionStore(object):
     '''
     This class is used to register, save and delete MDANSE user definitions (a.k.a. UD).
     
@@ -25,9 +25,14 @@ class UserDefinitionStore(dict):
     
     def __init__(self):
         
-        dict.__init__(self)
+        self._definitions = {}
+                
+        self.load()
         
-        self.load()                                               
+    @property
+    def definitions(self):
+        
+        return self._definitions                                               
                        
     def load(self):
         '''
@@ -47,7 +52,7 @@ class UserDefinitionStore(dict):
             return
           
         else:
-            self.update(UD)
+            self._definitions.update(UD)
             f.close()
                                     
     def save(self):
@@ -63,69 +68,82 @@ class UserDefinitionStore(dict):
         except IOError:
             return
         else:
-            cPickle.dump(self, f, protocol=2)
+            cPickle.dump(self._definitions, f, protocol=2)
             f.close()
                                     
-    def get_definition(self, target, section, name):
-        '''
-        Returns a user definition given its target, category and its name.
-                
-        :return: the user definition if it found or None otherwise
-        :rtype: any
-        '''
-            
-        if not self.has_definition(target,section,name):
-            raise UserDefinitionStoreError('The item %r could not be found' % (target,section,name))
-
-        ud = self[target][section][name]
-            
-        return ud
-
-    def remove_target(self,target):
+    def remove_definition(self,*defs):
         
-        if self.has_target(target):
-            del self[target]
-
-    def remove_section(self,target,section):
-        
-        if self.has_section(target, section):
-            del self[target][section]
-        
-    def remove_definition(self,target,section,name):
-        
-        if self.has_definition(target, section, name):
-            del self[target][section][name]
+        if self.has_definition(*defs):
+            defs = list(defs)
+            locald = self._definitions
+            while defs:
+                val = defs.pop(0)            
+                if len(defs)==0:
+                    del locald[val]
+                    return
+                locald = locald[val]
                                                    
     def set_definition(self, target, section, name, value):
                         
         if self.has_definition(target, section, name):
             raise UserDefinitionStoreError('Item %s is already registered as an user definition. You must delete it before setting it.' % (target,section,name))
 
-        self.setdefault(target,{}).setdefault(section,{})[name] = value                                          
+        self._definitions.setdefault(target,{}).setdefault(section,{})[name] = value                                          
 
-    def filter(self,target,section):
+    def filter(self,*defs):
         
-        return self.get(target,{}).get(section,{}).keys()
-
-    def has_target(self,target):
-                
-        return self.has_key(target)
-
-    def has_section(self,target,section):
+        d = self.get_definition(*defs)
+        if d is None:
+            return [] 
         
-        if not self.has_key(target):
-            return False
+        return d.keys()
+
+    def get_definition(self,*defs):
+        '''
+        Returns a user definition given its target, category and its name.
                 
-        return self[target].has_key(section)
+        :return: the user definition if it found or None otherwise
+        :rtype: any
+        '''
+        
+        locald = self._definitions
+        
+        defs = list(defs)    
+        while defs:
+        
+            val = defs.pop(0)            
+            locald = locald.get(val,None)
             
-    def has_definition(self,target,section,name):
-        
-        if not self.has_key(target):
-            return False
+            if locald is None:
+                return None
                 
-        if not self[target].has_key(section):
-            return False
+            if not defs:
+                break
+                
+            if not isinstance(locald,dict):
+                return None
+                
+        return locald
+            
+    def has_definition(self,*defs):
         
-        return self[target][section].has_key(name)
+        locald = self._definitions
+        
+        defs = list(defs)    
+        while defs:
+        
+            val = defs.pop(0)            
+            locald = locald.get(val,None)
+            
+            if locald is None:
+                return False
+                
+            if not defs:
+                break
+                
+            if not isinstance(locald,dict):
+                return False
+                
+        return True
         
 UD_STORE = UserDefinitionStore()
