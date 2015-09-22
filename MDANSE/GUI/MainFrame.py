@@ -292,7 +292,9 @@ or directly to the MDANSE mailing list:
         
         f = RegistryViewer(self)
         
-        f.Show()
+        f.ShowModal()
+        
+        f.Destroy()
 
     def on_open_api(self, event):
         
@@ -330,7 +332,8 @@ or directly to the MDANSE mailing list:
         from MDANSE.GUI.UserDefinitionViewer import UserDefinitionViewer
         
         f = UserDefinitionViewer(self)
-        f.Show()
+        f.ShowModal()
+        f.Destroy()
 
     def on_open_converter(self,event):
 
@@ -370,9 +373,9 @@ or directly to the MDANSE mailing list:
 
     def on_set_preferences(self, event):
 
-        from MDANSE.GUI.PreferencesSettingsDialog import PreferencesSettingsDialog
+        from MDANSE.GUI.PreferencesSettings import PreferencesSettings
         
-        d = PreferencesSettingsDialog(self)
+        d = PreferencesSettings(self)
         
         d.ShowModal()
         
