@@ -152,7 +152,7 @@ if __name__ == "__main__":
     
     app = wx.App(False)
     
-    p = UserDefinitionDialog(None,t,'atoms_list')
+    p = UserDefinitionDialog(None,t,'atom_selection')
         
     p.SetSize((800,800))
             

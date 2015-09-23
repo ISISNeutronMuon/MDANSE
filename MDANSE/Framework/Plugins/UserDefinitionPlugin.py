@@ -66,54 +66,29 @@ class UserDefinitionPlugin(ComponentPlugin):
         self._mainPanel.GetSizer().Add(udPanel,0,wx.EXPAND|wx.ALL,5)
 
         self.Bind(wx.EVT_BUTTON, self.on_apply, applyButton)
-        self.Bind(wx.EVT_BUTTON, self.on_save, saveButton)
-
-    def on_save(self, event):
+        self.Bind(wx.EVT_BUTTON, lambda evt : self.on_apply(evt,True), saveButton)
+                        
+    def on_apply(self, event, save=False):
 
         name = str(self._udName.GetValue().strip())
         
         if not name:
-            LOGGER('Empty user definition name.','error',['console'])
+            LOGGER('Empty user definition name.','error',['dialog'])
             return
 
         value = self.validate()        
         if value is None:
             return
-        
-        udType = getattr(self,'udType','type')
-                
+                        
         if UD_STORE.has_definition(self._target,self.type,name):
-            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,udType,name),'error',['console'])
+            LOGGER('There is already a user-definition with that name.','error',['dialog'])
             return
                   
         UD_STORE.set_definition(self._target,self.type,name,value)
                  
         pub.sendMessage("msg_set_ud")
         
-        UD_STORE.save()
-
         LOGGER('User definition %r successfully set.' % name,'info',['console'])
         
-    def on_apply(self, event):
-
-        name = str(self._udName.GetValue().strip())
-        
-        if not name:
-            LOGGER('Empty user definition name.','error',['console'])
-            return
-
-        value = self.validate()        
-        if value is None:
-            return
-        
-        udType = getattr(self,'udType','type')
-                
-        if UD_STORE.has_definition(self._target,self.type,name):
-            LOGGER('There is already a user-definition that matches %s,%s,%s' % (self._target,udType,name),'error',['console'])
-            return
-                  
-        UD_STORE.set_definition(self._target,self.type,name,value)
-                 
-        pub.sendMessage("msg_set_ud")
-
-        LOGGER('User definition %r successfully set.' % name,'info',['console'])
+        if save:
+            UD_STORE.save()

@@ -144,7 +144,7 @@ class IPlugin(wx.Panel):
             return
                 
         window = event.GetPane().window
-        
+                
         # Call the 'close' method the plugin to be closed
         window.close()
         

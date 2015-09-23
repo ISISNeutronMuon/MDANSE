@@ -136,15 +136,23 @@ class UserDefinitionViewer(wx.Dialog):
             self._tree.Expand(item)            
         
     def on_show_info(self, event=None):
+
+        currentItem = self._tree.GetSelection()
+
+        itemData = self._tree.GetItemData(currentItem)
         
-        ItemData = self._tree.GetItemData(self._tree.GetSelection())
-        
-        if ItemData is None:
+        if itemData is None:
             return
         
-        containerStr = str(ItemData.GetData())
-       
-        self._info.SetValue(containerStr)       
+        data = itemData.GetData()
+        
+        level = self.get_item_level(currentItem)
+
+        if level <= 3:
+            self._info.SetValue("Contains the followings definitions: %s" % data.keys())
+            return
+                       
+        self._info.SetValue(str(itemData.GetData()))       
 
     def on_delete(self, event):
 
