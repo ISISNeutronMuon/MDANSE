@@ -402,8 +402,6 @@ class PlotterFrame(wx.Frame):
         mainMenu = wx.MenuBar()
         fileMenu = wx.Menu()
         loadData = fileMenu.Append(wx.ID_ANY, 'Load')
-        fileMenu.AppendSeparator()
-        _quit = fileMenu.Append(wx.ID_ANY, 'Quit')
 
         mainMenu.Append(fileMenu, 'File')
 
@@ -414,17 +412,10 @@ class PlotterFrame(wx.Frame):
         self.SetMenuBar(mainMenu)
         
         self.Bind(wx.EVT_MENU, self.on_load_data, loadData)
-        self.Bind(wx.EVT_MENU, self.on_quit, _quit)
-        self.Bind(wx.EVT_CLOSE, self.on_quit)
    
     def on_quit(self, event=None):
-        d = wx.MessageDialog(None,
-                             'Do you really want to quit ?',
-                             'Question',
-                             wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
-        if d.ShowModal() == wx.ID_YES:
-            d.Destroy()
-            self.Destroy()
+
+        self.Destroy()
                 
     def on_load_data(self, event=None):
         filters = 'NC file (*.nc)|*.nc|All files (*.*)|*.*'
