@@ -91,7 +91,7 @@ class AtomTransmutationConfigurator(IConfigurator):
             if not isinstance(expression,basestring):
                 raise ConfiguratorError("Wrong format for atom transmutation configurator.",self)
                 
-            if UD_STORE.has_definition(trajConfig["basename"],"atom_transmutation",expression):                
+            if UD_STORE.has_definition(trajConfig["basename"],"atom_selection",expression):                
                 ud = UD_STORE.get_definition(trajConfig["basename"],"atom_selection",expression)
                 self.transmutate(configuration, ud["indexes"], element)
             else:

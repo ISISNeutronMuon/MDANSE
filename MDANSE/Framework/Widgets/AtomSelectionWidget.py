@@ -115,7 +115,7 @@ class AtomSelectionWidget(UserDefinitionWidget):
             panel = sizerItem.GetWindow()
             children = panel.GetChildren()
             udName = children[0]
-            oldSelection = udName.GetStringSelection()            
+            oldSelection = udName.GetStringSelection()
             udName.SetItems(uds)
             udName.SetStringSelection(oldSelection)
             
