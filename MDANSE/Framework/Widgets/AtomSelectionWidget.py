@@ -114,12 +114,8 @@ class AtomSelectionWidget(UserDefinitionWidget):
             
             panel = sizerItem.GetWindow()
             children = panel.GetChildren()
-            udName = children[0]
-            oldSelection = udName.GetStringSelection()
-            udName.SetItems(uds)
-            udName.SetStringSelection(oldSelection)
-            
-            uds.append(udName)
+            udName = children[0]            
+            uds.append(udName.GetStringSelection())
                   
         if not uds:
             return None

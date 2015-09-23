@@ -83,11 +83,8 @@ class AtomTransmutationWidget(AtomSelectionWidget):
             children = panel.GetChildren()
             udName = children[0]
             element = children[2]
-            oldSelection = udName.GetStringSelection()            
-            udName.SetItems(uds)
-            udName.SetStringSelection(oldSelection)
             
-            uds.append([udName,element.GetStringSelection])
+            uds.append([udName.GetStringSelection(),element.GetStringSelection])
                   
         if not uds:
             return None
