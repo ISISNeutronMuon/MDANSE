@@ -95,7 +95,7 @@ class UserDefinitionViewer(wx.Dialog):
 
     def build_tree(self, node, data):
                 
-        for k, v in data.items():
+        for k, v in sorted(data.items()):
             
             dataItem = wx.TreeItemData(v)
             subnode = self._tree.AppendItem(node, str(k), data=dataItem)
