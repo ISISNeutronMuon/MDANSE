@@ -77,12 +77,12 @@ class AtomTransmutationWidget(AtomSelectionWidget):
         del sizerItemList[0]
 
         uds = []
-        for sizerItem in self._sizer.GetChildren():
+        for sizerItem in sizerItemList:
             
             panel = sizerItem.GetWindow()
             children = panel.GetChildren()
             udName = children[0]
-            element = children[1]
+            element = children[2]
             oldSelection = udName.GetStringSelection()            
             udName.SetItems(uds)
             udName.SetStringSelection(oldSelection)

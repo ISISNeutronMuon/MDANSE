@@ -127,7 +127,7 @@ class JobPlugin(ComponentPlugin):
     def on_save(self, event=None):
 
         parameters = self._parametersPanel.validate()
-        
+                
         if not parameters:
             return
         
