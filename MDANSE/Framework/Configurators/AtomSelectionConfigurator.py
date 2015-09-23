@@ -89,10 +89,10 @@ class AtomSelectionConfigurator(IConfigurator):
         
             if UD_STORE.has_definition(trajConfig["basename"],"atom_selection",v):
                 ud = UD_STORE.get_definition(trajConfig["basename"],"atom_selection",v)
-                self["indexes"].append(ud["indexes"])
+                self["indexes"].extend(ud["indexes"])
             else:        
                 parser = AtomSelectionParser(trajConfig["instance"].universe)
-                self["indexes"].append(parser.parse(v))
+                self["indexes"].extend(parser.parse(v))
 
         self["indexes"].sort()
         
