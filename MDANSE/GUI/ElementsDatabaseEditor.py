@@ -235,9 +235,7 @@ class ElementsDatabaseEditor(wx.Frame):
         self.Bind(wx.EVT_MENU,self.on_saveas_database, saveasItem)
  
         self.SetMenuBar(menubar)
-        
-        self.MakeModal(True)
-        
+                
     def on_show_popup_menu(self, event):
 
         menu = wx.Menu()

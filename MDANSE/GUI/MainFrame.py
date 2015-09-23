@@ -409,13 +409,19 @@ or directly to the MDANSE mailing list:
 
     def on_toggle_toolbar(self, event=None):
 
+        self._prevSize = self.GetSize()
+
         if self.GetToolBar():
+            sizeH = self._prevSize[1] - self._toolbar.GetSize()[1]
             self._toolbar.Hide()
             self.SetToolBar(None)
         else:
+            sizeH = self._prevSize[1] + self._toolbar.GetSize()[1]
             self.SetToolBar(self._toolbar)
-            self._toolbar.Show()   
-        
+            self._toolbar.Show()
+            
+        self.SetSize((-1,sizeH))
+            
     @property
     def panels(self):
         return self._panels
