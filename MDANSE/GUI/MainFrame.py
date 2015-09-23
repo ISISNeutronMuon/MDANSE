@@ -410,7 +410,7 @@ or directly to the MDANSE mailing list:
     def on_toggle_toolbar(self, event=None):
 
         if self.GetToolBar():
-            self._toolbar.Hide()                                    
+            self._toolbar.Hide()
             self.SetToolBar(None)
         else:
             self.SetToolBar(self._toolbar)

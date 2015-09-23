@@ -143,7 +143,7 @@ class PluginsTreePanel(wx.Panel):
             self._tree.AppendItem(node, "No plugins available")
             return
                 
-        for k, v in data.items():
+        for k, v in sorted(data.items()):
             
             plugin = REGISTRY["plugin"].get(k, None)
             
