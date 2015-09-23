@@ -47,20 +47,12 @@ class ConfigurationPanel(wx.Panel):
         return dict([(k,v.get_value()) for k,v in self._widgets.items()])
     
     def validate(self):
- 
-        for w in self._widgets.values():
-            w.SetBackgroundColour(wx.NullColour)
-            w.Refresh()
-              
+               
         parameters = {}
+        parameters.update(self.get_value())
         try:
             parameters.update(self.get_value())
         except ConfiguratorError as e:
-            d = wx.MessageDialog(self, str(e), style=wx.ICON_ERROR|wx.STAY_ON_TOP|wx.CENTRE)
-            d.ShowModal()
-            w = self._widgets[e.configurator.name]
-            w.SetBackgroundColour("Pink")
-            w.Refresh()
-            w.SetFocus()
+            wx.MessageBox(self, str(e), "Invalid input", style=wx.ICON_ERROR|wx.OK)
         finally:
             return parameters
