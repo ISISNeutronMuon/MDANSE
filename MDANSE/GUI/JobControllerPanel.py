@@ -92,7 +92,7 @@ class JobController(threading.Thread):
                 pass
         
         self.update()
-
+        
     def run(self):
         
         while not self._stop.is_set():
@@ -145,13 +145,16 @@ class JobController(threading.Thread):
                 
                 # Check that the pid of the running job corresponds to an active pid.
                 running = (info['pid'] in pids)
-                
+                                
                 # If so, check that the corresponding pid actually corresponds to the job by comparing 
                 # the job starting date and the pid creation date.
                 if running:
                     jobStartingTime = datetime.datetime.strptime(info["start"],"%d-%m-%Y %H:%M:%S")
                     procStartingTime = datetime.datetime.strptime(pids[info['pid']],"%d-%m-%Y %H:%M:%S")
                     running = (jobStartingTime >= procStartingTime)
+                    
+                if not running:
+                    info["state"] = "aborted"
                     
                 # If the job was aborted, display the traceback on the dialog logger and remove the corresponding job temporary file
                 if info['state'] == 'aborted':
