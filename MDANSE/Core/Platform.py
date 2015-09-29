@@ -49,11 +49,7 @@ class PlatformError(Error):
 
 class Platform(object):
     """
-    This class implements platform-free standard operations.
-    
-    This is the base class for OS-specific concrete implementation.
-    
-    @note: this class is designed according to the singleton pattern.
+    This is the base class for OS-free standard operations.
     """
     
     __metaclass__ = abc.ABCMeta    
@@ -65,9 +61,7 @@ class Platform(object):
         Create a new instance of Platform class.
         
         :param cls: the class to instanciate.
-        :type cls: class
-        
-        @note: designed using the Singleton pattern.
+        :type cls: class        
         '''
                 
         # Case of the first instanciation.
@@ -308,18 +302,6 @@ class Platform(object):
         
         return os.path.dirname(os.path.dirname(__file__))
 
-    @abc.abstractmethod
-    def preferences_file(self):
-        '''
-        Returns the path for MDANSE preferences file.
-
-        :return: the path for the MDANSE preferences file
-        :rtype: string
-        
-        :note: this path is OS specific.
-        '''    
-        pass
-
     def logfiles_directory(self):
         '''
         Returns the path of the directory where the MDANSE job logfiles are stored.
@@ -368,6 +350,21 @@ class Platform(object):
         '''
         pass
 
+    def preferences_file(self):
+        '''
+        Returns the path for MDANSE preferences file.
+
+        :return: the path for the MDANSE preferences file
+        :rtype: string
+        
+        :note: this path is OS specific.
+        '''
+
+        # The preferences files will be located in the application directory.        
+        appdir = self.application_directory()
+        
+        return os.path.join(appdir, 'mdanse_preferences')
+
 class PlatformPosix(Platform):
     '''
     Base class for POSIX derived OS.
@@ -414,22 +411,6 @@ class PlatformPosix(Platform):
         
         return basedir
 
-    def preferences_file(self):
-        '''
-        Returns the path for MDANSE preferences file.
-
-        :return: the path for the MDANSE preferences file
-        :rtype: string
-        
-        :note: this path is OS specific.
-        '''
-
-        # The preferences files will be located in the application directory.        
-        appdir = self.application_directory()
-        
-        return os.path.join(appdir, 'mdanse_preferences')
-
-
     def etime_to_ctime(self, etime):
         '''
         Converts the elapsed time (i.e. as output by ps unix command) to local time.
@@ -473,21 +454,21 @@ class PlatformPosix(Platform):
 
 class PlatformMac(PlatformPosix):
     '''
-    Concrete implementation of Platform interface for MacOS.
+    Concrete implementation of :py:class:~MDANSE.Core.Platform.Platform interface for MacOS OS.
     '''
 
     name = "macos"
 
 class PlatformLinux(PlatformPosix):
     '''
-    Concrete implementation of Platform interface Linux.
+    Concrete implementation of :py:class:~MDANSE.Core.Platform.Platform interface for Linux OS.
     '''
 
     name = "linux"
 
 class PlatformWin(Platform):
     '''
-    Concrete implementation of Platform interface Windows.
+    Concrete implementation of :py:class:~MDANSE.Core.Platform.Platform interface for Windows OS.
     '''
     
     name = "windows"
@@ -616,21 +597,7 @@ class PlatformWin(Platform):
         
         # Close the handle.
         ctypes.windll.kernel32.CloseHandle(handle)                
-        
-    def preferences_file(self):
-        '''
-        Returns the path for MDANSE preferences file.
-
-        :return: the path for the MDANSE preferences file
-        :rtype: string
-        
-        :note: this path is OS specific.
-        '''    
-
-        appdir = self.application_directory()
-                
-        return os.path.join(appdir, 'preferences.ini')
-     
+             
 import platform
 system = platform.system()
 
