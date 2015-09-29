@@ -78,7 +78,7 @@ class JobError(Error):
         if job._status is not None:
             job._status._state["state"] = "aborted"
             job._status._state['traceback'] = trace
-            job._status._state['info'] += trace
+            job._status._state['info'] = job.info
             job._status.update(force=True)
             
     def __str__(self):
@@ -140,8 +140,6 @@ class IJob(Configurable):
         self._outputData = OutputData()
         
         self._status = None
-
-        self._info = ""
                                             
     @classmethod
     def build_parallelization_test(cls, testFile, parameters=None):
@@ -426,6 +424,8 @@ class IJob(Configurable):
         try:
             
             self._name = IJob.define_unique_name()
+
+            self._info = 'Information about %s job.\n' % self._name
                                                         
             if status:
                 self._status = JobStatus(self)
@@ -434,7 +434,6 @@ class IJob(Configurable):
                                     
             self.initialize()
 
-            self._info = 'Information about %s job.\n' % self._name
             self._info += str(self)
             
             if self._status is not None:
