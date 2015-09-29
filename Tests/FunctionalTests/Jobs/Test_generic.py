@@ -9,7 +9,7 @@ class TestGENERIC(UnitTest):
     def test(self):
         parameters = {}
         parameters['gt_file'] = '../../../Data/Trajectories/Generic/test.gtf'
-        parameters['output_file'] = ('output', ['netcdf'])
+        parameters['output_file'] = ('/tmp/output', ['netcdf'])
         job = REGISTRY['job']['generic']()
         self.assertNotRaises(job.run, parameters, status=False)
 

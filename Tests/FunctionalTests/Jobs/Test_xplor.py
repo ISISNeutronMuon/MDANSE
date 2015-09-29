@@ -10,7 +10,7 @@ class TestXPLOR(UnitTest):
         parameters = {}
         parameters['dcd_file'] = '../../../Data/Trajectories/CHARMM/2vb1.dcd'
         parameters['fold'] = False
-        parameters['output_file'] = ('output', ['netcdf'])
+        parameters['output_file'] = ('/tmp/output', ['netcdf'])
         parameters['pdb_file'] = '../../../Data/Trajectories/CHARMM/2vb1.pdb'
         job = REGISTRY['job']['xplor']()
         self.assertNotRaises(job.run, parameters, status=False)

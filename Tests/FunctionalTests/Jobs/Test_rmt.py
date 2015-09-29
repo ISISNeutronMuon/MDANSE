@@ -11,7 +11,7 @@ class TestRMT(UnitTest):
         parameters['axis'] = 'c'
         parameters['frames'] = (0, 10, 1)
         parameters['lower_leaflet'] = 'DMPC'
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/dmpc_in_periodic_universe.nc'
         parameters['upper_leaflet'] = 'DMPC'
         job = REGISTRY['job']['rmt']()

@@ -14,7 +14,7 @@ class TestVACF(UnitTest):
         parameters['grouping_level'] = 'atom'
         parameters['interpolation_order'] = 'no interpolation'
         parameters['normalize'] = False
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['projection'] = None
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'

@@ -10,7 +10,7 @@ class TestAC(UnitTest):
         parameters = {}
         parameters['axis_selection'] = ('Water', ('OW', 'HW'))
         parameters['frames'] = (0, 10, 1)
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['per_axis'] = False
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'

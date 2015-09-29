@@ -76,7 +76,7 @@ class TestElementsDatabase(UnitTest):
     def test_add_element(self):
         
         # Adding an already existing element does not trigger an error anymore
-        self.assertNotRaises(ELEMENTS.add_element, "H")
+        self.assertRaises(ElementsDatabaseError,ELEMENTS.add_element, "H")
 
         # Otherwise, everything should be OK
         self.assertNotRaises(ELEMENTS.add_element, "element1")

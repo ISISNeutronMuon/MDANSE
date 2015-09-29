@@ -47,14 +47,14 @@ class TestPreferences(UnitTest):
     
     def test_get_item(self):
         
-        self.assertRaises(PreferencesError,PREFERENCES.get_preferences_item,'xxxxx')
+        self.assertRaises(PreferencesError,PREFERENCES.__getitem__,'xxxxx')
 
     def test_set_item(self):
         
-        val = PREFERENCES.get_preferences_item("working_directory").get_value()
-        PREFERENCES.set_preferences_item("working_directory","test")
-        self.assertEqual(PREFERENCES.get_preferences_item("working_directory").value,os.path.join(os.getcwd(),"test"))
-        PREFERENCES.set_preferences_item("working_directory",val)
+        val = PREFERENCES["working_directory"].get_value()
+        PREFERENCES["working_directory"].set_value("test")
+        self.assertEqual(PREFERENCES["working_directory"].value,os.path.join(os.getcwd(),"test"))
+        PREFERENCES["working_directory"].set_value(val)
         
         shutil.rmtree("test")
                 

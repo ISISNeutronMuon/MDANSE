@@ -9,7 +9,7 @@ class TestSD(UnitTest):
     def test(self):
         parameters = {}
         parameters['frames'] = (0, 10, 1)
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['reference_basis'] = ('C284H438N84O79S7', ('O', 'C_beta', 'C_delta'))
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['spatial_resolution'] = 0.1

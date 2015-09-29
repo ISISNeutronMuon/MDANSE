@@ -10,7 +10,7 @@ class TestROG(UnitTest):
         parameters = {}
         parameters['atom_selection'] = 'all'
         parameters['frames'] = (0, 10, 1)
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
         parameters['weights'] = 'equal'

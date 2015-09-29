@@ -8,7 +8,7 @@ class TestDFTB(UnitTest):
 
     def test(self):
         parameters = {}
-        parameters['output_file'] = ('output', ['netcdf'])
+        parameters['output_file'] = ('/tmp/output', ['netcdf'])
         parameters['trj_file'] = '../../../Data/Trajectories/Forcite/nylon66_rho100_500K_v300K.trj'
         parameters['xtd_file'] = '../../../Data/Trajectories/Forcite/nylon66_rho100_500K_v300K.xtd'
         job = REGISTRY['job']['dftb']()

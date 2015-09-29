@@ -11,7 +11,7 @@ class TestRBT(UnitTest):
         parameters['atom_selection'] = 'all'
         parameters['frames'] = (0, 10, 1)
         parameters['grouping_level'] = 'atom'
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['reference'] = 0
         parameters['remove_translation'] = False
         parameters['running_mode'] = ('monoprocessor', 1)

@@ -8,7 +8,7 @@ class TestVASP(UnitTest):
 
     def test(self):
         parameters = {}
-        parameters['output_file'] = ('output', ['netcdf'])
+        parameters['output_file'] = ('/tmp/output', ['netcdf'])
         parameters['time_step'] = 1.0
         parameters['xdatcar_file'] = '../../../Data/Trajectories/VASP/XDATCAR_version5'
         job = REGISTRY['job']['vasp']()

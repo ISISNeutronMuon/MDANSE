@@ -10,7 +10,7 @@ class TestSSF(UnitTest):
         parameters = {}
         parameters['atom_selection'] = 'all'
         parameters['frames'] = (0, 10, 1)
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['q_values'] = (0, 10, 1)
         parameters['r_values'] = (0, 10, 1)
         parameters['running_mode'] = ('monoprocessor', 1)

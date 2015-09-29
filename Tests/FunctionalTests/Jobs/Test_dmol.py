@@ -9,7 +9,7 @@ class TestDMOL(UnitTest):
     def test(self):
         parameters = {}
         parameters['his_file'] = '../../../Data/Trajectories/Discover/sushi.his'
-        parameters['output_file'] = ('output', ['netcdf'])
+        parameters['output_file'] = ('/tmp/output', ['netcdf'])
         parameters['xtd_file'] = '../../../Data/Trajectories/Discover/sushi.xtd'
         job = REGISTRY['job']['dmol']()
         self.assertNotRaises(job.run, parameters, status=False)

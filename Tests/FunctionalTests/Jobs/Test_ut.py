@@ -10,7 +10,7 @@ class TestUT(UnitTest):
         parameters = {}
         parameters['atom_selection'] = 'all'
         parameters['frames'] = (0, 10, 1)
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
         job = REGISTRY['job']['ut']()
         self.assertNotRaises(job.run, parameters, status=False)

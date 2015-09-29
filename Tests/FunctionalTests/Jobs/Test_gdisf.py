@@ -12,7 +12,7 @@ class TestGDISF(UnitTest):
         parameters['frames'] = (0, 10, 1)
         parameters['grouping_level'] = 'atom'
         parameters['instrument_resolution'] = ('gaussian', {'mu': 0.0, 'sigma': 10.0})
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['projection'] = None
         parameters['q_shells'] = (0, 10, 1)
         parameters['running_mode'] = ('monoprocessor', 1)

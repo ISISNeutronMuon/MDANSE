@@ -10,7 +10,7 @@ class TestTEMP(UnitTest):
         parameters = {}
         parameters['frames'] = (0, 10, 1)
         parameters['interpolation_order'] = 'no interpolation'
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
         job = REGISTRY['job']['temp']()
         self.assertNotRaises(job.run, parameters, status=False)

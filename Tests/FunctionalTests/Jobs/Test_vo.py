@@ -10,7 +10,7 @@ class TestVO(UnitTest):
         parameters = {}
         parameters['atom_selection'] = 'all'
         parameters['frames'] = (0, 5, 1)
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['pbc'] = True
         parameters['pbc_border_size'] = 0.0
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'

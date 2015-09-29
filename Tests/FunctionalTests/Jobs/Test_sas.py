@@ -11,7 +11,7 @@ class TestSAS(UnitTest):
         parameters['atom_selection'] = 'all'
         parameters['frames'] = (0, 2, 1)
         parameters['n_sphere_points'] = 1000
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['probe_radius'] = 0.14
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'

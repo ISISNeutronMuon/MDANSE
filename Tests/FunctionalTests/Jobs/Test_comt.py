@@ -11,7 +11,7 @@ class TestCOMT(UnitTest):
         parameters['atom_selection'] = 'all'
         parameters['frames'] = (0, 1, 1)
         parameters['grouping_level'] = 'atom'
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
         job = REGISTRY['job']['comt']()
         self.assertNotRaises(job.run, parameters, status=False)

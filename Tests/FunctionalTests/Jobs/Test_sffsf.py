@@ -10,7 +10,7 @@ class TestSFFSF(UnitTest):
         parameters = {}
         parameters['instrument_resolution'] = ('gaussian', {'mu': 0.0, 'sigma': 10.0})
         parameters['netcdf_input_file'] = '../../../Data/NetCDF/disf_prot.nc'
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         job = REGISTRY['job']['sffsf']()
         self.assertNotRaises(job.run, parameters, status=False)
 

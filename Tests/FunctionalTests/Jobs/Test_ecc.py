@@ -11,7 +11,7 @@ class TestECC(UnitTest):
         parameters['atom_selection'] = 'all'
         parameters['center_of_mass'] = 'all'
         parameters['frames'] = (0, 10, 1)
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
         parameters['weights'] = 'equal'
         job = REGISTRY['job']['ecc']()

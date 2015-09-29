@@ -11,7 +11,7 @@ class TestGMFT(UnitTest):
         parameters['atom_selection'] = 'all'
         parameters['contiguous'] = False
         parameters['frames'] = (0, 10, 1)
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['reference_selection'] = 'all'
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
         job = REGISTRY['job']['gmft']()

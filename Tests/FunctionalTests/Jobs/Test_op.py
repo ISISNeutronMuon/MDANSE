@@ -10,7 +10,7 @@ class TestOP(UnitTest):
         parameters = {}
         parameters['axis_selection'] = ('C284H438N84O79S7', ('C', 'C_beta'))
         parameters['frames'] = (0, 10, 1)
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['per_axis'] = False
         parameters['reference_direction'] = [0, 0, 1]
         parameters['running_mode'] = ('monoprocessor', 1)

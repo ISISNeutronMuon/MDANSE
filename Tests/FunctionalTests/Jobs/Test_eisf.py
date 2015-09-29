@@ -11,7 +11,7 @@ class TestEISF(UnitTest):
         parameters['atom_selection'] = 'all'
         parameters['frames'] = (0, 10, 1)
         parameters['grouping_level'] = 'atom'
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['projection'] = None
         parameters['q_vectors'] = ('spherical_lattice', {'width': 0.1, 'n_vectors': 50, 'shells': (0, 5, 0.1)})
         parameters['running_mode'] = ('monoprocessor', 1)

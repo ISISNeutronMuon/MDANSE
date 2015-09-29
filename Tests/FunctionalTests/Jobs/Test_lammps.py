@@ -10,7 +10,7 @@ class TestLAMMPS(UnitTest):
         parameters = {}
         parameters['config_file'] = '../../../Data/Trajectories/LAMMPS/glycyl_L_alanine_charmm.config'
         parameters['n_steps'] = 1
-        parameters['output_file'] = ('output', ['netcdf'])
+        parameters['output_file'] = ('/tmp/output', ['netcdf'])
         parameters['time_step'] = 1.0
         parameters['trajectory_file'] = '../../../Data/Trajectories/LAMMPS/glycyl_L_alanine_charmm.lammps'
         job = REGISTRY['job']['lammps']()

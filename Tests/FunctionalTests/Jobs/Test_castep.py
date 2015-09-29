@@ -9,7 +9,7 @@ class TestCASTEP(UnitTest):
     def test(self):
         parameters = {}
         parameters['castep_file'] = '../../../Data/Trajectories/CASTEP/PBAnew.md'
-        parameters['output_file'] = ('output', ['netcdf'])
+        parameters['output_file'] = ('/tmp/output', ['netcdf'])
         job = REGISTRY['job']['castep']()
         self.assertNotRaises(job.run, parameters, status=False)
 

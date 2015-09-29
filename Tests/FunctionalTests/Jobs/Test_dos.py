@@ -14,7 +14,7 @@ class TestDOS(UnitTest):
         parameters['grouping_level'] = 'atom'
         parameters['instrument_resolution'] = ('gaussian', {'mu': 0.0, 'sigma': 10.0})
         parameters['interpolation_order'] = 'no interpolation'
-        parameters['output_files'] = ('output', ['netcdf'])
+        parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['projection'] = None
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
