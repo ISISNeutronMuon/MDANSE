@@ -38,7 +38,6 @@ import inspect
 import os
 import re
 import subprocess
-import tempfile
 
 from MDANSE.Core.Error import Error
 
@@ -330,20 +329,6 @@ class Platform(object):
         '''
        
         path = os.path.join(self.application_directory(), 'logfiles')
-        
-        self.create_directory(path)
-                       
-        return path
-
-    def jobscripts_directory(self):
-        '''
-        Returns the path of the directory where the MDANSE job  script files are stored.
-                
-        :return: the path of the directory where the MDANSE job script files are stored.
-        :rtype: str
-        '''
-       
-        path = os.path.join(self.application_directory(), 'jobscripts')
         
         self.create_directory(path)
                        
