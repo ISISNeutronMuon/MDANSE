@@ -39,10 +39,10 @@ import sys
 
 class _Meta(type):
     '''
-    Metaclass that allows to use the __getitem__ method at a class level for the class that has been built.
+    Metaclass that allows to use the :py:meth:`__getitem__` method at a class level for the class that has been built.
      
     The class that uses this metaclass must define a class attribute named _registry that will be used
-    by the __getitem__ method.
+    by the :py:meth:`__getitem__` method.
     '''
          
     def __getitem__(self, item):
@@ -58,8 +58,8 @@ class ClassRegistry(abc.ABCMeta):
 
     The MDANSE framework is based on a set of interfaces that covers different aspects of the framework such 
     as the analysis, the input data, the output file formats ... By metaclassing each base class of these interfaces 
-    with :py:class:`~MDANSE.Core.ClassRegistry.ClassRegistry` object, their corresponding concrete class instances will be automatically registered at import time in 
-    a data structure that can be further used all over the framework.
+    with :py:class:`~MDANSE.Core.ClassRegistry.ClassRegistry` object, their respective concrete class instances will be 
+    automatically registered at import time in a data structure that can be further used all over the framework.
         
     The data structure used to store the concrete classes is a nested dictionary whose primary key 
     is the :py:attr:`type` class attribute of the base class they are inheriting from and secondary key is 
