@@ -41,13 +41,12 @@ import time
 import wx
 import wx.lib.intctrl as intctrl
 
-from MDANSE import LOGGER
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Status import convert_duration, total_seconds
 from MDANSE.GUI.Icons import ICONS
-from MDANSE.GUI.Events.JobControllerEvent import EVT_JOB_CONTROLLER, EVT_JOB_CRASH, JobControllerEvent, JobCrashEvent
+from MDANSE.GUI.Events.JobControllerEvent import EVT_JOB_CONTROLLER, JobControllerEvent
         
 class JobController(threading.Thread):
     
@@ -65,6 +64,8 @@ class JobController(threading.Thread):
         
         self._firstCheck = True
         
+        self._init = True
+        
         if start:
             self.start()
         
@@ -73,24 +74,24 @@ class JobController(threading.Thread):
         
         return self._registry
 
-    def kill_job(self, job):
+    def kill_job(self, info):
                 
-        if self._registry.has_key(job):
+        if self._registry.has_key(info["name"]):
 
-            if self._registry[job]['state'] == 'running':
+            if info['state'] == 'running':
                 try:
-                    PLATFORM.kill_process(self._registry[job]['pid'])
+                    PLATFORM.kill_process(info['pid'])
                 except:
                     pass
-                else:
-                    del self._registry[job]
 
-        if os.path.exists(job):            
+            del self._registry[info["name"]]
+
+        if os.path.exists(info['temporary_file']):            
             try:
-                os.unlink(job)
+                os.unlink(info['temporary_file'])
             except:
                 pass
-        
+
         self.update()
         
     def run(self):
@@ -103,34 +104,35 @@ class JobController(threading.Thread):
         
         self._stop.set()
         
-    def update(self):
+    def update(self, init=False):
                         
         pids = PLATFORM.get_processes_info()
                         
         # The list of the registered jobs.
         jobs = [f for f in glob.glob(os.path.join(PLATFORM.temporary_files_directory(),'*'))]
-                
+                        
         # Loop over the job registered at the previous controller check point     
-        for j in self._registry.keys():            
+        for job in self._registry.keys():            
 
             # Case where a job has finished during two controller check points (i.e. its temporary file has been deleted)
-            if self._registry[j]['state'] == 'finished':
-                del self._registry[j]
+            if self._registry[job]['state'] == 'finished':
+                del self._registry[job]
                 continue
             
-            if not j in jobs:
-                self._registry[j]['eta'] = 'N/A'
-                self._registry[j]['progress'] = 100
-                self._registry[j]['state'] = 'finished'
-                start = datetime.datetime.strptime(self._registry[j]["start"],"%d-%m-%Y %H:%M:%S")
-                self._registry[j]['elapsed'] = '%02d:%02dh:%02dm:%02ds' % convert_duration(total_seconds(datetime.datetime.today() - start))
-        
+            # Case where the jobs has finished properly (e.g. its temporary file has been removed)
+            if not job in jobs:
+                self._registry[job]['eta'] = 'N/A'
+                self._registry[job]['progress'] = 100
+                self._registry[job]['state'] = 'finished'
+                start = datetime.datetime.strptime(self._registry[job]["start"],"%d-%m-%Y %H:%M:%S")
+                self._registry[job]['elapsed'] = '%02d:%02dh:%02dm:%02ds' % convert_duration(total_seconds(datetime.datetime.today() - start))
+                
         # Loop over the job whose temporary files are still present
-        for j in jobs:
+        for job in jobs:
 
             # Open the job temporary file
             try:
-                f = open(j, 'rb')
+                f = open(job, 'rb')
                 info = cPickle.load(f)
                 f.close()
                 
@@ -142,7 +144,7 @@ class JobController(threading.Thread):
             else:
                 
                 name = info['name']
-                
+                                
                 # Check that the pid of the running job corresponds to an active pid.
                 running = (info['pid'] in pids)
                                 
@@ -157,9 +159,9 @@ class JobController(threading.Thread):
                     info["state"] = "aborted"
                     
                 # If the job was aborted, display the traceback on the dialog logger and remove the corresponding job temporary file
-                if info['state'] == 'aborted':
-                    wx.PostEvent(self._window, JobCrashEvent(info['traceback']))
-                    self.kill_job(j)
+                if self._init and info['state'] == 'aborted':
+                    self.kill_job(info)
+                    self._init = False
                     continue
 
                 self._registry[name] = info
@@ -185,7 +187,6 @@ class JobControllerPanel(wx.ScrolledWindow):
         self._jobsController = JobController(self,True)
 
         EVT_JOB_CONTROLLER(self,self.on_update)
-        EVT_JOB_CRASH(self,self.on_crash_summary)
         
         pub.subscribe(self.msg_start_job,"msg_start_job")
 
@@ -201,15 +202,18 @@ class JobControllerPanel(wx.ScrolledWindow):
 
     def add_job(self, name, jobStatus):
                         
-        name = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['name'])
+        name = wx.Button(self, wx.ID_ANY, style=wx.BU_EXACTFIT,label=jobStatus['name'])
+        if jobStatus["state"] == "aborted":
+            name.SetBackgroundColour(wx.RED)
         pid = intctrl.IntCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['pid'])
         start = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['start'])
         elapsed = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['elapsed'])
-        state = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['state'])
+        state = wx.Button(self, wx.ID_ANY, style=wx.BU_EXACTFIT,label=jobStatus['state'])
         progress = wx.Gauge(self, wx.ID_ANY,range=100)
         progress.SetValue(jobStatus['progress'])
         eta = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['eta'])
-        kill = wx.BitmapButton(self, wx.ID_ANY, ICONS["stop",24,24])
+        kill = wx.BitmapButton(self, wx.ID_ANY, ICONS["stop",16,16])
+        
 
         r = self._gbSizer.GetRows()
 
@@ -222,16 +226,16 @@ class JobControllerPanel(wx.ScrolledWindow):
         self._gbSizer.Add(eta     ,pos=(r,6),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
         self._gbSizer.Add(kill    ,pos=(r,7),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
 
-        name.Bind(wx.EVT_LEFT_DCLICK,self.on_display_info)
-
         self._gbSizer.Layout()
 
-        kill.Bind(wx.EVT_BUTTON, self.on_kill_job)
+        self.Bind(wx.EVT_BUTTON,self.on_display_info,name)
+        self.Bind(wx.EVT_BUTTON,self.on_display_traceback,state)
+        self.Bind(wx.EVT_BUTTON, self.on_kill_job,kill)
 
     def on_display_info(self,event):
         
         row = self._gbSizer.GetItemPosition(event.GetEventObject())[0]
-        name = self._gbSizer.FindItemAtPosition((row,0)).Window.GetValue() 
+        name = self._gbSizer.FindItemAtPosition((row,0)).Window.GetLabel() 
 
         f = wx.Frame(self,size=(800,500))
                 
@@ -239,28 +243,51 @@ class JobControllerPanel(wx.ScrolledWindow):
         
         sizer = wx.BoxSizer(wx.VERTICAL)
         
+        info = self._jobsController.registry[name]['info'].strip()
+        if not info:
+            info = "No information available about %r job." % name
+        
         self._info = wx.TextCtrl(panel,wx.ID_ANY,style=wx.TE_AUTO_SCROLL|wx.TE_READONLY|wx.TE_MULTILINE)
-        self._info.SetValue(self._jobsController.registry[name]['info'])
+        self._info.SetValue(info)
         
         sizer.Add(self._info,1,wx.ALL|wx.EXPAND,5)
         
         panel.SetSizer(sizer)
         
         f.Show()
-                                    
-    def on_kill_job(self, event):
+
+    def on_display_traceback(self,event):
         
         row = self._gbSizer.GetItemPosition(event.GetEventObject())[0]
-        name = self._gbSizer.FindItemAtPosition((row,0)).Window.GetValue() 
+        name = self._gbSizer.FindItemAtPosition((row,0)).Window.GetLabel() 
+
+        f = wx.Frame(self,size=(800,500))
+                
+        panel = wx.Panel(f,wx.ID_ANY)
+        
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        tb = self._jobsController.registry[name]['traceback'].strip()
+        if not tb:
+            tb = "No traceback available about %r job." % name
+        
+        self._tb = wx.TextCtrl(panel,wx.ID_ANY,style=wx.TE_AUTO_SCROLL|wx.TE_READONLY|wx.TE_MULTILINE)
+        self._tb.SetValue(tb)
+        
+        sizer.Add(self._tb,1,wx.ALL|wx.EXPAND,5)
+        
+        panel.SetSizer(sizer)
+        
+        f.Show()
+                                    
+    def on_kill_job(self, event):
+                
+        row = self._gbSizer.GetItemPosition(event.GetEventObject())[0]
+        name = self._gbSizer.FindItemAtPosition((row,0)).Window.GetLabel() 
 
         d = wx.MessageDialog(None, 'Do you really want to kill job %r ?' % name, 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_EXCLAMATION)
         if d.ShowModal() == wx.ID_YES:
-            self._jobsController.kill_job(name)
-
-    def on_crash_summary(self,event):
-
-        LOGGER(event.traceback,'error',['console'])
-
+            self._jobsController.kill_job(self._jobsController.registry[name])
                         
     def on_update(self, event):
                                         
