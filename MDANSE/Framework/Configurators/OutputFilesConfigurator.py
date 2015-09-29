@@ -31,6 +31,7 @@ Created on May 21, 2015
 '''
 
 import os
+import tempfile
 
 from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
@@ -49,7 +50,7 @@ class OutputFilesConfigurator(IConfigurator):
     
     type = 'output_files'
     
-    _default = ("output", ["netcdf"])
+    _default = (os.path.join(tempfile.gettempdir(),"output"), ["netcdf"])
                     
     def __init__(self, name, formats=None, **kwargs):
         '''

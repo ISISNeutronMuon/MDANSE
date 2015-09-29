@@ -89,26 +89,9 @@ class McStasVirtualInstrument(IJob):
     settings['display'] = ('boolean', {'label':'trace the 3D view of the simulation'})
     settings['instrument'] = ('mcstas_instrument',{"label":'mcstas instrument','default' : os.path.join('..','..','..','Data','McStas','Instruments','Simple_ToF_Flat_Sample.out')})
     settings['options'] = ('mcstas_options', {'label':'mcstas options'})
-#     settings['options'] = ('mcstas_options', {"label":'mcstas options'})
     settings['parameters'] = ('mcstas_parameters', {'label':'instrument parameters',
                                                     'dependencies':{'instrument':'instrument'},
                                                     'exclude':['sample_coh','sample_inc']}) 
-#     settings['parameters'] = ('mcstas_parameters', {'label':'instrument parameters', 
-#                                                              'dependencies':{"instrument":"instrument"}, 
-#                                                              'exclude':['sample_coh','sample_inc'], 
-#                                                              'default' :{'beam_wavelength_Angs': 2.0, 
-#                                                                          'environment_thickness_m': 0.002, 
-#                                                                          'beam_resolution_meV': 0.1, 
-#                                                                          'container':os.path.join('..','..','..','Data','McStas','Samples','Al.laz'),
-#                                                                          'container_thickness_m': 5e-05, 
-#                                                                          'sample_height_m': 0.05, 
-#                                                                          'environment':os.path.join('..','..','..','Data','McStas','Samples','Al.laz'),
-#                                                                          'environment_radius_m': 0.025, 
-#                                                                          'sample_thickness_m': 0.001, 
-#                                                                          'sample_detector_distance_m': 4.0, 
-#                                                                          'sample_width_m': 0.02, 
-#                                                                          'sample_rotation_deg': 45.0, 
-#                                                                          'detector_height_m': 3.0}})        
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     
     def initialize(self):

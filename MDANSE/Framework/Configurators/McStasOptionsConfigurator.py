@@ -31,6 +31,7 @@ Created on Mar 30, 2015
 '''
 
 import os
+import tempfile
 import time
 
 from MDANSE import PLATFORM
@@ -43,7 +44,7 @@ class McStasOptionsConfigurator(IConfigurator):
 
     type = "mcstas_options"
     
-    _default = {"ncount" : 10000, "dir" : os.path.join(os.getcwd(),"mcstas_output",time.strftime("%d.%m.%Y-%H:%M:%S", time.localtime()))}
+    _default = {"ncount" : 10000, "dir" : os.path.join(tempfile.gettempdir(),"mcstas_output",time.strftime("%d.%m.%Y-%H:%M:%S", time.localtime()))}
         
     def configure(self, configuration, value):
         '''
