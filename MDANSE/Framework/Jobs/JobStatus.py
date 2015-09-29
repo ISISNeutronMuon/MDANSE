@@ -66,8 +66,12 @@ class JobStatus(Status):
         
         self._state['elapsed'] = self.elapsedTime
         self._state['current_step'] = self.currentStep
-        self._state['eta'] = self.eta
-        self._state['progress'] = 100*self.currentStep/self.nSteps
+        if self._nSteps is not None:
+            self._state['eta'] = self.eta
+            self._state['progress'] = 100*self.currentStep/self.nSteps
+        else:
+            self._eta = "N/A"
+            self._state['progress'] = 0
         
         self.save_status()
         
