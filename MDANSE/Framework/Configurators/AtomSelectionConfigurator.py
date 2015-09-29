@@ -36,7 +36,7 @@ import operator
 import numpy
 
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
 
 # The granularities at which the selection will be performed
@@ -80,6 +80,9 @@ class AtomSelectionConfigurator(IConfigurator):
         
         if isinstance(value,basestring):
             value = [value]
+
+        if not isinstance(value,(list,tuple)):
+            raise ConfiguratorError("Invalid input value.")
         
         self["value"] = value
         

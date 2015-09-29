@@ -76,6 +76,9 @@ class AtomTransmutationConfigurator(IConfigurator):
         # if the input value is None, do not perform any transmutation
         if value is None:
             return
+        
+        if not isinstance(value,(list,tuple)):
+            raise ConfiguratorError("Invalid input value.")
 
         self["atom_selection"] = configuration[self._dependencies['atom_selection']]
         if self["atom_selection"]["level"] != "atom":
