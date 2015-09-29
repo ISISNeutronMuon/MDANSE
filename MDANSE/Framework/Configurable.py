@@ -65,10 +65,10 @@ class Configurable(object):
                                      
         self._configured=False
         
-        if settings is not None:
-            self.settings = settings
+        self._info = ""
         
-        self.build_configuration()
+        if settings is not None:
+            self.set_settings(settings)
         
     def build_configuration(self):
         
@@ -154,6 +154,8 @@ class Configurable(object):
                     conf.configure(self,parameters[name])
                     
                     self._configuration[name]=conf
+                    
+                    self._info += conf.get_information()
                                                             
                     configured.add(name)
                     
@@ -172,15 +174,10 @@ class Configurable(object):
         :rtype: str
         '''
         
-        if not self._configured:
-            return "Not yet configured"
-        
-        info = []
-        for configurator in self._configuration.values():            
-            info.append(configurator.get_information())
-            info.append('\n')
-            
-        return "".join(info)
+        if not self._info:
+            return "No information available yet."
+                    
+        return self._info
     
     @classmethod
     def build_doc(cls):
