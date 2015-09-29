@@ -4,8 +4,6 @@ import datetime
 
 import numpy
 
-from MDANSE.Externals.pubsub import pub as Publisher
-
 def total_seconds(td):
     
     return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10.0**6
@@ -127,9 +125,6 @@ class Status(object):
                 
     def update(self,force=False):
         
-        if self._nSteps is None:
-            return
-        
         if self._updateStep == 0:
             return
                 
@@ -143,10 +138,11 @@ class Status(object):
             
             self._lastRefresh = lastUpdate
             
-            self._elapsedTime = '%02dd:%02dh:%02dm:%02ds' % convert_duration(total_seconds(datetime.datetime.today() - self._startTime))
-            duration = [total_seconds(self._deltas[i+1]-self._deltas[i]) for i in range(self._currentStep)]
-            duration = numpy.median(duration)*(self._nSteps-self._currentStep)
-            duration = datetime.timedelta(seconds=round(duration))
-            duration = convert_duration(total_seconds(duration))            
-            self._eta = '%02dd:%02dh:%02dm:%02ds' % duration
+            if self._nSteps is not None:
+                self._elapsedTime = '%02dd:%02dh:%02dm:%02ds' % convert_duration(total_seconds(datetime.datetime.today() - self._startTime))
+                duration = [total_seconds(self._deltas[i+1]-self._deltas[i]) for i in range(self._currentStep)]
+                duration = numpy.median(duration)*(self._nSteps-self._currentStep)
+                duration = datetime.timedelta(seconds=round(duration))
+                duration = convert_duration(total_seconds(duration))            
+                self._eta = '%02dd:%02dh:%02dm:%02ds' % duration
             self.update_status()
