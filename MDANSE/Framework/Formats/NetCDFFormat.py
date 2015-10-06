@@ -70,6 +70,9 @@ class NetCDFFormat(IFormat):
         outputFile = NetCDFFile(filename, 'w')
         
         if header:
+            # This is to avoid any segmentation fault when writing the NetCDF header field
+            header = str(header)
+
             outputFile.header = header
         
         # Loop over the OutputVariable instances to write.
