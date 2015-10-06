@@ -46,7 +46,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
     
     _default = "equal"
            
-    def __init__(self, configurable, name, **kwargs):
+    def __init__(self, name, **kwargs):
         '''
         Initializes the configurator.
 
@@ -54,7 +54,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         :type name: str
         '''
                 
-        SingleChoiceConfigurator.__init__(self, configurable, name, choices=ELEMENTS.numericProperties, **kwargs)
+        SingleChoiceConfigurator.__init__(self, name, choices=ELEMENTS.numericProperties, **kwargs)
 
     def configure(self, value):
         '''

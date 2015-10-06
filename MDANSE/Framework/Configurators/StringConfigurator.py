@@ -43,7 +43,7 @@ class StringConfigurator(IConfigurator):
     
     _default = ""
 
-    def __init__(self, configurable, name, evalType=None, acceptNullString=True, **kwargs):
+    def __init__(self, name, evalType=None, acceptNullString=True, **kwargs):
         '''
         Initializes the configurator.
         
@@ -55,7 +55,7 @@ class StringConfigurator(IConfigurator):
         :type acceptNullString: bool
         '''
         
-        IConfigurator.__init__(self, configurable, name, **kwargs)
+        IConfigurator.__init__(self, name, **kwargs)
         
         self._evalType = evalType
         

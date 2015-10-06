@@ -97,7 +97,7 @@ class IConfigurator(dict):
     
     _doc_ = "undocumented"
                             
-    def __init__(self, configurable, name, dependencies=None, default=None, label=None, widget=None):
+    def __init__(self, name, **kwargs):
         '''
         Initializes a configurator object.
         
@@ -117,15 +117,15 @@ class IConfigurator(dict):
 
         self._name = name
         
-        self._configurable = configurable
+        self._configurable = kwargs.get('configurable',None)
                 
-        self._dependencies = dependencies if dependencies is not None else {}
+        self._dependencies = kwargs.get('dependencies',{})
 
-        self._default = default if default is not None else self.__class__._default
+        self._default = kwargs.get('default',self.__class__._default) 
 
-        self._label = label if label is not None else " ".join(name.split('_')).strip()
+        self._label = kwargs.get('label'," ".join(name.split('_')).strip())
 
-        self._widget = widget if widget is not None else self.type
+        self._widget = kwargs.get('widget',self.type)
             
     @property
     def default(self):
@@ -192,6 +192,10 @@ class IConfigurator(dict):
 
         :note: this is an abstract method.
         '''
+
+    def set_configurable(self,configurable):
+        
+        self._configurable = configurable
                                                 
     def check_dependencies(self, configured):
         '''

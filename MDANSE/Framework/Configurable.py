@@ -77,7 +77,7 @@ class Configurable(object):
         for name,(typ,kwds) in self.settings.items():
             
             try:
-                self._configuration[name] = REGISTRY["configurator"][typ](self, name, **kwds)
+                self._configuration[name] = REGISTRY["configurator"][typ](name, configurable=self,**kwds)
             # Any kind of error has to be caught
             except:
                 raise ConfigurationError("Invalid type for %r configurator" % name)
@@ -187,7 +187,7 @@ class Configurable(object):
         :param cls: the configurable class for which documentation should be built
         :type cls: an instance of MDANSE.Framework.Configurable.Configurable derived class
         
-        :return: the documnetation about the configurable class
+        :return: the documentation about the configurable class
         :rtype: str
         '''
               

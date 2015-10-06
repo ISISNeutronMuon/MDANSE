@@ -62,7 +62,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
     
     _default = "atom"
     
-    def __init__(self, configurable, name, choices=None, **kwargs):
+    def __init__(self, name, choices=None, **kwargs):
         '''
         Initializes the configurator.
         
@@ -77,7 +77,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         else:
             choices = list(set(LEVELS.keys()).intersection(choices))
 
-        SingleChoiceConfigurator.__init__(self, configurable, name, choices=choices, **kwargs)
+        SingleChoiceConfigurator.__init__(self, name, choices=choices, **kwargs)
         
     def configure(self,value):
         '''

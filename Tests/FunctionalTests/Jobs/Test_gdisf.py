@@ -9,6 +9,7 @@ class TestGDISF(UnitTest):
     def test(self):
         parameters = {}
         parameters['atom_selection'] = 'all'
+        parameters['atom_transmutation'] = None
         parameters['frames'] = (0, 10, 1)
         parameters['grouping_level'] = 'atom'
         parameters['instrument_resolution'] = ('gaussian', {'mu': 0.0, 'sigma': 10.0})
@@ -17,7 +18,6 @@ class TestGDISF(UnitTest):
         parameters['q_shells'] = (0, 10, 1)
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
-        parameters['transmutated_atoms'] = None
         parameters['weights'] = 'b_incoherent'
         job = REGISTRY['job']['gdisf']()
         self.assertNotRaises(job.run, parameters, status=False)

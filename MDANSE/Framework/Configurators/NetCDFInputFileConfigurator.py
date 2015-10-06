@@ -49,7 +49,7 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
     
     _default = ''
         
-    def __init__(self, configurable, name, variables=None, **kwargs):
+    def __init__(self, name, variables=None, **kwargs):
         '''
         Initializes the configurator.
         
@@ -60,7 +60,7 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
         '''        
 
         # The base class constructor.
-        InputFileConfigurator.__init__(self, configurable, name, **kwargs)
+        InputFileConfigurator.__init__(self, name, **kwargs)
         
         self._variables = variables if variables is not None else []
            

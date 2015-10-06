@@ -45,7 +45,7 @@ class RangeConfigurator(IConfigurator):
 
     _default = (0,10,1)
 
-    def __init__(self, configurable, name, valueType=int, includeLast=False, sort=False, toList=False, mini=None, maxi=None, **kwargs):
+    def __init__(self, name, valueType=int, includeLast=False, sort=False, toList=False, mini=None, maxi=None, **kwargs):
         '''
         Initializes the configurator.
         
@@ -65,7 +65,7 @@ class RangeConfigurator(IConfigurator):
         :type maxi: int, float or None
         '''
                         
-        IConfigurator.__init__(self, configurable, name, **kwargs)
+        IConfigurator.__init__(self, name, **kwargs)
         
         self._valueType = valueType
         

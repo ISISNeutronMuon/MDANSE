@@ -48,7 +48,7 @@ class FramesConfigurator(RangeConfigurator):
     
     type = 'frames'
     
-    def __init__(self, configurable, name, **kwargs):
+    def __init__(self, name, **kwargs):
         '''
         Initializes the configurator.
         
@@ -56,7 +56,7 @@ class FramesConfigurator(RangeConfigurator):
         :type name: str
         '''
 
-        RangeConfigurator.__init__(self, configurable, name, sort=True, **kwargs)
+        RangeConfigurator.__init__(self, name, sort=True, **kwargs)
              
     def configure(self, value):
         '''

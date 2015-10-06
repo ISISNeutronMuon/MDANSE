@@ -260,6 +260,7 @@ class IJob(Configurable):
             #. parameters (dict): optional. If not None, the parameters with which the job file will be built.
         """
         
+        
         f = open(jobFile, 'w')
                    
         # The first line contains the call to the python executable. This is necessary for the file to

@@ -52,7 +52,7 @@ class OutputFilesConfigurator(IConfigurator):
     
     _default = (os.path.join(tempfile.gettempdir(),"output"), ["netcdf"])
                     
-    def __init__(self, configurable, name, formats=None, **kwargs):
+    def __init__(self, name, formats=None, **kwargs):
         '''
         Initializes the configurator.
         
@@ -62,7 +62,7 @@ class OutputFilesConfigurator(IConfigurator):
         :type formats: list of str
         '''
                         
-        IConfigurator.__init__(self, configurable, name, **kwargs)
+        IConfigurator.__init__(self, name, **kwargs)
 
         self._formats = formats if formats is not None else OutputFilesConfigurator._default[2]
     

@@ -60,7 +60,7 @@ class McStasParametersConfigurator(IConfigurator):
                 'sample_rotation_deg': 45.0,
                 'detector_height_m': 3.0}        
     
-    def __init__(self, configurable, name, exclude=None, **kwargs):
+    def __init__(self, name, exclude=None, **kwargs):
         '''
         Initializes the configurator.
         
@@ -71,7 +71,7 @@ class McStasParametersConfigurator(IConfigurator):
         '''
         
         # The base class constructor.
-        IConfigurator.__init__(self, configurable, name, **kwargs)
+        IConfigurator.__init__(self, name, **kwargs)
         
         self._exclude = exclude if exclude is not None else []
         

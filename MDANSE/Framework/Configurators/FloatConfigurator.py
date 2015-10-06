@@ -41,7 +41,7 @@ class FloatConfigurator(IConfigurator):
     
     _default = 0
     
-    def __init__(self, configurable, name, mini=None, maxi=None, choices=None, **kwargs):
+    def __init__(self, name, mini=None, maxi=None, choices=None, **kwargs):
         '''
         Initializes the configurator.
         
@@ -56,7 +56,7 @@ class FloatConfigurator(IConfigurator):
         '''
 
         # The base class constructor.
-        IConfigurator.__init__(self, configurable, name, **kwargs)
+        IConfigurator.__init__(self, name, **kwargs)
         
         self._mini = float(mini) if mini is not None else None
 

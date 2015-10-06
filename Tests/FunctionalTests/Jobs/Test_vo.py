@@ -8,7 +8,6 @@ class TestVO(UnitTest):
 
     def test(self):
         parameters = {}
-        parameters['atom_selection'] = 'all'
         parameters['frames'] = (0, 5, 1)
         parameters['output_files'] = ('/tmp/output', ['netcdf'])
         parameters['pbc'] = True

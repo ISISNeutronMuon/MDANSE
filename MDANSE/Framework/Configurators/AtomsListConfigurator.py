@@ -47,7 +47,7 @@ class AtomsListConfigurator(IConfigurator):
     
     _default = None
                     
-    def __init__(self, configurable, name, nAtoms=2, **kwargs):
+    def __init__(self, name, nAtoms=2, **kwargs):
         '''
         Initializes the configurator.
 
@@ -57,7 +57,7 @@ class AtomsListConfigurator(IConfigurator):
         :type nAtoms: int
         '''
         
-        IConfigurator.__init__(self, configurable, name, **kwargs)
+        IConfigurator.__init__(self, name, **kwargs)
         
         self._nAtoms = nAtoms
         
