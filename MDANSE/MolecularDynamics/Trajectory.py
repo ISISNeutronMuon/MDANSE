@@ -132,7 +132,7 @@ def partition_universe(universe,groups):
     
     return coll
 
-def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable="configuration", dtype=numpy.float64):
+def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable="configuration", weights=None, dtype=numpy.float64):
     
     if not isinstance(atoms,(list,tuple)):
         atoms = [atoms]
@@ -143,11 +143,15 @@ def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable=
     nFrames = len(range(first, last, step))
     
     serie = numpy.zeros((nFrames,3), dtype=dtype)
+    
+    if weights is None:
+        weights = [1.0]*len(atoms)
 
-    for at in atoms:
-        serie += trajectory.readParticleTrajectory(at, first, last, step, variable).array
+    for i,at in enumerate(atoms):
+        w = weights[i]
+        serie += w*trajectory.readParticleTrajectory(at, first, last, step, variable).array
                 
-    serie /= len(atoms)
+    serie /= sum(weights)
     
     return serie
 
