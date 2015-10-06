@@ -44,17 +44,15 @@ class PartialChargeConfigurator(IConfigurator):
     
     _default = ''
                    
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure a python script. 
                 
-        :param configuration: the current configuration.
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the path for the python script.
         :type value: str 
         '''
 
-        trajConfig = configuration[self._dependencies['trajectory']]
+        trajConfig = self._configurable[self._dependencies['trajectory']]
         
         if UD_STORE.has_definition(trajConfig["basename"],'partial_charges',value):
             self.update(UD_STORE.get_definition(trajConfig["basename"],'partial_charges',value))

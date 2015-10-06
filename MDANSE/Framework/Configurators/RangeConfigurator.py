@@ -45,7 +45,7 @@ class RangeConfigurator(IConfigurator):
 
     _default = (0,10,1)
 
-    def __init__(self, name, valueType=int, includeLast=False, sort=False, toList=False, mini=None, maxi=None, **kwargs):
+    def __init__(self, configurable, name, valueType=int, includeLast=False, sort=False, toList=False, mini=None, maxi=None, **kwargs):
         '''
         Initializes the configurator.
         
@@ -65,7 +65,7 @@ class RangeConfigurator(IConfigurator):
         :type maxi: int, float or None
         '''
                         
-        IConfigurator.__init__(self, name, **kwargs)
+        IConfigurator.__init__(self, configurable, name, **kwargs)
         
         self._valueType = valueType
         
@@ -79,12 +79,10 @@ class RangeConfigurator(IConfigurator):
         
         self._maxi = maxi
                         
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure a range from its first, last and step values.
         
-        :param configuration: the current configuration
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the first, last and step values used to generate the range.
         :type value: 3-tuple
         '''
@@ -101,7 +99,7 @@ class RangeConfigurator(IConfigurator):
             value = value[value >= self._mini]
 
         if self._maxi is not None:
-            value = value[value <= self._maxi]
+            value = value[value < self._maxi]
         
         if value.size == 0:
             raise ConfiguratorError("the input range is empty." , self)

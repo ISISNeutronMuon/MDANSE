@@ -35,7 +35,6 @@ import itertools
 
 import numpy
 
-from MDANSE import ELEMENTS
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
@@ -62,13 +61,11 @@ class DynamicCoherentStructureFactor(IJob):
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['instrument_resolution'] = ('instrument_resolution',{'dependencies':{'trajectory':'trajectory',
-                                                                                       'frames' : 'frames'}})
+    settings['instrument_resolution'] = ('instrument_resolution',{'dependencies':{'trajectory':'trajectory','frames' : 'frames'}})
     settings['q_vectors'] = ('q_vectors',{'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    settings['transmutated_atoms'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory',
-                                                                                  'atom_selection':'atom_selection'}})
-    settings['weights'] = ('weights', {'default':'b_coherent'})
+    settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
+    settings['weights'] = ('weights', {'default':'b_coherent',"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection', 'atom_transmutation':'atom_transmutation'}})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
     
@@ -78,10 +75,10 @@ class DynamicCoherentStructureFactor(IJob):
         """
 
         if not self.configuration['trajectory']['instance'].universe.is_periodic:
-            raise DynamicCoherentStructureFactorError('Cannot start %s analysis on non-periodic system'%self.label)
+            raise DynamicCoherentStructureFactorError('Cannot start %s analysis on non-periodic system' % self.label)
         
         if not self.configuration['q_vectors']['is_lattice']:
-            raise DynamicCoherentStructureFactorError('The Q vectors must be generated on a lattice to run %s analysis'%self.label)
+            raise DynamicCoherentStructureFactorError('The Q vectors must be generated on a lattice to run %s analysis' % self.label)
         
         self.numberOfSteps = self.configuration['q_vectors']['n_shells']
         
@@ -101,7 +98,8 @@ class DynamicCoherentStructureFactor(IJob):
         self._outputData.add("frequency","line", self._instrResolution["frequencies"], units='THz')
         self._outputData.add("frequency_window","line", self._instrResolution["frequency_window"], axis="frequency", units="au") 
                                 
-        self._elementsPairs = sorted(itertools.combinations_with_replacement(self.configuration['atom_selection']['contents'].keys(),2))
+        self._elementsPairs = sorted(itertools.combinations_with_replacement(self.configuration['atom_selection']['unique_names'],2))
+        self._indexesPerElement = self.configuration['atom_selection'].get_indexes()
 
         for pair in self._elementsPairs:
             self._outputData.add("f(q,t)_%s%s" % pair,"surface", (nQShells,self._nFrames),axis="q|time"     , units="au")                                                 
@@ -136,7 +134,7 @@ class DynamicCoherentStructureFactor(IJob):
             qVectors = qVectors.T
                                                             
             rho = {}
-            for element in self.configuration['atom_selection']['contents'].keys():
+            for element in self.configuration['atom_selection']['unique_names']:
                 rho[element] = numpy.zeros((self._nFrames, qVectors.shape[1]), dtype = numpy.complex64)
 
             # loop over the trajectory time steps
@@ -146,7 +144,7 @@ class DynamicCoherentStructureFactor(IJob):
 
                 conf.convertToBoxCoordinates()
 
-                for element,idxs in self.configuration['atom_selection']['contents'].items():
+                for element,idxs in self._indexesPerElement.items():
                     selectedCoordinates = numpy.take(conf.array, idxs, axis=0)
                     rho[element][i,:] = numpy.sum(numpy.exp(1j*numpy.dot(selectedCoordinates, qVectors)),axis=0)
 
@@ -170,22 +168,21 @@ class DynamicCoherentStructureFactor(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
         
+        nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
         for pair in self._elementsPairs:
-            ni = self.configuration['atom_selection']['n_atoms_per_element'][pair[0]]
-            nj = self.configuration['atom_selection']['n_atoms_per_element'][pair[1]]
+            ni = nAtomsPerElement[pair[0]]
+            nj = nAtomsPerElement[pair[1]]
             self._outputData["f(q,t)_%s%s" % pair][:] /= numpy.sqrt(ni*nj)
             self._outputData["s(q,f)_%s%s" % pair][:] = get_spectrum(self._outputData["f(q,t)_%s%s" % pair],
                                                                      self.configuration["instrument_resolution"]["time_window"],
                                                                      self.configuration["instrument_resolution"]["time_step"],
                                                                      axis=1)        
         
-        props = dict([[k,ELEMENTS[k,self.configuration["weights"]["property"]]] for k in self.configuration['atom_selection']['n_atoms_per_element'].keys()])
-
-        fqtTotal = weight(props,self._outputData,self.configuration['atom_selection']['n_atoms_per_element'],2,"f(q,t)_%s%s")
+        fqtTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,2,"f(q,t)_%s%s")
 
         self._outputData["f(q,t)_total"][:] = fqtTotal
         
-        sqfTotal = weight(props,self._outputData,self.configuration['atom_selection']['n_atoms_per_element'],2,"s(q,f)_%s%s")
+        sqfTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,2,"s(q,f)_%s%s")
         self._outputData["s(q,f)_total"][:] = sqfTotal
     
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)

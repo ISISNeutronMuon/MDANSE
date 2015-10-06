@@ -115,6 +115,8 @@ class MolecularTrace(IJob):
 
         self._outputData.add('molecular_trace',"volume", tuple(numpy.ceil(numpy.array([dimx, dimy, dimz])/self.resolution)))
         
+        self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
+        
     def run_step(self, index):
         """
         Runs a single step of the job.
@@ -134,7 +136,7 @@ class MolecularTrace(IJob):
         grid = numpy.zeros(self.gdim, dtype = numpy.int32)
 
         # Loop over the indexes of the selected atoms for the molecular trace calculation.
-        mt_fast_calc.mt(conf.array[self.configuration['atom_selection']['indexes'],:], grid, self.configuration['spatial_resolution']['value'], self.min)
+        mt_fast_calc.mt(conf.array[self._indexes,:], grid, self.configuration['spatial_resolution']['value'], self.min)
 
         return index, grid
     

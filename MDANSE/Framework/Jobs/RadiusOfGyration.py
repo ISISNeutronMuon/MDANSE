@@ -34,7 +34,6 @@ import collections
 
 import numpy
 
-from MDANSE import ELEMENTS
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Analysis import radius_of_gyration
 
@@ -57,7 +56,7 @@ class RadiusOfGyration(IJob):
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    settings['weights'] = ('weights',{})
+    settings['weights'] = ('weights',{"dependencies":{"atom_selection":"atom_selection"}})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
@@ -72,11 +71,10 @@ class RadiusOfGyration(IJob):
         
         self._outputData.add('rog',"line", (self.configuration['frames']['number'],),axis='time', units="nm")
 
-        self._indexes = self.configuration['atom_selection']['indexes']
-
-        self._masses = numpy.array([ELEMENTS[el[0],self.configuration["weights"]["property"]] for el in self.configuration['atom_selection']['elements']],dtype=numpy.float64)
-
+        self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
         
+        self._masses = numpy.array([m for masses in self._configuration['atom_selection']['masses'] for m in masses],dtype=numpy.float64)
+
     def run_step(self, index):
         """
         Runs a single step of the job.\n
@@ -99,7 +97,6 @@ class RadiusOfGyration(IJob):
         rog = radius_of_gyration(series, masses=self._masses, root=True)
                                                  
         return index, rog
-                
                         
     def combine(self, index, x):
         """
@@ -118,6 +115,4 @@ class RadiusOfGyration(IJob):
         # Write the output variables.
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
-        self.configuration['trajectory']['instance'].close()     
-  
-        
+        self.configuration['trajectory']['instance'].close()

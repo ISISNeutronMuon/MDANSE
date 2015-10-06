@@ -60,8 +60,8 @@ class RigidBodyTrajectory(IJob):
     settings = collections.OrderedDict()
     settings['trajectory']=('mmtk_trajectory',{})
     settings['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
-    settings['atom_selection']=('atom_selection',{"dependencies":{'trajectory':'trajectory','grouping_level':'grouping_level'}})
-    settings['grouping_level']=('grouping_level',{})
+    settings['atom_selection']=('atom_selection',{"dependencies":{'trajectory':'trajectory'}})
+    settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['stepwise']=('boolean',{'default':True})
     settings['reference']=('integer',{"mini":0})
     settings['remove_translation']=('integer',{'default':False})
@@ -72,7 +72,7 @@ class RigidBodyTrajectory(IJob):
         """
         """
 
-        self.numberOfSteps = self.configuration['atom_selection']['n_groups'] 
+        self.numberOfSteps = self.configuration['atom_selection']['selection_length'] 
          
         if (self.configuration['reference']['value'] >= self.configuration['trajectory']['length']):
             raise JobError(self,'Invalid reference frame. Must be an integer in [%d,%d[' % (0,self.configuration['trajectory']['length']))
@@ -80,18 +80,18 @@ class RigidBodyTrajectory(IJob):
         self.nFrames = self.configuration['frames']['number']                  
         self._rbt = {'trajectory':{}}
         
-        self._quaternions = numpy.zeros((self.configuration['atom_selection']['n_groups'],self.configuration['frames']['number'], 4),dtype=numpy.float64)
-        self._coms = numpy.zeros((self.configuration['atom_selection']['n_groups'],self.configuration['frames']['number'], 3),dtype=numpy.float64)
-        self._fits = numpy.zeros((self.configuration['atom_selection']['n_groups'],self.configuration['frames']['number']),dtype=numpy.float64)
+        self._quaternions = numpy.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number'], 4),dtype=numpy.float64)
+        self._coms = numpy.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number'], 3),dtype=numpy.float64)
+        self._fits = numpy.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number']),dtype=numpy.float64)
             
     def run_step(self, index):
         '''
         '''
-        
-        indexes = self.configuration['atom_selection']['groups'][index]
-        
+
         atoms = sorted(self.configuration['trajectory']['universe'].atomList(), key=operator.attrgetter('index'))
- 
+        
+        indexes = self.configuration['atom_selection']["indexes"][index]
+         
         group = Collection([atoms[idx] for idx in indexes])
          
         rbtPerGroup = {}        
@@ -194,9 +194,11 @@ class RigidBodyTrajectory(IJob):
         '''
         '''
         
-        selectedAtoms = Collection()
         atoms = sorted(self.configuration['trajectory']['universe'].atomList(), key=operator.attrgetter('index'))
-        [[selectedAtoms.addObject(atoms[idx]) for idx in indexes] for indexes in self.configuration['atom_selection']['groups']]
+        selectedAtoms = Collection()
+        for indexes in self.configuration['atom_selection']['indexes']:
+            for idx in indexes:
+                selectedAtoms.addObject(atoms[idx])
 
         # Create trajectory
         outputFile = Trajectory(selectedAtoms, self.configuration['output_files']['files'][0], 'w')
@@ -220,14 +222,15 @@ class RigidBodyTrajectory(IJob):
         outputFile = NetCDFFile(self.configuration['output_files']['files'][0], 'a')
 
         outputFile.createDimension('NFRAMES', self.configuration['frames']['number'])
-        outputFile.createDimension('NGROUPS', self.configuration['atom_selection']['n_groups'])
+        outputFile.createDimension('NGROUPS', self.configuration['atom_selection']['selection_length'])
         outputFile.createDimension('QUATERNIONLENGTH',4)
+        outputFile.createDimension('XYZ',3)
  
         # The NetCDF variable that stores the quaternions.
         QUATERNIONS = outputFile.createVariable('quaternion', numpy.dtype(numpy.float64).char, ('NGROUPS', 'NFRAMES','QUATERNIONLENGTH'))
  
         # The NetCDF variable that stores the centers of mass.
-        COM = outputFile.createVariable('com', numpy.dtype(numpy.float64).char, ('NGROUPS','NFRAMES','xyz'))
+        COM = outputFile.createVariable('com', numpy.dtype(numpy.float64).char, ('NGROUPS','NFRAMES','XYZ'))
              
         # The NetCDF variable that stores the rigid-body fit.
         FIT = outputFile.createVariable('fit', numpy.dtype(numpy.float64).char, ('NGROUPS','NFRAMES'))
@@ -235,9 +238,9 @@ class RigidBodyTrajectory(IJob):
         outputFile.info = self._info
  
         # Loop over the groups.
-        for comp in range(self.configuration['atom_selection']['n_groups']):
+        for comp in range(self.configuration['atom_selection']['selection_length']):
              
-            aIndexes = self.configuration['atom_selection']['groups'][comp]
+            aIndexes = self.configuration['atom_selection']['indexes'][comp]
              
             outputFile.info += 'Group %s: %s\n' % (comp, [index for index in aIndexes])
  

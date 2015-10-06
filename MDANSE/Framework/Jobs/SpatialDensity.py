@@ -66,11 +66,8 @@ class SpatialDensity(IJob):
     settings['trajectory'] = ('mmtk_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'MMTK', 'protein_in_periodic_universe.nc')})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['spatial_resolution'] = ('float', {'mini':0.01, 'default':0.1})
-    settings['reference_basis'] = ('atoms_list', {'dependencies':{'trajectory':'trajectory'},
-                                                  'nAtoms':3,
-                                                  'default':('C284H438N84O79S7',('O','C_beta','C_delta'))})
-    settings['target_molecule'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'},
-                                                      'default':'atom_index 151'})
+    settings['reference_basis'] = ('atoms_list', {'dependencies':{'trajectory':'trajectory'},'nAtoms':3,'default':('C284H438N84O79S7',('O','C_beta','C_delta'))})
+    settings['target_molecule'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'},'default':'atom_index 151'})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
@@ -117,6 +114,8 @@ class SpatialDensity(IJob):
         self.rX = numpy.linspace(minx, maxx, self.gdim[0])
         self.rY = numpy.linspace(miny, maxy, self.gdim[1])
         self.rZ = numpy.linspace(minz, maxz, self.gdim[2])
+
+        self._targetIndexes  = [idx for idxs in self.configuration['target_molecule']['indexes'] for idx in idxs]
         
     def run_step(self, index):
         """
@@ -143,7 +142,7 @@ class SpatialDensity(IJob):
         origins = numpy.zeros((self.configuration['reference_basis']['n_values'],3), dtype = numpy.float64)
         bases = numpy.zeros((self.configuration['reference_basis']['n_values'],3,3), dtype = numpy.float64)
         
-        indexes = numpy.array(self.configuration['target_molecule']['indexes']).astype(numpy.int32)
+        indexes = numpy.array(self._targetIndexes).astype(numpy.int32)
                 
         for i, basis in enumerate(self.configuration['reference_basis']['atoms']):
             

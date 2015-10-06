@@ -56,9 +56,8 @@ class CenterOfMassesTrajectory(IJob):
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}, 'default':(0,1,1)})
-    settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory',
-                                                                         'grouping_level':'grouping_level'}})
-    settings['grouping_level'] = ('grouping_level',{})
+    settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
+    settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['output_files'] = ('output_files', {'formats':["netcdf"]})
                 
     def initialize(self):
@@ -67,8 +66,8 @@ class CenterOfMassesTrajectory(IJob):
         """
 
         self.numberOfSteps = self.configuration['frames']['number']
-                        
-        self._partition = partition_universe(self.configuration['trajectory']['instance'].universe,self.configuration['atom_selection']['groups'])
+                                        
+        self._partition = partition_universe(self.configuration['trajectory']['instance'].universe,self.configuration['atom_selection']['indexes'])
 
         self._newUniverse = copy.copy(self.configuration['trajectory']['instance'].universe)
         

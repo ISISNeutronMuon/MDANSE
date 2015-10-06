@@ -67,7 +67,8 @@ class CroppedTrajectory(IJob):
         atoms = sorted_atoms(self.configuration['trajectory']['instance'].universe)
         
         # The collection of atoms corresponding to the atoms selected for output.
-        self._selectedAtoms = Collection([atoms[ind] for ind in self.configuration['atom_selection']['indexes']])
+        indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]        
+        self._selectedAtoms = Collection([atoms[ind] for ind in indexes])
 
         # The output trajectory is opened for writing.
         self._ct = Trajectory(self._selectedAtoms, self.configuration['output_files']['files'][0], "w")

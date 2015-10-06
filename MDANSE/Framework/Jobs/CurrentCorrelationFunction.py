@@ -35,7 +35,6 @@ import itertools
 
 import numpy
 
-from MDANSE import ELEMENTS
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation, normalize, get_spectrum
@@ -65,9 +64,8 @@ class CurrentCorrelationFunction(IJob):
     settings['q_vectors'] = ('q_vectors',{'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
     settings['normalize'] = ('boolean', {'default':False})
-    settings['transmutated_atoms'] = ('atom_transmutation',{'dependencies':{'trajectory':'trajectory',
-                                                                                 'atom_selection':'atom_selection'}})
-    settings['weights'] = ('weights', {'default':'b_coherent'})
+    settings['atom_transmutation'] = ('atom_transmutation',{'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
+    settings['weights'] = ('weights', {'default':'b_coherent',"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection', 'atom_transmutation':'atom_transmutation'}})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
 
@@ -91,8 +89,11 @@ class CurrentCorrelationFunction(IJob):
         self._outputData.add("times","line", self.configuration['frames']['time'], units='ps')
 
         self._outputData.add("frequency","line", self._instrResolution["frequencies"],units='THz')
-                                
-        self._elementsPairs = sorted(itertools.combinations_with_replacement(self.configuration['atom_selection']['contents'].keys(),2))
+
+        self._elements = self.configuration['atom_selection']['unique_names']
+        self._elementsPairs = sorted(itertools.combinations_with_replacement(self._elements,2))
+        
+        self._indexesPerElement = self.configuration['atom_selection'].get_indexes()
 
         for pair in self._elementsPairs:
             self._outputData.add("j(q,t)_long_%s%s"  % pair,"surface", (nQShells,self._nFrames), axis="q|times", units="au")                                                 
@@ -115,7 +116,7 @@ class CurrentCorrelationFunction(IJob):
             #. index (int): The index of the step. 
             #. rho (numpy.array): The exponential part of I(q,t)
         """
-                
+
         shell = self.configuration["q_vectors"]["shells"][index]
         
         if not shell in self.configuration["q_vectors"]["value"]:
@@ -139,7 +140,7 @@ class CurrentCorrelationFunction(IJob):
             rhoTrans = {}
             rhoLong_loop = {}
             rhoTrans_loop = {}
-            for element in self.configuration['atom_selection']['contents'].keys():
+            for element in self._elements:
                 rho[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
                 rho_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
                 rhoLong_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
@@ -150,7 +151,7 @@ class CurrentCorrelationFunction(IJob):
                 conf = traj.configuration[frame]
                 vel = traj.velocities[frame]
                 
-                for element,idxs in self.configuration['atom_selection']['contents'].items():
+                for element,idxs in self._indexesPerElement.items():
                     selectedCoordinates = conf.array[idxs,:]
                     selectedVelocities =  vel.array[idxs,:]
                     selectedVelocities = numpy.transpose(selectedVelocities)[:,:,numpy.newaxis]
@@ -159,7 +160,7 @@ class CurrentCorrelationFunction(IJob):
 
             Q2 = numpy.sum(qVectors**2,axis=0)
             
-            for element in self.configuration['atom_selection']['contents'].keys():
+            for element in self._elements:
                 qj = numpy.sum(rho[element]*qVectors,axis=1)
                 rhoLong[element] = (qj[:,numpy.newaxis,:]*qVectors[numpy.newaxis,:,:])/Q2
                 rhoTrans[element] = rho[element] - rhoLong[element]
@@ -173,32 +174,34 @@ class CurrentCorrelationFunction(IJob):
             #. index (int): The index of the step.\n
             #. x (any): The returned result(s) of run_step
         """
-        
+
         if x is None:
             return
         
         jLong, jTrans = x
         
-        for pair in self._elementsPairs:
+        for at1,at2 in self._elementsPairs:
             
             corrLong = numpy.zeros((self._nFrames,),dtype=numpy.float64)
             corrTrans = numpy.zeros((self._nFrames,),dtype=numpy.float64)
             
             for i in range(3):
-                corrLong += correlation(jLong[pair[0]][:,i,:],jLong[pair[1]][:,i,:], axis=0, average=1)
-                corrTrans += correlation(jTrans[pair[0]][:,i,:],jTrans[pair[1]][:,i,:], axis=0, average=1)
+                corrLong += correlation(jLong[at1][:,i,:],jLong[at2][:,i,:], axis=0, average=1)
+                corrTrans += correlation(jTrans[at1][:,i,:],jTrans[at2][:,i,:], axis=0, average=1)
                             
-            self._outputData["j(q,t)_long_%s%s" % pair][index,:] += corrLong
-            self._outputData["j(q,t)_trans_%s%s" % pair][index,:] += corrTrans
+            self._outputData["j(q,t)_long_%s%s" % (at1,at2)][index,:] += corrLong
+            self._outputData["j(q,t)_trans_%s%s" % (at1,at2)][index,:] += corrTrans
                                         
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
-                
+                        
+        nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
         for pair in self._elementsPairs:
-            ni = self.configuration['atom_selection']['n_atoms_per_element'][pair[0]]
-            nj = self.configuration['atom_selection']['n_atoms_per_element'][pair[1]]
+            at1,at2 = pair
+            ni = nAtomsPerElement[at1]
+            nj = nAtomsPerElement[at2]
             self._outputData["j(q,t)_long_%s%s" % pair][:] /= ni*nj
             self._outputData["j(q,t)_trans_%s%s" % pair][:] /= ni*nj
             self._outputData["J(q,f)_long_%s%s" % pair][:] = get_spectrum(self._outputData["j(q,t)_long_%s%s" % pair],
@@ -215,22 +218,16 @@ class CurrentCorrelationFunction(IJob):
                 self._outputData["j(q,t)_long_%s%s" % pair] = normalize(self._outputData["j(q,t)_long_%s%s" % pair],axis=1)
                 self._outputData["j(q,t)_trans_%s%s" % pair] = normalize(self._outputData["j(q,t)_trans_%s%s" % pair],axis=1)
 
-        props = dict([[k,ELEMENTS[k,self.configuration["weights"]["property"]]] for k in self.configuration['atom_selection']['n_atoms_per_element'].keys()])
-
-        jqtLongTotal = weight(props,self._outputData,self.configuration['atom_selection']['n_atoms_per_element'],2,"j(q,t)_long_%s%s")
+        jqtLongTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,2,"j(q,t)_long_%s%s")
         self._outputData["j(q,t)_long_total"][:] = jqtLongTotal
 
-        jqtTransTotal = weight(props,self._outputData,self.configuration['atom_selection']['n_atoms_per_element'],2,"j(q,t)_trans_%s%s")
+        jqtTransTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,2,"j(q,t)_trans_%s%s")
         self._outputData["j(q,t)_trans_total"][:] = jqtTransTotal
         
-        sqfLongTotal = weight(props,
-                              self._outputData,
-                              self.configuration['atom_selection']['n_atoms_per_element'],
-                              2,
-                              "J(q,f)_long_%s%s")
+        sqfLongTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,2,"J(q,f)_long_%s%s")
         self._outputData["J(q,f)_long_total"][:] = sqfLongTotal
 
-        sqfTransTotal = weight(props,self._outputData,self.configuration['atom_selection']['n_atoms_per_element'],2,"J(q,f)_trans_%s%s")
+        sqfTransTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,2,"J(q,f)_trans_%s%s")
         self._outputData["J(q,f)_trans_total"][:] = sqfTransTotal
     
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)

@@ -34,7 +34,6 @@ import collections
 
 import numpy
 
-from MDANSE import ELEMENTS
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.MolecularDynamics.Analysis import mean_square_deviation
@@ -60,12 +59,10 @@ class RootMeanSquareDeviation(IJob):
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['reference_frame'] = ('integer', {'mini':0, 'default':0})
-    settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory',
-                                                                          'grouping_level':'grouping_level'}})
-    settings['grouping_level'] = ('grouping_level',{})
-    settings['transmutated_atoms'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory',
-                                                                                  'atom_selection':'atom_selection'}})
-    settings['weights'] = ('weights',{})
+    settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
+    settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection', 'atom_transmutation':'atom_transmutation'}})
+    settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
+    settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
     
@@ -78,12 +75,12 @@ class RootMeanSquareDeviation(IJob):
         # Will store the time.
         self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
 
-        self._indexes = self.configuration['atom_selection']['indexes']
+        self._indexes = self.configuration['atom_selection'].get_indexes()
 
-        self._masses = numpy.array([ELEMENTS[el[0],self.configuration["weights"]["property"]] for el in self.configuration['atom_selection']['elements']],dtype=numpy.float64)
+        self._masses = numpy.array([m for masses in self._configuration['atom_selection']['masses'] for m in masses],dtype=numpy.float64)
                                     
         # Will store the mean square deviation
-        for element in self.configuration['atom_selection']['contents'].keys():    
+        for element in self.configuration['atom_selection']['unique_names']:
             self._outputData.add("rmsd_%s" % element,"line", (self.configuration['frames']['number'],), axis="time", units="nm")
                 
     def run_step(self, index):
@@ -103,8 +100,8 @@ class RootMeanSquareDeviation(IJob):
         conf2 = self.configuration['trajectory']['instance'].universe.configuration()
         
         rmsd = {}
-        for k in self.configuration['atom_selection']['contents'].keys():
-            rmsd[k] = mean_square_deviation(conf1.array[self._indexes,:],conf2.array[self._indexes,:],masses=None,root=False)
+        for k,v in self._indexes.items():
+            rmsd[k] = mean_square_deviation(conf1.array[v,:],conf2.array[v,:],masses=None,root=False)
                 
         return index, rmsd
                         
@@ -125,13 +122,10 @@ class RootMeanSquareDeviation(IJob):
         Finalize the job.
         """
             
-        props = dict([[k,ELEMENTS[k,self.configuration["weights"]["property"]]] for k in self.configuration['atom_selection']['n_atoms_per_element'].keys()])
+        weights = self.configuration["weights"].get_weights()
+        nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
                 
-        rmsdTotal = weight(props,
-                           self._outputData,
-                           self.configuration['atom_selection']['n_atoms_per_element'],
-                           1,
-                           "rmsd_%s")
+        rmsdTotal = weight(weights,self._outputData,nAtomsPerElement,1,"rmsd_%s")
                 
         self._outputData.add("rmsd_total","line", rmsdTotal, axis="time", units="nm") 
         

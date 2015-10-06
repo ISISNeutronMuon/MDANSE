@@ -55,9 +55,8 @@ class RootMeanSquareFluctuation(IJob):
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory',
-                                                                          'grouping_level':'grouping_level'}})
-    settings['grouping_level'] = ('grouping_level',{})
+    settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
+    settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
     
@@ -65,14 +64,14 @@ class RootMeanSquareFluctuation(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
-        self.numberOfSteps = self.configuration['atom_selection']['n_groups']
+        self.numberOfSteps = self.configuration['atom_selection']['selection_length']
         
         # Will store the indexes.
-        
-        self._outputData.add('indexes',"line",self.configuration['atom_selection']['indexes'])
+        indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]        
+        self._outputData.add('indexes',"line",indexes)
             
         # Will store the mean square fluctuation evolution.
-        self._outputData.add('rmsf',"line",(self.configuration['atom_selection']['n_selected_atoms'],),axis='indexes',units='nm')
+        self._outputData.add('rmsf',"line",(self.configuration['atom_selection']['selection_length'],),axis='indexes',units='nm')
         
     def run_step(self, index):
         """
@@ -85,14 +84,14 @@ class RootMeanSquareFluctuation(IJob):
             #. rmsf (numpy.array): the calculated root mean square fluctuation for atom index
         """
         # read the particle trajectory  
-        atomIndex = self.configuration['atom_selection']['groups'][index]   
+        indexes = self.configuration['atom_selection']["indexes"][index]
         
         # read the particle trajectory                                              
         series = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
-                               atomIndex,
-                               first=self.configuration['frames']['first'],
-                               last=self.configuration['frames']['last']+1,
-                               step=self.configuration['frames']['step'])
+                                       indexes,
+                                       first=self.configuration['frames']['first'],
+                                       last=self.configuration['frames']['last']+1,
+                                       step=self.configuration['frames']['step'])
         
         rmsf = mean_square_fluctuation(series,root=True)
 

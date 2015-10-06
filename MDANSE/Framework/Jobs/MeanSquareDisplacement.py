@@ -32,7 +32,6 @@ Created on Mar 30, 2015
 
 import collections
 
-from MDANSE import ELEMENTS
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
@@ -76,10 +75,10 @@ class MeanSquareDisplacement(IJob):
     settings['trajectory']=('mmtk_trajectory',{})
     settings['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['projection']=('projection', {"label":"project coordinates"})
-    settings['atom_selection']=('atom_selection',{"dependencies":{'trajectory':'trajectory','grouping_level':'grouping_level'}})
-    settings['grouping_level']=('grouping_level',{})
-    settings['transmutated_atoms']=('atom_transmutation',{"dependencies":{'trajectory':'trajectory', 'atom_selection':'atom_selection'}})
-    settings['weights']=('weights',{})
+    settings['atom_selection']=('atom_selection',{"dependencies":{'trajectory':'trajectory'}})
+    settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection', 'atom_transmutation':'atom_transmutation'}})
+    settings['atom_transmutation']=('atom_transmutation',{"dependencies":{'trajectory':'trajectory', 'atom_selection':'atom_selection'}})
+    settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
     settings['output_files']=('output_files', {"formats":["netcdf","ascii","svg"]})
     settings['running_mode']=('running_mode',{})
             
@@ -88,15 +87,14 @@ class MeanSquareDisplacement(IJob):
         Initialize the input parameters and analysis self variables
         """
 
-        self.numberOfSteps = self.configuration['atom_selection']['n_groups']
+        self.numberOfSteps = self.configuration['atom_selection']['selection_length']
                         
         # Will store the time.
         self._outputData.add("times", "line", self.configuration['frames']['time'], units='ps')
                         
         # Will store the mean square displacement evolution.
-        for element in self.configuration['atom_selection']['contents'].keys():
+        for element in self.configuration['atom_selection']['unique_names']:
             self._outputData.add("msd_%s" % element, "line", (self.configuration['frames']['number'],), axis="times", units="nm2") 
-
 
     def run_step(self, index):
         """
@@ -110,13 +108,15 @@ class MeanSquareDisplacement(IJob):
         """
                 
         # get atom index
-        indexes = self.configuration['atom_selection']["groups"][index]
+        indexes = self.configuration['atom_selection']["indexes"][index]
+        masses = self.configuration['atom_selection']["masses"][index]
                         
         series = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
                                        indexes,
                                        first=self.configuration['frames']['first'],
                                        last=self.configuration['frames']['last']+1,
-                                       step=self.configuration['frames']['step'])
+                                       step=self.configuration['frames']['step'],
+                                       weights=masses)
          
         series = self.configuration['projection']["projector"](series)
         
@@ -134,7 +134,7 @@ class MeanSquareDisplacement(IJob):
         """     
                 
         # The symbol of the atom.
-        element = self.configuration['atom_selection']['elements'][index][0]
+        element = self.configuration['atom_selection']["names"][index]
         
         self._outputData["msd_%s" % element] += x
             
@@ -145,16 +145,12 @@ class MeanSquareDisplacement(IJob):
         """ 
 
         # The MSDs per element are averaged.
-        for element, number in self.configuration['atom_selection']['n_atoms_per_element'].items():
+        nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
+        for element, number in nAtomsPerElement.items():
             self._outputData["msd_%s" % element] /= number
 
-        props = dict([[k,ELEMENTS[k,self.configuration["weights"]["property"]]] for k in self.configuration['atom_selection']['n_atoms_per_element'].keys()])
-        
-        msdTotal = weight(props,
-                          self._outputData,
-                          self.configuration['atom_selection']['n_atoms_per_element'],
-                          1,
-                          "msd_%s")
+        weights = self.configuration["weights"].get_weights()
+        msdTotal = weight(weights,self._outputData,nAtomsPerElement,1,"msd_%s")
         
         self._outputData.add("msd_total", "line", msdTotal, axis="times", units="nm2") 
         

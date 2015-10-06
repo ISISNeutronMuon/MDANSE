@@ -34,7 +34,6 @@ import collections
 
 import numpy
 
-from MDANSE import ELEMENTS
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation, get_spectrum
@@ -59,11 +58,11 @@ class DynamicIncoherentStructureFactor(IJob):
     settings['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['instrument_resolution'] = ('instrument_resolution',{"dependencies":{'trajectory':'trajectory', 'frames' : 'frames'}})
     settings['q_vectors'] = ('q_vectors',{"dependencies":{'trajectory':'trajectory'}})
-    settings['atom_selection']=('atom_selection',{"dependencies":{'trajectory':'trajectory','grouping_level':'grouping_level'}})
-    settings['grouping_level']=('grouping_level',{})
-    settings['transmutated_atoms']=('atom_transmutation',{"dependencies":{'trajectory':'trajectory', 'atom_selection':'atom_selection'}})
+    settings['atom_selection']=('atom_selection',{"dependencies":{'trajectory':'trajectory'}})
+    settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection', 'atom_transmutation':'atom_transmutation'}})
+    settings['atom_transmutation']=('atom_transmutation',{"dependencies":{'trajectory':'trajectory', 'atom_selection':'atom_selection'}})
     settings['projection']=('projection', {"label":"project coordinates"})
-    settings['weights']=('weights',{"default" : "b_incoherent"})
+    settings['weights'] = ('weights', {'default':'b_incoherent',"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection', 'atom_transmutation':'atom_transmutation'}})
     settings['output_files']=('output_files', {"formats":["netcdf","ascii"]})
     settings['running_mode']=('running_mode',{})
                     
@@ -72,7 +71,7 @@ class DynamicIncoherentStructureFactor(IJob):
         Initialize the input parameters and analysis self variables
         """
 
-        self.numberOfSteps = self.configuration['atom_selection']['n_groups']
+        self.numberOfSteps = self.configuration['atom_selection']['selection_length']
 
         self._nQShells = self.configuration["q_vectors"]["n_shells"]
 
@@ -90,7 +89,7 @@ class DynamicIncoherentStructureFactor(IJob):
         self._outputData.add("frequency","line", self._instrResolution["frequencies"], units='THz')
         self._outputData.add("frequency_window","line", self._instrResolution["frequency_window"], axis="frequency", units="au") 
                         
-        for element in self.configuration['atom_selection']['contents'].keys():
+        for element in self.configuration['atom_selection']['unique_names']:
             self._outputData.add("f(q,t)_%s" % element,"surface", (self._nQShells,self._nFrames)     , axis="q|time", units="au")                                                 
             self._outputData.add("s(q,f)_%s" % element,"surface", (self._nQShells,self._nFrequencies), axis="q|frequency", units="nm2/ps") 
 
@@ -109,13 +108,15 @@ class DynamicIncoherentStructureFactor(IJob):
         """
         
         # get atom index
-        indexes = self.configuration['atom_selection']["groups"][index]                                                                          
+        indexes = self.configuration['atom_selection']["indexes"][index]
+        masses = self.configuration['atom_selection']["masses"][index]
                 
         series = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
                                        indexes,
                                        first=self.configuration['frames']['first'],
                                        last=self.configuration['frames']['last']+1,
-                                       step=self.configuration['frames']['step'])
+                                       step=self.configuration['frames']['step'],
+                                       weights=masses)
         
         series = self.configuration['projection']["projector"](series)
 
@@ -144,8 +145,7 @@ class DynamicIncoherentStructureFactor(IJob):
             #. x (any): The returned result(s) of run_step
         """
                 
-        # The symbol of the atom.
-        element = self.configuration['atom_selection']['elements'][index][0]
+        element = self.configuration['atom_selection']["names"][index]
         
         self._outputData["f(q,t)_%s" % element] += x
             
@@ -155,18 +155,19 @@ class DynamicIncoherentStructureFactor(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
         
-        for element, number in self.configuration['atom_selection']['n_atoms_per_element'].items():
+        nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
+        for element, number in nAtomsPerElement.items():
             self._outputData["f(q,t)_%s" % element][:] /= number
             self._outputData["s(q,f)_%s" % element][:] = get_spectrum(self._outputData["f(q,t)_%s" % element],
                                                                       self.configuration["instrument_resolution"]["time_window"],
                                                                       self.configuration["instrument_resolution"]["time_step"],
                                                                       axis=1)
 
-        props = dict([[k,ELEMENTS[k,self.configuration["weights"]["property"]]] for k in self.configuration['atom_selection']['n_atoms_per_element'].keys()])
+        weights = self.configuration["weights"].get_weights()
+                
+        self._outputData["f(q,t)_total"][:] = weight(weights,self._outputData,nAtomsPerElement,1,"f(q,t)_%s")
         
-        self._outputData["f(q,t)_total"][:] = weight(props,self._outputData,self.configuration['atom_selection']['n_atoms_per_element'],1,"f(q,t)_%s")
-        
-        self._outputData["s(q,f)_total"][:] = weight(props,self._outputData,self.configuration['atom_selection']['n_atoms_per_element'],1,"s(q,f)_%s")
+        self._outputData["s(q,f)_total"][:] = weight(weights,self._outputData,nAtomsPerElement,1,"s(q,f)_%s")
     
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         

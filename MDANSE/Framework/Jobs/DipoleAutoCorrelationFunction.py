@@ -52,10 +52,8 @@ class DipoleAutoCorrelationFunction(IJob):
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'},
-                                                    'default' : 'atom_index 0,1,2'})
-    settings['atom_charges'] = ('partial_charges',{'dependencies':{'trajectory':'trajectory'},
-                                                   'default':{0:0.5,1:1.2,2:-0.2}})
+    settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'},'default' : 'atom_index 0,1,2'})
+    settings['atom_charges'] = ('partial_charges',{'dependencies':{'trajectory':'trajectory'},'default':{0:0.5,1:1.2,2:-0.2}})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
     
@@ -76,7 +74,8 @@ class DipoleAutoCorrelationFunction(IJob):
         if not isinstance(self.configuration["atom_charges"]["charges"],dict):
             raise JobError(self,'Invalid type for partial charges. Must be a dictionary that maps atom index to to partial charge.')
             
-        for idx, in self.configuration['atom_selection']["groups"]: 
+        self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
+        for idx in self._indexes: 
             if not self.configuration["atom_charges"]["charges"].has_key(idx):
                 raise JobError(self,'Partial charge not defined for atom: %d' % idx)                         
         
@@ -98,7 +97,7 @@ class DipoleAutoCorrelationFunction(IJob):
         conf = self.configuration['trajectory']['instance'].universe.contiguousObjectConfiguration()
 
         dipoleMoment = numpy.zeros((3,),dtype=numpy.float64)
-        for idx, in self.configuration['atom_selection']["groups"]: 
+        for idx in self._indexes: 
             dipoleMoment += self.configuration["atom_charges"]["charges"][idx]*conf[idx]
                 
         return index, dipoleMoment

@@ -34,7 +34,6 @@ import collections
 
 import numpy
 
-from MDANSE import ELEMENTS
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
@@ -60,11 +59,10 @@ class DensityProfile(IJob):
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
-    settings['transmutated_atoms'] = ('atom_transmutation',{'dependencies':{'trajectory':'trajectory',
-                                                                                 'atom_selection':'atom_selection'}})
+    settings['atom_transmutation'] = ('atom_transmutation',{'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['axis'] = ('single_choice', {'choices':['a','b','c'], 'default':'c'})
     settings['dr'] = ('float', {'default':0.01, 'mini':1.0e-9})
-    settings['weights'] = ('weights',{})
+    settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
     
@@ -87,7 +85,9 @@ class DensityProfile(IJob):
                                 
         self._outputData.add('r',"line", (self._nBins,), units="nm") 
 
-        for element in self.configuration['atom_selection']['contents'].keys():
+        self._indexesPerElement = self.configuration['atom_selection'].get_indexes()
+
+        for element in self._indexesPerElement.keys():
             self._outputData.add("dp_%s" % element,"line", (self._nBins,), axis="r", units="au") 
 
         self._extent = 0.0
@@ -117,7 +117,7 @@ class DensityProfile(IJob):
         
         dpPerFrame = {}
         
-        for k,v in self.configuration['atom_selection']["contents"].iteritems():
+        for k,v in self._indexesPerElement.iteritems():
             h = numpy.histogram(conf.array[v,self.configuration["axis"]["index"]],bins=self._nBins, range=[-0.5,0.5])
             dpPerFrame[k] = h[0]
             
@@ -142,16 +142,11 @@ class DensityProfile(IJob):
         Finalize the job.
         """
  
-        for element in self.configuration['atom_selection']['contents'].keys():
+        nAtomsPerElement = self.configuration['atom_selection'].get_natoms()        
+        for element in nAtomsPerElement.keys():
             self._outputData["dp_%s" % element] += self.numberOfSteps
 
-        props = dict([[k,ELEMENTS[k,self.configuration["weights"]["property"]]] for k in self.configuration['atom_selection']['n_atoms_per_element'].keys()])
-
-        dpTotal = weight(props,
-                         self._outputData,
-                         self.configuration['atom_selection']['n_atoms_per_element'],
-                         1,
-                         "dp_%s")
+        dpTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,1,"dp_%s")
             
         self._outputData.add("dp_total","line", dpTotal, axis="times", units="au") 
         

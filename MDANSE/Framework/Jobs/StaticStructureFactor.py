@@ -57,9 +57,8 @@ class StaticStructureFactor(DistanceHistogram):
     settings['r_values'] = ('range', {'valueType':float, 'includeLast':True, 'mini':0.0})
     settings['q_values'] = ('range', {'valueType':float, 'includeLast':True, 'mini':0.0})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    settings['transmutated_atoms'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory',
-                                                                                  'atom_selection':'atom_selection'}})
-    settings['weights'] = ('weights', {'default':'b_coherent'})
+    settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
+    settings['weights'] = ('weights', {'default':'b_coherent',"dependencies":{'atom_selection':'atom_selection','atom_transmutation':'atom_transmutation'}})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
@@ -91,14 +90,15 @@ class StaticStructureFactor(DistanceHistogram):
         
         dr = self.configuration['r_values']['step']
         
+        nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
         for pair in self._elementsPairs:
 
             self._outputData.add("ssf_intra_%s%s" % pair,"line", (nq,), axis='q', units="au")                                                 
             self._outputData.add("ssf_inter_%s%s" % pair,"line", (nq,), axis='q', units="au",)                                                 
             self._outputData.add("ssf_total_%s%s" % pair,"line", (nq,), axis='q', units="au")                                                 
 
-            ni = self.configuration['atom_selection']['n_atoms_per_element'][pair[0]]
-            nj = self.configuration['atom_selection']['n_atoms_per_element'][pair[1]]
+            ni = nAtomsPerElement[pair[0]]
+            nj = nAtomsPerElement[pair[1]]
             
             idi = self.selectedElements.index(pair[0])
             idj = self.selectedElements.index(pair[1])
@@ -123,20 +123,12 @@ class StaticStructureFactor(DistanceHistogram):
         self._outputData.add("ssf_inter","line", (nq,), axis='q', units="au",)                                                 
         self._outputData.add("ssf_total","line", (nq,), axis='q', units="au")                                                 
 
-        props = dict([[k,ELEMENTS[k,self.configuration["weights"]["property"]]] for k in self.configuration['atom_selection']['n_atoms_per_element'].keys()])
+        weights = self.configuration["weights"].get_weights()
 
-        ssfIntra = weight(props,
-                          self._outputData,
-                          self.configuration['atom_selection']['n_atoms_per_element'],
-                          2,
-                          "ssf_intra_%s%s")
+        ssfIntra = weight(weights,self._outputData,nAtomsPerElement,2,"ssf_intra_%s%s")
         self._outputData["ssf_intra"][:] = ssfIntra
 
-        ssfInter = weight(props,
-                          self._outputData,
-                          self.configuration['atom_selection']['n_atoms_per_element'],
-                          2,
-                          "ssf_inter_%s%s")
+        ssfInter = weight(weights,self._outputData,nAtomsPerElement,2,"ssf_inter_%s%s")
 
         self._outputData["ssf_inter"][:] = ssfInter
  

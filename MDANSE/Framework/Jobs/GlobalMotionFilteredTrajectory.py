@@ -90,12 +90,14 @@ class GlobalMotionFilteredTrajectory(IJob):
         
         self._cellParametersFunction = self.configuration['trajectory']['instance'].universe.cellParameters
         
-        atoms = sorted_atoms(self.configuration['trajectory']['instance'].universe)
 
         # The collection of atoms corresponding to the atoms selected for output.
-        self._selectedAtoms = Collection([atoms[ind] for ind in self.configuration['atom_selection']['indexes']])
+        atoms = sorted_atoms(self.configuration['trajectory']['instance'].universe)
+        sIndexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
+        self._selectedAtoms = Collection([atoms[ind] for ind in sIndexes])
 
-        self._referenceAtoms = Collection([atoms[ind] for ind in self.configuration['reference_selection']['indexes']])
+        rIndexes  = [idx for idxs in self.configuration['reference_selection']['indexes'] for idx in idxs]
+        self._referenceAtoms = Collection([atoms[ind] for ind in rIndexes])
                         
         # The output trajectory is opened for writing.
         self._gmft = Trajectory(self._selectedAtoms, self.configuration['output_files']['files'][0], "w")

@@ -84,7 +84,8 @@ class UnfoldedTrajectory(IJob):
         atoms = sorted_atoms(self.configuration['trajectory']['instance'].universe)
          
         # The collection of atoms corresponding to the atoms selected for output.
-        self._selectedAtoms = Collection([atoms[ind] for ind in self.configuration['atom_selection']['indexes']])
+        indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
+        self._selectedAtoms = Collection([atoms[ind] for ind in indexes])
         
         self._chemicalObjects = set([at.topLevelChemicalObject() for at in self._selectedAtoms])
                                          

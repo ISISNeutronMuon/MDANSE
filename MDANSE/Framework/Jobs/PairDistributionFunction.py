@@ -32,7 +32,6 @@ Created on Apr 10, 2015
 
 import numpy
 
-from MDANSE import ELEMENTS
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Mathematics.Arithmetic import weight
 
@@ -87,9 +86,10 @@ class PairDistributionFunction(DistanceHistogram):
         
         shellVolumes  = shellSurfaces*self.configuration['r_values']['step']
   
+        nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
         for pair in self._elementsPairs:
-            ni = self.configuration['atom_selection']['n_atoms_per_element'][pair[0]]
-            nj = self.configuration['atom_selection']['n_atoms_per_element'][pair[1]]
+            ni = nAtomsPerElement[pair[0]]
+            nj = nAtomsPerElement[pair[1]]
             
             idi = self.selectedElements.index(pair[0])
             idj = self.selectedElements.index(pair[1])
@@ -107,27 +107,15 @@ class PairDistributionFunction(DistanceHistogram):
             self._outputData["pdf_inter_%s%s" % pair][:] = self.hInter[idi,idj,:] / fact
             self._outputData["pdf_total_%s%s" % pair][:] = self._outputData["pdf_intra_%s%s" % pair][:] + self._outputData["pdf_inter_%s%s" % pair][:]
 
-        props = dict([[k,ELEMENTS[k,self.configuration["weights"]["property"]]] for k in self.configuration['atom_selection']['n_atoms_per_element'].keys()])
-            
-        pdfIntraTotal = weight(props,
-                               self._outputData,
-                               self.configuration['atom_selection']['n_atoms_per_element'],
-                               2,
-                               "pdf_intra_%s%s")
+        weights = self.configuration["weights"].get_weights()
+        
+        pdfIntraTotal = weight(weights,self._outputData,nAtomsPerElement,2,"pdf_intra_%s%s")
         self._outputData["pdf_intra_total"][:] = pdfIntraTotal
         
-        pdfInterTotal = weight(props,
-                               self._outputData,
-                               self.configuration['atom_selection']['n_atoms_per_element'],
-                               2,
-                               "pdf_inter_%s%s")
+        pdfInterTotal = weight(weights,self._outputData,nAtomsPerElement,2,"pdf_inter_%s%s")
         self._outputData["pdf_inter_total"][:] = pdfInterTotal
 
-        pdfTotal = weight(props,
-                          self._outputData,
-                          self.configuration['atom_selection']['n_atoms_per_element'],
-                          2,
-                          "pdf_total_%s%s")
+        pdfTotal = weight(weights,self._outputData,nAtomsPerElement,2,"pdf_total_%s%s")
         self._outputData["pdf_total"][:] = pdfTotal
                 
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)

@@ -77,7 +77,7 @@ class Configurable(object):
         for name,(typ,kwds) in self.settings.items():
             
             try:
-                self._configuration[name] = REGISTRY["configurator"][typ](name, **kwds)
+                self._configuration[name] = REGISTRY["configurator"][typ](self, name, **kwds)
             # Any kind of error has to be caught
             except:
                 raise ConfigurationError("Invalid type for %r configurator" % name)
@@ -150,22 +150,22 @@ class Configurable(object):
                     continue
                 
                 if conf.check_dependencies(configured):
-
-                    conf.configure(self,parameters[name])
+                                                            
+                    conf.configure(parameters[name])
                     
                     self._configuration[name]=conf
                     
                     self._info += conf.get_information()
                                                             
                     configured.add(name)
-                    
+                                        
                     progress = True
                     
             if not progress:
                 raise ConfigurationError("Circular or unsatisfiable dependencies when setting up configuration.")
 
         self._configured=True
-
+        
     def __str__(self):
         '''
         Returns the informations about the current configuration in text form.

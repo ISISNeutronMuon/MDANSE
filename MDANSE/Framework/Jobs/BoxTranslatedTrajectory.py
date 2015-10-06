@@ -72,8 +72,9 @@ class BoxCenteredTrajectory(IJob):
 
         # Create a MMTK collection from the atoms selected for translation.
         atoms = sorted_atoms(self.configuration['trajectory']['instance'].universe)
-        self._selectedAtoms = Collection([atoms[ind] for ind in self.configuration['atom_selection']['indexes']])
-                        
+        self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
+        self._selectedAtoms = Collection([atoms[idx] for idx in self._indexes])
+                                
         # The output trajectory is opened for writing.
         self._btt = Trajectory(self._selectedAtoms, self.configuration['output_files']['files'][0], "w")        
         self._btt.title = self.__class__.__name__
@@ -117,7 +118,7 @@ class BoxCenteredTrajectory(IJob):
         conf = Configuration(self._universe, self._universe._boxToRealPointArray(self._boxCoords))
         
         # The universe is translated by the center of the selected atoms.
-        c = center(conf.array[self.configuration['atom_selection']['indexes'],:])
+        c = center(conf.array[self._indexes,:])
         conf.array -= c                        
         self._universe.setConfiguration(conf)
     

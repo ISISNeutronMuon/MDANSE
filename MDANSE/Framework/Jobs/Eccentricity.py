@@ -95,7 +95,7 @@ class Eccentricity(IJob):
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['center_of_mass'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    settings['weights'] = ('weights',{})
+    settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
             
     def initialize(self):
@@ -103,11 +103,10 @@ class Eccentricity(IJob):
         Initialize the input parameters and analysis self variables
         """
         self.numberOfSteps = self.configuration['frames']['number']
-
-        self._masses = numpy.array([ELEMENTS[el[0],self.configuration["weights"]["property"]] for el in self.configuration['atom_selection']['elements']],dtype=numpy.float64)
                        
+        self._masses = [m for masses in self._configuration['atom_selection']['masses'] for m in masses]
         self._totalMass = numpy.sum(self._masses)
-        
+                
         # Will store the time.
         self._outputData.add('time',"line", self.configuration['frames']['time'], units="ps")
         
@@ -122,7 +121,9 @@ class Eccentricity(IJob):
         
         self._outputData.add('ratio_of_largest_to_smallest',"line",npoints,axis='time') 
         
-        self._outputData.add('radius_of_gyration',"line",npoints,axis='time') 
+        self._outputData.add('radius_of_gyration',"line",npoints,axis='time')
+        
+        self._indexes = self.configuration['atom_selection'].get_indexes()
     
     def run_step(self, index):
         """
@@ -151,11 +152,11 @@ class Eccentricity(IJob):
 
         # calculate the inertia moments and the radius of gyration
         xx = xy = xz = yy = yz = zz = 0
-        for atomSymbol, atomsIndexes in self.configuration['atom_selection']['contents'].items():
-            atomsCoordinates = series[atomsIndexes]
+        for name, idxs in self._indexes.items():
+            atomsCoordinates = series[idxs,:]
             difference = atomsCoordinates-com
             
-            w = ELEMENTS[atomSymbol,self.configuration["weights"]["property"]]
+            w = ELEMENTS[name,self.configuration["weights"]["property"]]
                                             
             xx += numpy.add.reduce(w * (difference[:,1]*difference[:,1] + difference[:,2]*difference[:,2]) )
             xy -= numpy.add.reduce(w * (difference[:,0]*difference[:,1]) )
@@ -210,7 +211,7 @@ class Eccentricity(IJob):
         # radius_of_gyration is a measure of the distribution of the mass 
         # of atomic groups or molecules that constitute the aqueous core 
         # relative to its center of mass 
-        self._outputData['radius_of_gyration'][index] = numpy.sqrt(x[6]/self.configuration['atom_selection']['n_groups'] )
+        self._outputData['radius_of_gyration'][index] = numpy.sqrt(x[6]/self.configuration['atom_selection']['selection_length'] )
         
     def finalize(self):
         """

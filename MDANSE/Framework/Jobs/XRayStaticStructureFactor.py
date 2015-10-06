@@ -76,8 +76,7 @@ class StaticStructureFactor(DistanceHistogram):
     settings['r_values'] = ('range', {'valueType':float, 'includeLast':True, 'mini':0.0})
     settings['q_values'] = ('range', {'valueType':float, 'includeLast':True, 'mini':0.0})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    settings['transmutated_atoms'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory',
-                                                                                  'atom_selection':'atom_selection'}})
+    settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
@@ -109,14 +108,15 @@ class StaticStructureFactor(DistanceHistogram):
         
         dr = self.configuration['r_values']['step']
         
+        nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
         for pair in self._elementsPairs:
 
             self._outputData.add("xssf_intra_%s%s" % pair,"line", (nq,), axis='q', units="au")                                                 
             self._outputData.add("xssf_inter_%s%s" % pair,"line", (nq,), axis='q', units="au",)                                                 
             self._outputData.add("xssf_total_%s%s" % pair,"line", (nq,), axis='q', units="au")                                                 
 
-            ni = self.configuration['atom_selection']['n_atoms_per_element'][pair[0]]
-            nj = self.configuration['atom_selection']['n_atoms_per_element'][pair[1]]
+            ni = nAtomsPerElement[pair[0]]
+            nj = nAtomsPerElement[pair[1]]
             
             idi = self.selectedElements.index(pair[0])
             idj = self.selectedElements.index(pair[1])
@@ -141,12 +141,12 @@ class StaticStructureFactor(DistanceHistogram):
         self._outputData.add("xssf_inter","line", (nq,), axis='q', units="au")                                                 
         self._outputData.add("xssf_total","line", (nq,), axis='q', units="au")                                                 
 
-        asf = dict((k,atomic_scattering_factor(k,self._outputData['q'])) for k in self.configuration['atom_selection']['n_atoms_per_element'].keys())
+        asf = dict((k,atomic_scattering_factor(k,self._outputData['q'])) for k in nAtomsPerElement.keys())
                         
-        xssfIntra = weight(asf,self._outputData,self.configuration['atom_selection']['n_atoms_per_element'],2,"xssf_intra_%s%s")
+        xssfIntra = weight(asf,self._outputData,nAtomsPerElement,2,"xssf_intra_%s%s")
         self._outputData["xssf_intra"][:] = xssfIntra
  
-        xssfInter = weight(asf,self._outputData,self.configuration['atom_selection']['n_atoms_per_element'],2,"xssf_inter_%s%s")
+        xssfInter = weight(asf,self._outputData,nAtomsPerElement,2,"xssf_inter_%s%s")
         self._outputData["xssf_inter"][:] = xssfInter
            
         self._outputData["xssf_total"][:] = xssfIntra + xssfInter

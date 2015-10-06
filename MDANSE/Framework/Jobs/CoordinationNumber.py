@@ -55,8 +55,7 @@ class CoordinationNumber(DistanceHistogram):
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['r_values'] = ('range', {'valueType':float, 'includeLast':True, 'mini':0.0})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    settings['transmutated_atoms'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory',
-                                                                                  'atom_selection':'atom_selection'}})
+    settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
@@ -94,12 +93,13 @@ class CoordinationNumber(DistanceHistogram):
         for k in self._concentrations.keys():
             self._concentrations[k] /= nFrames
 
-        for pair in self._elementsPairs:
-            ni = self.configuration['atom_selection']['n_atoms_per_element'][pair[0]]
-            nj = self.configuration['atom_selection']['n_atoms_per_element'][pair[1]]
+        nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
+        for at1,at2 in self._elementsPairs:
+            ni = nAtomsPerElement[at1]
+            nj = nAtomsPerElement[at2]
             
-            idi = self.selectedElements.index(pair[0])
-            idj = self.selectedElements.index(pair[1])
+            idi = self.selectedElements.index(at1)
+            idj = self.selectedElements.index(at2)
 
             if idi == idj:
                 nij = ni*(ni-1)/2.0    

@@ -97,6 +97,8 @@ class SolventAccessibleSurface(IJob):
         self.vdwRadii_list = numpy.zeros( (max(self.vdwRadii.keys())+1,2), dtype = numpy.float64)
         for k,v in self.vdwRadii.items():
             self.vdwRadii_list[k] = numpy.array([k,v])[:]   
+
+        self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
         
     def run_step(self, index):
         """
@@ -120,8 +122,8 @@ class SolventAccessibleSurface(IJob):
         
         # Loop over the indexes of the selected atoms for the sas calculation.
         sas = sas_fast_calc.sas(index,
-                                conf.array[self.configuration['atom_selection']['indexes'],:],
-                                numpy.array(self.configuration['atom_selection']['groups'], dtype=numpy.int32).ravel(),
+                                conf.array[self._indexes,:],
+                                numpy.array(self.configuration['atom_selection']['indexes'], dtype=numpy.int32).ravel(),
                                 self.vdwRadii_list,
                                 self.spherePoints,
                                 self.configuration['probe_radius']['value'])

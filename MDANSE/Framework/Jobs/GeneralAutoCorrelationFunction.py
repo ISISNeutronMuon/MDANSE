@@ -32,7 +32,6 @@ Created on Apr 10, 2015
 
 import collections
 
-from MDANSE import ELEMENTS
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation
@@ -54,14 +53,12 @@ class GeneralAutoCorrelationFunction(IJob):
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory',
-                                                                          'grouping_level':'grouping_level'}})
-    settings['grouping_level'] = ('grouping_level',{})
-    settings['transmutated_atoms'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory',
-                                                                                  'atom_selection':'atom_selection'}})        
+    settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
+    settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection', 'atom_transmutation':'atom_transmutation'}})
+    settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})        
     settings['trajectory_variable'] = ('trajectory_variable', {'dependencies':{'trajectory':'trajectory'}})
     settings['normalize'] = ('boolean', {'default':False})
-    settings['weights'] = ('weights',{})
+    settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
     settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
@@ -70,13 +67,13 @@ class GeneralAutoCorrelationFunction(IJob):
         Initialize the input parameters and analysis self variables
         """
 
-        self.numberOfSteps = self.configuration['atom_selection']['n_groups']
+        self.numberOfSteps = self.configuration['atom_selection']['selection_length']
         
         # Will store the time.
         self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
 
         # Will store the mean square displacement evolution.
-        for element in self.configuration['atom_selection']['contents'].keys():
+        for element in self.configuration['atom_selection']['unique_names']:
             self._outputData.add("gacf_%s" % element,"line", (self.configuration['frames']['number'],), axis="time", units="au")
 
         self._outputData.add("gacf_total","line", (self.configuration['frames']['number'],), axis="time", units="au") 
@@ -92,13 +89,15 @@ class GeneralAutoCorrelationFunction(IJob):
             #. atomicGACF (numpy.array): the calculated auto-correlation function for the index
         """
 
-        indexes = self.configuration['atom_selection']["groups"][index]
+        indexes = self.configuration['atom_selection']["indexes"][index]
+        masses = self.configuration['atom_selection']["masses"][index]
 
         series = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
                                        indexes,
                                        first=self.configuration['frames']['first'],
                                        last=self.configuration['frames']['last']+1,
                                        step=self.configuration['frames']['step'],
+                                       weights=masses,
                                        variable=self.configuration["trajectory_variable"]["value"])
                 
         atomicGACF = correlation(series,axis=0,average=1)
@@ -113,7 +112,7 @@ class GeneralAutoCorrelationFunction(IJob):
             #. x (any): The returned result(s) of run_step
         """     
 
-        element = self.configuration['atom_selection']['elements'][index][0]       
+        element = self.configuration['atom_selection']["names"][index]
         
         self._outputData["gacf_%s" % element] += x        
         
@@ -124,7 +123,8 @@ class GeneralAutoCorrelationFunction(IJob):
         """ 
         
         # The MSDs per element are averaged.
-        for element, number in self.configuration['atom_selection']['n_atoms_per_element'].items():
+        nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
+        for element, number in nAtomsPerElement.items():
             self._outputData["gacf_%s" % element] /= number
                 
         if self.configuration['normalize']["value"]:
@@ -135,13 +135,8 @@ class GeneralAutoCorrelationFunction(IJob):
                 else:
                     pacf /= pacf[0]
 
-        props = dict([[k,ELEMENTS[k,self.configuration["weights"]["property"]]] for k in self.configuration['atom_selection']['n_atoms_per_element'].keys()])
-        
-        gacfTotal = weight(props,
-                           self._outputData,
-                           self.configuration['atom_selection']['n_atoms_per_element'],
-                           1,
-                           "gacf_%s")
+        weights = self.configuration["weights"].get_weights()
+        gacfTotal = weight(weights,self._outputData,nAtomsPerElement,1,"gacf_%s")
         
         self._outputData["gacf_total"][:] = gacfTotal 
 
