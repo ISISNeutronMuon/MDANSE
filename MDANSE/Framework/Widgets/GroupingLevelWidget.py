@@ -35,4 +35,6 @@ from MDANSE.Framework.Widgets.SingleChoiceWidget import SingleChoiceWidget
 class GroupingLevelWidget(SingleChoiceWidget):
 
     type = "grouping_level"
+    
+    label = "Group coordinates by"
 
