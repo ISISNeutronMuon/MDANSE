@@ -38,9 +38,19 @@ import wx.aui as wxaui
 import numpy
 
 import vtk
+from vtk.util.numpy_support import numpy_to_vtk
 from vtk.wx.wxVTKRenderWindowInteractor import wxVTKRenderWindowInteractor 
 
 from MDANSE.Core.Error import Error
+
+DTYPES_TO_VTK = {'uint8':vtk.VTK_UNSIGNED_CHAR,
+                 'uint16':vtk.VTK_UNSIGNED_SHORT,
+                 'int8':vtk.VTK_CHAR,
+                 'int16':vtk.VTK_SHORT,
+                 'int32':vtk.VTK_INT,
+                 'uint32':vtk.VTK_UNSIGNED_INT,
+                 'float32':vtk.VTK_FLOAT,
+                 'float64':vtk.VTK_DOUBLE}
 
 class Plotter3DError(Error):
     pass   
@@ -64,11 +74,11 @@ class Plotter3D(wx.Panel):
     def build_panel(self):
         
         self.viewer = wx.Panel(self)
-        
+                
         self.iren = wxVTKRenderWindowInteractor(self.viewer, -1, size=(500,500), flag=wx.EXPAND)
         self.iren.SetPosition((0,0))
-        # define interaction style
-        self.iren.GetInteractorStyle().SetCurrentStyleToTrackballCamera() # change interaction style
+        # define interaction style        
+        self.iren.GetInteractorStyle().SetCurrentStyleToTrackballCamera() 
         self.iren.Enable(1)
         
         # create renderer  
@@ -76,9 +86,10 @@ class Plotter3D(wx.Panel):
         self.renderer.SetBackground(1, 1, 1)
         self.iren.GetRenderWindow().AddRenderer(self.renderer)
     
-        # cam stuff
-        self.camera=vtk.vtkCamera() # create camera 
-        self.renderer.SetActiveCamera(self.camera) # associate camera to renderer
+        # create camera
+        self.camera=vtk.vtkCamera() 
+        # associate camera to renderer
+        self.renderer.SetActiveCamera(self.camera)
         self.camera.SetFocalPoint(0, 0, 0)
         self.camera.SetPosition(0, 0, 0)
         
@@ -99,44 +110,56 @@ class Plotter3D(wx.Panel):
         self._mgr.Update()
     
     def array_to_2d_imagedata(self):
+                
         if self.data.ndim !=2:
             raise Plotter3DError('Data dimension should be 2')
+        
         nx = self.data.shape[0]
         ny = self.data.shape[1]
         nz = 1
+        
         image = vtk.vtkImageData()
         image.SetDimensions(nx,ny,1)
         image.SetExtent(0, nx-1, 0, ny-1, 0, nz-1)
+
+        dtype = DTYPES_TO_VTK[self.data.dtype.name]
+        
         if vtk.vtkVersion.GetVTKMajorVersion()<6:
-            image.SetScalarTypeToDouble()
+            image.SetScalarType(dtype)
             image.SetNumberOfScalarComponents(1)
         else:
-            image.AllocateScalars(vtk.VTK_DOUBLE,1)
+            image.AllocateScalars(dtype,1)
+            
         image.SetSpacing(1.,1.,0.)
-        for i in range(nx):
-            for j in range(ny):
-                image.SetScalarComponentFromDouble(i,j,0,0,self.data[i,j])
+
+        vtk_array = numpy_to_vtk(num_array=self.data.ravel(), deep=True, array_type=dtype)
+        image.GetPointData().SetScalars(vtk_array)
+
         return image
 
     def array_to_3d_imagedata(self):
+        
         if self.data.ndim !=3:
             raise Plotter3DError('Data dimension should be 3')
+        
         nx = self.data.shape[0]
         ny = self.data.shape[1]
         nz = self.data.shape[2]
         image = vtk.vtkImageData()
         image.SetDimensions(nx,ny,nz)
         image.SetExtent(0, nx-1, 0, ny-1, 0, nz-1)
+        
+        dtype = DTYPES_TO_VTK[self.data.dtype.name]
+        
         if vtk.vtkVersion.GetVTKMajorVersion()<6:
-            image.SetScalarTypeToDouble()
+            image.SetScalarType(dtype)
             image.SetNumberOfScalarComponents(1)
         else:
-            image.AllocateScalars(vtk.VTK_DOUBLE,1)
+            image.AllocateScalars(dtype,1)
+
+        vtk_array = numpy_to_vtk(num_array=self.data.ravel(), deep=True, array_type=dtype)
+        image.GetPointData().SetScalars(vtk_array)
         
-        for i in range(nx):
-            for j in range(ny):
-                for k in range(nz):
-                    image.SetScalarComponentFromDouble(i,j,k,0,self.data[i,j,k])
         return image
     
     def scalarfield(self, data):
