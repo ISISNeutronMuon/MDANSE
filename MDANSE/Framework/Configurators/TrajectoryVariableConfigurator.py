@@ -43,7 +43,7 @@ class TrajectoryVariableConfigurator(IConfigurator):
     
     _default = "velocities"
         
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure the MMTK trajectory variable.
                 
@@ -53,7 +53,7 @@ class TrajectoryVariableConfigurator(IConfigurator):
         :type value: str
         '''
                 
-        trajConfig = configuration[self._dependencies['trajectory']]
+        trajConfig = self._configurable[self._dependencies['trajectory']]
        
         if not value in trajConfig['instance'].variables():
             raise ConfiguratorError("%r is not registered as a trajectory variable." % value, self)

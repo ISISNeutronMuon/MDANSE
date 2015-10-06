@@ -33,8 +33,8 @@ Created on Mar 30, 2015
 import collections
 import operator
 
-import numpy
 
+from MDANSE import ELEMENTS
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
@@ -52,28 +52,38 @@ class AtomSelectionConfigurator(IConfigurator):
     This configurator allows the selection of a specific set of atoms on which the analysis will be performed.
 
     Without any selection, all the atoms stored into the trajectory file will be selected.
+    
+    After the call to :py:meth:`~MDANSE.Framework.Configurators.AtomSelectionConfigurator.AtomSelectionConfigurator.configure` method 
+    the following keys will be available for this configurator
+    
+    #. value: the input value used to configure this configurator
+    #. indexes: the sorted (in increasing order) MMTK indexes of the selected atoms 
+    #. n_selected_atoms: the number of selected atoms
+    #. elements: a nested-list of the chemical symbols of the selected atoms. The size of the nested list depends on the 
+    grouping_level selected via :py:class:`~MDANSE.Framework.Configurators.GroupingLevelConfigurator.GroupingLevelConfigurator`
+    configurator.
+    
         
-    :note: this configurator depends on 'trajectory' and 'grouping_level' configurators to be configured
+    :note: this configurator depends on :py:class:`~MDANSE.Framework.Configurators.MMTKTrajectoryConfigurator.MMTKTrajectoryConfigurator` 
+    and :py:class:`~MDANSE.Framework.Configurators.GroupingLevelConfigurator.GroupingLevelConfigurator` configurators to be configured
     '''
 
     type = 'atom_selection'
     
     _default = "all"
                     
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure an input value. 
         
         The value must be a string that can be either an atom selection string or a valid user 
         definition.
         
-        :param configuration: the current configuration
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the input value
         :type value: str
         '''
                           
-        trajConfig = configuration[self._dependencies['trajectory']]
+        trajConfig = self._configurable[self._dependencies['trajectory']]
         
         if value is None:
             value = ['all']
@@ -86,97 +96,51 @@ class AtomSelectionConfigurator(IConfigurator):
         
         self["value"] = value
         
-        self["indexes"] = []
+        indexes = set()
 
         for v in value:
         
             if UD_STORE.has_definition(trajConfig["basename"],"atom_selection",v):
                 ud = UD_STORE.get_definition(trajConfig["basename"],"atom_selection",v)
-                self["indexes"].extend(ud["indexes"])
+                indexes.update(ud["indexes"])
             else:        
                 parser = AtomSelectionParser(trajConfig["instance"].universe)
-                self["indexes"].extend(parser.parse(v))
+                indexes.update(parser.parse(v))
 
-        self["indexes"].sort()
-        
-        self["n_selected_atoms"] = len(self["indexes"])
+        indexes = sorted(list(indexes))
+
         atoms = sorted(trajConfig["universe"].atomList(), key = operator.attrgetter('index'))
-        selectedAtoms = [atoms[idx] for idx in self["indexes"]]
-        self["elements"] = [[at.symbol] for at in selectedAtoms]
+        selectedAtoms = [atoms[idx] for idx in indexes]
 
-        if self._dependencies.has_key("grouping_level"):
-            self.group(selectedAtoms, configuration[self._dependencies['grouping_level']]['value'])
-        else:
-            self.group(selectedAtoms)
-                                 
-        self.set_contents()
-            
-    @staticmethod                                                                                                                        
-    def find_parent(atom, level):
-        '''
-        Retrieve recursively the parent of a given MMTK atom at a given level.
-        For example, a level of 1 will return the direct parent of the atom. 
-        
-        :note: this is a static method
-        
-        :param atom: the atom for which the parent is searched for
-        :type atom: MMTK.Atom object
-        :param level: the level of the parent
-        :type level: int
-        '''
-        
-        for _ in range(level):
-            atom = atom.parent
-            
-        return atom
-    
-    def group(self, atoms, level="atom"):
-        '''
-        Group the selected atoms according to a given granularity and update
-        the configurator with the grouping results.
-        
-        :param atoms: the atoms for 
-        :type atoms: list of MMTK.Atom
-        :param level: the level of granularity at which the atoms should be grouped
-        :type level: str
-        '''
-                                        
-        groups = collections.OrderedDict()
-        
-        for at in atoms:
-            lvl = LEVELS[level][at.topLevelChemicalObject().__class__.__name__.lower()]
-            parent = self.find_parent(at,lvl)        
-            groups.setdefault(parent,[]).append(at.index)
-        
-        self["groups"] = groups.values()
-            
-        self["n_groups"] = len(self["groups"])
-        
-        if level != "atom":
-            self["elements"] = [["dummy"]]*self["n_groups"]
-                                        
-        self["level"] = level
+        self["selection_length"] = len(indexes)        
+        self['elements'] = [[at.symbol] for at in selectedAtoms]
+        self['indexes'] = [[idx] for idx in indexes]
+        self['names'] = [at.symbol for at in selectedAtoms]
+        self['unique_names'] = sorted(set(self['names']))
+        self['masses'] = [[ELEMENTS[n,'atomic_weight']] for n in self['names']]
                 
-        self.set_contents()
-                        
-    def set_contents(self):
-        '''
-        Sets the contents of the atom selection.
-        '''
-                    
-        self["contents"] = collections.OrderedDict()
-        self['index_to_symbol'] = collections.OrderedDict()
-        for i, group in enumerate(self["elements"]):
-            for j, el in enumerate(group):
-                self["contents"].setdefault(el,[]).append(self["groups"][i][j])
-                self['index_to_symbol'][self["groups"][i][j]] = el
-                 
-        for k,v in self["contents"].items():
-            self["contents"][k] = numpy.array(v,dtype=numpy.int32)
+    def get_natoms(self):
+                
+        nAtomsPerElement = {}
+        for v in self["names"]:
+            if nAtomsPerElement.has_key(v):
+                nAtomsPerElement[v] += 1
+            else:
+                nAtomsPerElement[v] = 1
+                
+        return nAtomsPerElement
+    
+    def get_indexes(self):
+
+        indexesPerElement = {}
+        for i,v in enumerate(self["names"]):
+            if indexesPerElement.has_key(v):
+                indexesPerElement[v].extend(self['indexes'][i])
+            else:
+                indexesPerElement[v] = self['indexes'][i]
+                
+        return indexesPerElement
             
-        self["n_atoms_per_element"] = dict([(k,len(v)) for k,v in self["contents"].items()])              
-        self['n_selected_elements'] = len(self["contents"])
-                        
     def get_information(self):
         '''
         Returns some informations the atom selection.
@@ -190,8 +154,6 @@ class AtomSelectionConfigurator(IConfigurator):
         
         info = []
         info.append("Number of selected atoms:%d" % self["n_selected_atoms"])
-        info.append("Level of selection:%s" % self["level"])
-        info.append("Number of selected groups:%d" % self["n_groups"])
         info.append("Selected elements:%s" % self["contents"].keys())
         
         return "\n".join(info)

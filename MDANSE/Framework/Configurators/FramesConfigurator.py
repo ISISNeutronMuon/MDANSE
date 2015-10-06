@@ -48,7 +48,7 @@ class FramesConfigurator(RangeConfigurator):
     
     type = 'frames'
     
-    def __init__(self, name, **kwargs):
+    def __init__(self, configurable, name, **kwargs):
         '''
         Initializes the configurator.
         
@@ -56,34 +56,30 @@ class FramesConfigurator(RangeConfigurator):
         :type name: str
         '''
 
-        RangeConfigurator.__init__(self, name, sort=True, **kwargs)
+        RangeConfigurator.__init__(self, configurable, name, sort=True, **kwargs)
              
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure the frames range that will be used to perform an analysis.
                 
-        :param configuration: the current configuration
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the input value
         :type value: 3-tuple, 'all' or None
         '''
                                         
-        trajConfig = configuration[self._dependencies['trajectory']]
+        trajConfig = self._configurable[self._dependencies['trajectory']]
 
         if value in ["all",None]:
             value = (0, trajConfig['length'], 1)
             
-        self._mini = -1
+        self._mini = 0
         self._maxi = trajConfig['length']
         
-        RangeConfigurator.configure(self, configuration, value)
-                                                          
+        RangeConfigurator.configure(self, value)
+                                                                          
         self["n_frames"] = self["number"]
                                                                                              
         self['time'] = trajConfig['md_time_step']*self['value']
 
-        self['relative_time'] = self['time'] - self['time'][0]
-        
         # case of single frame selected
         try:
             self['time_step'] = self['time'][1] - self['time'][0]

@@ -65,19 +65,17 @@ class InstrumentResolutionConfigurator(IConfigurator):
         
     _default = ('gaussian', {'mu': 0.0, 'sigma': 10.0})
         
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure the instrument resolution.
                 
-        :param configuration: the current configuration
-        :type configuration: subclass of :class: MDANSE.Framework.Configurable.Configurable
         :param value: the instrument resolution. It must a 2-tuple where the 1st element is the \
         is a string representing one of the supported instrument resolution and the 2nd element \
         is a dictionary that stores the parameters for this kernel.
         :type value: 2-tuple
         '''
 
-        framesCfg = configuration[self._dependencies['frames']]
+        framesCfg = self._configurable[self._dependencies['frames']]
                 
         time = framesCfg["time"]
         self["n_frames"] = len(time)                                                                                             

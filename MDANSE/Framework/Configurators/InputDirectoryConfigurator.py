@@ -46,7 +46,7 @@ class InputDirectoryConfigurator(IConfigurator):
     
     _default = os.getcwd()
 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure an input directory. 
                 

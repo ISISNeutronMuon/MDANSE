@@ -44,7 +44,7 @@ class OutputDirectoryConfigurator(IConfigurator):
     
     _default = os.getcwd()
 
-    def __init__(self, name, new=False, **kwargs):
+    def __init__(self, configurable, name, new=False, **kwargs):
         '''
         Initializes the configurator.
         
@@ -54,11 +54,11 @@ class OutputDirectoryConfigurator(IConfigurator):
         :type new: bool
         '''        
                 
-        IConfigurator.__init__(self, name, **kwargs)
+        IConfigurator.__init__(self, configurable, name, **kwargs)
         
         self._new = new
 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure an output directory. 
                 

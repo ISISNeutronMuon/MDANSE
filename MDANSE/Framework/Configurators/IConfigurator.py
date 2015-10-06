@@ -97,7 +97,7 @@ class IConfigurator(dict):
     
     _doc_ = "undocumented"
                             
-    def __init__(self, name, dependencies=None, default=None, label=None, widget=None):
+    def __init__(self, configurable, name, dependencies=None, default=None, label=None, widget=None):
         '''
         Initializes a configurator object.
         
@@ -116,6 +116,8 @@ class IConfigurator(dict):
         '''
 
         self._name = name
+        
+        self._configurable = configurable
                 
         self._dependencies = dependencies if dependencies is not None else {}
 
@@ -181,13 +183,10 @@ class IConfigurator(dict):
         return self._widget
     
     @abc.abstractmethod
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configures this configurator with a given value.
         
-        :param configuration: the current configuration. The configuration is passed at configuration time \
-        because it can be used in the case where the configurator depends on other configurators to be comfigured.
-        :type configuration: Framework.Configurable.Configurable object
         :param value: the input value to be configured.
         :type value: depends on the configurator
 
@@ -211,7 +210,6 @@ class IConfigurator(dict):
 
         return True
     
-    @abc.abstractmethod
     def get_information(self):
         '''
         Returns some informations about this configurator.
@@ -222,4 +220,4 @@ class IConfigurator(dict):
         :note: this is an abstract method.
         '''
 
-        pass
+        return ""

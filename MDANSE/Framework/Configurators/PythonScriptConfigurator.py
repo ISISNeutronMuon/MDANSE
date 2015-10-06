@@ -42,7 +42,7 @@ class PythonScriptConfigurator(InputFileConfigurator):
     
     _default = ''
         
-    def __init__(self, name, variables=None, **kwargs):
+    def __init__(self, configurable, name, variables=None, **kwargs):
         '''
         Initializes the configurator.
         
@@ -53,11 +53,11 @@ class PythonScriptConfigurator(InputFileConfigurator):
         '''        
 
         # The base class constructor.
-        InputFileConfigurator.__init__(self, name, **kwargs)
+        InputFileConfigurator.__init__(self, configurable, name, **kwargs)
         
         self._variables = variables if variables is not None else []
            
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure a python script. 
                 
@@ -67,7 +67,7 @@ class PythonScriptConfigurator(InputFileConfigurator):
         :type value: str 
         '''
                 
-        InputFileConfigurator.configure(self, configuration, value)
+        InputFileConfigurator.configure(self, value)
         
         namespace = {}
         

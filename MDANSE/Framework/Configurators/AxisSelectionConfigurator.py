@@ -47,7 +47,7 @@ class AxisSelection(IConfigurator):
     
     _default = None
 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure an input value. 
         
@@ -64,7 +64,7 @@ class AxisSelection(IConfigurator):
         :type value: tuple or str 
         '''
         
-        trajConfig = configuration[self._dependencies['trajectory']]
+        trajConfig = self._configurable[self._dependencies['trajectory']]
                 
         if UD_STORE.has_definition(trajConfig["basename"],"axis_selection",value): 
             ud = UD_STORE.get_definition(trajConfig["basename"],"axis_selection",value)

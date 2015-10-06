@@ -31,6 +31,7 @@ Created on Mar 30, 2015
 '''
 
 import collections
+import operator
 
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import SingleChoiceConfigurator
 
@@ -61,7 +62,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
     
     _default = "atom"
     
-    def __init__(self, name, choices=None, **kwargs):
+    def __init__(self, configurable, name, choices=None, **kwargs):
         '''
         Initializes the configurator.
         
@@ -76,7 +77,79 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         else:
             choices = list(set(LEVELS.keys()).intersection(choices))
 
-        SingleChoiceConfigurator.__init__(self, name, choices=choices, **kwargs)
+        SingleChoiceConfigurator.__init__(self, configurable, name, choices=choices, **kwargs)
+        
+    def configure(self,value):
+        '''
+        :param value: the level of granularity at which the atoms should be grouped
+        :type value: str
+        '''
+
+        if value is None:
+            value = "atom"
+            
+        value = str(value)
+                     
+        SingleChoiceConfigurator.configure(self, value)
+
+        if value == "atom":
+            return
+                                                                        
+        trajConfig = self._configurable[self._dependencies['trajectory']]
+        atomSelectionConfig = self._configurable[self._dependencies['atom_selection']]
+
+        allAtoms = sorted(trajConfig["universe"].atomList(), key = operator.attrgetter('index'))
+
+        groups = collections.OrderedDict()
+        for i in range(atomSelectionConfig["selection_length"]):
+            idx = atomSelectionConfig["indexes"][i][0]
+            el = atomSelectionConfig["elements"][i][0]
+            mass = atomSelectionConfig["masses"][i][0]
+            at = allAtoms[idx]
+            lvl = LEVELS[value][at.topLevelChemicalObject().__class__.__name__.lower()]
+            parent = self.find_parent(at,lvl)
+            d = groups.setdefault(parent,{})
+            d.setdefault("indexes",[]).append(idx)
+            d.setdefault("elements",[]).append(el)
+            d.setdefault("masses",[]).append(mass)
+
+        indexes = []
+        elements = []
+        masses = []
+        names = []
+        for i,v in enumerate(groups.values()):
+            names.append("group_%d" % i)
+            elements.append(v['elements'])
+            indexes.append(v['indexes'])
+            masses.append(v['masses'])
+        
+        atomSelectionConfig["indexes"] = indexes
+        atomSelectionConfig["elements"] = elements
+        atomSelectionConfig["masses"] = masses
+        atomSelectionConfig["names"] = names
+        atomSelectionConfig["selection_length"] = len(names)
+        atomSelectionConfig['unique_names'] = sorted(set(atomSelectionConfig['names']))
+                                                                                                                                
+        self["level"] = value
+
+    @staticmethod                                                                                                                        
+    def find_parent(atom, level):
+        '''
+        Retrieve recursively the parent of a given MMTK atom at a given level.
+        For example, a level of 1 will return the direct parent of the atom. 
+        
+        :note: this is a static method
+        
+        :param atom: the atom for which the parent is searched for
+        :type atom: MMTK.Atom object
+        :param level: the level of the parent
+        :type level: int
+        '''
+        
+        for _ in range(level):
+            atom = atom.parent
+            
+        return atom
     
     def get_information(self):
         '''

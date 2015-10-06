@@ -46,7 +46,7 @@ class McStasOptionsConfigurator(IConfigurator):
     
     _default = {"ncount" : 10000, "dir" : os.path.join(tempfile.gettempdir(),"mcstas_output",time.strftime("%d.%m.%Y-%H:%M:%S", time.localtime()))}
         
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure the McStas options. 
                 

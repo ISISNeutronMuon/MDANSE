@@ -55,9 +55,9 @@ class QVectorsConfigurator(IConfigurator):
     
     type = "q_vectors"
     
-    _default = ("spherical_lattice",{"shells":(0,5,0.1), "width" : 0.1, "n_vectors" : 50})
+    _default = ("spherical_lattice",{"shells":(0.1,5,0.1), "width" : 0.1, "n_vectors" : 50})
 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure a Q vectors generator. 
                 
@@ -68,7 +68,7 @@ class QVectorsConfigurator(IConfigurator):
         :type value: 2-tuple or str
         '''
 
-        trajConfig = configuration[self._dependencies['trajectory']]
+        trajConfig = self._configurable[self._dependencies['trajectory']]
 
         if UD_STORE.has_definition(trajConfig["basename"],"q_vectors",value):        
             ud = UD_STORE.get_definition(trajConfig["basename"],"q_vectors",value)

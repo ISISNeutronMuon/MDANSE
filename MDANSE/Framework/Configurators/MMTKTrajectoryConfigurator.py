@@ -52,17 +52,15 @@ class MMTKNetCDFTrajectoryConfigurator(InputFileConfigurator):
     
     _default = os.path.join('..','..','..','Data','Trajectories','MMTK','waterbox_in_periodic_universe.nc')
                         
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure a MMTK trajectory file. 
                 
-        :param configuration: the current configuration.
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the path for the MMTK trajectory file.
         :type value: str 
         '''
                 
-        InputFileConfigurator.configure(self, configuration, value)
+        InputFileConfigurator.configure(self, value)
         
         inputTraj = REGISTRY["input_data"]["mmtk_trajectory"](self['value'])
         

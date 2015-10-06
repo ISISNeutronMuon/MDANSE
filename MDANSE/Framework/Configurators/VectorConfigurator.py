@@ -45,7 +45,7 @@ class VectorConfigurator(IConfigurator):
     
     _default = [1.0,0.0,0.0]
     
-    def __init__(self, name, valueType=int, normalize=False, notNull=False, dimension=3, **kwargs):
+    def __init__(self, configurable, name, valueType=int, normalize=False, notNull=False, dimension=3, **kwargs):
         '''
         Initializes the configurator.
         
@@ -62,7 +62,7 @@ class VectorConfigurator(IConfigurator):
         '''
 
         # The base class constructor.
-        IConfigurator.__init__(self, name, **kwargs)
+        IConfigurator.__init__(self, configurable, name, **kwargs)
         
         self._valueType = valueType
         
@@ -72,12 +72,10 @@ class VectorConfigurator(IConfigurator):
         
         self._dimension = dimension
 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure a vector.
         
-        :param configuration: the current configuration
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the vector components.
         :type value: sequence-like object
         '''

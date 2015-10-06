@@ -47,7 +47,7 @@ class BasisSelection(IConfigurator):
     
     _default = None
 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure an input value. 
         
@@ -58,15 +58,13 @@ class BasisSelection(IConfigurator):
         keys are the names of three atoms of the molecule that will be used to define respectively the origin, the X and Y axis of the basis  
         #. str: the axis selection will be performed by reading the corresponding user definition.
         
-        :param configuration: the current configuration
-        :type configuration: MDANSE.Framework.Configurable.Configurable
         :param value: the input value
         :type value: tuple or str 
 
         :note: this configurator depends on 'trajectory' configurator to be configured
         '''
 
-        trajConfig = configuration[self._dependencies['trajectory']]
+        trajConfig = self._configurable[self._dependencies['trajectory']]
             
         if UD_STORE.has_definition(trajConfig["basename"],"basis_selection",value): 
             ud = UD_STORE.get_definition(trajConfig["basename"],"basis_selection",value)

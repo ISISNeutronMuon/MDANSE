@@ -52,7 +52,7 @@ class OutputFilesConfigurator(IConfigurator):
     
     _default = (os.path.join(tempfile.gettempdir(),"output"), ["netcdf"])
                     
-    def __init__(self, name, formats=None, **kwargs):
+    def __init__(self, configurable, name, formats=None, **kwargs):
         '''
         Initializes the configurator.
         
@@ -62,16 +62,14 @@ class OutputFilesConfigurator(IConfigurator):
         :type formats: list of str
         '''
                         
-        IConfigurator.__init__(self, name, **kwargs)
+        IConfigurator.__init__(self, configurable, name, **kwargs)
 
         self._formats = formats if formats is not None else OutputFilesConfigurator._default[2]
     
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure a set of output files for an analysis. 
                 
-        :param configuration: the current configuration.
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the output files specifications. Must be a 3-tuple whose 1st element \
         if the output directory, 2nd element the basename and 3rd element a list of file formats.
         :type value: 3-tuple

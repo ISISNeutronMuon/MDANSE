@@ -41,7 +41,7 @@ class SingleChoiceConfigurator(IConfigurator):
     
     _default = []
             
-    def __init__(self, name, choices=None, **kwargs):
+    def __init__(self, configurable, name, choices=None, **kwargs):
         '''
         Initializes the configurator.
 
@@ -51,16 +51,14 @@ class SingleChoiceConfigurator(IConfigurator):
         :type choices: list
         '''
         
-        IConfigurator.__init__(self, name, **kwargs)
+        IConfigurator.__init__(self, configurable, name, **kwargs)
         
         self._choices = choices if choices is not None else []
 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure the input item.
                 
-        :param configuration: the current configuration
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the input selection list.
         :type value: list
         '''

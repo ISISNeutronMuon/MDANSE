@@ -49,7 +49,7 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
     
     _default = ''
         
-    def __init__(self, name, variables=None, **kwargs):
+    def __init__(self, configurable, name, variables=None, **kwargs):
         '''
         Initializes the configurator.
         
@@ -60,11 +60,11 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
         '''        
 
         # The base class constructor.
-        InputFileConfigurator.__init__(self, name, **kwargs)
+        InputFileConfigurator.__init__(self, configurable, name, **kwargs)
         
         self._variables = variables if variables is not None else []
            
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure a MMTK trajectory file. 
                 
@@ -74,7 +74,7 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
         :type value: str 
         '''
                 
-        InputFileConfigurator.configure(self, configuration, value)
+        InputFileConfigurator.configure(self, value)
         
         try:
             self['instance'] = NetCDFFile(self['value'], 'r')

@@ -47,7 +47,7 @@ class AtomsListConfigurator(IConfigurator):
     
     _default = None
                     
-    def __init__(self, name, nAtoms=2, **kwargs):
+    def __init__(self, configurable, name, nAtoms=2, **kwargs):
         '''
         Initializes the configurator.
 
@@ -57,7 +57,7 @@ class AtomsListConfigurator(IConfigurator):
         :type nAtoms: int
         '''
         
-        IConfigurator.__init__(self, name, **kwargs)
+        IConfigurator.__init__(self, configurable, name, **kwargs)
         
         self._nAtoms = nAtoms
         
@@ -66,20 +66,18 @@ class AtomsListConfigurator(IConfigurator):
         
         return self._nAtoms
     
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure an input value. 
         
         The value must be a string that can be either an atom selection string or a valid user 
         definition.
         
-        :param configuration: the current configuration
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the input value
         :type value: str
         '''
                           
-        trajConfig = configuration[self._dependencies['trajectory']]
+        trajConfig = self._configurable[self._dependencies['trajectory']]
                 
         if UD_STORE.has_definition(trajConfig["basename"],"%d_atoms_list" % self._nAtoms,value): 
             molecule,atoms = UD_STORE.get_definition(trajConfig["basename"],"%d_atoms_list" % self._nAtoms,value)

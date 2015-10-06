@@ -53,7 +53,7 @@ class AtomTransmutationConfigurator(IConfigurator):
     
     _default = None
                                 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure an input value. 
         
@@ -65,14 +65,12 @@ class AtomTransmutationConfigurator(IConfigurator):
         selection to the target chemical element stored in the 2nd element
         #. str: the transmutation will be performed by reading the corresponding user definition
         
-        :param configuration: the current configuration
-        :type configuration: MDANSE.Framework.Configurable.Configurable
         :param value: the input value
         :type value: None or (str,str)-dict or str 
         '''
 
-        self["value"] = value  
-        
+        self["value"] = value
+                        
         # if the input value is None, do not perform any transmutation
         if value is None:
             return
@@ -80,13 +78,11 @@ class AtomTransmutationConfigurator(IConfigurator):
         if not isinstance(value,(list,tuple)):
             raise ConfiguratorError("Invalid input value.")
 
-        self["atom_selection"] = configuration[self._dependencies['atom_selection']]
-        if self["atom_selection"]["level"] != "atom":
-            raise ConfiguratorError("the atom transmutation can only be set with a grouping level set to %r" % 'atom', self)
-
-        trajConfig = configuration[self._dependencies['trajectory']]
+        trajConfig = self._configurable[self._dependencies['trajectory']]
                                                                 
-        parser = AtomSelectionParser(trajConfig["instance"].universe)
+        parser = AtomSelectionParser(trajConfig["instance"].universe)        
+
+        self._nTransmutatedAtoms = 0
 
         for expression,element in value:
                   
@@ -96,17 +92,18 @@ class AtomTransmutationConfigurator(IConfigurator):
                 
             if UD_STORE.has_definition(trajConfig["basename"],"atom_selection",expression):                
                 ud = UD_STORE.get_definition(trajConfig["basename"],"atom_selection",expression)
-                self.transmutate(configuration, ud["indexes"], element)
+                indexes = ud["indexes"]
             else:
                 indexes = parser.parse(expression)
-                self.transmutate(configuration, indexes, element)                    
-
-    def transmutate(self, configuration, selection, element):
+                
+            self.transmutate(indexes, element)
+            
+            self._nTransmutatedAtoms += len(indexes)
+                
+    def transmutate(self, selection, element):
         '''
         Transmutates a set of atoms to a given element 
         
-        :param configuration: the current configuration
-        :type configuration: MDANSE.Framework.Configurable.Configurable
         :param selection: the indexes of the atoms to be transmutated
         :type selection: list of int
         :param element: the symbol of the element to which the selected atoms should be transmutated
@@ -115,15 +112,15 @@ class AtomTransmutationConfigurator(IConfigurator):
         
         if element not in ELEMENTS:
             raise ConfiguratorError("the element %r is not registered in the database" % element, self)
+
+        atomSelConfigurator = self._configurable[self._dependencies['atom_selection']]
                 
         for idx in selection:
-            pos = self["atom_selection"]["groups"].index([idx])
-            self["atom_selection"]["elements"][pos] = [element]
+            atomSelConfigurator["names"][idx] = element
+            atomSelConfigurator["elements"][idx] = [element]
 
-        # Update the current configuration according to the changes triggered by
-        # atom transumutation                
-        configuration[self._dependencies['atom_selection']].set_contents()
-
+        atomSelConfigurator['unique_names'] = sorted(set(atomSelConfigurator['names']))
+            
     def get_information(self):
         '''
         Returns some informations the atoms selected for being transmutated.
@@ -136,6 +133,6 @@ class AtomTransmutationConfigurator(IConfigurator):
             return "Not configured yet"
                 
         if self["value"] is None:
-            return "No atoms selected for deuteration"
+            return "No atoms selected for transmutation"
         
-        return "Number of selected atoms for deuteration:%d\n" % self["atom_selection"]["n_selected_atoms"]
+        return "Number of transmutated atoms:%d\n" % self._nTransmutatedAtoms

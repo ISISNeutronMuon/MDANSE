@@ -47,7 +47,7 @@ class PythonObjectConfigurator(IConfigurator):
     
     _default = '""'
 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure a python object. 
                 

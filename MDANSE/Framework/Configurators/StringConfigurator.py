@@ -43,7 +43,7 @@ class StringConfigurator(IConfigurator):
     
     _default = ""
 
-    def __init__(self, name, evalType=None, acceptNullString=True, **kwargs):
+    def __init__(self, configurable, name, evalType=None, acceptNullString=True, **kwargs):
         '''
         Initializes the configurator.
         
@@ -55,18 +55,16 @@ class StringConfigurator(IConfigurator):
         :type acceptNullString: bool
         '''
         
-        IConfigurator.__init__(self, name, **kwargs)
+        IConfigurator.__init__(self, configurable, name, **kwargs)
         
         self._evalType = evalType
         
         self._acceptNullString = acceptNullString
     
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure an input string.
                 
-        :param configuration: the current configuration
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the input string
         :type value: str
         '''

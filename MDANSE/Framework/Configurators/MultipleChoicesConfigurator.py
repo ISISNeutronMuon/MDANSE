@@ -43,7 +43,7 @@ class MultipleChoicesConfigurator(IConfigurator):
     
     _default = []
             
-    def __init__(self, name, choices=None, nChoices=None, **kwargs):
+    def __init__(self, configurable, name, choices=None, nChoices=None, **kwargs):
         '''
         Initializes the configurator.
 
@@ -55,13 +55,13 @@ class MultipleChoicesConfigurator(IConfigurator):
         :type nChoices: int or None
         '''
         
-        IConfigurator.__init__(self, name, **kwargs)
+        IConfigurator.__init__(self, configurable, name, **kwargs)
         
         self._choices = choices
         
         self._nChoices = nChoices
 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure the input selection list.
                 

@@ -47,7 +47,7 @@ class BooleanConfigurator(IConfigurator):
     _shortCuts = {True  : True, "true"  : True , "yes" : True, "y" : True, "1" : True, 1 : True,
                   False : False, "false" : False, "no"  : False, "n" : False, "0" : False, 0 : False}
     
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure an input value. 
         

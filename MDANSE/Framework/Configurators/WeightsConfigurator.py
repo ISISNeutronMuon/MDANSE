@@ -46,7 +46,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
     
     _default = "equal"
            
-    def __init__(self, name, **kwargs):
+    def __init__(self, configurable, name, **kwargs):
         '''
         Initializes the configurator.
 
@@ -54,14 +54,12 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         :type name: str
         '''
                 
-        SingleChoiceConfigurator.__init__(self, name, choices=ELEMENTS.numericProperties, **kwargs)
+        SingleChoiceConfigurator.__init__(self, configurable, name, choices=ELEMENTS.numericProperties, **kwargs)
 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure the weight.
                 
-        :param configuration: the current configuration.
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the name of the weight to use.
         :type value: one of the numeric properties of MDANSE.Data.ElementsDatabase.ElementsDatabase
         '''
@@ -75,6 +73,25 @@ class WeightsConfigurator(SingleChoiceConfigurator):
             raise ConfiguratorError("weight %r is not registered as a valid numeric property." % value, self)
                                          
         self['property'] = value
+
+    def get_weights(self):
+        
+        ascfg = self._configurable[self._dependencies['atom_selection']]
+
+        weights = {}
+        for i in range(ascfg["selection_length"]):
+            name = ascfg["names"][i]
+            for el in ascfg["elements"][i]:
+                p = ELEMENTS[el,self["property"]]
+                if weights.has_key(name):
+                    weights[name] += p
+                else:
+                    weights[name] = p
+                    
+        for k,v in ascfg.get_natoms().items():
+            weights[k] /= v
+            
+        return weights
 
     def get_information(self):
         '''

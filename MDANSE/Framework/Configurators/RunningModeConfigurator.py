@@ -49,12 +49,10 @@ class RunningModeConfigurator(IConfigurator):
     
     _default = ("monoprocessor", 1)                
 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure the running mode.
      
-        :param configuration: the current configuration
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the running mode specification. It can be *'monoprocessor'* or a 2-tuple whose first element \
         must be *'multiprocessor'* and 2nd element the number of slots allocated for running the analysis.
         :type value: *'monoprocessor'* or 2-tuple

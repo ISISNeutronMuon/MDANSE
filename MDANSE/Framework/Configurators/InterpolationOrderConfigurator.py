@@ -50,7 +50,7 @@ class InterpolationOrderConfigurator(SingleChoiceConfigurator):
     
     _default = "no interpolation"
         
-    def __init__(self, name, orders=None,**kwargs):
+    def __init__(self, configurable, name, orders=None,**kwargs):
         '''
         Initializes the configurator.
         
@@ -61,23 +61,21 @@ class InterpolationOrderConfigurator(SingleChoiceConfigurator):
         if orders is None:
             orders = ["no interpolation","1st order","2nd order","3rd order","4th order","5th order"] 
                 
-        SingleChoiceConfigurator.__init__(self, name, choices=orders, **kwargs)
+        SingleChoiceConfigurator.__init__(self, configurable, name, choices=orders, **kwargs)
 
-    def configure(self, configuration, value):
+    def configure(self, value):
         '''
         Configure the input interpolation order.
                 
-        :param configuration: the current configuration.
-        :type configuration: MDANSE.Framework.Configurable.Configurable
         :param value: the interpolation order to be configured.
         :type value: str one of *'no interpolation'*,*'1st order'*,*'2nd order'*,*'3rd order'*,*'4th order'* or *'5th order'*.
         '''
         
-        SingleChoiceConfigurator.configure(self, configuration, value)
+        SingleChoiceConfigurator.configure(self, value)
         
         if value == "no interpolation":
 
-            trajConfig = configuration[self._dependencies['trajectory']]
+            trajConfig = self._configurable[self._dependencies['trajectory']]
 
             if not "velocities" in trajConfig['instance'].variables():
                 raise ConfiguratorError("the trajectory does not contain any velocities. Use an interpolation order higher than 0", self)
