@@ -129,7 +129,7 @@ class ClassRegistry(abc.ABCMeta):
             moduleName, _ = os.path.splitext(moduleFile)
             
             if moduleDir not in sys.path:        
-                sys.path.append(moduleDir)
+                sys.path.insert(0,moduleDir)
 
 
             # Any error that may occur here has to be caught. In such case the module is skipped.    
@@ -139,8 +139,8 @@ class ClassRegistry(abc.ABCMeta):
             except:
                 continue
             else:
-                if not os.path.samefile(os.path.dirname(mod.__file__),moduleDir):
-                    print "A module with name %s is already present in your distribution with %s path." % (moduleName,)
+                if os.path.abspath(os.path.dirname(mod.__file__)) != os.path.abspath(moduleDir):                    
+                    print "A module with name %s is already present in your distribution with %s path." % (moduleName,moduleDir)
 
     
     @classmethod
