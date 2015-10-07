@@ -130,7 +130,7 @@ class PreferencesSettings(wx.Dialog):
         self.build_dialog()        
         
     def build_dialog(self):
-                
+
         self._notebook = wxaui.AuiNotebook(self, wx.ID_ANY)
         
         self._sectionPanels = collections.OrderedDict()
@@ -177,7 +177,7 @@ class PreferencesSettings(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.on_default, defaultButton)
         self.Bind(wx.EVT_BUTTON, self.on_apply, applyButton)
         self.Bind(wx.EVT_BUTTON, self.on_ok, okButton)
-
+        
     def validate(self):
 
         for widget in self._widgets.values():

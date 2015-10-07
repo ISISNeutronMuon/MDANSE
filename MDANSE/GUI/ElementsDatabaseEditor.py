@@ -95,10 +95,7 @@ class PropertyDialog(wx.Dialog):
         
         # Bind the top sizer to the dialog.
         self.SetSizer(dlgsizer)
-        
-        # Layout the widget.
-        self.Layout()
-          
+                          
     def GetValue(self, event=None):
         """
         Handler called when the user clicks on the OK button of the property dialog.

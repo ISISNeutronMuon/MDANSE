@@ -44,6 +44,8 @@ class UserDefinitionViewer(wx.Dialog):
 
         self._udTree = {}
         
+        dialogSizer = wx.BoxSizer(wx.VERTICAL)
+        
         mainPanel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
         
         self._tree = wx.TreeCtrl(mainPanel, wx.ID_ANY, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT|wx.TR_EDIT_LABELS)
@@ -77,6 +79,10 @@ class UserDefinitionViewer(wx.Dialog):
             self.expand_ud(ud)
         
         self.set_editable(editable)
+        
+        dialogSizer.Add(mainPanel,1,wx.EXPAND)
+        
+        self.SetSizer(dialogSizer)
             
     def set_editable(self,editable=True):
         

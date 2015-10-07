@@ -43,6 +43,8 @@ class RegistryViewer(wx.Dialog):
 
         wx.Dialog.__init__(self, parent, wx.ID_ANY, size = (800,400), title="Registry viewer", style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
 
+        dialogSizer = wx.BoxSizer(wx.VERTICAL)
+
         mainPanel = wx.Panel(self, wx.ID_ANY, size=self.GetSize())
 
         mainSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -60,7 +62,11 @@ class RegistryViewer(wx.Dialog):
 
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_double_click_data)
 
-        self.set_plugins_tree(self._root, REGISTRY._registry)           
+        self.set_plugins_tree(self._root, REGISTRY._registry)
+        
+        dialogSizer.Add(mainPanel,1,wx.EXPAND)
+        
+        self.SetSizer(dialogSizer)           
             
     def set_plugins_tree(self, node, data):
         
