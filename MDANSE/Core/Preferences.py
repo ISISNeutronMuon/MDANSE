@@ -228,7 +228,7 @@ class InputDirectory(PreferencesItem):
         '''
         
         value = PLATFORM.get_path(value)
-        
+                
         try:
             PLATFORM.create_directory(value)
         except PlatformError:
@@ -238,7 +238,7 @@ class InputDirectory(PreferencesItem):
             self._value = value
         
     def get_value(self):
-        
+                
         return self._value
                 
 class Preferences(collections.OrderedDict):

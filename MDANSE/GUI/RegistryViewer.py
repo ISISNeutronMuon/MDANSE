@@ -92,7 +92,10 @@ class RegistryViewer(wx.Dialog):
 
         moduleFullName = PLATFORM.full_dotted_module(ItemData.GetData())
         
-        moduleDocPath = os.path.join(PLATFORM.help_path(), moduleFullName+'.html')
+        if moduleFullName is None:            
+            moduleDocPath = ''
+        else:        
+            moduleDocPath = os.path.join(PLATFORM.help_path(), moduleFullName+'.html')
                 
         self._info.LoadPage(moduleDocPath)
         

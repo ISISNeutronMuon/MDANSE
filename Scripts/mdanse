@@ -67,6 +67,15 @@ class CommandLineParser(optparse.OptionParser):
     Creates the MDANSE commad line parser.
     '''
     
+    def __init__(self,*args,**kwargs):
+        
+        optparse.OptionParser.__init__(self,*args,**kwargs)
+        
+        from MDANSE import LOGGER
+        
+        LOGGER.add_handler("terminal", REGISTRY['handler']['terminal'](), level="info", start=True)
+        LOGGER.start()
+    
     def add_mmtk_definition(self, option, opt_str, value, parser):
         
         if len(parser.rargs) != 3:
@@ -331,9 +340,7 @@ class CommandLineParser(optparse.OptionParser):
         else:
             raise CommandLineParserError("Invalid number of arguments for %r option" % opt_str)
                 
-        filename = IJob.save_template(shortname,longname)
-
-        print "Template for job %r saved in %r" % (shortname, filename)
+        IJob.save_template(shortname,longname)
                     
 if __name__ == "__main__":
 

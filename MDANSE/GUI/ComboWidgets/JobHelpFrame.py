@@ -14,9 +14,12 @@ class JobHelpFrame(wx.Frame):
         self.nolog = wx.LogNull()
 
         moduleFullName = PLATFORM.full_dotted_module(job.__class__)
-                
-        self._doc = os.path.join(PLATFORM.help_path(), moduleFullName+'.html')
-                                                                
+        
+        if moduleFullName is None:
+            self._doc = ""            
+        else:
+            self._doc = os.path.join(PLATFORM.help_path(), moduleFullName+'.html')
+                                                                        
         self.build()
         
     def build(self):
