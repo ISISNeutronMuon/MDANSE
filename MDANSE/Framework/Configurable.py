@@ -153,6 +153,8 @@ class Configurable(object):
                                                             
                     conf.configure(parameters[name])
                     
+                    conf.set_configured(True)
+                    
                     self._configuration[name]=conf
                     
                     self._info += conf.get_information()

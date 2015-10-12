@@ -465,19 +465,16 @@ class IJob(Configurable):
         return self._info
 
     @classmethod
-    def save_template(cls, shortname,longname=None):
-        
-        if longname is None:
-            longname = shortname
-            
+    def save_template(cls, shortname,classname):
+                    
         if REGISTRY['job'].has_key(shortname):
             LOGGER('A job with %r name is already stored in the registry' % shortname,'error')
-            return
+            return None
                         
         from MDANSE import PREFERENCES
         macrosDir =  PREFERENCES["macros_directory"].get_value()
         
-        templateFile = os.path.join(macrosDir,"%s.py" % longname)
+        templateFile = os.path.join(macrosDir,"%s.py" % classname)
                 
         try:            
             f = open(templateFile,'w')
@@ -545,11 +542,11 @@ class %s(IJob):
         
         # The trajectory is closed
         self.configuration['trajectory']['instance'].close()        
-''' % (longname,shortname,longname))
+''' % (classname,shortname,classname))
         
         except IOError:
             LOGGER('The job template could not be save to %r. Maybe a permission problem.' % templateFile,'error')
+            return None
         else:
-            f.close()
-        
-        return templateFile
+            f.close()        
+            return templateFile

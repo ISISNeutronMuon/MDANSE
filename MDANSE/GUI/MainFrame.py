@@ -193,6 +193,7 @@ class MainFrame(wx.Frame):
         udButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["user",32,32], 'Launch the user definitions editor')
         preferencesButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["preferences",32,32], 'Launch the preferences editor')
         registryButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["registry",32,32], 'Inspect MDANSE classes framework')
+        templateButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["template",32,32], 'Save a template for a new analysis')
         apiButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["api",32,32], 'Open MDANSE API')
         websiteButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["web",32,32], 'Open MDANSE website')
         aboutButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["about",32,32], 'About MDANSE')
@@ -211,6 +212,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_set_preferences, preferencesButton)
         self.Bind(wx.EVT_MENU, self.on_open_user_definitions, udButton)
         self.Bind(wx.EVT_MENU, self.on_open_classes_registry, registryButton)
+        self.Bind(wx.EVT_MENU, self.on_save_job_template, templateButton)
         self.Bind(wx.EVT_MENU, self.on_about, aboutButton)
         self.Bind(wx.EVT_MENU, self.on_quit, quitButton)
         self.Bind(wx.EVT_MENU, self.on_open_api, apiButton)
@@ -291,6 +293,16 @@ or directly to the MDANSE mailing list:
         from MDANSE.GUI.RegistryViewer import RegistryViewer
         
         f = RegistryViewer(self)
+        
+        f.ShowModal()
+        
+        f.Destroy()
+        
+    def on_save_job_template(self,event):
+        
+        from MDANSE.GUI.JobTemplateEditor import JobTemplateEditor
+        
+        f = JobTemplateEditor(self)
         
         f.ShowModal()
         

@@ -100,7 +100,7 @@ class PropertyDialog(wx.Dialog):
         """
         Handler called when the user clicks on the OK button of the property dialog.
         """
-        
+                
         pname = str(self.name.GetValue().strip())
         
         pdefault = str(self.propertyType.GetValue())

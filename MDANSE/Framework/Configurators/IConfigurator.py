@@ -126,6 +126,8 @@ class IConfigurator(dict):
         self._label = kwargs.get('label'," ".join(name.split('_')).strip())
 
         self._widget = kwargs.get('widget',self.type)
+        
+        self._configured = False
             
     @property
     def default(self):
@@ -192,6 +194,14 @@ class IConfigurator(dict):
 
         :note: this is an abstract method.
         '''
+
+    def set_configured(self,configured):
+        
+        self._configured = configured
+        
+    def is_configured(self):
+        
+        return self._configured
 
     def set_configurable(self,configurable):
         

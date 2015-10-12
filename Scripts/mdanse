@@ -333,14 +333,12 @@ class CommandLineParser(optparse.OptionParser):
 
         from MDANSE.Framework.Jobs.IJob import IJob        
 
-        if nargs == 1:
-            shortname = longname = parser.rargs[0]
-        elif nargs == 2:
-            shortname,longname = parser.rargs
-        else:
+        if nargs != 2:
             raise CommandLineParserError("Invalid number of arguments for %r option" % opt_str)
+
+        shortname,classname = parser.rargs
                 
-        IJob.save_template(shortname,longname)
+        IJob.save_template(shortname,classname)
                     
 if __name__ == "__main__":
 
