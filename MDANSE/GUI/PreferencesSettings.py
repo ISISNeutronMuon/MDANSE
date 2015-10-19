@@ -37,7 +37,8 @@ import wx
 import wx.aui as wxaui
 import wx.lib.filebrowsebutton as wxfile
 
-from MDANSE import PLATFORM, PREFERENCES
+from MDANSE import LOGGER, PLATFORM, PREFERENCES
+from MDANSE.Core.Preferences import PreferencesError
 
 class WritableDirectoryValidator(wx.PyValidator):  
 
@@ -187,21 +188,27 @@ class PreferencesSettings(wx.Dialog):
             
         return True
 
-    def on_apply(self,event):
-        
+    def on_apply(self,event=None):
+                
         if not self.validate():
-            return
+            return False
+
+        valid = True
 
         for k, widget in self._widgets.items():
-            PREFERENCES[k].set_value(widget.get_value())
+            try:
+                PREFERENCES[k].set_value(widget.get_value())
+            except PreferencesError as e:
+                LOGGER(str(e),'error',['console'])
+                valid = False
+                continue
+            
+        return valid
 
     def on_ok(self,event):
         
-        if not self.validate():
+        if not self.on_apply():
             return
-
-        for k, widget in self._widgets.items():
-            PREFERENCES[k].set_value(widget.get_value())
             
         PREFERENCES.save()
         

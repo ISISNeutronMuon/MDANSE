@@ -79,7 +79,6 @@ def databasePath(filename, directory, try_direct = False):
 
     if entries is  None:
         if directory == "Atoms":
-            LOGGER("Atom %r not found in the MMTK database. MDANSE will create a default one." % basename,"warning")
             ELEMENTS.add_element(basename,save=True)
             return os.path.join(PLATFORM.local_mmtk_database_directory(),"Atoms", basename)
         else:

@@ -40,7 +40,7 @@ import subprocess
 import sys
 import traceback
 
-from MDANSE import LOGGER, PLATFORM, REGISTRY
+from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Jobs.JobStatus import JobStatus
@@ -468,8 +468,7 @@ class IJob(Configurable):
     def save_template(cls, shortname,classname):
                     
         if REGISTRY['job'].has_key(shortname):
-            LOGGER('A job with %r name is already stored in the registry' % shortname,'error')
-            return None
+            raise KeyError('A job with %r name is already stored in the registry' % shortname)
                         
         from MDANSE import PREFERENCES
         macrosDir =  PREFERENCES["macros_directory"].get_value()
@@ -545,7 +544,6 @@ class %s(IJob):
 ''' % (classname,shortname,classname))
         
         except IOError:
-            LOGGER('The job template could not be save to %r. Maybe a permission problem.' % templateFile,'error')
             return None
         else:
             f.close()        

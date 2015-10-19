@@ -101,12 +101,15 @@ class JobTemplateEditor(wx.Dialog):
             return
                 
         from MDANSE.Framework.Jobs.IJob import IJob        
-                
-        filename = IJob.save_template(shortName,className)
         
-        if filename is not None:
-            LOGGER('Job template successfully saved to %r.' % filename,'info',['console'])                
-            self.EndModal(wx.ID_OK)
+        try:
+            filename = IJob.save_template(shortName,className)
+        except (IOError,KeyError) as e:
+            LOGGER(str(e),'error',['console'])
+            return
+        
+        LOGGER('Job template successfully saved to %r.' % filename,'info',['console'])                
+        self.EndModal(wx.ID_OK)
                           
 if __name__ == "__main__":
     app = wx.App(False)

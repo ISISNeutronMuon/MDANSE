@@ -8,6 +8,7 @@ import subprocess
 import sys
 import textwrap
 
+from MDANSE import LOGGER
 from MDANSE.Core.Error import Error
 from MDANSE import ELEMENTS, PLATFORM, REGISTRY
 from MDANSE.Framework.Jobs.JobStatus import JobState
@@ -70,9 +71,7 @@ class CommandLineParser(optparse.OptionParser):
     def __init__(self,*args,**kwargs):
         
         optparse.OptionParser.__init__(self,*args,**kwargs)
-        
-        from MDANSE import LOGGER
-        
+                
         LOGGER.add_handler("terminal", REGISTRY['handler']['terminal'](), level="info", start=True)
         LOGGER.start()
     
@@ -337,9 +336,13 @@ class CommandLineParser(optparse.OptionParser):
             raise CommandLineParserError("Invalid number of arguments for %r option" % opt_str)
 
         shortname,classname = parser.rargs
-                
-        IJob.save_template(shortname,classname)
-                    
+
+        try:
+            IJob.save_template(shortname,classname)
+        except (IOError,KeyError) as e:
+            LOGGER(str(e),'error',['console'])
+            return
+                                    
 if __name__ == "__main__":
 
     from MDANSE.__pkginfo__ import __version__, __date__

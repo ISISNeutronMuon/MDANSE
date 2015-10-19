@@ -35,7 +35,6 @@ import collections
 import ConfigParser
 import os
 
-from MDANSE import LOGGER
 from MDANSE.Core.Platform import PLATFORM, PlatformError
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
@@ -232,7 +231,7 @@ class InputDirectory(PreferencesItem):
         try:
             PLATFORM.create_directory(value)
         except PlatformError:
-            LOGGER("Invalid value for %r preferences item. Set the default value instead." % self._name,"warning")
+            raise PreferencesError('Invalid value for %r preferences item. Set the default value instead.' % self._name)
             self._value = self._default
         else:        
             self._value = value
@@ -337,7 +336,10 @@ class Preferences(collections.OrderedDict):
         for s in self._parser.sections():
             for k, v in self._parser.items(s):
                 if self.has_key(k):
-                    self[k].set_value(v)
+                    try:
+                        self[k].set_value(v)
+                    except PreferencesError:
+                        continue                        
                 else:
                     self._parser.remove_option(s,k)
             if not self._parser.items(s):
