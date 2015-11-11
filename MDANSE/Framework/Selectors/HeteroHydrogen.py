@@ -38,17 +38,27 @@ class HeteroHydrogenBound(ISelector):
     
     section = "hydrogens"
 
-    def select(self, *args):
+    def __init__(self, universe):
+        
+        ISelector.__init__(self,universe)
 
-        sel = set()
-            
         for obj in self._universe.objectList():
                                         
             heteroatoms = [at for at in obj.atomList() if at.type.name.strip().lower() not in ['carbon','hydrogen']]
             
             for het in heteroatoms:
                 neighbours = het.bondedTo()
-                hydrogens = [neigh for neigh in neighbours if neigh.type.name.strip().lower() == 'hydrogen']
-                sel.update(hydrogens)
-                    
+                hydrogens = [neigh.fullName().strip().lower() for neigh in neighbours if neigh.type.name.strip().lower() == 'hydrogen']
+                self._choices.extend(sorted(hydrogens))
+
+    def select(self, names):
+    
+        sel = set()
+
+        if '*' in names:
+            names = self._choices[1:]
+            
+        vals = set([v.lower() for v in names])
+        sel.update([at for at in self._universe.atomList() if at.fullName().strip().lower() in vals])
+        
         return sel

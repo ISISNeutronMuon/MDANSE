@@ -34,7 +34,7 @@ from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class OxyHydrogen(ISelector):
     
-    type = "oxy_hydrogen"
+    type = "sulphur_hydrogen"
     
     section = "hydrogens"
 
@@ -44,10 +44,10 @@ class OxyHydrogen(ISelector):
 
         for obj in self._universe.objectList():
                                         
-            oxygens = [at for at in obj.atomList() if at.type.name.strip().lower() == 'oxygen']
+            sulphurs = [at for at in obj.atomList() if at.type.name.strip().lower() in ['sulphur', 'sulfur']]
             
-            for oxy in oxygens:
-                neighbours = oxy.bondedTo()
+            for sul in sulphurs:
+                neighbours = sul.bondedTo()
                 hydrogens = [neigh.fullName().strip().lower() for neigh in neighbours if neigh.type.name.strip().lower() == 'hydrogen']
                 self._choices.extend(sorted(hydrogens))
                 
