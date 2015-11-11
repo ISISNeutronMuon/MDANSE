@@ -157,7 +157,7 @@ class QVectorsPlugin(UserDefinitionPlugin):
 
     label = "Q vectors"
     
-    ancestor = ["molecular_viewer"]
+    ancestor = ["mmtk_trajectory"]
             
     def __init__(self, parent, *args, **kwargs):
 

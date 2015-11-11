@@ -46,7 +46,7 @@ class PartialChargesPlugin(UserDefinitionPlugin):
 
     label = "Partial charges"
     
-    ancestor = ["molecular_viewer"]
+    ancestor = ["mmtk_trajectory"]
 
     def __init__(self, parent, *args, **kwargs):
         
