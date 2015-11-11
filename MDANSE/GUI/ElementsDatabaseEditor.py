@@ -216,9 +216,9 @@ class ElementsDatabaseEditor(wx.Frame):
         menubar = wx.MenuBar()
          
         fileMenu = wx.Menu()
-         
         saveItem   = fileMenu.Append(wx.ID_ANY, '&Save database\tCtrl+S')
         saveasItem = fileMenu.Append(wx.ID_ANY, '&Save database as ...\tCtrl+Shift+S')        
+        menubar.Append(fileMenu, "File")
  
         databaseMenu = wx.Menu()
         addElementItem = databaseMenu.Append(wx.ID_ANY, 'New element')

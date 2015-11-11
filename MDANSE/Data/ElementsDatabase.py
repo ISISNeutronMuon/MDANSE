@@ -259,9 +259,11 @@ class ElementsDatabase(object):
         # Return a csv writer object.            
         databaseWriter = csv.DictWriter(f, propNames, delimiter=delimiter, lineterminator=lineterminator, restval=restval)
         databaseWriter.writeheader()
-        default = {"id":"''"}
-        default.update(dict([(pname,repr(prop())) for pname,prop in self._properties.items()]))
-        databaseWriter.writerow(default)
+        
+        rtypes = dict([(v,k) for k,v in ElementsDatabase._TYPES.items()])
+        ptypes = {'id':'type'}
+        ptypes.update(dict([(k,rtypes[v]) for k,v in self._properties.items()]))
+        databaseWriter.writerow(ptypes)
         for ename, props in self._data.items():
             p = {"id":ename}
             p.update(dict([(pname,props.get(pname,prop())) for pname,prop in self._properties.items()]))
