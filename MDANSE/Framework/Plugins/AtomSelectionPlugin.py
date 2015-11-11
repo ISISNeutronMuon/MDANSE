@@ -193,11 +193,13 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
                     self.__filters[selector.section].append(selector.type)
                 else:
                     self.__filters[selector.section] = [selector.type]
-         
+                             
         for section, subsections in sorted(self.__filters.items()):
             section_node = self.filterTree.AppendItem(filters, section)
             for subsection in sorted(subsections):
                 self.filterTree.AppendItem(section_node,subsection)
+
+        self.filterTree.Expand(filters)
          
         self.values = wx.ListBox(self._queryPanel, wx.ID_ANY, style = wx.LB_MULTIPLE|wx.LB_NEEDED_SB)
                                  
