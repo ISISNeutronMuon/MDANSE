@@ -43,8 +43,10 @@ class ProgressBar(wx.Panel,Status):
                         
     def start_status(self):
         
+        print self.nSteps, self.currentStep
+        
         self._stop.Enable()        
-        self._progress.SetValue(self.currentStep)
+        self._progress.SetValue(0)
         self._progress.SetRange(self.nSteps)
         self._progress.SetBarColor(wx.GREEN)    
 
@@ -54,6 +56,6 @@ class ProgressBar(wx.Panel,Status):
         self._progress.Refresh()   
         
     def update_status(self):
-                
+        
         self._progress.SetValue(self.currentStep)
         self._progress.Refresh()   

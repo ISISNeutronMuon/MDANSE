@@ -59,6 +59,9 @@ class SphericalQVectors(IQVectors):
         nVectors = self._configuration["n_vectors"]["value"]
 
         self._configuration["q_vectors"] = {}
+        
+        if self._status is not None:
+            self._status.start(len(self._configuration["shells"]["value"]))
 
         for q in self._configuration["shells"]["value"]:
 

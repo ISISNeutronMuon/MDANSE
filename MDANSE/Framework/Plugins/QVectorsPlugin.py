@@ -228,16 +228,13 @@ class QVectorsPlugin(UserDefinitionPlugin):
         self.Destroy()
         
     def on_close_tab(self, event):
-        
-        if event.GetSelection() == 0:
+
+        qPanel = event.GetEventObject().GetPage(event.GetSelection())
+        if qPanel.progress.is_running():
+            d = wx.MessageDialog(None, 'The background task is still running. You must cancel it before closing this tab.', 'Warning', wx.OK|wx.ICON_WARNING)
+            d.ShowModal()
             event.Veto()
-        else:
-            qPanel = event.GetEventObject().GetPage(event.GetSelection())
-            if qPanel.progress.is_running():
-                d = wx.MessageDialog(None, 'The background task is still running. You must cancel it before closing this tab.', 'Warning', wx.OK|wx.ICON_WARNING)
-                d.ShowModal()
-                event.Veto()
-                return            
+            return            
                     
     def generate_q_vectors(self,generator):
                                 
