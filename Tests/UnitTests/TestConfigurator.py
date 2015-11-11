@@ -244,19 +244,19 @@ class TestConfigurator(UnitTest):
         self._parameters["trajectory"] = self._validTrajectory.filename
         self._parameters["atom_selection"] = None
         self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable['atom_selection']['n_selected_atoms'],self._configurable['trajectory']['instance'].universe.numberOfAtoms())
+        self.assertEqual(self._configurable['atom_selection']['selection_length'],self._configurable['trajectory']['instance'].universe.numberOfAtoms())
   
         # Test that 'all' parameters selects everything
         self._parameters["trajectory"] = self._validTrajectory.filename
         self._parameters["atom_selection"] = 'all'
         self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable['atom_selection']['n_selected_atoms'],self._configurable['trajectory']['instance'].universe.numberOfAtoms())
+        self.assertEqual(self._configurable['atom_selection']['selection_length'],self._configurable['trajectory']['instance'].universe.numberOfAtoms())
   
         # Test a valid atom selection string
         self._parameters["trajectory"] = self._validTrajectory.filename
         self._parameters["atom_selection"] = 'atom_type carbon'
         self.assertNotRaises(self._configurable.setup,self._parameters)
-        self.assertEqual(self._configurable['atom_selection']['n_selected_atoms'],sum([True for at in self._configurable['trajectory']['instance'].universe.atomList() if at.symbol=='C']))
+        self.assertEqual(self._configurable['atom_selection']['selection_length'],sum([True for at in self._configurable['trajectory']['instance'].universe.atomList() if at.symbol=='C']))
   
     def test_atom_transmutation(self):
 
@@ -284,7 +284,7 @@ class TestConfigurator(UnitTest):
         self._parameters["trajectory"] = self._validTrajectory.filename
         self._parameters["atom_transmutation"] = None
         self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable['atom_selection']['n_selected_atoms'],self._configurable['trajectory']['instance'].universe.numberOfAtoms())
+        self.assertEqual(self._configurable['atom_selection']['selection_length'],self._configurable['trajectory']['instance'].universe.numberOfAtoms())
   
         # Test a valid atom selection string
         self._parameters["trajectory"] = self._validTrajectory.filename
