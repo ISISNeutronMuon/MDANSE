@@ -30,17 +30,32 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+import glob
+import os
+
+from MDANSE import PREFERENCES
 from MDANSE.Framework.Selectors.ISelector import ISelector
                 
 class PythonScript(ISelector):
     
     type = "python_script"
     
-    section = None
-
+    section = 'miscellaneous'
+    
+    def __init__(self, universe):
+        
+        ISelector.__init__(self,universe)
+                
+        self._choices.extend(glob.glob(os.path.join(PREFERENCES['working_directory'].get_value(),'*.py')))
+        
+        self._rindexes = dict([(at.index,at) for at in universe.atomList()])
+    
     def select(self, scripts):
         
         sel = set()
+
+        if '*' in scripts:
+            scripts = self._choices[1:]
                                 
         for s in scripts:
             
@@ -55,6 +70,6 @@ class PythonScript(ISelector):
                 if not namespace.has_key("selection"):
                     continue
                                 
-                sel.update(namespace["selection"])
+                sel.update([self._rindexes[idx] for idx in namespace["selection"]])
                                         
         return sel
