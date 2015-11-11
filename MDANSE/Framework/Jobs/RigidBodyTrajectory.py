@@ -64,7 +64,7 @@ class RigidBodyTrajectory(IJob):
     settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['stepwise']=('boolean',{'default':True})
     settings['reference']=('integer',{"mini":0})
-    settings['remove_translation']=('integer',{'default':False})
+    settings['remove_translation']=('boolean',{'default':False})
     settings['output_files']=('output_files', {"formats":["netcdf"]})
     settings['running_mode']=('running_mode',{})
     
