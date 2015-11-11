@@ -96,6 +96,12 @@ class AtomSelectionWidget(UserDefinitionWidget):
         self.Bind(wx.EVT_BUTTON, self.on_view_definition, view)
         self.Bind(wx.EVT_BUTTON, self.on_remove_definition, remove)
 
+    def on_new_definition(self,event):
+        
+        dlg = UserDefinitionDialog(None,self._trajectory,'atom_selection')
+        
+        dlg.ShowModal()
+
     def on_remove_definition(self,event):
         
         self._sizer.Detach(event.GetEventObject().Parent)

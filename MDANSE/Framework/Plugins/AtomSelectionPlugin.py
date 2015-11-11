@@ -304,7 +304,7 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
         self._selectionSummary.SetValue("\n".join(text))
 
     def insert_keyword_values(self, keyword, values):
-
+        
         self._query.add_query([keyword,values])
                 
         self.set_selection()
@@ -360,6 +360,8 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
                                 
         if not self._selectors.has_key(selectionFilter):
             self._selectors[selectionFilter] = [str(v) for v in REGISTRY["selector"][selectionFilter](self._trajectory.universe).choices]
+        
+        self.values.DeselectAll()
         
         self.values.Set(self._selectors[selectionFilter])
 

@@ -119,7 +119,7 @@ class IPlugin(wx.Panel):
         return self._parent
     
     def is_parent(self,window):
-            
+                        
         if window == self:
             return True
 
@@ -141,6 +141,7 @@ class IPlugin(wx.Panel):
 
         d = wx.MessageDialog(None, 'Closing this plugin will also close all the other ones you plugged in in so far. Do you really want to close ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
         if d.ShowModal() == wx.ID_NO:
+            event.Veto()
             return
                 
         window = event.GetPane().window
