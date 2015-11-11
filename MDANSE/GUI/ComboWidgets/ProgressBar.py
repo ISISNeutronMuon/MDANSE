@@ -42,9 +42,7 @@ class ProgressBar(wx.Panel,Status):
         self.stop()
                         
     def start_status(self):
-        
-        print self.nSteps, self.currentStep
-        
+                
         self._stop.Enable()        
         self._progress.SetValue(0)
         self._progress.SetRange(self.nSteps)
