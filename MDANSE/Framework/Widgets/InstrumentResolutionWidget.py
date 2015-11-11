@@ -112,7 +112,7 @@ class InstrumentResolutionDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.on_ok, self._ok)
         self.Bind(wx.EVT_CHOICE, self.on_select_kernel, self._kernelChoice)
         self.Bind(wx.EVT_CLOSE, self.on_cancel)
-                
+                        
     @property
     def value(self):
         
@@ -172,6 +172,8 @@ class InstrumentResolutionDialog(wx.Dialog):
         self.Freeze()
         
         self._parametersPanel = ConfigurationPanel(self, resolution)
+        for w in self._parametersPanel.widgets.values():
+            self.Bind(wx.EVT_TEXT_ENTER,self.on_plot_kernel,w.widget)
         
         self._parametersSizer.Add(self._parametersPanel, 0, wx.ALL|wx.EXPAND, 5)
                 
