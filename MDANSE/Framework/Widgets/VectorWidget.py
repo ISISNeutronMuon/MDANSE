@@ -54,7 +54,7 @@ class VectorConfigurator(IWidget):
         self._y = wx.TextCtrl(self._widgetPanel, wx.ID_ANY)
         self._z = wx.TextCtrl(self._widgetPanel, wx.ID_ANY)
             
-        cfg = self.configurator
+        cfg = self._configurator
 
         self._x.SetValue(str(cfg.default[0]))
         self._y.SetValue(str(cfg.default[1]))
