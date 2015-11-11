@@ -291,14 +291,17 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
         
         nSelectedAtoms = len(self._selection)
         
-        self._selectionSummary.AppendText("Number of selected atoms: %d\n\n" % nSelectedAtoms)
+        text = []                
+        text.append("Number of selected atoms: %d\n" % nSelectedAtoms)
         
         if nSelectedAtoms == 0:
             return
         
-        self._selectionSummary.AppendText("List of selected atoms:\n")
+        text.append("List of selected atoms:")
         for idx in self._selection:
-            self._selectionSummary.AppendText("\t%s (MMTK index: %d)\n" % (self._atoms[idx].fullName(),self._atoms[idx].index))
+            text.append("\t%s (MMTK index: %d)" % (self._atoms[idx].fullName(),self._atoms[idx].index))
+            
+        self._selectionSummary.SetValue("\n".join(text))
 
     def insert_keyword_values(self, keyword, values):
 

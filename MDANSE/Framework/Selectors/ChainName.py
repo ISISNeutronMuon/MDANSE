@@ -72,14 +72,14 @@ class ChainName(ISelector):
         else:
             
             vals = set([v.lower() for v in names])
-    
+                
             for obj in self._universe.objectList():
                 try:
                     for chain in obj:
                         chainName = chain.name.strip().lower()
-                        if chainName in vals: 
+                        if chainName in vals:
                             sel.update([at for at in chain.atomList()])
-                except AttributeError:
-                    pass
+                except (AttributeError,TypeError):
+                    continue
                 
         return sel
