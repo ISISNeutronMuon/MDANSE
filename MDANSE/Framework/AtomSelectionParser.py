@@ -63,7 +63,7 @@ class AtomSelectionParser(object):
     
     def parse_arguments(self,token):
 
-        return "(%s)" % str(token)
+        return "(%s) " % str(token)
 
     def parse_expression(self, token):
                         
@@ -87,10 +87,12 @@ class AtomSelectionParser(object):
         grammar = Forward()
         
         grammar << selector.setParseAction(self.parse_expression)
+        
+        print "bef ", grammar.transformString(expression)
 
-        grammar = operatorPrecedence(grammar, [(oneOf(["and","&"],caseless=True), 2, opAssoc.LEFT , self.operator_and),
+        grammar = operatorPrecedence(grammar, [(oneOf(["and","&"],caseless=True), 2, opAssoc.RIGHT , self.operator_and),
                                                (oneOf(["not","~"],caseless=True), 1, opAssoc.RIGHT, self.operator_not),
-                                               (oneOf(["or","|"] ,caseless=True), 2, opAssoc.LEFT , self.operator_or)],
+                                               (oneOf(["or","|"] ,caseless=True), 2, opAssoc.RIGHT , self.operator_or)],
                                      lpar="(",
                                      rpar=")")
 
@@ -115,4 +117,63 @@ class AtomSelectionParser(object):
         
         indexes = [at.index for at in selection]
                 
-        return indexes    
+        return indexes
+    
+if __name__ == "__main__":
+
+    from MDANSE.Externals.pyparsing.pyparsing import *
+
+    def parse_keyword(token):
+        
+        print "parse_keyword"
+                            
+        return '"%s"(universe).select' % token[0]
+
+    def parse_arguments(token):
+
+        print "parse_arguments"
+
+        return "(%s)" % str(token)
+
+    def operator_and(token):
+
+        print "operator_and"
+        
+        token[0][1] = "&"
+        
+        return " ".join(token[0])
+
+    def operator_or(token):
+
+        print "operator_or"
+        
+        token[0][1] = "|"
+            
+        return " ".join(token[0])
+
+    def parse_expression(self, token):
+
+        print "parse_expression"
+                        
+        return "".join([str(t) for t in token])
+        
+    expression = 'carbo * or oxy * or nitro *'
+    
+    linkers   = oneOf(["and","or",], caseless=True)
+    keyword   = oneOf(['carbo','oxy','nitro'], caseless=True).setParseAction(parse_keyword)
+    arguments = Optional(~linkers + delimitedList(Word(printables,excludeChars=","),combine=False)).setParseAction(parse_arguments)
+    
+    selector = keyword+arguments
+    
+    grammar = Forward()
+    
+    grammar << selector.setParseAction(parse_expression)
+    
+    expr = operatorPrecedence(grammar, [(oneOf(["and"],caseless=True), 2, opAssoc.RIGHT , operator_and),
+                                           (oneOf(["or"] ,caseless=True), 2, opAssoc.RIGHT , operator_or)],
+                                 lpar="(",
+                                 rpar=")")
+
+    parsedExpression = expr.transformString(expression)
+    
+    print parsedExpression
