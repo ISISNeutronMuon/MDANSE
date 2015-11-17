@@ -88,8 +88,6 @@ class AtomSelectionParser(object):
         
         grammar << selector.setParseAction(self.parse_expression)
         
-        print "bef ", grammar.transformString(expression)
-
         grammar = operatorPrecedence(grammar, [(oneOf(["and","&"],caseless=True), 2, opAssoc.RIGHT , self.operator_and),
                                                (oneOf(["not","~"],caseless=True), 1, opAssoc.RIGHT, self.operator_not),
                                                (oneOf(["or","|"] ,caseless=True), 2, opAssoc.RIGHT , self.operator_or)],
