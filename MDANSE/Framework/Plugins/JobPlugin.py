@@ -99,10 +99,10 @@ class JobPlugin(ComponentPlugin):
                          
     def on_run(self, event=None):
 
-        parameters = self._parametersPanel.validate()
-        
-        if not parameters:
+        if not self._parametersPanel.validate():
             return
+
+        parameters = self._parametersPanel.get_value() 
         
         name = self._job.define_unique_name()
 
@@ -126,10 +126,10 @@ class JobPlugin(ComponentPlugin):
         
     def on_save(self, event=None):
 
-        parameters = self._parametersPanel.validate()
-                
-        if not parameters:
+        if not self._parametersPanel.validate():
             return
+
+        parameters = self._parametersPanel.get_value() 
         
         d = wx.FileDialog(self, "Save MDANSE python script", style = wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT, wildcard = "Python files (*.py)|*.py")        
         if d.ShowModal() == wx.ID_CANCEL:
