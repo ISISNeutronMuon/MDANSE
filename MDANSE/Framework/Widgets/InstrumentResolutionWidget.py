@@ -147,7 +147,7 @@ class InstrumentResolutionDialog(wx.Dialog):
         resolution.set_kernel(self._frequencies, self._timeStep)
         
         self._axis.clear()
-                        
+                                
         self._axis.plot(self._frequencies, resolution.frequencyWindow)
         self._axis.set_xlabel("frequency (THz)")
         self._axis.set_ylabel("instrument resolution (a.u)")
@@ -230,3 +230,16 @@ class InstrumentResolutionConfigurator(IWidget):
         self._trajectory = DATA_CONTROLLER[datakey]
                         
         self._setResolution.Enable(True)
+        
+if __name__ == "__main__":
+            
+    app = wx.App(False)
+    
+    p = InstrumentResolutionDialog()
+        
+    p.SetSize((800,800))
+            
+    p.ShowModal()
+    
+    app.MainLoop()
+                

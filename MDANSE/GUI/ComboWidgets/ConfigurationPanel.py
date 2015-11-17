@@ -49,10 +49,10 @@ class ConfigurationPanel(wx.Panel):
     def validate(self):
                
         parameters = {}
-        parameters.update(self.get_value())
         try:
             parameters.update(self.get_value())
         except ConfiguratorError as e:
             wx.MessageBox(self, str(e), "Invalid input", style=wx.ICON_ERROR|wx.OK)
+            return False
         finally:
-            return parameters
+            return True
