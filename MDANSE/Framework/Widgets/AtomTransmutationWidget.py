@@ -34,6 +34,7 @@ import wx
 
 from MDANSE import ELEMENTS
 
+from MDANSE.Framework.Configurable import ConfigurationError
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Widgets.AtomSelectionWidget import AtomSelectionWidget
 from MDANSE.GUI.Icons import ICONS
@@ -81,10 +82,13 @@ class AtomTransmutationWidget(AtomSelectionWidget):
             
             panel = sizerItem.GetWindow()
             children = panel.GetChildren()
-            udName = children[0]
-            element = children[2]
+            udName = children[0].GetStringSelection()
+            element = children[2].GetStringSelection()
             
-            uds.append([udName.GetStringSelection(),element.GetStringSelection])
+            if not element:
+                raise ConfigurationError("No target element provided for %r selection." % udName)
+
+            uds.append([udName,element])
                   
         if not uds:
             return None
