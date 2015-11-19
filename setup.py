@@ -37,8 +37,6 @@ QHULL_DIR = os.path.join("Extensions","qhull_lib")
 
 QHULL_INCLUDE_DIR = INCLUDE_DIR + [EXTENSIONS_PATH] + [os.path.join(QHULL_DIR,"ext")] + [os.path.join(QHULL_DIR,"src")]
 
-SCRIPTS_PATH = "Scripts"
-
 #################################
 # Helper function
 #################################
@@ -162,9 +160,8 @@ DATA_FILES.extend(find_data('Doc',exclude=[],prefix='conf_'))
 # Scripts section
 #################################
 
-SCRIPTS = []
-SCRIPTS.append(os.path.join(SCRIPTS_PATH,'mdanse'))
-SCRIPTS.append(os.path.join(SCRIPTS_PATH,'mdanse_gui'))
+SCRIPTS_PATH = "Scripts"
+SCRIPTS = glob.glob(os.path.join(SCRIPTS_PATH,'mdanse*'))
 
 #################################
 # Documentation
