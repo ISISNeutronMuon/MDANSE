@@ -33,7 +33,7 @@ Created on Mar 30, 2015
 import wx
 import wx.lib.intctrl as wxintctrl
 
-from MDANSE.GUI import DATA_CONTROLLER
+from MDANSE import DATA_CONTROLLER
 from MDANSE.Framework.Widgets.IWidget import IWidget
         
 class FramesWidget(IWidget):

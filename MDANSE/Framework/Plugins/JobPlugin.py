@@ -39,11 +39,10 @@ import time
 import wx
 import wx.aui as aui
 
-from MDANSE import PLATFORM,REGISTRY
+from MDANSE import DATA_CONTROLLER, PLATFORM,REGISTRY
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Plugins.ComponentPlugin import ComponentPlugin
 from MDANSE.Framework.InputData.EmptyData import EmptyData
-from MDANSE.GUI import DATA_CONTROLLER
 from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.GUI.ComboWidgets.JobHelpFrame import JobHelpFrame
 

@@ -33,10 +33,9 @@ Created on Apr 10, 2015
 import wx
 import wx.aui as wxaui
 
-from MDANSE.Externals.pubsub import pub
+from MDANSE import DATA_CONTROLLER, REGISTRY
 
-from MDANSE import REGISTRY
-from MDANSE.GUI import DATA_CONTROLLER
+from MDANSE.Externals.pubsub import pub
 
 class DropTarget(wx.TextDropTarget):
 

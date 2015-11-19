@@ -34,8 +34,8 @@ import wx
 
 from MMTK.Trajectory import TrajectoryVariable
 
+from MDANSE import DATA_CONTROLLER
 from MDANSE.Framework.Widgets.IWidget import IWidget
-from MDANSE.GUI import DATA_CONTROLLER
                             
 class TrajectoryVariableWidget(IWidget):
     

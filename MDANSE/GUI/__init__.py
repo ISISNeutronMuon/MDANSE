@@ -6,9 +6,6 @@ import platform
 if platform.dist()[0].lower() == "ubuntu":
     os.environ["UBUNTU_MENUPROXY"] = "0" 
         
-from MDANSE.GUI.DataController import DATA_CONTROLLER
-
-
 from MDANSE import REGISTRY
 from MDANSE.Framework.Plugins.DataPlugin import DataPlugin 
 from MDANSE.Framework.Plugins.JobPlugin import JobPlugin

@@ -38,9 +38,8 @@ from matplotlib.backends.backend_wxagg import NavigationToolbar2WxAgg as Navigat
 
 import wx
 
-from MDANSE import REGISTRY
+from MDANSE import DATA_CONTROLLER, REGISTRY
 from MDANSE.Framework.Widgets.IWidget import IWidget
-from MDANSE.GUI import DATA_CONTROLLER
 from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 
 class InstrumentResolutionDialog(wx.Dialog):

@@ -32,9 +32,8 @@ Created on Apr 10, 2015
 
 import wx
 
+from MDANSE import DATA_CONTROLLER
 from MDANSE.Externals.pubsub import pub
-
-from MDANSE.GUI.DataController import DATA_CONTROLLER
 
 class DataObject(wx.TextDataObject):
 

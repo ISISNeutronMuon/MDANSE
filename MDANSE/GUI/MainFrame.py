@@ -39,10 +39,9 @@ import webbrowser
 import wx
 import wx.aui as aui
 
+from MDANSE import DATA_CONTROLLER, LOGGER, PLATFORM, REGISTRY
 from MDANSE.__pkginfo__ import __version__, __revision__
-from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE.Framework.Jobs.Converters.Converter import Converter
-from MDANSE.GUI import DATA_CONTROLLER
 from MDANSE.GUI.ControllerPanel import ControllerPanel
 from MDANSE.GUI.DataTreePanel import DataTreePanel
 from MDANSE.GUI.Icons import ICONS

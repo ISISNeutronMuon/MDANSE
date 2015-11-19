@@ -36,11 +36,10 @@ import os
 import wx
 import wx.aui as wxaui
 
-from MDANSE import LOGGER, REGISTRY
+from MDANSE import DATA_CONTROLLER, LOGGER, REGISTRY
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Widgets.IWidget import IWidget
-from MDANSE.GUI import DATA_CONTROLLER
 
 class UserDefinitionDialog(wx.Dialog):
     

@@ -32,8 +32,8 @@ Created on Mar 30, 2015
 
 import wx
 
+from MDANSE import DATA_CONTROLLER
 from MDANSE.Framework.Widgets.IWidget import IWidget
-from MDANSE.GUI import DATA_CONTROLLER
 
 class InterpolationOrderWidget(IWidget):
     

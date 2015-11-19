@@ -34,11 +34,10 @@ import wx
 
 from Scientific.IO.NetCDF import _NetCDFFile
 
+from MDANSE import DATA_CONTROLLER
 from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Configurable import ConfigurationError
-
 from MDANSE.Framework.Widgets.IWidget import IWidget
-from MDANSE.GUI import DATA_CONTROLLER
     
 class NetCDFInputWidget(IWidget):
     

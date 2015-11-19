@@ -32,7 +32,7 @@ Created on Mar 30, 2015
 
 import wx
 
-from MDANSE.GUI import DATA_CONTROLLER
+from MDANSE import DATA_CONTROLLER
 from MDANSE.Framework.Plugins.IPlugin import IPlugin 
 
 def get_data_plugin(window):
