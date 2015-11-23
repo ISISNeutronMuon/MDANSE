@@ -296,7 +296,7 @@ class QVectorsPlugin(UserDefinitionPlugin):
                          
         if generatorName == self._currentGenerator:
             return
-                               
+                                       
         self._currentGenerator = REGISTRY["q_vectors"][generatorName](self._trajectory.universe)
          
         self._parametersSizer.Clear(deleteWindows=True)
@@ -306,8 +306,10 @@ class QVectorsPlugin(UserDefinitionPlugin):
         self._configurationPanel = ConfigurationPanel(self._mainPanel, self._currentGenerator)
  
         self._parametersSizer.Add(self._configurationPanel, 1, wx.ALL|wx.EXPAND, 5)
-                                 
+                                         
         self.Thaw()
                          
         self._parametersSizer.Layout()
+        
+        self._mgr.Update()
         
