@@ -47,8 +47,8 @@ class MMTKTrajectoryInputData(InputFileData):
         try:
             traj = MMTKTrajectory(None, self._name, "r")
             
-        except IOError:        
-            raise InputDataError("The MMTK trajectory %r could not be loaded property." % self._name)
+        except IOError as e:        
+            raise InputDataError(str(e))
         
         self._data = traj
         
