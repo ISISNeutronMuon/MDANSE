@@ -50,7 +50,7 @@ class TestElementsDatabase(UnitTest):
     def test___contains__(self):
         
         self.assertFalse("fhsdjfsd" in ELEMENTS)
-        self.assertFalse("h" in ELEMENTS)
+        self.assertTrue("h" in ELEMENTS)
         self.assertTrue("H" in ELEMENTS)
 
     def test___getitem__(self):
@@ -75,9 +75,6 @@ class TestElementsDatabase(UnitTest):
                                 
     def test_add_element(self):
         
-        # Adding an already existing element does not trigger an error anymore
-        self.assertRaises(ElementsDatabaseError,ELEMENTS.add_element, "H")
-
         # Otherwise, everything should be OK
         self.assertNotRaises(ELEMENTS.add_element, "element1")
         
