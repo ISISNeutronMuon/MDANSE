@@ -34,7 +34,6 @@ import collections
 
 import numpy
 
-from MDANSE import ELEMENTS
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Mathematics.Arithmetic import weight
 
