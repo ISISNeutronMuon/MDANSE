@@ -38,7 +38,7 @@ from MDANSE.Core.DataController import DATA_CONTROLLER
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
 
-from MDANSE.Data.ElementsDatabase import ELEMENTS
+from MDANSE.Data.ElementsDatabase import ELEMENTS, create_mmtk_atom_entry
 
 from MDANSE.Core.Preferences import PREFERENCES
 
@@ -80,7 +80,10 @@ def databasePath(filename, directory, try_direct = False):
 
     if entries is  None:
         if directory == "Atoms":
-            ELEMENTS.add_element(basename,save=True)
+            ELEMENTS.add_element(basename)
+            ELEMENTS.save()
+            create_mmtk_atom_entry(basename)
+
             return os.path.join(PLATFORM.local_mmtk_database_directory(),"Atoms", basename)
         else:
             raise IOError("Database entry %s/%s not found" % (directory, filename))
