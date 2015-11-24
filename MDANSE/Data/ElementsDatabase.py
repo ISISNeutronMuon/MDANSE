@@ -47,7 +47,7 @@ class ElementsDatabaseError(Error):
     '''
     pass
 
-def create_mmtk_atom_entry(name, symbol=None, mass=0.0):
+def create_mmtk_atom_entry(filename, name=None, symbol=None, mass=1.0, **props):
     '''
     Creates a new atom in mmtk database.
     
@@ -61,16 +61,26 @@ def create_mmtk_atom_entry(name, symbol=None, mass=0.0):
     :return: the absolute path of the file that stores the newly created atom
     :rtype: str
     '''
+    
+    # Every entry of the MMTK database is searched in lower case.
+    filename = filename.lower()
+    
+    if name is None:
+        name = filename
         
     if symbol is None:
-        symbol = name
-
+        symbol = filename
+        
     filename = os.path.join(PLATFORM.local_mmtk_database_directory(),"Atoms", name)
     f = open(filename, 'w')
     # This three entries are compulsory for a MMTK.Atom to be valid
-    f.write('name = "%s"\n\n' % name)
-    f.write('symbol = "%s"\n\n' % name)
-    f.write('mass = %s' % mass)
+    f.write('name = "%s"' % name)
+    f.write('\n\nsymbol = "%s"' % symbol)
+    f.write('\n\nmass = %s' % mass)
+    
+    for k,v in props.items():
+        f.write('\n\n%s = %r' % (k,v))
+            
     f.close()
     
     return filename
@@ -172,6 +182,8 @@ class ElementsDatabase(object):
         :return: True if the database contains a given element
         :rtype: bool
         '''
+        
+        ename = ename.lower()
 
         return self._data.has_key(ename)
 
@@ -189,10 +201,13 @@ class ElementsDatabase(object):
         '''
 
         if isinstance(item,basestring):
+            item = item.lower()
             return copy.deepcopy(self._data[item])
 
         try:            
             ename,pname = item
+            ename = ename.lower()
+            pname = pname.lower()
         except ValueError:
             raise ElementsDatabaseError("Invalid database entry")
                 
@@ -221,6 +236,8 @@ class ElementsDatabase(object):
 
         try:            
             ename,pname = item
+            ename = ename.lower()
+            pname = pname.lower()
         except ValueError:
             raise ElementsDatabaseError("Invalid database entry")
         
@@ -340,6 +357,8 @@ class ElementsDatabase(object):
             
             for pname,ptype in zip(properties,reader.next()[1:]):
                 
+                pname = pname.lower()
+                
                 if self._properties.has_key(pname):
                     continue
                 
@@ -347,11 +366,11 @@ class ElementsDatabase(object):
                                         
             # Reads the next lines of the CSV that correspond to the database entries
             for r in reader:
-                ename = r.pop(0)
+                ename = r.pop(0).lower()
                 props = collections.OrderedDict()
                 # Loop over the contents of the current line
                 for i,v in enumerate(r):
-                    pname = properties[i]
+                    pname = properties[i].lower()
                     try:
                         props[pname] = self._properties[pname](v)
                     except ValueError:
@@ -365,7 +384,7 @@ class ElementsDatabase(object):
         except:
             self._load(ElementsDatabase._DEFAULT_DATABASE)
         
-    def add_element(self, ename, save=False):
+    def add_element(self, ename, createMMTKEntry=False):
         '''
         Add a new element in the elements database.
         
@@ -374,19 +393,13 @@ class ElementsDatabase(object):
         :param save: if True the elements database will be saved
         :type save: bool
         '''
-
-        if self._data.has_key(ename):
-            raise ElementsDatabaseError("The element %r is already registered in the database." % ename)
-            
-        self._data[ename] = collections.OrderedDict([(pname,prop()) for pname,prop in self._properties.iteritems()])
         
-        # Create the corresponding MMTK entry
-        create_mmtk_atom_entry(ename,symbol=self._data[ename]["symbol"],mass=self._data[ename]["atomic_weight"])
+        ename = ename.lower()
 
-        if save:
-            self.save()
-
-    def add_property(self, pname, typ, save=False):
+        if not self._data.has_key(ename):
+            self._data[ename] = collections.OrderedDict([(pname,prop()) for pname,prop in self._properties.iteritems()])
+            
+    def add_property(self, pname, typ):
         '''
         Add a new property to the elements database.
         
@@ -399,6 +412,8 @@ class ElementsDatabase(object):
         :param save: if True the elements database will be saved
         :type save: bool
         '''
+        
+        pname = pname.lower()
 
         if self._properties.has_key(pname):
             raise ElementsDatabaseError("The property %r is already registered in the database." % pname)
@@ -410,10 +425,7 @@ class ElementsDatabase(object):
         
         for v in self._data.values():
             v[pname] = self._properties[pname]()
-        
-        if save:
-            self.save()
-                
+                        
     @property
     def elements(self):
         '''
@@ -455,6 +467,8 @@ class ElementsDatabase(object):
         :rtype: dict
         '''
         
+        ename = ename.lower()
+        
         return copy.deepcopy(self._data[ename])
 
     def get_elements(self):
@@ -477,6 +491,8 @@ class ElementsDatabase(object):
         :return: the name of the isotopes corresponding to the selected element
         :rtype: list
         '''
+        
+        ename = ename.lower()
 
         # The isotopes are searched according to |symbol| property
         symbol = self._data[ename]["symbol"]
@@ -504,6 +520,8 @@ class ElementsDatabase(object):
         :rtype: MDANSE.Data.ElementsDatabase.SortedDict
         '''
         
+        pname = pname.lower()
+        
         if not self._properties.has_key(pname):
             raise ElementsDatabaseError("The property %r is not registered in the elements database" % pname)
         
@@ -519,6 +537,8 @@ class ElementsDatabase(object):
         :return: the type of the selected property
         :rtype: one of str, int or float
         '''
+        
+        pname = pname.lower()
 
         return copy.deepcopy(self._properties[pname])
                 
@@ -542,6 +562,8 @@ class ElementsDatabase(object):
         :return: True if the elements database contains the selected element
         :rtype: bool
         '''
+        
+        ename = ename.lower()
 
         return self._data.has_key(ename)
 
@@ -555,6 +577,8 @@ class ElementsDatabase(object):
         :return: True if the elements database contains the selected property
         :rtype: bool
         '''
+        
+        pname = pname.lower()
 
         return self._properties.has_key(pname)
 
@@ -568,6 +592,8 @@ class ElementsDatabase(object):
         :return: the information about a selected element
         :rype: str
         '''
+        
+        ename = ename.lower()
         
         # A delimiter line.
         delimiter = "-"*70
@@ -614,6 +640,8 @@ class ElementsDatabase(object):
         :return: the names of the elements that matched the property with the selected value within the selected tolerance
         :rtype: list
         '''
+        
+        pname = pname.lower()
 
         tolerance = abs(tolerance)
 
