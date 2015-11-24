@@ -301,7 +301,7 @@ class MolecularViewerPanel(ComponentPlugin):
                         
         # The array that will store the scale for all the atoms.
         self._atomsScales = numpy.array([ELEMENTS[at.symbol,'vdw_radius'] for at in self._atoms]).astype(numpy.float32)
-
+        
         scalars = ndarray_to_vtkarray(self.atomsColours, self._atomsScales, self._nAtoms) 
 
         bonds = vtk.vtkCellArray()
@@ -333,6 +333,9 @@ class MolecularViewerPanel(ComponentPlugin):
         pub.sendMessage('msg_set_trajectory', plugin=self)
 
     def color_string_to_RGB(self, s):
+        
+        if not s.strip():
+            s = "1;1;1"
         
         return numpy.array(s.split(';')).astype(numpy.float32)/255.
         
