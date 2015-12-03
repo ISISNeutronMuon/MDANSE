@@ -38,7 +38,7 @@ import webbrowser
 
 import wx
 import wx.aui as aui
-
+ 
 from MDANSE import DATA_CONTROLLER, LOGGER, PLATFORM, REGISTRY
 from MDANSE.__pkginfo__ import __version__, __revision__
 from MDANSE.Framework.Jobs.Converters.Converter import Converter
