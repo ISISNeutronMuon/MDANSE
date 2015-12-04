@@ -63,7 +63,7 @@ class DispersionLatticeQVectors(LatticeQVectors):
         if self._status is not None:
             self._status.start(len(dists))
 
-        self._configuration["q_vectors"] = {}
+        self._configuration["q_vectors"] = collections.OrderedDict()
                                 
         for i,v in enumerate(dists):
 

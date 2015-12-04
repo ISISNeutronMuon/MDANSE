@@ -69,7 +69,7 @@ class MillerIndicesLatticeQVectors(LatticeQVectors):
         if self._status is not None:
             self._status.start(len(self._configuration["shells"]["value"]))
 
-        self._configuration["q_vectors"] = {}
+        self._configuration["q_vectors"] = collections.OrderedDict()
         
         for q in self._configuration["shells"]["value"]:
 

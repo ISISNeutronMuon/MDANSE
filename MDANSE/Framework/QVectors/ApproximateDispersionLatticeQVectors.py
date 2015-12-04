@@ -73,7 +73,7 @@ class ApproximatedDispersionQVectors(LatticeQVectors):
         if self._status is not None:
             self._status.start(len(qGroups))
 
-        self._configuration["q_vectors"] = {}
+        self._configuration["q_vectors"] = collections.OrderedDict()
 
         for k,v in qGroups.iteritems():
 

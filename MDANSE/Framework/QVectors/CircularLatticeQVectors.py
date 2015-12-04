@@ -82,7 +82,7 @@ class CircularLatticeQVectors(LatticeQVectors):
         if self._status is not None:
             self._status.start(self._configuration["shells"]['number'])
 
-        self._configuration["q_vectors"] = {}
+        self._configuration["q_vectors"] = collections.OrderedDict()
 
         for q in self._configuration["shells"]["value"]:
 
