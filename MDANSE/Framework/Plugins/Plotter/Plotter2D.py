@@ -332,8 +332,8 @@ class Plotter2D(wx.Panel):
             v_tmp_plot = self.v_cross_slice_plot.plot(self.Xaxis*self.Xunit_conversion_factor, vslice, color='%s'%self.get_circular_color(self.cross_slice_color_index))
             h_tmp_plot = self.h_cross_slice_plot.plot(self.Yaxis*self.Yunit_conversion_factor, hslice, color='%s'%self.get_circular_color(self.cross_slice_color_index))
             
-            self.v_cross_slice_legend.append([v_tmp_plot[0],'%s = %8.3f' % (self.Xlabel,x)])
-            self.h_cross_slice_legend.append([h_tmp_plot[0],'%s = %8.3f' % (self.Ylabel,y)])
+            self.v_cross_slice_legend.append([v_tmp_plot[0],'%s = %8.3f' % (self.Ylabel,y)])
+            self.h_cross_slice_legend.append([h_tmp_plot[0],'%s = %8.3f' % (self.Xlabel,x)])
             
             self.v_cross_slice_plot.set_xlabel(self.Xlabel + self.fmt_Xunit)
             self.h_cross_slice_plot.set_xlabel(self.Ylabel + self.fmt_Yunit)
