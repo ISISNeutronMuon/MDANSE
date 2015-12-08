@@ -160,7 +160,7 @@ class DynamicCoherentStructureFactor(IJob):
         """
                
         for pair in self._elementsPairs:
-            corr = correlation(x[pair[0]],x[pair[1]], average=1)/x[pair[0]].shape[1]
+            corr = correlation(x[pair[0]],x[pair[1]], average=1)
             self._outputData["f(q,t)_%s%s" % pair][index,:] += corr
             
     def finalize(self):
