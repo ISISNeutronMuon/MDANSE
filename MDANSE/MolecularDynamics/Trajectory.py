@@ -144,7 +144,7 @@ def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable=
     
     serie = numpy.zeros((nFrames,3), dtype=dtype)
     
-    if weights is None:
+    if weights is None or len(atoms) == 1:
         weights = [1.0]*len(atoms)
 
     for i,at in enumerate(atoms):
