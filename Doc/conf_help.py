@@ -77,7 +77,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "classic"
+html_theme = "default"
 html_theme_options = {'sidebarwidth':250}
 
 html_show_copyright = False
