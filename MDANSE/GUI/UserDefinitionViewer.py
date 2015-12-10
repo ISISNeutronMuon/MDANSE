@@ -74,6 +74,8 @@ class UserDefinitionViewer(wx.Dialog):
         self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.on_try_rename, self._tree)
 
         self.Bind(wx.EVT_BUTTON, self.on_save_ud, self._save)
+
+        self.Bind(wx.EVT_CLOSE, self.on_close)
         
         if ud is not None:
             self.expand_ud(ud)
@@ -246,6 +248,10 @@ class UserDefinitionViewer(wx.Dialog):
         UD_STORE.set_definition(targetItemName,sectionItemName,newItemName,currentItemData.GetData())
         UD_STORE.remove_definition(targetItemName,sectionItemName,currentItemName)
 
+    def on_close(self, event):
+        
+            self.Destroy()
+            
 if __name__ == "__main__":
     app = wx.App(False)
     f = UserDefinitionViewer(None,ud=['protein_in_periodic_universe.nc','atom_selection',"sfdfdfsd"],editable=True)

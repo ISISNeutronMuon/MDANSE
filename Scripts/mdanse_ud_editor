@@ -9,8 +9,8 @@ class UserDefinitionViewerApp(wx.App):
     def OnInit(self):
         
         f = UserDefinitionViewer(None)
-        f.Show()
         self.SetTopWindow(f)
+        f.Show()
         return True
 
 if __name__ == "__main__":
