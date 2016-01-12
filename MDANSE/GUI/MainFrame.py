@@ -120,7 +120,7 @@ class MainFrame(wx.Frame):
         paneInfo=aui.AuiPaneInfo()
         self._mgr.AddPane(self._panels["data"], paneInfo.Caption("Data").Name("data").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
         self._mgr.AddPane(self._panels["plugins"], paneInfo.Caption("Plugins").Name("plugins").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
-        self._mgr.AddPane(self._panels["working"], paneInfo.Name("working").Center().CloseButton(False))
+        self._mgr.AddPane(self._panels["working"], paneInfo.Caption("Working panel").Name("working").Center().CloseButton(False))
         self._mgr.AddPane(self._panels["controller"], paneInfo.Name("controller").Name("controller").Floatable().Right().Bottom().CloseButton(True).DestroyOnClose(False).MinSize((-1,120)))
 
         self._mgr.Update()
