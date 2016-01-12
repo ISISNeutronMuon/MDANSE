@@ -32,7 +32,10 @@ Created on Apr 10, 2015
 
 import collections
 
+from MMTK import Units
+
 from MDANSE import ELEMENTS
+from MDANSE.Externals.magnitude.magnitude import mg
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
@@ -66,7 +69,7 @@ class Density(IJob):
         # Will store the time.
         self._outputData.add("times","line", self.configuration['frames']['time'], units='ps')
 
-        self._outputData.add("mass_density","line", (self._nFrames,), units='g/nm3')
+        self._outputData.add("mass_density","line", (self._nFrames,), units='g/cm3')
 
         self._outputData.add("atomic_density","line", (self._nFrames,), units='1/nm3')
 
@@ -86,11 +89,11 @@ class Density(IJob):
                         
         self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
                 
-        cellVolume = self.configuration['trajectory']['instance'].universe.cellVolume()
+        cellVolume = self.configuration['trajectory']['instance'].universe.cellVolume()*mg(1.0,'nm3','cm3').toval()
                 
         atomicDensity = self.configuration['trajectory']['instance'].universe.numberOfAtoms()/cellVolume
                 
-        massDensity = sum([ELEMENTS[s,'atomic_weight'] for s in self._symbols])/cellVolume
+        massDensity = sum([ELEMENTS[s,'atomic_weight'] for s in self._symbols])/Units.Nav/cellVolume
                         
         return index, (atomicDensity, massDensity)
     
