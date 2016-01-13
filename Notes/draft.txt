@@ -1,0 +1,114 @@
+MDANSE : An interactive analysis environment for molecular dynamics simulations
+
+Gael Goret, Bachir Aoun, Yannick Raoul, Miguel Gonzalez and Eric Pellegrini
+
+
+1] ABSTRACT
+TODO GG, EP
+
+2] INTRODUCTION
+
+Since the pioneer works of Alder and Wainwright,1 molecular dynamics (MD) 
+simulations has been recognized as a valuable tool for the study of condensed matter. 
+Since then, the combined progress in hardware, software and algorithmic led to a tremendous 
+growth on this field and allows nowadays the study of always more complex molecular systems, 
+such as molecular liquids and crystals, polymers, and biological macromolecules (e.g. proteins, 
+nucleic acids, sugars, lipids). This wide range of molecular system on which the simulations can 
+be applied on, opens the MD field to a large variety of scientific areas. Furthermore, their use 
+is no longer reserved to experts and the availability of many user-friendly packages 
+(e.g. CHARMM, 2 NAMD, 3 AMBER,4 DL_POLY5) allowed many experimentalists to use computer simulations 
+to interpret their measurements whenever they are too complex to be described by simple analytical models. 
+However, these packages primarly designed for producing with a high efficiency MD trajectories are limited 
+in their functionality for analyzing these trajectories.
+
+In this article, we present MDANSE (Molecular Dynamics Analyzis for Neutron Scattering Experiments) a new 
+python interactive environment for analyzing molecular dynamics data dsigned to cover a wide 
+range of properties (e.g. dynamical, structural, scattering, thermodynamical) that can be accessed through the 
+post-processing of a molecular dynamics trajectory. MDANSE is especially suited to explore the structure and dynamics of 
+atomic or molecular systems in association with thermal neutron scattering experiments (TNS).
+Indeed, this experimental technique provides information on time and space correlations of atomic positions. 1,2 
+Indeed, TNS gives access to temporal and spatial ranges respectively from subpicoseconds to tenth of nanoseconds and 
+angstrom to tenth of nanometers. This spatio-temporal domain matches very well with the one provided by 
+classical molecular dynamics simulations and  and to this effect both techniques are very complementary.
+
+In the neutron scattering community, few packages allow really to put together experimental and MD data ... (e.g. sassena, nmoldyn).
+We have been involved through the years in the developement of nMolDyn and its advertising especially at the Institut 
+Laue-Langevin [cite ill article using nmoldyn]. This gave us the unique opportunity to be in close contact with users, and to understand 
+better their needs in term of features and ergonomy. This has motivated the developement of MDANSE application.
+
+
+
+
+
+3] DESCRIPTION 
+
+Aujourd'hui de plus en plus de scientifiques ont recours a la simulation par dynamique moleculaire comme outil de validation et d'interpretation 
+de leur donnes experiementales. Ceci engendre un large spectre d'utlisateur au profil divers (physicien, biologiste ...) dont l'experience en informatique 
+va du simple utilisteur de programme a l'expert en programmation. Dans le cas plus specifique de la communaute de la neutronique, la comparaison 
+entre l'experience et la dynamique moleculaire est fondamentale dans la mesure ou le systemes explores et les temps de simulation sont compatibles.  
+
+
+. Ceci entraine la necessite de mettre en place des outils adaptes a ce public et qui soit 
+suffisamment ergonomique avec notamment une interface graphique permettant d'acceder aux fonctionnalite du software mais aussi suffisamment modulaire et extensible pour 
+ceux   
+
+ 
+
+
+
+# Why MDANSE ? Targeted features ? manque dans la communautee de neutronique d'environnement faisant le lien entre l'experience et la simulation.
+# breve description nmoldyn, explication de pourquoi un fork
+# avec les annee le publique qui accede a la MD, necessitee d'un programme reponsdance a un grande varieter de profils dans le public scientifique.
+# mise en lumiere des limitations d'nmoldyn
+
+
+This article describes the fourth version of nMoldyn. This version benefits from the experience gained through the development of previous versions of nMoldyn and the feedback of nMoldyn user community. This feedback mainly targeted (1) the lack for an interactive graphical environment and (2) the difficulty to extend nMoldyn to new analysis and (3) the possibility for the original neutron scattering community to use the scattering functions obtained from their MD analysis to setup virtual models of neutron spectrometers.
+Each of these points motivated the design of nMoldyn 4. 
+
+A strong emphasis has been put on a complete redesign of the GUI, which includes now a 3D viewer for the MD trajectory and a sophisticated plotter for multi-dimensional data. The 3D molecular viewer allows parts of the molecular system to be selected interactively prior to an analysis and in that context, nMoldyn GUI can now be considered as an interactive graphical environment. The kernel of nMoldyn was also deeply modified to make easier the development and the integration of of the components necessary for implementing new analysis. Finally, a binding of nMoldyn to neutron ray-tracing McStas software17 has been introduced. This allows including scattering functions computed with nMoldyn as models of ideal sample of neutron virtual spectrometers. This in turn allows instrument-dependent artifacts in scattering data, like multiple scattering, absorption and cross-talk between the sample and its environment to be investigated. Trajectories of neutrons in the sample and instrument can be visualized with the 3D viewer.
+An Interactive Graphical Environment
+One of the main features that nMoldyn4 offer is the possibility to visualize and interact with 3D graphics. Thanks to developments based on wx Python18 and the visualization toolkit libraries,19 it is now possible to display a molecular trajectory, pick a set of atoms, visualize the trace of neutrons in an instrument simulation, or interpret simply 2D or 3D resulting data as 3D density plot, elevated surface, scalar field... The nMoldyn graphical environment allow to navigate interactively from the input of data, going through the parameterization of analyses to the visualization of results in an user friendly and integrated way.  However, being a python package, nMoldyn can still be accessed through the command line interface.
+Working Environment
+The nMoldyn main window is divided in four panels (numbered from 1 to 4 on figure 1). The first panel is the nMoldyn workspace where all the actions will take place via a drag and drop mechanism of data and their related actions (e.g. viewing a molecule, trajectory animation, launching a job …). The second panel is the data panel that will display all the data that have been loaded in the current nMoldyn session. Dragging a data from this panel and dropping it on the workspace will create a tab that will serve as a container for all subsequent actions related to this data. Dropping an action on this tab will automatically pop up its related GUI (widget, dialog, viewer …). The third panel is the plugins panel that will contains all the actions related to the widget currently on focus into the workspace. This panel is dynamically updated each time the user selects a widget on the workspace. For example, a typical workflow for nMoldyn4 would be the following. 1) The user loads a trajectory. It is displayed in the data panel. 2) Data is dragged and dropped into the workspace. That creates a tab in the workspace waiting for further actions which are displayed in the plugins panel. 3) The user drags and drops the molecular viewer plugin into the previously created tab. The molecular viewer widget pops up in the tab showing the molecular contents of the trajectory. 4) The user animates the trajectory by dragging and dropping the animation panel into the previously created molecular viewer. And so on. Finally, the fourth panel contains various widgets related to the current nMoldyn session. It contains 1) a logger of the application. 2) a python console, allowing to handle the nMoldyn frameworks interactively. 3) a job manager, showing the states of the running jobs.
+2D/3D Plotter
+In the workflow of nMoldyn4, once an analyses has finished, a NetCDF file containing the results is written. To interpret properly this content, we have provided an integrated tool adapted to all the dimensions of the output data. Based respectively on matplotlib and VTK for 2D and 3D rendering, the nMoldyn4 plotter produces publication quality figures for the classic rendering types. The 1D and 2D data can be plotted as lines and images in single or multiple windows. To enhance the possibility cross comparison, the units conversions are handle automatically, and slices coming from different images can be merged into the same plot easily. For data with higher dimensionality several plotting modes can be used (1) the image elevation mode (see figure 2) displays 2D data as 3D colored landscape, (2) the scalar-field mode displays 3D densities as a field of combined gradient of color and transparency, (3) the iso-surface mode is another way to plot 3D densities represented in that case as a transparent surface going through all the values with the same intensity (see figure 3).  
+
+
+
+Figure 1. Snapshot of nMoldyn 4 main window with the different panels of the working environment numbered from 1 to 4.
+
+This plotter includes also the possibility of slicing the density using a cut plan interpolating the data.
+Properties Editor
+Most of the quantities proposed by nMoldyn can be weighted by using a given property. In previous versions of nMoldyn the list of the properties that could be used was not extensible. It consisted basically in weighting by atomic masses and numbers, coherent and incoherent scattering lengths.
+Opening nMoldyn to new experimental techniques (e.g. X-ray scattering, infrared and RMN spectroscopy) made necessary to make extensible the list of atomic properties that can be used in the weighting scheme. This has been done in nMoldyn4 and exposed to the GUI via an atomic properties editor (see figure 4). 
+
+
+Figure 4. The nMoldyn 4 properties editor which gives access to the nMoldyn 4 elements database. 
+
+This properties editor displays the nMoldyn elements database.  It is editable which allows the management of the atomic properties of all defined atoms. Additionally, new atom types can be added, in order to fit some special molecular dynamics simulations. For instance, when computing analyses related to neutron spectrometry, some hydrogen atoms should be turned to deuterium to match the experience. In such case, the use of properties editor will allow to add the deuterium as a new entry and to further transmute some of the hydrogen atoms into deuterium.
+
+
+Figure 2. An elevation plot produced by nMoldyn 4 plotting tool. 
+
+
+Figure 3. An elevation plot produced by nMoldyn 4 plotting tool.
+
+An Extendable Framework
+
+Compared to previous versions, nMoldyn4 has been structured in such a way that user can extend easily most of the principal software components. Indeed, the nMoldyn framework is based on a set of interfaces for which each base class is metaclassed in order to provide the (automatic) self-registration into a tree like structure called Registry at import time. Each branch of this tree will store the classes that compose each of these interfaces (e.g. Jobs, Configurators, Plugins …) and will be built up only when it will be required in the course of the execution flow. 
+This object-oriented design provides some flexibility for any user that would like to extend any of these interfaces. Indeed, he /she will just have to subclass any of their base class and nMoldyn will take in charge their automatic registration at runtime. This also allows, thanks to the introspection mechanism to transparently integrate in nMoldyn the user made component derived from the base classes identically as if they were built-in components. The figure 5 shows all the programming interfaces that are handled by the registry.
+
+
+Figure 5. The nMoldyn 4 extendable components handled by the class registry. 
+
+4] EXAMPLE
+4.1] Argon/Water (M.G.)
+4.2] Water (M.G.)
+
+5] CONCLUSION
+
+6] Acknowledgments
+MDANSE development was supported by the Agence Nationale de la Recherche under contract N° ANR-2010-COSI-001-01
+
+
+
