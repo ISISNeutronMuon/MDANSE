@@ -30,6 +30,8 @@ Created on Apr 14, 2015
 :author: Gael Goret, Bachir Aoun, Eric C. Pellegrini
 '''
 
+import os
+
 import numpy
 
 import vtk
@@ -47,6 +49,7 @@ from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
 from MDANSE.Framework.Plugins.DataPlugin import get_data_plugin 
 from MDANSE.Framework.Plugins.ComponentPlugin import ComponentPlugin
+from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
 # The colour for a selected atom (R,G,B,Alpha).
 RGB_COLOURS = {}
@@ -403,6 +406,7 @@ class MolecularViewerPanel(ComponentPlugin):
 
         popupMenu.AppendSeparator()
         selectionBox = popupMenu.Append(wx.ID_ANY, 'Show/hide selection box',kind=wx.ITEM_CHECK)
+        saveSelection = popupMenu.Append(wx.ID_ANY, 'Save selection')
         clearSelection = popupMenu.Append(wx.ID_ANY, 'Clear selection')
 
         popupMenu.AppendSeparator()
@@ -411,6 +415,7 @@ class MolecularViewerPanel(ComponentPlugin):
         
         popupMenu.Bind(wx.EVT_MENU, self.on_toggle_selection_box, selectionBox)
         popupMenu.Bind(wx.EVT_MENU, self.on_clear_selection, clearSelection)
+        popupMenu.Bind(wx.EVT_MENU, self.on_save_selection, saveSelection)
         popupMenu.Bind(wx.EVT_MENU, self.parallel_proj_onoff, parallelProjection)
         popupMenu.Check(parallelProjection.GetId(), self.camera.GetParallelProjection())
         
@@ -478,6 +483,11 @@ class MolecularViewerPanel(ComponentPlugin):
 
     @property
     def picked_atoms(self):
+        
+        return self.__pickedAtoms
+    
+    @property
+    def selectedAtoms(self):
         
         return self.__pickedAtoms
 
@@ -640,9 +650,11 @@ class MolecularViewerPanel(ComponentPlugin):
             self.pick_atoms([idx],new=(not obj.GetShiftKey()))
 
     def on_info_pick(self, obj, evt = None):
+        
+        
         if not self._trajectoryLoaded:
             return
-        
+                
         pos = obj.GetEventPosition()
         
         self.picker.AddPickList(self.picking_domain)
@@ -689,7 +701,41 @@ class MolecularViewerPanel(ComponentPlugin):
         self._polydata.Modified()
         
         self._iren.Render()
+
+    def on_save_selection(self,event=None):
         
+        if not self._trajectoryLoaded:
+            return
+        
+        if not self.__pickedAtoms:
+            return
+        
+        d = wx.TextEntryDialog(self,"Enter selection name","New selection")
+ 
+        # If the new element dialog is closed by clicking on OK. 
+        if d.ShowModal() == wx.ID_CANCEL:
+            return
+ 
+        # Get rid of wxpython unicode string formatting
+        name = str(d.GetValue())
+                         
+        if not name:
+            return
+        
+        target = os.path.basename(self._trajectory.filename)
+        
+        if UD_STORE.has_definition(target,"atom_selection",name):
+            LOGGER('There is already a user-definition with that name.','error',['console'])
+            return
+                  
+        UD_STORE.set_definition(target,"atom_selection",name,{'indexes':sorted(self.__pickedAtoms)})
+                 
+        UD_STORE.save()
+                 
+        pub.sendMessage("msg_set_ud")
+        
+        LOGGER('User definition %r successfully set.' % name,'info',['console'])
+                                                         
     def show_selection(self, selection):
         
         if not self._trajectoryLoaded:

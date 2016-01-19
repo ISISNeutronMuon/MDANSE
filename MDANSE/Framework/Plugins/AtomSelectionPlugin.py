@@ -168,7 +168,7 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
         pub.subscribe(self.msg_select_atoms_from_viewer, 'msg_select_atoms_from_viewer')
 
         UserDefinitionPlugin.__init__(self,parent,size=(800,500))
-        
+                
     def build_panel(self):
                                                 
         self._mainPanel = wx.ScrolledWindow(self, wx.ID_ANY, size=self.GetSize())
@@ -274,6 +274,9 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
         self.parent.mgr.Update()
         
         self.set_trajectory(self.dataproxy.data)
+
+        if self.parent.selectedAtoms:
+            self.insert_keyword_values('atom_picked',sorted(self.parent.selectedAtoms))     
                                 
     def set_trajectory(self,trajectory):
 
@@ -312,11 +315,7 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
         self.selectionTextCtrl.SetValue(self._query.get_expression())
         
         self.display_selection_summary()
-        
-    def close(self):
                 
-        pub.sendMessage('msg_clear_selection',plugin=self)                                
-        
     def on_add_operator(self, event=None):
 
         operator = event.GetEventObject().GetLabel()
