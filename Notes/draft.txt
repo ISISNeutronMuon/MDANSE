@@ -36,46 +36,70 @@ We have been involved through the years in the developement of nMolDyn and its a
 Laue-Langevin [cite ill article using nmoldyn]. This gave us the unique opportunity to be in close contact with users, and to understand 
 better their needs in term of features and ergonomy. This has motivated the developement of MDANSE application.
 
+2] SCIENTIFIC INTRODUCTION AND CONTEXT (MARK)
 
 3] DESCRIPTION
 
-This article describes MDANCE and annonce its first public realease. This software benefits from the experience gained through 
+MDANSE is a python application used to process molecular dynamics trajectories. It has been designed using 
+modern software engineering techniques (OOP, Version Control System, build server, Graphical User Interface). 
+A strong emphasis has been put to design a software that offers flexibility, ergonomy, and portability. 
+MDANSE offers a 2D/3D graphical environment to guide the user from loading and inspecting trajectories to the 
+visualization of the results of the available analysis. Besides this complete graphical environment, MDANSE has also been designed 
+to be used as a library through the generation of python scripts using directly its scientific kernel. 
+
+As a python application, MDANSE relies on a few dependencie namely:
+
+1) NumPy for working on N-dimensional arrays [ref] 
+2) Matplotlib for producing 2D plot [ref]
+3) VTK for visualizing 3D data [ref]
+4) wxPython for designing the GUI [ref]
+5) MMTK the molecular simulation library [ref]
+
+The dependency upon MMTK library triggers that the input trajectory file format is netCDF [ref] which a machine independant 
+compact binary file format. All of these packages are developed and distributed following
+the Open Source principles [ref]. The use of a high-level interpreted language may be surprising at first sight for the design of a 
+scientific application for which high performance computing is required for processing MD trajectories in a reasonable time. A closer
+inspection reveals that all the time-critical parts of the algorithms use efficient implementations in C, Cython or Fortran, which are provided 
+by extensions in MDANSE itself or other packages (e.g. NumPy and MMTK) together with a Python interface. 
+Moreover the use of a largely used programming language as python allows to open the application to many users in the scientific community.  
+
+This article describes MDANSE and annonce its first public realease. This software benefits from the experience gained through 
 the development of nMoldyn and from the feedback of the neutron user community.
-The design of MDANCE have been motivated on this feedback which mainly targeted on the : (1) the lack for an interactive graphical environment 
-(2) the possibility to extend available analysis and to create new ones easily for specific purposes.
+The design of MDANSE have been motivated on this feedback which mainly targeted on the : (1) the lack for an interactive graphical environment 
+(2) the possibility to create new analysis.
 A strong emphasis has been put on the design of the GUI, which includes now a 3D viewer for the MD trajectory and a sophisticated plotter for 
 multi-dimensional data. The 3D molecular viewer allows parts of the molecular system to be selected interactively prior to an analysis and in that 
-context, MDANCE GUI can now be considered as an interactive graphical environment. The kernel of MDANCE has been builded to make easier the 
-development and the integration of of the components necessary for implementing new analysis. 
+context, MDANSE GUI can now be considered as an interactive graphical environment. The kernel of MDANSE has been designed to make easier the 
+development and the integration of the components necessary for implementing new analysis. 
 
 3.1] An Interactive Graphical Environment
-One of the main features that MDANCE offer is the possibility to visualize and interact with 3D graphics. 
+One of the main features that MDANSE offers is the possibility to visualize and interact with 3D graphics. 
 Thanks to developments based on wxPython[ref] and the visualization toolkit libraries[ref], it is possible to display a molecular trajectory, 
 pick a set of atoms, or interpret simply 2D or 3D resulting data as 3D density plot, elevated surface, scalar field... 
-The MDANCE graphical environment allow to navigate interactively from the input of data, going through the parameterization of analyses 
-to the visualization of results in an user friendly and integrated way.  However, being a python package, MDANCE can also be accessed 
+The MDANSE graphical environment allow to navigate interactively from the input of data, going through the parameterization of analyses 
+to the visualization of results in an user friendly and integrated way.  However, being a python package, MDANSE can also be accessed 
 through the command line interface.
 
 3.2]Working Environment
 
-The main window is divided in four panels (numbered from 1 to 4 on figure 1). The first panel is the MDANCE workspace where all the actions will 
+The main window is divided in four panels (numbered from 1 to 4 on figure 1). The first panel is the MDANSE workspace where all the actions will 
 take place via a drag and drop mechanism of data and their related actions (e.g. viewing a molecule, trajectory animation, launching a job …). 
-The second panel is the data panel that will display all the data that have been loaded in the current MDANCE session. Dragging a data from this panel 
+The second panel is the data panel that will display all the data that have been loaded in the current MDANSE session. Dragging a data from this panel 
 and dropping it on the workspace will create a tab that will serve as a container for all subsequent actions related to this data. 
 Dropping an action on this tab will automatically pop up its related GUI (widget, dialog, viewer …). The third panel is the plugins panel that will 
 contains all the actions related to the widget currently on focus into the workspace. This panel is dynamically updated each time the user selects 
-a widget on the workspace. For example, a typical workflow for MDANCE would be the following. 1) The user loads a trajectory. 
+a widget on the workspace. For example, a typical workflow for MDANSE would be the following. 1) The user loads a trajectory. 
 It is displayed in the data panel. 2) Data is dragged and dropped into the workspace. That creates a tab in the workspace waiting for further actions 
 which are displayed in the plugins panel. 3) The user drags and drops the molecular viewer plugin into the previously created tab. 
 The molecular viewer widget pops up in the tab showing the molecular contents of the trajectory. 4) The user animates the trajectory by 
 dragging and dropping the animation panel into the previously created molecular viewer. And so on. Finally, the fourth panel contains 
-various widgets related to the current MDANCE session. It contains 1) a logger of the application. 2) a python console, allowing to handle the 
-MDANCE frameworks interactively. 3) a job manager, showing the states of the running jobs.
+various widgets related to the current MDANSE session. It contains 1) a logger of the application. 2) a python console, allowing to handle the 
+MDANSE frameworks interactively. 3) a job manager, showing the states of the running jobs.
 
 3.3] 2D/3D Plotter
-In the workflow of MDANCE, once an analyses has finished, a NetCDF file containing the results is written. 
+In the workflow of MDANSE, once an analyses has finished, a NetCDF file containing the results is written. 
 To interpret properly this content, we have provided an integrated tool adapted to all the dimensions of the output data. 
-Based respectively on matplotlib and VTK for 2D and 3D rendering, the MDANCE plotter produces publication quality figures for the 
+Based respectively on matplotlib and VTK for 2D and 3D rendering, the MDANSE plotter produces publication quality figures for the 
 classic rendering types. The 1D and 2D data can be plotted as lines and images in single or multiple windows. To enhance the possibility 
 cross comparison, the units conversions are handle automatically, and slices coming from different images can be merged into the same plot easily. 
 For data with higher dimensionality several plotting modes can be used (1) the image elevation mode (see figure 2) displays 2D data as 
@@ -84,40 +108,40 @@ mode is another way to plot 3D densities represented in that case as a transpare
 the same intensity (see figure 3). This plotter includes also the possibility of slicing the density using a cut plan interpolating the data. 
 
 Figure 1.] 
-Snapshot of MDANCE main window with the different panels of the working environment numbered from 1 to 4.
+Snapshot of MDANSE main window with the different panels of the working environment numbered from 1 to 4.
 
 3.4] Properties Editor
-Most of the quantities proposed by MDANCE can be weighted by using specific properties (atomic masses and numbers, coherent and 
-incoherent scattering lengths, etc.). in MDANCE the list of those properties is easily extensible, which open the use of MDANCE to new 
-experimental techniques (e.g. X-ray scattering, infrared and RMN spectroscopy). Thereby, in MDANCE the properties editor expose the 
+Most of the quantities proposed by MDANSE can be weighted by using specific properties (atomic masses and numbers, coherent and 
+incoherent scattering lengths, etc.). in MDANSE the list of those properties is easily extensible, which open the use of MDANSE to new 
+experimental techniques (e.g. X-ray scattering, infrared and RMN spectroscopy). Thereby, in MDANSE the properties editor expose the 
 modification of the elements data base which allow the users to tune freely the weighting scheme (see figure 4). 
-This properties editor displays the MDANCE elements database.  It is editable which allows the management of the atomic properties 
+This properties editor displays the MDANSE elements database.  It is editable which allows the management of the atomic properties 
 of all defined atoms. Additionally, new atom types can be added, in order to fit some special molecular dynamics simulations. 
 For instance, when computing analyses related to neutron spectrometry, some hydrogen atoms should be turned to deuterium to match the 
 experience. In such case, the use of properties editor will allow to add the deuterium as a new entry and to further transmute some of 
 the hydrogen atoms into deuterium.
 
 Figure 4.] 
-The MDANCE properties editor which gives access to the MDANCE elements database. 
+The MDANSE properties editor which gives access to the MDANSE elements database. 
 
 Figure 2.]
-An elevation plot produced by MDANCE plotting tool. 
+An elevation plot produced by MDANSE plotting tool. 
 
 Figure 3.]
-An elevation plot produced by MDANCE plotting tool.
+An elevation plot produced by MDANSE plotting tool.
 
 3.5] An Extendable Framework
-MDANCE has been structured in such a way that user can extend easily most of the principal software components. Indeed, the MDANCE framework 
+MDANSE has been structured in such a way that user can extend easily most of the principal software components. Indeed, the MDANSE framework 
 is based on a set of interfaces for which each base class is metaclassed in order to provide the (automatic) self-registration into a tree like 
 structure called Registry at import time. Each branch of this tree will store the classes that compose each of these interfaces (e.g. Jobs, 
 Configurators, Plugins …) and will be built up only when it will be required in the course of the execution flow. 
 This object-oriented design provides some flexibility for any user that would like to extend any of these interfaces. 
-Indeed, he /she will just have to subclass any of their base class and MDANCE will take in charge their automatic registration at runtime. 
-This also allows, thanks to the introspection mechanism to transparently integrate in MDANCE the user made component derived from the base 
+Indeed, he /she will just have to subclass any of their base class and MDANSE will take in charge their automatic registration at runtime. 
+This also allows, thanks to the introspection mechanism to transparently integrate in MDANSE the user made component derived from the base 
 classes identically as if they were built-in components. The figure 5 shows all the programming interfaces that are handled by the registry.
 
 Figure 5.]
-The MDANCE extendable components handled by the class registry. 
+The MDANSE extendable components handled by the class registry. 
 
 4] EXAMPLE
 4.1] Argon/Water (M.G.)
