@@ -51,9 +51,7 @@ class LorentzianInstrumentResolution(IInstrumentResolution):
 
         mu = self._configuration["mu"]["value"]
         sigma = self._configuration["sigma"]["value"]
+                                          
+        self._frequencyWindow = (2.0*sigma)/((frequencies-mu)**2 + sigma**2)
+        self._timeWindow = numpy.fft.fftshift(numpy.fft.ifft(numpy.fft.ifftshift(self._frequencyWindow))/dt)
                 
-        fact = 0.5*sigma
-                          
-        self._frequencyWindow = (1.0/numpy.pi)*(fact/((frequencies-mu)**2 + fact**2))
-                
-        self._timeWindow = numpy.fft.fftshift(numpy.abs(numpy.fft.ifft(self._frequencyWindow))/dt)

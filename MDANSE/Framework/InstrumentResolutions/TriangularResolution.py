@@ -53,6 +53,6 @@ class TriangularInstrumentResolution(IInstrumentResolution):
                                 
         val = numpy.abs(frequencies-mu) - sigma
                         
-        self._frequencyWindow = numpy.where( val >= 0, 0.0, -val/sigma**2)
-                                
-        self._timeWindow = numpy.fft.fftshift(numpy.abs(numpy.fft.ifft(self._frequencyWindow))/dt)
+        self._frequencyWindow = 2.0*numpy.pi*numpy.where( val >= 0, 0.0, -val/sigma**2)
+        
+        self._timeWindow = numpy.fft.fftshift(numpy.fft.ifft(numpy.fft.ifftshift(self._frequencyWindow))/dt)

@@ -51,6 +51,7 @@ class SquareInstrumentResolution(IInstrumentResolution):
         mu = self._configuration["mu"]["value"]
         sigma = self._configuration["sigma"]["value"]
                                 
-        self._frequencyWindow = numpy.where((numpy.abs(frequencies-mu)-sigma) > 0,0.0,1.0/(2.0*sigma))
+        self._frequencyWindow = 2.0*numpy.pi*numpy.where((numpy.abs(frequencies-mu)-sigma) > 0,0.0,1.0/(2.0*sigma))
                         
-        self._timeWindow = numpy.fft.fftshift(numpy.abs(numpy.fft.ifft(self._frequencyWindow))/dt)
+        self._timeWindow = numpy.fft.fftshift(numpy.fft.ifft(numpy.fft.ifftshift(self._frequencyWindow))/dt)
+        

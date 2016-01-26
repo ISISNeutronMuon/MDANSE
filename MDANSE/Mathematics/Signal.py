@@ -224,9 +224,18 @@ def get_spectrum(signal,window=None,timeStep=1.0,axis=0):
     if window is None:
         window = numpy.ones(signal.shape[axis])
 
+    window /= window[len(window)/2]
+
     s = [numpy.newaxis]*signal.ndim
     s[axis] = slice(None)
+
+    # We compute the unitary inverse fourier transform with angular frequencies as described in
+    # https://en.wikipedia.org/wiki/Fourier_transform#Discrete_Fourier_Transforms_and_Fast_Fourier_Transforms
     
-    return numpy.fft.fftshift(numpy.abs(numpy.fft.fft(signal*window[s],axis=axis)),axes=axis)*timeStep    
+    # For information about the manipulation around fftshift and ifftshift
+    # http://www.mathworks.com/matlabcentral/newsreader/view_thread/285244
+    
+    fftSignal = 0.5*numpy.fft.fftshift(numpy.fft.fft(numpy.fft.ifftshift(signal*window[s],axes=axis),axis=axis),axes=axis)*timeStep/numpy.pi
+    return fftSignal.real
     
     

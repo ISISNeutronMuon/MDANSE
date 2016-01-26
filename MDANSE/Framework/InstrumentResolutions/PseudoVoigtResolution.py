@@ -57,12 +57,10 @@ class PseudoVoigtInstrumentResolution(IInstrumentResolution):
         muG = self._configuration["mu_gaussian"]["value"]
         sigmaG = self._configuration["sigma_gaussian"]["value"]
 
-        gContribution = (1.0/(sigmaG*numpy.sqrt(2.0*numpy.pi)))*numpy.exp(-0.5*((frequencies-muG)/sigmaG)**2)
-
-        fact = 0.5*sigmaL
+        gaussian = (numpy.sqrt(2.0*numpy.pi)/sigmaG)*numpy.exp(-0.5*((frequencies-muG)/sigmaG)**2)
                           
-        lContribution = (1.0/numpy.pi)*(fact/((frequencies-muL)**2 + fact**2))
+        lorentzian = (2.0*sigmaL)/((frequencies-muL)**2 + sigmaL**2)
         
-        self._frequencyWindow = eta*lContribution + (1.0-eta)*gContribution
+        self._frequencyWindow = eta*lorentzian + (1.0-eta)*gaussian
+        self._timeWindow = numpy.fft.fftshift(numpy.fft.ifft(numpy.fft.ifftshift(self._frequencyWindow))/dt)
                 
-        self._timeWindow = numpy.fft.fftshift(numpy.abs(numpy.fft.ifft(self._frequencyWindow))/dt)
