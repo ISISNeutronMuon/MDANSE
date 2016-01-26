@@ -59,6 +59,8 @@ class IWidget(wx.Panel):
                         
         self.build_panel()
         
+        self.Bind(wx.EVT_WINDOW_DESTROY,self.OnDestroy)
+        
         pub.subscribe(self._set_data, 'msg_set_data')
                         
     @property
@@ -109,3 +111,8 @@ class IWidget(wx.Panel):
             return
         
         self.set_data(plugin.datakey)
+
+    def OnDestroy(self,event):
+                
+        pub.unsubscribe(self._set_data, 'msg_set_data')
+        event.Skip()

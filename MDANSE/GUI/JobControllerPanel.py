@@ -188,6 +188,8 @@ class JobControllerPanel(wx.ScrolledWindow):
 
         EVT_JOB_CONTROLLER(self,self.on_update)
         
+        self.Bind(wx.EVT_WINDOW_DESTROY,self.OnDestroy)
+        
         pub.subscribe(self.msg_start_job,"msg_start_job")
 
     def __del__(self):
@@ -195,6 +197,12 @@ class JobControllerPanel(wx.ScrolledWindow):
         self._jobsController.stop()
         while self._jobsController.is_alive():
             time.sleep(0.01)
+            
+    def OnDestroy(self,event):
+        
+        pub.subscribe(self.msg_start_job,"msg_start_job")
+        event.Skip()
+        
             
     def msg_start_job(self,message):
                 

@@ -274,6 +274,7 @@ class MolecularViewerPanel(ComponentPlugin):
                 
         self.clear_universe()
 
+        pub.unsubscribe(self.msg_set_selection, "msg_set_selection")
         pub.unsubscribe(self.msg_switch_viewers_state, "msg_switch_viewers_state")
         pub.unsubscribe(self.msg_clear_selection,'msg_clear_selection')                                
                 

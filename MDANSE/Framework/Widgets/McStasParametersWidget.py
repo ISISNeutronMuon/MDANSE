@@ -57,6 +57,12 @@ class McStasParametersWidget(IWidget):
          
         return self._sizer
   
+    def OnDestroy(self,event):
+        
+        pub.unsubscribe(self.msg_set_instrument, "msg_set_instrument")
+        
+        IWidget.OnDestroy(self, event)
+  
     def msg_set_instrument(self, message):
 
         widget, parameters = message

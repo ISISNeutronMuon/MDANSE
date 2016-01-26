@@ -60,11 +60,18 @@ class PluginsTreePanel(wx.Panel):
         self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_drag, self._tree)
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_double_click)
         
-        pub.subscribe(self.msg_set_plugins_tree, 'msg_set_plugins_tree')  
+        pub.subscribe(self.msg_set_plugins_tree, 'msg_set_plugins_tree')
+        
+        self.Bind(wx.EVT_WINDOW_DESTROY,self.OnDestroy)
         
     @property
     def tree(self):
         return self._tree
+
+    def OnDestroy(self,event):
+        
+        pub.subscribe(self.msg_set_plugins_tree, 'msg_set_plugins_tree')
+        event.Skip()
 
     def build_panel(self):
         

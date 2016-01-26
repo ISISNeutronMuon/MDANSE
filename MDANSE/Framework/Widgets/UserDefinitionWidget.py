@@ -87,7 +87,12 @@ class UserDefinitionWidget(IWidget):
         self.Bind(wx.EVT_BUTTON, self.on_new_definition, newUD)
 
         return sizer
-    
+
+    def OnDestroy(self,event):
+        
+        pub.unsubscribe(self.msg_set_ud, 'msg_set_ud')
+        IWidget.OnDestroy(self,event)
+        
     def on_view_definition(self,event):
         
         viewUD = event.GetEventObject()

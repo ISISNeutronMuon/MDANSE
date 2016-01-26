@@ -55,6 +55,8 @@ class DataTreePanel(wx.Panel):
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_double_click_data)
         self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_drag_data)
         self.Bind(wx.EVT_TREE_KEY_DOWN, self.on_delete_data, self._tree)
+        
+        self.Bind(wx.EVT_WINDOW_DESTROY,self.OnDestroy)
 
         pub.subscribe(self.msg_load_input_data, 'msg_load_input_data')       
         pub.subscribe(self.msg_delete_input_data, 'msg_delete_input_data')       
@@ -62,6 +64,12 @@ class DataTreePanel(wx.Panel):
     @property
     def tree(self):
         return self._tree
+    
+    def OnDestroy(self,event):
+        
+        pub.unsubscribe(self.msg_load_input_data, 'msg_load_input_data')       
+        pub.unsubscribe(self.msg_delete_input_data, 'msg_delete_input_data')       
+        event.Skip()
     
     def msg_load_input_data(self, data):
         
