@@ -134,10 +134,9 @@ class FieldFile(dict):
                             while 1:
                                 if ELEMENTS.has_element(element):
                                     break
-                                element = sitnam[:-1]
+                                element = element[:-1]
                                 if not element:
-                                    element = sitnam
-                                    break
+                                    raise FieldFileError("Could not define any element from %r" % sitnam)
                                               
                         try:
                             nrept = int(vals[2])
