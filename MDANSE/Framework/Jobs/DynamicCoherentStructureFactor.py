@@ -88,25 +88,25 @@ class DynamicCoherentStructureFactor(IJob):
         
         self._instrResolution = self.configuration["instrument_resolution"]
         
-        self._nFrequencies = self._instrResolution['n_frequencies']
+        self._nOmegas = self._instrResolution['n_omegas']
 
         self._outputData.add("q","line",self.configuration["q_vectors"]["shells"], units="inv_nm") 
 
         self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
-        self._outputData.add("time_window","line", self._instrResolution["time_window"], axis="time", units="au") 
+        self._outputData.add("time_window","line", self._instrResolution["time_window"], units="au") 
 
-        self._outputData.add("frequency","line", self._instrResolution["frequencies"], units='THz')
-        self._outputData.add("frequency_window","line", self._instrResolution["frequency_window"], axis="frequency", units="au") 
+        self._outputData.add("omega","line", self._instrResolution["omega"], units='rad/ps')
+        self._outputData.add("omega_window","line", self._instrResolution["omega_window"], axis="omega", units="au") 
                                 
         self._elementsPairs = sorted(itertools.combinations_with_replacement(self.configuration['atom_selection']['unique_names'],2))
         self._indexesPerElement = self.configuration['atom_selection'].get_indexes()
 
         for pair in self._elementsPairs:
-            self._outputData.add("f(q,t)_%s%s" % pair,"surface", (nQShells,self._nFrames),axis="q|time"     , units="au")                                                 
-            self._outputData.add("s(q,f)_%s%s" % pair,"surface", (nQShells,self._nFrequencies), axis="q|frequency", units="nm2/ps") 
+            self._outputData.add("f(q,t)_%s%s" % pair,"surface", (nQShells,self._nFrames),axis="q|time", units="au")                                                 
+            self._outputData.add("s(q,f)_%s%s" % pair,"surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps") 
 
         self._outputData.add("f(q,t)_total","surface", (nQShells,self._nFrames), axis="q|time", units="au")                                                 
-        self._outputData.add("s(q,f)_total","surface", (nQShells,self._nFrequencies), axis="q|frequency", units="nm2/ps") 
+        self._outputData.add("s(q,f)_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps") 
  
     def run_step(self, index):
         """
@@ -176,7 +176,7 @@ class DynamicCoherentStructureFactor(IJob):
             self._outputData["s(q,f)_%s%s" % pair][:] = get_spectrum(self._outputData["f(q,t)_%s%s" % pair],
                                                                      self.configuration["instrument_resolution"]["time_window"],
                                                                      self.configuration["instrument_resolution"]["time_step"],
-                                                                     axis=1)        
+                                                                     axis=1)
         
         fqtTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,2,"f(q,t)_%s%s")
 

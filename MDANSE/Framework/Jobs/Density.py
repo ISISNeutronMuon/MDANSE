@@ -67,11 +67,11 @@ class Density(IJob):
         self._symbols = sorted_atoms(self.configuration['trajectory']['instance'].universe,"symbol")
 
         # Will store the time.
-        self._outputData.add("times","line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
 
-        self._outputData.add("mass_density","line", (self._nFrames,), units='g/cm3')
+        self._outputData.add("mass_density","line", (self._nFrames,), axis='time', units='g/cm3')
 
-        self._outputData.add("atomic_density","line", (self._nFrames,), units='1/cm3')
+        self._outputData.add("atomic_density","line", (self._nFrames,), axis='time', units='1/cm3')
 
         if not self.configuration['trajectory']['instance'].universe.is_periodic:
             raise JobError("Pair distribution function cannot be calculated for infinite universe trajectories")

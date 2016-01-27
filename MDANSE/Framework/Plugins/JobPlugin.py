@@ -184,6 +184,6 @@ if __name__ == "__main__":
     filename = os.path.join(os.path.dirname(PLATFORM.package_directory()),'Data','Trajectories','MMTK','protein_in_periodic_universe.nc')
     
     app = wx.App(False)
-    f = JobFrame(None,'msd',filename)
+    f = JobFrame(None,'dl_poly',filename)
     f.Show()
     app.MainLoop()            

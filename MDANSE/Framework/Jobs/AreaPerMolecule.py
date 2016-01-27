@@ -82,9 +82,9 @@ class AreaPerMolecule(IJob):
         if self._nMolecules == 0:
             raise AreaPerMoleculeError("No molecule matches %r name." % self.configuration["name"]["value"])
 
-        self._outputData.add("times", "line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time", "line", self.configuration['frames']['time'], units='ps')
 
-        self._outputData.add("area_per_molecule", "line", (self.configuration['frames']['number'],), axis="times", units="1/nm2")
+        self._outputData.add("area_per_molecule", "line", (self.configuration['frames']['number'],), axis="time", units="1/nm2")
                                          
     def run_step(self, index):
         """

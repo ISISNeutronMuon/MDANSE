@@ -44,9 +44,10 @@ class IdealInstrumentResolution(IInstrumentResolution):
     
     settings = collections.OrderedDict()
 
-    def set_kernel(self, frequencies, dt):
+    def set_kernel(self, omegas, dt):
                 
-        self._frequencyWindow = numpy.zeros(len(frequencies), dtype=numpy.float64)
-        self._frequencyWindow[len(frequencies)/2] = 1.0
+        nOmegas = len(omegas)
+        self._omegaWindow = numpy.zeros(nOmegas, dtype=numpy.float64)
+        self._omegaWindow[nOmegas/2] = 1.0
 
-        self._timeWindow = numpy.ones(len(frequencies), dtype=numpy.float64)
+        self._timeWindow = numpy.ones(nOmegas, dtype=numpy.float64)

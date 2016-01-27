@@ -33,7 +33,7 @@ Created on Mar 30, 2015
 import numpy
 
 from MDANSE import REGISTRY
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 class InstrumentResolutionConfigurator(IConfigurator):
     """
@@ -43,7 +43,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
     of states) when performing the fourier transform of its time-dependant counterpart. This allow to 
     convolute of the signal with a resolution function to have a better match with experimental spectrum.
     
-    In MDANSE, the instrument resolution are defined in frequency (energy) space and are internally 
+    In MDANSE, the instrument resolution are defined in omegas space and are internally 
     inverse-fourier-transformed to get a time-dependant version. This time-dependant resolution function will then 
     be multiplied by the time-dependant signal to get the resolution effect according to the Fourier Transform theorem:
     
@@ -83,11 +83,10 @@ class InstrumentResolutionConfigurator(IConfigurator):
         self._timeStep = framesCfg['time'][1] - framesCfg['time'][0]
         self['time_step'] = self._timeStep
                 
-        self["frequencies"] = numpy.fft.fftshift(numpy.fft.fftfreq(2*self["n_frames"]-1,self["time_step"]))
-        
-        df = round(self["frequencies"][1] - self["frequencies"][0],3)
-        
-        self["n_frequencies"] = len(self["frequencies"])
+        # We compute angular frequency AND NOT ORDINARY FREQUENCY ANYMORE
+        self["omega"] = 2.0*numpy.pi*numpy.fft.fftshift(numpy.fft.fftfreq(2*self["n_frames"]-1,self["time_step"]))
+                
+        self["n_omegas"] = len(self["omega"])
 
         kernel, parameters = value
                 
@@ -97,21 +96,11 @@ class InstrumentResolutionConfigurator(IConfigurator):
         
         resolution.setup(parameters)
         
-        resolution.set_kernel(self["frequencies"], self["time_step"])
-
-        dmax = resolution.timeWindow.max()-1
-        
-        if dmax > 0.1:
-            raise ConfiguratorError('''the resolution function is too sharp for the available frequency step. 
-You can change your resolution function settings to make it broader or use "ideal" kernel if you do not want to smooth your signal.
-For a gaussian resolution function, this would correspond to a sigma at least equal to the frequency step (%s)''' % df,self)
-        elif dmax < -0.1:
-            raise ConfiguratorError('''the resolution function is too broad.
-You should change your resolution function settings to make it sharper.''',self)
+        resolution.set_kernel(self["omega"], self["time_step"])
             
-        self["frequency_window"] = resolution.frequencyWindow
+        self["omega_window"] = resolution.omegaWindow
 
-        self["time_window"] = resolution.timeWindow
+        self["time_window"] = resolution.timeWindow.real
         
         self["kernel"] = kernel
         self["parameters"] = parameters

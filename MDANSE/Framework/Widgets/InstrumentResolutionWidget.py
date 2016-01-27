@@ -54,7 +54,7 @@ class InstrumentResolutionDialog(wx.Dialog):
         
         self._timeStep = timeStep
         
-        self._frequencies = numpy.fft.fftshift(numpy.fft.fftfreq(self._nSteps, self._timeStep))
+        self._omegas = 2.0*numpy.pi*numpy.fft.fftshift(numpy.fft.fftfreq(self._nSteps,timeStep))
                 
         self._currentKernel = None
                           
@@ -111,6 +111,8 @@ class InstrumentResolutionDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.on_ok, self._ok)
         self.Bind(wx.EVT_CHOICE, self.on_select_kernel, self._kernelChoice)
         self.Bind(wx.EVT_CLOSE, self.on_cancel)
+        
+        self.on_plot_kernel()
                         
     @property
     def value(self):
@@ -132,7 +134,7 @@ class InstrumentResolutionDialog(wx.Dialog):
         
         self.Destroy()
         
-    def on_plot_kernel(self, event):
+    def on_plot_kernel(self, event=None):
         
         if not self._parametersPanel.validate():
             return
@@ -143,19 +145,21 @@ class InstrumentResolutionDialog(wx.Dialog):
         
         resolution.setup(self._parametersPanel.get_value())
         
-        resolution.set_kernel(self._frequencies, self._timeStep)
+        resolution.set_kernel(self._omegas, self._timeStep)
         
         self._axis.clear()
                                 
-        self._axis.plot(self._frequencies, resolution.frequencyWindow)
-        self._axis.set_xlabel("frequency (THz)")
+        self._axis.plot(self._omegas, resolution.omegaWindow)
+        self._axis.set_xlabel("omega (rad/ps)")
         self._axis.set_ylabel("instrument resolution (a.u)")
 
         self._canvas.draw()
 
     def on_select_kernel(self, event):
-                        
+                                
         self.select_kernel(event.GetString())
+        
+        self.on_plot_kernel()
         
     def select_kernel(self, kernelName):
                 

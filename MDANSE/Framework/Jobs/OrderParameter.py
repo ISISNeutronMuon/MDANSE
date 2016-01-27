@@ -100,7 +100,7 @@ class OrderParameter(IJob):
         
         self.numberOfSteps = self._nAxis
 
-        self._outputData.add("times","line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
 
         self._outputData.add("axis_index","line", numpy.arange(self.configuration['axis_selection']['n_values']), units='au')
                         
@@ -117,13 +117,13 @@ class OrderParameter(IJob):
         else:
             self._doRotation = True
 
-        self._outputData.add('p1',"line", (self._nFrames,), axis='times', units="au") 
-        self._outputData.add('p2',"line", (self._nFrames,), axis='times', units="au") 
-        self._outputData.add('s2',"line", (self._nAxis,), axis='times', units="au") 
+        self._outputData.add('p1',"line", (self._nFrames,), axis='time', units="au") 
+        self._outputData.add('p2',"line", (self._nFrames,), axis='time', units="au") 
+        self._outputData.add('s2',"line", (self._nAxis,), axis='time', units="au") 
             
         if self.configuration['per_axis']['value']:
-            self._outputData.add('p1_per_axis',"surface", (self._nAxis,self._nFrames), axis='axis_index|times', units="au") 
-            self._outputData.add('p2_per_axis',"surface", (self._nAxis,self._nFrames), axis='axis_index|times', units="au") 
+            self._outputData.add('p1_per_axis',"surface", (self._nAxis,self._nFrames), axis='axis_index|time', units="au") 
+            self._outputData.add('p2_per_axis',"surface", (self._nAxis,self._nFrames), axis='axis_index|time', units="au") 
 
     def run_step(self, index):
         """

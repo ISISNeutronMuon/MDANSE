@@ -79,11 +79,11 @@ class McStasVirtualInstrument(IJob):
     settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['sample_coh'] = ('netcdf_input_file', {"widget":'input_file',
                                                     "label":'MDANSE Coherent Structure Factor',
-                                                    "variables":['q','frequency','s(q,f)_total'],
+                                                    "variables":['q','omega','s(q,f)_total'],
                                                     'default' : os.path.join('..','..','..','Data','NetCDF','dcsf_prot.nc')})
     settings['sample_inc'] = ('netcdf_input_file', {"widget":'input_file',
                                                     "label":'MDANSE Incoherent Structure Factor',
-                                                    "variables" :['q','frequency','s(q,f)_total'],
+                                                    "variables" :['q','omega','s(q,f)_total'],
                                                     'default':os.path.join('..','..','..','Data','NetCDF','disf_prot.nc')})
     settings['temperature'] = ('float', {"default":298.0})
     settings['display'] = ('boolean', {'label':'trace the 3D view of the simulation'})

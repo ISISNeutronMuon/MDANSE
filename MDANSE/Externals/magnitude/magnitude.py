@@ -342,9 +342,9 @@ def _numberp(n):  ## Python has to have a decent way to do this!
             isinstance(n, types.LongType))
 
 class Magnitude:
-    def __init__(self, val, m=0, s=0, K=0, kg=0, A=0, mol=0, cd=0, dollar=0, b=0):
+    def __init__(self, val, m=0, s=0, K=0, kg=0, A=0, mol=0, cd=0, dollar=0, b=0, rad=0):
         self.val = val
-        self.unit = [m, s, K, kg, A, mol, cd, dollar, b]
+        self.unit = [m, s, K, kg, A, mol, cd, dollar, b, rad]
         self.out_unit = None
         self.out_factor = None
         self.oprec = None
@@ -1059,10 +1059,11 @@ def _init_mags():
     new_mag('$', Magnitude(1.0, dollar=1))
     new_mag('dollar', Magnitude(1.0, dollar=1))
     new_mag('b', Magnitude(1.0, b=1))           # bit
+    new_mag('rad', Magnitude(1.0, rad=1))           # bit
 
     # Magnitudes for derived SI units
     new_mag('B', Magnitude(8.0, b=1))
-    new_mag('rad', Magnitude(1.0))  # radian
+#    new_mag('rad', Magnitude(1.0))  # radian
     new_mag('sr', Magnitude(1.0))  # steradian
     new_mag('Hz', Magnitude(1.0, s=-1))  # hertz
     new_mag('g', Magnitude(1e-3, kg=1))  # gram
@@ -1134,33 +1135,47 @@ def _init_mags():
     new_mag('J_per_mole', Magnitude(1.66055927e-24, m=2, kg=1, s=-2))    
     new_mag('eV', Magnitude(1.60217649e-19, m=2, kg=1, s=-2))
     new_mag('Ha', Magnitude(4.35974394e-18, m=2, kg=1, s=-2))
-    
-    # Eric - frequency
-    new_mag('rad_inv_s', Magnitude(2.0*math.pi, s=-1))
-    
+        
     # Energy equivalent
-    new_mag('inv_m_eq', Magnitude(1.9864455e-25, m=2, kg=1, s=-2))
-    new_mag('Hz_eq', Magnitude(6.62606896e-34, m=2, kg=1, s=-2))
-    new_mag('K_eq', Magnitude(1.3806504e-23, m=2, kg=1, s=-2))
-    new_mag('u_eq', Magnitude(1.49241783e-10, m=2, kg=1, s=-2))
+    new_mag('1/m_eq', Magnitude(1.9864455e-25, m=2, kg=1, s=-2))
+    new_mag('hnu', Magnitude(6.62606896e-34, m=2, kg=1, s=-2))
+    new_mag('T(energy)', Magnitude(1.3806504e-23, m=2, kg=1, s=-2))
+    new_mag('m(energy)', Magnitude(1.49241783e-10, m=2, kg=1, s=-2))
+
+    new_mag('h', Magnitude(6.62607004e-34,m=2,kg=1,s=-1))
+    new_mag('hbar', Magnitude(6.62607004e-34/2.0/math.pi,m=2,kg=1,s=-1,rad=-1))
 
     # Frequency equivalent
-    new_mag('J_eq', Magnitude(1.50919045e+33, s=-1))
-    new_mag('eV_eq', Magnitude(2.41798945e+14, s=-1))
+    new_mag('J(freq)', Magnitude(1.50919045e+33, s=-1))
+    new_mag('eV(freq)', Magnitude(2.41798945e+14, s=-1))
 
     # Eric - inverse of distance
-    new_mag('inv_m', Magnitude(1.0, m=-1, kg=0, s=0))
-    new_mag('inv_m', Magnitude(1.0, m=-1, kg=0, s=0))
-    new_mag('inv_um', Magnitude(1.0e6, m=-1, kg=0, s=0))
-    new_mag('inv_nm', Magnitude(1.0e9, m=-1, kg=0, s=0))
-    new_mag('inv_ang', Magnitude(1.0e10, m=-1, kg=0, s=0))
+#    new_mag('1/m', Magnitude(1.0, m=-1, kg=0, s=0))
+#    new_mag('inv_cm', Magnitude(1.0e2, m=-1, kg=0, s=0))
+#    new_mag('inv_um', Magnitude(1.0e6, m=-1, kg=0, s=0))
+#    new_mag('inv_nm', Magnitude(1.0e9, m=-1, kg=0, s=0))
+#    new_mag('inv_ang', Magnitude(1.0e10, m=-1, kg=0, s=0))
+
+    new_mag('cyc', Magnitude(2.0*math.pi,rad=1))
     
     new_mag('au', Magnitude(1.0))
     new_mag('wu', Magnitude(1.0))
     new_mag('unitless', Magnitude(1.0))
     new_mag('no-unit', Magnitude(1.0))
 
+    # Eric - frequency
+#    new_mag('rad_inv_s', Magnitude(1.0, s=-1))
+#    new_mag('rad_inv_ps', Magnitude(1.0e12, s=-1))
+
 
 if not MAGS:
     _init_mags()
+
+if __name__ == "__main__":
+    print mg(1.0,'h THz','meV')
+    print mg(1.0,'meV/h','THz')
+    print mg(1.0,'hbar rad/ps','meV')
+    print mg(1.0,'cyc THz','rad/ps')
+    print mg(1.0,'rad/ps',' cyc THz')
+    print mg(1.0,'rad/ps',' cyc meV(freq)')
     

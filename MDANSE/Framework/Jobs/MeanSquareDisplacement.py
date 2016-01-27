@@ -90,11 +90,11 @@ class MeanSquareDisplacement(IJob):
         self.numberOfSteps = self.configuration['atom_selection']['selection_length']
                         
         # Will store the time.
-        self._outputData.add("times", "line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time", "line", self.configuration['frames']['time'], units='ps')
                         
         # Will store the mean square displacement evolution.
         for element in self.configuration['atom_selection']['unique_names']:
-            self._outputData.add("msd_%s" % element, "line", (self.configuration['frames']['number'],), axis="times", units="nm2") 
+            self._outputData.add("msd_%s" % element, "line", (self.configuration['frames']['number'],), axis="time", units="nm2") 
 
     def run_step(self, index):
         """
@@ -152,7 +152,7 @@ class MeanSquareDisplacement(IJob):
         weights = self.configuration["weights"].get_weights()
         msdTotal = weight(weights,self._outputData,nAtomsPerElement,1,"msd_%s")
         
-        self._outputData.add("msd_total", "line", msdTotal, axis="times", units="nm2") 
+        self._outputData.add("msd_total", "line", msdTotal, axis="time", units="nm2") 
         
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         

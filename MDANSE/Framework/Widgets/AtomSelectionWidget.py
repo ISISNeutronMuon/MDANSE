@@ -61,7 +61,7 @@ class AtomSelectionWidget(UserDefinitionWidget):
         panel.SetSizer(sizer)
         
         self._sizer.Add(panel, 1, wx.ALL|wx.ALIGN_RIGHT, 5)
-
+        
         self._choices = []
 
         pub.subscribe(self.msg_set_ud, "msg_set_ud")
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     
     app = wx.App(False)
     
-    p = UserDefinitionDialog(None,t,'atom_selection')
+    p = UserDefinitionDialog(None,t,'q_vectors')
         
     p.SetSize((800,800))
             

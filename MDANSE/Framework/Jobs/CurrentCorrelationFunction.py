@@ -82,13 +82,15 @@ class CurrentCorrelationFunction(IJob):
         
         self._instrResolution = self.configuration["instrument_resolution"]
         
-        self._nFrequencies = self._instrResolution['n_frequencies']
+        self._nOmegas = self._instrResolution['n_omegas']
                 
         self._outputData.add("q","line", numpy.array(self.configuration["q_vectors"]["shells"]), units="inv_nm") 
 
-        self._outputData.add("times","line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time_window","line", self._instrResolution["time_window"], units="au") 
 
-        self._outputData.add("frequency","line", self._instrResolution["frequencies"],units='THz')
+        self._outputData.add("omega","line", self._instrResolution["omega"],units='rad/ps')
+        self._outputData.add("omega_window","line", self._instrResolution["omega_window"], axis="omega", units="au") 
 
         self._elements = self.configuration['atom_selection']['unique_names']
         self._elementsPairs = sorted(itertools.combinations_with_replacement(self._elements,2))
@@ -96,15 +98,15 @@ class CurrentCorrelationFunction(IJob):
         self._indexesPerElement = self.configuration['atom_selection'].get_indexes()
 
         for pair in self._elementsPairs:
-            self._outputData.add("j(q,t)_long_%s%s"  % pair,"surface", (nQShells,self._nFrames), axis="q|times", units="au")                                                 
-            self._outputData.add("j(q,t)_trans_%s%s" % pair,"surface", (nQShells,self._nFrames), axis="q|times", units="au")                                                 
-            self._outputData.add("J(q,f)_long_%s%s"  % pair,"surface", (nQShells,self._nFrequencies), axis="q|frequency", units="au") 
-            self._outputData.add("J(q,f)_trans_%s%s" % pair,"surface", (nQShells,self._nFrequencies), axis="q|frequency", units="au") 
+            self._outputData.add("j(q,t)_long_%s%s"  % pair,"surface", (nQShells,self._nFrames), axis="q|time", units="au")                                                 
+            self._outputData.add("j(q,t)_trans_%s%s" % pair,"surface", (nQShells,self._nFrames), axis="q|time", units="au")                                                 
+            self._outputData.add("J(q,f)_long_%s%s"  % pair,"surface", (nQShells,self._nOmegas), axis="q|omega", units="au") 
+            self._outputData.add("J(q,f)_trans_%s%s" % pair,"surface", (nQShells,self._nOmegas), axis="q|omega", units="au") 
 
-        self._outputData.add("j(q,t)_long_total","surface", (nQShells,self._nFrames), axis="q|times"    , units="au")                                                 
-        self._outputData.add("J(q,f)_long_total","surface", (nQShells,self._nFrequencies), axis="q|frequency", units="au") 
-        self._outputData.add("j(q,t)_trans_total","surface", (nQShells,self._nFrames), axis="q|times"    , units="au")                                                 
-        self._outputData.add("J(q,f)_trans_total","surface", (nQShells,self._nFrequencies), axis="q|frequency", units="au") 
+        self._outputData.add("j(q,t)_long_total","surface", (nQShells,self._nFrames), axis="q|time"    , units="au")                                                 
+        self._outputData.add("J(q,f)_long_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="au") 
+        self._outputData.add("j(q,t)_trans_total","surface", (nQShells,self._nFrames), axis="q|time"    , units="au")                                                 
+        self._outputData.add("J(q,f)_trans_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="au") 
          
     def run_step(self, index):
         """

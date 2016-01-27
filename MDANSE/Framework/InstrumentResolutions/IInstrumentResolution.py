@@ -49,21 +49,21 @@ class IInstrumentResolution(Configurable):
         
         Configurable.__init__(self)
                         
-        self._frequencyWindow = None
+        self._omegaWindow = None
 
         self._timeWindow = None
         
     @abc.abstractmethod
-    def set_kernel(self, frequencies, dt):
+    def set_kernel(self, omegas, dt):
         pass    
     
     @property
-    def frequencyWindow(self):
+    def omegaWindow(self):
         
-        if self._frequencyWindow is None:
-            raise InstrumentResolutionError("Undefined frequency window")
+        if self._omegaWindow is None:
+            raise InstrumentResolutionError("Undefined omega window")
         
-        return self._frequencyWindow
+        return self._omegaWindow
 
     @property
     def timeWindow(self):

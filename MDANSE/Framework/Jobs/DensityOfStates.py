@@ -77,14 +77,14 @@ class DensityOfStates(IJob):
         self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
         self._outputData.add("time_window","line", instrResolution["time_window"], axis="time", units="au") 
 
-        self._outputData.add("frequency","line", instrResolution["frequencies"], units='THz')
-        self._outputData.add("frequency_window","line", instrResolution["frequency_window"], axis="frequency", units="au") 
+        self._outputData.add("omega","line", instrResolution["omega"], units='rad/ps')
+        self._outputData.add("omega_window","line", instrResolution["omega_window"], axis="omega", units="au") 
             
         for element in self.configuration['atom_selection']['unique_names']:
             self._outputData.add("vacf_%s" % element,"line", (self.configuration['frames']['number'],), axis="time", units="nm2/ps2") 
-            self._outputData.add("dos_%s" % element,"line", (instrResolution['n_frequencies'],), axis="frequency", units="nm2/ps") 
+            self._outputData.add("dos_%s" % element,"line", (instrResolution['n_omegas'],), axis="omega", units="nm2/ps") 
         self._outputData.add("vacf_total","line", (self.configuration['frames']['number'],), axis="time", units="nm2/ps2")         
-        self._outputData.add("dos_total","line", (instrResolution['n_frequencies'],), axis="frequency", units="nm2/ps")        
+        self._outputData.add("dos_total","line", (instrResolution['n_omegas'],), axis="omega", units="nm2/ps")        
         
     def run_step(self, index):
         """
