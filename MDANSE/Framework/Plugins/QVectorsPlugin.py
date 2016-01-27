@@ -179,7 +179,6 @@ class QVectorsPlugin(UserDefinitionPlugin):
         self._availableGenerators = wx.Choice(self._mainPanel, wx.ID_ANY)
         generateButton  = wx.Button(self._mainPanel, wx.ID_ANY, label="Generate")
         sbSizer1.Add(self._availableGenerators, 1, wx.ALL|wx.EXPAND, 5)        
-        sbSizer1.Add(generateButton, 1, wx.ALL|wx.EXPAND, 5)        
         sizer.Add(sbSizer1, 0, wx.ALL|wx.EXPAND, 5)
     
         # Widgets and sizers related to parameters section        
@@ -191,6 +190,8 @@ class QVectorsPlugin(UserDefinitionPlugin):
 
         sizer.Add(self._notebook, 3, wx.ALL|wx.EXPAND, 5)
                  
+        sizer.Add(generateButton, 0, wx.ALL|wx.EXPAND, 5)
+
         self._mainPanel.SetSizer(sizer)
 
         self._mgr.AddPane(self._mainPanel, wxaui.AuiPaneInfo().DestroyOnClose().Center().Dock().CaptionVisible(False).CloseButton(False).BestSize(self.GetSize()))
@@ -202,7 +203,7 @@ class QVectorsPlugin(UserDefinitionPlugin):
 
     def plug(self):
         
-        self.parent.mgr.GetPane(self).Float().Dockable(False).CloseButton(True).BestSize((600,600))
+        self.parent.mgr.GetPane(self).Float().Dockable(False).CloseButton(True).BestSize((600,800))
         
         self.parent.mgr.Update()
         
