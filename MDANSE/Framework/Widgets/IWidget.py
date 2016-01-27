@@ -97,6 +97,8 @@ class IWidget(wx.Panel):
         self._staticBoxSizer.Add(self._widgetPanel, 1, wx.ALL|wx.EXPAND, 0)
         
         self.SetSizer(self._staticBoxSizer)
+        
+        self._widgetPanel.GrandParent.Refresh()
                 
     def get_value(self):
         
