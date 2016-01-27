@@ -18,7 +18,7 @@ class TestDISF(UnitTest):
         parameters['q_vectors'] = ('spherical_lattice', {'width': 0.1, 'n_vectors': 50, 'shells': (0.1, 5, 0.1)})
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
-        parameters['weights'] = 'b_incoherent'
+        parameters['weights'] = 'b_incoherent2'
         job = REGISTRY['job']['disf']()
         self.assertNotRaises(job.run, parameters, status=False)
 

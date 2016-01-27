@@ -18,7 +18,7 @@ class TestGDISF(UnitTest):
         parameters['q_shells'] = (0, 10, 1)
         parameters['running_mode'] = ('monoprocessor', 1)
         parameters['trajectory'] = '../../../Data/Trajectories/MMTK/waterbox_in_periodic_universe.nc'
-        parameters['weights'] = 'b_incoherent'
+        parameters['weights'] = 'b_incoherent2'
         job = REGISTRY['job']['gdisf']()
         self.assertNotRaises(job.run, parameters, status=False)
 
