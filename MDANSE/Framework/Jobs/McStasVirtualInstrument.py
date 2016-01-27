@@ -48,9 +48,9 @@ from MDANSE.Externals.magnitude import magnitude
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
-MCSTAS_UNITS_LUT = {'THz': magnitude.mg(1,"THz","meV_eq").toval(), 
+MCSTAS_UNITS_LUT = {'THz': magnitude.mg(1,"THz","meV(freq)").toval(), 
                     'nm**2' : magnitude.mg(1,"nm2","b").toval(),
-                    'inv_nm' : magnitude.mg(1,"inv_nm","inv_ang").toval()
+                    'inv_nm' : magnitude.mg(1,"1/nm","1/ang").toval()
                     } 
 
 class McStasError(Error):
@@ -79,11 +79,11 @@ class McStasVirtualInstrument(IJob):
     settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['sample_coh'] = ('netcdf_input_file', {"widget":'input_file',
                                                     "label":'MDANSE Coherent Structure Factor',
-                                                    "variables":['q','omega','s(q,f)_total'],
+                                                    "variables":['q','frequency','s(q,f)_total'],
                                                     'default' : os.path.join('..','..','..','Data','NetCDF','dcsf_prot.nc')})
     settings['sample_inc'] = ('netcdf_input_file', {"widget":'input_file',
                                                     "label":'MDANSE Incoherent Structure Factor',
-                                                    "variables" :['q','omega','s(q,f)_total'],
+                                                    "variables" :['q','frequency','s(q,f)_total'],
                                                     'default':os.path.join('..','..','..','Data','NetCDF','disf_prot.nc')})
     settings['temperature'] = ('float', {"default":298.0})
     settings['display'] = ('boolean', {'label':'trace the 3D view of the simulation'})
@@ -170,13 +170,13 @@ class McStasVirtualInstrument(IJob):
         cmdLine.append(sqwInput)
         cmdLine.append(trace)
         cmdLine.extend(parameters)
-
+        
         s = subprocess.Popen(" ".join(cmdLine), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
         out,_ = s.communicate()
         
         for line in out.splitlines():
             if "ERROR" in line:
-                raise McStasError("An error occured during McStas run: %s" % line)
+                raise McStasError("An error occured during McStas run: %s" % out)
                 
         with open(os.path.join(self.configuration["options"]["mcstas_output_directory"],"mcstas_mdanse.mvi"),"w") as f:
             f.write(out)
