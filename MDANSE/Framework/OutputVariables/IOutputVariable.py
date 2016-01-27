@@ -66,7 +66,7 @@ class IOutputVariable(numpy.ndarray):
     
     type = "output_variable"
         
-    def __new__(cls, value, name, axis=(), units="unitless"):
+    def __new__(cls, value, name, axis='index', units="unitless"):
         '''
         Instanciate a new MDANSE output variable.
                 
