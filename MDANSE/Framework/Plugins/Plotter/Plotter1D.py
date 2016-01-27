@@ -269,15 +269,15 @@ class Plotter1D(wx.Panel):
     def export_data(self, event = None):
 
         first = True
-        
+                        
         for v in self.plots.values():
            
             line, label, varname = v
             if first:
                 try:
                     axis = self.dataproxy[varname]['axis'][0]
-                    data = [self.dataproxy[axis]['data']]
-                    labels = ['%s (%s)'%(axis, self.dataproxy[axis]['units'])]
+                    data = [self.dataproxy[axis]['data']*self.Xunit_conversion_factor]
+                    labels = ['%s (%s)'%(axis, self.Xunit)]
                 except:
                     data = [numpy.arange(self.dataproxy[varname]['data'].shape[0])]
                     labels = ['default_axis (au)']
@@ -285,8 +285,8 @@ class Plotter1D(wx.Panel):
                     
             try:
                 line.get_xydata()
-                data.append(line.get_ydata())
-                labels.append('%s (%s)'%(label, self.dataproxy[varname]['units']))
+                data.append(line.get_ydata()*self.Yunit_conversion_factor)
+                labels.append('%s (%s)'%(label, self.Yunit))
             except:
                 raise Plotter1DError('encounter issue for variable %r while exporting data' % varname)
         header = '# '

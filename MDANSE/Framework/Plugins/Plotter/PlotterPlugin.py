@@ -138,9 +138,10 @@ class DataPanel(wx.Panel):
 
         self.datalist = wx.ListCtrl(self.setup, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
         self.datalist.InsertColumn(0, 'Variable', width=100)
-        self.datalist.InsertColumn(1, 'Unit', width=65)
-        self.datalist.InsertColumn(2, 'Axis', width=50)
-        self.datalist.InsertColumn(3, 'Dimension')
+#        self.datalist.InsertColumn(1, 'Unit', width=65)
+        self.datalist.InsertColumn(1, 'Axis', width=50)
+        self.datalist.InsertColumn(2, 'Dimension')
+        self.datalist.InsertColumn(3, 'Size')
         
         sizer1 =  wx.BoxSizer(wx.HORIZONTAL)
        
@@ -240,12 +241,11 @@ class DataPanel(wx.Panel):
         self.datalist.DeleteAllItems()
         for i, var in enumerate(sorted(self.dataproxy.keys())):
             self.datalist.InsertStringItem(i, var)
-            self.datalist.SetStringItem(i, 1,self.dataproxy[var]['units'])
+            #self.datalist.SetStringItem(i, 1,self.dataproxy[var]['units'])
             axis = ','.join(self.dataproxy[var]['axis'])
-            if not axis :
-                axis = 'None'
-            self.datalist.SetStringItem(i, 2,axis)
-            self.datalist.SetStringItem(i, 3,str(self.dataproxy[var]['data'].ndim))
+            self.datalist.SetStringItem(i, 1,axis)
+            self.datalist.SetStringItem(i, 2,str(self.dataproxy[var]['data'].ndim))
+            self.datalist.SetStringItem(i, 3,str(self.dataproxy[var]['data'].shape))
         self.datalist.Select(0, True)
             
     def on_select_variables(self, event = None):

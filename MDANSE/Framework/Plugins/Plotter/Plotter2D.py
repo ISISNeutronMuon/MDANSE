@@ -217,11 +217,11 @@ class Plotter2D(wx.Panel):
    
    
     def export_data(self, event = None):
-        header = '# Data         : %s\n# First row    : %s\n# First column : %s\n' % (self.varname,self.Xlabel,self.Ylabel)
+        header = '# Data         : %s\n# First row    : %s (%s)\n# First column : %s (%s)\n' % (self.varname,self.Xlabel,self.Xunit,self.Ylabel,self.Yunit)
         output_fname = self.get_output_filename()
         
-        x = numpy.concatenate(([0],self.Xaxis))
-        data = numpy.vstack((x,numpy.hstack((self.Yaxis[:,numpy.newaxis],self.data))))
+        x = numpy.concatenate(([0],self.Xaxis))*self.Xunit_conversion_factor
+        data = numpy.vstack((x,numpy.hstack((self.Yaxis[:,numpy.newaxis]*self.Yunit_conversion_factor,self.data))))
         if output_fname:
             with open(output_fname, 'w') as f:
                 f.write(header)
