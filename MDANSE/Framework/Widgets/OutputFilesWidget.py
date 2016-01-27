@@ -61,6 +61,9 @@ class OutputFilesWidget(IWidget):
 
         sizer.Add(hSizer, 0, wx.ALL|wx.EXPAND, 0)
 
+        if len(self._configurator.formats) == 1:
+            self._formats.Hide()
+
         return sizer
 
     def get_widget_value(self):
