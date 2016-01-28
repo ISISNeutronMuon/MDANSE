@@ -22,7 +22,7 @@ However, these packages primarly designed for producing with a high efficiency M
 in their functionality for analyzing these trajectories.
 
 In this article, we present MDANSE (Molecular Dynamics Analyzis for Neutron Scattering Experiments) a new 
-python interactive environment for analyzing molecular dynamics data dsigned to cover a wide 
+python interactive environment for analyzing molecular dynamics data designed to cover a wide 
 range of properties (e.g. dynamical, structural, scattering, thermodynamical) that can be accessed through the 
 post-processing of a molecular dynamics trajectory. MDANSE is especially suited to explore the structure and dynamics of 
 atomic or molecular systems in association with thermal neutron scattering experiments (TNS).
@@ -63,7 +63,7 @@ inspection reveals that all the time-critical parts of the algorithms use effici
 by extensions in MDANSE itself or other packages (e.g. NumPy and MMTK) together with a Python interface. 
 Moreover the use of a largely used programming language as python allows to open the application to many users in the scientific community.  
 
-This article describes MDANSE and annonce its first public realease. This software benefits from the experience gained through 
+This article describes MDANSE and announces its first public realease. This software benefits from the experience gained through 
 the development of nMoldyn and from the feedback of the neutron user community.
 The design of MDANSE have been motivated on this feedback which mainly targeted on the : (1) the lack for an interactive graphical environment 
 (2) the possibility to create new analysis.
@@ -72,12 +72,39 @@ multi-dimensional data. The 3D molecular viewer allows parts of the molecular sy
 context, MDANSE GUI can now be considered as an interactive graphical environment. The kernel of MDANSE has been designed to make easier the 
 development and the integration of the components necessary for implementing new analysis. 
 
+MDANSE has been implemented using the Oriented Object Programming (OOP) paradigm. The Framework consist in a set of interfaces defining the building 
+block necessary to write a new analysis (see table 1.). In order to allow any new concrete class derived from one of these interface to be automatically 
+recognized when launching MDANSE application, these base class are metaclassed and referenced into a tree like structure called Registry at import time. 
+Hence, each branch of this tree will store the classes that compose each of these interfaces.
+In this context the extension of any of these interface is possible by subclassing any of the registred class, and MDANSE will take in charge their automatic 
+registration at runtime.
+
+Table 1.]
+Todo build the table based on the registry
+nom | short description
+
+
+
+
+The possibility to visualize and interact with 3D graphics, from the input of data, going through the parameterization of analyses to the visualization 
+of results in an user friendly and integrated way is an important feature in MDANSE. It is easy to display a molecular trajectory, pick a set of atoms, or 
+interpret simply 2D or 3D resulting data as 3D representations.
+The interactive graphical environment is based on the concept of Plugin. A Plugin is a window, that can be draged and droped into another one allowing 
+to perform an action in the context of the parent Plugin. This builds a chain of Plugins whose first element is a Plugin storing the data itself which 
+has to be initialy droped on the main window. 
+A typical exemple of this concept is the animation of a molecular dynamics trajectory.
+the user will 1) load a trajectory 2) drag the corresponding Plugin to the main window 2) drag the molecular viewer Plugin into the data Plugin 
+3) drag the animation panel in the molecular viewer Plugin and start the animation. the Plugin base class is one of the registry interface, allowing the user 
+to seemlessly add its own plugins to the enviromment.
+
+
+
 3.1] An Interactive Graphical Environment
 One of the main features that MDANSE offers is the possibility to visualize and interact with 3D graphics. 
 Thanks to developments based on wxPython[ref] and the visualization toolkit libraries[ref], it is possible to display a molecular trajectory, 
 pick a set of atoms, or interpret simply 2D or 3D resulting data as 3D density plot, elevated surface, scalar field... 
 The MDANSE graphical environment allow to navigate interactively from the input of data, going through the parameterization of analyses 
-to the visualization of results in an user friendly and integrated way.  However, being a python package, MDANSE can also be accessed 
+to the visualization of results in an user friendly and integrated way. However, being a python package, MDANSE can also be accessed 
 through the command line interface.
 
 3.2]Working Environment
@@ -130,15 +157,6 @@ An elevation plot produced by MDANSE plotting tool.
 Figure 3.]
 An elevation plot produced by MDANSE plotting tool.
 
-3.5] An Extendable Framework
-MDANSE has been structured in such a way that user can extend easily most of the principal software components. Indeed, the MDANSE framework 
-is based on a set of interfaces for which each base class is metaclassed in order to provide the (automatic) self-registration into a tree like 
-structure called Registry at import time. Each branch of this tree will store the classes that compose each of these interfaces (e.g. Jobs, 
-Configurators, Plugins …) and will be built up only when it will be required in the course of the execution flow. 
-This object-oriented design provides some flexibility for any user that would like to extend any of these interfaces. 
-Indeed, he /she will just have to subclass any of their base class and MDANSE will take in charge their automatic registration at runtime. 
-This also allows, thanks to the introspection mechanism to transparently integrate in MDANSE the user made component derived from the base 
-classes identically as if they were built-in components. The figure 5 shows all the programming interfaces that are handled by the registry.
 
 Figure 5.]
 The MDANSE extendable components handled by the class registry. 
