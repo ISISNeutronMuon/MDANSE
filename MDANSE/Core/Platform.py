@@ -444,7 +444,7 @@ class PlatformPosix(Platform):
         '''        
     
         # Get all the active processes using the Unix ps command
-        procs = subprocess.Popen(['ps', '-o', 'pid,etime'], stdout=subprocess.PIPE)
+        procs = subprocess.Popen(['ps', '-eo', 'pid,etime'], stdout=subprocess.PIPE)
 
         # The output of the ps command is splitted according to line feeds.
         procs = procs.communicate()[0].split('\n')[1:]
