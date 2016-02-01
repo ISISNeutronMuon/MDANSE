@@ -86,4 +86,7 @@ class ProjectionConfigurator(IConfigurator):
         :rtype: str
         '''
         
-        return "Projection along %r axis:" % self["axis"] 
+        if self["axis"] is not None:        
+            return "No projection performed\n"
+        else: 
+            return "Projection along %r axis\n" % self["axis"]

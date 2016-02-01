@@ -149,11 +149,11 @@ class AtomSelectionConfigurator(IConfigurator):
         :rtype: str
         '''
 
-        if not self.has_key("n_selected_atoms"):
-            return "No configured yet"
+        if not self.has_key("selection_length"):
+            return "Not configured yet\n"
         
         info = []
-        info.append("Number of selected atoms:%d" % self["n_selected_atoms"])
-        info.append("Selected elements:%s" % self["contents"].keys())
+        info.append("Number of selected atoms:%d" % self["selection_length"])
+        info.append("Selected elements:%s" % self["unique_names"])
         
         return "\n".join(info)
