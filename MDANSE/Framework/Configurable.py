@@ -65,7 +65,7 @@ class Configurable(object):
                                      
         self._configured=False
         
-        self._info = ""
+        self._info = []
         
         if settings is not None:
             self.set_settings(settings)
@@ -157,7 +157,7 @@ class Configurable(object):
                     
                     self._configuration[name]=conf
                     
-                    self._info += conf.get_information()
+                    self._info.append(conf.get_information())
                                                             
                     configured.add(name)
                                         
@@ -179,7 +179,7 @@ class Configurable(object):
         if not self._info:
             return "No information available yet."
                     
-        return self._info
+        return "\n".join(self._info)
     
     @classmethod
     def build_doc(cls):

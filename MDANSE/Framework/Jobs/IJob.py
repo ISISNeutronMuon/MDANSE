@@ -78,7 +78,7 @@ class JobError(Error):
         if job._status is not None:
             job._status._state["state"] = "aborted"
             job._status._state['traceback'] = trace
-            job._status._state['info'] = job.info
+            job._status._state['info'] = str(job)
             job._status.update(force=True)
             
     def __str__(self):
@@ -425,8 +425,6 @@ class IJob(Configurable):
         try:
             
             self._name = IJob.define_unique_name()
-
-            self._info = 'Information about %s job.\n' % self._name
                                                         
             if status:
                 self._status = JobStatus(self)
@@ -434,12 +432,10 @@ class IJob(Configurable):
             self.setup(parameters)
                                     
             self.initialize()
-
-            self._info += str(self)
             
             if self._status is not None:
                 self._status.start(self.numberOfSteps,rate=0.1)
-                self._status.state['info'] = self._info
+                self._status.state['info'] = str(self)
                                         
             if getattr(self,'numberOfSteps', 0) <= 0:
                 raise JobError(self,"Invalid number of steps for job %s" % self._name)
