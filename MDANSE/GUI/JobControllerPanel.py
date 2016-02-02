@@ -98,7 +98,7 @@ class JobController(threading.Thread):
         
         while not self._stop.is_set():
             self.update()
-            self._stop.wait(2.0)
+            self._stop.wait(10.0)
 
     def stop(self):
         
