@@ -281,19 +281,22 @@ class JobControllerPanel(wx.ScrolledWindow):
 
             if registry.has_key(k):
                 continue
-                        
+                                    
             row,_ = self._gbSizer.GetItemPosition(v['name'])            
             for c in range(self._gbSizer.GetCols()):
                 w = self._gbSizer.FindItemAtPosition((row,c))
                 w.GetWindow().Destroy()
             del self._jobs[k]
-    
+        
             for r in range(row+1,self._gbSizer.GetRows()):
                 for i in range(self._gbSizer.GetCols()):
                     w = self._gbSizer.FindItemAtPosition((r,i))
+                    if w is None:
+                        continue
                     self._gbSizer.SetItemPosition(w.GetWindow(),(r-1,i))
 
         for jobName, jobStatus in registry.items():
+            
             if jobStatus["state"] == "aborted":
                     self._jobs[jobName]["name"].SetBackgroundColour(wx.RED)
                         
@@ -304,18 +307,18 @@ class JobControllerPanel(wx.ScrolledWindow):
                 self._jobs[jobName]['eta'].SetValue(jobStatus['eta'])
             else:
                 self._jobs[jobName] = {}
-                self._jobs[jobName]['name']     = wx.Button(self, wx.ID_ANY, style=wx.BU_EXACTFIT,label=jobStatus['name'])
-                self._jobs[jobName]['pid']      = intctrl.IntCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['pid'])
-                self._jobs[jobName]['start']    = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['start'])
-                self._jobs[jobName]['elapsed']  = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['elapsed'])
-                self._jobs[jobName]['state']    = wx.Button(self, wx.ID_ANY, style=wx.BU_EXACTFIT,label=jobStatus['state'])
+                self._jobs[jobName]['name'] = wx.Button(self, wx.ID_ANY, style=wx.BU_EXACTFIT,label=jobStatus['name'])
+                self._jobs[jobName]['pid'] = intctrl.IntCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['pid'])
+                self._jobs[jobName]['start'] = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['start'])
+                self._jobs[jobName]['elapsed'] = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['elapsed'])
+                self._jobs[jobName]['state'] = wx.Button(self, wx.ID_ANY, style=wx.BU_EXACTFIT,label=jobStatus['state'])
                 self._jobs[jobName]['progress'] = wx.Gauge(self, wx.ID_ANY,range=100)
                 self._jobs[jobName]['progress'].SetValue(jobStatus['progress'])
-                self._jobs[jobName]['eta']      = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['eta'])
-                self._jobs[jobName]['kill']     = wx.BitmapButton(self, wx.ID_ANY, ICONS["stop",16,16])
+                self._jobs[jobName]['eta'] = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.ALIGN_CENTER_HORIZONTAL,value=jobStatus['eta'])
+                self._jobs[jobName]['kill'] = wx.BitmapButton(self, wx.ID_ANY, ICONS["stop",16,16])
 
-                r = self._gbSizer.GetRows()
-        
+                r = len(self._jobs)
+                        
                 self._gbSizer.Add(self._jobs[jobName]['name']    ,pos=(r,0),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
                 self._gbSizer.Add(self._jobs[jobName]['pid']     ,pos=(r,1),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
                 self._gbSizer.Add(self._jobs[jobName]['start']   ,pos=(r,2),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
@@ -325,11 +328,11 @@ class JobControllerPanel(wx.ScrolledWindow):
                 self._gbSizer.Add(self._jobs[jobName]['eta']     ,pos=(r,6),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
                 self._gbSizer.Add(self._jobs[jobName]['kill']    ,pos=(r,7),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
                 
-            self._gbSizer.Layout()
-
             self.Bind(wx.EVT_BUTTON,self.on_display_info,self._jobs[jobName]['name'])
             self.Bind(wx.EVT_BUTTON,self.on_display_traceback,self._jobs[jobName]['state'])
             self.Bind(wx.EVT_BUTTON, self.on_kill_job,self._jobs[jobName]['kill'])
+
+        self._gbSizer.Layout()
                                                                                                     
 if __name__ == "__main__":
         
