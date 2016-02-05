@@ -63,8 +63,8 @@ class ClassRegistry(abc.ABCMeta):
         
     The data structure used to store the concrete classes is a nested dictionary whose primary key 
     is the :py:attr:`type` class attribute of the base class they are inheriting from and secondary key is 
-    their own :py:attr:`type` class attribute. Any concrete class of those interfaces that does not define the
-    :py:attr:`type` class attribute will not be registered.    
+    their own :py:attr:`type` class attribute. Any concrete class of those interfaces that does not define the :py:attr:`type` 
+    class attribute will not be registered.    
     '''
     
     __metaclass__ = _Meta

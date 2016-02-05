@@ -49,34 +49,53 @@ from MDANSE.GUI.Icons import ICONS
 from MDANSE.GUI.Events.JobControllerEvent import EVT_JOB_CONTROLLER, JobControllerEvent
         
 class JobController(threading.Thread):
+    '''
+    This class sets up the job controlling daemon that will regurlarly check for the status of running MDANSE jobs.
+    
+    The job controller run on a separate thread in order to non-block the main thread.
+    
+    When the thread is running, it will check every 10s the status of the MDANSE running jobs by looking at their 
+    corresponding temporary pickle files. It unpickles them and updates the :py:attr:`_runningJobs` dictionnary used to store
+    the information about each running jobs (state, progress, eta, name ...). That dictionnary is passed to the job 
+    controller panel widget using wx.PostEvent mechanism. In doing the job controller panel widget just has to bind 
+    to EVT_JOB_CONTROLLER and it will receive the updated version of :py:attr:`_runningJobs` dictionnary every time 
+    the :py:meth:run is called.     
+    '''
     
     __metaclass__ = Singleton
     
     def __init__(self, window, start=False):
+        '''
+        
+        :param window: the wx object that will be notify when job controller is updated
+        :type window: wx object
+        :param start: if True the job controller thread is started at __init__ stage.
+        :type start: bool
+        '''
         
         threading.Thread.__init__(self)
         
+        # The wx object related to this thread
         self._window = window
         
         self._stop = threading.Event()
                                 
-        self._registry = collections.OrderedDict()
-        
-        self._firstCheck = True
-        
-        self._init = True
+        self._runningJobs = collections.OrderedDict()
+                
+        # This variable is used to keep track whether or not it is the first run of the thread.
+        self._firstThreadRun = True
         
         if start:
             self.start()
         
     @property
-    def registry(self):
+    def runningJobs(self):
         
-        return self._registry
+        return self._runningJobs
 
     def kill_job(self, info):
                 
-        if self._registry.has_key(info["name"]):
+        if self._runningJobs.has_key(info["name"]):
 
             if info['state'] == 'running':
                 try:
@@ -84,7 +103,7 @@ class JobController(threading.Thread):
                 except:
                     pass
 
-            del self._registry[info["name"]]
+            del self._runningJobs[info["name"]]
 
         if os.path.exists(info['temporary_file']):            
             try:
@@ -112,20 +131,19 @@ class JobController(threading.Thread):
         jobs = [f for f in glob.glob(os.path.join(PLATFORM.temporary_files_directory(),'*'))]
                         
         # Loop over the job registered at the previous controller check point     
-        for job in self._registry.keys():            
+        for job in self._runningJobs.keys():            
 
             # Case where a job has finished during two controller check points (i.e. its temporary file has been deleted)
-            if self._registry[job]['state'] == 'finished':
-                del self._registry[job]
+            if self._runningJobs[job]['state'] == 'finished':
                 continue
             
             # Case where the jobs has finished properly (e.g. its temporary file has been removed)
             if not job in jobs:
-                self._registry[job]['eta'] = 'N/A'
-                self._registry[job]['progress'] = 100
-                self._registry[job]['state'] = 'finished'
-                start = datetime.datetime.strptime(self._registry[job]["start"],"%d-%m-%Y %H:%M:%S")
-                self._registry[job]['elapsed'] = '%02d:%02dh:%02dm:%02ds' % convert_duration(total_seconds(datetime.datetime.today() - start))
+                self._runningJobs[job]['eta'] = 'N/A'
+                self._runningJobs[job]['progress'] = 100
+                self._runningJobs[job]['state'] = 'finished'
+                start = datetime.datetime.strptime(self._runningJobs[job]["start"],"%d-%m-%Y %H:%M:%S")
+                self._runningJobs[job]['elapsed'] = '%02d:%02dh:%02dm:%02ds' % convert_duration(total_seconds(datetime.datetime.today() - start))
                 
         # Loop over the job whose temporary files are still present
         for job in jobs:
@@ -159,20 +177,20 @@ class JobController(threading.Thread):
                     info["state"] = "aborted"
                     
                 # If the job was aborted, display the traceback on the dialog logger and remove the corresponding job temporary file
-                if self._init and info['state'] == 'aborted':
+                if self._firstThreadRun and info['state'] == 'aborted':
                     self.kill_job(info)
                     continue
 
-                self._registry[name] = info
+                self._runningJobs[name] = info
                 
-        wx.PostEvent(self._window, JobControllerEvent(self._registry))
+        wx.PostEvent(self._window, JobControllerEvent(self._runningJobs))
         
-        self._init = False
+        self._firstThreadRun = False
 
                                               
 class JobControllerPanel(wx.ScrolledWindow):
     
-    columns = [("name",(150,-1)),("pid",(60,-1)),("start",(150,-1)),("elapsed",(150,-1)),("state",(100,-1)),("progress",(-1,-1)),("eta",(120,-1)),("kill",(50,-1))]
+    columns = [("name",(180,-1)),("pid",(60,-1)),("start",(150,-1)),("elapsed",(140,-1)),("state",(90,-1)),("progress",(-1,-1)),("eta",(120,-1)),("kill",(50,-1))]
     
     def __init__(self, parent):
         
@@ -227,7 +245,7 @@ class JobControllerPanel(wx.ScrolledWindow):
         
         sizer = wx.BoxSizer(wx.VERTICAL)
         
-        info = self._jobsController.registry[name]['info'].strip()
+        info = self._jobsController.runningJobs[name]['info'].strip()
         if not info:
             info = "No information available about %r job." % name
         
@@ -251,7 +269,7 @@ class JobControllerPanel(wx.ScrolledWindow):
         
         sizer = wx.BoxSizer(wx.VERTICAL)
         
-        tb = self._jobsController.registry[name]['traceback'].strip()
+        tb = self._jobsController.runningJobs[name]['traceback'].strip()
         if not tb:
             tb = "No traceback available about %r job." % name
         
@@ -271,15 +289,15 @@ class JobControllerPanel(wx.ScrolledWindow):
 
         d = wx.MessageDialog(None, 'Do you really want to kill job %r ?' % name, 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_EXCLAMATION)
         if d.ShowModal() == wx.ID_YES:
-            self._jobsController.kill_job(self._jobsController.registry[name])
+            self._jobsController.kill_job(self._jobsController.runningJobs[name])
                         
     def on_update(self, event):
                                         
-        registry = event.registry
+        runningJobs = event.runningJobs
 
         for k,v in self._jobs.items():
 
-            if registry.has_key(k):
+            if runningJobs.has_key(k):
                 continue
                                     
             row,_ = self._gbSizer.GetItemPosition(v['name'])            
@@ -295,7 +313,7 @@ class JobControllerPanel(wx.ScrolledWindow):
                         continue
                     self._gbSizer.SetItemPosition(w.GetWindow(),(r-1,i))
 
-        for jobName, jobStatus in registry.items():
+        for jobName, jobStatus in runningJobs.items():
             
             if jobStatus["state"] == "aborted":
                     self._jobs[jobName]["name"].SetBackgroundColour(wx.RED)

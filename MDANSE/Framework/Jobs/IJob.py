@@ -115,7 +115,7 @@ class IJob(Configurable):
         Sets a name for the job that is not already in use by another running job.
         """
         
-        prefix = '%d' % PLATFORM.pid()
+        prefix = '%s_%d' % (PLATFORM.username()[:4],PLATFORM.pid())
     
         # The list of the registered jobs.
         registeredJobs = [os.path.basename(f) for f in glob.glob(os.path.join(PLATFORM.temporary_files_directory(),'*'))]
@@ -424,7 +424,7 @@ class IJob(Configurable):
         
         try:
             
-            self._name = IJob.define_unique_name()
+            self._name = "%s_%s" % (self.type,IJob.define_unique_name())
                                                         
             if status:
                 self._status = JobStatus(self)

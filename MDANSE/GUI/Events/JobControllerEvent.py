@@ -13,13 +13,13 @@ def EVT_JOB_CRASH(win, func):
 
 class JobControllerEvent(wx.PyEvent):
 
-    def __init__(self, registry):
+    def __init__(self, runningJobs):
 
         wx.PyEvent.__init__(self)
         
         self.SetEventType(EVT_JOB_CONTROLLER_ID)
         
-        self.registry = registry
+        self.runningJobs = runningJobs
 
 class JobCrashEvent(wx.PyEvent):
 
