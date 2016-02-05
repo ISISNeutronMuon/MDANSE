@@ -105,7 +105,7 @@ class JobController(threading.Thread):
         self._stop.set()
         
     def update(self, init=False):
-                    
+                
         pids = PLATFORM.get_processes_info()
                         
         # The list of the registered jobs.
