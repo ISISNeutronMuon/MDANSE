@@ -4,7 +4,7 @@ stages:
 build:
   stage: build
   script:
-    # - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh setup
+    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh setup
     - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh build
   only:
     - master
