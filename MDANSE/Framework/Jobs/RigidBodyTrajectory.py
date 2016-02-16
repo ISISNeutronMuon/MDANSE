@@ -235,7 +235,7 @@ class RigidBodyTrajectory(IJob):
         # The NetCDF variable that stores the rigid-body fit.
         FIT = outputFile.createVariable('fit', numpy.dtype(numpy.float64).char, ('NGROUPS','NFRAMES'))
  
-        outputFile.info = self._info
+        outputFile.info = str(self)
  
         # Loop over the groups.
         for comp in range(self.configuration['atom_selection']['selection_length']):
