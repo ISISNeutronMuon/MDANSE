@@ -6,6 +6,8 @@ build:
   script:
     - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh setup
     - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh build
+    - c:\cygwin64\bin\bash
+    - cd /cygdrive/c/Projects/mdanse/resources/ && scp MDANSE_*.exe gitlabci-nsxtool@mdanse.ill.fr:/mnt/data/software/mdanse/uploads
   only:
     - master
   tags:
