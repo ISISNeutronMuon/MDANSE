@@ -1,9 +1,7 @@
-windows:
+linux:
   script:
-    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh setup
-    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh build
-    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\upload.sh
+    - echo "hello"
   only:
     - master
   tags:
-    - windows
+    - ubuntu14.04
