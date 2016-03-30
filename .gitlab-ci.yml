@@ -1,7 +1,6 @@
 linux:
   script:
-    - cd /Projects/mdanse/resources
-    - echo `whoami`
+    - cd /home/gitlab-runner/Projects/mdanse/resources
     - ./build_deb.sh amd64 trusty
   only:
     - master
