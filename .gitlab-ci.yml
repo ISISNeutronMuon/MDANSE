@@ -1,6 +1,6 @@
 linux:
   script:
-    - echo "hello"
+    - cd /Projects/mdanse/resources
   only:
     - master
   tags:
