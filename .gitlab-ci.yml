@@ -1,6 +1,7 @@
 linux:
   script:
     - cd /Projects/mdanse/resources
+    - echo "test"
   only:
     - master
   tags:
