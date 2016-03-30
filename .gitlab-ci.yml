@@ -1,6 +1,7 @@
 linux:
   script:
     - cd /Projects/mdanse/resources
+    - echo `whoami`
     - ./build_deb.sh amd64 trusty
   only:
     - master
