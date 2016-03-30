@@ -1,7 +1,7 @@
 linux:
   script:
     - cd /Projects/mdanse/resources
-    - echo "test"
+    - ./build_deb.sh amd64 trusty
   only:
     - master
   tags:
