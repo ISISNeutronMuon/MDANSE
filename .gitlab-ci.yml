@@ -3,7 +3,7 @@ linux:
     - cd /home/gitlab-runner/Projects/mdanse/resources
     - ./build_deb.sh amd64 trusty
   only:
-    - master
+    - master 
   tags:
     - ubuntu14.04
     
