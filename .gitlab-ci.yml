@@ -1,7 +1,6 @@
 linux:
   script:
     - cd /home/gitlab-runner/Projects/mdanse/resources
-    - echo `pwd`
     - ./build_deb.sh amd64 trusty
   only:
     - master
