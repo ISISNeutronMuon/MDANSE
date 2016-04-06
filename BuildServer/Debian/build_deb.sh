@@ -55,12 +55,12 @@ chmod -R 755 ${DEBIAN_ROOT_DIR}/DEBIAN
 # Build the /usr/share/applications directory inside the debian root directory and copy the mdanse desktop file inside
 DEBIAN_APP_DIR=${DEBIAN_ROOT_DIR}/usr/share/applications
 mkdir -p ${DEBIAN_APP_DIR}
-cp MDANSE.desktop ${DEBIAN_APP_DIR}/
+cp BuildServer/Debian/MDANSE.desktop ${DEBIAN_APP_DIR}/
 
 # Build the /usr/share/pixmaps directory inside the debian root directory and copy the mdanse icon file inside
 DEBIAN_PIXMAPS_DIR=${DEBIAN_ROOT_DIR}/usr/share/pixmaps
 mkdir -p ${DEBIAN_PIXMAPS_DIR}
-cp mdanse.png ${DEBIAN_PIXMAPS_DIR}/
+cp MDANSE/GUI/Icons/mdanse.png ${DEBIAN_PIXMAPS_DIR}/
 
 # Build the /usr/local/bin directory inside the debian root directory and copy the mdanse scripts inside
 DEBIAN_BIN_DIR=${DEBIAN_ROOT_DIR}/usr/local/bin
