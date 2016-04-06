@@ -8,9 +8,9 @@ linux:
     
 windows:
   script:
-    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh setup
-    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh build
-    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\upload.sh
+#    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh setup
+#    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh build
+    - c:\Projects\mdanse\resources\upload.bat
   only:
     - master
   tags:
