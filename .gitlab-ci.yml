@@ -6,12 +6,12 @@ linux:
   tags:
     - ubuntu14.04
     
-# windows:
-#   script:
-#     - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh setup
-#     - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh build
-#     - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\upload.sh
-#   only:
-#     - master
-#   tags:
-#     - windows
+windows:
+  script:
+    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh setup
+    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh build
+    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\upload.sh
+  only:
+    - master
+  tags:
+    - windows
