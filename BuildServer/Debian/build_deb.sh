@@ -48,7 +48,7 @@ echo "$BLEU""Build debian tree" "$NORMAL"
 DEBIAN_ROOT_DIR=debian_${DISTRO}-${ARCH}
 
 # Copy all the debian files (e.g. control, copyright, md5sum ...) into DEBIAN directory
-cp -R BuildServer/Debian/DEBIAN ${DEBIAN_ROOT_DIR}/
+cp -r BuildServer/Debian/DEBIAN ${DEBIAN_ROOT_DIR}/
 chmod -R 755 ${DEBIAN_ROOT_DIR}/DEBIAN
 
 # Build the /usr/share/applications directory inside the debian root directory and copy the mdanse desktop file inside
