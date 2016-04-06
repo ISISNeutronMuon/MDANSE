@@ -1,0 +1,17 @@
+Package: MDANSE
+Version: 1.0.0
+Architecture: amd64
+Depends: python-wxmpl, pyro, python-vtk
+Section: Science
+Priority: optional
+Homepage: https://github.com/mdanseproject/MDANSE
+Maintainer: E.C. Pellegrini <pellegrini@ill.fr>
+Description: MDANSE - Molecular Dynamics Analysis for Neutron Scattering Experiments.
+ MDANSE is an interactive analysis program for Molecular Dynamics simulations. It is especially designed for the computation and decomposition of neutron scattering spectra, but also computes other quantities.
+ .
+ This distribution includes the Molecular Modelling Toolkit (MMTK), a library which contains a wide range of algorithms that are used in molecular simulations and modelling. It is particularly useful for data analysis and visualization, but also contains standard techniques such as energy minimization and Molecular Dynamics. 
+ .
+ The installation location is /usr/local/mdanse. 
+ Example files are in /usr/share/doc/mdanse.
+ .
+ Packaged by E.C. Pellegrini, ILL.
