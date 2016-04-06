@@ -43,8 +43,6 @@ sed -i "s/__revision__ = \"undefined\"/__revision__ = \"${REV_NUMBER}\"/" MDANSE
 echo "$BLEU""Building MDANSE" "$NORMAL"
 python setup.py build 
 
-# back to working dir
-cd /home/gitlab-runner/Projects/mdanse/resources
 echo "$BLEU""Build debian tree" "$NORMAL"
 
 DEBIAN_ROOT_DIR=debian_${DISTRO}-${ARCH}
