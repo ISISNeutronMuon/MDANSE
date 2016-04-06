@@ -1,7 +1,7 @@
 windows:
   script:
-#    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh setup
-#    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh build
+    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh setup
+    - c:\cygwin64\bin\bash c:\Projects\mdanse\resources\package.sh build
     - cmd /C c:\Projects\mdanse\resources\upload.bat
   only:
     - master
