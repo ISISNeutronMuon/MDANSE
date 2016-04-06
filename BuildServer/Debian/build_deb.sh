@@ -48,6 +48,7 @@ echo "$BLEU""Build debian tree" "$NORMAL"
 DEBIAN_ROOT_DIR=debian_${DISTRO}-${ARCH}
 
 # Copy all the debian files (e.g. control, copyright, md5sum ...) into DEBIAN directory
+mkdir ${DEBIAN_ROOT_DIR} 
 cp -r BuildServer/Debian/DEBIAN ${DEBIAN_ROOT_DIR}/
 chmod -R 755 ${DEBIAN_ROOT_DIR}/DEBIAN
 
