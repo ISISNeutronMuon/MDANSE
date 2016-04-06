@@ -65,13 +65,13 @@ cp MDANSE/GUI/Icons/mdanse.png ${DEBIAN_PIXMAPS_DIR}/
 # Build the /usr/local/bin directory inside the debian root directory and copy the mdanse scripts inside
 DEBIAN_BIN_DIR=${DEBIAN_ROOT_DIR}/usr/local/bin
 mkdir -p ${DEBIAN_BIN_DIR}
-cp ./mdanse/build/scripts-2.7/* ${DEBIAN_BIN_DIR}/
+cp build/scripts-2.7/* ${DEBIAN_BIN_DIR}/
 dos2unix ${DEBIAN_BIN_DIR}/mdanse_*
 
 # Build the usr/local/lib/python2.7/dist-packages directory inside the debian root directory and copy the MDANSE package inside
 DEBIAN_DIST_DIR=${DEBIAN_ROOT_DIR}/usr/local/lib/python2.7/dist-packages
 mkdir -p ${DEBIAN_DIST_DIR}
-cp -r ./mdanse/build/lib.linux-x86_64-2.7/MDANSE ${DEBIAN_DIST_DIR}
+cp -r build/lib.linux-x86_64-2.7/MDANSE ${DEBIAN_DIST_DIR}
 # also copy the localy installed ScientificPython and MMTK
 cp -r /usr/local/lib/python2.7/dist-packages/Scientific* ${DEBIAN_DIST_DIR}
 cp -r /usr/local/lib/python2.7/dist-packages/MMTK* ${DEBIAN_DIST_DIR}
