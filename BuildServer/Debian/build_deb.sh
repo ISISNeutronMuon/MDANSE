@@ -78,3 +78,5 @@ cp -r /usr/local/lib/python2.7/dist-packages/MMTK* ${DEBIAN_DIST_DIR}
 
 export TMPDIR=.
 fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb
+
+scp MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb gitlabci-nsxtool@mdanse.ill.fr:/mnt/data/software/mdanse/uploads
