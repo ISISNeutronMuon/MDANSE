@@ -76,44 +76,5 @@ cp -r build/lib.linux-x86_64-2.7/MDANSE ${DEBIAN_DIST_DIR}
 cp -r /usr/local/lib/python2.7/dist-packages/Scientific* ${DEBIAN_DIST_DIR}
 cp -r /usr/local/lib/python2.7/dist-packages/MMTK* ${DEBIAN_DIST_DIR}
 
+export TMPDIR=.
 fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb
-
-#export BUILD_PATH=build-chroot-${DISTRO}-${ARCH}
-
-# Create a basic debian disto
-#rm -rf ${BUILD_PATH}
-#debootstrap --arch $ARCH $DISTRO ${BUILD_PATH}
-
-#mkdir -p "${BUILD_PATH}/build"
-#cp debcreate.sh "${BUILD_PATH}/build"
-
-#ROOT=./${BUILD_PATH}/build/MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}
-
-#mkdir -p ${ROOT}/usr/local/lib/python2.7/dist-packages/
-#mkdir -p ${ROOT}/usr/local/bin
-#mkdir -p ${ROOT}/usr/share/pixmaps/
-#mkdir -p ${ROOT}/usr/share/applications/
-
-#cp -R DEBIAN ${ROOT}
-
-# copy build things to debian tree
-#cp -r ./mdanse/build/lib.linux-x86_64-2.7/MDANSE ${ROOT}/usr/local/lib/python2.7/dist-packages/
-# also copy the localy installed MMTK (not package available)
-# NOTE : This suppose that MDANSE dependencies are up to date on build machine...
-#cp -r /usr/local/lib/python2.7/dist-packages/Scientific* ${ROOT}/usr/local/lib/python2.7/dist-packages/
-#cp -r /usr/local/lib/python2.7/dist-packages/MMTK* ${ROOT}/usr/local/lib/python2.7/dist-packages/
-# and the MDANSE scripts
-#cp ./mdanse/build/scripts-2.7/* ${ROOT}/usr/local/bin
-# secure "linux end of line"
-#cd ${ROOT}/usr/local/bin
-#dos2unix mdanse_*
-#cd -
-# Icon (in case of change)
-#cp ./mdanse/MDANSE/GUI/Icons/mdanse.png ${ROOT}/usr/share/pixmaps/
-#cp MDANSE.desktop ${ROOT}/usr/share/applications/.
-
-#echo "$BLEU""Ready to chroot and debcreate" "$NORMAL"
-# Then, to create a debian package :
-#chroot ./${BUILD_PATH} /bin/bash -c "cd /build ; ./debcreate.sh"
-
-#mv ${BUILD_PATH}/build/MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb .
