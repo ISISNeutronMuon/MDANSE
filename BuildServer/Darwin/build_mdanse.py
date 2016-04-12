@@ -33,8 +33,8 @@ if sys.platform.startswith('darwin'):
 		'matplotlib_backends': '-',
         'optimize': '1',
         'plist': PLIST,
-        'bdist_base': 'scripts/darwin/build',
-        'dist_dir': 'scripts/darwin/dist',
+        'bdist_base': 'build_darwin/build',
+        'dist_dir': 'build_darwin/dist',
         'graph': False,
         'xref': False
     }
