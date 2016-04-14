@@ -11,7 +11,7 @@ if sys.platform.startswith('darwin'):
     version = 1
     build_name = "MDANSE"
 
-    APP = ['../../Scripts/mdanse_gui']
+    APP = ['../../../Scripts/mdanse_gui']
     PLIST = {
         u'CFBundleName': u'MDANSE',
         u'CFBundleShortVersionString': build_name,
@@ -29,7 +29,7 @@ if sys.platform.startswith('darwin'):
     }
     OPTIONS = {
         'argv_emulation': True,
-        'iconfile': u'../../MDANSE/GUI/Icons/mdanse.icns',
+        'iconfile': u'../../../MDANSE/GUI/Icons/mdanse.icns',
         'excludes': 'PyQt4',
 		'matplotlib_backends': '-',
         'optimize': '1',

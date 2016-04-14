@@ -31,8 +31,6 @@ TARGET_DIR=MDANSE-${BUILD_NAME}-${BUILD_TARGET}
 #############################
 
 if [ "$BUILD_TARGET" = "darwin" ]; then
-	
-	
 	cd ../../../
 	
 	# take the latest version of nmoldyn available on the forge
@@ -48,62 +46,45 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	
 	# Now build last version and install it in our homebrewed python
 	echo -e "$BLEU""Building MDANSE" "$NORMAL"
+	
 	/usr/local/bin/python setup.py build
 	/usr/local/bin/python setup.py install
 	
 	TARGET_DIR=MDANSE-${BUILD_NAME}-b${REV_NUMBER}-MacOS
 	
 	echo -e "$BLEU""Packaging MDANSE" "$NORMAL"
-	rm -rf build_darwin/build
-	rm -rf build_darwin/dist
+	rm -rf BuildServer/Darwin/Build/dist
+	rm -rf BuildServer/Darwin/Build/build
 	
 	# debug option for py2app, if needed
 	export DISTUTILS_DEBUG=0
 
-        cd BuildServer/Darwin/Scripts
+    cd BuildServer/Darwin/Scripts
 
 	/usr/local/bin/python build.py py2app
+	
 	rc=$?
 	if [[ $rc != 0 ]]; then
 		echo -e "$ROUGE""Cannot build app." "$NORMAL"
 		exit 1
 	fi
-
-        cd ../..
+	
+    cd ../Build
 
 	# Do some manual cleanup, e.g.
 	# matplotlib/tests ==> 45.2 Mb
-	rm -rf build_darwin/dist/MDANSE.app/Contents/Resources/lib/python2.7/matplotlib/tests
-	rm -rf build_darwin/dist/MDANSE.app/Contents/Resources/mpl-data/sample_data 
-
-
-	#Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
-	echo "$BUILD_NAME b$REV_NUMBER"> build_darwin/dist/MDANSE.app/Contents/Resources/version
-
-	cd build_darwin
+	rm -rf dist/MDANSE.app/Contents/Resources/lib/python2.7/matplotlib/tests
+	rm -rf dist/MDANSE.app/Contents/Resources/mpl-data/sample_data 
 	
-        # Archive app
-	echo -e "$BLEU" "Archiving ${TARGET_DIR}.tar.gz ..." "$NORMAL"
-	cd dist
-	gnutar cfp - MDANSE.app | gzip --best -c > ../../../${TARGET_DIR}.tar.gz
-	cd ..
-	exit;
-	TODAY=$(date +"%m-%d-%y-%Hh%Mm%S")
-	# Create sparse image for distribution
-	echo -e "$BLEU" "Creating new MDANSE.dmg.sparseimage ..." "$NORMAL"
-	hdiutil detach /Volumes/MDANSE/ -quiet
-	# Keep previous build, in case of
-	mv -f MDANSE.dmg.sparseimage MDANSE.dmg.sparseimage.${TODAY}.old
-	hdiutil convert DmgTemplateCompressed.dmg -format UDSP -o MDANSE.dmg.sparseimage
-	hdiutil resize -size 1024m MDANSE.dmg.sparseimage
-	hdiutil attach MDANSE.dmg.sparseimage
-	echo -e "$BLEU" "Copying MDANSE.app on dmg ..." "$NORMAL"
-	cp -a dist/MDANSE.app /Volumes/MDANSE/MDANSE/
-	# Reset Custom icon on MDANSE folder
-	SetFile -a C /Volumes/MDANSE/MDANSE/
-	hdiutil detach /Volumes/MDANSE
-	hdiutil convert MDANSE.dmg.sparseimage -format UDZO -imagekey zlib-level=9 -ov -o ../../${TARGET_DIR}.dmg
-	echo -e "$VERT" "Done." "$NORMAL"
+	#Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
+	echo "$BUILD_NAME b$REV_NUMBER"> dist/MDANSE.app/Contents/Resources/version
+	
+	rm -f ./MDANSE.dmg
+	rm -f ./rw.MDANSE.dmg
+	
+	hdiutil unmount /Volumes/MDANSE -force -quiet
+	
+	../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 MDANSE.dmg ./dist
 	exit
 fi
 

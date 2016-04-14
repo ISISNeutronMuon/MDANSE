@@ -6,4 +6,3 @@
 .eggs
 dist/
 .DS_Store
-./MDANSE/__pkginfo__.py
