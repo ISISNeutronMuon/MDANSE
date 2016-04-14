@@ -6,3 +6,4 @@
 .eggs
 dist/
 .DS_Store
+Tests/FunctionalTests/Jobs

@@ -47,14 +47,34 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	# Now build last version and install it in our homebrewed python
 	echo -e "$BLEU""Building MDANSE" "$NORMAL"
 	
+	# Clean up temporary build directories
+	rm -rf build
+	rm -rf dist
+	
+	# Remove previous install of MDANSE
+	rm /usr/local/bin/mdanse*
+	rm /usr/local/lib/python2.7/site-packages/MDANSE*.egg-info
+	rm -rf /usr/local/lib/python2.7/site-packages/MDANSE
+	
+	# Build and install MDANSE to the homebrewed python
 	/usr/local/bin/python setup.py build
 	/usr/local/bin/python setup.py install
+
+    # Performs the unit tests
+	cd Tests/UnitTests
+    nosetests --verbosity=3 -P .
+	cd ../..
+	
+	cd Tests/FunctionalTests/Jobs
+	python BuildJobTests.py
+    nosetests --verbosity=3 --exe -P .
+	cd ../../..
 	
 	TARGET_DIR=MDANSE-${BUILD_NAME}-b${REV_NUMBER}-MacOS
 	
 	echo -e "$BLEU""Packaging MDANSE" "$NORMAL"
-	rm -rf BuildServer/Darwin/Build/dist
-	rm -rf BuildServer/Darwin/Build/build
+	rm -rf BuildServer/Darwin/Build
+	mkdir BuildServer/Darwin/Build
 	
 	# debug option for py2app, if needed
 	export DISTUTILS_DEBUG=0
@@ -83,6 +103,8 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	rm -f ./rw.MDANSE.dmg
 	
 	hdiutil unmount /Volumes/MDANSE -force -quiet
+	
+	sleep 5
 	
 	../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 MDANSE.dmg ./dist
 	exit

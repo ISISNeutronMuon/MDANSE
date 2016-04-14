@@ -161,6 +161,8 @@ echo "Mount directory: $MOUNT_DIR"
 DEV_NAME=$(hdiutil attach -readwrite -noverify -noautoopen "${DMG_TEMP_NAME}" | egrep '^/dev/' | sed 1q | awk '{print $1}')
 echo "Device name:     $DEV_NAME"
 
+sleep 5
+
 if ! test -z "$BACKGROUND_FILE"; then
   echo "Copying background file..."
   test -d "$MOUNT_DIR/.background" || mkdir "$MOUNT_DIR/.background"

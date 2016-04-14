@@ -310,9 +310,9 @@ or directly to the MDANSE mailing list:
     def on_open_api(self, event):
         
         mainHTML = os.path.join(PLATFORM.api_path(),'MDANSE.html')
-
+        
         if os.path.exists(mainHTML):
-            webbrowser.open(mainHTML)
+            webbrowser.open("file://%s" % mainHTML)
         else:
             LOGGER("Can not open MDANSE API. Maybe the documentation was not properly installed.", "error",['dialog'])
             
