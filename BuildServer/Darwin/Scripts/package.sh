@@ -33,7 +33,7 @@ TARGET_DIR=MDANSE-${BUILD_NAME}-${BUILD_TARGET}
 if [ "$BUILD_TARGET" = "darwin" ]; then
 	
 	
-	cd ../..
+	cd ../../../
 	
 	# take the latest version of nmoldyn available on the forge
 	echo -e "$BLEU""Getting last MDANSE revision" "$NORMAL"
@@ -49,7 +49,7 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	# Now build last version and install it in our homebrewed python
 	echo -e "$BLEU""Building MDANSE" "$NORMAL"
 	/usr/local/bin/python setup.py build
-	#/usr/local/bin/python setup.py install
+	/usr/local/bin/python setup.py install
 	
 	TARGET_DIR=MDANSE-${BUILD_NAME}-b${REV_NUMBER}-MacOS
 	
@@ -59,13 +59,17 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	
 	# debug option for py2app, if needed
 	export DISTUTILS_DEBUG=0
-	
-	/usr/local/bin/python ./BuildServer/Darwin/build_mdanse.py py2app
+
+        cd BuildServer/Darwin/Scripts
+
+	/usr/local/bin/python build.py py2app
 	rc=$?
 	if [[ $rc != 0 ]]; then
 		echo -e "$ROUGE""Cannot build app." "$NORMAL"
 		exit 1
 	fi
+
+        cd ../..
 
 	# Do some manual cleanup, e.g.
 	# matplotlib/tests ==> 45.2 Mb
@@ -77,13 +81,13 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	echo "$BUILD_NAME b$REV_NUMBER"> build_darwin/dist/MDANSE.app/Contents/Resources/version
 
 	cd build_darwin
-
-	# Archive app
+	
+        # Archive app
 	echo -e "$BLEU" "Archiving ${TARGET_DIR}.tar.gz ..." "$NORMAL"
 	cd dist
 	gnutar cfp - MDANSE.app | gzip --best -c > ../../../${TARGET_DIR}.tar.gz
 	cd ..
-
+	exit;
 	TODAY=$(date +"%m-%d-%y-%Hh%Mm%S")
 	# Create sparse image for distribution
 	echo -e "$BLEU" "Creating new MDANSE.dmg.sparseimage ..." "$NORMAL"
@@ -95,8 +99,6 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	hdiutil attach MDANSE.dmg.sparseimage
 	echo -e "$BLEU" "Copying MDANSE.app on dmg ..." "$NORMAL"
 	cp -a dist/MDANSE.app /Volumes/MDANSE/MDANSE/
-	echo -e "$BLEU" "Copying UserData/ on dmg ..." "$NORMAL"
-	cp -R ../../MDANSE/UserData/ /Volumes/MDANSE/MDANSE/
 	# Reset Custom icon on MDANSE folder
 	SetFile -a C /Volumes/MDANSE/MDANSE/
 	hdiutil detach /Volumes/MDANSE
