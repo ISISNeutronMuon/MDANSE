@@ -5,3 +5,10 @@
 /qhull.so
 /sas_fast_calc.so
 /sd_fast_calc.so
+/distance_histogram.o
+/fast_calculation.o
+/mic_fast_calc.o
+/mt_fast_calc.o
+/qhull.o
+/sas_fast_calc.o
+/sd_fast_calc.o

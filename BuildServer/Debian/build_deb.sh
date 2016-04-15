@@ -43,6 +43,18 @@ sed -i "s/__revision__ = \"undefined\"/__revision__ = \"${REV_NUMBER}\"/" MDANSE
 echo "$BLEU""Building MDANSE" "$NORMAL"
 python setup.py build 
 
+export PYTHONPATH=${PWD}/build/lib.linux-x86_64-2.7
+
+# Performs the unit tests
+cd Tests/UnitTests
+nosetests --verbosity=3 -P .
+cd ../..
+
+cd Tests/FunctionalTests/Jobs
+python BuildJobTests.py
+nosetests --verbosity=3 --exe -P .
+cd ../../..
+
 echo "$BLEU""Build debian tree" "$NORMAL"
 
 DEBIAN_ROOT_DIR=debian_${DISTRO}-${ARCH}
