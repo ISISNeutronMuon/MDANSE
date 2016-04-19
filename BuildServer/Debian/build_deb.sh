@@ -92,5 +92,4 @@ export TMPDIR=.
 fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb
 scp MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb gitlabci-nsxtool@mdanse.ill.fr:/mnt/data/software/mdanse/uploads
 
-( echo "cd mdanse" ; echo "put MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb" ) | ftp ftp.ill.fr
-
+curl -T MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
