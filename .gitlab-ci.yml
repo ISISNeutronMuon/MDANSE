@@ -15,4 +15,12 @@ linux:
     - master 
   tags:
     - ubuntu14.04
-    
+
+macos:
+  script:
+    - cd ./BuildServer/Darwin/Scripts
+    - ./package.sh
+  only:
+    - master
+  tags:
+    - mac
