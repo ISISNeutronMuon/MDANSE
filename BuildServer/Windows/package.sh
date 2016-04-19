@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # RUN FROM c:\cygwin64\bin\bash c:\Users\Administrateur\Desktop\BUILD\package.sh
 
 #############################
@@ -33,28 +32,17 @@ fi
 ##Which versions of external programs to use
 PYTHON_VERSION=2.7.6
 
+CI_PROJECT_DIR_WIN=$(cygpath -a -w ${CI_PROJECT_DIR})
+
+
 # Change working directory to the directory the script is in
 # http://stackoverflow.com/a/246128
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-# Remove the log file created at the previous build
-rm -f NSISlog.txt
+#SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="${CI_PROJECT_DIR}/BuildServer/Windows"
 
 # This is the directory that will contain the temporary installation
-TARGET_DIR="C:\\Projects\\mdanse\\build\\${BUILD_TARGET}"
+TARGET_DIR="${CI_PROJECT_DIR_WIN}\\BuildServer\\Windows\\${BUILD_TARGET}"
 TARGET_DIR_CYGWIN=$(cygpath -u $TARGET_DIR)
-
-#############################
-# Support functions
-#############################
-function checkTool
-{
-	if [ -z "`which $1`" ]; then
-		echo "The $1 command must be somewhere in your \$PATH."
-		echo "Fix your \$PATH or install $2"
-		exit 1
-	fi
-}
 
 function extract
 {
@@ -63,16 +51,11 @@ function extract
 	7z x -y $* >> log.txt
 }
 
-if [ $BUILD_TARGET = "win32" ] || [ $BUILD_TARGET = "win-amd64" ] ; then
-	#Check if we have 7zip, needed to extract and packup a bunch of packages for windows.
-	checkTool 7z "7zip: http://www.7-zip.org/"
-fi
-
 #############################
 # Build the packages
 #############################
 
-cd "$SCRIPT_DIR"
+cd "${SCRIPT_DIR}"
 
 if [ $TASK = "setup" ]; then
 
@@ -231,7 +214,6 @@ elif [ $TASK = "build" ]; then
 	# go back to the installation base directory
 	cd ${SCRIPT_DIR}
 	
-	CI_PROJECT_DIR_WIN=$(cygpath -a -w ${CI_PROJECT_DIR})
 	cmd /V:ON /E:ON /C "setup_and_build.bat" "${CI_PROJECT_DIR_WIN}" "${TARGET_DIR}" ${MSVC_BUILD_TARGET}
 
 	# Exit now if unable to build
@@ -264,5 +246,5 @@ elif [ $TASK = "build" ]; then
 	echo "Creating nsis installer for target ${BUILD_TARGET}..."
 	makensis /V4 /ONSISlog.txt /DVERSION=${VERSION} /DARCH=${BUILD_TARGET} /DPYTHON_INST="${TARGET_DIR}" /DREVISION=${REV_NUMBER}  MDANSE_installer.nsi
     
-    curl -T "C:/Projects/mdanse/resources/MDANSE_*.exe"  ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
+    curl -T "MDANSE_*.exe"  ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
 fi
