@@ -108,8 +108,7 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	
 	../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 MDANSE.dmg ./dist
 	
-	( echo "cd mdanse" ; echo "put MDANSE.dmg" ) | ftp ftp.ill.fr
-
+	curl -T MDANSE.img ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
 	exit
 fi
 
