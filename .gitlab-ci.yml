@@ -16,7 +16,7 @@ linux:
   tags:
     - ubuntu14.04
 
-macos:
+mac:
   script:
     - cd ./BuildServer/Darwin/Scripts
     - ./package.sh
