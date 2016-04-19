@@ -263,5 +263,6 @@ elif [ $TASK = "build" ]; then
 	# create the MDANSE installer
 	echo "Creating nsis installer for target ${BUILD_TARGET}..."
 	makensis /V4 /ONSISlog.txt /DVERSION=${VERSION} /DARCH=${BUILD_TARGET} /DPYTHON_INST="${TARGET_DIR}" /DREVISION=${REV_NUMBER}  MDANSE_installer.nsi
-	
+    
+    curl -T "C:/Projects/mdanse/resources/MDANSE_*.exe"  ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
 fi
