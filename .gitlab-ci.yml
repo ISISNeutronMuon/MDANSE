@@ -7,19 +7,19 @@ windows:
   tags:
     - windows
 
-linux:
-  script:
-    - ./BuildServer/Debian/build_deb.sh amd64 trusty
-  only:
-    - master 
-  tags:
-    - ubuntu14.04
+#linux:
+#  script:
+#    - ./BuildServer/Debian/build_deb.sh amd64 trusty
+#  only:
+#    - master 
+#  tags:
+#    - ubuntu14.04
 
-mac:
-  script:
-    - cd ./BuildServer/Darwin/Scripts
-    - ./package.sh
-  only:
-    - master
-  tags:
-    - mac
+#mac:
+#  script:
+#    - cd ./BuildServer/Darwin/Scripts
+#    - ./package.sh
+#  only:
+#    - master
+#  tags:
+#    - mac
