@@ -1,6 +1,6 @@
 windows:
   script:
-    - c:\cygwin64\bin\bash unix2dos.exe .\BuildServer\Windows\package.sh
+    - c:\cygwin64\bin\bash -c "unix2dos.exe .\BuildServer\Windows\package.sh"
     - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh setup
     - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh build
   only:
