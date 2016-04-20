@@ -64,7 +64,14 @@ if [ $TASK = "setup" ]; then
 	fi
 
     DEPENDENCIES_DIR=$(cygpath -u ${CI_WINDOWS_DEPENDENCIES_PATH})
+    echo "12:3l;jrkjfkfjkjf"
+    echo $DEPENDENCIES_DIR
+
 	DEPENDENCIES_DIR=${DEPENDENCIES_DIR}/${BUILD_TARGET}
+	echo "dkljsdkjdsfkjdsksdjkdsjkdsjksdj"
+	echo $DEPENDENCIES_DIR
+	
+	
 	PYTHON_MSI=python-${PYTHON_VERSION}${PYTHON_SUFFIX}.msi
 	PYTHON_MSI_WIN=$(cygpath -a -w ${DEPENDENCIES_DIR}/${PYTHON_MSI})
 		
