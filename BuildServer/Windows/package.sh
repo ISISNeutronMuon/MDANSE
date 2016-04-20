@@ -34,7 +34,6 @@ PYTHON_VERSION=2.7.6
 
 CI_PROJECT_DIR_WIN=$(cygpath -a -w ${CI_PROJECT_DIR})
 
-
 # Change working directory to the directory the script is in
 # http://stackoverflow.com/a/246128
 #SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -64,7 +63,8 @@ if [ $TASK = "setup" ]; then
 		rm -rf ${TARGET_DIR_CYGWIN}
 	fi
 
-	DEPENDENCIES_DIR=dependencies/${BUILD_TARGET}
+    DEPENDENCIES_DIR=$(cygpath -u ${CI_WINDOWS_DEPENDENCIES_PATH})
+	DEPENDENCIES_DIR=${DEPENDENCIES_DIR}/${BUILD_TARGET}
 	PYTHON_MSI=python-${PYTHON_VERSION}${PYTHON_SUFFIX}.msi
 	PYTHON_MSI_WIN=$(cygpath -a -w ${DEPENDENCIES_DIR}/${PYTHON_MSI})
 		
