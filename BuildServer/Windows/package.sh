@@ -65,12 +65,9 @@ if [ $TASK = "setup" ]; then
 
 
 	DEPENDENCIES_DIR=${CI_WINDOWS_DEPENDENCIES_PATH_UNIX}/${BUILD_TARGET}
-	echo "dkljsdkjdsfkjdsksdjkdsjkdsjksdj"
-	echo $DEPENDENCIES_DIR
-	
-	
+
 	PYTHON_MSI=python-${PYTHON_VERSION}${PYTHON_SUFFIX}.msi
-	PYTHON_MSI_WIN=$(cygpath -a -w ${DEPENDENCIES_DIR}/${PYTHON_MSI})
+	PYTHON_MSI_WIN=${DEPENDENCIES_DIR}/${PYTHON_MSI}
 		
 	echo "Extracting python ${PYTHON_MSI_WIN} in ${TARGET_DIR}"
 	cmd /c "msiexec  /L* pythonlog.txt /qn /a ${PYTHON_MSI_WIN} TARGETDIR=${TARGET_DIR}"
