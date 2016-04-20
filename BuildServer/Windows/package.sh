@@ -63,11 +63,8 @@ if [ $TASK = "setup" ]; then
 		rm -rf ${TARGET_DIR_CYGWIN}
 	fi
 
-    DEPENDENCIES_DIR=$(cygpath -u ${CI_WINDOWS_DEPENDENCIES_PATH})
-    echo "12:3l;jrkjfkfjkjf"
-    echo $DEPENDENCIES_DIR
 
-	DEPENDENCIES_DIR=${DEPENDENCIES_DIR}/${BUILD_TARGET}
+	DEPENDENCIES_DIR=${CI_WINDOWS_DEPENDENCIES_PATH_UNIX}/${BUILD_TARGET}
 	echo "dkljsdkjdsfkjdsksdjkdsjkdsjksdj"
 	echo $DEPENDENCIES_DIR
 	
