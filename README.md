@@ -10,6 +10,8 @@ provide any support for this.
 
 MDANSE is developed and maintained by:
 
+------
+
 **Eric Pellegrini**
 
 Computing for Science Group
@@ -21,6 +23,8 @@ Institut Laue Langevin
 38042 Grenoble
 
 France
+
+------
 
 If you have any questions about MDANSE, please contact send an email at:
 
