@@ -21,23 +21,18 @@ CYAN="\\033[1;36m"
 ##Select the build target
 BUILD_TARGET=debian
 
-##Do we need to create the final archive
-ARCHIVE_FOR_DISTRIBUTION=1
-##Which version name are we appending to the final archive
-export BUILD_NAME=1.0.0
-
-export REV_NUMBER="undefined"
-
 cd
 cd $CI_PROJECT_DIR
 
 # Get revision number from git (without trailing newline)
-REV_NUMBER=$(git rev-list --count HEAD)
-echo "$BLEU""Revision number is -->${REV_NUMBER}<--" "$NORMAL"
+# REV_NUMBER=$(git rev-list --count HEAD)
+# echo "$BLEU""Revision number is -->${REV_NUMBER}<--" "$NORMAL"
 
 # Add current revision number to python source code (will appear in "About..." dialog)
 # see http://stackoverflow.com/questions/7648328/getting-sed-error
-sed -i "s/__revision__ = \"undefined\"/__revision__ = \"${REV_NUMBER}\"/" MDANSE/__pkginfo__.py
+# sed -i "s/__revision__ = \"undefined\"/__revision__ = \"${REV_NUMBER}\"/" MDANSE/__pkginfo__.py
+
+MDANSE_VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)
 
 # Now build last version
 echo "$BLEU""Building MDANSE" "$NORMAL"
@@ -89,7 +84,7 @@ cp -r /usr/local/lib/python2.7/dist-packages/Scientific* ${DEBIAN_DIST_DIR}
 cp -r /usr/local/lib/python2.7/dist-packages/MMTK* ${DEBIAN_DIST_DIR}
 
 export TMPDIR=.
-fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb
-scp MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb gitlabci-nsxtool@mdanse.ill.fr:/mnt/data/software/mdanse/uploads
+fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} MDANSE-${MDANSE_VERSION}-${DISTRO}-${ARCH}.deb
+scp MDANSE-${MDANSE_VERSION}-${DISTRO}-${ARCH}.deb gitlabci-nsxtool@mdanse.ill.fr:/mnt/data/software/mdanse/uploads
 
-curl -T MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
+curl -T MDANSE-${MDANSE_VERSION}-${DISTRO}-${ARCH}.deb ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
