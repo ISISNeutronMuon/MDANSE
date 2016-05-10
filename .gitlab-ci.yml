@@ -11,6 +11,9 @@ osx:
   only:
     - tags
   allow_failure: false
+  artifacts:
+    paths:
+    - BuildServer/Darwin/Build/*.dmg
   
 windows:
   stage: build
