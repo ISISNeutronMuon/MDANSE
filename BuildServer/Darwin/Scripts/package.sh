@@ -22,7 +22,7 @@ BUILD_TARGET=darwin
 
 cd ../../../
 
-declare -x MDANSE_VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)	
+declare -x MDANSE_VERSION=$(perl -pe '($_)=/([0-9]+([.][0-9]+)+)/' MDANSE/__pkginfo__.py)
 echo ${MDANSE_VERSION}
 exit
 
