@@ -23,6 +23,8 @@ BUILD_TARGET=darwin
 cd ../../../
 
 declare -x MDANSE_VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)	
+echo ${MDANSE_VERSION}
+exit
 
 # Which version name are we appending to the final archive
 TARGET_DIR=MDANSE-${MDANSE_VERSION}-${BUILD_TARGET}
@@ -100,7 +102,7 @@ hdiutil unmount /Volumes/MDANSE -force -quiet
 
 sleep 5
 
-../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 MDANSE.dmg ./dist
+../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 ${MDANSE_DMG} ./dist
 
 curl -T ${MDANSE_DMG} ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
 exit
