@@ -237,7 +237,7 @@ elif [ $TASK = "build" ]; then
 	cd ${CI_PROJECT_DIR}
 	
 	# Other way to fetch the current version without python 
-	VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)
+	MDANSE_VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)
 
 	cd ${SCRIPT_DIR}
 
@@ -245,7 +245,7 @@ elif [ $TASK = "build" ]; then
 	
 	# create the MDANSE installer
 	echo "Creating nsis installer for target ${BUILD_TARGET}..."
-	makensis /V4 /ONSISlog.txt /DVERSION=${VERSION} /DARCH=${BUILD_TARGET} /DPYTHON_INST="${TARGET_DIR}" MDANSE_installer.nsi
+	makensis /V4 /ONSISlog.txt /DVERSION=${MDANSE_VERSION} /DARCH=${BUILD_TARGET} /DPYTHON_INST="${TARGET_DIR}" MDANSE_installer.nsi
     
-    curl -T "MDANSE_*.exe"  ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
+    curl -T "MDANSE-${MDANSE_VERSION}-${BUILD_TARGET}.exe"  ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
 fi
