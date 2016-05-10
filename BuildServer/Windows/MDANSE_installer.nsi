@@ -11,10 +11,6 @@
   !define VERSION 'DEV'
 !endif
 
-!ifndef REVISION
-  !define REVISION '???'
-!endif
-
 ; The name of the installer
 Name "MDANSE ${VERSION}"
 
@@ -54,7 +50,7 @@ ShowUnInstDetails show
 !define WEB_ICON   "icons\website.ico"
 
 !define MUI_WELCOMEPAGE_TEXT "This wizard will guide you through the installation of \
-MDANSE release ${VERSION} (Rev ${REVISION}).\
+MDANSE release ${VERSION}.\
 \n\nMDANSE (Molecular Dynamics ANalysis for Neutron Scattering Experiments) is an program for the analysis of Molecular Dynamics simulations. \
 It is especially designed for the computation and decomposition of neutron scattering spectra. \
 The structure and dynamics of the simulated systems can be characterized in terms of various space \
