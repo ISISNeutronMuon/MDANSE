@@ -5,7 +5,7 @@ import os
 if sys.platform.startswith('darwin'):
     from setuptools import setup
 
-    version = os.environ['MDANSE_VERSION']
+    version = os.environ['CI_BUILD_TAG']
 
     APP = ['../../../Scripts/mdanse_gui']
 
