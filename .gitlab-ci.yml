@@ -1,4 +1,19 @@
+stages:
+  - build
+
+osx:
+  stage: build
+  script:
+    - cd ./BuildServer/Darwin/Scripts
+    - ./package.sh
+  tags:
+    - mac
+  only:
+    - tags
+  allow_failure: false
+  
 windows:
+  stage: build
   script:
     - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/package.sh"
     - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh setup
@@ -7,20 +22,4 @@ windows:
     - tags
   tags:
     - windows
-
-linux:
-  script:
-    - ./BuildServer/Debian/build_deb.sh amd64 trusty
-  only:
-    - tags
-  tags:
-    - ubuntu14.04
-
-mac:
-  script:
-    - cd ./BuildServer/Darwin/Scripts
-    - ./package.sh
-  only:
-    - tags
-  tags:
-    - mac
+  allow_failure: false
