@@ -25,8 +25,8 @@ cd
 cd $CI_PROJECT_DIR
 
 # Get revision number from git (without trailing newline)
-# REV_NUMBER=$(git rev-list --count HEAD)
-# echo "$BLEU""Revision number is -->${REV_NUMBER}<--" "$NORMAL"
+REV_NUMBER=$(git rev-list --count HEAD)
+echo "$BLEU""Revision number is -->${REV_NUMBER}<--" "$NORMAL"
 
 # Add current revision number to python source code (will appear in "About..." dialog)
 # see http://stackoverflow.com/questions/7648328/getting-sed-error
