@@ -207,7 +207,8 @@ elif [ $TASK = "build" ]; then
 	echo "Revision number is $REV_NUMBER"
 
 	# Add current revision number to python source code (will appear in "About..." dialog)
-	# sed -i "s/__revision__ = \"undefined\"/__revision__ = \"${REV_NUMBER}\"/" MDANSE/__pkginfo__.py
+    sed -i "/__version__/c\__version__ = '${CI_BUILD_TAG}'" MDANSE/__pkginfo__.py
+    sed -i "/__revision__/c\__revision__ = '${REV_NUMBER}'/" MDANSE/__pkginfo__.py
 
 	# setup the environment for a visual studio build of MDANSE using microsoft SDK 7.0 and build MDANSE
 	echo "MDANSE setup and build"
@@ -237,7 +238,7 @@ elif [ $TASK = "build" ]; then
 	cd ${CI_PROJECT_DIR}
 	
 	# Other way to fetch the current version without python 
-	MDANSE_VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)
+	#MDANSE_VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)
 
 	cd ${SCRIPT_DIR}
 
@@ -245,7 +246,7 @@ elif [ $TASK = "build" ]; then
 	
 	# create the MDANSE installer
 	echo "Creating nsis installer for target ${BUILD_TARGET}..."
-	makensis /V4 /ONSISlog.txt /DVERSION=${MDANSE_VERSION} /DARCH=${BUILD_TARGET} /DPYTHON_INST="${TARGET_DIR}" MDANSE_installer.nsi
+	makensis /V4 /ONSISlog.txt /DVERSION=${CI_BUILD_TAG} /DARCH=${BUILD_TARGET} /DPYTHON_INST="${TARGET_DIR}" MDANSE_installer.nsi
     
-    curl -T "MDANSE-${MDANSE_VERSION}-${BUILD_TARGET}.exe"  ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
+    curl -T "MDANSE-${CI_BUILD_TAG}-${BUILD_TARGET}.exe"  ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
 fi
