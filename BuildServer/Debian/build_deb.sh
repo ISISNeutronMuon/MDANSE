@@ -53,7 +53,7 @@ cd ../../..
 
 echo "$BLEU""Build debian tree" "$NORMAL"
 
-DEBIAN_ROOT_DIR=debian_${DISTRO}-${ARCH}
+DEBIAN_ROOT_DIR=BuildServer/Debian/Build
 
 # Copy all the debian files (e.g. control, copyright, md5sum ...) into DEBIAN directory
 mkdir ${DEBIAN_ROOT_DIR}
@@ -85,4 +85,4 @@ cp -r /usr/local/lib/python2.7/dist-packages/Scientific* ${DEBIAN_DIST_DIR}
 cp -r /usr/local/lib/python2.7/dist-packages/MMTK* ${DEBIAN_DIST_DIR}
 
 export TMPDIR=.
-fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} MDANSE-${CI_BUILD_TAG}-${DISTRO}-${ARCH}.deb
+fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} ${DEBIAN_ROOT_DIR}/MDANSE-${CI_BUILD_TAG}-${DISTRO}-${ARCH}.deb

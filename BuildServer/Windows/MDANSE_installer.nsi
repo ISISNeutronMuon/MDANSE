@@ -15,7 +15,7 @@
 Name "MDANSE ${VERSION}"
 
 ; The name of the installer file to write
-OutFile "MDANSE-${VERSION}-${ARCH}.exe"
+OutFile "${TARGET_DIR}\MDANSE-${VERSION}-${ARCH}.exe"
 
 RequestExecutionLevel admin #NOTE: You still need to check user rights with UserInfo!
 
@@ -99,7 +99,7 @@ Section "MDANSE ${VERSION}" SEC01
   SetShellVarContext all
   SetOutPath "$INSTDIR"
   SetOverwrite on
-  File /r /x *.pyc /x *.pyo /x *.log /x *.egg-info "${PYTHON_INST}\*"
+  File /r /x *.pyc /x *.pyo /x *.log /x *.egg-info "${TARGET_DIR}\*"
   File "CHANGELOG.txt"
   File "LICENSE.txt"
   File "MDANSE_launcher.bat"
@@ -119,7 +119,7 @@ Section "MDANSE ${VERSION}" SEC01
   CreateShortCut "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\MDANSE_command_shell.lnk" \
 					"$SYSDIR\cmd.exe" \
 					'/K "$INSTDIR\MDANSE_command_shell.bat"' \
-					"${ICONS_DIR}\terminal.ico" 0					
+					"${ICONS_DIR}\terminal.ico" 0
   WriteIniStr "$INSTDIR\MDANSE.url" "InternetShortcut" "URL" "${WEB_SITE}"
   CreateShortCut "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\Website.lnk" "$INSTDIR\MDANSE.url" "" "${ICONS_DIR}\web.ico" 0
   CreateShortCut "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\Uninstall.lnk" "$INSTDIR\uninst.exe" "" "${ICONS_DIR}\uninstall.ico" 0
@@ -130,7 +130,7 @@ Section "MDANSE ${VERSION}" SEC01
   WriteRegStr ${UNINST_ROOT_KEY} "${UNINST_KEY}" "DisplayVersion" "${VERSION}"
   WriteRegStr ${UNINST_ROOT_KEY} "${UNINST_KEY}" "URLInfoAbout" "${WEB_SITE}"
   WriteRegStr ${UNINST_ROOT_KEY} "${UNINST_KEY}" "Publisher" "${PUBLISHER}"
-  
+
   WriteUninstaller "$INSTDIR\uninst.exe"
   SetAutoClose false
 SectionEnd
@@ -155,7 +155,7 @@ Section uninstall
   Delete "${ICONS_DIR}\web.ico"
 
   Delete "$DESKTOP\MDANSE.lnk"
-    
+
   Delete "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\MDANSE_command_shell.lnk"
   Delete "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\Uninstall.lnk"
   Delete "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\Website.lnk"

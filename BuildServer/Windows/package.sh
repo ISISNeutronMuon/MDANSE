@@ -40,7 +40,7 @@ CI_PROJECT_DIR_WIN=$(cygpath -a -w ${CI_PROJECT_DIR})
 SCRIPT_DIR="${CI_PROJECT_DIR}/BuildServer/Windows"
 
 # This is the directory that will contain the temporary installation
-TARGET_DIR="${CI_PROJECT_DIR_WIN}\\BuildServer\\Windows\\${BUILD_TARGET}"
+TARGET_DIR="${CI_PROJECT_DIR_WIN}\\BuildServer\\Windows\\Build"
 TARGET_DIR_CYGWIN=$(cygpath -u $TARGET_DIR)
 
 function extract
@@ -208,7 +208,7 @@ elif [ $TASK = "build" ]; then
 
 	# Add current revision number to python source code (will appear in "About..." dialog)
   sed -i "/__version__/c\__version__ = '${CI_BUILD_TAG}'" MDANSE/__pkginfo__.py
-  sed -i "/__revision__/c\__revision__ = '${REV_NUMBER}'/" MDANSE/__pkginfo__.py
+  sed -i "/__revision__/c\__revision__ = '${REV_NUMBER}'" MDANSE/__pkginfo__.py
 
 	# setup the environment for a visual studio build of MDANSE using microsoft SDK 7.0 and build MDANSE
 	echo "MDANSE setup and build"
@@ -246,5 +246,5 @@ elif [ $TASK = "build" ]; then
 
 	# create the MDANSE installer
 	echo "Creating nsis installer for target ${BUILD_TARGET}..."
-	makensis /V4 /ONSISlog.txt /DVERSION=${CI_BUILD_TAG} /DARCH=${BUILD_TARGET} /DPYTHON_INST="${TARGET_DIR}" MDANSE_installer.nsi
+	makensis /V4 /ONSISlog.txt /DVERSION=${CI_BUILD_TAG} /DARCH=${BUILD_TARGET} /DTARGET_DIR="${TARGET_DIR}" MDANSE_installer.nsi
 fi
