@@ -91,7 +91,7 @@ rm -rf dist/MDANSE.app/Contents/Resources/mpl-data/sample_data
 #Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "${MDANSE_VERSION}"> dist/MDANSE.app/Contents/Resources/version
 
-MDANSE_DMG=MDANSE-${VERSION}-${BUILD_TARGET}.dmg
+MDANSE_DMG=MDANSE-${MDANSE_VERSION}-${BUILD_TARGET}.dmg
 
 rm -f ./${MDANSE_DMG}
 rm -f ./rw.${MDANSE_DMG}
