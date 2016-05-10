@@ -22,27 +22,30 @@ BUILD_TARGET=darwin
 
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
-##Which version name are we appending to the final archive
-export BUILD_NAME=1.0
-TARGET_DIR=MDANSE-${BUILD_NAME}-${BUILD_TARGET}
 
 #############################
 # Darwin
 #############################
 
 if [ "$BUILD_TARGET" = "darwin" ]; then
+
 	cd ../../../
-	
+
+    declare -x VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)	
+
+    # Which version name are we appending to the final archive
+    TARGET_DIR=MDANSE-${VERSION}-${BUILD_TARGET}
+    
 	# take the latest version of nmoldyn available on the forge
 	echo -e "$BLEU""Getting last MDANSE revision" "$NORMAL"
 
 	# Get revision number from git (without trailing newline)
-	export REV_NUMBER=$(git rev-list --count HEAD)
-	echo "$BLEU""Revision number is -->${REV_NUMBER}<--" "$NORMAL"
+	# export REV_NUMBER=$(git rev-list --count HEAD)
+	# echo "$BLEU""Revision number is -->${REV_NUMBER}<--" "$NORMAL"
 
 	# Add current revision number to python source code (will appear in "About..." dialog)
 	# see http://stackoverflow.com/questions/7648328/getting-sed-error
-	sed -i "" "s/__revision__ = \"undefined\"/__revision__ = \"${REV_NUMBER}\"/" MDANSE/__pkginfo__.py
+	# sed -i "" "s/__revision__ = \"undefined\"/__revision__ = \"${REV_NUMBER}\"/" MDANSE/__pkginfo__.py
 	
 	# Now build last version and install it in our homebrewed python
 	echo -e "$BLEU""Building MDANSE" "$NORMAL"
@@ -70,8 +73,6 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
     nosetests --verbosity=3 --exe -P .
 	cd ../../..
 	
-	TARGET_DIR=MDANSE-${BUILD_NAME}-b${REV_NUMBER}-MacOS
-	
 	echo -e "$BLEU""Packaging MDANSE" "$NORMAL"
 	rm -rf BuildServer/Darwin/Build
 	mkdir BuildServer/Darwin/Build
@@ -97,7 +98,7 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	rm -rf dist/MDANSE.app/Contents/Resources/mpl-data/sample_data 
 	
 	#Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
-	echo "$BUILD_NAME b$REV_NUMBER"> dist/MDANSE.app/Contents/Resources/version
+	echo "${VERSION}"> dist/MDANSE.app/Contents/Resources/version
 	
 	rm -f ./MDANSE.dmg
 	rm -f ./rw.MDANSE.dmg
@@ -108,7 +109,7 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	
 	../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 MDANSE.dmg ./dist
 	
-	curl -T MDANSE.dmg ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
+	curl -T MDANSE-${VERSION}-${BUILD_TARGET}.dmg ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
 	exit
 fi
 
