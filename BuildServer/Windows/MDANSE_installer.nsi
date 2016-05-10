@@ -15,7 +15,7 @@
 Name "MDANSE ${VERSION}"
 
 ; The name of the installer file to write
-OutFile "MDANSE_${VERSION}_${ARCH}.exe"
+OutFile "MDANSE-${VERSION}-${ARCH}.exe"
 
 RequestExecutionLevel admin #NOTE: You still need to check user rights with UserInfo!
 
