@@ -23,8 +23,6 @@ BUILD_TARGET=darwin
 cd ../../../
 
 declare -x MDANSE_VERSION=$(perl -pe '($_)=/([0-9]+([.][0-9]+)+)/' MDANSE/__pkginfo__.py)
-echo ${MDANSE_VERSION}
-exit
 
 # Which version name are we appending to the final archive
 TARGET_DIR=MDANSE-${MDANSE_VERSION}-${BUILD_TARGET}
