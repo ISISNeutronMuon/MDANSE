@@ -90,7 +90,7 @@ cd ../Build
 # Do some manual cleanup, e.g.
 # matplotlib/tests ==> 45.2 Mb
 rm -rf dist/MDANSE.app/Contents/Resources/lib/python2.7/matplotlib/tests
-rm -rf dist/MDANSE.app/Contents/Resources/mpl-data/sample_data 
+rm -rf dist/MDANSE.app/Contents/Resources/mpl-data/sample_data
 
 #Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "${CI_BUILD_TAG"> dist/MDANSE.app/Contents/Resources/version
@@ -106,7 +106,4 @@ sleep 5
 
 ../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 ${MDANSE_DMG} ./dist
 
-curl -T ${MDANSE_DMG} ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
 exit
-
-

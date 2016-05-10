@@ -37,7 +37,7 @@ sed -i "/__revision__/c\__revision__ = '${REV_NUMBER}'/" MDANSE/__pkginfo__.py
 
 # Now build last version
 echo "$BLEU""Building MDANSE" "$NORMAL"
-python setup.py build 
+python setup.py build
 
 export PYTHONPATH=${PWD}/build/lib.linux-x86_64-2.7
 
@@ -56,7 +56,7 @@ echo "$BLEU""Build debian tree" "$NORMAL"
 DEBIAN_ROOT_DIR=debian_${DISTRO}-${ARCH}
 
 # Copy all the debian files (e.g. control, copyright, md5sum ...) into DEBIAN directory
-mkdir ${DEBIAN_ROOT_DIR} 
+mkdir ${DEBIAN_ROOT_DIR}
 cp -r BuildServer/Debian/DEBIAN ${DEBIAN_ROOT_DIR}/
 chmod -R 755 ${DEBIAN_ROOT_DIR}/DEBIAN
 
@@ -86,6 +86,3 @@ cp -r /usr/local/lib/python2.7/dist-packages/MMTK* ${DEBIAN_DIST_DIR}
 
 export TMPDIR=.
 fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} MDANSE-${CI_BUILD_TAG}-${DISTRO}-${ARCH}.deb
-scp MDANSE-${CI_BUILD_TAG}-${DISTRO}-${ARCH}.deb gitlabci-nsxtool@mdanse.ill.fr:/mnt/data/software/mdanse/uploads
-
-curl -T MDANSE-${CI_BUILD_TAG}-${DISTRO}-${ARCH}.deb ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
