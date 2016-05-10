@@ -4,7 +4,7 @@ windows:
     - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh setup
     - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh build
   only:
-    - master
+    - tags
   tags:
     - windows
 
@@ -12,7 +12,7 @@ linux:
   script:
     - ./BuildServer/Debian/build_deb.sh amd64 trusty
   only:
-    - master 
+    - tags
   tags:
     - ubuntu14.04
 
@@ -21,6 +21,6 @@ mac:
     - cd ./BuildServer/Darwin/Scripts
     - ./package.sh
   only:
-    - master
+    - tags
   tags:
     - mac
