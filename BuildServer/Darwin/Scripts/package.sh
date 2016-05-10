@@ -20,6 +20,8 @@ CYAN="\\033[1;36m"
 ##Select the build target
 BUILD_TARGET=darwin
 
+echo ${CI_BUILD_TAG}
+
 cd ../../../
 
 declare -x MDANSE_VERSION=$(perl -pe '($_)=/([0-9]+([.][0-9]+)+)/' MDANSE/__pkginfo__.py)
