@@ -30,9 +30,10 @@ cd $CI_PROJECT_DIR
 
 # Add current revision number to python source code (will appear in "About..." dialog)
 # see http://stackoverflow.com/questions/7648328/getting-sed-error
-# sed -i "s/__revision__ = \"undefined\"/__revision__ = \"${REV_NUMBER}\"/" MDANSE/__pkginfo__.py
+sed -i "/__version__/c\__version__ = '${CI_BUILD_TAG}'" MDANSE/__pkginfo__.py
+sed -i "/__revision__/c\__revision__ = '${REV_NUMBER}'/" MDANSE/__pkginfo__.py
 
-MDANSE_VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)
+#MDANSE_VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)
 
 # Now build last version
 echo "$BLEU""Building MDANSE" "$NORMAL"
@@ -84,7 +85,7 @@ cp -r /usr/local/lib/python2.7/dist-packages/Scientific* ${DEBIAN_DIST_DIR}
 cp -r /usr/local/lib/python2.7/dist-packages/MMTK* ${DEBIAN_DIST_DIR}
 
 export TMPDIR=.
-fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} MDANSE-${MDANSE_VERSION}-${DISTRO}-${ARCH}.deb
-scp MDANSE-${MDANSE_VERSION}-${DISTRO}-${ARCH}.deb gitlabci-nsxtool@mdanse.ill.fr:/mnt/data/software/mdanse/uploads
+fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} MDANSE-${CI_BUILD_TAG}-${DISTRO}-${ARCH}.deb
+scp MDANSE-${CI_BUILD_TAG}-${DISTRO}-${ARCH}.deb gitlabci-nsxtool@mdanse.ill.fr:/mnt/data/software/mdanse/uploads
 
-curl -T MDANSE-${MDANSE_VERSION}-${DISTRO}-${ARCH}.deb ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
+curl -T MDANSE-${CI_BUILD_TAG}-${DISTRO}-${ARCH}.deb ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
