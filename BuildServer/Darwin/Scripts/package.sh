@@ -21,6 +21,7 @@ CYAN="\\033[1;36m"
 BUILD_TARGET=darwin
 
 echo ${CI_BUILD_TAG}
+exit
 
 cd ../../../
 
