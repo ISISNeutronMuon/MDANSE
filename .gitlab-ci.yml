@@ -10,6 +10,7 @@ osx:
     - mac
   only:
     - tags
+    - triggers
   allow_failure: false
   artifacts:
     paths:
@@ -26,6 +27,7 @@ windows:
     - BuildServer/Windows/Build/*.exe
   only:
     - tags
+    - triggers
   tags:
     - windows
   allow_failure: false
@@ -39,6 +41,7 @@ linux:
      - BuildServer/Debian/Build/*.deb
    only:
      - tags
+     - triggers
    tags:
      - ubuntu14.04
    allow_failure: false
