@@ -59,14 +59,14 @@ rm -rf /usr/local/lib/python2.7/site-packages/MDANSE
 /usr/local/bin/python setup.py install
 
 # Performs the unit tests
-cd Tests/UnitTests
-nosetests --verbosity=3 -P .
-cd ../..
+#cd Tests/UnitTests
+#nosetests --verbosity=3 -P .
+#cd ../..
 
-cd Tests/FunctionalTests/Jobs
-python BuildJobTests.py
-nosetests --verbosity=3 --exe -P .
-cd ../../..
+#cd Tests/FunctionalTests/Jobs
+#python BuildJobTests.py
+#nosetests --verbosity=3 --exe -P .
+#cd ../../..
 
 echo -e "$BLEU""Packaging MDANSE" "$NORMAL"
 rm -rf BuildServer/Darwin/Build
@@ -104,7 +104,7 @@ hdiutil unmount /Volumes/MDANSE -force -quiet
 
 sleep 5
 
-echo -e "$BLEU""${MDANSE_DMG}" "$NORMAL"
+echo -e "$BLEU""sdhfkdshfkjhf${MDANSE_DMG}" "$NORMAL"
 
 ../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ./dist
 
