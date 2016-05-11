@@ -57,14 +57,14 @@ rm -rf /usr/local/lib/python2.7/site-packages/MDANSE
 /usr/local/bin/python setup.py install >> BuildServer/Darwin/Scripts/build_log.txt 2>&1
 
 # Performs the unit tests
-#cd Tests/UnitTests
-#nosetests --verbosity=3 -P .
-#cd ../..
+cd Tests/UnitTests
+nosetests --verbosity=3 -P .
+cd ../..
 
-#cd Tests/FunctionalTests/Jobs
-#python BuildJobTests.py
-#nosetests --verbosity=3 --exe -P .
-#cd ../../..
+cd Tests/FunctionalTests/Jobs
+python BuildJobTests.py
+nosetests --verbosity=3 --exe -P .
+cd ../../..
 
 echo -e "$BLEU""Packaging MDANSE" "$NORMAL"
 rm -rf BuildServer/Darwin/Build
@@ -91,7 +91,6 @@ rm -rf dist/MDANSE.app/Contents/Resources/lib/python2.7/matplotlib/tests
 rm -rf dist/MDANSE.app/Contents/Resources/mpl-data/sample_data
 
 MDANSE_DMG=MDANSE-${CI_BUILD_TAG}-${BUILD_TARGET}.dmg
-echo -e "$BLEU""sdhfkdshfkjhf${MDANSE_DMG}" "$NORMAL"
 
 #Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "${CI_BUILD_TAG}" > dist/MDANSE.app/Contents/Resources/version
