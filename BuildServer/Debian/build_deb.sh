@@ -18,6 +18,13 @@ BLANCLAIR="\\033[1;08m"
 JAUNE="\\033[1;33m"
 CYAN="\\033[1;36m"
 
+if [ -n "${RUN_NIGHTLY_BUILD}" ]
+then
+    VERSION_NAME="devel"
+else
+    VERSION_NAME=${CI_BUILD_TAG}
+fi
+
 ##Select the build target
 BUILD_TARGET=debian
 
@@ -30,7 +37,7 @@ echo -e "$BLEU""Revision number = ${REV_NUMBER}<--" "$NORMAL"
 
 # Add current revision number to python source code (will appear in "About..." dialog)
 # see http://stackoverflow.com/questions/7648328/getting-sed-error
-sed -i '' 's/.*__version__.*/__version__ = \"${CI_BUILD_TAG}\"/' MDANSE/__pkginfo__.py
+sed -i '' 's/.*__version__.*/__version__ = \"${VERSION_NAME}\"/' MDANSE/__pkginfo__.py
 sed -i '' 's/.*__revision__.*/__revision__ = \"${REV_NUMBER}\"/' MDANSE/__pkginfo__.py
 
 #MDANSE_VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)
@@ -85,4 +92,4 @@ cp -r /usr/local/lib/python2.7/dist-packages/Scientific* ${DEBIAN_DIST_DIR}
 cp -r /usr/local/lib/python2.7/dist-packages/MMTK* ${DEBIAN_DIST_DIR}
 
 export TMPDIR=.
-fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} ${DEBIAN_ROOT_DIR}/MDANSE-${CI_BUILD_TAG}-${DISTRO}-${ARCH}.deb
+fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} ${DEBIAN_ROOT_DIR}/MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.deb
