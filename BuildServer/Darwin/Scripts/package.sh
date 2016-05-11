@@ -94,7 +94,7 @@ MDANSE_DMG=MDANSE-${CI_BUILD_TAG}-${BUILD_TARGET}.dmg
 echo -e "$BLEU""sdhfkdshfkjhf${MDANSE_DMG}" "$NORMAL"
 
 #Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
-echo "${CI_BUILD_TAG" > dist/MDANSE.app/Contents/Resources/version
+echo "${CI_BUILD_TAG}" > dist/MDANSE.app/Contents/Resources/version
 
 rm -f ./${MDANSE_DMG}
 rm -f ./rw.${MDANSE_DMG}
@@ -102,8 +102,6 @@ rm -f ./rw.${MDANSE_DMG}
 hdiutil unmount /Volumes/MDANSE -force -quiet
 
 sleep 5
-
-echo -e "$BLEU""sdhfkdshfkjhf${MDANSE_DMG}" "$NORMAL"
 
 ../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ./dist
 
