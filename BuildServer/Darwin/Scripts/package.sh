@@ -23,6 +23,7 @@ then
 else
     VERSION_NAME=${CI_BUILD_TAG}
 fi
+export VERSION_NAME
 
 ##Select the build target
 BUILD_TARGET=darwin
