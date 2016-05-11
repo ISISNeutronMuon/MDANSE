@@ -18,6 +18,13 @@ else
     BUILD_TARGET=$2
 fi
 
+if [ -n "${RUN_NIGHTLY_BUILD}" ]
+then
+    VERSION_NAME="devel"
+else
+    VERSION_NAME=${CI_BUILD_TAG}
+fi
+
 if [ "$BUILD_TARGET" = "win32" ]; then
 	PYTHON_SUFFIX=""
 	MSVC_BUILD_TARGET="/x86"
@@ -207,7 +214,7 @@ elif [ $TASK = "build" ]; then
 	echo "Revision number is $REV_NUMBER"
 
 	# Add current revision number to python source code (will appear in "About..." dialog)
-    sed -i '' 's/.*__version__.*/__version__ = \"${CI_BUILD_TAG}\"/' MDANSE/__pkginfo__.py
+    sed -i '' 's/.*__version__.*/__version__ = \"${VERSION_NAME}\"/' MDANSE/__pkginfo__.py
     sed -i '' 's/.*__revision__.*/__revision__ = \"${REV_NUMBER}\"/' MDANSE/__pkginfo__.py
 
 	# setup the environment for a visual studio build of MDANSE using microsoft SDK 7.0 and build MDANSE
@@ -247,5 +254,5 @@ elif [ $TASK = "build" ]; then
 	# create the MDANSE installer
 	echo "Creating nsis installer for target ${BUILD_TARGET}..."
 
-	makensis /V4 /ONSISlog.txt /DVERSION=${CI_BUILD_TAG} /DARCH=${BUILD_TARGET} /DTARGET_DIR="${TARGET_DIR}" MDANSE_installer.nsi
+	makensis /V4 /ONSISlog.txt /DVERSION=${VERSION_NAME} /DARCH=${BUILD_TARGET} /DTARGET_DIR="${TARGET_DIR}" MDANSE_installer.nsi
 fi
