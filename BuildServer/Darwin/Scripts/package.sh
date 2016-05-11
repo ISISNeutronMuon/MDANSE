@@ -20,8 +20,6 @@ CYAN="\\033[1;36m"
 ##Select the build target
 BUILD_TARGET=darwin
 
-echo ${CI_BUILD_TAG}
-
 cd ../../../
 
 # old way to get MDANSE version
@@ -35,7 +33,7 @@ echo -e "$BLEU""Getting last MDANSE revision" "$NORMAL"
 
 # Get revision number from git (without trailing newline)
 REV_NUMBER=$(git rev-list --count HEAD)
-echo "$BLEU""Revision number is -->${REV_NUMBER}<--" "$NORMAL"
+echo -e "$BLEU""Revision number = ${REV_NUMBER}" "$NORMAL"
 
 # Add current revision number to python source code (will appear in "About..." dialog)
 # see http://stackoverflow.com/questions/7648328/getting-sed-error
@@ -92,10 +90,11 @@ cd ../Build
 rm -rf dist/MDANSE.app/Contents/Resources/lib/python2.7/matplotlib/tests
 rm -rf dist/MDANSE.app/Contents/Resources/mpl-data/sample_data
 
+MDANSE_DMG=MDANSE-${CI_BUILD_TAG}-${BUILD_TARGET}.dmg
+echo -e "$BLEU""sdhfkdshfkjhf${MDANSE_DMG}" "$NORMAL"
+
 #Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "${CI_BUILD_TAG" > dist/MDANSE.app/Contents/Resources/version
-
-MDANSE_DMG=MDANSE-${CI_BUILD_TAG}-${BUILD_TARGET}.dmg
 
 rm -f ./${MDANSE_DMG}
 rm -f ./rw.${MDANSE_DMG}
