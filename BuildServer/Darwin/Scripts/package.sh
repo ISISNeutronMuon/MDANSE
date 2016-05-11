@@ -17,6 +17,13 @@ BLANCLAIR="\\033[1;08m"
 JAUNE="\\033[1;33m"
 CYAN="\\033[1;36m"
 
+if [ -n "${RUN_NIGHTLY_BUILD}" ]
+then
+    VERSION_NAME="devel"
+else
+    VERSION_NAME=${CI_BUILD_TAG}
+fi
+
 ##Select the build target
 BUILD_TARGET=darwin
 
@@ -26,7 +33,7 @@ cd ../../../
 #declare -x MDANSE_VERSION=$(perl -pe '($_)=/([0-9]+([.][0-9]+)+)/' MDANSE/__pkginfo__.py)
 
 # Which version name are we appending to the final archive
-TARGET_DIR=MDANSE-${CI_BUILD_TAG}-${BUILD_TARGET}
+TARGET_DIR=MDANSE-${VERSION_NAME}-${BUILD_TARGET}
 
 # take the latest version of nmoldyn available on the forge
 echo -e "$BLEU""Getting last MDANSE revision" "$NORMAL"
@@ -37,7 +44,7 @@ echo -e "$BLEU""Revision number = ${REV_NUMBER}" "$NORMAL"
 
 # Add current revision number to python source code (will appear in "About..." dialog)
 # see http://stackoverflow.com/questions/7648328/getting-sed-error
-sed -i '' 's/.*__version__.*/__version__ = \"${CI_BUILD_TAG}\"/' MDANSE/__pkginfo__.py
+sed -i '' 's/.*__version__.*/__version__ = \"${VERSION_NAME}\"/' MDANSE/__pkginfo__.py
 sed -i '' 's/.*__revision__.*/__revision__ = \"${REV_NUMBER}\"/' MDANSE/__pkginfo__.py
 
 # Now build last version and install it in our homebrewed python
@@ -90,10 +97,10 @@ cd ../Build
 rm -rf dist/MDANSE.app/Contents/Resources/lib/python2.7/matplotlib/tests
 rm -rf dist/MDANSE.app/Contents/Resources/mpl-data/sample_data
 
-MDANSE_DMG=MDANSE-${CI_BUILD_TAG}-${BUILD_TARGET}.dmg
+MDANSE_DMG=MDANSE-${VERSION_NAME}-${BUILD_TARGET}.dmg
 
 #Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
-echo "${CI_BUILD_TAG}" > dist/MDANSE.app/Contents/Resources/version
+echo "${VERSION_NAME}" > dist/MDANSE.app/Contents/Resources/version
 
 rm -f ./${MDANSE_DMG}
 rm -f ./rw.${MDANSE_DMG}
