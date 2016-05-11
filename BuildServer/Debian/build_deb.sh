@@ -26,12 +26,12 @@ cd $CI_PROJECT_DIR
 
 # Get revision number from git (without trailing newline)
 REV_NUMBER=$(git rev-list --count HEAD)
-echo "$BLEU""Revision number is -->${REV_NUMBER}<--" "$NORMAL"
+echo -e "$BLEU""Revision number = ${REV_NUMBER}<--" "$NORMAL"
 
 # Add current revision number to python source code (will appear in "About..." dialog)
 # see http://stackoverflow.com/questions/7648328/getting-sed-error
-sed -i "/__version__/c\__version__ = '${CI_BUILD_TAG}'" MDANSE/__pkginfo__.py
-sed -i "/__revision__/c\__revision__ = '${REV_NUMBER}'/" MDANSE/__pkginfo__.py
+sed -i '' 's/.*__version__.*/__version__ = \"${CI_BUILD_TAG}\"/' MDANSE/__pkginfo__.py
+sed -i '' 's/.*__revision__.*/__revision__ = \"${REV_NUMBER}\"/' MDANSE/__pkginfo__.py
 
 #MDANSE_VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)
 
