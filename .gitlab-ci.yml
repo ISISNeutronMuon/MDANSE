@@ -24,7 +24,7 @@ windows:
     - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh build
   artifacts:
     paths:
-    - BuildServer/Windows/Build/*.exe
+    - BuildServer/Windows/Build/MDANSE*.exe
   only:
     - tags
     - triggers
