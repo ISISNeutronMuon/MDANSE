@@ -39,8 +39,8 @@ echo "$BLEU""Revision number is -->${REV_NUMBER}<--" "$NORMAL"
 
 # Add current revision number to python source code (will appear in "About..." dialog)
 # see http://stackoverflow.com/questions/7648328/getting-sed-error
-sed -i "/__version__/c\__version__ = '${CI_BUILD_TAG}'" MDANSE/__pkginfo__.py
-sed -i "/__revision__/c\__revision__ = '${REV_NUMBER}'/" MDANSE/__pkginfo__.py
+sed -i '' 's/.*__version__.*/__version__ = \"${CI_BUILD_TAG}\"/' MDANSE/__pkginfo__.py
+sed -i '' 's/.*__revision__.*/__revision__ = \"${REV_NUMBER}\"/' MDANSE/__pkginfo__.py
 
 # Now build last version and install it in our homebrewed python
 echo -e "$BLEU""Building MDANSE" "$NORMAL"
@@ -55,8 +55,8 @@ rm /usr/local/lib/python2.7/site-packages/MDANSE*.egg-info
 rm -rf /usr/local/lib/python2.7/site-packages/MDANSE
 
 # Build and install MDANSE to the homebrewed python
-/usr/local/bin/python setup.py build &> BuildServer/Darwin/Scripts/build_log.txt
-/usr/local/bin/python setup.py install &>> BuildServer/Darwin/Scripts/build_log.txt
+/usr/local/bin/python setup.py build >> BuildServer/Darwin/Scripts/build_log.txt 2>&1
+/usr/local/bin/python setup.py install >> BuildServer/Darwin/Scripts/build_log.txt 2>&1
 
 # Performs the unit tests
 #cd Tests/UnitTests
@@ -77,7 +77,7 @@ export DISTUTILS_DEBUG=0
 
 cd BuildServer/Darwin/Scripts
 
-/usr/local/bin/python build.py py2app &>> build_log.txt
+/usr/local/bin/python build.py py2app >> build_log.txt 2>&1
 
 rc=$?
 if [[ $rc != 0 ]]; then
