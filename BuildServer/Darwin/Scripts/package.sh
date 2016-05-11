@@ -55,8 +55,8 @@ rm /usr/local/lib/python2.7/site-packages/MDANSE*.egg-info
 rm -rf /usr/local/lib/python2.7/site-packages/MDANSE
 
 # Build and install MDANSE to the homebrewed python
-/usr/local/bin/python setup.py build
-/usr/local/bin/python setup.py install
+/usr/local/bin/python setup.py build > BuildServer/Darwin/Scripts/build_log.txt
+/usr/local/bin/python setup.py install >> BuildServer/Darwin/Scripts/build_log.txt
 
 # Performs the unit tests
 #cd Tests/UnitTests
@@ -77,7 +77,7 @@ export DISTUTILS_DEBUG=0
 
 cd BuildServer/Darwin/Scripts
 
-/usr/local/bin/python build.py py2app
+/usr/local/bin/python build.py py2app >> BuildServer/Darwin/Scripts/build_log.txt
 
 rc=$?
 if [[ $rc != 0 ]]; then
