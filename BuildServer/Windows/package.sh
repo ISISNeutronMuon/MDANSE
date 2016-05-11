@@ -246,5 +246,6 @@ elif [ $TASK = "build" ]; then
 
 	# create the MDANSE installer
 	echo "Creating nsis installer for target ${BUILD_TARGET}..."
+
 	makensis /V4 /ONSISlog.txt /DVERSION=${CI_BUILD_TAG} /DARCH=${BUILD_TARGET} /DTARGET_DIR="${TARGET_DIR}" MDANSE_installer.nsi
 fi

@@ -104,6 +104,8 @@ hdiutil unmount /Volumes/MDANSE -force -quiet
 
 sleep 5
 
+echo ${MDANSE_DMG}
+
 ../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ./dist
 
 exit
