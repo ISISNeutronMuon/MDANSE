@@ -23,7 +23,7 @@ windows:
     - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh build
   artifacts:
     paths:
-    - BuildServer/Windows/*.exe
+    - BuildServer/Windows/Build/*.exe
   only:
     - tags
   tags:
@@ -36,7 +36,7 @@ linux:
      - ./BuildServer/Debian/build_deb.sh amd64 trusty
    artifacts:
      paths:
-     - BuildServer/Debian/*.deb
+     - BuildServer/Debian/Build/*.deb
    only:
      - tags
    tags:
