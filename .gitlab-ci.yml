@@ -15,20 +15,20 @@ osx:
     paths:
     - BuildServer/Darwin/Build/*.dmg
 
-windows:
-  stage: build
-  script:
-    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/package.sh"
-    - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh setup
-    - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh build
-  artifacts:
-    paths:
-    - BuildServer/Windows/*.exe
-  only:
-    - tags
-  tags:
-    - windows
-  allow_failure: false
+#windows:
+#  stage: build
+#  script:
+#    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/package.sh"
+#    - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh setup
+#    - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh build
+#  artifacts:
+#    paths:
+#    - BuildServer/Windows/*.exe
+#  only:
+#    - tags
+#  tags:
+#    - windows
+#  allow_failure: false
 
 # linux:
 #   stage: build
