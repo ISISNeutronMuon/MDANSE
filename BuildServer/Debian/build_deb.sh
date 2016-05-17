@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 export ARCH=$1
 export DISTRO=$2
