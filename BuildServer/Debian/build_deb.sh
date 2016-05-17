@@ -22,13 +22,17 @@ if [ -n "${RUN_NIGHTLY_BUILD}" ]
 then
     VERSION_NAME="devel"
 else
+    echo $CI_BUILD_TAG
     if [[ $CI_BUILD_TAG =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
         VERSION_NAME=${BASH_REMATCH[1]}
+        echo $VERSION_NAME
     else
         echo -e "$ROUGE""Invalid version number ${CI_BUILD_TAG}" "$NORMAL"
         exit
     fi
 fi
+
+exit
 
 ##Select the build target
 BUILD_TARGET=debian
