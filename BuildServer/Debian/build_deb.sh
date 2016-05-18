@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 export ARCH=$1
 export DISTRO=$2
@@ -18,30 +18,38 @@ BLANCLAIR="\\033[1;08m"
 JAUNE="\\033[1;33m"
 CYAN="\\033[1;36m"
 
+if [ -n "${RUN_NIGHTLY_BUILD}" ]
+then
+    VERSION_NAME="devel"
+else
+    if [[ $CI_BUILD_TAG =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+        VERSION_NAME=${BASH_REMATCH[1]}
+    else
+        echo -e "$ROUGE""Invalid version number ${CI_BUILD_TAG}" "$NORMAL"
+        exit
+    fi
+fi
+
 ##Select the build target
 BUILD_TARGET=debian
-
-##Do we need to create the final archive
-ARCHIVE_FOR_DISTRIBUTION=1
-##Which version name are we appending to the final archive
-export BUILD_NAME=1.0.0
-
-export REV_NUMBER="undefined"
 
 cd
 cd $CI_PROJECT_DIR
 
 # Get revision number from git (without trailing newline)
 REV_NUMBER=$(git rev-list --count HEAD)
-echo "$BLEU""Revision number is -->${REV_NUMBER}<--" "$NORMAL"
+echo -e "$BLEU""Revision number = ${REV_NUMBER}<--" "$NORMAL"
 
 # Add current revision number to python source code (will appear in "About..." dialog)
 # see http://stackoverflow.com/questions/7648328/getting-sed-error
-sed -i "s/__revision__ = \"undefined\"/__revision__ = \"${REV_NUMBER}\"/" MDANSE/__pkginfo__.py
+sed -i '' 's/.*__version__.*/__version__ = \"${VERSION_NAME}\"/' MDANSE/__pkginfo__.py
+sed -i '' 's/.*__revision__.*/__revision__ = \"${REV_NUMBER}\"/' MDANSE/__pkginfo__.py
+
+#MDANSE_VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)
 
 # Now build last version
 echo "$BLEU""Building MDANSE" "$NORMAL"
-python setup.py build 
+python setup.py build
 
 export PYTHONPATH=${PWD}/build/lib.linux-x86_64-2.7
 
@@ -57,10 +65,10 @@ cd ../../..
 
 echo "$BLEU""Build debian tree" "$NORMAL"
 
-DEBIAN_ROOT_DIR=debian_${DISTRO}-${ARCH}
+DEBIAN_ROOT_DIR=BuildServer/Debian/Build
 
 # Copy all the debian files (e.g. control, copyright, md5sum ...) into DEBIAN directory
-mkdir ${DEBIAN_ROOT_DIR} 
+mkdir ${DEBIAN_ROOT_DIR}
 cp -r BuildServer/Debian/DEBIAN ${DEBIAN_ROOT_DIR}/
 chmod -R 755 ${DEBIAN_ROOT_DIR}/DEBIAN
 
@@ -89,7 +97,4 @@ cp -r /usr/local/lib/python2.7/dist-packages/Scientific* ${DEBIAN_DIST_DIR}
 cp -r /usr/local/lib/python2.7/dist-packages/MMTK* ${DEBIAN_DIST_DIR}
 
 export TMPDIR=.
-fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb
-scp MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb gitlabci-nsxtool@mdanse.ill.fr:/mnt/data/software/mdanse/uploads
-
-curl -T MDANSE-${BUILD_NAME}-${DISTRO}-${ARCH}.deb ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
+fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} ${DEBIAN_ROOT_DIR}/MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.deb

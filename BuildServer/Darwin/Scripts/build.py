@@ -5,17 +5,15 @@ import os
 if sys.platform.startswith('darwin'):
     from setuptools import setup
 
-    build_name = os.environ['BUILD_NAME']
-    rev_number = os.environ['REV_NUMBER']
-    version = build_name + " v" + rev_number
+    version = os.environ['VERSION_NAME']
 
     APP = ['../../../Scripts/mdanse_gui']
 
     PLIST = {
         u'CFBundleName': u'MDANSE',
-        u'CFBundleShortVersionString': build_name,
+        u'CFBundleShortVersionString': version,
         u'CFBundleVersion': version,
-        u'CFBundleIdentifier': u'eu.ill.MDANSE-'+build_name,
+        u'CFBundleIdentifier': u'eu.ill.MDANSE-'+version,
         u'LSApplicationCategoryType': u'public.app-category.science'
     }
     OPTIONS = {

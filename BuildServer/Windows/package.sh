@@ -18,6 +18,19 @@ else
     BUILD_TARGET=$2
 fi
 
+if [ -n "${RUN_NIGHTLY_BUILD}" ]
+then
+    VERSION_NAME="devel"
+else
+    if [[ ${CI_BUILD_TAG} =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]
+    then
+        VERSION_NAME=${BASH_REMATCH[1]}
+    else
+        echo "Invalid version number ${CI_BUILD_TAG}"
+        exit
+    fi
+fi
+
 if [ "$BUILD_TARGET" = "win32" ]; then
 	PYTHON_SUFFIX=""
 	MSVC_BUILD_TARGET="/x86"
@@ -40,7 +53,7 @@ CI_PROJECT_DIR_WIN=$(cygpath -a -w ${CI_PROJECT_DIR})
 SCRIPT_DIR="${CI_PROJECT_DIR}/BuildServer/Windows"
 
 # This is the directory that will contain the temporary installation
-TARGET_DIR="${CI_PROJECT_DIR_WIN}\\BuildServer\\Windows\\${BUILD_TARGET}"
+TARGET_DIR="${CI_PROJECT_DIR_WIN}\\BuildServer\\Windows\\Build"
 TARGET_DIR_CYGWIN=$(cygpath -u $TARGET_DIR)
 
 function extract
@@ -68,10 +81,10 @@ if [ $TASK = "setup" ]; then
 
 	PYTHON_MSI=python-${PYTHON_VERSION}${PYTHON_SUFFIX}.msi
 	PYTHON_MSI_WIN=${CI_WINDOWS_DEPENDENCIES_PATH}\\${BUILD_TARGET}\\${PYTHON_MSI}
-		
+
 	echo "Extracting python ${PYTHON_MSI_WIN} in ${TARGET_DIR}"
 	cmd /c "msiexec  /L* pythonlog.txt /qn /a ${PYTHON_MSI_WIN} TARGETDIR=${TARGET_DIR}"
-	
+
 	# Exit now if something goes wrong
 	if [ $? -ne 0 ]; then
 		status = $?
@@ -95,10 +108,10 @@ if [ $TASK = "setup" ]; then
 	cd ${DEPENDENCIES_DIR}
 
 	echo "Extracting dependencies"
-	
+
 	# extract numpy
 	extract numpy-MKL-1.8.0.${BUILD_TARGET}-py2.7.exe PLATLIB
-	
+
 	# extract matplotlib and its dependencies
 	extract pyparsing-2.0.1.${BUILD_TARGET}-py2.7.exe PURELIB
 	extract python-dateutil-2.2.${BUILD_TARGET}-py2.7.exe PURELIB
@@ -111,39 +124,39 @@ if [ $TASK = "setup" ]; then
 	extract Cython-0.19.2.${BUILD_TARGET}-py2.7.exe SCRIPTS
 
 	# extract Pyro
-	extract Pyro-3.16.${BUILD_TARGET}.exe PURELIB	
+	extract Pyro-3.16.${BUILD_TARGET}.exe PURELIB
 
 	# extract Sphinx and its dependencies
-	extract alabaster-0.7.5.${BUILD_TARGET}.exe PURELIB	
-	extract Pygments-2.0.2.${BUILD_TARGET}.exe PURELIB	
-	extract Pygments-2.0.2.${BUILD_TARGET}.exe SCRIPTS	
-	extract Babel-1.3.${BUILD_TARGET}.exe PURELIB	
-	extract Babel-1.3.${BUILD_TARGET}.exe SCRIPTS	
-	extract MarkupSafe-0.23.${BUILD_TARGET}-py2.7.exe PLATLIB	
-	extract Jinja2-2.7.3.${BUILD_TARGET}.exe PURELIB	
-	extract docutils-0.12.${BUILD_TARGET}.exe PURELIB	
-	extract docutils-0.12.${BUILD_TARGET}.exe SCRIPTS	
-	extract Sphinx-1.3.1.${BUILD_TARGET}.exe PURELIB	
+	extract alabaster-0.7.5.${BUILD_TARGET}.exe PURELIB
+	extract Pygments-2.0.2.${BUILD_TARGET}.exe PURELIB
+	extract Pygments-2.0.2.${BUILD_TARGET}.exe SCRIPTS
+	extract Babel-1.3.${BUILD_TARGET}.exe PURELIB
+	extract Babel-1.3.${BUILD_TARGET}.exe SCRIPTS
+	extract MarkupSafe-0.23.${BUILD_TARGET}-py2.7.exe PLATLIB
+	extract Jinja2-2.7.3.${BUILD_TARGET}.exe PURELIB
+	extract docutils-0.12.${BUILD_TARGET}.exe PURELIB
+	extract docutils-0.12.${BUILD_TARGET}.exe SCRIPTS
+	extract Sphinx-1.3.1.${BUILD_TARGET}.exe PURELIB
 	extract sphinx_rtd_theme-0.1.8.${BUILD_TARGET}.exe PURELIB
-	
-	extract nose-1.3.7.${BUILD_TARGET}.exe PURELIB	
-	extract nose-1.3.7.${BUILD_TARGET}.exe SCRIPTS	
+
+	extract nose-1.3.7.${BUILD_TARGET}.exe PURELIB
+	extract nose-1.3.7.${BUILD_TARGET}.exe SCRIPTS
 
 	# extract VTK
 	extract VTK-5.10.1.${BUILD_TARGET}-py2.7.exe PURELIB
 
 	# extract wxPython and its dependencies
-	extract wxPython-common-2.8.12.1.${BUILD_TARGET}-py2.7.exe PURELIB    
+	extract wxPython-common-2.8.12.1.${BUILD_TARGET}-py2.7.exe PURELIB
 	extract wxPython-2.8.12.1.${BUILD_TARGET}-py2.7.exe PLATLIB
-	
+
 	# extract ScientificPython
 	extract ScientificPython-2.9.2.${BUILD_TARGET}-py2.7.exe DATA
 	extract ScientificPython-2.9.2.${BUILD_TARGET}-py2.7.exe PLATLIB
 	extract ScientificPython-2.9.2.${BUILD_TARGET}-py2.7.exe SCRIPTS
-	
+
 	# extract MMTK
 	extract MMTK-2.7.6.${BUILD_TARGET}-py2.7.exe PLATLIB
-				
+
 	# move the packages to the target directory
 	echo "Moving dependencies to ${BUILD_TARGET}"
 	mv PLATLIB/numpy ${TARGET_DIR_CYGWIN}/Lib/site-packages/numpy
@@ -153,7 +166,7 @@ if [ $TASK = "setup" ]; then
 	mv PURELIB/pytz ${TARGET_DIR_CYGWIN}/Lib/site-packages/pytz
 	mv PURELIB/six.py ${TARGET_DIR_CYGWIN}/Lib/site-packages/six.py
 	mv PLATLIB/matplotlib ${TARGET_DIR_CYGWIN}/Lib/site-packages/matplotlib
-	
+
 	mv PLATLIB/Cython ${TARGET_DIR_CYGWIN}/Lib/site-packages/Cython
 	mv SCRIPTS/cython.py ${TARGET_DIR_CYGWIN}/Scripts/cython.py
 	cp ${TARGET_DIR}/Scripts/cython.py ${TARGET_DIR_CYGWIN}/Lib/site-packages/
@@ -173,48 +186,49 @@ if [ $TASK = "setup" ]; then
 
 	mv PURELIB/nose ${TARGET_DIR_CYGWIN}/Lib/site-packages/nose
 	mv SCRIPTS/nosetests ${TARGET_DIR_CYGWIN}/Scripts/
-	
+
 	mv PURELIB/vtk ${TARGET_DIR_CYGWIN}/Lib/site-packages/vtk
 
 	mv PURELIB/wx.pth ${TARGET_DIR_CYGWIN}/Lib/site-packages/
 	mv PURELIB/wxversion.py ${TARGET_DIR_CYGWIN}/Lib/site-packages/
 	mv PLATLIB/wx-2.8-msw-unicode ${TARGET_DIR_CYGWIN}/Lib/site-packages/wx-2.8-msw-unicode
-	
+
 	echo "package='NumPy'" >> PLATLIB/Scientific/N.py
 	mv PLATLIB/Scientific ${TARGET_DIR_CYGWIN}/Lib/site-packages/Scientific
-	# this is a hack due to a bug introduced by Konrad in version 2.9.2 of Scientific: the N.package is not defined anymore 
+	# this is a hack due to a bug introduced by Konrad in version 2.9.2 of Scientific: the N.package is not defined anymore
 	# which triggers erros for modules that used N.package (e.g. MMTK.Random)
 	mv DATA/Lib/site-packages/Scientific/netcdf3.dll ${TARGET_DIR_CYGWIN}/Lib/site-packages/Scientific
 	mv SCRIPTS/task_manager ${TARGET_DIR_CYGWIN}/Scripts/task_manager
-	
+
 	mv PLATLIB/MMTK ${TARGET_DIR_CYGWIN}/Lib/site-packages/MMTK
-	
+
 	rm -rf DATA
 	rm -rf PLATLIB
 	rm -rf PURELIB
  	rm -rf SCRIPTS
 
 	cd ${SCRIPT_DIR}
-	
+
 	rm pythonlog.txt
 
 elif [ $TASK = "build" ]; then
-	
+
 	cd ${CI_PROJECT_DIR}
-	
+
 	# Get revision number from GIT
 	REV_NUMBER=$(git rev-list --count HEAD)
 	echo "Revision number is $REV_NUMBER"
 
 	# Add current revision number to python source code (will appear in "About..." dialog)
-	sed -i "s/__revision__ = \"undefined\"/__revision__ = \"${REV_NUMBER}\"/" MDANSE/__pkginfo__.py
+    sed -i '' 's/.*__version__.*/__version__ = \"${VERSION_NAME}\"/' MDANSE/__pkginfo__.py
+    sed -i '' 's/.*__revision__.*/__revision__ = \"${REV_NUMBER}\"/' MDANSE/__pkginfo__.py
 
 	# setup the environment for a visual studio build of MDANSE using microsoft SDK 7.0 and build MDANSE
 	echo "MDANSE setup and build"
-	
+
 	# go back to the installation base directory
 	cd ${SCRIPT_DIR}
-	
+
 	cmd /V:ON /E:ON /C "setup_and_build.bat" "${CI_PROJECT_DIR_WIN}" "${TARGET_DIR}" ${MSVC_BUILD_TARGET}
 
 	# Exit now if unable to build
@@ -233,19 +247,18 @@ elif [ $TASK = "build" ]; then
 		echo "One or several unit tests failed"
 		exit status
 	fi
-	
+
 	cd ${CI_PROJECT_DIR}
-	
-	# Other way to fetch the current version without python 
-	VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)
+
+	# Other way to fetch the current version without python
+	#MDANSE_VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)
 
 	cd ${SCRIPT_DIR}
 
 	echo "Packaging"
-	
+
 	# create the MDANSE installer
 	echo "Creating nsis installer for target ${BUILD_TARGET}..."
-	makensis /V4 /ONSISlog.txt /DVERSION=${VERSION} /DARCH=${BUILD_TARGET} /DPYTHON_INST="${TARGET_DIR}" /DREVISION=${REV_NUMBER}  MDANSE_installer.nsi
-    
-    curl -T "MDANSE_*.exe"  ftp://$CI_FTP_USER_USERNAME:$CI_FTP_USER_PASSWORD@ftp.ill.fr/mdanse/
+
+	makensis /V4 /ONSISlog.txt /DVERSION=${VERSION_NAME} /DARCH=${BUILD_TARGET} /DTARGET_DIR="${TARGET_DIR}" MDANSE_installer.nsi
 fi
