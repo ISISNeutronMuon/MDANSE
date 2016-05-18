@@ -295,7 +295,7 @@ class CommandLineParser(optparse.OptionParser):
         name = parser.rargs[0]
                     
         # A name for the template is built.
-        filename = os.path.abspath('default_%s.py' % name.lower())
+        filename = os.path.abspath('template_%s.py' % name.lower())
         jobs[name].save(filename)    
 
         # Try to save the template for the job.  

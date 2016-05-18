@@ -5,11 +5,15 @@ recursive-include Extensions/qhull_lib *.h *c *.pxd
 
 recursive-include MDANSE/GUI/Resources/Icons *.png
 
-include MDANSEData/elements_database.csv
+include MDANSE/Data/elements_database.csv
 
 include MDANSE/Data/Atoms/*
 
-recursive-include UserData *
+recursive-include Data *
+
+recursive-include Doc *
 
 include Scripts/*
+
+recursive-include Tests *.py
 
