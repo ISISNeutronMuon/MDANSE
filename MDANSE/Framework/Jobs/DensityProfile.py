@@ -148,7 +148,7 @@ class DensityProfile(IJob):
 
         dpTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,1,"dp_%s")
             
-        self._outputData.add("dp_total","line", dpTotal, axis="time", units="au") 
+        self._outputData.add("dp_total","line", dpTotal, axis="r", units="au") 
         
         self._extent /= self.numberOfSteps
                 

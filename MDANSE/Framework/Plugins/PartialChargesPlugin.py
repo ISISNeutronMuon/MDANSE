@@ -108,7 +108,7 @@ class PartialChargesPlugin(UserDefinitionPlugin):
                     d = self._contents.setdefault(descr,[0.0,[]])
                     d[1].append(at.index)
             else:
-                descr = (at.name,)
+                descr = (obj.name,)
                 d = self._contents.setdefault(descr,[0.0,[]])
                 d[1].append(at.index)
             
