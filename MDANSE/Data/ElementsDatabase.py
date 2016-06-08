@@ -47,44 +47,6 @@ class ElementsDatabaseError(Error):
     '''
     pass
 
-def create_mmtk_atom_entry(filename, name=None, symbol=None, mass=1.0, **props):
-    '''
-    Creates a new atom in mmtk database.
-    
-    :param name: the basename of the file in which the atom entry will be stored
-    :type name: str
-    :param symbol:
-    :type symbol: str
-    :param mass: the mass of the atom 
-    :type mass: float
-    
-    :return: the absolute path of the file that stores the newly created atom
-    :rtype: str
-    '''
-    
-    # Every entry of the MMTK database is searched in lower case.
-    filename = filename.lower()
-    
-    if name is None:
-        name = filename
-        
-    if symbol is None:
-        symbol = filename
-        
-    filename = os.path.join(PLATFORM.local_mmtk_database_directory(),"Atoms", name)
-    f = open(filename, 'w')
-    # This three entries are compulsory for a MMTK.Atom to be valid
-    f.write('name = "%s"' % name)
-    f.write('\n\nsymbol = "%s"' % symbol)
-    f.write('\n\nmass = %s' % mass)
-    
-    for k,v in props.items():
-        f.write('\n\n%s = %r' % (k,v))
-            
-    f.close()
-    
-    return filename
-
 def indent(elem, level=0):
     """
     Produces a pretty indented XML tree.
@@ -384,14 +346,12 @@ class ElementsDatabase(object):
         except:
             self._load(ElementsDatabase._DEFAULT_DATABASE)
         
-    def add_element(self, ename, createMMTKEntry=False):
+    def add_element(self, ename):
         '''
         Add a new element in the elements database.
         
         :param ename: the name of the element to add
         :type ename: str
-        :param save: if True the elements database will be saved
-        :type save: bool
         '''
         
         ename = ename.lower()
@@ -728,18 +688,5 @@ class ElementsDatabase(object):
         '''
         
         self.export("csv",ElementsDatabase._USER_DATABASE)
-        
-    def rebuild_mmtk_database(self):
-        '''
-        Rebuild the whole MMTK Atoms database from the MDANSE elements database.
-        '''
-        
-        for name,props in self._data.items():
-            filename = os.path.join(PLATFORM.local_mmtk_database_directory(),"Atoms", name)
-            f = open(filename, 'w')
-            f.write('name = "%s"\n\n' % props["name"])
-            f.write('symbol = "%s"\n\n' % name)
-            f.write('mass = %s' % props["atomic_weight"])
-            f.close()
             
 ELEMENTS = ElementsDatabase()

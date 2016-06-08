@@ -49,6 +49,8 @@ class MMTKTrajectoryInputData(InputFileData):
             
         except IOError as e:        
             raise InputDataError(str(e))
+        except ValueError as e:
+            raise InputDataError(str(e))            
         
         self._data = traj
         

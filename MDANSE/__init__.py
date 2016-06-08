@@ -38,7 +38,7 @@ from MDANSE.Core.DataController import DATA_CONTROLLER
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
 
-from MDANSE.Data.ElementsDatabase import ELEMENTS, create_mmtk_atom_entry
+from MDANSE.Data.ElementsDatabase import ELEMENTS
 
 from MDANSE.Core.Preferences import PREFERENCES
 
@@ -48,49 +48,6 @@ import os
 
 # MMTK imports.
 from MMTK import Database
-from MMTK.Database import path
-from MMTK.Utility import checkURL, isURL, joinURL
 
-def databasePath(filename, directory, try_direct = False):
-        
-    if isURL(filename):
-        return filename
-    
-    filename = os.path.expanduser(filename)
-    
-    if try_direct and os.path.exists(filename):
-        return os.path.normcase(filename)
-    
-    entries = None
-    
-    dirname,basename = os.path.split(filename) 
-    
-    if dirname == '':
-        for p in path:
-            if isURL(p):
-                url = joinURL(p, directory+'/'+basename)
-                if checkURL(url):
-                    entries = url
-                    break
-            else:
-                full_name = os.path.join(os.path.join(p, directory), basename)
-                if os.path.exists(full_name):
-                    entries = os.path.normcase(full_name)
-                    break
-
-    if entries is  None:
-        if directory == "Atoms":
-            ELEMENTS.add_element(basename)
-            ELEMENTS.save()
-            create_mmtk_atom_entry(basename)
-
-            return os.path.join(PLATFORM.local_mmtk_database_directory(),"Atoms", basename)
-        else:
-            raise IOError("Database entry %s/%s not found" % (directory, filename))
-    else:
-        return entries
-
-# Add the path to the MDANSE database to complete the MMTK database.
-Database.databasePath = databasePath
-Database.path.insert(0,os.path.join(PLATFORM.package_directory(), 'Data'))
-Database.path.insert(0,PLATFORM.local_mmtk_database_directory())
+# The default databse is still the MMTK one
+Database.path.append(os.path.join(PLATFORM.package_directory(), 'Data'))

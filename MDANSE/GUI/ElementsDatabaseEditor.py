@@ -36,9 +36,136 @@ import wx
 import wx.grid as wxgrid
 
 from MDANSE import ELEMENTS
+from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
 
-class PropertyDialog(wx.Dialog):
+def create_mmtk_atom_entry(entryname, name, symbol, mass, **props):
+    '''
+    Creates a new atom in mmtk database.
+    
+    :param name: the basename of the file in which the atom entry will be stored
+    :type name: str
+    :param symbol:
+    :type symbol: str
+    :param mass: the mass of the atom 
+    :type mass: float
+    
+    :return: the absolute path of the file that stores the newly created atom
+    :rtype: str
+    '''
+    
+    # Every entry of the MMTK database is searched in lower case.
+    entryname = entryname.lower()
+            
+    filename = os.path.join(PLATFORM.local_mmtk_database_directory(),"Atoms", entryname)
+
+    f = open(filename, 'w')
+    # This three entries are compulsory for a MMTK.Atom to be valid
+    f.write('name = "%s"' % name)
+    f.write('\n\nsymbol = "%s"' % symbol)
+    f.write('\n\nmass = %f' % mass)
+    
+    for k,v in props.items():
+        f.write('\n\n%s = %r' % (k,v))
+            
+    f.close()
+    
+    return filename
+
+class ElementsDatabaseError(Error):
+    pass
+
+class NewElementDialog(wx.Dialog):
+    """
+    This class pops up a dialog that prompts the user for registering a new element in the database.
+    """
+
+    def __init__(self,*args,**kwargs):
+        """
+        The constructor.
+        """
+
+        # The base class constructor
+        wx.Dialog.__init__(self,*args,**kwargs)
+        
+        self.Center()
+
+        panel = wx.Panel(self,wx.ID_ANY)
+        
+        staticLabel0 = wx.StaticText(panel, -1, "Enter element settings")
+        
+        subPanel = wx.Panel(panel,wx.ID_ANY)
+        staticLabel1 = wx.StaticText(subPanel, wx.ID_ANY, "Entry name")
+        self._entry = wx.TextCtrl(subPanel, wx.ID_ANY)        
+        staticLabel2 = wx.StaticText(subPanel, wx.ID_ANY, "Atom name")
+        self._name = wx.TextCtrl(subPanel, id = wx.ID_ANY)
+        staticLabel3 = wx.StaticText(subPanel, wx.ID_ANY, "Atom symbol")
+        self._symbol = wx.TextCtrl(subPanel, wx.ID_ANY)        
+        staticLabel4 = wx.StaticText(subPanel, wx.ID_ANY, "Atom Mass (uma)")
+        self._mass = wx.TextCtrl(subPanel, id = wx.ID_ANY)
+        
+        staticLine = wx.StaticLine(self, wx.ID_ANY)
+
+        buttonPanel = wx.Panel(self,wx.ID_ANY)
+        ok = wx.Button(buttonPanel, wx.ID_OK, "OK")
+        ok.SetDefault()
+        cancel = wx.Button(buttonPanel, wx.ID_CANCEL, "Cancel")
+
+        panelSizer = wx.BoxSizer(wx.VERTICAL)
+        panelSizer.Add(staticLabel0, 0, wx.ALL|wx.ALIGN_LEFT, 5)
+        subsizer = wx.GridBagSizer(5,5)
+        subsizer.AddGrowableCol(1)
+        subsizer.Add(staticLabel1,pos=(0,0),flag=wx.ALIGN_CENTER_VERTICAL)
+        subsizer.Add(self._entry   ,pos=(0,1),flag=wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
+        subsizer.Add(staticLabel2,pos=(1,0),flag=wx.ALIGN_CENTER_VERTICAL)
+        subsizer.Add(self._name,pos=(1,1),flag=wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
+        subsizer.Add(staticLabel3,pos=(2,0),flag=wx.ALIGN_CENTER_VERTICAL)
+        subsizer.Add(self._symbol,pos=(2,1),flag=wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
+        subsizer.Add(staticLabel4,pos=(3,0),flag=wx.ALIGN_CENTER_VERTICAL)
+        subsizer.Add(self._mass,pos=(3,1),flag=wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
+        subPanel.SetSizer(subsizer)
+        panelSizer.Add(subPanel, 0, wx.ALL|wx.EXPAND, 5)
+        panel.SetSizer(panelSizer)
+
+        btnsizer = wx.StdDialogButtonSizer()
+        btnsizer.AddButton(cancel)
+        btnsizer.AddButton(ok)
+        btnsizer.Realize()        
+        buttonPanel.SetSizer(btnsizer)
+
+        dlgsizer = wx.BoxSizer(wx.VERTICAL)
+        dlgsizer.Add(panel, 1, wx.ALL|wx.EXPAND, 5)
+        dlgsizer.Add(staticLine, 0, wx.ALL|wx.EXPAND, 5)
+        dlgsizer.Add(buttonPanel, 0, wx.ALL|wx.ALIGN_RIGHT|wx.EXPAND, 5)
+        
+        # Bind the top sizer to the dialog.
+        self.SetSizer(dlgsizer)
+                          
+    def GetValue(self, event=None):
+        """
+        Handler called when the user clicks on the OK button of the property dialog.
+        """
+
+        entry = str(self._entry.GetValue().strip())
+        if not entry:
+            raise ElementsDatabaseError("Empty entry name")
+                
+        name = str(self._name.GetValue().strip())
+        if not name:
+            raise ElementsDatabaseError("Empty name")
+
+        symbol = str(self._symbol.GetValue().strip())
+        if not symbol:
+            raise ElementsDatabaseError("Empty symbol")
+            
+        try:
+            mass = float(self._mass.GetValue().strip())
+        except ValueError:
+            raise ElementsDatabaseError("Invalid mass value")
+                                                            
+        return entry,name,symbol,mass
+
+class NewPropertyDialog(wx.Dialog):
     """
     This class pops up a dialog that prompts the user for registering a new property in the database.
     """
@@ -60,7 +187,7 @@ class PropertyDialog(wx.Dialog):
         subPanel = wx.Panel(panel,wx.ID_ANY)
         staticLabel1 = wx.StaticText(subPanel, wx.ID_ANY, "Name")
         self.name = wx.TextCtrl(subPanel, wx.ID_ANY)        
-        staticLabel2 = wx.StaticText(subPanel, wx.ID_ANY, "Default value")
+        staticLabel2 = wx.StaticText(subPanel, wx.ID_ANY, "Numeric type")
         self.propertyType = wx.ComboBox(subPanel, id = wx.ID_ANY, choices=ELEMENTS._TYPES.keys(), style=wx.CB_READONLY)
         
         staticLine = wx.StaticLine(self, wx.ID_ANY)
@@ -139,9 +266,17 @@ class Database(wxgrid.PyGridTableBase):
         
         self.notify_grid(wxgrid.GRIDTABLE_NOTIFY_COLS_APPENDED, 1)
     
-    def add_row(self, ename):
-                                
-        ELEMENTS.add_element(ename)
+    def add_row(self, entry, name, symbol, mass):
+        
+        if ELEMENTS.has_element(entry):
+            return
+                                        
+        create_mmtk_atom_entry(entry, name, symbol, mass)
+
+        ELEMENTS.add_element(entry)
+        ELEMENTS[entry,"name"] = name
+        ELEMENTS[entry,"symbol"] = symbol
+        ELEMENTS[entry,"atomic_weight"] = mass
                                         
         self.notify_grid(wxgrid.GRIDTABLE_NOTIFY_ROWS_APPENDED, 1)
         
@@ -210,6 +345,8 @@ class ElementsDatabaseEditor(wx.Frame):
         self.SetSize((800,400))
         
         self.Bind(wx.EVT_CONTEXT_MENU, self.on_show_popup_menu)
+        
+        self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def build_menu(self):
  
@@ -253,6 +390,15 @@ class ElementsDatabaseEditor(wx.Frame):
         self.PopupMenu(menu)
 
         menu.Destroy()
+        
+    def on_close(self,event):
+        
+        d = wx.MessageDialog(None, 'This will close the database editor. Continue ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_WARNING)
+                 
+        if d.ShowModal() == wx.ID_NO:
+            return
+        
+        self.Destroy()
                         
     def on_edit_cell(self,event):
         
@@ -265,26 +411,23 @@ class ElementsDatabaseEditor(wx.Frame):
         Handler called when the user add new elements to the database.
         """
  
-        d = wx.TextEntryDialog(self,"Enter element id","add element")
+        d = NewElementDialog(self,title="Add element",size=(400,220))
  
         # If the new element dialog is closed by clicking on OK. 
         if d.ShowModal() == wx.ID_CANCEL:
             return
  
         # Get rid of wxpython unicode string formatting
-        ename = str(d.GetValue())
-                         
-        if not ename:
-            return
-                                 
-        self._database.add_row(ename)
-         
+        entry,name,symbol,mass = d.GetValue()
+                                                                                  
+        self._database.add_row(entry,name,symbol,mass)
+                        
     def on_add_property(self, message):
         """
         Handler called when the user add a property to the database.
         """
  
-        d = PropertyDialog(self,title="Add property",size=(400,160))
+        d = NewPropertyDialog(self,title="Add property",size=(400,160))
  
         if d.ShowModal() == wx.ID_CANCEL:
             return
