@@ -187,10 +187,9 @@ class MainFrame(wx.Frame):
                 
         loadDataButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["load",32,32], 'Load a trajectory')
         periodicTableButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["periodic_table",32,32], 'Launch the periodic table viewer')
-        elementsDatabaseButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["element",32,32], 'Launch the elements database editor')
+        elementsDatabaseButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["atom",32,32], 'Launch the elements database editor')
         plotButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["plot",32,32], 'Launch the NetCDF plotter')
         udButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["user",32,32], 'Launch the user definitions editor')
-        atomButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["atom",32,32], 'Create an atom database entry')
         preferencesButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["preferences",32,32], 'Launch the preferences editor')
         registryButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["registry",32,32], 'Inspect MDANSE classes framework')
         templateButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["template",32,32], 'Save a template for a new analysis')
@@ -211,7 +210,6 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_start_plotter, plotButton)
         self.Bind(wx.EVT_MENU, self.on_set_preferences, preferencesButton)
         self.Bind(wx.EVT_MENU, self.on_open_user_definitions, udButton)
-        self.Bind(wx.EVT_MENU, self.on_create_atom_database_entry, atomButton)
         self.Bind(wx.EVT_MENU, self.on_open_classes_registry, registryButton)
         self.Bind(wx.EVT_MENU, self.on_save_job_template, templateButton)
         self.Bind(wx.EVT_MENU, self.on_about, aboutButton)
@@ -269,10 +267,6 @@ or directly to the MDANSE mailing list:
         d = wx.MessageDialog(self, report_str, 'Bug report', style=wx.OK|wx.ICON_INFORMATION)
         d.ShowModal()
         d.Destroy()
-
-    def on_create_atom_database_entry(self,event):
-        
-        print "coucou"
 
     def on_simple_help(self,event):
 
