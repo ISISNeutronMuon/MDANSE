@@ -1,10 +1,10 @@
 import os
 
-from MDANSE import PLATFORM,PREFERENCES,REGISTRY
+from MDANSE import PLATFORM,REGISTRY
 
 directories = sorted([x[0] for x in os.walk(os.path.dirname(__file__))][1:])
 
-macrosDir = PREFERENCES['macros_directory'].get_value()
+macrosDir = PLATFORM.macros_directory()
 directories.insert(0,macrosDir)
 directories.extend(sorted([x[0] for x in os.walk(macrosDir)][1:]))
 
