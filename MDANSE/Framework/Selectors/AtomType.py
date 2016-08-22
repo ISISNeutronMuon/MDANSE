@@ -38,9 +38,9 @@ class AtomType(ISelector):
 
     section = "atoms"
 
-    def __init__(self, universe):
+    def __init__(self, trajectory):
 
-        ISelector.__init__(self,universe)
+        ISelector.__init__(self,trajectory)
                 
         self._choices.extend(sorted(set([at.type.name.lower() for at in self._universe.atomList()])))
 

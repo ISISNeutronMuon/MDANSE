@@ -38,9 +38,9 @@ class MoleculeIndex(ISelector):
 
     section = "molecules"
 
-    def __init__(self, universe):
+    def __init__(self, trajectory):
 
-        ISelector.__init__(self,universe)
+        ISelector.__init__(self,trajectory)
                 
         self._choices.extend(range(len(self._universe.objectList())))    
 

@@ -44,9 +44,9 @@ class ISelector(object):
     
     type = "selector"
         
-    def __init__(self,universe):
+    def __init__(self,trajectory):
         
-        self._universe = universe
+        self._universe = trajectory.universe
                 
         self._choices = ["*"]
 

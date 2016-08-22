@@ -50,9 +50,9 @@ class ResClass(ISelector):
 
     section = "proteins"
 
-    def __init__(self, universe):
+    def __init__(self, trajectory):
 
-        ISelector.__init__(self,universe)
+        ISelector.__init__(self,trajectory)
                         
         self._choices.extend(sorted(CHEMFAMILIES.keys()))
 

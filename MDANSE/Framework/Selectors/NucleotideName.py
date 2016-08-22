@@ -40,9 +40,9 @@ class NuclName(ISelector):
 
     section = "nucleic acids"
 
-    def __init__(self, universe):
+    def __init__(self, trajectory):
 
-        ISelector.__init__(self,universe)
+        ISelector.__init__(self,trajectory)
 
         for obj in self._universe.objectList():
             if isinstance(obj, NucleotideChain):

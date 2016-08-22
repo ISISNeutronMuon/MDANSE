@@ -38,9 +38,9 @@ class AtomFullName(ISelector):
 
     section = "atoms"
 
-    def __init__(self, universe):
+    def __init__(self, trajectory):
         
-        ISelector.__init__(self,universe)
+        ISelector.__init__(self,trajectory)
                 
         self._choices.extend(sorted(set([at.fullName().strip().lower() for at in self._universe.atomList()])))
 

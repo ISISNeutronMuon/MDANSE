@@ -33,7 +33,7 @@ Created on Mar 27, 2015
 import glob
 import os
 
-from MDANSE import PREFERENCES
+from MDANSE import PLATFORM
 from MDANSE.Framework.Selectors.ISelector import ISelector
                 
 class PythonScript(ISelector):
@@ -42,13 +42,13 @@ class PythonScript(ISelector):
     
     section = 'miscellaneous'
     
-    def __init__(self, universe):
+    def __init__(self, trajectory):
         
-        ISelector.__init__(self,universe)
+        ISelector.__init__(self,trajectory)
                 
-        self._choices.extend(glob.glob(os.path.join(PREFERENCES['working_directory'].get_value(),'*.py')))
+        self._choices.extend(glob.glob(os.path.dirname(PLATFORM.get_path(trajectory.filename)),'*.py'))
         
-        self._rindexes = dict([(at.index,at) for at in universe.atomList()])
+        self._rindexes = dict([(at.index,at) for at in self._universe.atomList()])
     
     def select(self, scripts):
         
