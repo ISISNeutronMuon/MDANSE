@@ -465,11 +465,8 @@ class IJob(Configurable):
                     
         if REGISTRY['job'].has_key(shortname):
             raise KeyError('A job with %r name is already stored in the registry' % shortname)
-                        
-        from MDANSE import PREFERENCES
-        macrosDir =  PREFERENCES["macros_directory"].get_value()
-        
-        templateFile = os.path.join(macrosDir,"%s.py" % classname)
+                                
+        templateFile = os.path.join(PLATFORM.macros_directory(),"%s.py" % classname)
                 
         try:            
             f = open(templateFile,'w')
