@@ -80,7 +80,7 @@ class AtomTransmutationConfigurator(IConfigurator):
 
         trajConfig = self._configurable[self._dependencies['trajectory']]
                                                                 
-        parser = AtomSelectionParser(trajConfig["instance"].universe)        
+        parser = AtomSelectionParser(trajConfig["instance"])        
 
         self._nTransmutatedAtoms = 0
 

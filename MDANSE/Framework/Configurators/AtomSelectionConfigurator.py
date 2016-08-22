@@ -104,7 +104,7 @@ class AtomSelectionConfigurator(IConfigurator):
                 ud = UD_STORE.get_definition(trajConfig["basename"],"atom_selection",v)
                 indexes.update(ud["indexes"])
             else:        
-                parser = AtomSelectionParser(trajConfig["instance"].universe)
+                parser = AtomSelectionParser(trajConfig["instance"])
                 indexes.update(parser.parse(v))
 
         indexes = sorted(list(indexes))
