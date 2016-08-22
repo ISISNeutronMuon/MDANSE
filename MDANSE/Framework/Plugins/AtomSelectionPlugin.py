@@ -282,7 +282,7 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
 
         self._trajectory = trajectory 
 
-        self._query.set_parser(AtomSelectionParser(self._trajectory.universe))
+        self._query.set_parser(AtomSelectionParser(self._trajectory))
 
         self._atoms = sorted_atoms(self._trajectory.universe)        
 
