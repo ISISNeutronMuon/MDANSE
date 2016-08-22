@@ -40,14 +40,14 @@ from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
 
 from MDANSE.Data.ElementsDatabase import ELEMENTS
 
-from MDANSE.Core.Preferences import PREFERENCES
-
 import Framework
 
 import os
 
 # MMTK imports.
 from MMTK import Database
+
+PLATFORM.create_directory(PLATFORM.macros_directory())
 
 # The default databse is still the MMTK one
 Database.path.append(os.path.join(PLATFORM.package_directory(), 'Data'))
