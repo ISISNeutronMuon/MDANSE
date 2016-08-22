@@ -42,8 +42,9 @@ echo -e "$BLEU""Revision number = ${REV_NUMBER}<--" "$NORMAL"
 
 # Add current revision number to python source code (will appear in "About..." dialog)
 # see http://stackoverflow.com/questions/7648328/getting-sed-error
-sed -i '' 's/.*__version__.*/__version__ = \"${VERSION_NAME}\"/' MDANSE/__pkginfo__.py
-sed -i '' 's/.*__revision__.*/__revision__ = \"${REV_NUMBER}\"/' MDANSE/__pkginfo__.py
+sed -i "s/.*__version__.*/__version__ = \"${VERSION_NAME}\"/" MDANSE/__pkginfo__.py
+sed -i "s/.*__revision__.*/__revision__ = \"${REV_NUMBER}\"/" MDANSE/__pkginfo__.py
+sed -i "s/.*__date__.*/__date__ = \"`date +"%d-%d-%Y"`\"/" MDANSE/__pkginfo__.py
 
 #MDANSE_VERSION=$(grep -Po '(?<=__version__ = \")\d.\d.\d' MDANSE/__pkginfo__.py)
 
