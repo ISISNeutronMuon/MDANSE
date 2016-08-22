@@ -307,11 +307,23 @@ class Platform(object):
         
         return os.path.dirname(os.path.dirname(__file__))
 
+    def macros_directory(self):
+        '''
+        Returns the path of the directory where the MDANSE macros will be searched.
+                
+        :return: the path of the directory where the MDANSE macros will be searched.
+        :rtype: str
+        '''
+        
+        macrosDir = os.path.join(self.application_directory(),'macros')
+        
+        return macrosDir
+
     def logfiles_directory(self):
         '''
         Returns the path of the directory where the MDANSE job logfiles are stored.
                 
-        :return: the path of the directory where the MDANSE job logfiles are stored..
+        :return: the path of the directory where the MDANSE job logfiles are stored.
         :rtype: str
         '''
        
@@ -496,7 +508,7 @@ class PlatformWin(Platform):
             os.makedirs(basedir)
         
         return basedir
-
+    
     def get_process_creation_time(self, process):
         '''
         Return the creation time of a given process.
