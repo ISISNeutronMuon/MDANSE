@@ -66,7 +66,7 @@ cd ../../..
 echo "$BLEU""Build debian tree" "$NORMAL"
 
 # Set automatically the good version number for the Debian control file
-sed -i '' 's/Version:.*/Version: ${VERSION_NAME}/g' BuildServer/Debian/DEBIAN/control
+sed -i "s/Version:.*/Version: ${VERSION_NAME}/g" BuildServer/Debian/DEBIAN/control
 
 DEBIAN_ROOT_DIR=BuildServer/Debian/Build
 
