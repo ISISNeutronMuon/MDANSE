@@ -174,7 +174,6 @@ class PreferencesSettings(wx.Dialog):
             
         self.SetSizer(self._sizer)
                     
-        self.Bind(wx.EVT_CLOSE, self.on_cancel)
         self.Bind(wx.EVT_BUTTON, self.on_default, defaultButton)
         self.Bind(wx.EVT_BUTTON, self.on_apply, applyButton)
         self.Bind(wx.EVT_BUTTON, self.on_ok, okButton)
@@ -212,12 +211,8 @@ class PreferencesSettings(wx.Dialog):
             
         PREFERENCES.save()
         
-        self.Destroy() 
-                                            
-    def on_cancel(self, event):
-        
-        self.Destroy()
-        
+        self.Close() 
+                                                    
     def on_default(self, event):
         
         for v in PREFERENCES.values():
