@@ -4,6 +4,7 @@ Architecture: amd64
 Depends: python-wxmpl, pyro, python-vtk
 Section: Science
 Priority: optional
+Installed-Size: 1000
 Homepage: https://code.ill.fr/scientific-software/mdanse
 Maintainer: E.C. Pellegrini <pellegrini@ill.fr>
 Description: MDANSE - Molecular Dynamics Analysis for Neutron Scattering Experiments.
