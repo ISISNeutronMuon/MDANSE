@@ -102,7 +102,7 @@ cp -r /usr/local/lib/python2.7/dist-packages/MMTK* ${DEBIAN_DIST_DIR}
 
 # Compute the Installed-Size field for the debian package
 instSize=$(du ${DEBIAN_ROOT_DIR} -b -s | cut -f1)
-sed -i "s/Installed-Size:.*/Installed-Size: $((1+(instSize/1024)))/g" BuildServer/Debian/DEBIAN/control
+sed -i "s/Installed-Size:.*/Installed-Size: $((1+(instSize/1024)))/g" ${DEBIAN_ROOT_DIR}/DEBIAN/control
 
 export TMPDIR=.
 fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} ${DEBIAN_ROOT_DIR}/MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.deb
