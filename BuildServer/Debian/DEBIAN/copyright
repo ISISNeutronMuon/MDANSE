@@ -1,0 +1,12 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0
+Upstream-Name: mdanse
+Upstream-Contact: Eric Pellegrini <pellegrini@ill.fr>
+Source: https://mdanse.org/
+
+Files: debian/*
+Copyright: © 2016, Eric Pellegrini <pellegrini@ill.fr>
+License: GPL-3+
+
+On Debian systems, you can find the full text of the GNU General Public
+License v3 in `/usr/share/common-licenses/GPL-3'.
+
