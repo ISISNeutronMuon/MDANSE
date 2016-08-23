@@ -100,5 +100,9 @@ cp -r build/lib.linux-x86_64-2.7/MDANSE ${DEBIAN_DIST_DIR}
 cp -r /usr/local/lib/python2.7/dist-packages/Scientific* ${DEBIAN_DIST_DIR}
 cp -r /usr/local/lib/python2.7/dist-packages/MMTK* ${DEBIAN_DIST_DIR}
 
+# Compute the Installed-Size field for the debian package
+instSize=$(du ${DEBIAN_ROOT_DIR} -b -s | cut -f1)
+sed -i "s/Installed-Size:.*/Installed-Size: $((1+(instSize/1024)))/g" BuildServer/Debian/DEBIAN/control
+
 export TMPDIR=.
 fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} ${DEBIAN_ROOT_DIR}/MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.deb
