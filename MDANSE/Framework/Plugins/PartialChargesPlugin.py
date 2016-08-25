@@ -110,7 +110,7 @@ class PartialChargesPlugin(UserDefinitionPlugin):
             else:
                 descr = (obj.name,)
                 d = self._contents.setdefault(descr,[0.0,[]])
-                d[1].append(at.index)
+                d[1].append(obj.index)
             
         self._grid.CreateGrid(0,2)
         
