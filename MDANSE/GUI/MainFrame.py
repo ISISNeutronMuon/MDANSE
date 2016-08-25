@@ -117,11 +117,14 @@ class MainFrame(wx.Frame):
         self._panels["controller"] = ControllerPanel(self)
         
         # Add the panes corresponding to the tree control and the notebook.
-        paneInfo=aui.AuiPaneInfo()
-        self._mgr.AddPane(self._panels["data"], paneInfo.Caption("Data").Name("data").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
-        self._mgr.AddPane(self._panels["plugins"], paneInfo.Caption("Plugins").Name("plugins").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
-        self._mgr.AddPane(self._panels["working"], paneInfo.Caption("Working panel").Name("working").Center().CloseButton(False))
-        self._mgr.AddPane(self._panels["controller"], paneInfo.Name("controller").Name("controller").Floatable().Right().Bottom().CloseButton(True).DestroyOnClose(False).MinSize((-1,120)))
+        paneInfo1=aui.AuiPaneInfo()
+        self._mgr.AddPane(self._panels["data"], paneInfo1.Caption("Data").Name("data").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
+        paneInfo2=aui.AuiPaneInfo()
+        self._mgr.AddPane(self._panels["plugins"], paneInfo2.Caption("Plugins").Name("plugins").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
+        paneInfo3=aui.AuiPaneInfo()
+        self._mgr.AddPane(self._panels["working"], paneInfo3.Caption("Working panel").Name("working").Center().CloseButton(False))
+        paneInfo4=aui.AuiPaneInfo()
+        self._mgr.AddPane(self._panels["controller"], paneInfo4.Name("controller").Name("controller").Floatable().Right().Bottom().CloseButton(True).DestroyOnClose(False).MinSize((-1,120)))
 
         self._mgr.Update()
 
