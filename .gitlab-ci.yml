@@ -17,7 +17,7 @@ build:trusty:
 test:trusty:
   stage: test
   script:
-  - ./BuildServer/Debian/run_test.sh
+  - ./BuildServer/Debian/run_tests.sh
   allow_failure: false
 
 deploy:trusty:
