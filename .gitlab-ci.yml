@@ -1,47 +1,74 @@
 stages:
   - build
+  - test
+  - deploy
 
-osx:
+build:trusty:
   stage: build
   script:
-    - cd ./BuildServer/Darwin/Scripts
-    - ./package.sh
-  tags:
-    - mac
+  - ./BuildServer/Debian/run_build.sh
   only:
-    - tags
-    - triggers
+  - tags
+  - triggers
+  tags:
+  - ubuntu14.04
   allow_failure: false
-  artifacts:
-    paths:
-    - BuildServer/Darwin/Build/*.dmg
 
-windows:
-  stage: build
+test:trusty:
+  stage: test
   script:
-    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/package.sh"
-    - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh setup
-    - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh build
-  artifacts:
-    paths:
-    - BuildServer/Windows/Build/MDANSE*.exe
-  only:
-    - tags
-    - triggers
-  tags:
-    - windows
+  - ./BuildServer/Debian/run_test.sh
   allow_failure: false
 
-linux:
-   stage: build
-   script:
-     - ./BuildServer/Debian/build_deb.sh amd64 trusty
-   artifacts:
-     paths:
-     - BuildServer/Debian/Build/*.deb
-   only:
-     - tags
-     - triggers
-   tags:
-     - ubuntu14.04
-   allow_failure: false
+deploy:trusty:
+  stage: deploy
+  script:
+  - ./BuildServer/Debian/run_deploy.sh amd64 trusty
+  artifacts:
+    paths:
+    - ./BuildServer/Debian/Build/*.deb
+
+#osx:
+#  stage: build
+#  script:
+#    - cd ./BuildServer/Darwin/Scripts
+#    - ./package.sh
+#  tags:
+#    - mac
+#  only:
+#    - tags
+#    - triggers
+#  allow_failure: false
+#  artifacts:
+#    paths:
+#    - BuildServer/Darwin/Build/*.dmg
+
+#windows:
+#  stage: build
+#  script:
+#    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/package.sh"
+#    - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh setup
+#    - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh build
+#  artifacts:
+#    paths:
+#    - BuildServer/Windows/Build/MDANSE*.exe
+#  only:
+#    - tags
+#    - triggers
+#  tags:
+#    - windows
+#  allow_failure: false
+
+#linux:
+#   stage: build
+#   script:
+#     - ./BuildServer/Debian/build_deb.sh amd64 trusty
+#   artifacts:
+#     paths:
+#     - BuildServer/Debian/Build/*.deb
+#   only:
+#     - tags
+#     - triggers
+#   tags:
+#     - ubuntu14.04
+#   allow_failure: false
