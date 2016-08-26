@@ -4,5 +4,5 @@ __date__ = "April 2015"
 
 __author__ = "Eric Pellegrini"
 
-__revision__ = "undefined"
+__build__ = "undefined"
 
