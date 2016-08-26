@@ -40,7 +40,7 @@ import wx
 import wx.aui as aui
  
 from MDANSE import DATA_CONTROLLER, LOGGER, PLATFORM, REGISTRY
-from MDANSE.__pkginfo__ import __version__, __revision__
+from MDANSE.__pkginfo__ import __version__
 from MDANSE.Framework.Jobs.Converters.Converter import Converter
 from MDANSE.GUI.ControllerPanel import ControllerPanel
 from MDANSE.GUI.DataTreePanel import DataTreePanel
@@ -228,14 +228,9 @@ class MainFrame(wx.Frame):
         DATA_CONTROLLER[data.filename] = data
 
     def on_about(self, event=None):
-        
-        if __revision__ is "undefined":
-            rev=""
-        else:
-            rev=" (%s)" % __revision__
-                        
+                                
         about_str = \
-"""MDANSE version %s%s.
+"""MDANSE version %s.
 
 An interactive program for analyzing Molecular Dynamics simulations.
 
@@ -243,7 +238,7 @@ Authors:
 \tEric C. Pellegrini
 \tGael Goret
 \tBachir Aoun
-""" % (__version__,rev)
+""" % (__version__,)
         
         d = wx.MessageDialog(self, about_str, 'About', style=wx.OK|wx.ICON_INFORMATION)
         d.ShowModal()
