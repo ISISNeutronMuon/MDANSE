@@ -40,12 +40,6 @@ cd $CI_PROJECT_DIR
 REV_NUMBER=$(git rev-list --count HEAD)
 echo -e "$BLEU""Revision number = ${REV_NUMBER}<--" "$NORMAL"
 
-# Add current revision number to python source code (will appear in "About..." dialog)
-# see http://stackoverflow.com/questions/7648328/getting-sed-error
-sed -i "s/.*__version__.*/__version__ = \"${VERSION_NAME}\"/" MDANSE/__pkginfo__.py
-sed -i "s/.*__revision__.*/__revision__ = \"${REV_NUMBER}\"/" MDANSE/__pkginfo__.py
-sed -i "s/.*__date__.*/__date__ = \"`date +"%d-%m-%Y"`\"/" MDANSE/__pkginfo__.py
-
 # Now build last version
 echo "$BLEU""Building MDANSE" "$NORMAL"
 python setup.py build
