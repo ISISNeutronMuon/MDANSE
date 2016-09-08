@@ -11,15 +11,17 @@ build:trusty:
     - ./BuildServer/Debian/run_build.sh
   only:
     - tags
+  allow_failure: false
   tags:
     - ubuntu14.04
-  allow_failure: false
 
 test:trusty:
   stage: test
   script:
     - ./BuildServer/Debian/run_tests.sh
   allow_failure: false
+  tags:
+    - ubuntu14.04
 
 deploy:trusty:
   stage: deploy
@@ -31,6 +33,8 @@ deploy:trusty:
   artifacts:
     paths:
     - ./BuildServer/Debian/Build/*.deb
+  tags:
+    - ubuntu14.04
 
 # osx pipeline
 
@@ -39,9 +43,9 @@ build:osx:
   script:
     - cd ./BuildServer/Darwin/Scripts
     - ./run_build.sh
-  tags:
-    - ubuntu14.04
   allow_failure: false
+  tags:
+    - mac
 
 test:osx:
   stage: test
@@ -49,6 +53,8 @@ test:osx:
     - cd ./BuildServer/Darwin/Scripts
     - ./run_tests.sh
   allow_failure: false
+  tags:
+    - mac
 
 deploy:osx:
   stage: deploy
@@ -61,6 +67,8 @@ deploy:osx:
   artifacts:
     paths:
     - ./BuildServer/Debian/Build/*.deb
+  tags:
+    - mac
 
 #osx:
 #  stage: build
