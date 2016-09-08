@@ -3,27 +3,61 @@ stages:
   - test
   - deploy
 
+# trusty pipeline
+
 build:trusty:
   stage: build
   script:
-  - ./BuildServer/Debian/run_build.sh
+    - ./BuildServer/Debian/run_build.sh
   only:
-  - tags
-  - triggers
+    - tags
   tags:
-  - ubuntu14.04
+    - ubuntu14.04
   allow_failure: false
 
 test:trusty:
   stage: test
   script:
-  - ./BuildServer/Debian/run_tests.sh
+    - ./BuildServer/Debian/run_tests.sh
   allow_failure: false
 
 deploy:trusty:
   stage: deploy
   script:
-  - ./BuildServer/Debian/run_deploy.sh amd64 trusty
+    - ./BuildServer/Debian/run_deploy.sh amd64 trusty
+  only:
+    - tags
+  when: on_success
+  artifacts:
+    paths:
+    - ./BuildServer/Debian/Build/*.deb
+
+# osx pipeline
+
+build:osx:
+  stage: build
+  script:
+    - cd ./BuildServer/Darwin/Scripts
+    - ./run_build.sh
+  tags:
+    - ubuntu14.04
+  allow_failure: false
+
+test:osx:
+  stage: test
+  script:
+    - cd ./BuildServer/Darwin/Scripts
+    - ./run_tests.sh
+  allow_failure: false
+
+deploy:osx:
+  stage: deploy
+  script:
+    - cd ./BuildServer/Darwin/Scripts
+    - ./run_deploy.sh
+  only:
+    - tags
+  when: on_success
   artifacts:
     paths:
     - ./BuildServer/Debian/Build/*.deb
@@ -58,17 +92,3 @@ deploy:trusty:
 #  tags:
 #    - windows
 #  allow_failure: false
-
-#linux:
-#   stage: build
-#   script:
-#     - ./BuildServer/Debian/build_deb.sh amd64 trusty
-#   artifacts:
-#     paths:
-#     - BuildServer/Debian/Build/*.deb
-#   only:
-#     - tags
-#     - triggers
-#   tags:
-#     - ubuntu14.04
-#   allow_failure: false
