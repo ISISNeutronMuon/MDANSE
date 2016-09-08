@@ -66,24 +66,9 @@ deploy:osx:
   when: on_success
   artifacts:
     paths:
-    - ./BuildServer/Debian/Build/*.deb
+      - BuildServer/Darwin/Build/*.dmg
   tags:
     - mac
-
-#osx:
-#  stage: build
-#  script:
-#    - cd ./BuildServer/Darwin/Scripts
-#    - ./package.sh
-#  tags:
-#    - mac
-#  only:
-#    - tags
-#    - triggers
-#  allow_failure: false
-#  artifacts:
-#    paths:
-#    - BuildServer/Darwin/Build/*.dmg
 
 #windows:
 #  stage: build
