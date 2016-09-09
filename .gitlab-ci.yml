@@ -102,5 +102,5 @@ deploy:windows:
     paths:
       - BuildServer/Windows/Build/MDANSE*.exe
   tags:
-    - window
+    - windows
 

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# RUN FROM c:\cygwin64\bin\bash c:\Users\Administrateur\Desktop\BUILD\package.sh
-
 #############################
 # CONFIGURATION
 #############################
@@ -16,6 +14,7 @@ if [ -n "${RUN_NIGHTLY_BUILD}" ]
 then
     VERSION_NAME="devel"
 else
+    echo ${CI_BUILD_TAG}
     if [[ ${CI_BUILD_TAG} =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]
     then
         VERSION_NAME=${BASH_REMATCH[1]}
