@@ -10,19 +10,7 @@ else
     BUILD_TARGET=$1
 fi
 
-if [ -n "${RUN_NIGHTLY_BUILD}" ]
-then
-    VERSION_NAME="devel"
-else
-    echo ${CI_BUILD_TAG}
-    if [[ ${CI_BUILD_TAG} =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]
-    then
-        VERSION_NAME=${BASH_REMATCH[1]}
-    else
-        echo "Invalid version number ${CI_BUILD_TAG}"
-        exit
-    fi
-fi
+VERSION_NAME=`python -c "execfile('MDANSE\__pkginfo__.py') ; print __version__`
 
 if [ "$BUILD_TARGET" = "win32" ]; then
 	PYTHON_SUFFIX=""
