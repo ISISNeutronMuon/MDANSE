@@ -70,18 +70,37 @@ deploy:osx:
   tags:
     - mac
 
-#windows:
-#  stage: build
-#  script:
-#    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/package.sh"
-#    - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh setup
-#    - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh build
-#  artifacts:
-#    paths:
-#    - BuildServer/Windows/Build/MDANSE*.exe
-#  only:
-#    - tags
-#    - triggers
-#  tags:
-#    - windows
-#  allow_failure: false
+# windows 7 pipeline
+
+build:windows:
+  stage: build
+  script:
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_build.sh"
+    - c:\cygwin64\bin\bash .\BuildServer\Windows\run_build.sh
+  allow_failure: false
+  tags:
+    - windows
+
+test:windows:
+  stage: test
+  script:
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_tests.sh"
+    - c:\cygwin64\bin\bash .\BuildServer\Windows\run_tests.sh
+  allow_failure: false
+  tags:
+    - windows
+
+deploy:windows:
+  stage: deploy
+  script:
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_deploy.sh"
+    - c:\cygwin64\bin\bash .\BuildServer\Windows\run_deploy.sh
+  only:
+    - tags
+  when: on_success
+  artifacts:
+    paths:
+      - BuildServer/Windows/Build/MDANSE*.exe
+  tags:
+    - window
+
