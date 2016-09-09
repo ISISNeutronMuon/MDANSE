@@ -9,8 +9,6 @@ build:trusty:
   stage: build
   script:
     - ./BuildServer/Debian/run_build.sh
-  only:
-    - tags
   allow_failure: false
   tags:
     - ubuntu14.04
