@@ -195,10 +195,6 @@ cd ${CI_PROJECT_DIR}
 REV_NUMBER=$(git rev-list --count HEAD)
 echo "Revision number is $REV_NUMBER"
 
-# Add current revision number to python source code (will appear in "About..." dialog)
-sed -i '' 's/.*__version__.*/__version__ = \"${VERSION_NAME}\"/' MDANSE/__pkginfo__.py
-sed -i '' 's/.*__revision__.*/__revision__ = \"${REV_NUMBER}\"/' MDANSE/__pkginfo__.py
-
 # setup the environment for a visual studio build of MDANSE using microsoft SDK 7.0 and build MDANSE
 echo "MDANSE setup and build"
 
