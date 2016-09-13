@@ -10,7 +10,7 @@ else
     BUILD_TARGET=$1
 fi
 
-VERSION_NAME=`cat MDANSE\__pkginfo__.py | sed "s/__version__\s*=\s*'\(.*\)'/\1/"`
+VERSION_NAME=`cat MDANSE/__pkginfo__.py | sed "s/__version__\s*=\s*'\(.*\)'/\1/"`
 
 if [ "$BUILD_TARGET" = "win32" ]; then
 	PYTHON_SUFFIX=""
