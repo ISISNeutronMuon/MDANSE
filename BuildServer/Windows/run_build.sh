@@ -10,7 +10,7 @@ else
     BUILD_TARGET=$1
 fi
 
-VERSION_NAME=`python -c "execfile('MDANSE\__pkginfo__.py') ; print __version__`
+VERSION_NAME=`python -c "execfile('MDANSE\__pkginfo__.py') ; print __version__"`
 
 if [ "$BUILD_TARGET" = "win32" ]; then
 	PYTHON_SUFFIX=""
