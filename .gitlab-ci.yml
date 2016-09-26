@@ -12,9 +12,9 @@ build:trusty:
   allow_failure: false
   tags:
     - ubuntu14.04
-  artefacts:
+  artifacts:
     paths:
-    -  ./build
+    - ./build
 test:trusty:
   stage: test
   script:
