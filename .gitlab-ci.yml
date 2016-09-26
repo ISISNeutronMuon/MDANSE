@@ -12,7 +12,9 @@ build:trusty:
   allow_failure: false
   tags:
     - ubuntu14.04
-
+  cache:
+    paths:
+    -  ./build
 test:trusty:
   stage: test
   script:
@@ -34,9 +36,7 @@ deploy:trusty:
     - ./BuildServer/Debian/Build/*.deb
   tags:
     - ubuntu14.04
-  cache:
-    paths:
-    -  ./build
+
 
 # osx pipeline
 
