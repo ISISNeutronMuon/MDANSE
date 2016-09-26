@@ -22,6 +22,9 @@ test:trusty:
   allow_failure: false
   tags:
     - ubuntu14.04
+  cache:
+    paths:
+    -  ./build
 
 deploy:trusty:
   stage: deploy
