@@ -10,7 +10,7 @@ else
     BUILD_TARGET=$1
 fi
 
-VERSION_NAME=`python -c "execfile('MDANSE\__pkginfo__.py') ; print __version__`
+VERSION_NAME=`cat MDANSE/__pkginfo__.py | sed "s/__version__\s*=\s*'\(.*\)'/\1/"`
 
 if [ "$BUILD_TARGET" = "win32" ]; then
 	PYTHON_SUFFIX=""
@@ -194,10 +194,6 @@ cd ${CI_PROJECT_DIR}
 # Get revision number from GIT
 REV_NUMBER=$(git rev-list --count HEAD)
 echo "Revision number is $REV_NUMBER"
-
-# Add current revision number to python source code (will appear in "About..." dialog)
-sed -i '' 's/.*__version__.*/__version__ = \"${VERSION_NAME}\"/' MDANSE/__pkginfo__.py
-sed -i '' 's/.*__revision__.*/__revision__ = \"${REV_NUMBER}\"/' MDANSE/__pkginfo__.py
 
 # setup the environment for a visual studio build of MDANSE using microsoft SDK 7.0 and build MDANSE
 echo "MDANSE setup and build"
