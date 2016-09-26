@@ -12,7 +12,7 @@ build:trusty:
   allow_failure: false
   tags:
     - ubuntu14.04
-  cache:
+  artefacts:
     paths:
     -  ./build
 test:trusty:
@@ -22,9 +22,8 @@ test:trusty:
   allow_failure: false
   tags:
     - ubuntu14.04
-  cache:
-    paths:
-    -  ./build
+  dependencies:
+    - build:trusty
 
 deploy:trusty:
   stage: deploy
