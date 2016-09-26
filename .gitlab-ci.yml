@@ -14,7 +14,7 @@ build:trusty:
     - ubuntu14.04
   artifacts:
     paths:
-    - ./build
+    - build
 test:trusty:
   stage: test
   script:
