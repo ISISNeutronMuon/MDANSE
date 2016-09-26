@@ -4,7 +4,6 @@ stages:
   - deploy
 
 # trusty pipeline
-
 build:trusty:
   stage: build
   script:
