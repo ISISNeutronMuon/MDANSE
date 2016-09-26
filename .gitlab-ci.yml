@@ -1,47 +1,108 @@
 stages:
   - build
+  - test
+  - deploy
 
-osx:
+# trusty pipeline
+
+build:trusty:
+  stage: build
+  script:
+    - ./BuildServer/Debian/run_build.sh
+  allow_failure: false
+  tags:
+    - ubuntu14.04
+
+test:trusty:
+  stage: test
+  script:
+    - ./BuildServer/Debian/run_tests.sh
+  allow_failure: false
+  tags:
+    - ubuntu14.04
+
+deploy:trusty:
+  stage: deploy
+  script:
+    - ./BuildServer/Debian/run_deploy.sh amd64 trusty
+  only:
+    - tags
+    - hotfix-.*
+  when: on_success
+  artifacts:
+    paths:
+    - ./BuildServer/Debian/Build/*.deb
+  tags:
+    - ubuntu14.04
+
+# osx pipeline
+
+build:osx:
   stage: build
   script:
     - cd ./BuildServer/Darwin/Scripts
-    - ./package.sh
+    - ./run_build.sh
+  allow_failure: false
   tags:
     - mac
+
+test:osx:
+  stage: test
+  script:
+    - cd ./BuildServer/Darwin/Scripts
+    - ./run_tests.sh
+  allow_failure: false
+  tags:
+    - mac
+
+deploy:osx:
+  stage: deploy
+  script:
+    - cd ./BuildServer/Darwin/Scripts
+    - ./run_deploy.sh
   only:
     - tags
-    - triggers
-  allow_failure: false
+    - hotfix-.*
+  when: on_success
   artifacts:
     paths:
-    - BuildServer/Darwin/Build/*.dmg
+      - BuildServer/Darwin/Build/*.dmg
+  tags:
+    - mac
 
-windows:
+# windows 7 pipeline
+
+build:windows:
   stage: build
   script:
-    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/package.sh"
-    - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh setup
-    - c:\cygwin64\bin\bash .\BuildServer\Windows\package.sh build
-  artifacts:
-    paths:
-    - BuildServer/Windows/Build/MDANSE*.exe
-  only:
-    - tags
-    - triggers
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_build.sh"
+    - c:\cygwin64\bin\bash .\BuildServer\Windows\run_build.sh
+  allow_failure: false
   tags:
     - windows
-  allow_failure: false
 
-linux:
-   stage: build
-   script:
-     - ./BuildServer/Debian/build_deb.sh amd64 trusty
-   artifacts:
-     paths:
-     - BuildServer/Debian/Build/*.deb
-   only:
-     - tags
-     - triggers
-   tags:
-     - ubuntu14.04
-   allow_failure: false
+test:windows:
+  stage: test
+  script:
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_tests.sh"
+    - c:\cygwin64\bin\bash -c "chmod a+x .\BuildServer\Windows\run_tests.sh"
+    - c:\cygwin64\bin\bash .\BuildServer\Windows\run_tests.sh
+  allow_failure: false
+  tags:
+    - windows
+
+deploy:windows:
+  stage: deploy
+  script:
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_deploy.sh"
+    - c:\cygwin64\bin\bash .\BuildServer\Windows\run_deploy.sh
+  only:
+    - tags
+    - hotfix-.*
+  when: on_success
+  artifacts:
+    paths:
+      - BuildServer/Windows/Build/MDANSE*.exe
+  tags:
+    - windows
+
