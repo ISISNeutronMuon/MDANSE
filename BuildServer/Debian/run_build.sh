@@ -7,6 +7,8 @@ export DISTRO=$2
 # CONFIGURATION
 #############################
 
+echo "BUID REF NAME --> ${CI_BUILD_REF_NAME}"
+
 ## Add some colors
 ROUGE="\\033[1;31m"
 BLEU="\\033[1;34m"
