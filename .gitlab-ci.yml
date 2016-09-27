@@ -4,6 +4,7 @@ stages:
   - deploy
 
 # trusty pipeline
+
 build:trusty:
   stage: build
   script:
@@ -14,6 +15,7 @@ build:trusty:
   artifacts:
     paths:
     - build
+
 test:trusty:
   stage: test
   script:
@@ -31,13 +33,13 @@ deploy:trusty:
   only:
     - tags
     - hotfix-.*
+    - develop
   when: on_success
   artifacts:
     paths:
     - ./BuildServer/Debian/Build/*.deb
   tags:
     - ubuntu14.04
-
 
 # osx pipeline
 
