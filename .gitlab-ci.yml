@@ -86,7 +86,7 @@ build:windows:
   allow_failure: false
   artifacts:
     paths:
-    - Build
+    - .\BuildServer\Windows\Build
   tags:
     - windows
 
