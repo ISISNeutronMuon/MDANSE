@@ -34,7 +34,7 @@ import os
 import shutil
 import unittest
 
-from MDANSE import PREFERENCES
+from MDANSE.Core.Preferences import Preferences
 from MDANSE.Core.Preferences import PreferencesError
 from UnitTest import UnitTest
 
@@ -44,6 +44,10 @@ class UnStringable:
         raise TypeError("Object not castable to a string.")
 
 class TestPreferences(UnitTest):
+
+    def setUp(self):
+                
+        PREFERENCES = Preferences()
     
     def test_get_item(self):
         
