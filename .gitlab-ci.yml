@@ -56,8 +56,7 @@ build:osx:
 test:osx:
   stage: test
   script:
-    - cd ./BuildServer/Darwin/Scripts
-    - ./run_tests.sh
+    - ./BuildServer/Darwin/Scripts/run_tests.sh
   allow_failure: false
   tags:
     - mac
@@ -65,8 +64,7 @@ test:osx:
 deploy:osx:
   stage: deploy
   script:
-    - cd ./BuildServer/Darwin/Scripts
-    - ./run_deploy.sh
+    - ./BuildServer/Darwin/Scripts/run_deploy.sh
   only:
     - master
     - develop
