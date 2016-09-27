@@ -11,7 +11,7 @@ export DISTRO=$2
 ROUGE="\\033[1;31m"
 BLEU="\\033[1;34m"
 
-VERSION_NAME=`sed -n "sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' __pkginfo__.py" MDANSE/__pkginfo__.py`
+VERSION_NAME=`sed -n "sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' MDANSE/__pkginfo__.py`
 if [ -n "${CI_BUILD_REF_NAME}" ]
 then
     VERSION_NAME=${VERSION_NAME}-${CI_BUILD_REF}
