@@ -60,6 +60,8 @@ stages:
 #  allow_failure: false
 #  tags:
 #    - mac
+#  dependencies:
+#    - build:osx
 
 #deploy:osx:
 #  stage: deploy
@@ -99,6 +101,8 @@ test:windows:
   allow_failure: false
   tags:
     - windows
+ dependencies:
+   - build:windows
 
 # deploy:windows:
 #   stage: deploy
