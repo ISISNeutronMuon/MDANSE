@@ -6,11 +6,13 @@ export PYTHONPATH=${CI_PROJECT_DIR}/build/lib.linux-x86_64-2.7
 
 # Performs the unit tests
 cd Tests/UnitTests
-nosetests --verbosity=3 -P .
+test=`nosetests --verbosity=3 -P .`
+echo "test=$test"
 cd ../..
 
 # Performs the functional tests
 cd Tests/FunctionalTests/Jobs
 python BuildJobTests.py
-nosetests --verbosity=3 --exe -P .
+test=`nosetests --verbosity=3 --exe -P .`
+echo "test1=$test"
 
