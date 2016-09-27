@@ -90,15 +90,15 @@ build:windows:
   tags:
     - windows
 
-# test:windows:
-#   stage: test
-#   script:
-#     - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_tests.sh"
-#     - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_tests.sh"
-#     - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_tests.sh"
-#   allow_failure: false
-#   tags:
-#     - windows
+test:windows:
+  stage: test
+  script:
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_tests.sh"
+    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_tests.sh"
+    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_tests.sh"
+  allow_failure: false
+  tags:
+    - windows
 
 # deploy:windows:
 #   stage: deploy
