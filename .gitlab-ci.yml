@@ -31,8 +31,7 @@ deploy:trusty:
   script:
     - ./BuildServer/Debian/run_deploy.sh amd64 trusty
   only:
-    - tags
-    - hotfix-.*
+    - master
     - develop
   when: on_success
   artifacts:
