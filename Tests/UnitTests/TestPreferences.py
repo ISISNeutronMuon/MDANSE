@@ -48,6 +48,10 @@ class TestPreferences(UnitTest):
     def setUp(self):
                 
         PREFERENCES = Preferences()
+
+    def tearDown(self):
+
+        pass
     
     def test_get_item(self):
         
