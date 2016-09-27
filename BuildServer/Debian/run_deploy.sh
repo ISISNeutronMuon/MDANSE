@@ -12,9 +12,9 @@ ROUGE="\\033[1;31m"
 BLEU="\\033[1;34m"
 
 VERSION_NAME=`sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' MDANSE/__pkginfo__.py`
-if [ -n "${CI_BUILD_REF_NAME}" ]
+if [ "${CI_BUILD_REF_NAME}" -eq "develop"]
 then
-    VERSION_NAME=${VERSION_NAME}-${CI_BUILD_REF}
+    VERSION_NAME=${VERSION_NAME}-`git rev-parse --short HEAD`
 fi
 
 ##Select the build target
