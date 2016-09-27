@@ -101,8 +101,8 @@ test:windows:
   allow_failure: false
   tags:
     - windows
- dependencies:
-   - build:windows
+  dependencies:
+    - build:windows
 
 # deploy:windows:
 #   stage: deploy
