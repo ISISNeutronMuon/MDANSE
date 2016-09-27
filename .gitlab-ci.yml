@@ -104,19 +104,19 @@ test:windows:
   dependencies:
     - build:windows
 
-# deploy:windows:
-#   stage: deploy
-#   script:
-#     - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_deploy.sh"
-#     - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_deploy.sh"
-#     - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_deploy.sh"
-#   only:
-#     - tags
-#     - hotfix-.*
-#   when: on_success
-#   artifacts:
-#     paths:
-#       - BuildServer/Windows/Build/MDANSE*.exe
-#   tags:
-#     - windows
+deploy:windows:
+  stage: deploy
+  script:
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_deploy.sh"
+    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_deploy.sh"
+    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_deploy.sh"
+  only:
+    - master
+    - develop
+  when: on_success
+  artifacts:
+    paths:
+      - BuildServer/Windows/Build/MDANSE*.exe
+  tags:
+    - windows
 
