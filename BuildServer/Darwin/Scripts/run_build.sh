@@ -10,16 +10,10 @@
 ROUGE="\\033[1;31m"
 BLEU="\\033[1;34m"
 
-VERSION_NAME=`python -c "execfile('MDANSE/__pkginfo__.py') ; print __version__`
-export VERSION_NAME
-
 ##Select the build target
 BUILD_TARGET=darwin
 
 cd ../../../
-
-# Which version name are we appending to the final archive
-TARGET_DIR=MDANSE-${VERSION_NAME}-${BUILD_TARGET}
 
 # take the latest version of nmoldyn available on the forge
 echo -e "$BLEU""Getting last MDANSE revision" "$NORMAL"
