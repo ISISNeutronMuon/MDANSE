@@ -13,7 +13,7 @@ else
 fi
 
 VERSION_NAME=`sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' MDANSE/__pkginfo__.py`
-if [ "${CI_BUILD_REF_NAME}" -eq "develop" ]
+if [ "${CI_BUILD_REF_NAME}" == "develop" ]
 then
     VERSION_NAME=${VERSION_NAME}-`git rev-parse --short HEAD`
 fi
