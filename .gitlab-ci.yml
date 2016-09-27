@@ -5,77 +5,77 @@ stages:
 
 # trusty pipeline
 
-#build:trusty:
-#  stage: build
-#  script:
-#    - ./BuildServer/Debian/run_build.sh
-#  allow_failure: false
-#  artifacts:
-#    paths:
-#    - build
-#  tags:
-#    - ubuntu14.04
+build:trusty:
+  stage: build
+  script:
+    - ./BuildServer/Debian/run_build.sh
+  allow_failure: false
+  artifacts:
+    paths:
+    - build
+  tags:
+    - ubuntu14.04
 
-#test:trusty:
-#  stage: test
-#  script:
-#    - ./BuildServer/Debian/run_tests.sh
-#  allow_failure: false
-#  tags:
-#    - ubuntu14.04
-#  dependencies:
-#    - build:trusty
+test:trusty:
+  stage: test
+  script:
+    - ./BuildServer/Debian/run_tests.sh
+  allow_failure: false
+  tags:
+    - ubuntu14.04
+  dependencies:
+    - build:trusty
 
-#deploy:trusty:
-#  stage: deploy
-#  script:
-#    - ./BuildServer/Debian/run_deploy.sh amd64 trusty
-#  only:
-#    - master
-#    - develop
-#  when: on_success
-#  artifacts:
-#    paths:
-#    - ./BuildServer/Debian/Build/*.deb
-#  tags:
-#    - ubuntu14.04
+deploy:trusty:
+  stage: deploy
+  script:
+    - ./BuildServer/Debian/run_deploy.sh amd64 trusty
+  only:
+    - master
+    - develop
+  when: on_success
+  artifacts:
+    paths:
+    - ./BuildServer/Debian/Build/*.deb
+  tags:
+    - ubuntu14.04
 
 # osx pipeline
 
-#build:osx:
-#  stage: build
-#  script:
-#    - ./BuildServer/Darwin/Scripts/run_build.sh
-#  allow_failure: false
-#  artifacts:
-#    paths:
-#    - build
-#  tags:
-#    - mac
+build:osx:
+  stage: build
+  script:
+    - ./BuildServer/Darwin/Scripts/run_build.sh
+  allow_failure: false
+  artifacts:
+    paths:
+    - build
+  tags:
+    - mac
 
-#test:osx:
-#  stage: test
-#  script:
-#    - ./BuildServer/Darwin/Scripts/run_tests.sh
-#  allow_failure: false
-#  tags:
-#    - mac
-#  dependencies:
-#    - build:osx
+test:osx:
+  stage: test
+  script:
+    - ./BuildServer/Darwin/Scripts/run_tests.sh
+  allow_failure: false
+  tags:
+    - mac
+  dependencies:
+    - build:osx
 
-#deploy:osx:
-#  stage: deploy
-#  script:
-#    - ./BuildServer/Darwin/Scripts/run_deploy.sh
-#  only:
-#    - master
-#    - develop
-#  when: on_success
-#  artifacts:
-#    paths:
-#      - BuildServer/Darwin/Build/*.dmg
-#  tags:
-#    - mac
+deploy:osx:
+  stage: deploy
+  script:
+    - ./BuildServer/Darwin/Scripts/run_deploy.sh
+  only:
+    - master
+    - develop
+  when: on_success
+  artifacts:
+    paths:
+      - BuildServer/Darwin/Build/*.dmg
+  tags:
+    - mac
 
 # # windows 7 pipeline
 
