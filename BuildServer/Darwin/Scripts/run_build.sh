@@ -13,8 +13,6 @@ BLEU="\\033[1;34m"
 ##Select the build target
 BUILD_TARGET=darwin
 
-cd ../../../
-
 # take the latest version of nmoldyn available on the forge
 echo -e "$BLEU""Getting last MDANSE revision" "$NORMAL"
 
