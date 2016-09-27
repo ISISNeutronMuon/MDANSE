@@ -10,8 +10,6 @@ else
     BUILD_TARGET=$1
 fi
 
-VERSION_NAME=`cat MDANSE/__pkginfo__.py | sed "s/__version__\s*=\s*'\(.*\)'/\1/"`
-
 if [ "$BUILD_TARGET" = "win32" ]; then
 	PYTHON_SUFFIX=""
 	MSVC_BUILD_TARGET="/x86"
@@ -54,7 +52,6 @@ if [ -e "$TARGET_DIR_CYGWIN" ]; then
 	rm -rf ${TARGET_DIR_CYGWIN}
 fi
 
-
 DEPENDENCIES_DIR=${CI_WINDOWS_DEPENDENCIES_PATH_UNIX}/${BUILD_TARGET}
 
 PYTHON_MSI=python-${PYTHON_VERSION}${PYTHON_SUFFIX}.msi
@@ -65,7 +62,7 @@ cmd /c "msiexec  /L* pythonlog.txt /qn /a ${PYTHON_MSI_WIN} TARGETDIR=${TARGET_D
 
 # Exit now if something goes wrong
 if [ $? -ne 0 ]; then
-	status = $?
+	status=$?
 	echo "Failed to extract python"
 	exit status
 fi
@@ -205,7 +202,7 @@ cmd /V:ON /E:ON /C "setup_and_build.bat" "${CI_PROJECT_DIR_WIN}" "${TARGET_DIR}"
 
 # Exit now if unable to build
 if [ $? -ne 0 ]; then
-	status = $?
+	status=$?
 	echo "Failed to build MDANSE"
 	exit status
 fi

@@ -34,7 +34,7 @@ import os
 import shutil
 import unittest
 
-from MDANSE import PREFERENCES
+from MDANSE.Core.Preferences import Preferences
 from MDANSE.Core.Preferences import PreferencesError
 from UnitTest import UnitTest
 
@@ -44,17 +44,21 @@ class UnStringable:
         raise TypeError("Object not castable to a string.")
 
 class TestPreferences(UnitTest):
+
+    def setUp(self):
+                
+        self._preferences = Preferences()
     
     def test_get_item(self):
         
-        self.assertRaises(PreferencesError,PREFERENCES.__getitem__,'xxxxx')
+        self.assertRaises(PreferencesError,self._preferences.__getitem__,'xxxxx')
 
     def test_set_item(self):
         
-        val = PREFERENCES["working_directory"].get_value()
-        PREFERENCES["working_directory"].set_value("test")
-        self.assertEqual(PREFERENCES["working_directory"].value,os.path.join(os.getcwd(),"test"))
-        PREFERENCES["working_directory"].set_value(val)
+        val = self._preferences["working_directory"].get_value()
+        self._preferences["working_directory"].set_value("test")
+        self.assertEqual(self._preferences["working_directory"].value,os.path.join(os.getcwd(),"test"))
+        self._preferences["working_directory"].set_value(val)
         
         shutil.rmtree("test")
                 
@@ -64,7 +68,7 @@ class TestPreferences(UnitTest):
         '''
         
         # Test that loading a preferences file whose type is not a basestring throw a PreferencesError
-        self.assertRaises(PreferencesError,PREFERENCES.load,10)
+        self.assertRaises(PreferencesError,self._preferences.load,10)
 
     def test_save_preferences(self):
         '''
@@ -72,9 +76,9 @@ class TestPreferences(UnitTest):
         '''
         
         # Test that saving a preferences file whose type is not a basestring throw a PreferencesError
-        self.assertRaises(PreferencesError,PREFERENCES.save,10)
+        self.assertRaises(PreferencesError,self._preferences.save,10)
         # Test that saving a preferences whose path does not exists throw a PreferencesError
-        self.assertRaises(PreferencesError,PREFERENCES.save,os.path.join('xxxx','yyyy'))
+        self.assertRaises(PreferencesError,self._preferences.save,os.path.join('xxxx','yyyy'))
 
 def suite():
     loader = unittest.TestLoader()

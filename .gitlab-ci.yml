@@ -4,16 +4,18 @@ stages:
   - deploy
 
 # trusty pipeline
+
 build:trusty:
   stage: build
   script:
     - ./BuildServer/Debian/run_build.sh
   allow_failure: false
-  tags:
-    - ubuntu14.04
   artifacts:
     paths:
     - build
+  tags:
+    - ubuntu14.04
+
 test:trusty:
   stage: test
   script:
@@ -29,8 +31,8 @@ deploy:trusty:
   script:
     - ./BuildServer/Debian/run_deploy.sh amd64 trusty
   only:
-    - tags
-    - hotfix-.*
+    - master
+    - develop
   when: on_success
   artifacts:
     paths:
@@ -38,77 +40,83 @@ deploy:trusty:
   tags:
     - ubuntu14.04
 
-
 # osx pipeline
 
-# build:osx:
-#   stage: build
-#   script:
-#     - cd ./BuildServer/Darwin/Scripts
-#     - ./run_build.sh
-#   allow_failure: false
-#   tags:
-#     - mac
+build:osx:
+  stage: build
+  script:
+    - ./BuildServer/Darwin/Scripts/run_build.sh
+  allow_failure: false
+  artifacts:
+    paths:
+    - build
+  tags:
+    - mac
 
-# test:osx:
-#   stage: test
-#   script:
-#     - cd ./BuildServer/Darwin/Scripts
-#     - ./run_tests.sh
-#   allow_failure: false
-#   tags:
-#     - mac
+test:osx:
+  stage: test
+  script:
+    - ./BuildServer/Darwin/Scripts/run_tests.sh
+  allow_failure: false
+  tags:
+    - mac
+  dependencies:
+    - build:osx
 
-# deploy:osx:
-#   stage: deploy
-#   script:
-#     - cd ./BuildServer/Darwin/Scripts
-#     - ./run_deploy.sh
-#   only:
-#     - tags
-#     - hotfix-.*
-#   when: on_success
-#   artifacts:
-#     paths:
-#       - BuildServer/Darwin/Build/*.dmg
-#   tags:
-#     - mac
+deploy:osx:
+  stage: deploy
+  script:
+    - ./BuildServer/Darwin/Scripts/run_deploy.sh
+  only:
+    - master
+    - develop
+  when: on_success
+  artifacts:
+    paths:
+      - BuildServer/Darwin/Build/*.dmg
+  tags:
+    - mac
 
 # # windows 7 pipeline
 
-# build:windows:
-#   stage: build
-#   script:
-#     - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_build.sh"
-#     - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_build.sh"
-#     - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_build.sh"
-#   allow_failure: false
-#   tags:
-#     - windows
+build:windows:
+  stage: build
+  script:
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_build.sh"
+    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_build.sh"
+    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_build.sh"
+  allow_failure: false
+  artifacts:
+    paths:
+    - .\BuildServer\Windows\Build
+  tags:
+    - windows
 
-# test:windows:
-#   stage: test
-#   script:
-#     - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_tests.sh"
-#     - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_tests.sh"
-#     - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_tests.sh"
-#   allow_failure: false
-#   tags:
-#     - windows
+test:windows:
+  stage: test
+  script:
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_tests.sh"
+    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_tests.sh"
+    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_tests.sh"
+  allow_failure: false
+  tags:
+    - windows
+  dependencies:
+    - build:windows
 
-# deploy:windows:
-#   stage: deploy
-#   script:
-#     - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_deploy.sh"
-#     - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_deploy.sh"
-#     - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_deploy.sh"
-#   only:
-#     - tags
-#     - hotfix-.*
-#   when: on_success
-#   artifacts:
-#     paths:
-#       - BuildServer/Windows/Build/MDANSE*.exe
-#   tags:
-#     - windows
+deploy:windows:
+  stage: deploy
+  script:
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_deploy.sh"
+    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_deploy.sh"
+    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_deploy.sh"
+  only:
+    - master
+    - develop
+  when: on_success
+  artifacts:
+    paths:
+      - BuildServer/Windows/Build/MDANSE*.exe
+  tags:
+    - windows
 

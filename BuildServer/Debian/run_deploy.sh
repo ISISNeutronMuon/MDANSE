@@ -11,16 +11,10 @@ export DISTRO=$2
 ROUGE="\\033[1;31m"
 BLEU="\\033[1;34m"
 
-if [ -n "${RUN_NIGHTLY_BUILD}" ]
+VERSION_NAME=`sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' MDANSE/__pkginfo__.py`
+if [ "${CI_BUILD_REF_NAME}" == "develop" ]
 then
-    VERSION_NAME="devel"
-else
-    if [[ $CI_BUILD_TAG =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-        VERSION_NAME=${BASH_REMATCH[1]}
-    else
-        echo -e "$ROUGE""Invalid version number ${CI_BUILD_TAG}" "$NORMAL"
-        exit
-    fi
+    VERSION_NAME=${VERSION_NAME}-`git rev-parse --short HEAD`
 fi
 
 ##Select the build target
