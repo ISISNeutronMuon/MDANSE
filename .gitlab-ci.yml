@@ -10,6 +10,9 @@ build:trusty:
   script:
     - ./BuildServer/Debian/run_build.sh
   allow_failure: false
+  only:
+    - tags
+    - develop
   artifacts:
     paths:
     - build
@@ -21,17 +24,20 @@ test:trusty:
   script:
     - ./BuildServer/Debian/run_tests.sh
   allow_failure: false
-  tags:
-    - ubuntu14.04
+  only:
+    - tags
+    - develop
   dependencies:
     - build:trusty
+  tags:
+    - ubuntu14.04
 
 deploy:trusty:
   stage: deploy
   script:
     - ./BuildServer/Debian/run_deploy.sh amd64 trusty
   only:
-    - master
+    - tags
     - develop
   when: on_success
   artifacts:
