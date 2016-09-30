@@ -11,8 +11,11 @@ build:trusty:
     - ./BuildServer/Debian/run_build.sh
   allow_failure: false
   only:
+    - triggers
+    - tags
     - /^feature-.*$/
     - /^release-.*$/
+    - /^hotfix-.*$/
     - develop
   artifacts:
     paths:
