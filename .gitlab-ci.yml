@@ -24,8 +24,7 @@ build:trusty:
 #     - ./BuildServer/Debian/run_tests.sh
 #   allow_failure: false
 #   only:
-#     - tags
-#     - develop
+#     - /^feature-.*$/
 #   dependencies:
 #     - build:trusty
 #   tags:
