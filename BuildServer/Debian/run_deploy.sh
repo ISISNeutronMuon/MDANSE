@@ -17,6 +17,7 @@ if [[ ${CI_BUILD_REF_NAME} =~ feature- ]]
 then
     VERSION_NAME=${VERSION_NAME}-`git rev-parse --short HEAD`
 elif [ -n "${WEEKLY_BUILD}" ]
+then
     VERSION_NAME=${VERSION_NAME}-"weekly-build-"`date +%Y-%m-%d`
 fi
 
