@@ -12,6 +12,7 @@ build:trusty:
   allow_failure: false
   only:
     - /^feature-.*$/
+    - develop
   artifacts:
     paths:
     - build
