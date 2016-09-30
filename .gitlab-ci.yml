@@ -46,7 +46,7 @@ deploy:trusty:
     - ./BuildServer/Debian/run_deploy.sh amd64 trusty
   only:
     - triggers
-	- tags
+    - tags
     - develop
   when: on_success
   artifacts:
