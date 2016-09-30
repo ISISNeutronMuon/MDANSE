@@ -12,6 +12,7 @@ build:trusty:
   allow_failure: false
   only:
     - /^feature-.*$/
+    - /^release-.*$/
     - develop
   artifacts:
     paths:
@@ -26,6 +27,8 @@ build:trusty:
 #   allow_failure: false
 #   only:
 #     - /^feature-.*$/
+    # - /^release-.*$/
+    # - develop
 #   dependencies:
 #     - build:trusty
 #   tags:
