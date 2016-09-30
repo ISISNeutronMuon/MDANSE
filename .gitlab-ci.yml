@@ -11,7 +11,7 @@ build:trusty:
     - ./BuildServer/Debian/run_build.sh
   allow_failure: false
   only:
-    - feature-*
+    - /^feature-.*$/
   artifacts:
     paths:
     - build
