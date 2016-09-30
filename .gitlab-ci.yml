@@ -16,7 +16,6 @@ build:trusty:
     - /^feature-.*$/
     - /^release-.*$/
     - /^hotfix-.*$/
-    - develop
   artifacts:
     paths:
     - build
