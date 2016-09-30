@@ -11,40 +11,39 @@ build:trusty:
     - ./BuildServer/Debian/run_build.sh
   allow_failure: false
   only:
-    - tags
-    - develop
+    - feature-*
   artifacts:
     paths:
     - build
   tags:
     - ubuntu14.04
 
-test:trusty:
-  stage: test
-  script:
-    - ./BuildServer/Debian/run_tests.sh
-  allow_failure: false
-  only:
-    - tags
-    - develop
-  dependencies:
-    - build:trusty
-  tags:
-    - ubuntu14.04
+# test:trusty:
+#   stage: test
+#   script:
+#     - ./BuildServer/Debian/run_tests.sh
+#   allow_failure: false
+#   only:
+#     - tags
+#     - develop
+#   dependencies:
+#     - build:trusty
+#   tags:
+#     - ubuntu14.04
 
-deploy:trusty:
-  stage: deploy
-  script:
-    - ./BuildServer/Debian/run_deploy.sh amd64 trusty
-  only:
-    - tags
-    - develop
-  when: on_success
-  artifacts:
-    paths:
-    - ./BuildServer/Debian/Build/*.deb
-  tags:
-    - ubuntu14.04
+# deploy:trusty:
+#   stage: deploy
+#   script:
+#     - ./BuildServer/Debian/run_deploy.sh amd64 trusty
+#   only:
+#     - tags
+#     - develop
+#   when: on_success
+#   artifacts:
+#     paths:
+#     - ./BuildServer/Debian/Build/*.deb
+#   tags:
+#     - ubuntu14.04
 
 # osx pipeline
 
