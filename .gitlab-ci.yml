@@ -16,6 +16,7 @@ build:trusty:
     - /^feature-.*$/
     - /^release-.*$/
     - /^hotfix-.*$/
+    - develop
   artifacts:
     paths:
     - build
@@ -33,6 +34,7 @@ test:trusty:
     - /^feature-.*$/
     - /^release-.*$/
     - /^hotfix-.*$/
+    - develop
   dependencies:
     - build:trusty
   tags:
@@ -44,6 +46,7 @@ deploy:trusty:
     - ./BuildServer/Debian/run_deploy.sh amd64 trusty
   only:
     - triggers
+    - develop
   when: on_success
   artifacts:
     paths:
