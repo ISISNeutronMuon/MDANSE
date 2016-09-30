@@ -43,7 +43,7 @@ deploy:trusty:
   script:
     - ./BuildServer/Debian/run_deploy.sh amd64 trusty
   only:
-    - develop
+    - triggers
   when: on_success
   artifacts:
     paths:
