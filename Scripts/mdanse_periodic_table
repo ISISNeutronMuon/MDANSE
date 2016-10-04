@@ -1,19 +1,9 @@
 #!python
 
-import wx
-
-from MDANSE.GUI.PeriodicTableViewer import PeriodicTableViewer
-
-class PeriodicTableViewerApp(wx.App):
-    
-    def OnInit(self):
-        
-        f = PeriodicTableViewer(None)
-        f.Show()
-        self.SetTopWindow(f)
-        return True
 
 if __name__ == "__main__":
+
+    from MDANSE.GUI.Apps import PeriodicTableViewerApp
     
     app = PeriodicTableViewerApp(None)
     app.MainLoop()

@@ -11,10 +11,16 @@ ROUGE="\\033[1;31m"
 BLEU="\\033[1;34m"
 
 VERSION_NAME=`sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' MDANSE/__pkginfo__.py`
-if [ "${CI_BUILD_REF_NAME}" == "develop" ]
+
+if [[ ${CI_BUILD_REF_NAME} =~ develop ]]
 then
+    if [ -n "${WEEKLY_BUILD}" ]
+    then
+        VERSION_NAME=${VERSION_NAME}-"weekly-"`date +%Y-%m-%d`
+    fi
     VERSION_NAME=${VERSION_NAME}-`git rev-parse --short HEAD`
 fi
+
 export VERSION_NAME
 
 ##Select the build target

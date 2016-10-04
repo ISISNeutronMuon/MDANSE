@@ -1,18 +1,8 @@
 #!/usr/bin/env python
 
-import wx
-
-from MDANSE.GUI.MainFrame import MainFrame
-
-class MainApplication(wx.App):
-    
-    def OnInit(self):
-        
-        f = MainFrame(None)
-        f.Show()
-        return True
-
 if __name__ == "__main__":
+
+    from MDANSE.GUI.Apps import MainApplication
 
     app = MainApplication(None)
     app.MainLoop()

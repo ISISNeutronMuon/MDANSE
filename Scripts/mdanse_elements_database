@@ -1,19 +1,8 @@
 #!python
 
-import wx
-
-from MDANSE.GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
-
-class ElementsDatabaseEditorApp(wx.App):
-    
-    def OnInit(self):
-        
-        f = ElementsDatabaseEditor(None)
-        f.Show()
-        self.SetTopWindow(f)
-        return True
-
 if __name__ == "__main__":
+
+    from MDANSE.GUI.Apps import ElementsDatabaseEditorApp
     
     app = ElementsDatabaseEditorApp(None)
     app.MainLoop()
