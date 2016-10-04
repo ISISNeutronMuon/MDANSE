@@ -20,6 +20,7 @@ build:trusty:
   artifacts:
     paths:
     - build
+    expire_in: 1 day
   tags:
     - ubuntu14.04
 
