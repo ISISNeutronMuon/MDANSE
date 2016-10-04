@@ -2,7 +2,7 @@ stages:
   - build
   - test
   - deploy
-
+ 
 # trusty pipeline
 
 build:trusty:
