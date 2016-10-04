@@ -17,10 +17,9 @@ if [[ ${CI_BUILD_REF_NAME} =~ develop ]]
 then
     if [ -n "${WEEKLY_BUILD}" ]
     then
-        VERSION_NAME=${VERSION_NAME}-"weekly-build-"`date +%Y-%m-%d`
-    else
-        VERSION_NAME=${VERSION_NAME}-`git rev-parse --short HEAD`
+        VERSION_NAME=${VERSION_NAME}-"weekly-"`date +%Y-%m-%d`
     fi
+    VERSION_NAME=${VERSION_NAME}-`git rev-parse --short HEAD`
 fi
 
 ##Select the build target
