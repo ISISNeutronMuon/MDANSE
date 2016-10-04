@@ -20,6 +20,7 @@ build:trusty:
   artifacts:
     paths:
     - build
+    expire_in: 1 day
   tags:
     - ubuntu14.04
 
@@ -57,81 +58,113 @@ deploy:trusty:
 
 # osx pipeline
 
-#build:osx:
-#  stage: build
-#  script:
-#    - ./BuildServer/Darwin/Scripts/run_build.sh
-#  allow_failure: false
-#  artifacts:
-#    paths:
-#    - build
-#  tags:
-#    - mac
+build:osx:
+  stage: build
+  script:
+    - ./BuildServer/Darwin/Scripts/run_build.sh
+  allow_failure: false
+  only:
+    - triggers
+    - tags
+    - /^feature-.*$/
+    - /^release-.*$/
+    - /^hotfix-.*$/
+    - develop
+  artifacts:
+    paths:
+    - build
+    expire_in: 1 day
+  tags:
+    - mac
 
-#test:osx:
-#  stage: test
-#  script:
-#    - ./BuildServer/Darwin/Scripts/run_tests.sh
-#  allow_failure: false
-#  tags:
-#    - mac
-#  dependencies:
-#    - build:osx
+test:osx:
+  stage: test
+  script:
+    - ./BuildServer/Darwin/Scripts/run_tests.sh
+  allow_failure: false
+  only:
+    - triggers
+    - tags
+    - /^feature-.*$/
+    - /^release-.*$/
+    - /^hotfix-.*$/
+    - develop
+  dependencies:
+    - build:osx
+  tags:
+    - mac
 
-#deploy:osx:
-#  stage: deploy
-#  script:
-#    - ./BuildServer/Darwin/Scripts/run_deploy.sh
-#  only:
-#    - master
-#    - develop
-#  when: on_success
-#  artifacts:
-#    paths:
-#      - BuildServer/Darwin/Build/*.dmg
-#  tags:
-#    - mac
+deploy:osx:
+  stage: deploy
+  script:
+    - ./BuildServer/Darwin/Scripts/run_deploy.sh
+  only:
+    - triggers
+    - tags
+    - develop
+  when: on_success
+  artifacts:
+    paths:
+     - BuildServer/Darwin/Build/*.dmg
+  tags:
+    - mac
 
 # # windows 7 pipeline
 
-#build:windows:
-#  stage: build
-#  script:
-#    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_build.sh"
-#    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_build.sh"
-#    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_build.sh"
-#  allow_failure: false
-#  artifacts:
-#    paths:
-#    - .\BuildServer\Windows\Build
-#  tags:
-#    - windows
+build:windows:
+  stage: build
+  script:
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_build.sh"
+    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_build.sh"
+    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_build.sh"
+  allow_failure: false
+  only:
+    - triggers
+    - tags
+    - /^feature-.*$/
+    - /^release-.*$/
+    - /^hotfix-.*$/
+    - develop
+  artifacts:
+    paths:
+    - .\BuildServer\Windows\Build
+    expire_in: 1 day
+  tags:
+    - windows
 
-#test:windows:
-#  stage: test
-#  script:
-#    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_tests.sh"
-#    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_tests.sh"
-#    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_tests.sh"
-#  allow_failure: false
-#  tags:
-#    - windows
-#  dependencies:
-#    - build:windows
+test:windows:
+  stage: test
+  script:
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_tests.sh"
+    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_tests.sh"
+    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_tests.sh"
+  allow_failure: false
+  only:
+    - triggers
+    - tags
+    - /^feature-.*$/
+    - /^release-.*$/
+    - /^hotfix-.*$/
+    - develop
+  dependencies:
+    - build:windows
+  tags:
+    - windows
 
-#deploy:windows:
-#  stage: deploy
-#  script:
-#    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_deploy.sh"
-#    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_deploy.sh"
-#    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_deploy.sh"
-#  only:
-#    - master
-#    - develop
-#  when: on_success
-#  artifacts:
-#    paths:
-#      - BuildServer/Windows/Build/MDANSE*.exe
-#  tags:
-#    - windows
+deploy:windows:
+  stage: deploy
+  script:
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_deploy.sh"
+    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_deploy.sh"
+    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_deploy.sh"
+  only:
+    - triggers
+    - tags
+    - develop
+  when: on_success
+  artifacts:
+    paths:
+     - BuildServer/Windows/Build/MDANSE*.exe
+  tags:
+    - windows
 
