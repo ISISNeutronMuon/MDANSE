@@ -367,21 +367,6 @@ class Platform(object):
         '''
         pass
 
-    def preferences_file(self):
-        '''
-        Returns the path for MDANSE preferences file.
-
-        :return: the path for the MDANSE preferences file
-        :rtype: string
-        
-        :note: this path is OS specific.
-        '''
-
-        # The preferences files will be located in the application directory.        
-        appdir = self.application_directory()
-        
-        return os.path.join(appdir, 'mdanse_preferences')
-
 class PlatformPosix(Platform):
     '''
     Base class for POSIX derived OS.

@@ -193,7 +193,6 @@ class MainFrame(wx.Frame):
         elementsDatabaseButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["atom",32,32], 'Launch the elements database editor')
         plotButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["plot",32,32], 'Launch the NetCDF plotter')
         udButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["user",32,32], 'Launch the user definitions editor')
-#         preferencesButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["preferences",32,32], 'Launch the preferences editor')
         registryButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["registry",32,32], 'Inspect MDANSE classes framework')
         templateButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["template",32,32], 'Save a template for a new analysis')
         apiButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["api",32,32], 'Open MDANSE API')
@@ -211,7 +210,6 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_open_periodic_table, periodicTableButton)
         self.Bind(wx.EVT_MENU, self.on_open_elements_database, elementsDatabaseButton)
         self.Bind(wx.EVT_MENU, self.on_start_plotter, plotButton)
-#         self.Bind(wx.EVT_MENU, self.on_set_preferences, preferencesButton)
         self.Bind(wx.EVT_MENU, self.on_open_user_definitions, udButton)
         self.Bind(wx.EVT_MENU, self.on_open_classes_registry, registryButton)
         self.Bind(wx.EVT_MENU, self.on_save_job_template, templateButton)
@@ -379,16 +377,6 @@ or directly to the MDANSE mailing list:
         d = wx.MessageDialog(None, 'Do you really want to quit ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
         if d.ShowModal() == wx.ID_YES:
             self.Destroy()
-
-#     def on_set_preferences(self, event):
-# 
-#         from MDANSE.GUI.PreferencesSettings import PreferencesSettings
-#         
-#         d = PreferencesSettings(self)
-#         
-#         d.ShowModal()
-#         
-#         d.Destroy()
                                                                          
     def on_start_plotter(self, event = None):
 
