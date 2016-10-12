@@ -36,11 +36,12 @@ class ControllerPanel(wx.Panel):
             il.Add(ICONS["log",16,16])
             il.Add(ICONS["shell",16,16])
             il.Add(ICONS["hourglass",16,16])
-            self._notebook.AssignImageList(il)
     
             self._notebook.AddPage(self._pages["logger"], 'Logger')                   
             self._notebook.AddPage(self._pages["console"], 'Console')
             self._notebook.AddPage(self._pages["jobs"], 'Jobs')
+
+            self._notebook.AssignImageList(il)
             
             self._notebook.SetPageImage(0, 0)
             self._notebook.SetPageImage(1, 1)
