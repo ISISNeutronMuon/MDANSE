@@ -231,8 +231,9 @@ class MolecularViewerPanel(ComponentPlugin):
         del self._surface
         self._surface = None
 
-    def msg_set_selection(self,plugin):
+    def msg_set_selection(self,message):
         
+        plugin = message.data        
         if not self.is_parent(plugin):
             return
                 
@@ -240,7 +241,7 @@ class MolecularViewerPanel(ComponentPlugin):
         
     def on_show_selection_box(self,message):
 
-        window,show = message
+        window,show = message.data
         
         if get_data_plugin(self) != get_data_plugin(window):
             return
@@ -249,7 +250,7 @@ class MolecularViewerPanel(ComponentPlugin):
 
     def on_enable_picking(self,message):
 
-        window,state = message
+        window,state = message.data
         
         if get_data_plugin(self) != get_data_plugin(window):
             return
@@ -334,7 +335,7 @@ class MolecularViewerPanel(ComponentPlugin):
         
         self._trajectoryLoaded = True
 
-        PUBLISHER.sendMessage('msg_set_trajectory', plugin=self)
+        PUBLISHER.sendMessage('msg_set_trajectory', data=self)
 
     def color_string_to_RGB(self, s):
         
@@ -597,7 +598,7 @@ class MolecularViewerPanel(ComponentPlugin):
         self.set_configuration(self._timerCounter)
         self._timerCounter += 1
         
-        PUBLISHER.sendMessage("msg_timer", plugin=self)
+        PUBLISHER.sendMessage("msg_timer", data=self)
 
     def set_rendering_mode(self, mode):
         if not self._trajectoryLoaded:
@@ -677,7 +678,7 @@ class MolecularViewerPanel(ComponentPlugin):
 
         self.show_selection(list(self.__pickedAtoms))
                         
-        PUBLISHER.sendMessage('msg_select_atoms_from_viewer', message = (self.dataplugin,list(self.__pickedAtoms)))
+        PUBLISHER.sendMessage('msg_select_atoms_from_viewer', data=(self.dataplugin,list(self.__pickedAtoms)))
 
     def box_atoms(self, atomsList):
                                 
@@ -733,7 +734,7 @@ class MolecularViewerPanel(ComponentPlugin):
                  
         UD_STORE.save()
                  
-        PUBLISHER.sendMessage("msg_set_ud")
+        PUBLISHER.sendMessage("msg_set_ud",data=None)
         
         LOGGER('User definition %r successfully set.' % name,'info',['console'])
                                                          
@@ -784,15 +785,16 @@ class MolecularViewerPanel(ComponentPlugin):
             self.stop_animation()
             
         if check:
-            PUBLISHER.sendMessage("msg_switch_viewers_state", viewer=self) 
+            PUBLISHER.sendMessage("msg_switch_viewers_state", data=self) 
             
-        PUBLISHER.sendMessage('msg_animate_trajectory', plugin=self)
+        PUBLISHER.sendMessage('msg_animate_trajectory', data=self)
     
-    def msg_switch_viewers_state(self, viewer):
+    def msg_switch_viewers_state(self, message):
                  
         if not self._animationLoop:
             return
         
+        viewer = message.data
         if viewer==self:
             return
          
@@ -1002,8 +1004,9 @@ class MolecularViewerPanel(ComponentPlugin):
                 
         return assembly
     
-    def msg_clear_selection(self,plugin):
+    def msg_clear_selection(self,message):
 
+        plugin = message.data
         if not self.is_parent(plugin):
             return
         

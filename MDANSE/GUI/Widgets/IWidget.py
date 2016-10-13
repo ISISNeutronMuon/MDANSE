@@ -108,8 +108,9 @@ class IWidget(wx.Panel):
     def set_data(self,datakey):
         pass
 
-    def _set_data(self,plugin):
+    def _set_data(self,message):
                 
+        plugin = message.data
         if not plugin.is_parent(self):
             return
         

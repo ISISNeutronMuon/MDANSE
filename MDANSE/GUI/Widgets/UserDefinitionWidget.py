@@ -59,7 +59,7 @@ class UserDefinitionDialog(wx.Dialog):
         
         self._plugin.set_trajectory(trajectory)
                 
-        PUBLISHER.sendMessage("msg_set_data", plugin=self._plugin)
+        PUBLISHER.sendMessage("msg_set_data", data=self._plugin)
         
     @property
     def plugin(self):
@@ -129,7 +129,7 @@ class UserDefinitionWidget(IWidget):
         
         self.msg_set_ud()
 
-    def msg_set_ud(self):
+    def msg_set_ud(self,message):
          
         uds = UD_STORE.filter(self._basename, self.type)
         

@@ -158,7 +158,7 @@ class IPlugin(wx.Panel):
         
         self._currentWindow = self
         
-        PUBLISHER.sendMessage('msg_set_plugins_tree', plugin=self)
+        PUBLISHER.sendMessage('msg_set_plugins_tree', data=self)
                                             
     def build_dialog(self):
 
@@ -198,6 +198,6 @@ class IPlugin(wx.Panel):
         
         self._currentWindow = window
 
-        PUBLISHER.sendMessage('msg_set_plugins_tree', plugin=window)
+        PUBLISHER.sendMessage('msg_set_plugins_tree', data=window)
                 
         

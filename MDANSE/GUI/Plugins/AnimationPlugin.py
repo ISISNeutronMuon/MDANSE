@@ -149,8 +149,9 @@ class AnimationPlugin(ComponentPlugin):
         self.speedSlider.SetValue(int(self.speedEntry.GetValue()))        
         self._parent.change_frame_rate()
                 
-    def msg_timer(self, plugin):
+    def msg_timer(self, message):
         
+        plugin = message.data
         if not plugin.is_parent(self):
             return
         
@@ -171,8 +172,9 @@ class AnimationPlugin(ComponentPlugin):
         
         self._parent.start_stop_animation()
 
-    def msg_update_animation_icon(self, plugin):
+    def msg_update_animation_icon(self, message):
  
+        plugin = message.data
         if not plugin.is_parent(self):
             return
                  
@@ -181,8 +183,9 @@ class AnimationPlugin(ComponentPlugin):
         else:
             self.startStop.SetBitmapLabel(ICONS["play",32,32])
 
-    def msg_set_trajectory(self, plugin):
-         
+    def msg_set_trajectory(self, message):
+        
+        plugin = message.data
         if not plugin.is_parent(self):
             return
  

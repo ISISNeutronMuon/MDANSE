@@ -169,11 +169,12 @@ class PluginsTreePanel(wx.Panel):
             
             self.set_plugins_tree(subnode, v)
         
-    def msg_set_plugins_tree(self, plugin):
+    def msg_set_plugins_tree(self,message):
                         
         if self._tree.GetCount() !=0:
             self._tree.DeleteChildren(self._root)
-                                                                
+                    
+        plugin = message.data                                            
         if plugin is None:
             return
         

@@ -64,7 +64,7 @@ class NetCDFInputWidget(IWidget):
         
         filename = event.GetString()
                 
-        PUBLISHER.sendMessage("msg_set_netcdf", message=(self,filename))
+        PUBLISHER.sendMessage("msg_set_netcdf", data=(self,filename))
 
     def set_data(self, datakey):
                         
@@ -77,7 +77,7 @@ class NetCDFInputWidget(IWidget):
         
         self._selectNetCDF.SetStringSelection(datakey)
         
-        PUBLISHER.sendMessage("msg_set_netcdf", message = (self,datakey))
+        PUBLISHER.sendMessage("msg_set_netcdf", data=(self,datakey))
                 
     def get_widget_value(self):
         

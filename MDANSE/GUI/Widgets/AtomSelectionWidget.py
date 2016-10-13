@@ -129,7 +129,7 @@ class AtomSelectionWidget(UserDefinitionWidget):
         else:
             return uds
 
-    def msg_set_ud(self):
+    def msg_set_ud(self,message):
          
         uds = UD_STORE.filter(self._basename, self.type)
         
