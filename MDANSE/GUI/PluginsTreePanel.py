@@ -36,7 +36,8 @@ import cPickle
 import wx
 
 from MDANSE import REGISTRY
-from MDANSE.Externals.pubsub import pub
+
+from MDANSE.GUI import PUBLISHER
 
 class DataObject(wx.TextDataObject):
 
@@ -60,7 +61,7 @@ class PluginsTreePanel(wx.Panel):
         self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_drag, self._tree)
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_double_click)
         
-        pub.subscribe(self.msg_set_plugins_tree, 'msg_set_plugins_tree')
+        PUBLISHER.subscribe(self.msg_set_plugins_tree, 'msg_set_plugins_tree')
         
         self.Bind(wx.EVT_WINDOW_DESTROY,self.OnDestroy)
         
@@ -70,7 +71,7 @@ class PluginsTreePanel(wx.Panel):
 
     def OnDestroy(self,event):
         
-        pub.subscribe(self.msg_set_plugins_tree, 'msg_set_plugins_tree')
+        PUBLISHER.subscribe(self.msg_set_plugins_tree, 'msg_set_plugins_tree')
         event.Skip()
 
     def build_panel(self):
@@ -168,11 +169,12 @@ class PluginsTreePanel(wx.Panel):
             
             self.set_plugins_tree(subnode, v)
         
-    def msg_set_plugins_tree(self, plugin):
+    def msg_set_plugins_tree(self,message):
                         
         if self._tree.GetCount() !=0:
             self._tree.DeleteChildren(self._root)
-                                                                
+                    
+        plugin = message.data                                            
         if plugin is None:
             return
         

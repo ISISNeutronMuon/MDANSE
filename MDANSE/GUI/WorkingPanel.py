@@ -33,9 +33,10 @@ Created on Apr 10, 2015
 import wx
 import wx.aui as wxaui
 
-from MDANSE import DATA_CONTROLLER, REGISTRY
+from MDANSE import REGISTRY
 
-from MDANSE.Externals.pubsub import pub
+from MDANSE.GUI import PUBLISHER
+from MDANSE.GUI.DataController import DATA_CONTROLLER
 
 class DropTarget(wx.TextDropTarget):
 
@@ -120,7 +121,7 @@ class WorkingPanel(wx.Panel):
         
         dataPlugin = self._notebook.GetPage(self._notebook.GetSelection())
                
-        pub.sendMessage('msg_set_plugins_tree', plugin=dataPlugin)
+        PUBLISHER.sendMessage('msg_set_plugins_tree', data=dataPlugin)
         
     def on_close_page(self, event):
 
@@ -130,5 +131,5 @@ class WorkingPanel(wx.Panel):
             return
         
         if self._notebook.GetPageCount() == 1:
-            pub.sendMessage('msg_set_plugins_tree', plugin=None)
+            PUBLISHER.sendMessage('msg_set_plugins_tree', data=None)
         

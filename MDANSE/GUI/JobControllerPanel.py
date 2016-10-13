@@ -43,8 +43,9 @@ import wx.lib.intctrl as intctrl
 
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
-from MDANSE.Externals.pubsub import pub
 from MDANSE.Framework.Status import convert_duration, total_seconds
+
+from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.Icons import ICONS
 from MDANSE.GUI.Events.JobControllerEvent import EVT_JOB_CONTROLLER, JobControllerEvent
         
@@ -217,7 +218,7 @@ class JobControllerPanel(wx.ScrolledWindow):
         
         self.Bind(wx.EVT_WINDOW_DESTROY,self.OnDestroy)
         
-        pub.subscribe(self.msg_start_job,"msg_start_job")
+        PUBLISHER.subscribe(self.msg_start_job,"msg_start_job")
 
     def __del__(self):
 
@@ -227,7 +228,7 @@ class JobControllerPanel(wx.ScrolledWindow):
             
     def OnDestroy(self,event):
         
-        pub.subscribe(self.msg_start_job,"msg_start_job")
+        PUBLISHER.subscribe(self.msg_start_job,"msg_start_job")
         event.Skip()
         
     def msg_start_job(self,message):
