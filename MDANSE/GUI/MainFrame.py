@@ -39,10 +39,11 @@ import webbrowser
 import wx
 import wx.aui as aui
  
-from MDANSE import DATA_CONTROLLER, LOGGER, PLATFORM, REGISTRY
+from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE.__pkginfo__ import __version__
 from MDANSE.Framework.Jobs.Converters.Converter import Converter
 from MDANSE.GUI.ControllerPanel import ControllerPanel
+from MDANSE.GUI.DataController import DATA_CONTROLLER
 from MDANSE.GUI.DataTreePanel import DataTreePanel
 from MDANSE.GUI.Icons import ICONS
 from MDANSE.GUI.PluginsTreePanel import PluginsTreePanel
@@ -344,7 +345,7 @@ or directly to the MDANSE mailing list:
 
     def on_open_converter(self,event):
 
-        from MDANSE.Framework.Plugins.JobPlugin import JobFrame
+        from MDANSE.GUI.Plugins.JobPlugin import JobFrame
 
         item = self.GetMenuBar().FindItemById(event.GetId())
         converter = item.GetText()
@@ -380,7 +381,7 @@ or directly to the MDANSE mailing list:
                                                                          
     def on_start_plotter(self, event = None):
 
-        from MDANSE.Framework.Plugins.Plotter.PlotterPlugin import PlotterFrame
+        from MDANSE.GUI.Plugins.Plotter.PlotterPlugin import PlotterFrame
         
         f = PlotterFrame(self)
         

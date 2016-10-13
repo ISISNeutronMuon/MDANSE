@@ -37,7 +37,6 @@ from __pkginfo__ import __version__, __author__, __date__
 
 from MDANSE.Logging.Logger import LOGGER
 
-from MDANSE.Core.DataController import DATA_CONTROLLER
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
 

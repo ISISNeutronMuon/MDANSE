@@ -32,8 +32,8 @@ Created on Apr 10, 2015
 
 import wx
 
-from MDANSE import DATA_CONTROLLER
-from MDANSE.Externals.pubsub import pub
+from MDANSE.GUI import PUBLISHER
+from MDANSE.GUI.DataController import DATA_CONTROLLER
 
 class DataObject(wx.TextDataObject):
 
@@ -58,8 +58,8 @@ class DataTreePanel(wx.Panel):
         
         self.Bind(wx.EVT_WINDOW_DESTROY,self.OnDestroy)
 
-        pub.subscribe(self.msg_load_input_data, 'msg_load_input_data')       
-        pub.subscribe(self.msg_delete_input_data, 'msg_delete_input_data')       
+        PUBLISHER.subscribe(self.msg_load_input_data, 'msg_load_input_data')       
+        PUBLISHER.subscribe(self.msg_delete_input_data, 'msg_delete_input_data')       
         
     @property
     def tree(self):
@@ -67,8 +67,8 @@ class DataTreePanel(wx.Panel):
     
     def OnDestroy(self,event):
         
-        pub.unsubscribe(self.msg_load_input_data, 'msg_load_input_data')       
-        pub.unsubscribe(self.msg_delete_input_data, 'msg_delete_input_data')       
+        PUBLISHER.unsubscribe(self.msg_load_input_data, 'msg_load_input_data')       
+        PUBLISHER.unsubscribe(self.msg_delete_input_data, 'msg_delete_input_data')       
         event.Skip()
     
     def msg_load_input_data(self, data):
