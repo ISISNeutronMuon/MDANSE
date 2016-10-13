@@ -358,7 +358,7 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
             return
                                 
         if not self._selectors.has_key(selectionFilter):
-            self._selectors[selectionFilter] = [str(v) for v in REGISTRY["selector"][selectionFilter](self._trajectory.universe).choices]
+            self._selectors[selectionFilter] = [str(v) for v in REGISTRY["selector"][selectionFilter](self._trajectory).choices]
         
         self.values.DeselectAll()
         
