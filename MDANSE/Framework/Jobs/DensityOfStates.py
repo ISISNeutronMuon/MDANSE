@@ -32,6 +32,7 @@ Created on Apr 10, 2015
 
 import collections
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation, differentiate, get_spectrum
@@ -43,8 +44,6 @@ class DensityOfStates(IJob):
 	It is determined as the power spectrum (Fourier transform) of the Velocity AutoCorrelation Function (VACF).
 	The partial Density of States corresponds to selected sets of atoms or molecules.
 	"""
-
-    type = 'dos'
     
     label = "Density Of States"
 
@@ -158,3 +157,5 @@ class DensityOfStates(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     
+
+REGISTRY['dos'] = DensityOfStates

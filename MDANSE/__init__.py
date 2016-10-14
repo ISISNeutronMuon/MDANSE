@@ -38,18 +38,21 @@ from __pkginfo__ import __version__, __author__, __date__
 from MDANSE.Logging.Logger import LOGGER
 
 from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Core.ClassRegistry import ClassRegistry as REGISTRY
+from MDANSE.Core.ClassRegistry import REGISTRY
 
 from MDANSE.Data.ElementsDatabase import ELEMENTS
 
-import Framework
+import MDANSE.Framework
 
 import os
+
+# MMTK hack for MMTK in case when freezing MDANSE
+os.environ["MMTKDATABASE"] = os.path.join(PLATFORM.package_directory(), 'Data')
+
+PLATFORM.create_directory(PLATFORM.macros_directory())
 
 # MMTK imports.
 from MMTK import Database
 
-PLATFORM.create_directory(PLATFORM.macros_directory())
-
-# The default databse is still the MMTK one
+# The default database is still the MMTK one
 Database.path.append(os.path.join(PLATFORM.package_directory(), 'Data'))

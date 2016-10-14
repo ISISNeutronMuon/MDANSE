@@ -39,7 +39,7 @@ from matplotlib.backends.backend_wxagg import NavigationToolbar2WxAgg as Navigat
 import wx
 
 from MDANSE import REGISTRY
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE.GUI.Widgets.IWidget import IWidget
 from MDANSE.GUI.DataController import DATA_CONTROLLER
 from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 
@@ -187,10 +187,8 @@ class InstrumentResolutionDialog(wx.Dialog):
 
         self.Fit()
 
-class InstrumentResolutionConfigurator(IWidget):
-    
-    type = "instrument_resolution"
-    
+class InstrumentResolutionWidget(IWidget):
+        
     def add_widgets(self):
         
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -234,6 +232,8 @@ class InstrumentResolutionConfigurator(IWidget):
         self._trajectory = DATA_CONTROLLER[datakey]
                         
         self._setResolution.Enable(True)
+    
+REGISTRY["instrument_resolution"] = InstrumentResolutionWidget
         
 if __name__ == "__main__":
             

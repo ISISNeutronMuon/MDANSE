@@ -2,7 +2,7 @@ import glob
 import os
 import platform
 
-from wx.lib.pubsub.pub import Publisher
+from MDANSE.Externals.pubsub.pub import Publisher
 
 PUBLISHER = Publisher()
 
@@ -14,33 +14,35 @@ from MDANSE import PLATFORM, REGISTRY
 from MDANSE.GUI.Plugins.DataPlugin import DataPlugin 
 from MDANSE.GUI.Plugins.JobPlugin import JobPlugin
 
-directories = sorted([x[0] for x in os.walk(os.path.dirname(__file__))][1:])
+from MDANSE.GUI.Handlers import *
+from MDANSE.GUI.Plugins import *
+from MDANSE.GUI.Widgets import *
 
-macrosDir = PLATFORM.macros_directory()
-directories.insert(0,macrosDir)
-directories.extend(sorted([x[0] for x in os.walk(macrosDir)][1:]))
-
-for d in directories:
-    REGISTRY.update_registry(d)
+macrosDirectories = sorted([x[0] for x in os.walk(PLATFORM.macros_directory())][0:])
+ 
+for d in macrosDirectories:
+    REGISTRY.update(d)
 
 for job in REGISTRY["job"].values():
 
-    if not hasattr(job, "type"):
+    if not hasattr(job, "_type"):
         continue
                     
-    attrs = {"type"      : job.type,
+    attrs = {"_type"     : job._type,
              "ancestor"  : getattr(job,'ancestor',job.ancestor),
              "category"  : getattr(job, "category", ("Miscellaneous",)),
              "label"     : getattr(job, "label", job.__name__)}
             
     kls = type("%sPlugin" % job.__name__, (JobPlugin,), attrs)
+    REGISTRY[job._type] = kls
 
 for data in REGISTRY["input_data"].values():
 
-    if not hasattr(data, "type"):
+    if not hasattr(data, "_type"):
         continue
 
-    attrs = {"type"     : data.type, 
+    attrs = {"_type"    : data._type, 
              "label"    : " ".join("".split("_")).capitalize(),
              "ancestor" : ['empty_data']}
     kls = type("%sPlugin" % data.__name__, (DataPlugin,), attrs)
+    REGISTRY[data._type] = kls

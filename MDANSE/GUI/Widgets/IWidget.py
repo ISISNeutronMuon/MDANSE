@@ -34,15 +34,11 @@ import abc
         
 import wx
 
-from MDANSE import REGISTRY
-
 from MDANSE.GUI import PUBLISHER
 
 class IWidget(wx.Panel):
-    
-    __metaclass__ = REGISTRY
-    
-    type = "widget"
+        
+    _registry = "widget"
 
     def __init__(self, parent, name, configurator, *args, **kwargs):
         

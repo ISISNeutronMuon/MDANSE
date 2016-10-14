@@ -36,7 +36,7 @@ import numpy
 
 from MMTK import Units
 
-from MDANSE import ELEMENTS
+from MDANSE import ELEMENTS, REGISTRY
 from MDANSE.Mathematics.Signal import differentiate
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory, sorted_atoms
@@ -50,8 +50,6 @@ class Temperature(IJob):
 	compared to the time step in the MD simulations (~fs) the 
 	velocities are averaged over many configurations and will not give accurate temperatures.
     """
-
-    type = 'temp'
     
     label = "Temperature"
 
@@ -138,3 +136,5 @@ class Temperature(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     
+
+REGISTRY['temp'] = Temperature

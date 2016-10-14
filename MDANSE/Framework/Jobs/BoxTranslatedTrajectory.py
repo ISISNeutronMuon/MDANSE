@@ -38,6 +38,7 @@ from MMTK.Collections import Collection
 from MMTK.ParticleProperties import Configuration
 from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
@@ -46,9 +47,7 @@ class BoxCenteredTrajectory(IJob):
     """
     Build a new trajectory by translating the contents of the simulation box such that a given atom selection is at the centre of the simulation box. 
     """
-    
-    type = 'btt'
-    
+        
     label = "Box Translated Trajectory"
 
     category = ('Analysis','Trajectory',)
@@ -150,3 +149,5 @@ class BoxCenteredTrajectory(IJob):
                                                     
         # The output trajectory is closed.
         self._btt.close()   
+
+REGISTRY['btt'] = BoxCenteredTrajectory

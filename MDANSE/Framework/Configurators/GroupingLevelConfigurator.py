@@ -33,6 +33,7 @@ Created on Mar 30, 2015
 import collections
 import operator
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import SingleChoiceConfigurator
 
 LEVELS = collections.OrderedDict()
@@ -57,9 +58,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
     * 'chain': the atoms that belongs to a MMTK AtomCluster or Molecule object will be grouped as a single atom per object while the ones that belongs to a MMTK NucleotideChain, PeptideChain or Protein object will be grouped according to the chain they belong to
     * 'molecule': the atoms that belongs to any MMTK chemical object will be grouped as a single atom per object
     """
-    
-    type = 'grouping_level'
-    
+        
     _default = "atom"
     
     def __init__(self, name, choices=None, **kwargs):
@@ -160,3 +159,5 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         '''
         
         return "Grouping level: %r\n" % self["value"]
+    
+REGISTRY['grouping_level'] = GroupingLevelConfigurator

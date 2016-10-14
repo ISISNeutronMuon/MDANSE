@@ -32,7 +32,7 @@ Created on Mar 30, 2015
 
 import os
 
-from MDANSE import PLATFORM
+from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
     
 class InputDirectoryConfigurator(IConfigurator):
@@ -41,9 +41,7 @@ class InputDirectoryConfigurator(IConfigurator):
      
     :attention: The directory will be created at configuration time if it does not exist.
     '''
-    
-    type = "input_directory"
-    
+        
     _default = os.getcwd()
 
     def configure(self, value):
@@ -71,3 +69,5 @@ class InputDirectoryConfigurator(IConfigurator):
         '''
         
         return "Input directory: %r" % self['value']
+    
+REGISTRY["input_directory"] = InputDirectoryConfigurator

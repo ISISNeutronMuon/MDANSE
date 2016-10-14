@@ -104,7 +104,7 @@ class PluginsTreePanel(wx.Panel):
             ancestors = []
             for anc in ancestor:
                 ancestors.append(anc)
-                ancestors.extend([c.type for c in REGISTRY['plugin'][anc].__subclasses__()])
+                ancestors.extend([c._type for c in REGISTRY['plugin'][anc].__subclasses__()])
             
             for a in ancestors:
 
@@ -113,7 +113,7 @@ class PluginsTreePanel(wx.Panel):
                 for cat in category:
                     d = d.setdefault(cat,collections.OrderedDict())
                         
-                d[kls.type] = True
+                d[kls._type] = True
                             
     def on_double_click(self, event):
         
@@ -159,7 +159,7 @@ class PluginsTreePanel(wx.Panel):
                 label = k
                 data = None
             else:
-                label = getattr(plugin,"label",plugin.type)
+                label = getattr(plugin,"label",plugin._type)
                 data = wx.TreeItemData(k)
                 
             subnode = self._tree.AppendItem(node, label, data=data)
@@ -178,6 +178,6 @@ class PluginsTreePanel(wx.Panel):
         if plugin is None:
             return
         
-        self.set_plugins_tree(self._root, self._hierarchy.get(plugin.type,{}))
+        self.set_plugins_tree(self._root, self._hierarchy.get(plugin._type,{}))
         
         self.TopLevelParent._mgr.Update()

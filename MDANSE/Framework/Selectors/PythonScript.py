@@ -33,13 +33,11 @@ Created on Mar 27, 2015
 import glob
 import os
 
-from MDANSE import PLATFORM
+from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
                 
 class PythonScript(ISelector):
-    
-    type = "python_script"
-    
+        
     section = 'miscellaneous'
     
     def __init__(self, trajectory):
@@ -73,3 +71,5 @@ class PythonScript(ISelector):
                 sel.update([self._rindexes[idx] for idx in namespace["selection"]])
                                         
         return sel
+    
+REGISTRY["python_script"] = PythonScript

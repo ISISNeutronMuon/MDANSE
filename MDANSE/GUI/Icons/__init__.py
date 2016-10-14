@@ -1,10 +1,10 @@
 import os
+import pkg_resources
+import sys
 
 import wx
 
 from MDANSE.Core.Singleton import Singleton
-
-root = os.path.dirname(__file__)
 
 class Icons(object):
     
@@ -14,8 +14,14 @@ class Icons(object):
 
         name, width, height = item
 
-        icon = os.path.join(root,name)+".png"
-
+        try:  
+            icon = pkg_resources.resource_filename(__name__,name+".png")
+        except:  
+            if hasattr(sys,'frozen'):
+                icon = os.path.join(os.path.dirname(sys.executable),name+".png")
+            else:
+                raise
+                
         image = wx.ImageFromBitmap(wx.Bitmap(icon))
         image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
         

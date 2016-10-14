@@ -30,6 +30,7 @@ Created on Jun 9, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 
@@ -37,9 +38,7 @@ class PythonScriptConfigurator(InputFileConfigurator):
     """
     This configurator allows to input a Python script.
     """
-    
-    type = 'python_script'
-    
+        
     _default = ''
         
     def __init__(self, name, variables=None, **kwargs):
@@ -106,3 +105,5 @@ class PythonScriptConfigurator(InputFileConfigurator):
                 info.append(v)
             
         return "\n".join(info)
+    
+REGISTRY['python_script'] = PythonScriptConfigurator

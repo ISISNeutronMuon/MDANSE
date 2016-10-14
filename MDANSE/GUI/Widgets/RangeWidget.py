@@ -32,13 +32,12 @@ Created on Mar 30, 2015
 
 import wx
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurable import ConfigurationError
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class RangeWidget(IWidget):
-
-    type = "range"
 
     def add_widgets(self):
 
@@ -82,3 +81,5 @@ class RangeWidget(IWidget):
             raise ConfigurationError("Invalid value for %r entry" % self.name)
         else:
             return val
+
+REGISTRY["range"] = RangeWidget

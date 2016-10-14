@@ -32,14 +32,13 @@ Created on Mar 30, 2015
 
 import wx
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurable import ConfigurationError
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class ProjectionWidget(IWidget):
     
-    type = "projection"
-
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -128,3 +127,5 @@ class ProjectionWidget(IWidget):
         
         self._panelAxial.Enable(rb == self._axial)
         self._panelPlanar.Enable(rb == self._planar)
+
+REGISTRY["projection"] = ProjectionWidget

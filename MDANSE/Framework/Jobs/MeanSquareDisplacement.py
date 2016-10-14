@@ -32,6 +32,7 @@ Created on Mar 30, 2015
 
 import collections
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
@@ -62,9 +63,7 @@ class MeanSquareDisplacement(IJob):
 	and the saturation value is reached more slowly.
 	The MSD can also reveal e.g. sub-diffusion regimes for the translational diffusion of lipids in membranes.
     """
-    
-    type = 'msd'
-    
+        
     label = "Mean Square Displacement"
 
     category = ('Analysis','Dynamics',)
@@ -156,4 +155,7 @@ class MeanSquareDisplacement(IJob):
         
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
-        self.configuration['trajectory']['instance'].close()     
+        self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['msd'] = MeanSquareDisplacement
+     

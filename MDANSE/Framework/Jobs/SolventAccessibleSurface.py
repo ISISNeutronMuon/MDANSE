@@ -34,7 +34,7 @@ import collections
 
 import numpy
 
-from MDANSE import ELEMENTS
+from MDANSE import ELEMENTS, REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import generate_sphere_points
 from MDANSE.Extensions import sas_fast_calc
@@ -59,8 +59,6 @@ class SolventAccessibleSurface(IJob):
     A typical value is 0.14 nm, which is approximately the radius of a water molecule. 
     Another factor that affects the result is the definition of the VDW radii of the atoms in the molecule under study.     
     """
-
-    type = 'sas'
 
     label = "Solvent Accessible Surface"
     
@@ -153,4 +151,7 @@ class SolventAccessibleSurface(IJob):
         # Write the output variables.
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
-        self.configuration['trajectory']['instance'].close()     
+        self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['sas'] = SolventAccessibleSurface
+     

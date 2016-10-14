@@ -33,12 +33,11 @@ Created on Mar 27, 2015
 from MMTK.NucleicAcids import NucleotideChain
 from MMTK.Proteins import PeptideChain, Protein
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class Macromolecule(ISelector):
-    
-    type = "macromolecule"
-    
+        
     section = "miscellaneous"
     
     lookup = {NucleotideChain:"nucleotide_chain",PeptideChain:"peptide_chain",Protein:"protein"}
@@ -73,3 +72,5 @@ class Macromolecule(ISelector):
                     sel.update([at for at in obj.atomList()])
 
         return sel
+
+REGISTRY["macromolecule"] = Macromolecule

@@ -37,6 +37,7 @@ import tarfile
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Externals.svgfig.svgfig import _hacks, Frame, Poly
 from MDANSE.Framework.Formats.IFormat import IFormat
 
@@ -53,8 +54,6 @@ class SVGFormat(IFormat):
     
     :attention: only the 1D output variables can be written in SVG file format.
     '''
-
-    type = 'svg'
     
     extension = ".svg"
     
@@ -114,3 +113,5 @@ class SVGFormat(IFormat):
             tf.addfile(tarinfo=info, fileobj=tempStr)
                 
         tf.close()
+
+REGISTRY['svg'] = SVGFormat

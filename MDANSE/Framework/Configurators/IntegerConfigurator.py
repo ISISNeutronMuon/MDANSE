@@ -30,15 +30,14 @@ Created on Mar 30, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
     
 class IntegerConfigurator(IConfigurator):
     """
     This Configurator allows to input an integer.
     """
-    
-    type = 'integer'
-    
+        
     _default = 0
     
     def __init__(self, name, mini=None, maxi=None, choices=None, **kwargs):
@@ -133,3 +132,5 @@ class IntegerConfigurator(IConfigurator):
         '''
         
         return "Value: %r" % self["value"]
+    
+REGISTRY['integer'] = IntegerConfigurator

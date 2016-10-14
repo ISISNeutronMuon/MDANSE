@@ -32,11 +32,10 @@ Created on Mar 27, 2015
 
 from MMTK.NucleicAcids import NucleotideChain
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
                                          
 class NucleotideType(ISelector):
-
-    type = "nucleotide_type"
 
     section = "nucleic acids"
 
@@ -81,3 +80,5 @@ class NucleotideType(ISelector):
                     pass
                 
         return sel
+
+REGISTRY["nucleotide_type"] = NucleotideType

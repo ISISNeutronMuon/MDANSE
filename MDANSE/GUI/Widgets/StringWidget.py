@@ -32,11 +32,11 @@ Created on Mar 30, 2015
 
 import wx
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE import REGISTRY
+
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class StringWidget(IWidget):
-
-    type = "string"
 
     def add_widgets(self):
         
@@ -53,3 +53,5 @@ class StringWidget(IWidget):
         val = self._string.GetValue()
 
         return val
+
+REGISTRY["string"] = StringWidget

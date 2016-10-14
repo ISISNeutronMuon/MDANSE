@@ -33,12 +33,11 @@ Created on Mar 30, 2015
 import wx
 import wx.lib.filebrowsebutton as wxfile
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE import REGISTRY
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class InputDirectoryWidget(IWidget):
-    
-    type = "input_directory"
-    
+        
     def add_widgets(self):
         
         default = self._configurator.default
@@ -57,3 +56,5 @@ class InputDirectoryWidget(IWidget):
         dirname = self._dirname.GetValue()
                                             
         return dirname
+    
+REGISTRY["input_directory"] = InputDirectoryWidget

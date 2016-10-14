@@ -34,14 +34,14 @@ import wx
 
 from MMTK.Trajectory import Trajectory
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurable import ConfigurationError
-from MDANSE.Framework.Widgets.IWidget import IWidget
+
 from MDANSE.GUI.DataController import DATA_CONTROLLER
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class MMTKTrajectoryWidget(IWidget):
-    
-    type = "mmtk_trajectory"
-        
+            
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -69,3 +69,5 @@ class MMTKTrajectoryWidget(IWidget):
             raise ConfigurationError("No MMTK trajectory file selected", self)
         
         return filename
+    
+REGISTRY["mmtk_trajectory"] = MMTKTrajectoryWidget

@@ -34,6 +34,7 @@ import collections
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Mathematics.Arithmetic import weight
 
@@ -41,8 +42,6 @@ class StaticStructureFactor(DistanceHistogram):
     """
     Computes the static structure factor from the pair distribution function for a set of atoms.
     """
-
-    type = 'ssf'
 
     label = "Static Structure Factor"
     
@@ -136,3 +135,5 @@ class StaticStructureFactor(DistanceHistogram):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['ssf'] = StaticStructureFactor

@@ -32,6 +32,7 @@ Created on May 22, 2015
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
         
 class RangeConfigurator(IConfigurator):
@@ -41,8 +42,6 @@ class RangeConfigurator(IConfigurator):
     By default the values are generated as a NumPy array.
     """
     
-    type = "range"
-
     _default = (0,10,1)
 
     def __init__(self, name, valueType=int, includeLast=False, sort=False, toList=False, mini=None, maxi=None, **kwargs):
@@ -207,3 +206,5 @@ class RangeConfigurator(IConfigurator):
             info += ("last value excluded")
          
         return info
+    
+REGISTRY["range"] = RangeConfigurator

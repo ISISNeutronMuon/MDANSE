@@ -52,7 +52,7 @@ class JobPlugin(ComponentPlugin):
         
     def __init__(self, parent, *args, **kwargs):
                 
-        self._job = REGISTRY["job"][self.type]()
+        self._job = REGISTRY["job"][self._type]()
         
         ComponentPlugin.__init__(self, parent, size=wx.Size(800,400), *args, **kwargs)
                 

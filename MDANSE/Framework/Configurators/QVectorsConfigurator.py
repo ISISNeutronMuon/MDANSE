@@ -52,9 +52,7 @@ class QVectorsConfigurator(IConfigurator):
     
     :note: this configurator depends on 'trajectory' configurator to be configured.
     """
-    
-    type = "q_vectors"
-    
+        
     _default = ("spherical_lattice",{"shells":(0.1,5,0.1), "width" : 0.1, "n_vectors" : 50})
 
     def configure(self, value):
@@ -88,7 +86,7 @@ class QVectorsConfigurator(IConfigurator):
                 raise ConfiguratorError("no Q vectors could be generated", self)
 
             self["parameters"] = parameters
-            self["type"] = generator.type
+            self["type"] = generator._type
             self["is_lattice"] = generator.is_lattice
             self["q_vectors"] = generator.configuration['q_vectors']
                                         
@@ -109,3 +107,5 @@ class QVectorsConfigurator(IConfigurator):
             info.append("Shell %s: %d Q vectors generated\n" % (qValue,len(qVectors)))
         
         return "".join(info)
+    
+REGISTRY["q_vectors"] = QVectorsConfigurator

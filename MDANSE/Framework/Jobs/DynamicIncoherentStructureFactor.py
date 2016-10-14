@@ -34,6 +34,7 @@ import collections
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation, get_spectrum
@@ -44,8 +45,6 @@ class DynamicIncoherentStructureFactor(IJob):
     Computes the dynamic incoherent structure factor S_inc(Q,w) for a set of atoms.
 	It can be compared to experimental data e.g. the quasielastic scattering due to diffusion processes.
     """
-
-    type = 'disf'
     
     label = "Dynamic Incoherent Structure Factor"
 
@@ -172,3 +171,5 @@ class DynamicIncoherentStructureFactor(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['disf'] = DynamicIncoherentStructureFactor

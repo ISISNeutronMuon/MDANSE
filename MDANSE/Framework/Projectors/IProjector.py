@@ -30,17 +30,14 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
-from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 
 class ProjectorError(Error):
     pass
 
 class IProjector(object):
-
-    __metaclass__ = REGISTRY
     
-    type = 'projector'
+    _registry = 'projector'
         
     def __init__(self):
         

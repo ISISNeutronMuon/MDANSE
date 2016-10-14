@@ -32,6 +32,7 @@ Created on May 26, 2015
 
 import logging.handlers
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Handlers.IHandler import IHandler
 
 class LogFileHandler(IHandler,logging.handlers.RotatingFileHandler):
@@ -39,8 +40,6 @@ class LogFileHandler(IHandler,logging.handlers.RotatingFileHandler):
     This class implements a logging.Handler subclass that will log messages on a rotating file. When the size of the file will exceed a given 
     amount of bytes, the file is closed and a new file is opened. 
     '''
-
-    type = "logfile"
         
     def __init__(self, filename, mode='a', maxBytes=1e7, backupCount=9, delay=True):
         '''
@@ -68,4 +67,6 @@ class LogFileHandler(IHandler,logging.handlers.RotatingFileHandler):
         '''
                 
         logging.handlers.RotatingFileHandler.__init__(self,filename, mode=mode, maxBytes=maxBytes, backupCount=backupCount, delay=delay)
+
+REGISTRY["logfile"] = LogFileHandler
                 

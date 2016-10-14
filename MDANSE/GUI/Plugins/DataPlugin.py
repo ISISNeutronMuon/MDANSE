@@ -48,9 +48,7 @@ def get_data_plugin(window):
             return None
                     
 class DataPlugin(IPlugin):
-    
-    type = None
-        
+            
     ancestor = []
     
     def __init__(self, parent, datakey, **kwargs):

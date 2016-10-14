@@ -30,6 +30,7 @@ Created on May 21, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
 class MultipleChoicesConfigurator(IConfigurator):
@@ -38,9 +39,7 @@ class MultipleChoicesConfigurator(IConfigurator):
      
     :attention: all the selected items must belong to the allowed selection list. 
     """
-    
-    type = "multiple_choices"
-    
+        
     _default = []
             
     def __init__(self, name, choices=None, nChoices=None, **kwargs):
@@ -114,3 +113,5 @@ class MultipleChoicesConfigurator(IConfigurator):
     def get_information(self):
         
         return "Selected items: %r" % self['choices']
+    
+REGISTRY["multiple_choices"] = MultipleChoicesConfigurator

@@ -32,17 +32,15 @@ Created on Mar 30, 2015
 
 import wx
 
-from MDANSE import ELEMENTS
+from MDANSE import ELEMENTS,REGISTRY
 
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
-from MDANSE.Framework.Widgets.AtomSelectionWidget import AtomSelectionWidget
+from MDANSE.GUI.Widgets.AtomSelectionWidget import AtomSelectionWidget
 from MDANSE.GUI.Icons import ICONS
 
 class AtomTransmutationWidget(AtomSelectionWidget):
-         
-    type = "atom_transmutation"
-    
+             
     udType = "atom_selection"
   
     def on_add_definition(self,event):
@@ -94,3 +92,5 @@ class AtomTransmutationWidget(AtomSelectionWidget):
             return None
         else:
             return uds
+        
+REGISTRY["atom_transmutation"] = AtomTransmutationWidget

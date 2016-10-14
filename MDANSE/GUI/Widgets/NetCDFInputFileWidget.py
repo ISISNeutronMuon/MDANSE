@@ -34,16 +34,15 @@ import wx
 
 from Scientific.IO.NetCDF import _NetCDFFile
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurable import ConfigurationError
-from MDANSE.Framework.Widgets.IWidget import IWidget
 
 from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.DataController import DATA_CONTROLLER
+from MDANSE.GUI.Widgets.IWidget import IWidget
     
-class NetCDFInputWidget(IWidget):
-    
-    type = "netcdf_input_file"
-    
+class NetCDFInputFileWidget(IWidget):
+        
     def __getattr__(self, attr):
         
         return self._netcdf.variables[attr].getValue()
@@ -87,3 +86,5 @@ class NetCDFInputWidget(IWidget):
             raise ConfigurationError("No NetCDF file selected", self)
         
         return filename
+    
+REGISTRY["netcdf_input_file"] = NetCDFInputFileWidget

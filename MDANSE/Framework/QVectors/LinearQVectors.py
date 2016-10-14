@@ -34,13 +34,12 @@ import collections
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 
 class LinearQVectors(IQVectors):
     """
     """
-
-    type = "linear"
 
     settings = collections.OrderedDict()
     settings['seed'] = ('integer', {"mini":0, "default":0})
@@ -80,3 +79,5 @@ class LinearQVectors(IQVectors):
                     return
                 else:
                     self._status.update()
+
+REGISTRY["linear"] = LinearQVectors

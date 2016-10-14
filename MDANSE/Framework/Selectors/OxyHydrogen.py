@@ -30,12 +30,11 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class OxyHydrogen(ISelector):
-    
-    type = "oxy_hydrogen"
-    
+        
     section = "hydrogens"
 
     def __init__(self, trajectory):
@@ -63,3 +62,4 @@ class OxyHydrogen(ISelector):
         
         return sel
     
+REGISTRY["oxy_hydrogen"] = OxyHydrogen

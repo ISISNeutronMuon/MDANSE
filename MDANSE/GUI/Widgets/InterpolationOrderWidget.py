@@ -32,13 +32,12 @@ Created on Mar 30, 2015
 
 import wx
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE import REGISTRY
 from MDANSE.GUI.DataController import DATA_CONTROLLER
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class InterpolationOrderWidget(IWidget):
     
-    type = "interpolation_order"
-
     def add_widgets(self):
         
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -68,3 +67,5 @@ class InterpolationOrderWidget(IWidget):
         value = self._interpolationOrder.GetStringSelection()
         
         return value
+
+REGISTRY["interpolation_order"] = InterpolationOrderWidget

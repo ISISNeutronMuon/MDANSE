@@ -43,13 +43,12 @@ from Scientific.IO.NetCDF import NetCDFFile
 from MMTK.Collections import Collection
 from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 
 class RigidBodyTrajectory(IJob):
     """
     """
-
-    type = 'rbt'
     
     label = 'Rigid Body Trajectory'
 
@@ -249,3 +248,5 @@ class RigidBodyTrajectory(IJob):
             FIT[comp,:] = self._fits[comp][:]
                          
         outputFile.close()
+        
+REGISTRY['rbt'] = RigidBodyTrajectory

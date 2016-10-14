@@ -32,12 +32,11 @@ Created on Mar 30, 2015
 
 import wx
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE import REGISTRY
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class BooleanWidget(IWidget):
-    
-    type = "boolean"
-    
+        
     def add_widgets(self):
         
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -52,3 +51,5 @@ class BooleanWidget(IWidget):
     def get_widget_value(self):
                 
         return self._boolean.GetValue()
+
+REGISTRY["boolean"] = BooleanWidget

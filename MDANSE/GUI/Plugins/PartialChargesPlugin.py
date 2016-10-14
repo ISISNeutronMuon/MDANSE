@@ -40,12 +40,10 @@ from MMTK import AtomCluster, Molecule
 from MMTK.NucleicAcids import NucleotideChain
 from MMTK.Proteins import PeptideChain, Protein
 
-from MDANSE import LOGGER
+from MDANSE import LOGGER, REGISTRY
 from MDANSE.GUI.Plugins.UserDefinitionPlugin import UserDefinitionPlugin
 
 class PartialChargesPlugin(UserDefinitionPlugin):
-
-    type = 'partial_charges'
 
     label = "Partial charges"
     
@@ -164,3 +162,5 @@ class PartialChargesPlugin(UserDefinitionPlugin):
             return None
         
         return {'charges' : charges}
+    
+REGISTRY["partial_charges"] = PartialChargesPlugin

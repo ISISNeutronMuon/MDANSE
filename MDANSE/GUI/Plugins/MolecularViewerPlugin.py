@@ -42,7 +42,7 @@ import wx.aui as aui
 
 from MMTK.Trajectory import Trajectory
 
-from MDANSE import ELEMENTS, LOGGER
+from MDANSE import ELEMENTS, LOGGER, REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
@@ -148,13 +148,11 @@ class SelectionBox(vtk.vtkBoxWidget):
 
         self.viewer.pick_atoms(selection,True)
 
-class MolecularViewerPanel(ComponentPlugin):
+class MolecularViewerPlugin(ComponentPlugin):
     '''
     This class sets up a molecular viewer using vtk functionnalities.
     '''
-        
-    type = "molecular_viewer"
-    
+            
     label = "Molecular Viewer"
     
     ancestor = ["mmtk_trajectory"]
@@ -1139,3 +1137,5 @@ def build_axes():
     axes.GetZAxisTipProperty().SetColor( 1, 0, 0 )
     axes.GetZAxisShaftProperty().SetColor( 1, 0, 0 )
     return axes
+
+REGISTRY["molecular_viewer"] = MolecularViewerPlugin

@@ -213,7 +213,7 @@ class Configurable(object):
         for k,v in cls.get_default_parameters().items():
             docstring += ">>> parameters[%r]=%r\n" % (k,v)
         docstring += ">>> \n"
-        docstring += ">>> job = REGISTRY['job'][%r]()\n" % cls.type            
+        docstring += ">>> job = REGISTRY['job'][%r]()\n" % cls._type            
         docstring += ">>> job.setup(parameters)\n"
         docstring += ">>> job.run()\n"
                                    

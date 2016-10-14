@@ -32,6 +32,7 @@ Created on Apr 10, 2015
 
 import collections
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation
@@ -41,9 +42,7 @@ class GeneralAutoCorrelationFunction(IJob):
     """
     Computes the autocorrelation for any available trajectory variable.
     """
-    
-    type = 'gacf'
-    
+        
     label = "General AutoCorrelation Function"
 
     category = ('Analysis','Dynamics',)
@@ -143,3 +142,5 @@ class GeneralAutoCorrelationFunction(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['gacf'] = GeneralAutoCorrelationFunction

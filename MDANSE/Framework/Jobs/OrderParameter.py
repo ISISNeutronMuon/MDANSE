@@ -38,6 +38,7 @@ import numpy
 from Scientific.Geometry import Vector
 from Scientific.Geometry.Transformation import angleFromSineAndCosine, Rotation 
 
+from MDANSE import REGISTRY
 from MDANSE.Mathematics.Signal import correlation
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
@@ -70,9 +71,7 @@ class OrderParameter(IJob):
     **Acknowledgement**\n
     AOUN Bachir, PELLEGRINI Eric
     """
-    
-    type = 'op'
-    
+        
     label = "Order parameter"
 
     category = ('Analysis','Dynamics',)
@@ -221,3 +220,5 @@ class OrderParameter(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     
+
+REGISTRY['op'] = OrderParameter

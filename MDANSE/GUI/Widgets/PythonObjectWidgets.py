@@ -34,12 +34,12 @@ import ast
 
 import wx
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE import REGISTRY
+
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class PythonObjectWidget(IWidget):
     
-    type = "python_object"
-
     def add_widgets(self):
         
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -55,3 +55,5 @@ class PythonObjectWidget(IWidget):
         val = self._string.GetValue()
 
         return ast.literal_eval(val)
+
+REGISTRY["python_object"] = PythonObjectWidget

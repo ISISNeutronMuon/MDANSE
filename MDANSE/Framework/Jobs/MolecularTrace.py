@@ -34,6 +34,7 @@ import collections
 
 import numpy 
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Extensions import mt_fast_calc
 
@@ -51,8 +52,6 @@ class MolecularTrace(IJob):
     Gael Goret, PELLEGRINI Eric
     
     """
-
-    type = 'mt'
 
     label = "Molecular Trace"
     
@@ -163,4 +162,5 @@ class MolecularTrace(IJob):
         
         self.configuration['trajectory']['instance'].close()     
   
+REGISTRY['mt'] = MolecularTrace
         

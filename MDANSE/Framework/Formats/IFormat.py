@@ -30,8 +30,6 @@ Created on May 26, 2015
 :author: Eric C. Pellegrini
 '''
 
-from MDANSE import REGISTRY
-
 class IFormat(object):
     '''
     This is the base class for writing MDANSE output data. In MDANSE, the output of an analysis can be written in different file format.
@@ -40,10 +38,8 @@ class IFormat(object):
     subclass of IFormat and overload the "write" class method as defined in IFormat base class which will actually write the output variables, 
     and redefine the "type", "extension" and "extensions" class attributes.
     '''
-    
-    __metaclass__ = REGISTRY
-    
-    type = "format"
+        
+    _registry = "format"
 
     @classmethod    
     def write(cls, filename, data, header=""):

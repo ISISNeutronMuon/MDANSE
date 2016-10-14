@@ -34,6 +34,7 @@ import collections
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 
 class CoordinationNumber(DistanceHistogram):
@@ -41,8 +42,6 @@ class CoordinationNumber(DistanceHistogram):
     The Coordination Number is computed from the pair distribution function for a set of atoms. 
     It describes the total number of neighbours, as a function of distance, from a central atom, or the centre of a group of atoms.
     """
-
-    type = 'cn'
 
     label = "Coordination Number"
     
@@ -133,3 +132,5 @@ class CoordinationNumber(DistanceHistogram):
         self.configuration['trajectory']['instance'].close()     
   
         DistanceHistogram.finalize(self)
+
+REGISTRY['cn'] = CoordinationNumber

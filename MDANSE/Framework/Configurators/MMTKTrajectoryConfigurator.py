@@ -47,9 +47,7 @@ class MMTKNetCDFTrajectoryConfigurator(InputFileConfigurator):
     
     :attention: once configured, the MMTK trajectory file will be opened for reading.    
     '''
-    
-    type = 'mmtk_trajectory'
-    
+        
     _default = os.path.join('..','..','..','Data','Trajectories','MMTK','waterbox_in_periodic_universe.nc')
                         
     def configure(self, value):
@@ -96,3 +94,5 @@ class MMTKNetCDFTrajectoryConfigurator(InputFileConfigurator):
             info.append("The trajectory contains atomic velocities\n")
         
         return "".join(info)
+    
+REGISTRY['mmtk_trajectory'] = MMTKNetCDFTrajectoryConfigurator

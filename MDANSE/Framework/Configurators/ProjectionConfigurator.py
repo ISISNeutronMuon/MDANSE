@@ -42,8 +42,6 @@ class ProjectionConfigurator(IConfigurator):
     in MDANSE.Framework.Projectors.IProjector.IProjector for the sake of homogeneity.
     '''
 
-    type = 'projection'
-
     _default = None
                         
     def configure(self, value):
@@ -90,3 +88,5 @@ class ProjectionConfigurator(IConfigurator):
             return "No projection performed\n"
         else: 
             return "Projection along %r axis\n" % self["axis"]
+
+REGISTRY['projection'] = ProjectionConfigurator

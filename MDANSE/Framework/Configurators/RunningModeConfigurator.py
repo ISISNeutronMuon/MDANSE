@@ -32,7 +32,7 @@ Created on May 22, 2015
 
 import os
 
-from MDANSE import PLATFORM
+from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
                         
 class RunningModeConfigurator(IConfigurator):
@@ -42,8 +42,6 @@ class RunningModeConfigurator(IConfigurator):
     MDANSE currently support monoprocessor or multiprocessor (SMP) running modes. In the laster case, you have to 
     specify the number of slots used for running the analysis.
     """
-
-    type = 'running_mode'
     
     availablesModes = ["monoprocessor","multiprocessor"]
     
@@ -104,3 +102,5 @@ class RunningModeConfigurator(IConfigurator):
         '''
         
         return "Run in %s mode (%d slots)" % (self["mode"],self["slots"])
+    
+REGISTRY['running_mode'] = RunningModeConfigurator

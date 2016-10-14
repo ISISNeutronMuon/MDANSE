@@ -32,7 +32,6 @@ Created on Mar 30, 2015
 
 import abc
 
-from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Configurable import Configurable
 
@@ -40,10 +39,8 @@ class QVectorsError(Error):
     pass
 
 class IQVectors(Configurable):
-    
-    __metaclass__ = REGISTRY
-    
-    type = "q_vectors"
+        
+    _registry = "q_vectors"
 
     is_lattice = False
             

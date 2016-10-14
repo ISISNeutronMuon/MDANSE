@@ -34,13 +34,12 @@ import collections
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 class MillerIndicesLatticeQVectors(LatticeQVectors):
     """
     """
-
-    type = 'miller_indices_lattice'
     
     settings = collections.OrderedDict()
     settings['shells'] = ('range', {"valueType":float, "includeLast":True, "mini":0.0})
@@ -94,3 +93,5 @@ class MillerIndicesLatticeQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
+
+REGISTRY["miller_indices_lattice"] = MillerIndicesLatticeQVectors

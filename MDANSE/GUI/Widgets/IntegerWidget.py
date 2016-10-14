@@ -33,12 +33,11 @@ Created on Mar 30, 2015
 import wx
 import wx.lib.intctrl as wxintctrl
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE import REGISTRY
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class IntegerWidget(IWidget):
-    
-    type = "integer"
-    
+        
     def add_widgets(self):
         
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -59,3 +58,5 @@ class IntegerWidget(IWidget):
         val = self._integer.GetValue()
 
         return val
+
+REGISTRY["integer"] = IntegerWidget

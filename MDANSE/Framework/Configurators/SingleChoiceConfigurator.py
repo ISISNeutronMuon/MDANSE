@@ -30,15 +30,14 @@ Created on May 22, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
 class SingleChoiceConfigurator(IConfigurator):
     """
      This Configurator allows to select a single item among multiple choices.
     """
-    
-    type = "single_choice"
-    
+        
     _default = []
             
     def __init__(self, name, choices=None, **kwargs):
@@ -90,3 +89,5 @@ class SingleChoiceConfigurator(IConfigurator):
         '''
         
         return "Selected item: %r" % self['value']
+    
+REGISTRY["single_choice"] = SingleChoiceConfigurator

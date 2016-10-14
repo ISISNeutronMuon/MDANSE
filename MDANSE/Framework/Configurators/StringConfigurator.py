@@ -32,15 +32,14 @@ Created on May 22, 2015
 
 import ast
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
  
 class StringConfigurator(IConfigurator):
     """
     This Configurator allows to input a string.
     """
-    
-    type = 'string'
-    
+        
     _default = ""
 
     def __init__(self, name, evalType=None, acceptNullString=True, **kwargs):
@@ -113,3 +112,5 @@ class StringConfigurator(IConfigurator):
         '''
         
         return "Value: %r" % self['value']
+    
+REGISTRY['string'] = StringConfigurator

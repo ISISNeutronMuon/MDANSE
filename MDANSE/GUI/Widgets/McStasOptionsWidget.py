@@ -34,14 +34,13 @@ import collections
 
 import wx
 
-from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurable import Configurable
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
-class McStasOptionsConfiguratorWidget(IWidget):
+class McStasOptionsWidget(IWidget):
      
-    type = "mcstas_options"
-
     _mcStasTypes = {'double' : 'float', 'int' : 'integer', 'str' : 'input_file'}
  
     def add_widgets(self):
@@ -67,3 +66,5 @@ class McStasOptionsConfiguratorWidget(IWidget):
         val = self._panel.get_value()
          
         return val
+    
+REGISTRY["mcstas_options"] = McStasOptionsWidget

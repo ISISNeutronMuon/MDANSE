@@ -34,11 +34,15 @@ import os
 
 import wx
 
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionDialog, UserDefinitionWidget
+from MDANSE import REGISTRY
+
+from MDANSE.GUI.Widgets.UserDefinitionWidget import UserDefinitionDialog, UserDefinitionWidget
 
 class PartialChargesWidget(UserDefinitionWidget):
-        
-    type = "partial_charges"
+    
+    pass
+
+REGISTRY["partial_charges"] = PartialChargesWidget
                             
 if __name__ == "__main__":
     

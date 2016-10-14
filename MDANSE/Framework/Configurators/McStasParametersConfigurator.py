@@ -34,15 +34,13 @@ import os
 import re
 import subprocess
 
-from MDANSE import PLATFORM
+from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
         
 class McStasParametersConfigurator(IConfigurator):
     '''
     This configurator allows to input the McStas instrument parameters that will be used to run a McStas executable file.
     '''
-
-    type = "mcstas_parameters"
 
     _mcStasTypes = {'double' : float, 'int' : int, 'string' : str}
 
@@ -121,3 +119,5 @@ class McStasParametersConfigurator(IConfigurator):
         '''
         
         return "McStas command line parameters:%s" % self["value"]
+
+REGISTRY["mcstas_parameters"] = McStasParametersConfigurator

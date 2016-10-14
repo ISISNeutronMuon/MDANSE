@@ -65,9 +65,7 @@ class McStasVirtualInstrument(IJob):
 	The result is the instrument-dependent perturbation of the sum of the scattering contributions including 
 	instrument resolution, self-shielding and multiple scattering.
     """
-    
-    type = 'mvi'
-    
+        
     label = "McStas Virtual Instrument"
 
     category = ('Analysis','Virtual Instruments',)
@@ -413,4 +411,6 @@ class McStasVirtualInstrument(IJob):
                   'title':''}
         
         return FSsingle
-        
+    
+REGISTRY['mvi'] = McStasVirtualInstrument
+    

@@ -35,6 +35,7 @@ import os
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Extensions import sd_fast_calc
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import build_cartesian_axes
@@ -53,9 +54,7 @@ class SpatialDensity(IJob):
     coordinates of the separation vector. This can provide useful information about the local structure in a complex system such as the 
     relative orientation of neighbouring molecules in a liquid.
     """
-    
-    type = 'sd'
-    
+        
     label = "Spatial Density"
     
     category = ('Analysis','Structure',)
@@ -191,3 +190,5 @@ class SpatialDensity(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['sd'] = SpatialDensity

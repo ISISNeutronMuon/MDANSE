@@ -32,6 +32,7 @@ Created on Apr 10, 2015
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Mathematics.Arithmetic import weight
 
@@ -49,8 +50,6 @@ class PairDistributionFunction(DistanceHistogram):
     function to calculate the internal energy of the system, usually quite accurately.
 	Finally it can even be used to derive the inter-atomic potentials of mean force.
     """
-
-    type = 'pdf'
 
     label = "Pair Distribution Function"
     
@@ -124,4 +123,5 @@ class PairDistributionFunction(DistanceHistogram):
   
         super(PairDistributionFunction,self).finalize()
         
+REGISTRY['pdf'] = PairDistributionFunction
         

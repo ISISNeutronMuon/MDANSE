@@ -33,15 +33,13 @@ Created on Apr 14, 2015
 import wx
 import wx.aui as wxaui
 
-
+from MDANSE import REGISTRY
 from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.Icons import ICONS
 from MDANSE.GUI.Plugins.ComponentPlugin import ComponentPlugin
 
 class AnimationPlugin(ComponentPlugin):
-    
-    type = "animation"
-    
+        
     label = "Animation"
     
     ancestor = ["molecular_viewer"]
@@ -189,4 +187,7 @@ class AnimationPlugin(ComponentPlugin):
         if not plugin.is_parent(self):
             return
  
-        self.frameSlider.SetRange(0,self._parent.n_frames-1)    
+        self.frameSlider.SetRange(0,self._parent.n_frames-1)
+        
+REGISTRY["animation"] = AnimationPlugin
+    

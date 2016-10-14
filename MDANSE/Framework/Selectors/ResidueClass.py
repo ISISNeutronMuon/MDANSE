@@ -32,6 +32,7 @@ Created on Mar 27, 2015
 
 from MMTK.Proteins import PeptideChain, Protein
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 # Dictionnary associating tuples of residue names (values) to their corresponding chemical family (key). 
@@ -44,9 +45,7 @@ CHEMFAMILIES = {'acidic'      : ('asp','glu'),
                 'polar'       : ('arg','asn','asp','cys','gln','glu','his','lys','ser','thr','trp','tyr'),
                 'small'       : ('ala','asn','asp','cys','cyx','gly','pro','ser','thr','val')}
                                          
-class ResClass(ISelector):
-
-    type = "residue_class"
+class ResidueClass(ISelector):
 
     section = "proteins"
 
@@ -93,3 +92,5 @@ class ResClass(ISelector):
                     pass
                                                    
         return sel
+    
+REGISTRY["residue_class"] = ResidueClass

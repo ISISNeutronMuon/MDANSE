@@ -35,6 +35,7 @@ import itertools
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation, normalize, get_spectrum
@@ -48,8 +49,6 @@ class CurrentCorrelationFunction(IJob):
     For more information, see e.g. 'J.-P. Hansen and I. R. McDonald, Theory of Simple Liquids (3rd ed., Elsevier), chapter 7.4: Correlations
     in space and time)' 
     """
-
-    type = 'ccf'
     
     label = "Current Correlation Function"
 
@@ -235,3 +234,6 @@ class CurrentCorrelationFunction(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['ccf'] = CurrentCorrelationFunction
+        
