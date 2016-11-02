@@ -137,6 +137,9 @@ extract MMTK-2.7.6.${BUILD_TARGET}-py2.7.exe PLATLIB
 
 # move the packages to the target directory
 echo "Moving dependencies to ${BUILD_TARGET}"
+
+mv PURELIB/pkg_resources ${TARGET_DIR_CYGWIN}/Lib/site-packages/pkg_resources
+
 mv PLATLIB/numpy ${TARGET_DIR_CYGWIN}/Lib/site-packages/numpy
 
 mv PURELIB/dateutil ${TARGET_DIR_CYGWIN}/Lib/site-packages/dateutil
