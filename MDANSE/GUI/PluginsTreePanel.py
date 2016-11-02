@@ -36,7 +36,8 @@ import cPickle
 import wx
 
 from MDANSE import REGISTRY
-from MDANSE.Externals.pubsub import pub
+
+from MDANSE.GUI import PUBLISHER
 
 class DataObject(wx.TextDataObject):
 
@@ -60,7 +61,7 @@ class PluginsTreePanel(wx.Panel):
         self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_drag, self._tree)
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_double_click)
         
-        pub.subscribe(self.msg_set_plugins_tree, 'msg_set_plugins_tree')
+        PUBLISHER.subscribe(self.msg_set_plugins_tree, 'msg_set_plugins_tree')
         
         self.Bind(wx.EVT_WINDOW_DESTROY,self.OnDestroy)
         
@@ -70,7 +71,7 @@ class PluginsTreePanel(wx.Panel):
 
     def OnDestroy(self,event):
         
-        pub.subscribe(self.msg_set_plugins_tree, 'msg_set_plugins_tree')
+        PUBLISHER.subscribe(self.msg_set_plugins_tree, 'msg_set_plugins_tree')
         event.Skip()
 
     def build_panel(self):
@@ -103,7 +104,7 @@ class PluginsTreePanel(wx.Panel):
             ancestors = []
             for anc in ancestor:
                 ancestors.append(anc)
-                ancestors.extend([c.type for c in REGISTRY['plugin'][anc].__subclasses__()])
+                ancestors.extend([c._type for c in REGISTRY['plugin'][anc].__subclasses__()])
             
             for a in ancestors:
 
@@ -112,7 +113,7 @@ class PluginsTreePanel(wx.Panel):
                 for cat in category:
                     d = d.setdefault(cat,collections.OrderedDict())
                         
-                d[kls.type] = True
+                d[kls._type] = True
                             
     def on_double_click(self, event):
         
@@ -158,7 +159,7 @@ class PluginsTreePanel(wx.Panel):
                 label = k
                 data = None
             else:
-                label = getattr(plugin,"label",plugin.type)
+                label = getattr(plugin,"label",plugin._type)
                 data = wx.TreeItemData(k)
                 
             subnode = self._tree.AppendItem(node, label, data=data)
@@ -168,14 +169,15 @@ class PluginsTreePanel(wx.Panel):
             
             self.set_plugins_tree(subnode, v)
         
-    def msg_set_plugins_tree(self, plugin):
+    def msg_set_plugins_tree(self,message):
                         
         if self._tree.GetCount() !=0:
             self._tree.DeleteChildren(self._root)
-                                                                
+                    
+        plugin = message.data                                            
         if plugin is None:
             return
         
-        self.set_plugins_tree(self._root, self._hierarchy.get(plugin.type,{}))
+        self.set_plugins_tree(self._root, self._hierarchy.get(plugin._type,{}))
         
         self.TopLevelParent._mgr.Update()

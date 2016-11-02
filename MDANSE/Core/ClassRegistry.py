@@ -30,29 +30,15 @@ Created on Mar 30, 2015
 :author: Eric C. Pellegrini
 '''
 
-import abc
 import glob
 import imp
 import inspect
 import os
 import sys
 
-class _Meta(type):
-    '''
-    Metaclass that allows to use the :py:meth:`__getitem__` method at a class level for the class that has been built.
-     
-    The class that uses this metaclass must define a class attribute named _registry that will be used
-    by the :py:meth:`__getitem__` method.
-    '''
-         
-    def __getitem__(self, item):
-        """
-        Returns a given item stored in the class registry
-        """
-         
-        return self._registry[item]
+from MDANSE.Core.Singleton import Singleton
     
-class ClassRegistry(abc.ABCMeta):
+class ClassRegistry(object):
     '''
     Metaclass that registers the classes that make the MDANSE framework.
 
@@ -67,49 +53,41 @@ class ClassRegistry(abc.ABCMeta):
     class attribute will not be registered.    
     '''
     
-    __metaclass__ = _Meta
+    __metaclass__ = Singleton
 
-    __interfaces = set()
+    def __init__(self):
+        
+        self._registry = {}
+        
+        self._sections = {}
+        
+    def __setitem__(self,name,cls):
 
-    _registry = {}
-                
-    def __init__(self, name, bases, namespace):
-        '''
-        Constructor
+        # The class to be registered must have a class attribute "_registry" to be registered, otherwise return       
+        clsRegistry = getattr(cls,"_registry")
+        if clsRegistry is None:
+            return
         
-        :param name: the name of the class to be built by this metaclass
-        :type name: str
-        :param bases: the base classes of the class to be built by this metaclass
-        :type bases: tuple 
-        :param namespace: the attributes and methods of the class to be built by this metaclass
-        :type namespace: dict
-        '''
+        # And this attribute must be a string for the class to be registerable otherwise return
+        if not isinstance(clsRegistry,basestring):
+            return
         
-        super(ClassRegistry, self).__init__(name, bases, namespace)
-            
-        # If the class objet does not have a type attribute, it will not be registered.    
-        typ = getattr(self, 'type', None)
-        if typ is None:
+        # Fetch the branch of the registry corresponding the one of the class to be registred, otherwise create a new branch        
+        d = self._registry.setdefault(clsRegistry,{})
+        
+        # If a class has already been registered with that name return
+        if d.has_key(name):
             return
 
-        # If the class object is metaclassed by ClassRegistry then a new section of the registry will
-        # be created with its type attribute.
-        metaClass = namespace.get("__metaclass__", None)                              
-        if metaClass is ClassRegistry:
-            ClassRegistry.__interfaces.add(self)
-            if (ClassRegistry._registry.has_key(typ)):
-                return
-            ClassRegistry._registry[typ] = {}
+        setattr(cls,"_type",name)
+        
+        d[name] = cls
+                
+    def __getitem__(self,name):
+        
+        return self._registry.get(name,{})
 
-        else:
-                                            
-            for interface in ClassRegistry.__interfaces:
-                if issubclass(self, interface):
-                    ClassRegistry._registry[interface.type][typ] = self
-                    break
-          
-    @classmethod      
-    def update_registry(cls,packageDir):
+    def update(self,packageDir):
         '''
         Update the classes registry by importing all the modules contained in a given package.
         
@@ -141,10 +119,8 @@ class ClassRegistry(abc.ABCMeta):
             else:
                 if os.path.abspath(os.path.dirname(mod.__file__)) != os.path.abspath(moduleDir):                    
                     print "A module with name %s is already present in your distribution with %s path." % (moduleName,moduleDir)
-
     
-    @classmethod
-    def info(cls, interface):
+    def info(self, interface):
         '''
         Returns informations about the subclasses of a given base class stored in the registry.
         
@@ -155,7 +131,7 @@ class ClassRegistry(abc.ABCMeta):
         :rtype: str
         '''
                 
-        if not cls._registry.has_key(interface):
+        if not self._registry.has_key(interface):
             return "The interface " + interface + " is not registered"
 
         words = ["Name", "Class","File"]
@@ -168,7 +144,7 @@ class ClassRegistry(abc.ABCMeta):
         maxlength = -1
         
         # Loop over the registry items.
-        for i, (k, v) in enumerate(sorted(cls._registry[interface].items())):
+        for i, (k, v) in enumerate(sorted(self._registry[interface].items())):
             
             # Get the module corresponding to the job class.
             mod = inspect.getmodule(v)
@@ -185,8 +161,8 @@ class ClassRegistry(abc.ABCMeta):
                     
         return contents.format(maxlength,*words)
 
-    @classmethod
-    def get_interfaces(cls):
+    @property
+    def interfaces(self):
         '''
         Returns the interfaces that are currently registered.
         
@@ -194,4 +170,8 @@ class ClassRegistry(abc.ABCMeta):
         :rtype: list of str
         '''
         
-        return sorted(cls._registry.keys())
+        return sorted(self._registry.keys())
+        
+REGISTRY = ClassRegistry()
+
+                

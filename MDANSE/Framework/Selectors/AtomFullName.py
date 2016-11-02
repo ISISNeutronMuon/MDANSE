@@ -30,11 +30,10 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
                 
 class AtomFullName(ISelector):
-
-    type = "atom_fullname"
 
     section = "atoms"
 
@@ -67,3 +66,5 @@ class AtomFullName(ISelector):
             sel.update([at for at in self._universe.atomList() if at.fullName().strip().lower() in vals])
         
         return sel
+
+REGISTRY["atom_fullname"] = AtomFullName

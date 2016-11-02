@@ -34,7 +34,7 @@ import collections
 import operator
 
 
-from MDANSE import ELEMENTS
+from MDANSE import ELEMENTS, REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
@@ -67,8 +67,6 @@ class AtomSelectionConfigurator(IConfigurator):
     :note: this configurator depends on :py:class:`~MDANSE.Framework.Configurators.MMTKTrajectoryConfigurator.MMTKTrajectoryConfigurator` 
     and :py:class:`~MDANSE.Framework.Configurators.GroupingLevelConfigurator.GroupingLevelConfigurator` configurators to be configured
     '''
-
-    type = 'atom_selection'
     
     _default = "all"
                     
@@ -157,3 +155,5 @@ class AtomSelectionConfigurator(IConfigurator):
         info.append("Selected elements:%s" % self["unique_names"])
         
         return "\n".join(info)
+    
+REGISTRY["atom_selection"] = AtomSelectionConfigurator

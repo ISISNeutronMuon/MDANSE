@@ -30,12 +30,11 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
-class HeteroHydrogenBound(ISelector):
-    
-    type = "hetero_hydrogen"
-    
+class HeteroHydrogen(ISelector):
+        
     section = "hydrogens"
 
     def __init__(self, trajectory):
@@ -62,3 +61,6 @@ class HeteroHydrogenBound(ISelector):
         sel.update([at for at in self._universe.atomList() if at.fullName().strip().lower() in vals])
         
         return sel
+    
+REGISTRY["hetero_hydrogen"] = HeteroHydrogen
+

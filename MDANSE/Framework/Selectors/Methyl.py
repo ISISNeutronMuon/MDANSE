@@ -30,11 +30,10 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class Methyl(ISelector):
-
-    type = "methyl"
 
     section = "chemical groups"
 
@@ -57,3 +56,5 @@ class Methyl(ISelector):
                     sel.update([car] + hydrogens)
 
         return sel
+
+REGISTRY["methyl"] = Methyl

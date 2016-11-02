@@ -32,6 +32,7 @@ Created on Jun 9, 2015
 
 import os
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator,ConfiguratorError
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
@@ -39,9 +40,7 @@ class PartialChargeConfigurator(IConfigurator):
     """
     This configurator allows to input partial charges.
     """
-    
-    type = 'partial_charges'
-    
+        
     _default = ''
                    
     def configure(self, value):
@@ -88,3 +87,5 @@ class PartialChargeConfigurator(IConfigurator):
         info = 'Sum of partial charges = %8.3f' % sum(self['charges'].values())
         
         return info
+
+REGISTRY['partial_charges'] = PartialChargeConfigurator

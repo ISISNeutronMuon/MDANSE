@@ -28,7 +28,6 @@
 This package contains all the externals dependencies of MDANSE. It contains:
 
     #. magnitude: a package for handling units
-    #. pubsub: a package that implements the publisher subscriber mechanism
     #. pyparsing: a package for creating and executing simple grammar
     #. svgfig: a package for handling SVG file format
 

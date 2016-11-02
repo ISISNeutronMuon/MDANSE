@@ -30,12 +30,11 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
     
 class CarboHydrogen(ISelector):
-    
-    type = "carbo_hydrogen"
-    
+        
     section = "hydrogens"
 
     def __init__(self, trajectory):
@@ -63,4 +62,4 @@ class CarboHydrogen(ISelector):
         
         return sel
     
-    
+REGISTRY["carbo_hydrogen"] = CarboHydrogen

@@ -34,13 +34,12 @@ import collections
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import IInstrumentResolution
 
 class PseudoVoigtInstrumentResolution(IInstrumentResolution):
     """Defines an instrument resolution with a pseudo-voigt response
     """
-
-    type = 'pseudo-voigt'
 
     settings = collections.OrderedDict()
     settings['eta'] = ('float', {"mini":0.0, "maxi":1.0, "default":0.5})
@@ -63,4 +62,6 @@ class PseudoVoigtInstrumentResolution(IInstrumentResolution):
         
         self._omegaWindow = eta*lorentzian + (1.0-eta)*gaussian
         self._timeWindow = numpy.fft.fftshift(numpy.fft.ifft(numpy.fft.ifftshift(self._omegaWindow))/dt)
+
+REGISTRY['pseudo-voigt'] = PseudoVoigtInstrumentResolution
                 

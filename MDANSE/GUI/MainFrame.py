@@ -39,10 +39,11 @@ import webbrowser
 import wx
 import wx.aui as aui
  
-from MDANSE import DATA_CONTROLLER, LOGGER, PLATFORM, REGISTRY
+from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE.__pkginfo__ import __version__
-from MDANSE.Framework.Jobs.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.GUI.ControllerPanel import ControllerPanel
+from MDANSE.GUI.DataController import DATA_CONTROLLER
 from MDANSE.GUI.DataTreePanel import DataTreePanel
 from MDANSE.GUI.Icons import ICONS
 from MDANSE.GUI.PluginsTreePanel import PluginsTreePanel
@@ -138,11 +139,11 @@ class MainFrame(wx.Frame):
         converterMenu = wx.Menu()
         self._converters = {}
 
-        converters = [job for job in REGISTRY["job"].values() if issubclass(job,Converter)]
-        converters = sorted(converters, key = operator.attrgetter('label'))
-        for job in converters:
+        converters = [job for job in REGISTRY["job"].items() if issubclass(job[1],Converter)]
+        converters = sorted(converters)
+        for name,job in converters:
             item = converterMenu.Append(wx.ID_ANY,job.label)
-            self._converters[job.label] = job.type
+            self._converters[job.label] = name
             self.Bind(wx.EVT_MENU, self.on_open_converter, item)
 
         fileMenu.AppendMenu(wx.ID_ANY,'Trajectory converters',converterMenu)
@@ -314,7 +315,7 @@ or directly to the MDANSE mailing list:
             
     def on_load_data(self, event=None):
 
-        wildcards = collections.OrderedDict([kls.type, "%s (*.%s)|*.%s" % (kls.type,kls.extension,kls.extension)] for kls in REGISTRY["input_data"].values() if kls.extension is not None)
+        wildcards = collections.OrderedDict([kls._type, "%s (*.%s)|*.%s" % (kls._type,kls.extension,kls.extension)] for kls in REGISTRY["input_data"].values() if kls.extension is not None)
                 
         dialog = wx.FileDialog ( None, message='Open data ...', wildcard="|".join(wildcards.values()), style=wx.OPEN)
         
@@ -344,7 +345,7 @@ or directly to the MDANSE mailing list:
 
     def on_open_converter(self,event):
 
-        from MDANSE.Framework.Plugins.JobPlugin import JobFrame
+        from MDANSE.GUI.Plugins.JobPlugin import JobFrame
 
         item = self.GetMenuBar().FindItemById(event.GetId())
         converter = item.GetText()
@@ -380,7 +381,7 @@ or directly to the MDANSE mailing list:
                                                                          
     def on_start_plotter(self, event = None):
 
-        from MDANSE.Framework.Plugins.Plotter.PlotterPlugin import PlotterFrame
+        from MDANSE.GUI.Plugins.Plotter.PlotterPlugin import PlotterFrame
         
         f = PlotterFrame(self)
         

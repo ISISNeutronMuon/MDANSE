@@ -30,11 +30,10 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class MoleculeIndex(ISelector):
-
-    type = "molecule_index"
 
     section = "molecules"
 
@@ -70,3 +69,5 @@ class MoleculeIndex(ISelector):
             sel.update([at for v in vals for at in objList[v].atomList()])
         
         return sel
+
+REGISTRY["molecule_index"] = MoleculeIndex

@@ -32,14 +32,13 @@ Created on Mar 27, 2015
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.InputData.IInputData import InputDataError
 from MDANSE.Framework.InputData.InputFileData import InputFileData
 from MDANSE.MolecularDynamics.Trajectory import get_chemical_objects_size, get_chemical_objects_number, MMTKTrajectory
 
 class MMTKTrajectoryInputData(InputFileData):
-    
-    type = "mmtk_trajectory"
-    
+        
     extension = "nc"
     
     def load(self):
@@ -99,3 +98,5 @@ class MMTKTrajectoryInputData(InputFileData):
     @property
     def netcdf(self):
         return self._data.trajectory.file
+
+REGISTRY["mmtk_trajectory"] = MMTKTrajectoryInputData    

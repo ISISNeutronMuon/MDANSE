@@ -32,11 +32,10 @@ Created on Mar 27, 2015
 
 from MMTK.Proteins import PeptideChain, Protein
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
         
-class ResType(ISelector):
-
-    type = "residue_type"
+class ResidueType(ISelector):
 
     section = "proteins"
 
@@ -80,3 +79,5 @@ class ResType(ISelector):
                     pass
                 
         return sel
+    
+REGISTRY["residue_type"] = ResidueType

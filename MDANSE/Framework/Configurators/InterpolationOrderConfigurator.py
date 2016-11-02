@@ -30,6 +30,7 @@ Created on Mar 30, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import SingleChoiceConfigurator
             
@@ -45,9 +46,7 @@ class InterpolationOrderConfigurator(SingleChoiceConfigurator):
 
     :note: this configurator depends on 'trajectory' configurator to be configured.
     """
-    
-    type = "interpolation_order"
-    
+        
     _default = "no interpolation"
         
     def __init__(self, name, orders=None,**kwargs):
@@ -85,3 +84,5 @@ class InterpolationOrderConfigurator(SingleChoiceConfigurator):
         else:
 
             self["variable"] = "configuration"
+            
+REGISTRY["interpolation_order"] = InterpolationOrderConfigurator

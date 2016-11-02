@@ -30,11 +30,10 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
     
 class Thiol(ISelector):
-
-    type = "thiol"
 
     section = "chemical groups"
 
@@ -60,3 +59,5 @@ class Thiol(ISelector):
                     sel.update([sul] + hydrogens)
                 
         return sel
+    
+REGISTRY["thiol"] = Thiol

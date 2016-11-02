@@ -30,6 +30,7 @@ Created on May 22, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
           
 class TrajectoryVariableConfigurator(IConfigurator):
@@ -38,9 +39,7 @@ class TrajectoryVariableConfigurator(IConfigurator):
 
     :note: this configurator depends on 'trajectory' configurator to be configured
     """
-        
-    type = 'trajectory_variable'
-    
+            
     _default = "velocities"
         
     def configure(self, value):
@@ -69,3 +68,5 @@ class TrajectoryVariableConfigurator(IConfigurator):
         '''
         
         return "Selected variable: %r" % self["value"]
+    
+REGISTRY['trajectory_variable'] = TrajectoryVariableConfigurator

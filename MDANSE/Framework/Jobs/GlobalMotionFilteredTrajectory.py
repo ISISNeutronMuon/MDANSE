@@ -35,6 +35,7 @@ import collections
 from MMTK.Collections import Collection
 from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
@@ -58,9 +59,7 @@ class GlobalMotionFilteredTrajectory(IJob):
 
     In the global motion filtered trajectory, the universe is made infinite and all the configurations contiguous.
     """
-    
-    type = 'gmft'
-    
+        
     label = "Global Motion Filtered Trajectory"
 
     category = ('Analysis','Trajectory',)
@@ -197,3 +196,5 @@ class GlobalMotionFilteredTrajectory(IJob):
                                  
         # The output trajectory is closed.
         self._gmft.close()
+        
+REGISTRY['gmft'] = GlobalMotionFilteredTrajectory

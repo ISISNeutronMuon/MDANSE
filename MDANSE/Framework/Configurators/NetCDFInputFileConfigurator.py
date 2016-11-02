@@ -32,6 +32,7 @@ Created on May 21, 2015
 
 from Scientific.IO.NetCDF import NetCDFFile
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 
@@ -44,9 +45,7 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
     
     For more information, please consult the NetCDF website: http://www.unidata.ucar.edu/software/netcdf/
     """
-    
-    type = 'netcdf_input_file'
-    
+        
     _default = ''
         
     def __init__(self, name, variables=None, **kwargs):
@@ -115,3 +114,5 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
                 info.append(v)
             
         return "\n".join(info)
+    
+REGISTRY['netcdf_input_file'] = NetCDFInputFileConfigurator

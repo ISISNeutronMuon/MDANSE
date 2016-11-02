@@ -34,7 +34,7 @@ import collections
 
 import numpy
 
-from MDANSE import ELEMENTS
+from MDANSE import ELEMENTS, REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass
 
@@ -82,8 +82,7 @@ class Eccentricity(IJob):
     AOUN Bachir, PELLEGRINI Eric
     
     """
-    type = 'ecc'
-
+    
     label = "Eccentricity"
     
     category = ('Analysis','Structure',)
@@ -221,4 +220,7 @@ class Eccentricity(IJob):
         # Write the output variables.
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
-        self.configuration['trajectory']['instance'].close()     
+        self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['ecc'] = Eccentricity
+     

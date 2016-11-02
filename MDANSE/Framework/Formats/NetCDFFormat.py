@@ -36,14 +36,13 @@ import numpy
 
 from Scientific.IO.NetCDF import NetCDFFile
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Formats.IFormat import IFormat
 
 class NetCDFFormat(IFormat):
     '''
     This class handles the writing of output variables in NetCDF file format.
     '''
-
-    type = 'netcdf'
 
     extension = ".nc"
     
@@ -100,3 +99,5 @@ class NetCDFFormat(IFormat):
         
         # The NetCDF file is closed.
         outputFile.close()
+
+REGISTRY['netcdf'] = NetCDFFormat

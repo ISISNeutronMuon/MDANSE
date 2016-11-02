@@ -35,6 +35,7 @@ import collections
 from MMTK.Collections import Collection
 from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
@@ -42,9 +43,7 @@ class CroppedTrajectory(IJob):
     """
     Crop a trajectory in terms of the contents of the simulation box (selected atoms or molecules) and the trajectory length.
     """
-    
-    type = 'ct'
-    
+        
     label = "Cropped Trajectory"
 
     category = ('Analysis','Trajectory',)
@@ -122,3 +121,5 @@ class CroppedTrajectory(IJob):
                                                     
         # The output trajectory is closed.
         self._ct.close()   
+
+REGISTRY['ct'] = CroppedTrajectory

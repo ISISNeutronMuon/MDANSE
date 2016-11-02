@@ -32,7 +32,6 @@ Created on Mar 30, 2015
 
 import abc
 
-from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Configurable import Configurable
 
@@ -40,10 +39,8 @@ class InstrumentResolutionError(Error):
     pass
 
 class IInstrumentResolution(Configurable):
-
-    __metaclass__ = REGISTRY
     
-    type = "instrument_resolution"
+    _registry = "instrument_resolution"
     
     def __init__(self):
         

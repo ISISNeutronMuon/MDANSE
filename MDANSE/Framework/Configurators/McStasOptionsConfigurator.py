@@ -34,15 +34,13 @@ import os
 import tempfile
 import time
 
-from MDANSE import PLATFORM
+from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
 class McStasOptionsConfigurator(IConfigurator):
     """
     This configurator allows to input the McStas options that will be used to run a McStas executable file.
     """
-
-    type = "mcstas_options"
     
     _default = {"ncount" : 10000, "dir" : os.path.join(tempfile.gettempdir(),"mcstas_output",time.strftime("%d.%m.%Y-%H:%M:%S", time.localtime()))}
         
@@ -90,3 +88,5 @@ class McStasOptionsConfigurator(IConfigurator):
         '''
         
         return "McStas command line options: %s" % self["value"]
+    
+REGISTRY["mcstas_options"] = McStasOptionsConfigurator

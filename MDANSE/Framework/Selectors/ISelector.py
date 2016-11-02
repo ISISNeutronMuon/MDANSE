@@ -32,17 +32,14 @@ Created on Mar 27, 2015
 
 import abc
 
-from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 
 class SelectorError(Error):
     pass
 
 class ISelector(object):
-
-    __metaclass__ = REGISTRY
     
-    type = "selector"
+    _registry = "selector"
         
     def __init__(self,trajectory):
         

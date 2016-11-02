@@ -30,10 +30,12 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 
 class SurfaceOutputVariable(IOutputVariable):
+        
+    _nDimensions = 2
     
-    type = "surface"
+REGISTRY["surface"] = SurfaceOutputVariable
     
-    _nDimensions = 2    

@@ -35,6 +35,7 @@ import os
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 
@@ -50,8 +51,6 @@ class AreaPerMolecule(IJob):
     the simulation performed was in the NPT ensemble. This analysis is relevant for oriented structures like lipid membranes.
     '''
     
-    type = 'apm'
-
     label = "Area Per Molecule"
     
     category = ('Analysis','Structure',)
@@ -124,4 +123,7 @@ class AreaPerMolecule(IJob):
         """
         
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
-        self.configuration['trajectory']['instance'].close()     
+        self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['apm'] = AreaPerMolecule
+     

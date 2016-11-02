@@ -59,10 +59,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
     
     :note: this configurator depends on the 'frame' configurator to be configured.
     """
-    
-    
-    type = "instrument_resolution"
-        
+            
     _default = ('gaussian', {'mu': 0.0, 'sigma': 10.0})
         
     def configure(self, value):
@@ -125,3 +122,5 @@ class InstrumentResolutionConfigurator(IConfigurator):
         info = "\n".join(info)
                     
         return info
+    
+REGISTRY["instrument_resolution"] = InstrumentResolutionConfigurator

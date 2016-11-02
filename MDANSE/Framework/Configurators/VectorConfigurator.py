@@ -34,15 +34,14 @@ import numpy
 
 from Scientific.Geometry import Vector
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
 class VectorConfigurator(IConfigurator):
     """
     This configurator allows to input a 3D vector, by giving its 3 components
     """
-    
-    type = "vector"
-    
+        
     _default = [1.0,0.0,0.0]
     
     def __init__(self, name, valueType=int, normalize=False, notNull=False, dimension=3, **kwargs):
@@ -151,3 +150,5 @@ class VectorConfigurator(IConfigurator):
         '''
         
         return "Value: %r" % self["value"]
+    
+REGISTRY["vector"] = VectorConfigurator

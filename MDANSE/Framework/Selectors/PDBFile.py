@@ -34,12 +34,10 @@ import os
 
 from MMTK.PDB import PDBConfiguration
 
-from MDANSE import PLATFORM
+from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector, SelectorError
                     
 class PDBFile(ISelector):
-
-    type = "pdbfile"
 
     section = None
 
@@ -90,3 +88,5 @@ class PDBFile(ISelector):
                         sel.update([univCoord[p]])
                         
         return sel
+    
+REGISTRY["pdf_file"] = PDBFile

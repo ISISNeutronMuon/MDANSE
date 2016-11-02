@@ -1,37 +1,37 @@
-"""
+'''
 
-:copyright: Copyright since 2006 by Oliver Schoenborn, all rights reserved.
-:license: BSD, see LICENSE_BSD_Simple.txt for details.
+:copyright: Copyright 2006-2009 by Oliver Schoenborn, all rights reserved.
+:license: BSD, see LICENSE.txt for details.
 
-"""
+'''
 
 import weakref
 
-from .topicutils import (stringize, WeakNone)
-from .validatedefnargs import verifySubset
-from .. import py2and3
+from MDANSE.Externals.pubsub.core.topicutils import stringize, WeakNone
+from MDANSE.Externals.pubsub.core.validatedefnargs import verifySubset
+
 
 ### Exceptions raised during check() from sendMessage()
 
-class SenderMissingReqdMsgDataError(RuntimeError):
-    """
+class SenderMissingReqdArgs(RuntimeError):
+    '''
     Raised when a sendMessage() is missing arguments tagged as
     'required' by pubsub topic of message.
-    """
+    '''
 
     def __init__(self, topicName, argNames, missing):
         argsStr = ','.join(argNames)
         missStr = ','.join(missing)
         msg = "Some required args missing in call to sendMessage('%s', %s): %s" \
-            % (stringize(topicName), argsStr, missStr)
+            % (topicName, argsStr, missStr)
         RuntimeError.__init__(self, msg)
 
 
-class SenderUnknownMsgDataError(RuntimeError):
-    """
+class SenderUnknownOptArgs(RuntimeError):
+    '''
     Raised when a sendMessage() has arguments not listed among the topic's
-    message data specification (MDS).
-    """
+    listener specification.
+    '''
 
     def __init__(self, topicName, argNames, extra):
         argsStr = ','.join(argNames)
@@ -42,8 +42,8 @@ class SenderUnknownMsgDataError(RuntimeError):
 
 
 class ArgsInfo:
-    """
-    Encode the Message Data Specification (MDS) for a given
+    '''
+    Encode the Listener Protocol Specification (LPS) for a given
     topic. ArgsInfos form a tree identical to that of Topics in that
     ArgInfos have a reference to their parent and children ArgInfos,
     created for the parent and children topics.
@@ -56,9 +56,9 @@ class ArgsInfo:
     specification of each of its children. Also, the instance
     can be used to check validity and filter arguments.
 
-    The MDS can be created "empty", ie "incomplete", meaning it cannot
+    The LPS can be created "empty", ie "incomplete", meaning it cannot
     yet be used to validate listener subscriptions to topics.
-    """
+    '''
 
     SPEC_MISSING        = 10 # no args given
     SPEC_COMPLETE       = 12 # all args, but not confirmed via user spec
@@ -98,38 +98,38 @@ class ArgsInfo:
         return self.allDocs.copy()
 
     def setArgsDocs(self, docs):
-        """docs is a mapping from arg names to their documentation"""
+        '''docs is a mapping from arg names to their documentation'''
         if not self.isComplete():
             raise
-        for arg, doc in py2and3.iteritems(docs):
+        for arg, doc in docs.iteritems():
             self.allDocs[arg] = doc
 
     def check(self, msgKwargs):
-        """Check that the message arguments given satisfy the topic message
-        data specification (MDS). Raises SenderMissingReqdMsgDataError if some required
-        args are missing or not known, and raises SenderUnknownMsgDataError if some
-        optional args are unknown. """
+        '''Check that the message arguments given satisfy the topic arg
+        specification. Raises SenderMissingReqdArgs if some required
+        args are missing or not known, and raises SenderUnknownOptArgs if some
+        optional args are unknown. '''
         all = set(msgKwargs)
         # check that it has all required args
         needReqd = set(self.allRequired)
         hasReqd = (needReqd <= all)
         if not hasReqd:
-            raise SenderMissingReqdMsgDataError(
-                self.topicNameTuple, py2and3.keys(msgKwargs), needReqd - all)
+            raise SenderMissingReqdArgs(
+                self.topicNameTuple, msgKwargs.keys(), needReqd - all)
 
         # check that all other args are among the optional spec
         optional = all - needReqd
         ok = (optional <= set(self.allOptional))
         if not ok:
-            raise SenderUnknownMsgDataError( self.topicNameTuple,
-                py2and3.keys(msgKwargs), optional - set(self.allOptional) )
+            raise SenderUnknownOptArgs( self.topicNameTuple,
+                msgKwargs.keys(), optional - set(self.allOptional) )
 
     def filterArgs(self, msgKwargs):
-        """Returns a dict which contains only those items of msgKwargs
+        '''Returns a dict which contains only those items of msgKwargs
         which are defined for topic. E.g. if msgKwargs is {a:1, b:'b'}
         and topic arg spec is ('a',) then return {a:1}. The returned dict
         is valid only if check(msgKwargs) was called (or
-        check(superset of msgKwargs) was called)."""
+        check(superset of msgKwargs) was called).'''
         assert self.isComplete()
         if len(msgKwargs) == self.numArgs():
             return msgKwargs
@@ -150,20 +150,20 @@ class ArgsInfo:
         return newKwargs
 
     def hasSameArgs(self, *argNames):
-        """Returns true if self has all the message arguments given, no
+        '''Returns true if self has all the message arguments given, no
         more and no less. Order does not matter. So if getArgs()
         returns ('arg1', 'arg2') then self.hasSameArgs('arg2', 'arg1')
-        will return true. """
+        will return true. '''
         return set(argNames) == set( self.getArgs() )
 
     def hasParent(self, argsInfo):
-        """return True if self has argsInfo object as parent"""
+        '''return True if self has argsInfo object as parent'''
         return self.parentAI() is argsInfo
 
     def getCompleteAI(self):
-        """Get the closest arg spec, starting from self and moving to parent,
+        '''Get the closest arg spec, starting from self and moving to parent,
         that is complete. So if self.isComplete() is True, then returns self,
-        otherwise returns parent (if parent.isComplete()), etc. """
+        otherwise returns parent (if parent.isComplete()), etc. '''
         AI = self
         while AI is not None:
             if AI.isComplete():
@@ -172,8 +172,8 @@ class ArgsInfo:
         return None
 
     def updateAllArgsFinal(self, topicDefn):
-        """This can only be called once, if the construction was done
-        with ArgSpecGiven.SPEC_GIVEN_NONE"""
+        '''This can only be called once, if the construction was done
+        with ArgSpecGiven.SPEC_GIVEN_NONE'''
         assert not self.isComplete()
         assert topicDefn.isComplete()
         self.__setAllArgs(topicDefn)
@@ -183,7 +183,7 @@ class ArgsInfo:
         self.childrenAI.append(childAI)
 
     def __notifyParentCompleted(self):
-        """Parent should call this when parent ArgsInfo has been completed"""
+        '''Parent should call this when parent ArgsInfo has been completed'''
         assert self.parentAI().isComplete()
         if self.isComplete():
             # verify that our spec is compatible with parent's

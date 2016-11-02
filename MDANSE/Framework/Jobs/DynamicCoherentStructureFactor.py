@@ -35,6 +35,7 @@ import itertools
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
@@ -49,8 +50,6 @@ class DynamicCoherentStructureFactor(IJob):
 	It can be compared to experimental data e.g. the energy-integrated, static structure factor S_coh(Q)
 	or the dispersion and intensity of phonons.
     """
-
-    type = 'dcsf'
     
     label = "Dynamic Coherent Structure Factor"
 
@@ -189,4 +188,5 @@ class DynamicCoherentStructureFactor(IJob):
         
         self.configuration['trajectory']['instance'].close()     
   
+REGISTRY['dcsf'] = DynamicCoherentStructureFactor
         

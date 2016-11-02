@@ -1,41 +1,41 @@
-"""
+'''
 
-:copyright: Copyright since 2006 by Oliver Schoenborn, all rights reserved.
-:license: BSD, see LICENSE_BSD_Simple.txt for details.
+:copyright: Copyright 2006-2009 by Oliver Schoenborn, all rights reserved.
+:license: BSD, see LICENSE.txt for details.
 
-"""
+'''
 
 import weakref
-from .topicutils import WeakNone
+from MDANSE.Externals.pubsub.core.topicutils import WeakNone
 
-class SenderMissingReqdMsgDataError(RuntimeError):
-    """
+class SenderMissingReqdArgs(RuntimeError):
+    '''
     Ignore: Not used for this message protocol.
-    """
+    '''
     pass
 
 
-class SenderUnknownMsgDataError(RuntimeError):
-    """
+class SenderUnknownOptArgs(RuntimeError):
+    '''
     Ignore: Not used for this message protocol.
-    """
+    '''
     pass
 
 
 class ArgsInfo:
-    """
-    Encode the Message Data Specification (MDS) for a given
-    topic. In the arg1 protocol of pubsub, this MDS is the same for all
+    '''
+    Encode the Listener Function Parameter Specification (LPS) for a given
+    topic. In the DataMsg API of pubsub, this is the same for all
     topics, so this is quite a simple class, required only because
     the part of pubsub that uses ArgsInfos supports several API
     versions using one common API. So the only difference between
     an ArgsInfo and an ArgSpecGiven is that ArgsInfo refers to
     parent topic's ArgsInfo; other data members are the same.
 
-    Note that the MDS is always complete because it is known:
+    Note that the LPS is always complete because it is known:
     it consists of one required argument named 'data' and no
     optional arguments.
-    """
+    '''
 
     SPEC_MISSING        = 10 # no args given
     SPEC_COMPLETE       = 12 # all args, but not confirmed via user spec

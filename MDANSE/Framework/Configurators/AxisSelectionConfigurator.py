@@ -30,6 +30,7 @@ Created on Mar 30, 2015
 :author: Bachir Aoun and Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
@@ -42,9 +43,7 @@ class AxisSelection(IConfigurator):
     
     :note: this configurator depends on 'trajectory' configurator to be configured.
     """
-    
-    type = "axis_selection"
-    
+        
     _default = None
 
     def configure(self, value):
@@ -90,3 +89,6 @@ class AxisSelection(IConfigurator):
         '''
         
         return "Axis vector:%s" % self["value"]
+    
+REGISTRY["axis_selection"] = AxisSelection
+    

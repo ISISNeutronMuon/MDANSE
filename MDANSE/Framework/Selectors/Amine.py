@@ -30,14 +30,13 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
                     
 class Amine(ISelector):
     '''
     Returns the amine atoms.
     '''
-
-    type = "amine"
 
     section = "chemical groups"
 
@@ -56,3 +55,5 @@ class Amine(ISelector):
                     sel.update([nit] + [hyd for hyd in hydrogens])
                     
         return sel
+
+REGISTRY["amine"] = Amine

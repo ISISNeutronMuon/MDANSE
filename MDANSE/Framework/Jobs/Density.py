@@ -34,7 +34,7 @@ import collections
 
 from MMTK import Units
 
-from MDANSE import ELEMENTS
+from MDANSE import ELEMENTS, REGISTRY
 from MDANSE.Externals.magnitude.magnitude import mg
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
@@ -43,8 +43,6 @@ class Density(IJob):
     """
     Computes the atom and mass densities for a given trajectory. These are time dependent if the simulation box volume fluctuates.
     """
-
-    type = 'den'
     
     label = "Density"
 
@@ -117,4 +115,7 @@ class Density(IJob):
 
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
-        self.configuration['trajectory']['instance'].close()                                         
+        self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['den'] = Density
+                                         

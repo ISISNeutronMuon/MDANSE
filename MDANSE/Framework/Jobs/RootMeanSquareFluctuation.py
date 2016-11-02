@@ -32,6 +32,7 @@ Created on Apr 10, 2015
 
 import collections
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Analysis import mean_square_fluctuation
 from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
@@ -43,8 +44,6 @@ class RootMeanSquareFluctuation(IJob):
 	rather than time resolved. It reveals the dynamical heterogeneity of the molecule over the course
 	of a MD simulation.
     """
-
-    type = 'rmsf'
 
     label = "Root Mean Square Fluctuation"
     
@@ -115,4 +114,6 @@ class RootMeanSquareFluctuation(IJob):
         # Write the output variables.
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
-        self.configuration['trajectory']['instance'].close()         
+        self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['rmsf'] = RootMeanSquareFluctuation

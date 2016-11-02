@@ -30,6 +30,7 @@ Created on Mar 30, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
     
 class BooleanConfigurator(IConfigurator):
@@ -39,8 +40,6 @@ class BooleanConfigurator(IConfigurator):
     The input value can be directly provided as a Python boolean or by the using the following (standard)
      representation of a boolean: 'true'/'false', 'yes'/'no', 'y'/'n', '1'/'0', 1/0
     """
-
-    type = 'boolean'
     
     _default = False
     
@@ -73,3 +72,5 @@ class BooleanConfigurator(IConfigurator):
         '''
         
         return "Value: %r" % self['value']
+    
+REGISTRY["boolean"] = BooleanConfigurator

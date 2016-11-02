@@ -30,11 +30,10 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class AtomIndex(ISelector):
-
-    type = "atom_index"
 
     section = "atoms"
 
@@ -66,3 +65,5 @@ class AtomIndex(ISelector):
             sel.update([at for at in self._universe.atomList() if at.index in vals])
             
         return sel        
+
+REGISTRY["atom_index"] = AtomIndex

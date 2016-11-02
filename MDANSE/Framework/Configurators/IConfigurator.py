@@ -32,7 +32,6 @@ Created on Mar 30, 2015
 
 import abc
 
-from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 
 class ConfiguratorError(Error):
@@ -89,9 +88,7 @@ class IConfigurator(dict):
     configuration.
     '''
     
-    __metaclass__ = REGISTRY
-
-    type = "configurator"
+    _registry = "configurator"
     
     _default = None
     
@@ -125,7 +122,7 @@ class IConfigurator(dict):
 
         self._label = kwargs.get('label'," ".join(name.split('_')).strip())
 
-        self._widget = kwargs.get('widget',self.type)
+        self._widget = kwargs.get('widget',self._type)
         
         self._configured = False
             

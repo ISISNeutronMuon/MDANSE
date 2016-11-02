@@ -37,13 +37,12 @@ import numpy
 
 from Scientific.Geometry import Vector
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
      
 class CircularLatticeQVectors(LatticeQVectors):
     """
     """
-
-    type = 'circular_lattice'
 
     settings = collections.OrderedDict()
     settings['seed'] = ('integer', {"mini":0, "default":0})
@@ -114,3 +113,5 @@ class CircularLatticeQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
+
+REGISTRY['circular_lattice'] = CircularLatticeQVectors

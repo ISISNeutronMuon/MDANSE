@@ -37,13 +37,12 @@ import numpy
 
 from Scientific.Geometry import Vector
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 class LinearLatticeQVectors(LatticeQVectors):
     """
     """
-
-    type = 'linear_lattice'
 
     settings = collections.OrderedDict()
     settings['seed'] = ('integer', {"mini":0, "default":0})
@@ -109,3 +108,5 @@ class LinearLatticeQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
+
+REGISTRY["linear_lattice"] = LinearLatticeQVectors

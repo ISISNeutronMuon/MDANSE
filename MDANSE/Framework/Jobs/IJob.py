@@ -100,10 +100,8 @@ class IJob(Configurable):
     """
     This class handles a MDANSE job. In MDANSE any task modeled by a loop can be considered as a MDANSE job. 
     """
-            
-    __metaclass__ = REGISTRY
-    
-    type = "job"
+                
+    _registry = "job"
     
     section = "job"
     
@@ -162,7 +160,7 @@ class IJob(Configurable):
         f.write('from Tests.UnitTest import UnitTest\n')
         f.write('from MDANSE import REGISTRY\n\n')
                 
-        f.write('class Test%sParallel(UnitTest):\n\n' % cls.type.upper())
+        f.write('class Test%sParallel(UnitTest):\n\n' % cls._type.upper())
                     
         f.write('    def test(self):\n')      
 
@@ -172,7 +170,7 @@ class IJob(Configurable):
         for k, v in sorted(parameters.items()):
             f.write('        parameters[%r] = %r\n' % (k, v))
                 
-        f.write('\n        job = REGISTRY[%r](%r)\n\n' % ('job',cls.type))
+        f.write('\n        job = REGISTRY[%r](%r)\n\n' % ('job',cls._type))
 
         f.write('        parameters["running_mode"] = ("monoprocessor",1)\n')
         f.write('        self.assertNotRaises(job.run,parameters,False)\n\n')
@@ -198,7 +196,7 @@ class IJob(Configurable):
         f.write('def suite():\n')
         f.write('    loader = unittest.TestLoader()\n')
         f.write('    s = unittest.TestSuite()\n')
-        f.write('    s.addTest(loader.loadTestsFromTestCase(Test%sParallel))\n' % cls.type.upper())
+        f.write('    s.addTest(loader.loadTestsFromTestCase(Test%sParallel))\n' % cls._type.upper())
         f.write('    return s\n\n')
         f.write('if __name__ == "__main__":\n')
         f.write('    unittest.main(verbosity=2)\n')
@@ -294,7 +292,7 @@ class IJob(Configurable):
         f.write('################################################################\n')
         f.write('\n')
     
-        f.write('job = REGISTRY[%r][%r]()\n' % ('job',cls.type))
+        f.write('job = REGISTRY[%r][%r]()\n' % ('job',cls._type))
         f.write('job.run(parameters,status=True)')
          
         f.close()
@@ -319,7 +317,7 @@ class IJob(Configurable):
         f.write('from Tests.UnitTests.UnitTest import UnitTest\n')
         f.write('from MDANSE import REGISTRY\n\n')
                 
-        f.write('class Test%s(UnitTest):\n\n' % cls.type.upper())
+        f.write('class Test%s(UnitTest):\n\n' % cls._type.upper())
         
         f.write('    def test(self):\n')      
 
@@ -333,13 +331,13 @@ class IJob(Configurable):
             f.write('        parameters[%r] = %r\n' % (k, v))
     
         # Sets |analysis| variable to an instance analysis to save. 
-        f.write('        job = REGISTRY[%r][%r]()\n' % ('job',cls.type))
+        f.write('        job = REGISTRY[%r][%r]()\n' % ('job',cls._type))
         f.write('        self.assertNotRaises(job.run, parameters, status=False)\n\n')
         
         f.write('def suite():\n')
         f.write('    loader = unittest.TestLoader()\n')
         f.write('    s = unittest.TestSuite()\n')
-        f.write('    s.addTest(loader.loadTestsFromTestCase(Test%s))\n' % cls.type.upper())
+        f.write('    s.addTest(loader.loadTestsFromTestCase(Test%s))\n' % cls._type.upper())
         f.write('    return s\n\n')
         f.write("if __name__ == '__main__':\n")
         f.write('    unittest.main(verbosity=2)\n')
@@ -424,7 +422,7 @@ class IJob(Configurable):
         
         try:
             
-            self._name = "%s_%s" % (self.type,IJob.define_unique_name())
+            self._name = "%s_%s" % (self._type,IJob.define_unique_name())
                                                         
             if status:
                 self._status = JobStatus(self)

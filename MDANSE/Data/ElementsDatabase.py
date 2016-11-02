@@ -35,6 +35,8 @@ import copy
 import csv
 import numbers
 import os
+import pkg_resources
+import sys
 import xml.etree.ElementTree as etree
 
 from MDANSE.Core.Platform import PLATFORM
@@ -111,8 +113,14 @@ class ElementsDatabase(object):
     
     __metaclass__ = Singleton
     
-    # The default path
-    _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__), "elements_database.csv")
+    try:  
+        _DEFAULT_DATABASE = pkg_resources.resource_filename(__name__,"elements_database.csv")
+    except:  
+        if hasattr(sys,'frozen'):
+            _DEFAULT_DATABASE = os.path.join(os.path.dirname(sys.executable),"elements_database.csv")
+        else:
+            raise
+
 
     # The user path
     _USER_DATABASE = os.path.join(PLATFORM.application_directory(), "elements_database.csv")

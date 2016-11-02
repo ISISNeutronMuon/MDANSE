@@ -30,10 +30,11 @@ Created on May 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.InputData.IInputData import IInputData
 
 class PeriodicTableData(IInputData):
-    
-    type = "periodic_table"
-    
+        
     extension = None
+
+REGISTRY["periodic_table"] = PeriodicTableData

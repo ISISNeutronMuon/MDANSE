@@ -32,6 +32,7 @@ Created on May 22, 2015
 
 import ast
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
         
 class PythonObjectConfigurator(IConfigurator):
@@ -42,9 +43,7 @@ class PythonObjectConfigurator(IConfigurator):
     
     :note: this configurator is based on a literal and safe evaluation of the input using ast standard library module.
     """
-    
-    type = 'python_object'
-    
+        
     _default = '""'
 
     def configure(self, value):
@@ -70,3 +69,5 @@ class PythonObjectConfigurator(IConfigurator):
         '''
         
         return "Python object: %r" % self['value']
+    
+REGISTRY['python_object'] = PythonObjectConfigurator

@@ -30,11 +30,10 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
                
 class Expression(ISelector):
-
-    type = "expression"
 
     section = None
 
@@ -51,3 +50,5 @@ class Expression(ISelector):
         sel.update([aList[idx] for idx in eval(expression)])
         
         return sel
+
+REGISTRY["expression"] = Expression

@@ -30,7 +30,7 @@ Created on May 22, 2015
 :author: Eric C. Pellegrini
 '''
 
-from MDANSE import ELEMENTS
+from MDANSE import ELEMENTS, REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import SingleChoiceConfigurator
 
@@ -41,9 +41,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
     
     Any numeric property defined in MDANSE.Data.ElementsDatabase.ElementsDatabase can be used as a weigh.
     """
-    
-    type = 'weights'
-    
+        
     _default = "equal"
            
     def __init__(self, name, **kwargs):
@@ -102,3 +100,5 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         '''
         
         return "selected weight: %s" % self["property"]
+    
+REGISTRY['weights'] = WeightsConfigurator

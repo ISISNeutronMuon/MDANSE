@@ -32,6 +32,7 @@ Created on Apr 10, 2015
 
 import collections
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation
@@ -41,9 +42,7 @@ class PositionAutoCorrelationFunction(IJob):
     """
     Like the velocity autocorrelation function, but using positions instead of velocities.
     """
-    
-    type = 'pacf'
-    
+        
     label = "Position AutoCorrelation Function"
 
     category = ('Analysis','Dynamics',)
@@ -143,6 +142,4 @@ class PositionAutoCorrelationFunction(IJob):
         
         self.configuration['trajectory']['instance'].close()     
   
-        
-                        
-    
+REGISTRY['pacf'] = PositionAutoCorrelationFunction
