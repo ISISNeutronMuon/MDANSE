@@ -30,11 +30,10 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
         
 class Sulphate(ISelector):
-
-    type = "sulphate"
 
     section = "chemical groups"
 
@@ -58,3 +57,5 @@ class Sulphate(ISelector):
                     sel.update([sul] + oxygens)
                 
         return sel
+    
+REGISTRY["sulphate"] = Sulphate

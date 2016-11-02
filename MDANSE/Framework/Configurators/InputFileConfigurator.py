@@ -32,16 +32,14 @@ Created on Mar 30, 2015
 
 import os
 
-from MDANSE import PLATFORM
+from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
 class InputFileConfigurator(IConfigurator):
     """
     This Configurator allows to set an input file.    
     """
-    
-    type = 'input_file'
-    
+        
     _default = ""
     
     def __init__(self, name, wildcard="All files|*.*",**kwargs):
@@ -96,3 +94,5 @@ class InputFileConfigurator(IConfigurator):
         '''
         
         return "Input file: %r" % self["value"]
+    
+REGISTRY['input_file'] = InputFileConfigurator

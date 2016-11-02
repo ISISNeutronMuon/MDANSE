@@ -34,7 +34,7 @@ import collections
 
 import numpy
 
-from MDANSE import ELEMENTS
+from MDANSE import ELEMENTS, REGISTRY
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Mathematics.Arithmetic import weight
 
@@ -56,13 +56,11 @@ def atomic_scattering_factor(element, qvalues):
     
     return c + numpy.sum(a[:, numpy.newaxis] * numpy.exp(-b[:, numpy.newaxis]*(qvalues[numpy.newaxis, :]/(4.0*numpy.pi))**2),axis=0)
 
-class StaticStructureFactor(DistanceHistogram):
+class XRayStaticStructureFactor(DistanceHistogram):
     """
     Computes the X-ray static structure from the pair distribution function for a set of atoms,
 	taking into account the atomic form factor for X-rays.
     """
-
-    type = 'xssf'
 
     label = "XRay Static Structure Factor"
     
@@ -154,3 +152,5 @@ class StaticStructureFactor(DistanceHistogram):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
           
         self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['xssf'] = XRayStaticStructureFactor

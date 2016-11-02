@@ -36,13 +36,12 @@ import operator
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 class ApproximatedDispersionQVectors(LatticeQVectors):
     """
     """
-
-    type = 'approximated_dispersion'
     
     settings = collections.OrderedDict()
     settings['q_start'] = ('vector', {"label":"Q start (nm^-1)","valueType":float, "notNull":False, "default":[0,0,0]})
@@ -88,3 +87,5 @@ class ApproximatedDispersionQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
+                    
+REGISTRY['approximated_dispersion'] = ApproximatedDispersionQVectors

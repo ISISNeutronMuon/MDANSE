@@ -34,6 +34,7 @@ import collections
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
@@ -47,7 +48,6 @@ class DensityProfile(IJob):
     For a lipid membrane, the density variation in the direction perpendicular to the membrane is probed in reflectometry measurements.	
     The Density Profile Analysis can show segregation or cluster order formation, for example during the formation of micelles. 
     """
-    type = 'dp'
 
     label = "Density Profile"
     
@@ -158,3 +158,5 @@ class DensityProfile(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
          
         self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['dp'] = DensityProfile

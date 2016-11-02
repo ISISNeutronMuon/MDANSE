@@ -30,11 +30,11 @@ Created on Mar 30, 2015
 :author: Eric C. Pellegrini
 '''
 
-from MDANSE.Framework.Widgets.SingleChoiceWidget import SingleChoiceWidget
+from MDANSE import REGISTRY
+from MDANSE.GUI.Widgets.SingleChoiceWidget import SingleChoiceWidget
 
 class GroupingLevelWidget(SingleChoiceWidget):
-
-    type = "grouping_level"
     
     label = "Group coordinates by"
 
+REGISTRY["grouping_level"] = GroupingLevelWidget

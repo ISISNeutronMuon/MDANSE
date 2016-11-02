@@ -47,9 +47,7 @@ class OutputFilesConfigurator(IConfigurator):
     Currently MDANSE supports ASCII, NetCDF and SVG file formats. To define a new output file format for an analysis, you must inherit from
     MDANSE.Framework.Formats.IFormat.IFormat interface.   
     """
-    
-    type = 'output_files'
-    
+        
     _default = (os.path.join(tempfile.gettempdir(),"output"), ["netcdf"])
                     
     def __init__(self, name, formats=None, **kwargs):
@@ -126,3 +124,5 @@ class OutputFilesConfigurator(IConfigurator):
             info.append("\n")
         
         return "".join(info)
+    
+REGISTRY['output_files'] = OutputFilesConfigurator

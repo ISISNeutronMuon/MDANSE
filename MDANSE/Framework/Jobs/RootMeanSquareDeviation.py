@@ -34,6 +34,7 @@ import collections
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.MolecularDynamics.Analysis import mean_square_deviation
@@ -46,8 +47,6 @@ class RootMeanSquareDeviation(IJob):
     It can provide essential information about the structure, if it reached equilibrium or conversely 
     if major structural changes occurred during the simulation.
     """
-
-    type = 'rmsd'
 
     label = "Root Mean Square Deviation"
     
@@ -135,5 +134,5 @@ class RootMeanSquareDeviation(IJob):
         
         self.configuration['trajectory']['instance'].close()     
   
-        
+REGISTRY['rmsd'] = RootMeanSquareDeviation
                     

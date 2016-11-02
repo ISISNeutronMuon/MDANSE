@@ -151,9 +151,7 @@ class Query(object):
         self._parser = parser
                             
 class AtomSelectionPlugin(UserDefinitionPlugin):
-    
-    type = 'atom_selection'
-    
+        
     label = "Atom selection"
     
     ancestor = ["molecular_viewer"]
@@ -191,9 +189,9 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
         for selector in selectors:            
             if selector.section is not None:
                 if self.__filters.has_key(selector.section):
-                    self.__filters[selector.section].append(selector.type)
+                    self.__filters[selector.section].append(selector._type)
                 else:
-                    self.__filters[selector.section] = [selector.type]
+                    self.__filters[selector.section] = [selector._type]
                              
         for section, subsections in sorted(self.__filters.items()):
             section_node = self.filterTree.AppendItem(filters, section)
@@ -410,4 +408,7 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
             LOGGER("The current selection is empty", "error", ["dialog"])
             return None
                 
-        return {'indexes':self._selection}        
+        return {'indexes':self._selection}
+    
+REGISTRY["atom_selection"] = AtomSelectionPlugin
+        

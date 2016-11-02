@@ -34,16 +34,15 @@ import os
 
 import wx
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionDialog, UserDefinitionWidget
 
 from MDANSE.GUI import PUBLISHER
+from MDANSE.GUI.Widgets.UserDefinitionWidget import UserDefinitionDialog, UserDefinitionWidget
 from MDANSE.GUI.Icons import ICONS
 
 class AtomSelectionWidget(UserDefinitionWidget):
          
-    type = "atom_selection"
-
     def add_widgets(self):
  
         self._sizer = wx.BoxSizer(wx.VERTICAL)
@@ -131,7 +130,7 @@ class AtomSelectionWidget(UserDefinitionWidget):
 
     def msg_set_ud(self,message):
          
-        uds = UD_STORE.filter(self._basename, self.type)
+        uds = UD_STORE.filter(self._basename, self._type)
         
         sizerItemList = list(self._sizer.GetChildren())
         del sizerItemList[0]
@@ -144,7 +143,9 @@ class AtomSelectionWidget(UserDefinitionWidget):
             oldSelection = udName.GetStringSelection()            
             udName.SetItems(uds)
             udName.SetStringSelection(oldSelection)
-            
+         
+REGISTRY["atom_selection"] = AtomSelectionWidget
+   
 if __name__ == "__main__":
     
     from MMTK.Trajectory import Trajectory

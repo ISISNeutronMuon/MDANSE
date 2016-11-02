@@ -33,6 +33,7 @@ Created on Apr 10, 2015
 import collections
 import os
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import get_spectrum
 
@@ -40,9 +41,7 @@ class StructureFactorFromScatteringFunction(IJob):
     """
     Computes the structure factor from a NetCDF file containing an intermediate scattering function.
     """
-    
-    type = 'sffsf'
-    
+        
     label = "Structure Factor From Scattering Function"
 
     category = ('Analysis','Scattering',)
@@ -119,3 +118,5 @@ class StructureFactorFromScatteringFunction(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['netcdf_input_file']['instance'].close()
+
+REGISTRY['sffsf'] = StructureFactorFromScatteringFunction

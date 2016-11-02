@@ -30,6 +30,7 @@ Created on Mar 30, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Mathematics.Arithmetic import ComplexNumber
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
@@ -37,9 +38,7 @@ class ComplexNumberConfigurator(IConfigurator):
     """
     This Configurator allows to input a complex number of the form a + bj.
     """
-    
-    type = 'complex_number'
-    
+        
     _default = 0
     
     def __init__(self, name, mini=None, maxi=None, choices=None,**kwargs):
@@ -131,3 +130,5 @@ class ComplexNumberConfigurator(IConfigurator):
         '''
         
         return "Value: %r" % self['value']
+    
+REGISTRY['complex_number'] = ComplexNumberConfigurator

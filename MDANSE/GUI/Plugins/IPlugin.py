@@ -80,10 +80,8 @@ class PluginDropTarget(wx.DropTarget):
         return d
 
 class IPlugin(wx.Panel):
-    
-    __metaclass__ = REGISTRY
-    
-    type = "plugin"
+        
+    _registry = "plugin"
         
     ancestor = []
     

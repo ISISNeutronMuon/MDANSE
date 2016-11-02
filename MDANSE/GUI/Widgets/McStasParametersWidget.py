@@ -34,17 +34,16 @@ import collections
  
 import wx
  
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurable import ConfigurationError
 from MDANSE.Framework.Configurable import Configurable
-from MDANSE.Framework.Widgets.IWidget import IWidget
 
 from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class McStasParametersWidget(IWidget):
- 
-    type = "mcstas_parameters"
-     
+      
     _mcStasTypes = {'double' : 'float', 'int' : 'integer', 'string' : 'input_file'}
  
     def initialize(self):
@@ -108,4 +107,7 @@ class McStasParametersWidget(IWidget):
          
         val = self._configurationPanel.get_value()
          
-        return val 
+        return val
+    
+REGISTRY["mcstas_parameters"] = McStasParametersWidget
+ 

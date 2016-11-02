@@ -30,16 +30,15 @@ Created on Jun 30, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionWidget, UserDefinitionDialog
+from MDANSE.GUI.Widgets.UserDefinitionWidget import UserDefinitionWidget, UserDefinitionDialog
 
 class AtomListWidget(UserDefinitionWidget):
     
-    type = 'atoms_list'
-
     def on_new_user_definition(self,event):
 
-        dlg = UserDefinitionDialog(self,self._trajectory,self.type)
+        dlg = UserDefinitionDialog(self,self._trajectory,self._type)
         
         dlg.plugin.set_natoms(self._configurator._nAtoms)
                 
@@ -47,11 +46,13 @@ class AtomListWidget(UserDefinitionWidget):
         
         dlg.ShowModal()
         
-    def msg_set_ud(self):
+    def msg_set_ud(self, message=None):
          
-        uds = UD_STORE.filter(self._basename, self.type)
+        uds = UD_STORE.filter(self._basename, self._type)
                                 
-        uds = [v for v in uds if UD_STORE.get_definition(self._basename, self.type,v)["natoms"]==self._configurator._nAtoms] 
+        uds = [v for v in uds if UD_STORE.get_definition(self._basename, self._type,v)["natoms"]==self._configurator._nAtoms] 
         
         self._availableUDs.SetItems(uds)
-        
+
+REGISTRY["atoms_list"] = AtomListWidget
+    

@@ -37,12 +37,10 @@ from MDANSE import REGISTRY
 from MDANSE.GUI.Plugins.ComponentPlugin import ComponentPlugin
 
 class DataInfoPlugin(ComponentPlugin):
-    
-    type = "data_info"
-    
+        
     label = "Data info"
     
-    ancestor = [data.type for data in REGISTRY["input_data"].values()]
+    ancestor = REGISTRY["input_data"].keys()
 
     def __init__(self, parent, *args, **kwargs):
         
@@ -77,3 +75,4 @@ class DataInfoPlugin(ComponentPlugin):
         self._parent._mgr.GetPane(self).Float().CloseButton(True).BestSize((600,600))            
         self._parent._mgr.Update()
 
+REGISTRY["data_info"] = DataInfoPlugin

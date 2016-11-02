@@ -37,6 +37,7 @@ from MMTK.Collections import Collection
 from MMTK.ParticleProperties import Configuration
 from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.Mathematics.Geometry import center
 
@@ -47,9 +48,7 @@ class RefoldedMembraneTrajectory(IJob):
     
     :note: The normal to the membrane is assumed to be parallel to the z axis. 
     """
-    
-    type = 'rmt'
-    
+        
     label = "Refolded Membrane Trajectory"
 
     category = ('Analysis','Macromolecules','Lipids')
@@ -161,3 +160,5 @@ class RefoldedMembraneTrajectory(IJob):
                                                     
         # The output trajectory is closed.
         self._rmt.close()
+        
+REGISTRY['rmt'] = RefoldedMembraneTrajectory

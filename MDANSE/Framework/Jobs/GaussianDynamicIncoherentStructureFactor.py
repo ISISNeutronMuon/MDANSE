@@ -34,6 +34,7 @@ import collections
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import get_spectrum
@@ -44,9 +45,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
     """
     Computes the dynamic incoherent structure factor S_inc(Q,w) for a set of atoms in the Gaussian approximation.
     """
-    
-    type = 'gdisf'
-    
+        
     label = "Gaussian Dynamic Incoherent Structure Factor"
 
     category = ('Analysis','Scattering',)
@@ -170,3 +169,5 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['gdisf'] = GaussianDynamicIncoherentStructureFactor

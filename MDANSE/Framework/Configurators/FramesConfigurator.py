@@ -30,6 +30,7 @@ Created on Mar 30, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.RangeConfigurator import RangeConfigurator
 
 class FramesConfigurator(RangeConfigurator):
@@ -45,9 +46,7 @@ class FramesConfigurator(RangeConfigurator):
 
     :note: this configurator depends on 'trajectory' configurator to be configured
     """
-    
-    type = 'frames'
-    
+        
     def __init__(self, name, **kwargs):
         '''
         Initializes the configurator.
@@ -96,3 +95,5 @@ class FramesConfigurator(RangeConfigurator):
         
         return "%d frames selected (first=%.3f ; last = %.3f ; time step = %.3f)\n" % \
             (self["n_frames"],self["time"][0],self["time"][-1],self["time_step"])
+            
+REGISTRY['frames'] = FramesConfigurator

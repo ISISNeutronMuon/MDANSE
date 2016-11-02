@@ -30,11 +30,10 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
-class Bases(ISelector):
-
-    type = "nucleotide_base"
+class NucleotideBase(ISelector):
 
     section = "nucleic acids"
 
@@ -57,3 +56,5 @@ class Bases(ISelector):
                 pass
             
         return sel
+    
+REGISTRY["nucleotide_base"] = NucleotideBase

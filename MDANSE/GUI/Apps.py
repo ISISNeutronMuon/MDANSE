@@ -32,7 +32,7 @@ Created on Oct 04, 2016
 
 import wx
 
-from MDANSE.GUI.Plugins.Plotter.PlotterPlugin import PlotterFrame
+from MDANSE.GUI.Plugins.PlotterPlugin import PlotterFrame
 from MDANSE.GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE.GUI.MainFrame import MainFrame
 from MDANSE.GUI.PeriodicTableViewer import PeriodicTableViewer

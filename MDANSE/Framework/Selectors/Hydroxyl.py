@@ -30,11 +30,10 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
        
 class Hydroxyl(ISelector):
-
-    type = "hydroxyl"
 
     section = "chemical groups"
 
@@ -57,3 +56,5 @@ class Hydroxyl(ISelector):
                     sel.update([oxy] + hydrogens)
   
         return sel
+    
+REGISTRY["hydroxyl"] = Hydroxyl

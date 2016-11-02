@@ -30,11 +30,10 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
                                     
 class Phosphate(ISelector):
-
-    type = "phosphate"
 
     section = "chemical groups"
 
@@ -58,3 +57,5 @@ class Phosphate(ISelector):
                     sel.update([pho] + oxygens)
                 
         return sel
+    
+REGISTRY["phosphate"] = Phosphate

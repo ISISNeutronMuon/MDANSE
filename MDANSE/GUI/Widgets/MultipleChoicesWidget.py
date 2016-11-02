@@ -32,13 +32,12 @@ Created on Mar 30, 2015
 
 import wx.combo
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE import REGISTRY
 from MDANSE.GUI.ComboWidgets.ComboCheckbox import ComboCheckbox
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class MultipleChoicesWidget(IWidget):
     
-    type = "multiple_choices"
-
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -57,3 +56,5 @@ class MultipleChoicesWidget(IWidget):
     def get_widget_value(self):
         
         return self._choices.GetStringSelection()
+    
+REGISTRY["multiple_choices"] = MultipleChoicesWidget

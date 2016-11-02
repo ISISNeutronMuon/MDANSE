@@ -36,9 +36,7 @@ import os
 from MDANSE.Framework.InputData.IInputData import IInputData
 
 class InputFileData(IInputData):
-    
-    type = None
-    
+        
     def __init__(self, filename, load=True):
                 
         IInputData.__init__(self,filename)

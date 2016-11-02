@@ -38,6 +38,7 @@ from vtk.wx.wxVTKRenderWindowInteractor import wxVTKRenderWindowInteractor
 import wx
 import wx.aui as aui
 
+from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.GUI.Plugins.ComponentPlugin import ComponentPlugin
 
@@ -65,9 +66,7 @@ class MviViewerPlugin(ComponentPlugin):
     '''
     This class sets up the Mcstas virtual instrument viewer using vtk functionnalities.
     '''
-    
-    type = "mvi_viewer"
-    
+        
     label = "McStas Virtual Instrument Viewer"
     
     ancestor = ["mvi_trace"]
@@ -385,3 +384,5 @@ class MviViewerPlugin(ComponentPlugin):
         y.append(y[0]);
         z.append(z[0]); 
         return numpy.column_stack([x,y,z])
+    
+REGISTRY["mvi_viewer"] = MviViewerPlugin

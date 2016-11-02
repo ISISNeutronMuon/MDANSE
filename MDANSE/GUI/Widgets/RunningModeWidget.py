@@ -34,12 +34,12 @@ import multiprocessing
 
 import wx
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE import REGISTRY
+
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class RunningModeWidget(IWidget):
     
-    type = "running_mode"
-
     def initialize(self):
 
         self._totalNumberOfProcessors = multiprocessing.cpu_count()
@@ -93,3 +93,5 @@ class RunningModeWidget(IWidget):
         name = btn.GetName()
         
         self._processors.Enable(name=="multiprocessor")
+        
+REGISTRY["running_mode"] = RunningModeWidget

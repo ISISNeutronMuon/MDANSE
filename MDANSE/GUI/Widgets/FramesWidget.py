@@ -33,13 +33,14 @@ Created on Mar 30, 2015
 import wx
 import wx.lib.intctrl as wxintctrl
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE import REGISTRY
 from MDANSE.Framework.InputData.EmptyData import EmptyData
+
+from MDANSE.GUI.DataController import DATA_CONTROLLER
+from MDANSE.GUI.Widgets.IWidget import IWidget
         
 class FramesWidget(IWidget):
-        
-    type = "frames"
-    
+            
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -103,3 +104,5 @@ class FramesWidget(IWidget):
         time = self._trajectory.data.time[f:l:s]
         
         return time
+
+REGISTRY["frames"] = FramesWidget

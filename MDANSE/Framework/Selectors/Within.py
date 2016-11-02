@@ -30,11 +30,12 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
                
-class Within(ISelector):
+class WithinSelection(ISelector):
 
-    type = "within"
+    type = "within_selection"
 
     section = None
 
@@ -46,3 +47,5 @@ class Within(ISelector):
             sel.update([a for a in self._universe.selectShell(at.position(),mini,maxi).atomList()])
         
         return sel
+    
+REGISTRY["within_selection"] = WithinSelection

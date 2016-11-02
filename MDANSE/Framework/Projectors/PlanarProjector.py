@@ -34,11 +34,10 @@ import numpy
 
 from Scientific.Geometry import Vector
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Projectors.IProjector import IProjector, ProjectorError
     
 class PlanarProjector(IProjector):
-
-    type = 'planar'
 
     def set_axis(self, axis):
                         
@@ -60,4 +59,6 @@ class PlanarProjector(IProjector):
             return numpy.dot(value,self._projectionMatrix.T)
         except (TypeError,ValueError):
             raise ProjectorError("Invalid data to apply projection on")
+
+REGISTRY['planar'] = PlanarProjector
         

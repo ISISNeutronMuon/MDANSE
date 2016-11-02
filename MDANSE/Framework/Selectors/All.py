@@ -30,14 +30,15 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class All(ISelector):
-
-    type = "all"
 
     section = "miscellaneous"
                     
     def select(self, *args):
         return set(self._universe.atomList())
+
+REGISTRY["all"] = All
                     

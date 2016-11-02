@@ -30,10 +30,11 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.InputData.IInputData import IInputData
 
 class EmptyData(IInputData):
 
-    type = "empty_data"
-
-    extension = None    
+    extension = None
+    
+REGISTRY["empty_data"] = EmptyData    

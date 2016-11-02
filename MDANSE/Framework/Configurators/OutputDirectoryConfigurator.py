@@ -32,16 +32,14 @@ Created on May 21, 2015
 
 import os
 
-from MDANSE import PLATFORM
+from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
         
 class OutputDirectoryConfigurator(IConfigurator):
     """
      This Configurator allows to set an output directory.
     """
-    
-    type = "output_directory"
-    
+        
     _default = os.getcwd()
 
     def __init__(self, name, new=False, **kwargs):
@@ -85,3 +83,5 @@ class OutputDirectoryConfigurator(IConfigurator):
         '''
         
         return "Output directory: %r" % self['value']
+    
+REGISTRY["output_directory"] = OutputDirectoryConfigurator

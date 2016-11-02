@@ -34,8 +34,6 @@ from MDANSE.GUI.Plugins.IPlugin import IPlugin
              
 class ComponentPlugin(IPlugin):
     
-    type = None
-
     @property
     def datakey(self):
         return self.parent.datakey

@@ -32,14 +32,13 @@ Created on Mar 30, 2015
 
 import wx
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurable import ConfigurationError
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE.GUI.Widgets.IWidget import IWidget
     
-class VectorConfigurator(IWidget):
-    
-    type = "vector"
-    
+class VectorWidget(IWidget):
+        
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -83,3 +82,5 @@ class VectorConfigurator(IWidget):
             raise ConfigurationError("Invalid value for %r entry" % self.name)
         else:        
             return val
+
+REGISTRY["vector"] = VectorWidget

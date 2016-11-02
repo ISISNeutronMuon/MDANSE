@@ -30,10 +30,12 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 
 class VolumeOutputVariable(IOutputVariable):
+        
+    _nDimensions = 3
     
-    type = "volume"
+REGISTRY["volume"] = VolumeOutputVariable
     
-    _nDimensions = 3    

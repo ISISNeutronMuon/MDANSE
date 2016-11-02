@@ -31,7 +31,7 @@ Created on Sep 22, 2015
 
 import wx
 
-from MDANSE import LOGGER
+from MDANSE import LOGGER, REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
 from MDANSE.GUI import PUBLISHER
@@ -81,7 +81,7 @@ class UserDefinitionPlugin(ComponentPlugin):
         if value is None:
             return
                         
-        if UD_STORE.has_definition(self._target,self.type,name):
+        if UD_STORE.has_definition(self._target,self._type,name):
             LOGGER('There is already a user-definition with that name.','error',['dialog'])
             return
                   
@@ -93,3 +93,5 @@ class UserDefinitionPlugin(ComponentPlugin):
         
         if save:
             UD_STORE.save()
+
+REGISTRY["user_definition"] = UserDefinitionPlugin

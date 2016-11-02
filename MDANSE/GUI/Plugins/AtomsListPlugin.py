@@ -35,7 +35,7 @@ import os
 import wx
 import wx.aui as wxaui
 
-from MDANSE import LOGGER
+from MDANSE import LOGGER, REGISTRY
 from MDANSE.GUI.Plugins.UserDefinitionPlugin import UserDefinitionPlugin
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule, get_chemical_objects_dict
 
@@ -70,9 +70,7 @@ class AtomNameDropTarget(wx.TextDropTarget):
         self._atoms.Append([data])
                 
 class AtomsListPlugin(UserDefinitionPlugin):
-    
-    type = 'atoms_list'
-    
+        
     label = "Atoms list"
     
     ancestor = ["molecular_viewer"]
@@ -263,4 +261,7 @@ class AtomsListPlugin(UserDefinitionPlugin):
             LOGGER("The current selection is empty", "error", ["dialog"])
             return None
                                 
-        return {'indexes' : self._selection, "natoms" : self._nAtoms}        
+        return {'indexes' : self._selection, "natoms" : self._nAtoms}
+    
+REGISTRY["atoms_list"] = AtomsListPlugin
+        

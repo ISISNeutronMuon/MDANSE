@@ -32,14 +32,12 @@ Created on Mar 30, 2015
 
 import wx
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurable import ConfigurationError
-
-from MDANSE.Framework.Widgets.StringWidget import StringWidget
+from MDANSE.GUI.Widgets.StringWidget import StringWidget
 
 class FloatWidget(StringWidget):
     
-    type = "float"
-
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -63,3 +61,5 @@ class FloatWidget(StringWidget):
     def widget(self):
         
         return self._float
+    
+REGISTRY["float"] = FloatWidget

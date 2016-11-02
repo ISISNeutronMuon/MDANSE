@@ -30,8 +30,12 @@ Created on Mar 30, 2015
 :author: Eric C. Pellegrini
 '''
 
-from MDANSE.Framework.Widgets.InputDirectoryWidget import InputDirectoryWidget
+from MDANSE import REGISTRY
+
+from MDANSE.GUI.Widgets.InputDirectoryWidget import InputDirectoryWidget
 
 class OutputDirectoryWidget(InputDirectoryWidget):
     
-    type = "output_directory"
+    pass
+    
+REGISTRY["output_directory"] = OutputDirectoryWidget

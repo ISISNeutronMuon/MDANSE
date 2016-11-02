@@ -36,14 +36,13 @@ import operator
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 class GridLatticeQVectors(LatticeQVectors):
     """
     """
-    
-    type = 'grid'
-    
+        
     settings = collections.OrderedDict()
     settings['hrange'] = ('range', {"valueType":int, "includeLast":True})
     settings['krange'] = ('range', {"valueType":int, "includeLast":True})
@@ -100,3 +99,5 @@ class GridLatticeQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
+
+REGISTRY["grid"] = GridLatticeQVectors

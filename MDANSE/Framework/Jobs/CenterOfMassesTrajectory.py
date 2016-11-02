@@ -36,6 +36,7 @@ import copy
 from MMTK import Atom
 from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import partition_universe
 
@@ -44,9 +45,7 @@ class CenterOfMassesTrajectory(IJob):
     Creates a trajectory from the centre of masses for selected groups of atoms in a given input trajectory.
 	For a molecular system, the centre of mass trajectory will contain only the molecular translations, which are therefore separated from the rotations.
     """
-    
-    type = 'comt'
-    
+        
     label = "Center Of Masses Trajectory"
 
     category = ('Analysis','Trajectory',)
@@ -138,3 +137,5 @@ class CenterOfMassesTrajectory(IJob):
         
         # The output trajectory is closed.
         self._comt.close()   
+
+REGISTRY['comt'] = CenterOfMassesTrajectory

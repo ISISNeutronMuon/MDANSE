@@ -35,13 +35,12 @@ import random
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 class SphericalLatticeQVectors(LatticeQVectors):
     """
     """
-
-    type = 'spherical_lattice'
 
     settings = collections.OrderedDict()
     settings['seed'] = ('integer', {"mini":0, "default":0})
@@ -106,3 +105,5 @@ class SphericalLatticeQVectors(LatticeQVectors):
                     return None
                 else:
                     self._status.update()
+
+REGISTRY["spherical_lattice"] = SphericalLatticeQVectors

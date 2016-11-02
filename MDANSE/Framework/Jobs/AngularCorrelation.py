@@ -34,6 +34,7 @@ import collections
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Mathematics.Signal import correlation
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
@@ -60,9 +61,7 @@ class AngularCorrelation(IJob):
     **Usage:** \n
     This analysis is used to study molecule's orientation and rotation relaxation.    
     '''
-    
-    type = 'ac'
-    
+        
     label = "Angular Correlation"
 
     category = ('Analysis','Dynamics',)
@@ -152,4 +151,6 @@ class AngularCorrelation(IJob):
                 
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
-        self.configuration['trajectory']['instance'].close()  
+        self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['ac'] = AngularCorrelation

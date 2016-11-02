@@ -32,6 +32,7 @@ Created on May 21, 2015
 
 import collections
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation, differentiate, normalize
@@ -64,8 +65,6 @@ class VelocityAutoCorrelationFunction(IJob):
     This is a special case of a more general relationship between the VACF and the mean square displacement, and belongs to a class of properties 
     known as the Green-Kubo relations, which relate correlation functions to so-called transport coefficients. 
     """
-
-    type = 'vacf'
     
     label = "Velocity AutoCorrelation Function"
 
@@ -173,4 +172,6 @@ class VelocityAutoCorrelationFunction(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     
+
+REGISTRY['vacf'] = VelocityAutoCorrelationFunction
     

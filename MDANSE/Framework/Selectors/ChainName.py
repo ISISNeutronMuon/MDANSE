@@ -32,11 +32,10 @@ Created on Mar 27, 2015
 
 from MMTK.Proteins import PeptideChain, Protein
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class ChainName(ISelector):
-
-    type = "chain_name"
 
     section = "proteins"
 
@@ -83,3 +82,5 @@ class ChainName(ISelector):
                     continue
                 
         return sel
+
+REGISTRY["chain_name"] = ChainName

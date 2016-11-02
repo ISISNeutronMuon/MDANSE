@@ -34,6 +34,7 @@ import ctypes
 import logging
 import os
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Handlers.IHandler import IHandler
 
 class ColorizingStreamHandler(IHandler,logging.StreamHandler):
@@ -42,8 +43,6 @@ class ColorizingStreamHandler(IHandler,logging.StreamHandler):
     
     :copyright: 2010, 2011 Vinay Sajip
     '''
-
-    type = "terminal"
     
     # color names to indices
     color_map = {'black'   : 0,
@@ -236,3 +235,4 @@ class ColorizingStreamHandler(IHandler,logging.StreamHandler):
             message = '\n'.join([self.colorize(p, record) for p in parts])
         return message
                 
+REGISTRY["terminal"] = ColorizingStreamHandler

@@ -30,10 +30,12 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.AtomIndex import AtomIndex
         
 class AtomPicked(AtomIndex):
 
-    type = "atom_picked"
-
     section = "miscellaneous"
+    
+REGISTRY["atom_picked"] = AtomPicked
+

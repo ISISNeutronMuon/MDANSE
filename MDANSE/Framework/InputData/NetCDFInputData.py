@@ -34,13 +34,12 @@ import collections
 
 from Scientific.IO.NetCDF import NetCDFFile
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.InputData.IInputData import InputDataError
 from MDANSE.Framework.InputData.InputFileData import InputFileData
 
 class NetCDFInputData(InputFileData):
-    
-    type = "netcdf_data"
-    
+        
     extension = "nc"
     
     def load(self):
@@ -73,3 +72,5 @@ class NetCDFInputData(InputFileData):
     def netcdf(self):
         
         return self._netcdf
+
+REGISTRY["netcdf_data"] = NetCDFInputData

@@ -37,8 +37,6 @@ from MDANSE.Framework.QVectors.IQVectors import IQVectors, QVectorsError
 class LatticeQVectors(IQVectors):
     
     is_lattice = True
-
-    type = None
     
     def __init__(self, universe,status=None):
         

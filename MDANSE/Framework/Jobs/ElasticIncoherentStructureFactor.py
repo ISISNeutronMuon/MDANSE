@@ -34,6 +34,7 @@ import collections
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
@@ -47,8 +48,6 @@ class ElasticIncoherentStructureFactor(IJob):
     Elastic scattering is only present for systems in which the atomic motion is confined in space, as
     in solids. The Q-dependence of the EISF indicates e.g. the fraction of static/mobile atoms and the spatial dependence of the dynamics.
     """
-
-    type = 'eisf'
     
     label = "Elastic Incoherent Structure Factor"
 
@@ -155,3 +154,5 @@ class ElasticIncoherentStructureFactor(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['eisf'] = ElasticIncoherentStructureFactor

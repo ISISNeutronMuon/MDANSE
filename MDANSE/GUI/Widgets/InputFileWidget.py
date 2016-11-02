@@ -33,14 +33,12 @@ Created on Mar 30, 2015
 import wx
 import wx.lib.filebrowsebutton as wxfile
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Configurable import ConfigurationError
-
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class InputFileWidget(IWidget):
-    
-    type = "input_file"
-    
+        
     def add_widgets(self):
         
         default = self._configurator.default
@@ -62,3 +60,5 @@ class InputFileWidget(IWidget):
             raise ConfigurationError("No input file selected", self)
 
         return filename
+    
+REGISTRY["input_file"] = InputFileWidget

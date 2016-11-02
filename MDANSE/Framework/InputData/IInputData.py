@@ -30,7 +30,6 @@ Created on May 27, 2015
 :author: Eric C. Pellegrini
 '''
 
-from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 
 class InputDataError(Error):
@@ -42,10 +41,8 @@ class IInputData(object):
     '''
     This is the base class for handling MDANSE input data.    
     '''
-    
-    __metaclass__ = REGISTRY
-    
-    type = "input_data"
+        
+    _registry = "input_data"
 
     def __init__(self,name, *args):
         '''

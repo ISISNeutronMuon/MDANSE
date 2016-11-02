@@ -118,11 +118,11 @@ class DataTreePanel(wx.Panel):
 
         item = None
         for cItem in self.get_children(self._root):
-            if data.type == self._tree.GetItemText(cItem):
+            if data._type == self._tree.GetItemText(cItem):
                 item = cItem
                 break
         if item is None:    
-            item = self._tree.AppendItem(self._root, data.type, data=None)
+            item = self._tree.AppendItem(self._root, data._type, data=None)
 
         self._tree.AppendItem(item, data.shortname, data=dataItem)
 

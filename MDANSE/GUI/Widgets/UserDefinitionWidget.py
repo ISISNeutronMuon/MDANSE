@@ -38,10 +38,10 @@ import wx.aui as wxaui
 
 from MDANSE import LOGGER, REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
-from MDANSE.Framework.Widgets.IWidget import IWidget
 
 from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.DataController import DATA_CONTROLLER
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class UserDefinitionDialog(wx.Dialog):
     
@@ -69,9 +69,7 @@ class UserDefinitionDialog(wx.Dialog):
 class UserDefinitionWidget(IWidget):
     
     __metaclass__ = abc.ABCMeta
-    
-    type = None    
-                
+                    
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -105,13 +103,13 @@ class UserDefinitionWidget(IWidget):
         
         from MDANSE.GUI.UserDefinitionViewer import UserDefinitionViewer
         
-        f = UserDefinitionViewer(self,ud=[self._basename,self.type,ud])
+        f = UserDefinitionViewer(self,ud=[self._basename,self._type,ud])
         
         f.Show()
     
     def on_new_definition(self,event):
         
-        dlg = UserDefinitionDialog(None,self._trajectory,self.type)
+        dlg = UserDefinitionDialog(None,self._trajectory,self._type)
         
         dlg.ShowModal()
         
@@ -127,10 +125,10 @@ class UserDefinitionWidget(IWidget):
 
         self._basename = os.path.basename(self._filename)
         
-        self.msg_set_ud()
+        self.msg_set_ud(None)
 
     def msg_set_ud(self,message):
          
-        uds = UD_STORE.filter(self._basename, self.type)
+        uds = UD_STORE.filter(self._basename, self._type)
         
         self._availableUDs.SetItems(uds)

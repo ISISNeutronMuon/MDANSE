@@ -30,11 +30,10 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class CarbonAlpha(ISelector):
-
-    type = "carbon_alpha"
 
     section = "proteins"
 
@@ -57,3 +56,5 @@ class CarbonAlpha(ISelector):
                 pass
 
         return sel
+
+REGISTRY["carbon_alpha"] = CarbonAlpha

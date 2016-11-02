@@ -39,6 +39,7 @@ import numpy
 
 from Scientific.IO.NetCDF import NetCDFFile
 
+from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.GUI.Plugins.ComponentPlugin import ComponentPlugin
 
@@ -46,8 +47,6 @@ class DensitySuperpositionError(Error):
     pass
 
 class DensitySuperpositionPlugin(ComponentPlugin):
-
-    type = "density_superposition"
     
     label = "Density superposition"
     
@@ -421,6 +420,7 @@ class TestFrame(wx.Frame):
         self._mgr.AddPane(self.plugin, aui.AuiPaneInfo().DestroyOnClose().Dock().CaptionVisible(True).CloseButton(True).BestSize(self.GetSize()))
         self._mgr.Update() 
 
+REGISTRY["density_superposition"] = DensitySuperpositionPlugin
 
 if __name__ == "__main__":
     app = wx.App(False)

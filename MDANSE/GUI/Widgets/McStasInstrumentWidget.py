@@ -36,13 +36,12 @@ import subprocess
 
 import wx
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE import REGISTRY
 
 from MDANSE.GUI import PUBLISHER
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class McStasInstrumentWidget(IWidget):
-    
-    type = "mcstas_instrument"
     
     _mcStasTypes = {'double' : float, 'int' : int, 'string' : str}
 
@@ -92,3 +91,5 @@ class McStasInstrumentWidget(IWidget):
     def get_widget_value(self):
         
         return self._instrument.GetStringSelection()
+    
+REGISTRY["mcstas_instrument"] = McStasInstrumentWidget

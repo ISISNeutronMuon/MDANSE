@@ -91,7 +91,7 @@ class WorkingPanel(wx.Panel):
         if data is None:
             return
                                         
-        container = REGISTRY["plugin"].get(data.type,None)
+        container = REGISTRY["plugin"].get(data._type,None)
                         
         if container is None:
             return

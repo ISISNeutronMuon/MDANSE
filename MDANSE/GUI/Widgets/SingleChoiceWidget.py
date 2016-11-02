@@ -32,12 +32,12 @@ Created on Mar 30, 2015
 
 import wx
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE import REGISTRY
+
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class SingleChoiceWidget(IWidget):
     
-    type = "single_choice"
-
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -52,3 +52,5 @@ class SingleChoiceWidget(IWidget):
     def get_widget_value(self):
         
         return self._choices.GetStringSelection()
+
+REGISTRY["single_choice"] = SingleChoiceWidget

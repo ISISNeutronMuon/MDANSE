@@ -34,6 +34,7 @@ import collections
 
 import numpy 
 
+from MDANSE import REGISTRY
 from MDANSE.Extensions import mic_fast_calc, qhull
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import factorial
@@ -56,8 +57,6 @@ class Voronoi(IJob):
     Gael Goret, PELLEGRINI Eric
     
     """
-
-    type = 'vo'
 
     label = "Voronoi"
     
@@ -205,4 +204,5 @@ class Voronoi(IJob):
         
         self.configuration['trajectory']['instance'].close()     
   
+REGISTRY['vo'] = Voronoi
         

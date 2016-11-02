@@ -30,12 +30,11 @@ Created on Mar 27, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.InputData.InputFileData import InputFileData
 
 class MviTraceInputData(InputFileData):
-    
-    type = "mvi_trace"
-    
+        
     extension = "mvi"
     
     def load(self):
@@ -43,3 +42,5 @@ class MviTraceInputData(InputFileData):
         
     def close(self):
         pass   
+
+REGISTRY["mvi_trace"] = MviTraceInputData

@@ -40,6 +40,7 @@ from MMTK.ChemicalObjects import isChemicalObject
 from MMTK.Collections import Collection
 from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
@@ -59,9 +60,7 @@ class UnfoldedTrajectory(IJob):
 	
 	The routine may fail if the molecule is bigger than half of the box side (L/2) and or the initial structure is not in itself contiguous.	
     """
-    
-    type = 'ut'
-    
+        
     label = "Unfolded Trajectory"
 
     category = ('Analysis','Trajectory',)
@@ -183,4 +182,7 @@ class UnfoldedTrajectory(IJob):
         # The output trajectory is closed.
         self._outputTraj.close()
         
-        sys.setrecursionlimit(self._oldRecursionLimit)                
+        sys.setrecursionlimit(self._oldRecursionLimit)
+        
+REGISTRY['ut'] = UnfoldedTrajectory
+                

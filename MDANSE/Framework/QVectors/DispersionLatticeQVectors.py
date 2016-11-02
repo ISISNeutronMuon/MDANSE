@@ -34,13 +34,12 @@ import collections
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 class DispersionLatticeQVectors(LatticeQVectors):
     """
     """
-
-    type = 'dispersion_lattice'
 
     settings = collections.OrderedDict()
     settings['start'] = ('vector', {"valueType":int, "notNull":False, "default":[0,0,0]})
@@ -78,3 +77,5 @@ class DispersionLatticeQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
+
+REGISTRY["dispersion_lattice"] = DispersionLatticeQVectors

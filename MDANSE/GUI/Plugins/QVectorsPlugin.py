@@ -153,8 +153,6 @@ class QVectorsPanel(wx.Panel):
                             
 class QVectorsPlugin(UserDefinitionPlugin):
     
-    type = 'q_vectors'
-
     label = "Q vectors"
     
     ancestor = ["mmtk_trajectory"]
@@ -282,8 +280,8 @@ class QVectorsPlugin(UserDefinitionPlugin):
             return
         
         ud = {}
-        ud['parameters'] = (qPanel.generator.type,qPanel.parameters)
-        ud['generator'] = qPanel.generator.type
+        ud['parameters'] = (qPanel.generator._type,qPanel.parameters)
+        ud['generator'] = qPanel.generator._type
         ud['q_vectors'] = qPanel.grid.GetTable().data
         ud['is_lattice'] = qPanel.generator.is_lattice
         
@@ -313,4 +311,6 @@ class QVectorsPlugin(UserDefinitionPlugin):
         self._parametersSizer.Layout()
         
         self._mgr.Update()
-        
+
+REGISTRY["q_vectors"] = QVectorsPlugin
+    

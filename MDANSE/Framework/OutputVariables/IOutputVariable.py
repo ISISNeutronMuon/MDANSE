@@ -61,10 +61,8 @@ class IOutputVariable(numpy.ndarray):
     A MDANSE output variable is defined as s subclass of Numpy array that stores additional attributes.
     Those extra attributes will be contain information necessary for the the MDANSE plotter. 
     '''
-
-    __metaclass__ = REGISTRY
     
-    type = "output_variable"
+    _registry = "output_variable"
         
     def __new__(cls, value, name, axis='index', units="unitless"):
         '''
@@ -124,7 +122,7 @@ class IOutputVariable(numpy.ndarray):
         info = []
 
         info.append("# variable name: %s"  % self.name)
-        info.append("# \ttype: %s"  % self.type)
+        info.append("# \ttype: %s"  % self._type)
         info.append("# \taxis: %s" % str(self.axis))
         info.append("# \tunits: %s" % self.units)
         

@@ -30,13 +30,9 @@ Created on May 26, 2015
 :author: Eric C. Pellegrini
 '''
 
-from MDANSE import REGISTRY
-
 class IHandler(object):
     '''
     Base class for the handlers of MDANSE logger.
     '''
     
-    __metaclass__ = REGISTRY
-
-    type = "handler"                
+    _registry = "handler"                

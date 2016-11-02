@@ -34,11 +34,15 @@ import os
 
 import wx
 
-from MDANSE.Framework.Widgets.UserDefinitionWidget import UserDefinitionDialog, UserDefinitionWidget
+from MDANSE import REGISTRY
+
+from MDANSE.GUI.Widgets.UserDefinitionWidget import UserDefinitionDialog, UserDefinitionWidget
         
 class QVectorsWidget(UserDefinitionWidget):
+    
+    pass
         
-    type = "q_vectors"
+REGISTRY["q_vectors"] = QVectorsWidget
         
 if __name__ == "__main__":
     

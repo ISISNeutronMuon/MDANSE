@@ -36,6 +36,7 @@ import tarfile
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Formats.IFormat import IFormat
 
 class ASCIIFormat(IFormat):
@@ -44,8 +45,6 @@ class ASCIIFormat(IFormat):
     added to a single archive file. 
     '''
     
-    type = 'ascii'
-
     extension = ".dat"
 
     extensions = ['.dat','.txt']
@@ -122,3 +121,5 @@ class ASCIIFormat(IFormat):
             fileobject.write('#slice:%s\n' % slices)
             numpy.savetxt(fileobject, array)
             fileobject.write('\n')
+
+REGISTRY['ascii'] = ASCIIFormat

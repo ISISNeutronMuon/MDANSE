@@ -30,6 +30,7 @@ Created on Mar 30, 2015
 :author: Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
@@ -42,8 +43,6 @@ class AtomsListConfigurator(IConfigurator):
         
     :note: this configurator depends on 'trajectory'
     '''
-
-    type = 'atoms_list'
     
     _default = None
                     
@@ -105,3 +104,6 @@ class AtomsListConfigurator(IConfigurator):
         info.append("Number of selected %d-tuplets:%d" % (self._nAtoms,self["n_values"]))
         
         return "\n".join(info)
+    
+REGISTRY["atoms_list"] = AtomsListConfigurator
+    

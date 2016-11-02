@@ -34,6 +34,7 @@ import collections
 
 import numpy
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Analysis import radius_of_gyration
 
@@ -43,8 +44,6 @@ class RadiusOfGyration(IJob):
     a surface, or an ensemble of points. It is calculated as the Root Mean Square Distance between
     the system and a reference which, in MDANSE, is the centre of gravity of the system. 
     """ 
-
-    type = 'rog'
 
     label = "Radius of Gyration"
     
@@ -116,3 +115,5 @@ class RadiusOfGyration(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()
+        
+REGISTRY['rog'] = RadiusOfGyration

@@ -30,6 +30,7 @@ Created on Mar 30, 2015
 :author: Bachir Aoun and Eric C. Pellegrini
 '''
 
+from MDANSE import REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
@@ -42,9 +43,7 @@ class BasisSelection(IConfigurator):
     These coordinates will respectively define the origin, the X axis and y axis of the basis, the 
     Z axis being latter defined in such a way that the basis is direct.     
     """
-    
-    type = 'basis_selection'
-    
+        
     _default = None
 
     def configure(self, value):
@@ -91,3 +90,5 @@ class BasisSelection(IConfigurator):
         '''
         
         return "Basis vector:%s" % self["value"]
+    
+REGISTRY["basis_selection"] = BasisSelection

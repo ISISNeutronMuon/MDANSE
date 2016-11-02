@@ -35,13 +35,13 @@ import os
 import wx.combo
 import wx.lib.filebrowsebutton as wxfile
 
-from MDANSE.Framework.Widgets.IWidget import IWidget
+from MDANSE import REGISTRY
+
 from MDANSE.GUI.ComboWidgets.ComboCheckbox import ComboCheckbox
+from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class OutputFilesWidget(IWidget):
-    
-    type = "output_files"
-        
+            
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -86,3 +86,5 @@ class OutputFilesWidget(IWidget):
             trajectoryDir = os.path.dirname(datakey)
             
         self._filename.SetValue(os.path.join(trajectoryDir,basename))
+        
+REGISTRY["output_files"] = OutputFilesWidget

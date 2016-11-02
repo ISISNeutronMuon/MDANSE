@@ -30,7 +30,7 @@ Created on Mar 30, 2015
 :author: Eric C. Pellegrini
 '''
 
-from MDANSE import ELEMENTS
+from MDANSE import ELEMENTS, REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
@@ -48,9 +48,7 @@ class AtomTransmutationConfigurator(IConfigurator):
             
     :note: this configurator depends on 'trajectory' and 'atom_selection' configurators to be configured
     """
-    
-    type = 'atom_transmutation'
-    
+        
     _default = None
                                 
     def configure(self, value):
@@ -136,3 +134,5 @@ class AtomTransmutationConfigurator(IConfigurator):
             return "No atoms selected for transmutation"
         
         return "Number of transmutated atoms:%d\n" % self._nTransmutatedAtoms
+    
+REGISTRY["atom_transmutation"] = AtomTransmutationConfigurator
