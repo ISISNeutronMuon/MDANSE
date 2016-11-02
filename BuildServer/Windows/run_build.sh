@@ -84,6 +84,9 @@ cd ${DEPENDENCIES_DIR}
 
 echo "Extracting dependencies"
 
+# extract setuptools
+extract setuptools-28.7.1.${BUILD_TARGET}.exe PURELIB
+
 # extract numpy
 extract numpy-MKL-1.8.0.${BUILD_TARGET}-py2.7.exe PLATLIB
 
