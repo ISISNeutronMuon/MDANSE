@@ -21,7 +21,7 @@ class Icons(object):
                 icon = os.path.join(os.path.dirname(sys.executable),name+".png")
             else:
                 raise
-                
+
         image = wx.ImageFromBitmap(wx.Bitmap(icon))
         image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
         

@@ -30,6 +30,7 @@ Created on Mar 26, 2015
 :author: Eric C. Pellegrini
 '''
 
+import os
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -43,11 +44,6 @@ from MDANSE.Core.ClassRegistry import REGISTRY
 from MDANSE.Data.ElementsDatabase import ELEMENTS
 
 import MDANSE.Framework
-
-import os
-
-# MMTK hack for MMTK in case when freezing MDANSE
-os.environ["MMTKDATABASE"] = os.path.join(PLATFORM.package_directory(), 'Data')
 
 PLATFORM.create_directory(PLATFORM.macros_directory())
 
