@@ -50,7 +50,7 @@ class DataController(collections.OrderedDict):
             return
         else:
             collections.OrderedDict.__delitem__(self,item)
-            PUBLISHER.sendMessage("msg_delete_input_data", data=item)
+            PUBLISHER.sendMessage("msg_delete_input_data", message=item)
     
     def __getitem__(self, key):
         
@@ -65,7 +65,7 @@ class DataController(collections.OrderedDict):
         
         collections.OrderedDict.__setitem__(self, item,value)
         
-        PUBLISHER.sendMessage("msg_load_input_data", data=value)
+        PUBLISHER.sendMessage("msg_load_input_data", message=value)
                     
     def has_proxy(self, item):
         '''

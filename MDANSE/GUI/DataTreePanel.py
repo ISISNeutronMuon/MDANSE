@@ -73,16 +73,17 @@ class DataTreePanel(wx.Panel):
     
     def msg_load_input_data(self,message):
         
-        data = message.data
-        if data is None:
+        if message is None:
             return
                         
-        self.add_data(data)
+        self.add_data(message)
 
     def msg_delete_input_data(self,message):
 
-        data = message.data
-        item = self.get_tree_item(self._root,data)
+        if message is None:
+            return
+
+        item = self.get_tree_item(self._root,message)
         
         if item is None:
             return

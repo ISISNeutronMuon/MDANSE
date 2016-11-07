@@ -174,7 +174,7 @@ class PluginsTreePanel(wx.Panel):
         if self._tree.GetCount() !=0:
             self._tree.DeleteChildren(self._root)
                     
-        plugin = message.data                                            
+        plugin = message                                            
         if plugin is None:
             return
         

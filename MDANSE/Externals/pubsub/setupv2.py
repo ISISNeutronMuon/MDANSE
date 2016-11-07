@@ -8,7 +8,7 @@ or maintained.
 
 '''
 
-from MDANSE.Externals.pubsub import pubsubconf
+import pubsubconf
 pubsubconf.setVersion(2)
 
 
