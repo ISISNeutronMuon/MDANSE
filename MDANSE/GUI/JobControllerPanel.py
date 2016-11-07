@@ -296,6 +296,7 @@ class JobControllerPanel(wx.ScrolledWindow):
                                         
         runningJobs = event.runningJobs
 
+        # Remove the widgets corresponding to the jobs that are not running anymore  
         for k,v in self._jobs.items():
 
             if runningJobs.has_key(k):
@@ -315,9 +316,6 @@ class JobControllerPanel(wx.ScrolledWindow):
                     self._gbSizer.SetItemPosition(w.GetWindow(),(r-1,i))
 
         for jobName, jobStatus in runningJobs.items():
-            
-            if jobStatus["state"] == "aborted":
-                    self._jobs[jobName]["name"].SetBackgroundColour(wx.RED)
                         
             if self._jobs.has_key(jobName):
                 self._jobs[jobName]['progress'].SetValue(jobStatus['progress'])
@@ -346,6 +344,9 @@ class JobControllerPanel(wx.ScrolledWindow):
                 self._gbSizer.Add(self._jobs[jobName]['progress'],pos=(r,5),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
                 self._gbSizer.Add(self._jobs[jobName]['eta']     ,pos=(r,6),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
                 self._gbSizer.Add(self._jobs[jobName]['kill']    ,pos=(r,7),flag=wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
+
+            if jobStatus["state"] == "aborted":
+                self._jobs[jobName]["name"].SetBackgroundColour(wx.RED)
                 
             self.Bind(wx.EVT_BUTTON,self.on_display_info,self._jobs[jobName]['name'])
             self.Bind(wx.EVT_BUTTON,self.on_display_traceback,self._jobs[jobName]['state'])
