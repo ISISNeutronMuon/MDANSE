@@ -123,7 +123,7 @@ class JobPlugin(ComponentPlugin):
 
         time.sleep(1)
 
-        PUBLISHER.sendMessage("msg_start_job",data=None)
+        PUBLISHER.sendMessage("msg_start_job",message=None)
         
     def on_save(self, event=None):
 
@@ -152,7 +152,7 @@ class JobPlugin(ComponentPlugin):
                 
         self._parent.mgr.Update()
                     
-        PUBLISHER.sendMessage("msg_set_data", data=self)
+        PUBLISHER.sendMessage("msg_set_data", message=self)
                         
     def on_close(self, event):
         
@@ -179,7 +179,7 @@ class JobFrame(wx.Frame):
                         
         plugin = REGISTRY['plugin'][self._jobType](self)
         
-        PUBLISHER.sendMessage("msg_set_data", data=plugin)
+        PUBLISHER.sendMessage("msg_set_data", message=plugin)
                         
 if __name__ == "__main__":
             

@@ -149,7 +149,7 @@ class AnimationPlugin(ComponentPlugin):
                 
     def msg_timer(self, message):
         
-        plugin = message.data
+        plugin = message
         if not plugin.is_parent(self):
             return
         
@@ -172,7 +172,7 @@ class AnimationPlugin(ComponentPlugin):
 
     def msg_update_animation_icon(self, message):
  
-        plugin = message.data
+        plugin = message
         if not plugin.is_parent(self):
             return
                  
@@ -183,7 +183,7 @@ class AnimationPlugin(ComponentPlugin):
 
     def msg_set_trajectory(self, message):
         
-        plugin = message.data
+        plugin = message
         if not plugin.is_parent(self):
             return
  

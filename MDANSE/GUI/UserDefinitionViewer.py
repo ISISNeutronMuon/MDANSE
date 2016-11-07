@@ -203,7 +203,7 @@ class UserDefinitionViewer(wx.Dialog):
             self._udTree.clear()
             self._info.Clear()
             
-            PUBLISHER.sendMessage("msg_set_ud",data=None)
+            PUBLISHER.sendMessage("msg_set_ud",message=None)
 
     def on_save_ud(self,event):
 

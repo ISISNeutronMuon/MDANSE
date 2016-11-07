@@ -106,7 +106,7 @@ class IWidget(wx.Panel):
 
     def _set_data(self,message):
                 
-        plugin = message.data
+        plugin = message
         if not plugin.is_parent(self):
             return
         

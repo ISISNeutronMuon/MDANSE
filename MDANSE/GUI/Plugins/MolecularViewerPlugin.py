@@ -231,7 +231,7 @@ class MolecularViewerPlugin(ComponentPlugin):
 
     def msg_set_selection(self,message):
         
-        plugin = message.data        
+        plugin = message        
         if not self.is_parent(plugin):
             return
                 
@@ -333,7 +333,7 @@ class MolecularViewerPlugin(ComponentPlugin):
         
         self._trajectoryLoaded = True
 
-        PUBLISHER.sendMessage('msg_set_trajectory', data=self)
+        PUBLISHER.sendMessage('msg_set_trajectory', message=self)
 
     def color_string_to_RGB(self, s):
         
@@ -596,7 +596,7 @@ class MolecularViewerPlugin(ComponentPlugin):
         self.set_configuration(self._timerCounter)
         self._timerCounter += 1
         
-        PUBLISHER.sendMessage("msg_timer", data=self)
+        PUBLISHER.sendMessage("msg_timer", message=self)
 
     def set_rendering_mode(self, mode):
         if not self._trajectoryLoaded:
@@ -676,7 +676,7 @@ class MolecularViewerPlugin(ComponentPlugin):
 
         self.show_selection(list(self.__pickedAtoms))
                         
-        PUBLISHER.sendMessage('msg_select_atoms_from_viewer', data=(self.dataplugin,list(self.__pickedAtoms)))
+        PUBLISHER.sendMessage('msg_select_atoms_from_viewer', message=(self.dataplugin,list(self.__pickedAtoms)))
 
     def box_atoms(self, atomsList):
                                 
@@ -732,7 +732,7 @@ class MolecularViewerPlugin(ComponentPlugin):
                  
         UD_STORE.save()
                  
-        PUBLISHER.sendMessage("msg_set_ud",data=None)
+        PUBLISHER.sendMessage("msg_set_ud",message=None)
         
         LOGGER('User definition %r successfully set.' % name,'info',['console'])
                                                          
@@ -783,16 +783,16 @@ class MolecularViewerPlugin(ComponentPlugin):
             self.stop_animation()
             
         if check:
-            PUBLISHER.sendMessage("msg_switch_viewers_state", data=self) 
+            PUBLISHER.sendMessage("msg_switch_viewers_state", message=self) 
             
-        PUBLISHER.sendMessage('msg_animate_trajectory', data=self)
+        PUBLISHER.sendMessage('msg_animate_trajectory', message=self)
     
     def msg_switch_viewers_state(self, message):
                  
         if not self._animationLoop:
             return
         
-        viewer = message.data
+        viewer = message
         if viewer==self:
             return
          
@@ -1004,7 +1004,7 @@ class MolecularViewerPlugin(ComponentPlugin):
     
     def msg_clear_selection(self,message):
 
-        plugin = message.data
+        plugin = message
         if not self.is_parent(plugin):
             return
         

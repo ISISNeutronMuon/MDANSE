@@ -179,7 +179,7 @@ VERSION_STR = "2.0a.200810.r153"
 
 
 import sys, traceback
-from MDANSE.Externals.pubsub.core import weakmethod
+from core import weakmethod
 
 __all__ = [
     # listener stuff:
@@ -599,6 +599,6 @@ class Message:
 
 #---------------------------------------------------------------------------
 
-from MDANSE.Externals.pubsub import pubsubconf
+import pubsubconf
 pubsubconf.pubModuleLoaded()
 del pubsubconf

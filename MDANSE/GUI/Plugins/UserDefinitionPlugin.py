@@ -87,7 +87,7 @@ class UserDefinitionPlugin(ComponentPlugin):
                   
         UD_STORE.set_definition(self._target,self.type,name,value)
                  
-        PUBLISHER.sendMessage("msg_set_ud",data=None)
+        PUBLISHER.sendMessage("msg_set_ud",message=None)
         
         LOGGER('User definition %r successfully set.' % name,'info',['console'])
         
