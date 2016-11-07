@@ -75,7 +75,7 @@ class _PubModuleInfo:
         (pubsubInitGlobals), assumed to be pubsub.__init__'s global dict.
         The pub module will provide the legacy "version 1" API for pubsub,
         and Publisher will be the singleton stored in that module.'''
-        from MDANSE.Externals.pubsub import pub
+        import pub
         from pub import Publisher
 
         self.__pubsubDict['Publisher'] = Publisher

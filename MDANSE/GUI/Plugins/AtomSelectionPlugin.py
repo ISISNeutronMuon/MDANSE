@@ -342,7 +342,7 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
         
         self._selectionSummary.Clear()
 
-        PUBLISHER.sendMessage('msg_clear_selection',data=self)                                
+        PUBLISHER.sendMessage('msg_clear_selection',message=self)                                
                 
     def on_display_keyword_values(self, event=None):
         
@@ -382,7 +382,7 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
 
     def msg_select_atoms_from_viewer(self, message):
 
-        dataPlugin,selection = message.data
+        dataPlugin,selection = message
         
         if dataPlugin != get_data_plugin(self):
             return
@@ -395,7 +395,7 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
 
         _, self._selection = self._query.parse()
                 
-        PUBLISHER.sendMessage("msg_set_selection", data=self)
+        PUBLISHER.sendMessage("msg_set_selection", message=self)
     
     @property
     def selection(self):

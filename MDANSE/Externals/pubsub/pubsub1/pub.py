@@ -75,7 +75,7 @@ from inspect import getargspec, ismethod, isfunction
 from weakref import ref as WeakRef
 
 # from pubsub, for weakly bound methods:
-from MDANSE.Externals.pubsub.core.weakmethod import getWeakRef as _getWeakRef
+from core.weakmethod import getWeakRef as _getWeakRef
 
 # -----------------------------------------------------------------------------
 
@@ -777,7 +777,7 @@ Publisher = PublisherClass(_key)
 
 #---------------------------------------------------------------------------
 
-from MDANSE.Externals.pubsub.core.datamsg import Message
+from core.datamsg import Message
 
 #---------------------------------------------------------------------------
 
@@ -801,6 +801,6 @@ def setupForTesting():
 
 #---------------------------------------------------------------------------
 
-from MDANSE.Externals.pubsub import pubsubconf
+import pubsubconf
 pubsubconf.pubModuleLoaded()
 del pubsubconf

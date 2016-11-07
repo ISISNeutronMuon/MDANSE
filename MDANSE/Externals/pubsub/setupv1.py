@@ -12,7 +12,7 @@ a version of wxPython where legacy v1 API is *not* the default:
 
 '''
 
-from MDANSE.Externals.pubsub import pubsubconf
+import pubsubconf
 pubsubconf.setVersion(1)
 
 

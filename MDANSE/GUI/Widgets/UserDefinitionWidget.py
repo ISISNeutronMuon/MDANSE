@@ -59,7 +59,7 @@ class UserDefinitionDialog(wx.Dialog):
         
         self._plugin.set_trajectory(trajectory)
                 
-        PUBLISHER.sendMessage("msg_set_data", data=self._plugin)
+        PUBLISHER.sendMessage("msg_set_data", message=self._plugin)
         
     @property
     def plugin(self):
