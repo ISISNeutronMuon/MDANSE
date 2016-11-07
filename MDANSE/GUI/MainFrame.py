@@ -371,7 +371,7 @@ or directly to the MDANSE mailing list:
 
     def on_open_mdanse_url(self, event):
 
-        webbrowser.open('https://github.com/eurydyce/MDANSE/tree/master/MDANSE')
+        webbrowser.open('http://mdanse.org')
 
     def on_quit(self, event=None):
         
@@ -381,7 +381,7 @@ or directly to the MDANSE mailing list:
                                                                          
     def on_start_plotter(self, event = None):
 
-        from MDANSE.GUI.Plugins.Plotter.PlotterPlugin import PlotterFrame
+        from MDANSE.GUI.Plugins.PlotterPlugin import PlotterFrame
         
         f = PlotterFrame(self)
         
