@@ -233,7 +233,7 @@ class CommandLineParser(optparse.OptionParser):
             
         if len(parser.rargs) == 0:
             print "Registered interfaces:"
-            for interfaceName in REGISTRY.get_interfaces():
+            for interfaceName in REGISTRY.interfaces:
                 print "\t- %s" % interfaceName
         elif len(parser.rargs) == 1:
             val = parser.rargs[0]                    
@@ -333,9 +333,10 @@ class CommandLineParser(optparse.OptionParser):
         from MDANSE.Framework.Jobs.IJob import IJob        
 
         if nargs != 2:
-            raise CommandLineParserError("Invalid number of arguments for %r option" % opt_str)
+            print "Two arguments required resp. the name and the shortname of the class to be templated"
+            return
 
-        shortname,classname = parser.rargs
+        classname,shortname = parser.rargs
 
         try:
             IJob.save_template(shortname,classname)

@@ -52,3 +52,8 @@ from MMTK import Database
 
 # The default database is still the MMTK one
 Database.path.append(os.path.join(PLATFORM.package_directory(), 'Data'))
+ 
+macrosDirectories = sorted([x[0] for x in os.walk(PLATFORM.macros_directory())][0:])
+ 
+for d in macrosDirectories:
+    REGISTRY.update(d)

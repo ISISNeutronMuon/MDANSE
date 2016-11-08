@@ -472,17 +472,17 @@ class IJob(Configurable):
             f.write(
 '''import collections
 
+from MDANSE import REGISTRY
+
 from MDANSE.Framework.Jobs.IJob import IJob
 
-class %s(IJob):
+class %(classname)s(IJob):
     """
     You should enter the description of your job here ...
     """
-    
-    type = %r
-    
-    # You should enter the label under which your job will be referenced from the gui.
-    label = %r
+        
+    # You should enter the label under which your job will be viewed from the gui.
+    label = %(label)r
 
     # You should enter the category under which your job will be references.
     category = ('My jobs',)
@@ -532,7 +532,9 @@ class %s(IJob):
         
         # The trajectory is closed
         self.configuration['trajectory']['instance'].close()        
-''' % (classname,shortname,classname))
+
+REGISTRY[%(shortname)r] = %(classname)s
+''' % {'classname':classname,'label':'label of the class','shortname':shortname})
         
         except IOError:
             return None
