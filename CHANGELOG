@@ -1,3 +1,18 @@
-version 1.0:
-   - first release 
+version 1.0.3.c:
+----------------
+* bug fix when saving user definitions
+* bug fix with the initial size of the user definitions plugins
+* updated the job template writing
+* small refactoring of the save job template command line option
+* removed unused imports
+* removed white spaces
+
+version 1.0.3.b:
+----------------
+* bug fix with JobControllerPanel in case of crashing jobs
+* regression fixed due to trials to get rid of relative imports MDANSE/Externals/pubsub package
+
+version 1.0.3.a:
+----------------
+* updated `MDANSE/__pkginfo__.py` module
 
