@@ -158,4 +158,3 @@ class MeanSquareDisplacement(IJob):
         self.configuration['trajectory']['instance'].close()
         
 REGISTRY['msd'] = MeanSquareDisplacement
-     
