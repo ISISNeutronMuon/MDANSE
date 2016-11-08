@@ -166,11 +166,11 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
 
         PUBLISHER.subscribe(self.msg_select_atoms_from_viewer, 'msg_select_atoms_from_viewer')
 
-        UserDefinitionPlugin.__init__(self,parent,size=(800,500))
+        UserDefinitionPlugin.__init__(self,parent,size=(600,600))
                 
     def build_panel(self):
-                                                
-        self._mainPanel = wx.ScrolledWindow(self, wx.ID_ANY, size=self.GetSize())
+                      
+        self._mainPanel = wx.ScrolledWindow(self, wx.ID_ANY)
         self._mainPanel.SetScrollbars(20,20,50,50)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -251,10 +251,7 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
         self._mainSizer = wx.BoxSizer(wx.VERTICAL)                                                                              
         self._mainSizer.Add(self._mainPanel, 1, wx.EXPAND|wx.ALL, 5)        
         self.SetSizer(self._mainSizer)            
-        
-        self._mgr.AddPane(self._mainPanel, wxaui.AuiPaneInfo().DestroyOnClose().Center().Dock().CaptionVisible(False).CloseButton(False).BestSize(self.GetSize()))
-        self._mgr.Update()
-                                                                                      
+                                                                                              
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_display_keyword_values, self.filterTree)
         self.Bind(wx.EVT_LISTBOX, self.on_insert_keyword_values, self.values)
   
@@ -268,9 +265,9 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
         
     def plug(self):
         
-        self.parent.mgr.GetPane(self).Float().Dockable(False).CloseButton(True).BestSize((600,600))
+        self._parent._mgr.GetPane(self).Float().Floatable(True).Dockable(True).CloseButton(True)
         
-        self.parent.mgr.Update()
+        self._parent._mgr.Update()
         
         self.set_trajectory(self.dataproxy.data)
 

@@ -33,7 +33,6 @@ Created on Jun 30, 2015
 import os
 
 import wx
-import wx.aui as wxaui
 
 from MDANSE import LOGGER, REGISTRY
 from MDANSE.GUI.Plugins.UserDefinitionPlugin import UserDefinitionPlugin
@@ -85,7 +84,7 @@ class AtomsListPlugin(UserDefinitionPlugin):
         
         self._selection = []
                                 
-        UserDefinitionPlugin.__init__(self,parent,size=(800,500))
+        UserDefinitionPlugin.__init__(self,parent,size=(600,600))
                                                 
     def build_panel(self):
 
@@ -139,9 +138,6 @@ class AtomsListPlugin(UserDefinitionPlugin):
         self._mainSizer.Add(self._mainPanel, 1, wx.EXPAND|wx.ALL, 5)        
         self.SetSizer(self._mainSizer)            
         
-        self._mgr.AddPane(self._mainPanel, wxaui.AuiPaneInfo().DestroyOnClose().Center().Dock().CaptionVisible(False).CloseButton(False).BestSize(self.GetSize()))
-        self._mgr.Update()
-
         self.Bind(wx.EVT_SPINCTRL,self.on_define_list_size,self._nAtomsSpinCtrl)                
         self.Bind(wx.EVT_TREE_BEGIN_DRAG,self.on_add_atom,self._molecules)
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_add_atom)
