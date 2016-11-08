@@ -57,6 +57,8 @@ class UserDefinitionDialog(wx.Dialog):
         
         self.SetTitle(self._plugin.label)
         
+        self.SetSize(self._plugin.GetSize())
+        
         self._plugin.set_trajectory(trajectory)
                 
         PUBLISHER.sendMessage("msg_set_data", message=self._plugin)

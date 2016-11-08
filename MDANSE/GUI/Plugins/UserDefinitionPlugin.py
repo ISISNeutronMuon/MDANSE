@@ -30,10 +30,10 @@ Created on Sep 22, 2015
 '''
 
 import wx
+import wx.aui as wxaui
 
 from MDANSE import LOGGER, REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
-
 from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.Plugins.ComponentPlugin import ComponentPlugin
 
@@ -43,10 +43,14 @@ class UserDefinitionPlugin(ComponentPlugin):
     
     def __init__(self,parent,*args,**kwargs):
         
-        ComponentPlugin.__init__(self,parent,size=(800,500))
+        ComponentPlugin.__init__(self,parent,*args,**kwargs)
         
         self.add_ud_panel()
-                
+        
+        self._mgr.AddPane(self._mainPanel, wxaui.AuiPaneInfo().DestroyOnClose().Center().Dock().CaptionVisible(False).CloseButton(False).BestSize(self.GetSize()))
+
+        self._mgr.Update()
+                                
     def add_ud_panel(self):
 
         udPanel = wx.Panel(self._mainPanel,wx.ID_ANY)
@@ -82,10 +86,10 @@ class UserDefinitionPlugin(ComponentPlugin):
             return
                         
         if UD_STORE.has_definition(self._target,self._type,name):
-            LOGGER('There is already a user-definition with that name.','error',['dialog'])
+            LOGGER('There is already an user-definition with that name.','error',['dialog'])
             return
-                  
-        UD_STORE.set_definition(self._target,self.type,name,value)
+                          
+        UD_STORE.set_definition(self._target,self._type,name,value)
                  
         PUBLISHER.sendMessage("msg_set_ud",message=None)
         

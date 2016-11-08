@@ -33,7 +33,6 @@ Created on Jul 2, 2015
 import os
 
 import wx
-import wx.aui as wxaui
 import wx.grid as wxgrid
 
 from MMTK import AtomCluster, Molecule
@@ -55,7 +54,7 @@ class PartialChargesPlugin(UserDefinitionPlugin):
     
         self._selectedAtoms = []
                         
-        UserDefinitionPlugin.__init__(self, parent)
+        UserDefinitionPlugin.__init__(self, parent,size=(600,600))
                         
     def build_panel(self):
 
@@ -69,12 +68,9 @@ class PartialChargesPlugin(UserDefinitionPlugin):
 
         self._mainPanel.SetSizer(sizer)
                                                 
-        self._mgr.AddPane(self._mainPanel, wxaui.AuiPaneInfo().DestroyOnClose().Center().Dock().CaptionVisible(False).CloseButton(False).BestSize(self.GetSize()))
-        self._mgr.Update()
-
     def plug(self):
                 
-        self.parent.mgr.GetPane(self).Float().Dockable(False).CloseButton(True).BestSize((600,600))
+        self.parent.mgr.GetPane(self).Float().Dockable(False).CloseButton(True)
         
         self.parent.mgr.Update()
         

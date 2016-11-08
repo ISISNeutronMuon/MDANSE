@@ -54,7 +54,7 @@ class JobPlugin(ComponentPlugin):
                 
         self._job = REGISTRY["job"][self._type]()
         
-        ComponentPlugin.__init__(self, parent, size=wx.Size(800,400), *args, **kwargs)
+        ComponentPlugin.__init__(self, parent, size=wx.Size(800,600), *args, **kwargs)
                 
     def build_panel(self):
         
@@ -148,9 +148,9 @@ class JobPlugin(ComponentPlugin):
 
     def plug(self):
                 
-        self._parent._mgr.GetPane(self).Float().Center().Floatable(True).Dockable(True).CloseButton(True).BestSize((800,600))
+        self._parent._mgr.GetPane(self).Float().Center().Floatable(True).Dockable(True).CloseButton(True)
                 
-        self._parent.mgr.Update()
+        self._parent._mgr.Update()
                     
         PUBLISHER.sendMessage("msg_set_data", message=self)
                         
@@ -162,14 +162,14 @@ class JobFrame(wx.Frame):
     
     def __init__(self, parent, jobType, datakey=None):
                 
-        wx.Frame.__init__(self, parent, wx.ID_ANY, size = (800,800), style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
+        wx.Frame.__init__(self, parent, wx.ID_ANY, style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
 
         self._jobType = jobType
 
         job = REGISTRY['job'][self._jobType]
         
         self.SetTitle(job.label)
-        
+                
         data = REGISTRY['input_data'][job.ancestor[0]](datakey,True)
 
         self.datakey = data.name
@@ -178,6 +178,8 @@ class JobFrame(wx.Frame):
             DATA_CONTROLLER[data.name] = data
                         
         plugin = REGISTRY['plugin'][self._jobType](self)
+
+        self.SetSize(plugin.GetSize())
         
         PUBLISHER.sendMessage("msg_set_data", message=plugin)
                         
@@ -186,6 +188,6 @@ if __name__ == "__main__":
     filename = os.path.join(os.path.dirname(PLATFORM.package_directory()),'Data','Trajectories','MMTK','protein_in_periodic_universe.nc')
     
     app = wx.App(False)
-    f = JobFrame(None,'dl_poly',filename)
+    f = JobFrame(None,'dacf',filename)
     f.Show()
     app.MainLoop()            

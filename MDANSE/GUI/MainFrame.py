@@ -31,7 +31,6 @@ Created on Apr 14, 2015
 '''
 
 import collections
-import operator
 import os
 import sys
 import webbrowser

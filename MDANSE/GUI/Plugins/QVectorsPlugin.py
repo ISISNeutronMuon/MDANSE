@@ -191,9 +191,6 @@ class QVectorsPlugin(UserDefinitionPlugin):
         sizer.Add(generateButton, 0, wx.ALL|wx.EXPAND, 5)
 
         self._mainPanel.SetSizer(sizer)
-
-        self._mgr.AddPane(self._mainPanel, wxaui.AuiPaneInfo().DestroyOnClose().Center().Dock().CaptionVisible(False).CloseButton(False).BestSize(self.GetSize()))
-        self._mgr.Update()
                                  
         self.Bind(wxaui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_tab, self._notebook)
         self.Bind(wx.EVT_BUTTON, self.on_generate_q_vectors, generateButton)
