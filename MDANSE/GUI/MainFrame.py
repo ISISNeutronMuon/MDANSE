@@ -349,7 +349,7 @@ or directly to the MDANSE mailing list:
         item = self.GetMenuBar().FindItemById(event.GetId())
         converter = item.GetText()
                         
-        f = JobFrame(self,self._converters[converter],"Trajectory converter")
+        f = JobFrame(self,self._converters[converter],os.path.join(PLATFORM.home_directory(),"trajectory_conversion.nc"))
         f.Show()
 
     def on_open_periodic_table(self, event):
