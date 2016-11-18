@@ -91,12 +91,17 @@ class MainFrame(wx.Frame):
         self.build_dialog()
         
         # Add some handlers to the loggers
-        LOGGER.add_handler("console", REGISTRY['handler']['console'](self._panels["controller"].pages["logger"]), level="info")
+        consoleHandler = REGISTRY['handler']['console'](self._panels["controller"].pages["logger"])
+        LOGGER.add_handler("console", consoleHandler, level="info")
         LOGGER.add_handler("dialog", REGISTRY['handler']['dialog'](), level="error")
         LOGGER.start()
         
+        # Redirect all output to the console logger
+        sys.stdout = consoleHandler
+        sys.stderr = consoleHandler
+                
         sys.excepthook = excepthook
-         
+                 
     def build_dialog(self):
         
         self.build_menu()
@@ -349,7 +354,7 @@ or directly to the MDANSE mailing list:
         item = self.GetMenuBar().FindItemById(event.GetId())
         converter = item.GetText()
                         
-        f = JobFrame(self,self._converters[converter],"Trajectory converter")
+        f = JobFrame(self,self._converters[converter],os.path.join(PLATFORM.home_directory(),"trajectory_conversion.nc"))
         f.Show()
 
     def on_open_periodic_table(self, event):

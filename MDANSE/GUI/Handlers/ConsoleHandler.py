@@ -82,6 +82,10 @@ class ConsoleHandler(IHandler, logging.Handler):
         @type record: logging.LogRecord        
         """
         
+        record.msg = record.msg.strip()
+        if not record.msg:
+            return
+        
         self.style.SetTextColour(ConsoleHandler.COLORS.get(record.levelname,wx.BLACK))
                                     
         # Set the the created text attribute as the default style for the text ctrl.                            
@@ -91,5 +95,11 @@ class ConsoleHandler(IHandler, logging.Handler):
         self._window.AppendText(self.format(record))
 
         self._window.AppendText("\n")
-
+        
+    def write(self,message):
+        
+        record = logging.LogRecord("console",logging.INFO,None,None,message,None,None,None)
+        
+        self.emit(record)
+        
 REGISTRY["console"] = ConsoleHandler

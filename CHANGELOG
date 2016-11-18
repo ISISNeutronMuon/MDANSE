@@ -1,5 +1,14 @@
 version 1.0.3.c:
 ----------------
+* redirected the sys.stdout and sys.stderr to the LOGGER
+* implemented a write method so as ConsoleHandler behaves as a file-like object
+* the job short name appears now explicitely in the saved job files
+* small refactoring of MDANSE __init__
+* small refactoring of ClassRegistry
+* removed the explicit imports of the framework classes
+* the plotter show the last loaded data now
+* bug fix in rmsd job: the PBC were not applied to the calculation
+* bug fix in AtomSelectionConfigurator::get_indexes
 * bug fix when saving user definitions
 * bug fix with the initial size of the user definitions plugins
 * updated the job template writing

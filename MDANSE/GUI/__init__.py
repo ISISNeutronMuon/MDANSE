@@ -8,18 +8,13 @@ from MDANSE.Externals.pubsub import pub as PUBLISHER
 if platform.dist()[0].lower() == "ubuntu":
     os.environ["UBUNTU_MENUPROXY"] = "0" 
         
-from MDANSE import PLATFORM, REGISTRY
+from MDANSE import REGISTRY
 from MDANSE.GUI.Plugins.DataPlugin import DataPlugin 
 from MDANSE.GUI.Plugins.JobPlugin import JobPlugin
 
-from MDANSE.GUI.Handlers import *
-from MDANSE.GUI.Plugins import *
-from MDANSE.GUI.Widgets import *
-
-macrosDirectories = sorted([x[0] for x in os.walk(PLATFORM.macros_directory())][0:])
- 
-for d in macrosDirectories:
-    REGISTRY.update(d)
+REGISTRY.update(os.path.join(os.path.dirname(__file__),"Handlers"))
+REGISTRY.update(os.path.join(os.path.dirname(__file__),"Plugins"))
+REGISTRY.update(os.path.join(os.path.dirname(__file__),"Widgets"))
 
 for job in REGISTRY["job"].values():
 
@@ -30,7 +25,7 @@ for job in REGISTRY["job"].values():
              "ancestor"  : getattr(job,'ancestor',job.ancestor),
              "category"  : getattr(job, "category", ("Miscellaneous",)),
              "label"     : getattr(job, "label", job.__name__)}
-            
+
     kls = type("%sPlugin" % job.__name__, (JobPlugin,), attrs)
     REGISTRY[job._type] = kls
 

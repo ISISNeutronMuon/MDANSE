@@ -135,7 +135,7 @@ class AtomSelectionConfigurator(IConfigurator):
             if indexesPerElement.has_key(v):
                 indexesPerElement[v].extend(self['indexes'][i])
             else:
-                indexesPerElement[v] = self['indexes'][i]
+                indexesPerElement[v] = self['indexes'][i][:]
                 
         return indexesPerElement
             
