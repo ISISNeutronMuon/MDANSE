@@ -1,4 +1,8 @@
-version 1.0.3.c:
+version 1.0.3.e:
+----------------
+* bug fix relative to REGISTRY update
+
+version 1.0.3.d:
 ----------------
 * redirected the sys.stdout and sys.stderr to the LOGGER
 * implemented a write method so as ConsoleHandler behaves as a file-like object
@@ -16,7 +20,7 @@ version 1.0.3.c:
 * removed unused imports
 * removed white spaces
 
-version 1.0.3.b:
+version 1.0.3.c:
 ----------------
 * bug fix with JobControllerPanel in case of crashing jobs
 * regression fixed due to trials to get rid of relative imports MDANSE/Externals/pubsub package
