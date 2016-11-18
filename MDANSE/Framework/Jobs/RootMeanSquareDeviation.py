@@ -37,7 +37,7 @@ import numpy
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.MolecularDynamics.Analysis import mean_square_deviation
+from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
 class RootMeanSquareDeviation(IJob):
     """
@@ -67,16 +67,12 @@ class RootMeanSquareDeviation(IJob):
     
     def initialize(self):
 
-        self.numberOfSteps = self.configuration['frames']['number']
+        self.numberOfSteps = self.configuration['atom_selection']['selection_length']
         
-        self.referenceFrame = self.configuration['reference_frame']['value'] % self.configuration['trajectory']['length']
+        self._referenceIndex = self.configuration['reference_frame']['value']
         
         # Will store the time.
         self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
-
-        self._indexes = self.configuration['atom_selection'].get_indexes()
-
-        self._masses = numpy.array([m for masses in self._configuration['atom_selection']['masses'] for m in masses],dtype=numpy.float64)
                                     
         # Will store the mean square deviation
         for element in self.configuration['atom_selection']['unique_names']:
@@ -90,19 +86,20 @@ class RootMeanSquareDeviation(IJob):
         @type index: int.              
         """
         
-        # get the Frame index
-        frameIndex = self.configuration['frames']['value'][index] 
+        indexes = self.configuration['atom_selection']["indexes"][index]
+        masses = self.configuration['atom_selection']["masses"][index]
         
-        self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
-        
-        conf1 = self.configuration['trajectory']['instance'].configuration[self.referenceFrame]
-        conf2 = self.configuration['trajectory']['instance'].universe.configuration()
-        
-        rmsd = {}
-        for k,v in self._indexes.items():
-            rmsd[k] = mean_square_deviation(conf1.array[v,:],conf2.array[v,:],masses=None,root=False)
+        series = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
+                                       indexes,
+                                       first=self.configuration['frames']['first'],
+                                       last=self.configuration['frames']['last']+1,
+                                       step=self.configuration['frames']['step'],
+                                       weights=masses)
+
+        # Compute the squared sum of the difference between all the coordinate of atoms i and the reference ones 
+        squaredDiff = numpy.sum((series-series[self._referenceIndex,:])**2,axis=1)
                 
-        return index, rmsd
+        return index, squaredDiff
                         
     def combine(self, index, x):
         """
@@ -112,22 +109,28 @@ class RootMeanSquareDeviation(IJob):
             #. x (any): The returned result(s) of run_step
         """     
                 
-        # The symbol of the atom.
-        for element in x.keys():
-            self._outputData["rmsd_%s" % element][index] = x[element]                                
+        element = self.configuration['atom_selection']["names"][index]
+        
+        self._outputData["rmsd_%s" % element] += x
         
     def finalize(self):
         """
         Finalize the job.
         """
-            
-        weights = self.configuration["weights"].get_weights()
+                
+        # The RMSDs per element are averaged.
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
-                
+        for element, number in nAtomsPerElement.items():
+            self._outputData["rmsd_%s" % element] /= number
+
+        weights = self.configuration["weights"].get_weights()
         rmsdTotal = weight(weights,self._outputData,nAtomsPerElement,1,"rmsd_%s")
-                
+        rmsdTotal = numpy.sqrt(rmsdTotal)
         self._outputData.add("rmsd_total","line", rmsdTotal, axis="time", units="nm") 
-        
+            
+        for element, number in nAtomsPerElement.items():
+            self._outputData["rmsd_%s" % element]  = numpy.sqrt(self._outputData["rmsd_%s" % element])
+      
         # Write the output variables.
          
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
