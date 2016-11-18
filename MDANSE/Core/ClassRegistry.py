@@ -34,10 +34,24 @@ import glob
 import imp
 import inspect
 import os
-import sys
 
 from MDANSE.Core.Singleton import Singleton
     
+def path_to_module(path,stop=""):
+    
+    path, _ = os.path.splitext(path)
+    
+    splittedPath = path.split(os.sep)
+    
+    try:
+        idx = splittedPath.index(stop)
+    except ValueError:
+        idx = 0
+    finally:
+        module = ".".join(splittedPath[idx:])
+            
+    return module
+        
 class ClassRegistry(object):
     '''
     Metaclass that registers the classes that make the MDANSE framework.
@@ -87,7 +101,7 @@ class ClassRegistry(object):
         
         return self._registry.get(name,{})
 
-    def update(self,packageDir):
+    def update(self,packageDir, macros=False):
         '''
         Update the classes registry by importing all the modules contained in a given package.
         
@@ -103,19 +117,21 @@ class ClassRegistry(object):
      
             if moduleFile == '__init__.py':
                 continue
-     
-            moduleName, _ = os.path.splitext(moduleFile)
             
             # Any error that may occur here has to be caught. In such case the module is skipped.    
             try:
-                filehandler,path,description = imp.find_module(moduleName, [moduleDir])
-                mod = imp.load_module(moduleName,filehandler,path,description)
+                if macros:
+                    moduleName,_ = os.path.splitext(moduleFile)
+                    filehandler,path,description = imp.find_module(moduleName, [moduleDir])
+                    imp.load_module(moduleName,filehandler,path,description)
+                    filehandler.close()
+                else:
+                    moduleName, _ = os.path.splitext(moduleFile)
+                    module = path_to_module(module,stop="MDANSE")
+                    __import__(module)
             except:
                 continue
-            else:
-                if os.path.abspath(os.path.dirname(mod.__file__)) != os.path.abspath(moduleDir):                    
-                    print "A module with name %s is already present in your distribution with %s path." % (moduleName,moduleDir)
-    
+        
     def info(self, interface):
         '''
         Returns informations about the subclasses of a given base class stored in the registry.
