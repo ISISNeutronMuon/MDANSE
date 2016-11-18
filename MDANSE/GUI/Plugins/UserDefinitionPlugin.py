@@ -59,21 +59,18 @@ class UserDefinitionPlugin(ComponentPlugin):
         actionsSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
                         
         self._udName = wx.TextCtrl(udPanel, wx.ID_ANY, style = wx.TE_PROCESS_ENTER)
-        applyButton  = wx.Button(udPanel, wx.ID_ANY, label="Apply")
         saveButton  = wx.Button(udPanel, wx.ID_ANY, label="Save")
         
         actionsSizer.Add(self._udName, 1, wx.ALL|wx.EXPAND, 5)
-        actionsSizer.Add(applyButton, 0, wx.ALL, 5)
         actionsSizer.Add(saveButton, 0, wx.ALL, 5)
         
         udPanel.SetSizer(actionsSizer)
         
         self._mainPanel.GetSizer().Add(udPanel,0,wx.EXPAND|wx.ALL,5)
 
-        self.Bind(wx.EVT_BUTTON, self.on_apply, applyButton)
-        self.Bind(wx.EVT_BUTTON, lambda evt : self.on_apply(evt,True), saveButton)
+        self.Bind(wx.EVT_BUTTON, lambda evt : self.on_save(evt), saveButton)
                         
-    def on_apply(self, event, save=False):
+    def on_save(self, event):
 
         name = str(self._udName.GetValue().strip())
         
@@ -84,7 +81,7 @@ class UserDefinitionPlugin(ComponentPlugin):
         value = self.validate()        
         if value is None:
             return
-                        
+                                
         if UD_STORE.has_definition(self._target,self._type,name):
             LOGGER('There is already an user-definition with that name.','error',['dialog'])
             return
@@ -92,10 +89,9 @@ class UserDefinitionPlugin(ComponentPlugin):
         UD_STORE.set_definition(self._target,self._type,name,value)
                  
         PUBLISHER.sendMessage("msg_set_ud",message=None)
-        
+                
+        UD_STORE.save()
+
         LOGGER('User definition %r successfully set.' % name,'info',['console'])
-        
-        if save:
-            UD_STORE.save()
 
 REGISTRY["user_definition"] = UserDefinitionPlugin

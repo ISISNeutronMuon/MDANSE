@@ -106,10 +106,6 @@ class ClassRegistry(object):
      
             moduleName, _ = os.path.splitext(moduleFile)
             
-            if moduleDir not in sys.path:        
-                sys.path.insert(0,moduleDir)
-
-
             # Any error that may occur here has to be caught. In such case the module is skipped.    
             try:
                 filehandler,path,description = imp.find_module(moduleName, [moduleDir])

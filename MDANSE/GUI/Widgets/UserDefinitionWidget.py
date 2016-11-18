@@ -132,5 +132,10 @@ class UserDefinitionWidget(IWidget):
     def msg_set_ud(self,message):
          
         uds = UD_STORE.filter(self._basename, self._type)
+
+        currentSelection = self._availableUDs.GetStringSelection()
         
         self._availableUDs.SetItems(uds)
+        
+        if currentSelection:
+            self._availableUDs.SetStringSelection(currentSelection)

@@ -92,6 +92,7 @@ class AtomSelectionWidget(UserDefinitionWidget):
         self._sizer.Add(panel,1,wx.ALL|wx.EXPAND,5)
         
         self._widgetPanel.GrandParent.Layout()
+        self._widgetPanel.GrandParent.Refresh()
 
         self.Bind(wx.EVT_BUTTON, self.on_view_definition, view)
         self.Bind(wx.EVT_BUTTON, self.on_remove_definition, remove)
