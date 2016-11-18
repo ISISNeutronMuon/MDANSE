@@ -292,8 +292,8 @@ class IJob(Configurable):
         f.write('################################################################\n')
         f.write('\n')
     
-        f.write('job = REGISTRY[%r][%r]()\n' % ('job',cls._type))
-        f.write('job.run(parameters,status=True)')
+        f.write('%s = REGISTRY[%r][%r]()\n' % (cls._type,'job',cls._type))
+        f.write('%s.run(parameters,status=True)' % (cls._type))
          
         f.close()
         
