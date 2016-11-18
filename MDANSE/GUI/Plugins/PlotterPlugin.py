@@ -230,13 +230,13 @@ class DataPanel(wx.Panel):
         self.parent._data = self.dataDict[var]['data']
         self.show_data()
         
-    def show_dataset(self):
+    def show_dataset(self, index=0):
         self.datasetlist.DeleteAllItems()
         for i, k in enumerate(self.dataDict.keys()):
             self.datasetlist.InsertStringItem(i, k)
             self.datasetlist.SetStringItem(i, 1,self.dataDict[k]['basename'])
             self.datasetlist.SetStringItem(i, 2,self.dataDict[k]['path'])
-        self.datasetlist.Select(0, True)
+        self.datasetlist.Select(index, True)
         
     def show_data(self):
         self.datalist.DeleteAllItems()
@@ -417,6 +417,7 @@ class PlotterFrame(wx.Frame):
         self.Destroy()
                 
     def on_load_data(self, event=None):
+        
         filters = 'NC file (*.nc)|*.nc|All files (*.*)|*.*'
         dialog = wx.FileDialog ( self, message = 'Open file...', wildcard=filters, style=wx.MULTIPLE)
         if dialog.ShowModal() == wx.ID_CANCEL:
@@ -447,7 +448,7 @@ class PlotterFrame(wx.Frame):
             unique_name = self.unique(basename, self.plugin._dataDict)
             
             self.plugin._dataDict[unique_name]={'data':data,'path':filename,'basename':basename}
-            self.plugin._dataPanel.show_dataset()
+            self.plugin._dataPanel.show_dataset(-1)
     
     def unique(self, key, dic):
         skey = key
