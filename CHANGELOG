@@ -1,5 +1,6 @@
 version 1.0.4.rc2
 ----------------
+* added support for gitflow bugfix branch to gitlab config file
 * the DL_POLY converter is now compliant with DL_POLY 4
 * added the mass tolerance to LAMMP converter
 * updated the LAMMP example trajectory with more accurate masses
