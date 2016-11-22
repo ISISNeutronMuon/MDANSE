@@ -48,8 +48,8 @@ from MDANSE.Framework.Jobs.Converter import Converter
        
 _HISTORY_FORMAT = {}
 _HISTORY_FORMAT["2"] = {"rec1" : 81, "rec2" : 31, "reci" : 61, "recii" : 37, "reciii" : 37, "reciv" : 37, "reca" : 43, "recb" : 37, "recc" : 37, "recd" : 37}
-_HISTORY_FORMAT["3"] = {"rec1" : 73, "rec2" : 31, "reci" : 73, "recii" : 37, "reciii" : 37, "reciv" : 37, "reca" : 55, "recb" : 37, "recc" : 37, "recd" : 37}
-_HISTORY_FORMAT["4"] = {"rec1" : 73, "rec2" : 51, "reci" : 73, "recii" : 37, "reciii" : 37, "reciv" : 37, "reca" : 55, "recb" : 37, "recc" : 37, "recd" : 37}
+_HISTORY_FORMAT["3"] = {"rec1" : 73, "rec2" : 73, "reci" : 73, "recii" : 73, "reciii" : 73, "reciv" : 73, "reca" : 73, "recb" : 73, "recc" : 73, "recd" : 73}
+_HISTORY_FORMAT["4"] = {"rec1" : 73, "rec2" : 73, "reci" : 73, "recii" : 73, "reciii" : 73, "reciv" : 73, "reca" : 73, "recb" : 73, "recc" : 73, "recd" : 73}
 
 class FieldFileError(Error):
     pass          
@@ -184,18 +184,19 @@ class FieldFile(dict):
 class HistoryFile(dict):
     
     def __init__(self, filename, version="2"):
-        
+
         self['instance'] = open(filename, 'rb')
 
         testLine = len(self['instance'].readline())
-        if testLine not in [81,82]:
+        
+        if (testLine not in [81,82]) and (testLine not in [73,74]):
             raise HistoryFileError('Invalid DLPOLY history file')
 
         self['instance'].seek(0,0)
         
-        offset = testLine-81
-                            
         self["version"] = version
+        
+        offset = testLine - _HISTORY_FORMAT[self["version"]]["rec1"]
 
         self._headerSize = _HISTORY_FORMAT[self["version"]]["rec1"] + _HISTORY_FORMAT[self["version"]]["rec2"] + 2*offset
 
@@ -203,7 +204,7 @@ class HistoryFile(dict):
 
         data = self['instance'].read(_HISTORY_FORMAT[self["version"]]["rec2"]+offset)
                                 
-        self["keytrj"], self["imcon"], self["natms"] = [int(v) for v in data.split()]
+        self["keytrj"], self["imcon"], self["natms"] = [int(v) for v in data.split()[0:3]] 
         
         if self["keytrj"] not in range(3):
             raise HistoryFileError("Invalid value for trajectory output key.")
@@ -233,10 +234,13 @@ class HistoryFile(dict):
 
         self._maskStep = 3+3*(self["keytrj"]+1)+1
         
+        if (self["version"] == u'3') or (self["version"] == u'4'):
+            self._maskStep += 1
+        
         self['instance'].seek(0)        
                         
     def read_step(self, step):
-        
+
         self['instance'].seek(self._headerSize+step*self._frameSize)
 
         data = self['instance'].read(self._configHeaderSize).splitlines()
@@ -260,9 +264,11 @@ class HistoryFile(dict):
         mask[1::self._maskStep] = False
         mask[2::self._maskStep] = False
         mask[3::self._maskStep] = False
-                    
+        if (self["version"] == u'3') or (self["version"] == u'4'):
+            mask[4::self._maskStep] = False
+
         config = numpy.array(numpy.compress(mask,data),dtype=numpy.float64)
-                
+
         config = numpy.reshape(config,(self["natms"],3*(self["keytrj"]+1)))
                 
         config[:,0:3] *= Units.Ang
