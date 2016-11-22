@@ -54,9 +54,11 @@ class LAMMPSTrajectoryFileError(Error):
 
 class LAMMPSConfigFile(dict):
 
-    def __init__(self, filename):
+    def __init__(self, filename,tolerance):
         
         self._filename = filename
+        
+        self._tolerance = tolerance
 
         self['n_bonds'] = None
 
@@ -100,13 +102,16 @@ class LAMMPSConfigFile(dict):
                                                                     
                 for j in range(1, self["n_atom_types"]+1):
                     idx, mass = lines[i+j].strip().split()
-                    tolerance = 1.0e-3
                     idx = int(idx)
                     mass = float(mass)
-                    el = ELEMENTS.match_numeric_property("atomic_weight", mass, tolerance=tolerance)
-                    if len(el) != 1:
-                        raise LAMMPSConfigFileError("The atom %d with defined mass %f could not be assigned with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (idx,mass,tolerance))
-                    self["elements"][idx] = el[0]
+                    el = ELEMENTS.match_numeric_property("atomic_weight", mass, tolerance=self._tolerance)
+                    nElements = len(el)
+                    if nElements == 0:
+                        raise LAMMPSConfigFileError("The atom %d with defined mass %f could not be assigned with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (idx,mass,self._tolerance))
+                    elif nElements > 1:
+                        raise LAMMPSConfigFileError("The atoms %s of MDANSE database matches the mass %f with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (el,mass,self._tolerance))
+                    else:                    
+                        self["elements"][idx] = el[0]
 
             m = re.match("^bonds$",line, re.I)
             if m:
@@ -132,6 +137,7 @@ class LAMMPSConverter(Converter):
                                               'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.config')})
     settings['trajectory_file'] = ('input_file', {'label':"LAMMPS trajectory file",
                                                   'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.lammps')})
+    settings['mass_tolerance'] = ('float', {'label':"mass tolerance (uma)", 'default':1.0e-5, 'mini':1.0e-9})        
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
     settings['n_steps'] = ('integer', {'label':"number of time steps", 'default':1, 'mini':0})        
     settings['output_file'] = ('output_files', {'formats':["netcdf"]})
@@ -144,7 +150,7 @@ class LAMMPSConverter(Converter):
         # The number of steps of the analysis.
         self.numberOfSteps = self.configuration["n_steps"]["value"]
         
-        self._lammpsConfig = LAMMPSConfigFile(self.configuration["config_file"]["value"])
+        self._lammpsConfig = LAMMPSConfigFile(self.configuration["config_file"]["value"],self.configuration["mass_tolerance"]["value"])
         
         self.parse_first_step()
         
@@ -333,8 +339,8 @@ class LAMMPSConverter(Converter):
                 for i in range(self._nAtoms):
                     temp = self._lammps.readline().split()
                     idx = int(temp[self._id])-1
-                    ty = temp[self._type]
-                    name = "%s%s" % (self._lammpsConfig["elements"][ty],idx)
+                    ty = int(temp[self._type])
+                    name = "%s%d" % (self._lammpsConfig["elements"][ty],idx)
                     self._rankToName[i] = name
                     g.add_node(idx, element=self._lammpsConfig["elements"][ty], atomName=name)
                     
