@@ -1,5 +1,10 @@
 version 1.0.4.rc1
 ----------------
+* added the mass tolerance to LAMMP converter
+* updated the LAMMP example trajectory with more accurate masses
+
+version 1.0.4.rc1
+----------------
 * bug fix in IWidget: the label of the configurator was not taken into account
 * bug fix path_to_module function: the list of directories has to be parsed backwards
 * raise an error when none or more than atom matches the mass stored in the LAMMPS config file
