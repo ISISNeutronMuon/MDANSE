@@ -50,7 +50,7 @@ class IWidget(wx.Panel):
                                 
         self._configurator = configurator
                                                         
-        self._label = ' '.join(name.capitalize().split('_'))
+        self._label = self._configurator.label
                         
         self.initialize()
                         
