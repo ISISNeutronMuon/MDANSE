@@ -50,7 +50,7 @@ class DistanceHistogram(IJob):
     settings = collections.OrderedDict()    
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['r_values'] = ('range', {'valueType':float, 'includeLast':True, 'mini':0.0})
+    settings['r_values'] = ('range', {'label':'r values (nm)','valueType':float, 'includeLast':True, 'mini':0.0})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
