@@ -100,7 +100,12 @@ class LAMMPSConfigFile(dict):
                                                                     
                 for j in range(1, self["n_atom_types"]+1):
                     idx, mass = lines[i+j].strip().split()
-                    el = ELEMENTS.match_numeric_property("atomic_weight", float(mass), tolerance=1.0e-3)
+                    tolerance = 1.0e-3
+                    idx = int(idx)
+                    mass = float(mass)
+                    el = ELEMENTS.match_numeric_property("atomic_weight", mass, tolerance=tolerance)
+                    if len(el) != 1:
+                        raise LAMMPSConfigFileError("The atom %d with defined mass %f could not be assigned with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (idx,mass,tolerance))
                     self["elements"][idx] = el[0]
 
             m = re.match("^bonds$",line, re.I)
