@@ -42,13 +42,13 @@ def path_to_module(path,stop=""):
     path, _ = os.path.splitext(path)
     
     splittedPath = path.split(os.sep)
-    
+        
     try:
-        idx = splittedPath.index(stop)
+        idx = splittedPath[::-1].index(stop)
     except ValueError:
         idx = 0
     finally:
-        module = ".".join(splittedPath[idx:])
+        module = ".".join(splittedPath[len(splittedPath)-1-idx:])
             
     return module
         
@@ -110,14 +110,14 @@ class ClassRegistry(object):
         :param packageDir: the package for which all modules should be imported
         :type packageDir: str
         '''
-                
+                        
         for module in glob.glob(os.path.join(packageDir,'*.py')):
-                                             
+            
             moduleDir, moduleFile = os.path.split(module)
      
             if moduleFile == '__init__.py':
                 continue
-            
+
             # Any error that may occur here has to be caught. In such case the module is skipped.    
             try:
                 if macros:
