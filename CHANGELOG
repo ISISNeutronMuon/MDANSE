@@ -1,5 +1,10 @@
 version 1.0.4.rc2
 ----------------
+* bug fix in debian packager: add the python-setuptools dependency
+* improved LAMMPS converter: the parsing of the config file is more tolerance in term of required keyword format
+
+version 1.0.4.rc2
+----------------
 * added support for gitflow bugfix branch to gitlab config file
 * the DL_POLY converter is now compliant with DL_POLY 4
 * added the mass tolerance to LAMMP converter
