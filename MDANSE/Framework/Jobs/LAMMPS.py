@@ -81,21 +81,21 @@ class LAMMPSConfigFile(dict):
         for i, line in enumerate(lines):
                                         
             if self['n_atoms'] is None:
-                m = re.match("^(\d+) atoms$",line, re.I) 
+                m = re.match("^\s*(\d+)\s*atoms\s*$",line, re.I) 
                 if m:
                     self['n_atoms'] = int(m.groups()[0])
                   
             if self["n_atom_types"] is None: 
-                m = re.match("^(\d+) atom types$",line, re.I)             
+                m = re.match("^\s*(\d+)\s*atom types\s*$",line, re.I)             
                 if m:
                     self["n_atom_types"] = int(m.groups()[0])
 
             if self['n_bonds'] is None:
-                m = re.match("^(\d+) bonds$",line, re.I) 
+                m = re.match("^\s*(\d+)\s*bonds\s*$",line, re.I) 
                 if m:
                     self['n_bonds'] = int(m.groups()[0])
 
-            if re.match("^masses$", line, re.I):
+            if re.match("^\s*masses\s*$", line, re.I):
                 
                 if self["n_atom_types"] is None:
                     raise LAMMPSConfigFileError("Did not find the number of atom types.")
@@ -113,7 +113,7 @@ class LAMMPSConfigFile(dict):
                     else:                    
                         self["elements"][idx] = el[0]
 
-            m = re.match("^bonds$",line, re.I)
+            m = re.match("^\s*bonds\s*$",line, re.I)
             if m:
                 for j in range(1, self['n_bonds']+1):
                     _,_,at1,at2 = lines[i+j].split()

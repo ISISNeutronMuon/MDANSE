@@ -1,7 +1,7 @@
 Package: mdanse
 Version: 1.0.0
 Architecture: amd64
-Depends: python-wxmpl, pyro, python-vtk
+Depends: python-setuptools, python-wxmpl, pyro, python-vtk
 Section: Science
 Priority: optional
 Installed-Size: 1000
