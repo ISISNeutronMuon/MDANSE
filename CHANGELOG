@@ -1,4 +1,9 @@
-version 1.0.4.rc2
+version 1.0.4.rc4
+----------------
+* bug fix in coordination number analysis: some pairs were never taken into account
+* bug fix when transmutating atoms from an atom selection different to 'all'
+
+version 1.0.4.rc3
 ----------------
 * bug fix in debian packager: add the python-setuptools dependency
 * improved LAMMPS converter: the parsing of the config file is more tolerance in term of required keyword format
