@@ -112,12 +112,18 @@ class AtomTransmutationConfigurator(IConfigurator):
             raise ConfiguratorError("the element %r is not registered in the database" % element, self)
 
         atomSelConfigurator = self._configurable[self._dependencies['atom_selection']]
-                
+                        
         for idx in selection:
-            atomSelConfigurator["names"][idx] = element
-            atomSelConfigurator["elements"][idx] = [element]
+            try:
+                idxInSelection = atomSelConfigurator["flatten_indexes"].index(idx)
+            except ValueError:
+                pass
+            else:                 
+                atomSelConfigurator["names"][idxInSelection] = element
+                atomSelConfigurator["elements"][idxInSelection] = [element]
 
         atomSelConfigurator['unique_names'] = sorted(set(atomSelConfigurator['names']))
+        atomSelConfigurator['masses'] = [[ELEMENTS[n,'atomic_weight']] for n in atomSelConfigurator['names']]
             
     def get_information(self):
         '''

@@ -93,7 +93,8 @@ class CoordinationNumber(DistanceHistogram):
             self._concentrations[k] /= nFrames
 
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
-        for at1,at2 in self._elementsPairs:
+        for pair in self._elementsPairs:
+            at1,at2 = pair 
             ni = nAtomsPerElement[at1]
             nj = nAtomsPerElement[at2]
             
@@ -120,6 +121,7 @@ class CoordinationNumber(DistanceHistogram):
             cBeta = self._concentrations[pair[1]]
                         
             invPair = pair[::-1]
+            print pair, cnIntra
             self._outputData["cn_intra_%s%s" % pair][:] = self.averageDensity*cBeta*cnIntra
             self._outputData["cn_inter_%s%s" % pair][:] = self.averageDensity*cBeta*cnInter        
             self._outputData["cn_total_%s%s" % pair][:] = self.averageDensity*cBeta*cnTotal 
