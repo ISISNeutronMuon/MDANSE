@@ -105,14 +105,17 @@ class AtomSelectionConfigurator(IConfigurator):
                 parser = AtomSelectionParser(trajConfig["instance"])
                 indexes.update(parser.parse(v))
 
-        indexes = sorted(list(indexes))
+        self["flatten_indexes"] = sorted(list(indexes))
+        
+        trajConfig = self._configurable[self._dependencies['trajectory']]
 
         atoms = sorted(trajConfig["universe"].atomList(), key = operator.attrgetter('index'))
         selectedAtoms = [atoms[idx] for idx in indexes]
 
-        self["selection_length"] = len(indexes)        
+        self["selection_length"] = len(self["flatten_indexes"])        
+        self['indexes'] = [[idx] for idx in self["flatten_indexes"]]
+
         self['elements'] = [[at.symbol] for at in selectedAtoms]
-        self['indexes'] = [[idx] for idx in indexes]
         self['names'] = [at.symbol for at in selectedAtoms]
         self['unique_names'] = sorted(set(self['names']))
         self['masses'] = [[ELEMENTS[n,'atomic_weight']] for n in self['names']]
