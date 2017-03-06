@@ -35,7 +35,6 @@ import copy
 import csv
 import numbers
 import os
-import pkg_resources
 import sys
 import xml.etree.ElementTree as etree
 
@@ -113,15 +112,8 @@ class ElementsDatabase(object):
     
     __metaclass__ = Singleton
     
-    try:  
-        _DEFAULT_DATABASE = pkg_resources.resource_filename(__name__,"elements_database.csv")
-    except:  
-        if hasattr(sys,'frozen'):
-            _DEFAULT_DATABASE = os.path.join(os.path.dirname(sys.executable),"elements_database.csv")
-        else:
-            raise
-
-
+    _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),"elements_database.csv")
+    
     # The user path
     _USER_DATABASE = os.path.join(PLATFORM.application_directory(), "elements_database.csv")
     

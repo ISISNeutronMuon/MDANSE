@@ -1,5 +1,4 @@
 import os
-import pkg_resources
 import sys
 
 import wx
@@ -14,13 +13,7 @@ class Icons(object):
 
         name, width, height = item
 
-        try:  
-            icon = pkg_resources.resource_filename(__name__,name+".png")
-        except:  
-            if hasattr(sys,'frozen'):
-                icon = os.path.join(os.path.dirname(sys.executable),name+".png")
-            else:
-                raise
+        icon = os.path.join(os.path.dirname(__file__),name+".png")
 
         image = wx.ImageFromBitmap(wx.Bitmap(icon))
         image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
