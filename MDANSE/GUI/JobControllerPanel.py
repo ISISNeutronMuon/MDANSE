@@ -75,6 +75,8 @@ class JobController(threading.Thread):
         '''
         
         threading.Thread.__init__(self)
+
+        self.setDaemon(True)
         
         # The wx object related to this thread
         self._window = window
