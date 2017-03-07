@@ -1,3 +1,7 @@
+version 1.0.6.a
+----------------
+* bug fix when setting the commit id in __pkginfo__
+
 version 1.0.6
 ----------------
 * the bug report button opens now the default mail client for sending bug report
