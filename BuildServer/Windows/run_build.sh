@@ -195,8 +195,8 @@ rm pythonlog.txt
 cd ${CI_PROJECT_DIR}
 
 # Get revision number from GIT
-REV_NUMBER=$(git rev-list --count HEAD)
-echo "Revision number is $REV_NUMBER"
+COMMIT_ID=$(git rev-parse --long HEAD)
+echo "Commit id ${COMMIT_ID}"
 
 # setup the environment for a visual studio build of MDANSE using microsoft SDK 7.0 and build MDANSE
 echo "MDANSE setup and build"

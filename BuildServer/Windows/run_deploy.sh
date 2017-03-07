@@ -12,6 +12,10 @@ else
     BUILD_TARGET=$1
 fi
 
+# Update the __pkginfo__ file with the current commit 
+COMMIT_ID=$(git rev-parse --long HEAD)
+sed -i 's/.*__commit__.*/__commit__ = \"${COMMIT_ID}\"/' MDANSE/__pkginfo__.py
+
 VERSION_NAME=`sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' MDANSE/__pkginfo__.py`
 
 if [[ ${CI_BUILD_REF_NAME} =~ develop ]]
