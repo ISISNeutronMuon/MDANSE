@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script is to package the nMolDyn package for Mac OS X
+# This script is to package the MDANSE package for Mac OS X
 
 #############################
 # CONFIGURATION
@@ -10,6 +10,10 @@
 ROUGE="\\033[1;31m"
 BLEU="\\033[1;34m"
 
+# Update the __pkginfo__ file with the current commit 
+COMMIT_ID=$(git rev-parse --long HEAD)
+sed -i 's/.*__commit__.*/__commit__ = \"${COMMIT_ID}\"/' MDANSE/__pkginfo__.py
+
 VERSION_NAME=`sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' MDANSE/__pkginfo__.py`
 
 if [[ ${CI_BUILD_REF_NAME} =~ develop ]]
@@ -18,7 +22,7 @@ then
     then
         VERSION_NAME=${VERSION_NAME}-"weekly-"`date +%Y-%m-%d`
     fi
-    VERSION_NAME=${VERSION_NAME}-`git rev-parse --short HEAD`
+    VERSION_NAME=${VERSION_NAME}-${COMMIT_ID}
 fi
 
 export VERSION_NAME

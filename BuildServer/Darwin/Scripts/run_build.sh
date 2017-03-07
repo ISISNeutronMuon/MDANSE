@@ -17,8 +17,8 @@ BUILD_TARGET=darwin
 echo -e "$BLEU""Getting last MDANSE revision" "$NORMAL"
 
 # Get revision number from git (without trailing newline)
-REV_NUMBER=$(git rev-list --count HEAD)
-echo -e "$BLEU""Revision number = ${REV_NUMBER}" "$NORMAL"
+COMMIT_ID=$(git rev-parse --long HEAD)
+echo -e "$BLEU""Commit id = ${COMMIT_ID}" "$NORMAL"
 
 # Now build last version and install it in our homebrewed python
 echo -e "$BLEU""Building MDANSE" "$NORMAL"
