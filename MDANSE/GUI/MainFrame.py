@@ -39,7 +39,7 @@ import wx
 import wx.aui as aui
  
 from MDANSE import LOGGER, PLATFORM, REGISTRY
-from MDANSE.__pkginfo__ import __version__
+from MDANSE.__pkginfo__ import __commit__, __version__
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.GUI.ControllerPanel import ControllerPanel
 from MDANSE.GUI.DataController import DATA_CONTROLLER
@@ -233,7 +233,7 @@ class MainFrame(wx.Frame):
     def on_about(self, event=None):
                                 
         about_str = \
-"""MDANSE version %s.
+"""MDANSE version %s (commit %s).
 
 An interactive program for analyzing Molecular Dynamics simulations.
 
@@ -241,33 +241,15 @@ Authors:
 \tEric C. Pellegrini
 \tGael Goret
 \tBachir Aoun
-""" % (__version__,)
+""" % (__version__,__commit__)
         
         d = wx.MessageDialog(self, about_str, 'About', style=wx.OK|wx.ICON_INFORMATION)
         d.ShowModal()
         d.Destroy()
 
     def on_bug_report(self, event=None):
-        report_str = \
-"""The version 1 of MDANSE is currently under testing.
-In order to facilitate the integration of new features and bug fixes, please send pull request to: 
 
-https://github.com/mdanseproject/MDANSE/tree/master/MDANSE
-
-for any other request, please send an email to:
-
-\tpellegrini@ill.fr
-\tgonzalezm@ill.fr
-\tjohnson@ill.fr
-
-or directly to the MDANSE mailing list:
-
-\tmdanse@ill.fr
-"""
-        
-        d = wx.MessageDialog(self, report_str, 'Bug report', style=wx.OK|wx.ICON_INFORMATION)
-        d.ShowModal()
-        d.Destroy()
+        webbrowser.open("mailto:mdanse@ill.fr?subject=MDANSE query")        
 
     def on_simple_help(self,event):
 
@@ -439,7 +421,7 @@ or directly to the MDANSE mailing list:
         
 if __name__ == "__main__":
     
-    app = wx.App(False)
-    f = MainFrame(None)
-    f.Show()
+    from MDANSE.GUI.Apps import MainApplication
+    
+    app = MainApplication(None)
     app.MainLoop()
