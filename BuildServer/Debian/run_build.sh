@@ -13,8 +13,11 @@ BLEU="\\033[1;34m"
 cd
 cd $CI_PROJECT_DIR
 
-# Get revision number from git (without trailing newline)
+# Update the __pkginfo__ file with the current commit 
 COMMIT_ID=$(git rev-parse --long HEAD)
+sed -i "s/.*__commit__.*/__commit__ = \"${COMMIT_ID}\"/" MDANSE/__pkginfo__.py
+
+# Get revision number from git (without trailing newline)
 echo -e "$BLEU""Commit id = ${COMMIT_ID}<--" "$NORMAL"
 
 # Now build last version

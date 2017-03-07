@@ -16,8 +16,11 @@ BUILD_TARGET=darwin
 # take the latest version of nmoldyn available on the forge
 echo -e "$BLEU""Getting last MDANSE revision" "$NORMAL"
 
-# Get revision number from git (without trailing newline)
+# Update the __pkginfo__ file with the current commit. The sed -i "" is compulsory other crashes on macos
 COMMIT_ID=$(git rev-parse --long HEAD)
+sed -i "" "s/.*__commit__.*/__commit__ = \"${COMMIT_ID}\"/" MDANSE/__pkginfo__.py
+
+# Get revision number from git (without trailing newline)
 echo -e "$BLEU""Commit id = ${COMMIT_ID}" "$NORMAL"
 
 # Now build last version and install it in our homebrewed python
