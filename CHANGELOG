@@ -1,3 +1,13 @@
+version 1.0.6
+----------------
+* the bug report button opens now the default mail client for sending bug report
+* the __pkginfo__ is now updated with the commit id when MDANSE is built
+
+version 1.0.5
+----------------
+* bug fix on macos when closing the application from the Finder: the jobs manager thread was not properly closed
+* the macos dmg file was corrupted due to the use of pkg_resources module for storing resources
+
 version 1.0.4.rc4
 ----------------
 * bug fix in coordination number analysis: some pairs were never taken into account
