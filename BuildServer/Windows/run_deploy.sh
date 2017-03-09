@@ -12,7 +12,7 @@ else
     BUILD_TARGET=$1
 fi
 
-COMMIT_ID=$(git rev-parse --long HEAD)
+COMMIT_ID=$(git rev-parse HEAD)
 VERSION_NAME=`sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' MDANSE/__pkginfo__.py`
 
 if [[ ${CI_BUILD_REF_NAME} =~ develop ]]
