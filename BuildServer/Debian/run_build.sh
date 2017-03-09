@@ -14,7 +14,7 @@ cd
 cd $CI_PROJECT_DIR
 
 # Update the __pkginfo__ file with the current commit 
-COMMIT_ID=$(git rev-parse --long HEAD)
+COMMIT_ID=$(git rev-parse HEAD)
 sed -i "s/.*__commit__.*/__commit__ = \"${COMMIT_ID}\"/" MDANSE/__pkginfo__.py
 
 # Get revision number from git (without trailing newline)

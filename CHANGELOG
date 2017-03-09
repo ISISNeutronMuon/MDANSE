@@ -1,3 +1,7 @@
+version 1.0.8
+-------------
+* bug fix when getting git commit id in long format
+
 version 1.0.7
 -------------
 * = 1.0.6.a
