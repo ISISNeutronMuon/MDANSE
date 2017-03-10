@@ -17,7 +17,7 @@ BUILD_TARGET=darwin
 echo -e "$BLEU""Getting last MDANSE revision" "$NORMAL"
 
 # Update the __pkginfo__ file with the current commit. The sed -i "" is compulsory other crashes on macos
-COMMIT_ID=$(git rev-parse HEAD)
+COMMIT_ID=$(git rev-parse --short HEAD)
 sed -i "" "s/.*__commit__.*/__commit__ = \"${COMMIT_ID}\"/" MDANSE/__pkginfo__.py
 
 # Get revision number from git (without trailing newline)
