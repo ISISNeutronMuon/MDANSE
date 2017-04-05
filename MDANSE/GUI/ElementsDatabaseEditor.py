@@ -35,7 +35,7 @@ import os
 import wx
 import wx.grid as wxgrid
 
-from MDANSE import ELEMENTS
+from MDANSE import ELEMENTS, PLATFORM
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
 
