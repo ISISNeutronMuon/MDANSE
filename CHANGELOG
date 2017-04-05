@@ -1,3 +1,8 @@
+version 1.0.10
+-------------
+* bug fix due to missing import in ElementsDatabaseEditor
+* bug fix when loading trajectory with missing unknown MMTK atoms
+
 version 1.0.9
 -------------
 * use the short git commit id instead of long
