@@ -52,3 +52,12 @@ from MMTK import Database
 
 # The default database is still the MMTK one
 Database.path.append(os.path.join(PLATFORM.package_directory(), 'Data'))
+Database.path.append(os.path.join(PLATFORM.application_directory(), 'mmtk_database'))
+
+# Update the database with user defined atom entries
+import glob
+userDefinedAtoms =  glob.glob(os.path.join(PLATFORM.application_directory(), 'mmtk_database','Atoms','*'))
+for atomFile in userDefinedAtoms:
+    atomName = os.path.basename(atomFile)
+    if not ELEMENTS.has_element(atomName):
+        ELEMENTS.add_element(atomName)
