@@ -30,9 +30,6 @@ Created on Mar 26, 2015
 :author: Eric C. Pellegrini
 '''
 
-import sys
-sys.setrecursionlimit(10000)
-
 import os
 import warnings
 warnings.filterwarnings("ignore")
