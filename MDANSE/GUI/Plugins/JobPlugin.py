@@ -118,9 +118,9 @@ class JobPlugin(ComponentPlugin):
             startupinfo.wShowWindow = subprocess.SW_HIDE
         else:
             startupinfo = None
-        
-        subprocess.Popen([sys.executable, filename], startupinfo=startupinfo, stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+        subprocess.check_output([sys.executable, filename],stderr=subprocess.STDOUT)
+        
         time.sleep(1)
 
         PUBLISHER.sendMessage("msg_start_job",message=None)
