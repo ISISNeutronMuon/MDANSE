@@ -63,6 +63,8 @@ hdiutil unmount /Volumes/MDANSE -force -quiet
 
 sleep 5
 
+cp -r /usr/local/Cellar/python/2.7.11/Frameworks/Python.framework dist/MDANSE.app/Contents/Frameworks/
+
 cp /usr/local/Cellar/python/2.7.11/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python dist/MDANSE.app/Contents/MacOS/python
 
 install_name_tool -change /usr/local/Cellar/python/2.7.11/Frameworks/Python.framework/#Versions/2.7/Python @executable_path/../Frameworks/Python.framework/Versions/2.7/Python #dist/MDANSE.app/Contents/MacOS/python
