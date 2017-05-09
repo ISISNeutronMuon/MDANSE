@@ -67,7 +67,7 @@ cp -r /usr/local/Cellar/python/2.7.11/Frameworks/Python.framework dist/MDANSE.ap
 
 cp /usr/local/Cellar/python/2.7.11/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python dist/MDANSE.app/Contents/MacOS/python
 
-install_name_tool -change /usr/local/Cellar/python/2.7.11/Frameworks/Python.framework/#Versions/2.7/Python @executable_path/../Frameworks/Python.framework/Versions/2.7/Python #dist/MDANSE.app/Contents/MacOS/python
+install_name_tool -change /usr/local/Cellar/python/2.7.11/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Frameworks/Python.framework/Versions/2.7/Python dist/MDANSE.app/Contents/MacOS/python
 
 ../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ./dist
 
