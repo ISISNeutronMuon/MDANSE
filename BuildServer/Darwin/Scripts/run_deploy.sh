@@ -66,11 +66,11 @@ sleep 5
 # recipe to make the dmg free from the building machine dependency adapted from 
 # http://joaoventura.net/blog/2016/embeddable-python-osx/
 cp -r /usr/local/Frameworks/Python.framework/Versions/2.7/lib/python2.7/ ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/lib/python2.7
-cp /usr/local/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python dist/MDANSE.app/Contents/MacOS/python
-cp /usr/local/Frameworks/Python.framework/Versions/2.7/Python ./dist/MDANSE.app/Contents/MacOS/libpython2.7.dylib
-install_name_tool -change /usr/local/Cellar/python/2.7.11/Frameworks/Python.framework/Versions/2.7/Python @executable_path/libpython2.7.dylib ./dist/MDANSE.app/Contents/MacOS/python
-chmod 777 ./dist/MDANSE.app/Contents/MacOS/libpython2.7.dylib
-install_name_tool -id @executable_path/libpython2.7.dylib ./dist/MDANSE.app/Contents/MacOS/libpython2.7.dylib
+cp /usr/local/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ./dist/MDANSE.app/Contents/MacOS/python
+cp /usr/local/Frameworks/Python.framework/Versions/2.7/Python ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib
+install_name_tool -change /usr/local/Cellar/python/2.7.11/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib ./dist/MDANSE.app/Contents/MacOS/python
+chmod 777 ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib
+install_name_tool -id @executable_path/../Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib
 
 ../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ./dist
 
