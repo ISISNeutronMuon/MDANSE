@@ -72,6 +72,9 @@ install_name_tool -change /usr/local/Cellar/python/2.7.11/Frameworks/Python.fram
 chmod 777 ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib
 install_name_tool -id @executable_path/../Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib
 
+chmod 777 ../Scripts/change_dylib_path.sh
+../Scripts/change_dylib_path.sh
+
 ../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ./dist
 
 exit
