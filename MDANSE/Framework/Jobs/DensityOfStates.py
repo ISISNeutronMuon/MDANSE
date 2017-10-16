@@ -73,7 +73,7 @@ class DensityOfStates(IJob):
 
         instrResolution = self.configuration["instrument_resolution"]        
                 
-        self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time","line", self.configuration['frames']['duration'], units='ps')
         self._outputData.add("time_window","line", instrResolution["time_window"], axis="time", units="au") 
 
         self._outputData.add("omega","line", instrResolution["omega"], units='rad/ps')

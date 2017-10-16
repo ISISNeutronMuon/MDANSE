@@ -84,6 +84,8 @@ class FramesConfigurator(RangeConfigurator):
             self['time_step'] = self['time'][1] - self['time'][0]
         except IndexError:
             self['time_step'] = 1.0
+            
+        self['duration'] = self['time'] - self['time'][0]    
 
     def get_information(self):
         '''

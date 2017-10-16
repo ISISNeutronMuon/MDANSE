@@ -85,7 +85,7 @@ class AngularCorrelation(IJob):
                 
         self.numberOfSteps = self.configuration['axis_selection']['n_values']
 
-        self._outputData.add("time","line", self.configuration['frames']['time'],units='ps')
+        self._outputData.add("time","line", self.configuration['frames']['duration'],units='ps')
 
         self._outputData.add("axis_index","line", numpy.arange(self.configuration['axis_selection']['n_values']), units='au')
                         

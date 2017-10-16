@@ -64,7 +64,7 @@ class DipoleAutoCorrelationFunction(IJob):
         self.numberOfSteps = self.configuration['frames']['number']
                         
         # Will store the time.
-        self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time","line", self.configuration['frames']['duration'], units='ps')
         
         self._dipoleMoments = numpy.zeros((self.configuration['frames']['number'],3),dtype=numpy.float64)
             
