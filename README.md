@@ -1,3 +1,5 @@
+MDANSE 
+
 MDANSE (**M**olecular **D**ynamics **A**nalysis for **N**eutron **S**cattering 
 **E**xperiments) is a 
 python application designed for computing properties that can be directly 
