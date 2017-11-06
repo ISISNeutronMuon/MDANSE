@@ -9,3 +9,4 @@ dist/
 Tests/FunctionalTests/Jobs
 /.gitignore
 /MANIFEST
+.settings

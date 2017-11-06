@@ -21,7 +21,6 @@ if sys.platform.startswith('darwin'):
         'iconfile': u'../../../MDANSE/GUI/Icons/mdanse.icns',
         'excludes': 'PyQt4',
 		'matplotlib_backends': '-',
-        'optimize': '1',
         'plist': PLIST,
         'bdist_base': '../Build/build',
         'dist_dir': '../Build/dist',
@@ -36,4 +35,4 @@ if sys.platform.startswith('darwin'):
         setup_requires=['py2app']
     )
 else:
-   print 'No build_app implementation for your system.'
+    print 'No build_app implementation for your system.'
