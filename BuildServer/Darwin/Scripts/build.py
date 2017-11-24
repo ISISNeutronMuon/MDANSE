@@ -17,7 +17,7 @@ if sys.platform.startswith('darwin'):
         u'LSApplicationCategoryType': u'public.app-category.science'
     }
     OPTIONS = {
-        'argv_emulation': True,
+        'argv_emulation': False,# has to be False otherwise triggers problems zith wxPython which lose some events that are captured by OS
         'iconfile': u'../../../MDANSE/GUI/Icons/mdanse.icns',
         'excludes': 'PyQt4',
 		'matplotlib_backends': '-',
@@ -26,11 +26,12 @@ if sys.platform.startswith('darwin'):
         'bdist_base': '../Build/build',
         'dist_dir': '../Build/dist',
         'graph': False,
-        'xref': False
+        'xref': False,
+        'packages' : ["MDANSE","MMTK","Scientific"]
     }
 
     setup(
-        name="MDANSE",
+        name='MDANSE',
         app=APP,
         options={'py2app': OPTIONS},
         setup_requires=['py2app']
