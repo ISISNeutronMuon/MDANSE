@@ -4,7 +4,7 @@ ROUGE="\\033[1;31m"
 
 # Performs the unit tests
 cd Tests/UnitTests
-nosetests --verbosity=3 -P .
+/Library/Frameworks/Python.framework/Versions/2.7/bin/nosetests --verbosity=3 -P .
 # Exit now if unable to run tests
 if [ $? -ne 0 ]; then
 	status = $?
