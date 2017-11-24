@@ -36,7 +36,7 @@ export DISTUTILS_DEBUG=0
 
 cd BuildServer/Darwin/Scripts
 
-/usr/local/bin/python build.py py2app >> build_log.txt 2>&1
+/usr/local/bin/python build.py py2app
 
 rc=$?
 if [[ $rc != 0 ]]; then
@@ -63,14 +63,21 @@ hdiutil unmount /Volumes/MDANSE -force -quiet
 
 sleep 5
 
-# recipe to make the dmg free from the building machine dependency adapted from 
-# http://joaoventura.net/blog/2016/embeddable-python-osx/
-cp -r /usr/local/Frameworks/Python.framework/Versions/2.7/lib/python2.7/ ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/lib/python2.7
-cp /usr/local/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ./dist/MDANSE.app/Contents/MacOS/python
-cp /usr/local/Frameworks/Python.framework/Versions/2.7/Python ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib
-install_name_tool -change /usr/local/Cellar/python/2.7.11/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib ./dist/MDANSE.app/Contents/MacOS/python
+# When launching the bundle, the executable target (i.e. MDANSE) modify the python that is shipped with the bundle (si.e. package path, dylib dependencies ...)
+# see http://joaoventura.net/blog/2016/embeddable-python-osx/ for technical details
+# In our case we also want the user to be able to start directly python without launching the bundle executable (e.g. to run scripts in command line) which is the reason
+# why we have to modify the python executable appropriately with the following commands
+cp -r /Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/ ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/lib/python2.7
+rm -rf ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/*
+cp /Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ./dist/MDANSE.app/Contents/MacOS/python
+cp /Library/Frameworks/Python.framework/Versions/2.7/Python ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib
+install_name_tool -change /Library/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib ./dist/MDANSE.app/Contents/MacOS/python
 chmod 777 ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib
 install_name_tool -id @executable_path/../Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/libpython2.7.dylib
+
+# In order that the modified python in the bundle import the zipped sitepackages located in Contents/Resources we provide a modified site.py that will
+# update the sys.path accordingly
+cp ../Scripts/site.py ./dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions/2.7/lib/python2.7/.
 
 chmod 777 ../Scripts/change_dylib_path.sh
 ../Scripts/change_dylib_path.sh

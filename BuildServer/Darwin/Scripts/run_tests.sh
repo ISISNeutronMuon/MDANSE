@@ -14,7 +14,7 @@ fi
 cd ../..
 
 cd Tests/FunctionalTests/Jobs
-python BuildJobTests.py
+/Library/Frameworks/Python.framework/Versions/2.7/bin/python BuildJobTests.py
 nosetests --verbosity=3 --exe -P .
 if [ $? -ne 0 ]; then
 	status=$?
