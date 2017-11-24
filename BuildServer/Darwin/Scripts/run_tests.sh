@@ -15,7 +15,7 @@ cd ../..
 
 cd Tests/FunctionalTests/Jobs
 /Library/Frameworks/Python.framework/Versions/2.7/bin/python BuildJobTests.py
-nosetests --verbosity=3 --exe -P .
+/Library/Frameworks/Python.framework/Versions/2.7/bin/nosetests --verbosity=3 --exe -P .
 if [ $? -ne 0 ]; then
 	status=$?
 	echo -e "$ROUGE""One or several functional tests failed"
