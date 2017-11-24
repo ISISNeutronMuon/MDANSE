@@ -77,7 +77,7 @@ build:osx:
     - build
     expire_in: 1 day
   tags:
-    - ci-macmini2
+    - macmini2
 
 test:osx:
   stage: test
@@ -95,7 +95,7 @@ test:osx:
   dependencies:
     - build:osx
   tags:
-    - ci-macmini2
+    - macmini2
 
 deploy:osx:
   stage: deploy
@@ -110,7 +110,7 @@ deploy:osx:
     paths:
      - BuildServer/Darwin/Build/*.dmg
   tags:
-    - ci-macmini2
+    - macmini2
 
 # # windows 7 pipeline
 
