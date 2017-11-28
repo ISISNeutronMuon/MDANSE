@@ -594,7 +594,5 @@ sys.path.append(resources_dir)
 sys.path.append(os.path.join(resources_dir,'lib-dynload'))
 sys.path.append(os.path.join(resources_dir,'site-packages.zip'))
 
-print sys.path
-
 if __name__ == '__main__':
     _script()
