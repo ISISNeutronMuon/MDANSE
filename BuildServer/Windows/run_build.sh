@@ -33,7 +33,7 @@ SCRIPT_DIR_WIN=$(cygpath -a -w $SCRIPT_DIR)
 
 # This is the directory that will contain the temporary installation
 TARGET_DIR="${CI_PROJECT_DIR_WIN}\\BuildServer\\Windows\\Build"
-TARGET_DIR_CYGWIN=$(cygpath -u $TARGET_DIR)
+TARGET_DIR_WIN=$(cygpath -u $TARGET_DIR)
 
 function extract
 {
@@ -48,9 +48,9 @@ function extract
 
 cd "${SCRIPT_DIR}"
 
-if [ -e "$TARGET_DIR_CYGWIN" ]; then
-	echo "Removing previous target dir : $TARGET_DIR_CYGWIN"
-	rm -rf ${TARGET_DIR_CYGWIN}
+if [ -e "$TARGET_DIR_WIN" ]; then
+	echo "Removing previous target dir : $TARGET_DIR_WIN"
+	rm -rf ${TARGET_DIR_WIN}
 fi
 
 CI_WINDOWS_DEPENDENCIES_PATH=$(cygpath -a -w ${CI_WINDOWS_DEPENDENCIES_PATH_UNIX})
@@ -73,16 +73,16 @@ fi
 
 #Clean up python a bit, to keep the package size down
 echo "Cleaning up Python"
-rm -rf ${TARGET_DIR_CYGWIN}/Doc
-rm -rf ${TARGET_DIR_CYGWIN}/Lib/site-packages
-rm -rf ${TARGET_DIR_CYGWIN}/Lib/test
-rm -rf ${TARGET_DIR_CYGWIN}/Tools/Scripts
-rm -rf ${TARGET_DIR_CYGWIN}/tcl
-rm -f ${TARGET_DIR_CYGWIN}/NEWS.txt
-rm -f ${TARGET_DIR_CYGWIN}/${PYTHON_MSI}
+rm -rf ${TARGET_DIR_WIN}/Doc
+rm -rf ${TARGET_DIR_WIN}/Lib/site-packages
+rm -rf ${TARGET_DIR_WIN}/Lib/test
+rm -rf ${TARGET_DIR_WIN}/Tools/Scripts
+rm -rf ${TARGET_DIR_WIN}/tcl
+rm -f ${TARGET_DIR_WIN}/NEWS.txt
+rm -f ${TARGET_DIR_WIN}/${PYTHON_MSI}
 
-mkdir -p ${TARGET_DIR_CYGWIN}/Lib/site-packages
-mkdir -p ${TARGET_DIR_CYGWIN}/Scripts
+mkdir -p ${TARGET_DIR_WIN}/Lib/site-packages
+mkdir -p ${TARGET_DIR_WIN}/Scripts
 
 cd ${DEPENDENCIES_DIR}
 
@@ -137,41 +137,41 @@ extract netCDF4.6.0.${BUILD_TARGET}.exe \$_OUTDIR
 # move the packages to the target directory
 echo "Moving dependencies to ${BUILD_TARGET}"
 
-mv PURELIB/pkg_resources ${TARGET_DIR_CYGWIN}/Lib/site-packages/pkg_resources
+mv PURELIB/pkg_resources ${TARGET_DIR_WIN}/Lib/site-packages/pkg_resources
 
-mv PLATLIB/numpy ${TARGET_DIR_CYGWIN}/Lib/site-packages/numpy
+mv PLATLIB/numpy ${TARGET_DIR_WIN}/Lib/site-packages/numpy
 
-mv PURELIB/dateutil ${TARGET_DIR_CYGWIN}/Lib/site-packages/dateutil
-mv PURELIB/pyparsing.py ${TARGET_DIR_CYGWIN}/Lib/site-packages/pyparsing.py
-mv PURELIB/pytz ${TARGET_DIR_CYGWIN}/Lib/site-packages/pytz
-mv PURELIB/six.py ${TARGET_DIR_CYGWIN}/Lib/site-packages/six.py
-mv PLATLIB/matplotlib ${TARGET_DIR_CYGWIN}/Lib/site-packages/matplotlib
+mv PURELIB/dateutil ${TARGET_DIR_WIN}/Lib/site-packages/dateutil
+mv PURELIB/pyparsing.py ${TARGET_DIR_WIN}/Lib/site-packages/pyparsing.py
+mv PURELIB/pytz ${TARGET_DIR_WIN}/Lib/site-packages/pytz
+mv PURELIB/six.py ${TARGET_DIR_WIN}/Lib/site-packages/six.py
+mv PLATLIB/matplotlib ${TARGET_DIR_WIN}/Lib/site-packages/matplotlib
 
-mv PLATLIB/Cython ${TARGET_DIR_CYGWIN}/Lib/site-packages/Cython
-mv SCRIPTS/cython.py ${TARGET_DIR_CYGWIN}/Scripts/cython.py
-cp ${TARGET_DIR}/Scripts/cython.py ${TARGET_DIR_CYGWIN}/Lib/site-packages/
-mv PURELIB/Pyro ${TARGET_DIR_CYGWIN}/Lib/site-packages/Pyro
+mv PLATLIB/Cython ${TARGET_DIR_WIN}/Lib/site-packages/Cython
+mv SCRIPTS/cython.py ${TARGET_DIR_WIN}/Scripts/cython.py
+cp ${TARGET_DIR}/Scripts/cython.py ${TARGET_DIR_WIN}/Lib/site-packages/
+mv PURELIB/Pyro ${TARGET_DIR_WIN}/Lib/site-packages/Pyro
 
-mv PURELIB/alabaster ${TARGET_DIR_CYGWIN}/Lib/site-packages/alabaster
-mv PURELIB/pygments ${TARGET_DIR_CYGWIN}/Lib/site-packages/pygments
-mv SCRIPTS/pygment* ${TARGET_DIR_CYGWIN}/Scripts/
-mv PURELIB/babel ${TARGET_DIR_CYGWIN}/Lib/site-packages/babel
-mv SCRIPTS/pybabel* ${TARGET_DIR_CYGWIN}/Scripts/
-mv PLATLIB/markupsafe ${TARGET_DIR_CYGWIN}/Lib/site-packages/markupsafe
-mv PURELIB/jinja2 ${TARGET_DIR_CYGWIN}/Lib/site-packages/jinja2
-mv PURELIB/docutils ${TARGET_DIR_CYGWIN}/Lib/site-packages/docutils
-mv SCRIPTS/rst* ${TARGET_DIR_CYGWIN}/Scripts/
-mv PURELIB/sphinx ${TARGET_DIR_CYGWIN}/Lib/site-packages/sphinx
-mv PURELIB/sphinx_rtd_theme ${TARGET_DIR_CYGWIN}/Lib/site-packages/sphinx_rtd_theme
+mv PURELIB/alabaster ${TARGET_DIR_WIN}/Lib/site-packages/alabaster
+mv PURELIB/pygments ${TARGET_DIR_WIN}/Lib/site-packages/pygments
+mv SCRIPTS/pygment* ${TARGET_DIR_WIN}/Scripts/
+mv PURELIB/babel ${TARGET_DIR_WIN}/Lib/site-packages/babel
+mv SCRIPTS/pybabel* ${TARGET_DIR_WIN}/Scripts/
+mv PLATLIB/markupsafe ${TARGET_DIR_WIN}/Lib/site-packages/markupsafe
+mv PURELIB/jinja2 ${TARGET_DIR_WIN}/Lib/site-packages/jinja2
+mv PURELIB/docutils ${TARGET_DIR_WIN}/Lib/site-packages/docutils
+mv SCRIPTS/rst* ${TARGET_DIR_WIN}/Scripts/
+mv PURELIB/sphinx ${TARGET_DIR_WIN}/Lib/site-packages/sphinx
+mv PURELIB/sphinx_rtd_theme ${TARGET_DIR_WIN}/Lib/site-packages/sphinx_rtd_theme
 
-mv PURELIB/nose ${TARGET_DIR_CYGWIN}/Lib/site-packages/nose
-mv SCRIPTS/nosetests ${TARGET_DIR_CYGWIN}/Scripts/
+mv PURELIB/nose ${TARGET_DIR_WIN}/Lib/site-packages/nose
+mv SCRIPTS/nosetests ${TARGET_DIR_WIN}/Scripts/
 
-mv PURELIB/vtk ${TARGET_DIR_CYGWIN}/Lib/site-packages/vtk
+mv PURELIB/vtk ${TARGET_DIR_WIN}/Lib/site-packages/vtk
 
-mv PURELIB/wx.pth ${TARGET_DIR_CYGWIN}/Lib/site-packages/
-mv PURELIB/wxversion.py ${TARGET_DIR_CYGWIN}/Lib/site-packages/
-mv PLATLIB/wx-2.8-msw-unicode ${TARGET_DIR_CYGWIN}/Lib/site-packages/wx-2.8-msw-unicode
+mv PURELIB/wx.pth ${TARGET_DIR_WIN}/Lib/site-packages/
+mv PURELIB/wxversion.py ${TARGET_DIR_WIN}/Lib/site-packages/
+mv PLATLIB/wx-2.8-msw-unicode ${TARGET_DIR_WIN}/Lib/site-packages/wx-2.8-msw-unicode
 
 mv \$_OUTDIR/bin/netcdf.dll .
 mv \$_OUTDIR/include/netcdf.h .
@@ -182,13 +182,22 @@ rm -rf \$_OUTDIR
 git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
 git checkout master
+<<<<<<< 96c22f0f2d6da2683699c988a232ae9f489f3d39
+cmd /V:ON /E:ON /C "${SCRIPT_DIR_WIN}/setup_and_build.bat" "${DEPENDENCIES_DIR_WIN}/scientific-python" "${TARGET_DIR}" "${MSVC_BUILD_TARGET}" "--netcdf_prefix=${DEPENDENCIES_DIR_WIN} --netcdf_dll=${DEPENDENCIES_DIR_WIN}"
+
+=======
+echo "${SCRIPT_DIR}/setup_and_build.bat"
+echo "${DEPENDENCIES_DIR}/scientific-python"
+echo "${TARGET_DIR}"
+echo "${MSVC_BUILD_TARGET}"
+echo "--netcdf_prefix=${DEPENDENCIES_DIR} --netcdf_dll=${DEPENDENCIES_DIR}"
 cmd /V:ON /E:ON /C "${SCRIPT_DIR_WIN}/setup_and_build.bat" "${DEPENDENCIES_DIR_WIN}/scientific-python" "${TARGET_DIR}" "${MSVC_BUILD_TARGET}" "--netcdf_prefix=${DEPENDENCIES_DIR_WIN} --netcdf_dll=${DEPENDENCIES_DIR_WIN}"
 
 cd ..
 rm -rf scientific-python
 
-mv netcdf.h ${TARGET_DIR_CYGWIN}/include/Scientific
-mv netcdf.dll ${TARGET_DIR_CYGWIN}/Lib/site-packages/Scientific
+mv netcdf.h ${TARGET_DIR_WIN}/include/Scientific
+mv netcdf.dll ${TARGET_DIR_WIN}/Lib/site-packages/Scientific
 rm netcdf.lib
 
 git clone https://code.ill.fr/scientific-software/mmtk.git
