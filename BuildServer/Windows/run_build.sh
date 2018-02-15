@@ -177,7 +177,7 @@ mv \$_OUTDIR/bin/netcdf.dll .
 mv \$_OUTDIR/include/netcdf.h .
 mv \$_OUTDIR/lib/netcdf.lib .
 
-rm -rf \$_OUTDIR
+# rm -rf \$_OUTDIR
 
 git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
