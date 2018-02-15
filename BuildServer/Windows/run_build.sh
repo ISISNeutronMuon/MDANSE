@@ -127,13 +127,8 @@ extract VTK-5.10.1.${BUILD_TARGET}-py2.7.exe PURELIB
 extract wxPython-common-2.8.12.1.${BUILD_TARGET}-py2.7.exe PURELIB
 extract wxPython-2.8.12.1.${BUILD_TARGET}-py2.7.exe PLATLIB
 
-# extract ScientificPython
-extract ScientificPython-2.9.2.${BUILD_TARGET}-py2.7.exe DATA
-extract ScientificPython-2.9.2.${BUILD_TARGET}-py2.7.exe PLATLIB
-extract ScientificPython-2.9.2.${BUILD_TARGET}-py2.7.exe SCRIPTS
-
-# extract MMTK
-extract MMTK-2.7.6.${BUILD_TARGET}-py2.7.exe PLATLIB
+# extract netcdf
+extract netCDF4.6.0.${BUILD_TARGET}.exe PURELIB
 
 # move the packages to the target directory
 echo "Moving dependencies to ${BUILD_TARGET}"
@@ -174,14 +169,27 @@ mv PURELIB/wx.pth ${TARGET_DIR_CYGWIN}/Lib/site-packages/
 mv PURELIB/wxversion.py ${TARGET_DIR_CYGWIN}/Lib/site-packages/
 mv PLATLIB/wx-2.8-msw-unicode ${TARGET_DIR_CYGWIN}/Lib/site-packages/wx-2.8-msw-unicode
 
-echo "package='NumPy'" >> PLATLIB/Scientific/N.py
-mv PLATLIB/Scientific ${TARGET_DIR_CYGWIN}/Lib/site-packages/Scientific
-# this is a hack due to a bug introduced by Konrad in version 2.9.2 of Scientific: the N.package is not defined anymore
-# which triggers erros for modules that used N.package (e.g. MMTK.Random)
-mv DATA/Lib/site-packages/Scientific/netcdf3.dll ${TARGET_DIR_CYGWIN}/Lib/site-packages/Scientific
-mv SCRIPTS/task_manager ${TARGET_DIR_CYGWIN}/Scripts/task_manager
+mv \$_OUTDIR/bin/netcdf.dll .
+mv \$_OUTDIR/include/netcdf.h .
+mv \$_OUTDIR/lib/netcdf.lib .
 
-mv PLATLIB/MMTK ${TARGET_DIR_CYGWIN}/Lib/site-packages/MMTK
+git clone https://code.ill.fr/scientific-software/scientific-python.git
+cd scientific-python
+git checkout master
+cmd /V:ON /E:ON /C "setup_and_build.bat" "${DEPENDENCIES_DIR}/scientific-python" "${TARGET_DIR}" ${MSVC_BUILD_TARGET} "--netcdf_prefix=${DEPENDENCIES_DIR} --netcdf_dll=${DEPENDENCIES_DIR}"
+cd ..
+rm -rf scientific-python
+
+mv netcdf.h ${TARGET_DIR_CYGWIN}/include/Scientific
+mv netcdf.dll ${TARGET_DIR_CYGWIN}/Lib/site-packages/Scientific
+rm netcdf.lib
+
+git clone https://code.ill.fr/scientific-software/mmtk.git
+cd mmtk
+git checkout master
+cmd /V:ON /E:ON /C "setup_and_build.bat" "${DEPENDENCIES_DIR}/mmtk" "${TARGET_DIR}" ${MSVC_BUILD_TARGET}
+cd ..
+rm -rf mmtk
 
 rm -rf DATA
 rm -rf PLATLIB
