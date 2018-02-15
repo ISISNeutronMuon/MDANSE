@@ -132,7 +132,7 @@ extract wxPython-common-2.8.12.1.${BUILD_TARGET}-py2.7.exe PURELIB
 extract wxPython-2.8.12.1.${BUILD_TARGET}-py2.7.exe PLATLIB
 
 # extract netcdf
-extract netCDF4.6.0.${BUILD_TARGET}.exe \$_OUTDIR
+extract netCDF4.6.0.${BUILD_TARGET}.exe PURELIB
 
 # move the packages to the target directory
 echo "Moving dependencies to ${BUILD_TARGET}"
@@ -183,6 +183,7 @@ git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
 git checkout master
 cmd /V:ON /E:ON /C "${SCRIPT_DIR_WIN}/setup_and_build.bat" "${DEPENDENCIES_DIR_WIN}/scientific-python" "${TARGET_DIR}" "${MSVC_BUILD_TARGET}" "--netcdf_prefix=${DEPENDENCIES_DIR_WIN} --netcdf_dll=${DEPENDENCIES_DIR_WIN}"
+
 cd ..
 rm -rf scientific-python
 
@@ -194,6 +195,7 @@ git clone https://code.ill.fr/scientific-software/mmtk.git
 cd mmtk
 git checkout master
 cmd /V:ON /E:ON /C "${SCRIPT_DIR_WIN}/setup_and_build.bat" "${DEPENDENCIES_DIR_WIN}/mmtk" "${TARGET_DIR}" "${MSVC_BUILD_TARGET}"
+
 cd ..
 rm -rf mmtk
 
