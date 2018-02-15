@@ -14,8 +14,8 @@ BLEU="\\033[1;34m"
 cd /tmp
 rm -rf scientific-python
 git clone https://code.ill.fr/scientific-software/scientific-python.git
-git checkout master
 cd scientific-python
+git checkout master
 python setup.py build
 
 declare -x PYTHONPATH=/tmp/scientific-python/build/lib.linux-x86_64-2.7/:${PYTHONPATH}
@@ -24,8 +24,8 @@ declare -x PYTHONPATH=/tmp/scientific-python/build/lib.linux-x86_64-2.7/:${PYTHO
 cd /tmp
 rm -rf mmtk
 git clone https://code.ill.fr/scientific-software/mmtk.git
-git checkout master
 cd mmtk
+git checkout master
 python setup.py build
 
 

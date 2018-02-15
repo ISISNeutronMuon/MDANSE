@@ -177,8 +177,6 @@ mv \$_OUTDIR/bin/netcdf.dll .
 mv \$_OUTDIR/include/netcdf.h .
 mv \$_OUTDIR/lib/netcdf.lib .
 
-rm -rf \$_OUTDIR
-
 git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
 git checkout master
@@ -194,6 +192,7 @@ git clone https://code.ill.fr/scientific-software/mmtk.git
 cd mmtk
 git checkout master
 cmd /V:ON /E:ON /C "${SCRIPT_DIR_WIN}/setup_and_build.bat" "${DEPENDENCIES_DIR_WIN}/mmtk" "${TARGET_DIR}" "${MSVC_BUILD_TARGET}"
+
 cd ..
 rm -rf mmtk
 
