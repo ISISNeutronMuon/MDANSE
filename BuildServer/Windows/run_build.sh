@@ -132,7 +132,7 @@ extract wxPython-common-2.8.12.1.${BUILD_TARGET}-py2.7.exe PURELIB
 extract wxPython-2.8.12.1.${BUILD_TARGET}-py2.7.exe PLATLIB
 
 # extract netcdf
-extract netCDF4.6.0.${BUILD_TARGET}.exe PURELIB
+extract netCDF4.6.0.${BUILD_TARGET}.exe \$_OUTDIR
 
 # move the packages to the target directory
 echo "Moving dependencies to ${BUILD_TARGET}"
