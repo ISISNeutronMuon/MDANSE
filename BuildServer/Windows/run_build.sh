@@ -176,7 +176,7 @@ mv \$_OUTDIR/lib/netcdf.lib .
 git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
 git checkout master
-cmd /V:ON /E:ON /C "setup_and_build.bat" "${DEPENDENCIES_DIR}/scientific-python" "${TARGET_DIR}" ${MSVC_BUILD_TARGET} "--netcdf_prefix=${DEPENDENCIES_DIR} --netcdf_dll=${DEPENDENCIES_DIR}"
+cmd /V:ON /E:ON /C "${CI_PROJECT_DIR}/setup_and_build.bat" "${DEPENDENCIES_DIR}/scientific-python" "${TARGET_DIR}" ${MSVC_BUILD_TARGET} "--netcdf_prefix=${DEPENDENCIES_DIR} --netcdf_dll=${DEPENDENCIES_DIR}"
 cd ..
 rm -rf scientific-python
 
@@ -187,7 +187,7 @@ rm netcdf.lib
 git clone https://code.ill.fr/scientific-software/mmtk.git
 cd mmtk
 git checkout master
-cmd /V:ON /E:ON /C "setup_and_build.bat" "${DEPENDENCIES_DIR}/mmtk" "${TARGET_DIR}" ${MSVC_BUILD_TARGET}
+cmd /V:ON /E:ON /C "${CI_PROJECT_DIR}/setup_and_build.bat" "${DEPENDENCIES_DIR}/mmtk" "${TARGET_DIR}" ${MSVC_BUILD_TARGET}
 cd ..
 rm -rf mmtk
 
