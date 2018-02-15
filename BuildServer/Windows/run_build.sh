@@ -181,7 +181,6 @@ git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
 git checkout master
 cmd /V:ON /E:ON /C "${SCRIPT_DIR_WIN}/setup_and_build.bat" "${DEPENDENCIES_DIR_WIN}/scientific-python" "${TARGET_DIR}" "${MSVC_BUILD_TARGET}" "--netcdf_prefix=${DEPENDENCIES_DIR_WIN} --netcdf_dll=${DEPENDENCIES_DIR_WIN}"
-
 cd ..
 rm -rf scientific-python
 
@@ -193,7 +192,6 @@ git clone https://code.ill.fr/scientific-software/mmtk.git
 cd mmtk
 git checkout master
 cmd /V:ON /E:ON /C "${SCRIPT_DIR_WIN}/setup_and_build.bat" "${DEPENDENCIES_DIR_WIN}/mmtk" "${TARGET_DIR}" "${MSVC_BUILD_TARGET}"
-
 cd ..
 rm -rf mmtk
 
