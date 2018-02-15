@@ -178,6 +178,11 @@ rm -rf \$_OUTDIR
 git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
 git checkout master
+echo "${SCRIPT_DIR}/setup_and_build.bat"
+echo "${DEPENDENCIES_DIR}/scientific-python"
+echo "${TARGET_DIR}"
+echo "${MSVC_BUILD_TARGET}"
+echo "--netcdf_prefix=${DEPENDENCIES_DIR} --netcdf_dll=${DEPENDENCIES_DIR}"
 cmd /V:ON /E:ON /C "${SCRIPT_DIR}/setup_and_build.bat" "${DEPENDENCIES_DIR}/scientific-python" "${TARGET_DIR}" "${MSVC_BUILD_TARGET}" "--netcdf_prefix=${DEPENDENCIES_DIR} --netcdf_dll=${DEPENDENCIES_DIR}"
 cd ..
 rm -rf scientific-python
