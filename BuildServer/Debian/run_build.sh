@@ -12,6 +12,7 @@ BLEU="\\033[1;34m"
 
 # build ILL version of ScientificPython
 cd /tmp
+<<<<<<< f7dd0f1618cc26371704210243b8235afc4cef45
 rm -rf scientific-python
 git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
