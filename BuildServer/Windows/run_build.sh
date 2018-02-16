@@ -21,7 +21,7 @@ else
 	exit 1 # signal error
 fi
 
-##Which versions of external programs to use
+# Which versions of external programs to use
 PYTHON_VERSION=2.7.6
 
 CI_PROJECT_DIR_WIN=$(cygpath -a -w ${CI_PROJECT_DIR})

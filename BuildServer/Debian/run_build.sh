@@ -12,6 +12,7 @@ BLEU="\\033[1;34m"
 
 # build ILL version of ScientificPython
 cd /tmp
+rm -rf scientific-python
 git clone https://code.ill.fr/scientific-software/scientific-python.git
 git checkout master
 cd scientific-python
@@ -21,6 +22,7 @@ declare -x PYTHONPATH=/tmp/scientific-python/build/lib.linux-x86_64-2.7/:${PYTHO
 
 # build ILL version of ScientificPython
 cd /tmp
+rm -rf mmtk
 git clone https://code.ill.fr/scientific-software/mmtk.git
 git checkout master
 cd mmtk
