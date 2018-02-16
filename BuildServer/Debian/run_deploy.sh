@@ -60,10 +60,13 @@ dos2unix ${DEBIAN_BIN_DIR}/mdanse_*
 # Build the usr/local/lib/python2.7/dist-packages directory inside the debian root directory and copy the MDANSE package inside
 DEBIAN_DIST_DIR=${DEBIAN_ROOT_DIR}/usr/local/lib/python2.7/dist-packages
 mkdir -p ${DEBIAN_DIST_DIR}
+
+# Copy the localy installed ScientificPython and MMTK
+cp -r /tmp/scientific-python/build/lib.linux-x86_64-2.7/Scientific ${DEBIAN_DIST_DIR}
+cp -r /tmp/mmtk/build/lib.linux-x86_64-2.7/MMTK ${DEBIAN_DIST_DIR}
+
+# Copy the localy installed MDANSE
 cp -r build/lib.linux-x86_64-2.7/MDANSE ${DEBIAN_DIST_DIR}
-# also copy the localy installed ScientificPython and MMTK
-cp -r /usr/local/lib/python2.7/dist-packages/Scientific* ${DEBIAN_DIST_DIR}
-cp -r /usr/local/lib/python2.7/dist-packages/MMTK* ${DEBIAN_DIST_DIR}
 
 # Compute the Installed-Size field for the debian package
 instSize=$(du ${DEBIAN_ROOT_DIR} -b -s | cut -f1)
