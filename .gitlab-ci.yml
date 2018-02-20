@@ -115,6 +115,8 @@ ci:windows:
     paths:
     - .\BuildServer\Windows\Build
     expire_in: 1 day
+  dependencies:
+    - build:windows
   tags:
     - windows
 
