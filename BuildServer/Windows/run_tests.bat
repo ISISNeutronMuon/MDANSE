@@ -27,9 +27,6 @@ cd "%MDANSE_FUNCTIONAL_TESTS_DIR%"
 
 rem Generate the functional test Python files (one for each job)
 :: Remove actual Test files (if any) and the test_BuildJobTests.py file
-del Test_*
-%1\python.exe BuildJobTests.py
-
 del AllTests*
 del Build*
 %1\python.exe -m nose
