@@ -12,24 +12,22 @@ ci:trusty:
   only:
     - triggers
     - tags
-    - /^feature-.*$/
-    - /^release-.*$/
-    - /^hotfix-.*$/
-    - /^bugfix-.*$/
+    - release
+    - hotfix
     - develop
+    - /^feature-.*$/
+    - /^bugfix-.*$/
   artifacts:
     paths:
     - build
     expire_in: 1 day
   tags:
-    - ubuntu14.04
-
+    - ubuntu16.04
 deploy:trusty:
   stage: deploy
   script:
     - ./BuildServer/Debian/run_deploy.sh amd64 trusty
   only:
-    - triggers
     - tags
     - develop
   dependencies:
@@ -39,10 +37,9 @@ deploy:trusty:
     paths:
     - ./BuildServer/Debian/Build/*.deb
   tags:
-    - ubuntu14.04
+    - ubuntu16.04
 
 # osx pipeline
-
 ci:osx:
   stage: ci
   script:
@@ -52,24 +49,39 @@ ci:osx:
   only:
     - triggers
     - tags
-    - /^feature-.*$/
-    - /^release-.*$/
-    - /^hotfix-.*$/
-    - /^bugfix-.*$/
+    - release
+    - hotfix
     - develop
+    - /^feature-.*$/
+    - /^bugfix-.*$/
   artifacts:
     paths:
     - build
     expire_in: 1 day
   tags:
-    - macmini2
-
+    - macos10.13
+test:osx:
+  stage: test
+  script:
+    - ./BuildServer/Darwin/Scripts/run_tests.sh
+  allow_failure: false
+  only:
+    - triggers
+    - tags
+    - release
+    - hotfix
+    - develop
+    - /^feature-.*$/
+    - /^bugfix-.*$/
+  dependencies:
+    - build:osx
+  tags:
+    - macos10.13
 deploy:osx:
   stage: deploy
   script:
     - ./BuildServer/Darwin/Scripts/run_deploy.sh
   only:
-    - triggers
     - tags
     - develop
   dependencies:
@@ -79,43 +91,34 @@ deploy:osx:
     paths:
      - BuildServer/Darwin/Build/*.dmg
   tags:
-    - macmini2
+    - macos10.13
 
 # windows 7 pipeline
-
 ci:windows:
   stage: ci
   script:
-    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_build.sh"
-    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_build.sh"
-    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_build.sh"
-    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_tests.sh"
-    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_tests.sh"
-    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_tests.sh"
+    - .\BuildServer\\Windows\\run_build.bat
+    - .\BuildServer\\Windows\\run_tests.bat
   allow_failure: false
   only:
     - triggers
     - tags
-    - /^feature-.*$/
-    - /^release-.*$/
-    - /^hotfix-.*$/
-    - /^bugfix-.*$/
     - develop
+    - release
+    - hotfix
+    - /^feature-.*$/
+    - /^bugfix-.*$/
   artifacts:
     paths:
     - .\BuildServer\Windows\Build
     expire_in: 1 day
   tags:
     - windows
-
 deploy:windows:
   stage: deploy
   script:
-    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_deploy.sh"
-    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_deploy.sh"
-    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_deploy.sh"
+    - .\BuildServer\\Windows\\run_deploy.bat
   only:
-    - triggers
     - tags
     - develop
   dependencies:
