@@ -96,8 +96,12 @@ class DipoleAutoCorrelationFunction(IJob):
         conf = self.configuration['trajectory']['instance'].universe.contiguousObjectConfiguration()
 
         dipoleMoment = numpy.zeros((3,),dtype=numpy.float64)
-        for idx in self._indexes: 
-            dipoleMoment += self.configuration["atom_charges"]["charges"][idx]*conf[idx]
+        for idx in self._indexes:
+            temp = self.configuration["atom_charges"]["charges"][idx]*conf[idx]
+            # Loop to sum temp because MMTK redefines __add__ operator, leading to a crash
+            #dipoleMoment = dipoleMoment + self.configuration["atom_charges"]["charges"][idx]*conf[idx]
+            for k in range(len(temp)):
+                dipoleMoment[k] = dipoleMoment[k] + temp[k]
                 
         return index, dipoleMoment
 

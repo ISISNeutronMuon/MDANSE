@@ -103,7 +103,7 @@ def mic_generator_2D(double[:,:] pts not None, double border, double[:] box_para
         
 def mic_generator_3D(double[:,:] pts not None, double border, double[:] box_param):
     
-    cdef int i, m, new_id, nb_init_points
+    cdef int i, j_int, m, new_id, nb_init_points
     cdef double x, y, z, Xmin, Xmax, Ymin, Ymax, Zmin, Zmax, j, k, l, n0, n1, n2
     cdef vector[equiv_t] equivalence
     cdef vector[point] new_points
@@ -168,8 +168,9 @@ def mic_generator_3D(double[:,:] pts not None, double border, double[:] box_para
     
     for i in range(new_points.size()):
         j = i + nb_init_points
-        res[j,0] = new_points[i][0]
-        res[j,1] = new_points[i][1]
-        res[j,2] = new_points[i][2]
+        j_int = int(j)
+        res[j_int,0] = new_points[i][0]
+        res[j_int,1] = new_points[i][1]
+        res[j_int,2] = new_points[i][2]
     
     return res, d

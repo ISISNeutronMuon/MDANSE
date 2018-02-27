@@ -107,12 +107,12 @@ class MolecularTrace(IJob):
         self.min = numpy.array([minx, miny, minz], dtype = numpy.float64)
         self._outputData.add('origin',"line", self.min, units = 'nm')
         
-        self.gdim = numpy.ceil(numpy.array([dimx, dimy, dimz])/self.resolution)
+        self.gdim = numpy.ceil(numpy.array([dimx, dimy, dimz])/self.resolution).astype(numpy.int)
         spacing = self.configuration['spatial_resolution']['value']
         self._outputData.add('spacing',"line",numpy.array([spacing, spacing, spacing]), units = 'nm')
         self.grid = numpy.zeros(self.gdim, dtype = numpy.int32)
 
-        self._outputData.add('molecular_trace',"volume", tuple(numpy.ceil(numpy.array([dimx, dimy, dimz])/self.resolution)))
+        self._outputData.add('molecular_trace',"volume", tuple(numpy.ceil(numpy.array([dimx, dimy, dimz])/self.resolution).astype(numpy.int)))
         
         self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
         
