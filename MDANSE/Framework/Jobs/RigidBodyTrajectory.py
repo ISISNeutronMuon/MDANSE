@@ -65,7 +65,6 @@ class RigidBodyTrajectory(IJob):
     settings['reference']=('integer',{"mini":0})
     settings['remove_translation']=('boolean',{'default':False})
     settings['output_files']=('output_files', {"formats":["netcdf"]})
-    settings['running_mode']=('running_mode',{})
     
     def initialize(self):
         """

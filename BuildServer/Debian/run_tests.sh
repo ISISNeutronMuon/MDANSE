@@ -13,17 +13,18 @@ nosetests --verbosity=3 -P .
 if [ $? -ne 0 ]; then
 	status = $?
 	echo -e "$ROUGE""One or several unit tests failed"
-	exit status
+	exit $status
 fi
 cd ../..
 
 # Performs the functional tests
 cd Tests/FunctionalTests/Jobs
+rm -rf Test_*
 python BuildJobTests.py
 nosetests --verbosity=3 --exe -P .
 if [ $? -ne 0 ]; then
 	status=$?
 	echo -e "$ROUGE""One or several functional tests failed"
-	exit status
+	exit $status
 fi
 
