@@ -1,12 +1,13 @@
 stages:
-  - build
+  - ci
   - deploy
  
 # trusty pipeline
-build:trusty:
-  stage: build
+ci:trusty:
+  stage: ci
   script:
     - ./BuildServer/Debian/run_build.sh
+    - ./BuildServer/Debian/run_tests.sh
   allow_failure: false
   only:
     - triggers
@@ -20,24 +21,6 @@ build:trusty:
     paths:
     - build
     expire_in: 1 day
-  tags:
-    - ubuntu14.04
-
-test:trusty:
-  stage: build
-  script:
-    - ./BuildServer/Debian/run_tests.sh
-  allow_failure: false
-  only:
-    - triggers
-    - tags
-    - /^feature-.*$/
-    - /^release-.*$/
-    - /^hotfix-.*$/
-    - /^bugfix-.*$/
-    - develop
-  dependencies:
-    - build:trusty
   tags:
     - ubuntu14.04
 
@@ -49,6 +32,8 @@ deploy:trusty:
     - triggers
     - tags
     - develop
+  dependencies:
+    - ci:trusty
   when: on_success
   artifacts:
     paths:
@@ -58,10 +43,11 @@ deploy:trusty:
 
 # osx pipeline
 
-build:osx:
-  stage: build
+ci:osx:
+  stage: ci
   script:
     - ./BuildServer/Darwin/Scripts/run_build.sh
+    - ./BuildServer/Darwin/Scripts/run_tests.sh
   allow_failure: false
   only:
     - triggers
@@ -78,24 +64,6 @@ build:osx:
   tags:
     - macmini2
 
-test:osx:
-  stage: build
-  script:
-    - ./BuildServer/Darwin/Scripts/run_tests.sh
-  allow_failure: false
-  only:
-    - triggers
-    - tags
-    - /^feature-.*$/
-    - /^release-.*$/
-    - /^hotfix-.*$/
-    - /^bugfix-.*$/
-    - develop
-  dependencies:
-    - build:osx
-  tags:
-    - macmini2
-
 deploy:osx:
   stage: deploy
   script:
@@ -104,6 +72,8 @@ deploy:osx:
     - triggers
     - tags
     - develop
+  dependencies:
+    - ci:osx
   when: on_success
   artifacts:
     paths:
@@ -111,14 +81,17 @@ deploy:osx:
   tags:
     - macmini2
 
-# # windows 7 pipeline
+# windows 7 pipeline
 
-build:windows:
-  stage: build
+ci:windows:
+  stage: ci
   script:
     - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_build.sh"
     - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_build.sh"
     - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_build.sh"
+    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_tests.sh"
+    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_tests.sh"
+    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_tests.sh"
   allow_failure: false
   only:
     - triggers
@@ -135,26 +108,6 @@ build:windows:
   tags:
     - windows
 
-test:windows:
-  stage: build
-  script:
-    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_tests.sh"
-    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_tests.sh"
-    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_tests.sh"
-  allow_failure: false
-  only:
-    - triggers
-    - tags
-    - /^feature-.*$/
-    - /^release-.*$/
-    - /^hotfix-.*$/
-    - /^bugfix-.*$/
-    - develop
-  dependencies:
-    - build:windows
-  tags:
-    - windows
-
 deploy:windows:
   stage: deploy
   script:
@@ -165,6 +118,8 @@ deploy:windows:
     - triggers
     - tags
     - develop
+  dependencies:
+    - ci:windows
   when: on_success
   artifacts:
     paths:
