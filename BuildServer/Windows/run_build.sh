@@ -210,11 +210,10 @@ cd ${SCRIPT_DIR}
 cmd /V:ON /E:ON /C "setup_and_build.bat" "${CI_PROJECT_DIR_WIN}" "${TARGET_DIR}" ${MSVC_BUILD_TARGET}
 
 # Exit now if unable to build
-echo $?
 if [ $? -ne 0 ]; then
 	status=$?
+	echo $status
 	echo "Failed to build MDANSE"
 	echo $PATH
-	echo $status
 	exit $status
 fi
