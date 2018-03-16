@@ -1,6 +1,5 @@
 stages:
   - build_and_test
-  - test
   - deploy
  
 # trusty pipeline
