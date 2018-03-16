@@ -4,8 +4,6 @@
 # CONFIGURATION
 #############################
 
-echo $PATH
-
 if [ ! $1 ]; then
     BUILD_TARGET="win-amd64"
 else
@@ -215,5 +213,7 @@ cmd /V:ON /E:ON /C "setup_and_build.bat" "${CI_PROJECT_DIR_WIN}" "${TARGET_DIR}"
 if [ $? -ne 0 ]; then
 	status=$?
 	echo "Failed to build MDANSE"
+	echo $PATH
+	echo $status
 	exit $status
 fi
