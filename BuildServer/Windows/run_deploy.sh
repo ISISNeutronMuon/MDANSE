@@ -48,3 +48,4 @@ echo "Creating nsis installer for target ${BUILD_TARGET}..."
 
 makensis /V4 /ONSISlog.txt /DVERSION=${VERSION_NAME} /DARCH=${BUILD_TARGET} /DTARGET_DIR="${TARGET_DIR}" MDANSE_installer.nsi
 
+exit 0

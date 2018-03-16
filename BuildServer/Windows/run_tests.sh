@@ -17,9 +17,10 @@ echo "Running tests"
 cmd /V:ON /E:ON /C "run_tests.bat" "${TARGET_DIR}" "${CI_PROJECT_DIR_WIN}"
 
 # Exit now if unable to run tests
-if [ $? -ne 0 ]; then
-	status=$?
+status = $?
+if [ $status -ne 0 ]; then
+	echo "Failed to extract python"
 	echo "One or several unit tests failed"
-	exit $status
 fi
 
+exit 0
