@@ -4,7 +4,7 @@ stages:
   - deploy
  
 # trusty pipeline
-build:trusty:
+build_and_test:trusty:
   stage: build
   script:
     - ./BuildServer/Debian/run_build.sh
@@ -24,7 +24,7 @@ build:trusty:
   tags:
     - ubuntu14.04
 
-test:trusty:
+build_and_test:trusty:
   stage: test
   script:
     - ./BuildServer/Debian/run_tests.sh
