@@ -50,13 +50,14 @@ class JobFileGenerator():
             parameters = self.job.get_default_parameters()
         test_string = test_string +     '        parameters = {}\n'
         for k, v in sorted(parameters.items()):
-            test_string = test_string + '        parameters[%r] = %r\n' % (k, v)
+            temp = 'parameters[%r] = %r\n' % (k, v)
+            test_string = test_string + '        ' + temp.replace('\\\\', '/')
         test_string = test_string +     '        job = REGISTRY[%r][%r]()\n' % ('job',self.job._type)
         test_string = test_string +     '        if "output_file" in parameters:\n'
         test_string = test_string +     '            output_path = parameters["output_file"][0]\n'
         test_string = test_string +     '        else:\n'
         test_string = test_string +     '            output_path = parameters["output_files"][0]\n'
-        test_string = test_string +     '        reference_data_path = "' + self.reference_data_path + '"\n'
+        test_string = test_string +     '        reference_data_path = "' + self.reference_data_path.replace('\\', '/') + '"\n'
         # Launch the job in monoprocessor mode and copy output file
         test_string = test_string +     '        print "Launching job in monoprocessor mode"\n'
         test_string = test_string +     '        parameters["running_mode"] = ("monoprocessor",1)\n'
@@ -73,11 +74,11 @@ class JobFileGenerator():
         # Compare reference data with monoprocessor if reference data exists
         if self.reference_data_file:
             test_string = test_string + '        print "Comparing monoprocessor output with reference output"\n'
-            test_string = test_string + '        self.assertTrue(compare("' +  self.reference_data_file + '", reference_data_path + "_mono" + ".nc"))\n\n'
+            test_string = test_string + '        self.assertTrue(compare("' +  self.reference_data_file.replace('\\', '/') + '", reference_data_path + "_mono" + ".nc"))\n\n'
         # Compare reference data with multiprocessor if reference data exists
         if self.reference_data_file and self.multiprocessor:
             test_string = test_string + '        print "Comparing multiprocessor output with reference output"\n'
-            test_string = test_string + '        self.assertTrue(compare("' +  self.reference_data_file + '", reference_data_path + "_multi" + ".nc"))\n\n'
+            test_string = test_string + '        self.assertTrue(compare("' +  self.reference_data_file.replace('\\', '/') + '", reference_data_path + "_multi" + ".nc"))\n\n'
         # If no reference data but multiprocessor, compare mono and multiprocessor
         elif self.multiprocessor:
             test_string = test_string + '        print "Comparing monoprocessor output with multiprocessor output"\n'
@@ -172,3 +173,4 @@ if __name__ == '__main__':
             pass
         else:
             job_file_generator = JobFileGenerator(job)
+

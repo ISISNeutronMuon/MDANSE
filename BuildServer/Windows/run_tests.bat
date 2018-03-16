@@ -11,9 +11,12 @@ cd %testsPath%
 set testsPath=%2\Tests\FunctionalTests\Jobs
 cd %testsPath%
 
+:: Remove actual Test files (if any) and the test_BuildJobTests.py file
 del Test_*
 %1\python.exe BuildJobTests.py
 
-%1\python.exe %1\Scripts\nosetests --verbosity=3 %testsPath%\Test_*.py
+del AllTests*
+del Build*
+%1\python.exe -m nose
 
 exit %errorlevel%
