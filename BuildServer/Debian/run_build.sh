@@ -24,7 +24,7 @@ echo -e "$BLEU""Commit id = ${COMMIT_ID}<--" "$NORMAL"
 echo "$BLEU""Building MDANSE" "$NORMAL"
 python setup.py build
 
-status = $?
+status=$?
 if [ $status -ne 0 ]; then
 	echo "Failed to build MDANSE"
 	exit $status

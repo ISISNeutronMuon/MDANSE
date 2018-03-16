@@ -10,8 +10,8 @@ export PYTHONPATH=${CI_PROJECT_DIR}/build/lib.linux-x86_64-2.7
 cd Tests/UnitTests
 nosetests --verbosity=3 -P .
 # Exit now if unable to run tests
+status=$?
 if [ $? -ne 0 ]; then
-	status = $?
 	echo -e "$ROUGE""One or several unit tests failed"
 	exit $status
 fi
@@ -23,7 +23,7 @@ rm -rf Test_*
 python BuildJobTests.py
 nosetests --verbosity=3 --exe Test_*.py
 
-status = $?
+status=$?
 if [ $status -ne 0 ]; then
 	echo -e "$ROUGE""One or several functional tests failed"
 	exit $status
