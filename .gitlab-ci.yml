@@ -24,7 +24,6 @@ build_and_test:trusty:
   tags:
     - ubuntu14.04
 
-build_and_test:trusty:
   stage: test
   script:
     - ./BuildServer/Debian/run_tests.sh
