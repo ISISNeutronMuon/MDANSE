@@ -30,6 +30,8 @@ Created on Apr 13, 2015
 :author: Eric C. Pellegrini
 '''
 
+import collections
+
 class Node(object):
     
     def __init__(self, name, **kwargs):
@@ -44,7 +46,7 @@ class Node(object):
 
     @property
     def links(self):
-        return set(self._links)
+        return self._links
     
     def add_link(self, other):
         self._links.add(other)
@@ -54,18 +56,16 @@ class Graph(object):
     
     def __init__(self):
         
-        self._nodes = {}
+        self._nodes = collections.OrderedDict()
         
     @property
     def nodes(self):
         return self._nodes
     
     def add_node(self, name, **kwargs):
-        
         self._nodes[name] = Node(name, **kwargs)
         
     def add_link(self, source, target):
-        
         self._nodes[source].add_link(self._nodes[target])
         
     def build_connected_components(self):
@@ -74,7 +74,7 @@ class Graph(object):
         result = []
 
         # Make a copy of the set, so we can modify it.
-        nodes = set(self._nodes.values())
+        nodes = [self._nodes[k] for k in sorted(self._nodes.keys())]
 
         # Iterate while we still have nodes to process.
         while nodes:
@@ -102,7 +102,9 @@ class Graph(object):
                 neighbors.difference_update(group)
     
                 # Remove the remaining nodes from the global set.
-                nodes.difference_update(neighbors)
+                for neigh in neighbors:
+                    if neigh in nodes:
+                        nodes.remove(neigh)
     
                 # Add them to the group of connected nodes.
                 group.update(neighbors)
@@ -110,6 +112,10 @@ class Graph(object):
                 # Add them to the queue, so we visit them in the next iterations.
                 queue.extend(neighbors)
     
+            # Sort the group
+            group = list(group)
+            group.sort(key = lambda n : n.name)
+
             # Add the group to the list of groups.
             result.append(group)
     

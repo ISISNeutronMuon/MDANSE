@@ -12,7 +12,6 @@ BLEU="\\033[1;34m"
 
 ##Select the build target
 
-
 # take the latest version of nmoldyn available on the forge
 echo -e "$BLEU""Getting last MDANSE revision" "$NORMAL"
 
@@ -37,4 +36,10 @@ rm -rf /Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-pack
 
 # Build and install MDANSE to the homebrewed python
 /Library/Frameworks/Python.framework/Versions/2.7/bin/python setup.py build >> BuildServer/Darwin/Scripts/build_log.txt 2>&1
-/Library/Frameworks/Python.framework/Versions/2.7/bin/python setup.py install >> BuildServer/Darwin/Scripts/build_log.txt 2>&1
+status=$?
+if [ $status -ne 0 ]; then
+	echo -e "$ROUGE" "Failed to build MDANSE" "$NORMAL"
+	exit $status
+fi
+
+exit 0

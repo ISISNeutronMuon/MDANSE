@@ -38,10 +38,10 @@ cd BuildServer/Darwin/Scripts
 
 /usr/local/bin/python build.py py2app
 
-rc=$?
-if [[ $rc != 0 ]]; then
+status=$?
+if [[ $status != 0 ]]; then
 	echo -e "$ROUGE""Cannot build app." "$NORMAL"
-	exit 1
+	exit $status
 fi
 
 cd ../Build
@@ -84,4 +84,4 @@ chmod 777 ../Scripts/change_dylib_path.sh
 
 ../Tools/create-dmg/create-dmg --background "../Resources/background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ./dist
 
-exit
+exit 0

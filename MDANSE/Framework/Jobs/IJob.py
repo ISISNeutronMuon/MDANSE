@@ -139,72 +139,7 @@ class IJob(Configurable):
         
         self._status = None
                                             
-    @classmethod
-    def build_parallelization_test(cls, testFile, parameters=None):
-        """
-        Produce a file like object for a given job.\n
-        :Parameters:
-            #. parameters (dict): optional. If not None, the parameters with which the job file will be built.
-        """
-         
-        f = open(testFile, 'w')
-           
-        # The first line contains the call to the python executable. This is necessary for the file to
-        # be autostartable.
-        f.write('#!%s\n\n' % sys.executable)
-
-        f.write('import os\n')
-        f.write('import unittest\n')
-        f.write('import numpy\n')
-        f.write('from Scientific.IO.NetCDF import NetCDFFile\n')
-        f.write('from Tests.UnitTest import UnitTest\n')
-        f.write('from MDANSE import REGISTRY\n\n')
-                
-        f.write('class Test%sParallel(UnitTest):\n\n' % cls._type.upper())
-                    
-        f.write('    def test(self):\n')      
-
-        # Writes the line that will initialize the |parameters| dictionary.
-        f.write('        parameters = {}\n')
-        
-        for k, v in sorted(parameters.items()):
-            f.write('        parameters[%r] = %r\n' % (k, v))
-                
-        f.write('\n        job = REGISTRY[%r](%r)\n\n' % ('job',cls._type))
-
-        f.write('        parameters["running_mode"] = ("monoprocessor",1)\n')
-        f.write('        self.assertNotRaises(job.run,parameters,False)\n\n')
-
-        f.write('        f = NetCDFFile(job.configuration["output_files"]["files"][0],"r")\n')
-        f.write('        resMono = {}\n')
-        f.write('        for k,v in f.variables.items():\n')
-        f.write('            resMono[k] = v.getValue()\n')
-        f.write('        f.close()\n\n')
-
-        f.write('        parameters["running_mode"] = ("multiprocessor",2)\n')
-        f.write('        self.assertNotRaises(job.run,parameters,False)\n\n')
-
-        f.write('        f = NetCDFFile(job.configuration["output_files"]["files"][0],"r")\n')
-        f.write('        resMulti = {}\n')
-        f.write('        for k,v in f.variables.items():\n')
-        f.write('            resMulti[k] = v.getValue()\n')
-        f.write('        f.close()\n\n')
-
-        f.write('        for k in resMono.keys():\n')
-        f.write('            self.assertTrue(numpy.allclose(resMono[k],resMulti[k]))\n\n')
-            
-        f.write('def suite():\n')
-        f.write('    loader = unittest.TestLoader()\n')
-        f.write('    s = unittest.TestSuite()\n')
-        f.write('    s.addTest(loader.loadTestsFromTestCase(Test%sParallel))\n' % cls._type.upper())
-        f.write('    return s\n\n')
-        f.write('if __name__ == "__main__":\n')
-        f.write('    unittest.main(verbosity=2)\n')
-        
-        f.close()
-        
-        os.chmod(testFile,stat.S_IRWXU)
-
+  
     @staticmethod
     def set_pyro_server():
     
@@ -298,53 +233,6 @@ class IJob(Configurable):
         f.close()
         
         os.chmod(jobFile,stat.S_IRWXU)
-                
-    @classmethod
-    def build_test(cls, testFile, parameters=None):
-        """
-        Produce a file like object for a given job.\n
-        :Parameters:
-            #. parameters (dict): optional. If not None, the parameters with which the job file will be built.
-        """
-                
-        f = open(testFile, 'w')
-           
-        # The first line contains the call to the python executable. This is necessary for the file to
-        # be autostartable.
-        f.write('#!%s\n\n' % sys.executable)
-
-        f.write('import unittest\n')
-        f.write('from Tests.UnitTests.UnitTest import UnitTest\n')
-        f.write('from MDANSE import REGISTRY\n\n')
-                
-        f.write('class Test%s(UnitTest):\n\n' % cls._type.upper())
-        
-        f.write('    def test(self):\n')      
-
-        # Writes the line that will initialize the |parameters| dictionary.
-        f.write('        parameters = {}\n')
-        
-        if parameters is None:
-            parameters = cls.get_default_parameters()
-        
-        for k, v in sorted(parameters.items()):
-            f.write('        parameters[%r] = %r\n' % (k, v))
-    
-        # Sets |analysis| variable to an instance analysis to save. 
-        f.write('        job = REGISTRY[%r][%r]()\n' % ('job',cls._type))
-        f.write('        self.assertNotRaises(job.run, parameters, status=False)\n\n')
-        
-        f.write('def suite():\n')
-        f.write('    loader = unittest.TestLoader()\n')
-        f.write('    s = unittest.TestSuite()\n')
-        f.write('    s.addTest(loader.loadTestsFromTestCase(Test%s))\n' % cls._type.upper())
-        f.write('    return s\n\n')
-        f.write("if __name__ == '__main__':\n")
-        f.write('    unittest.main(verbosity=2)\n')
-        
-        f.close()
-        
-        os.chmod(testFile,stat.S_IRWXU)
         
     def _run_monoprocessor(self):
 
@@ -380,7 +268,8 @@ class IJob(Configurable):
             if self._status is not None:
                 if self._status.is_stopped():
                     self._status.cleanup()
-                    return
+                    # Break to ensure the master will be shutdowned
+                    break
                 else:
                     self._status.update()
             

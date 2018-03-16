@@ -61,10 +61,10 @@ echo "Extracting python ${PYTHON_MSI_WIN} in ${TARGET_DIR}"
 cmd /c "msiexec  /L* pythonlog.txt /qn /a ${PYTHON_MSI_WIN} TARGETDIR=${TARGET_DIR}"
 
 # Exit now if something goes wrong
-if [ $? -ne 0 ]; then
-	status=$?
+status=$?
+if [ $status -ne 0 ]; then
 	echo "Failed to extract python"
-	exit status
+	exit $status
 fi
 
 #Clean up python a bit, to keep the package size down
@@ -210,8 +210,10 @@ cd ${SCRIPT_DIR}
 cmd /V:ON /E:ON /C "setup_and_build.bat" "${CI_PROJECT_DIR_WIN}" "${TARGET_DIR}" ${MSVC_BUILD_TARGET}
 
 # Exit now if unable to build
-if [ $? -ne 0 ]; then
-	status=$?
+status=$?
+if [ $status -ne 0 ]; then
 	echo "Failed to build MDANSE"
-	exit status
+	exit $status
 fi
+
+exit 0
