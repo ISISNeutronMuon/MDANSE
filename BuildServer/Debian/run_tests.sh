@@ -21,7 +21,7 @@ cd ../..
 cd Tests/FunctionalTests/Jobs
 rm -rf Test_*
 python BuildJobTests.py
-nosetests --verbosity=3 --exe -P .
+nosetests --verbosity=3 --exe Test_*.py
 if [ $? -ne 0 ]; then
 	status=$?
 	echo -e "$ROUGE""One or several functional tests failed"

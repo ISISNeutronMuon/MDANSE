@@ -20,6 +20,6 @@ cmd /V:ON /E:ON /C "run_tests.bat" "${TARGET_DIR}" "${CI_PROJECT_DIR_WIN}"
 if [ $? -ne 0 ]; then
 	status=$?
 	echo "One or several unit tests failed"
-	exit status
+	exit $status
 fi
 
