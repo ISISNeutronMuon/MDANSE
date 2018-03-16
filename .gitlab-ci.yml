@@ -1,10 +1,10 @@
 stages:
-  - build_and_test
+  - build
   - deploy
  
 # trusty pipeline
 build:trusty:
-  stage: build_and_test
+  stage: build
   script:
     - ./BuildServer/Debian/run_build.sh
   allow_failure: false
@@ -24,7 +24,7 @@ build:trusty:
     - ubuntu14.04
 
 test:trusty:
-  stage: build_and_test
+  stage: build
   script:
     - ./BuildServer/Debian/run_tests.sh
   allow_failure: false
@@ -59,7 +59,7 @@ deploy:trusty:
 # osx pipeline
 
 build:osx:
-  stage: build_and_test
+  stage: build
   script:
     - ./BuildServer/Darwin/Scripts/run_build.sh
   allow_failure: false
@@ -79,7 +79,7 @@ build:osx:
     - macmini2
 
 test:osx:
-  stage: build_and_test
+  stage: build
   script:
     - ./BuildServer/Darwin/Scripts/run_tests.sh
   allow_failure: false
@@ -114,7 +114,7 @@ deploy:osx:
 # # windows 7 pipeline
 
 build:windows:
-  stage: build_and_test
+  stage: build
   script:
     - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_build.sh"
     - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_build.sh"
@@ -136,7 +136,7 @@ build:windows:
     - windows
 
 test:windows:
-  stage: build_and_test
+  stage: build
   script:
     - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_tests.sh"
     - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_tests.sh"
