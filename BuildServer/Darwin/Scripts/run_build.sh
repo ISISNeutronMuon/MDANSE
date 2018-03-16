@@ -42,11 +42,4 @@ if [ $status -ne 0 ]; then
 	exit $status
 fi
 
-/Library/Frameworks/Python.framework/Versions/2.7/bin/python setup.py install >> BuildServer/Darwin/Scripts/build_log.txt 2>&1
-status=$?
-if [ $status -ne 0 ]; then
-	echo -e "$ROUGE" "Failed to install MDANSE" "$NORMAL"
-	exit $status
-fi
-
 exit 0
