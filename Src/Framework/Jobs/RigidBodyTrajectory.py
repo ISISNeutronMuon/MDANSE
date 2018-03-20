@@ -27,7 +27,7 @@
 '''
 Created on Jun 9, 2015
 
-:author: Erc C. Pellegrini
+:author: Eric C. Pellegrini
 '''
 
 import collections
@@ -60,7 +60,7 @@ class RigidBodyTrajectory(IJob):
     settings['trajectory']=('mmtk_trajectory',{})
     settings['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['atom_selection']=('atom_selection',{"dependencies":{'trajectory':'trajectory'}})
-    settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection'}})
+    settings['grouping_level']=('grouping_level',{"default" : "atom","dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['stepwise']=('boolean',{'default':True})
     settings['reference']=('integer',{"mini":0})
     settings['remove_translation']=('boolean',{'default':False})
@@ -82,15 +82,19 @@ class RigidBodyTrajectory(IJob):
         self._coms = numpy.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number'], 3),dtype=numpy.float64)
         self._fits = numpy.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number']),dtype=numpy.float64)
             
+        atoms = sorted(self.configuration['trajectory']['universe'].atomList(), key=operator.attrgetter('index'))
+
+        self._groups = []
+
+        for i in range(self.configuration['atom_selection']['selection_length']):
+            indexes = self.configuration['atom_selection']["indexes"][i]
+            self._groups.append(Collection([atoms[idx] for idx in indexes]))
+    
     def run_step(self, index):
         '''
         '''
-
-        atoms = sorted(self.configuration['trajectory']['universe'].atomList(), key=operator.attrgetter('index'))
-        
-        indexes = self.configuration['atom_selection']["indexes"][index]
-         
-        group = Collection([atoms[idx] for idx in indexes])
+                 
+        group = self._groups[index]
          
         rbtPerGroup = {}        
         # Those matrix will store the quaternions and the CMS coming from the RBT trajectory.
@@ -114,7 +118,11 @@ class RigidBodyTrajectory(IJob):
                     
                 currentFrame = self.configuration['frames']['value'][comp]                    
                      
-                refConfig = self.configuration['trajectory']['instance'].configuration[previousFrame]
+                self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], currentFrame)
+
+                refConfig = self.configuration['trajectory']['instance'].universe.contiguousObjectConfiguration()
+#                refConfig = self.configuration['trajectory']['instance'].configuration[previousFrame]
+                        
  
                 # The RBT is created just for the current step.
                 rbt = self.configuration['trajectory']['instance'].readRigidBodyTrajectory(group,
@@ -132,8 +140,11 @@ class RigidBodyTrajectory(IJob):
         # A unique RBT is performed from first to last skipping skip steps and using refConfig as the reference.
         else:
             
+            self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], self.configuration['reference']['value'])
+            refConfig = self.configuration['trajectory']['instance'].universe.contiguousObjectConfiguration()
+
             # If a fixed reference has been set. We can already set the reference configuration here.
-            refConfig = self.configuration['trajectory']['instance'].configuration[self.configuration['reference']['value']]
+#            refConfig = self.configuration['trajectory']['instance'].configuration[self.configuration['reference']['value']]
              
             # The RBT is created for the whole frame selection
             rbt = self.configuration['trajectory']['instance'].readRigidBodyTrajectory(group,
@@ -146,36 +157,7 @@ class RigidBodyTrajectory(IJob):
             rbtPerGroup['quaternions'] = rbt.quaternions
             rbtPerGroup['com'] = rbt.cms
             rbtPerGroup['fit'] = rbt.fit
- 
-        # Can not use the centers of mass defined by rbt.cms because the reference frame selected can be out of the selected frames for the Rigid Body Trajectory.
-        centerOfMass = group.centerOfMass(refConfig)
- 
-        # Loop over the atoms of the group to set the RBT trajectory.
-        for atom in group:
-                         
-            rbtPerGroup['trajectory'][atom.index] = numpy.zeros((self.configuration['frames']['number'],3), dtype=numpy.float64)
-             
-            # The coordinates of the atoms are centered around the center of mass of the group.
-            xyz = refConfig[atom] - centerOfMass
- 
-            # Loop over the selected frames.
-            for comp in range(self.configuration['frames']['number']):
-                 
-                # The rotation matrix corresponding to the selected frame in the RBT.
-                transfo = Quaternion(rbtPerGroup['quaternions'][comp,:]).asRotation()
- 
-                if self.configuration['remove_translation']['value']:
-                    # The transformation matrix corresponding to the selected frame in the RBT.
-                    transfo = Translation(centerOfMass)*transfo
-                         
-                # Compose with the CMS translation if the removeTranslation flag is set off.
-                else:
-                    # The transformation matrix corresponding to the selected frame in the RBT.
-                    transfo = Translation(Vector(rbtPerGroup['com'][comp,:]))*transfo
- 
-                # The RBT is performed on the CMS centered coordinates of atom at.
-                rbtPerGroup['trajectory'][atom.index][comp,:] = transfo(Vector(xyz))
-                                         
+                                          
         return index, rbtPerGroup
     
     def combine(self, index, x):
@@ -185,9 +167,7 @@ class RigidBodyTrajectory(IJob):
         self._quaternions[index] = x['quaternions']
         self._coms[index] = x['com']
         self._fits[index] = x['fit']
-        
-        self._rbt['trajectory'].update(x['trajectory'])
-        
+                
     def finalize(self):
         '''
         '''
@@ -205,15 +185,52 @@ class RigidBodyTrajectory(IJob):
         snapshot = SnapshotGenerator(self.configuration['trajectory']['universe'], actions = [TrajectoryOutput(outputFile, ["configuration","time"], 0, None, 1)])
                 
         # The output is written
-        for comp in range(self.configuration['frames']['number']):
+        for frame in range(self.configuration['frames']['number']):
 
-            currentFrame = self.configuration['frames']['value'][comp]                    
+            currentFrame = self.configuration['frames']['value'][frame]                    
 
             self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], currentFrame)
-            
-            for atom in selectedAtoms:
-                atom.setPosition(self._rbt['trajectory'][atom.index][comp,:])
-            snapshot(data = {'time' : self.configuration['frames']['time'][comp]})
+
+            # Case of a moving reference.
+            if self.configuration['stepwise']['value']:
+                if frame == 0:
+                    previousFrame = self.configuration['frames']['value'][0]
+                     
+                else:
+                    previousFrame = self.configuration['frames']['value'][frame-1]
+
+                refConfig = self.configuration['trajectory']['instance'].configuration[previousFrame]
+           
+            else:
+                # If a fixed reference has been set. We can already set the reference configuration here.
+                refConfig = self.configuration['trajectory']['instance'].configuration[self.configuration['reference']['value']]
+
+
+            for group_index,group in enumerate(self._groups):
+
+                centerOfMass = group.centerOfMass(refConfig)    
+        
+                # Loop over the atoms of the group to set the RBT trajectory.
+                for atom in group:
+                                                        
+                    # The coordinates of the atoms are centered around the center of mass of the group.
+                    xyz = refConfig[atom] - centerOfMass
+                                    
+                    # The rotation matrix corresponding to the selected frame in the RBT.
+                    transfo = Quaternion(self._quaternions[group_index,frame,:]).asRotation()
+          
+                    if self.configuration['remove_translation']['value']:
+                        # The transformation matrix corresponding to the selected frame in the RBT.
+                        transfo = Translation(centerOfMass)*transfo
+                              
+                    # Compose with the CMS translation if the removeTranslation flag is set off.
+                    else:
+                        # The transformation matrix corresponding to the selected frame in the RBT.
+                        transfo = Translation(Vector(self._coms[group_index,frame,:]))*transfo
+                          
+                    atom.setPosition(transfo(Vector(xyz)))
+
+            snapshot(data = {'time' : self.configuration['frames']['time'][frame]})
   
         outputFile.close()
 
