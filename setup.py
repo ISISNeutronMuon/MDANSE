@@ -184,8 +184,10 @@ if sphinx:
             sphinxDir = os.path.join(build.build_base,'sphinx',self.doctype)
                                  
             metadata = self.distribution.metadata
-     
-            sphinx.apidoc.main(['',
+            
+            # /!\ apidoc.main is deprecated. The API has been broken in sphinx 1.7.0, see https://github.com/sphinx-doc/sphinx/issues/4615
+            if int(sphinx.__version__.split(".")[1]) <= 6:
+                sphinx.apidoc.main(['',
                                 '-F',
                                 '--separate',
                                 '-H', metadata.name,
@@ -195,7 +197,17 @@ if sphinx:
                                 '-o', sphinxDir,
                                 os.path.join(buildDir,'MDANSE'),
                                 os.path.join(buildDir,'MDANSE','Externals')])
-                 
+            else:
+                sphinx.apidoc.main('', [
+                                '-F',
+                                '--separate',
+                                '-H', metadata.name,
+                                '-A', metadata.author,
+                                '-V', metadata.version,
+                                '-R', metadata.version,
+                                '-o', sphinxDir,
+                                os.path.join(buildDir,'MDANSE'),
+                                os.path.join(buildDir,'MDANSE','Externals')])
             curDir = os.getcwd()
                  
             import shutil

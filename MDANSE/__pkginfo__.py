@@ -6,4 +6,6 @@ __author__ = "Eric Pellegrini"
 
 __commit__ = "undefined"
 
+__beta__ = True
+
 

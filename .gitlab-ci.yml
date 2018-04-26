@@ -1,13 +1,17 @@
 stages:
   - ci
   - deploy
+  - clean
  
-# trusty pipeline
-ci:trusty:
+# xenial pipeline
+ci:xenial:
   stage: ci
   script:
-    - ./BuildServer/Debian/run_build.sh
-    - ./BuildServer/Debian/run_tests.sh
+    - source ./BuildServer/Unix/definitions_debian.sh
+    - source ./BuildServer/Unix/version.sh
+    - ./BuildServer/Unix/clean.sh
+    - ./BuildServer/Unix/build.sh
+    - ./BuildServer/Unix/tests.sh
   allow_failure: false
   only:
     - triggers
@@ -19,33 +23,39 @@ ci:trusty:
     - /^bugfix-.*$/
   artifacts:
     paths:
-    - build
+    - ./BuildServer/Unix/Build
     expire_in: 1 day
   tags:
-    - ubuntu16.04
-
-deploy:trusty:
+    - ubuntu14.04
+deploy:xenial:
   stage: deploy
   script:
-    - ./BuildServer/Debian/run_deploy.sh amd64 trusty
+    - ./BuildServer/Unix/deploy_debian.sh
   only:
     - tags
     - develop
   dependencies:
-    - ci:trusty
+    - ci:xenial
   when: on_success
   artifacts:
     paths:
-    - ./BuildServer/Debian/Build/*.deb
+     - BuildServer/MDANSE*.deb
   tags:
-    - ubuntu16.04
+    - ubuntu14.04
+clean:xenial:
+  stage: clean
+  script:
+    - ./BuildServer/Unix/clean.sh
 
 # osx pipeline
 ci:osx:
   stage: ci
   script:
-    - ./BuildServer/Darwin/Scripts/run_build.sh
-    - ./BuildServer/Darwin/Scripts/run_tests.sh
+    - source ./BuildServer/Unix/definitions_macos.sh
+    - source ./BuildServer/Unix/version.sh
+    - ./BuildServer/Unix/clean.sh
+    - ./BuildServer/Unix/build.sh
+    - ./BuildServer/Unix/tests.sh
   allow_failure: false
   only:
     - triggers
@@ -57,33 +67,14 @@ ci:osx:
     - /^bugfix-.*$/
   artifacts:
     paths:
-    - build
+    - ./BuildServer/Unix/Build
     expire_in: 1 day
   tags:
-    - macos10.13
-
-test:osx:
-  stage: test
-  script:
-    - ./BuildServer/Darwin/Scripts/run_tests.sh
-  allow_failure: false
-  only:
-    - triggers
-    - tags
-    - release
-    - hotfix
-    - develop
-    - /^feature-.*$/
-    - /^bugfix-.*$/
-  dependencies:
-    - build:osx
-  tags:
-    - macos10.13
-
+    - macmini2
 deploy:osx:
   stage: deploy
   script:
-    - ./BuildServer/Darwin/Scripts/run_deploy.sh
+    - ./BuildServer/Unix/deploy_macos.sh
   only:
     - tags
     - develop
@@ -92,16 +83,24 @@ deploy:osx:
   when: on_success
   artifacts:
     paths:
-     - BuildServer/Darwin/Build/*.dmg
+     - BuildServer/MDANSE*.dmg
   tags:
-    - macos10.13
+    - macmini2
+clean:osx:
+  stage: clean
+  script:
+    - ./BuildServer/Unix/clean.sh
 
 # windows 7 pipeline
+# "call" is mandatory, see https://gitlab.com/gitlab-org/gitlab-runner/issues/1051
 ci:windows:
   stage: ci
   script:
-    - .\BuildServer\\Windows\\run_build.bat
-    - .\BuildServer\\Windows\\run_tests.bat
+    - call .\\BuildServer\\Windows\\definitions.bat
+    - call .\\BuildServer\\Windows\\version.bat
+    - call .\\BuildServer\\Windows\\clean.bat
+    - call .\\BuildServer\\Windows\\build.bat
+    - call .\\BuildServer\\Windows\\tests.bat
   allow_failure: false
   only:
     - triggers
@@ -113,17 +112,14 @@ ci:windows:
     - /^bugfix-.*$/
   artifacts:
     paths:
-    - .\BuildServer\Windows\Build
+    - call .\\BuildServer\\Windows\\Build
     expire_in: 1 day
-  dependencies:
-    - build:windows
   tags:
     - windows
-
 deploy:windows:
   stage: deploy
   script:
-    - .\BuildServer\\Windows\\run_deploy.bat
+    - call .\\BuildServer\\Windows\\deploy.bat
   only:
     - tags
     - develop
@@ -132,7 +128,10 @@ deploy:windows:
   when: on_success
   artifacts:
     paths:
-     - BuildServer/Windows/Build/MDANSE*.exe
+     - BuildServer\\MDANSE*.exe
   tags:
     - windows
-
+clean:windows:
+  stage:clean
+  script:
+    - call .\\BuildServer\\Windows\\clean.bat

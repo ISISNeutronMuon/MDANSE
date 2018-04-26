@@ -32,6 +32,7 @@ Created on May 29, 2015
 
 import unittest
 import os
+import sys
 import glob
 
 def suite():
@@ -45,7 +46,8 @@ def suite():
     return test_suite
 
 def run_test():
-    unittest.TextTestRunner(verbosity=2).run(suite())
+    if not unittest.TextTestRunner(verbosity=2).run(suite()).wasSuccessful():
+        sys.exit(1)
 
 if __name__ == '__main__':
     #os.chdir("Jobs")

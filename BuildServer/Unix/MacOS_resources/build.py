@@ -7,7 +7,7 @@ if sys.platform.startswith('darwin'):
 
     version = os.environ['VERSION_NAME']
 
-    APP = ['../../../Scripts/mdanse_gui']
+    APP = ['../../Scripts/mdanse_gui']
 
     PLIST = {
         u'CFBundleName': u'MDANSE',
@@ -18,13 +18,13 @@ if sys.platform.startswith('darwin'):
     }
     OPTIONS = {
         'argv_emulation': False,# has to be False otherwise triggers problems zith wxPython which lose some events that are captured by OS
-        'iconfile': u'../../../MDANSE/GUI/Icons/mdanse.icns',
+        'iconfile': u'../../MDANSE/GUI/Icons/mdanse.icns',
         'excludes': 'PyQt4',
 		'matplotlib_backends': '-',
         'optimize': '1',
         'plist': PLIST,
-        'bdist_base': '../Build/build',
-        'dist_dir': '../Build/dist',
+        'bdist_base': './Build/build',
+        'dist_dir': './Build/dist',
         'graph': False,
         'xref': False,
         'packages' : ["MDANSE","MMTK","Scientific"]
