@@ -48,8 +48,8 @@ if %STATUS% neq 0 (
     exit %STATUS%
 )
 rem Copy netcdf dependencies
-cp "%MDANSE_DEPENDENCIES_DIR%\\NetCDF\\netcdf.dll" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\site-packages\\Scientific\\"
-cp "%MDANSE_DEPENDENCIES_DIR%\\NetCDF\\netcdf.h" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\include\\Scientific\\"
+copy "%MDANSE_DEPENDENCIES_DIR%\\NetCDF\\netcdf.dll" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\site-packages\\Scientific\\"
+copy "%MDANSE_DEPENDENCIES_DIR%\\NetCDF\\netcdf.h" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\include\\Scientific\\"
 cd ..
 rmdir /S /Q scientific-python
 

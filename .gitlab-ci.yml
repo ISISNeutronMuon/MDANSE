@@ -112,7 +112,7 @@ ci:windows:
     - /^bugfix-.*$/
   artifacts:
     paths:
-    - call .\\BuildServer\\Windows\\Build
+    - .\\BuildServer\\Windows\\Build
     expire_in: 1 day
   tags:
     - windows
@@ -132,6 +132,6 @@ deploy:windows:
   tags:
     - windows
 clean:windows:
-  stage:clean
+  stage: clean
   script:
     - call .\\BuildServer\\Windows\\clean.bat
