@@ -35,6 +35,18 @@ if %STATUS% neq 0 (
     exit %STATUS%
 )
 
+rem Perform dependencies tests
+set MDANSE_UNIT_TESTS_DIR=%MDANSE_SOURCE_DIR%\\Tests\\DependenciesTests
+cd "%MDANSE_UNIT_TESTS_DIR%"
+"%PYTHON_EXE%" AllTests.py
+rem Exit now if something goes wrong
+set STATUS=%ERRORLEVEL%
+if %STATUS% neq 0 (
+    echo "Failed when running dependencies tests"
+    call ${MDANSE_SOURCE_DIR}\\BuildServer\\Windows\\clean.bat
+    exit %STATUS%
+)
+
 rem Perform functional tests
 set MDANSE_FUNCTIONAL_TESTS_DIR=%MDANSE_SOURCE_DIR%\\Tests\\FunctionalTests\\Jobs
 cd "%MDANSE_FUNCTIONAL_TESTS_DIR%"

@@ -23,7 +23,7 @@ cd ${MDANSE_SOURCE_DIR}
 # DEPENDENCIES TESTS
 #############################
 echo -e "${BLUE}""Performing dependencies tests""${NORMAL}"
-cd Tests/DependeciesTests
+cd Tests/DependenciesTests
 ${PYTHONEXE} AllTests.py
 status=$?
 if [ $status -ne 0 ]; then
