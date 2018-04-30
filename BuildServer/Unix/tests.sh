@@ -17,7 +17,21 @@ if [ $status -ne 0 ]; then
 	${MDANSE_SOURCE_DIR}/BuildServer/Unix/clean.sh
 	exit $status
 fi
-cd ../..
+cd ${MDANSE_SOURCE_DIR}
+
+#############################
+# DEPENDENCIES TESTS
+#############################
+echo -e "${BLUE}""Performing dependencies tests""${NORMAL}"
+cd Tests/DependeciesTests
+${PYTHONEXE} AllTests.py
+status=$?
+if [ $status -ne 0 ]; then
+	echo -e "${RED}" "One or several unit tests failed"
+	${MDANSE_SOURCE_DIR}/BuildServer/Unix/clean.sh
+	exit $status
+fi
+cd ${MDANSE_SOURCE_DIR}
 
 #############################
 # FUCNTIONAL TESTS
@@ -33,3 +47,4 @@ if [ $status -ne 0 ]; then
 	${MDANSE_SOURCE_DIR}/BuildServer/Unix/clean.sh
 	exit $status
 fi
+cd ${MDANSE_SOURCE_DIR}
