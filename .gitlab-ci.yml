@@ -3,51 +3,6 @@ stages:
   - deploy
   - clean
 
-# xenial pipeline
-ci:xenial:
-  stage: ci
-  script:
-    - source ./BuildServer/Unix/definitions_debian.sh
-    - source ./BuildServer/Unix/version.sh
-    - ./BuildServer/Unix/clean.sh
-    - ./BuildServer/Unix/build.sh
-    - ./BuildServer/Unix/tests.sh
-  allow_failure: false
-  only:
-    - triggers
-    - tags
-    - release
-    - hotfix
-    - develop
-    - /^feature-.*$/
-    - /^bugfix-.*$/
-  artifacts:
-    paths:
-    - ./BuildServer/Unix/Build
-    expire_in: 1 day
-  tags:
-    - ubuntu16.04
-deploy:xenial:
-  stage: deploy
-  script:
-    - ./BuildServer/Unix/deploy_debian.sh
-  only:
-    - tags
-    - develop
-  dependencies:
-    - ci:xenial
-  when: on_success
-  artifacts:
-    paths:
-     - BuildServer/MDANSE*.deb
-  tags:
-    - ubuntu16.04
-clean:xenial:
-  stage: clean
-  script:
-    - ./BuildServer/Unix/clean.sh
-  tags:
-    - ubuntu16.04
 
 # osx pipeline
 ci:osx:
@@ -77,9 +32,6 @@ deploy:osx:
   stage: deploy
   script:
     - ./BuildServer/Unix/deploy_macos.sh
-  only:
-    - tags
-    - develop
   dependencies:
     - ci:osx
   when: on_success
@@ -124,9 +76,6 @@ deploy:windows:
   stage: deploy
   script:
     - call .\\BuildServer\\Windows\\deploy.bat
-  only:
-    - tags
-    - develop
   dependencies:
     - ci:windows
   when: on_success
