@@ -2,7 +2,7 @@ stages:
   - ci
   - deploy
   - clean
- 
+
 # xenial pipeline
 ci:xenial:
   stage: ci
@@ -26,7 +26,7 @@ ci:xenial:
     - ./BuildServer/Unix/Build
     expire_in: 1 day
   tags:
-    - ubuntu14.04
+    - ubuntu16.04
 deploy:xenial:
   stage: deploy
   script:
@@ -41,11 +41,13 @@ deploy:xenial:
     paths:
      - BuildServer/MDANSE*.deb
   tags:
-    - ubuntu14.04
+    - ubuntu16.04
 clean:xenial:
   stage: clean
   script:
     - ./BuildServer/Unix/clean.sh
+  tags:
+    - ubuntu16.04
 
 # osx pipeline
 ci:osx:
@@ -70,7 +72,7 @@ ci:osx:
     - ./BuildServer/Unix/Build
     expire_in: 1 day
   tags:
-    - macmini2
+    - macos10.13
 deploy:osx:
   stage: deploy
   script:
@@ -85,11 +87,13 @@ deploy:osx:
     paths:
      - BuildServer/MDANSE*.dmg
   tags:
-    - macmini2
+    - macos10.13
 clean:osx:
   stage: clean
   script:
     - ./BuildServer/Unix/clean.sh
+  tags:
+    - macos10.13
 
 # windows 7 pipeline
 # "call" is mandatory, see https://gitlab.com/gitlab-org/gitlab-runner/issues/1051
@@ -115,7 +119,7 @@ ci:windows:
     - .\\BuildServer\\Windows\\Build
     expire_in: 1 day
   tags:
-    - windows
+    - windows10
 deploy:windows:
   stage: deploy
   script:
@@ -130,8 +134,10 @@ deploy:windows:
     paths:
      - BuildServer\\MDANSE*.exe
   tags:
-    - windows
+    - windows10
 clean:windows:
   stage: clean
   script:
     - call .\\BuildServer\\Windows\\clean.bat
+  tags:
+    - windows10
