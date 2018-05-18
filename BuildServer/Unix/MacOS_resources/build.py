@@ -23,8 +23,8 @@ if sys.platform.startswith('darwin'):
 		'matplotlib_backends': '-',
         'optimize': '1',
         'plist': PLIST,
-        'bdist_base': './Build/build',
-        'dist_dir': './Build/dist',
+        'bdist_base': './Build_macOS/build',
+        'dist_dir': './Build_macOS/dist',
         'graph': False,
         'xref': False,
         'packages' : ["MDANSE","MMTK","Scientific"]

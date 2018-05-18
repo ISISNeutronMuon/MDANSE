@@ -23,7 +23,7 @@ ci:osx:
     - /^bugfix-.*$/
   artifacts:
     paths:
-    - ./BuildServer/Unix/Build
+    - ./BuildServer/Unix/Build_macOS
     expire_in: 1 day
   tags:
     - macos10.13
