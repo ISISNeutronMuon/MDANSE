@@ -9,7 +9,6 @@ ci:osx:
   stage: ci
   script:
     - source ./BuildServer/Unix/definitions_macos.sh
-    - source ./BuildServer/Unix/version.sh
     - ./BuildServer/Unix/clean.sh
     - ./BuildServer/Unix/build.sh
     - ./BuildServer/Unix/tests.sh
@@ -31,6 +30,8 @@ ci:osx:
 deploy:osx:
   stage: deploy
   script:
+    - source ./BuildServer/Unix/definitions_macos.sh
+    - source ./BuildServer/Unix/version.sh
     - ./BuildServer/Unix/deploy_macos.sh
   dependencies:
     - ci:osx
@@ -43,6 +44,7 @@ deploy:osx:
 clean:osx:
   stage: clean
   script:
+    - source ./BuildServer/Unix/definitions_macos.sh
     - ./BuildServer/Unix/clean.sh
   tags:
     - macos10.13
@@ -53,7 +55,6 @@ ci:windows:
   stage: ci
   script:
     - call .\\BuildServer\\Windows\\definitions.bat
-    - call .\\BuildServer\\Windows\\version.bat
     - call .\\BuildServer\\Windows\\clean.bat
     - call .\\BuildServer\\Windows\\build.bat
     - call .\\BuildServer\\Windows\\tests.bat
@@ -75,6 +76,8 @@ ci:windows:
 deploy:windows:
   stage: deploy
   script:
+    - call .\\BuildServer\\Windows\\definitions.bat
+    - call .\\BuildServer\\Windows\\version.bat
     - call .\\BuildServer\\Windows\\deploy.bat
   dependencies:
     - ci:windows
@@ -87,6 +90,7 @@ deploy:windows:
 clean:windows:
   stage: clean
   script:
+    - call .\\BuildServer\\Windows\\definitions.bat
     - call .\\BuildServer\\Windows\\clean.bat
   tags:
     - windows10
