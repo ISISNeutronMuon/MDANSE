@@ -15,7 +15,7 @@ ci:ubuntu_xenial:
   before_script:
     - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t build_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/build/Dockerfile_build .
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t build_xenial -f ./BuildServer/Docker/Builder/Dockerfile_build .
   after_script:
     - docker logout
   allow_failure: false
