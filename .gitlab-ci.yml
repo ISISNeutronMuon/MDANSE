@@ -3,7 +3,7 @@ stages:
   - deploy
 
 # osx pipeline
-ci:ubunutu-xenial:
+ci:ubuntu_xenial:
   stage: ci
   image: docker:stable
   # When using dind, it's wise to use the overlayfs driver for
