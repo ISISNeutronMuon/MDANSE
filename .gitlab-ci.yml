@@ -29,6 +29,8 @@ ci:ubuntu_xenial:
     - /^bugfix-.*$/
   tags:
     - docker
+    - sci
+    - ubuntu
 
 # osx pipeline
 ci:osx:
