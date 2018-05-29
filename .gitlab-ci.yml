@@ -28,7 +28,7 @@ ci:ubuntu_xenial:
     - /^feature-.*$/
     - /^bugfix-.*$/
   tags:
-    - macos10.13
+    - docker
 
 # osx pipeline
 ci:osx:
