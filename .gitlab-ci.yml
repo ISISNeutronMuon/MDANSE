@@ -1,8 +1,34 @@
 stages:
   - ci
   - deploy
-  - clean
 
+# osx pipeline
+ci:ubunutu-xenial:
+  stage: ci
+  image: docker:stable
+  # When using dind, it's wise to use the overlayfs driver for
+  # improved performance.
+  variables:
+    DOCKER_DRIVER: overlay2
+  services:
+    - docker.ill.fr/si/dind/image:latest
+  before_script:
+    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+  script:
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t build_xenial -f ./BuildServer/Docker/build/Dockerfile_build .
+  after_script:
+    - docker logout
+  allow_failure: false
+  only:
+    - triggers
+    - tags
+    - release
+    - hotfix
+    - develop
+    - /^feature-.*$/
+    - /^bugfix-.*$/
+  tags:
+    - macos10.13
 
 # osx pipeline
 ci:osx:
@@ -10,7 +36,6 @@ ci:osx:
   script:
     - source ./BuildServer/Unix/definitions_macos.sh
     - source ./BuildServer/Unix/version.sh
-    - ./BuildServer/Unix/clean.sh
     - ./BuildServer/Unix/build.sh
     - ./BuildServer/Unix/tests.sh
   allow_failure: false
@@ -28,6 +53,7 @@ ci:osx:
     expire_in: 1 day
   tags:
     - macos10.13
+
 deploy:osx:
   stage: deploy
   script:
@@ -42,13 +68,6 @@ deploy:osx:
      - BuildServer/MDANSE*.dmg
   tags:
     - macos10.13
-clean:osx:
-  stage: clean
-  script:
-    - source ./BuildServer/Unix/definitions_macos.sh
-    - ./BuildServer/Unix/clean.sh
-  tags:
-    - macos10.13
 
 # windows 7 pipeline
 # "call" is mandatory, see https://gitlab.com/gitlab-org/gitlab-runner/issues/1051
@@ -57,7 +76,6 @@ ci:windows:
   script:
     - call .\\BuildServer\\Windows\\definitions.bat
     - call .\\BuildServer\\Windows\\version.bat
-    - call .\\BuildServer\\Windows\\clean.bat
     - call .\\BuildServer\\Windows\\build.bat
     - call .\\BuildServer\\Windows\\tests.bat
   allow_failure: false
@@ -75,6 +93,7 @@ ci:windows:
     expire_in: 1 day
   tags:
     - windows10
+
 deploy:windows:
   stage: deploy
   script:
@@ -89,10 +108,4 @@ deploy:windows:
      - BuildServer\\MDANSE*.exe
   tags:
     - windows10
-clean:windows:
-  stage: clean
-  script:
-    - call .\\BuildServer\\Windows\\definitions.bat
-    - call .\\BuildServer\\Windows\\clean.bat
-  tags:
-    - windows10
+
