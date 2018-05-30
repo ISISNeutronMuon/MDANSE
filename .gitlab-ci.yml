@@ -28,7 +28,7 @@ deploy:ubuntu_xenial:
     - docker build --force-rm -t deploy_mdanse_xenial -f ./BuildServer/Docker/Builder/Dockerfile_deploy .
     - chmod 755 ./BuildServer/Docker/upload_artefacts.sh
     - echo `pwd`
-    - ./BuildServer/Docker/upload_artefacts.sh 
+    - ./BuildServer/Docker/upload_artefacts.sh
     - echo `ls`
     - echo `pwd`
     - echo ${CI_PROJECT_DIR}
@@ -43,7 +43,7 @@ deploy:ubuntu_xenial:
     - /^bugfix-.*$/
   artifacts:
     paths:
-    - ./*.deb
+    - ${CI_PROJECT_DIR}/*.deb
   tags:
     - docker
     - sci
