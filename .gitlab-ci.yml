@@ -2,7 +2,7 @@ stages:
   - ci
   - deploy
 
-# osx pipeline
+# ubuntu pipeline
 ci:ubuntu_xenial:
   stage: ci
   image: docker:stable
@@ -15,9 +15,42 @@ ci:ubuntu_xenial:
   before_script:
     - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t build_xenial -f ./BuildServer/Docker/Builder/Dockerfile_deploy .
-    - docker cp build_xenial:/mdanse/BuildServer/*.deb .
-    - docker rmi build_xenial
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t build_mdanse_xenial -f ./BuildServer/Docker/Builder/Dockerfile_build .
+  after_script:
+    - docker logout
+  allow_failure: false
+  only:
+    - triggers
+    - tags
+    - release
+    - hotfix
+    - develop
+    - /^feature-.*$/
+    - /^bugfix-.*$/
+  artifacts:
+    paths:
+    - ./*.deb
+  tags:
+    - docker
+    - sci
+    - ubuntu
+
+# ubuntu pipeline
+deploy:ubuntu_xenial:
+  stage: deploy
+  image: docker:stable
+  # When using dind, it's wise to use the overlayfs driver for
+  # improved performance.
+  variables:
+    DOCKER_DRIVER: overlay2
+  services:
+    - docker.ill.fr/si/dind/image:latest
+  before_script:
+    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+  script:
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t deploy_mdanse_xenial -f ./BuildServer/Docker/Builder/Dockerfile_deploy .
+    - chmod 755 ./BuildServer/Docker/upload_artefacts.sh
+    - ./BuildServer/Docker/upload_artefacts.sh 
   after_script:
     - docker logout
   allow_failure: false
