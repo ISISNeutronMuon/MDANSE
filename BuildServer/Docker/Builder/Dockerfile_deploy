@@ -10,9 +10,5 @@ WORKDIR mdanse
 
 RUN git checkout ${MDANSE_GIT_COMMIT}
 
-RUN source ./BuildServer/Unix/definitions_debian.sh ; source ./BuildServer/Unix/version.sh ; ./BuildServer/Unix/build.sh
-
-RUN source ./BuildServer/Unix/definitions_debian.sh ; source ./BuildServer/Unix/version.sh ; ./BuildServer/Unix/tests.sh
-
 RUN source ./BuildServer/Unix/definitions_debian.sh ; source ./BuildServer/Unix/version.sh ; ./BuildServer/Unix/deploy_debian.sh
 
