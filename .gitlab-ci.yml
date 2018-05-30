@@ -5,19 +5,17 @@ stages:
 # ubuntu pipeline
 ci:ubuntu_xenial:
   stage: ci
-  image: docker:stable
-  # When using dind, it's wise to use the overlayfs driver for
-  # improved performance.
-  variables:
-    DOCKER_DRIVER: overlay2
-  services:
-    - docker.ill.fr/si/dind/image:latest
-  before_script:
-    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+#  image: docker:stable
+#  variables:
+#    DOCKER_DRIVER: overlay2
+#  services:
+#    - docker.ill.fr/si/dind/image:latest
+#  before_script:
+#    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t build_mdanse_xenial -f ./BuildServer/Docker/Builder/Dockerfile_build .
-  after_script:
-    - docker logout
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_xenial -f ./BuildServer/Docker/Builder/Dockerfile_build .
+#  after_script:
+#    - docker logout
   allow_failure: false
   only:
     - triggers
@@ -27,9 +25,6 @@ ci:ubuntu_xenial:
     - develop
     - /^feature-.*$/
     - /^bugfix-.*$/
-  artifacts:
-    paths:
-    - ./*.deb
   tags:
     - docker
     - sci
@@ -38,21 +33,19 @@ ci:ubuntu_xenial:
 # ubuntu pipeline
 deploy:ubuntu_xenial:
   stage: deploy
-  image: docker:stable
-  # When using dind, it's wise to use the overlayfs driver for
-  # improved performance.
-  variables:
-    DOCKER_DRIVER: overlay2
-  services:
-    - docker.ill.fr/si/dind/image:latest
-  before_script:
-    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+#  image: docker:stable
+#  variables:
+#    DOCKER_DRIVER: overlay2
+#  services:
+#    - docker.ill.fr/si/dind/image:latest
+#  before_script:
+#    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
   script:
     - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t deploy_mdanse_xenial -f ./BuildServer/Docker/Builder/Dockerfile_deploy .
     - chmod 755 ./BuildServer/Docker/upload_artefacts.sh
     - ./BuildServer/Docker/upload_artefacts.sh 
-  after_script:
-    - docker logout
+#  after_script:
+#    - docker logout
   allow_failure: false
   only:
     - triggers

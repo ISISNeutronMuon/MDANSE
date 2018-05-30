@@ -1,4 +1,4 @@
-FROM docker.ill.fr/scientific-software/mdanse:ubuntu-xenial
+FROM ci_mdanse_xenial
 
 SHELL ["/bin/bash", "-c"]
 
