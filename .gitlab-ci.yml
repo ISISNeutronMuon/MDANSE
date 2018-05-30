@@ -27,7 +27,9 @@ deploy:ubuntu_xenial:
   script:
     - docker build --force-rm -t deploy_mdanse_xenial -f ./BuildServer/Docker/Builder/Dockerfile_deploy .
     - chmod 755 ./BuildServer/Docker/upload_artefacts.sh
+    - echo `pwd`
     - ./BuildServer/Docker/upload_artefacts.sh 
+    - echo `ls`
   allow_failure: false
   only:
     - triggers
