@@ -30,6 +30,8 @@ deploy:ubuntu_xenial:
     - echo `pwd`
     - ./BuildServer/Docker/upload_artefacts.sh 
     - echo `ls`
+    - echo `pwd`
+    - echo ${CI_PROJECT_DIR}
   allow_failure: false
   only:
     - triggers
