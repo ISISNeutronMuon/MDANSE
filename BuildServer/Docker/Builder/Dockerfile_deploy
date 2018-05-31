@@ -2,5 +2,8 @@ FROM ci_mdanse_xenial
 
 SHELL ["/bin/bash", "-c"]
 
+VOLUME builds
+
 RUN source ./BuildServer/Unix/definitions_debian.sh ; source ./BuildServer/Unix/version.sh ; ./BuildServer/Unix/deploy_debian.sh
+
 

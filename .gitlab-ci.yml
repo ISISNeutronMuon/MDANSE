@@ -2,45 +2,109 @@ stages:
   - ci
   - deploy
 
-# ubuntu pipeline
-ci:ubuntu_xenial:
+############################
+# ubuntu trusty  pipeline
+############################
+ci:ubuntu_trusty:
   stage: ci
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_xenial -f ./BuildServer/Docker/Builder/Dockerfile_build .
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Dockerfile_build .
   allow_failure: false
-  only:
-    - triggers
-    - tags
-    - release
-    - hotfix
-    - develop
-    - /^feature-.*$/
-    - /^bugfix-.*$/
   tags:
     - docker
     - sci
     - ubuntu
 
-# ubuntu pipeline
+deploy:ubuntu_trusty:
+  stage: deploy
+  script:
+    - docker build --force-rm -t deploy_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Dockerfile_deploy .
+    - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
+  dependencies:
+    - ci:ubuntu_trusty
+  allow_failure: false
+  only:
+    - master
+    - develop
+    - triggers
+    - /^release-*$/
+    - /^hotfix-*$/
+  when: on_success
+  artifacts:
+    paths:
+    - ./*.deb
+  tags:
+    - docker
+    - sci
+    - ubuntu
+
+############################
+# ubuntu xenial  pipeline
+############################
+ci:ubuntu_xenial:
+  stage: ci
+  script:
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Dockerfile_build .
+  allow_failure: false
+  tags:
+    - docker
+    - sci
+    - ubuntu
+
 deploy:ubuntu_xenial:
   stage: deploy
   script:
-    - docker build --force-rm -t deploy_mdanse_xenial -f ./BuildServer/Docker/Builder/Dockerfile_deploy .
-    - chmod 755 ./BuildServer/Docker/upload_artefacts.sh
-    - echo `pwd`
-    - ./BuildServer/Docker/upload_artefacts.sh
-    - echo `ls`
-    - echo `pwd`
-    - echo ${CI_PROJECT_DIR}
+    - docker build --force-rm -t deploy_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Dockerfile_deploy .
+    - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
+  dependencies:
+    - ci:ubuntu_xenial
   allow_failure: false
   only:
-    - triggers
-    - tags
-    - release
-    - hotfix
+    - master
     - develop
-    - /^feature-.*$/
-    - /^bugfix-.*$/
+    - triggers
+    - /^release-*$/
+    - /^hotfix-*$/
+  when: on_success
+  artifacts:
+    paths:
+    - ./*.deb
+  tags:
+    - docker
+    - sci
+    - ubuntu
+
+############################
+# ubuntu bionic pipeline
+############################
+ci:ubuntu_bionic:
+  stage: ci
+  script:
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Dockerfile_build .
+  allow_failure: false
+  tags:
+    - docker
+    - sci
+    - ubuntu
+
+deploy:ubuntu_bionic:
+  stage: deploy
+  script:
+    - docker build --force-rm -t deploy_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Dockerfile_deploy .
+    - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
+  dependencies:
+    - ci:ubuntu_bionic
+  allow_failure: false
+  only:
+    - master
+    - develop
+    - triggers
+    - /^release-*$/
+    - /^hotfix-*$/
+  when: on_success
   artifacts:
     paths:
     - ${CI_PROJECT_DIR}/*.deb
@@ -48,4 +112,89 @@ deploy:ubuntu_xenial:
     - docker
     - sci
     - ubuntu
+
+############################
+# osx high sierra pipeline
+############################
+ci:osx:
+  stage: ci
+  script:
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/definitions_macos.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/version.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Unix/build.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Unix/tests.sh
+  allow_failure: false
+  artifacts:
+    paths:
+    - ${CI_PROJECT_DIR}/BuildServer/Unix/Build_macOS
+    expire_in: 1 day
+  tags:
+    - sci
+    - osx-10.13
+
+deploy:osx:
+  stage: deploy
+  script:
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/definitions_macos.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/version.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Unix/deploy_macos.sh
+  dependencies:
+    - ci:osx
+  allow_failure: false
+  only:
+    - master
+    - develop
+    - triggers
+    - /^release-*$/
+    - /^hotfix-*$/
+  when: on_success
+  artifacts:
+    paths:
+     - ${CI_PROJECT_DIR}/BuildServer/*.dmg
+  tags:
+    - sci
+    - osx-10.13
+
+############################
+# windows 10 pipeline
+# "call" is mandatory, see https://gitlab.com/gitlab-org/gitlab-runner/issues/1051
+############################
+ci:windows:
+  stage: ci
+  script:
+    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\definitions.bat
+    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\version.bat
+    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\build.bat
+    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\tests.bat
+  allow_failure: false
+  artifacts:
+    paths:
+    - ${CI_PROJECT_DIR}\\BuildServer\\Windows\\Build
+    expire_in: 1 day
+  tags:
+    - sci
+    - windows-10
+
+deploy:windows:
+  stage: deploy
+  script:
+    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\definitions.bat
+    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\version.bat
+    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\deploy.bat
+  dependencies:
+    - ci:windows
+  allow_failure: false
+  only:
+    - master
+    - develop
+    - triggers
+    - /^release-*$/
+    - /^hotfix-*$/
+  when: on_success
+  artifacts:
+    paths:
+     - ${CI_PROJECT_DIR}\\BuildServer\\*.exe
+  tags:
+    - sci
+    - windows-10
 
