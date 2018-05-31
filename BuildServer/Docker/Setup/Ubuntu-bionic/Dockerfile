@@ -4,6 +4,8 @@ RUN export DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update
 
+RUN apt-get install -y tzdata
+
 RUN apt-get upgrade -y
 
 RUN apt-get install -y --no-install-recommends fakeroot
@@ -18,7 +20,7 @@ RUN apt-get install -y --no-install-recommends cython
 RUN apt-get install -y --no-install-recommends python-dev
 
 RUN apt-get install -y --no-install-recommends python-wxmpl
-RUN apt-get install -y --no-install-recommends python-vtk
+RUN apt-get install -y --no-install-recommends python-vtk6
 RUN apt-get install -y --no-install-recommends python-nose
 RUN apt-get install -y --no-install-recommends python-sphinx
 RUN apt-get install -y --no-install-recommends pyro
