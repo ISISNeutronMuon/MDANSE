@@ -162,14 +162,14 @@ deploy:osx:
 ci:windows:
   stage: ci
   script:
-    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\definitions.bat
-    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\version.bat
-    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\build.bat
-    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\tests.bat
+    - call %CI_PROJECT_DIR%\\BuildServer\\Windows\\definitions.bat
+    - call %CI_PROJECT_DIR%\\BuildServer\\Windows\\version.bat
+    - call %CI_PROJECT_DIR%\\BuildServer\\Windows\\build.bat
+    - call %CI_PROJECT_DIR%\\BuildServer\\Windows\\tests.bat
   allow_failure: false
   artifacts:
     paths:
-    - ${CI_PROJECT_DIR}\\BuildServer\\Windows\\Build
+    - %CI_PROJECT_DIR%\\BuildServer\\Windows\\Build
     expire_in: 1 day
   tags:
     - sci
@@ -178,9 +178,9 @@ ci:windows:
 deploy:windows:
   stage: deploy
   script:
-    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\definitions.bat
-    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\version.bat
-    - call ${CI_PROJECT_DIR}\\BuildServer\\Windows\\deploy.bat
+    - call %CI_PROJECT_DIR%\\BuildServer\\Windows\\definitions.bat
+    - call %CI_PROJECT_DIR%\\BuildServer\\Windows\\version.bat
+    - call %CI_PROJECT_DIR%\\BuildServer\\Windows\\deploy.bat
   dependencies:
     - ci:windows
   allow_failure: false
@@ -193,7 +193,7 @@ deploy:windows:
   when: on_success
   artifacts:
     paths:
-     - ${CI_PROJECT_DIR}\\BuildServer\\*.exe
+     - %CI_PROJECT_DIR%\\BuildServer\\*.exe
   tags:
     - sci
     - windows-10
