@@ -1,6 +1,7 @@
 stages:
   - ci
   - deploy
+  - clean
 
 ############################
 # ubuntu trusty  pipeline
@@ -197,4 +198,16 @@ deploy:windows:
   tags:
     - sci
     - windows-10
+
+clean_docker:
+  stage: clean
+  when: always
+  script:
+    - docker rm `docker ps -q -f "status=exited"`
+    - docker images -a --format "{{.Repository}}:{{.Tag}}" | grep mdanse | xargs docker rmi -f
+    - docker rmi `docker images -q -f "dangling=true"`
+  tags:
+    - docker
+    - sci
+    - ubuntu
 
