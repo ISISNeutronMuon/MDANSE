@@ -41,6 +41,7 @@ class SuperpositionTest(unittest.TestCase):
             tr, rms = universe.findTransformation(ref_conf)
             self.assert_(abs(rms) < 1.e-5)
             universe.applyTransformation(tr)
+            self.assertTrue(False)
             self.assert_(universe.rmsDifference(ref_conf) < 1.e-5)
             axis, angle = tr.rotation().axisAndAngle()
             self.assert_(abs(angle - 0.7) < 1.e-5)

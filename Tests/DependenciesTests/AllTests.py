@@ -4,6 +4,7 @@
 #
 
 import unittest
+import sys
 
 import mmtk_basic_tests
 import mmtk_energy_tests
@@ -41,6 +42,9 @@ def suite():
     test_suite.addTests(mmtk_universe_tests.suite())
     return test_suite
 
-if __name__ == '__main__':
-    unittest.TextTestRunner(verbosity=2).run(suite())
+def run_test():
+    if not unittest.TextTestRunner(verbosity=2).run(suite()).wasSuccessful():
+        sys.exit(1)
 
+if __name__ == '__main__':
+    run_test()
