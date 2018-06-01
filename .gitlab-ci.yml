@@ -199,7 +199,7 @@ deploy:windows:
     - sci
     - windows-10
 
-clean_docker:
+clean:docker:
   stage: clean
   when: always
   script:
@@ -209,3 +209,22 @@ clean_docker:
     - sci
     - ubuntu
 
+clean:osx:
+  stage: clean
+  when: always
+  script:
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/definitions_macos.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Unix/clean.sh
+  tags:
+    - sci
+    - osx-10.13
+    
+clean:windows:
+  stage: clean
+  when: always
+  script:
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\definitions.bat"
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\clean.bat"
+  tags:
+    - sci
+    - windows-10

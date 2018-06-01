@@ -23,14 +23,12 @@ ${PYTHONEXE} setup.py build
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to build Scientific""${NORMAL}"
-	${MDANSE_SOURCE_DIR}/BuildServer/Unix/clean.sh
 	exit $status
 fi
 ${PYTHONEXE} setup.py install --prefix=${MDANSE_TEMPORARY_INSTALLATION_DIR}
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to install Scientific""${NORMAL}"
-	${MDANSE_SOURCE_DIR}/BuildServer/Unix/clean.sh
 	exit $status
 fi
 export NETCDF_HEADER_FILE_PATH=${MDANSE_TEMPORARY_INSTALLATION_DIR}/include/python2.7/
@@ -47,14 +45,12 @@ ${PYTHONEXE} setup.py build
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to build MMTK""${NORMAL}"
-	${MDANSE_SOURCE_DIR}/BuildServer/Unix/clean.sh
 	exit $status
 fi
 ${PYTHONEXE} setup.py install --prefix=${MDANSE_TEMPORARY_INSTALLATION_DIR}
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to install MMTK""${NORMAL}"
-	${MDANSE_SOURCE_DIR}/BuildServer/Unix/clean.sh
 	exit $status
 fi
 
@@ -69,14 +65,12 @@ ${PYTHONEXE} setup.py build
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to build MDANSE""${NORMAL}"
-	${MDANSE_SOURCE_DIR}/BuildServer/Unix/clean.sh
 	exit $status
 fi
 ${PYTHONEXE} setup.py install --prefix=${MDANSE_TEMPORARY_INSTALLATION_DIR}
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to install MDANSE""${NORMAL}"
-	${MDANSE_SOURCE_DIR}/BuildServer/Unix/clean.sh
 	exit $status
 fi
 

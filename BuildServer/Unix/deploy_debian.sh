@@ -60,7 +60,6 @@ fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} ${MDANSE_SOURCE_DIR}/BuildServer/MDANSE-
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
-	${MDANSE_SOURCE_DIR}/BuildServer/Unix/clean.sh
 	exit $status
 fi
 

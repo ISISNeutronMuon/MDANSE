@@ -26,7 +26,6 @@ ${PYTHONEXE} MacOS_resources/build.py py2app
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
-	${MDANSE_SOURCE_DIR}/BuildServer/Unix/clean.sh
 	exit $status
 fi
 

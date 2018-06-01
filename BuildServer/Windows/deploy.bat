@@ -21,7 +21,6 @@ set STATUS=%ERRORLEVEL%
 rem Exit now if something goes wrong
 if %STATUS% neq 0 (
     echo "Failed when packaging MDANSE"
-    call ${MDANSE_SOURCE_DIR}\\BuildServer\\Windows\\clean.bat
     exit %STATUS%
 )
 

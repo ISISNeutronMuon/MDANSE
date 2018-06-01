@@ -37,14 +37,12 @@ set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build
 if %STATUS% neq 0 (
     echo "Failed to build Scientific"
-    call ${MDANSE_SOURCE_DIR}\\BuildServer\\Windows\\clean.bat
     exit %STATUS%
 )
 %PYTHON_EXE% setup.py install
 rem Exit now if unable to install
 if %STATUS% neq 0 (
     echo "Failed to install Scientific"
-    call ${MDANSE_SOURCE_DIR}\\BuildServer\\Windows\\clean.bat
     exit %STATUS%
 )
 rem Copy netcdf dependencies
@@ -64,14 +62,12 @@ set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build
 if %STATUS% neq 0 (
     echo "Failed to build MMTK"
-    call ${MDANSE_SOURCE_DIR}\\BuildServer\\Windows\\clean.bat
     exit %STATUS%
 )
 %PYTHON_EXE% setup.py install
 rem Exit now if unable to install
 if %STATUS% neq 0 (
     echo "Failed to install MMTK"
-    call ${MDANSE_SOURCE_DIR}\\BuildServer\\Windows\\clean.bat
     exit %STATUS%
 )
 cd ..
@@ -84,14 +80,12 @@ set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build
 if %STATUS% neq 0 (
     echo "Failed to build MDANSE"
-    call ${MDANSE_SOURCE_DIR}\\BuildServer\\Windows\\clean.bat
     exit %STATUS%
 )
 %PYTHON_EXE% setup.py install
 rem Exit now if unable to install
 if %STATUS% neq 0 (
     echo "Failed to install MDANSE"
-    call ${MDANSE_SOURCE_DIR}\\BuildServer\\Windows\\clean.bat
     exit %STATUS%
 )
 rmdir /S /Q build

@@ -31,7 +31,6 @@ rem Exit now if something goes wrong
 set STATUS=%ERRORLEVEL%
 if %STATUS% neq 0 (
     echo "Failed when running unitary tests"
-    call ${MDANSE_SOURCE_DIR}\\BuildServer\\Windows\\clean.bat
     exit %STATUS%
 )
 
@@ -43,7 +42,6 @@ rem Exit now if something goes wrong
 set STATUS=%ERRORLEVEL%
 if %STATUS% neq 0 (
     echo "Failed when running dependencies tests"
-    call ${MDANSE_SOURCE_DIR}\\BuildServer\\Windows\\clean.bat
     exit %STATUS%
 )
 
@@ -60,7 +58,6 @@ rem Exit now if something goes wrong
 set STATUS=%ERRORLEVEL%
 if %STATUS% neq 0 (
     echo "Failed when running functional tests"
-    call ${MDANSE_SOURCE_DIR}\\BuildServer\\Windows\\clean.bat
     exit %STATUS%
 )
 
