@@ -203,6 +203,7 @@ clean:docker:
   stage: clean
   when: always
   script:
+    - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
     - ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
   tags:
     - docker
