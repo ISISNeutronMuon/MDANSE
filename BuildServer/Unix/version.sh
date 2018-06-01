@@ -10,14 +10,20 @@ $SED_I_COMMAND "s/.*__commit__.*/__commit__ = \"${MDANSE_GIT_CURRENT_COMMIT}\"/"
 # Get MDANSE version
 MDANSE_VERSION=`sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' MDANSE/__pkginfo__.py`
 
-# Check if branch is master, tag as draft otherwise
+# Check if branch is master
 if [[ ${CI_COMMIT_REF_NAME} == "master" ]]
 then
     VERSION_NAME=${MDANSE_VERSION}
-    $SED_I_COMMAND "s/.*__commit__.*/__commit__ = \"${MDANSE_GIT_CURRENT_COMMIT}\"/" MDANSE/__pkginfo__.py
-    $SED_I_COMMAND "s/.*__beta__.*/__beta__ = False/" MDANSE/__pkginfo__.py
+    $SED_I_COMMAND "s/.*__beta__.*/__beta__ = None/" MDANSE/__pkginfo__.py
 else
-    VERSION_NAME=${MDANSE_VERSION}-"beta"-${MDANSE_GIT_CURRENT_COMMIT}
-    $SED_I_COMMAND "s/.*__beta__.*/__beta__ = True/" MDANSE/__pkginfo__.py
+    # Check if branch is release*
+	if [[ ${CI_COMMIT_REF_NAME::7} == "release" ]]
+	then
+	    VERSION_NAME=${MDANSE_VERSION}-rc-${MDANSE_GIT_CURRENT_COMMIT}
+	    $SED_I_COMMAND "s/.*__beta__.*/__beta__ = \"rc\"/" MDANSE/__pkginfo__.py
+	else
+	    VERSION_NAME=${MDANSE_VERSION}-beta-${MDANSE_GIT_CURRENT_COMMIT}
+	    $SED_I_COMMAND "s/.*__beta__.*/__beta__ = \"beta\"/" MDANSE/__pkginfo__.py
+	fi
 fi
 export VERSION_NAME

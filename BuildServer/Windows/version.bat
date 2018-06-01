@@ -17,8 +17,14 @@ for /F %%i in (' %cmd% ') do set MDANSE_VERSION=%%i
 rem Check if branch is master, tag as draft otherwise
 if "%CI_COMMIT_REF_NAME%" == "master" (
     set VERSION_NAME=%MDANSE_VERSION%
-    sed -i "s/.*__beta__.*/__beta__ = False/" MDANSE/__pkginfo__.py
+    sed -i "s/.*__beta__.*/__beta__ = None/" MDANSE/__pkginfo__.py
 ) else (
-    set VERSION_NAME=%MDANSE_VERSION%-"beta"-%MDANSE_GIT_CURRENT_COMMIT%
-    sed -i "s/.*__beta__.*/__beta__ = True/" MDANSE/__pkginfo__.py
+    rem Check if branch is release*
+    if "%CI_COMMIT_REF_NAME:~0,7%" == "release" (
+        set VERSION_NAME=%MDANSE_VERSION%-rc-%MDANSE_GIT_CURRENT_COMMIT%
+        sed -i "s/.*__beta__.*/__beta__ = \"rc\"/" MDANSE/__pkginfo__.py
+    ) else (
+        set VERSION_NAME=%MDANSE_VERSION%-beta-%MDANSE_GIT_CURRENT_COMMIT%
+        sed -i "s/.*__beta__.*/__beta__ = \"beta\"/" MDANSE/__pkginfo__.py
+    )
 )

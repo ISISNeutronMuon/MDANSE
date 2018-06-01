@@ -232,9 +232,9 @@ class MainFrame(wx.Frame):
 
     def on_about(self, event=None):
         if __beta__:
-            beta_string = " (beta)" 
+            beta_string = " (" + str(__beta__) + ")"
         else:
-            beta_string = ""  
+            beta_string = ""
         about_str = \
 """MDANSE version %s (commit %s).
 
