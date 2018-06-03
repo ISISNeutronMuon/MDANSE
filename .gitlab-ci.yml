@@ -21,7 +21,7 @@ deploy:ubuntu_trusty:
   script:
     - docker build --force-rm -t deploy_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-trusty/Dockerfile_deploy .
     - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
-    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh trusty
   dependencies:
     - ci:ubuntu_trusty
   allow_failure: false
@@ -58,7 +58,7 @@ deploy:ubuntu_xenial:
   script:
     - docker build --force-rm -t deploy_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_deploy .
     - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
-    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh xenial
   dependencies:
     - ci:ubuntu_xenial
   allow_failure: false
@@ -95,7 +95,7 @@ deploy:ubuntu_bionic:
   script:
     - docker build --force-rm -t deploy_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-bionic/Dockerfile_deploy .
     - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
-    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh bionic
   dependencies:
     - ci:ubuntu_bionic
   allow_failure: false
