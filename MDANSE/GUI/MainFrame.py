@@ -39,7 +39,7 @@ import wx
 import wx.aui as aui
  
 from MDANSE import LOGGER, PLATFORM, REGISTRY
-from MDANSE.__pkginfo__ import __commit__, __version__
+from MDANSE.__pkginfo__ import __commit__, __version__, __beta__
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.GUI.ControllerPanel import ControllerPanel
 from MDANSE.GUI.DataController import DATA_CONTROLLER
@@ -231,7 +231,10 @@ class MainFrame(wx.Frame):
         DATA_CONTROLLER[data.filename] = data
 
     def on_about(self, event=None):
-                                
+        if __beta__:
+            beta_string = " (" + str(__beta__) + ")"
+        else:
+            beta_string = ""
         about_str = \
 """MDANSE version %s (commit %s).
 
@@ -241,7 +244,7 @@ Authors:
 \tEric C. Pellegrini
 \tGael Goret
 \tBachir Aoun
-""" % (__version__,__commit__)
+""" % (__version__ + beta_string,__commit__)
         
         d = wx.MessageDialog(self, about_str, 'About', style=wx.OK|wx.ICON_INFORMATION)
         d.ShowModal()

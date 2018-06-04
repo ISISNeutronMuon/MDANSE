@@ -1,129 +1,231 @@
 stages:
   - ci
   - deploy
- 
-# trusty pipeline
-ci:trusty:
+  - clean
+
+############################
+# ubuntu trusty  pipeline
+############################
+ci:ubuntu_trusty:
   stage: ci
   script:
-    - ./BuildServer/Debian/run_build.sh
-    - ./BuildServer/Debian/run_tests.sh
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-trusty/Dockerfile_build .
   allow_failure: false
-  only:
-    - triggers
-    - tags
-    - /^feature-.*$/
-    - /^release-.*$/
-    - /^hotfix-.*$/
-    - /^bugfix-.*$/
-    - develop
-  artifacts:
-    paths:
-    - build
-    expire_in: 1 day
   tags:
-    - ubuntu14.04
+    - docker
+    - sci
+    - ubuntu
 
-deploy:trusty:
+deploy:ubuntu_trusty:
   stage: deploy
   script:
-    - ./BuildServer/Debian/run_deploy.sh amd64 trusty
-  only:
-    - triggers
-    - tags
-    - develop
+    - docker build --force-rm -t deploy_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-trusty/Dockerfile_deploy .
+    - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh trusty
   dependencies:
-    - ci:trusty
+    - ci:ubuntu_trusty
+  allow_failure: false
+  only:
+    - master
+    - develop
+    - /^release-*$/
+    - /^hotfix-*$/
+    - web
   when: on_success
   artifacts:
     paths:
-    - ./BuildServer/Debian/Build/*.deb
+    - ./*.deb
   tags:
-    - ubuntu14.04
+    - docker
+    - sci
+    - ubuntu
 
-# osx pipeline
+############################
+# ubuntu xenial  pipeline
+############################
+ci:ubuntu_xenial:
+  stage: ci
+  script:
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_build .
+  allow_failure: false
+  tags:
+    - docker
+    - sci
+    - ubuntu
 
+deploy:ubuntu_xenial:
+  stage: deploy
+  script:
+    - docker build --force-rm -t deploy_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_deploy .
+    - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh xenial
+  dependencies:
+    - ci:ubuntu_xenial
+  allow_failure: false
+  only:
+    - master
+    - develop
+    - /^release-*$/
+    - /^hotfix-*$/
+    - web
+  when: on_success
+  artifacts:
+    paths:
+    - ./*.deb
+  tags:
+    - docker
+    - sci
+    - ubuntu
+
+############################
+# ubuntu bionic pipeline
+############################
+ci:ubuntu_bionic:
+  stage: ci
+  script:
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-bionic/Dockerfile_build .
+  allow_failure: false
+  tags:
+    - docker
+    - sci
+    - ubuntu
+
+deploy:ubuntu_bionic:
+  stage: deploy
+  script:
+    - docker build --force-rm -t deploy_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-bionic/Dockerfile_deploy .
+    - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh bionic
+  dependencies:
+    - ci:ubuntu_bionic
+  allow_failure: false
+  only:
+    - master
+    - develop
+    - /^release-*$/
+    - /^hotfix-*$/
+    - web
+  when: on_success
+  artifacts:
+    paths:
+    - ${CI_PROJECT_DIR}/*.deb
+  tags:
+    - docker
+    - sci
+    - ubuntu
+
+############################
+# osx high sierra pipeline
+############################
 ci:osx:
   stage: ci
   script:
-    - ./BuildServer/Darwin/Scripts/run_build.sh
-    - ./BuildServer/Darwin/Scripts/run_tests.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/definitions_macos.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/version.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Unix/build.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Unix/tests.sh
   allow_failure: false
-  only:
-    - triggers
-    - tags
-    - /^feature-.*$/
-    - /^release-.*$/
-    - /^hotfix-.*$/
-    - /^bugfix-.*$/
-    - develop
   artifacts:
     paths:
-    - build
-    expire_in: 1 day
+    - ${CI_PROJECT_DIR}/BuildServer/Unix/Build_macOS
+    expire_in: 1 hrs
   tags:
-    - macmini2
+    - sci
+    - osx-10.13
 
 deploy:osx:
   stage: deploy
   script:
-    - ./BuildServer/Darwin/Scripts/run_deploy.sh
-  only:
-    - triggers
-    - tags
-    - develop
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/definitions_macos.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/version.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Unix/deploy_macos.sh
   dependencies:
     - ci:osx
+  allow_failure: false
+  only:
+    - master
+    - develop
+    - /^release-*$/
+    - /^hotfix-*$/
+    - web
   when: on_success
   artifacts:
     paths:
-     - BuildServer/Darwin/Build/*.dmg
+     - ${CI_PROJECT_DIR}/BuildServer/*.dmg
   tags:
-    - macmini2
+    - sci
+    - osx-10.13
 
-# windows 7 pipeline
-
+############################
+# windows 10 pipeline
+# "call" is mandatory, see https://gitlab.com/gitlab-org/gitlab-runner/issues/1051
+############################
 ci:windows:
   stage: ci
   script:
-    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_build.sh"
-    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_build.sh"
-    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_build.sh"
-    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_tests.sh"
-    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_tests.sh"
-    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_tests.sh"
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\definitions.bat"
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\version.bat"
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\build.bat"
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\tests.bat"
   allow_failure: false
-  only:
-    - triggers
-    - tags
-    - /^feature-.*$/
-    - /^release-.*$/
-    - /^hotfix-.*$/
-    - /^bugfix-.*$/
-    - develop
   artifacts:
     paths:
-    - .\BuildServer\Windows\Build
-    expire_in: 1 day
+    - "%CI_PROJECT_DIR%\\BuildServer\\Windows\\Build"
+    expire_in: 1 hrs
   tags:
-    - windows
+    - sci
+    - windows-10
 
 deploy:windows:
   stage: deploy
   script:
-    - c:\cygwin64\bin\bash -c "dos2unix.exe ./BuildServer/Windows/run_deploy.sh"
-    - c:\cygwin64\bin\bash -c "chmod a+x ./BuildServer/Windows/run_deploy.sh"
-    - c:\cygwin64\bin\bash -c "./BuildServer/Windows/run_deploy.sh"
-  only:
-    - triggers
-    - tags
-    - develop
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\definitions.bat"
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\version.bat"
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\deploy.bat"
   dependencies:
     - ci:windows
+  allow_failure: false
+  only:
+    - master
+    - develop
+    - /^release-*$/
+    - /^hotfix-*$/
+    - web
   when: on_success
   artifacts:
     paths:
-     - BuildServer/Windows/Build/MDANSE*.exe
+     - "%CI_PROJECT_DIR%\\BuildServer\\*.exe"
   tags:
-    - windows
+    - sci
+    - windows-10
 
+clean:docker:
+  stage: clean
+  when: always
+  script:
+    - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
+  tags:
+    - docker
+    - sci
+    - ubuntu
+
+clean:osx:
+  stage: clean
+  when: always
+  script:
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/definitions_macos.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Unix/clean.sh
+  tags:
+    - sci
+    - osx-10.13
+    
+clean:windows:
+  stage: clean
+  when: always
+  script:
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\definitions.bat"
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\clean.bat"
+  tags:
+    - sci
+    - windows-10
