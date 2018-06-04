@@ -137,7 +137,7 @@ def find_data(where=".", exclude=EXCLUDE, exclude_directories=EXCLUDE_DIRECTORIE
 #################################
 
 PACKAGE_INFO = {}
-execfile('MDANSE/__pkginfo__.py', PACKAGE_INFO)
+execfile('MDANSE/__pkginfo__.py', {}, PACKAGE_INFO)
 
 PACKAGES = find_packages(path=".")
 PACKAGES = PACKAGES.keys()
@@ -297,22 +297,14 @@ if sphinx:
 
 setup (name             = "MDANSE",
        version          = PACKAGE_INFO["__version__"],
-       description      = "Analysis of Molecular Dynamics trajectories",
-       long_description =
-"""MDANSE is an interactive program for the analysis of Molecular
-Dynamics simulations. It is especially designed for the computation
-and decomposition of neutron scattering spectra. The structure and
-dynamics of the simulated systems can be characterized in terms of
-various space and time correlation functions. To analyze the dynamics
-of complex systems, rigid-body motions of arbitrarily chosen molecular
-subunits can be studied.
-""",
-       author           = "B. Aoun & G. Goret & E. Pellegrini",
-       author_email     = "aoun.ill.fr, goretg@ill.fr, pellegrini@ill.fr",
-       maintainer       = "B. Aoun, G. Goret, E. Pellegrini",
-       maintainer_email = "aoun.ill.fr, goretg.ill.fr, pellegrini@ill.fr",
-       url              = "https://github.com/eurydyce/MDANSE/tree/master/MDANSE",
-       license          = "CeCILL",
+       description      = PACKAGE_INFO["__description__"],
+       long_description = PACKAGE_INFO["__long_description__"],
+       author           = PACKAGE_INFO["__author__"],
+       author_email     = PACKAGE_INFO["__author_email__"],
+       maintainer       = PACKAGE_INFO["__maintainer__"],
+       maintainer_email = PACKAGE_INFO["__maintainer_email__"],
+       url              = PACKAGE_INFO["__url__"],
+       license          = PACKAGE_INFO["__license__"],
        packages         = PACKAGES,
        package_data     = PACKAGE_DATA,
        data_files       = DATA_FILES,
