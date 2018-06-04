@@ -53,10 +53,7 @@ class JobFileGenerator():
             temp = 'parameters[%r] = %r\n' % (k, v)
             test_string = test_string + '        ' + temp.replace('\\\\', '/')
         test_string = test_string +     '        job = REGISTRY[%r][%r]()\n' % ('job',self.job._type)
-        test_string = test_string +     '        if "output_file" in parameters:\n'
-        test_string = test_string +     '            output_path = parameters["output_file"][0]\n'
-        test_string = test_string +     '        else:\n'
-        test_string = test_string +     '            output_path = parameters["output_files"][0]\n'
+    test_string = test_string +     '            output_path = parameters["output_files"][0]\n'
         test_string = test_string +     '        reference_data_path = "' + self.reference_data_path.replace('\\', '/') + '"\n'
         # Launch the job in monoprocessor mode and copy output file
         test_string = test_string +     '        print "Launching job in monoprocessor mode"\n'
