@@ -285,7 +285,7 @@ class ForciteConverter(Converter):
     settings = collections.OrderedDict()
     settings['xtd_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Forcite','nylon66_rho100_500K_v300K.xtd')})
     settings['trj_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Forcite','nylon66_rho100_500K_v300K.trj')})
-    settings['output_file'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
                 
     def initialize(self):
         '''
@@ -315,7 +315,7 @@ class ForciteConverter(Converter):
             self._forces.array[:,:] = 0.00
 
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['files'][0], mode='w', comment=self._trjfile["title"])
+        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w', comment=self._trjfile["title"])
 
         # A frame generator is created.
         self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
