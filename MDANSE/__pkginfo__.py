@@ -1,6 +1,6 @@
-__version__ = "1.0.12"
+__version__ = "1.1.0"
 
-__date__ = "24-11-2017"
+__date__ = "05-06-2018"
 
 __author__ = "Eric Pellegrini"
 

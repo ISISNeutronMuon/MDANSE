@@ -1,6 +1,13 @@
-version 1.0.12
+version 1.1.0
 --------------
-* updated the macos build scripts in order to have an universal dmg
+* ADDED issue #11 MDANSE is now compliant with 16.04 and 18.04 Ubuntu systems
+* ADDED issue #12 MDANSE has now three different development phases (beta, rc, release)
+* CHANGED Replacing all "output_file" occurences by "output_files" /!\ Modifies API /!\
+* FIXED issue #9 updated the macos build scripts in order to have an universal dmg
+* FIXED issue #7 suppression of the appearance of an error dialog when closing widgets
+* ADDED (internal) Reference data files integrated in functional tests
+* CHANGED (internal) MDANSE is now build on new build servers (2018)
+* CHANGED (internal) Complete refactoring of build scripts
 
 version 1.0.11
 -------------
