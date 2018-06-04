@@ -273,6 +273,8 @@ class MolecularViewerPlugin(ComponentPlugin):
                 
         self.clear_universe()
 
+    def __del__(self):
+        
         PUBLISHER.unsubscribe(self.msg_set_selection, "msg_set_selection")
         PUBLISHER.unsubscribe(self.msg_switch_viewers_state, "msg_switch_viewers_state")
         PUBLISHER.unsubscribe(self.msg_clear_selection,'msg_clear_selection')                                
