@@ -7,6 +7,9 @@ rem MDANSE_TEMPORARY_INSTALLATION_DIR
 
 cd "%MDANSE_SOURCE_DIR%\\BuildServer\\Windows"
 
+rem copy LICENSE
+copy %MDANSE_SOURCE_DIR%\\LICENSE %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Windows_resources\\nsis\\
+
 rem copy CHANGELOG
 copy %MDANSE_SOURCE_DIR%\\CHANGELOG %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Windows_resources\\nsis\\
 
