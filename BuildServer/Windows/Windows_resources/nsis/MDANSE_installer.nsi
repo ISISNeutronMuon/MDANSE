@@ -60,7 +60,7 @@ and time correlation functions."
 !insertmacro MUI_PAGE_WELCOME
 
 ; Insert a "License" page in the installer
-!insertmacro MUI_PAGE_LICENSE "LICENSE.txt"
+!insertmacro MUI_PAGE_LICENSE "${TARGET_DIR}\LICENSE"
 
 ; Insert a page to browse for the installation directory
 !insertmacro MUI_PAGE_DIRECTORY
@@ -75,7 +75,7 @@ and time correlation functions."
 ; Insert in the finish page the possibility to view the changelog
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "View Changelog"
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
-!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\CHANGELOG.txt"
+!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\CHANGELOG"
 ; Actually insert the finish page to the installer
 !insertmacro MUI_PAGE_FINISH
 
@@ -100,8 +100,8 @@ Section "MDANSE ${VERSION}" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite on
   File /r /x *.pyc /x *.pyo /x *.log /x *.egg-info "${TARGET_DIR}\*"
-  File "CHANGELOG.txt"
-  File "LICENSE.txt"
+  File "${TARGET_DIR}\CHANGELOG"
+  File "${TARGET_DIR}\LICENSE"
   File "MDANSE_launcher.bat"
   File "MDANSE_command_shell.bat"
   CreateDirectory "${ICONS_DIR}"
@@ -145,7 +145,7 @@ Section uninstall
   SetShellVarContext all
   Delete "$INSTDIR\MDANSE.url"
   Delete "$INSTDIR\uninst.exe"
-  Delete "$INSTDIR\CHANGELOG.txt"
+  Delete "$INSTDIR\CHANGELOG"
   Delete "$INSTDIR\MDANSE_launcher.bat"
   Delete "$INSTDIR\MDANSE_command_shell.bat"
   Delete "$INSTDIR\python27.dll"
