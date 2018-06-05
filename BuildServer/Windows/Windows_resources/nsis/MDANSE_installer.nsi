@@ -73,9 +73,9 @@ and time correlation functions."
 !define MUI_FINISHPAGE_RUN_TEXT "Start MDANSE ${VERSION}"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\MDANSE_launcher.bat"
 ; Insert in the finish page the possibility to view the changelog
-!define MUI_FINISHPAGE_SHOWREADME_TEXT "View Changelog"
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "View CHANGELOG"
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
-!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\CHANGELOG"
+!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\CHANGELOG.txt"
 ; Actually insert the finish page to the installer
 !insertmacro MUI_PAGE_FINISH
 
@@ -100,7 +100,7 @@ Section "MDANSE ${VERSION}" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite on
   File /r /x *.pyc /x *.pyo /x *.log /x *.egg-info "${TARGET_DIR}\*"
-  File "CHANGELOG"
+  File "CHANGELOG.txt"
   File "LICENSE"
   File "MDANSE_launcher.bat"
   File "MDANSE_command_shell.bat"
@@ -146,7 +146,7 @@ Section uninstall
   Delete "$INSTDIR\MDANSE.url"
   Delete "$INSTDIR\uninst.exe"
   Delete "$INSTDIR\LICENSE"
-  Delete "$INSTDIR\CHANGELOG"
+  Delete "$INSTDIR\CHANGELOG.txt"
   Delete "$INSTDIR\MDANSE_launcher.bat"
   Delete "$INSTDIR\MDANSE_command_shell.bat"
   Delete "$INSTDIR\python27.dll"

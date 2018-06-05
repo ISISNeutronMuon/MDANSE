@@ -10,8 +10,8 @@ cd "%MDANSE_SOURCE_DIR%\\BuildServer\\Windows"
 rem copy LICENSE
 copy %MDANSE_SOURCE_DIR%\\LICENSE %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Windows_resources\\nsis\\
 
-rem copy CHANGELOG
-copy %MDANSE_SOURCE_DIR%\\CHANGELOG %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Windows_resources\\nsis\\
+rem copy CHANGELOG to CHANGELOG.txt (compulsory to be opened by nsis through an external text editor)
+copy %MDANSE_SOURCE_DIR%\\CHANGELOG %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Windows_resources\\nsis\\CHANGELOG.txt
 
 rem Copy site.py 
 copy %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Windows_resources\\site.py %MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\
