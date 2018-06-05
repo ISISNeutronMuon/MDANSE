@@ -32,7 +32,7 @@ ShowInstDetails show
 ShowUnInstDetails show
 
 !define PUBLISHER "Institut Laue-Langevin"
-!define WEB_SITE "https://github.com/eurydyce/MDANSE"
+!define WEB_SITE "http://www.mdanse.org"
 !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\MDANSE"
 !define UNINST_ROOT_KEY "HKLM"
 
@@ -60,7 +60,7 @@ and time correlation functions."
 !insertmacro MUI_PAGE_WELCOME
 
 ; Insert a "License" page in the installer
-!insertmacro MUI_PAGE_LICENSE "LICENSE.txt"
+!insertmacro MUI_PAGE_LICENSE "LICENSE"
 
 ; Insert a page to browse for the installation directory
 !insertmacro MUI_PAGE_DIRECTORY
@@ -73,7 +73,7 @@ and time correlation functions."
 !define MUI_FINISHPAGE_RUN_TEXT "Start MDANSE ${VERSION}"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\MDANSE_launcher.bat"
 ; Insert in the finish page the possibility to view the changelog
-!define MUI_FINISHPAGE_SHOWREADME_TEXT "View Changelog"
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "View CHANGELOG"
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\CHANGELOG.txt"
 ; Actually insert the finish page to the installer
@@ -101,7 +101,7 @@ Section "MDANSE ${VERSION}" SEC01
   SetOverwrite on
   File /r /x *.pyc /x *.pyo /x *.log /x *.egg-info "${TARGET_DIR}\*"
   File "CHANGELOG.txt"
-  File "LICENSE.txt"
+  File "LICENSE"
   File "MDANSE_launcher.bat"
   File "MDANSE_command_shell.bat"
   CreateDirectory "${ICONS_DIR}"
@@ -145,6 +145,7 @@ Section uninstall
   SetShellVarContext all
   Delete "$INSTDIR\MDANSE.url"
   Delete "$INSTDIR\uninst.exe"
+  Delete "$INSTDIR\LICENSE"
   Delete "$INSTDIR\CHANGELOG.txt"
   Delete "$INSTDIR\MDANSE_launcher.bat"
   Delete "$INSTDIR\MDANSE_command_shell.bat"
