@@ -3,8 +3,6 @@ import stat
 import sys
 
 from MDANSE import REGISTRY
-#from docutils.io import Output
-#from docutils.nodes import reference
 
 class JobFileGenerator():
     def __init__(self, job, parameters=None):
@@ -53,7 +51,7 @@ class JobFileGenerator():
             temp = 'parameters[%r] = %r\n' % (k, v)
             test_string = test_string + '        ' + temp.replace('\\\\', '/')
         test_string = test_string +     '        job = REGISTRY[%r][%r]()\n' % ('job',self.job._type)
-    test_string = test_string +     '            output_path = parameters["output_files"][0]\n'
+        test_string = test_string +     '        output_path = parameters["output_files"][0]\n'
         test_string = test_string +     '        reference_data_path = "' + self.reference_data_path.replace('\\', '/') + '"\n'
         # Launch the job in monoprocessor mode and copy output file
         test_string = test_string +     '        print "Launching job in monoprocessor mode"\n'
@@ -66,7 +64,7 @@ class JobFileGenerator():
             test_string = test_string + '        print "Launching job in multiprocessor mode"\n'
             test_string = test_string + '        parameters["running_mode"] = ("multiprocessor",2)\n'
             test_string = test_string + '        self.assertNotRaises(job.run,parameters,False)\n'
-            test_string = test_string +     '        shutil.copy(output_path + ".nc", reference_data_path + "_multi" + ".nc")\n'
+            test_string = test_string + '        shutil.copy(output_path + ".nc", reference_data_path + "_multi" + ".nc")\n'
             test_string = test_string + '        print "Multiprocessor execution completed"\n\n'
         # Compare reference data with monoprocessor if reference data exists
         if self.reference_data_file:
