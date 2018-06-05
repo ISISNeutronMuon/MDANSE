@@ -1,8 +1,18 @@
 stages:
+  - docker_login
   - ci
   - deploy
   - clean
 
+docker_login:
+  stage: docker_login
+  script:
+    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+  tags:
+    - docker
+    - sci
+    - ubuntu
+  
 ############################
 # ubuntu trusty  pipeline
 ############################
@@ -205,6 +215,8 @@ clean:docker:
   script:
     - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
     - ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
+  after_script:
+    - docker logout
   tags:
     - docker
     - sci
