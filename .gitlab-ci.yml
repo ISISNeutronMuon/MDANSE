@@ -28,8 +28,8 @@ deploy:ubuntu_trusty:
   only:
     - master
     - develop
-    - /^release-*$/
-    - /^hotfix-*$/
+    - /^release-.*$/
+    - /^hotfix-.*$/
     - web
   when: on_success
   artifacts:
@@ -65,8 +65,8 @@ deploy:ubuntu_xenial:
   only:
     - master
     - develop
-    - /^release-*$/
-    - /^hotfix-*$/
+    - /^release-.*$/
+    - /^hotfix-.*$/
     - web
   when: on_success
   artifacts:
@@ -102,8 +102,8 @@ deploy:ubuntu_bionic:
   only:
     - master
     - develop
-    - /^release-*$/
-    - /^hotfix-*$/
+    - /^release-.*$/
+    - /^hotfix-.*$/
     - web
   when: on_success
   artifacts:
@@ -145,8 +145,8 @@ deploy:osx:
   only:
     - master
     - develop
-    - /^release-*$/
-    - /^hotfix-*$/
+    - /^release-.*$/
+    - /^hotfix-.*$/
     - web
   when: on_success
   artifacts:
@@ -188,8 +188,8 @@ deploy:windows:
   only:
     - master
     - develop
-    - /^release-*$/
-    - /^hotfix-*$/
+    - /^release-.*$/
+    - /^hotfix-.*$/
     - web
   when: on_success
   artifacts:
