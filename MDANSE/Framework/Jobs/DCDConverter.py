@@ -280,7 +280,7 @@ class DCDConverter(Converter):
     settings = collections.OrderedDict()
     settings['pdb_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.pdb')})
     settings['dcd_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.dcd')})
-    settings['output_file'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
     settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
 
     def initialize(self):
@@ -313,7 +313,7 @@ class DCDConverter(Converter):
         resolve_undefined_molecules_name(self._universe)
         
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['files'][0], mode='w')
+        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
         
         # A frame generator is created.        
         self._snapshot = SnapshotGenerator(self._universe, actions=[TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])

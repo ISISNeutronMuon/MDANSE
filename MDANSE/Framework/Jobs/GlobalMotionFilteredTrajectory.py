@@ -80,7 +80,10 @@ class GlobalMotionFilteredTrajectory(IJob):
         """
 
         self.numberOfSteps = self.configuration['frames']['number']
-                
+        
+        # Store universe name for further restoration
+        self.old_universe_name = self.configuration['trajectory']['instance'].universe.__class__.__name__
+
         self.configuration['trajectory']['instance'].universe.__class__.__name__ = 'InfiniteUniverse'
         
         self.configuration['trajectory']['instance'].universe._descriptionArguments = lambda: '()'
@@ -196,5 +199,8 @@ class GlobalMotionFilteredTrajectory(IJob):
                                  
         # The output trajectory is closed.
         self._gmft.close()
+        
+        # Restore universe name
+        self.configuration['trajectory']['instance'].universe.__class__.__name__ = self.old_universe_name
         
 REGISTRY['gmft'] = GlobalMotionFilteredTrajectory

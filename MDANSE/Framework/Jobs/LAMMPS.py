@@ -140,7 +140,7 @@ class LAMMPSConverter(Converter):
     settings['mass_tolerance'] = ('float', {'label':"mass tolerance (uma)", 'default':1.0e-5, 'mini':1.0e-9})        
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
     settings['n_steps'] = ('integer', {'label':"number of time steps", 'default':1, 'mini':0})        
-    settings['output_file'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
     
     def initialize(self):
         '''
@@ -155,7 +155,7 @@ class LAMMPSConverter(Converter):
         self.parse_first_step()
         
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['files'][0], mode='w')
+        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
 
         self._nameToIndex = dict([(at.name,at.index) for at in self._universe.atomList()])
 

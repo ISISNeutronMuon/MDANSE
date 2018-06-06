@@ -13,8 +13,8 @@ def mt(ndarray[np.float64_t, ndim = 2] config not None,
        ndarray[np.int32_t, ndim = 3] grid not None,
        double resolution,ndarray[np.float64_t, ndim = 1] mini not None): 
     
-    cdef int at, nbatom , atom
-    cdef double Xpos, Ypos, Zpos, i, j, k , mx, my, mz
+    cdef int at, nbatom, atom, i, j, k
+    cdef double Xpos, Ypos, Zpos, mx, my, mz
     
     mx = mini[0] 
     my = mini[1]
@@ -23,7 +23,7 @@ def mt(ndarray[np.float64_t, ndim = 2] config not None,
     nbatom = config.shape[0]
     for atom in range(nbatom):
         # The  of atoms |i| in the current configuration.
-        i = floor((config[atom,0]-mx)/resolution)
-        j = floor((config[atom,1]-my)/resolution)
-        k = floor((config[atom,2]-mz)/resolution)
-        grid[i,j,k] += 1
+        i = int(floor((config[atom,0]-mx)/resolution))
+        j = int(floor((config[atom,1]-my)/resolution))
+        k = int(floor((config[atom,2]-mz)/resolution))
+        grid[i][j][k] += 1

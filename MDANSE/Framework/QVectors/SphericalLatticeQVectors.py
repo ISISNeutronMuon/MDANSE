@@ -60,7 +60,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
                 
         vects = numpy.mgrid[-hklMax[0]:hklMax[0]+1,-hklMax[1]:hklMax[1]+1,-hklMax[2]:hklMax[2]+1]
                 
-        vects = vects.reshape(3,(2*hklMax[0]+1)*(2*hklMax[1]+1)*(2*hklMax[2]+1))
+        vects = vects.reshape(3,int(2*hklMax[0]+1)*int(2*hklMax[1]+1)*int(2*hklMax[2]+1))
                     
         vects = numpy.dot(self._reciprocalMatrix,vects)
                 

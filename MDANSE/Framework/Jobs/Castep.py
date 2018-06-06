@@ -142,7 +142,7 @@ class CASTEPConverter(Converter):
         
     settings = collections.OrderedDict()
     settings['castep_file'] = ('input_file', {'default':os.path.join('..','..','..','Data','Trajectories','CASTEP','PBAnew.md')})
-    settings['output_file'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
                 
     def initialize(self):
         """
@@ -165,7 +165,7 @@ class CASTEPConverter(Converter):
         self._gradients = ParticleVector(self._universe)        
 
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['files'][0], mode='w')
+        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
 
         # A frame generator is created.
         self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])

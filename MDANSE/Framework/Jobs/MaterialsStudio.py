@@ -152,25 +152,7 @@ class XTDFile(object):
                 bondsMapping[idx] = [atomsMapping[int(v)] for v in node.attrib['Connects'].split(',')]
                 idx1,idx2 = bondsMapping[idx]
                 self._atoms[idx1]["bonded_to"].add(idx2)
-                self._atoms[idx2]["bonded_to"].add(idx1)
-                
-
-    def _build_universe(self, idx, clustered, cluster):
-        """
-        """
-
-        clustered[idx] = True
-        cluster.append(idx)
-        
-        at = self._atoms[idx]
-        
-        for nidx in at["bonded_to"]:
-            
-            if nidx in clustered:
-                continue
-            
-            self._build_universe(nidx, clustered, cluster)
-            
+                self._atoms[idx2]["bonded_to"].add(idx1)            
 
     def build_universe(self):        
 
@@ -179,37 +161,47 @@ class XTDFile(object):
             self._universe.setShape(self._cell)
         else:
             self._universe = InfiniteUniverse()
-            
-        clustered = {}
-        
-        cluster = []
-        
+                    
         configuration = numpy.empty((self._nAtoms,3),dtype=numpy.float64)
                             
-        for idx in self._atoms.keys():
-            
-            if idx in clustered:
-                continue
-
-            self._build_universe(idx, clustered, cluster)
-
-            clustername = collections.defaultdict(lambda : 0)
-            
-            ac = []
-            for idx in cluster:
+        nclusters = 0
+         
+        clusters = {}
+         
+        equivalences = {}
+         
+        for idx,atom in self._atoms.items():
+         
+            if not clusters.has_key(idx):
+                nclusters += 1
+                clusters[idx] = nclusters
+             
+            for neighbor in atom["bonded_to"]:
+                if (neighbor in clusters) and (clusters[idx] != clusters[neighbor]):
+                    equivalences[clusters[neighbor]] = equivalences.get(clusters[idx],clusters[idx])
+                     
+                clusters[neighbor] = clusters[idx]
+                         
+        mergedClusters = {}
+        for idx,clusterId in clusters.items():
+            if equivalences.has_key(clusterId):
+                mergedClusters.setdefault(equivalences[clusterId],[]).append(idx)
+            else:
+                mergedClusters.setdefault(clusterId,[]).append(idx)
+                 
+        for k,indexes in mergedClusters.items():
+            atomCluster = AtomCluster([])
+            bruteFormula = collections.defaultdict(lambda : 0)
+            for idx in indexes:
                 element = self._atoms[idx]["element"]
                 name = self._atoms[idx]["name"]
                 at = Atom(element, name=name, xtdIndex=idx)
                 at.index = self._atoms[idx]["mmtk_index"]
                 configuration[at.index] = self._atoms[idx]["xyz"]
-                ac.append(at)
-                clustername[element] += 1
-            clustername = "".join(["%s%d" % (k,v) for k,v in sorted(clustername.items())])
-            cluster = []
-            
-            ac = AtomCluster(ac,name=clustername)
-            self._universe.addObject(ac)
-
+                atomCluster.atoms.append(at)
+                bruteFormula[element] += 1
+            atomCluster.name = "".join(["%s%d" % (k,v) for k,v in sorted(bruteFormula.items())])
+            self._universe.addObject(atomCluster)
 
         if self._pbc:
             configuration = self._universe._boxToRealPointArray(configuration)
