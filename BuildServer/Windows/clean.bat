@@ -6,6 +6,7 @@ rem MDANSE_DEPENDENCIES_DIR
 rem MDANSE_TEMPORARY_INSTALLATION_DIR
 
 cd %MDANSE_SOURCE_DIR%
+del MDANSE*.exe
 rmdir /S /Q build
 rmdir /S /Q BuildServer\\Windows\\Build
 

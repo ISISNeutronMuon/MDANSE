@@ -56,7 +56,7 @@ instSize=$(du ${DEBIAN_ROOT_DIR} -b -s | cut -f1)
 sed -i "s/Installed-Size:.*/Installed-Size: $((1+(instSize/1024)))/g" ${DEBIAN_ROOT_DIR}/DEBIAN/control
 
 export TMPDIR=.
-fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} ${MDANSE_SOURCE_DIR}/BuildServer/MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.deb
+fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} ${MDANSE_SOURCE_DIR}/MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.deb
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
