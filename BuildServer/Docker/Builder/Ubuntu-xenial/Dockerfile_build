@@ -4,13 +4,15 @@ SHELL ["/bin/bash", "-c"]
 
 ARG MDANSE_GIT_COMMIT
 
+ARG MDANSE_GIT_BRANCH_NAME
+
 RUN GIT_SSL_NO_VERIFY=true git clone https://code.ill.fr/scientific-software/mdanse.git
 
 WORKDIR mdanse
 
 RUN git checkout ${MDANSE_GIT_COMMIT}
 
-RUN source ./BuildServer/Unix/definitions_debian.sh ; source ./BuildServer/Unix/version.sh ; ./BuildServer/Unix/build.sh
+RUN source ./BuildServer/Unix/definitions_debian.sh ${MDANSE_GIT_BRANCH_NAME}; source ./BuildServer/Unix/version.sh ; ./BuildServer/Unix/build.sh
 
-RUN source ./BuildServer/Unix/definitions_debian.sh ; source ./BuildServer/Unix/version.sh ; ./BuildServer/Unix/tests.sh
+RUN source ./BuildServer/Unix/definitions_debian.sh ${MDANSE_GIT_BRANCH_NAME}; source ./BuildServer/Unix/version.sh ; ./BuildServer/Unix/tests.sh
 

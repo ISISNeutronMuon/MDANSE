@@ -2,8 +2,10 @@ FROM ci_mdanse_trusty
 
 SHELL ["/bin/bash", "-c"]
 
+ARG MDANSE_GIT_BRANCH_NAME
+
 VOLUME builds
 
-RUN source ./BuildServer/Unix/definitions_debian.sh ; source ./BuildServer/Unix/version.sh ; ./BuildServer/Unix/deploy_debian.sh
+RUN source ./BuildServer/Unix/definitions_debian.sh ${MDANSE_GIT_BRANCH_NAME}; source ./BuildServer/Unix/version.sh ; ./BuildServer/Unix/deploy_debian.sh
 
 

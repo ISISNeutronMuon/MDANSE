@@ -17,3 +17,5 @@ rm -rf BuildServer/Build_Debian
 rm -rf BuildServer/Build_macOS
 rm -rf BuildServer/Unix/Build_Debian
 rm -rf BuildServer/Unix/Build_macOS
+rm -rf *.deb
+rm -rf *.dmg
