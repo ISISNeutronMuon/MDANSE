@@ -64,6 +64,6 @@ chmod 777 ${MDANSE_SOURCE_DIR}/BuildServer/Unix/MacOS_resources//change_dylib_pa
 ${MDANSE_SOURCE_DIR}/BuildServer/Unix/MacOS_resources//change_dylib_path.sh
 
 ${MDANSE_SOURCE_DIR}/BuildServer/Unix/MacOS_resources/dmg/create-dmg --background "${MDANSE_SOURCE_DIR}/BuildServer/Unix/MacOS_resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${MDANSE_TEMPORARY_INSTALLATION_DIR}/dist
-mv ${MDANSE_SOURCE_DIR}/BuildServer/Unix/${MDANSE_DMG} ${MDANSE_SOURCE_DIR}/BuildServer
+mv ${MDANSE_SOURCE_DIR}/BuildServer/Unix/${MDANSE_DMG} ${MDANSE_SOURCE_DIR}
 
 rm -rf ${MDANSE_TEMPORARY_INSTALLATION_DIR}

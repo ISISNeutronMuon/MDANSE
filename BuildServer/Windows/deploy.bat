@@ -30,7 +30,7 @@ if %STATUS% neq 0 (
     exit %STATUS%
 )
 
-move %MDANSE_TEMPORARY_INSTALLATION_DIR%\\MDANSE*.exe %MDANSE_SOURCE_DIR%\\BuildServer\\
+move %MDANSE_TEMPORARY_INSTALLATION_DIR%\\MDANSE*.exe %MDANSE_SOURCE_DIR%\\
 rem Remove NSIS log file
 del NSISlog.txt
 cd %MDANSE_SOURCE_DIR%
