@@ -1,3 +1,6 @@
+version 1.2.0
+--------------
+
 version 1.1.1
 --------------
 * FIXED issue #14 Package name was not valid for debian package in 1.1.0 version
