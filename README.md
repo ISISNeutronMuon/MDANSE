@@ -1,5 +1,7 @@
 **MDANSE** (**M**olecular **D**ynamics **A**nalysis for **N**eutron **S**cattering 
-**E**xperiments) is a python application designed for computing properties that can be directly 
+**E**xperiments) 
+
+MDANSE is a python application designed for computing properties that can be directly 
 compared with neutron scattering experiments such as the coherent and incoherent 
 intermediate scattering functions and their Fourier transforms, the elastic 
 incoherent structure factor, the static coherent structure factor or the radial 
