@@ -17,21 +17,23 @@ Python and currently works on Linux, MacOS and Windows.
 
 MDANSE is developed and maintained by:
 
-------
 **Remi Perenon**
+
 perenon[at]ill.fr
-Computing for Science Group
-Institut Laue Langevin
-71 Avenue des Martyrs
-38042 Grenoble
+
+Computing for Science Group  
+Institut Laue Langevin  
+71 Avenue des Martyrs  
+38042 Grenoble  
 France
-------
+
 **Eric Pellegrini**
+
 pellegrini[at]ill.fr
-Computing for Science Group
-Institut Laue Langevin
-71 Avenue des Martyrs
-38042 Grenoble
-France
-------
+
+Computing for Science Group  
+Institut Laue Langevin  
+71 Avenue des Martyrs  
+38042 Grenoble  
+France  
 
