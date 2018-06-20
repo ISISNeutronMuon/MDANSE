@@ -35,6 +35,7 @@ import os
 import sys
 import webbrowser
 
+
 import wx
 import wx.aui as aui
  
@@ -225,8 +226,20 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_bug_report, bugButton)
                                                                     
     def load_data(self,typ,filename):
-        
-        data = REGISTRY["input_data"][typ](filename)
+        if typ == "automatic":
+            # if type is set on automatic, find data type
+            if filename[-4:] == ".mvi":
+                # File is mvi
+                typ = "molecular_viewer"
+                data = REGISTRY["input_data"]["molecular_viewer"](filename)
+            else:
+                # File is either netcdf or mmtk
+                try:
+                    data = REGISTRY["input_data"]["mmtk_trajectory"](filename)
+                except KeyError:
+                    data = REGISTRY["input_data"]["netcdf_data"](filename)
+        else:
+            data = REGISTRY["input_data"][typ](filename)
 
         DATA_CONTROLLER[data.filename] = data
 
@@ -305,15 +318,18 @@ Authors:
     def on_load_data(self, event=None):
 
         wildcards = collections.OrderedDict([kls._type, "%s (*.%s)|*.%s" % (kls._type,kls.extension,kls.extension)] for kls in REGISTRY["input_data"].values() if kls.extension is not None)
-                
-        dialog = wx.FileDialog ( None, message='Open data ...', wildcard="|".join(wildcards.values()), style=wx.OPEN)
+
+        dialog = wx.FileDialog ( None, message='Open data ...', wildcard="automatic (*.mvi,*.nc)|*.mvi;*.nc|" + "|".join(wildcards.values()), style=wx.OPEN)
         
         if dialog.ShowModal() == wx.ID_CANCEL:
             return ""
                 
         idx = dialog.GetFilterIndex()
-                                                
-        dataType = wildcards.keys()[idx]
+        # Check if automatic has been chosen
+        if idx <= 0:
+            dataType = "automatic"
+        else:
+            dataType = wildcards.keys()[idx-1]
                         
         filename = dialog.GetPath()
         
