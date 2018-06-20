@@ -1,5 +1,7 @@
 **MDANSE** (**M**olecular **D**ynamics **A**nalysis for **N**eutron **S**cattering 
-**E**xperiments) is a python application designed for computing properties that can be directly 
+**E**xperiments) 
+
+MDANSE is a python application designed for computing properties that can be directly 
 compared with neutron scattering experiments such as the coherent and incoherent 
 intermediate scattering functions and their Fourier transforms, the elastic 
 incoherent structure factor, the static coherent structure factor or the radial 
@@ -15,21 +17,23 @@ Python and currently works on Linux, MacOS and Windows.
 
 MDANSE is developed and maintained by:
 
-------
 **Remi Perenon**
+
 perenon[at]ill.fr
-Computing for Science Group
-Institut Laue Langevin
-71 Avenue des Martyrs
-38042 Grenoble
+
+Computing for Science Group  
+Institut Laue Langevin  
+71 Avenue des Martyrs  
+38042 Grenoble  
 France
-------
+
 **Eric Pellegrini**
+
 pellegrini[at]ill.fr
-Computing for Science Group
-Institut Laue Langevin
-71 Avenue des Martyrs
-38042 Grenoble
-France
-------
+
+Computing for Science Group  
+Institut Laue Langevin  
+71 Avenue des Martyrs  
+38042 Grenoble  
+France  
 
