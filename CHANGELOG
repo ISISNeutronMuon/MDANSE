@@ -1,3 +1,6 @@
+version 1.2.0
+--------------
+
 version 1.1.2
 --------------
 * ADDED issue #15 An automatic mode for data loading is added to compel with the fact that data filter does not appear in data loading popup on macOS

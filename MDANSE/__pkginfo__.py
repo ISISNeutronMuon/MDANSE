@@ -25,7 +25,7 @@ __repo__             = "https://code.ill.fr/scientific-software/mdanse/"
 
 __license__          = "GPL 3"
 
-__version__ = "1.1.2"
+__version__ = "1.2.0"
 
 __date__ = "20-06-2018"
 
