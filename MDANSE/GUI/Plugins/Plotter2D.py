@@ -76,7 +76,7 @@ class Plotter2D(wx.Panel):
         ### Initialize variables ###
         self.parent = parent
         self.figure = Figure(figsize=(5,4), dpi=None)
-        self.axes = self.figure.add_axes( (10,10,10,10), frameon=True, axisbg='b')
+        self.axes = self.figure.add_axes( (10,10,10,10), frameon=True, facecolor='b')
         self.canvas = FigureCanvasWxAgg( self, wx.ID_ANY, self.figure )
         self.toolbar = NavigationToolbar2WxAgg(self.canvas)
         self.ax = None

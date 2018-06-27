@@ -49,20 +49,20 @@ class ScaledLocator(matplotlib.ticker.MaxNLocator):
     def inv_rescale(self, x):
         return  (x - self.x0) / self.dx
 
-    def __call__(self): 
-        vmin, vmax = self.axis.get_view_interval()
-        vmin, vmax = self.rescale(vmin), self.rescale(vmax)
-        vmin, vmax = matplotlib.transforms.nonsingular(vmin, vmax, expander = 0.05)
-        locs = self.bin_boundaries(vmin, vmax)
-        locs = self.inv_rescale(locs)
-        prune = self._prune
-        if prune=='lower':
-            locs = locs[1:]
-        elif prune=='upper':
-            locs = locs[:-1]
-        elif prune=='both':
-            locs = locs[1:-1]
-        return self.raise_if_exceeds(locs)
+    #def __call__(self): 
+    #    vmin, vmax = self.axis.get_view_interval()
+    #    vmin, vmax = self.rescale(vmin), self.rescale(vmax)
+    #    vmin, vmax = matplotlib.transforms.nonsingular(vmin, vmax, expander = 0.05)
+    #    locs = self.bin_boundaries(vmin, vmax)
+    #    locs = self.inv_rescale(locs)
+    #    prune = self._prune
+    #    if prune=='lower':
+    #        locs = locs[1:]
+    #    elif prune=='upper':
+    #        locs = locs[:-1]
+    #    elif prune=='both':
+    #        locs = locs[1:-1]
+    #    return self.raise_if_exceeds(locs)
 
 class ScaledFormatter(matplotlib.ticker.OldScalarFormatter):
     """Formats tick labels scaled by *dx* and shifted by *x0*."""
