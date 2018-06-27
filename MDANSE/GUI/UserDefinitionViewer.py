@@ -140,7 +140,9 @@ class UserDefinitionViewer(wx.Dialog):
 
         while item != self._root:
             item = self._tree.GetItemParent(item)
-            self._tree.Expand(item)            
+            # Check if item is not root (leading to crash otherwise)
+            if item != self._root:
+                self._tree.Expand(item)
         
     def on_show_info(self, event=None):
 
