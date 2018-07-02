@@ -281,7 +281,10 @@ EXTENSIONS = [Extension('MDANSE.Extensions.distance_histogram',
               Extension('MDANSE.Extensions.qhull',
                         include_dirs  = QHULL_INCLUDE_DIR,
                         sources =  glob.glob(os.path.join(QHULL_DIR, 'src','*.c')) + [os.path.join("Extensions",'qhull.pyx')],
-                        define_macros = [('qh_QHpointer','1')])
+                        define_macros = [('qh_QHpointer','1')]),
+              Extension('MDANSE.Extensions.xtc',
+                        include_dirs=[os.path.join('Extensions','xtc','include')],
+                        sources=glob.glob(os.path.join('Extensions','xtc','src','*.c')) + [os.path.join('Extensions','xtc','xtc.pyx')])
               ]
 
 CMDCLASS = {'build'     : mdanse_build,
