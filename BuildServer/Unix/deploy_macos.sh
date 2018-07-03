@@ -53,12 +53,12 @@ install_name_tool -id @loader_path/libpython2.7.dylib ${MDANSE_TEMPORARY_INSTALL
 ln -s ../Resources/bin/python ${MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/MacOS/python
 
 # Do some manual cleanup, e.g.
+rm ${MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Resources/lib/python2.7/MDANSE/__pkginfo__.py\"\"
 # matplotlib/tests ==> 45.2 Mb
 #rm -rf ${MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Resources/lib/python2.7/matplotlib/tests
 #rm -rf ${MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Resources/mpl-data/sample_data
-#rm -rf {MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Resources/lib/python2.7/scipy
-#rm -rf {MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Resources/lib/python2.7/zmq
-rm MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Resources/lib/python2.7/MDANSE/__pkginfo__.py\"\"
+#rm -rf ${MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Resources/lib/python2.7/scipy
+#rm -rf ${MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Resources/lib/python2.7/zmq
 
 #mkdir ${MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Frameworks/Python.framework
 #mkdir ${MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions
