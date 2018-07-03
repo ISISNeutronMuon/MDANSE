@@ -23,3 +23,5 @@ RUN apt-get install -y --no-install-recommends python-nose
 RUN apt-get install -y --no-install-recommends python-sphinx
 RUN apt-get install -y --no-install-recommends pyro
 
+RUN apt-get install -y --no-install-recommends lsb-release
+
