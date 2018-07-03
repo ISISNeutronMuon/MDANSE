@@ -283,7 +283,7 @@ EXTENSIONS = [Extension('MDANSE.Extensions.distance_histogram',
                         sources =  glob.glob(os.path.join(QHULL_DIR, 'src','*.c')) + [os.path.join("Extensions",'qhull.pyx')],
                         define_macros = [('qh_QHpointer','1')]),
               Extension('MDANSE.Extensions.xtc',
-                        include_dirs=[os.path.join('Extensions','xtc','include')],
+                        include_dirs=[numpy.get_include(),os.path.join('Extensions','xtc','include')],
                         sources=glob.glob(os.path.join('Extensions','xtc','src','*.c')) + [os.path.join('Extensions','xtc','xtc.pyx')])
               ]
 
