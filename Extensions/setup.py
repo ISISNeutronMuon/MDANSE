@@ -44,7 +44,13 @@ EXTENSIONS = [Extension('distance_histogram',
               Extension('qhull',
                         include_dirs  = QHULL_INCLUDE_DIR,
                         sources =  glob.glob(os.path.join(QHULL_DIR, 'src','*.c')) + ['qhull.pyx'],
-                        define_macros = [('qh_QHpointer','1')])
+                        define_macros = [('qh_QHpointer','1')]),
+              Extension('mdanse_xtc',
+                        include_dirs=[numpy.get_include(),'./xtc/include/','./xtc/'],
+                        sources=['./xtc/src/xdrfile.c',
+                                 './xtc/src/xdr_seek.c',
+                                 './xtc/src/xdrfile_xtc.c',
+                                 './xtc/xtc.pyx'])
               ]
 
 

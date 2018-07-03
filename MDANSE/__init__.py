@@ -51,6 +51,7 @@ PLATFORM.create_directory(PLATFORM.macros_directory())
 from MMTK import Database
 
 # The default database is still the MMTK one
+Database.path = []
 Database.path.append(os.path.join(PLATFORM.package_directory(), 'Data'))
 Database.path.append(os.path.join(PLATFORM.application_directory(), 'mmtk_database'))
 
