@@ -58,6 +58,7 @@ ln -s ../Resources/bin/python ${MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.a
 #rm -rf ${MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Resources/mpl-data/sample_data
 #rm -rf {MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Resources/lib/python2.7/scipy
 #rm -rf {MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Resources/lib/python2.7/zmq
+rm MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Resources/lib/python2.7/MDANSE/__pkginfo__.py\"\"
 
 #mkdir ${MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Frameworks/Python.framework
 #mkdir ${MDANSE_TEMPORARY_INSTALLATION_DIR}/dist/MDANSE.app/Contents/Frameworks/Python.framework/Versions
