@@ -5,8 +5,8 @@ export PYTHONEXE=/usr/bin/python
 # The sed -i"" is compulsory other crashes on macos
 export SED_I_COMMAND='sed -i ""'
 export MDANSE_SOURCE_DIR=$(pwd)
-export MDANSE_TEMPORARY_INSTALLATION_DIR=${MDANSE_SOURCE_DIR}/build/osx
-export PYTHONPATH=${MDANSE_TEMPORARY_INSTALLATION_DIR}/lib/python2.7/site-packages/:${PYTHONPATH}
+export MDANSE_TEMPORARY_INSTALLATION_DIR=${MDANSE_SOURCE_DIR}/build
+export PYTHONPATH=${MDANSE_TEMPORARY_INSTALLATION_DIR}:${PYTHONPATH}
 export MDANSE_DEPENDENCIES_DIR=/Users/ci/Projects/mdanse/dependencies
 export RED="\\033[1;31m"
 export BLUE="\\033[1;34m"
