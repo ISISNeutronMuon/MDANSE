@@ -137,7 +137,6 @@ ci:osx:
     - source ${CI_PROJECT_DIR}/BuildServer/Unix/version.sh
     - ${CI_PROJECT_DIR}/BuildServer/Unix/build.sh
     - ${CI_PROJECT_DIR}/BuildServer/Unix/tests.sh
-    - ${CI_PROJECT_DIR}/BuildServer/Unix/deploy_macos.sh
   allow_failure: false
   artifacts:
     paths:
