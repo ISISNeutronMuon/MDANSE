@@ -62,6 +62,9 @@ cd $MDANSE_SOURCE_DIR
 
 # Now build last version and install it
 ${PYTHONEXE} setup.py build
+${PYTHONEXE} setup.py build_api
+${PYTHONEXE} setup.py build_help
+
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to build MDANSE""${NORMAL}"

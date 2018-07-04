@@ -1,6 +1,7 @@
 import fnmatch
 import glob
 import os
+import subprocess
 import sys
 
 import numpy
@@ -168,52 +169,46 @@ SCRIPTS = glob.glob(os.path.join(SCRIPTS_PATH,'mdanse*'))
 #################################
 
 if sphinx:
-    import sphinx.apidoc
-    import sphinx.setup_command
 
+    import sphinx.setup_command
     class mdanse_build_doc(sphinx.setup_command.BuildDoc):
-                              
+
         def run(self):
             
             build = self.get_finalized_command('build')
                     
             buildDir = os.path.abspath(build.build_lib)
 
+            if not os.path.exists(buildDir):
+                raise IOError("build command must be performed prior building the doc")
+
             sys.path.insert(0,buildDir)
 
-            sphinxDir = os.path.join(build.build_base,'sphinx',self.doctype)
+            sphinxDir = os.path.abspath(os.path.join(build.build_base,'sphinx',self.doctype))
+
+            if not os.path.exists(sphinxDir):
+                os.mkdir(sphinxDir)
                                  
             metadata = self.distribution.metadata
+
+            args = ["sphinx-apidoc",
+                    "-F",
+                    "--separate",
+                    "-H%s" % metadata.name,
+                    "-A%s" % metadata.author,
+                    "-R%s" % metadata.version,
+                    "-o%s" % sphinxDir,
+                    os.path.join(buildDir,'MDANSE'),
+                    os.path.join(buildDir,'MDANSE','Externals')]
+
+            p = subprocess.call(args)
+                             
+            currentDirectory = os.getcwd()
             
-            # /!\ apidoc.main is deprecated. The API has been broken in sphinx 1.7.0, see https://github.com/sphinx-doc/sphinx/issues/4615
-            if int(sphinx.__version__.split(".")[1]) <= 6:
-                sphinx.apidoc.main(['',
-                                '-F',
-                                '--separate',
-                                '-H', metadata.name,
-                                '-A', metadata.author,
-                                '-V', metadata.version,
-                                '-R', metadata.version,
-                                '-o', sphinxDir,
-                                os.path.join(buildDir,'MDANSE'),
-                                os.path.join(buildDir,'MDANSE','Externals')])
-            else:
-                sphinx.apidoc.main('', [
-                                '-F',
-                                '--separate',
-                                '-H', metadata.name,
-                                '-A', metadata.author,
-                                '-V', metadata.version,
-                                '-R', metadata.version,
-                                '-o', sphinxDir,
-                                os.path.join(buildDir,'MDANSE'),
-                                os.path.join(buildDir,'MDANSE','Externals')])
-            curDir = os.getcwd()
-                 
             import shutil
-            shutil.copy(os.path.join(curDir,'Doc','conf_%s.py' % self.doctype),os.path.join(sphinxDir,'conf.py'))
-            shutil.copy(os.path.join(curDir,'Doc','mdanse_logo.png'),os.path.join(sphinxDir,'_static'))
-            shutil.copy(os.path.join(curDir,'Doc','layout.html'),os.path.join(sphinxDir,'_templates'))
+            shutil.copy(os.path.join(currentDirectory,'Doc','conf_%s.py' % self.doctype),os.path.join(sphinxDir,'conf.py'))
+            shutil.copy(os.path.join(currentDirectory,'Doc','mdanse_logo.png'),os.path.join(sphinxDir,'_static'))
+            shutil.copy(os.path.join(currentDirectory,'Doc','layout.html'),os.path.join(sphinxDir,'_templates'))
      
             # The directory where the rst files are located.
             self.source_dir = sphinxDir
@@ -223,8 +218,8 @@ if sphinx:
             # The directory where the documentation will be built
             self.build_dir = os.path.join(buildDir,'MDANSE','Doc',self.doctype)
             
-            self.finalize_options()
-                                                     
+            self.builder_target_dir = os.path.join(self.build_dir, self.builder)
+                                                                 
             sphinx.setup_command.BuildDoc.run(self)
                  
             sys.path.pop(0)
@@ -241,15 +236,15 @@ if sphinx:
 # Debian packaging
 #################################
 
-class mdanse_build(build):
+#class mdanse_build(build):
 
-    def has_sphinx(self):
-        if sphinx is None:
-            return False
-        setup_dir = os.path.dirname(os.path.abspath(__file__))
-        return os.path.isdir(os.path.join(setup_dir, 'Doc'))
+#    def has_sphinx(self):
+#        if sphinx is None:
+#            return False
+#        setup_dir = os.path.dirname(os.path.abspath(__file__))
+#        return os.path.isdir(os.path.join(setup_dir, 'Doc'))
     
-    sub_commands = build.sub_commands + [('build_api', has_sphinx),('build_help',has_sphinx)]
+#    sub_commands = build.sub_commands# + [('build_api', has_sphinx),('build_help',has_sphinx)]
                         
 #################################
 # Extensions section
@@ -287,8 +282,7 @@ EXTENSIONS = [Extension('MDANSE.Extensions.distance_histogram',
                         sources=glob.glob(os.path.join('Extensions','xtc','src','*.c')) + [os.path.join('Extensions','xtc','xtc.pyx')])
               ]
 
-CMDCLASS = {'build'     : mdanse_build,
-            'build_ext' : cython_build_ext}
+CMDCLASS = {'build_ext' : cython_build_ext}
 
 if sphinx:
     CMDCLASS['build_api'] = mdanse_build_api
