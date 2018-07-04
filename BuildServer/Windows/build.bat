@@ -82,12 +82,5 @@ if %STATUS% neq 0 (
     echo "Failed to build MDANSE"
     exit %STATUS%
 )
-%PYTHON_EXE% setup.py install
-rem Exit now if unable to install
-if %STATUS% neq 0 (
-    echo "Failed to install MDANSE"
-    exit %STATUS%
-)
-rmdir /S /Q build
 
 cd %MDANSE_SOURCE_DIR%

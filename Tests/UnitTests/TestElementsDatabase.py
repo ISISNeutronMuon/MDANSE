@@ -32,12 +32,10 @@ Created on May 29, 2015
 
 import unittest
 
-from UnitTest import UnitTest
-
 from MDANSE import ELEMENTS
 from MDANSE.Data.ElementsDatabase import ElementsDatabaseError
 
-class TestElementsDatabase(UnitTest):
+class TestElementsDatabase(unittest.TestCase):
     '''
     Unittest for the configurators used to setup an analysis in MDANSE
     '''
@@ -57,26 +55,26 @@ class TestElementsDatabase(UnitTest):
                 
         for e in ELEMENTS.elements:
             for p in ELEMENTS.properties:
-                self.assertNotRaises(ELEMENTS.__getitem__,(e,p))
+                _ = ELEMENTS[e,p]
 
     def test_getelement(self):
         
         for e in ELEMENTS.elements:
-            self.assertNotRaises(ELEMENTS.get_element,e)
+            _ = ELEMENTS.get_element(e)
 
     def test_get_property(self):
                 
         for p in ELEMENTS.properties:
-            self.assertNotRaises(ELEMENTS.get_property,p)
+            _ = ELEMENTS.get_property(p)
 
     def test___setitem__(self):
         
-        self.assertNotRaises(ELEMENTS.__setitem__,('C','atomic_weight'),20.0)
+        ELEMENTS['C','atomic_weight'] = 20.0
                                 
     def test_add_element(self):
         
         # Otherwise, everything should be OK
-        self.assertNotRaises(ELEMENTS.add_element, "element1")
+        ELEMENTS.add_element("element1")
         
     def test_add_property(self):
         
@@ -84,9 +82,9 @@ class TestElementsDatabase(UnitTest):
         self.assertRaises(ElementsDatabaseError, ELEMENTS.add_property, "atomic_weight",0.0)
                 
         # Otherwise, everything should be OK
-        self.assertNotRaises(ELEMENTS.add_property, "prop1",'float')
-        self.assertNotRaises(ELEMENTS.add_property, "prop2",'int')
-        self.assertNotRaises(ELEMENTS.add_property, "prop3",'str')
+        ELEMENTS.add_property("prop1",'float')
+        ELEMENTS.add_property("prop2",'int')
+        ELEMENTS.add_property("prop3",'str')
         
     def test_has_property(self):
         

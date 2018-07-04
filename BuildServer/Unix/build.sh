@@ -5,10 +5,6 @@
 #############################
 rm -rf build
 
-# Create the temporary directory where ScientificPython, MMTK and MDANSE will be installed
-rm -rf ${MDANSE_TEMPORARY_INSTALLATION_DIR}
-mkdir ${MDANSE_TEMPORARY_INSTALLATION_DIR}
-
 #############################
 # BUILDING DEPENDENCIES
 #############################
@@ -61,20 +57,11 @@ echo -e "${BLUE}""Building MDANSE""${NORMAL}"
 cd $MDANSE_SOURCE_DIR
 
 # Now build last version and install it
-${PYTHONEXE} setup.py build
-${PYTHONEXE} setup.py build_api
-${PYTHONEXE} setup.py build_help
+${PYTHONEXE} setup.py build --build-platlib build/lib --build-scripts build/scripts
 
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to build MDANSE""${NORMAL}"
 	exit $status
 fi
-${PYTHONEXE} setup.py install --prefix=${MDANSE_TEMPORARY_INSTALLATION_DIR}
-status=$?
-if [ $status -ne 0 ]; then
-	echo -e "${RED}" "Failed to install MDANSE""${NORMAL}"
-	exit $status
-fi
 
-rm -rf build

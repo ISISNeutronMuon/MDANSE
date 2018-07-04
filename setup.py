@@ -182,7 +182,7 @@ if sphinx:
         def run(self):
             
             build = self.get_finalized_command('build')
-                    
+
             buildDir = os.path.abspath(build.build_lib)
 
             if not os.path.exists(buildDir):

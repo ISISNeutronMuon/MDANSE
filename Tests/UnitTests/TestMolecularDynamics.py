@@ -34,11 +34,9 @@ import unittest
 
 import numpy
 
-from UnitTest import UnitTest
-
 from MDANSE.MolecularDynamics.Analysis import radius_of_gyration, mean_square_deviation, mean_square_fluctuation
 
-class TestMolecularDynamics(UnitTest):
+class TestMolecularDynamics(unittest.TestCase):
     '''
     Unittest for the geometry-related functions
     '''

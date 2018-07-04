@@ -5,6 +5,33 @@ rem BUILD_TARGET
 rem MDANSE_DEPENDENCIES_DIR
 rem MDANSE_TEMPORARY_INSTALLATION_DIR
 
+cd "%MDANSE_SOURCE_DIR%"
+
+%PYTHON_EXE% setup.py build_api
+
+set STATUS=%ERRORLEVEL%
+rem Exit now if unable to build
+if %STATUS% neq 0 (
+    echo "Failed to build MDANSE API"
+    exit %STATUS%
+)
+
+%PYTHON_EXE% setup.py build_help
+
+set STATUS=%ERRORLEVEL%
+rem Exit now if unable to build
+if %STATUS% neq 0 (
+    echo "Failed to build MDANSE embedded documentation"
+    exit %STATUS%
+)
+
+%PYTHON_EXE% setup.py install
+rem Exit now if unable to install
+if %STATUS% neq 0 (
+    echo "Failed to install MDANSE"
+    exit %STATUS%
+)
+
 cd "%MDANSE_SOURCE_DIR%\\BuildServer\\Windows"
 
 rem copy LICENSE
@@ -33,4 +60,5 @@ if %STATUS% neq 0 (
 move %MDANSE_TEMPORARY_INSTALLATION_DIR%\\MDANSE*.exe %MDANSE_SOURCE_DIR%\\
 rem Remove NSIS log file
 del NSISlog.txt
+
 cd %MDANSE_SOURCE_DIR%

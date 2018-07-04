@@ -5,6 +5,8 @@
 #############################
 cd ${MDANSE_SOURCE_DIR}
 
+PYTHONPATH=${MDANSE_SOURCE_DIR}/build/lib:${PYTHONPATH}
+
 #############################
 # UNITARY TESTS
 #############################

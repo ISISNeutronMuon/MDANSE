@@ -17,14 +17,14 @@ if sys.platform.startswith('darwin'):
         u'LSApplicationCategoryType': u'public.app-category.science'
     }
     OPTIONS = {
-        'argv_emulation': False,# has to be False otherwise triggers problems zith wxPython which lose some events that are captured by OS
+        'argv_emulation': False,# has to be False otherwise triggers problems with wxPython which lose some events that are captured by OS
         'iconfile': u'../../MDANSE/GUI/Icons/mdanse.icns',
         'excludes': 'PyQt4',
 		'matplotlib_backends': '-',
         'optimize': '1',
         'plist': PLIST,
-        'bdist_base': './Build_macOS/build',
-        'dist_dir': './Build_macOS/dist',
+        'bdist_base': '../../../build',
+        'dist_dir': '../../../dist',
         'graph': False,
         'xref': False,
         'packages' : ["MDANSE","MMTK","Scientific"]

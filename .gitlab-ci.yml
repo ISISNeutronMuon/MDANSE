@@ -140,7 +140,7 @@ ci:osx:
   allow_failure: false
   artifacts:
     paths:
-    - ${CI_PROJECT_DIR}/BuildServer/Unix/Build_macOS
+    - ${CI_PROJECT_DIR}/build
     expire_in: 1 hrs
   tags:
     - sci

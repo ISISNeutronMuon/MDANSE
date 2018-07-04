@@ -10,20 +10,19 @@ export DISTUTILS_DEBUG=0
 # PREPARATION
 #############################
 cd ${MDANSE_SOURCE_DIR}
-DEBIAN_ROOT_DIR=${MDANSE_SOURCE_DIR}/BuildServer/Build_Debian
+DEBIAN_ROOT_DIR=${MDANSE_SOURCE_DIR}/dist/debian
 rm -rf ${DEBIAN_ROOT_DIR}
-mkdir ${DEBIAN_ROOT_DIR}
+mkdir -p ${DEBIAN_ROOT_DIR}
 
 #############################
 # PACKAGING
 #############################
 echo -e "${BLUE}""Build debian tree""${NORMAL}"
 
-# Set automatically the good version number for the Debian control file
-sed -i "s/Version:.*/Version: ${VERSION_NAME}/g" BuildServer/Unix/Debian_resources/DEBIAN/control
-
 # Copy all the debian files (e.g. control, copyright, md5sum ...) into DEBIAN directory
 cp -r BuildServer/Unix/Debian_resources/DEBIAN ${DEBIAN_ROOT_DIR}/
+# Set automatically the good version number for the Debian control file
+sed -i "s/Version:.*/Version: ${VERSION_NAME}/g" ${DEBIAN_ROOT_DIR}/DEBIAN/control
 chmod -R 755 ${DEBIAN_ROOT_DIR}/DEBIAN
 
 # Build the /usr/share/applications directory inside the debian root directory and copy the mdanse desktop file inside
@@ -46,6 +45,32 @@ dos2unix ${DEBIAN_BIN_DIR}/mdanse_*
 DEBIAN_DIST_DIR=${DEBIAN_ROOT_DIR}/usr/local/lib/python2.7/dist-packages
 mkdir -p ${DEBIAN_DIST_DIR}
 
+${PYTHONEXE} setup.py build --build-platlib build/lib --build-scripts build/scripts build_api
+
+status=$?
+if [ $status -ne 0 ]; then
+	echo -e "${RED}" "Failed to build MDANSE API""${NORMAL}"
+	exit $status
+fi
+
+${PYTHONEXE} setup.py build --build-platlib build/lib --build-scripts build/scripts build_help
+
+status=$?
+if [ $status -ne 0 ]; then
+	echo -e "${RED}" "Failed to build MDANSE embedded documentation""${NORMAL}"
+	exit $status
+fi
+
+echo -e "${BLUE}""Installing MDANSE""${NORMAL}"
+cd $MDANSE_SOURCE_DIR
+
+${PYTHONEXE} setup.py build --build-platlib build/lib --build-scripts build/scripts install --prefix=${MDANSE_TEMPORARY_INSTALLATION_DIR}
+status=$?
+if [ $status -ne 0 ]; then
+	echo -e "${RED}" "Failed to install MDANSE""${NORMAL}"
+	exit $status
+fi
+
 # Copy the localy installed ScientificPython, MMTK and MDANSE
 cp -r ${MDANSE_TEMPORARY_INSTALLATION_DIR}/lib/python2.7/site-packages/Scientific ${DEBIAN_DIST_DIR}
 cp -r ${MDANSE_TEMPORARY_INSTALLATION_DIR}/lib/python2.7/site-packages/MMTK ${DEBIAN_DIST_DIR}
@@ -63,4 +88,3 @@ if [ $status -ne 0 ]; then
 	exit $status
 fi
 
-rm -rf ${MDANSE_TEMPORARY_INSTALLATION_DIR}
