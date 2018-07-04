@@ -171,6 +171,12 @@ SCRIPTS = glob.glob(os.path.join(SCRIPTS_PATH,'mdanse*'))
 if sphinx:
 
     import sphinx.setup_command
+
+    try:
+        from sphinx.ext.apidoc import main as sphinx_apidoc_main
+    except ImportError:
+        from sphinx.apidoc import main as sphinx_apidoc_main
+
     class mdanse_build_doc(sphinx.setup_command.BuildDoc):
 
         def run(self):
@@ -190,9 +196,7 @@ if sphinx:
                 os.mkdir(sphinxDir)
                                  
             metadata = self.distribution.metadata
-
-            args = ["sphinx-apidoc",
-                    "-F",
+            args = ["-F",
                     "--separate",
                     "-H%s" % metadata.name,
                     "-A%s" % metadata.author,
@@ -201,7 +205,12 @@ if sphinx:
                     os.path.join(buildDir,'MDANSE'),
                     os.path.join(buildDir,'MDANSE','Externals')]
 
-            p = subprocess.call(args)
+
+            # /!\ apidoc.main is deprecated. The API has been broken in sphinx 1.7.0, see https://github.com/sphinx-doc/sphinx/issues/4615
+            if int(sphinx.__version__.split(".")[1]) <= 6:
+                args.insert(0,"")
+
+            sphinx_apidoc_main(args)
                              
             currentDirectory = os.getcwd()
             
@@ -218,9 +227,14 @@ if sphinx:
             # The directory where the documentation will be built
             self.build_dir = os.path.join(buildDir,'MDANSE','Doc',self.doctype)
             
-            self.builder_target_dir = os.path.join(self.build_dir, self.builder)
-                                                                 
-            sphinx.setup_command.BuildDoc.run(self)
+            if isinstance(self.builder,basestring):
+                builders = [self.builder]
+            else:
+                builders = self.builder
+
+            for builder in builders:
+                self.builder_target_dir = os.path.join(self.build_dir, builder)
+                sphinx.setup_command.BuildDoc.run(self)
                  
             sys.path.pop(0)
             
@@ -231,20 +245,6 @@ if sphinx:
     class mdanse_build_api(mdanse_build_doc):
         
         doctype = 'api'
-
-#################################
-# Debian packaging
-#################################
-
-#class mdanse_build(build):
-
-#    def has_sphinx(self):
-#        if sphinx is None:
-#            return False
-#        setup_dir = os.path.dirname(os.path.abspath(__file__))
-#        return os.path.isdir(os.path.join(setup_dir, 'Doc'))
-    
-#    sub_commands = build.sub_commands# + [('build_api', has_sphinx),('build_help',has_sphinx)]
                         
 #################################
 # Extensions section
