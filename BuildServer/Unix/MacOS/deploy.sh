@@ -11,7 +11,7 @@ export DISTUTILS_DEBUG=0
 #############################
 cd ${CI_PROJECT_DIR}
 
-MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
+export MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
 
 #############################
 # PACKAGING
@@ -39,7 +39,7 @@ echo "${VERSION_NAME}" > ${MDANSE_APP_DIR}/Contents/Resources/version
 ### In our case we also want the user to be able to start directly python without launching the bundle executable (e.g. to run scripts in command line) which is the reason
 ### why we have to modify the python executable appropriately with the following commands
 rm ${MDANSE_APP_DIR}/Contents/MacOS/python
-mkdir ${MDANSE_APP_DIR}/Contents/Resources/bin
+mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
 cp /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin/python
 
 cp -r /System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/* ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/
@@ -52,7 +52,7 @@ install_name_tool -id @loader_path/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents
 ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python
 
 # Do some manual cleanup, e.g.
-rm ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/MDANSE/__pkginfo__.py\"\"
+#rm ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/MDANSE/__pkginfo__.py\"\"
 # matplotlib/tests ==> 45.2 Mb
 #rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/matplotlib/tests
 #rm -rf ${MDANSE_APP_DIR}/Contents/Resources/mpl-data/sample_data
@@ -88,4 +88,4 @@ ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/change_dylib_path.sh
 hdiutil unmount /Volumes/MDANSE -force -quiet
 sleep 5
 
-${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/dmg/create-dmg --background "${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_PROJECT_DIR}
+${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/dmg/create-dmg --background "${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist

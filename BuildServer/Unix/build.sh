@@ -30,6 +30,9 @@ git clone https://code.ill.fr/scientific-software/mmtk.git
 cd mmtk
 git checkout master
 
+# Env var needed by MMTK
+export NETCDF_HEADER_FILE_PATH=${CI_TEMP_INSTALL_DIR}/include/python2.7/
+
 ${PYTHONEXE} setup.py build --build-base=${CI_TEMP_BUILD_DIR} install --prefix=${CI_TEMP_INSTALL_DIR}
 status=$?
 if [ $status -ne 0 ]; then
