@@ -12,7 +12,7 @@ WORKDIR mdanse
 
 RUN git checkout ${MDANSE_GIT_COMMIT}
 
-RUN source ./BuildServer/Unix/definitions_debian.sh ${MDANSE_GIT_BRANCH_NAME}; source ./BuildServer/Unix/version.sh ; ./BuildServer/Unix/build.sh
+RUN source ./BuildServer/Unix/Debian/definitions.sh; source ./BuildServer/Unix/setup_ci.sh ; ./BuildServer/Unix/build.sh
 
-RUN source ./BuildServer/Unix/definitions_debian.sh ${MDANSE_GIT_BRANCH_NAME}; source ./BuildServer/Unix/version.sh ; ./BuildServer/Unix/tests.sh
+RUN source ./BuildServer/Unix/Debian/definitions.sh; source ./BuildServer/Unix/setup_ci.sh ; ./BuildServer/Unix/tests.sh
 

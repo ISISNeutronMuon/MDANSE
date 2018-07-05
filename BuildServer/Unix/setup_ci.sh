@@ -26,7 +26,10 @@ export CI_COMMIT_ID=${CI_COMMIT_ID:0:8}
 
 # Get commit branch from Gitlab
 if [ -z ${CI_COMMIT_REF_NAME} ]; then
-    export CI_COMMIT_REF_NAME=$(git rev-parse --abbrev-ref HEAD)
+    CI_COMMIT_REF_NAME=$(git show -s --pretty=%d HEAD)
+    CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME:2:-1}
+    CI_COMMIT_REF_NAME=$(echo ${CI_COMMIT_REF_NAME} | rev | cut -d/ -f1 | rev)
+    export CI_COMMIT_REF_NAME
 fi
 
 export RED="\\033[1;31m"

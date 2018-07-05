@@ -2,10 +2,8 @@ FROM ci_mdanse_xenial
 
 SHELL ["/bin/bash", "-c"]
 
-ARG MDANSE_GIT_BRANCH_NAME
-
 VOLUME builds
 
-RUN source ./BuildServer/Unix/definitions_debian.sh ${MDANSE_GIT_BRANCH_NAME}; source ./BuildServer/Unix/version.sh ; ./BuildServer/Unix/deploy_debian.sh
+RUN source ./BuildServer/Unix/Debian/definitions.sh; source ./BuildServer/Unix/setup_ci.sh ; ./BuildServer/Unix/Debian/deploy.sh
 
 

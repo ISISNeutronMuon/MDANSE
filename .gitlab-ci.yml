@@ -134,7 +134,7 @@ ci:osx:
   stage: ci
   script:
     - source ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/definitions.sh
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/version.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/setup_ci.sh
     - ${CI_PROJECT_DIR}/BuildServer/Unix/build.sh
     - ${CI_PROJECT_DIR}/BuildServer/Unix/tests.sh
   allow_failure: false
@@ -150,7 +150,7 @@ deploy:osx:
   stage: deploy
   script:
     - source ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/definitions.sh
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/version.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/setup_ci.sh
     - ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/deploy.sh
   dependencies:
     - ci:osx
@@ -178,7 +178,7 @@ ci:windows:
   stage: ci
   script:
     - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\definitions.bat"
-    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\version.bat"
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\setup_ci.bat"
     - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\build.bat"
     - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\tests.bat"
   allow_failure: false
@@ -194,7 +194,7 @@ deploy:windows:
   stage: deploy
   script:
     - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\definitions.bat"
-    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\version.bat"
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\setup_ci.bat"
     - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\deploy.bat"
   dependencies:
     - ci:windows
