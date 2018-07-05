@@ -134,7 +134,7 @@ ci:osx:
   stage: ci
   script:
     - source ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/definitions.sh
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/version.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/version.sh
     - ${CI_PROJECT_DIR}/BuildServer/Unix/build.sh
     - ${CI_PROJECT_DIR}/BuildServer/Unix/tests.sh
   allow_failure: false
@@ -150,7 +150,7 @@ deploy:osx:
   stage: deploy
   script:
     - source ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/definitions.sh
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/version.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/version.sh
     - ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/deploy.sh
   dependencies:
     - ci:osx
