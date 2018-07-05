@@ -2,7 +2,7 @@ stages:
   - docker_login
   - ci
   - deploy
-  - clean
+  - docker_logout
 
 docker_login:
   stage: docker_login
@@ -133,8 +133,8 @@ deploy:ubuntu_bionic:
 ci:osx:
   stage: ci
   script:
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/definitions_macos.sh
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/version.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/definitions.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/version.sh
     - ${CI_PROJECT_DIR}/BuildServer/Unix/build.sh
     - ${CI_PROJECT_DIR}/BuildServer/Unix/tests.sh
   allow_failure: false
@@ -149,9 +149,9 @@ ci:osx:
 deploy:osx:
   stage: deploy
   script:
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/definitions_macos.sh
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/version.sh
-    - ${CI_PROJECT_DIR}/BuildServer/Unix/deploy_macos.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/definitions.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/version.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/deploy.sh
   dependencies:
     - ci:osx
   allow_failure: false
@@ -214,35 +214,13 @@ deploy:windows:
     - sci
     - windows-10
 
-clean:docker:
+docker_logout:
   stage: clean
   when: always
   script:
-    - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
-    - ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
-  after_script:
     - docker logout
   tags:
     - docker
     - sci
     - ubuntu
 
-clean:osx:
-  stage: clean
-  when: always
-  script:
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/definitions_macos.sh
-    - ${CI_PROJECT_DIR}/BuildServer/Unix/clean.sh
-  tags:
-    - sci
-    - osx-10.13
-    
-clean:windows:
-  stage: clean
-  when: always
-  script:
-    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\definitions.bat"
-    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\clean.bat"
-  tags:
-    - sci
-    - windows-10

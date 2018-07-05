@@ -308,5 +308,4 @@ setup (name             = "MDANSE",
        platforms        = ['Unix','Windows'],
        ext_modules      = EXTENSIONS,
        scripts          = SCRIPTS,
-       cmdclass         = CMDCLASS,
-       install_requires = ['Jinja2'])
+       cmdclass         = CMDCLASS)
