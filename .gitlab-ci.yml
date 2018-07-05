@@ -215,7 +215,7 @@ deploy:windows:
     - windows-10
 
 docker_logout:
-  stage: clean
+  stage: docker_logout
   when: always
   script:
     - docker logout
