@@ -19,7 +19,7 @@ if [ $status -ne 0 ]; then
 	exit $status
 fi
 
-cp ${CI_TEMP_DIR}/include/python2.7/Scientific/netcdf.h ${CI_TEMP_DIR}/include/python2.7/
+cp ${CI_TEMP_INSTALL_DIR}/include/python2.7/Scientific/netcdf.h ${CI_TEMP_INSTALL_DIR}/include/python2.7/
 
 cd ${CI_TEMP_DIR}
 

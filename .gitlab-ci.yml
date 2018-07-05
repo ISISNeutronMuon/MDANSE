@@ -19,7 +19,7 @@ docker_login:
 ci:ubuntu_trusty:
   stage: ci
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} --build-arg MDANSE_GIT_BRANCH_NAME=${CI_COMMIT_REF_NAME} -t ci_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-trusty/Dockerfile_build .
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-trusty/Dockerfile_build .
   allow_failure: false
   tags:
     - docker
@@ -29,7 +29,7 @@ ci:ubuntu_trusty:
 deploy:ubuntu_trusty:
   stage: deploy
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_BRANCH_NAME=${CI_COMMIT_REF_NAME} -t deploy_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-trusty/Dockerfile_deploy .
+    - docker build --force-rm -t deploy_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-trusty/Dockerfile_deploy .
     - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
     - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh trusty
   dependencies:
@@ -57,7 +57,7 @@ deploy:ubuntu_trusty:
 ci:ubuntu_xenial:
   stage: ci
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} --build-arg MDANSE_GIT_BRANCH_NAME=${CI_COMMIT_REF_NAME} -t ci_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_build .
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_build .
   allow_failure: false
   tags:
     - docker
@@ -67,7 +67,7 @@ ci:ubuntu_xenial:
 deploy:ubuntu_xenial:
   stage: deploy
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_BRANCH_NAME=${CI_COMMIT_REF_NAME} -t deploy_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_deploy .
+    - docker build --force-rm --build-arg -t deploy_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_deploy .
     - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
     - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh xenial
   dependencies:
@@ -95,7 +95,7 @@ deploy:ubuntu_xenial:
 ci:ubuntu_bionic:
   stage: ci
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} --build-arg MDANSE_GIT_BRANCH_NAME=${CI_COMMIT_REF_NAME} -t ci_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-bionic/Dockerfile_build .
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-bionic/Dockerfile_build .
   allow_failure: false
   tags:
     - docker
@@ -105,7 +105,7 @@ ci:ubuntu_bionic:
 deploy:ubuntu_bionic:
   stage: deploy
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_BRANCH_NAME=${CI_COMMIT_REF_NAME} -t deploy_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-bionic/Dockerfile_deploy .
+    - docker build --force-rm -t deploy_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-bionic/Dockerfile_deploy .
     - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
     - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh bionic
   dependencies:
