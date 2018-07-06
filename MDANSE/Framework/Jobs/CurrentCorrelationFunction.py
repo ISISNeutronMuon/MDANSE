@@ -128,11 +128,7 @@ class CurrentCorrelationFunction(IJob):
             traj = self.configuration['trajectory']['instance']
             
             qVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"]
-            
-            qVectors = traj.universe._boxToRealPointArray(qVectors.T)
-                                     
-            qVectors = qVectors.T
-            
+                        
             nQVectors = qVectors.shape[1]
             
             rho = {}

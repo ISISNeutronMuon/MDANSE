@@ -127,11 +127,7 @@ class DynamicCoherentStructureFactor(IJob):
             traj = self.configuration['trajectory']['instance']
             
             qVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"]
-            
-            qVectors = traj.universe._boxToRealPointArray(qVectors.T)
-                                     
-            qVectors = qVectors.T
-                                                            
+                                                                        
             rho = {}
             for element in self.configuration['atom_selection']['unique_names']:
                 rho[element] = numpy.zeros((self._nFrames, qVectors.shape[1]), dtype = numpy.complex64)
@@ -140,8 +136,6 @@ class DynamicCoherentStructureFactor(IJob):
             for i, frame in enumerate(self.configuration['frames']['value']):
                 
                 conf = traj.configuration[frame]
-
-                conf.convertToBoxCoordinates()
 
                 for element,idxs in self._indexesPerElement.items():
                     selectedCoordinates = numpy.take(conf.array, idxs, axis=0)
