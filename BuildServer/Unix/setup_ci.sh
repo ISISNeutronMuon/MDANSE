@@ -36,7 +36,7 @@ export NORMAL="\\033[0m"
 echo -e "${BLUE}""Commit id = ${CI_COMMIT_ID}""${NORMAL}"
 echo -e "${BLUE}""Branch name = ${CI_COMMIT_REF_NAME}""${NORMAL}"
 
-PKG_INFO=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages/MDANSE/__pkginfo__.py
+PKG_INFO=${CI_PROJECT_DIR}/MDANSE/__pkginfo__.py
 
 # Update the __pkginfo__ file with the current commit
 $SED_I_COMMAND "s/.*__commit__.*/__commit__ = \"${CI_COMMIT_ID}\"/" ${PKG_INFO}
