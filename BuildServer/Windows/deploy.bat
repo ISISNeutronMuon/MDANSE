@@ -35,20 +35,20 @@ if %STATUS% neq 0 (
 cd "%MDANSE_SOURCE_DIR%\\BuildServer\\Windows"
 
 rem copy LICENSE
-copy %MDANSE_SOURCE_DIR%\\LICENSE %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Windows_resources\\nsis\\
+copy %MDANSE_SOURCE_DIR%\\LICENSE %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Resources\\nsis\\
 
 rem copy CHANGELOG to CHANGELOG.txt (compulsory to be opened by nsis through an external text editor)
-copy %MDANSE_SOURCE_DIR%\\CHANGELOG %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Windows_resources\\nsis\\CHANGELOG.txt
+copy %MDANSE_SOURCE_DIR%\\CHANGELOG %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Resources\\nsis\\CHANGELOG.txt
 
 rem Copy site.py 
-copy %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Windows_resources\\site.py %MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\
+copy %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Resources\\site.py %MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\
 
 rem Copy Visual dll see https://stackoverflow.com/questions/214852/python-module-dlls to understand why dll copy destination folder must be the Scientific folder
 copy "%MDANSE_DEPENDENCIES_DIR%\\NetCDF\\vcruntime140.dll" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\site-packages\\Scientific\\"
 
 rem create the MDANSE installer
 echo "Creating nsis installer for target %MDANSE_TEMPORARY_INSTALLATION_DIR%..."
-makensis /V4 /ONSISlog.txt /DVERSION=%VERSION_NAME% /DARCH=%BUILD_TARGET% /DTARGET_DIR=%MDANSE_TEMPORARY_INSTALLATION_DIR% %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Windows_resources\\nsis\\MDANSE_installer.nsi
+makensis /V4 /ONSISlog.txt /DVERSION=%VERSION_NAME% /DARCH=%BUILD_TARGET% /DTARGET_DIR=%MDANSE_TEMPORARY_INSTALLATION_DIR% %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Resources\\nsis\\MDANSE_installer.nsi
 
 set STATUS=%ERRORLEVEL%
 rem Exit now if something goes wrong

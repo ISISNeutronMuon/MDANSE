@@ -88,4 +88,4 @@ ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/change_dylib_path.sh
 hdiutil unmount /Volumes/MDANSE -force -quiet
 sleep 5
 
-${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/dmg/create-dmg --background "${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
+${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/Resources/dmg/create-dmg --background "${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist

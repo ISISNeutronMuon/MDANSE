@@ -23,7 +23,7 @@ mkdir -p ${DEBIAN_ROOT_DIR}
 echo -e "${BLUE}""Build debian tree""${NORMAL}"
 
 # Copy all the debian files (e.g. control, copyright, md5sum ...) into DEBIAN directory
-cp -r ${SCRIPT_DIR}/DEBIAN ${DEBIAN_ROOT_DIR}/
+cp -r ${SCRIPT_DIR}/Resources/DEBIAN ${DEBIAN_ROOT_DIR}/
 # Set automatically the good version number for the Debian control file
 sed -i "s/Version:.*/Version: ${VERSION_NAME}/g" ${DEBIAN_ROOT_DIR}/DEBIAN/control
 chmod -R 755 ${DEBIAN_ROOT_DIR}/DEBIAN
@@ -31,7 +31,7 @@ chmod -R 755 ${DEBIAN_ROOT_DIR}/DEBIAN
 # Build the /usr/share/applications directory inside the debian root directory and copy the mdanse desktop file inside
 DEBIAN_APP_DIR=${DEBIAN_ROOT_DIR}/usr/share/applications
 mkdir -p ${DEBIAN_APP_DIR}
-cp ${SCRIPT_DIR}/MDANSE.desktop ${DEBIAN_APP_DIR}/
+cp ${SCRIPT_DIR}/Resources/MDANSE.desktop ${DEBIAN_APP_DIR}/
 
 # Build the /usr/share/pixmaps directory inside the debian root directory and copy the mdanse icon file inside
 DEBIAN_PIXMAPS_DIR=${DEBIAN_ROOT_DIR}/usr/share/pixmaps
