@@ -185,6 +185,7 @@ ci:windows:
   artifacts:
     paths:
     - "%CI_PROJECT_DIR%\\BuildServer\\Windows\\Build"
+    - "%CI_PROJECT_DIR%\\build"
     expire_in: 1 hrs
   tags:
     - sci
