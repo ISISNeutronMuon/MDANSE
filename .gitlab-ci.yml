@@ -67,7 +67,7 @@ ci:ubuntu_xenial:
 deploy:ubuntu_xenial:
   stage: deploy
   script:
-    - docker build --force-rm --build-arg -t deploy_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_deploy .
+    - docker build --force-rm -t deploy_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_deploy .
     - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
     - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh xenial
   dependencies:

@@ -50,7 +50,7 @@ mkdir -p ${DEBIAN_DIST_DIR}
 
 cd ${CI_PROJECT_DIR}
 
-# Buid API
+# Build API
 ${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR} build_api
 
 status=$?
@@ -59,7 +59,7 @@ if [ $status -ne 0 ]; then
 	exit $status
 fi
 
-# Buid embedded doc
+# Build embedded doc
 ${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR} build_help
 
 status=$?
