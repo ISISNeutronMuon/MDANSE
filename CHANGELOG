@@ -1,6 +1,7 @@
 version 1.2.0
 --------------
 * ADDED issue #10 Implemented Gromacs trajectory converter
+* FIXED issue #20 Opening the theoretical help on MacOS is now OK
 * FIXED issue #21 "Save a template for new analysis" button produced an error
 * CHANGED (internal) MDANSE is now built with system python (2.7.10)
 
