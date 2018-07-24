@@ -141,6 +141,7 @@ ci:osx:
   artifacts:
     paths:
     - ${CI_PROJECT_DIR}/build
+    - ${CI_PROJECT_DIR}/temp
     expire_in: 1 hrs
   tags:
     - sci
@@ -186,6 +187,7 @@ ci:windows:
     paths:
     - "%CI_PROJECT_DIR%\\BuildServer\\Windows\\Build"
     - "%CI_PROJECT_DIR%\\build"
+    - "%CI_PROJECT_DIR%\\Extensions"
     expire_in: 1 hrs
   tags:
     - sci
