@@ -1170,12 +1170,4 @@ def _init_mags():
 
 if not MAGS:
     _init_mags()
-
-if __name__ == "__main__":
-    print mg(1.0,'h THz','meV')
-    print mg(1.0,'meV/h','THz')
-    print mg(1.0,'hbar rad/ps','meV')
-    print mg(1.0,'cyc THz','rad/ps')
-    print mg(1.0,'rad/ps',' cyc THz')
-    print mg(1.0,'rad/ps',' cyc meV(freq)')
     

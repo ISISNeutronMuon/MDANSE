@@ -122,36 +122,26 @@ if __name__ == "__main__":
     from MDANSE.Externals.pyparsing.pyparsing import *
 
     def parse_keyword(token):
-        
-        print "parse_keyword"
-                            
+                                    
         return '"%s"(universe).select' % token[0]
 
     def parse_arguments(token):
 
-        print "parse_arguments"
-
         return "(%s)" % str(token)
 
     def operator_and(token):
-
-        print "operator_and"
         
         token[0][1] = "&"
         
         return " ".join(token[0])
 
     def operator_or(token):
-
-        print "operator_or"
         
         token[0][1] = "|"
             
         return " ".join(token[0])
 
     def parse_expression(self, token):
-
-        print "parse_expression"
                         
         return "".join([str(t) for t in token])
         
@@ -173,5 +163,4 @@ if __name__ == "__main__":
                                  rpar=")")
 
     parsedExpression = expr.transformString(expression)
-    
-    print parsedExpression
+

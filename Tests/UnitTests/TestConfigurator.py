@@ -41,11 +41,10 @@ from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.Projectors.IProjector import ProjectorError
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParserError
-from UnitTest import UnitTest
 
 TRAJECTORIES_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),"UserData","Trajectories")
 
-class TestConfigurator(UnitTest):
+class TestConfigurator(unittest.TestCase):
     '''
     Unittest for the configurators used to setup an analysis in MDANSE
     '''
@@ -70,16 +69,16 @@ class TestConfigurator(UnitTest):
           
         # Case of a valid integer
         self._parameters["test_integer"] = 20
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
                   
         # Case of a float that will casted to an integer
         self._parameters["test_integer"] = 20.2
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
         self.assertEqual(self._configurable["test_integer"]["value"], 20)
  
         # Case of a string that can be casted to an integer
         self._parameters["test_integer"] = "30"
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
         self.assertEqual(self._configurable["test_integer"]["value"], 30)
          
         # Case of a string that cannot be casted to an integer
@@ -99,17 +98,17 @@ class TestConfigurator(UnitTest):
  
         # Case of an integer that will be casted to a float
         self._parameters["test_float"] = 20
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
         self.assertEqual(self._configurable["test_float"]["value"], 20.0)
          
         # Case of a float
         self._parameters["test_float"] = 20.2
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
         self.assertEqual(self._configurable["test_float"]["value"], 20.2)
  
         # Case of a string that can be casted to a float
         self._parameters["test_float"] = "30.2"
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
         self.assertEqual(self._configurable["test_float"]["value"], 30.2)
          
         # Case of a string that cannot be casted to a float
@@ -129,7 +128,7 @@ class TestConfigurator(UnitTest):
            
         # Case of a valid trajectory
         self._parameters["trajectory"] = self._validTrajectory.filename
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
          
         # Case of an unknown trajectory
         self._parameters["trajectory"] = 'fsfsdjkfjkfjs'
@@ -162,12 +161,12 @@ class TestConfigurator(UnitTest):
          
         # No projection
         self._parameters["projection"] = None
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
         proj = self._configurable["projection"]['projector'](data)
         self.assertTrue(numpy.array_equal(data,proj))
  
         self._parameters["projection"] = ('null',None)
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
         proj = self._configurable["projection"]['projector'](data)
         self.assertTrue(numpy.array_equal(data,proj))
          
@@ -185,13 +184,13 @@ class TestConfigurator(UnitTest):
  
         # Axial projection
         self._parameters["projection"] = ('axial',(1,0,0))
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
         proj = self._configurable["projection"]['projector'](data)
         self.assertTrue(numpy.array_equal(data[:,0],proj[:,0]))
  
         # Axial projection - wrong data
         self._parameters["projection"] = ('axial',(1,0,0))
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
         self.assertRaises(ProjectorError, self._configurable["projection"]['projector'].__call__,None)
         self.assertRaises(ProjectorError, self._configurable["projection"]['projector'].__call__,[1])
  
@@ -209,7 +208,7 @@ class TestConfigurator(UnitTest):
  
         # Planar projection
         self._parameters["projection"] = ('planar',(1,0,0))
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
         proj = self._configurable["projection"]['projector'](data)
         self.assertTrue(numpy.array_equal(numpy.zeros((data.shape[0],), dtype=numpy.float64),proj[:,0]))
         self.assertTrue(numpy.array_equal(data[:,1],proj[:,1]))
@@ -217,7 +216,7 @@ class TestConfigurator(UnitTest):
  
         # Planar projection - wrong data
         self._parameters["projection"] = ('planar',(1,0,0))
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
         self.assertRaises(ProjectorError, self._configurable["projection"]['projector'].__call__,None)
         self.assertRaises(ProjectorError, self._configurable["projection"]['projector'].__call__,[1])
  
@@ -255,7 +254,7 @@ class TestConfigurator(UnitTest):
         # Test a valid atom selection string
         self._parameters["trajectory"] = self._validTrajectory.filename
         self._parameters["atom_selection"] = 'atom_type carbon'
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
         self.assertEqual(self._configurable['atom_selection']['selection_length'],sum([True for at in self._configurable['trajectory']['instance'].universe.atomList() if at.symbol=='C']))
   
     def test_atom_transmutation(self):
@@ -289,7 +288,7 @@ class TestConfigurator(UnitTest):
         # Test a valid atom selection string
         self._parameters["trajectory"] = self._validTrajectory.filename
         self._parameters["atom_transmutation"] = None
-        self.assertNotRaises(self._configurable.setup,self._parameters)
+        self._configurable.setup(self._parameters)
 
 def suite():
     loader = unittest.TestLoader()

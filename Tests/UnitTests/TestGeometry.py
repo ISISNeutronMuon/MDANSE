@@ -34,11 +34,9 @@ import unittest
 
 import numpy
 
-from UnitTest import UnitTest
-
 from MDANSE.Mathematics.Geometry import center_of_mass
 
-class TestGeometry(UnitTest):
+class TestGeometry(unittest.TestCase):
     '''
     Unittest for the geometry-related functions
     '''

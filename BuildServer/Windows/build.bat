@@ -32,19 +32,14 @@ rmdir /S /Q scientific-python
 git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
 git checkout master
-%PYTHON_EXE% setup.py build --netcdf_prefix="%MDANSE_DEPENDENCIES_DIR%\\NetCDF" --netcdf_dll="%MDANSE_DEPENDENCIES_DIR%\\NetCDF"
+%PYTHON_EXE% setup.py build --netcdf_prefix="%MDANSE_DEPENDENCIES_DIR%\\NetCDF" --netcdf_dll="%MDANSE_DEPENDENCIES_DIR%\\NetCDF" install
 set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build
 if %STATUS% neq 0 (
     echo "Failed to build Scientific"
     exit %STATUS%
 )
-%PYTHON_EXE% setup.py install
-rem Exit now if unable to install
-if %STATUS% neq 0 (
-    echo "Failed to install Scientific"
-    exit %STATUS%
-)
+
 rem Copy netcdf dependencies
 copy "%MDANSE_DEPENDENCIES_DIR%\\NetCDF\\netcdf.dll" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\site-packages\\Scientific\\"
 copy "%MDANSE_DEPENDENCIES_DIR%\\NetCDF\\netcdf.h" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\include\\Scientific\\"
@@ -57,37 +52,25 @@ rmdir /S /Q mmtk
 git clone https://code.ill.fr/scientific-software/mmtk.git
 cd mmtk
 git checkout master
-%PYTHON_EXE% setup.py build
+%PYTHON_EXE% setup.py build install
 set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build
 if %STATUS% neq 0 (
     echo "Failed to build MMTK"
     exit %STATUS%
 )
-%PYTHON_EXE% setup.py install
-rem Exit now if unable to install
-if %STATUS% neq 0 (
-    echo "Failed to install MMTK"
-    exit %STATUS%
-)
+
 cd ..
 rmdir /S /Q mmtk
 
 rem Go back to the MDANSE source directory and build and install it
 cd "%MDANSE_SOURCE_DIR%"
-%PYTHON_EXE% setup.py build
+%PYTHON_EXE% setup.py build install
 set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build
 if %STATUS% neq 0 (
     echo "Failed to build MDANSE"
     exit %STATUS%
 )
-%PYTHON_EXE% setup.py install
-rem Exit now if unable to install
-if %STATUS% neq 0 (
-    echo "Failed to install MDANSE"
-    exit %STATUS%
-)
-rmdir /S /Q build
 
 cd %MDANSE_SOURCE_DIR%

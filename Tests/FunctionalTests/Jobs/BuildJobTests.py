@@ -38,10 +38,9 @@ class JobFileGenerator():
         # parameters (dict): optional. If not None, the parameters which the job file will be built with.
         """
         array_of_python_dependancies_string = ['unittest', 'numpy', 'os']
-        array_of_mdanse_dependancies_string = ['from Tests.UnitTests.UnitTest import UnitTest',
-                                               'from MDANSE import REGISTRY']
+        array_of_mdanse_dependancies_string = ['from MDANSE import REGISTRY']
         test_string = ''
-        test_string = test_string +     'class Test%s(UnitTest):\n\n' % self.job._type.upper()
+        test_string = test_string +     'class Test%s(unittest.TestCase):\n\n' % self.job._type.upper()
         test_string = test_string +     '    def test(self):\n'
         # Writes the line that will initialize the |parameters| dictionary and create the job
         if parameters is None:
@@ -56,14 +55,14 @@ class JobFileGenerator():
         # Launch the job in monoprocessor mode and copy output file
         test_string = test_string +     '        print "Launching job in monoprocessor mode"\n'
         test_string = test_string +     '        parameters["running_mode"] = ("monoprocessor",1)\n'
-        test_string = test_string +     '        self.assertNotRaises(job.run, parameters, status=False)\n'
+        test_string = test_string +     '        job.run(parameters, status=False)\n'
         test_string = test_string +     '        shutil.copy(output_path + ".nc", reference_data_path + "_mono" + ".nc")\n'
         test_string = test_string +     '        print "Monoprocessor execution completed"\n\n'
         # Launch the job in multiprocessor mode if avalaible
         if self.multiprocessor:
             test_string = test_string + '        print "Launching job in multiprocessor mode"\n'
             test_string = test_string + '        parameters["running_mode"] = ("multiprocessor",2)\n'
-            test_string = test_string + '        self.assertNotRaises(job.run,parameters,False)\n'
+            test_string = test_string + '        job.run(parameters,False)\n'
             test_string = test_string + '        shutil.copy(output_path + ".nc", reference_data_path + "_multi" + ".nc")\n'
             test_string = test_string + '        print "Multiprocessor execution completed"\n\n'
         # Compare reference data with monoprocessor if reference data exists

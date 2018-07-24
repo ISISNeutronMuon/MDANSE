@@ -2,7 +2,7 @@ stages:
   - docker_login
   - ci
   - deploy
-  - clean
+  - docker_logout
 
 docker_login:
   stage: docker_login
@@ -19,7 +19,7 @@ docker_login:
 ci:ubuntu_trusty:
   stage: ci
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} --build-arg MDANSE_GIT_BRANCH_NAME=${CI_COMMIT_REF_NAME} -t ci_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-trusty/Dockerfile_build .
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-trusty/Dockerfile_build .
   allow_failure: false
   tags:
     - docker
@@ -29,7 +29,7 @@ ci:ubuntu_trusty:
 deploy:ubuntu_trusty:
   stage: deploy
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_BRANCH_NAME=${CI_COMMIT_REF_NAME} -t deploy_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-trusty/Dockerfile_deploy .
+    - docker build --force-rm -t deploy_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-trusty/Dockerfile_deploy .
     - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
     - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh trusty
   dependencies:
@@ -57,7 +57,7 @@ deploy:ubuntu_trusty:
 ci:ubuntu_xenial:
   stage: ci
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} --build-arg MDANSE_GIT_BRANCH_NAME=${CI_COMMIT_REF_NAME} -t ci_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_build .
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_build .
   allow_failure: false
   tags:
     - docker
@@ -67,7 +67,7 @@ ci:ubuntu_xenial:
 deploy:ubuntu_xenial:
   stage: deploy
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_BRANCH_NAME=${CI_COMMIT_REF_NAME} -t deploy_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_deploy .
+    - docker build --force-rm -t deploy_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_deploy .
     - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
     - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh xenial
   dependencies:
@@ -95,7 +95,7 @@ deploy:ubuntu_xenial:
 ci:ubuntu_bionic:
   stage: ci
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} --build-arg MDANSE_GIT_BRANCH_NAME=${CI_COMMIT_REF_NAME} -t ci_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-bionic/Dockerfile_build .
+    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-bionic/Dockerfile_build .
   allow_failure: false
   tags:
     - docker
@@ -105,7 +105,7 @@ ci:ubuntu_bionic:
 deploy:ubuntu_bionic:
   stage: deploy
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_BRANCH_NAME=${CI_COMMIT_REF_NAME} -t deploy_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-bionic/Dockerfile_deploy .
+    - docker build --force-rm -t deploy_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-bionic/Dockerfile_deploy .
     - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
     - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh bionic
   dependencies:
@@ -133,14 +133,15 @@ deploy:ubuntu_bionic:
 ci:osx:
   stage: ci
   script:
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/definitions_macos.sh
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/version.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/definitions.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/setup_ci.sh
     - ${CI_PROJECT_DIR}/BuildServer/Unix/build.sh
     - ${CI_PROJECT_DIR}/BuildServer/Unix/tests.sh
   allow_failure: false
   artifacts:
     paths:
-    - ${CI_PROJECT_DIR}/BuildServer/Unix/Build_macOS
+    - ${CI_PROJECT_DIR}/build
+    - ${CI_PROJECT_DIR}/temp
     expire_in: 1 hrs
   tags:
     - sci
@@ -149,9 +150,9 @@ ci:osx:
 deploy:osx:
   stage: deploy
   script:
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/definitions_macos.sh
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/version.sh
-    - ${CI_PROJECT_DIR}/BuildServer/Unix/deploy_macos.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/definitions.sh
+    - source ${CI_PROJECT_DIR}/BuildServer/Unix/setup_ci.sh
+    - ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/deploy.sh
   dependencies:
     - ci:osx
   allow_failure: false
@@ -178,13 +179,15 @@ ci:windows:
   stage: ci
   script:
     - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\definitions.bat"
-    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\version.bat"
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\setup_ci.bat"
     - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\build.bat"
     - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\tests.bat"
   allow_failure: false
   artifacts:
     paths:
     - "%CI_PROJECT_DIR%\\BuildServer\\Windows\\Build"
+    - "%CI_PROJECT_DIR%\\build"
+    - "%CI_PROJECT_DIR%\\Extensions"
     expire_in: 1 hrs
   tags:
     - sci
@@ -194,7 +197,7 @@ deploy:windows:
   stage: deploy
   script:
     - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\definitions.bat"
-    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\version.bat"
+    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\setup_ci.bat"
     - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\deploy.bat"
   dependencies:
     - ci:windows
@@ -214,35 +217,13 @@ deploy:windows:
     - sci
     - windows-10
 
-clean:docker:
-  stage: clean
+docker_logout:
+  stage: docker_logout
   when: always
   script:
-    - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
-    - ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
-  after_script:
     - docker logout
   tags:
     - docker
     - sci
     - ubuntu
 
-clean:osx:
-  stage: clean
-  when: always
-  script:
-    - source ${CI_PROJECT_DIR}/BuildServer/Unix/definitions_macos.sh
-    - ${CI_PROJECT_DIR}/BuildServer/Unix/clean.sh
-  tags:
-    - sci
-    - osx-10.13
-    
-clean:windows:
-  stage: clean
-  when: always
-  script:
-    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\definitions.bat"
-    - call "%CI_PROJECT_DIR%\\BuildServer\\Windows\\clean.bat"
-  tags:
-    - sci
-    - windows-10

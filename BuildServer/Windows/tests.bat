@@ -13,7 +13,10 @@ if "%1%"=="win32" (
 	set BUILD_TARGET=win-amd64
 )
 
+set PYTHONPATH=%MDANSE_SOURCE_DIR%/build/lib;%PYTHONPATH%
+
 set MDANSE_SOURCE_DIR=%cd%
+
 rem Set the site-packages of the temporary Python
 set PYTHON_SCRIPT_DIR=%MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Build\\Scripts
 rem Set the location where the temporary Python will be installed
