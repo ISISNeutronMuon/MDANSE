@@ -138,11 +138,11 @@ class UserDefinitionViewer(wx.Dialog):
 
         self._tree.SelectItem(item,True)
 
-        while item != self._root:
+        while True:
             item = self._tree.GetItemParent(item)
-            # Check if item is not root (leading to crash otherwise)
-            if item != self._root:
-                self._tree.Expand(item)
+            if item == self._root:
+                break
+            self._tree.Expand(item)
         
     def on_show_info(self, event=None):
 
@@ -254,4 +254,4 @@ if __name__ == "__main__":
     f = UserDefinitionViewer(None,ud=['protein_in_periodic_universe.nc','atom_selection',"sfdfdfsd"],editable=True)
     f.ShowModal()
     f.Destroy()
-    app.MainLoop()    
+    app.MainLoop()

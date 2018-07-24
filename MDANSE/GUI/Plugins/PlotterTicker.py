@@ -38,6 +38,8 @@ class ScaledLocator(matplotlib.ticker.MaxNLocator):
     *x0*. For example, this would locate minutes on an axis plotted in seconds
     if dx=60.  This differs from MultipleLocator in that an approriate interval
     of dx units will be chosen similar to the default MaxNLocator.
+    
+    see https://stackoverflow.com/questions/9451395/customize-x-axis-in-matplotlib
     """
     def __init__(self, dx=1.0, x0=0.0):
         self.dx = dx
