@@ -150,7 +150,6 @@ class Platform(object):
             raise PlatformError('Invalid query object type.')
                     
         basepath = os.path.join(os.path.dirname(self.package_directory()),'')
-        print basepath, len(basepath), path.split(basepath), path
         
         s = path.split(basepath)        
         if len(s) != 2:
