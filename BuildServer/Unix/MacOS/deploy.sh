@@ -63,7 +63,6 @@ install_name_tool -id @loader_path/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents
 ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python
 
 # Do some manual cleanup, e.g.
-#rm ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/MDANSE/__pkginfo__.py\"\"
 # matplotlib/tests ==> 45.2 Mb
 #rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/matplotlib/tests
 #rm -rf ${MDANSE_APP_DIR}/Contents/Resources/mpl-data/sample_data

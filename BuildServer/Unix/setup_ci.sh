@@ -42,7 +42,7 @@ echo -e "${BLUE}""Branch name = ${CI_COMMIT_REF_NAME}""${NORMAL}"
 PKG_INFO=${CI_PROJECT_DIR}/MDANSE/__pkginfo__.py
 
 # Update the __pkginfo__ file with the current commit
-$SED_I_COMMAND "s/.*__commit__.*/__commit__ = \"${CI_COMMIT_ID}\"/" ${PKG_INFO}
+"${SED_I_COMMAND[@]}" "s/.*__commit__.*/__commit__ = \"${CI_COMMIT_ID}\"/" ${PKG_INFO}
 
 # Get MDANSE version
 MDANSE_VERSION=`sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' ${PKG_INFO}`
@@ -51,16 +51,16 @@ MDANSE_VERSION=`sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' ${PKG_INFO}`
 if [[ ${CI_COMMIT_REF_NAME} == "master" ]]
 then
     VERSION_NAME=${MDANSE_VERSION}
-    ${SED_I_COMMAND} "s/.*__beta__.*/__beta__ = None/" ${PKG_INFO}
+    "${SED_I_COMMAND[@]}" "s/.*__beta__.*/__beta__ = None/" ${PKG_INFO}
 else
     # Check if branch is release*
 	if [[ ${CI_COMMIT_REF_NAME::7} == "release" ]]
 	then
 	    VERSION_NAME=${MDANSE_VERSION}-rc-${CI_COMMIT_ID}
-	    ${SED_I_COMMAND} "s/.*__beta__.*/__beta__ = \"rc\"/" ${PKG_INFO}
+	    "${SED_I_COMMAND[@]}" "s/.*__beta__.*/__beta__ = \"rc\"/" ${PKG_INFO}
 	else
 	    VERSION_NAME=${MDANSE_VERSION}-beta-${CI_COMMIT_ID}
-	    ${SED_I_COMMAND} "s/.*__beta__.*/__beta__ = \"beta\"/" ${PKG_INFO}
+	    "${SED_I_COMMAND[@]}" "s/.*__beta__.*/__beta__ = \"beta\"/" ${PKG_INFO}
 	fi
 fi
 export VERSION_NAME
