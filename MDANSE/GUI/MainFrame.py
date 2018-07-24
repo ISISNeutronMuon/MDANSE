@@ -284,7 +284,7 @@ Authors:
 
     def on_theory_help(self,event):
 
-        webbrowser.open(os.path.join(PLATFORM.doc_path(),'theory_help.pdf'))
+        webbrowser.open("file://%s" % os.path.join(PLATFORM.doc_path(),'theory_help.pdf'))
                 
     def on_open_classes_registry(self,event):
         
