@@ -234,6 +234,7 @@ if sphinx:
 
             for builder in builders:
                 self.builder_target_dir = os.path.join(self.build_dir, builder)
+                sphinx.setup_command.BuildDoc.finalize_options(self)
                 sphinx.setup_command.BuildDoc.run(self)
                  
             sys.path.pop(0)

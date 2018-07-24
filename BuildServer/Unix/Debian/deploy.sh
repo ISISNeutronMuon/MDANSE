@@ -51,24 +51,13 @@ mkdir -p ${DEBIAN_DIST_DIR}
 cd ${CI_PROJECT_DIR}
 
 # Build API
-${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR} build_api
+${PYTHONEXE} setup.py build_api build_help install --prefix=${CI_TEMP_INSTALL_DIR}
 
 status=$?
 if [ $status -ne 0 ]; then
-	echo -e "${RED}" "Failed to build MDANSE API""${NORMAL}"
+	echo -e "${RED}" "Failed to build MDANSE Documentation""${NORMAL}"
 	exit $status
 fi
-
-# Build embedded doc
-${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR} build_help
-
-status=$?
-if [ $status -ne 0 ]; then
-	echo -e "${RED}" "Failed to build MDANSE embedded documentation""${NORMAL}"
-	exit $status
-fi
-
-echo -e "${BLUE}""Installing MDANSE""${NORMAL}"
 
 # Copy the localy installed ScientificPython, MMTK and MDANSE
 cp -r ${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages/Scientific ${DEBIAN_DIST_DIR}

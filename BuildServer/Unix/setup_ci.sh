@@ -7,10 +7,11 @@ fi
 export CI_TEMP_DIR=${CI_PROJECT_DIR}/temp
 
 export CI_TEMP_BUILD_DIR=${CI_PROJECT_DIR}/temp/build
+export CI_TEMP_BUILD_DIR=${CI_PROJECT_DIR}/build
 
 export CI_TEMP_INSTALL_DIR=${CI_PROJECT_DIR}/temp/install
 
-export PYTHONPATH=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages:${PYTHONPATH}
+export PYTHONPATH=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages/:${PYTHONPATH}
 
 mkdir -p ${CI_TEMP_DIR}
 
@@ -19,6 +20,8 @@ cd ${CI_PROJECT_DIR}
 # Get revision number from Git
 if [ -z ${CI_COMMIT_SHA} ]; then
     export CI_COMMIT_ID=$(git rev-parse HEAD)
+else
+    export CI_COMMIT_ID=${CI_COMMIT_SHA}
 fi
 export CI_COMMIT_ID=${CI_COMMIT_ID:0:8}
 

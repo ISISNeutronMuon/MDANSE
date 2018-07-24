@@ -13,6 +13,15 @@ cd ${CI_PROJECT_DIR}
 
 export MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
 
+# Build API
+${PYTHONEXE} setup.py build_api build_help install --prefix=${CI_TEMP_INSTALL_DIR}
+
+status=$?
+if [ $status -ne 0 ]; then
+	echo -e "${RED}" "Failed to build MDANSE Documentation""${NORMAL}"
+	exit $status
+fi
+
 #############################
 # PACKAGING
 #############################
@@ -89,3 +98,5 @@ hdiutil unmount /Volumes/MDANSE -force -quiet
 sleep 5
 
 ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/Resources/dmg/create-dmg --background "${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
+mv ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/${MDANSE_DMG} ${CI_PROJECT_DIR}
+

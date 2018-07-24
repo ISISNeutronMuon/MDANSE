@@ -5,7 +5,7 @@ rem BUILD_TARGET
 rem MDANSE_DEPENDENCIES_DIR
 rem MDANSE_TEMPORARY_INSTALLATION_DIR
 
-cd "%MDANSE_SOURCE_DIR%"
+cd %MDANSE_SOURCE_DIR%
 
 rem Set the path to python executable
 set PYTHON_EXE=%MDANSE_TEMPORARY_INSTALLATION_DIR%\\python.exe
@@ -16,28 +16,12 @@ rem For the sake of code safety, this should be the same framework used to build
 rem see http://p-nand-q.com/python/building-python-27-with-vs2010.html for more info
 set VS90COMNTOOLS=C:\Users\\ci\\AppData\\Local\\Programs\\Common\\Microsoft\\Visual C++ for Python\\9.0\\Common7\\Tools
 
-%PYTHON_EXE% setup.py build_api
+%PYTHON_EXE% setup.py build_api build_help install
 
 set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build
 if %STATUS% neq 0 (
-    echo "Failed to build MDANSE API"
-    exit %STATUS%
-)
-
-%PYTHON_EXE% setup.py build_help
-
-set STATUS=%ERRORLEVEL%
-rem Exit now if unable to build
-if %STATUS% neq 0 (
-    echo "Failed to build MDANSE embedded documentation"
-    exit %STATUS%
-)
-
-%PYTHON_EXE% setup.py install
-rem Exit now if unable to install
-if %STATUS% neq 0 (
-    echo "Failed to install MDANSE"
+    echo "Failed to build MDANSE Documentation"
     exit %STATUS%
 )
 
