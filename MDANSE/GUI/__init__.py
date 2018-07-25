@@ -2,11 +2,17 @@ import glob
 import os
 import platform
 
+import wx
+
+from MDANSE import PLATFORM
 from MDANSE.Externals.pubsub import pub as PUBLISHER
 
 # Hack for the (in)famous "(python:865): LIBDBUSMENU-GLIB-WARNING **: Trying to remove a child that doesn't believe we're it's parent."
 if platform.dist()[0].lower() == "ubuntu":
     os.environ["UBUNTU_MENUPROXY"] = "0" 
+
+if PLATFORM.name == "macos":
+    wx.SystemOptions.SetOption("osx.openfiledialog.always-show-types","1")
         
 from MDANSE import REGISTRY
 from MDANSE.GUI.Plugins.DataPlugin import DataPlugin 
