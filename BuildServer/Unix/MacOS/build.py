@@ -29,7 +29,7 @@ if sys.platform.startswith('darwin'):
         'dist_dir': os.path.join(os.environ['CI_TEMP_DIR'],'dist'),
         'graph': False,
         'xref': False,
-        'packages' : ["MDANSE","MMTK","Scientific"]
+        'packages' : ["MDANSE","MMTK","Scientific","matplotlib"]
     }
 
     setup(
