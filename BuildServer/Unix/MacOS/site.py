@@ -586,9 +586,10 @@ def _script():
         print textwrap.dedent(help % (sys.argv[0], os.pathsep))
         sys.exit(10)
 
-site_file_dir = os.path.abspath(os.path.dirname(__file__))
-contents_dir = os.path.join(*([site_file_dir]+[os.path.pardir]*6))
-resources_dir = os.path.abspath(os.path.join(contents_dir,'Resources','lib','python2.7'))
+new_sys_path = [p for p in sys.path if not p.startswith("/System") and not p.startswith("/Library")]
+sys.path = new_sys_path
+
+resources_dir = os.path.abspath(os.path.join(os.path.dirname(sys.executable),'..','Resources','lib','python2.7'))
 
 sys.path.append(resources_dir)
 sys.path.append(os.path.join(resources_dir,'lib-dynload'))

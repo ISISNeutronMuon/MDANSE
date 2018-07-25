@@ -87,7 +87,8 @@ ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python
 ## In order that the modified python in the bundle import the zipped sitepackages located in Contents/Resources we provide a modified site.py that will
 ## update the sys.path accordingly
 
-#cp ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Frameworks/Python.framework/Versions/2.7/lib/python2.7/.
+cp ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
+cp ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/.
 
 chmod 777 ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/change_dylib_path.sh
 ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/change_dylib_path.sh
