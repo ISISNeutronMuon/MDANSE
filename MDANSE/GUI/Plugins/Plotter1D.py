@@ -30,10 +30,12 @@ Created on Apr 10, 2015
 :author: Gael Goret, Bachir Aoun, Eric C. Pellegrini
 '''
 
+from distutils.version import LooseVersion
 import os
 
 import numpy
 
+import matplotlib
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg, NavigationToolbar2WxAgg
 from matplotlib.figure import Figure
 from matplotlib.colors import LogNorm, Normalize
@@ -64,7 +66,11 @@ class Plotter1D(wx.Panel):
         ### Initialize variables ###
         self.parent = parent
         self.figure = Figure(figsize=(5,4), dpi=None)
-        self.axes = self.figure.add_axes( (10,10,10,10), frameon=True, facecolor='b')
+        
+        if LooseVersion(matplotlib.__version__) < LooseVersion("2.0.0"):
+            self.axes = self.figure.add_axes( (10,10,10,10), frameon=True, axis_bgcolor='b')
+        else:
+            self.axes = self.figure.add_axes( (10,10,10,10), frameon=True, facecolor='b')
         self.canvas = FigureCanvasWxAgg( self, wx.ID_ANY, self.figure )
         self.toolbar = NavigationToolbar2WxAgg(self.canvas)
         self.plots = {}
