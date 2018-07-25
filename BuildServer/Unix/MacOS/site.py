@@ -64,7 +64,7 @@ import __builtin__
 import traceback
 
 # Prefixes for site-packages; add additional prefixes like /usr/local here
-PREFIXES = [sys.prefix, sys.exec_prefix]
+PREFIXES = []
 # Enable per user site-packages directory
 # set it to False to disable the feature or True to force the feature
 ENABLE_USER_SITE = None
@@ -75,6 +75,9 @@ ENABLE_USER_SITE = None
 USER_SITE = None
 USER_BASE = None
 
+resources_dir = os.path.abspath(os.path.join(os.path.dirname(sys.executable),'..','Resources','lib','python2.7'))
+
+sys.path.append(os.path.join(resources_dir,'site-packages.zip'))
 
 def makepath(*paths):
     dir = os.path.join(*paths)
@@ -585,15 +588,6 @@ def _script():
         import textwrap
         print textwrap.dedent(help % (sys.argv[0], os.pathsep))
         sys.exit(10)
-
-new_sys_path = [p for p in sys.path if not p.startswith("/System") and not p.startswith("/Library")]
-sys.path = new_sys_path
-
-resources_dir = os.path.abspath(os.path.join(os.path.dirname(sys.executable),'..','Resources','lib','python2.7'))
-
-sys.path.append(resources_dir)
-sys.path.append(os.path.join(resources_dir,'lib-dynload'))
-sys.path.append(os.path.join(resources_dir,'site-packages.zip'))
 
 if __name__ == '__main__':
     _script()
