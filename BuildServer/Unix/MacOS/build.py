@@ -1,6 +1,9 @@
 # coding=utf-8
-import sys
+
 import os
+import sys
+
+import matplotlib
 
 if sys.platform.startswith('darwin'):
     from setuptools import setup
@@ -34,6 +37,7 @@ if sys.platform.startswith('darwin'):
     setup(
         name='MDANSE',
         app=APP,
+        data_files=matplotlib.get_py2exe_datafiles(),
         options={'py2app': OPTIONS},
         setup_requires=['py2app']
     )
