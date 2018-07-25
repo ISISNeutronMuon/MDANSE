@@ -1,14 +1,15 @@
 version 1.2.0
 --------------
 * ADDED issue #10 Implemented Gromacs trajectory converter
-* FIXED issue #20 Opening the theoretical help on MacOS is now OK
+* FIXED issue #25 The plotter is now compliant with all matplotlib versions (was crashing on ubuntu-xenial)
 * FIXED issue #21 "Save a template for new analysis" button produced an error
+* FIXED issue #20 Opening the theoretical help on MacOS is now OK
 * CHANGED (internal) MDANSE is now built with system python (2.7.10)
 
 version 1.1.3
 --------------
-* FIXED issue #17 The plotter crashed when user was clicking on "plot in new window"
 * FIXED issue #19 Users could not display user definitions
+* FIXED issue #17 The plotter crashed when user was clicking on "plot in new window"
 
 version 1.1.2
 --------------
@@ -21,8 +22,8 @@ version 1.1.1
 
 version 1.1.0
 --------------
-* ADDED issue #11 MDANSE is now compliant with 16.04 and 18.04 Ubuntu systems
 * ADDED issue #12 MDANSE has now three different development phases (beta, rc, release)
+* ADDED issue #11 MDANSE is now compliant with 16.04 and 18.04 Ubuntu systems
 * CHANGED Replacing all "output_file" occurences by "output_files" /!\ Modifies API /!\
 * FIXED issue #13 The changelog was not updated in the windows installer
 * FIXED issue #9 updated the macos build scripts in order to have an universal dmg
