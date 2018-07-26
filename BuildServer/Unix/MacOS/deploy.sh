@@ -57,7 +57,7 @@ cp -r /System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/* $
 cp /System/Library/Frameworks/Python.framework/Versions/2.7/Python ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
 chmod 777 ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
 
-install_name_tool -change /System/Library/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../lib/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
+install_name_tool -change /System/Library/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Resources/lib/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
 install_name_tool -id @loader_path/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
 
 ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python
@@ -92,6 +92,9 @@ cp ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/R
 
 chmod 777 ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/change_dylib_path.sh
 ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/change_dylib_path.sh
+
+# Comment the 'add_system_python_extras' call that add some System path to the sys.path
+"${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 
 #############################
 # Create DMG
