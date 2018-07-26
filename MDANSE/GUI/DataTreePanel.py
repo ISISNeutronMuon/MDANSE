@@ -102,9 +102,9 @@ class DataTreePanel(wx.Panel):
             if data is not None:
                 if data.GetData() == name:
                     return item
-                else:
-                    continue
-            return self.get_tree_item(item, name)
+            match = self.get_tree_item(item, name)
+            if match is not None:
+                return match  
         
         return None
     
@@ -154,6 +154,9 @@ class DataTreePanel(wx.Panel):
             
             item = self._tree.GetSelection()
             itemData = self._tree.GetItemData(item)
+
+            if itemData is None:
+                return
             
             if itemData.GetData() is None:
                 return
