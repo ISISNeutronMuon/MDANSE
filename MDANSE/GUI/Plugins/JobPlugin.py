@@ -119,11 +119,15 @@ class JobPlugin(ComponentPlugin):
         else:
             startupinfo = None
 
-        subprocess.check_output([sys.executable, filename],stderr=subprocess.STDOUT)
-        
-        time.sleep(1)
+        try:
+            subprocess.check_output([sys.executable, filename],stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            message = e.output
+        else:        
+            message = None
 
-        PUBLISHER.sendMessage("msg_start_job",message=None)
+        time.sleep(1)
+        PUBLISHER.sendMessage("msg_start_job",message=message)
         
     def on_save(self, event=None):
 
