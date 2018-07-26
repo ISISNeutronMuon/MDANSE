@@ -41,7 +41,6 @@ import wx.aui as aui
 
 from MDANSE import PLATFORM,REGISTRY
 from MDANSE.Framework.InputData.EmptyData import EmptyData
-from MDANSE.Framework.Jobs.IJob import JobError
 
 from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.DataController import DATA_CONTROLLER
@@ -123,10 +122,12 @@ class JobPlugin(ComponentPlugin):
         try:
             subprocess.check_output([sys.executable, filename],stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            raise JobError(e.output)
+            message = e.output
         else:        
-            time.sleep(1)
-            PUBLISHER.sendMessage("msg_start_job",message=None)
+            message = None
+
+        time.sleep(1)
+        PUBLISHER.sendMessage("msg_start_job",message=message)
         
     def on_save(self, event=None):
 
