@@ -1,6 +1,7 @@
 version 1.2.0
 --------------
-* ADDED issue #10 Implemented Gromacs trajectory converter
+* ADDED issue #27 Better error handling when an error occurs when running an analysis from the GUI
+* FIXED issue #25 The plotter is now compliant with all matplotlib versions (was crashing on ubuntu-xenial)
 * FIXED issue #25 The plotter is now compliant with all matplotlib versions (was crashing on ubuntu-xenial)
 * FIXED issue #21 "Save a template for new analysis" button produced an error
 * FIXED issue #20 Opening the theoretical help on MacOS is now OK
