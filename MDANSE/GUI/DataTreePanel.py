@@ -98,10 +98,13 @@ class DataTreePanel(wx.Panel):
     def get_tree_item(self, node, name):
                 
         for item in self.get_children(node):
-            if self._tree.GetItemData(item).GetData() == name:
-                return item
-            else:
-                return self.get_tree_item(item, name)
+            data = self._tree.GetItemData(item)
+            if data is not None:
+                if data.GetData() == name:
+                    return item
+                else:
+                    continue
+            return self.get_tree_item(item, name)
         
         return None
     
