@@ -40,10 +40,11 @@ class ComboCheckbox(wx.CheckListBox,wx.combo.ComboPopup):
     
     def GetControl(self):
         return self
-        
+            
     def GetAdjustedSize(self, minWidth, prefHeight, maxHeight):
-        return self.GetSize()
-    
+         size = self.GetControl().GetSize()
+         return wx.Size(minWidth, size[1])
+
     def GetStringValue(self): 
         return self.GetCheckedStrings()
     
