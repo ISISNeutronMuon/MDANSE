@@ -85,7 +85,7 @@ class CurrentCorrelationFunction(IJob):
                 
         self._outputData.add("q","line", numpy.array(self.configuration["q_vectors"]["shells"]), units="inv_nm") 
 
-        self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time","line", self.configuration['frames']['duration'], units='ps')
         self._outputData.add("time_window","line", self._instrResolution["time_window"], units="au") 
 
         self._outputData.add("omega","line", self._instrResolution["omega"],units='rad/ps')
@@ -128,11 +128,7 @@ class CurrentCorrelationFunction(IJob):
             traj = self.configuration['trajectory']['instance']
             
             qVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"]
-            
-            qVectors = traj.universe._boxToRealPointArray(qVectors.T)
-                                     
-            qVectors = qVectors.T
-            
+                        
             nQVectors = qVectors.shape[1]
             
             rho = {}

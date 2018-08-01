@@ -69,7 +69,7 @@ class GeneralAutoCorrelationFunction(IJob):
         self.numberOfSteps = self.configuration['atom_selection']['selection_length']
         
         # Will store the time.
-        self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time","line", self.configuration['frames']['duration'], units='ps')
 
         # Will store the mean square displacement evolution.
         for element in self.configuration['atom_selection']['unique_names']:

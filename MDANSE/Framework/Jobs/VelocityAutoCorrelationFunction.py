@@ -93,7 +93,7 @@ class VelocityAutoCorrelationFunction(IJob):
         self.numberOfSteps = self.configuration['atom_selection']['selection_length']
                         
         # Will store the time.
-        self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time","line", self.configuration['frames']['duration'], units='ps')
             
         # Will store the mean square displacement evolution.
         for element in self.configuration['atom_selection']['unique_names']:
@@ -160,15 +160,16 @@ class VelocityAutoCorrelationFunction(IJob):
         for element, number in nAtomsPerElement.items():
             self._outputData["vacf_%s" % element] /= number
 
-        if self.configuration['normalize']["value"]:
-            for element in nAtomsPerElement.keys():
-                self._outputData["vacf_%s" % element] = normalize(self._outputData["vacf_%s" % element], axis=0)
-                    
         weights = self.configuration["weights"].get_weights()
                     
         vacfTotal = weight(weights,self._outputData,nAtomsPerElement,1,"vacf_%s")
         self._outputData["vacf_total"][:] = vacfTotal
-                
+        
+        if self.configuration['normalize']["value"]:
+            for element in nAtomsPerElement.keys():
+                self._outputData["vacf_%s" % element] = normalize(self._outputData["vacf_%s" % element], axis=0)
+            self._outputData["vacf_total"] = normalize(self._outputData["vacf_total"], axis=0)
+                                    
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     

@@ -42,9 +42,6 @@ class OutputVariableError(Error):
 
 class OutputData(collections.OrderedDict):
     
-    def __setitem__(self,item,value):
-        pass
-    
     def add(self, dataName, dataType, data, **kwargs):
                 
         collections.OrderedDict.__setitem__(self,dataName,REGISTRY["output_variable"][dataType](data, dataName, **kwargs))
@@ -53,6 +50,10 @@ class OutputData(collections.OrderedDict):
         
         for fmt in formats:  
             REGISTRY["format"][fmt].write(basename, self, header)
+            
+    def __setitem__(self, item, value):
+        # Explicitely discard any changes on output data
+        pass
 
 class IOutputVariable(numpy.ndarray):
     '''

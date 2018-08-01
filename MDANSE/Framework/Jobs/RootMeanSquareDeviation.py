@@ -72,7 +72,7 @@ class RootMeanSquareDeviation(IJob):
         self._referenceIndex = self.configuration['reference_frame']['value']
         
         # Will store the time.
-        self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time","line", self.configuration['frames']['duration'], units='ps')
                                     
         # Will store the mean square deviation
         for element in self.configuration['atom_selection']['unique_names']:
