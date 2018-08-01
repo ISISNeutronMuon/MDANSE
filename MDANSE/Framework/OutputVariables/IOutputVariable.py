@@ -50,10 +50,6 @@ class OutputData(collections.OrderedDict):
         
         for fmt in formats:  
             REGISTRY["format"][fmt].write(basename, self, header)
-            
-    def __setitem__(self, item, value):
-        # Explicitely discard any changes on output data
-        pass
 
 class IOutputVariable(numpy.ndarray):
     '''
