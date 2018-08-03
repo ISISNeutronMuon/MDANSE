@@ -40,6 +40,7 @@ deploy:ubuntu_trusty:
     - develop
     - /^release-.*$/
     - /^hotfix-.*$/
+    - /^build-.*$/
     - tags
     - web
   when: on_success
@@ -78,6 +79,7 @@ deploy:ubuntu_xenial:
     - develop
     - /^release-.*$/
     - /^hotfix-.*$/
+    - /^build-.*$/
     - tags
     - web
   when: on_success
@@ -116,6 +118,7 @@ deploy:ubuntu_bionic:
     - develop
     - /^release-.*$/
     - /^hotfix-.*$/
+    - /^build-.*$/
     - tags
     - web
   when: on_success
@@ -161,6 +164,7 @@ deploy:osx:
     - develop
     - /^release-.*$/
     - /^hotfix-.*$/
+    - /^build-.*$/
     - tags
     - web
   when: on_success
@@ -207,6 +211,7 @@ deploy:windows:
     - develop
     - /^release-.*$/
     - /^hotfix-.*$/
+    - /^build-.*$/
     - tags
     - web
   when: on_success
