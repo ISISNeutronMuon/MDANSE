@@ -20,7 +20,7 @@ if sys.platform.startswith('darwin'):
     }
     OPTIONS = {
         'argv_emulation': False,# has to be False otherwise triggers problems with wxPython which lose some events that are captured by OS
-        'iconfile': os.path.join(project_dir,'MDANSE','GUI','Icons','mdanse.icns'),
+        'iconfile': os.path.join(project_dir,'Src','GUI','Icons','mdanse.icns'),
         'excludes': 'PyQt4',
 		'matplotlib_backends': '-',
         'optimize': '1',
