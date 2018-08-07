@@ -2,6 +2,8 @@ version 1.2.0
 --------------
 * ADDED issue #27 Better error handling when an error occurs when running an analysis from the GUI
 * ADDED issue #10 Implemented Gromacs trajectory converter
+* FIXED issue #32 Result of DCSF was incorrect (the QVectors changed over frames) /!\ Modifies job behavior
+* FIXED issue #31 Result of RMSD was incorrect (the sqrt was not applied) /!\ Modifies job behavior
 * FIXED issue #30 Normalization of VACF total value was incorrect
 * FIXED issue #29 Some jobs (AC, CCF, DOS, DACF, DCSF, DISF, GACF, MSD, PACF, RMSD, VACF) did not behave properly if first time of the MD is not zero
 * FIXED issue #28 The time step is now part of the settings for DCD based converters
