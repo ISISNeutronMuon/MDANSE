@@ -12,4 +12,3 @@ do
         install_name_tool -change /usr/local/lib/libwx_$l-3.0.dylib @executable_path/../Frameworks/libwx_$l-3.0.dylib $f
     done
 done
-

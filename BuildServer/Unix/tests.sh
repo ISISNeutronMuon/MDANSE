@@ -3,7 +3,6 @@
 #############################
 # PREPARATION
 #############################
-
 export PYTHONPATH=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages:${PYTHONPATH}
 
 #############################
@@ -43,4 +42,3 @@ if [ $status -ne 0 ]; then
 	echo -e "${RED}" "One or several functional tests failed"
 	exit $status
 fi
-

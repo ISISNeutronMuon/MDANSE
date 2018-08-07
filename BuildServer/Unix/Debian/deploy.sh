@@ -9,7 +9,6 @@ export DISTUTILS_DEBUG=0
 #############################
 # PREPARATION
 #############################
-
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 DEBIAN_ROOT_DIR=${CI_TEMP_DIR}/dist
@@ -75,4 +74,3 @@ if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
 	exit $status
 fi
-

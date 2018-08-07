@@ -14,6 +14,7 @@ version 1.2.0
 * FIXED issue #20 Opening the theoretical help on MacOS is now OK
 * FIXED issue #18 The items of the checkable combobox are now checkable on Windows
 * FIXED issue #16 The file filter combo box is now available from the input file dialog on MacOS
+* CHANGED (internal) issue #33 The macOS dmg is now ligher than before
 * CHANGED (internal) MDANSE is now built with system python (2.7.10)
 
 version 1.1.3
