@@ -52,7 +52,6 @@ ${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
 
 status=$?
 if [ $status -ne 0 ]; then
-	echo -e "${RED}" "Failed to build MDANSE""${NORMAL}"
+	echo -e "${RED}" "Failed to build/install MDANSE""${NORMAL}"
 	exit $status
 fi
-

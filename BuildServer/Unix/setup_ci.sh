@@ -32,10 +32,6 @@ if [ -z ${CI_COMMIT_REF_NAME} ]; then
     export CI_COMMIT_REF_NAME
 fi
 
-export RED="\\033[1;31m"
-export BLUE="\\033[1;34m"
-export NORMAL="\\033[0m"
-
 echo -e "${BLUE}""Commit id = ${CI_COMMIT_ID}""${NORMAL}"
 echo -e "${BLUE}""Branch name = ${CI_COMMIT_REF_NAME}""${NORMAL}"
 
@@ -64,5 +60,3 @@ else
 	fi
 fi
 export VERSION_NAME
-
-

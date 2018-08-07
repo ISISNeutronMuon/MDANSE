@@ -1,9 +1,4 @@
 @echo off
-rem VERSION_NAME
-rem MDANSE_SOURCE_DIR
-rem BUILD_TARGET
-rem MDANSE_DEPENDENCIES_DIR
-rem MDANSE_TEMPORARY_INSTALLATION_DIR
 
 rem Set the location of the MDANSE CI scripts
 set BUILD_SCRIPT_DIR=%MDANSE_SOURCE_DIR%\\BuildServer\\Windows
