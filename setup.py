@@ -45,22 +45,17 @@ QHULL_INCLUDE_DIR = INCLUDE_DIR + [EXTENSIONS_PATH] + [os.path.join(QHULL_DIR,"e
 def is_package(path):
     return (os.path.isdir(path) and os.path.isfile(os.path.join(path, '__init__.py')))
 
-def find_packages(path, base="", exclude=None):
+def find_packages(path, base=None, exclude=None):
 
-    packages = {}
+    packages = []
 
-    for item in os.listdir(path):
-        d = os.path.join(path, item)
-        if exclude is not None and (os.path.abspath(d) == os.path.abspath(exclude)):
-            continue
-        if is_package(d):
-            if base:
-                module_name = "%(base)s.%(item)s" % vars()
-            else:
-                module_name = item
-            packages[module_name] = d
-            packages.update(find_packages(d, module_name, exclude))
-            
+    for root,dirs,files in os.walk(path):
+        if "__init__.py" in files:
+            if base is not None:
+                root = root.replace(path,base)
+            package = root.replace(os.sep,".")
+            packages.append(package)
+
     return packages
 
 def find_package_data(where='.', package='', exclude=EXCLUDE, exclude_directories=EXCLUDE_DIRECTORIES, only_in_packages=True, show_ignored=False):
@@ -138,17 +133,16 @@ def find_data(where=".", exclude=EXCLUDE, exclude_directories=EXCLUDE_DIRECTORIE
 #################################
 
 PACKAGE_INFO = {}
-execfile('MDANSE/__pkginfo__.py', {}, PACKAGE_INFO)
+execfile('Src/__pkginfo__.py', {}, PACKAGE_INFO)
 
-PACKAGES = find_packages(path=".")
-PACKAGES = PACKAGES.keys()
+PACKAGES = find_packages(path="Src",base="MDANSE")
 
 #################################
 # Package data section
 #################################
 
 # Retrieve all the data related to the MDANSE package.
-PACKAGE_DATA = find_package_data(where='MDANSE', package='MDANSE', show_ignored=False)
+PACKAGE_DATA = find_package_data(where='Src', package='MDANSE', show_ignored=False)
 
 #################################
 # User data section
@@ -305,6 +299,7 @@ setup (name             = "MDANSE",
        license          = PACKAGE_INFO["__license__"],
        packages         = PACKAGES,
        package_data     = PACKAGE_DATA,
+       package_dir      = {"MDANSE":"Src"},
        data_files       = DATA_FILES,
        platforms        = ['Unix','Windows'],
        ext_modules      = EXTENSIONS,

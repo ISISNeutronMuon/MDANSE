@@ -1,5 +1,5 @@
 #!/bin/sh
 
 cd ../Tests/
-coverage run --source=../MDANSE/ ../Tests/AllTests.py
-coverage html --omit=../MDANSE/Externals/*,../MDANSE/GUI/*,../MDANSE/Framework/Plugins/*,../MDANSE/Framework/ConfiguratorWidgets/*
+coverage run --source=../Src/ ../Tests/AllTests.py
+coverage html --omit=../Src/Externals/*,../Src/GUI/*,../Src/Framework/Plugins/*,../Src/Framework/ConfiguratorWidgets/*
