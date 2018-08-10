@@ -2,6 +2,7 @@ version 1.2.0
 --------------
 * ADDED issue #27 Better error handling when an error occurs when running an analysis from the GUI
 * ADDED issue #10 Implemented Gromacs trajectory converter
+* FIXED issue #35 Result of RBT was incorrect /!\ Modifies job behavior
 * FIXED issue #32 Result of DCSF was incorrect (the QVectors changed over frames) /!\ Modifies job behavior
 * FIXED issue #31 Result of RMSD was incorrect (the sqrt was not applied) /!\ Modifies job behavior
 * FIXED issue #30 Normalization of VACF total value was incorrect /!\ Modifies job behavior
