@@ -132,7 +132,7 @@ class RigidBodyTrajectory(IJob):
             # Compose with the CMS translation if the removeTranslation flag is set off.
             else:
                 # The transformation matrix corresponding to the selected frame in the RBT.
-                transfo = Translation(Vector(self._coms[group_index,frame,:]))*transfo
+                transfo = Translation(Vector(self._coms[group_id,index,:]))*transfo
 
                              
             # Loop over the atoms of the group to set the RBT trajectory.
