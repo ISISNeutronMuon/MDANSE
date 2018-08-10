@@ -4,12 +4,12 @@ version 1.2.0
 * ADDED issue #10 Implemented Gromacs trajectory converter
 * FIXED issue #32 Result of DCSF was incorrect (the QVectors changed over frames) /!\ Modifies job behavior
 * FIXED issue #31 Result of RMSD was incorrect (the sqrt was not applied) /!\ Modifies job behavior
-* FIXED issue #30 Normalization of VACF total value was incorrect
-* FIXED issue #29 Some jobs (AC, CCF, DOS, DACF, DCSF, DISF, GACF, MSD, PACF, RMSD, VACF) did not behave properly if first time of the MD is not zero
-* FIXED issue #28 The time step is now part of the settings for DCD based converters
+* FIXED issue #30 Normalization of VACF total value was incorrect /!\ Modifies job behavior
+* FIXED issue #29 Some jobs (AC, CCF, DOS, DACF, DCSF, DISF, GACF, MSD, PACF, RMSD, VACF) did not behave properly if first time of the MD is not zero /!\ Modifies jobs behaviors
+* FIXED issue #28 The time step is now part of the settings for DCD based converters /!\ Modifies jobs CHARMM, NAMD and XPLOR behaviors
 * FIXED issue #26 Data can be deleted from the GUI
 * FIXED issue #25 The plotter is now compliant with all matplotlib versions (was crashing on ubuntu-xenial)
-* FIXED issue #24 Q vectors in CCF Job were incorrect
+* FIXED issue #24 Q vectors in CCF Job were incorrect /!\ Modifies job behavior
 * FIXED issue #21 "Save a template for new analysis" button produced an error
 * FIXED issue #20 Opening the theoretical help on MacOS is now OK
 * FIXED issue #18 The items of the checkable combobox are now checkable on Windows
