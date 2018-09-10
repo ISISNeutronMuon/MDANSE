@@ -112,15 +112,13 @@ class JobPlugin(ComponentPlugin):
                         
         self._job.save(filename, parameters)
                                 
-        if PLATFORM.name == "windows":
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            startupinfo.wShowWindow = subprocess.SW_HIDE
-        else:
-            startupinfo = None
-
         try:
-            subprocess.check_output([sys.executable, filename],stderr=subprocess.STDOUT)
+            from subprocess import DEVNULL
+        except ImportError:
+            DEVNULL = os.open(os.devnull, os.O_RDWR)
+            
+        try:
+            subprocess.check_output([sys.executable, filename], stdin=DEVNULL, stderr=DEVNULL)
         except subprocess.CalledProcessError as e:
             message = e.output
         else:        
