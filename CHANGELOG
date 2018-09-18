@@ -3,12 +3,12 @@ version 1.2.0
 * ADDED issue #27 Better error handling when an error occurs when running an analysis from the GUI
 * ADDED issue #10 Implemented Gromacs trajectory converter
 * FIXED issue #36 Jobs could not be launched on Windows machines
-* FIXED issue #35 Result of RBT was incorrect /!\ Modifies job behavior
+* FIXED issue #35 Result of RBT was incorrect /!\ Modifies API (removes stepwise parameter) /!\ Modifies job behavior
 * FIXED issue #32 Result of DCSF was incorrect (the QVectors changed over frames) /!\ Modifies job behavior
 * FIXED issue #31 Result of RMSD was incorrect (the sqrt was not applied) /!\ Modifies job behavior
 * FIXED issue #30 Normalization of VACF total value was incorrect /!\ Modifies job behavior
-* FIXED issue #29 Some jobs (AC, CCF, DOS, DACF, DCSF, DISF, GACF, MSD, PACF, RMSD, VACF) did not behave properly if first time of the MD is not zero /!\ Modifies jobs behaviors
-* FIXED issue #28 The time step is now part of the settings for DCD based converters /!\ Modifies jobs CHARMM, NAMD and XPLOR behaviors
+* FIXED issue #29 Some jobs (AC, CCF, DOS, DACF, DCSF, DISF, GACF, GDISF, MSD, PACF, RMSD, VACF) did not behave properly if first time of the MD is not zero /!\ Modifies jobs behaviors
+* FIXED issue #28 The time step is now part of the settings for DCD based converters /!\ Modifies API (with default value) /!\ Modifies jobs CHARMM, NAMD and XPLOR behaviors
 * FIXED issue #26 Data can be deleted from the GUI
 * FIXED issue #25 The plotter is now compliant with all matplotlib versions (was crashing on ubuntu-xenial)
 * FIXED issue #24 Q vectors in CCF Job were incorrect /!\ Modifies job behavior
@@ -17,8 +17,9 @@ version 1.2.0
 * FIXED issue #18 The items of the checkable combobox are now checkable on Windows
 * FIXED issue #16 The file filter combo box is now available from the input file dialog on MacOS
 * CHANGED (internal) issue #34 source code is moved to Src/ instead of MDANSE/
+* CHANGED (internal) MDANSE can now be built without documentation
 * CHANGED (internal) issue #33 The macOS dmg is now ligher than before
-* CHANGED (internal) MDANSE is now built with system python (2.7.10)
+* CHANGED (internal) MDANSE is now built with system python on macOS (2.7.10)
 
 version 1.1.3
 --------------
