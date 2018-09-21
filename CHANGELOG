@@ -1,3 +1,7 @@
+version 1.2.1
+--------------
+* FIXED issue #39 Time scale in Gromacs converter was incorrect
+
 version 1.2.0
 --------------
 * ADDED issue #27 Better error handling when an error occurs when running an analysis from the GUI
