@@ -109,7 +109,7 @@ class GromacsConverter(Converter):
             self._universe.foldCoordinatesIntoBox()
                                                    
         # The current time.
-        t = times[0]*Units.fs
+        t = times[0]*Units.ps
 
         # Store a snapshot of the current configuration in the output trajectory.
         self._snapshot(data={'time': t})

@@ -27,7 +27,7 @@ __license__          = "GPL 3"
 
 __version__ = "1.3.0"
 
-__date__ = "27-06-2018"
+__date__ = "01-01-1970"
 
 __commit__ = "undefined"
 
