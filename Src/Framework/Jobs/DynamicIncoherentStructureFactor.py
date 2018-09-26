@@ -132,9 +132,10 @@ class DynamicIncoherentStructureFactor(IJob):
             #. index (int): The index of the step.\n
             #. x (any): The returned result(s) of run_step
         """
-                
-        for k,v in x.items():
-            self._outputData["f(q,t)_%s" % k][index,:] += v
+
+        if x is not None: 
+            for k,v in x.items():
+                self._outputData["f(q,t)_%s" % k][index,:] += v
                         
     def finalize(self):
         """
