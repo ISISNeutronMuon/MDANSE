@@ -52,7 +52,7 @@ class DynamicIncoherentStructureFactor(IJob):
         Initialize the input parameters and analysis self variables
         """
 
-        self.numberOfSteps = self.configuration['atom_selection']['selection_length']
+        self.numberOfSteps = self.configuration["q_vectors"]["n_shells"]
 
         self._nQShells = self.configuration["q_vectors"]["n_shells"]
 
@@ -88,34 +88,41 @@ class DynamicIncoherentStructureFactor(IJob):
             #. atomicSF (numpy.array): The atomic structure factor
         """
         
-        # get atom index
-        indexes = self.configuration['atom_selection']["indexes"][index]
-        masses = self.configuration['atom_selection']["masses"][index]
+        shell = self.configuration["q_vectors"]["shells"][index]
+        
+        if not shell in self.configuration["q_vectors"]["value"]:
+            return index, None
+            
+        else:
+
+            qVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"]
+
+
+            disf_per_q_shell = {}
+            for element in self.configuration['atom_selection']['unique_names']:
+                disf_per_q_shell[element] = numpy.zeros((self._nFrames,), dtype = numpy.float)
+
+            for i,atom_indexes in enumerate(self.configuration['atom_selection']["indexes"]):
+
+                masses = self.configuration['atom_selection']["masses"][i]
+
+                element = self.configuration['atom_selection']["names"][i]
+                        
+                series = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
+                                               atom_indexes,
+                                               first=self.configuration['frames']['first'],
+                                               last=self.configuration['frames']['last']+1,
+                                               step=self.configuration['frames']['step'],
+                                               weights=[masses])
                 
-        series = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
-                                       indexes,
-                                       first=self.configuration['frames']['first'],
-                                       last=self.configuration['frames']['last']+1,
-                                       step=self.configuration['frames']['step'],
-                                       weights=masses)
+                series = self.configuration['projection']["projector"](series)
+                                                                                    
+                rho = numpy.exp(1j*numpy.dot(series, qVectors))
+                res = correlation(rho, axis=0, average=1)
+                    
+                disf_per_q_shell[element] += res
         
-        series = self.configuration['projection']["projector"](series)
-
-        atomicSF = numpy.zeros((self._nQShells,self._nFrames), dtype=numpy.float64)
-
-        for i,q in enumerate(self.configuration["q_vectors"]["shells"]):
-                        
-            if not q in self.configuration["q_vectors"]["value"]:
-                continue
-            
-            qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
-                        
-            rho = numpy.exp(1j*numpy.dot(series, qVectors))
-            res = correlation(rho, axis=0, average=1)
-            
-            atomicSF[i,:] += res
-        
-        return index, atomicSF
+        return index, disf_per_q_shell
     
     
     def combine(self, index, x):
@@ -126,11 +133,9 @@ class DynamicIncoherentStructureFactor(IJob):
             #. x (any): The returned result(s) of run_step
         """
                 
-        element = self.configuration['atom_selection']["names"][index]
-        
-        self._outputData["f(q,t)_%s" % element] += x
-            
-    
+        for k,v in x.items():
+            self._outputData["f(q,t)_%s" % k][index,:] += v
+                        
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
