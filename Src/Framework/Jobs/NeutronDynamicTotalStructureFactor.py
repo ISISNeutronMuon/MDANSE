@@ -101,24 +101,26 @@ class DynamicTotalStructureFactor(IJob):
         self._indexesPerElement = self.configuration['atom_selection'].get_indexes()
 
         for element in self.configuration['atom_selection']['unique_names']:
-            self._outputData.add("f_inc(q,t)_%s" % element,"surface", (nQShells,self._nFrames), axis="q|time",  units="au")                                                 
+            self._outputData.add("f_inc(q,t)_%s" % element,"surface", (nQShells,self._nFrames), axis="q|time",  units="au")
             self._outputData.add("f_tot(q,t)_%s" % element,"surface", (nQShells,self._nFrames), axis="q|time",  units="au")
-            self._outputData.add("s_inc(q,f)_%s" % element,"surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps") 
-            self._outputData.add("s_tot(q,f)_%s" % element,"surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps") 
+            self._outputData.add("s_inc(q,f)_%s" % element,"surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps")
+            self._outputData.add("s_tot(q,f)_%s" % element,"surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps")
 
         for pair in self._elementsPairs:
-            if pair[0] != pair[1]:
-                continue
-            self._outputData.add("f_coh(q,t)_%s%s" % pair,"surface", (nQShells,self._nFrames), axis="q|time" , units="au")                                                                                                
-            self._outputData.add("s_coh(q,f)_%s%s" % pair,"surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps") 
+            self._outputData.add("f_coh(q,t)_%s%s" % pair,"surface", (nQShells,self._nFrames), axis="q|time" , units="au")
+            self._outputData.add("s_coh(q,f)_%s%s" % pair,"surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps")
 
-        self._outputData.add("f_coh(q,t)_total","surface", (nQShells,self._nFrames), axis="q|time", units="au")                                                 
-        self._outputData.add("f_inc(q,t)_total","surface", (nQShells,self._nFrames), axis="q|time", units="au")                                                 
-        self._outputData.add("f_tot(q,t)_total","surface", (nQShells,self._nFrames), axis="q|time", units="au")                                                 
+        self._outputData.add("f_coh(q,t)_total","surface", (nQShells,self._nFrames), axis="q|time", units="au")
+        self._outputData.add("f_inc(q,t)_total","surface", (nQShells,self._nFrames), axis="q|time", units="au")
+        self._outputData.add("f_coh_weighted(q,t)_total","surface", (nQShells,self._nFrames), axis="q|time", units="au")
+        self._outputData.add("f_inc_weighted(q,t)_total","surface", (nQShells,self._nFrames), axis="q|time", units="au")
+        self._outputData.add("f_tot(q,t)_total","surface", (nQShells,self._nFrames), axis="q|time", units="au")
 
-        self._outputData.add("s_coh(q,f)_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps") 
-        self._outputData.add("s_inc(q,f)_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps") 
-        self._outputData.add("s_tot(q,f)_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps") 
+        self._outputData.add("s_coh(q,f)_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps")
+        self._outputData.add("s_inc(q,f)_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps")
+        self._outputData.add("s_coh_weighted(q,f)_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps")
+        self._outputData.add("s_inc_weighted(q,f)_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps")
+        self._outputData.add("s_tot(q,f)_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="nm2/ps")
  
     def run_step(self, index):
         """
@@ -196,8 +198,6 @@ class DynamicTotalStructureFactor(IJob):
             rho,disf = x
 
             for pair in self._elementsPairs:
-                if pair[0] != pair[1]:
-                    continue
                 corr = correlation(rho[pair[0]],rho[pair[1]], average=1)
                 self._outputData["f_coh(q,t)_%s%s" % pair][index,:] += corr
 
@@ -208,42 +208,50 @@ class DynamicTotalStructureFactor(IJob):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
-        
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
+        
+        # Compute concentrations
+        nTotalAtoms = 0
+        for val in nAtomsPerElement.values():
+            nTotalAtoms += val
+
+        # Compute coherent functions and structure factor
         for pair in self._elementsPairs:
-            if pair[0] != pair[1]:
-                continue
+            b_coh1 = ELEMENTS[pair[0],"b_coherent"]
+            b_coh2 = ELEMENTS[pair[1],"b_coherent"]
             ni = nAtomsPerElement[pair[0]]
             nj = nAtomsPerElement[pair[1]]
+            ci = float(ni)/nTotalAtoms
+            cj = float(ni)/nTotalAtoms
+            
             self._outputData["f_coh(q,t)_%s%s" % pair][:] /= numpy.sqrt(ni*nj)
             self._outputData["s_coh(q,f)_%s%s" % pair][:] = get_spectrum(self._outputData["f_coh(q,t)_%s%s" % pair],
                                                                          self.configuration["instrument_resolution"]["time_window"],
                                                                          self.configuration["instrument_resolution"]["time_step"],
                                                                          axis=1)
-                
-        for element, number in nAtomsPerElement.items():
-            self._outputData["f_inc(q,t)_%s" % element][:] /= number
+            self._outputData["f_coh_weighted(q,t)_total"][:] += self._outputData["f_coh(q,t)_%s%s" % pair][:] * numpy.sqrt(ci*cj) * b_coh1 * b_coh2
+            self._outputData["s_coh_weighted(q,f)_total"][:] += self._outputData["s_coh(q,f)_%s%s" % pair][:] * numpy.sqrt(ci*cj) * b_coh1 * b_coh2
+        
+        # Compute incoherent functions and structure factor
+        for element, ni in nAtomsPerElement.items():
+            b_inc = ELEMENTS[element,"b_incoherent"]
+            ni = nAtomsPerElement[element]
+            ci = float(ni)/nTotalAtoms
+            
+            self._outputData["f_inc(q,t)_%s" % element][:] /= ni
             self._outputData["s_inc(q,f)_%s" % element][:] = get_spectrum(self._outputData["f_inc(q,t)_%s" % element],
                                                                           self.configuration["instrument_resolution"]["time_window"],
                                                                           self.configuration["instrument_resolution"]["time_step"],
                                                                           axis=1)
-
-                
-        for element, number in nAtomsPerElement.items():
-
-            b_coh = ELEMENTS[element,"b_coherent"]
-            b_inc = ELEMENTS[element,"b_incoherent"]
-
-            self._outputData["f_tot(q,t)_%s" % element][:] += b_coh*self._outputData["f_coh(q,t)_%s%s" % (element,element)][:]
-            self._outputData["f_tot(q,t)_%s" % element][:] += b_inc*self._outputData["f_inc(q,t)_%s" % element][:]
-
-            self._outputData["s_tot(q,f)_%s" % element][:] += b_coh*self._outputData["s_coh(q,f)_%s%s" % (element,element)][:]
-            self._outputData["s_tot(q,f)_%s" % element][:] += b_inc*self._outputData["s_inc(q,f)_%s" % element][:]
+            self._outputData["f_inc_weighted(q,t)_total"][:] += self._outputData["f_inc(q,t)_%s" % element][:] * ci * b_inc**2
+            self._outputData["s_inc_weighted(q,f)_total"][:] += self._outputData["s_inc(q,f)_%s" % element][:] * ci * b_inc**2
+        
+        # Compute total sum
+        self._outputData["f_tot(q,t)_total"][:] = self._outputData["f_coh_weighted(q,t)_total"][:] + self._outputData["f_inc_weighted(q,t)_total"][:]
+        self._outputData["s_tot(q,f)_total"][:] = self._outputData["s_coh_weighted(q,f)_total"][:] + self._outputData["s_inc_weighted(q,f)_total"][:]
        
-
+        #
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
-        
-        self.configuration['trajectory']['instance'].close()     
+        self.configuration['trajectory']['instance'].close()
   
-REGISTRY['dtsf'] = DynamicTotalStructureFactor
-        
+REGISTRY['ndtsf'] = NeutronDynamicTotalStructureFactor
