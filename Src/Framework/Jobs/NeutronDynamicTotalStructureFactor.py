@@ -42,19 +42,19 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import correlation, get_spectrum
 from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
-class DynamicTotalStructureFactorError(Error):
+class NeutronDynamicTotalStructureFactorError(Error):
     pass
 
-class DynamicTotalStructureFactor(IJob):
+class NeutronDynamicTotalStructureFactor(IJob):
     """
     Computes the dynamic total structure factor for a set of atoms as the sum of the incoherent and coherent structure factors
     """
     
-    label = "Dynamic Total Structure Factor"
+    label = "Neutron Dynamic Total Structure Factor"
 
     category = ('Analysis','Scattering',)
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})
@@ -72,10 +72,10 @@ class DynamicTotalStructureFactor(IJob):
         """
 
         if not self.configuration['trajectory']['instance'].universe.is_periodic:
-            raise DynamicCoherentStructureFactorError('Cannot start %s analysis on non-periodic system' % self.label)
+            raise NeutronDynamicTotalStructureFactorError('Cannot start %s analysis on non-periodic system' % self.label)
         
         if not self.configuration['q_vectors']['is_lattice']:
-            raise DynamicCoherentStructureFactorError('The Q vectors must be generated on a lattice to run %s analysis' % self.label)
+            raise NeutronDynamicTotalStructureFactorError('The Q vectors must be generated on a lattice to run %s analysis' % self.label)
         
         self.numberOfSteps = self.configuration['q_vectors']['n_shells']
         
