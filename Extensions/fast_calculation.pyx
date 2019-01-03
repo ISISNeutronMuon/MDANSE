@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-#################################################
-# fast calculation module of trajectory-viewer  #
-# Gael Goret for the Institut Laue-Langevin     #
-# gael.goret@ill.eu                             #
-#################################################
-
-
 import cython
 cimport numpy as np
 from numpy cimport ndarray

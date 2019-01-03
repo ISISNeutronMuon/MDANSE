@@ -1,6 +1,3 @@
-# Pour compiler:
-#      python setup.py build_ext --inplace
-
 import glob
 import os
 import sys

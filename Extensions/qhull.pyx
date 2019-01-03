@@ -1,9 +1,3 @@
-"""
-Wrappers for Qhull triangulation, plus some additional N-D geometry utilities
-
-.. versionadded:: 0.9
-
-"""
 #
 # Copyright (C)  Pauli Virtanen, 2010.
 #
