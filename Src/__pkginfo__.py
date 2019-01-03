@@ -1,3 +1,17 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Src/__pkginfo__.py
+# @brief     Implements module/class/test __pkginfo__
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2013-now
+# @authors   Scientific Computing Group at ILL (see AUTHORS)
+#
+# **************************************************************************
+
 __description__  = "Analysis of Molecular Dynamics trajectories"
 
 __long_description__ = """MDANSE is an interactive program for the analysis of Molecular

@@ -1,3 +1,17 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Src/Externals/pubsub/core/imp2.py
+# @brief     Implements module/class/test imp2
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2013-now
+# @authors   Scientific Computing Group at ILL (see AUTHORS)
+#
+# **************************************************************************
+
 """
 The _resolve_name and _import_module were taken from the backport of 
 importlib.import_module from 3.x to 2.7. Thanks to the Python developers

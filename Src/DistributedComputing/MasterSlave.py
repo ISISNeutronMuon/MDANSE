@@ -1,3 +1,17 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Src/DistributedComputing/MasterSlave.py
+# @brief     Implements module/class/test MasterSlave
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2013-now
+# @authors   Scientific Computing Group at ILL (see AUTHORS)
+#
+# **************************************************************************
+
 '''
 Distributed computing using a master-slave model
 

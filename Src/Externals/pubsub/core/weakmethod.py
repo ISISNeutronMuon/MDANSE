@@ -1,3 +1,17 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Src/Externals/pubsub/core/weakmethod.py
+# @brief     Implements module/class/test weakmethod
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2013-now
+# @authors   Scientific Computing Group at ILL (see AUTHORS)
+#
+# **************************************************************************
+
 """
 This module provides a basic "weak method" implementation, WeakMethod. It uses
 weakref.WeakRef which, used on its own, produces weak methods that are dead on

@@ -1,3 +1,17 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Src/Externals/pubsub/core/topicdefnprovider.py
+# @brief     Implements module/class/test topicdefnprovider
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2013-now
+# @authors   Scientific Computing Group at ILL (see AUTHORS)
+#
+# **************************************************************************
+
 """
 :copyright: Copyright since 2006 by Oliver Schoenborn, all rights reserved.
 :license: BSD, see LICENSE_BSD_Simple.txt for details.

@@ -1,3 +1,17 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Src/GUI/ComboWidgets/ComboCheckbox.py
+# @brief     Implements module/class/test ComboCheckbox
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2013-now
+# @authors   Scientific Computing Group at ILL (see AUTHORS)
+#
+# **************************************************************************
+
 import wx.combo
 
 class ComboCheckbox(wx.CheckListBox,wx.combo.ComboPopup):

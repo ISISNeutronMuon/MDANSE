@@ -1,3 +1,17 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Src/Externals/pubsub/core/arg1/publisher.py
+# @brief     Implements module/class/test publisher
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2013-now
+# @authors   Scientific Computing Group at ILL (see AUTHORS)
+#
+# **************************************************************************
+
 """
 Mixin for publishing messages to a topic's listeners. This will be
 mixed into topicobj.Topic so that a user can use a Topic object to

@@ -1,3 +1,17 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Extensions/xtc/xtc.pyx
+# @brief     Implements module/class/test xtc
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2013-now
+# @authors   Scientific Computing Group at ILL (see AUTHORS)
+#
+# **************************************************************************
+
 # cython: c_string_type=str, c_string_encoding=ascii
 ##############################################################################
 # MDTraj: A Python Library for Loading, Saving, and Manipulating

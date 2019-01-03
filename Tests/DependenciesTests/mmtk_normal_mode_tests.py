@@ -1,3 +1,17 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Tests/DependenciesTests/mmtk_normal_mode_tests.py
+# @brief     Implements module/class/test mmtk_normal_mode_tests
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2013-now
+# @authors   Scientific Computing Group at ILL (see AUTHORS)
+#
+# **************************************************************************
+
 # Normal mode tests
 #
 # Written by Konrad Hinsen

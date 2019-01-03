@@ -1,3 +1,17 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Src/Externals/svgfig/svgfig.py
+# @brief     Implements module/class/test svgfig
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2013-now
+# @authors   Scientific Computing Group at ILL (see AUTHORS)
+#
+# **************************************************************************
+
 # svgfig.py copyright (C) 2008 Jim Pivarski <jpivarski@gmail.com>
 # 
 # This program is free software; you can redistribute it and/or

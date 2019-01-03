@@ -1,3 +1,17 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Src/Framework/Formats/IFormat.py
+# @brief     Implements module/class/test IFormat
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2013-now
+# @authors   Scientific Computing Group at ILL (see AUTHORS)
+#
+# **************************************************************************
+
 class IFormat(object):
     '''
     This is the base class for writing MDANSE output data. In MDANSE, the output of an analysis can be written in different file format.
