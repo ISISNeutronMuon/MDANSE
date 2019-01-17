@@ -4,6 +4,6 @@ SHELL ["/bin/bash", "-c"]
 
 VOLUME builds
 
-RUN source ./BuildServer/Unix/Debian/definitions.sh; source ./BuildServer/Unix/setup_ci.sh ; ./BuildServer/Unix/Debian/deploy.sh
+RUN source ./BuildServer/Unix/Debian/definitions.sh; source ./BuildServer/Unix/setup_ci.sh ; source ./BuildServer/Unix/bionic_dependencies_modification.sh ; ./BuildServer/Unix/Debian/deploy.sh
 
 
