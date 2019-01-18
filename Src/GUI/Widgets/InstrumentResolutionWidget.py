@@ -28,11 +28,11 @@ from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 class InstrumentResolutionDialog(wx.Dialog):
     
     def __init__(self, parent=None, nSteps=100, timeStep=1.0):
-        
+
         wx.Dialog.__init__(self, parent, wx.ID_ANY, title="Instrument resolution", style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
 
         self._parent = parent
-    
+
         self._nSteps = nSteps
         
         self._timeStep = timeStep
@@ -63,9 +63,9 @@ class InstrumentResolutionDialog(wx.Dialog):
 
         sb = wx.StaticBox(self, wx.ID_ANY)
         sbSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
-        self._cancel = wx.Button(self, wx.ID_ANY, label="Cancel")
+        self._cancel = wx.Button(self, wx.ID_ANY, label="Discard and quit")
         self._plot = wx.Button(self, wx.ID_ANY, label="Plot")
-        self._ok = wx.Button(self, wx.ID_ANY, label="OK")
+        self._ok = wx.Button(self, wx.ID_ANY, label="Save and quit")
         sbSizer.Add(self._cancel, 0, wx.ALL, 5)
         sbSizer.Add((-1,-1), 1, wx.ALL|wx.EXPAND, 5)
         sbSizer.Add(self._plot, 0, wx.ALL, 5)
@@ -93,9 +93,9 @@ class InstrumentResolutionDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.on_plot_kernel, self._plot)
         self.Bind(wx.EVT_BUTTON, self.on_ok, self._ok)
         self.Bind(wx.EVT_CHOICE, self.on_select_kernel, self._kernelChoice)
-        self.Bind(wx.EVT_CLOSE, self.on_cancel)
+        #self.Bind(wx.EVT_CLOSE, self.on_close)
         
-        self.on_plot_kernel()
+        self.plot()
                         
     @property
     def value(self):
@@ -103,10 +103,10 @@ class InstrumentResolutionDialog(wx.Dialog):
         return self._value
                 
     def on_cancel(self, event):
-        
+    
         self._value = None
-                                
-        self.Destroy()
+    
+        self.Close()
         
     def on_ok(self, event):
         
@@ -115,9 +115,13 @@ class InstrumentResolutionDialog(wx.Dialog):
         
         self._value = (self._currentKernel, self._parametersPanel.get_value())
         
-        self.Destroy()
+        self.Close()
         
-    def on_plot_kernel(self, event=None):
+    def on_plot_kernel(self, event):
+        
+        self.plot()
+        
+    def plot(self):
         
         if not self._parametersPanel.validate():
             return
@@ -142,7 +146,7 @@ class InstrumentResolutionDialog(wx.Dialog):
                                 
         self.select_kernel(event.GetString())
         
-        self.on_plot_kernel()
+        self.plot()
         
     def select_kernel(self, kernelName):
                 
@@ -159,7 +163,7 @@ class InstrumentResolutionDialog(wx.Dialog):
         
         self._parametersPanel = ConfigurationPanel(self, resolution)
         for w in self._parametersPanel.widgets.values():
-            self.Bind(wx.EVT_TEXT_ENTER,self.on_plot_kernel,w.widget)
+            self.Bind(wx.EVT_TEXT_ENTER,self.plot,w.widget)
         
         self._parametersSizer.Add(self._parametersPanel, 0, wx.ALL|wx.EXPAND, 5)
                 
