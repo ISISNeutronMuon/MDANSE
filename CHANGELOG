@@ -1,3 +1,5 @@
+* FIXED issue #41 Instrument resolution window frozes GUI on macOS
+
 version 1.2.1
 --------------
 * FIXED issue #39 Time scale in Gromacs converter was incorrect
