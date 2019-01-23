@@ -1,3 +1,4 @@
+* ADDED Neutron Dynamic Total Structure Factor analysis
 * FIXED issue #41 Instrument resolution window froze GUI on macOS
 * FIXED issue #40 MDANSE could not be used on Ubuntu Bionic systems (due to vtk dependency name)
 
