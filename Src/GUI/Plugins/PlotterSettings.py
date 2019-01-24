@@ -15,8 +15,20 @@
 import matplotlib
 
 import wx
+from MDANSE.Core.Error import Error
+from MDANSE.Externals.magnitude import magnitude
 
-class ImageSettingsDialog(wx.Dialog):
+class UnitsSettingsError(Error):
+    pass
+
+class UnitsSettingsDialog():
+    def checkUnits(self, oldUnit, newUnit):
+        try:
+            magnitude.mg(1., oldUnit, newUnit).toval()
+        except magnitude.MagnitudeError:
+            raise UnitsSettingsError("the axis unit (%s) is inconsistent with the current unit (%s) "%(newUnit, oldUnit))
+
+class ImageSettingsDialog(wx.Dialog, UnitsSettingsDialog):
     
     def __init__(self, parent=None):
         wx.Dialog.__init__(self, parent, wx.ID_ANY, title="Image Settings", style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
@@ -149,7 +161,9 @@ class ImageSettingsDialog(wx.Dialog):
         self.normType.SetValue(self.parent.normType)
         
     def set_settings(self, event = None):
-        
+        self.checkUnits(self.parent.Xunit, self.Xunit.GetValue())
+        self.checkUnits(self.parent.Yunit, self.Yunit.GetValue())
+          
         self.parent.figure.gca().set_title(self.title.GetValue())
         self.parent.Xlabel = self.Xlabel.GetValue()
         self.parent.Ylabel = self.Ylabel.GetValue()
@@ -305,6 +319,7 @@ class GeneralSettingsDialog(wx.Dialog):
         self.grid_color_picker.SetColour(wx.Colour(int(self.parent.gridColor[0]*255),int(self.parent.gridColor[1]*255),int(self.parent.gridColor[2]*255)))
         
     def set_settings(self, event = None):
+        
         self.parent.figure.gca().set_title(self.title.GetValue())
         self.parent.Xlabel = self.Xlabel.GetValue()
         self.parent.Ylabel = self.Ylabel.GetValue()
@@ -353,7 +368,7 @@ class GeneralSettingsDialog(wx.Dialog):
         self.MakeModal(False)
         self.Destroy()
 
-class AxesSettingsDialog(wx.Dialog):
+class AxesSettingsDialog(wx.Dialog, UnitsSettingsDialog):
     
     def __init__(self, parent=None):
         
@@ -467,6 +482,10 @@ class AxesSettingsDialog(wx.Dialog):
         self.Yscale.SetValue(self.parent.Yscale)
         
     def set_settings(self, event = None):
+        # CheckUnits. checkUnits method will raise exception if needed
+        self.checkUnits(self.parent.Xunit, self.Xunit.GetValue())
+        self.checkUnits(self.parent.Yunit, self.Yunit.GetValue())
+        
         self.parent.Xunit = self.Xunit.GetValue()
         self.parent.Yunit = self.Yunit.GetValue()
          
