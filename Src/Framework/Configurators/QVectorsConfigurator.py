@@ -49,28 +49,35 @@ class QVectorsConfigurator(IConfigurator):
         '''
 
         trajConfig = self._configurable[self._dependencies['trajectory']]
-
-        if UD_STORE.has_definition(trajConfig["basename"],"q_vectors",value):        
-            ud = UD_STORE.get_definition(trajConfig["basename"],"q_vectors",value)
-            self["parameters"] = ud['parameters']
-            self["type"] = ud['generator']
-            self["is_lattice"] = ud['is_lattice']
-            self["q_vectors"] = ud['q_vectors']
-            
+        if isinstance(value,basestring): 
+            if UD_STORE.has_definition(trajConfig["basename"],"q_vectors",value):
+                ud = UD_STORE.get_definition(trajConfig["basename"],"q_vectors",value)
+                self["parameters"] = ud['parameters']
+                self["type"] = ud['generator']
+                self["is_lattice"] = ud['is_lattice']
+                self["q_vectors"] = ud['q_vectors']
+            else:
+                raise ConfiguratorError("Q vectors user definition %s is not stored on this machine" % value, self)
+                
         else:
-
-            generator, parameters = value
-            generator = REGISTRY["q_vectors"][generator](trajConfig["universe"])
-            generator.setup(parameters)
-            generator.generate()
-                        
-            if not generator.configuration['q_vectors']:
-                raise ConfiguratorError("no Q vectors could be generated", self)
-
-            self["parameters"] = parameters
-            self["type"] = generator._type
-            self["is_lattice"] = generator.is_lattice
-            self["q_vectors"] = generator.configuration['q_vectors']
+            if isinstance(value,tuple):
+                try:
+                    generator, parameters = value
+                except ValueError:
+                    raise ConfiguratorError("Invalid q vectors settings %s" % value, self)
+                generator = REGISTRY["q_vectors"][generator](trajConfig["universe"])
+                generator.setup(parameters)
+                generator.generate()
+                            
+                if not generator.configuration['q_vectors']:
+                    raise ConfiguratorError("no Q vectors could be generated", self)
+    
+                self["parameters"] = parameters
+                self["type"] = generator._type
+                self["is_lattice"] = generator.is_lattice
+                self["q_vectors"] = generator.configuration['q_vectors']
+            else:
+                raise ConfiguratorError("Q vectors setting must be a tuple %s" % value, self)
                                         
         self["shells"] = self["q_vectors"].keys()
         self["n_shells"] = len(self["q_vectors"])    
