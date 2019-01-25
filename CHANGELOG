@@ -1,4 +1,5 @@
 * ADDED Neutron Dynamic Total Structure Factor analysis
+* ADDED User can now launch a script with qvector parameters instead of saved qvector definition
 * FIXED issue #42 Plotter units could be inconsistent
 * FIXED issue #41 Instrument resolution window froze GUI on macOS
 * FIXED issue #40 MDANSE could not be used on Ubuntu Bionic systems (due to vtk dependency name)
