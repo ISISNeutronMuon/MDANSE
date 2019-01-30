@@ -72,9 +72,9 @@ def get_weights(props, contents, dim):
         weights[elements] = numpy.float64(numpy.copy(fact))
                 
         if normFactor is None:
-            normFactor = numpy.abs(fact)
+            normFactor = fact
         else:
-            normFactor += numpy.abs(fact)
+            normFactor += fact
         
     for k in weights.keys():
         weights[k] /= numpy.float64(normFactor)
