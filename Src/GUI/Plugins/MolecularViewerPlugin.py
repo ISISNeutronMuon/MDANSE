@@ -252,11 +252,16 @@ class MolecularViewerPlugin(ComponentPlugin):
         self.SetFocusIgnoringChildren()
            
     def close(self):
-                
+        # Ensure unsubscription
+        self.__unsubscribe()
+        # Clear the viewer
         self.clear_universe()
 
     def __del__(self):
+        # Ensure unsubscription
+        self.__unsubscribe()
         
+    def __unsubscribe(self):
         PUBLISHER.unsubscribe(self.msg_set_selection, "msg_set_selection")
         PUBLISHER.unsubscribe(self.msg_switch_viewers_state, "msg_switch_viewers_state")
         PUBLISHER.unsubscribe(self.msg_clear_selection,'msg_clear_selection')                                
