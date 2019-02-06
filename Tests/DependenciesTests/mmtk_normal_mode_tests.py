@@ -108,12 +108,12 @@ class PeptideTest(unittest.TestCase):
         vmodes = NormalModes.VibrationalModes(self.universe,
                                               subspace=self.subspace)
         freq = vmodes.frequencies[6:]
-        self.assertAlmostEqual(freq[0],  3.29430105)
+        self.assertAlmostEqual(freq[0],  3.29430097)
         self.assertAlmostEqual(freq[1],  3.5216842)
         self.assertAlmostEqual(freq[2],  6.36658335)
         self.assertAlmostEqual(freq[3],  6.81335036)
         self.assertAlmostEqual(freq[4],  8.96368475)
-        self.assertAlmostEqual(freq[5],  9.80151378)
+        self.assertAlmostEqual(freq[5],  9.80151384)
         self.assertAlmostEqual(freq[6],  12.26528168)
         self.assertAlmostEqual(freq[7],  12.64098176)
         self.assertAlmostEqual(freq[8],  16.13558466)
