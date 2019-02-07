@@ -114,8 +114,12 @@ class JobPlugin(ComponentPlugin):
         else:        
             message = None
 
-        time.sleep(1)
         PUBLISHER.sendMessage("msg_start_job",message=message)
+        
+        if message is None:
+            d = wx.MessageDialog(None, 'Your analysis is performing. Do you want to close ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
+            if d.ShowModal() == wx.ID_YES:
+                self.on_close(None)
         
     def on_save(self, event=None):
 
