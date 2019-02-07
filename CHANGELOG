@@ -1,7 +1,9 @@
+version 1.3.0
+--------------
 * ADDED Neutron Dynamic Total Structure Factor analysis
 * ADDED User can now launch a script with qvector parameters instead of saved qvector definition
-* FIXED issue #45 MSD computing on non-orthorombic universe was wrong (fixed with new mmtk version) /!\ Modifies MSD and DoS, and maybe others... /!\ Units in MMTK have slightly changed
-* FIXED issue #44 An error message appeared when display, close and reopen molecular viewer and animation
+* FIXED issue #45 MSD computing on non-orthorombic universe was wrong (fixed with new mmtk version) /!\ Modifies MSD, VACF and DoS, and maybe others... /!\ Units in MMTK have slightly changed
+* FIXED issue #44 An error message appeared when display, close and reopen molecular viewer and animation plugins
 * FIXED issue #43 The weights are no more normalized with absolute sum /!\ Modifies at least CCF, DCSF and SSF job behavior
 * FIXED issue #42 Plotter units could be inconsistent
 * FIXED issue #41 Instrument resolution window froze GUI on macOS
