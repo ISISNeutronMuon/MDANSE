@@ -216,9 +216,12 @@ class JobControllerPanel(wx.ScrolledWindow):
         event.Skip()
         
     def msg_start_job(self,message):
-                
-        self._jobsController.update()
+        t = threading.Thread(target=self.updateJobsController)
+        t.start()
 
+    def updateJobsController(self):
+        time.sleep(PLATFORM.jobs_launch_delay())
+        self._jobsController.update()
     def on_display_info(self,event):
         
         row = self._gbSizer.GetItemPosition(event.GetEventObject())[0]

@@ -16,6 +16,8 @@ import collections
 import cPickle
 import datetime
 import os
+import threading
+import time
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Status import Status
@@ -47,8 +49,9 @@ class JobStatus(Status):
         self.save_status()
                     
     def finish_status(self):
-
-        self.cleanup()
+        # Launch a thread that will wait before erasing the file
+        t= threading.Thread(target = self.cleanup)
+        t.start()
                     
     @property
     def state(self):
@@ -56,7 +59,8 @@ class JobStatus(Status):
         return self._state    
 
     def cleanup(self):
-                        
+        # Wait before cleaning
+        time.sleep(PLATFORM.jobs_launch_delay())
         try:
             os.unlink(self._state['temporary_file'])
         except:

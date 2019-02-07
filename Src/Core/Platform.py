@@ -75,6 +75,16 @@ class Platform(object):
 
         return os.path.join(self.package_directory(), 'Doc')
     
+    def jobs_launch_delay(self):
+        '''
+        Returns the delay (in seconds) for a job to launch.
+        This is used to determine the delay before updating the GUI and suppressing a job status file
+        
+        :return: the delay (in seconds) for a job to launch
+        :rtype: float
+        '''
+        return 2.0
+    
     def api_path(self):
         '''
         Returns the path for MDANSE HTML API.
