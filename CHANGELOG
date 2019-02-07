@@ -6,6 +6,7 @@
 * FIXED issue #42 Plotter units could be inconsistent
 * FIXED issue #41 Instrument resolution window froze GUI on macOS
 * FIXED issue #40 MDANSE could not be used on Ubuntu Bionic systems (due to vtk dependency name)
+* FIXED issue #38 Interface was frozen when jobs were launched. A delay of 2s is added at the end of jobs before suppressing the status file
 
 version 1.2.1
 --------------
