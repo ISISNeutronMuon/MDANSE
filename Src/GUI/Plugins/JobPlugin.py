@@ -155,8 +155,9 @@ class JobPlugin(ComponentPlugin):
             self.parent.mgr.ClosePane(self.parent.mgr.GetPane(self))
         except AttributeError:
             # If the job is a converter, the parent has no mgr attribute
-            pass
-       
+            self.parent.Close()
+            
+
 class JobFrame(wx.Frame):
     
     def __init__(self, parent, jobType, datakey=None):
