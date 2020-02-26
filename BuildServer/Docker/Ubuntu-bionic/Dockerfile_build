@@ -1,16 +1,14 @@
-FROM docker.ill.fr/scientific-software/mdanse:ubuntu-bionic
+FROM ci_mdanse_bionic
 
 SHELL ["/bin/bash", "-c"]
 
-ARG MDANSE_GIT_COMMIT
+ARG CI_COMMIT_SHORT_SHA
+ARG CI_COMMIT_REF_NAME
 
-RUN GIT_SSL_NO_VERIFY=true git clone https://code.ill.fr/scientific-software/mdanse.git
+ENV CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA}
+ENV CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME}
 
-WORKDIR mdanse
+COPY ./ /app/
+WORKDIR /app
 
-RUN git checkout ${MDANSE_GIT_COMMIT}
-
-RUN source ./BuildServer/Unix/Debian/definitions.sh; source ./BuildServer/Unix/setup_ci.sh ; ./BuildServer/Unix/build.sh
-
-RUN source ./BuildServer/Unix/Debian/definitions.sh; source ./BuildServer/Unix/setup_ci.sh ; ./BuildServer/Unix/tests.sh
-
+CMD source ./BuildServer/Unix/Debian/definitions.sh;  source ./BuildServer/Unix/setup_ci.sh; ./BuildServer/Unix/build.sh; ./BuildServer/Unix/tests.sh; cp -a ${CI_PROJECT_DIR}/build /artifacts/; cp -a ${CI_PROJECT_DIR}/temp /artifacts/

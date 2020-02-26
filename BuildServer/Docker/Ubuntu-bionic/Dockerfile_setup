@@ -1,5 +1,8 @@
 FROM ubuntu:bionic
 
+ENV https_proxy http://proxy.ill.fr:8888
+ENV http_proxy http://proxy.ill.fr:8888
+
 RUN export DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update
@@ -26,5 +29,3 @@ RUN apt-get install -y --no-install-recommends python-sphinx
 RUN apt-get install -y --no-install-recommends pyro
 
 RUN apt-get install -y --no-install-recommends lsb-release
-
-
