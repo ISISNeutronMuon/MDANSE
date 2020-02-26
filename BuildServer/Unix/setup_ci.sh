@@ -17,20 +17,22 @@ mkdir -p ${CI_TEMP_DIR}
 
 cd ${CI_PROJECT_DIR}
 
-# Get revision number from Git
-if [ -z ${CI_COMMIT_SHA} ]; then
-    export CI_COMMIT_ID=$(git rev-parse HEAD)
-else
-    export CI_COMMIT_ID=${CI_COMMIT_SHA}
-fi
-export CI_COMMIT_ID=${CI_COMMIT_ID:0:8}
-
-# Get commit branch from Gitlab
-if [ -z ${CI_COMMIT_REF_NAME} ]; then
-    CI_COMMIT_REF_NAME=$(git show -s --pretty=%d HEAD)
-    CI_COMMIT_REF_NAME=$(echo ${CI_COMMIT_REF_NAME} | rev | cut -d, -f1 | cut -c2- | cut -d/ -f1 | rev)
-    export CI_COMMIT_REF_NAME
-fi
+## Get revision number from Git
+CI_COMMIT_ID=${CI_COMMIT_SHORT_SHA}
+#if [ -z ${CI_COMMIT_SHA} ]; then
+#    export CI_COMMIT_ID=$(git rev-parse HEAD)
+#else
+#    export CI_COMMIT_ID=${CI_COMMIT_SHA}
+#fi
+#export CI_COMMIT_ID=${CI_COMMIT_ID:0:8}
+#
+## Get commit branch from Gitlab
+#if [ -z ${CI_COMMIT_REF_NAME} ]; then
+#    CI_COMMIT_REF_NAME=$(git show -s --pretty=%d HEAD)
+#    CI_COMMIT_REF_NAME=$(echo ${CI_COMMIT_REF_NAME} | rev | cut -d, -f1 | cut -c2- | cut -d/ -f1 | rev)
+#    export CI_COMMIT_REF_NAME
+#fi
+#
 
 echo -e "${BLUE}""Commit id = ${CI_COMMIT_ID}""${NORMAL}"
 echo -e "${BLUE}""Branch name = ${CI_COMMIT_REF_NAME}""${NORMAL}"

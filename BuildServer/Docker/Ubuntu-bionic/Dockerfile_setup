@@ -1,4 +1,9 @@
-FROM ubuntu:trusty
+FROM ubuntu:bionic
+
+ENV https_proxy http://proxy.ill.fr:8888
+ENV http_proxy http://proxy.ill.fr:8888
+
+RUN export DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update
 
@@ -18,10 +23,9 @@ RUN apt-get install -y --no-install-recommends cython
 RUN apt-get install -y --no-install-recommends python-dev
 
 RUN apt-get install -y --no-install-recommends python-wxmpl
-RUN apt-get install -y --no-install-recommends python-vtk
+RUN apt-get install -y --no-install-recommends python-vtk6
 RUN apt-get install -y --no-install-recommends python-nose
 RUN apt-get install -y --no-install-recommends python-sphinx
 RUN apt-get install -y --no-install-recommends pyro
 
 RUN apt-get install -y --no-install-recommends lsb-release
-

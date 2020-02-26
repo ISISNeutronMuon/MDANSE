@@ -1,26 +1,45 @@
 stages:
-  - docker_login
+  - docker_pre_clean
   - ci
   - deploy
-  - docker_logout
+  - docker_post_clean
 
-docker_login:
-  stage: docker_login
+docker_pre_clean:
+  stage: docker_pre_clean
   script:
-    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
+  allow_failure: true
   tags:
     - docker
     - sci
     - ubuntu
-  
+
+docker_post_clean:
+  stage: docker_post_clean
+  script:
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
+  allow_failure: true
+  when: always
+  tags:
+    - docker
+    - sci
+    - ubuntu
+
 ############################
-# ubuntu trusty  pipeline
+# ubuntu trusty pipeline
 ############################
 ci:ubuntu_trusty:
   stage: ci
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-trusty/Dockerfile_build .
+    - docker build --force-rm=true -t ci_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Ubuntu-trusty/Dockerfile_setup .
+    - docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA} --build-arg CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME} --no-cache -t ci_mdanse_trusty_build -f ${CI_PROJECT_DIR}/BuildServer/Docker/Ubuntu-trusty/Dockerfile_build .
+    - docker run -iv${PWD}:/artifacts/ ci_mdanse_trusty_build
   allow_failure: false
+  artifacts:
+    paths:
+    - ${CI_PROJECT_DIR}/build
+    - ${CI_PROJECT_DIR}/temp
+    expire_in: 1 hrs
   tags:
     - docker
     - sci
@@ -29,9 +48,9 @@ ci:ubuntu_trusty:
 deploy:ubuntu_trusty:
   stage: deploy
   script:
-    - docker build --force-rm -t deploy_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-trusty/Dockerfile_deploy .
-    - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
-    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh trusty
+    - docker build --force-rm=true -t ci_mdanse_trusty -f ${CI_PROJECT_DIR}/BuildServer/Docker/Ubuntu-trusty/Dockerfile_setup .
+    - docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA} --build-arg CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME} --no-cache -t ci_mdanse_trusty_build -f ${CI_PROJECT_DIR}/BuildServer/Docker/Ubuntu-trusty/Dockerfile_deploy .
+    - docker run -iv${PWD}:/artifacts/ ci_mdanse_trusty_build
   dependencies:
     - ci:ubuntu_trusty
   allow_failure: false
@@ -46,20 +65,27 @@ deploy:ubuntu_trusty:
   when: on_success
   artifacts:
     paths:
-    - ./*.deb
+    - ${CI_PROJECT_DIR}/*.deb
   tags:
     - docker
     - sci
     - ubuntu
 
 ############################
-# ubuntu xenial  pipeline
+# ubuntu xenial pipeline
 ############################
 ci:ubuntu_xenial:
   stage: ci
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_build .
+    - docker build --force-rm=true -t ci_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Ubuntu-xenial/Dockerfile_setup .
+    - docker build --force-rm=true --build-arg  CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA} --build-arg CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME} --no-cache -t ci_mdanse_xenial_build -f ${CI_PROJECT_DIR}/BuildServer/Docker/Ubuntu-xenial/Dockerfile_build .
+    - docker run -iv${PWD}:/artifacts/ ci_mdanse_xenial_build
   allow_failure: false
+  artifacts:
+    paths:
+    - ${CI_PROJECT_DIR}/build
+    - ${CI_PROJECT_DIR}/temp
+    expire_in: 1 hrs
   tags:
     - docker
     - sci
@@ -68,9 +94,9 @@ ci:ubuntu_xenial:
 deploy:ubuntu_xenial:
   stage: deploy
   script:
-    - docker build --force-rm -t deploy_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-xenial/Dockerfile_deploy .
-    - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
-    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh xenial
+    - docker build --force-rm=true -t ci_mdanse_xenial -f ${CI_PROJECT_DIR}/BuildServer/Docker/Ubuntu-xenial/Dockerfile_setup .
+    - docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA} --build-arg CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME} --no-cache -t ci_mdanse_xenial_build -f ${CI_PROJECT_DIR}/BuildServer/Docker/Ubuntu-xenial/Dockerfile_deploy .
+    - docker run -iv${PWD}:/artifacts/ ci_mdanse_xenial_build
   dependencies:
     - ci:ubuntu_xenial
   allow_failure: false
@@ -85,7 +111,7 @@ deploy:ubuntu_xenial:
   when: on_success
   artifacts:
     paths:
-    - ./*.deb
+    - ${CI_PROJECT_DIR}/*.deb
   tags:
     - docker
     - sci
@@ -97,8 +123,15 @@ deploy:ubuntu_xenial:
 ci:ubuntu_bionic:
   stage: ci
   script:
-    - docker build --force-rm --build-arg MDANSE_GIT_COMMIT=${CI_COMMIT_SHA} -t ci_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-bionic/Dockerfile_build .
+    - docker build --force-rm=true -t ci_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Ubuntu-bionic/Dockerfile_setup .
+    - docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA} --build-arg CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME} --build-arg CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA} --build-arg CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME} --no-cache -t ci_mdanse_bionic_build -f ${CI_PROJECT_DIR}/BuildServer/Docker/Ubuntu-bionic/Dockerfile_build .
+    - docker run -iv${PWD}:/artifacts/ ci_mdanse_bionic_build
   allow_failure: false
+  artifacts:
+    paths:
+    - ${CI_PROJECT_DIR}/build
+    - ${CI_PROJECT_DIR}/temp
+    expire_in: 1 hrs
   tags:
     - docker
     - sci
@@ -107,9 +140,9 @@ ci:ubuntu_bionic:
 deploy:ubuntu_bionic:
   stage: deploy
   script:
-    - docker build --force-rm -t deploy_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Builder/Ubuntu-bionic/Dockerfile_deploy .
-    - chmod 755 ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh
-    - ${CI_PROJECT_DIR}/BuildServer/Docker/upload_artefacts.sh bionic
+    - docker build --force-rm=true -t ci_mdanse_bionic -f ${CI_PROJECT_DIR}/BuildServer/Docker/Ubuntu-bionic/Dockerfile_setup .
+    - docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA} --build-arg CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME} --no-cache -t ci_mdanse_bionic_build -f ${CI_PROJECT_DIR}/BuildServer/Docker/Ubuntu-bionic/Dockerfile_deploy .
+    - docker run -iv${PWD}:/artifacts/ ci_mdanse_bionic_build
   dependencies:
     - ci:ubuntu_bionic
   allow_failure: false
@@ -221,14 +254,3 @@ deploy:windows:
   tags:
     - sci
     - windows-10
-
-docker_logout:
-  stage: docker_logout
-  when: always
-  script:
-    - docker logout
-  tags:
-    - docker
-    - sci
-    - ubuntu
-
