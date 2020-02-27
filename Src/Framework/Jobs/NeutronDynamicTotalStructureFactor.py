@@ -210,9 +210,12 @@ class NeutronDynamicTotalStructureFactor(IJob):
             
             self._outputData["f(q,t)_coh_weighted_%s%s" % pair][:] = self._outputData["f(q,t)_coh_%s%s" % pair][:] * numpy.sqrt(ci*cj) * bi * bj
             self._outputData["s(q,f)_coh_weighted_%s%s" % pair][:] = self._outputData["s(q,f)_coh_%s%s" % pair][:] * numpy.sqrt(ci*cj) * bi * bj
-
-            self._outputData["f(q,t)_coh_total"][:] += self._outputData["f(q,t)_coh_weighted_%s%s" % pair][:]
-            self._outputData["s(q,f)_coh_total"][:] += self._outputData["s(q,f)_coh_weighted_%s%s" % pair][:]
+            if pair[0] == pair[1]: # Add a factor 2 if the two elements are different
+                self._outputData["f(q,t)_coh_total"][:] += self._outputData["f(q,t)_coh_weighted_%s%s" % pair][:]
+                self._outputData["s(q,f)_coh_total"][:] += self._outputData["s(q,f)_coh_weighted_%s%s" % pair][:]
+            else:
+                self._outputData["f(q,t)_coh_total"][:] += 2*self._outputData["f(q,t)_coh_weighted_%s%s" % pair][:]
+                self._outputData["s(q,f)_coh_total"][:] += 2*self._outputData["s(q,f)_coh_weighted_%s%s" % pair][:]
         
         # Compute incoherent functions and structure factor
         for element, ni in nAtomsPerElement.items():
