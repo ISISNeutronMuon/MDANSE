@@ -1,5 +1,6 @@
 version 1.4.0
 --------------
+* FIXED issue #51 SFFSF job was accessible from MMTK trajectory and molecular viewer
 * FIXED issue #49 Some LAMMPS files could not be converted
 * FIXED issue #48 There was an error in NDTSF analysis
 * FIXED issue #47 GUI converter did not close

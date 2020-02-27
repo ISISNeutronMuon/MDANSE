@@ -28,7 +28,7 @@ class StructureFactorFromScatteringFunction(IJob):
 
     category = ('Analysis','Scattering',)
     
-    ancestor = ["netcdf_data","mmtk_trajectory","molecular_viewer"]
+    ancestor = ["netcdf_data"]
     
     settings = collections.OrderedDict()
     settings['netcdf_input_file'] = ('netcdf_input_file', {'variables':['time','f(q,t)_total'],
