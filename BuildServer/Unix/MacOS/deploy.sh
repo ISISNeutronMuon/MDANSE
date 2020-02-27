@@ -17,7 +17,7 @@ export MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
 export PYTHONPATH=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages:${PYTHONPATH}
 
 # Build API
-${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
+${PYTHONEXE} setup.py build_api build_help install --prefix=${CI_TEMP_INSTALL_DIR}
 
 status=$?
 if [ $status -ne 0 ]; then
