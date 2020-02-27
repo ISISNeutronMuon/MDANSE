@@ -5,6 +5,7 @@
 #############################
 # Debug option for py2app, if needed
 export DISTUTILS_DEBUG=0
+export MDANSE_DEPENDENCIES_DIR=/Users/ci/Projects/mdanse/bundle
 
 #############################
 # PREPARATION
@@ -16,7 +17,7 @@ export MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
 export PYTHONPATH=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages:${PYTHONPATH}
 
 # Build API
-${PYTHONEXE} setup.py build_api build_help install --prefix=${CI_TEMP_INSTALL_DIR}
+${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
 
 status=$?
 if [ $status -ne 0 ]; then
@@ -28,66 +29,29 @@ fi
 # PACKAGING
 #############################
 echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
-MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
-cd ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS
-${PYTHONEXE} build.py py2app
-status=$?
-if [ $status -ne 0 ]; then
-	echo -e "${RED}" "Cannot build app.""${NORMAL}"
-	exit $status
-fi
+# Copy the bundle
+mkdir ${CI_TEMP_DIR}/dist
+mkdir ${CI_TEMP_DIR}/dist/MDANSE.app
+cp -R ${MDANSE_DEPENDENCIES_DIR} ${MDANSE_APP_DIR}/Contents
+cp -R ${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages/* ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/
 
 # Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "${VERSION_NAME}" > ${MDANSE_APP_DIR}/Contents/Resources/version
 
-#############################
-# Copying Python
-#############################
-### When launching the bundle, the executable target (i.e. MDANSE) modify the python that is shipped with the bundle (si.e. package path, dylib dependencies ...)
-### see http://joaoventura.net/blog/2016/embeddable-python-osx/ for technical details
-### In our case we also want the user to be able to start directly python without launching the bundle executable (e.g. to run scripts in command line) which is the reason
-### why we have to modify the python executable appropriately with the following commands
-rm ${MDANSE_APP_DIR}/Contents/MacOS/python
-mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
-cp /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin/python
+# Copy MDANSE GUI
+cp ${CI_PROJECT_DIR}/Scripts/mdanse_gui ${MDANSE_APP_DIR}/Contents/Resources/
 
-cp -r /System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/* ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/
-cp /System/Library/Frameworks/Python.framework/Versions/2.7/Python ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
-chmod 777 ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
+# Modify Info.plist
+sed -i "" "s/<MDANSE_VERSION>/${VERSION_NAME}/" ${MDANSE_APP_DIR}/Contents/Info.plist
 
-install_name_tool -change /System/Library/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Resources/lib/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
-install_name_tool -id @loader_path/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
-
-ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python
-
-cp ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
-cp ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/.
-
-chmod 777 ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/change_dylib_path.sh
-${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/change_dylib_path.sh
-
-# Comment the 'add_system_python_extras' call that add some System path to the sys.path
-"${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
-
-#############################
-# Cleanup
-#############################
-# Removing matplotlib/tests ==> 45.2 Mb
-rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/matplotlib/tests
-# Sample data for matplotlib is useless
-rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/matplotlib/mpl-data/sample_data
-rm -rf ${MDANSE_APP_DIR}/Contents/Resources/mpl-data/sample_data
-# Scipy package is useless
-rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/scipy
-# ZMQ package is useless
-rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/zmq
+# Relink netcdf
+install_name_tool -change /usr/local/opt/netcdf/lib/libnetcdf.15.dylib @executable_path/../Frameworks/libnetcdf.15.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/Scientific/_netcdf.so
 
 #############################
 # Create DMG
 #############################
+MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 hdiutil unmount /Volumes/MDANSE -force -quiet
 sleep 5
-
-${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/Resources/dmg/create-dmg --background "${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
-mv ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/${MDANSE_DMG} ${CI_PROJECT_DIR}
+${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/create-dmg --background "${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
