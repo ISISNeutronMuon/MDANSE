@@ -86,7 +86,7 @@ class AtomSelectionConfigurator(IConfigurator):
         trajConfig = self._configurable[self._dependencies['trajectory']]
 
         atoms = sorted(trajConfig["universe"].atomList(), key = operator.attrgetter('index'))
-        selectedAtoms = [atoms[idx] for idx in indexes]
+        selectedAtoms = [atoms[idx] for idx in self["flatten_indexes"]]
 
         self["selection_length"] = len(self["flatten_indexes"])
         self['indexes'] = [[idx] for idx in self["flatten_indexes"]]
