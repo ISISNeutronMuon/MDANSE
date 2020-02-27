@@ -83,16 +83,26 @@ class LAMMPSConfigFile(dict):
                     raise LAMMPSConfigFileError("Did not find the number of atom types.")
                                                                     
                 for j in range(1, self["n_atom_types"]+1):
-                    idx, mass = lines[i+j].strip().split()
+                    data_line = lines[i+j].strip().split("#")[0] #Remove commentary if any
+                    idx, mass = data_line.split()[0:2]
                     idx = int(idx)
                     mass = float(mass)
                     el = ELEMENTS.match_numeric_property("atomic_weight", mass, tolerance=self._tolerance)
                     nElements = len(el)
                     if nElements == 0:
+                        # No element is matching
                         raise LAMMPSConfigFileError("The atom %d with defined mass %f could not be assigned with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (idx,mass,self._tolerance))
-                    elif nElements > 1:
+                    elif nElements == 2:
+                        # If two elements are matching, these can be the same appearing twice (example 'Al' and 'Al27')
+                        if el[0][:min((len(el[0]), len(el[1])))] == el[1][:min((len(el[0]), len(el[1])))]:
+                            self["elements"][idx] = el[0]
+                        else:
+                            raise LAMMPSConfigFileError("The atoms %s of MDANSE database matches the mass %f with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (el,mass,self._tolerance))
+                    elif nElements > 2:
+                        # More than two elements are matching => error
                         raise LAMMPSConfigFileError("The atoms %s of MDANSE database matches the mass %f with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (el,mass,self._tolerance))
-                    else:                    
+                    else:
+                        # One element is matching => continue
                         self["elements"][idx] = el[0]
 
             m = re.match("^\s*bonds\s*$",line, re.I)
@@ -296,10 +306,11 @@ class LAMMPSConverter(Converter):
                 self._id = keywords.index("id")
                 self._type = keywords.index("type")
                 
+                # Field name is <x,y,z>u if real coordinates and <x,y,z>s if fractional ones
                 try:
-                    self._x = keywords.index("x")
-                    self._y = keywords.index("y")
-                    self._z = keywords.index("z")
+                    self._x = keywords.index("xu")
+                    self._y = keywords.index("yu")
+                    self._z = keywords.index("zu")
                 except ValueError:
                     try:
                         self._x = keywords.index("xs")
