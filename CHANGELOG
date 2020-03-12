@@ -1,3 +1,17 @@
+version 1.4.0
+--------------
+* FIXED issue #51 SFFSF job was accessible from MMTK trajectory and molecular viewer
+* FIXED issue #50 Some results could be inconsistent when using multiple atom selections
+* FIXED issue #49 Some LAMMPS files could not be converted
+* FIXED issue #48 There was an error in NDTSF analysis
+* FIXED issue #47 GUI converter did not close
+* CHANGED (internal) Docker build has been changed
+* CHANGED (internal) macOS build has been changed
+
+version 1.3.1
+--------------
+* FIXED issue #46 There was an error message when closign converter plugins. The error is no more here but the converter still does not close.
+
 version 1.3.0
 --------------
 * ADDED Neutron Dynamic Total Structure Factor analysis

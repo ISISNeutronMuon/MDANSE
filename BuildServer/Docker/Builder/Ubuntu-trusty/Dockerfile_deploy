@@ -1,9 +1,0 @@
-FROM ci_mdanse_trusty
-
-SHELL ["/bin/bash", "-c"]
-
-VOLUME builds
-
-RUN source ./BuildServer/Unix/Debian/definitions.sh; source ./BuildServer/Unix/setup_ci.sh ; ./BuildServer/Unix/Debian/deploy.sh
-
-

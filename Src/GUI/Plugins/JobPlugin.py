@@ -151,9 +151,13 @@ class JobPlugin(ComponentPlugin):
         PUBLISHER.sendMessage("msg_set_data", message=self)
                         
     def on_close(self, event):
-        
-        self.parent.mgr.ClosePane(self.parent.mgr.GetPane(self))
-        
+        try:
+            self.parent.mgr.ClosePane(self.parent.mgr.GetPane(self))
+        except AttributeError:
+            # If the job is a converter, the parent has no mgr attribute
+            self.parent.Close()
+            
+
 class JobFrame(wx.Frame):
     
     def __init__(self, parent, jobType, datakey=None):
