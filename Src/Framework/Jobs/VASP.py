@@ -39,16 +39,16 @@ class XDATCARFile(dict):
         
         self['instance'] = open(filename, 'rb')
 
+        # Read header
         self["instance"].readline()
         header = []
         while True:
             self._headerSize = self["instance"].tell()
             line = self["instance"].readline().strip()
             if not line or line.lower().startswith("direct"):
-                self._dummyLineSize = self["instance"].tell() - self._headerSize
+                self._frameHeaderSize = self["instance"].tell() - self._headerSize
                 break
-            header.append(line)
-                                                        
+            header.append(line)                                   
         self["scale_factor"] = float(header[0])
 
         cell = " ".join(header[1:4]).split()
@@ -59,34 +59,85 @@ class XDATCARFile(dict):
                     
         self["atoms"] = zip(header[4].split(),[int(v) for v in header[5].split()])
                     
-        nAtoms = sum([v[1] for v in self["atoms"]])
-                                    
-        self["n_atoms"] = 0
+        self["n_atoms"] = sum([v[1] for v in self["atoms"]])
+        
+        # The point here is to determine if the trajectory is NVT or NPT. If traj is NPT, the box will change at each iteration and the "header" will appear betwwen every frame
+        # We try to read the two first frames to figure it out
+        nAtoms = 0
         while True:
             self._frameSize = self['instance'].tell()
             line = self["instance"].readline().strip()
             if not line or line.lower().startswith("direct"):
                 break
-            self["n_atoms"] += 1
-            
-        if nAtoms != self["n_atoms"]:
-            raise XDATCARFileError("The number of atoms (%d) does not match the size of a frame (%d)." % (nAtoms,["n_atoms"]))
-            
-        self._frameSize -= self._headerSize
-        
-        self._actualFrameSize = self._frameSize - self._dummyLineSize
+            nAtoms += 1
+                    
+        if nAtoms == self["n_atoms"]:
+            # Traj is NVT
+            # Structure is
+            # Header
+            # FrameHeader
+            # Frame 1
+            # FrameHeader
+            # Frame 2
+            # ...
+            # With frameHeader being "dummy"
+            self._npt = False
+            self._frameSize -= self._headerSize
+            self._actualFrameSize = self._frameSize - self._frameHeaderSize
+        else:
+            # Traj is NPT
+            # Structure is
+            # FrameHeader
+            # Frame 1
+            # FrameHeader
+            # Frame 2
+            # ...
+            # With FrameHeader containing box size
+            self._npt = True
+            self._actualFrameSize = self._frameSize
+            self._frameSize -= self._headerSize
+            self._frameHeaderSize += self._headerSize
+            self._headerSize = 0
+            self._actualFrameSize = self._frameSize - self._frameHeaderSize
+            # Retry to read the first frame
+            self["instance"].seek(self._frameHeaderSize)
+            nAtoms = 0
+            while True:
+                self._frameSize = self['instance'].tell()
+                line = self["instance"].readline().strip()
+                if len(line.split("  ")) != 3:
+                    break
+                nAtoms += 1
 
+            if nAtoms != self["n_atoms"]:
+                # Something went wrong
+                raise XDATCARFileError("The number of atoms (%d) does not match the size of a frame (%d)." % (nAtoms, self["n_atoms"]))
+            
+        # Read frame number
         self["instance"].seek(0,2)
-        
         self["n_frames"] = (self['instance'].tell()-self._headerSize)/self._frameSize
-
+        
+        # Go back to top
         self["instance"].seek(0)
                 
                 
     def read_step(self, step):
-        
         self['instance'].seek(self._headerSize+step*self._frameSize)
-        self['instance'].read(self._dummyLineSize)
+        
+        if self._npt:
+            # Read box size
+            self["instance"].readline()
+            header = []
+            while True:
+                line = self["instance"].readline().strip()
+                if not line or line.lower().startswith("direct"):
+                    break
+                header.append(line)
+            cell = " ".join(header[1:4]).split()
+            cell = numpy.array(cell,dtype=numpy.float64)
+            self["cell_shape"] = numpy.reshape(cell,(3,3))*Units.Ang*self["scale_factor"]
+        else:
+            self['instance'].read(self._frameHeaderSize)
                         
         data = numpy.array(self['instance'].read(self._actualFrameSize).split(), dtype=numpy.float64)
         
@@ -121,7 +172,6 @@ class VASPConverter(Converter):
         self.numberOfSteps = self._xdatcarFile['n_frames']
         
         self._universe = ParallelepipedicPeriodicUniverse()
-        self._universe.setShape(self._xdatcarFile["cell_shape"])
         
         for symbol,number in self._xdatcarFile["atoms"]:
             for i in range(number):
@@ -144,6 +194,8 @@ class VASPConverter(Converter):
 
         # Read the current step in the xdatcar file.
         config = self._xdatcarFile.read_step(index)
+        
+        self._universe.setShape(self._xdatcarFile["cell_shape"])
         
         conf = Configuration(self._universe,config)
         
