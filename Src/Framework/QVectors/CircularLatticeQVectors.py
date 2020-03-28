@@ -47,6 +47,8 @@ class CircularLatticeQVectors(LatticeQVectors):
         qMax = self._configuration["shells"]["last"] + 0.5*self._configuration["width"]["value"]
                 
         uvMax = numpy.ceil([qMax/Vector(v).length() for v in qVects.T]) + 1
+        # Enforce integers in uvMax
+        uvMax = uvMax.astype(numpy.int64)
                 
         idxs = numpy.mgrid[-uvMax[0]:uvMax[0]+1,-uvMax[1]:uvMax[1]+1]
 
