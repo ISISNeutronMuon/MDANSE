@@ -1,5 +1,6 @@
 version 1.4.0
 --------------
+* FIXED issue #52 QVector circular lattice generator created an error
 * FIXED issue #51 SFFSF job was accessible from MMTK trajectory and molecular viewer
 * FIXED issue #50 Some results could be inconsistent when using multiple atom selections
 * FIXED issue #49 Some LAMMPS files could not be converted
