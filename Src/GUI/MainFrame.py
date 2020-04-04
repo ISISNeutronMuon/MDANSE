@@ -23,6 +23,7 @@ import wx.aui as aui
  
 from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE.__pkginfo__ import __author__, __commit__, __version__, __beta__
+from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.GUI.ControllerPanel import ControllerPanel
 from MDANSE.GUI.DataController import DATA_CONTROLLER
@@ -106,9 +107,14 @@ class MainFrame(wx.Frame):
         
         # Add the panes corresponding to the tree control and the notebook.
         paneInfo1=aui.AuiPaneInfo()
-        self._mgr.AddPane(self._panels["data"], paneInfo1.Caption("Data").Name("data").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
         paneInfo2=aui.AuiPaneInfo()
-        self._mgr.AddPane(self._panels["plugins"], paneInfo2.Caption("Plugins").Name("plugins").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
+        # Order is first "Data", and then "Plugins". It is switched on Linux and macOS
+        if PLATFORM.name == "windows":
+            self._mgr.AddPane(self._panels["data"], paneInfo1.Caption("Data").Name("data").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
+            self._mgr.AddPane(self._panels["plugins"], paneInfo2.Caption("Plugins").Name("plugins").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
+        else:
+            self._mgr.AddPane(self._panels["plugins"], paneInfo2.Caption("Plugins").Name("plugins").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
+            self._mgr.AddPane(self._panels["data"], paneInfo1.Caption("Data").Name("data").Left().CloseButton(True).DestroyOnClose(False).MinSize((250,-1)))
         paneInfo3=aui.AuiPaneInfo()
         self._mgr.AddPane(self._panels["working"], paneInfo3.Caption("Working panel").Name("working").Center().CloseButton(False))
         paneInfo4=aui.AuiPaneInfo()
