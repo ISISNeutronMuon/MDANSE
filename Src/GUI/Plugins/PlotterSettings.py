@@ -23,10 +23,11 @@ class UnitsSettingsError(Error):
 
 class UnitsSettingsDialog():
     def checkUnits(self, oldUnit, newUnit):
-        try:
-            magnitude.mg(1., oldUnit, newUnit).toval()
-        except magnitude.MagnitudeError:
-            raise UnitsSettingsError("the axis unit (%s) is inconsistent with the current unit (%s) "%(newUnit, oldUnit))
+        if oldUnit != newUnit:
+            try:
+                magnitude.mg(1., oldUnit, newUnit).toval()
+            except magnitude.MagnitudeError:
+                raise UnitsSettingsError("the axis unit (%s) is inconsistent with the current unit (%s) "%(newUnit, oldUnit))
 
 class ImageSettingsDialog(wx.Dialog, UnitsSettingsDialog):
     
