@@ -596,7 +596,11 @@ class LinesSettingsDialog(wx.Dialog):
         _id = 0
         for k in self.parent.plots.keys():
             if type(self.parent.plots[k][0].get_color()) is str:
-                r,g,b = matplotlib.colors.colorConverter.colors[self.parent.plots[k][0].get_color()]
+                try:
+                    r,g,b = matplotlib.colors.colorConverter.colors[self.parent.plots[k][0].get_color()]
+                except KeyError:
+                    color = self.parent.plots[k][0].get_color().lstrip("#")
+                    r,g,b = tuple(int(color[i:i+2], 16)/255.0 for i in (0, 2, 4))
             else:
                 r,g,b = self.parent.plots[k][0].get_color()
             self.lines.InsertStringItem(index = _id, label = k)
@@ -619,7 +623,11 @@ class LinesSettingsDialog(wx.Dialog):
         self.parent.figure.canvas.draw()
         
         if type(self.current_line.get_color()) is str:
-            r,g,b = matplotlib.colors.colorConverter.colors[self.current_line.get_color()]
+            try:
+                r,g,b = matplotlib.colors.colorConverter.colors[self.current_line.get_color()]
+            except KeyError:
+                color = self.current_line.get_color().lstrip("#")
+                r,g,b = tuple(int(color[i:i+2], 16)/255.0 for i in (0, 2, 4))
         else:
             r,g,b = self.current_line.get_color()
         color = wx.Colour(int(r*255), int(g*255), int(b*255))
