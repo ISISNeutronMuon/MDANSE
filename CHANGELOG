@@ -1,6 +1,7 @@
 version 1.4.0
 --------------
 * FIXED issue #56 Layout on Windows differed from macOS and Linux (we keep Windows Layout: "Data" on top, "Plugins" below)
+* FIXED issue #55 Plotter (1D, 2D, Plotter, NetCDF Plotter) had several issues (see https://code.ill.fr/scientific-software/mdanse/issues/55)
 * FIXED issue #54 Some Gromacs trajectories cannot be opened (due to the presence of "M" dummy atoms)
 * FIXED issue #53 VASP NPT trajectories could not be opened
 * FIXED issue #52 QVector circular lattice generator created an error

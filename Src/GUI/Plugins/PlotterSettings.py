@@ -23,10 +23,11 @@ class UnitsSettingsError(Error):
 
 class UnitsSettingsDialog():
     def checkUnits(self, oldUnit, newUnit):
-        try:
-            magnitude.mg(1., oldUnit, newUnit).toval()
-        except magnitude.MagnitudeError:
-            raise UnitsSettingsError("the axis unit (%s) is inconsistent with the current unit (%s) "%(newUnit, oldUnit))
+        if oldUnit != newUnit:
+            try:
+                magnitude.mg(1., oldUnit, newUnit).toval()
+            except magnitude.MagnitudeError:
+                raise UnitsSettingsError("the axis unit (%s) is inconsistent with the current unit (%s) "%(newUnit, oldUnit))
 
 class ImageSettingsDialog(wx.Dialog, UnitsSettingsDialog):
     
@@ -34,7 +35,6 @@ class ImageSettingsDialog(wx.Dialog, UnitsSettingsDialog):
         wx.Dialog.__init__(self, parent, wx.ID_ANY, title="Image Settings", style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
         self.parent = parent
         self.build_dialog()
-        self.Bind(wx.EVT_CLOSE, self.on_close)
         
     def build_dialog(self):
         
@@ -133,9 +133,7 @@ class ImageSettingsDialog(wx.Dialog, UnitsSettingsDialog):
         
         hsizer1 = wx.BoxSizer(wx.HORIZONTAL)
         self.apply_button  = wx.Button(self, wx.ID_ANY, label="Apply")
-        self.quit_button  = wx.Button(self, wx.ID_ANY, label="Quit")
         hsizer1.Add(self.apply_button, 0, wx.EXPAND, 0)
-        hsizer1.Add(self.quit_button, 0, wx.EXPAND, 0)
         
         Sizer.Add(hsizer1, 0, wx.ALIGN_RIGHT|wx.RIGHT|wx.ALL, 5)
         
@@ -143,8 +141,7 @@ class ImageSettingsDialog(wx.Dialog, UnitsSettingsDialog):
         Sizer.Fit(self)
         self.Layout()
         
-        self.Bind(wx.EVT_BUTTON, self.set_settings, self.apply_button)    
-        self.Bind(wx.EVT_BUTTON, self.on_close, self.quit_button)  
+        self.Bind(wx.EVT_BUTTON, self.set_settings, self.apply_button)
         
         self.get_settings()
     
@@ -188,17 +185,13 @@ class ImageSettingsDialog(wx.Dialog, UnitsSettingsDialog):
         self.parent.color_bar.update_normal(self.parent.ax)
         self.parent.canvas.draw()
     
-    def on_close(self, event = None):
-        self.MakeModal(False)
-        self.Destroy()
-        
+
 class GeneralSettingsDialog(wx.Dialog):
     
     def __init__(self, parent=None):
         wx.Dialog.__init__(self, parent, wx.ID_ANY, title="General Settings", style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
         self.parent = parent
         self.build_dialog()
-        self.Bind(wx.EVT_CLOSE, self.on_close)
         
     def build_dialog(self):
         self.legend_location_choice = ['best' , 'upper right' , 'upper left' ,\
@@ -291,9 +284,7 @@ class GeneralSettingsDialog(wx.Dialog):
         
         hsizer5 = wx.BoxSizer(wx.HORIZONTAL)
         self.apply_button  = wx.Button(self, wx.ID_ANY, label="Apply")
-        self.quit_button  = wx.Button(self, wx.ID_ANY, label="Quit")
         hsizer5.Add(self.apply_button, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALIGN_RIGHT, 0)
-        hsizer5.Add(self.quit_button, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALIGN_RIGHT, 0)
         
         Sizer.Add(sbsizer0, 0, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
         Sizer.Add(sbsizer1, 0, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
@@ -304,8 +295,7 @@ class GeneralSettingsDialog(wx.Dialog):
         Sizer.Fit(self)
         self.Layout()    
 
-        self.Bind(wx.EVT_BUTTON, self.set_settings, self.apply_button)    
-        self.Bind(wx.EVT_BUTTON, self.on_close, self.quit_button)  
+        self.Bind(wx.EVT_BUTTON, self.set_settings, self.apply_button)
         
         self.get_settings()
     
@@ -364,9 +354,6 @@ class GeneralSettingsDialog(wx.Dialog):
         
         self.parent.canvas.draw() 
                 
-    def on_close(self, event = None):
-        self.MakeModal(False)
-        self.Destroy()
 
 class AxesSettingsDialog(wx.Dialog, UnitsSettingsDialog):
     
@@ -375,7 +362,6 @@ class AxesSettingsDialog(wx.Dialog, UnitsSettingsDialog):
         wx.Dialog.__init__(self, parent, wx.ID_ANY, title="Axes Settings", style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX)
         self.parent = parent
         self.build_dialog()
-        self.Bind(wx.EVT_CLOSE, self.on_close)
         
     def build_dialog(self):
         
@@ -446,9 +432,7 @@ class AxesSettingsDialog(wx.Dialog, UnitsSettingsDialog):
                
         hsizer1 = wx.BoxSizer(wx.HORIZONTAL)
         self.apply_button  = wx.Button(self, wx.ID_ANY, label="Apply")
-        self.quit_button  = wx.Button(self, wx.ID_ANY, label="Quit")
         hsizer1.Add(self.apply_button, 0, wx.EXPAND, 0)
-        hsizer1.Add(self.quit_button, 0, wx.EXPAND, 0)
         
         Sizer.Add(hsizer0, 0, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
         Sizer.Add(hsizer1, 0, wx.ALIGN_RIGHT|wx.RIGHT|wx.ALL, 5)
@@ -458,8 +442,7 @@ class AxesSettingsDialog(wx.Dialog, UnitsSettingsDialog):
         self.Layout()
         
         self.Bind(wx.EVT_BUTTON, self.auto_fit, self.auto_fit_button)
-        self.Bind(wx.EVT_BUTTON, self.set_settings, self.apply_button)    
-        self.Bind(wx.EVT_BUTTON, self.on_close, self.quit_button)  
+        self.Bind(wx.EVT_BUTTON, self.set_settings, self.apply_button)
     
         self.get_settings()
     
@@ -515,9 +498,6 @@ class AxesSettingsDialog(wx.Dialog, UnitsSettingsDialog):
         self.Xmax.SetValue(str(self.parent.Xmax))
         self.Ymax.SetValue(str(self.parent.Ymax))
     
-    def on_close(self, event = None):
-        self.MakeModal(False)
-        self.Destroy()
 
 class LinesSettingsDialog(wx.Dialog):
     
@@ -526,7 +506,6 @@ class LinesSettingsDialog(wx.Dialog):
         self.parent = parent
         self.current_line = None
         self.build_dialog()
-        self.Bind(wx.EVT_CLOSE, self.on_close)
         
     def build_dialog(self):
         
@@ -573,9 +552,7 @@ class LinesSettingsDialog(wx.Dialog):
         
         hsizer1 = wx.BoxSizer(wx.HORIZONTAL)
         self.apply_button  = wx.Button(self, wx.ID_ANY, label="Apply")
-        self.quit_button  = wx.Button(self, wx.ID_ANY, label="Quit")
         hsizer1.Add(self.apply_button, 0, wx.EXPAND, 0)
-        hsizer1.Add(self.quit_button, 0, wx.EXPAND, 0)
         
         Sizer.Add(bagSizer, 0, wx.EXPAND|wx.ALL, 5)
         Sizer.Add(hsizer1, 0, wx.ALIGN_RIGHT|wx.RIGHT|wx.ALL, 5)
@@ -584,9 +561,8 @@ class LinesSettingsDialog(wx.Dialog):
         Sizer.Fit(self)
         self.Layout()
         
-        self.Bind(wx.EVT_BUTTON, self.delete_line, self.del_button)    
-        self.Bind(wx.EVT_BUTTON, self.set_settings, self.apply_button)    
-        self.Bind(wx.EVT_BUTTON, self.on_close, self.quit_button)  
+        self.Bind(wx.EVT_BUTTON, self.delete_line, self.del_button)
+        self.Bind(wx.EVT_BUTTON, self.set_settings, self.apply_button)
         self.Bind(wx.EVT_LIST_ITEM_FOCUSED, self.on_select_item, self.lines)
     
         self.set_lines()
@@ -596,7 +572,11 @@ class LinesSettingsDialog(wx.Dialog):
         _id = 0
         for k in self.parent.plots.keys():
             if type(self.parent.plots[k][0].get_color()) is str:
-                r,g,b = matplotlib.colors.colorConverter.colors[self.parent.plots[k][0].get_color()]
+                try:
+                    r,g,b = matplotlib.colors.colorConverter.colors[self.parent.plots[k][0].get_color()]
+                except KeyError:
+                    color = self.parent.plots[k][0].get_color().lstrip("#")
+                    r,g,b = tuple(int(color[i:i+2], 16)/255.0 for i in (0, 2, 4))
             else:
                 r,g,b = self.parent.plots[k][0].get_color()
             self.lines.InsertStringItem(index = _id, label = k)
@@ -619,7 +599,11 @@ class LinesSettingsDialog(wx.Dialog):
         self.parent.figure.canvas.draw()
         
         if type(self.current_line.get_color()) is str:
-            r,g,b = matplotlib.colors.colorConverter.colors[self.current_line.get_color()]
+            try:
+                r,g,b = matplotlib.colors.colorConverter.colors[self.current_line.get_color()]
+            except KeyError:
+                color = self.current_line.get_color().lstrip("#")
+                r,g,b = tuple(int(color[i:i+2], 16)/255.0 for i in (0, 2, 4))
         else:
             r,g,b = self.current_line.get_color()
         color = wx.Colour(int(r*255), int(g*255), int(b*255))
@@ -664,12 +648,3 @@ class LinesSettingsDialog(wx.Dialog):
             return
         self.parent.delete_line(self.current_line)
         self.set_lines()
-        
-    def on_close(self, event = None):
-        self.MakeModal(False)
-        # unselect selection
-        if self.parent.selectedLine is not None:
-            self.parent.selectedLine.set_alpha(1.0)
-            self.parent.selectedLine.figure.canvas.draw()
-            self.parent.selectedLine = None
-        self.Destroy()    

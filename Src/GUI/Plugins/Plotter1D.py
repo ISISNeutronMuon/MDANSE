@@ -403,11 +403,11 @@ class Plotter1D(wx.Panel):
         elif  scaleStr == 'symlog':
             self.figure.gca().set_yscale('symlog')
         elif scaleStr == 'ln':
-            self.figure.gca().set_yscale('log', basex=numpy.exp(1))
+            self.figure.gca().set_yscale('log', basey=numpy.exp(1))
         elif scaleStr == 'log 10':
-            self.figure.gca().set_yscale('log', basex=10)
+            self.figure.gca().set_yscale('log', basey=10)
         elif scaleStr == 'log 2':
-            self.figure.gca().set_yscale('log', basex=2)
+            self.figure.gca().set_yscale('log', basey=2)
         self.on_auto_fit() 
         self.figure.canvas.draw()
         
