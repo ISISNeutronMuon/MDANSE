@@ -46,7 +46,7 @@ cp ${CI_PROJECT_DIR}/Scripts/mdanse_gui ${MDANSE_APP_DIR}/Contents/Resources/
 sed -i "" "s/<MDANSE_VERSION>/${VERSION_NAME}/" ${MDANSE_APP_DIR}/Contents/Info.plist
 
 # Relink netcdf
-install_name_tool -change /usr/local/opt/netcdf/lib/libnetcdf.15.dylib @executable_path/../Frameworks/libnetcdf.15.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/Scientific/_netcdf.so
+install_name_tool -change /usr/local/opt/netcdf/lib/libnetcdf.18.dylib @executable_path/../Frameworks/libnetcdf.18.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/Scientific/_netcdf.so
 
 #############################
 # Create DMG
