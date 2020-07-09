@@ -306,23 +306,25 @@ class LAMMPSConverter(Converter):
                 self._id = keywords.index("id")
                 self._type = keywords.index("type")
                 
-                # Field name is <x,y,z>u if real coordinates and <x,y,z>s if fractional ones
+                # Field name is <x,y,z> or cd ..<x,y,z>u if real coordinates and <x,y,z>s if fractional ones
+                self._fractionalCoordinates = False
                 try:
-                    self._x = keywords.index("xu")
-                    self._y = keywords.index("yu")
-                    self._z = keywords.index("zu")
+                    self._x = keywords.index("x")
+                    self._y = keywords.index("y")
+                    self._z = keywords.index("z")
                 except ValueError:
                     try:
-                        self._x = keywords.index("xs")
-                        self._y = keywords.index("ys")
-                        self._z = keywords.index("zs")
+                        self._x = keywords.index("xu")
+                        self._y = keywords.index("yu")
+                        self._z = keywords.index("zu")
                     except ValueError:
-                        raise LAMMPSTrajectoryFileError("No coordinates could be found in the trajectory")
-                    else:
-                        self._fractionalCoordinates = True
-                        
-                else:
-                    self._fractionalCoordinates = False
+                        try:
+                            self._x = keywords.index("xs")
+                            self._y = keywords.index("ys")
+                            self._z = keywords.index("zs")
+                            self._fractionalCoordinates = True
+                        except ValueError:
+                            raise LAMMPSTrajectoryFileError("No coordinates could be found in the trajectory")
                     
                 self._rankToName = {}
                 
