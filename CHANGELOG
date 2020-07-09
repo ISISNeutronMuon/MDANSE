@@ -1,6 +1,7 @@
 version 1.5.0
 --------------
 * FIXED issue #57 On macOS, MDANSE did not use the embedded python
+* CHANGED (internal) netCDF version hass been updated on macOS
 
 version 1.4.0
 --------------
