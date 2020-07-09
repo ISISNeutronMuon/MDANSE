@@ -228,7 +228,7 @@ class LAMMPSConverter(Converter):
 
         for i,_ in enumerate(range(self._itemsPosition["ATOMS"][0], self._itemsPosition["ATOMS"][1])):
             temp = self._lammps.readline().split()
-            idx = self._nameToIndex[self._rankToName[i]]
+            idx = self._nameToIndex[self._rankToName[int(temp[0])-1]]
             conf.array[idx,:] = numpy.array([temp[self._x],temp[self._y],temp[self._z]],dtype=numpy.float64)
 
         if self._fractionalCoordinates:
@@ -336,7 +336,7 @@ class LAMMPSConverter(Converter):
                     idx = int(temp[self._id])-1
                     ty = int(temp[self._type])
                     name = "%s%d" % (self._lammpsConfig["elements"][ty],idx)
-                    self._rankToName[i] = name
+                    self._rankToName[int(temp[0])-1] = name
                     g.add_node(idx, element=self._lammpsConfig["elements"][ty], atomName=name)
                     
                 if self._lammpsConfig["n_bonds"] is not None:
