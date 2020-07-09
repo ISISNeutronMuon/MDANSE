@@ -42,8 +42,9 @@ echo "${VERSION_NAME}" > ${MDANSE_APP_DIR}/Contents/Resources/version
 # Copy MDANSE GUI
 cp ${CI_PROJECT_DIR}/Scripts/mdanse_gui ${MDANSE_APP_DIR}/Contents/Resources/
 
-# Modify Info.plist
-sed -i "" "s/<MDANSE_VERSION>/${VERSION_NAME}/" ${MDANSE_APP_DIR}/Contents/Info.plist
+# Modify Info.plist and copy it
+sed -i "" "s/<MDANSE_VERSION>/${VERSION_NAME}/" ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/Resources/Info.plist
+cp ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/Resources/Info.plist ${MDANSE_APP_DIR}/Contents/
 
 # Relink netcdf
 install_name_tool -change /usr/local/opt/netcdf/lib/libnetcdf.18.dylib @executable_path/../Frameworks/libnetcdf.18.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/Scientific/_netcdf.so

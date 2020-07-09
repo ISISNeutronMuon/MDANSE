@@ -1,3 +1,7 @@
+version 1.5.0
+--------------
+* FIXED issue #57 On macOS, MDANSE did not use the embedded python
+
 version 1.4.0
 --------------
 * FIXED issue #56 Layout on Windows differed from macOS and Linux (we keep Windows Layout: "Data" on top, "Plugins" below)
