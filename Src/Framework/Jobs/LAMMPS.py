@@ -129,7 +129,7 @@ class LAMMPSConverter(Converter):
                                               'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.config')})
     settings['trajectory_file'] = ('input_file', {'label':"LAMMPS trajectory file",
                                                   'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.lammps')})
-    settings['mass_tolerance'] = ('float', {'label':"mass tolerance (uma)", 'default':1.0e-5, 'mini':1.0e-9})        
+    settings['mass_tolerance'] = ('float', {'label':"mass tolerance (uma)", 'default':1.0e-3, 'mini':1.0e-9})
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
     settings['n_steps'] = ('integer', {'label':"number of time steps", 'default':1, 'mini':0})        
     settings['output_files'] = ('output_files', {'formats':["netcdf"]})
