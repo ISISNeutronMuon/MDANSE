@@ -131,7 +131,7 @@ class LAMMPSConverter(Converter):
                                                   'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.lammps')})
     settings['mass_tolerance'] = ('float', {'label':"mass tolerance (uma)", 'default':1.0e-3, 'mini':1.0e-9})
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
-    settings['n_steps'] = ('integer', {'label':"number of time steps", 'default':1, 'mini':0})        
+    settings['n_steps'] = ('integer', {'label':"number of time steps (0 for automatic detection)", 'default':0, 'mini':0})
     settings['output_files'] = ('output_files', {'formats':["netcdf"]})
     
     def initialize(self):
@@ -153,6 +153,13 @@ class LAMMPSConverter(Converter):
 
         # A frame generator is created.
         self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
+
+        # Estimate number of steps if needed
+        if self.numberOfSteps == 0:
+            self.numberOfSteps = 1
+            for line in self._lammps:
+                if line.startswith("ITEM: TIMESTEP"):
+                    self.numberOfSteps += 1
 
         self._lammps.seek(0,0)
 
