@@ -129,9 +129,9 @@ class LAMMPSConverter(Converter):
                                               'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.config')})
     settings['trajectory_file'] = ('input_file', {'label':"LAMMPS trajectory file",
                                                   'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.lammps')})
-    settings['mass_tolerance'] = ('float', {'label':"mass tolerance (uma)", 'default':1.0e-5, 'mini':1.0e-9})        
+    settings['mass_tolerance'] = ('float', {'label':"mass tolerance (uma)", 'default':1.0e-3, 'mini':1.0e-9})
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
-    settings['n_steps'] = ('integer', {'label':"number of time steps", 'default':1, 'mini':0})        
+    settings['n_steps'] = ('integer', {'label':"number of time steps (0 for automatic detection)", 'default':0, 'mini':0})
     settings['output_files'] = ('output_files', {'formats':["netcdf"]})
     
     def initialize(self):
@@ -153,6 +153,13 @@ class LAMMPSConverter(Converter):
 
         # A frame generator is created.
         self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
+
+        # Estimate number of steps if needed
+        if self.numberOfSteps == 0:
+            self.numberOfSteps = 1
+            for line in self._lammps:
+                if line.startswith("ITEM: TIMESTEP"):
+                    self.numberOfSteps += 1
 
         self._lammps.seek(0,0)
 
@@ -228,7 +235,7 @@ class LAMMPSConverter(Converter):
 
         for i,_ in enumerate(range(self._itemsPosition["ATOMS"][0], self._itemsPosition["ATOMS"][1])):
             temp = self._lammps.readline().split()
-            idx = self._nameToIndex[self._rankToName[i]]
+            idx = self._nameToIndex[self._rankToName[int(temp[0])-1]]
             conf.array[idx,:] = numpy.array([temp[self._x],temp[self._y],temp[self._z]],dtype=numpy.float64)
 
         if self._fractionalCoordinates:
@@ -306,23 +313,25 @@ class LAMMPSConverter(Converter):
                 self._id = keywords.index("id")
                 self._type = keywords.index("type")
                 
-                # Field name is <x,y,z>u if real coordinates and <x,y,z>s if fractional ones
+                # Field name is <x,y,z> or cd ..<x,y,z>u if real coordinates and <x,y,z>s if fractional ones
+                self._fractionalCoordinates = False
                 try:
-                    self._x = keywords.index("xu")
-                    self._y = keywords.index("yu")
-                    self._z = keywords.index("zu")
+                    self._x = keywords.index("x")
+                    self._y = keywords.index("y")
+                    self._z = keywords.index("z")
                 except ValueError:
                     try:
-                        self._x = keywords.index("xs")
-                        self._y = keywords.index("ys")
-                        self._z = keywords.index("zs")
+                        self._x = keywords.index("xu")
+                        self._y = keywords.index("yu")
+                        self._z = keywords.index("zu")
                     except ValueError:
-                        raise LAMMPSTrajectoryFileError("No coordinates could be found in the trajectory")
-                    else:
-                        self._fractionalCoordinates = True
-                        
-                else:
-                    self._fractionalCoordinates = False
+                        try:
+                            self._x = keywords.index("xs")
+                            self._y = keywords.index("ys")
+                            self._z = keywords.index("zs")
+                            self._fractionalCoordinates = True
+                        except ValueError:
+                            raise LAMMPSTrajectoryFileError("No coordinates could be found in the trajectory")
                     
                 self._rankToName = {}
                 
@@ -334,7 +343,7 @@ class LAMMPSConverter(Converter):
                     idx = int(temp[self._id])-1
                     ty = int(temp[self._type])
                     name = "%s%d" % (self._lammpsConfig["elements"][ty],idx)
-                    self._rankToName[i] = name
+                    self._rankToName[int(temp[0])-1] = name
                     g.add_node(idx, element=self._lammpsConfig["elements"][ty], atomName=name)
                     
                 if self._lammpsConfig["n_bonds"] is not None:

@@ -1,6 +1,9 @@
 version 1.5.0
 --------------
+* FIXED issue #58 Some LAMMPS files could not be converted with MDANSE
 * FIXED issue #57 On macOS, MDANSE did not use the embedded python
+* CHANGED LAMMPS converter accepts now "0" as the number of steps (=> automatic detection of the steps number)
+* CHANGED Defautl mass tolerance in LAMMPS converter in now 10^-3 instead of 10^-5
 * CHANGED (internal) netCDF version hass been updated on macOS
 
 version 1.4.0
