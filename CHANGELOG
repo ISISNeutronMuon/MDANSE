@@ -1,5 +1,6 @@
 version 1.5.0
 --------------
+* ADDED issue #59 Added smart_association in LAMMPS converter. When two or more masses are matching in a LAMMPS trajectory, and smart_association is set to True, we select the nearest one.
 * FIXED issue #58 Some LAMMPS files could not be converted with MDANSE
 * FIXED issue #57 On macOS, MDANSE did not use the embedded python
 * CHANGED LAMMPS converter accepts now "0" as the number of steps (=> automatic detection of the steps number)
