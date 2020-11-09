@@ -36,7 +36,7 @@ class LAMMPSTrajectoryFileError(Error):
 
 class LAMMPSConfigFile(dict):
 
-    def __init__(self, filename,tolerance):
+    def __init__(self, filename,tolerance,smart_association):
         
         self._filename = filename
         
@@ -92,18 +92,28 @@ class LAMMPSConfigFile(dict):
                     if nElements == 0:
                         # No element is matching
                         raise LAMMPSConfigFileError("The atom %d with defined mass %f could not be assigned with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (idx,mass,self._tolerance))
-                    elif nElements == 2:
-                        # If two elements are matching, these can be the same appearing twice (example 'Al' and 'Al27')
-                        if el[0][:min((len(el[0]), len(el[1])))] == el[1][:min((len(el[0]), len(el[1])))]:
-                            self["elements"][idx] = el[0]
-                        else:
-                            raise LAMMPSConfigFileError("The atoms %s of MDANSE database matches the mass %f with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (el,mass,self._tolerance))
-                    elif nElements > 2:
-                        # More than two elements are matching => error
-                        raise LAMMPSConfigFileError("The atoms %s of MDANSE database matches the mass %f with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (el,mass,self._tolerance))
-                    else:
+                    elif nElements == 1:
                         # One element is matching => continue
                         self["elements"][idx] = el[0]
+                    elif nElements == 2 and el[0][:min((len(el[0]), len(el[1])))] == el[1][:min((len(el[0]), len(el[1])))]:
+                        # If two elements are matching, these can be the same appearing twice (example 'Al' and 'Al27')
+                        self["elements"][idx] = el[0]
+                    else:
+                        # Two or more elements are matching
+                        if smart_association:
+                            # Take the nearest match
+                            matched_element = None
+                            for element in el:
+                                if matched_element is None:
+                                    matched_element=element
+                                else:
+                                    if numpy.abs(ELEMENTS[element]["atomic_weight"] - mass) < numpy.abs(ELEMENTS[matched_element]["atomic_weight"] - mass):
+                                        matched_element = element
+                            self["elements"][idx] = matched_element
+                            print(matched_element)
+                        else:
+                            # More than two elements are matching => error
+                            raise LAMMPSConfigFileError("The atoms %s of MDANSE database matches the mass %f with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (el,mass,self._tolerance))
 
             m = re.match("^\s*bonds\s*$",line, re.I)
             if m:
@@ -130,6 +140,7 @@ class LAMMPSConverter(Converter):
     settings['trajectory_file'] = ('input_file', {'label':"LAMMPS trajectory file",
                                                   'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.lammps')})
     settings['mass_tolerance'] = ('float', {'label':"mass tolerance (uma)", 'default':1.0e-3, 'mini':1.0e-9})
+    settings['smart_mass_association'] = ('boolean', {'label':"smart mass association", 'default':True})
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
     settings['n_steps'] = ('integer', {'label':"number of time steps (0 for automatic detection)", 'default':0, 'mini':0})
     settings['output_files'] = ('output_files', {'formats':["netcdf"]})
@@ -142,7 +153,7 @@ class LAMMPSConverter(Converter):
         # The number of steps of the analysis.
         self.numberOfSteps = self.configuration["n_steps"]["value"]
         
-        self._lammpsConfig = LAMMPSConfigFile(self.configuration["config_file"]["value"],self.configuration["mass_tolerance"]["value"])
+        self._lammpsConfig = LAMMPSConfigFile(self.configuration["config_file"]["value"],self.configuration["mass_tolerance"]["value"],self.configuration['smart_mass_association']["value"])
         
         self.parse_first_step()
         
