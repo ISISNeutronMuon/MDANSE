@@ -7,9 +7,11 @@ MDANSE has intercaes with molecular dynamics softwares such as CASTEP, DLPOLY, G
 
 MDANSE can be run on Linux, Windows and McOS. 
 
-Contact: \
-Sanghamitra Mukhopadhyay \
+This project is built on the development published previously: \
+G. Goret, B. Aoun, E. Pellegrini, "MDANSE: An Interactive Analysis Environment for Molecular Dynamics Simulations", J Chem Inf Model. 57(1):1-5 (2017).
+
+To join the project contact: \
+Dr. Sanghamitra Mukhopadhyay (sanghamitra.mukhopadhyay@stfc.ac.uk) \
 ISIS Neutron and Muon Source \
 Rutherford Appleton Laboratory \
-Didcot \
-UK
+Didcot, UK
