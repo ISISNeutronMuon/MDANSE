@@ -41,8 +41,13 @@ class MDFile(dict):
     def __init__(self, filename):
         
         self['instance'] = open(filename, 'rb')
-        for _ in range(5):
-            self["instance"].readline()
+
+        # Skip over the header
+        while True:
+            line = self["instance"].readline()
+            if re.search('END', line):  # If the current line is the 'END header' line
+                self["instance"].readline()  # Skip this line (it should be blank line)
+                break  # At this point, the pointer should be at the line storing time information.
         
         self._headerSize = self["instance"].tell()
                 
