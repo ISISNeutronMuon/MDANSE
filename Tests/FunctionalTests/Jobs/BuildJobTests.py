@@ -19,7 +19,7 @@ import sys
 from MDANSE import REGISTRY
 
 class JobFileGenerator():
-    def __init__(self, job, parameters=None):
+    def __init__(self, job, parameters=None, pyfile_name=None):
         """
         Builds test for a given job
         :Parameters:
@@ -42,7 +42,7 @@ class JobFileGenerator():
             print "/!\ Job " + str(job) + " cannot be launched on multiprocessor"
             self.multiprocessor = False
         # Create the job file
-        self.job_file_name = "Test_%s.py" % job._type
+        self.job_file_name = "Test_%s.py" % (pyfile_name if pyfile_name else job._type)
         self.__build_job_file(parameters)
 
     def __build_job_file(self, parameters):
@@ -181,4 +181,9 @@ if __name__ == '__main__':
             pass
         else:
             job_file_generator = JobFileGenerator(job)
+            if job_id == 'castep':
+                job.settings['castep_file'] = ('input_file', {'default': os.path.join('..', '..', '..', 'Data',
+                                                                                      'Trajectories', 'CASTEP',
+                                                                                      'PBAnew_short.md')})
+                job_file_generator = JobFileGenerator(job, pyfile_name='castep_short_header')
 
