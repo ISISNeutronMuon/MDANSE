@@ -11,6 +11,10 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
+"""
+A test suite for testing BuildJobTests.py. It ensures that a test file is created in the correct directory with the
+correct name by using a test double. However, it does not test if the content of the created file itself is correct.
+"""
 
 import unittest
 import os
@@ -18,6 +22,7 @@ from BuildJobTests import JobFileGenerator
 
 
 class JobForTest:
+    """A test double used as a substitute for an actual MDANSE job class."""
     settings = {}
     configuration = {"output_files": {"files": ["./File.nc"]}}
     _type = 'Test'

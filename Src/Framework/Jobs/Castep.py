@@ -204,7 +204,7 @@ class CASTEPConverter(Converter):
         :return: The index of the step and None
         :rtype: (int, None)-tuple
 
-        @note: the argument index is the index of the loop note the index of the frame.      
+        @note: the argument index is the index of the loop not the index of the frame.
         """
                 
         nAtoms = self._castepFile["n_atoms"]  # Retrieve the number of atoms
