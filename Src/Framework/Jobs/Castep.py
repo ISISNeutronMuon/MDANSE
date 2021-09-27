@@ -54,9 +54,13 @@ class MDFile(dict):
         # Skip over the header
         while True:
             line = self["instance"].readline()
-            if re.search('END', line):  # If the current line is the 'END header' line
-                self["instance"].readline()  # Skip this line (it should be blank line)
-                break  # At this point, the file handle should be at the line storing time information.
+            if re.search('END', line):
+                self["instance"].readline()
+                break
+            # If a line storing data is read, something is wrong with the header.
+            elif re.match(".*<-- h$", line):
+                raise CASTEPError('The provided input file is corrupted. Due to unexpected END header line, the header'
+                                  'length could not be determined.')
         
         self._headerSize = self["instance"].tell()  # Record the length of the header
 
