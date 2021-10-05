@@ -9,7 +9,8 @@ jobs:
       matrix:
         os: [ubuntu-18.04, ubuntu-16.04]
     steps:
-      - run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/BuildServer/Docker/clean.sh
+      - uses: actions/checkout@v2
+      - run: $GITHUB_REPOSITORY/BuildServer/Docker/clean.sh
   
   ci_ubuntu:
     if: always()
@@ -31,15 +32,16 @@ jobs:
             tag: ci_mdanse_xenial
             build: ci_mdanse_xenial_build
     steps:
-      - run: docker build --force-rm=true -t ${{ matrix.tag }} -f $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/BuildServer/Docker/${{ matrix.name }}/Dockerfile_setup .
-      - run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ${{ matrix.build }} -f $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/BuildServer/Docker/${{ matrix.name }}/Dockerfile_build .
+      - uses: actions/checkout@v2
+      - run: docker build --force-rm=true -t ${{ matrix.tag }} -f $GITHUB_REPOSITORY/BuildServer/Docker/${{ matrix.name }}/Dockerfile_setup .
+      - run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ${{ matrix.build }} -f $GITHUB_REPOSITORY/BuildServer/Docker/${{ matrix.name }}/Dockerfile_build .
       - run: docker run -iv$PWD:/artifacts/ ${{ matrix.build }}
       - name: 'Archive artifacts'
         uses: actions/upload-artifact@v2
         with:
           path: |
-            $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/build
-            $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/temp
+            $GITHUB_REPOSITORY/build
+            $GITHUB_REPOSITORY/temp
           retention-days: 1/24
 
   deploy_ubuntu:
@@ -69,13 +71,14 @@ jobs:
       contains( github.ref, 'tags' ) ||
       contains( github.ref, 'web' )
     steps:
-      - run: docker build --force-rm=true -t ${{ matrix.tag }} -f $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/BuildServer/Docker/${{ matrix.name }}/Dockerfile_setup .
-      - run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ${{ matrix.build }} -f $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/BuildServer/Docker/${{ matrix.name }}/Dockerfile_deploy .
+      - uses: actions/checkout@v2
+      - run: docker build --force-rm=true -t ${{ matrix.tag }} -f $GITHUB_REPOSITORY/BuildServer/Docker/${{ matrix.name }}/Dockerfile_setup .
+      - run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ${{ matrix.build }} -f $GITHUB_REPOSITORY/BuildServer/Docker/${{ matrix.name }}/Dockerfile_deploy .
       - run: docker run -iv${PWD}:/artifacts/ ${{ matrix.build }}
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/*.deb 
+          path: $GITHUB_REPOSITORY/*.deb 
           retention-days: 1/24
   
   docker_post_clean:
@@ -86,43 +89,46 @@ jobs:
       matrix:
         os: [ubuntu-18.04, ubuntu-16.04]
     steps:
-      - run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/BuildServer/Docker/clean.sh
+      - uses: actions/checkout@v2
+      - run: $GITHUB_REPOSITORY/BuildServer/Docker/clean.sh
   
+  # OSX
   ci_osx:
     runs-on: macos-10.15
     steps:
+      - uses: actions/checkout@v2
       - run: |
-          source $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/BuildServer/Unix/MacOS/definitions.sh
-          source $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/BuildServer/Unix/setup_ci.sh
-          $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/BuildServer/Unix/build.sh
-          $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/BuildServer/Unix/tests.sh
+          source $GITHUB_REPOSITORY/BuildServer/Unix/MacOS/definitions.sh
+          source $GITHUB_REPOSITORY/BuildServer/Unix/setup_ci.sh
+          $GITHUB_REPOSITORY/BuildServer/Unix/build.sh
+          $GITHUB_REPOSITORY/BuildServer/Unix/tests.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: OSX_artifacts
           path: |
-            $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/build
-            $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/temp
+            $GITHUB_REPOSITORY/build
+            $GITHUB_REPOSITORY/temp
           retention-days: 1/24
   
-  # OSX
   deploy_osx:
     needs: ci_osx
     runs-on: macos-10.15
     steps:
+      - uses: actions/checkout@v2
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
           name: OSX_artifacts
       - run: |
-          source $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/BuildServer/Unix/MacOS/definitions.sh
-          source $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/BuildServer/Unix/setup_ci.sh
-          $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/BuildServer/Unix/MacOS/deploy.sh
+          source $GITHUB_REPOSITORY/BuildServer/Unix/MacOS/definitions.sh
+          source $GITHUB_REPOSITORY/BuildServer/Unix/setup_ci.sh
+          $GITHUB_REPOSITORY/BuildServer/Unix/MacOS/deploy.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: OSX_deploy_artifacts
-          path: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/*.dmg
+          path: $GITHUB_REPOSITORY/*.dmg
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
@@ -136,42 +142,44 @@ jobs:
   ci_windows:
     runs-on: windows-2019
     steps:
+      - uses: actions/checkout@v2
       - name: Run scripts
         run: |
-          call "%GITHUB_SERVER_URL%\\%GITHUB_REPOSITORY%\\BuildServer\\Windows\\definitions.bat"
-          call "%GITHUB_SERVER_URL%\\%GITHUB_REPOSITORY%\\BuildServer\\Windows\\setup_ci.bat"
-          call "%GITHUB_SERVER_URL%\\%GITHUB_REPOSITORY%\\BuildServer\\Windows\\build.bat"
-          call "%GITHUB_SERVER_URL%\\%GITHUB_REPOSITORY%\\BuildServer\\Windows\\tests.bat"
+          call "%$GITHUB_REPOSITORY%\\BuildServer\\Windows\\definitions.bat"
+          call "%$GITHUB_REPOSITORY%\\BuildServer\\Windows\\setup_ci.bat"
+          call "%$GITHUB_REPOSITORY%\\BuildServer\\Windows\\build.bat"
+          call "%$GITHUB_REPOSITORY%\\BuildServer\\Windows\\tests.bat"
         shell: cmd
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: Windows_artifacts
           path: |
-            "%GITHUB_SERVER_URL%\\%GITHUB_REPOSITORY%\\BuildServer\\Windows\\Build"
-            "%GITHUB_SERVER_URL%\\%GITHUB_REPOSITORY%\\build"
-            "%GITHUB_SERVER_URL%\\%GITHUB_REPOSITORY%\\Extensions"
+            "%$GITHUB_REPOSITORY%\\BuildServer\\Windows\\Build"
+            "%$GITHUB_REPOSITORY%\\build"
+            "%$GITHUB_REPOSITORY%\\Extensions"
           retention-days: 1/24
   
   deploy_windows:
     needs: ci_windows
     runs-on: windows-2019
     steps:
+      - uses: actions/checkout@v2
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
           name: Windows_artifacts
       - name: run scripts
         run: |
-          call "%GITHUB_SERVER_URL%\\%GITHUB_REPOSITORY%\\BuildServer\\Windows\\definitions.bat"
-          call "%GITHUB_SERVER_URL%\\%GITHUB_REPOSITORY%\\BuildServer\\Windows\\setup_ci.bat"
-          call "%GITHUB_SERVER_URL%\\%GITHUB_REPOSITORY%\\BuildServer\\Windows\\deploy.bat"
+          call "%$GITHUB_REPOSITORY%\\BuildServer\\Windows\\definitions.bat"
+          call "%$GITHUB_REPOSITORY%\\BuildServer\\Windows\\setup_ci.bat"
+          call "%$GITHUB_REPOSITORY%\\BuildServer\\Windows\\deploy.bat"
         shell: cmd
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: Windows_deploy_artifacts
-          path: "%GITHUB_SERVER_URL%\\%GITHUB_REPOSITORY%\\*.exe"
+          path: "%$GITHUB_REPOSITORY%\\*.exe"
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
