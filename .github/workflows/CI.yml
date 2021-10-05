@@ -1,0 +1,178 @@
+name: CI/CD
+
+on: [push, workflow_dispatch]
+
+jobs:
+  docker_pre_clean:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, ubuntu-16.04]
+    steps:
+      - run: ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
+  
+  ci_ubuntu:
+    if: always()
+    needs: docker_pre_clean
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [""]
+        name: ['']
+        tag: ['']
+        build: ['']
+        include:
+          - os: ubuntu-18.04
+            name: ubuntu_bionic
+            tag: ci_mdanse_bionic
+            build: ci_mdanse_bionic_build
+          - os: ubuntu-16.04
+            name: ubuntu_xenial
+            tag: ci_mdanse_xenial
+            build: ci_mdanse_xenial_build
+    steps:
+      - run: docker build --force-rm=true -t ${{ matrix.tag }} -f $GITHUB_REPOSITORY/BuildServer/Docker/${{ matrix.name }}/Dockerfile_setup .
+      - run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ${{ matrix.build }} -f $GITHUB_REPOSITORY/BuildServer/Docker/${{ matrix.name }}/Dockerfile_build .
+      - run: docker run -iv$PWD:/artifacts/ ${{ matrix.build }}
+      - name: 'Archive artifacts'
+        uses: actions/upload-artifact@v2
+        with:
+          path: |
+            ${CI_PROJECT_DIR}/build
+            ${CI_PROJECT_DIR}/temp
+          retention-days: 1/24
+
+  deploy_ubuntu:
+    runs-on: ${{ matrix.os }}
+    needs: ci_ubuntu
+    strategy:
+      matrix:
+        os: [""]
+        name: ['']
+        tag: ['']
+        build: ['']
+        include:
+          - os: ubuntu-18.04
+            name: ubuntu_bionic
+            tag: ci_mdanse_bionic
+            build: ci_mdanse_bionic_build
+          - os: ubuntu-16.04
+            name: ubuntu_xenial
+            tag: ci_mdanse_xenial
+            build: ci_mdanse_xenial_build
+    if: |
+      contains( github.ref, 'master' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, 'web' )
+    steps:
+      - run: docker build --force-rm=true -t ${{ matrix.tag }} -f $GITHUB_REPOSITORY/BuildServer/Docker/${{ matrix.name }}/Dockerfile_setup .
+      - run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ${{ matrix.build }} -f $GITHUB_REPOSITORY/BuildServer/Docker/${{ matrix.name }}/Dockerfile_deploy .
+      - run: docker run -iv${PWD}:/artifacts/ ${{ matrix.build }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: $GITHUB_REPOSITORY/*.deb 
+          retention-days: 1/24
+  
+  docker_post_clean:
+    if: always()
+    needs: deploy_ubuntu
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, ubuntu-16.04]
+    steps:
+      - run: $GITHUB_REPOSITORY/BuildServer/Docker/clean.sh
+  
+  ci_osx:
+    runs-on: macos-10.15
+    steps:
+      - run: |
+          source $GITHUB_REPOSITORY/BuildServer/Unix/MacOS/definitions.sh
+          source $GITHUB_REPOSITORY/BuildServer/Unix/setup_ci.sh
+          $GITHUB_REPOSITORY/BuildServer/Unix/build.sh
+          $GITHUB_REPOSITORY/BuildServer/Unix/tests.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: OSX_artifacts
+          path: |
+            ${CI_PROJECT_DIR}/build
+            ${CI_PROJECT_DIR}/temp
+          retention-days: 1/24
+  
+  # OSX
+  deploy_osx:
+    needs: ci_osx
+    runs-on: macos-10.15
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: OSX_artifacts
+      - run: |
+          source $GITHUB_REPOSITORY/BuildServer/Unix/MacOS/definitions.sh
+          source $GITHUB_REPOSITORY/BuildServer/Unix/setup_ci.sh
+          $GITHUB_REPOSITORY/BuildServer/Unix/MacOS/deploy.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: OSX_deploy_artifacts
+          path: ${CI_PROJECT_DIR}/*.dmg
+    if: |
+      contains( github.ref, 'master' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, 'web' )
+  
+  # WINDOWS
+  ci_windows:
+    runs-on: windows-2019
+    steps:
+      - run: |
+          call "%GITHUB_REPOSITORY%\\BuildServer\\Windows\\definitions.bat"
+          call "%GITHUB_REPOSITORY%\\BuildServer\\Windows\\setup_ci.bat"
+          call "%GITHUB_REPOSITORY%\\BuildServer\\Windows\\build.bat"
+          call "%GITHUB_REPOSITORY%\\BuildServer\\Windows\\tests.bat"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Windows_artifacts
+          path: |
+            "%GITHUB_REPOSITORY%\\BuildServer\\Windows\\Build"
+            "%GITHUB_REPOSITORY%\\build"
+            "%GITHUB_REPOSITORY%\\Extensions"
+          retention-days: 1/24
+  
+  deploy_windows:
+    needs: ci_windows
+    runs-on: windows-2019
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: Windows_artifacts
+      - run: |
+          call "%GITHUB_REPOSITORY%\\BuildServer\\Windows\\definitions.bat"
+          call "%GITHUB_REPOSITORY%\\BuildServer\\Windows\\setup_ci.bat"
+          call "%GITHUB_REPOSITORY%\\BuildServer\\Windows\\deploy.bat"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Windows_deploy_artifacts
+          path: "%GITHUB_REPOSITORY%\\*.exe"
+    if: |
+      contains( github.ref, 'master' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, 'web' )
