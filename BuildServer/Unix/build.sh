@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ${CI_PROJECT_DIR}
+cd $GITHUB_WORKSPACE
 
 #############################
 # BUILDING DEPENDENCIES
@@ -21,7 +21,7 @@ fi
 
 cp ${CI_TEMP_INSTALL_DIR}/include/python2.7/Scientific/netcdf.h ${CI_TEMP_INSTALL_DIR}/include/python2.7/
 
-cd ${CI_PROJECT_DIR}
+cd $GITHUB_WORKSPACE
 
 # Build ILL version of MMTK
 echo -e "${BLUE}""Building MMTK""${NORMAL}"
@@ -31,7 +31,7 @@ cd mmtk
 git checkout master
 
 # Env var needed by MMTK
-export NETCDF_HEADER_FILE_PATH=${CI_TEMP_INSTALL_DIR}/include/python2.7/
+export NETCDF_HEADER_FILE_PATH=${CI_TEMP_INSTALL_DIR}/include/python2.7/:$NETCDF_HEADER_FILE_PATH
 
 ${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
 status=$?
@@ -45,7 +45,7 @@ fi
 #############################
 echo -e "${BLUE}""Building MDANSE""${NORMAL}"
 
-cd ${CI_PROJECT_DIR}
+cd $GITHUB_WORKSPACE
 
 # Now build last version and install it
 ${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR}

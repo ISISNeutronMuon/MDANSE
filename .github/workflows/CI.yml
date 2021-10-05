@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-18.04, ubuntu-16.04]
+        os: [ubuntu-18.04, ubuntu-20.04]
     steps:
       - uses: actions/checkout@v2
       - run: $GITHUB_WORKSPACE/BuildServer/Docker/clean.sh
@@ -27,15 +27,18 @@ jobs:
             name: ubuntu_bionic
             tag: ci_mdanse_bionic
             build: ci_mdanse_bionic_build
-          - os: ubuntu-16.04
+          - os: ubuntu-20.04
             name: ubuntu_xenial
             tag: ci_mdanse_xenial
             build: ci_mdanse_xenial_build
     steps:
       - uses: actions/checkout@v2
-      - run: docker build --force-rm=true -t ${{ matrix.tag }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_setup .
-      - run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ${{ matrix.build }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_build .
-      - run: docker run -iv$PWD:/artifacts/ ${{ matrix.build }}
+      - name: Install NetCDF
+        run: sudo apt-get netcdf netcdf-bin libnetcdf-dev
+      - run: |
+            docker build --force-rm=true -t ${{ matrix.tag }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_setup .
+            docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ${{ matrix.build }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_build .
+            docker run -iv$PWD:/artifacts/ ${{ matrix.build }}
       - name: 'Archive artifacts'
         uses: actions/upload-artifact@v2
         with:
@@ -58,7 +61,7 @@ jobs:
             name: ubuntu_bionic
             tag: ci_mdanse_bionic
             build: ci_mdanse_bionic_build
-          - os: ubuntu-16.04
+          - os: ubuntu-20.04
             name: ubuntu_xenial
             tag: ci_mdanse_xenial
             build: ci_mdanse_xenial_build
@@ -87,7 +90,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-18.04, ubuntu-16.04]
+        os: [ubuntu-18.04, ubuntu-20.04]
     steps:
       - uses: actions/checkout@v2
       - run: $GITHUB_WORKSPACE/BuildServer/Docker/clean.sh
@@ -97,6 +100,8 @@ jobs:
     runs-on: macos-10.15
     steps:
       - uses: actions/checkout@v2
+      - name: Install NetCDF
+        run: brew install netcdf
       - run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
@@ -145,19 +150,19 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run scripts
         run: |
-          call "$GITHUB_WORKSPACE\\BuildServer\\Windows\\definitions.bat"
-          call "$GITHUB_WORKSPACE\\BuildServer\\Windows\\setup_ci.bat"
-          call "$GITHUB_WORKSPACE\\BuildServer\\Windows\\build.bat"
-          call "$GITHUB_WORKSPACE\\BuildServer\\Windows\\tests.bat"
+          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\definitions.bat"
+          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\setup_ci.bat"
+          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\build.bat"
+          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\tests.bat"
         shell: cmd
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: Windows_artifacts
           path: |
-            "$GITHUB_WORKSPACE\\BuildServer\\Windows\\Build"
-            "$GITHUB_WORKSPACE\\build"
-            "$GITHUB_WORKSPACE\\Extensions"
+            "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\Build"
+            "%GITHUB_WORKSPACE%\\build"
+            "%GITHUB_WORKSPACE%\\Extensions"
           retention-days: 1/24
   
   deploy_windows:
@@ -171,15 +176,15 @@ jobs:
           name: Windows_artifacts
       - name: run scripts
         run: |
-          call "$GITHUB_WORKSPACE\\BuildServer\\Windows\\definitions.bat"
-          call "$GITHUB_WORKSPACE\\BuildServer\\Windows\\setup_ci.bat"
-          call "$GITHUB_WORKSPACE\\BuildServer\\Windows\\deploy.bat"
+          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\definitions.bat"
+          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\setup_ci.bat"
+          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\deploy.bat"
         shell: cmd
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: Windows_deploy_artifacts
-          path: "$GITHUB_WORKSPACE\\*.exe"
+          path: "%GITHUB_WORKSPACE%\\*.exe"
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
