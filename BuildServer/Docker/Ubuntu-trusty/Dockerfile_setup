@@ -1,8 +1,5 @@
 FROM ubuntu:trusty
 
-ENV https_proxy http://proxy.ill.fr:8888
-ENV http_proxy http://proxy.ill.fr:8888
-
 RUN export DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update
