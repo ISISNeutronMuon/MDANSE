@@ -18,17 +18,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [""]
+        os: [ubuntu-18.04, ubuntu-20.04]
         name: ['']
         tag: ['']
         build: ['']
         include:
-          - os: ubuntu-18.04
-            name: ubuntu_bionic
+          - name: ubuntu_bionic
             tag: ci_mdanse_bionic
             build: ci_mdanse_bionic_build
-          - os: ubuntu-20.04
-            name: ubuntu_xenial
+          - name: ubuntu_xenial
             tag: ci_mdanse_xenial
             build: ci_mdanse_xenial_build
     steps:
@@ -162,7 +160,7 @@ jobs:
         run: |
           choco install python2 --params '"/InstallDir:%HOME%\Python2"'
           # wget https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -O netcdf.exe
-          python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+          python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro==3.16
       - name: Set up virtual machine
         run: |
           call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\definitions.bat"

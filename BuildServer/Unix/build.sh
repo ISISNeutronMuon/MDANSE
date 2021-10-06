@@ -12,7 +12,7 @@ git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
 git checkout master
 
-${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
+python2 setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to build/install Scientific""${NORMAL}"
@@ -33,7 +33,7 @@ git checkout master
 # Env var needed by MMTK
 export NETCDF_HEADER_FILE_PATH=${CI_TEMP_INSTALL_DIR}/include/python2.7/:$NETCDF_HEADER_FILE_PATH
 
-${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
+python2 setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to build/install MMTK""${NORMAL}"
@@ -48,7 +48,7 @@ echo -e "${BLUE}""Building MDANSE""${NORMAL}"
 cd $GITHUB_WORKSPACE
 
 # Now build last version and install it
-${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
+python2 setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
 
 status=$?
 if [ $status -ne 0 ]; then
