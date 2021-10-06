@@ -13,7 +13,7 @@ jobs:
       - run: $GITHUB_WORKSPACE/BuildServer/Docker/clean.sh
   
   ci_ubuntu:
-    if: always()
+    #if: always()
     needs: docker_pre_clean
     runs-on: ${{ matrix.os }}
     strategy:
@@ -35,10 +35,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install NetCDF
         run: sudo apt-get netcdf netcdf-bin libnetcdf-dev
-      - run: |
-            docker build --force-rm=true -t ${{ matrix.tag }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_setup .
-            docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ${{ matrix.build }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_build .
-            docker run -iv$PWD:/artifacts/ ${{ matrix.build }}
+      - name: Set up docker
+        run: docker build --force-rm=true -t ${{ matrix.tag }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_setup .
+      - name: Build MDANSE
+        run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ${{ matrix.build }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_build .
+      - name: Generate artifacts
+        run: docker run -iv$PWD:/artifacts/ ${{ matrix.build }}
       - name: 'Archive artifacts'
         uses: actions/upload-artifact@v2
         with:
@@ -75,9 +77,12 @@ jobs:
       contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
-      - run: docker build --force-rm=true -t ${{ matrix.tag }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_setup .
-      - run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ${{ matrix.build }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_deploy .
-      - run: docker run -iv${PWD}:/artifacts/ ${{ matrix.build }}
+      - name: Set up docker
+        run: docker build --force-rm=true -t ${{ matrix.tag }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_setup .
+      - name: Deploy
+        run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ${{ matrix.build }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_deploy .
+      - name: Generate artifacts
+        run: docker run -iv${PWD}:/artifacts/ ${{ matrix.build }}
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -102,11 +107,14 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install NetCDF
         run: brew install netcdf
-      - run: |
+      - name: Prepare virtual machine
+        run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-          $GITHUB_WORKSPACE/BuildServer/Unix/build.sh
-          $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
+      - name: Build MDANSE
+        run: $GITHUB_WORKSPACE/BuildServer/Unix/build.sh
+      - name: Run tests
+        run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -125,10 +133,12 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: OSX_artifacts
-      - run: |
+      - name: Prepare virtual machine
+        run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-          $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
+      - name: Deploy
+        run: $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -148,12 +158,21 @@ jobs:
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
-      - name: Run scripts
+      - name: Install dependencies
+        run: |
+          choco install python2 --params '"/InstallDir:%HOME%\Python2"'
+          # wget https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -O netcdf.exe
+          python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+      - name: Set up virtual machine
         run: |
           call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\definitions.bat"
           call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\setup_ci.bat"
-          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\build.bat"
-          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\tests.bat"
+        shell: cmd
+      - name: Build MDANSE
+        run: call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\build.bat"
+        shell: cmd
+      - name: Run tests
+        run: call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\tests.bat"
         shell: cmd
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
@@ -174,11 +193,13 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: Windows_artifacts
-      - name: run scripts
+      - name: Set up virtual machine
         run: |
           call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\definitions.bat"
           call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\setup_ci.bat"
-          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\deploy.bat"
+        shell: cmd
+      - name: Deploy
+        run: call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\deploy.bat"
         shell: cmd
       - name: Upload artifacts
         uses: actions/upload-artifact@v2

@@ -13,10 +13,10 @@ rem Get revision number from Git
 rem To understand this syntax "set cmd=...... for /F %%ii ......", see https://stackoverflow.com/questions/2323292/assign-output-of-a-program-to-a-variable
 rem set cmd="git rev-parse --short HEAD"
 rem for /F %%i in (' %cmd% ') do set MDANSE_GIT_CURRENT_COMMIT=%%i
-set MDANSE_GIT_CURRENT_COMMIT=%CI_COMMIT_SHORT_SHA%
+set MDANSE_GIT_CURRENT_COMMIT=%GITHUB_REF::7%
 
 rem Get commit branch from Gitlab
-set MDANSE_GIT_BRANCH_NAME=%CI_COMMIT_REF_NAME%
+set MDANSE_GIT_BRANCH_NAME=%GITHUB_REF%
 
 cd "%MDANSE_SOURCE_DIR%"
 

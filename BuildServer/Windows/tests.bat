@@ -17,7 +17,7 @@ set PYTHON_SCRIPT_DIR=%MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Build\\Scripts
 rem Set the location where the temporary Python will be installed
 set MDANSE_TEMPORARY_INSTALLATION_DIR=%MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Build
 rem Set the path to python executable
-set PYTHON_EXE=%MDANSE_TEMPORARY_INSTALLATION_DIR%\\python.exe
+set PYTHON_EXE=%HOME%\Python2\\python.exe
 rem Set the path to MDANSE target
 set PYTHONPATH=%MDANSE_SOURCE_DIR%\\build\\lib.%BUILD_TARGET%-2.7;%PYTHONPATH%
 

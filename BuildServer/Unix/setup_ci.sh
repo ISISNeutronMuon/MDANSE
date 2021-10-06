@@ -54,7 +54,7 @@ then
     "${SED_I_COMMAND[@]}" "s/.*__beta__.*/__beta__ = None/" ${PKG_INFO}
 else
     # Check if branch is release*
-	if [[ ${$GITHUB_REF::7} == "release" ]]
+	if [[ ${GITHUB_REF::7} == "release" ]]
 	then
 	    VERSION_NAME=${MDANSE_VERSION}-rc-${CI_COMMIT_ID}
 	    "${SED_I_COMMAND[@]}" "s/.*__beta__.*/__beta__ = \"rc\"/" ${PKG_INFO}
