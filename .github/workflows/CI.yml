@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install NetCDF
-        run: sudo apt-get libnetcdf-dev
+        run: sudo apt-get install netcdf netcdf-bin libnetcdf-dev
       - name: Set up docker
         run: docker build --force-rm=true -t ci_mdanse_bionic -f $GITHUB_WORKSPACE/BuildServer/Docker/ubuntu_bionic/Dockerfile_setup .
       - name: Build MDANSE
@@ -99,7 +99,10 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
       - name: Build MDANSE
-        run: $GITHUB_WORKSPACE/BuildServer/Unix/build.sh
+        run: |
+          csrutil disable
+          fsck -n -f
+          $GITHUB_WORKSPACE/BuildServer/Unix/build.sh
       - name: Run tests
         run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Upload artifacts
@@ -151,7 +154,7 @@ jobs:
           # wget https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -O netcdf.exe
           curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
           python2 get-pip.py
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro==3.15
+          python2 -m pip install setuptools<45 wheel numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
       - name: Set up virtual machine
         run: |
           call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\definitions.bat"
