@@ -92,7 +92,7 @@ jobs:
         os: [ubuntu-18.04, ubuntu-latest]
     steps:
       - name: Install libraries
-        run: sudo apt-get install netcdf-bin libnetcdf-dev libpython-dev
+        run: sudo apt-get install netcdf-bin libnetcdf-dev
       - name: Install python dependencies with pip
         run: python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
       - name: Install wx
