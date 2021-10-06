@@ -12,7 +12,7 @@ git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
 git checkout master
 
-python2 setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
+sudo python2 setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to build/install Scientific""${NORMAL}"
