@@ -80,8 +80,8 @@ jobs:
         run: |
           cd $HOME
           python2 -m pip install virtualenv
-          python2 -m virtualenv mdanse_venv
-      - run: source mdanse_venv/bin/activate
+          python2 -m virtualenv $HOME/mdanse_venv
+      - run: source $HOME/mdanse_venv/bin/activate
       - run: |
           which python
           pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
@@ -130,15 +130,19 @@ jobs:
           which python
       - run: |
           which python
+          source $HOME/mdanse_venv/bin/activate
+          which python
           python -c "import matplotlib"
           python -c "import cython"
           python -c "import numpy; numpy.test()"
       - name: Prepare virtual machine
         run: |
+          source $HOME/mdanse_venv/bin/activate
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
       - name: Build MDANSE
         run: |
+          source $HOME/mdanse_venv/bin/activate
           $GITHUB_WORKSPACE/BuildServer/Unix/build.sh
       - name: Run tests
         run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
@@ -189,9 +193,9 @@ jobs:
         with:
           python-version: '2.7.18'
       - uses: actions/checkout@v2
+      - run: set PATH=%PATH%:%CONDA%\condabin
       - name: Install dependencies
         run: |
-          set PATH=%PATH%:%CONDA%
           conda create --prefix "%HOME%\mdanse_venv" python=2.7.18
           conda activate "%HOME%\mdanse_venv"
           conda install pip
