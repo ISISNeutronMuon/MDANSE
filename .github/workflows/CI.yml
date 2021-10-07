@@ -96,8 +96,8 @@ jobs:
           cd mmtk
           python setup.py build
           python setup.py install
+      - uses: actions/checkout@v2
       - name: Install MDANSE
-        uses: actions/checkout@v2
         run: |
           cd $GITHUB_WORKSPACE
           python setup.py build
