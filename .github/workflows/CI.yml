@@ -96,9 +96,12 @@ jobs:
       - name: Install python dependencies with pip
         run: |
           cd $HOME
-          wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
-          sudo python2 get-pip.py
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+          #wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
+          #sudo python2 get-pip.py
+          pip install virtualenv
+          python2 -m virtualenv $HOME/mdanse_venv
+          source $HOME/mdanse_venv/bin/activate
+          pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
       - name: Install wx
         run: |
           wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
@@ -176,8 +179,9 @@ jobs:
           #curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
           #python2 get-pip.py
           #python2 -m pip install setuptools<45 wheel
-          python2 -m ensurepip
-          python2 -m pip install -U pip
+          python -m pip install virtualenv
+          python2 -m virtualenv %HOME%\mdanse_venv
+          %HOME%\mdanse_venv\Scripts\activate.bat
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
       - name: Set up virtual machine
         run: |
