@@ -96,8 +96,7 @@ jobs:
       - name: Install python dependencies with pip
         run: |
           cd $HOME
-          #wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
-          #sudo python2 get-pip.py
+          
           pip install virtualenv
           python2 -m virtualenv $HOME/mdanse_venv
           source $HOME/mdanse_venv/bin/activate
@@ -175,10 +174,8 @@ jobs:
       - name: Install dependencies
         run: |
           choco install python2 --params '"/InstallDir:%HOME%\Python2"'
-          # wget https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -O netcdf.exe
-          #curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
-          #python2 get-pip.py
-          #python2 -m pip install setuptools<45 wheel
+
+          refreshenv
           python -m pip install virtualenv
           python2 -m virtualenv %HOME%\mdanse_venv
           %HOME%\mdanse_venv\Scripts\activate.bat
