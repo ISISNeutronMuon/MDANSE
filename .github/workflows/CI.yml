@@ -35,23 +35,8 @@ jobs:
           retention-days: 1/24
 
   deploy_ubuntu:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-18.04
     needs: ci_ubuntu
-    strategy:
-      matrix:
-        os: [""]
-        name: ['']
-        tag: ['']
-        build: ['']
-        include:
-          - os: ubuntu-18.04
-            name: ubuntu_bionic
-            tag: ci_mdanse_bionic
-            build: ci_mdanse_bionic_build
-          - os: ubuntu-20.04
-            name: ubuntu_xenial
-            tag: ci_mdanse_xenial
-            build: ci_mdanse_xenial_build
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
@@ -64,11 +49,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set up docker
-        run: docker build --force-rm=true -t ${{ matrix.tag }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_setup .
+        run: docker build --force-rm=true -t ci_mdanse_bionic -f $GITHUB_WORKSPACE/BuildServer/Docker/Ubuntu-bionic/Dockerfile_setup .
       - name: Deploy
-        run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ${{ matrix.build }} -f $GITHUB_WORKSPACE/BuildServer/Docker/${{ matrix.name }}/Dockerfile_deploy .
+        run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ci_mdanse_bionic_build -f $GITHUB_WORKSPACE/BuildServer/Docker/Ubuntu-bionic/Dockerfile_deploy .
       - name: Generate artifacts
-        run: docker run -iv${PWD}:/artifacts/ ${{ matrix.build }}
+        run: docker run -iv${PWD}:/artifacts/ ci_mdanse_bionic_build
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -98,9 +83,7 @@ jobs:
           python2 -m virtualenv $HOME/mdanse_venv
           source $HOME/mdanse_venv/bin/activate
           pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-      - run: |
-          python
-          import wx
+      - run: python -c "import wx"
 
   
   # OSX
@@ -115,8 +98,9 @@ jobs:
           python2 -m pip install virtualenv
           python2 -m virtualenv $HOME/mdanse_venv
           source $HOME/mdanse_venv/bin/activate
-          which python
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+          python -c "import numpy"
+          python -c "import numpy.distutils"
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
