@@ -87,6 +87,12 @@ jobs:
         run: |
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python/
+      - run: |
+          which python
+      - run: python -c "import numpy"
+      - run: python -c "import numpy.distutils"
+      - run: python -c "from numpy.distutils import misc_util"
+      - run: |
           python setup.py build
           python setup.py install
       - name: Install MMTK
@@ -175,10 +181,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: |
-          python2 -m pip install virtualenv
-          python2 -m virtualenv %HOME%\mdanse_venv
+          python2.7 -m pip install virtualenv
+          python2.7 -m virtualenv %HOME%\mdanse_venv
           "%HOME%\mdanse_venv\Scripts\activate.bat"
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+          python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
       - name: Set up virtual machine
         run: |
           call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\definitions.bat"

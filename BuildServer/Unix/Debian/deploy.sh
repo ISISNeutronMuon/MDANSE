@@ -9,7 +9,8 @@ export DISTUTILS_DEBUG=0
 #############################
 # PREPARATION
 #############################
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR=$GITHUB_WORKSPACE/BuildServer/Unix/Debian/
 
 DEBIAN_ROOT_DIR=${CI_TEMP_DIR}/dist
 
