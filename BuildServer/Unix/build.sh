@@ -33,7 +33,7 @@ git checkout master
 # Env var needed by MMTK
 export NETCDF_HEADER_FILE_PATH=${CI_TEMP_INSTALL_DIR}/include/python2.7/:$NETCDF_HEADER_FILE_PATH
 
-python2 setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
+python2 setup.py install --prefix=$GITHUB_WORKSPACE/SCP
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to build/install MMTK""${NORMAL}"
