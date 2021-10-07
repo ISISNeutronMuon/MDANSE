@@ -86,18 +86,15 @@ jobs:
       - run: $GITHUB_WORKSPACE/BuildServer/Docker/clean.sh
 
   test_ubuntu:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-18.04, ubuntu-latest]
+    runs-on: ubuntu-18.04
     steps:
       - name: Install libraries
         run: sudo apt-get install netcdf-bin libnetcdf-dev
       - name: Install python dependencies with pip
         run: |
           cd $HOME
-          
-          pip install virtualenv
+
+          python -m pip install virtualenv
           python2 -m virtualenv $HOME/mdanse_venv
           source $HOME/mdanse_venv/bin/activate
           pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
@@ -118,7 +115,11 @@ jobs:
       - name: Install NetCDF
         run: brew install netcdf
       - name: Install dependecies
-        run: python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+        run: |
+          python2 -m pip install virtualenv
+          python2 -m virtualenv $HOME/mdanse_venv
+          source $HOME/mdanse_venv/bin/activate
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
