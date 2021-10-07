@@ -59,7 +59,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '19_continuous_integration' )
     steps:
       - uses: actions/checkout@v2
       - name: Set up docker
@@ -89,23 +90,18 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Install libraries
-        run: sudo apt-get install netcdf-bin libnetcdf-dev
+        run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0
       - name: Install python dependencies with pip
         run: |
           cd $HOME
-
           python -m pip install virtualenv
           python2 -m virtualenv $HOME/mdanse_venv
           source $HOME/mdanse_venv/bin/activate
           pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-      - name: Install wx
-        run: |
-          wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
-          tar -xf wxPython-src-3.0.2.0.tar.bz2
-          cd wxPython-src-3.0.2.0/wxPython
-          python2 build-wxpython.py --build_dir=../bld
-          export PYTHONPATH=$PYTHONPATH:$HOME/wxPython-src-3.0.2.0/wxPython/
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/wxPython-src-3.0.2.0/bld/lib/
+      - run: |
+          python
+          import wx
+
   
   # OSX
   ci_osx:
@@ -119,6 +115,7 @@ jobs:
           python2 -m pip install virtualenv
           python2 -m virtualenv $HOME/mdanse_venv
           source $HOME/mdanse_venv/bin/activate
+          which python
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
       - name: Prepare virtual machine
         run: |
