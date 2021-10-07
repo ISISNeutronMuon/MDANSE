@@ -1,7 +1,7 @@
 @echo off
 
 rem Set the source directory
-set MDANSE_SOURCE_DIR=%cd%
+set MDANSE_SOURCE_DIR=%GITHUB_WORKSPACE%
 
 rem Set th directory where the MDANSE dependencies are stored
 set MDANSE_DEPENDENCIES_DIR=C:\\Projects\\mdanse\\resources\\dependencies\\%BUILD_TARGET%
