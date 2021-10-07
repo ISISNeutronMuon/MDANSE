@@ -184,7 +184,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
-          - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
       - name: Install dependencies
         run: |
           conda create --prefix "%HOME%\mdanse_venv" python=2.7.18
