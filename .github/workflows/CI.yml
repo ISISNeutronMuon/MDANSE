@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Install libraries
-        run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0
+        run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6
       - name: Install python dependencies with pip
         run: |
           cd $HOME
@@ -83,9 +83,26 @@ jobs:
           python2 -m virtualenv $HOME/mdanse_venv
           source $HOME/mdanse_venv/bin/activate
           pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-      - run: python -c "import wx"
+      - name: Install ScientificPython
+        run: |
+          git clone https://code.ill.fr/scientific-software/scientific-python.git
+          cd /scientific-python/
+          python setup.py build
+          python setup.py install
+      - name: Install MMTK
+        run: |
+          cd ..
+          git clone https://code.ill.fr/scientific-software/mmtk.git
+          cd mmtk
+          python setup.py build
+          python setup.py install
+      - name: Install MDANSE
+        uses: actions/checkout@v2
+        run: |
+          cd $GITHUB_WORKSPACE
+          python setup.py build
+          python setup.py install
 
-  
   # OSX
   ci_osx:
     runs-on: macos-10.15
@@ -99,8 +116,7 @@ jobs:
           python2 -m virtualenv $HOME/mdanse_venv
           source $HOME/mdanse_venv/bin/activate
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-          python -c "import numpy"
-          python -c "import numpy.distutils"
+      - run: python -c "import numpy.distutils.misc_util"
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -152,13 +168,14 @@ jobs:
   ci_windows:
     runs-on: windows-2019
     steps:
+      - name: Install python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '2.7.18'
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: |
-          choco install python2 --params '"/InstallDir:%HOME%\Python2"'
-
-          refreshenv
-          python -m pip install virtualenv
+          python2 -m pip install virtualenv
           python2 -m virtualenv %HOME%\mdanse_venv
           %HOME%\mdanse_venv\Scripts\activate.bat
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
