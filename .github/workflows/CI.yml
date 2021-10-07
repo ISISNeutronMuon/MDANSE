@@ -86,7 +86,7 @@ jobs:
       - name: Install ScientificPython
         run: |
           git clone https://code.ill.fr/scientific-software/scientific-python.git
-          cd /scientific-python/
+          cd scientific-python/
           python setup.py build
           python setup.py install
       - name: Install MMTK
@@ -116,7 +116,7 @@ jobs:
           python2 -m virtualenv $HOME/mdanse_venv
           source $HOME/mdanse_venv/bin/activate
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-      - run: python -c "import numpy.distutils.misc_util"
+      - run: python -c "import numpy; numpy.test()"
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -177,7 +177,7 @@ jobs:
         run: |
           python2 -m pip install virtualenv
           python2 -m virtualenv %HOME%\mdanse_venv
-          %HOME%\mdanse_venv\Scripts\activate.bat
+          "%HOME%\mdanse_venv\Scripts\activate.bat"
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
       - name: Set up virtual machine
         run: |
