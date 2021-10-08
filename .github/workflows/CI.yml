@@ -221,7 +221,7 @@ jobs:
         run: |
           cd $HOME
           Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile ./netCDF.exe
-          netCDF.exe /s
+          "netCDF.exe" /s
       - name: Install ScientificPython
         run: |
           "%CONDA%\condabin\conda.bat" activate "%HOME%\mdanse_venv"
@@ -247,6 +247,7 @@ jobs:
           "%HOME%\mdanse_venv\Scripts\activate.bat"
           which python
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+        shell: cmd
       - name: Set up virtual machine
         run: |
           "%HOME%\mdanse_venv\Scripts\activate.bat"
