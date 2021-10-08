@@ -247,15 +247,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install virtualenv
-          python -m virtualenv %HOME%\mdanse_venv
+          python -m virtualenv "%HOME%\mdanse_venv"
           which python
-          %HOME%\mdanse_venv\Scripts\activate.bat
+          cd %HOME%\mdanse_venv\Scripts
+          activate.bat
           which python
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
         shell: cmd
       - name: Set up virtual machine
         run: |
-          "%HOME%\mdanse_venv\Scripts\activate.bat"
           call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\definitions.bat"
           call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\setup_ci.bat"
         shell: cmd
