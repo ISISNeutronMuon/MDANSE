@@ -94,7 +94,7 @@ jobs:
       - run: dpkg -L libnetcdf-dev
       - name: Install MMTK
         run: |
-          export NETCDF_HEADER_FILE_PATH=/usr/include/:/usr/local/include/:/usr/:/usr/lib:/usr/share
+          export NETCDF_HEADER_FILE_PATH=/usr/include/:/usr/local/include/:/usr/:/usr/lib:/usr/share:/usr/lib/x86_64-linux-gnu/:/usr/bin/nc-config
           source $HOME/mdanse_venv/bin/activate
           cd ..
           git clone https://code.ill.fr/scientific-software/mmtk.git
@@ -220,7 +220,7 @@ jobs:
       - name: Install NetCDF
         run: |
           cd $HOME
-          curl https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe
+          curl https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/src/netcdf-c-4.8.1.zip
           netCDF4.8.1-NC3-64.exe /s
       - name: Install ScientificPython
         run: |
@@ -240,11 +240,6 @@ jobs:
           cd $HOME
           choco install visualstudioexpress2008
           choco install vcredist2008
-          cd C:\
-          where /r C:\ *vcvarsamd64.bat*
-          where /r D:\ *vcvarsamd64.bat*
-          where /r C:\ *vcvars32.bat*
-          where /r C:\ *vcvars32.bat*
           where /r C:\ *9.0*
         shell: cmd
       - name: Install dependencies
