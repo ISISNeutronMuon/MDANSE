@@ -224,11 +224,10 @@ jobs:
           Start-Process .\netCDF.exe /S -NoNewWindow -Wait -PassThru
       - name: Install ScientificPython
         run: |
-          where /r C:\ *netCDF*
           mkdir %GITHUB_WORKSPACE%\temp\install
           "%CONDA%\condabin\conda.bat" activate "%HOME%\mdanse_venv"
           which python
-          python setup.py install --prefix=%GITHUB_WORKSPACE%\temp\install
+          python setup.py build --netcdf_prefix="C:\Program Files\netCDF 4.8.1\include\" --netcdf_dll="C:\Program Files\netCDF 4.8.1\bin\" install
         shell: cmd
 
   ci_windows:
@@ -239,13 +238,20 @@ jobs:
         with:
           python-version: '2.7.18'
       - uses: actions/checkout@v2
-      - name: Install VS 2008
+      - name: Install VC 2008 redist
         run: |
-          cd $HOME
           choco install vcredist2008
         shell: cmd
+      - name: Install VS2008
+        run: |
+          cd $HOME
+          Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
+          Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
+          md .\tempVS
+          Start-Process E:\vs_setup.msi /quiet /passive /qn /norestart /Option full
       - name: Install dependencies
         run: |
+          where /r C:\ *Microsoft Visual Studio*
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
         shell: cmd
       - name: Set up virtual machine
