@@ -222,9 +222,13 @@ jobs:
           cd $HOME
           Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile ./netCDF.exe
           Start-Process .\netCDF.exe /S -NoNewWindow -Wait -PassThru
+          where /r C:\ *netCDF*
       - name: Install ScientificPython
         run: |
+          mkdir %GITHUB_WORKSPACE%\temp\install
           "%CONDA%\condabin\conda.bat" activate "%HOME%\mdanse_venv"
+          which python
+          python setup.py install --prefix=%GITHUB_WORKSPACE%\temp\install
         shell: cmd
 
   ci_windows:
@@ -244,6 +248,7 @@ jobs:
         run: |
           python -m pip install virtualenv
           python -m virtualenv %HOME%\mdanse_venv
+          which python
           "%HOME%\mdanse_venv\Scripts\activate.bat"
           which python
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
