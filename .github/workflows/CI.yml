@@ -147,7 +147,7 @@ jobs:
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          export NETCDF_HEADER_FILE_PATH=/usr/local/include/:/usr/local/:/usr/local/lib:/usr/local/bin
+          export NETCDF_HEADER_FILE_PATH=/usr/local/include/:/usr/local/:/usr/local/lib:/usr/local/binW
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
       - name: Install MDANSE
         run: |
@@ -214,12 +214,12 @@ jobs:
           "%CONDA%\condabin\conda.bat" install -c ccordoba12 vtk
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
         shell: cmd
+      - run: cd "%HOME%"
       - name: Install NetCDF
         run: |
-          cd "%HOME%"
+          cd $HOME
           wget https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe
           netCDF4.8.1-NC3-64.exe /s
-        shell: cmd
       - name: Install ScientificPython
         run: |
           "%CONDA%\condabin\conda.bat" activate "%HOME%\mdanse_venv"
@@ -239,7 +239,7 @@ jobs:
           choco install visualstudioexpress2008
           choco install vcredist2008
           cd C:\
-          dir "Microsoft Visual Studio 9.0" /AD /b /s
+          dir "chocolatey" /AD /b /s
         shell: cmd
       - name: Install dependencies
         run: |
