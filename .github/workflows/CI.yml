@@ -220,7 +220,7 @@ jobs:
       - name: Install NetCDF
         run: |
           cd $HOME
-          wget https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile ./netCDF.exe
+          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile ./netCDF.exe
           netCDF.exe /s
       - name: Install ScientificPython
         run: |
