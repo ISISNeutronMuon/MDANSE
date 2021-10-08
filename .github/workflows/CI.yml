@@ -246,12 +246,6 @@ jobs:
         shell: cmd
       - name: Install dependencies
         run: |
-          python -m pip install virtualenv
-          python -m virtualenv "%HOME%\mdanse_venv"
-          which python
-          cd %HOME%\mdanse_venv\Scripts
-          activate.bat
-          which python
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
         shell: cmd
       - name: Set up virtual machine
@@ -261,12 +255,10 @@ jobs:
         shell: cmd
       - name: Build MDANSE
         run: |
-          "%HOME%\mdanse_venv\Scripts\activate.bat"
           "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\build.bat"
         shell: cmd
       - name: Run tests
         run: |
-          "%HOME%\mdanse_venv\Scripts\activate.bat"
           call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\tests.bat"
         shell: cmd
       - name: Upload artifacts
