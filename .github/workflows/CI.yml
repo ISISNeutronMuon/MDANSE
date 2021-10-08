@@ -78,6 +78,7 @@ jobs:
         run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6
       - name: Install python dependencies with pip
         run: |
+          mkdir $HOME/temp_install
           cd $HOME
           python2 -m pip install virtualenv
           python2 -m virtualenv $HOME/mdanse_venv
@@ -89,22 +90,25 @@ jobs:
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python/
           python setup.py build
-          sudo $HOME/mdanse_venv/bin/python setup.py install
+          sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
       - name: Install MMTK
         run: |
           source $HOME/mdanse_venv/bin/activate
           cd ..
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          python setup.py build
-          sudo $HOME/mdanse_venv/bin/python setup.py install
+          sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
       - uses: actions/checkout@v2
       - name: Install MDANSE
         run: |
           source $HOME/mdanse_venv/bin/activate
           cd $GITHUB_WORKSPACE
-          python setup.py build
-          python setup.py install
+          python setup.py install --prefix=$HOME/temp_install
+      - name: Run tests
+        run: |
+          source $HOME/mdanse_venv/bin/activate
+          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
+          $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
 
   # OSX
   ci_osx:
@@ -126,8 +130,12 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
       - name: Build MDANSE
         run: |
+          mkdir $HOME/temp/install
           source $HOME/mdanse_venv/bin/activate
-          $GITHUB_WORKSPACE/BuildServer/Unix/build.sh
+          cd $HOME
+          git clone https://code.ill.fr/scientific-software/scientific-python.git
+          cd scientific-python
+          sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp/install
       - name: Run tests
         run: |
           source $HOME/mdanse_venv/bin/activate
@@ -187,6 +195,7 @@ jobs:
           "%CONDA%\condabin\conda.bat" install -c daf wxpython
           "%CONDA%\condabin\conda.bat" install -c ccordoba12 vtk
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+        shell: cmd
       - name: Try dependecies
         run: |
           "%CONDA%\condabin\conda.bat" activate "%HOME%\mdanse_venv"

@@ -27,7 +27,7 @@ rmdir /S /Q scientific-python
 git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
 git checkout master
-python2.7 setup.py build --netcdf_prefix="%MDANSE_DEPENDENCIES_DIR%\\NetCDF" --netcdf_dll="%MDANSE_DEPENDENCIES_DIR%\\NetCDF" install
+python setup.py build --netcdf_prefix="%MDANSE_DEPENDENCIES_DIR%\\NetCDF" --netcdf_dll="%MDANSE_DEPENDENCIES_DIR%\\NetCDF" install
 set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build
 if %STATUS% neq 0 (
@@ -47,7 +47,7 @@ rmdir /S /Q mmtk
 git clone https://code.ill.fr/scientific-software/mmtk.git
 cd mmtk
 git checkout master
-python2.7 setup.py build install
+python setup.py build install
 set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build
 if %STATUS% neq 0 (
@@ -60,7 +60,7 @@ rmdir /S /Q mmtk
 
 rem Go back to the MDANSE source directory and build and install it
 cd "%MDANSE_SOURCE_DIR%"
-%PYTHON_EXE% setup.py build install
+python setup.py build install
 set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build
 if %STATUS% neq 0 (
