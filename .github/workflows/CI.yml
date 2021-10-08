@@ -148,6 +148,7 @@ jobs:
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
           export NETCDF_HEADER_FILE_PATH=/usr/local/include/:/usr/local/:/usr/local/lib:/usr/local/binW
+          echo $NETCDF_HEADER_FILE_PATH
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
       - name: Install MDANSE
         run: |
@@ -215,6 +216,7 @@ jobs:
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
         shell: cmd
       - run: cd "%HOME%"
+        shell: cmd
       - name: Install NetCDF
         run: |
           cd $HOME
@@ -239,7 +241,7 @@ jobs:
           choco install visualstudioexpress2008
           choco install vcredist2008
           cd C:\
-          dir "chocolatey" /AD /b /s
+          where /r C:\ *Microsoft Visual Studio*
         shell: cmd
       - name: Install dependencies
         run: |
