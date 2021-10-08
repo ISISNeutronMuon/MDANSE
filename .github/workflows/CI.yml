@@ -82,9 +82,9 @@ jobs:
           python2 -m pip install virtualenv
           python2 -m virtualenv $HOME/mdanse_venv
       - run: |
-        which python
-        source $HOME/mdanse_venv/bin/activate
-        which python
+          which python
+          source $HOME/mdanse_venv/bin/activate
+          which python
       - run: |
           which python
           source $HOME/mdanse_venv/bin/activate
