@@ -11,4 +11,4 @@ ENV CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME}
 COPY ./ /app/
 WORKDIR /app
 
-CMD source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh;  source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh; source $GITHUB_WORKSPACE/BuildServer/Unix/bionic_dependencies_modification.sh; $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh; cp -a *.deb /artifacts/
+CMD source ./BuildServer/Unix/Debian/definitions.sh;  source ./BuildServer/Unix/setup_ci.sh; source ./BuildServer/Unix/bionic_dependencies_modification.sh; ./BuildServer/Unix/Debian/deploy.sh; cp -a *.deb /artifacts/

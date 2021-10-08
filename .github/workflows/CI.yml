@@ -93,7 +93,9 @@ jobs:
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
       - name: Install MMTK
         run: |
-          export NETCDF_HEADER_FILE_PATH=/usr/include/
+          sudo apt-get install locate
+          locate netcdf
+          export NETCDF_HEADER_FILE_PATH=/usr/include/:/usr/local/include
           source $HOME/mdanse_venv/bin/activate
           cd ..
           git clone https://code.ill.fr/scientific-software/mmtk.git
@@ -131,8 +133,7 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
       - name: Build MDANSE
         run: |
-          mkdir $GITHUB_WORKSPACE/temp
-          mkdir $GITHUB_WORKSPACE/temp/install
+          mkdir -p $GITHUB_WORKSPACE/temp/install
           source $HOME/mdanse_venv/bin/activate
           cd $HOME
           git clone https://code.ill.fr/scientific-software/scientific-python.git
@@ -198,15 +199,14 @@ jobs:
           "%CONDA%\condabin\conda.bat" install -c ccordoba12 vtk
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
         shell: cmd
-      - name: Try dependecies
+      - name: Install NetCDF
+        run: |
+          cd %HOME%
+          wget https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe
+          netCDF4.8.1-NC3-64.exe /s
+      - name: Install ScientificPython
         run: |
           "%CONDA%\condabin\conda.bat" activate "%HOME%\mdanse_venv"
-          python -c "import numpy"
-          python -c "import matplotlib"
-          python -c "import cython"
-          python -c "import wx"
-          python -c "import vtk"
-          pythong -c "import Pyro"
         shell: cmd
 
   ci_windows:
@@ -218,7 +218,7 @@ jobs:
           python-version: '2.7.18'
       - uses: actions/checkout@v2
       - name: Install VS 2008
-        run:
+        run: |
           cd $HOME
           choco install visualstudioexpress2008
           choco install vcredist2008
