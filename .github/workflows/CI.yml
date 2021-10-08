@@ -91,11 +91,12 @@ jobs:
           cd scientific-python/
           python setup.py build
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
+      - run: |
+          sudo apt-get install locate
+      - run: locate libnetcdf
+      - run: dpkg -L libnetcdf-dev
       - name: Install MMTK
         run: |
-          sudo apt-get install locate
-          locate libnetcdf
-          dpkg -L libnetcdf-dev
           export NETCDF_HEADER_FILE_PATH=/usr/include/:/usr/local/include/:/usr/
           source $HOME/mdanse_venv/bin/activate
           cd ..
@@ -120,7 +121,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install NetCDF
-        run: brew install netcdf
+        run: |
+          brew install netcdf
+          export NETCDF_HEADER_FILE_PATH=/usr/include/:/usr/local/include/
       - name: Install dependecies
         run: |
           python2 -m pip install virtualenv
@@ -142,7 +145,6 @@ jobs:
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp/install
       - name: Install MMTK
         run: |
-          export NETCDF_HEADER_FILE_PATH=/usr/include/:/usr/local/include/
           source $HOME/mdanse_venv/bin/activate
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
@@ -215,7 +217,7 @@ jobs:
         shell: cmd
       - name: Install NetCDF
         run: |
-          cd "%HOME%"
+          cd "%HOME%\"
           wget https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe
           netCDF4.8.1-NC3-64.exe /s
       - name: Install ScientificPython
@@ -238,6 +240,7 @@ jobs:
           choco install vcredist2008
           cd C:\
           dir *vcvarsamd64*.* /s
+        shell: cmd
       - name: Install dependencies
         run: |
           python2.7 -m pip install virtualenv
