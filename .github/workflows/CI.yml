@@ -91,9 +91,6 @@ jobs:
           cd scientific-python/
           python setup.py build
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
-      - run: |
-          sudo apt-get install locate
-      - run: locate libnetcdf
       - run: dpkg -L libnetcdf-dev
       - name: Install MMTK
         run: |
@@ -137,6 +134,7 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
       - name: Install ScientificPython
         run: |
+          export NETCDF_HEADER_FILE_PATH=/usr/include/:/usr/local/include/
           mkdir -p $GITHUB_WORKSPACE/temp/install
           source $HOME/mdanse_venv/bin/activate
           cd $HOME
@@ -149,6 +147,7 @@ jobs:
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
+          export NETCDF_HEADER_FILE_PATH=/usr/include/:/usr/local/include/
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
       - name: Install MDANSE
         run: |
@@ -217,7 +216,8 @@ jobs:
         shell: cmd
       - name: Install NetCDF
         run: |
-          cd "%HOME%\"
+          cd "%HOME%\mdanse_venv"
+          cd ..
           wget https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe
           netCDF4.8.1-NC3-64.exe /s
       - name: Install ScientificPython
@@ -238,7 +238,7 @@ jobs:
           cd $HOME
           choco install visualstudioexpress2008
           choco install vcredist2008
-          cd C:\
+          cd D:\
           dir *vcvarsamd64*.* /s
         shell: cmd
       - name: Install dependencies
