@@ -93,6 +93,7 @@ jobs:
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
       - name: Install MMTK
         run: |
+          export NETCDF_HEADER_FILE_PATH=/usr/include/
           source $HOME/mdanse_venv/bin/activate
           cd ..
           git clone https://code.ill.fr/scientific-software/mmtk.git
@@ -130,7 +131,8 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
       - name: Build MDANSE
         run: |
-          mkdir $HOME/temp/install
+          mkdir $GITHUB_WORKSPACE/temp
+          mkdir $GITHUB_WORKSPACE/temp/install
           source $HOME/mdanse_venv/bin/activate
           cd $HOME
           git clone https://code.ill.fr/scientific-software/scientific-python.git
@@ -205,6 +207,7 @@ jobs:
           python -c "import wx"
           python -c "import vtk"
           pythong -c "import Pyro"
+        shell: cmd
 
   ci_windows:
     runs-on: windows-2019
@@ -214,6 +217,12 @@ jobs:
         with:
           python-version: '2.7.18'
       - uses: actions/checkout@v2
+      - name: Install VS 2008
+        run:
+          cd $HOME
+          # wget http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso
+          choco install visualstudioexpress2008
+          choco install vcredist2008
       - name: Install dependencies
         run: |
           python2.7 -m pip install virtualenv
