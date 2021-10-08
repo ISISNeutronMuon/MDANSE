@@ -220,7 +220,7 @@ jobs:
       - name: Install NetCDF
         run: |
           cd $HOME
-          wget https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe
+          curl https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe
           netCDF4.8.1-NC3-64.exe /s
       - name: Install ScientificPython
         run: |
@@ -241,7 +241,11 @@ jobs:
           choco install visualstudioexpress2008
           choco install vcredist2008
           cd C:\
-          where /r C:\ *Microsoft Visual Studio*
+          where /r C:\ *vcvarsamd64.bat*
+          where /r D:\ *vcvarsamd64.bat*
+          where /r C:\ *vcvars32.bat*
+          where /r C:\ *vcvars32.bat*
+          where /r C:\ *9.0*
         shell: cmd
       - name: Install dependencies
         run: |
