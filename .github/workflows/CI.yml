@@ -137,8 +137,8 @@ jobs:
           $GITHUB_WORKSPACE/BuildServer/Unix/build.sh
       - name: Run tests
         run: |
-        source $HOME/mdanse_venv/bin/activate
-        $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
+          source $HOME/mdanse_venv/bin/activate
+          $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
