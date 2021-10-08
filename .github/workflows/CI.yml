@@ -220,7 +220,6 @@ jobs:
       - name: Install VS 2008
         run:
           cd $HOME
-          # wget http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso
           choco install visualstudioexpress2008
           choco install vcredist2008
       - name: Install dependencies
