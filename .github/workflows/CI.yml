@@ -94,12 +94,13 @@ jobs:
       - run: dpkg -L libnetcdf-dev
       - name: Install MMTK
         run: |
-          export NETCDF_HEADER_FILE_PATH=/.:/usr:/usr/bin:/usr/bin/nc-config:/usr/include:/usr/include/netcdf.h:/usr/include/netcdf_mem.h:/usr/include/netcdf_meta.h:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu/cmake:/usr/lib/x86_64-linux-gnu/cmake/netCDF:/usr/lib/x86_64-linux-gnu/cmake/netCDF/netCDFConfig.cmake:/usr/lib/x86_64-linux-gnu/cmake/netCDF/netCDFConfigVersion.cmake:/usr/lib/x86_64-linux-gnu/cmake/netCDF/netCDFTargets-none.cmake:/usr/lib/x86_64-linux-gnu/cmake/netCDF/netCDFTargets.cmake:/usr/lib/x86_64-linux-gnu/libnetcdf.settings:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig/netcdf.pc:/usr/share:/usr/share/doc:/usr/share/doc/libnetcdf-dev:/usr/share/doc/libnetcdf-dev/copyright:/usr/share/man:/usr/share/man/man1:/usr/share/man/man1/nc-config.1.gz:/usr/share/man/man3:/usr/share/man/man3/netcdf.3.gz:/usr/lib/x86_64-linux-gnu/libnetcdf.so:/usr/share/doc/libnetcdf-dev/changelog.Debian.gz
           source $HOME/mdanse_venv/bin/activate
           cd ..
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
+        env:
+          NETCDF_HEADER_FILE_PATH: '/usr/:/usr/bin/:/usr/include/:/usr/lib/'
       - uses: actions/checkout@v2
       - name: Install MDANSE
         run: |
@@ -213,6 +214,7 @@ jobs:
       - name: Install dependencies
         run: |
           which python
+          python -m pip install pip==20.3.4
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
           copy "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl" D:\
           python -m pip install D:\PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl
