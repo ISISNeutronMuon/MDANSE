@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Install libraries
-        run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6
+        run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6 python-dev
       - name: Install python dependencies with pip
         run: |
           mkdir $HOME/temp_install
@@ -94,7 +94,7 @@ jobs:
       - run: dpkg -L libnetcdf-dev
       - name: Install MMTK
         run: |
-          sudo export NETCDF_HEADER_FILE_PATH=/usr/include/:/usr/local/include/:/usr/:/usr/lib:/usr/share:/usr/lib/x86_64-linux-gnu/:/usr/bin/nc-config:/usr/include/netcdf.h:/usr/lib/x86_64-linux-gnu/libnetcdf.so:/.
+          export NETCDF_HEADER_FILE_PATH=/.:/usr:/usr/bin:/usr/bin/nc-config:/usr/include:/usr/include/netcdf.h:/usr/include/netcdf_mem.h:/usr/include/netcdf_meta.h:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu/cmake:/usr/lib/x86_64-linux-gnu/cmake/netCDF:/usr/lib/x86_64-linux-gnu/cmake/netCDF/netCDFConfig.cmake:/usr/lib/x86_64-linux-gnu/cmake/netCDF/netCDFConfigVersion.cmake:/usr/lib/x86_64-linux-gnu/cmake/netCDF/netCDFTargets-none.cmake:/usr/lib/x86_64-linux-gnu/cmake/netCDF/netCDFTargets.cmake:/usr/lib/x86_64-linux-gnu/libnetcdf.settings:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig/netcdf.pc:/usr/share:/usr/share/doc:/usr/share/doc/libnetcdf-dev:/usr/share/doc/libnetcdf-dev/copyright:/usr/share/man:/usr/share/man/man1:/usr/share/man/man1/nc-config.1.gz:/usr/share/man/man3:/usr/share/man/man3/netcdf.3.gz:/usr/lib/x86_64-linux-gnu/libnetcdf.so:/usr/share/doc/libnetcdf-dev/changelog.Debian.gz
           source $HOME/mdanse_venv/bin/activate
           cd ..
           git clone https://code.ill.fr/scientific-software/mmtk.git
@@ -134,20 +134,24 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
       - name: Install ScientificPython
         run: |
-          export NETCDF_HEADER_FILE_PATH=/usr/include/:/usr/local/include/
+          export NETCDF_HEADER_FILE_PATH=/usr/include/:/usr/local/include/:/usr/local/:/usr/local/lib:/usr/local/bin
           mkdir -p $GITHUB_WORKSPACE/temp/install
           source $HOME/mdanse_venv/bin/activate
           cd $HOME
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp/install
+          cd $HOME
+          git clone https://code.ill.fr/scientific-software/mmtk.git
+          cd mmtk
+          sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
       - name: Install MMTK
         run: |
           source $HOME/mdanse_venv/bin/activate
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          export NETCDF_HEADER_FILE_PATH=/usr/local/include/:/usr/local/:/usr/local/lib:/usr/local/binW
+          export NETCDF_HEADER_FILE_PATH=/usr/local/include/:/usr/local/:/usr/local/lib:/usr/local/bin
           echo $NETCDF_HEADER_FILE_PATH
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
       - name: Install MDANSE
@@ -210,7 +214,8 @@ jobs:
         run: |
           which python
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-          python -m pip install "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl"
+          copy "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl" D:\
+          python -m pip install D:\PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl
           python -m pip install "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl"
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
           python -m pip install wxPython_common‑3.0.2.0‑py2‑none‑any.whl
@@ -243,7 +248,7 @@ jobs:
           cd $HOME
           Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
           Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
-          Start-Process E:\vs_setup.msi -ArgumentList "/quiet /norestart"
+          Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart"
       - name: Install dependencies
         run: |
           where /r C:\ *Microsoft Visual Studio*
