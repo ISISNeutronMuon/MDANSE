@@ -210,7 +210,8 @@ jobs:
         run: |
           which python
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-          python -m pip install %GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\PyQt4.whl %GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\VTK.whl %GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\wxPython.whl %GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\wxPython_common.whl
+          python -m pip install "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\PyQt4.whl" "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\VTK.whl"
+          python -m pip install "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\wxPython.whl" "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\wxPython_common.whl"
         shell: cmd
       - name: Install NetCDF
         run: |
