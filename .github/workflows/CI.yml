@@ -98,7 +98,7 @@ jobs:
           cd ..
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          echo $NETCDF_HEADER_FILE_PATH
+          export NETCDF_HEADER_FILE_PATH=$NETCDF_HEADER_FILE_PATH:/usr/include/python2.7/
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
         env:
           NETCDF_HEADER_FILE_PATH: /usr/include/
@@ -252,7 +252,7 @@ jobs:
       - name: Prepare NetCDF
         run: |
           choco install 7zip
-          where /r *7-zip*
+          where /r C:\ *7-zip*
           mkdir $env:HOME\netcdf
           Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:HOME\netcdf\netCDF.exe
       - name: Extract NetCDF
