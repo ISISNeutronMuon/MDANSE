@@ -211,9 +211,8 @@ jobs:
       - name: Install dependencies
         run: |
           which python
-          python -m pip install wheel numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-          copy "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl" D:\
-          python -m pip install D:\PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl
+          python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+          python -m pip install "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl"
           python -m pip install "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl"
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
           python -m pip install wxPython_common‑3.0.2.0‑py2‑none‑any.whl
@@ -243,17 +242,24 @@ jobs:
         shell: cmd
       - name: Install VS2008
         run: |
-          cd $HOME
+          cd $env:HOME
           Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
           Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
           Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart"
       - name: Install dependencies
         run: python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
         shell: cmd
-      - name: Install NetCDF
+      - name: Prepare NetCDF
         run: |
-          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:HOME/netCDF.exe
-          Start-Process $env:HOME/netCDF.exe -ArgumentList '/S' -NoNewWindow -Wait -PassThru
+          choco install 7zip
+          where /r *7-zip*
+          mkdir $env:HOME\netcdf
+          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:HOME\netcdf\netCDF.exe
+      - name: Extract NetCDF
+        run: |
+          cd "%HOME%\netcdf"
+          "C:\ProgramData\chocolatey\
+        shell: cmd
       - name: Set up virtual machine
         run: |
           call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\definitions.bat"
