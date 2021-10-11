@@ -210,8 +210,7 @@ jobs:
         run: |
           which python
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-          cd %GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies
-          python -m pip install PyQt4.whl VTK.whl wxPython.whl wxPython_common.whl
+          python -m pip install %GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\PyQt4.whl %GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\VTK.whl %GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\wxPython.whl %GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\wxPython_common.whl
         shell: cmd
       - name: Install NetCDF
         run: |
@@ -240,7 +239,7 @@ jobs:
           cd $HOME
           Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
           Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
-          Start-Process E:\vs_setup.msi /quiet /qn /norestart /Option full
+          Start-Process E:\vs_setup.msi /quiet /q n /norestart /full
       - name: Install dependencies
         run: |
           where /r C:\ *Microsoft Visual Studio*
