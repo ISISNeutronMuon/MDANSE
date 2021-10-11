@@ -7,7 +7,7 @@ rem Set the path to python executable
 set PYTHON_EXE=%MDANSE_TEMPORARY_INSTALLATION_DIR%\\python.exe
 
 rem Set the path to NetCDF resources
-set NETCDF_RESOURCES_PATH=%MDANSE_DEPENDENCIES_DIR%\\NetCDF
+set NETCDF_RESOURCES_PATH=%HOME%\netcdf\
 
 rem This is the env var used by distutils to find the MSVC framework to be used for compiling extension
 rem see https://stackoverflow.com/questions/2817869/error-unable-to-find-vcvarsall-bat for more info
@@ -27,7 +27,7 @@ rmdir /S /Q scientific-python
 git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
 git checkout master
-python setup.py build --netcdf_prefix="%MDANSE_DEPENDENCIES_DIR%\\NetCDF" --netcdf_dll="%MDANSE_DEPENDENCIES_DIR%\\NetCDF" install
+python setup.py build --netcdf_prefix="%NETCDF_RESOURCES_PATH%" --netcdf_dll="%NETCDF_RESOURCES_PATH%" install
 set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build
 if %STATUS% neq 0 (
@@ -36,8 +36,8 @@ if %STATUS% neq 0 (
 )
 
 rem Copy netcdf dependencies
-copy "%MDANSE_DEPENDENCIES_DIR%\\NetCDF\\netcdf.dll" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\site-packages\\Scientific\\"
-copy "%MDANSE_DEPENDENCIES_DIR%\\NetCDF\\netcdf.h" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\include\\Scientific\\"
+copy "%NETCDF_RESOURCES_PATH%\\netcdf.dll" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\site-packages\\Scientific\\"
+copy "%NETCDF_RESOURCES_PATH%\\netcdf.h" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\include\\Scientific\\"
 cd ..
 rmdir /S /Q scientific-python
 

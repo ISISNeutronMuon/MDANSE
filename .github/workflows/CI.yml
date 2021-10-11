@@ -209,15 +209,21 @@ jobs:
         with:
           python-version: '2.7.18'
       - uses: actions/checkout@v2
+      - name: Install VC 2008 redist
+        run: choco install vcredist2008
+        shell: cmd
+      - name: Install VS2008
+        run: |
+          cd $env:HOME
+          Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
+          Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
+          Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart"
       - name: Install dependencies
         run: |
           which python
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-          python -m pip install "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl"
-          python -m pip install "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl"
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
-          python -m pip install wxPython_common‑3.0.2.0‑py2‑none‑any.whl
-          python -m pip install "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl"
+          python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd
       - name: Install NetCDF
         run: |
@@ -238,8 +244,7 @@ jobs:
           python-version: '2.7.18'
       - uses: actions/checkout@v2
       - name: Install VC 2008 redist
-        run: |
-          choco install vcredist2008
+        run: choco install vcredist2008
         shell: cmd
       - name: Install VS2008
         run: |
@@ -248,7 +253,11 @@ jobs:
           Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
           Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart"
       - name: Install dependencies
-        run: python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+        run: |
+          which python
+          python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
+          python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd
       - name: Prepare NetCDF
         run: |
@@ -257,9 +266,8 @@ jobs:
           Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:HOME\netcdf\netCDF.exe
       - name: Extract NetCDF
         run: |
-          where /r C:\ *7z*
           cd "%HOME%\netcdf"
-          "C:\ProgramData\chocolatey\
+          "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
         shell: cmd
       - name: Set up virtual machine
         run: |
