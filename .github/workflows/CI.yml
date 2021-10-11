@@ -208,6 +208,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: |
+          "%CONDA%\bin\python" --version
           "%CONDA%\condabin\conda.bat" install python=2.7.18 --force
           "%CONDA%\condabin\conda.bat" install pip
           "%CONDA%\condabin\conda.bat" install -c daf wxpython
@@ -240,7 +241,8 @@ jobs:
         run: |
           cd $HOME
           Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
-          Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
+          $mountinfo = Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
+          write-output "ISO is mounted to $(($mountinfo | get-volume).driveletter):\"
           Start-Process F:\vs_setup.msi /quiet /qn /norestart /Option full
       - name: Install dependencies
         run: |
