@@ -208,13 +208,11 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: |
-          mkdir D:\MDANSE
-          "%CONDA%\condabin\conda.bat" create --prefix "D:\MDANSE\mdanse_venv" python=2.7.18
-          "%CONDA%\condabin\conda.bat" activate "D:\MDANSE\mdanse_venv"
+          "%CONDA%\condabin\conda.bat" install python=2.7.18
           "%CONDA%\condabin\conda.bat" install pip
           "%CONDA%\condabin\conda.bat" install -c daf wxpython
           "%CONDA%\condabin\conda.bat" install -c ccordoba12 vtk
-          python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+          "%CONDA%\bin\python" -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
         shell: cmd
       - name: Install NetCDF
         run: |
@@ -223,9 +221,7 @@ jobs:
       - name: Install ScientificPython
         run: |
           mkdir %GITHUB_WORKSPACE%\temp\install
-          "%CONDA%\condabin\conda.bat" activate "D:\MDANSE\mdanse_venv"
-          which python
-          python setup.py build --netcdf_prefix="C:\Program Files\netCDF 4.8.1\include\" --netcdf_dll="C:\Program Files\netCDF 4.8.1\bin\" install
+          "%CONDA%\bin\python" setup.py build --netcdf_prefix="C:\Program Files\netCDF 4.8.1\include\" --netcdf_dll="C:\Program Files\netCDF 4.8.1\bin\" install
         shell: cmd
 
   ci_windows:
@@ -246,7 +242,7 @@ jobs:
           Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
           Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
           md .\tempVS
-          Start-Process E:\vs_setup.msi /quiet /qn /norestart /Option full
+          Start-Process E:\vs_setup.msi /quiet /n /norestart /Option full
       - name: Install dependencies
         run: |
           where /r C:\ *Microsoft Visual Studio*
