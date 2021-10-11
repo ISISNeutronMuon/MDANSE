@@ -1,19 +1,10 @@
 @echo off
 
 rem Set the location of the MDANSE CI scripts
-set BUILD_SCRIPT_DIR=%MDANSE_SOURCE_DIR%\\BuildServer\\Windows
-
-rem Set the path to python executable
-set PYTHON_EXE=%MDANSE_TEMPORARY_INSTALLATION_DIR%\\python.exe
+set BUILD_SCRIPT_DIR=%GITHUB_WORKSPACE%\\BuildServer\\Windows
 
 rem Set the path to NetCDF resources
-set NETCDF_RESOURCES_PATH=%HOME%\netcdf\
-
-rem This is the env var used by distutils to find the MSVC framework to be used for compiling extension
-rem see https://stackoverflow.com/questions/2817869/error-unable-to-find-vcvarsall-bat for more info
-rem For the sake of code safety, this should be the same framework used to build Python itself
-rem see http://p-nand-q.com/python/building-python-27-with-vs2010.html for more info
-set VS90COMNTOOLS=C:\Users\\ci\\AppData\\Local\\Programs\\Common\\Microsoft\\Visual C++ for Python\\9.0\\Common7\\Tools
+set NETCDF_RESOURCES_PATH="%HOME%\netcdf\"
 
 rem copy target Python
 rmdir /S /Q %MDANSE_TEMPORARY_INSTALLATION_DIR%

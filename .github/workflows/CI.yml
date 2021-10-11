@@ -225,14 +225,22 @@ jobs:
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
           python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd
-      - name: Install NetCDF
+      - name: Prepare NetCDF
         run: |
-          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:HOME/netCDF.exe
-          Start-Process $env:HOME/netCDF.exe /S -NoNewWindow -Wait -PassThru
+          choco install 7zip
+          mkdir $env:HOME\netcdf
+          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:HOME\netcdf\netCDF.exe
+      - name: Extract NetCDF
+        run: |
+          cd "%HOME%\netcdf"
+          "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
+        shell: cmd
       - name: Install ScientificPython
         run: |
-          mkdir %GITHUB_WORKSPACE%\temp\install
-          python setup.py build --netcdf_prefix="C:\Program Files\netCDF 4.8.1\include\" --netcdf_dll="C:\Program Files\netCDF 4.8.1\bin\" install
+          cd %HOME%
+          git clone https://code.ill.fr/scientific-software/scientific-python.git
+          cd scientific-python
+          python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
         shell: cmd
 
   ci_windows:
