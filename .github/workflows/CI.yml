@@ -208,7 +208,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: |
-          "%CONDA%\condabin\conda.bat" install python=2.7.18
+          "%CONDA%\condabin\conda.bat" install python=2.7.18 --force
           "%CONDA%\condabin\conda.bat" install pip
           "%CONDA%\condabin\conda.bat" install -c daf wxpython
           "%CONDA%\condabin\conda.bat" install -c ccordoba12 vtk
@@ -241,8 +241,7 @@ jobs:
           cd $HOME
           Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
           Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
-          md .\tempVS
-          Start-Process E:\vs_setup.msi /quiet /n /norestart /Option full
+          Start-Process F:\vs_setup.msi /quiet /qn /norestart /Option full
       - name: Install dependencies
         run: |
           where /r C:\ *Microsoft Visual Studio*
