@@ -143,7 +143,8 @@ jobs:
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          python -c "import sys; print sys.prefix"
+          sudo mkdir -p /Library/Frameworks/Python.framework/Versions/2.7/include/Scientific
+          sudo cp /usr/include/netcdf.h /Library/Frameworks/Python.framework/Versions/2.7/include/Scientific
           sudo python2 setup.py install --prefix=$HOME/temp_install
       - name: Install MDANSE
         run: |
