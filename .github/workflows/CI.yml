@@ -100,10 +100,8 @@ jobs:
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
           sudo rm setup.py
-          sudo cp $GITHUB_WORKSPACE/tree/19_continuous_integration/BuildServer/Unix/setup.py $HOME/mmtk
+          sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
-        env:
-          NETCDF_HEADER_FILE_PATH: /usr/include/
       - uses: actions/checkout@v2
       - name: Install MDANSE
         run: |
@@ -232,7 +230,6 @@ jobs:
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
           "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat"
-          set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
         shell: cmd
       - name: Install MMTK
