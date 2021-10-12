@@ -134,7 +134,7 @@ jobs:
           python2 -m pip install virtualenv
           python2 -m virtualenv $HOME/mdanse_venv
           source $HOME/mdanse_venv/bin/activate
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
       - name: Prepare virtual machine
         run: |
           source $HOME/mdanse_venv/bin/activate
@@ -241,9 +241,7 @@ jobs:
           cd %HOME%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat"
-          where /r C:\ *vcvars*
-          "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat"
+          where /r "C:\Program Files (x86)\Microsoft Visual Studio 9.0\" *vcvars*
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
         shell: cmd
       - name: Install MMTK
@@ -308,8 +306,7 @@ jobs:
         shell: cmd
       - name: Build MDANSE
         run: |
-          where /r C:\ *vcvars*
-          "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat"
+          where /r "C:\Program Files (x86)\Microsoft Visual Studio 9.0\" *vcvars*
           "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\build.bat"
         shell: cmd
       - name: Run tests
