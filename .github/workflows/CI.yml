@@ -124,31 +124,23 @@ jobs:
       - name: Install NetCDF
         run: |
           brew install netcdf
-          export NETCDF_HEADER_FILE_PATH=/usr/include/:/usr/local/include/
       - name: Install dependecies
         run: |
-          python2 -m pip install virtualenv
-          python2 -m virtualenv $HOME/mdanse_venv
-          source $HOME/mdanse_venv/bin/activate
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24
       - name: Prepare virtual machine
         run: |
-          source $HOME/mdanse_venv/bin/activate
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
       - run: $GITHUB_WORKSPACE/BuildServer/Unix/build.sh
       - name: Install ScientificPython
         run: |
-          export NETCDF_HEADER_FILE_PATH=/usr/include/:/usr/local/include/:/usr/local/:/usr/local/lib:/usr/local/bin
           mkdir -p $GITHUB_WORKSPACE/temp/install
-          source $HOME/mdanse_venv/bin/activate
           cd $HOME
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp/install
       - name: Install MMTK
         run: |
-          source $HOME/mdanse_venv/bin/activate
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
@@ -157,12 +149,10 @@ jobs:
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
       - name: Install MDANSE
         run: |
-          source $HOME/mdanse_venv/bin/activate
           cd $GITHUB_WORKSPACE
           python setup.py install --prefix=$HOME/temp_install
       - name: Run tests
         run: |
-          source $HOME/mdanse_venv/bin/activate
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
