@@ -103,6 +103,7 @@ jobs:
           cd mmtk
           sudo rm setup.py
           sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
+          sudo cp $HOME/temp/install/include/python2.7/Scientific/netcdf.h  $HOME/mdanse_venv/include/python2.7
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
       - name: Install MDANSE
         run: |
@@ -125,33 +126,42 @@ jobs:
           brew install netcdf
       - name: Install dependecies
         run: |
+          mkdir -p $GITHUB_WORKSPACE/temp/install
+          python2 -m pip install virtualenv
+          python2 -m virtualenv $HOME/mdanse_venv
+          source $HOME/mdanse_venv/bin/activate
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24
       - name: Prepare virtual machine
         run: |
+          source $HOME/mdanse_venv/bin/activate
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
       - name: Install ScientificPython
         run: |
-          mkdir -p $GITHUB_WORKSPACE/temp/install
+          source $HOME/mdanse_venv/bin/activate
           cd $HOME
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
           sudo python2 setup.py install --prefix=$HOME/temp/install
       - name: Install MMTK
         run: |
+          source $HOME/mdanse_venv/bin/activate
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
           python2 -c "import Scientific"
           sudo rm setup.py
           sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
+          sudo cp $HOME/temp/install/include/python2.7/Scientific/netcdf.h  $HOME/mdanse_venv/include/python2.7
           sudo python2 setup.py install --prefix=$HOME/temp_install
       - name: Install MDANSE
         run: |
+          source $HOME/mdanse_venv/bin/activate
           cd $GITHUB_WORKSPACE
           python2 setup.py install --prefix=$HOME/temp_install
       - name: Run tests
         run: |
+          source $HOME/mdanse_venv/bin/activate
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
