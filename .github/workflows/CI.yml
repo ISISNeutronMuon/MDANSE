@@ -99,9 +99,8 @@ jobs:
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          python -c "import sys; print sys.prefix"
           sudo rm setup.py
-          sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
+          sudo cp $GITHUB_WORKSPACE/tree/19_continuous_integration/BuildServer/Unix/setup.py $HOME/mmtk
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
         env:
           NETCDF_HEADER_FILE_PATH: /usr/include/
@@ -144,8 +143,8 @@ jobs:
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          sudo mkdir -p /Library/Frameworks/Python.framework/Versions/2.7/include/Scientific
-          sudo cp /usr/local/include/netcdf.h /Library/Frameworks/Python.framework/Versions/2.7/include/Scientific
+          sudo rm setup.py
+          sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
           sudo python2 setup.py install --prefix=$HOME/temp_install
       - name: Install MDANSE
         run: |
@@ -193,7 +192,6 @@ jobs:
       contains( github.ref, 'web' )
   
   # WINDOWS
-  # vcvars location on windows github-hosted runners: C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\x86_amd64\vcvarsx86_amd64.bat
   test_windows:
     runs-on: windows-2019
     steps:
@@ -234,9 +232,10 @@ jobs:
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
           "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat"
-          copy "C:\Program Files (x86)\Microsoft Visual Studio 9.0\" D:\
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
         shell: cmd
+        env:
+          VS90COMNTOOLS: "C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
       - name: Install MMTK
         run: |
           cd %HOME%
@@ -299,6 +298,7 @@ jobs:
         shell: cmd
       - name: Build MDANSE
         run: |
+          where /r C:\ *vcvars*
           "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat"
           "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\build.bat"
         shell: cmd
