@@ -100,7 +100,7 @@ jobs:
           cd mmtk
           python -c "import sys; print sys.prefix"
           sudo mkdir -p /home/runner/mdanse_venv/include/Scientific
-          cp /usr/include/netcdf.h /home/runner/mdanse_venv/include/Scientific
+          sudo cp /usr/include/netcdf.h /home/runner/mdanse_venv/include/Scientific
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
         env:
           NETCDF_HEADER_FILE_PATH: /usr/include/
