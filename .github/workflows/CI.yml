@@ -143,6 +143,7 @@ jobs:
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
+          python -c "import sys; print sys.prefix"
           sudo python2 setup.py install --prefix=$HOME/temp_install
       - name: Install MDANSE
         run: |
