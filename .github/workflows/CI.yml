@@ -235,7 +235,6 @@ jobs:
           cd scientific-python
           "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat"
           copy "C:\Program Files (x86)\Microsoft Visual Studio 9.0\" D:\
-          where /r C:\ *vcvars*
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
         shell: cmd
       - name: Install MMTK
