@@ -87,6 +87,7 @@ jobs:
       - name: Install ScientificPython
         run: |
           source $HOME/mdanse_venv/bin/activate
+          cd $HOME
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python/
           python setup.py build
@@ -95,12 +96,12 @@ jobs:
       - name: Install MMTK
         run: |
           source $HOME/mdanse_venv/bin/activate
-          cd ..
+          cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
           python -c "import sys; print sys.prefix"
-          sudo mkdir -p /home/runner/mdanse_venv/include/Scientific
-          sudo cp /usr/include/netcdf.h /home/runner/mdanse_venv/include/Scientific
+          sudo rm setup.py
+          sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
         env:
           NETCDF_HEADER_FILE_PATH: /usr/include/
@@ -144,7 +145,7 @@ jobs:
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
           sudo mkdir -p /Library/Frameworks/Python.framework/Versions/2.7/include/Scientific
-          sudo cp /usr/include/netcdf.h /Library/Frameworks/Python.framework/Versions/2.7/include/Scientific
+          sudo cp /usr/local/include/netcdf.h /Library/Frameworks/Python.framework/Versions/2.7/include/Scientific
           sudo python2 setup.py install --prefix=$HOME/temp_install
       - name: Install MDANSE
         run: |
