@@ -67,6 +67,7 @@ if netcdf_h is None:
     sys.exit(1)
 
 compile_args.append("-DNUMPY=1")
+compile_args.append("-Wno-implicit-function-declaration")
 import numpy.distutils.misc_util
 include_dirs.extend(numpy.distutils.misc_util.get_numpy_include_dirs())
 
