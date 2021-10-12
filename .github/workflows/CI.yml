@@ -74,6 +74,7 @@ jobs:
   test_ubuntu:
     runs-on: ubuntu-18.04
     steps:
+      - uses: actions/checkout@v2
       - name: Install libraries
         run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6 python-dev
       - name: Install python dependencies with pip
@@ -102,7 +103,6 @@ jobs:
           sudo rm setup.py
           sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
-      - uses: actions/checkout@v2
       - name: Install MDANSE
         run: |
           source $HOME/mdanse_venv/bin/activate

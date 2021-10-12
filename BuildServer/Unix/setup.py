@@ -48,12 +48,10 @@ netcdf_h_search_paths = [os.environ.get('NETCDF_HEADER_FILE_PATH', '/tmp/'),
                          os.path.join(sys.prefix,'local','include',python_version,'Scientific'),
                          os.path.join(site.USER_BASE,'include',python_version,'Scientific')]
 
-if os.environ.get('GITHUB_WORKSPACE', False):
-    print 'adding github specifics'
-    netcdf_h_search_paths.append('/usr/include/')
-    netcdf_h_search_paths.append('/usr/local/include/')
-    netcdf_h_search_paths.append('/usr/local/Cellar/netcdf/4.8.0_2')
-    netcdf_h_search_paths.append('/usr/local/Cellar/netcdf/4.8.0_2/include')
+netcdf_h_search_paths.append('/usr/include/')
+netcdf_h_search_paths.append('/usr/local/include/')
+netcdf_h_search_paths.append('/usr/local/Cellar/netcdf/4.8.0_2')
+netcdf_h_search_paths.append('/usr/local/Cellar/netcdf/4.8.0_2/include')
 
 netcdf_h = None
 for path in netcdf_h_search_paths:
