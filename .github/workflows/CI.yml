@@ -115,10 +115,10 @@ jobs:
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
-          with:
-            name: test_ubuntu_artifacts
-            path: $HOME/mdanse_venv/*
-            retention-days: 1/24
+        with:
+          name: test_ubuntu_artifacts
+          path: $HOME/mdanse_venv/*
+          retention-days: 1/24
 
   # OSX
   ci_osx:
