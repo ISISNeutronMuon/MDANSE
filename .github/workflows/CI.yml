@@ -142,7 +142,7 @@ jobs:
           wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
           sudo tar -xf wxPython-src-3.0.2.0.tar.bz2
           cd wxPython-src-3.0.2.0/wxPython/
-          find /hostedtoolcache -name macosx10.14
+          sudo find / -name macosx10.14
           sudo $HOME/mdanse_venv/bin/python build-wxpython.py --build_dir=../bld --with-macosx-sdk=macosx10.14
           export PYTHONPATH=$PYTHONPATH:$HOME/wxPython-src-3.0.2.0/wxPython/
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/wxPython-src-3.0.2.0/bld/lib/
