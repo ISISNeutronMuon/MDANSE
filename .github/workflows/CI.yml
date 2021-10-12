@@ -201,6 +201,7 @@ jobs:
       contains( github.ref, 'web' )
   
   # WINDOWS
+  # vcvars location on windows github-hosted runners: C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\x86_amd64\vcvarsx86_amd64.bat
   test_windows:
     runs-on: windows-2019
     steps:
@@ -243,6 +244,25 @@ jobs:
           cd scientific-python
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
         shell: cmd
+      - name: Install MMTK
+        run: |
+          cd %HOME%
+          git clone https://code.ill.fr/scientific-software/mmtk.git
+          cd mmtk
+          python setup.py build install
+        shell: cmd
+      - name: Install MDANSE
+        run: |
+          cd %GITHUB_WORKSPACE%
+          python setup.py build install
+        shell: cmd
+      - name: Run tests
+        run: |
+          cd %GITHUB_WORKSPACE%\Tests
+          python UnitTests\AllTests.py
+          python DependenciesTests\AllTests.py
+          python FunctionalTests\BuildJobTests.py
+          python FunctionalTests\AllTests.py
 
   ci_windows:
     runs-on: windows-2019
