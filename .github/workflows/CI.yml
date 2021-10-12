@@ -142,6 +142,7 @@ jobs:
           wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
           sudo tar -xf wxPython-src-3.0.2.0.tar.bz2
           cd wxPython-src-3.0.2.0/wxPython/
+          find / -name SDK
           sudo $HOME/mdanse_venv/bin/python build-wxpython.py --build_dir=../bld
           export PYTHONPATH=$PYTHONPATH:$HOME/wxPython-src-3.0.2.0/wxPython/
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/wxPython-src-3.0.2.0/bld/lib/
@@ -252,7 +253,8 @@ jobs:
           cd %HOME%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          where /r "C:\Program Files (x86)"  *vcvars*
+          cd "C:\Program Files (x86)\Microsoft Visual Studio 14.0"
+          where *vcvars*
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
         shell: cmd
       - name: Install MMTK
@@ -319,7 +321,6 @@ jobs:
         run: |
           cd "C:\Program Files (x86)\Microsoft Visual Studio 14.0"
           where *vcvars*
-          python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
           "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\build.bat"
         shell: cmd
       - name: Run tests
