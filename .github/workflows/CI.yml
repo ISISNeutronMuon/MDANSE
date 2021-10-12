@@ -221,7 +221,6 @@ jobs:
           Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart"
       - name: Install dependencies
         run: |
-          where /r C:\ *vcvars*
           which python
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
@@ -263,6 +262,7 @@ jobs:
           python DependenciesTests\AllTests.py
           python FunctionalTests\BuildJobTests.py
           python FunctionalTests\AllTests.py
+        shell: cmd
 
   ci_windows:
     runs-on: windows-2019
