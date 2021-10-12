@@ -131,7 +131,6 @@ jobs:
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-      - run: $GITHUB_WORKSPACE/BuildServer/Unix/build.sh
       - name: Install ScientificPython
         run: |
           mkdir -p $GITHUB_WORKSPACE/temp/install
