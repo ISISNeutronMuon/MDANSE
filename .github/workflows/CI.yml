@@ -98,7 +98,9 @@ jobs:
           cd ..
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          export NETCDF_HEADER_FILE_PATH=$NETCDF_HEADER_FILE_PATH:/usr/include/python2.7/
+          python -c "import sys; print sys.prefix"
+          mkdir -p /usr/local/include/Scientific
+          cp /usr/include/netcdf.h /usr/local/include/Scientific
           sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
         env:
           NETCDF_HEADER_FILE_PATH: /usr/include/
