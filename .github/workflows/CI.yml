@@ -92,7 +92,7 @@ jobs:
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python/
           python setup.py build
-          sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
+          sudo $HOME/mdanse_venv/bin/python setup.py install
       - run: dpkg -L libnetcdf-dev
       - name: Install MMTK
         run: |
@@ -102,13 +102,12 @@ jobs:
           cd mmtk
           sudo rm setup.py
           sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
-          sudo cp $HOME/temp/install/include/python2.7/Scientific/netcdf.h  $HOME/mdanse_venv/include/python2.7
-          sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
+          sudo $HOME/mdanse_venv/bin/python setup.py install
       - name: Install MDANSE
         run: |
           source $HOME/mdanse_venv/bin/activate
           cd $GITHUB_WORKSPACE
-          python setup.py install --prefix=$HOME/temp_install
+          python setup.py install
       - name: Run tests
         run: |
           source $HOME/mdanse_venv/bin/activate
@@ -141,7 +140,7 @@ jobs:
           cd $HOME
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          sudo python2 setup.py install --prefix=$HOME/temp/install
+          sudo python2 setup.py install
       - name: Install MMTK
         run: |
           source $HOME/mdanse_venv/bin/activate
@@ -151,12 +150,12 @@ jobs:
           sudo rm setup.py
           sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
           sudo cp $HOME/temp/install/include/python2.7/Scientific/netcdf.h  $HOME/mdanse_venv/include/python2.7
-          sudo python2 setup.py install --prefix=$HOME/temp_install
+          sudo python2 setup.py install
       - name: Install MDANSE
         run: |
           source $HOME/mdanse_venv/bin/activate
           cd $GITHUB_WORKSPACE
-          python2 setup.py install --prefix=$HOME/temp_install
+          python2 setup.py install
       - name: Run tests
         run: |
           source $HOME/mdanse_venv/bin/activate
