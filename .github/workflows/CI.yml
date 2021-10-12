@@ -135,6 +135,16 @@ jobs:
           python2 -m virtualenv $HOME/mdanse_venv
           source $HOME/mdanse_venv/bin/activate
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+      - name: Install wx
+        run: |
+          source $HOME/mdanse_venv/bin/activate
+          cd $HOME
+          wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
+          sudo tar -xf wxPython-src-3.0.2.0.tar.bz2
+          cd wxPython-src-3.0.2.0/wxPython/
+          sudo $HOME/mdanse_venv/bin/python build-wxpython.py --build_dir=../bld
+          export PYTHONPATH=$PYTHONPATH:$HOME/wxPython-src-3.0.2.0/wxPython/
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/wxPython-src-3.0.2.0/bld/lib/
       - name: Prepare virtual machine
         run: |
           source $HOME/mdanse_venv/bin/activate
