@@ -235,14 +235,14 @@ jobs:
         run: |
           cd "%HOME%\netcdf"
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
+          set PATH=%PATH%;%HOME%\netcdf
         shell: cmd
       - name: Install ScientificPython
         run: |
           cd %HOME%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
-          cd "C:\Program Files (x86)\Microsoft Visual Studio 9.0"
-          where *vcvars*
           cd scientific-python
+          where /r "C:\Program Files (x86)"  *vcvars*
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
         shell: cmd
       - name: Install MMTK
@@ -262,8 +262,8 @@ jobs:
           cd %GITHUB_WORKSPACE%\Tests
           python UnitTests\AllTests.py
           python DependenciesTests\AllTests.py
-          python FunctionalTests\BuildJobTests.py
-          python FunctionalTests\AllTests.py
+          python FunctionalTests\Jobs\BuildJobTests.py
+          python FunctionalTests\Jobs\AllTests.py
         shell: cmd
 
   ci_windows:
@@ -307,7 +307,9 @@ jobs:
         shell: cmd
       - name: Build MDANSE
         run: |
-          where /r "C:\Program Files (x86)" *vcvars*
+          cd "C:\Program Files (x86)\Microsoft Visual Studio 14.0"
+          where *vcvars*
+          python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
           "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\build.bat"
         shell: cmd
       - name: Run tests
