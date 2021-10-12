@@ -137,19 +137,17 @@ jobs:
           cd $HOME
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp/install
+          sudo python2 setup.py install --prefix=$HOME/temp/install
       - name: Install MMTK
         run: |
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          export NETCDF_HEADER_FILE_PATH=/usr/local/include/:/usr/local/:/usr/local/lib:/usr/local/bin
-          echo $NETCDF_HEADER_FILE_PATH
-          sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=$HOME/temp_install
+          sudo python2 setup.py install --prefix=$HOME/temp_install
       - name: Install MDANSE
         run: |
           cd $GITHUB_WORKSPACE
-          python setup.py install --prefix=$HOME/temp_install
+          python2 setup.py install --prefix=$HOME/temp_install
       - name: Run tests
         run: |
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
