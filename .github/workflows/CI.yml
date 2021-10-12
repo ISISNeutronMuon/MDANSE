@@ -128,7 +128,7 @@ jobs:
       - name: Install NetCDF
         run: |
           brew install netcdf
-      - name: Install dependecies
+      - name: Install dependecies with pip
         run: |
           mkdir -p $GITHUB_WORKSPACE/temp/install
           python2 -m pip install virtualenv
@@ -240,8 +240,9 @@ jobs:
         run: |
           cd %HOME%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
+          cd "C:\Program Files (x86)\Microsoft Visual Studio 9.0"
+          where *vcvars*
           cd scientific-python
-          where /r "C:\Program Files (x86)"  *vcvars*
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
         shell: cmd
       - name: Install MMTK
