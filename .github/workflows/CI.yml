@@ -85,6 +85,7 @@ jobs:
           python2 -m virtualenv $HOME/mdanse_venv
           source $HOME/mdanse_venv/bin/activate
           pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+          sudo cp /usr/include/netcdf.h $HOME/mdanse_venv/include/python2.7
       - name: Install ScientificPython
         run: |
           source $HOME/mdanse_venv/bin/activate
@@ -93,7 +94,6 @@ jobs:
           cd scientific-python/
           python setup.py build
           sudo $HOME/mdanse_venv/bin/python setup.py install
-      - run: dpkg -L libnetcdf-dev
       - name: Install MMTK
         run: |
           source $HOME/mdanse_venv/bin/activate
@@ -113,6 +113,12 @@ jobs:
           source $HOME/mdanse_venv/bin/activate
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+          with:
+            name: test_ubuntu_artifacts
+            path: $HOME/mdanse_venv/*
+            retention-days: 1/24
 
   # OSX
   ci_osx:
@@ -149,7 +155,6 @@ jobs:
           cd mmtk
           sudo rm setup.py
           sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
-          sudo cp $HOME/temp/install/include/python2.7/Scientific/netcdf.h  $HOME/mdanse_venv/include/python2.7
           sudo python2 setup.py install
       - name: Install MDANSE
         run: |
@@ -164,9 +169,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: OSX_artifacts
-          path: |
-            $GITHUB_WORKSPACE/build
-            $GITHUB_WORKSPACE/temp
+          path: $HOME/mdanse_venv/*
           retention-days: 1/24
   
   deploy_osx:
