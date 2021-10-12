@@ -97,6 +97,7 @@ jobs:
       - name: Install MMTK
         run: |
           source $HOME/mdanse_venv/bin/activate
+          python -c "import Scientific"
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
@@ -141,6 +142,7 @@ jobs:
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
+          python2 -c "import Scientific"
           sudo rm setup.py
           sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
           sudo python2 setup.py install --prefix=$HOME/temp_install
