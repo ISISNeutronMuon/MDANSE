@@ -241,7 +241,7 @@ jobs:
           cd %HOME%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          where /r "C:\Program Files (x86)\Microsoft Visual Studio 9.0\" *vcvars*
+          where /R "C:\Program Files (x86)\Microsoft Visual Studio 9.0\"  *vcvars*
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
         shell: cmd
       - name: Install MMTK
@@ -306,7 +306,7 @@ jobs:
         shell: cmd
       - name: Build MDANSE
         run: |
-          where /r "C:\Program Files (x86)\Microsoft Visual Studio 9.0\" *vcvars*
+          where /R "C:\Program Files (x86)\Microsoft Visual Studio 9.0\" *vcvars*
           "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\build.bat"
         shell: cmd
       - name: Run tests
