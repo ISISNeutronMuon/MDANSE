@@ -142,8 +142,8 @@ jobs:
           wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
           sudo tar -xf wxPython-src-3.0.2.0.tar.bz2
           cd wxPython-src-3.0.2.0/wxPython/
-          find / -name SDK
-          sudo $HOME/mdanse_venv/bin/python build-wxpython.py --build_dir=../bld
+          find /hostedtoolcache -name macosx10.14
+          sudo $HOME/mdanse_venv/bin/python build-wxpython.py --build_dir=../bld --with-macosx-sdk=macosx10.14
           export PYTHONPATH=$PYTHONPATH:$HOME/wxPython-src-3.0.2.0/wxPython/
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/wxPython-src-3.0.2.0/bld/lib/
       - name: Prepare virtual machine
@@ -253,8 +253,7 @@ jobs:
           cd %HOME%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          cd "C:\Program Files (x86)\Microsoft Visual Studio 14.0"
-          where *vcvars*
+          where /r "C:\Program Files (x86)" *vcvars*
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
         shell: cmd
       - name: Install MMTK
