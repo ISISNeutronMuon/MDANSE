@@ -13,7 +13,7 @@ jobs:
       - run: $GITHUB_WORKSPACE/BuildServer/Docker/clean.sh
   
   ci_ubuntu:
-    if: always()
+    if: False
     needs: docker_pre_clean
     runs-on: ubuntu-18.04
     steps:
@@ -139,10 +139,12 @@ jobs:
         run: |
           source $HOME/mdanse_venv/bin/activate
           cd $HOME
-          wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython3.0-osx-3.0.2.0-cocoa-py2.7.dmg
-          MOUNTDIR=$(echo `hdiutil mount wxPython3.0-osx-3.0.2.0-cocoa-py2.7.dmg | tail -1 \
-          | awk '{$1=$2=""; print $0}'` | xargs -0 echo) \
-          && sudo installer -pkg "${MOUNTDIR}/"*.pkg -target $HOME
+          wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
+          sudo tar -xf wxPython-src-3.0.2.0.tar.bz2
+          cd /opt/mdanse/wxPython-src-3.0.2.0/wxPython/
+          sudo $HOME/mdanse_venv/bin/python2 build-wxpython.py --build_dir=../bld --osx_cocoa
+          export PYTHONPATH=$PYTHONPATH:$HOME/wxPython-src-3.0.2.0/wxPython/
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/wxPython-src-3.0.2.0/bld/lib/
           python -c "import wx"
       - name: Prepare virtual machine
         run: |
