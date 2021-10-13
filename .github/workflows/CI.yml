@@ -218,8 +218,8 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
       - name: Deploy
         run: |
-        source $HOME/mdanse_venv/bin/activate
-        $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
+          source $HOME/mdanse_venv/bin/activate
+          $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
