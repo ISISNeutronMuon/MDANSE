@@ -5,6 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   docker_pre_clean:
     runs-on: ${{ matrix.os }}
+    if: False
     strategy:
       matrix:
         os: [ubuntu-18.04,]
@@ -61,7 +62,7 @@ jobs:
           retention-days: 1/24
   
   docker_post_clean:
-    if: always()
+    if: False
     needs: deploy_ubuntu
     runs-on: ${{ matrix.os }}
     strategy:
@@ -143,7 +144,7 @@ jobs:
           wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
           sudo tar -xf wxPython-src-3.0.2.0.tar.bz2
           cd wxPython-src-3.0.2.0/wxPython/
-          sudo $HOME/mdanse_venv/bin/python2 build-wxpython.py --build_dir=../bld --osx_cocoa
+          sudo $HOME/mdanse_venv/bin/python2 build-wxpython.py --build_dir=../bld --osx_cocoa --mac_framework
           export PYTHONPATH=$PYTHONPATH:$HOME/wxPython-src-3.0.2.0/wxPython/
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/wxPython-src-3.0.2.0/bld/lib/
           python -c "import wx"
