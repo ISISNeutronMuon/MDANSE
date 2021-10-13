@@ -5,7 +5,6 @@ on: [push, workflow_dispatch]
 jobs:
   docker_pre_clean:
     runs-on: ${{ matrix.os }}
-    if: False
     strategy:
       matrix:
         os: [ubuntu-18.04,]
@@ -14,7 +13,7 @@ jobs:
       - run: $GITHUB_WORKSPACE/BuildServer/Docker/clean.sh
   
   ci_ubuntu:
-    if: False
+    if: always()
     needs: docker_pre_clean
     runs-on: ubuntu-18.04
     steps:
@@ -30,10 +29,11 @@ jobs:
       - name: 'Archive artifacts'
         uses: actions/upload-artifact@v2
         with:
+          name: ubuntu_artifacts
           path: |
-            $GITHUB_WORKSPACE/build
-            $GITHUB_WORKSPACE/temp
-          retention-days: 1/24
+            ${{ github.workspace }}/build
+            ${{ github.workspace }}/temp
+          retention-days: 1
 
   deploy_ubuntu:
     runs-on: ubuntu-18.04
@@ -49,6 +49,11 @@ jobs:
       contains( github.ref, '19_continuous_integration' )
     steps:
       - uses: actions/checkout@v2
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: ubuntu_artifacts
+          path: ~/
       - name: Set up docker
         run: docker build --force-rm=true -t ci_mdanse_bionic -f $GITHUB_WORKSPACE/BuildServer/Docker/Ubuntu-bionic/Dockerfile_setup .
       - name: Deploy
@@ -58,11 +63,12 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: $GITHUB_WORKSPACE/*.deb 
-          retention-days: 1/24
+          name: ubuntu_executable
+          path: ${{ github.workspace }}/*.deb
+          retention-days: 1
   
   docker_post_clean:
-    if: False
+    if: always()
     needs: deploy_ubuntu
     runs-on: ${{ matrix.os }}
     strategy:
@@ -139,7 +145,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: test_ubuntu_artifacts
-          path: $HOME
+          path: ~/
       - name: Deploy
         run: |
           source $HOME/mdanse_venv/bin/activate
@@ -212,7 +218,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: OSX_artifacts
-          path: $HOME
+          path: ~/
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
