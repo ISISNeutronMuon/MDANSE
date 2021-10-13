@@ -26,7 +26,7 @@ jobs:
         run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ci_mdanse_bionic_build -f $GITHUB_WORKSPACE/BuildServer/Docker/Ubuntu-bionic/Dockerfile_build .
       - name: Generate artifacts
         run: docker run -iv$PWD:/artifacts/ ci_mdanse_bionic_build
-      - name: 'Archive artifacts'
+      - name: Upload
         uses: actions/upload-artifact@v2
         with:
           name: ubuntu_artifacts
@@ -145,7 +145,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: test_ubuntu_artifacts
-          path: ~/
+          path: ~/mdanse_venv
       - name: Deploy
         run: |
           source $HOME/mdanse_venv/bin/activate
@@ -218,7 +218,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: OSX_artifacts
-          path: ~/
+          path: ~/mdanse_venv
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
