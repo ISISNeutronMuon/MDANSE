@@ -140,8 +140,7 @@ jobs:
       - name: Install wx
         run: |
           source $HOME/mdanse_venv/bin/activate
-          sudo chown 501:20 /usr/local/miniconda/pkgs/cache/3ea5bd45.json
-          conda install -c daf wxpython
+          sudo conda install -c daf wxpython
           sudo cp -r $CONDA/Lib/site-packages/wx $HOME/mdanse_venv/lib/python2.7/site-packages
           python -c "import wx"
       - name: Prepare virtual machine
