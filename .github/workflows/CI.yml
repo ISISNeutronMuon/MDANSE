@@ -137,13 +137,13 @@ jobs:
           python2 -m virtualenv $HOME/mdanse_venv
           source $HOME/mdanse_venv/bin/activate
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-      - name: Install wx
+      - name: Install wx and vtk
         run: |
-          source $HOME/mdanse_venv/bin/activate
           sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c daf wxpython
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $HOME/mdanse_venv/lib/python2.7/site-packages
-          python -c "import wx"
+          conda install -p $HOME/tempenv -c ccordoba12 vtk
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $HOME/mdanse_venv/lib/python2.7/site-packages
       - name: Prepare virtual machine
         run: |
           source $HOME/mdanse_venv/bin/activate
