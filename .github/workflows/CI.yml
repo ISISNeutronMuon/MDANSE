@@ -142,7 +142,7 @@ jobs:
           sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c daf wxpython
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $HOME/mdanse_venv/lib/python2.7/site-packages
-          conda install -p $HOME/tempenv -c ccordoba12 vtk
+          sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $HOME/mdanse_venv/lib/python2.7/site-packages
       - name: Prepare virtual machine
         run: |
