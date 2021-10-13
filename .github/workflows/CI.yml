@@ -26,11 +26,13 @@ jobs:
         run: docker build --force-rm=true --build-arg CI_COMMIT_SHORT_SHA=${GITHUB_SHA::8} --build-arg CI_COMMIT_REF_NAME=$GITHUB_REF --no-cache -t ci_mdanse_bionic_build -f $GITHUB_WORKSPACE/BuildServer/Docker/Ubuntu-bionic/Dockerfile_build .
       - name: Generate artifacts
         run: docker run -iv$PWD:/artifacts/ ci_mdanse_bionic_build
-      - name: Upload
+      - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: ubuntu_artifacts
           path: |
+            $PWD/artifacts
+            /artifacts
             ${{ github.workspace }}/build
             ${{ github.workspace }}/temp
           retention-days: 1
@@ -86,6 +88,7 @@ jobs:
         run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6 python-dev
       - name: Install python dependencies with pip
         run: |
+          which python2
           mkdir $HOME/temp_install
           cd $HOME
           python2 -m pip install virtualenv
@@ -149,6 +152,8 @@ jobs:
       - name: Deploy
         run: |
           source $HOME/mdanse_venv/bin/activate
+          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
+          source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
 
   # OSX
   ci_osx:
@@ -160,6 +165,7 @@ jobs:
           brew install netcdf wxwidgets
       - name: Install dependecies with pip
         run: |
+          which python2
           mkdir -p $GITHUB_WORKSPACE/temp/install
           python2 -m pip install virtualenv
           python2 -m virtualenv $HOME/mdanse_venv
