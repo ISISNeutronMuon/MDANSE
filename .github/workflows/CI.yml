@@ -118,8 +118,8 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: test_ubuntu_artifacts
-          path: $HOME/mdanse_venv
-          retention-days: 1/24
+          path: ~/mdanse_venv/
+          retention-days: 1
 
   test_deploy_ubuntu:
     needs: test_ubuntu
@@ -200,8 +200,8 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: OSX_artifacts
-          path: $HOME/mdanse_venv
-          retention-days: 1/24
+          path: '~/mdanse_venv'
+          retention-days: 1
   
   deploy_osx:
     needs: ci_osx
