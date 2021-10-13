@@ -140,7 +140,9 @@ jobs:
           source $HOME/mdanse_venv/bin/activate
           cd $HOME
           wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython3.0-osx-3.0.2.0-cocoa-py2.7.dmg
-          sudo installer -package wxPython3.0-osx-3.0.2.0-cocoa-py2.7.dmg -target $HOME
+          MOUNTDIR=$(echo `hdiutil mount wxPython3.0-osx-3.0.2.0-cocoa-py2.7.dmg | tail -1 \
+          | awk '{$1=$2=""; print $0}'` | xargs -0 echo) \
+          && sudo installer -pkg "${MOUNTDIR}/"*.pkg -target $HOME
           python -c "import wx"
       - name: Prepare virtual machine
         run: |
