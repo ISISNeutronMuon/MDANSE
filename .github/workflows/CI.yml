@@ -74,7 +74,6 @@ jobs:
 
   test_ubuntu:
     runs-on: ubuntu-18.04
-    if: False
     steps:
       - uses: actions/checkout@v2
       - name: Install libraries
@@ -119,8 +118,30 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: test_ubuntu_artifacts
-          path: $HOME/mdanse_venv/*
+          path: $HOME/mdanse_venv
           retention-days: 1/24
+
+  test_deploy_ubuntu:
+    runs-on: ubuntu-18.04
+    if: |
+      contains( github.ref, 'master' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '19_continuous_integration' )
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download artifacts
+          uses: actions/download-artifact@v2
+          with:
+            name: test_ubuntu_artifacts
+            path: $HOME
+      - name: Deploy
+        run: |
+          source $HOME/mdanse_venv/bin/activate
 
   # OSX
   ci_osx:
@@ -178,7 +199,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: OSX_artifacts
-          path: $HOME/mdanse_venv/*
+          path: $HOME/mdanse_venv
           retention-days: 1/24
   
   deploy_osx:
@@ -190,12 +211,15 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: OSX_artifacts
+          path: $HOME
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
       - name: Deploy
-        run: $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
+        run: |
+        source $HOME/mdanse_venv/bin/activate
+        $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -208,7 +232,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '19_continuous_integration' )
   
   # WINDOWS
   test_windows:

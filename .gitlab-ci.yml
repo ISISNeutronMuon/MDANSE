@@ -1,4 +1,4 @@
-stages:
+stagess:
   - docker_pre_clean
   - ci
   - deploy
