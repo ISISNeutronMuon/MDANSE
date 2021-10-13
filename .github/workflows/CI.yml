@@ -73,7 +73,7 @@ jobs:
 
   test_ubuntu:
     runs-on: ubuntu-18.04
-    if: never()
+    if: False
     steps:
       - uses: actions/checkout@v2
       - name: Install libraries
