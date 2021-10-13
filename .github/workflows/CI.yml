@@ -122,6 +122,7 @@ jobs:
           retention-days: 1/24
 
   test_deploy_ubuntu:
+    needs: test_ubuntu
     runs-on: ubuntu-18.04
     if: |
       contains( github.ref, 'master' ) ||
