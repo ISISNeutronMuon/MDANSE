@@ -129,7 +129,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install NetCDF
         run: |
-          brew install netcdf
+          brew install netcdf wxwidgets
       - name: Install dependecies with pip
         run: |
           mkdir -p $GITHUB_WORKSPACE/temp/install
