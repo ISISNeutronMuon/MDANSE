@@ -140,9 +140,9 @@ jobs:
       - name: Install wx
         run: |
           source $HOME/mdanse_venv/bin/activate
-          sudo conda install python=2.7
-          sudo conda install -c daf wxpython
-          sudo cp -r $CONDA/Lib/site-packages/wx $HOME/mdanse_venv/lib/python2.7/site-packages
+          sudo conda create -p $HOME/tempenv python=2.7
+          sudo conda install -p $HOME/tempenv -c daf wxpython
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $HOME/mdanse_venv/lib/python2.7/site-packages
           python -c "import wx"
       - name: Prepare virtual machine
         run: |
@@ -213,6 +213,7 @@ jobs:
   # WINDOWS
   test_windows:
     runs-on: windows-2019
+    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2
@@ -277,6 +278,7 @@ jobs:
 
   ci_windows:
     runs-on: windows-2019
+    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2
