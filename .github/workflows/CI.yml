@@ -13,7 +13,7 @@ jobs:
       - run: $GITHUB_WORKSPACE/BuildServer/Docker/clean.sh
   
   ci_ubuntu:
-    if: always()
+    if: False
     needs: docker_pre_clean
     runs-on: ubuntu-18.04
     steps:
@@ -173,6 +173,7 @@ jobs:
       - name: Install NetCDF
         run: |
           brew install netcdf
+          which python2
           mkdir /opt/hostedtoolcache/Python/2.7.18/x64/include
           sudo cp -r /usr/local/include/python2.7 /opt/hostedtoolcache/Python/2.7.18/x64/include
           sudo cp -r /usr/local/include/netcdf /opt/hostedtoolcache/Python/2.7.18/x64/include
