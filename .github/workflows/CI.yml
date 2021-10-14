@@ -171,12 +171,11 @@ jobs:
           python-version: '2.7.18'
       - name: Install NetCDF
         run: |
-          brew install netcdf tree
+          brew install netcdf
           cd /opt/hostedtoolcache/Python/2.7.18
-          tree
-          ls
+          ls *
           sudo cp -r /usr/local/include/netcdf /opt/hostedtoolcache/Python/2.7.18/x64/include
-          sudo cp /usr/local/include/netcdf/netcdf.h /opt/hostedtoolcache/Python/2.7.18/x64/include/python2,7
+          sudo cp /usr/local/include/netcdf/netcdf.h /opt/hostedtoolcache/Python/2.7.18/x64/include/python2.7
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
