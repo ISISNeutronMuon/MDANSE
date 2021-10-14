@@ -36,22 +36,22 @@ cp ${SCRIPT_DIR}/Resources/MDANSE.desktop ${DEBIAN_APP_DIR}/
 # Build the /usr/share/pixmaps directory inside the debian root directory and copy the mdanse icon file inside
 DEBIAN_PIXMAPS_DIR=${DEBIAN_ROOT_DIR}/usr/share/pixmaps
 mkdir -p ${DEBIAN_PIXMAPS_DIR}
-cp ${CI_PROJECT_DIR}/Src/GUI/Icons/mdanse.png ${DEBIAN_PIXMAPS_DIR}/
+cp $GITHUB_WORKSPACE/Src/GUI/Icons/mdanse.png ${DEBIAN_PIXMAPS_DIR}/
 
 # Build the /usr/local/bin directory inside the debian root directory and copy the mdanse scripts inside
 DEBIAN_BIN_DIR=${DEBIAN_ROOT_DIR}/usr/local/bin
 mkdir -p ${DEBIAN_BIN_DIR}
-cp ${CI_PROJECT_DIR}/Scripts/* ${DEBIAN_BIN_DIR}/
+cp $GITHUB_WORKSPACE/Scripts/* ${DEBIAN_BIN_DIR}/
 dos2unix ${DEBIAN_BIN_DIR}/mdanse_*
 
 # Build the usr/local/lib/python2.7/dist-packages directory inside the debian root directory and copy the MDANSE package inside
 DEBIAN_DIST_DIR=${DEBIAN_ROOT_DIR}/usr/local/lib/python2.7/dist-packages
 mkdir -p ${DEBIAN_DIST_DIR}
 
-cd ${CI_PROJECT_DIR}
+cd $GITHUB_WORKSPACE
 
 # Build API
-${PYTHONEXE} setup.py build_api build_help install --prefix=${CI_TEMP_INSTALL_DIR}
+python2 setup.py build_api build_help install --prefix=/opt/hostedtoolcache/Python/2.7.18/x64
 
 status=$?
 if [ $status -ne 0 ]; then
@@ -60,16 +60,16 @@ if [ $status -ne 0 ]; then
 fi
 
 # Copy the localy installed ScientificPython, MMTK and MDANSE
-cp -r ${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages/Scientific ${DEBIAN_DIST_DIR}
-cp -r ${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages/MMTK ${DEBIAN_DIST_DIR}
-cp -r ${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages/MDANSE ${DEBIAN_DIST_DIR}
+cp -r /opt/hostedtoolcache/Python/2.7.18/x64/lib/python2.7/site-packages/Scientific ${DEBIAN_DIST_DIR}
+cp -r /opt/hostedtoolcache/Python/2.7.18/x64/lib/python2.7/site-packages/MMTK ${DEBIAN_DIST_DIR}
+cp -r /opt/hostedtoolcache/Python/2.7.18/x64/lib/python2.7/site-packages/MDANSE ${DEBIAN_DIST_DIR}
 
 # Compute the Installed-Size field for the debian package
 instSize=$(du ${DEBIAN_ROOT_DIR} -b -s | cut -f1)
 sed -i "s/Installed-Size:.*/Installed-Size: $((1+(instSize/1024)))/g" ${DEBIAN_ROOT_DIR}/DEBIAN/control
 
 export TMPDIR=.
-fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} ${CI_PROJECT_DIR}/MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.deb
+fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} $GITHUB_WORKSPACE/MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.deb
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
