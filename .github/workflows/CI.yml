@@ -174,7 +174,7 @@ jobs:
         run: |
           brew install netcdf
           cd /opt/hostedtoolcache/Python/2.7.18/x64/
-          ls -a -b -R
+          sudo ls -a -b -R
           sudo cp -r /usr/local/include/netcdf /opt/hostedtoolcache/Python/2.7.18/x64/include
           sudo cp /usr/local/include/netcdf/netcdf.h /opt/hostedtoolcache/Python/2.7.18/x64/include/python2.7
       - name: Install dependecies with pip
