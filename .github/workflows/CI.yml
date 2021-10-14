@@ -153,6 +153,7 @@ jobs:
         with:
           name: test_ubuntu_artifacts
           path: ~/mdanse_venv
+      - run: sudo apt-get install dos2unix
       - name: Deploy
         run: |
           source $HOME/mdanse_venv/bin/activate
@@ -172,8 +173,8 @@ jobs:
       - name: Install NetCDF
         run: |
           brew install netcdf
-          cd /opt/hostedtoolcache/Python/2.7.18
-          ls *
+          cd /opt/hostedtoolcache/Python/2.7.18/x64
+          ls -a -b
           sudo cp -r /usr/local/include/netcdf /opt/hostedtoolcache/Python/2.7.18/x64/include
           sudo cp /usr/local/include/netcdf/netcdf.h /opt/hostedtoolcache/Python/2.7.18/x64/include/python2.7
       - name: Install dependecies with pip
