@@ -51,7 +51,8 @@ mkdir -p ${DEBIAN_DIST_DIR}
 cd $GITHUB_WORKSPACE
 
 # Build API
-python2 setup.py build_api build_help install --prefix=/opt/hostedtoolcache/Python/2.7.18/x64
+export PYTHONEXE=$HOME/Python
+$PYTHONEXE setup.py build_api build_help install --prefix=/opt/hostedtoolcache/Python/2.7.18/x64
 
 status=$?
 if [ $status -ne 0 ]; then
