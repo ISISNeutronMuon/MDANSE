@@ -94,7 +94,7 @@ jobs:
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
-          pythonw -c "import vtk"
+          python2 -c "import vtk"
       - name: Install ScientificPython
         run: |
           cd $HOME
@@ -166,6 +166,7 @@ jobs:
         run: |
           brew install netcdf
           sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
+          sudo find /usr/local -name netcdf.h
           sudo cp /usr/local/include/netcdf/netcdf.h $RUNNER_TOOL_CACHE/2.7.18/x64/include/python2.7
       - name: Install dependecies with pip
         run: |
