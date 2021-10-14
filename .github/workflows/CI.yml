@@ -90,10 +90,12 @@ jobs:
           python-version: '2.7.18'
       - name: Install libraries
         run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6 python-dev
-      - name: Install python dependencies with pip
+      - name: Install dependencies
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
+          sudo cp -r /usr/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/
+          sudo cp -r /usr/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/
           python2 -c "import vtk"
       - name: Install ScientificPython
         run: |
@@ -166,8 +168,8 @@ jobs:
         run: |
           brew install netcdf
           sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
-          sudo find /usr/local -name netcdf.h
-          sudo cp /usr/local/include/netcdf/netcdf.h $RUNNER_TOOL_CACHE/2.7.18/x64/include/python2.7
+          sudo find /usr/local -name netcdf
+          sudo cp /usr/local/include/netcdf.h $RUNNER_TOOL_CACHE/2.7.18/x64/include/python2.7
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
