@@ -153,7 +153,9 @@ jobs:
           name: test_ubuntu_artifacts
           path: ~/Python
       - run: |
-          $HOME/Python/bin/python -c "print 'HELLO WORLD'"
+          mkdir -p $GITHUB_WORKSPACE/python
+          sudo cp -r $HOME/Python $GITHUB_WORKSPACE/python
+          $GITHUB_WORKSPACE/python/bin/python -c "print 'HELLO WORLD'"
           sudo $HOME/Python/bin/python -c "print 'HELLO WORLD'"
       - run: sudo apt-get install dos2unix
       - name: Deploy
@@ -229,6 +231,8 @@ jobs:
           name: OSX_artifacts
           path: ~/Python
       - run: |
+          mkdir -p $GITHUB_WORKSPACE/python
+          cp -r $HOME/Python $GITHUB_WORKSPACE/python
           $HOME/Python/bin/python -c "import numpy"
       - name: Prepare virtual machine
         run: |
@@ -310,6 +314,9 @@ jobs:
       - name: Run tests
         run: |
           cd %GITHUB_WORKSPACE%\Tests
+          python -c "import Scientific"
+          python -c "import Scientific.IO"
+          python -c "import Scientific.IO.NetCDF"
           python UnitTests\AllTests.py
           python DependenciesTests\AllTests.py
           python FunctionalTests\Jobs\BuildJobTests.py
@@ -318,6 +325,7 @@ jobs:
 
   ci_windows:
     runs-on: windows-2019
+    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2
