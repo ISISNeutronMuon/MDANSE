@@ -126,11 +126,14 @@ jobs:
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
+      - run: |
+          cd $HOME
+          tar -cvf python.tar $RUNNER_TOOL_CACHE/Python/2.7.18/x64
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: test_ubuntu_artifacts
-          path: ${{ runner.tool_cache }}/Python/2.7.18/x64
+          path: ~/python.tar
           retention-days: 1
 
   test_deploy_ubuntu:
@@ -151,12 +154,11 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: test_ubuntu_artifacts
-          path: ~/Python
+          path: ~/
       - run: |
-          cd $HOME/Python
-          tree
-          $GITHUB_WORKSPACE/python/bin/python -c "print 'HELLO WORLD'"
-          sudo $HOME/Python/bin/python -c "print 'HELLO WORLD'"
+          cd $HOME
+          tar -xvf python.tar
+          sudo $HOME/python/bin/python -c "print 'HELLO WORLD'"
       - run: sudo apt-get install dos2unix
       - name: Deploy
         run: |
@@ -180,7 +182,6 @@ jobs:
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-          $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "print 'HELLO WORLD'"
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -232,7 +233,7 @@ jobs:
           path: ~/Python
       - run: |
           mkdir -p $GITHUB_WORKSPACE/python
-          cp -r $HOME/Python $GITHUB_WORKSPACE/python
+          sudo -r $HOME/Python $GITHUB_WORKSPACE/python
           $HOME/Python/bin/python -c "import numpy"
       - name: Prepare virtual machine
         run: |
