@@ -152,6 +152,9 @@ jobs:
         with:
           name: test_ubuntu_artifacts
           path: ~/Python
+      - run: |
+          $HOME/Python/bin/python -c "print 'HELLO WORLD'"
+          sudo $HOME/Python/bin/python -c "print 'HELLO WORLD'"
       - run: sudo apt-get install dos2unix
       - name: Deploy
         run: |
@@ -175,7 +178,7 @@ jobs:
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-          $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "print HELLO WORLD"
+          $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "print 'HELLO WORLD'"
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -266,7 +269,7 @@ jobs:
           cd $env:HOME
           Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
           Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
-          Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart"
+          Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
       - name: Install dependencies
         run: |
           which python
@@ -290,7 +293,6 @@ jobs:
           cd %HOME%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          where /r "C:\Program Files (x86)" *vcvars*
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
         shell: cmd
       - name: Install MMTK
