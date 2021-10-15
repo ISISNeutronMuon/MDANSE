@@ -108,9 +108,8 @@ jobs:
           sudo cp $HOME/tempenv/lib/libvtkWrappingPython27Core-6.3.so.1 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp $HOME/tempenv/lib/libvtkCommonCore-6.3.so.1 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp $HOME/tempenv/lib/libvtksys-6.3.so.1 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - run: |
-          cd $HOME/tempenv/lib
-          ls *
           python2 -c "import vtk"
       - name: Install ScientificPython
         run: |
