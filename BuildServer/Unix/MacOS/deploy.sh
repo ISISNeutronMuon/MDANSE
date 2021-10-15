@@ -19,7 +19,7 @@ export PYTHONPATH=$HOME/Python/lib/python2.7/site-packages:${PYTHONPATH}
 export PYTHONEXE=$HOME/Python/bin/python
 
 # Build API
-$PYTHONEXE setup.py build_api build_help install --prefix=${CI_TEMP_INSTALL_DIR}
+sudo $PYTHONEXE setup.py build_api build_help install --prefix=${CI_TEMP_INSTALL_DIR}
 
 status=$?
 if [ $status -ne 0 ]; then
@@ -57,4 +57,4 @@ install_name_tool -change /usr/local/opt/netcdf/lib/libnetcdf.18.dylib @executab
 MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 hdiutil unmount /Volumes/MDANSE -force -quiet
 sleep 5
-$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/create-dmg --background "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
+"$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/create-dmg" --background "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist

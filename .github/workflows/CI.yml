@@ -105,14 +105,13 @@ jobs:
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - run: |
-          python2 -c "import numpy"
+          python2 -c "import numpy.distutils.misc_util"
       - name: Install ScientificPython
         run: |
           cd $HOME
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python/
-          which python2
-          sudo python2 setup.py install
+          sudo $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
       - name: Install MMTK
         run: |
           cd $HOME
