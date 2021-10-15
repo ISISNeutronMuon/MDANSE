@@ -133,7 +133,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: test_ubuntu_artifacts
-          path: ~/python.tar.gz
+          path: $RUNNER_TOOL_CACHE/Python/2.7.18//python.tar.gz
           retention-days: 1
 
   test_deploy_ubuntu:
@@ -309,9 +309,8 @@ jobs:
           cd scientific-python
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
           python setup.py install --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
-          echo "%RUNNER_TOOL_CACHE%"
-          copy "%HOME%\netcdf\netcdf.dll" "%RUNNER_TOOL_CACHE%\windows\Python\2.7.18\x64\Lib\site-packages\Scientific"
-          copy "%HOME%\netcdf\netcdf.h" "%RUNNER_TOOL_CACHE%\windows\Python\2.7.18\x64\Lib\site-packages\Scientific"
+          copy "%HOME%\netcdf\netcdf.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
+          copy "%HOME%\netcdf\netcdf.h" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
         shell: cmd
       - name: Install MMTK
         run: |
