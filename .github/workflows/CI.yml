@@ -104,6 +104,7 @@ jobs:
           sudo cp $HOME/tempenv/lib/libwx_gtk2u-3.0.so.0 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp $HOME/tempenv/lib/libvtkCommonCorePython27D-6.3.so.1 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - run: |
           python2 -c "import wx"
           python2 -c "import vtk"
@@ -216,7 +217,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: OSX_artifacts
-          path: /opt/hostedtoolcache/Python/2.7.18/x64
+          path: ${{ runner.toolcache }}/Python/2.7.18/x64
           retention-days: 1
   
   deploy_osx:
