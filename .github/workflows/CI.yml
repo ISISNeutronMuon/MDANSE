@@ -130,7 +130,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: test_ubuntu_artifacts
-          path: $RUNNER_TOOL_CACHE/Python/2.7.18/x64
+          path: ${{ runner.tool_cache }}/Python/2.7.18/x64
           retention-days: 1
 
   test_deploy_ubuntu:
