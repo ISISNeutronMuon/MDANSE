@@ -107,6 +107,8 @@ jobs:
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
       - run: |
           which python2
+          sudo find $RUNNER_TOOL_CACHE -name libwx_gtk2u-3.0.so.0
+          sudo find $HOME/tempenv -name libwx_gtk2u-3.0.so.0
           python2 -c "import wx"
           python2 -c "import vtk"
       - name: Install ScientificPython
