@@ -52,7 +52,7 @@ cd $GITHUB_WORKSPACE
 
 # Build API
 export PYTHONEXE=$HOME/Python
-$PYTHONEXE setup.py build_api build_help install --prefix=/opt/hostedtoolcache/Python/2.7.18/x64
+sudo $PYTHONEXE/bin/python setup.py build_api build_help install --prefix=${CI_TEMP_INSTALL_DIR}
 
 status=$?
 if [ $status -ne 0 ]; then
@@ -61,9 +61,9 @@ if [ $status -ne 0 ]; then
 fi
 
 # Copy the localy installed ScientificPython, MMTK and MDANSE
-cp -r /opt/hostedtoolcache/Python/2.7.18/x64/lib/python2.7/site-packages/Scientific ${DEBIAN_DIST_DIR}
-cp -r /opt/hostedtoolcache/Python/2.7.18/x64/lib/python2.7/site-packages/MMTK ${DEBIAN_DIST_DIR}
-cp -r /opt/hostedtoolcache/Python/2.7.18/x64/lib/python2.7/site-packages/MDANSE ${DEBIAN_DIST_DIR}
+cp -r $PYTHONEXE/lib/python2.7/site-packages/Scientific ${DEBIAN_DIST_DIR}
+cp -r $PYTHONEXE/lib/python2.7/site-packages/MMTK ${DEBIAN_DIST_DIR}
+cp -r $PYTHONEXE/lib/python2.7/site-packages/MDANSE ${DEBIAN_DIST_DIR}
 
 # Compute the Installed-Size field for the debian package
 instSize=$(du ${DEBIAN_ROOT_DIR} -b -s | cut -f1)

@@ -36,7 +36,7 @@ echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 mkdir ${CI_TEMP_DIR}/dist
 mkdir ${CI_TEMP_DIR}/dist/MDANSE.app
 cp -R ${MDANSE_DEPENDENCIES_DIR} ${MDANSE_APP_DIR}/Contents
-cp -R ${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages/* ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/
+cp -R $HOME/Python/lib/python2.7/site-packages/* ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/
 
 # Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "${VERSION_NAME}" > ${MDANSE_APP_DIR}/Contents/Resources/version

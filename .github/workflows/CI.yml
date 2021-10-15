@@ -155,7 +155,6 @@ jobs:
       - run: sudo apt-get install dos2unix
       - name: Deploy
         run: |
-          source $HOME/mdanse_venv/bin/activate
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
@@ -176,6 +175,7 @@ jobs:
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+          $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "print HELLO WORLD"
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -225,6 +225,8 @@ jobs:
         with:
           name: OSX_artifacts
           path: ~/Python
+      - run: |
+          $HOME/Python/bin/python -c "import numpy"
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -250,7 +252,6 @@ jobs:
   # WINDOWS
   test_windows:
     runs-on: windows-2019
-    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2
@@ -315,7 +316,6 @@ jobs:
 
   ci_windows:
     runs-on: windows-2019
-    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2
