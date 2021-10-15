@@ -98,6 +98,7 @@ jobs:
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c daf wxpython
+          sudo find $HOME/tempenv -name wx
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
@@ -171,7 +172,7 @@ jobs:
         run: |
           brew install netcdf
           sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
-          sudo find /usr/local -name python2.7
+          sudo find /Applications -name python2.7
           sudo cp /usr/local/include/netcdf.h $RUNNER_TOOL_CACHE/2.7.18/x64/include/python2.7
       - name: Install dependecies with pip
         run: |
