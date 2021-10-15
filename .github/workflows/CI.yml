@@ -106,6 +106,7 @@ jobs:
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtkCommonCorePython27D-6.3.so.1 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp $HOME/tempenv/lib/libvtkWrappingPython27Core-6.3.so.1 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp $HOME/tempenv/lib/libvtkCommonCore-6.3.so.1 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - run: |
           python2 -c "import wx"
           python2 -c "import vtk"
