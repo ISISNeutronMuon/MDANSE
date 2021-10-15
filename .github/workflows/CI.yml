@@ -13,7 +13,6 @@ jobs:
       - run: $GITHUB_WORKSPACE/BuildServer/Docker/clean.sh
   
   ci_ubuntu:
-    if: False
     needs: docker_pre_clean
     runs-on: ubuntu-18.04
     steps:
@@ -92,7 +91,7 @@ jobs:
         run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6 python-dev
       - name: Install dependencies
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx stdeb
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
       - name: Install wx and vtk
         run: |
@@ -127,11 +126,7 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - run: |
-          cd $RUNNER_TOOL_CACHE/Python/2.7.18/
-          tar -czf python.tar.gz x64
-          ls
-          cd $HOME
-          ls
+          tar -czf python.tar.gz $RUNNER_TOOL_CACHE/Python/2.7.18/x64/*
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -159,13 +154,8 @@ jobs:
           name: test_ubuntu_artifacts
           path: ~/
       - run: |
-          tar -xzf ~/python.tar.gz -C $HOME
-          cd $HOME
-          ls
-          cd ~/python
-          ls
-          cd $RUNNER_TOOL_CACHE/Python/2.7.18/x64
-          ls
+          mkdir ~/python
+          tar -xzf ~/python.tar.gz -C $HOME/python
           sudo $HOME/python/bin/python -c "print 'HELLO WORLD'"
       - run: sudo apt-get install dos2unix
       - name: Deploy
@@ -189,7 +179,7 @@ jobs:
           sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
       - name: Install dependecies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx stdeb
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -289,7 +279,7 @@ jobs:
       - name: Install dependencies
         run: |
           which python
-          python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+          python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx stdeb
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
           python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd
@@ -339,6 +329,50 @@ jobs:
           python FunctionalTests\Jobs\BuildJobTests.py
           python FunctionalTests\Jobs\AllTests.py
         shell: cmd
+      - name: Zip python file
+        run: Compress-Archive -Path "$env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\*" -DestinationPath "$env:HOME\python.zip"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_windows_artifacts
+          path: ~/python.zip
+          retention-days: 1
+
+  test_deploy_windows:
+    needs: test_windows
+    runs-on: windows-2019
+    if: |
+      contains( github.ref, 'master' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '19_continuous_integration' )
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: test_windows_artifacts
+          path: ~/
+      - name: Unzip artifacts
+        run: Expand-Archive -Path "$env:HOME\python.zip" -Destination-Path "$env:HOME\python"
+      - name: Prepare virtual machine
+        run: |
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
+        shell: cmd
+      - name: Deploy
+        run: "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\deploy.bat"
+        shell: cmd
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Windows_executable
+          path: ${{ github.workspace }}\*.exe
+          retention-days: 90
 
   ci_windows:
     runs-on: windows-2019

@@ -11,4 +11,4 @@ ENV CI_COMMIT_REF_NAME=$GITHUB_REF
 COPY ./ /app/
 WORKDIR /app
 
-CMD source ./BuildServer/Unix/Debian/definitions.sh;  source ./BuildServer/Unix/setup_ci.sh; ./BuildServer/Unix/build.sh; ./BuildServer/Unix/tests.sh; cp -a $GITHUB_WORKSPACE/build /artifacts/; cp -a $GITHUB_WORKSPACE/temp /artifacts/
+CMD source ./BuildServer/Unix/Debian/definitions.sh;  source ./BuildServer/Unix/setup_ci.sh; ./BuildServer/Docker/build.sh; ./BuildServer/Unix/tests.sh; cp -a $GITHUB_WORKSPACE/build /artifacts/; cp -a $GITHUB_WORKSPACE/temp /artifacts/
