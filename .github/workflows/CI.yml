@@ -156,8 +156,11 @@ jobs:
           name: test_ubuntu_artifacts
           path: ~/
       - run: |
-          tar -xvf ${{steps.download.outputs.download-path}}/python.tar
-          cd ${{steps.download.outputs.download-path}}/python
+          cd $HOME
+          ls
+          tar -xvf ~/python.tar
+          ls
+          cd ~/python
           ls
           cd $RUNNER_TOOL_CACHE/Python/2.7.18/x64
           ls
@@ -217,11 +220,14 @@ jobs:
       - name: Run tests
         run: |
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
+      - run: |
+          cd $HOME
+          tar -cvf python.tar $RUNNER_TOOL_CACHE/Python/2.7.18/x64
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: OSX_artifacts
-          path: ${{ runner.tool_cache }}/Python/2.7.18/x64
+          path: ~/python.tar
           retention-days: 1
   
   deploy_osx:
@@ -235,8 +241,9 @@ jobs:
           name: OSX_artifacts
           path: ~/Python
       - run: |
+          tar -xvf ~/python.tar
           mkdir -p $GITHUB_WORKSPACE/python
-          sudo -r $HOME/Python $GITHUB_WORKSPACE/python
+          sudo cp -r $HOME/python $GITHUB_WORKSPACE/python
           $HOME/Python/bin/python -c "import numpy"
       - name: Prepare virtual machine
         run: |
@@ -303,8 +310,8 @@ jobs:
           cd scientific-python
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
           python setup.py install --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
-          copy "%HOME%\netcdf\netcdf.dll" "%RUNNER_TOOL_CACHE%\Python\x64\lib\site-packages\Scientific"
-          copy "%HOME%\netcdf\netcdf.h" "%RUNNER_TOOL_CACHE%\Python\x64\lib\site-packages\Scientific"
+          copy "%HOME%\netcdf\netcdf.dll" "%RUNNER_TOOL_CACHE%\windows\Python\x64\lib\site-packages\Scientific"
+          copy "%HOME%\netcdf\netcdf.h" "%RUNNER_TOOL_CACHE%\windows\Python\x64\lib\site-packages\Scientific"
         shell: cmd
       - name: Install MMTK
         run: |
