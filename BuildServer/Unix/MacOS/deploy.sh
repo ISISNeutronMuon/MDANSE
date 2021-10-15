@@ -16,7 +16,7 @@ export MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
 
 export PYTHONPATH=$HOME/Python/lib/python2.7/site-packages:${PYTHONPATH}
 
-export PYTHONEXE=$HOME/Python/bin/python
+export PYTHONEXE=$HOME/$RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python
 
 # Build API
 sudo $PYTHONEXE setup.py build_api build_help install --prefix=${CI_TEMP_INSTALL_DIR}

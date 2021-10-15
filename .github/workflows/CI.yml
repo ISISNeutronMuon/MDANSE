@@ -128,7 +128,7 @@ jobs:
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18/
-          tar -czf python.tar.gz x64 -C $HOME
+          tar -czf python.tar.gz x64
           ls
           cd $HOME
           ls
@@ -136,7 +136,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: test_ubuntu_artifacts
-          path: ~/python.tar.gz
+          path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
 
   test_deploy_ubuntu:
@@ -330,6 +330,7 @@ jobs:
       - run: |
           cd "%GITHUB_WORKSPACE%\Data\Jobs_reference_data"
           dir
+        shell: cmd
       - name: Run tests
         run: |
           cd %GITHUB_WORKSPACE%\Tests

@@ -37,8 +37,12 @@ class JobFileGenerator():
                                                 "Jobs_reference_data", job._type)
         self.reference_data_file = self.reference_data_path + "_reference" + ".nc"
         if not os.path.isfile(self.reference_data_file):
-            print "/!\ Reference data file is not present for job " + str(job)
-            self.reference_data_file = None
+            self.reference_data_path = os.path.abspath(os.path.join('Jobs', 'BuildJobTests.py')).split(os.sep)
+            self.reference_data_path = os.path.join(self.reference_data_path[:-4])
+            self.reference_data_file = self.reference_data_path + "_reference" + ".nc"
+            if not os.path.isfile(self.reference_data_file):
+                print r"/!\ Reference data file is not present for job " + str(job)
+                self.reference_data_file = None
 
         # Check if job can be launched on multiprocessor
         if job.settings.has_key('running_mode'):
