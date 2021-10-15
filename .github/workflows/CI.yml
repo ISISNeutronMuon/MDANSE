@@ -156,8 +156,11 @@ jobs:
           name: test_ubuntu_artifacts
           path: ~/
       - run: |
-          cd $HOME
-          tar -xvf python.tar
+          tar -xvf ${{steps.download.outputs.download-path}}/python.tar
+          cd ${{steps.download.outputs.download-path}}/python
+          ls
+          cd $RUNNER_TOOL_CACHE/Python/2.7.18/x64
+          ls
           sudo $HOME/python/bin/python -c "print 'HELLO WORLD'"
       - run: sudo apt-get install dos2unix
       - name: Deploy
