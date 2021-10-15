@@ -92,7 +92,9 @@ jobs:
         run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6 python-dev
       - name: Install dependencies
         run: |
+          which python2
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
+          which python2
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
       - name: Install wx and vtk
         run: |
@@ -102,14 +104,17 @@ jobs:
           sudo cp -r $HOME/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -r $HOME/tempenv/include/wx-3.0/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
-          sudo find $HOME/tempenv -name vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+      - run: |
+          which python2
+          python2 -c "import wx"
+          python2 -c "import vtk"
       - name: Install ScientificPython
         run: |
           cd $HOME
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python/
-          python2 setup.py build
+          which python2
           sudo python2 setup.py install
       - name: Install MMTK
         run: |
@@ -204,7 +209,6 @@ jobs:
           sudo python2 setup.py install
       - name: Install MDANSE
         run: |
-          source $HOME/mdanse_venv/bin/activate
           cd $GITHUB_WORKSPACE
           python2 setup.py install
       - name: Run tests
