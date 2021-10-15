@@ -129,6 +129,9 @@ jobs:
       - run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18/
           tar -czf python.tar.gz x64 -C $HOME
+          ls
+          cd $HOME
+          ls
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -241,9 +244,8 @@ jobs:
           path: ~/
       - run: |
           tar -xzf ~/python.tar.gz -C $HOME
-          mkdir -p $GITHUB_WORKSPACE/python
-          sudo cp -r $HOME/python $GITHUB_WORKSPACE/python
-          $HOME/Python/bin/python -c "import numpy"
+          echo $RUNNER_TOOL_CACHE
+          $HOME/$RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "import numpy"
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -309,11 +311,9 @@ jobs:
           cd scientific-python
           python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
           python setup.py install --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
-          cd "%HOME%\netcdf"
-          dir
-          cd "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
           copy "%HOME%\netcdf\netcdf.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
           copy "%HOME%\netcdf\netcdf.h" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
+          copy "%HOME%\netcdf\netcdf.lib" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
         shell: cmd
       - name: Install MMTK
         run: |
@@ -327,12 +327,12 @@ jobs:
           cd %GITHUB_WORKSPACE%
           python setup.py build install
         shell: cmd
+      - run: |
+          cd "%GITHUB_WORKSPACE%\Data\Jobs_reference_data"
+          dir
       - name: Run tests
         run: |
           cd %GITHUB_WORKSPACE%\Tests
-          python -c "import Scientific"
-          python -c "import Scientific.IO"
-          python -c "import Scientific.IO.NetCDF"
           python UnitTests\AllTests.py
           python DependenciesTests\AllTests.py
           python FunctionalTests\Jobs\BuildJobTests.py
