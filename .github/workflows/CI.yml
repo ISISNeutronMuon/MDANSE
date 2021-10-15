@@ -127,8 +127,8 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - run: |
-          cd $HOME
-          tar -czf python.tar.gz $RUNNER_TOOL_CACHE/Python/2.7.18/x64
+          cd $RUNNER_TOOL_CACHE/Python/2.7.18/
+          tar -czf python.tar.gz x64
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -157,6 +157,7 @@ jobs:
           path: ~/
       - run: |
           tar -xzf ~/python.tar.gz -C $HOME
+          cd $HOME
           ls
           cd ~/python
           ls
