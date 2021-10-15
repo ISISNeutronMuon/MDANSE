@@ -153,8 +153,8 @@ jobs:
           name: test_ubuntu_artifacts
           path: ~/Python
       - run: |
-          mkdir -p $GITHUB_WORKSPACE/python
-          sudo cp -r $HOME/Python $GITHUB_WORKSPACE/python
+          cd $HOME/Python
+          tree
           $GITHUB_WORKSPACE/python/bin/python -c "print 'HELLO WORLD'"
           sudo $HOME/Python/bin/python -c "print 'HELLO WORLD'"
       - run: sudo apt-get install dos2unix
@@ -297,7 +297,10 @@ jobs:
           cd %HOME%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf" install
+          python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
+          python setup.py install --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
+          copy "%HOME%\netcdf\netcdf.dll" "%RUNNER_TOOL_CACHE%\Python\x64\lib\site-packages\Scientific"
+          copy "%HOME%\netcdf\netcdf.h" "%RUNNER_TOOL_CACHE%\Python\x64\lib\site-packages\Scientific"
         shell: cmd
       - name: Install MMTK
         run: |
