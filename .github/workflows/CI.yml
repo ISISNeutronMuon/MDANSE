@@ -104,8 +104,6 @@ jobs:
           sudo cp $HOME/tempenv/lib/libwx_gtk2u-3.0.so.0 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-      - run: |
-          python2 -c "import numpy.distutils.misc_util"
       - name: Install ScientificPython
         run: |
           cd $HOME
@@ -119,11 +117,11 @@ jobs:
           cd mmtk
           sudo rm setup.py
           sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
-          sudo python2 setup.py install
+          sudo $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
       - name: Install MDANSE
         run: |
           cd $GITHUB_WORKSPACE
-          python2 setup.py install
+          $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
       - name: Run tests
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
