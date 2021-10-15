@@ -31,7 +31,7 @@ ShowInstDetails show
 ; Will show the details of uninstallation
 ShowUnInstDetails show
 
-!define PUBLISHER "ISIS Neutron and Muon Source"
+!define PUBLISHER "ILL"
 !define WEB_SITE "http://www.mdanse.org"
 !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\MDANSE"
 !define UNINST_ROOT_KEY "HKLM"
