@@ -94,7 +94,8 @@ jobs:
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
-          sudo cp /usr/lib64/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo find /usr -name libnetcdf*
+          sudo cp /usr/local/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -239,6 +240,7 @@ jobs:
           name: OSX_artifacts
           path: ~/
       - run: |
+          brew install netcdf
           tar -xzf ~/python.tar.gz -C $HOME
           echo $RUNNER_TOOL_CACHE
           $HOME/$RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "import Scientific.IO.NetCDF"

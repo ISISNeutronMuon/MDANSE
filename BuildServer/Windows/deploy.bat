@@ -10,7 +10,7 @@ rem see https://stackoverflow.com/questions/2817869/error-unable-to-find-vcvarsa
 rem For the sake of code safety, this should be the same framework used to build Python itself
 rem see http://p-nand-q.com/python/building-python-27-with-vs2010.html for more info
 set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
-
+echo "Starting MDANSE build"
 %PYTHON_EXE% setup.py build build_api build_help install
 
 set STATUS=%ERRORLEVEL%
@@ -19,8 +19,8 @@ if %STATUS% neq 0 (
     echo "Failed to build MDANSE Documentation"
     exit %STATUS%
 )
-
-cd "%MDANSE_SOURCE_DIR%\\BuildServer\\Windows"
+echo "Finished MDANSE build"
+cd "%MDANSE_SOURCE_DIR%\BuildServer\Windows"
 
 rem copy LICENSE
 copy %MDANSE_SOURCE_DIR%\\LICENSE %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Resources\\nsis\\
