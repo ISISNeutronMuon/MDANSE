@@ -94,7 +94,7 @@ jobs:
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
-          sudo cp /usr/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp /usr/lib64/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -182,6 +182,7 @@ jobs:
           brew install netcdf
           sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
           sudo cp /usr/local/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp /usr/local/opt/netcdf/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
@@ -376,7 +377,8 @@ jobs:
           "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
         shell: cmd
       - name: Deploy
-        run: "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\deploy.bat"
+        run: |
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\deploy.bat"
         shell: cmd
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
