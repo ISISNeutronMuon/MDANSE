@@ -156,11 +156,8 @@ jobs:
         with:
           name: test_ubuntu_artifacts
           path: ~/
-      - run: |
-          tar -xzf ~/python.tar.gz -C $HOME
-          cd $HOME/python
-          ls
-          sudo $HOME/python/bin/python -c "print 'HELLO WORLD'"
+      - name: Untar artifacts
+        run: tar -xzf ~/python.tar.gz -C $HOME"
       - run: sudo apt-get install dos2unix
       - name: Deploy
         run: |
@@ -360,9 +357,9 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: test_windows_artifacts
-          path: ~/
+          path: C:\
       - name: Unzip artifacts
-        run: Expand-Archive -Path "$env:HOME\python.zip" -DestinationPath "$env:HOME\python"
+        run: Expand-Archive -Path "C:\python.zip" -DestinationPath "$env:HOME\python"
       - name: Prepare virtual machine
         run: |
           "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"

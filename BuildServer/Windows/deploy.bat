@@ -3,15 +3,15 @@
 cd %MDANSE_SOURCE_DIR%
 
 rem Set the path to python executable
-set PYTHON_EXE=%MDANSE_TEMPORARY_INSTALLATION_DIR%\\python.exe
+set PYTHON_EXE=%HOME%\python\python.exe
 
 rem This is the env var used by distutils to find the MSVC framework to be used for compiling extension
 rem see https://stackoverflow.com/questions/2817869/error-unable-to-find-vcvarsall-bat for more info
 rem For the sake of code safety, this should be the same framework used to build Python itself
 rem see http://p-nand-q.com/python/building-python-27-with-vs2010.html for more info
-set VS90COMNTOOLS=C:\Users\\ci\\AppData\\Local\\Programs\\Common\\Microsoft\\Visual C++ for Python\\9.0\\Common7\\Tools
+set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
 
-%PYTHON_EXE% setup.py build_api build_help install
+%PYTHON_EXE% setup.py build build_api build_help install
 
 set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build
