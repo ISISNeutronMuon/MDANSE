@@ -185,11 +185,9 @@ if sphinx:
             sys.path.insert(0,buildDir)
 
             sphinxDir = os.path.abspath(os.path.join(build.build_base,'sphinx',self.doctype))
-            print os.path.exists(sphinxDir)
+
             if not os.path.exists(sphinxDir):
-                os.mkdir(sphinxDir)
-                print sphinxDir
-                print os.path.exists(sphinxDir)
+                os.makedirs(sphinxDir)
                                  
             metadata = self.distribution.metadata
             args = ["-F",

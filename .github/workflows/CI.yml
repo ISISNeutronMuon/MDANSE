@@ -157,7 +157,7 @@ jobs:
           name: test_ubuntu_artifacts
           path: ~/
       - name: Untar artifacts
-        run: tar -xzf ~/python.tar.gz -C $HOME"
+        run: tar -xzf ~/python.tar.gz -C $HOME
       - run: sudo apt-get install dos2unix
       - name: Deploy
         run: |
@@ -357,9 +357,9 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: test_windows_artifacts
-          path: C:\
+          path: D:\
       - name: Unzip artifacts
-        run: Expand-Archive -Path "C:\python.zip" -DestinationPath "$env:HOME\python"
+        run: Expand-Archive -Path "D:\python.zip" -DestinationPath "$env:HOME\python"
       - name: Prepare virtual machine
         run: |
           "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
