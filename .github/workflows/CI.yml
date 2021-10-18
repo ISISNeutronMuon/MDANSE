@@ -157,7 +157,9 @@ jobs:
           name: test_ubuntu_artifacts
           path: ~/
       - name: Untar artifacts
-        run: tar -xzf ~/python.tar.gz -C $HOME
+        run: |
+          tar -xzf ~/python.tar.gz -C $HOME
+          ~/python/bin/python -c "import Scientific.IO.NetCDF"
       - run: sudo apt-get install dos2unix
       - name: Deploy
         run: |
@@ -236,7 +238,7 @@ jobs:
       - run: |
           tar -xzf ~/python.tar.gz -C $HOME
           echo $RUNNER_TOOL_CACHE
-          $HOME/$RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "import numpy"
+          $HOME/$RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "import Scientific"
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -353,6 +355,12 @@ jobs:
       contains( github.ref, '19_continuous_integration' )
     steps:
       - uses: actions/checkout@v2
+      - name: Install VS2008
+        run: |
+          cd $env:HOME
+          Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
+          Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
+          Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
