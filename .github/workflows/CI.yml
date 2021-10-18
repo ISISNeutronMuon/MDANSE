@@ -161,6 +161,7 @@ jobs:
       - name: Untar artifacts
         run: |
           tar -xzf ~/python.tar.gz -C $HOME
+          sudo apt-get install netcdf-bin libnetcdf-dev
           ~/python/bin/python -c "import Scientific.IO.NetCDF"
       - run: sudo apt-get install dos2unix
       - name: Deploy
