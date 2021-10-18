@@ -14,6 +14,7 @@ jobs:
   
   ci_ubuntu:
     needs: docker_pre_clean
+    if: False
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -126,15 +127,14 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - run: |
-          cd $HOME
-          tar -czf python.tar.gz $RUNNER_TOOL_CACHE/Python/2.7.18/x64/*
-          tar -xzf python.tar.gz
-          ls
+          cd $RUNNER_TOOL_CACHE/Python/2.7.18
+          mv x64 python
+          tar -czf python.tar.gz python
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: test_ubuntu_artifacts
-          path: ~/python.tar.gz
+          path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
 
   test_deploy_ubuntu:
@@ -157,8 +157,9 @@ jobs:
           name: test_ubuntu_artifacts
           path: ~/
       - run: |
-          mkdir ~/python
-          tar -xzf ~/python.tar.gz -C $HOME/python
+          tar -xzf ~/python.tar.gz -C $HOME
+          cd $HOME/python
+          ls
           sudo $HOME/python/bin/python -c "print 'HELLO WORLD'"
       - run: sudo apt-get install dos2unix
       - name: Deploy
@@ -361,7 +362,7 @@ jobs:
           name: test_windows_artifacts
           path: ~/
       - name: Unzip artifacts
-        run: Expand-Archive -Path "$env:HOME\python.zip" -Destination-Path "$env:HOME\python"
+        run: Expand-Archive -Path "$env:HOME\python.zip" -DestinationPath "$env:HOME\python"
       - name: Prepare virtual machine
         run: |
           "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"

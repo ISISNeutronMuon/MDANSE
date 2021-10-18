@@ -19,7 +19,7 @@ export PYTHONPATH=$HOME/Python/lib/python2.7/site-packages:${PYTHONPATH}
 export PYTHONEXE=$HOME/$RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python
 
 # Build API
-sudo $PYTHONEXE setup.py build_api build_help install
+sudo $PYTHONEXE setup.py build build_api build_help install
 
 status=$?
 if [ $status -ne 0 ]; then
