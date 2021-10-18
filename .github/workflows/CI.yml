@@ -4,6 +4,7 @@ on: [push, workflow_dispatch]
 
 jobs:
   docker_pre_clean:
+    if: False
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -70,7 +71,7 @@ jobs:
           retention-days: 1
   
   docker_post_clean:
-    if: always()
+    if: False
     needs: deploy_ubuntu
     runs-on: ${{ matrix.os }}
     strategy:
@@ -94,8 +95,7 @@ jobs:
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
-          sudo find /usr -name libnetcdf*
-          sudo cp /usr/local/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp /usr/lib/x86_64-linux-gnu/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -301,6 +301,7 @@ jobs:
           cd "%HOME%\netcdf"
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
           set PATH=%PATH%;%HOME%\netcdf
+          copy "vcruntime140.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
         shell: cmd
       - name: Install ScientificPython
         run: |
@@ -324,10 +325,6 @@ jobs:
         run: |
           cd %GITHUB_WORKSPACE%
           python setup.py build install
-        shell: cmd
-      - run: |
-          cd "%GITHUB_WORKSPACE%\Data\Jobs_reference_data"
-          dir
         shell: cmd
       - name: Run tests
         run: |
@@ -373,13 +370,10 @@ jobs:
           path: ${{ github.workspace }}\
       - name: Unzip artifacts
         run: Expand-Archive -Path "$env:GITHUB_WORKSPACE\python.zip" -DestinationPath "$env:HOME\python"
-      - name: Prepare virtual machine
+      - name: Deploy
         run: |
           "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
           "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
-        shell: cmd
-      - name: Deploy
-        run: |
           "%GITHUB_WORKSPACE%\BuildServer\Windows\deploy.bat"
         shell: cmd
       - name: Upload artifacts

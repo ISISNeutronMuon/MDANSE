@@ -10,7 +10,7 @@ rem see https://stackoverflow.com/questions/2817869/error-unable-to-find-vcvarsa
 rem For the sake of code safety, this should be the same framework used to build Python itself
 rem see http://p-nand-q.com/python/building-python-27-with-vs2010.html for more info
 set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
-echo "Starting MDANSE build"
+
 %PYTHON_EXE% setup.py build build_api build_help install
 
 set STATUS=%ERRORLEVEL%
@@ -21,18 +21,15 @@ if %STATUS% neq 0 (
 )
 echo "Finished MDANSE build"
 cd "%MDANSE_SOURCE_DIR%\BuildServer\Windows"
-
+echo "Moved to buildserver\windows"
 rem copy LICENSE
 copy %MDANSE_SOURCE_DIR%\\LICENSE %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Resources\\nsis\\
-
+echo %MDANSE_SOURCE_DIR%
 rem copy CHANGELOG to CHANGELOG.txt (compulsory to be opened by nsis through an external text editor)
-copy %MDANSE_SOURCE_DIR%\\CHANGELOG %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Resources\\nsis\\CHANGELOG.txt
+copy %MDANSE_SOURCE_DIR%\CHANGELOG %MDANSE_SOURCE_DIR%\BuildServer\Windows\Resources\nsis\CHANGELOG.txt
 
 rem Copy site.py 
 copy %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Resources\\site.py %MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\
-
-rem Copy Visual dll see https://stackoverflow.com/questions/214852/python-module-dlls to understand why dll copy destination folder must be the Scientific folder
-copy "%MDANSE_DEPENDENCIES_DIR%\\NetCDF\\vcruntime140.dll" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\site-packages\\Scientific\\"
 
 rem create the MDANSE installer
 echo "Creating nsis installer for target %MDANSE_TEMPORARY_INSTALLATION_DIR%..."
