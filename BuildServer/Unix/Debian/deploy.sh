@@ -52,7 +52,7 @@ cd $GITHUB_WORKSPACE
 
 # Build API
 export PYTHONEXE=$HOME/python
-sudo $PYTHONEXE/bin/python setup.py build build_api build_help install --prefix=${CI_TEMP_INSTALL_DIR}
+sudo $PYTHONEXE/bin/python setup.py build build_api build_help install
 
 status=$?
 if [ $status -ne 0 ]; then

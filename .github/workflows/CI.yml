@@ -169,6 +169,12 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Ubuntu installer
+          path: ${{ github.workspace }}/*.deb
+          retention-days: 90
 
   # OSX
   ci_osx:
@@ -302,7 +308,6 @@ jobs:
           cd "%HOME%\netcdf"
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
           set PATH=%PATH%;%HOME%\netcdf
-          copy "vcruntime140.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
         shell: cmd
       - name: Install ScientificPython
         run: |
@@ -321,6 +326,7 @@ jobs:
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
           python setup.py build install
+          copy "%HOME%\netcdf\vcruntime140.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
         shell: cmd
       - name: Install MDANSE
         run: |
