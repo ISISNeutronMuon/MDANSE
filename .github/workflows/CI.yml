@@ -126,12 +126,15 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - run: |
+          cd $HOME
           tar -czf python.tar.gz $RUNNER_TOOL_CACHE/Python/2.7.18/x64/*
+          tar -xzf python.tar.gz
+          ls
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: test_ubuntu_artifacts
-          path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
+          path: ~/python.tar.gz
           retention-days: 1
 
   test_deploy_ubuntu:
@@ -330,12 +333,12 @@ jobs:
           python FunctionalTests\Jobs\AllTests.py
         shell: cmd
       - name: Zip python file
-        run: Compress-Archive -Path "$env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\*" -DestinationPath "$env:HOME\python.zip"
+        run: Compress-Archive -Path "$env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\*" -DestinationPath "$env:GITHUB_WORKSPACE\python.zip"
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: test_windows_artifacts
-          path: ~/python.zip
+          path: ${{ github.workspace }}/python.zip
           retention-days: 1
 
   test_deploy_windows:
