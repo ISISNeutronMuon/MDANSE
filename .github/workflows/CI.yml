@@ -103,7 +103,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-18.04, ubuntu-20.04]
+        os: ['ubuntu-18.04', 'ubuntu-20.04']
     steps:
       - uses: actions/checkout@v2
       - name: Install python
@@ -114,7 +114,7 @@ jobs:
         if: contains( ${{ matrix.os }}, '18')
         run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6 python-dev
       - name: Install libraries
-        if: startsWith( ${{ matrix.os }}, '20')
+        if: ${{ (matrix.os == 'ubuntu-18.04') }}
         run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev libgtk2.0-0 libgtk2.0-dev
       - name: Install dependencies
         run: |
@@ -295,13 +295,14 @@ jobs:
       - name: Extract NetCDF
         run: |
           echo %RUNNER_TOOL_CACHE%
-          cd C:\hostedtoolcache\windows\Python\2.7.18\x64"
+          cd "C:\hostedtoolcache\windows\Python\2.7.18\x64"
           dir
-          echo""
+          echo ""
           mkdir C:\hostedtoolcache\windows\Python\2.7.18\x64\netcdf
           dir
           copy "%HOME%\netcdf.exe" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           cd "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          dir
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
           set PATH=%PATH%;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf
         shell: cmd
