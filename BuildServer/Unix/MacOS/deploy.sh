@@ -5,7 +5,7 @@
 #############################
 # Debug option for py2app, if needed
 export DISTUTILS_DEBUG=0
-export MDANSE_DEPENDENCIES_DIR=/Users/ci/Projects/mdanse/bundle
+export MDANSE_DEPENDENCIES_DIR=$HOME/python
 
 #############################
 # PREPARATION
@@ -17,10 +17,10 @@ export MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
 export PYTHONPATH=$HOME/Python/lib/python2.7/site-packages:${PYTHONPATH}
 
 export PYTHONEXE=$HOME/$RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python
-echo "Build mdanse"
+
 # Build API
 sudo $PYTHONEXE setup.py build build_api build_help install
-echo "Finished building mdanse"
+
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to build MDANSE Documentation""${NORMAL}"
@@ -33,8 +33,8 @@ fi
 echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 
 # Copy the bundle
-mkdir ${CI_TEMP_DIR}/dist
-mkdir ${CI_TEMP_DIR}/dist/MDANSE.app
+echo $CI_TEMP_DIR
+mkdir -p $CI_TEMP_DIR/dist/MDANSE.app
 cp -R ${MDANSE_DEPENDENCIES_DIR} ${MDANSE_APP_DIR}/Contents
 cp -R $HOME/python/lib/python2.7/site-packages/* ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/
 
