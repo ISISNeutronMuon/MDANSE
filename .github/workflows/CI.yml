@@ -114,7 +114,7 @@ jobs:
         if: startsWith( ${{ matrix.os }}, "ubuntu-18")
         run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6 python-dev
       - name: Install libraries
-        if: startsWith( matrix.os, "ubuntu-20")
+        if: startsWith( ${{ matrix.os }}, "ubuntu-20")
         run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev libgtk2.0-0 libgtk2.0-dev
       - name: Install dependencies
         run: |
