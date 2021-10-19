@@ -3,103 +3,7 @@ name: CI/CD
 on: [push, workflow_dispatch]
 
 jobs:
-  ci_ubuntu_18:
-    runs-on: ubuntu-18.04
-    if: False
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '2.7.18'
-      - name: Install libraries
-        run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6 python-dev
-      - name: Install dependencies
-        run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
-          sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
-          sudo cp /usr/lib/x86_64-linux-gnu/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-      - name: Install wx and vtk
-        run: |
-          sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c daf wxpython
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-gtk2/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp -r $HOME/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -r $HOME/tempenv/include/wx-3.0/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
-          sudo cp $HOME/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-      - name: Install ScientificPython
-        run: |
-          cd $HOME
-          git clone https://code.ill.fr/scientific-software/scientific-python.git
-          cd scientific-python/
-          sudo $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
-      - name: Install MMTK
-        run: |
-          cd $HOME
-          git clone https://code.ill.fr/scientific-software/mmtk.git
-          cd mmtk
-          sudo rm setup.py
-          sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
-          sudo $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
-      - name: Install MDANSE
-        run: |
-          cd $GITHUB_WORKSPACE
-          $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
-      - name: Run tests
-        run: |
-          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
-          $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
-      - run: |
-          cd $RUNNER_TOOL_CACHE/Python/2.7.18
-          mv x64 python
-          tar -czf python.tar.gz python
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: test_ubuntu_artifacts
-          path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
-          retention-days: 1
-
-  deploy_ubuntu_18:
-    needs: ci_ubuntu_18
-    runs-on: ubuntu-18.04
-    if: |
-      contains( github.ref, 'master' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) ||
-      contains( github.ref, '19_continuous_integration' )
-    steps:
-      - uses: actions/checkout@v2
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: test_ubuntu_artifacts
-          path: ~/
-      - name: Untar artifacts
-        run: |
-          tar -xzf ~/python.tar.gz -C $HOME
-          sudo apt-get install netcdf-bin libnetcdf-dev
-      - run: sudo apt-get install dos2unix
-      - name: Deploy
-        run: |
-          source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
-          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-          source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: Ubuntu installer
-          path: ${{ github.workspace }}/*.deb
-          retention-days: 90
-
-  ci_ubuntu_20:
+  ci_ubuntu:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -175,6 +79,42 @@ jobs:
           name: test_ubuntu_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
+
+  deploy_ubuntu:
+    needs: ci_ubuntu
+    runs-on: ubuntu-18.04
+    if: |
+      contains( github.ref, 'master' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '19_continuous_integration' )
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: test_ubuntu_artifacts
+          path: ~/
+      - name: Untar artifacts
+        run: |
+          tar -xzf ~/python.tar.gz -C $HOME
+          sudo apt-get install netcdf-bin libnetcdf-dev
+      - run: sudo apt-get install dos2unix
+      - name: Deploy
+        run: |
+          source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
+          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
+          source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Ubuntu installer
+          path: ${{ github.workspace }}/*.deb
+          retention-days: 90
 
   # OSX
   ci_osx:
@@ -297,7 +237,8 @@ jobs:
         run: |
           cd %HOME%\netcdf
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
-          copy "%HOME%\netcdf" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\"
+          mkdir "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          copy "%HOME%\netcdf" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           dir
           set PATH=%PATH%;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf
