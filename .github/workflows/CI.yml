@@ -297,8 +297,7 @@ jobs:
         run: |
           cd %HOME%\netcdf
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
-          mkdir "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          copy "%HOME%\netcdf" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          copy "%HOME%\netcdf" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\"
           cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           dir
           set PATH=%PATH%;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf
