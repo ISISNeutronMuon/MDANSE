@@ -294,7 +294,7 @@ jobs:
           Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\netcdf\netCDF.exe
       - name: Extract NetCDF
         run: |
-          cd "%HOME%\netcdf"
+          cd "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
           set PATH=%PATH%;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf
         shell: cmd
