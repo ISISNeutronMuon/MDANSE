@@ -275,20 +275,11 @@ jobs:
         with:
           python-version: '2.7.18'
       - uses: actions/checkout@v2
-      - name: Set up virtual machine
-        run: |
-          call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
-          call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
-        shell: cmd
       - name: Copy python
         run: |
-          SET
-          echo "%MDANSE_TEMPORARY_INSTALLATION_DIR%"
-          mkdir %MDANSE_TEMPORARY_INSTALLATION_DIR%
-          xcopy /e /y /q "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64" "%MDANSE_TEMPORARY_INSTALLATION_DIR%"
-          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Build"
-          dir
-          "%GITHUB_WORKSPACE$\BuildServer\Windows\Build\Scripts\python.exe" -c "print 'HELLO WORLD'"
+          mkdir "%GITHUB_WORKSPACE%\BuildServer\Windows\Build"
+          xcopy /e /y /q "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64" "%GITHUB_WORKSPACE%\BuildServer\Windows\Build"
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" -c "print 'HELLO WORLD'"
         shell: cmd
       - name: Install VS2008
         run: |
@@ -298,57 +289,55 @@ jobs:
           Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
       - name: Install dependencies
         run: |
-          echo "%MDANSE_TEMPORARY_INSTALLATION_DIR%"
-          echo "hello world"
-          "%GITHUB_WORKSPACE$\BuildServer\Windows\Build\Scripts\python.exe" -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\Scripts\python.exe" -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
-          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd
       - name: Prepare NetCDF
         run: |
           choco install 7zip
-          mkdir $env:MDANSE_TEMPORARY_INSTALLATION_DIR\netcdf
-          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:MDANSE_TEMPORARY_INSTALLATION_DIR\netcdf\netCDF.exe
+          mkdir $env:GITHUB_WORKSPACE\BuildServer\Windows\Build\netcdf
+          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:GITHUB_WORKSPACE\BuildServer\Windows\Build\netcdf\netCDF.exe
       - name: Extract NetCDF
         run: |
-          cd "%MDANSE_TEMPORARY_INSTALLATION_DIR%\netcdf"
+          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\netcdf"
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
-          set PATH=%PATH%;%MDANSE_TEMPORARY_INSTALLATION_DIR%\netcdf
+          set PATH=%PATH%;%GITHUB_WORKSPACE%\BuildServer\Windows\Build\netcdf
         shell: cmd
       - name: Install ScientificPython
         run: |
-          cd %MDANSE_TEMPORARY_INSTALLATION_DIR%
+          cd %GITHUB_WORKSPACE%\BuildServer\Windows\Build
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
-          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" setup.py install --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
-          copy "%MDANSE_TEMPORARY_INSTALLATION_DIR%\netcdf\netcdf.dll" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\Lib\site-packages\Scientific"
-          copy "%MDANSE_TEMPORARY_INSTALLATION_DIR%\netcdf\netcdf.h" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\Include\Scientific"
-          copy "%MDANSE_TEMPORARY_INSTALLATION_DIR%\netcdf\netcdf.lib" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\Lib\site-packages\Scientific"
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" setup.py install --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
+          copy "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\netcdf\netcdf.dll" "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\Lib\site-packages\Scientific"
+          copy "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\netcdf\netcdf.h" "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\Include\Scientific"
+          copy "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\netcdf\netcdf.lib" "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\Lib\site-packages\Scientific"
         shell: cmd
       - name: Install MMTK
         run: |
-          cd "%MDANSE_TEMPORARY_INSTALLATION_DIR%"
+          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Build"
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" setup.py build install
-          copy "%MDANSE_TEMPORARY_INSTALLATION_DIR%\netcdf\vcruntime140.dll" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\Lib\site-packages\Scientific"
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" setup.py build install
+          copy "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\netcdf\vcruntime140.dll" "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\Lib\site-packages\Scientific"
         shell: cmd
       - name: Install MDANSE
         run: |
           cd %GITHUB_WORKSPACE%
-          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" setup.py build install
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" setup.py build install
         shell: cmd
       - name: Run tests
         run: |
           cd %GITHUB_WORKSPACE%\Tests
-          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" UnitTests\AllTests.py
-          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" DependenciesTests\AllTests.py
-          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" FunctionalTests\Jobs\BuildJobTests.py
-          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" FunctionalTests\Jobs\AllTests.py
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" UnitTests\AllTests.py
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" DependenciesTests\AllTests.py
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" FunctionalTests\Jobs\BuildJobTests.py
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" FunctionalTests\Jobs\AllTests.py
         shell: cmd
       - name: Zip python file
-        run: Compress-Archive -Path "$env:%MDANSE_TEMPORARY_INSTALLATION_DIR%\*" -DestinationPath "$env:GITHUB_WORKSPACE\python.zip"
+        run: Compress-Archive -Path "$env:GITHUB_WORKSPACE\BuildServer\Windows\Build\*" -DestinationPath "$env:GITHUB_WORKSPACE\python.zip"
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -380,14 +369,14 @@ jobs:
         run: |
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
-          mkdir %MDANSE_TEMPORARY_INSTALLATION_DIR%
+          mkdir %GITHUB_WORKSPACE%\BuildServer\Windows\Build
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
           name: test_windows_artifacts
           path: ${{ github.workspace }}\BuildServer\Windows\Build
       - name: Unzip artifacts
-        run: Expand-Archive -Path "$env:MDANSE_TEMPORARY_INSTALLATION_DIR\python.zip" -DestinationPath "$env:MDANSE_TEMPORARY_INSTALLATION_DIR"
+        run: Expand-Archive -Path "$env:GITHUB_WORKSPACE\BuildServer\Windows\Build\python.zip" -DestinationPath "$env:GITHUB_WORKSPACE\BuildServer\Windows\Build"
       - name: Deploy
         run: |
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\deploy.bat"
