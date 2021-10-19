@@ -117,7 +117,6 @@ jobs:
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
         run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev libgtk2.0-0 libgtk2.0-dev
       - name: Install dependencies
-        if: cancelled()
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
@@ -298,7 +297,7 @@ jobs:
           mkdir "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           dir
-          copy /d /v "%HOME%\netcdf.exe" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\"
+          copy /d /v "%HOME%\netCDF.exe" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\"
           dir
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
           set PATH=%PATH%;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf
