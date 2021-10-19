@@ -116,6 +116,7 @@ jobs:
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c daf wxpython
+          sudo find $HOME/tempenv -name wx
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
@@ -270,7 +271,7 @@ jobs:
       - name: Set up virtual machine
         run: |
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
-          call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat
+          call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
       - name: Copy python
         run: |
           mkdir %MDANSE_TEMPORARY_INSTALLATION_DIR%
