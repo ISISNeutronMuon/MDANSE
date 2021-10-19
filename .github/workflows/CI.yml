@@ -5,6 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu_18:
     runs-on: ubuntu-18.04
+    if: False
     steps:
       - uses: actions/checkout@v2
       - name: Install python
@@ -29,8 +30,6 @@ jobs:
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          python -c "import wx"
-          python -c "import vtk"
       - name: Install ScientificPython
         run: |
           cd $HOME
@@ -109,7 +108,7 @@ jobs:
         with:
           python-version: '2.7.18'
       - name: Install libraries
-        run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev
+        run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev libgtk2.0-0 libgtk2.0-dev
       - name: Install dependencies
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
@@ -126,7 +125,6 @@ jobs:
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp $HOME/tempenv/lib/libgtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           python -c "import vtk"
           python -c "import wx"
       - name: Install wx and vtk
@@ -175,6 +173,7 @@ jobs:
   # OSX
   ci_osx:
     runs-on: macos-10.15
+    if: False
     steps:
       - uses: actions/checkout@v2
       - name: Install python
@@ -286,6 +285,8 @@ jobs:
         run: |
           mkdir %MDANSE_TEMPORARY_INSTALLATION_DIR%
           xcopy /e /y %RUNNER_TOOL_CACHE%\Python\2.7.18\x64 %MDANSE_TEMPORARY_INSTALLATION_DIR%
+          cd %MDANSE_TEMPORARY_INSTALLATION_DIR%
+          dir
         shell: cmd
       - name: Install VS2008
         run: |
@@ -295,9 +296,9 @@ jobs:
           Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
       - name: Install dependencies
         run: |
-          echo %MDANSE_TEMPORARY_INSTALLATION_DIR%
+          echo "%MDANSE_TEMPORARY_INSTALLATION_DIR%"
           echo "hello world"
-          "%GITHUB_WORKSPACE$\BuildServer\Windows\Build\python.exe" -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
+          "%GITHUB_WORKSPACE$\BuildServer\Windows\Build\Scripts\python.exe" -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
           "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd
