@@ -284,7 +284,7 @@ jobs:
       - name: Prepare NetCDF
         run: |
           choco install 7zip
-          New-Item -Path "$env:RUNNER_TOOL_CACHE\Python\2.7.18\x64" -Name "netcdf" -ItemType "directory"
+          New-Item -Path "$env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\netcdf" -ItemType "directory"
           Set-Location -Path "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           Get-Location
           Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\netcdf\netCDF.exe
