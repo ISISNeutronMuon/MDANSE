@@ -107,16 +107,21 @@ jobs:
         with:
           python-version: '2.7.18'
       - name: Install libraries
-        run: |
-          sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev libvtk6.3 libvtk6-dev python-dev
-          which python
-          python -c "import vtk"
-          python -c "import wx"
+        run: sudo apt-get install netcdf-bin libnetcdf-dev libvtk6.3 libvtk6-dev python-dev
       - name: Install dependencies
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
           sudo cp /usr/lib/x86_64-linux-gnu/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+      - name: Install wx and vtk
+        run: |
+          sudo conda create -p $HOME/tempenv python=2.7
+          sudo conda install -p $HOME/tempenv -c daf wxpython
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          python -c "import vtk"
+          python -c "import wx"
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
