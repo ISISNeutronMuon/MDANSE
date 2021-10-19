@@ -275,12 +275,6 @@ jobs:
         with:
           python-version: '2.7.18'
       - uses: actions/checkout@v2
-      - name: Install VS2008
-        run: |
-          cd $env:HOME
-          Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
-          Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
-          Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
       - name: Install dependencies
         run: |
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
@@ -291,6 +285,8 @@ jobs:
         run: |
           choco install 7zip
           New-Item -Path "$env:RUNNER_TOOL_CACHE\Python\2.7.18\x64" -Name "netcdf" -ItemType "directory"
+          Set-Location -Path "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          Get-Location
           Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\netcdf\netCDF.exe
       - name: Extract NetCDF
         run: |
@@ -298,6 +294,12 @@ jobs:
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
           set PATH=%PATH%;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf
         shell: cmd
+      - name: Install VS2008
+        run: |
+          cd $env:HOME
+          Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
+          Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
+          Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
       - name: Install ScientificPython
         run: |
           cd "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"
