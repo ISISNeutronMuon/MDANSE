@@ -84,7 +84,6 @@ jobs:
         run: |
           tar -xzf ~/python.tar.gz -C $HOME
           sudo apt-get install netcdf-bin libnetcdf-dev
-          ~/python/bin/python -c "import Scientific.IO.NetCDF"
       - run: sudo apt-get install dos2unix
       - name: Deploy
         run: |
@@ -107,7 +106,7 @@ jobs:
         with:
           python-version: '2.7.18'
       - name: Install libraries
-        run: sudo apt-get install netcdf-bin libnetcdf-dev libvtk6.3 libvtk6-dev python-dev
+        run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev
       - name: Install dependencies
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
@@ -213,16 +212,16 @@ jobs:
           cd $GITHUB_WORKSPACE
           python2 setup.py install
       - name: Run tests
-        run: |
-          $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
+        run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - run: |
-          cd $HOME
-          tar -czf python.tar.gz $RUNNER_TOOL_CACHE/Python/2.7.18/x64
+          cd $RUNNER_TOOL_CACHE/Python/2.7.18
+          mv x64 Resources
+          tar -czf python.tar.gz Resources
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: OSX_artifacts
-          path: ~/python.tar.gz
+          path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
   
   deploy_osx:
@@ -237,9 +236,8 @@ jobs:
           path: ~/
       - run: |
           brew install netcdf
-          tar -xzf ~/python.tar.gz -C $HOME
-          echo $RUNNER_TOOL_CACHE
-          $HOME/$RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "import Scientific.IO.NetCDF"
+          mkdir -p ~/Contents
+          tar -xzf ~/python.tar.gz -C $HOME/Contents
       - name: Deploy MDANSE
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -269,8 +267,14 @@ jobs:
         with:
           python-version: '2.7.18'
       - uses: actions/checkout@v2
-      - name: Install VC 2008 redist
-        run: choco install vcredist2008
+      - name: Set up virtual machine
+        run: |
+          call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
+          call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat
+      - name: Copy python
+        run: |
+          mkdir %MDANSE_TEMPORARY_INSTALLATION_DIR%
+          xcopy /e /y %RUNNER_TOOL_CACHE%\Python\2.7.18\x64 %MDANSE_TEMPORARY_INSTALLATION_DIR%
         shell: cmd
       - name: Install VS2008
         run: |
@@ -280,55 +284,55 @@ jobs:
           Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
       - name: Install dependencies
         run: |
-          python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
+          %MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
-          python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
+          %MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd
       - name: Prepare NetCDF
         run: |
           choco install 7zip
-          mkdir $env:HOME\netcdf
-          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:HOME\netcdf\netCDF.exe
+          mkdir $env:MDANSE_TEMPORARY_INSTALLATION_DIR\netcdf
+          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:MDANSE_TEMPORARY_INSTALLATION_DIR\netcdf\netCDF.exe
       - name: Extract NetCDF
         run: |
-          cd "%HOME%\netcdf"
+          cd "%MDANSE_TEMPORARY_INSTALLATION_DIR%\netcdf"
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
-          set PATH=%PATH%;%HOME%\netcdf
+          set PATH=%PATH%;%MDANSE_TEMPORARY_INSTALLATION_DIR%\netcdf
         shell: cmd
       - name: Install ScientificPython
         run: |
-          cd %HOME%
+          cd %MDANSE_TEMPORARY_INSTALLATION_DIR%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          python setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
-          python setup.py install --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
-          copy "%HOME%\netcdf\netcdf.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
-          copy "%HOME%\netcdf\netcdf.h" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
-          copy "%HOME%\netcdf\netcdf.lib" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
+          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
+          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" setup.py install --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
+          copy "%MDANSE_TEMPORARY_INSTALLATION_DIR%\netcdf\netcdf.dll" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\Lib\site-packages\Scientific"
+          copy "%MDANSE_TEMPORARY_INSTALLATION_DIR%\netcdf\netcdf.h" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\Include\Scientific"
+          copy "%MDANSE_TEMPORARY_INSTALLATION_DIR%\netcdf\netcdf.lib" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\Lib\site-packages\Scientific"
         shell: cmd
       - name: Install MMTK
         run: |
-          cd %HOME%
+          cd "%MDANSE_TEMPORARY_INSTALLATION_DIR%"
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          python setup.py build install
-          copy "%HOME%\netcdf\vcruntime140.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
+          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" setup.py build install
+          copy "%MDANSE_TEMPORARY_INSTALLATION_DIR%\netcdf\vcruntime140.dll" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\Lib\site-packages\Scientific"
         shell: cmd
       - name: Install MDANSE
         run: |
           cd %GITHUB_WORKSPACE%
-          python setup.py build install
+          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" setup.py build install
         shell: cmd
       - name: Run tests
         run: |
           cd %GITHUB_WORKSPACE%\Tests
-          python UnitTests\AllTests.py
-          python DependenciesTests\AllTests.py
-          python FunctionalTests\Jobs\BuildJobTests.py
-          python FunctionalTests\Jobs\AllTests.py
+          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" UnitTests\AllTests.py
+          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" DependenciesTests\AllTests.py
+          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" FunctionalTests\Jobs\BuildJobTests.py
+          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" FunctionalTests\Jobs\AllTests.py
         shell: cmd
       - name: Zip python file
-        run: Compress-Archive -Path "$env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\*" -DestinationPath "$env:GITHUB_WORKSPACE\python.zip"
+        run: Compress-Archive -Path "$env:%MDANSE_TEMPORARY_INSTALLATION_DIR%\*" -DestinationPath "$env:GITHUB_WORKSPACE\python.zip"
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -356,19 +360,20 @@ jobs:
           Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
           Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
           Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
+      - name: Set up virtual machine
+        run: |
+          call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
+          call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
+          mkdir %MDANSE_TEMPORARY_INSTALLATION_DIR%
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
           name: test_windows_artifacts
-          path: ${{ github.workspace }}\
+          path: ${{ github.workspace }}\BuildServer\Windows\Build
       - name: Unzip artifacts
-        run: Expand-Archive -Path "$env:GITHUB_WORKSPACE\python.zip" -DestinationPath "$env:HOME\python"
+        run: Expand-Archive -Path "$env:MDANSE_TEMPORARY_INSTALLATION_DIR\python.zip" -DestinationPath "$env:MDANSE_TEMPORARY_INSTALLATION_DIR"
       - name: Deploy
         run: |
-          call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
-          echo "definitions complete"
-          call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
-          echo "setup complete"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\deploy.bat"
         shell: cmd
       - name: Upload artifacts

@@ -3,7 +3,7 @@
 cd %MDANSE_SOURCE_DIR%
 
 rem Set the path to python executable
-set PYTHON_EXE=%HOME%\python\python.exe
+set PYTHON_EXE=%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe
 
 rem This is the env var used by distutils to find the MSVC framework to be used for compiling extension
 rem see https://stackoverflow.com/questions/2817869/error-unable-to-find-vcvarsall-bat for more info
@@ -19,12 +19,12 @@ if %STATUS% neq 0 (
     echo "Failed to build MDANSE Documentation"
     exit %STATUS%
 )
-echo "Finished MDANSE build"
+
 cd "%MDANSE_SOURCE_DIR%\BuildServer\Windows"
-echo "Moved to buildserver\windows"
+
 rem copy LICENSE
 copy %MDANSE_SOURCE_DIR%\\LICENSE %MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Resources\\nsis\\
-echo %MDANSE_SOURCE_DIR%
+
 rem copy CHANGELOG to CHANGELOG.txt (compulsory to be opened by nsis through an external text editor)
 copy %MDANSE_SOURCE_DIR%\CHANGELOG %MDANSE_SOURCE_DIR%\BuildServer\Windows\Resources\nsis\CHANGELOG.txt
 

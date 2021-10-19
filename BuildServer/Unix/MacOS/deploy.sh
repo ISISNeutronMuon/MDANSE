@@ -5,7 +5,7 @@
 #############################
 # Debug option for py2app, if needed
 export DISTUTILS_DEBUG=0
-export MDANSE_DEPENDENCIES_DIR=$HOME/python
+export MDANSE_DEPENDENCIES_DIR=$HOME/Contents
 
 #############################
 # PREPARATION
@@ -14,9 +14,9 @@ cd $GITHUB_WORKSPACE
 
 export MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
 
-export PYTHONPATH=$HOME/Python/lib/python2.7/site-packages:${PYTHONPATH}
+export PYTHONPATH=$HOME/Contents/Resources/lib/python2.7/site-packages:${PYTHONPATH}
 
-export PYTHONEXE=$HOME/$RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python
+export PYTHONEXE=$HOME/Contents/Resources/bin/python
 
 # Build API
 sudo $PYTHONEXE setup.py build build_api build_help install
@@ -35,8 +35,7 @@ echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 # Copy the bundle
 echo $CI_TEMP_DIR
 mkdir -p $CI_TEMP_DIR/dist/MDANSE.app
-cp -R ${MDANSE_DEPENDENCIES_DIR} ${MDANSE_APP_DIR}/Contents
-cp -R $HOME/python/lib/python2.7/site-packages/* ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/
+cp -R ${MDANSE_DEPENDENCIES_DIR} ${MDANSE_APP_DIR}
 
 # Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "${VERSION_NAME}" > ${MDANSE_APP_DIR}/Contents/Resources/version
