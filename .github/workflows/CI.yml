@@ -287,19 +287,20 @@ jobs:
           python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
           python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
+          mkdir %HOME%\netcdf
         shell: cmd
       - name: Prepare NetCDF
         run: |
           choco install 7zip
-          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile "$env:HOME\netCDF.exe"
+          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile "$env:HOME\netcdf\netCDF.exe"
       - name: Extract NetCDF
         run: |
+          cd %HOME%\netcdf
+          "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
           mkdir "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          copy "%HOME%\netcdf" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           dir
-          copy /d /v "%HOME%\netCDF.exe" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\"
-          dir
-          "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
           set PATH=%PATH%;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf
         shell: cmd
       - name: Install VS2008
