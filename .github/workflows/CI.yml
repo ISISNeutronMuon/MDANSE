@@ -101,6 +101,7 @@ jobs:
 
   ci_ubuntu_20:
     runs-on: ubuntu-20.04
+    if: False
     steps:
       - uses: actions/checkout@v2
       - name: Install python
@@ -125,8 +126,6 @@ jobs:
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          python -c "import vtk"
-          python -c "import wx"
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -283,9 +282,10 @@ jobs:
         shell: cmd
       - name: Copy python
         run: |
+          echo "%MDANSE_TEMPORARY_INSTALLATION_DIR%"
           mkdir %MDANSE_TEMPORARY_INSTALLATION_DIR%
-          xcopy /e /y %RUNNER_TOOL_CACHE%\Python\2.7.18\x64 %MDANSE_TEMPORARY_INSTALLATION_DIR%
-          cd %MDANSE_TEMPORARY_INSTALLATION_DIR%
+          xcopy /e /y /q %RUNNER_TOOL_CACHE%\Python\2.7.18\x64 %MDANSE_TEMPORARY_INSTALLATION_DIR%
+          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
           dir
         shell: cmd
       - name: Install VS2008
