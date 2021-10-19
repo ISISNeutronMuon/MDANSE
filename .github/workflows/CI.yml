@@ -111,10 +111,10 @@ jobs:
         with:
           python-version: '2.7.18'
       - name: Install libraries
-        if: ${{ (matrix.os == 'ubuntu-20.04') }}
+        if: ${{ (matrix.os == 'ubuntu-18.04') }}
         run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6 python-dev
       - name: Install libraries
-        if: ${{ (matrix.os == 'ubuntu-18.04') }}
+        if: ${{ (matrix.os == 'ubuntu-20.04') }}
         run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev libgtk2.0-0 libgtk2.0-dev
       - name: Install dependencies
         if: cancelled()
@@ -295,14 +295,10 @@ jobs:
           Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile "$env:HOME\netCDF.exe"
       - name: Extract NetCDF
         run: |
-          echo %RUNNER_TOOL_CACHE%
-          cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"
-          dir
-          echo ""
           mkdir "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          dir
-          copy "%HOME%\netcdf.exe" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          dir
+          copy /d /v "%HOME%\netcdf.exe" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\"
           dir
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
           set PATH=%PATH%;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf
