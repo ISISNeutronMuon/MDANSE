@@ -61,8 +61,8 @@ jobs:
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
 
-  test_deploy_ubuntu:
-    needs: test_ubuntu
+  deploy_ubuntu_18:
+    needs: ci_ubuntu_18
     runs-on: ubuntu-18.04
     if: |
       contains( github.ref, 'master' ) ||
