@@ -275,12 +275,6 @@ jobs:
         with:
           python-version: '2.7.18'
       - uses: actions/checkout@v2
-      - name: Copy python
-        run: |
-          mkdir "%GITHUB_WORKSPACE%\BuildServer\Windows\Build"
-          xcopy /e /y /q "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64" "%GITHUB_WORKSPACE%\BuildServer\Windows\Build"
-          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" -c "print 'HELLO WORLD'"
-        shell: cmd
       - name: Install VS2008
         run: |
           cd $env:HOME
@@ -289,55 +283,55 @@ jobs:
           Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
       - name: Install dependencies
         run: |
-          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\Scripts\python.exe" -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
+          python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
-          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
+          python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd
       - name: Prepare NetCDF
         run: |
           choco install 7zip
-          mkdir $env:GITHUB_WORKSPACE\BuildServer\Windows\Build\netcdf
-          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:GITHUB_WORKSPACE\BuildServer\Windows\Build\netcdf\netCDF.exe
+          mkdir $env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\netcdf
+          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\netcdf\netCDF.exe
       - name: Extract NetCDF
         run: |
-          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\netcdf"
+          cd "%HOME%\netcdf"
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
-          set PATH=%PATH%;%GITHUB_WORKSPACE%\BuildServer\Windows\Build\netcdf
+          set PATH=%PATH%;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf
         shell: cmd
       - name: Install ScientificPython
         run: |
-          cd %GITHUB_WORKSPACE%\BuildServer\Windows\Build
+          cd "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" setup.py build --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
-          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" setup.py install --netcdf_prefix="%HOME%\netcdf" --netcdf_dll="%HOME%\netcdf"
-          copy "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\netcdf\netcdf.dll" "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\Lib\site-packages\Scientific"
-          copy "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\netcdf\netcdf.h" "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\Include\Scientific"
-          copy "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\netcdf\netcdf.lib" "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\Lib\site-packages\Scientific"
+          python setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          python setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.h" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\Scientific"
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.lib" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
         shell: cmd
       - name: Install MMTK
         run: |
-          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Build"
+          cd "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" setup.py build install
-          copy "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\netcdf\vcruntime140.dll" "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\Lib\site-packages\Scientific"
+          python setup.py build install
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
         shell: cmd
       - name: Install MDANSE
         run: |
           cd %GITHUB_WORKSPACE%
-          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" setup.py build install
+          python setup.py build install
         shell: cmd
       - name: Run tests
         run: |
           cd %GITHUB_WORKSPACE%\Tests
-          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" UnitTests\AllTests.py
-          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" DependenciesTests\AllTests.py
-          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" FunctionalTests\Jobs\BuildJobTests.py
-          "%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" FunctionalTests\Jobs\AllTests.py
+          python UnitTests\AllTests.py
+          python DependenciesTests\AllTests.py
+          python FunctionalTests\Jobs\BuildJobTests.py
+          python FunctionalTests\Jobs\AllTests.py
         shell: cmd
       - name: Zip python file
-        run: Compress-Archive -Path "$env:GITHUB_WORKSPACE\BuildServer\Windows\Build\*" -DestinationPath "$env:GITHUB_WORKSPACE\python.zip"
+        run: Compress-Archive -Path "$env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\*" -DestinationPath "$env:GITHUB_WORKSPACE\python.zip"
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
