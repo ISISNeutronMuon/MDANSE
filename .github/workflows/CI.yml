@@ -5,6 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu_18:
     runs-on: ubuntu-18.04
+    if: False
     steps:
       - uses: actions/checkout@v2
       - name: Install python
@@ -117,8 +118,11 @@ jobs:
           sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c daf wxpython
           sudo find $HOME/tempenv -name wx
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-gtk2 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp -r $HOME/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -r $HOME/tempenv/include/wx-3.0 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
+          sudo find $HOME/tempenv -name vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           python -c "import vtk"
           python -c "import wx"
@@ -188,7 +192,9 @@ jobs:
           sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c daf wxpython
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo find $HOME/tempenv -name wx
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
+          sudo find $HOME/tempenv -name vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
       - name: Prepare virtual machine
         run: |
@@ -272,6 +278,7 @@ jobs:
         run: |
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
+        shell: cmd
       - name: Copy python
         run: |
           mkdir %MDANSE_TEMPORARY_INSTALLATION_DIR%
