@@ -118,9 +118,9 @@ jobs:
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c daf wxpython
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-gtk2 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-gtk2/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp -r $HOME/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -r $HOME/tempenv/include/wx-3.0 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
+          sudo cp -r $HOME/tempenv/include/wx-3.0/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
           sudo cp $HOME/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
@@ -293,9 +293,9 @@ jobs:
           Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
       - name: Install dependencies
         run: |
-          %MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
+          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
-          %MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
+          "%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe" -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd
       - name: Prepare NetCDF
         run: |
