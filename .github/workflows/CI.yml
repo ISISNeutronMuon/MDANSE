@@ -282,11 +282,13 @@ jobs:
         shell: cmd
       - name: Copy python
         run: |
+          SET
           echo "%MDANSE_TEMPORARY_INSTALLATION_DIR%"
           mkdir %MDANSE_TEMPORARY_INSTALLATION_DIR%
-          xcopy /e /y /q %RUNNER_TOOL_CACHE%\Python\2.7.18\x64 %MDANSE_TEMPORARY_INSTALLATION_DIR%
-          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
+          xcopy /e /y /q "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64" "%MDANSE_TEMPORARY_INSTALLATION_DIR%"
+          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Build"
           dir
+          "%GITHUB_WORKSPACE$\BuildServer\Windows\Build\Scripts\python.exe" -c "print 'HELLO WORLD'"
         shell: cmd
       - name: Install VS2008
         run: |
