@@ -100,8 +100,10 @@ jobs:
           retention-days: 90
 
   ci_ubuntu_20:
-    runs-on: ubuntu-20.04
-    if: False
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, ubuntu-20.04]
     steps:
       - uses: actions/checkout@v2
       - name: Install python
@@ -285,7 +287,7 @@ jobs:
         run: |
           choco install 7zip
           New-Item -Path "$env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\netcdf" -ItemType Directory
-          Set-Location -Path "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          Set-Location -Path "$env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\netcdf"
           Get-Location
           Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\netcdf\netCDF.exe
       - name: Extract NetCDF
