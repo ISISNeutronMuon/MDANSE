@@ -26,8 +26,9 @@ jobs:
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-gtk2/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp -r $HOME/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -r $HOME/tempenv/include/wx-3.0/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
-          sudo cp $HOME/tempenv/lib/libwx_gtk2u-3.0.so.0 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp $HOME/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install ScientificPython
         run: |
@@ -117,13 +118,13 @@ jobs:
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c daf wxpython
-          sudo find $HOME/tempenv -name wx
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-gtk2 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp -r $HOME/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -r $HOME/tempenv/include/wx-3.0 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
+          sudo cp $HOME/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
-          sudo find $HOME/tempenv -name vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           python -c "import vtk"
           python -c "import wx"
       - name: Install wx and vtk
@@ -254,7 +255,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: OSX_deploy_artifacts
-          path: $GITHUB_WORKSPACE/*.dmg
+          path: ${{ github.workspace }}/*.dmg
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
