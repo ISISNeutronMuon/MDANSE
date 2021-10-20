@@ -20,10 +20,10 @@ OutFile "${TARGET_DIR}\MDANSE-${VERSION}-${ARCH}.exe"
 RequestExecutionLevel admin #NOTE: You still need to check user rights with UserInfo!
 
 ; The default installation directory
-InstallDir "$PROGRAMFILES\Institut Laue-Langevin\MDANSE"
+InstallDir "$PROGRAMFILES\MDANSE"
 
 ; Registry key to check for directory (so if you install again, it will overwrite the old one automatically)
-InstallDirRegKey HKLM "Software\Institut Laue-Langevin\MDANSE" "Install_Dir"
+InstallDirRegKey HKLM "Software\MDANSE" "Install_Dir"
 
 ; Will show the details of installation
 ShowInstDetails show
@@ -31,7 +31,7 @@ ShowInstDetails show
 ; Will show the details of uninstallation
 ShowUnInstDetails show
 
-!define PUBLISHER "Institut Laue-Langevin"
+!define PUBLISHER "ISIS Neutron and Muon Source"
 !define WEB_SITE "http://www.mdanse.org"
 !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\MDANSE"
 !define UNINST_ROOT_KEY "HKLM"
@@ -76,6 +76,13 @@ and time correlation functions."
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "View CHANGELOG"
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\CHANGELOG.txt"
+; Insert in the finish page the possibility to create desktop shortcut
+Function CreateDesktopShortCut
+  CreateShortCut "$DESKTOP\MDANSE.lnk" "$INSTDIR\MDANSE_launcher.bat"
+FunctionEnd
+!define MUI_FINISHPAGE_RUN_NOTCHECKED
+!define MUI_FINISHPAGE_RUN_TEXT "Create desktop shortcut"
+!define MUI_FINISHPAGE_RUN_FUNCTION CreateDesktopShortCut
 ; Actually insert the finish page to the installer
 !insertmacro MUI_PAGE_FINISH
 
@@ -89,9 +96,9 @@ and time correlation functions."
 
 Function .onInit
   ${If} ${ARCH} == "win-amd64"
-    StrCpy $INSTDIR "$PROGRAMFILES64\Institut Laue-Langevin\MDANSE"
+    StrCpy $INSTDIR "$PROGRAMFILES64\MDANSE"
   ${Else}
-    StrCpy $INSTDIR "$PROGRAMFILES\Institut Laue-Langevin\MDANSE"
+    StrCpy $INSTDIR "$PROGRAMFILES\MDANSE"
   ${EndIf}
 FunctionEnd
 
@@ -114,15 +121,15 @@ Section "MDANSE ${VERSION}" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite on
   CreateShortCut "$DESKTOP\MDANSE.lnk" "$INSTDIR\MDANSE_launcher.bat" "" "${ICONS_DIR}\run.ico" 0
-  CreateDirectory "$SMPROGRAMS\Institut Laue-Langevin\MDANSE"
-  CreateShortCut "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\MDANSE.lnk" "$INSTDIR\MDANSE_launcher.bat" "" "${ICONS_DIR}\run.ico" 0
-  CreateShortCut "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\MDANSE_command_shell.lnk" \
+  CreateDirectory "$SMPROGRAMS\MDANSE"
+  CreateShortCut "$SMPROGRAMS\MDANSE\MDANSE.lnk" "$INSTDIR\MDANSE_launcher.bat" "" "${ICONS_DIR}\run.ico" 0
+  CreateShortCut "$SMPROGRAMS\MDANSE\MDANSE_command_shell.lnk" \
 					"$SYSDIR\cmd.exe" \
 					'/K "$INSTDIR\MDANSE_command_shell.bat"' \
 					"${ICONS_DIR}\terminal.ico" 0
   WriteIniStr "$INSTDIR\MDANSE.url" "InternetShortcut" "URL" "${WEB_SITE}"
-  CreateShortCut "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\Website.lnk" "$INSTDIR\MDANSE.url" "" "${ICONS_DIR}\web.ico" 0
-  CreateShortCut "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\Uninstall.lnk" "$INSTDIR\uninst.exe" "" "${ICONS_DIR}\uninstall.ico" 0
+  CreateShortCut "$SMPROGRAMS\MDANSE\Website.lnk" "$INSTDIR\MDANSE.url" "" "${ICONS_DIR}\web.ico" 0
+  CreateShortCut "$SMPROGRAMS\MDANSE\Uninstall.lnk" "$INSTDIR\uninst.exe" "" "${ICONS_DIR}\uninstall.ico" 0
 
   WriteRegStr ${UNINST_ROOT_KEY} "${UNINST_KEY}" "DisplayName" "MDANSE"
   WriteRegStr ${UNINST_ROOT_KEY} "${UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
@@ -157,11 +164,11 @@ Section uninstall
 
   Delete "$DESKTOP\MDANSE.lnk"
 
-  Delete "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\MDANSE_command_shell.lnk"
-  Delete "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\Uninstall.lnk"
-  Delete "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\Website.lnk"
-  Delete "$SMPROGRAMS\Institut Laue-Langevin\MDANSE\MDANSE.lnk"
-  RMDir /r "$SMPROGRAMS\Institut Laue-Langevin\MDANSE"
+  Delete "$SMPROGRAMS\MDANSE\MDANSE_command_shell.lnk"
+  Delete "$SMPROGRAMS\MDANSE\Uninstall.lnk"
+  Delete "$SMPROGRAMS\MDANSE\Website.lnk"
+  Delete "$SMPROGRAMS\MDANSE\MDANSE.lnk"
+  RMDir /r "$SMPROGRAMS\MDANSE"
   RMDir /r "$INSTDIR"
 
   DeleteRegKey ${UNINST_ROOT_KEY} "${UNINST_KEY}"
