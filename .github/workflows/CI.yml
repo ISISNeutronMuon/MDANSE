@@ -74,9 +74,10 @@ jobs:
           mv x64 python
           tar -czf python.tar.gz python
       - name: Upload artifacts
+        if: ${{ (matrix.os == 'ubuntu-18.04') }}
         uses: actions/upload-artifact@v2
         with:
-          name: test_ubuntu_artifacts
+          name: ubuntu_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
 
@@ -315,13 +316,14 @@ jobs:
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
           mkdir %GITHUB_WORKSPACE%\BuildServer\Windows\Build
+        shell: cmd
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
           name: test_windows_artifacts
-          path: ${{ github.workspace }}\BuildServer\Windows\Build
+          path: ${{ github.workspace }}\
       - name: Unzip artifacts
-        run: Expand-Archive -Path "$env:GITHUB_WORKSPACE\BuildServer\Windows\Build\python.zip" -DestinationPath "$env:GITHUB_WORKSPACE\BuildServer\Windows\Build"
+        run: Expand-Archive -Path "$env:GITHUB_WORKSPACE\python.zip" -DestinationPath "$env:GITHUB_WORKSPACE\BuildServer\Windows\Build"
       - name: Deploy
         run: |
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\deploy.bat"
