@@ -227,10 +227,10 @@ jobs:
       - name: Install dependencies
         run: |
           cd /d C:\Windows
-          dir /s *.dll*
+          dir /s *python27.dll*
           echo "---------------------------------------------------"
           cd /d "%SystemRoot%"
-          dir /s *.dll*
+          dir /s *python27.dll*
           echo "---------------------------------------------------"
           cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs"
           dir
@@ -239,6 +239,7 @@ jobs:
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
           python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
           mkdir %HOME%\netcdf
+          cd /d %HOME%\netcdf
         shell: cmd
       - name: Prepare NetCDF
         run: |
