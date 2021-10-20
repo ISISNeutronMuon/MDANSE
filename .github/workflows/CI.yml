@@ -327,6 +327,8 @@ jobs:
         run: Expand-Archive -Path "$env:GITHUB_WORKSPACE\python.zip" -DestinationPath "$env:GITHUB_WORKSPACE\BuildServer\Windows\Build"
       - name: Deploy
         run: |
+          call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
+          call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\deploy.bat"
         shell: cmd
       - name: Upload artifacts

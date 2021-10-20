@@ -3,17 +3,11 @@
 rem Set the source directory
 set MDANSE_SOURCE_DIR=%GITHUB_WORKSPACE%
 
-rem Set th directory where the MDANSE dependencies are stored
-set MDANSE_DEPENDENCIES_DIR=C:\\Projects\\mdanse\\resources\\dependencies\\%BUILD_TARGET%
-
-rem Set the location where the temporary Python will be installed
-set MDANSE_TEMPORARY_INSTALLATION_DIR=%MDANSE_SOURCE_DIR%\\BuildServer\\Windows\\Build
-
 rem Get revision number from Git
 rem To understand this syntax "set cmd=...... for /F %%ii ......", see https://stackoverflow.com/questions/2323292/assign-output-of-a-program-to-a-variable
 rem set cmd="git rev-parse --short HEAD"
 rem for /F %%i in (' %cmd% ') do set MDANSE_GIT_CURRENT_COMMIT=%%i
-set MDANSE_GIT_CURRENT_COMMIT=%GITHUB_REF::7%
+set MDANSE_GIT_CURRENT_COMMIT=%GITHUB_SHA:~0,8%
 
 rem Get commit branch from Gitlab
 set MDANSE_GIT_BRANCH_NAME=%GITHUB_REF%
