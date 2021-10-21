@@ -5,7 +5,7 @@
 #############################
 # Debug option for py2app, if needed
 export DISTUTILS_DEBUG=0
-
+export PYTHONEXE=$HOME/python
 #############################
 # PREPARATION
 #############################
@@ -48,7 +48,6 @@ cp $PYTHONEXE/bin/* ${DEBIAN_BIN_DIR}/
 cd $GITHUB_WORKSPACE
 
 # Build API
-export PYTHONEXE=$HOME/python
 sudo $PYTHONEXE/bin/python setup.py build build_api build_help install
 
 status=$?
