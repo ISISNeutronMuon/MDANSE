@@ -46,6 +46,7 @@ jobs:
           sudo cp -r $HOME/tempenv/include/wx-3.0/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
           sudo cp $HOME/tempenv/lib/libwx_gtk2u-3.0.so.0 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install ScientificPython
         run: |

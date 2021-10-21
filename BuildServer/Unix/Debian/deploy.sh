@@ -43,10 +43,7 @@ DEBIAN_BIN_DIR=${DEBIAN_ROOT_DIR}/usr/local/bin
 mkdir -p ${DEBIAN_BIN_DIR}
 cp $GITHUB_WORKSPACE/Scripts/* ${DEBIAN_BIN_DIR}/
 dos2unix ${DEBIAN_BIN_DIR}/mdanse_*
-
-# Build the usr/local/lib/python2.7/dist-packages directory inside the debian root directory and copy the MDANSE package inside
-DEBIAN_DIST_DIR=${DEBIAN_ROOT_DIR}/usr/local/lib/python2.7/dist-packages
-mkdir -p ${DEBIAN_DIST_DIR}
+cp $PYTHONEXE/bin/* ${DEBIAN_BIN_DIR}/
 
 cd $GITHUB_WORKSPACE
 
@@ -61,9 +58,8 @@ if [ $status -ne 0 ]; then
 fi
 
 # Copy the localy installed ScientificPython, MMTK and MDANSE
-cp -r $PYTHONEXE/lib/python2.7/site-packages/Scientific ${DEBIAN_DIST_DIR}
-cp -r $PYTHONEXE/lib/python2.7/site-packages/MMTK ${DEBIAN_DIST_DIR}
-cp -r $PYTHONEXE/lib/python2.7/site-packages/MDANSE ${DEBIAN_DIST_DIR}
+cp -r $PYTHONEXE/lib $DEBIAN_ROOT_DIR/usr/local
+cp -r $PYTHONEXE/include $DEBIAN_ROOT_DIR/usr/local
 
 # Compute the Installed-Size field for the debian package
 instSize=$(du ${DEBIAN_ROOT_DIR} -b -s | cut -f1)

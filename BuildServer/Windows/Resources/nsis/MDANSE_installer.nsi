@@ -73,16 +73,16 @@ and time correlation functions."
 !define MUI_FINISHPAGE_RUN_TEXT "Start MDANSE ${VERSION}"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\MDANSE_launcher.bat"
 ; Insert in the finish page the possibility to view the changelog
-!define MUI_FINISHPAGE_SHOWREADME_TEXT "View CHANGELOG"
-!define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
-!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\CHANGELOG.txt"
+!define MUI_FINISHPAGE_LINK_LOCATION "$INSTDIR\CHANGELOG.txt"
+!define MUI_FINISHPAGE_LINK "View CHANGELOG"
 ; Insert in the finish page the possibility to create desktop shortcut
 Function CreateDesktopShortCut
   CreateShortCut "$DESKTOP\MDANSE.lnk" "$INSTDIR\MDANSE_launcher.bat"
 FunctionEnd
-!define MUI_FINISHPAGE_RUN_NOTCHECKED
-!define MUI_FINISHPAGE_RUN_TEXT "Create desktop shortcut"
-!define MUI_FINISHPAGE_RUN_FUNCTION CreateDesktopShortCut
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "Create desktop shortcut"
+!define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+!define MUI_FINISHPAGE_SHOWREADME ""
+!define MUI_FINISHPAGE_SHOWREADME_FUNCTION CreateDesktopShortCut
 ; Actually insert the finish page to the installer
 !insertmacro MUI_PAGE_FINISH
 
