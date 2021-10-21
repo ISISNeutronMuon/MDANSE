@@ -5,6 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
+    if: False
     strategy:
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
@@ -121,13 +122,17 @@ jobs:
   # OSX
   ci_osx:
     runs-on: macos-10.15
-    if: False
+    if: True
     steps:
       - uses: actions/checkout@v2
       - name: Install python
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
+      - run: |
+          sudo find /System -name python
+          echo "----------------------------------------"
+          sudo find / -name libpython
       - name: Install NetCDF
         run: |
           brew install netcdf
@@ -214,10 +219,45 @@ jobs:
       contains( github.ref, 'tags' ) ||
       contains( github.ref, 'web' ) ||
       contains( github.ref, '19_continuous_integration' )
-  
+
+  deploy_osx_old:
+    needs: ci_osx
+    runs-on: macos-10.15
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: OSX_artifacts
+          path: ~/
+      - run: |
+          brew install netcdf
+          mkdir -p ~/Contents
+          tar -xzf ~/python.tar.gz -C $HOME/Contents
+      - name: Deploy MDANSE
+        run: |
+          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
+          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
+          $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy_old.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: MacOS executable
+          path: ${{ github.workspace }}/*.dmg
+    if: |
+      contains( github.ref, 'master' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '19_continuous_integration' )
+
   # WINDOWS
-  test_windows:
+  ci_windows:
     runs-on: windows-2019
+    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2
@@ -289,12 +329,12 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: test_windows_artifacts
+          name: windows_artifacts
           path: ${{ github.workspace }}/python.zip
           retention-days: 1
 
-  test_deploy_windows:
-    needs: test_windows
+  deploy_windows:
+    needs: ci_windows
     runs-on: windows-2019
     if: |
       contains( github.ref, 'master' ) ||
@@ -322,7 +362,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: test_windows_artifacts
+          name: windows_artifacts
           path: ${{ github.workspace }}\
       - name: Unzip artifacts
         run: Expand-Archive -Path "$env:GITHUB_WORKSPACE\python.zip" -DestinationPath "$env:GITHUB_WORKSPACE\BuildServer\Windows\Build"
@@ -339,94 +379,3 @@ jobs:
           name: Windows_executable
           path: ${{ github.workspace }}\*.exe
           retention-days: 90
-
-  ci_windows:
-    runs-on: windows-2019
-    if: False
-    steps:
-      - name: Install python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '2.7.18'
-      - uses: actions/checkout@v2
-      - name: Install VC 2008 redist
-        run: choco install vcredist2008
-        shell: cmd
-      - name: Install VS2008
-        run: |
-          cd $env:HOME
-          Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
-          Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
-          Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart"
-      - name: Install dependencies
-        run: |
-          which python
-          python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
-          python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
-        shell: cmd
-      - name: Prepare NetCDF
-        run: |
-          choco install 7zip
-          mkdir $env:HOME\netcdf
-          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile $env:HOME\netcdf\netCDF.exe
-      - name: Extract NetCDF
-        run: |
-          cd "%HOME%\netcdf"
-          "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
-        shell: cmd
-      - name: Set up virtual machine
-        run: |
-          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\definitions.bat"
-          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\setup_ci.bat"
-        shell: cmd
-      - name: Build MDANSE
-        run: |
-          cd "C:\Program Files (x86)\Microsoft Visual Studio 14.0"
-          where *vcvars*
-          "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\build.bat"
-        shell: cmd
-      - name: Run tests
-        run: |
-          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\tests.bat"
-        shell: cmd
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: Windows_artifacts
-          path: |
-            "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\Build"
-            "%GITHUB_WORKSPACE%\\build"
-            "%GITHUB_WORKSPACE%\\Extensions"
-          retention-days: 1/24
-  
-  deploy_windows:
-    needs: ci_windows
-    runs-on: windows-2019
-    steps:
-      - uses: actions/checkout@v2
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: Windows_artifacts
-      - name: Set up virtual machine
-        run: |
-          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\definitions.bat"
-          call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\setup_ci.bat"
-        shell: cmd
-      - name: Deploy
-        run: call "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\deploy.bat"
-        shell: cmd
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: Windows_deploy_artifacts
-          path: "%GITHUB_WORKSPACE%\\*.exe"
-    if: |
-      contains( github.ref, 'master' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
