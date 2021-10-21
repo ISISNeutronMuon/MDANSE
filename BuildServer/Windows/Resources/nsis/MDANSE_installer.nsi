@@ -79,7 +79,7 @@ and time correlation functions."
 Function CreateDesktopShortCut
   CreateShortCut "$DESKTOP\MDANSE.lnk" "$INSTDIR\MDANSE_launcher.bat"
 FunctionEnd
-!define MUI_FINISHPAGE_SHOWREADME_TEXT "Create desktop shortcut"
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "Create desktop shortcut" "" "${ICONS_DIR}\MDANSE.ico"
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
 !define MUI_FINISHPAGE_SHOWREADME ""
 !define MUI_FINISHPAGE_SHOWREADME_FUNCTION CreateDesktopShortCut

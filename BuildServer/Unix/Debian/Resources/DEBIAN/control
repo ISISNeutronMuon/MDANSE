@@ -1,7 +1,7 @@
 Package: mdanse
 Version: 1.0.0
 Architecture: amd64
-Depends: python-setuptools, python-wxmpl, pyro, python-vtk
+Depends: dpkg
 Section: Science
 Priority: optional
 Installed-Size: 1000
@@ -12,4 +12,4 @@ Description: MDANSE - Molecular Dynamics Analysis for Neutron Scattering Experim
  .
  Most of MDANSE calculations can be applied to the whole system or to arbitrary subsets that can be defined in the graphical interface while less common selections can be specified via the command-line interface.
  .
- Developed by E. Pellegrini, ILL. Maintained and packaged by S. Mukhopadhyay, ISIS Neutron and Mueon Source.
+ Developed by E. Pellegrini, ILL. Maintained and packaged by S. Mukhopadhyay, ISIS Neutron and Muon Source.
