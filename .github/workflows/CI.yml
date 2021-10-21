@@ -130,7 +130,7 @@ jobs:
         with:
           python-version: '2.7.18'
       - run: |
-          sudo find /System -name python
+          sudo find /System/Library -name python
           echo "----------------------------------------"
           sudo find / -name libpython
       - name: Install NetCDF
