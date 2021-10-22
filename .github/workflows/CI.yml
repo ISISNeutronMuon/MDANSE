@@ -5,6 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
+    if: False
     strategy:
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
@@ -141,9 +142,8 @@ jobs:
           sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c daf wxpython
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo find $HOME/tempenv -name wx
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
-          sudo find $HOME/tempenv -name vtk
+          sudo find $HOME/tempenv -name libvtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
       - name: Prepare virtual machine
         run: |
@@ -169,7 +169,8 @@ jobs:
           python2 setup.py install
       - name: Run tests
         run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
-      - run: |
+      - name: Tar python
+        run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
@@ -194,6 +195,7 @@ jobs:
           brew install netcdf
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
+          $HOME/Contents/Resources/bin/python -c "import vtk"
       - name: Deploy MDANSE
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -213,6 +215,15 @@ jobs:
       contains( github.ref, 'tags' ) ||
       contains( github.ref, 'web' ) ||
       contains( github.ref, '19_continuous_integration' )
+
+  search_osx:
+    runs-on: macos-10.15
+    steps:
+      - name: Install python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '2.7.18'
+      - run: sudo find / -name Python
 
   deploy_osx_old:
     needs: ci_osx
@@ -251,6 +262,7 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
+    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2
