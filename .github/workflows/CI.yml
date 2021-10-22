@@ -136,7 +136,7 @@ jobs:
           sudo cp /usr/local/opt/netcdf/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install dependecies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb py2app
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb py2app==0.25
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -184,6 +184,7 @@ jobs:
 
   search_osx:
     runs-on: macos-10.15
+    if: False
     steps:
       - run: |
           brew install netcdf
