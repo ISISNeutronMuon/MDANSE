@@ -134,6 +134,7 @@ jobs:
           sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
           sudo cp /usr/local/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp /usr/local/opt/netcdf/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+      - run: python2 -c "import vtk"
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
@@ -187,7 +188,7 @@ jobs:
     steps:
       - run: |
           sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c daf wxpython
+          sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo find / -name 'libQt*' -print 2>/dev/null
 
   deploy_osx:

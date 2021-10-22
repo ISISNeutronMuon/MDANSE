@@ -6,11 +6,13 @@ import subprocess
 
 if sys.platform.startswith('darwin'):
     from setuptools import setup
-    print os.environ
-    project_dir = os.environ.get('GITHUB_WORKSPACE', os.environ.get('RUNNER_WORKSPACE', os.environ['TEMPENV_WORKSPACE']))
+
     try:
+        project_dir = os.environ.get('GITHUB_WORKSPACE',
+                                     os.environ['RUNNER_WORKSPACE'])
         version = os.environ['VERSION_NAME']
     except KeyError:
+        project_dir = sys.argv[2]
         echoes = subprocess.check_output(os.path.join(project_dir, 'BuildServer', 'Unix', 'setup_ci.sh'))
         print echoes
         version = echoes.split('/n')[-1]

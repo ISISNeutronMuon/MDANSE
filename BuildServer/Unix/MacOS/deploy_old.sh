@@ -31,7 +31,7 @@ echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
 cd ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS
-sudo ${PYTHONEXE} build.py py2app
+sudo ${PYTHONEXE} build.py py2app "$GITHUB_WORKSPACE"
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
