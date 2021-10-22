@@ -6,8 +6,8 @@ import subprocess
 
 if sys.platform.startswith('darwin'):
     from setuptools import setup
-
-    project_dir = os.environ['GITHUB_WORKSPACE']
+    print os.environ
+    project_dir = os.environ.get('GITHUB_WORKSPACE', os.environ.get('RUNNER_WORKSPACE', os.environ['TEMPENV_WORKSPACE']))
     try:
         version = os.environ['VERSION_NAME']
     except KeyError:
