@@ -203,6 +203,7 @@ jobs:
       - run: |
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
+          ~/Contents/Resources/bin/python -c "import Scientific.IO.NetCDF"
       - name: Deploy MDANSE
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
