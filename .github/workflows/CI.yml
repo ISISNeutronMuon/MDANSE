@@ -143,7 +143,9 @@ jobs:
           sudo conda install -p $HOME/tempenv -c daf wxpython
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
-          sudo find $HOME/tempenv -name libvtk
+          echo "---------------"
+          sudo find $HOME/tempenv -name 'libvtk*'
+          echo "_------------------------------"
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
       - name: Prepare virtual machine
         run: |
@@ -195,7 +197,7 @@ jobs:
           brew install netcdf
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
-          $HOME/Contents/Resources/bin/python -c "import vtk"
+          $HOME/Contents/Resources/bin/python -c "import wx"
       - name: Deploy MDANSE
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -223,7 +225,11 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
-      - run: sudo find / -name Python
+      - run: |
+          sudo conda create -p $HOME/tempenv python=2.7
+          sudo conda install -p $HOME/tempenv -c daf wxpython
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo find / -name 'libwx*'
 
   deploy_osx_old:
     needs: ci_osx

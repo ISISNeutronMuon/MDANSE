@@ -16,7 +16,7 @@ export MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
 export PYTHONPATH=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages:${PYTHONPATH}
 
 # Build API
-${PYTHONEXE} setup.py build build_api build_help install
+sudo ${PYTHONEXE} setup.py build build_api build_help install
 
 status=$?
 if [ $status -ne 0 ]; then
@@ -31,7 +31,7 @@ echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
 cd ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS
-${PYTHONEXE} build.py py2app
+sudo ${PYTHONEXE} build.py py2app
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
