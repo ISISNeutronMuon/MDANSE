@@ -3,6 +3,9 @@
 import os
 import sys
 
+from py2app.recipes import qt5
+qt5.check = lambda cmd, mf: None
+
 if sys.platform.startswith('darwin'):
     from setuptools import setup
 
