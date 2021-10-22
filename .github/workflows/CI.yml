@@ -201,6 +201,7 @@ jobs:
           name: OSX_artifacts
           path: ~/
       - run: |
+          brew install netcdf
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
           ~/Contents/Resources/bin/python -c "import Scientific.IO.NetCDF"
@@ -222,7 +223,7 @@ jobs:
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
       contains( github.ref, 'web' ) ||
-      contains( github.ref, '19_continuous_integration' )
+      contains( github.ref, 'xxxxxxxx' )
 
   deploy_osx_old:
     needs: ci_osx
