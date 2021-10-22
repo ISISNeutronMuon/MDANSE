@@ -184,6 +184,7 @@ jobs:
           retention-days: 1
 
   search_osx:
+    runs-on: macos-10.15
     steps:
       - run: |
           sudo conda create -p $HOME/tempenv python=2.7
