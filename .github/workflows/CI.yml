@@ -146,9 +146,6 @@ jobs:
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp $HOME/tempenv/lib/libiconv* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-      - run: |
-          $HOME/tempenv/bin/python -c "import vtk"
-          python2 -c "import vtk"
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -208,8 +205,6 @@ jobs:
           brew install netcdf
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
-          $HOME/Contents/Resources/bin/python -c "import wx"
-          $HOME/Contents/Resources/bin/python -c "import vtk"
       - name: Deploy MDANSE
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -228,7 +223,8 @@ jobs:
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
       contains( github.ref, 'web' ) ||
-      contains( github.ref, '19_continuous_integration' )
+      contains( github.ref, '19_continuous_integration' ) ||
+      False
 
   deploy_osx_old:
     needs: ci_osx
@@ -254,7 +250,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: MacOS executable
+          name: MacOS executable old
           path: ${{ github.workspace }}/*.dmg
     if: |
       contains( github.ref, 'master' ) ||
