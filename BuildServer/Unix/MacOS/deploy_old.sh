@@ -30,6 +30,10 @@ fi
 echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
+# Replace buggy py2app files
+sudo rm $HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes/qt*
+sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt* $HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes
+
 cd ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS
 sudo ${PYTHONEXE} build.py py2app "$GITHUB_WORKSPACE" "$VERSION_NAME" "$CI_TEMP_BUILD_DIR" "$CI_TEMP_DIR"
 status=$?
