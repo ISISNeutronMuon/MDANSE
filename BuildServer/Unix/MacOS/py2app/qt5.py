@@ -16,7 +16,7 @@ def check(cmd, mf):
 
         except ImportError:
             pass
-
+        return None
         try:
             import PyQt5
             from PyQt5.QtCore import QLibraryInfo
