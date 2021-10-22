@@ -2,7 +2,6 @@
 
 import os
 import sys
-import subprocess
 
 if sys.platform.startswith('darwin'):
     from setuptools import setup
@@ -24,6 +23,16 @@ if sys.platform.startswith('darwin'):
         u'CFBundleIdentifier': u'eu.ill.MDANSE-'+version,
         u'LSApplicationCategoryType': u'public.app-category.science'
     }
+
+    try:
+        temp_build_dir = os.environ['CI_TEMP_BUILD_DIR']
+    except KeyError:
+        temp_build_dir = sys.argv[4]
+    try:
+        temp_dir = os.path.join(os.environ['CI_TEMP_DIR'],'dist')
+    except KeyError:
+        temp_dir = os.path.join(sys.argv[5], 'dist')
+
     OPTIONS = {
         'argv_emulation': False,# has to be False otherwise triggers problems with wxPython which lose some events that are captured by OS
         'iconfile': os.path.join(project_dir,'MDANSE','GUI','Icons','mdanse.icns'),
@@ -31,8 +40,8 @@ if sys.platform.startswith('darwin'):
 		'matplotlib_backends': '-',
         'optimize': '1',
         'plist': PLIST,
-        'bdist_base': os.environ['CI_TEMP_BUILD_DIR'] or sys.argv[4],
-        'dist_dir': os.path.join(os.environ['CI_TEMP_DIR'] or sys.argv[5],'dist'),
+        'bdist_base': temp_build_dir,
+        'dist_dir': temp_dir,
         'graph': False,
         'xref': False,
         'packages' : ["MDANSE","MMTK","Scientific","matplotlib"]
