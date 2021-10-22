@@ -223,8 +223,7 @@ jobs:
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
       contains( github.ref, 'web' ) ||
-      contains( github.ref, '19_continuous_integration' ) ||
-      False
+      contains( github.ref, 'ssssss' )
 
   deploy_osx_old:
     needs: ci_osx

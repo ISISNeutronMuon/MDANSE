@@ -13,9 +13,7 @@ if sys.platform.startswith('darwin'):
         version = os.environ['VERSION_NAME']
     except KeyError:
         project_dir = sys.argv[2]
-        echoes = subprocess.check_output(os.path.join(project_dir, 'BuildServer', 'Unix', 'setup_ci.sh'))
-        print echoes
-        version = echoes.split('/n')[-1]
+        version = sys.argv[3]
 
     APP = [os.path.join(project_dir,'Scripts','mdanse_gui')]
 
@@ -33,8 +31,8 @@ if sys.platform.startswith('darwin'):
 		'matplotlib_backends': '-',
         'optimize': '1',
         'plist': PLIST,
-        'bdist_base': os.environ['CI_TEMP_BUILD_DIR'],
-        'dist_dir': os.path.join(os.environ['CI_TEMP_DIR'],'dist'),
+        'bdist_base': os.environ['CI_TEMP_BUILD_DIR'] or sys.argv[4],
+        'dist_dir': os.path.join(os.environ['CI_TEMP_DIR'] or sys.argv[5],'dist'),
         'graph': False,
         'xref': False,
         'packages' : ["MDANSE","MMTK","Scientific","matplotlib"]
