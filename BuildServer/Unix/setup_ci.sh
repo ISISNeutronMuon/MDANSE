@@ -64,3 +64,4 @@ else
 	fi
 fi
 export VERSION_NAME
+echo $VERSION_NAME

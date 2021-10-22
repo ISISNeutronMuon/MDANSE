@@ -2,12 +2,18 @@
 
 import os
 import sys
+import subprocess
 
 if sys.platform.startswith('darwin'):
     from setuptools import setup
 
-    version = os.environ['VERSION_NAME']
-    project_dir = os.environ['CI_PROJECT_DIR']
+    project_dir = os.environ['GITHUB_WORKSPACE']
+    try:
+        version = os.environ['VERSION_NAME']
+    except KeyError:
+        echoes = subprocess.check_output(os.path.join(project_dir, 'BuildServer', 'Unix', 'setup_ci.sh'))
+        print echoes
+        version = echoes.split('/n')[-1]
 
     APP = [os.path.join(project_dir,'Scripts','mdanse_gui')]
 

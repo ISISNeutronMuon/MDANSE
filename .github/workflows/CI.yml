@@ -144,9 +144,7 @@ jobs:
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          echo "----------------"
-          sudo find $HOME/tempenv/lib -name 'lib*'
+          sudo cp $HOME/tempenv/lib/lib* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -183,14 +181,6 @@ jobs:
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
 
-  search_osx:
-    runs-on: macos-10.15
-    steps:
-      - run: |
-          sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c daf wxpython
-          sudo find / -name 'libwx*' -print 2>/dev/null
-
   deploy_osx:
     needs: ci_osx
     runs-on: macos-10.15
@@ -205,6 +195,7 @@ jobs:
           brew install netcdf
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
+          $HOME/Contents/Resources/bin/python -c "import vtk"
           $HOME/Contents/Resources/bin/python -c "import wx"
       - name: Deploy MDANSE
         run: |
@@ -244,6 +235,7 @@ jobs:
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
+          printenv
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy_old.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
