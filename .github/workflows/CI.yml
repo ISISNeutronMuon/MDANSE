@@ -184,6 +184,7 @@ jobs:
 
   search_osx:
     runs-on: macos-10.15
+    if: False
     steps:
       - run: |
           brew install netcdf
@@ -200,7 +201,6 @@ jobs:
           name: OSX_artifacts
           path: ~/
       - run: |
-          brew install netcdf
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
       - name: Deploy MDANSE
@@ -221,7 +221,7 @@ jobs:
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
       contains( github.ref, 'web' ) ||
-      contains( github.ref, 'ssssss' )
+      contains( github.ref, '19_continuous_integration' )
 
   deploy_osx_old:
     needs: ci_osx
