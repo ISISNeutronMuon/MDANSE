@@ -142,7 +142,6 @@ jobs:
           sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c daf wxpython
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
@@ -183,7 +182,14 @@ jobs:
           name: OSX_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
-  
+
+  search_osx:
+    steps:
+      - run: |
+          sudo conda create -p $HOME/tempenv python=2.7
+          sudo conda install -p $HOME/tempenv -c daf wxpython
+          sudo find / -name 'libwx*' -print 2>/dev/null
+
   deploy_osx:
     needs: ci_osx
     runs-on: macos-10.15
