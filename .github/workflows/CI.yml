@@ -49,7 +49,6 @@ jobs:
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-      - run: sudo find / -name "libhdf5*"
       - name: Install ScientificPython
         run: |
           cd $HOME
@@ -73,22 +72,23 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Tar artifacts
-        if: ${{ (matrix.os == 'ubuntu-18.04') }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 python
           tar -czf python.tar.gz python
       - name: Upload artifacts
-        if: ${{ (matrix.os == 'ubuntu-18.04') }}
         uses: actions/upload-artifact@v2
         with:
-          name: ubuntu_artifacts
+          name: ${{ matrix.os }}_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
 
   deploy_ubuntu:
     needs: ci_ubuntu
-    runs-on: ubuntu-18.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ 'ubuntu-18.04', 'ubuntu-20.04' ]
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
@@ -96,7 +96,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '19_continuous_integration' )
     steps:
       - uses: actions/checkout@v2
       - name: Download artifacts
@@ -117,7 +118,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Ubuntu installer
+          name: ${{ matrix.os }}_installer
           path: ${{ github.workspace }}/*.deb
           retention-days: 90
 
@@ -139,8 +140,6 @@ jobs:
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb py2app
-          sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/py2app/recipes"
-          sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/py2app/recipes"
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
