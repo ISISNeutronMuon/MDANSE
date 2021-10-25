@@ -5,7 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: False
+    if: True
     strategy:
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
@@ -49,6 +49,7 @@ jobs:
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+      - run: sudo find / -name "libhdf5*"
       - name: Install ScientificPython
         run: |
           cd $HOME
@@ -71,7 +72,9 @@ jobs:
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
-      - run: |
+      - name: Tar artifacts
+        if: ${{ (matrix.os == 'ubuntu-18.04') }}
+        run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 python
           tar -czf python.tar.gz python
@@ -93,8 +96,7 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) ||
-      contains( github.ref, '19_continuous_integration' )
+      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
       - name: Download artifacts
@@ -137,6 +139,7 @@ jobs:
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb py2app
+          sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt*" "$RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/py2app/recipes"
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
