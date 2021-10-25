@@ -5,7 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: False
+    if: True
     strategy:
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
@@ -71,24 +71,26 @@ jobs:
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
+      - name: Copy over libraries
+        if: ${{ (matrix.os == 'ubuntu-18.04') }}
+        run: sudo cp /usr/lib/x86_64-linux-gnu/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Tar artifacts
+        if: ${{ (matrix.os == 'ubuntu-18.04') }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 python
           tar -czf python.tar.gz python
       - name: Upload artifacts
+        if: ${{ (matrix.os == 'ubuntu-18.04') }}
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.os }}_artifacts
+          name: ubuntu_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
 
   deploy_ubuntu:
     needs: ci_ubuntu
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ 'ubuntu-18.04', 'ubuntu-20.04' ]
+    runs-on: ubuntu-18.04
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
@@ -103,8 +105,9 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: ${{ matrix.os }}_artifacts
+          name: ubuntu_artifacts
           path: ~/
+      - run: sudo find / -name libhdf5*
       - name: Untar artifacts
         run: |
           tar -xzf ~/python.tar.gz -C $HOME
@@ -118,7 +121,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.os }}_installer
+          name: Ubuntu_installer
           path: ${{ github.workspace }}/*.deb
           retention-days: 90
 
