@@ -34,7 +34,7 @@ MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 sudo rm $HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes/qt*
 sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt* $HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes
 
-cd ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS
+cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS"
 sudo ${PYTHONEXE} build.py py2app "$GITHUB_WORKSPACE" "$VERSION_NAME" "$CI_TEMP_BUILD_DIR" "$CI_TEMP_DIR"
 status=$?
 if [ $status -ne 0 ]; then
@@ -43,6 +43,7 @@ if [ $status -ne 0 ]; then
 fi
 
 # Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
+echo "Add mdanse version file"
 echo "${VERSION_NAME}" > "${MDANSE_APP_DIR}/Contents/Resources/version"
 
 #############################
