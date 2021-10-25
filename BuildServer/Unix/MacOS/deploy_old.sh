@@ -43,7 +43,7 @@ if [ $status -ne 0 ]; then
 fi
 
 # Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
-echo "${VERSION_NAME}" > ${MDANSE_APP_DIR}/Contents/Resources/version
+echo "${VERSION_NAME}" > "${MDANSE_APP_DIR}/Contents/Resources/version"
 
 #############################
 # Copying Python
@@ -52,6 +52,7 @@ echo "${VERSION_NAME}" > ${MDANSE_APP_DIR}/Contents/Resources/version
 ### see http://joaoventura.net/blog/2016/embeddable-python-osx/ for technical details
 ### In our case we also want the user to be able to start directly python without launching the bundle executable (e.g. to run scripts in command line) which is the reason
 ### why we have to modify the python executable appropriately with the following commands
+echo -e "${BLUE}""Copying python""${NORMAL}"
 rm ${MDANSE_APP_DIR}/Contents/MacOS/python
 mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
 cp /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin/python
@@ -70,7 +71,7 @@ cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents
 
 chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 
-# Change dylib paths
+echo -e "${BLUE}""Changing dyilib paths""${NORMAL}"
 files=`ls ${MDANSE_APP_DIR}/Contents/Frameworks/libwx*.dylib`
 
 libs="osx_cocoau_xrc osx_cocoau_webview osx_cocoau_html osx_cocoau_qa osx_cocoau_adv osx_cocoau_core baseu_xml baseu_net baseu"
@@ -106,5 +107,5 @@ rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/zmq
 hdiutil unmount /Volumes/MDANSE -force -quiet
 sleep 5
 
-${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/create-dmg --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
+"${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/create-dmg" --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
 mv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/${MDANSE_DMG} ${GITHUB_WORKSPACE}
