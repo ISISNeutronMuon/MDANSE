@@ -32,8 +32,8 @@ MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
 # Replace buggy py2app files
 echo "Replacing buggy python2 files"
-sudo rm "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes/qt*"
-sudo cp "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt*" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
+sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
+sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
 
 echo "Building mdanse app"
 cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS"

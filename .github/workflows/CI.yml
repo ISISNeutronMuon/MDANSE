@@ -5,7 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: True
+    if: False
     strategy:
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
@@ -139,7 +139,8 @@ jobs:
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb py2app
-          sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt*" "$RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/py2app/recipes"
+          sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/py2app/recipes"
+          sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/py2app/recipes"
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
