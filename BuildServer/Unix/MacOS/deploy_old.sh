@@ -35,8 +35,10 @@ echo "Replacing buggy python2 files"
 sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
 sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
 
+echo "Moving dirs"
+cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS"
 echo "Building mdanse app"
-sudo ${PYTHONEXE} ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/build.py py2app "$GITHUB_WORKSPACE" "$VERSION_NAME" "$CI_TEMP_BUILD_DIR" "$CI_TEMP_DIR"
+sudo ${PYTHONEXE} build.py py2app "$GITHUB_WORKSPACE" "$VERSION_NAME" "$CI_TEMP_BUILD_DIR" "$CI_TEMP_DIR"
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
