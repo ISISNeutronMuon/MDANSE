@@ -113,12 +113,12 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: sphinx log
-          path: /temp/sphinx*.log
+          path: /tmp/sphinx*.log
 
   # OSX
   ci_osx:
     runs-on: macos-10.15
-    if: True
+    if: False
     steps:
       - uses: actions/checkout@v2
       - name: Install python
