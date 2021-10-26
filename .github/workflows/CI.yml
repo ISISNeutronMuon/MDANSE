@@ -199,7 +199,7 @@ jobs:
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-          $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
+          $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy_old.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -213,7 +213,7 @@ jobs:
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
       contains( github.ref, 'web' ) ||
-      contains( github.ref, 'xxxxxxxx' )
+      contains( github.ref, '19_continuous_integration' )
 
   deploy_osx_old:
     needs: ci_osx
@@ -229,13 +229,22 @@ jobs:
           brew install netcdf
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
-      - name: Deploy MDANSE
+      - name: Prepare VM
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-          printenv GITHUB_WORKSPACE
-          export TEMPENV_WORKSPACE=$GITHUB_WORKSPACE
-          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy_old.sh
+          $HOME/Contents/Resources/bin/python -c "import os; print os.environ"
+      - name: Build MDANSE
+        run: |
+          cd $GITHUB_WORKSPACE
+          sudo $HOME/Contents/Resources/bin/python setup.py build build_api build_help install
+      - name: Build using py2app
+        run: |
+          cd $GITHUB_WORKSPACE
+          sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
+          sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
+          sudo $HOME/Contents/Resources/bin/python build.py py2app
+          echo "${VERSION_NAME}" > "${CI_TEMP_DIR}/dist/MDANSE.app/Contents/Resources/version"
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
