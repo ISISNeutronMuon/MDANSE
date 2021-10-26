@@ -1,7 +1,7 @@
 Package: mdanse
 Version: 1.0.0
 Architecture: amd64
-Depends: dpkg, netcdf-bin, libnetcdf-dev
+Depends: netcdf-bin, libnetcdf-dev
 Section: Science
 Priority: optional
 Installed-Size: 1000
