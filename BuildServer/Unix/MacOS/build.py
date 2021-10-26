@@ -17,12 +17,12 @@ if sys.platform.startswith('darwin'):
     try:
         project_dir = os.environ['GITHUB_WORKSPACE']
     except KeyError as e:
-        project_dir = args.project_dir
+        project_dir = args.project_dir.replace("'", '').replace('"', '')
         print e
     try:
         version = os.environ['VERSION_NAME']
     except KeyError:
-        version = args.version
+        version = args.version.replace("'", '').replace('"', '')
 
     APP = [os.path.join(project_dir, 'Scripts', 'mdanse_gui')]
 
@@ -37,11 +37,11 @@ if sys.platform.startswith('darwin'):
     try:
         temp_build_dir = os.environ['CI_TEMP_BUILD_DIR']
     except KeyError:
-        temp_build_dir = args.temp_build_dir
+        temp_build_dir = args.temp_build_dir.replace("'", '').replace('"', '')
     try:
         temp_dir = os.path.join(os.environ['CI_TEMP_DIR'],'dist')
     except KeyError:
-        temp_dir = args.temp_dir
+        temp_dir = args.temp_dir.replace("'", '').replace('"', '')
 
     OPTIONS = {
         'argv_emulation': False,# has to be False otherwise triggers problems with wxPython which lose some events that are captured by OS
