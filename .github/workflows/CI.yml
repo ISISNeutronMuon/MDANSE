@@ -108,12 +108,12 @@ jobs:
           name: Ubuntu_installer
           path: ${{ github.workspace }}/*.deb
           retention-days: 90
-    - name: upload sphinx log
-      if: always()
-      uses: actions/upload-artifact@v2
-      with:
-        name: sphinx log
-        path: /temp/sphinx*.log
+      - name: upload sphinx log
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: sphinx log
+          path: /temp/sphinx*.log
 
   # OSX
   ci_osx:
