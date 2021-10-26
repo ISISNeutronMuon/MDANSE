@@ -37,18 +37,6 @@ jobs:
           sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-        if:
-      - name: Install wx and vtk
-        run: |
-          sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c daf wxpython
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-gtk2/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp -r $HOME/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -r $HOME/tempenv/include/wx-3.0/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
-          sudo cp $HOME/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install ScientificPython
         run: |
           cd $HOME
@@ -74,8 +62,7 @@ jobs:
       - name: Copy over libraries
         if: ${{ (matrix.os == 'ubuntu-18.04') }}
         run: |
-          sudo cp /usr/lib/x86_64-linux-gnu/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo find / -name libsz*
+          sudo cp -r /usr/lib/x86_64-linux-gnu/ $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Tar artifacts
         if: ${{ (matrix.os == 'ubuntu-18.04') }}
         run: |
@@ -109,7 +96,6 @@ jobs:
         with:
           name: ubuntu_artifacts
           path: ~/
-      - run: sudo find / -name libhdf5*
       - name: Untar artifacts
         run: |
           tar -xzf ~/python.tar.gz -C $HOME
@@ -130,6 +116,7 @@ jobs:
   # OSX
   ci_osx:
     runs-on: macos-10.15
+    if: False
     steps:
       - uses: actions/checkout@v2
       - name: Install python
