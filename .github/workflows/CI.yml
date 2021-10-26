@@ -128,6 +128,7 @@ jobs:
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb py2app
+          python2 -c "import sphinx; sphinx.__version__
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -230,6 +231,7 @@ jobs:
           brew install netcdf
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
+      - run: $HOME/Contents/Resources/bin/python -c "import sphinx"
       - name: Prepare VM
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -264,7 +266,7 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
-    if: False
+    if: True
     steps:
       - name: Install python
         uses: actions/setup-python@v2
