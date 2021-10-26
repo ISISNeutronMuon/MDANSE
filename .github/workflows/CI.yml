@@ -108,6 +108,12 @@ jobs:
           name: Ubuntu_installer
           path: ${{ github.workspace }}/*.deb
           retention-days: 90
+    - name: upload sphinx log
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: sphinx log
+        path: /temp/sphinx*.log
 
   # OSX
   ci_osx:
@@ -128,7 +134,7 @@ jobs:
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb py2app
-          python2 -c "import sphinx; sphinx.__version__
+          python2 -c "import sphinx; sphinx.__version__"
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -266,7 +272,7 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
-    if: True
+    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2
