@@ -5,7 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: False
+    if: True
     strategy:
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
@@ -73,7 +73,9 @@ jobs:
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Copy over libraries
         if: ${{ (matrix.os == 'ubuntu-18.04') }}
-        run: sudo cp /usr/lib/x86_64-linux-gnu/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+        run: |
+          sudo cp /usr/lib/x86_64-linux-gnu/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo find / -name libsz*
       - name: Tar artifacts
         if: ${{ (matrix.os == 'ubuntu-18.04') }}
         run: |
