@@ -5,7 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: True
+    if: False
     strategy:
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
@@ -108,14 +108,6 @@ jobs:
           name: Ubuntu_installer
           path: ${{ github.workspace }}/*.deb
           retention-days: 90
-      - if: always()
-        run: sudo cp /tmp/sphinx*.log $HOME
-      - name: upload sphinx log
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: sphinx log
-          path: ~/sphinx*.log
 
   # OSX
   ci_osx:
@@ -205,7 +197,7 @@ jobs:
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
           ~/Contents/Resources/bin/python -m pip install sphinx==1.6.7
-          ~/Contents/Resources/bin/python -c "import sphinx, sphinx.__version__"
+          ~/Contents/Resources/bin/python -c "import sphinx, print sphinx.__version__"
       - name: Deploy MDANSE
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -240,13 +232,14 @@ jobs:
           brew install netcdf
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
-      - run: $HOME/Contents/Resources/bin/python -c "import sphinx; sphinx.__version__"
+      - run: $HOME/Contents/Resources/bin/python -c "import sphinx; print sphinx.__version__"
       - name: Prepare VM
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           $HOME/Contents/Resources/bin/python -c "import os; print os.environ"
       - name: Build MDANSE
+        if: False
         run: |
           cd $GITHUB_WORKSPACE
           sudo $HOME/Contents/Resources/bin/python setup.py build build_api build_help install
