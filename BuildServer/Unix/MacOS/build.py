@@ -1,21 +1,27 @@
 # coding=utf-8
 
+import argparse
 import os
 import sys
 
-from py2app.recipes import qt5
-qt5.check = lambda cmd, mf: None
+parser = argparse.ArgumentParser()
+parser.add_argument('--project_dir')
+parser.add_argument('--version')
+parser.add_argument('--temp_build_dir')
+parser.add_argument('--temp_dir')
+args = parser.parse_args()
 
 if sys.platform.startswith('darwin'):
     from setuptools import setup
 
     try:
-        project_dir = os.environ.get('GITHUB_WORKSPACE',
-                                     os.environ['RUNNER_WORKSPACE'])
+        project_dir = os.environ.get('GITHUB_WORKSPACE', os.environ['RUNNER_WORKSPACE'])
+    except KeyError:
+        project_dir = args.project_dir
+    try:
         version = os.environ['VERSION_NAME']
     except KeyError:
-        project_dir = sys.argv[2]
-        version = sys.argv[3]
+        version = args.version
 
     APP = [os.path.join(project_dir,'Scripts','mdanse_gui')]
 
@@ -30,11 +36,11 @@ if sys.platform.startswith('darwin'):
     try:
         temp_build_dir = os.environ['CI_TEMP_BUILD_DIR']
     except KeyError:
-        temp_build_dir = sys.argv[4]
+        temp_build_dir = args.temp_build_dir
     try:
         temp_dir = os.path.join(os.environ['CI_TEMP_DIR'],'dist')
     except KeyError:
-        temp_dir = os.path.join(sys.argv[5], 'dist')
+        temp_dir = args.temp_dir
 
     OPTIONS = {
         'argv_emulation': False,# has to be False otherwise triggers problems with wxPython which lose some events that are captured by OS
