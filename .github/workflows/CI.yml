@@ -108,7 +108,8 @@ jobs:
           name: Ubuntu_installer
           path: ${{ github.workspace }}/*.deb
           retention-days: 90
-      - run: sudo cp /tmp/sphinx*.log $HOME
+      - if: always()
+        run: sudo cp /tmp/sphinx*.log $HOME
       - name: upload sphinx log
         if: always()
         uses: actions/upload-artifact@v2
