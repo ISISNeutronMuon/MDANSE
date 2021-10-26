@@ -108,17 +108,18 @@ jobs:
           name: Ubuntu_installer
           path: ${{ github.workspace }}/*.deb
           retention-days: 90
+      - run: sudo cp /tmp/sphinx*.log $HOME
       - name: upload sphinx log
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: sphinx log
-          path: /tmp/sphinx*.log
+          path: ~/sphinx*.log
 
   # OSX
   ci_osx:
     runs-on: macos-10.15
-    if: False
+    if: True
     steps:
       - uses: actions/checkout@v2
       - name: Install python
@@ -134,7 +135,7 @@ jobs:
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb py2app
-          python2 -c "import sphinx; sphinx.__version__"
+      - run: python2 -c "import sphinx; print sphinx.__version__"
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -202,6 +203,7 @@ jobs:
           brew install netcdf
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
+          ~/Contents/Resources/bin/python -m pip install sphinx==1.6.7
           ~/Contents/Resources/bin/python -c "import sphinx, sphinx.__version__"
       - name: Deploy MDANSE
         run: |
@@ -237,7 +239,7 @@ jobs:
           brew install netcdf
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
-      - run: $HOME/Contents/Resources/bin/python -c "import sphinx"
+      - run: $HOME/Contents/Resources/bin/python -c "import sphinx; sphinx.__version__"
       - name: Prepare VM
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
