@@ -5,11 +5,12 @@ import os
 import sys
 
 parser = argparse.ArgumentParser()
+parser.add_argument('py2app')
 parser.add_argument('--project_dir')
 parser.add_argument('--version')
 parser.add_argument('--temp_build_dir')
 parser.add_argument('--temp_dir')
-args, pyapp = parser.parse_known_args()
+args= parser.parse_args()
 
 if sys.platform.startswith('darwin'):
     from setuptools import setup

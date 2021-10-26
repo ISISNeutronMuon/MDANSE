@@ -5,7 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: False
+    if: True
     strategy:
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
@@ -25,7 +25,6 @@ jobs:
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
-          sudo cp /usr/lib/x86_64-linux-gnu/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -59,10 +58,6 @@ jobs:
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
-      - name: Copy over libraries
-        if: ${{ (matrix.os == 'ubuntu-18.04') }}
-        run: |
-          sudo cp -r /usr/lib/x86_64-linux-gnu/ $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Tar artifacts
         if: ${{ (matrix.os == 'ubuntu-18.04') }}
         run: |
