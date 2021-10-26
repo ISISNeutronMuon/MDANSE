@@ -9,7 +9,7 @@ parser.add_argument('--project_dir')
 parser.add_argument('--version')
 parser.add_argument('--temp_build_dir')
 parser.add_argument('--temp_dir')
-args = parser.parse_args()
+args, pyapp = parser.parse_known_args()
 
 if sys.platform.startswith('darwin'):
     from setuptools import setup
