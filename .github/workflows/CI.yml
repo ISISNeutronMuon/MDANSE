@@ -199,7 +199,7 @@ jobs:
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-          sudo $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy_old.sh
+          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy_old.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -243,7 +243,7 @@ jobs:
           cd $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/
           sudo cp -fv "py2app/qt5.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
           sudo cp -fv "py2app/qt6.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
-          sudo $HOME/Contents/Resources/bin/python build.py py2app
+          sudo $HOME/Contents/Resources/bin/python build.py py2app --project_dir $GITHUB_WORKSPACE --version $VERSION_NAME --temp_build_dir $CI_TEMP_BUILD_DIR --temp_dir $CI_TEMP_DIR
           echo "${VERSION_NAME}" > "${CI_TEMP_DIR}/dist/MDANSE.app/Contents/Resources/version"
       - name: Upload artifacts
         uses: actions/upload-artifact@v2

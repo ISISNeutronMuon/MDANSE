@@ -15,15 +15,16 @@ if sys.platform.startswith('darwin'):
     from setuptools import setup
 
     try:
-        project_dir = os.environ.get('GITHUB_WORKSPACE', os.environ['RUNNER_WORKSPACE'])
-    except KeyError:
+        project_dir = os.environ['GITHUB_WORKSPACE']
+    except KeyError as e:
         project_dir = args.project_dir
+        print e
     try:
         version = os.environ['VERSION_NAME']
     except KeyError:
         version = args.version
 
-    APP = [os.path.join(project_dir,'Scripts','mdanse_gui')]
+    APP = [os.path.join(project_dir, 'Scripts', 'mdanse_gui')]
 
     PLIST = {
         u'CFBundleName': u'MDANSE',
