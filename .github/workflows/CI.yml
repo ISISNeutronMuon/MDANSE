@@ -5,7 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: True
+    if: False
     strategy:
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
@@ -123,13 +123,13 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ubuntu-21.04_installer
-          path: ${{ github.workspace }}/*.deb
+          path: ${{ github.workspace }}/*21*.deb
           retention-days: 90
 
   # OSX
   ci_osx:
     runs-on: macos-10.15
-    if: False
+    if: True
     steps:
       - uses: actions/checkout@v2
       - name: Install python
@@ -144,7 +144,7 @@ jobs:
           sudo cp /usr/local/opt/netcdf/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install dependecies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb py2app docutils==0.17.1
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
