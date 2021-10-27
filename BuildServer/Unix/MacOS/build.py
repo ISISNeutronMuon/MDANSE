@@ -2,7 +2,7 @@
 
 import os
 import sys
-
+print sys.argv
 if sys.platform.startswith('darwin'):
     from setuptools import setup
 
