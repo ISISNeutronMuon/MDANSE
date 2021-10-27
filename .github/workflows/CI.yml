@@ -17,7 +17,7 @@ jobs:
           python-version: '2.7.18'
       - name: Install libraries
         if: ${{ (matrix.os == 'ubuntu-18.04') }}
-        run: sudo apt-get install netcdf-bin libnetcdf-dev libwxgtk3.0-dev python-wxgtk3.0 libvtk6.3 libvtk6-dev python-vtk6 python-dev
+        run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev
       - name: Install libraries
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
         run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev libgtk2.0-0 libgtk2.0-dev
@@ -110,7 +110,7 @@ jobs:
           retention-days: 90
       - name: Edit postinst
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
-        run: sed '$ a ln -s /usr/lib/x86_64-linux-gnu/libnetcdf.so.18 /usr/local/lib/libnetcdf.so.15' $GITHUB_WORKSPACE/
+        run: sed '$ a ln -s /usr/lib/x86_64-linux-gnu/libnetcdf.so.18 /usr/local/lib/libnetcdf.so.15' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/Resources/DEBIAN/postinst
       - name: Deploy for ubuntu 21
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
         run: |
@@ -128,7 +128,7 @@ jobs:
   # OSX
   ci_osx:
     runs-on: macos-10.15
-    if: False
+    if: True
     steps:
       - uses: actions/checkout@v2
       - name: Install python
