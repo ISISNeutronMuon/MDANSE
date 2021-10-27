@@ -61,7 +61,7 @@ echo -e "${BLUE}""Copying python""${NORMAL}"
 cp /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin/python
 
 cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
-cp /System/Library/Frameworks/Python.framework/Versions/2.7/Python ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
+sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Python ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
 chmod 777 ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
 
 install_name_tool -change /System/Library/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Resources/lib/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
