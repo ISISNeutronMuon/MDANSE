@@ -6,8 +6,14 @@ import sys
 if sys.platform.startswith('darwin'):
     from setuptools import setup
 
-    project_dir = os.getenv('GITHUB_WORKSPACE')
-    version = os.getenv('VERSION_NAME')
+    try:
+        project_dir = os.environ['CI_PROJECT_DIR']
+    except KeyError:
+        project_dir = sys.argv[2]
+    try:
+        version = os.environ['VERSION_NAME']
+    except KeyError:
+        version = sys.argv[3]
 
     APP = [os.path.join(project_dir,'Scripts','mdanse_gui')]
 
@@ -18,6 +24,16 @@ if sys.platform.startswith('darwin'):
         u'CFBundleIdentifier': u'eu.ill.MDANSE-'+version,
         u'LSApplicationCategoryType': u'public.app-category.science'
     }
+
+    try:
+        temp_build = os.environ['CI_TEMP_BUILD_DIR']
+    except KeyError:
+        temp_build = sys.argv[4]
+    try:
+        temp_dir = os.path.join(os.environ['CI_TEMP_DIR'], 'dist')
+    except KeyError:
+        temp_dir = sys.argv[5]
+
     OPTIONS = {
         'argv_emulation': False,# has to be False otherwise triggers problems with wxPython which lose some events that are captured by OS
         'iconfile': os.path.join(project_dir,'MDANSE','GUI','Icons','mdanse.icns'),
@@ -25,8 +41,8 @@ if sys.platform.startswith('darwin'):
 		'matplotlib_backends': '-',
         'optimize': '1',
         'plist': PLIST,
-        'bdist_base': os.getenv('CI_TEMP_BUILD_DIR'),
-        'dist_dir': os.path.join(os.getenv('CI_TEMP_DIR'),'dist'),
+        'bdist_base': temp_build,
+        'dist_dir': temp_dir,
         'graph': False,
         'xref': False,
         'packages' : ["MDANSE","MMTK","Scientific","matplotlib"]

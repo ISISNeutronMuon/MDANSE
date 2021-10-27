@@ -5,7 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: True
+    if: False
     strategy:
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
@@ -112,7 +112,7 @@ jobs:
   # OSX
   ci_osx:
     runs-on: macos-10.15
-    if: False
+    if: True
     steps:
       - uses: actions/checkout@v2
       - name: Install python
@@ -241,7 +241,7 @@ jobs:
           cd $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/
           sudo cp -fv "py2app/qt5.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
           sudo cp -fv "py2app/qt6.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
-          sudo $HOME/Contents/Resources/bin/python build.py py2app "$GITHUB_WORKSPACE"
+          sudo $HOME/Contents/Resources/bin/python build.py py2app "$GITHUB_WORKSPACE" "$VERSION_NAME" "$CI_TEMP_BUILD_DIR" "$CI_TEMP_DIR"
           echo "${VERSION_NAME}" > "${CI_TEMP_DIR}/dist/MDANSE.app/Contents/Resources/version"
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
