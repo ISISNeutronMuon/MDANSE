@@ -25,7 +25,6 @@ jobs:
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
-          sudo cp /usr/lib/x86_64-linux-gnu/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -69,13 +68,16 @@ jobs:
         if: ${{ (matrix.os == 'ubuntu-18.04') }}
         uses: actions/upload-artifact@v2
         with:
-          name: ubuntu_artifacts
+          name: ${{ matrix.os }}_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
 
   deploy_ubuntu:
     needs: ci_ubuntu
-    runs-on: ubuntu-18.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['ubuntu-18.04', 'ubuntu-20.04']
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
@@ -90,7 +92,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: ubuntu_artifacts
+          name: ${{ matrix.os }}_artifacts
           path: ~/
       - name: Untar artifacts
         run: |
@@ -105,7 +107,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Ubuntu_installer
+          name: ${{ matrix.os }}_installer
           path: ${{ github.workspace }}/*.deb
           retention-days: 90
 
@@ -241,7 +243,7 @@ jobs:
           cd $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/
           sudo cp -fv "py2app/qt5.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
           sudo cp -fv "py2app/qt6.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
-          sudo $HOME/Contents/Resources/bin/python build.py py2app
+          sudo $HOME/Contents/Resources/bin/python build.py py2app "$GITHUB_WORKSPACE"
           echo "${VERSION_NAME}" > "${CI_TEMP_DIR}/dist/MDANSE.app/Contents/Resources/version"
       - name: Upload artifacts
         uses: actions/upload-artifact@v2

@@ -5,9 +5,12 @@ import sys
 
 if sys.platform.startswith('darwin'):
     from setuptools import setup
-
-    version = os.environ['VERSION_NAME']
-    project_dir = os.environ['CI_PROJECT_DIR']
+    print os.environ
+    try:
+        project_dir = os.environ['GITHUB_WORKSPACE']
+    except KeyError:
+        pass
+    version = os.getenv('VERSION_NAME')
 
     APP = [os.path.join(project_dir,'Scripts','mdanse_gui')]
 
