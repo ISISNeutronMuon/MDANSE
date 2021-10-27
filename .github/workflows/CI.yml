@@ -5,7 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: False
+    if: True
     strategy:
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
@@ -110,13 +110,13 @@ jobs:
           retention-days: 90
       - name: Edit postinst
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
-        run: sed '$ a ln -s /usr/lib/x86_64-linux-gnu/libnetcdf.so.18 /usr/local/lib/libnetcdf.so.15' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/Resources/DEBIAN/postinst
+        run: sed -i '$ a ln -s /usr/lib/x86_64-linux-gnu/libnetcdf.so.18 /usr/local/lib/libnetcdf.so.15' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/Resources/DEBIAN/postinst
       - name: Deploy for ubuntu 21
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-          export DISTRO=ubuntu21.04
+          export DISTRO=ubuntu-21.04
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
       - name: Upload ubuntu21 artifacts
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
@@ -129,7 +129,7 @@ jobs:
   # OSX
   ci_osx:
     runs-on: macos-10.15
-    if: True
+    if: False
     steps:
       - uses: actions/checkout@v2
       - name: Install python

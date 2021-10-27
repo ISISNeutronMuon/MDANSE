@@ -1,6 +1,6 @@
 export ARCH=amd64
 
-export DISTRO=$(lsb_release -c | cut -f2)
+export DISTRO=ubuntu-$(lsb_release -rs)
 
 export PYTHONEXE=/usr/bin/python
 
