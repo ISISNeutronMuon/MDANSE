@@ -5,7 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: False
+    if: True
     strategy:
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
@@ -23,7 +23,7 @@ jobs:
         run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev libgtk2.0-0 libgtk2.0-dev
       - name: Install dependencies
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
           sudo cp /usr/lib/x86_64-linux-gnu/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install wx and vtk
@@ -127,7 +127,7 @@ jobs:
           sudo cp /usr/local/opt/netcdf/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install dependecies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb py2app
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb py2app docutils==0.17.1
       - run: python2 -c "import sphinx; print sphinx.__version__"
       - name: Install wx and vtk
         run: |
@@ -247,7 +247,7 @@ jobs:
           cd $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/
           sudo cp -fv "py2app/qt5.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
           sudo cp -fv "py2app/qt6.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
-          sudo $HOME/Contents/Resources/bin/python build.py py2app --project_dir "$GITHUB_WORKSPACE" --version "$VERSION_NAME" --temp_build_dir "$CI_TEMP_BUILD_DIR" --temp_dir "$CI_TEMP_DIR"
+          sudo $HOME/Contents/Resources/bin/python build.py py2app
           echo "${VERSION_NAME}" > "${CI_TEMP_DIR}/dist/MDANSE.app/Contents/Resources/version"
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
