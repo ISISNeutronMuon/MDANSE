@@ -47,6 +47,7 @@ fi
 
 # Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "Add mdanse version file"
+mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
 echo "${VERSION_NAME}" > "${MDANSE_APP_DIR}/Contents/Resources/version"
 
 #############################
@@ -58,7 +59,6 @@ echo "${VERSION_NAME}" > "${MDANSE_APP_DIR}/Contents/Resources/version"
 ### why we have to modify the python executable appropriately with the following commands
 echo -e "${BLUE}""Copying python""${NORMAL}"
 rm ${MDANSE_APP_DIR}/Contents/MacOS/python
-mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
 cp /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin/python
 
 cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
