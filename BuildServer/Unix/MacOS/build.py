@@ -7,7 +7,7 @@ if sys.platform.startswith('darwin'):
     from setuptools import setup
 
     try:
-        project_dir = os.environ['CI_PROJECT_DIR']
+        project_dir = os.environ['GITHUB_WORKSPACE']
     except KeyError:
         project_dir = sys.argv[3]
     try:
@@ -36,7 +36,7 @@ if sys.platform.startswith('darwin'):
 
     OPTIONS = {
         'argv_emulation': False,# has to be False otherwise triggers problems with wxPython which lose some events that are captured by OS
-        'iconfile': os.path.join(project_dir, 'GUI', 'Icons', 'mdanse.icns'),
+        'iconfile': os.path.join(project_dir, 'Src', 'GUI', 'Icons', 'mdanse.icns'),
         'excludes': 'PyQt4',
 		'matplotlib_backends': '-',
         'optimize': '1',
