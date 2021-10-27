@@ -5,11 +5,8 @@ import sys
 
 if sys.platform.startswith('darwin'):
     from setuptools import setup
-    print os.environ
-    try:
-        project_dir = os.environ['GITHUB_WORKSPACE']
-    except KeyError:
-        pass
+
+    project_dir = os.getenv('GITHUB_WORKSPACE')
     version = os.getenv('VERSION_NAME')
 
     APP = [os.path.join(project_dir,'Scripts','mdanse_gui')]
@@ -28,8 +25,8 @@ if sys.platform.startswith('darwin'):
 		'matplotlib_backends': '-',
         'optimize': '1',
         'plist': PLIST,
-        'bdist_base': os.environ['CI_TEMP_BUILD_DIR'],
-        'dist_dir': os.path.join(os.environ['CI_TEMP_DIR'],'dist'),
+        'bdist_base': os.getenv('CI_TEMP_BUILD_DIR'),
+        'dist_dir': os.path.join(os.getenv('CI_TEMP_DIR'),'dist'),
         'graph': False,
         'xref': False,
         'packages' : ["MDANSE","MMTK","Scientific","matplotlib"]

@@ -5,7 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: True
+    if: False
     strategy:
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
@@ -59,13 +59,11 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Tar artifacts
-        if: ${{ (matrix.os == 'ubuntu-18.04') }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 python
           tar -czf python.tar.gz python
       - name: Upload artifacts
-        if: ${{ (matrix.os == 'ubuntu-18.04') }}
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -114,7 +112,7 @@ jobs:
   # OSX
   ci_osx:
     runs-on: macos-10.15
-    if: False
+    if: True
     steps:
       - uses: actions/checkout@v2
       - name: Install python
