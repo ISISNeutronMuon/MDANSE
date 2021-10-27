@@ -38,7 +38,7 @@ sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$HOME/Cont
 echo "Moving dirs"
 cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS"
 echo "Building mdanse app"
-${PYTHONEXE} build.py py2app
+sudo ${PYTHONEXE} build.py py2app --argv-inject "$GITHUB_WORKSPACE" "$VERSION_NAME" "$CI_TEMP_BUILD_DIR" "$CI_TEMP_DIR"
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
