@@ -2,18 +2,18 @@
 
 import os
 import sys
-print sys.argv
+
 if sys.platform.startswith('darwin'):
     from setuptools import setup
 
     try:
         project_dir = os.environ['CI_PROJECT_DIR']
     except KeyError:
-        project_dir = sys.argv[1]
+        project_dir = sys.argv[3]
     try:
         version = os.environ['VERSION_NAME']
     except KeyError:
-        version = sys.argv[2]
+        version = sys.argv[5]
 
     APP = [os.path.join(project_dir,'Scripts','mdanse_gui')]
 
@@ -28,11 +28,11 @@ if sys.platform.startswith('darwin'):
     try:
         temp_build = os.environ['CI_TEMP_BUILD_DIR']
     except KeyError:
-        temp_build = sys.argv[3]
+        temp_build = sys.argv[7]
     try:
         temp_dir = os.path.join(os.environ['CI_TEMP_DIR'], 'dist')
     except KeyError:
-        temp_dir = sys.argv[4]
+        temp_dir = sys.argv[9]
 
     OPTIONS = {
         'argv_emulation': False,# has to be False otherwise triggers problems with wxPython which lose some events that are captured by OS
