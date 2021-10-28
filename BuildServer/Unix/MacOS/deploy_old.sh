@@ -48,10 +48,10 @@ if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
 	exit $status
 fi
-sudo find $GITHUB_WORKSPACE/ -name "__boot__.py"
+
 # Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "Add mdanse version file"
-echo "${VERSION_NAME}" > "${MDANSE_APP_DIR}/Contents/Resources/version"
+sudo echo "${VERSION_NAME}" > "${MDANSE_APP_DIR}/Contents/Resources/version"
 
 #############################
 # Copying Python
@@ -83,7 +83,7 @@ cp $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_D
 "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
 
 # Comment the 'add_system_python_extras' call that add some System path to the sys.path
-sudo find ${MDANSE_APP_DIR} -name "__boot__.py"
+
 "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 
 #############################
