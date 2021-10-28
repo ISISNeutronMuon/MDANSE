@@ -81,7 +81,7 @@ cp -v $HOME/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
 "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
 
 # Comment the 'add_system_python_extras' call that add some System path to the sys.path
-cd ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
+cd ${MDANSE_APP_DIR}/Contents/Resources/
 ls
 "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 

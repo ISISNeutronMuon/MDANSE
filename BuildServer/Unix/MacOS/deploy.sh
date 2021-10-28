@@ -35,7 +35,7 @@ echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 # Copy the bundle
 echo $CI_TEMP_DIR
 mkdir -p $CI_TEMP_DIR/dist/MDANSE.app
-cp -R ${MDANSE_DEPENDENCIES_DIR} ${MDANSE_APP_DIR}
+cp -R -v ${MDANSE_DEPENDENCIES_DIR} ${MDANSE_APP_DIR}
 mkdir -p $MDANSE_APP_DIR/Framework
 cp $MDANSE_APP_DIR/Contents/Resources/lib/lib* $MDANSE_APP_DIR/Framework
 
@@ -48,6 +48,13 @@ cp $GITHUB_WORKSPACE/Scripts/mdanse_gui ${MDANSE_APP_DIR}/Contents/Resources/
 # Modify Info.plist and copy it
 sed -i "" "s/<MDANSE_VERSION>/${VERSION_NAME}/" $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/Info.plist
 cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/Info.plist ${MDANSE_APP_DIR}/Contents/
+
+# Copy over other files
+cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/mdanse_gui ${MDANSE_APP_DIR}/Contents/
+mkdir -p ${MDANSE_APP_DIR}/Contents/MacOS
+cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/MDANSE ${MDANSE_APP_DIR}/MacOS/
+cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/python ${MDANSE_APP_DIR}/MacOS/
+
 echo "Starting installation"
 # Relink netcdf
 install_name_tool -change /usr/local/opt/netcdf/lib/libnetcdf.18.dylib @executable_path/../Frameworks/libnetcdf.18.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/Scientific/_netcdf.so
