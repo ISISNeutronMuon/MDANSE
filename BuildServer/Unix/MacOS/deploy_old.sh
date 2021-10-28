@@ -84,11 +84,11 @@ chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 echo -e "${BLUE}""Changing dyilib paths""${NORMAL}"
 sudo cp $HOME/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Frameworks
-"${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
+sudo "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
 
 # Comment the 'add_system_python_extras' call that add some System path to the sys.path
 
-"${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
+sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 
 #############################
 # Cleanup
@@ -109,5 +109,5 @@ sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/zmq
 sudo hdiutil unmount /Volumes/MDANSE -force -quiet
 sleep 5
 
-"${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/create-dmg" --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
-mv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/${MDANSE_DMG} ${GITHUB_WORKSPACE}
+sudo "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/create-dmg" --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
+sudo mv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/${MDANSE_DMG} ${GITHUB_WORKSPACE}
