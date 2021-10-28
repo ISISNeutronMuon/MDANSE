@@ -69,12 +69,12 @@ sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
 
 echo "Copy Python as dylib"
 sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Python ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
-chmod 777 ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
+sudo chmod 777 ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
 
-install_name_tool -change /System/Library/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Resources/lib/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
-install_name_tool -id @loader_path/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
+sudo install_name_tool -change /System/Library/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Resources/lib/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
+sudo install_name_tool -id @loader_path/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
 
-ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python
+sudo ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python
 
 sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
 sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/.
@@ -94,19 +94,19 @@ sudo cp $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_
 # Cleanup
 #############################
 # Removing matplotlib/tests ==> 45.2 Mb
-rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/matplotlib/tests
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/matplotlib/tests
 # Sample data for matplotlib is useless
-rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/matplotlib/mpl-data/sample_data
-rm -rf ${MDANSE_APP_DIR}/Contents/Resources/mpl-data/sample_data
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/matplotlib/mpl-data/sample_data
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/mpl-data/sample_data
 # Scipy package is useless
-rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/scipy
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/scipy
 # ZMQ package is useless
-rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/zmq
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/zmq
 
 #############################
 # Create DMG
 #############################
-hdiutil unmount /Volumes/MDANSE -force -quiet
+sudo hdiutil unmount /Volumes/MDANSE -force -quiet
 sleep 5
 
 "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/create-dmg" --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
