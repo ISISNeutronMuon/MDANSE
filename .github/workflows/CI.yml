@@ -128,8 +128,10 @@ jobs:
 
   # OSX
   ci_osx:
-    runs-on: macos-10.15
-    if: True
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['macos-10.15', 'macos-11']
     steps:
       - uses: actions/checkout@v2
       - name: Install python
@@ -177,72 +179,13 @@ jobs:
       - name: Run tests
         run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Tar python
+        if: ${{ (matrix.os == 'macos-10.15') }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: OSX_artifacts
-          path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
-          retention-days: 1
-
-  ci_osx_11:
-    runs-on: macos-11
-    if: True
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '2.7.18'
-      - name: Install NetCDF
-        run: |
-          brew install netcdf
-          sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
-      - name: Install dependecies with pip
-        run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app
-      - name: Install wx and vtk
-        run: |
-          sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c daf wxpython
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo conda install -p $HOME/tempenv -c free vtk
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp $HOME/tempenv/lib/libiconv* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-      - name: Prepare virtual machine
-        run: |
-          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
-          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-      - name: Install ScientificPython
-        run: |
-          cd $HOME
-          git clone https://code.ill.fr/scientific-software/scientific-python.git
-          cd scientific-python
-          sudo python2 setup.py install
-      - name: Install MMTK
-        run: |
-          cd $HOME
-          git clone https://code.ill.fr/scientific-software/mmtk.git
-          cd mmtk
-          sudo rm setup.py
-          sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
-          sudo python2 setup.py install
-      - name: Install MDANSE
-        run: |
-          cd $GITHUB_WORKSPACE
-          python2 setup.py install
-      - name: Run tests
-        run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
-      - name: Tar python
-        run: |
-          cd $RUNNER_TOOL_CACHE/Python/2.7.18
-          mv x64 Resources
-          tar -czf python.tar.gz Resources
-      - name: Upload artifacts
+        if: ${{ (matrix.os == 'macos-10.15') }}
         uses: actions/upload-artifact@v2
         with:
           name: OSX_artifacts
