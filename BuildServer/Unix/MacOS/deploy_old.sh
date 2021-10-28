@@ -24,6 +24,10 @@ if [ $status -ne 0 ]; then
 	exit $status
 fi
 
+# Create directories
+mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
+mkdir -p ${MDANSE_APP_DIR}/Contents/MacOS
+mkdir -p ${MDANSE_APP_DIR}/Contents/Frameworks
 #############################
 # PACKAGING
 #############################
@@ -47,7 +51,6 @@ fi
 sudo find $GITHUB_WORKSPACE/ -name "__boot__.py"
 # Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "Add mdanse version file"
-mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
 echo "${VERSION_NAME}" > "${MDANSE_APP_DIR}/Contents/Resources/version"
 
 #############################
@@ -67,7 +70,6 @@ chmod 777 ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
 install_name_tool -change /System/Library/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Resources/lib/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
 install_name_tool -id @loader_path/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
 
-mkdir -p ${MDANSE_APP_DIR}/Contents/MacOS
 ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python
 
 cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
@@ -76,7 +78,6 @@ cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents
 chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 
 echo -e "${BLUE}""Changing dyilib paths""${NORMAL}"
-mkdir -p ${MDANSE_APP_DIR}/Contents/Frameworks
 cp $HOME/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
 cp $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Frameworks
 "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"

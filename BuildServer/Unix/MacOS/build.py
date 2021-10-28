@@ -32,7 +32,7 @@ if sys.platform.startswith('darwin'):
     try:
         temp_dir = os.path.join(os.environ['CI_TEMP_DIR'], 'dist')
     except KeyError:
-        temp_dir = sys.argv[9]
+        temp_dir = os.path.join(sys.argv[9], 'dist')
 
     OPTIONS = {
         'argv_emulation': False,# has to be False otherwise triggers problems with wxPython which lose some events that are captured by OS

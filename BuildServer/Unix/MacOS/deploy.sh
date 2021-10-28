@@ -33,17 +33,16 @@ fi
 echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 
 # Copy the bundle
-echo $CI_TEMP_DIR
 mkdir -p $CI_TEMP_DIR/dist/MDANSE.app
 cp -R ${MDANSE_DEPENDENCIES_DIR} ${MDANSE_APP_DIR}
 mkdir -p $MDANSE_APP_DIR/Contents/Framework
 cp $MDANSE_APP_DIR/Contents/Resources/lib/lib* $MDANSE_APP_DIR/Contents/Framework
-cp $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Frameworks
+cp $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Framework
 
 # Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "${VERSION_NAME}" > ${MDANSE_APP_DIR}/Contents/Resources/version
 
-# Copy MDANSE GUI
+echo "Copy MDANSE GUI"
 cp $GITHUB_WORKSPACE/Scripts/mdanse_gui ${MDANSE_APP_DIR}/Contents/Resources/
 
 # Modify Info.plist and copy it
