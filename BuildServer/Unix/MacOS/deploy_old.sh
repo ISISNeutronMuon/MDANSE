@@ -44,7 +44,7 @@ if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
 	exit $status
 fi
-sudo find ${MDANSE_APP_DIR}/ -name "__boot__.py"
+sudo find $GITHUB_WORKSPACE/ -name "__boot__.py"
 # Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "Add mdanse version file"
 mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
@@ -78,6 +78,7 @@ chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 echo -e "${BLUE}""Changing dyilib paths""${NORMAL}"
 mkdir -p ${MDANSE_APP_DIR}/Contents/Frameworks
 cp $HOME/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
+cp $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Frameworks
 "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
 
 # Comment the 'add_system_python_extras' call that add some System path to the sys.path
