@@ -51,7 +51,7 @@ fi
 
 # Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "Add mdanse version file"
-sudo echo "${VERSION_NAME}" > "${MDANSE_APP_DIR}/Contents/Resources/version"
+echo "${VERSION_NAME}" | sudo tee "${MDANSE_APP_DIR}/Contents/Resources/version"
 
 #############################
 # Copying Python
