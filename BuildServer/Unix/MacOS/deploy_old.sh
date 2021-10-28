@@ -48,7 +48,7 @@ if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
 	exit $status
 fi
-
+ls ${MDANSE_APP_DIR}/*
 # Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
 echo "Add mdanse version file"
 echo "${VERSION_NAME}" | sudo tee "${MDANSE_APP_DIR}/Contents/Resources/version"
@@ -62,7 +62,7 @@ echo "${VERSION_NAME}" | sudo tee "${MDANSE_APP_DIR}/Contents/Resources/version"
 ### why we have to modify the python executable appropriately with the following commands
 echo -e "${BLUE}""Copying python""${NORMAL}"
 sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin
-sudo mv ${MDANSE_APP_DIR}/Contents/Resources/bin/Python ${MDANSE_APP_DIR}/Contents/Resources/bin/python
+sudo mv -T "${MDANSE_APP_DIR}/Contents/Resources/bin/Python" "${MDANSE_APP_DIR}/Contents/Resources/bin/python"
 
 sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
 sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Python ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
