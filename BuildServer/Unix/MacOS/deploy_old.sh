@@ -61,10 +61,10 @@ echo "${VERSION_NAME}" | sudo tee "${MDANSE_APP_DIR}/Contents/Resources/version"
 ### In our case we also want the user to be able to start directly python without launching the bundle executable (e.g. to run scripts in command line) which is the reason
 ### why we have to modify the python executable appropriately with the following commands
 echo -e "${BLUE}""Copying python""${NORMAL}"
-cp /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin
-mv ${MDANSE_APP_DIR}/Contents/Resources/bin/Python ${MDANSE_APP_DIR}/Contents/Resources/bin/python
+sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin
+sudo mv ${MDANSE_APP_DIR}/Contents/Resources/bin/Python ${MDANSE_APP_DIR}/Contents/Resources/bin/python
 
-cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
+sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
 sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Python ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
 chmod 777 ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
 
@@ -73,14 +73,14 @@ install_name_tool -id @loader_path/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents
 
 ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python
 
-cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
-cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/.
+sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
+sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/.
 
 chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 
 echo -e "${BLUE}""Changing dyilib paths""${NORMAL}"
-cp $HOME/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
-cp $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Frameworks
+sudo cp $HOME/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
+sudo cp $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Frameworks
 "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
 
 # Comment the 'add_system_python_extras' call that add some System path to the sys.path
