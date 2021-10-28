@@ -140,8 +140,6 @@ jobs:
         run: |
           brew install netcdf
           sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
-          sudo cp /usr/local/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp /usr/local/opt/netcdf/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app
@@ -202,10 +200,16 @@ jobs:
         with:
           name: OSX_artifacts
           path: ~/
-      - run: |
-          brew install netcdf
+      - name: Untar python
+        run: |
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
+      - name: Get netcdf
+        run: |
+          brew install netcdf
+          sudo cp /usr/local/lib/libnetcdf* $HOME/Contents/Resources/lib
+          sudo cp /usr/local/opt/netcdf/lib/libnetcdf* $HOME/Contents/Resources/lib
+          sudo cp /usr/local/lib/lib*.dylib $HOME/Contents/Resources/lib
       - name: Deploy MDANSE
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh

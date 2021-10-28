@@ -52,8 +52,8 @@ cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/Info.plist ${MDANSE_APP_DI
 # Copy over other files
 cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/mdanse_gui ${MDANSE_APP_DIR}/Contents/
 mkdir -p ${MDANSE_APP_DIR}/Contents/MacOS
-cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/MDANSE ${MDANSE_APP_DIR}/MacOS/
-cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/python ${MDANSE_APP_DIR}/MacOS/
+cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/MDANSE ${MDANSE_APP_DIR}/Contents/MacOS/
+cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/python ${MDANSE_APP_DIR}/Contents/MacOS/
 
 echo "Starting installation"
 # Relink netcdf
