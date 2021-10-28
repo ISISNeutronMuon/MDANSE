@@ -62,7 +62,9 @@ echo "${VERSION_NAME}" | sudo tee "${MDANSE_APP_DIR}/Contents/Resources/version"
 ### why we have to modify the python executable appropriately with the following commands
 echo -e "${BLUE}""Copying python""${NORMAL}"
 sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin
-sudo mv -T "${MDANSE_APP_DIR}/Contents/Resources/bin/Python" "${MDANSE_APP_DIR}/Contents/Resources/bin/python"
+cd "${MDANSE_APP_DIR}/Contents/Resources/bin"
+sudo mv Python python
+cd ${GITHUB_WORKSPACE}
 
 sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
 sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Python ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
