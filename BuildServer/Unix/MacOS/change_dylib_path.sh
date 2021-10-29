@@ -1,14 +1,7 @@
 #!/bin/bash
-echo $GITHUB_WORKSPACE
-echo "-------------------------------------"
-ls /Users/runner/work/MDANSE/MDANSE/temp/dist/MDANSE.app/Contents/Frameworks/libwx*.dylib
-echo "-------------------------------------"
+
 cd "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/"
 files=(libwx*.dylib)
-echo "${files[@]}"
-echo "-------------------------------------"
-echo "${files[*]}"
-echo "-------------------------------------"
 
 libs="osx_cocoau_xrc osx_cocoau_webview osx_cocoau_html osx_cocoau_qa osx_cocoau_adv osx_cocoau_core baseu_xml baseu_net baseu"
 

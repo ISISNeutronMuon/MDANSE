@@ -109,5 +109,5 @@ sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/zmq
 #############################
 sleep 5
 echo "Cretae dmg"
-sudo "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/create-dmg" --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
+"${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/create-dmg" --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
 sudo mv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/${MDANSE_DMG} ${GITHUB_WORKSPACE}
