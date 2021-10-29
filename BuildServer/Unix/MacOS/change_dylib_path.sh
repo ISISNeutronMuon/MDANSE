@@ -3,7 +3,8 @@ echo $GITHUB_WORKSPACE
 echo "-------------------------------------"
 ls /Users/runner/work/MDANSE/MDANSE/temp/dist/MDANSE.app/Contents/Frameworks/libwx*.dylib
 echo "-------------------------------------"
-files=("$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libwx*.dylib")
+cd "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/"
+files=(libwx*.dylib)
 echo "${files[@]}"
 echo "-------------------------------------"
 echo "${files[*]}"
@@ -21,3 +22,4 @@ do
         sudo install_name_tool -change /usr/local/lib/libwx_$l-3.0.dylib @executable_path/../Frameworks/libwx_$l-3.0.dylib $f
     done
 done
+cd $GITHUB_WORKSPACE
