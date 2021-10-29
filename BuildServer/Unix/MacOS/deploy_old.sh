@@ -84,7 +84,7 @@ chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 echo -e "${BLUE}""Changing dyilib paths""${NORMAL}"
 sudo cp -v $HOME/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp -v $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Frameworks
-sudo "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
+"${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
 
 # Comment the 'add_system_python_extras' call that add some System path to the sys.path
 
