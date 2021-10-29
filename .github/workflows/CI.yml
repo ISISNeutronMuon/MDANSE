@@ -283,7 +283,7 @@ jobs:
       - name: Build MDANSE
         run: |
           cd $GITHUB_WORKSPACE
-          "$HOME/Contents/Framework/bin/python" setup.py build build_api build_help install
+          "$HOME/Contents/Resources/bin/python" setup.py build build_api build_help install
       - name: Replace buggy py2app files with dummies
         run: |
           sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
@@ -293,7 +293,7 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS"
-          sudo "$HOME/Contents/Framework/bin/python" build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR"
+          sudo "$HOME/Contents/Resources/bin/python" build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR"
       - name: Add MDANSE version file
         run: echo "${VERSION_NAME}" | sudo tee "${MDANSE_APP_DIR}/Contents/Resources/version"
       - name: Copy python files

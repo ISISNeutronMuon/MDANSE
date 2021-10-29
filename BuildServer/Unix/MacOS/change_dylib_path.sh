@@ -1,7 +1,7 @@
 #!/bin/bash
-
-files=("$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libwx*.dylib")
-
+cd "${GITHUB_WORKSPACE}/temp/dist/MDANSE.app/Contents/Frameworks/"
+files=(libwx*.dylib)
+cd ${GITHUB_WORKSPACE}
 libs="osx_cocoau_xrc osx_cocoau_webview osx_cocoau_html osx_cocoau_qa osx_cocoau_adv osx_cocoau_core baseu_xml baseu_net baseu"
 
 for f in "${files[@]}"
