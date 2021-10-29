@@ -50,10 +50,13 @@ sed -i "" "s/<MDANSE_VERSION>/${VERSION_NAME}/" $GITHUB_WORKSPACE/BuildServer/Un
 cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/Info.plist ${MDANSE_APP_DIR}/Contents/
 
 # Copy over other files
-cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/mdanse_gui ${MDANSE_APP_DIR}/Contents/
+cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/mdanse_gui ${MDANSE_APP_DIR}/Contents/Resources
 mkdir -p ${MDANSE_APP_DIR}/Contents/MacOS
 cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/MDANSE ${MDANSE_APP_DIR}/Contents/MacOS/
 cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/python ${MDANSE_APP_DIR}/Contents/MacOS/
+cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/
+cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/__boot__.py ${MDANSE_APP_DIR}/Contents/Resources/
+cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/__error__.sh ${MDANSE_APP_DIR}/Contents/Resources/
 
 echo "Starting installation"
 # Relink netcdf

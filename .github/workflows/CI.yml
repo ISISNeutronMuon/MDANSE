@@ -238,7 +238,7 @@ jobs:
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
       contains( github.ref, 'web' ) ||
-      contains( github.ref, 'xxxxxxxxxxxxxxxx' )
+      contains( github.ref, '19_continuous_integration' )
 
   deploy_osx_old:
     needs: ci_osx
@@ -302,9 +302,9 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS"
           sudo "$HOME/Contents/Resources/bin/python" build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR"
-          mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin
-          mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/MacOS
-          mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
+          sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin
+          sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/MacOS
+          sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
       - name: Add MDANSE version file
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh

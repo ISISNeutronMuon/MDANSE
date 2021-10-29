@@ -14,11 +14,9 @@ libs="osx_cocoau_xrc osx_cocoau_webview osx_cocoau_html osx_cocoau_qa osx_cocoau
 
 for f in ${files[*]}
 do
-    echo $f
     sudo chmod 777 $f
     for l in $libs
     do
-        echo $l
         sudo install_name_tool -change /usr/local/lib/libwx_$l-3.0.dylib @executable_path/../Frameworks/libwx_$l-3.0.dylib $f
     done
 done
