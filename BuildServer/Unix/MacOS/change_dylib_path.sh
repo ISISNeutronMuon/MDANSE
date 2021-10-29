@@ -1,10 +1,10 @@
 #!/bin/bash
 
-files=`ls ${MDANSE_APP_DIR}/Contents/Frameworks/libwx*.dylib`
+files=("${MDANSE_APP_DIR}/Contents/Frameworks/libwx*.dylib")
 
 libs="osx_cocoau_xrc osx_cocoau_webview osx_cocoau_html osx_cocoau_qa osx_cocoau_adv osx_cocoau_core baseu_xml baseu_net baseu"
 
-for f in $files
+for f in "${files[@]}"
 do
     chmod 777 $f
     for l in $libs
