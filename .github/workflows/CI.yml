@@ -305,9 +305,9 @@ jobs:
       - name: Copy python files
         run: |
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin
-          sudo cp -v /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin/python
+          sudo cp -v /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin/python
           sudo cp -rv $HOME/Contents/Resources/lib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources
-          sudo cp -v /System/Library/Frameworks/Python.framework/Versions/2.7/Python ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
+          sudo cp -v /System/Library/Frameworks/Python.framework/Versions/2.7/Python $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/libpython2.7.dylib
           sudo chmod 777 $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/libpython2.7.dylib
       - name: Work with links
         run: |
@@ -339,6 +339,7 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           sudo hdiutil unmount /Volumes/MDANSE -force -quiet
           sleep 5
+          MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
           "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/create-dmg" --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" $GITHUB_WORKSPACE/temp/dist
           sudo mv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/${MDANSE_DMG} ${GITHUB_WORKSPACE}
       - name: Upload artifacts
