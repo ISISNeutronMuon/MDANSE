@@ -331,14 +331,16 @@ jobs:
           sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/__boot__.py
       - name: Delete unnecessary files
         run: |
+          du -hs $GITHUB_WORKSPACE/temp/dist/MDANSE.app
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/matplotlib/tests
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/matplotlib/mpl-data/sample_data
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/mpl-data/sample_data
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/scipy
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/zmq
-          sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/sphinx*
-          sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/Sphinx
-          sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/py2app*
+          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/sphinx*
+          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/Sphinx
+          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/py2app*
+          du -hs $GITHUB_WORKSPACE/temp/dist/MDANSE.app
       - name: Create dmg
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh

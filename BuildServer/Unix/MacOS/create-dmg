@@ -149,7 +149,7 @@ fi
 # Create the image
 echo "Creating disk image..."
 test -f "${DMG_TEMP_NAME}" && rm -f "${DMG_TEMP_NAME}"
-ACTUAL_SIZE=`du -sm "$SRC_FOLDER" | sed -e 's/	.*//g'`
+ACTUAL_SIZE=$(du -sm "$SRC_FOLDER" | sed -e 's/	.*//g')
 DISK_IMAGE_SIZE=$(expr $ACTUAL_SIZE + 200)
 echo $DISK_IMAGE_SIZE
 df -h
@@ -161,11 +161,11 @@ MOUNT_DIR="/Volumes/${VOLUME_NAME}"
 
 # try unmount dmg if it was mounted previously (e.g. developer mounted dmg, installed app and forgot to unmount it)
 echo "Unmounting disk image..."
-DEV_NAME=$(hdiutil info | egrep '^/dev/' | sed 1q | awk '{print $1}')
-test -d "${MOUNT_DIR}" && hdiutil detach "${DEV_NAME}"
+DEV_NAME=$(sudo hdiutil info | egrep '^/dev/' | sed 1q | awk '{print $1}')
+test -d "${MOUNT_DIR}" && sudo hdiutil detach "${DEV_NAME}"
 
 echo "Mount directory: $MOUNT_DIR"
-DEV_NAME=$(hdiutil attach -readwrite -noverify -noautoopen "${DMG_TEMP_NAME}" | egrep '^/dev/' | sed 1q | awk '{print $1}')
+DEV_NAME=$(sudo hdiutil attach -readwrite -noverify -noautoopen "${DMG_TEMP_NAME}" | egrep '^/dev/' | sed 1q | awk '{print $1}')
 echo "Device name:     $DEV_NAME"
 
 sleep 5
@@ -173,19 +173,19 @@ sleep 5
 if ! test -z "$BACKGROUND_FILE"; then
   echo "Copying background file..."
   test -d "$MOUNT_DIR/.background" || mkdir "$MOUNT_DIR/.background"
-  cp "$BACKGROUND_FILE" "$MOUNT_DIR/.background/$BACKGROUND_FILE_NAME"
+  sudo cp "$BACKGROUND_FILE" "$MOUNT_DIR/.background/$BACKGROUND_FILE_NAME"
 fi
 
 if ! test -z "$APPLICATION_LINK"; then
   echo "making link to Applications dir"
   echo $MOUNT_DIR
-  ln -s /Applications "$MOUNT_DIR/Applications"
+  sudo ln -s /Applications "$MOUNT_DIR/Applications"
 fi
 
 if ! test -z "$VOLUME_ICON_FILE"; then
   echo "Copying volume icon file '$VOLUME_ICON_FILE'..."
-  cp "$VOLUME_ICON_FILE" "$MOUNT_DIR/.VolumeIcon.icns"
-  SetFile -c icnC "$MOUNT_DIR/.VolumeIcon.icns"
+  sudo cp "$VOLUME_ICON_FILE" "$MOUNT_DIR/.VolumeIcon.icns"
+  sudo SetFile -c icnC "$MOUNT_DIR/.VolumeIcon.icns"
 fi
 
 # run applescript
@@ -201,26 +201,26 @@ rm "$APPLESCRIPT"
 
 # make sure it's not world writeable
 echo "Fixing permissions..."
-chmod -Rf go-w "${MOUNT_DIR}" &> /dev/null || true
+sudo chmod -Rf go-w "${MOUNT_DIR}" &> /dev/null || true
 echo "Done fixing permissions."
 
 # make the top window open itself on mount:
 echo "Blessing started"
-bless --folder "${MOUNT_DIR}" --openfolder "${MOUNT_DIR}"
+sudo bless --folder "${MOUNT_DIR}" --openfolder "${MOUNT_DIR}"
 echo "Blessing finished"
 
 if ! test -z "$VOLUME_ICON_FILE"; then
    # tell the volume that it has a special file attribute
-   SetFile -a C "$MOUNT_DIR"
+   sudo SetFile -a C "$MOUNT_DIR"
 fi
 
 # unmount
 echo "Unmounting disk image..."
-hdiutil detach "${DEV_NAME}"
+sudo hdiutil detach "${DEV_NAME}"
 
 # compress image
 echo "Compressing disk image..."
-hdiutil convert "${DMG_TEMP_NAME}" -format UDZO -imagekey zlib-level=9 -o "${DMG_DIR}/${DMG_NAME}"
+sudo hdiutil convert "${DMG_TEMP_NAME}" -format UDZO -imagekey zlib-level=9 -o "${DMG_DIR}/${DMG_NAME}"
 rm -f "${DMG_TEMP_NAME}"
 
 # adding EULA resources
