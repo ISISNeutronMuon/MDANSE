@@ -74,6 +74,7 @@ sudo cp -v $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDAN
 echo "Copy Python as dylib"
 sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Python ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
 sudo chmod 777 ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
+sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
 
 sudo install_name_tool -change /System/Library/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Resources/lib/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
 sudo install_name_tool -id @loader_path/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib

@@ -180,21 +180,20 @@ jobs:
       - name: Run tests
         run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Tar python
-        if: ${{ (matrix.os == 'macos-10.15') }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
       - name: Upload artifacts
         if: ${{ (matrix.os == 'macos-10.15') }}
-        uses: actions/upload-artifact@v2
         with:
-          name: OSX_artifacts
+          name: ${{ matrix.os }}_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
 
   test:
     runs-on: macos-10.15
+    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2
@@ -240,7 +239,7 @@ jobs:
 
   deploy_osx2:
     needs: ci_osx
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
       - uses: actions/checkout@v2
       - name: Download artifacts
@@ -277,8 +276,9 @@ jobs:
           echo "${VERSION_NAME}" | sudo tee "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/version"
       - name: Copy dependency dylibs
         run: |
-          sudo mv -v $HOME/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
-          sudo cp -v $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Frameworks
+          sudo mv -v "$HOME/Contents/Resources/lib/lib*" "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
+          sudo mv -v "$HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx*" "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
+          sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
       - name: Copy python files
         run: |
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin
