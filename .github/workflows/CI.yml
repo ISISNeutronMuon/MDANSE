@@ -321,7 +321,7 @@ jobs:
       - name: Change dylib paths
         run: |
           chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
-          sudo cp -v $HOME/Contents/Resources/lib/lib* $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
+          sudo mv -v $HOME/Contents/Resources/lib/lib* $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
           sudo cp -v $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
           sudo "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
       - name: Edit __boot__.py
@@ -330,12 +330,12 @@ jobs:
           sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/__boot__.py
       - name: Delete unnecessary files
         run: |
-          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/matplotlib/tests
-          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/matplotlib/mpl-data/sample_data
+          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/matplotlib/tests
+          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/matplotlib/mpl-data/sample_data
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/mpl-data/sample_data
-          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/scipy
-          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/zmq
-          sudo rm -rf $HOME/Contents
+          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/scipy
+          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/zmq
+          sudo "$HOME/Contents/Resources/bin/python" -m pip uninstall sphinx py2app
       - name: Create dmg
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -347,7 +347,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: MacOS executable
+          name: MacOS executable2
           path: ${{ github.workspace }}/*.dmg
     if: |
       contains( github.ref, 'master' ) ||

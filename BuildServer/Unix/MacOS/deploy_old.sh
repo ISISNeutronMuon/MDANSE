@@ -95,15 +95,18 @@ sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_ex
 #############################
 # Removing matplotlib/tests ==> 45.2 Mb
 echo "Remove files"
-sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/matplotlib/tests
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/matplotlib/tests
 # Sample data for matplotlib is useless
-sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/matplotlib/mpl-data/sample_data
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/matplotlib/mpl-data/sample_data
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/mpl-data/sample_data
 # Scipy package is useless
-sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/scipy
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/scipy
 # ZMQ package is useless
-sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/zmq
-
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/zmq
+# Remove python
+sudo rm -rf $HOME/Contents
+#Uninstall Sphinx
+sudo ${PYTHONEXE} -m pip uninstall sphinx py2app
 #############################
 # Create DMG
 #############################
