@@ -256,13 +256,7 @@ jobs:
         with:
           name: MacOS executable
           path: ${{ github.workspace }}/*.dmg
-      - name: Upload in-work
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: app1
-          path: ${{ github.workspace }}/temp/dist
-          retention-days: 1
+          retention-days: 90
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
@@ -360,13 +354,7 @@ jobs:
         with:
           name: MacOS executable2
           path: ${{ github.workspace }}/*.dmg
-      - name: Upload in-work
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: app2
-          path: ${{ github.workspace }}/temp/dist
-          retention-days: 1
+          retention-days: 90
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
