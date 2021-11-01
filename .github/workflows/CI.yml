@@ -202,48 +202,9 @@ jobs:
         with:
           name: OSX_artifacts
           path: ~/
+      - run: brew install netcdf
       - name: Untar python
         run: |
-          mkdir -p ~/Contents
-          tar -xzf ~/python.tar.gz -C $HOME/Contents
-      - name: Get netcdf
-        run: |
-          brew install netcdf
-          sudo cp /usr/local/lib/libnetcdf* $HOME/Contents/Resources/lib
-          sudo cp /usr/local/opt/netcdf/lib/libnetcdf* $HOME/Contents/Resources/lib
-          sudo cp /usr/local/lib/lib*.dylib $HOME/Contents/Resources/lib
-      - name: Deploy MDANSE
-        run: |
-          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
-          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: MacOS executable
-          path: ${{ github.workspace }}/*.dmg
-    if: |
-      contains( github.ref, 'master' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) ||
-      contains( github.ref, 'xxxxxxxxxxxxxxxxxxxxxxxxx' )
-
-  deploy_osx_old:
-    needs: ci_osx
-    runs-on: macos-10.15
-    steps:
-      - uses: actions/checkout@v2
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: OSX_artifacts
-          path: ~/
-      - run: |
-          brew install netcdf
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
       - name: Deploy MDANSE
@@ -267,7 +228,7 @@ jobs:
       contains( github.ref, 'web' ) ||
       contains( github.ref, '19_continuous_integration' )
 
-  deploy_osx_old2:
+  deploy_osx2:
     needs: ci_osx
     runs-on: macos-10.15
     steps:
@@ -277,8 +238,9 @@ jobs:
         with:
           name: OSX_artifacts
           path: ~/
-      - run: |
-          brew install netcdf
+      - run: brew install netcdf
+      - name: Untar python
+        run: |
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
       - name: Build MDANSE
@@ -323,15 +285,14 @@ jobs:
         run: |
           chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
           sudo mv -v $HOME/Contents/Resources/lib/lib* $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
-          sudo cp -v $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
-          sudo "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
+          sudo mv -v $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
+          "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
       - name: Edit __boot__.py
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/__boot__.py
       - name: Delete unnecessary files
         run: |
-          du -hs $GITHUB_WORKSPACE/temp/dist/MDANSE.app
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/matplotlib/tests
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/matplotlib/mpl-data/sample_data
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/mpl-data/sample_data
@@ -340,20 +301,18 @@ jobs:
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/sphinx*
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/Sphinx
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/py2app*
-          du -hs $GITHUB_WORKSPACE/temp/dist/MDANSE.app
       - name: Create dmg
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           sleep 5
-          MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
+          export MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
           "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/create-dmg" --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" $GITHUB_WORKSPACE/temp/dist
-          sudo mv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/${MDANSE_DMG} ${GITHUB_WORKSPACE}
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: MacOS executable2
-          path: ${{ github.workspace }}/*.dmg
+          path: ${{ github.workspace }}/BuildServer/Unix/MacOS/*.dmg
           retention-days: 90
     if: |
       contains( github.ref, 'master' ) ||
