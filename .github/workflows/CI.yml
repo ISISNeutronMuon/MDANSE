@@ -209,7 +209,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: OSX_artifacts
+          name: macos-10.15_artifacts
           path: ~/
       - run: brew install netcdf
       - name: Untar python
@@ -245,7 +245,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: OSX_artifacts
+          name: macos-11_artifacts
           path: ~/
       - run: brew install netcdf
       - name: Untar python
