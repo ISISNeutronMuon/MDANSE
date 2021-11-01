@@ -185,7 +185,7 @@ jobs:
           mv x64 Resources
           tar -czf python.tar.gz Resources
       - name: Upload artifacts
-        if: ${{ (matrix.os == 'macos-10.15') }}
+        uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
