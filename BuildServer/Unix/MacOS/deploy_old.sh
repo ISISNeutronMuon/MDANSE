@@ -82,8 +82,8 @@ sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Con
 chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 
 echo -e "${BLUE}""Changing dyilib paths""${NORMAL}"
-sudo cp -v $HOME/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
-sudo cp -v $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Frameworks
+sudo mv -v $HOME/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
+sudo mv -v $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Frameworks
 "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
 
 # Comment the 'add_system_python_extras' call that add some System path to the sys.path
@@ -108,11 +108,14 @@ sudo rm -rf $HOME/Contents
 #Uninstall Sphinx and py2app
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/sphinx*
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/Sphinx
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/alabaster*
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/py2app*
+
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/conf_
 #############################
 # Create DMG
 #############################
 sleep 5
-echo "Cretae dmg"
+echo "Create dmg"
 "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/create-dmg" --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
 sudo mv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/${MDANSE_DMG} ${GITHUB_WORKSPACE}
