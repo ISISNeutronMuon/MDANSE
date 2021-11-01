@@ -335,6 +335,7 @@ jobs:
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/mpl-data/sample_data
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/scipy
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/zmq
+          sudo rm -rf $HOME/Contents
       - name: Create dmg
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
