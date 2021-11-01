@@ -105,8 +105,10 @@ sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/sci
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/zmq
 # Remove python
 sudo rm -rf $HOME/Contents
-#Uninstall Sphinx
-sudo ${PYTHONEXE} -m pip uninstall sphinx py2app
+#Uninstall Sphinx and py2app
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/sphinx*
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/Sphinx
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/py2app*
 #############################
 # Create DMG
 #############################
