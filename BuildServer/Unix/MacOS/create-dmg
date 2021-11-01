@@ -122,10 +122,15 @@ test -z "$2" && {
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DMG_PATH="$1"
+echo $DMG_PATH
 DMG_DIRNAME="$(dirname "$DMG_PATH")"
+echo $DMG_DIRNAME
 DMG_DIR="$(cd "$DMG_DIRNAME" > /dev/null; pwd)"
+echo $DMG_DIR
 DMG_NAME="$(basename "$DMG_PATH")"
+echo $DMG_NAME
 DMG_TEMP_NAME="$DMG_DIR/rw.${DMG_NAME}"
+echo $DMG_TEMP_NAME
 SRC_FOLDER="$(cd "$2" > /dev/null; pwd)"
 test -z "$VOLUME_NAME" && VOLUME_NAME="$(basename "$DMG_PATH" .dmg)"
 
@@ -148,7 +153,7 @@ ACTUAL_SIZE=`du -sm "$SRC_FOLDER" | sed -e 's/	.*//g'`
 DISK_IMAGE_SIZE=$(expr $ACTUAL_SIZE + 20)
 echo $DISK_IMAGE_SIZE
 df -h
-sudo hdiutil create -srcfolder "$SRC_FOLDER" -volname "${VOLUME_NAME}" -fs HFS+ -fsargs "-c c=64,a=16,e=16" -format UDRW -size ${DISK_IMAGE_SIZE}m "${DMG_TEMP_NAME}"
+sudo hdiutil create -srcfolder "$SRC_FOLDER" -volname "${VOLUME_NAME}" -fs HFS+ -fsargs "-c c=64,a=16,e=16" -format UDRW -size "${DISK_IMAGE_SIZE}m" "${DMG_TEMP_NAME}"
 
 # mount it
 echo "Mounting disk image..."
