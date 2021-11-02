@@ -139,6 +139,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
+      - run: python2 -c "from hashlib import md5"
       - name: Install NetCDF
         run: |
           brew install netcdf
@@ -217,6 +218,7 @@ jobs:
         run: |
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
+          $HOME/Contents/Resources/bin/python -c "from hashlib import md5"
       - name: Deploy MDANSE
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -281,12 +283,7 @@ jobs:
           sudo cp -fv $HOME/Contents/Resources/lib/lib* "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp -fv $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp -fv /usr/local/lib/libint*.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
-          sudo find /usr -name libz.*
-          echo "/usr/lib/libz.*"
-          sudo find /usr -name libc++*
-          echo /usr/lib/libc++*
-          sudo cp -fv /usr/lib/libz.* $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
-          sudo cp -fv /usr/lib/libc++* $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
+      - run: sudo otool -L $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/lib-dynload/wx/libwx_baseu-3.0.0.4.0.dylib
       - name: Copy python files
         run: |
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin
