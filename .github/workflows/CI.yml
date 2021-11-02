@@ -128,7 +128,7 @@ jobs:
 
   # OSX
   ci_osx:
-    if: False
+    if: True
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -136,7 +136,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - if: ${{ (matrix.os == 'macos-10.15') }}
-        run: brew unlink openssl
+        run: brew unlink openssl@1.1
       - name: Install python
         uses: actions/setup-python@v2
         with:
@@ -202,7 +202,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
-      - run: sudo find /usr -name openssl*
+      - run: sudo find /usr -name libssl*
 
   deploy_osx:
     needs: ci_osx
