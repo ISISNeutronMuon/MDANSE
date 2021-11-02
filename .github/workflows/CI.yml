@@ -135,13 +135,13 @@ jobs:
         os: ['macos-10.15', 'macos-11']
     steps:
       - uses: actions/checkout@v2
-      - run: brew unlink openssl
+      - if: ${{ (matrix.os == 'macos-10.15') }}
+        run: brew unlink openssl
       - name: Install python
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
-      - if: ${{ (matrix.os == 'macos-10.15') }}
-        run: python2 -c "from hashlib import md5"
+      - run: python2 -c "from hashlib import md5"
       - name: Install NetCDF
         run: |
           brew install netcdf
