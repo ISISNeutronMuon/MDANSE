@@ -190,9 +190,6 @@ jobs:
           name: ${{ matrix.os }}_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
-      - run: |
-          cd /usr/local/opt/gettext/lib
-          ls
 
   test:
     runs-on: macos-10.15
@@ -284,8 +281,10 @@ jobs:
           sudo cp -fv $HOME/Contents/Resources/lib/lib* "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp -fv $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp -fv /usr/local/lib/libint*.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
-          sudo cp -v /usr/lib/libz.* ${MDANSE_APP_DIR}/Contents/Frameworks
-          sudo cp -v /usr/lib/libc++* ${MDANSE_APP_DIR}/Contents/Frameworks
+          echo /usr/lib/libz.*
+          echo /usr/lib/libc++*
+          sudo cp -fv /usr/lib/libz.* $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
+          sudo cp -fv /usr/lib/libc++* $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
       - name: Copy python files
         run: |
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin
