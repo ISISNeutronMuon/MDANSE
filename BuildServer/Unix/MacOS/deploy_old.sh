@@ -93,6 +93,7 @@ echo -e "${BLUE}""Changing dyilib paths""${NORMAL}"
 # Comment the 'add_system_python_extras' call that add some System path to the sys.path
 echo "Comment out in __boot__.py"
 sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
+sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 
 #############################
 # Cleanup
@@ -123,3 +124,6 @@ sleep 5
 echo "Create dmg"
 "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/create-dmg" --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
 sudo mv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/${MDANSE_DMG} ${GITHUB_WORKSPACE}
+
+cd /usr/local/opt
+ls

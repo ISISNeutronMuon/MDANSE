@@ -252,6 +252,7 @@ jobs:
         run: |
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
+          otool -L ~/Contents/Resources/bin/python
       - name: Build MDANSE
         run: |
           cd $GITHUB_WORKSPACE
@@ -326,6 +327,9 @@ jobs:
           name: MacOS executable2
           path: ${{ github.workspace }}/*.dmg
           retention-days: 90
+      - run: |
+          cd /usr/local/opt
+          ls
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
