@@ -72,6 +72,7 @@ sudo mv -v ${MDANSE_APP_DIR}/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Conte
 sudo cp -v $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp -v /usr/lib/libz.* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp -v /usr/lib/libc++* ${MDANSE_APP_DIR}/Contents/Frameworks
+sudo cp -v /usr/local/Cellar/openssl@1.1/1.1.1l_1/lib/libssl.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
 
 echo "Copy Python as dylib"
 sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Python ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
@@ -84,7 +85,13 @@ sudo install_name_tool -id @loader_path/libpython2.7.dylib ${MDANSE_APP_DIR}/Con
 sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
 sudo install_name_tool -change $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/libpython2.7.dylib  @executable_path/../Resources/lib/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
 sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
-sudo install_name_tool -change /usr/lib/liconv.2.dylib @executable_path/../Frameworks/liconv.2.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
+sudo install_name_tool -change /usr/lib/libiconv.2.dylib @executable_path/../Frameworks/libiconv.2.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
+# libc++
+sudo install_name_tool -change /usr/lib/libc++.1.dylib @executable_path/../Frameworks/libc++.1.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++.1.dylib
+sudo install_name_tool -change /usr/lib/libc++abi.dylib @executable_path/../Frameworks/libc++abi.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++.1.dylib
+sudo install_name_tool -change /usr/lib/libc++abi.dylib @executable_path/../Frameworks/libc++abi.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++abi.dylib
+# libz
+sudo install_name_tool -change /usr/lib/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libz.1.dylib
 
 sudo ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python27
 

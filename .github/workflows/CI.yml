@@ -312,6 +312,7 @@ jobs:
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/__boot__.py
+          sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/__boot__.py
       - name: Delete unnecessary files
         run: |
           sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/matplotlib/tests
