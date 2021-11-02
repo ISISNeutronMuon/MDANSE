@@ -140,7 +140,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
-      - run: python2 -c "from hashlib import md5"
+      - if: ${{ (matrix.os == 'macos-10.15') }}
+        run: python2 -c "from hashlib import md5"
       - name: Install NetCDF
         run: |
           brew install netcdf
