@@ -280,8 +280,9 @@ jobs:
           echo "${VERSION_NAME}" | sudo tee "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/version"
       - name: Copy dependency dylibs
         run: |
-          ls $HOME/Contents/Resources/lib/
-          sudo cp -fv "$HOME/Contents/Resources/lib/lib*" "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
+          echo "$HOME/Contents/Resources/lib/lib*"
+          echo $HOME/Contents/Resources/lib/lib*
+          sudo cp -fv $HOME/Contents/Resources/lib/lib* "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp -fv "$HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx*" "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
       - name: Copy python files
