@@ -252,7 +252,7 @@ jobs:
         run: |
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
-          otool -L ~/Contents/Resources/bin/python
+          sudo install_name_tool -change $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/libpython2.7.dylib ~/Contents/Resources/lib/libpython2.7.dylib ~/Contents/Resources/bin/python
       - name: Build MDANSE
         run: |
           cd $GITHUB_WORKSPACE
