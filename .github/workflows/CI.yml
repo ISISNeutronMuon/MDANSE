@@ -139,7 +139,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
-      - run: sudo find /usr -name openssl*
       - name: Install NetCDF
         run: |
           brew install netcdf
@@ -192,7 +191,7 @@ jobs:
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
       - run: |
-          cd /usr/local/opt
+          cd /usr/local/opt/gettext
           ls
 
   test:
@@ -281,6 +280,7 @@ jobs:
           echo "${VERSION_NAME}" | sudo tee "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/version"
       - name: Copy dependency dylibs
         run: |
+          ls $HOME/Contents/Resources/lib/
           sudo cp -fv "$HOME/Contents/Resources/lib/lib*" "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp -fv "$HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx*" "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
