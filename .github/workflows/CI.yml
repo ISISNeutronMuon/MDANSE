@@ -139,6 +139,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
+      - run: ls /usr/local/Cellar/openssl
       - name: Install NetCDF
         run: |
           brew install netcdf
@@ -190,6 +191,9 @@ jobs:
           name: ${{ matrix.os }}_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
+      - run: |
+          cd /usr/local/opt
+          ls
 
   test:
     runs-on: macos-10.15
@@ -277,15 +281,14 @@ jobs:
           echo "${VERSION_NAME}" | sudo tee "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/version"
       - name: Copy dependency dylibs
         run: |
-          sudo mv -v "$HOME/Contents/Resources/lib/lib*" "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
-          sudo mv -v "$HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx*" "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
+          sudo cp -fv "$HOME/Contents/Resources/lib/lib*" "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
+          sudo cp -fv "$HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx*" "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
       - name: Copy python files
         run: |
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin
           sudo cp -v /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin/python
           sudo cp -rv $HOME/Contents/Resources/lib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources
-          sudo cp -v /System/Library/Frameworks/Python.framework/Versions/2.7/Python $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/libpython2.7.dylib
           sudo chmod 777 $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/libpython2.7.dylib
       - name: Work with links
         run: |
