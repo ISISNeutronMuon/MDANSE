@@ -191,7 +191,7 @@ jobs:
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
       - run: |
-          cd /usr/local/opt/gettext
+          cd /usr/local/opt/gettext/lib
           ls
 
   test:
@@ -283,7 +283,7 @@ jobs:
           echo "$HOME/Contents/Resources/lib/lib*"
           echo $HOME/Contents/Resources/lib/lib*
           sudo cp -fv $HOME/Contents/Resources/lib/lib* "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
-          sudo cp -fv "$HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx*" "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
+          sudo cp -fv $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
       - name: Copy python files
         run: |
@@ -331,9 +331,6 @@ jobs:
           name: MacOS executable2
           path: ${{ github.workspace }}/*.dmg
           retention-days: 90
-      - run: |
-          cd /usr/local/opt
-          ls
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
