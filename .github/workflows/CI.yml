@@ -128,7 +128,7 @@ jobs:
 
   # OSX
   ci_osx:
-    if: False
+    if: True
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -196,7 +196,7 @@ jobs:
 
   test:
     runs-on: macos-10.15
-    if: True
+    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2
@@ -284,6 +284,8 @@ jobs:
           sudo cp -fv $HOME/Contents/Resources/lib/lib* "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp -fv $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp -fv /usr/local/lib/libint*.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
+          sudo cp -v /usr/lib/libz.* ${MDANSE_APP_DIR}/Contents/Frameworks
+          sudo cp -v /usr/lib/libc++* ${MDANSE_APP_DIR}/Contents/Frameworks
       - name: Copy python files
         run: |
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin

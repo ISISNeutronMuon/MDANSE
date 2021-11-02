@@ -70,6 +70,8 @@ sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
 echo "Copy dependency dylibs"
 sudo mv -v ${MDANSE_APP_DIR}/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp -v $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Frameworks
+sudo cp -v /usr/lib/libz.* ${MDANSE_APP_DIR}/Contents/Frameworks
+sudo cp -v /usr/lib/libc++* ${MDANSE_APP_DIR}/Contents/Frameworks
 
 echo "Copy Python as dylib"
 sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Python ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib

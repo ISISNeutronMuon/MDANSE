@@ -20,7 +20,9 @@ files=(libwx*.dylib)
 
 for f in ${files[*]}
 do
-  sudo install_name_tool -change /usr/lib/liconv.2.dylib @executable_path/../Frameworks/liconv.2.dylib $f
+  sudo install_name_tool -change @rpath/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib $f
+  sudo install_name_tool -change @rpath/liconv.2.dylib @executable_path/../Frameworks/liconv.2.dylib $f
+  sudo install_name_tool -change @rpath/lic++.1.dylib @executable_path/../Frameworks/lic++.1.dylib $f
 done
 
 cd $GITHUB_WORKSPACE
