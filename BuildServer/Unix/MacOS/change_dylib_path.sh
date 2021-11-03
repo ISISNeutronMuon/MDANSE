@@ -27,16 +27,12 @@ done
 
 echo "Changing vtk links inside lib-dynload"
 cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/vtk
-sos=(vtk*.so)
-dylibs=($GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libvtk*.dylib)
-for s in ${sos[*]}
+files=(vtk*.so)
+echo ${files[*]}
+for f in ${files[*]}
 do
-  for d in ${dylibs[*]}
-  do
-    sudo install_name_tool -change @rpath/$d @executable_path/../Frameworks/$d $s
-    # sudo install_name_tool -change /usr/lib/libstdc++.6.dylib @executable_path/../Frameworks/libiconv.2.dylib $s
-  done
+  sudo install_name_tool -add_rpath @executable_path/../Frameworks $f
+  sudo install_name_tool -change /usr/lib/libstdc++.6.dylib @executable_path/../Frameworks/libstdc++.6.dylib $f
 done
-
 
 cd $GITHUB_WORKSPACE
