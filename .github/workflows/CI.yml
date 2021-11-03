@@ -146,16 +146,20 @@ jobs:
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app
-      - name: Install wx and vtk
+      - name: Install vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c daf wxpython
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wxPython* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo conda install -p $HOME/tempenv -c free vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp $HOME/tempenv/lib/libiconv* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+      - name: Install wx
+        run: |
+          cd $HOME
+          wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
+          sudo tar -xf wxPython-src-3.0.2.0.tar.bz2
+          cd wxPython-src-3.0.2.0/wxPython/
+          python2 build-wxpython.py --build_dir=../bld --osx_cocoa --install
+          sudo find $RUNNER_TOOL_CACHE/Python/2.7.18/x64 -name *wx*
       - run: python2 -c "import wx; print wx.__version__"
       - name: Prepare virtual machine
         run: |
