@@ -148,7 +148,8 @@ jobs:
           cd wxPython-src-3.0.2.0/wxPython/
           sudo python2 build-wxpython.py --build_dir=../bld --osx_cocoa --install
           sudo find $RUNNER_TOOL_CACHE/Python/2.7.18/x64 -name *wx*
-      - run: python2 -c "import wx; print wx.__version__"
+      - if: ${{ (matrix.os == 'macos-10.15') }}
+        run: python2 -c "import wx; print wx.__version__"
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app
@@ -158,6 +159,10 @@ jobs:
           sudo conda install -p $HOME/tempenv -c free vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+      - if: ${{ (matrix.os == 'macos-11') }}
+        run: |
+          sudo conda install -p $HOME/tempenv -c travis wxpython
+          sudo find ~/tempenv -name *wx*
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -210,7 +215,7 @@ jobs:
       - name: Install vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c travis wxpython
+          sudo conda install -p $HOME/tempenv -c aaren wxpython
           ~/tempenv/bin/python -c "import wx; print wx.__version__"
 #      - run: sudo find / -name libssl* -print 2>/dev/null
 #      - run: sudo find / -name *openssl* -print 2>/dev/null
