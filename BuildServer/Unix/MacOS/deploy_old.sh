@@ -42,7 +42,7 @@ sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$HOME/Cont
 echo "Moving dirs"
 cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS"
 echo "Building mdanse app"
-sudo ${PYTHONEXE} build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR"
+sudo ${PYTHONEXE} build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR" --includes openssl
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
@@ -72,7 +72,6 @@ sudo mv -v ${MDANSE_APP_DIR}/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Conte
 sudo cp -v $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp -v /usr/lib/libz.* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp -v /usr/lib/libc++* ${MDANSE_APP_DIR}/Contents/Frameworks
-sudo cp -v /usr/local/Cellar/openssl@1.1/1.1.1l_1/lib/libssl.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
 
 echo "Copy Python as dylib"
 sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Python ${MDANSE_APP_DIR}/Contents/Resources/lib/libpython2.7.dylib
