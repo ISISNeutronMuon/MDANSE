@@ -150,9 +150,8 @@ jobs:
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c daf wxpython
-          sudo find ~/tempenv -name *wx*
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/python2.7/site-packages/wxPython* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wxPython* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo conda install -p $HOME/tempenv -c free vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
