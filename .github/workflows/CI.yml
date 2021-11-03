@@ -150,7 +150,8 @@ jobs:
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c daf wxpython
+          sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
+          sudo find ~/tempenv -name *wx*
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo conda install -p $HOME/tempenv -c free vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
@@ -273,6 +274,7 @@ jobs:
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/MacOS
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
+      - run: sudo find $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents -name *wx*
       - name: Add MDANSE version file
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
