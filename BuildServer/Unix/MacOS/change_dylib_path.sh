@@ -15,7 +15,7 @@ do
     done
 done
 
-echo "Changing links inside lib-dynload"
+echo "Changing wx links inside lib-dynload"
 cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/wx
 files=(libwx*.dylib)
 for f in ${files[*]}
@@ -23,6 +23,19 @@ do
   sudo install_name_tool -change @rpath/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib $f
   sudo install_name_tool -change @rpath/libiconv.2.dylib @executable_path/../Frameworks/libiconv.2.dylib $f
   sudo install_name_tool -change @rpath/libc++.1.dylib @executable_path/../Frameworks/libc++.1.dylib $f
+done
+
+echo "Changing vtk links inside lib-dynload"
+cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/vtk
+sos=(vtk*.so)
+dylibs=($GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libvtk*.dylib)
+for s in ${sos[*]}
+do
+  for d in ${dylibs[*]}
+  do
+    sudo install_name_tool -change @rpath/$d @executable_path/../Frameworks/$d $s
+    # sudo install_name_tool -change /usr/lib/libstdc++.6.dylib @executable_path/../Frameworks/libiconv.2.dylib $s
+  done
 done
 
 
