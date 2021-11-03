@@ -44,6 +44,7 @@ echo ${files[*]}
 for f in ${files[*]}
 do
   sudo install_name_tool -add_rpath @executable_path/../Frameworks $f
+  sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib $f
 done
 
 cd $GITHUB_WORKSPACE

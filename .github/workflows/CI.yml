@@ -139,7 +139,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
-      - run: sudo find /usr -name libstdc++*
       - name: Install NetCDF
         run: |
           brew install netcdf
@@ -150,9 +149,12 @@ jobs:
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c travis wxpython
+          sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
           sudo find ~/tempenv -name *wx*
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp -v $HOME/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -r ~/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -v ~/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wxPython* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo conda install -p $HOME/tempenv -c free vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
