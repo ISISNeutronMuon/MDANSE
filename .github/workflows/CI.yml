@@ -149,11 +149,9 @@ jobs:
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp -v $HOME/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -r ~/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -v ~/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wxPython* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo conda install -p $HOME/tempenv -c daf wxpython
+          sudo find ~/tempenv -name *wx*
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo conda install -p $HOME/tempenv -c free vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
@@ -180,6 +178,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           python2 setup.py install
+      - run: python2 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/mdanse_gui
       - name: Run tests
         run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Tar python
