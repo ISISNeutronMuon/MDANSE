@@ -256,6 +256,7 @@ jobs:
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
           sudo install_name_tool -change $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/libpython2.7.dylib ~/Contents/Resources/lib/libpython2.7.dylib ~/Contents/Resources/bin/python
+      - run: sudo find /usr -name libstdc++*
       - name: Build MDANSE
         run: |
           cd $GITHUB_WORKSPACE
@@ -283,7 +284,6 @@ jobs:
           sudo cp -fv $HOME/Contents/Resources/lib/lib* "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp -fv $HOME/Contents/Resources/lib/python2.7/site-packages/wx/libwx* "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
           sudo cp -fv /usr/local/lib/libint*.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
-          sudo cp -fv /usr/lib/libstdc++* $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
       - name: Copy python files
         run: |
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin
