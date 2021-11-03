@@ -152,10 +152,12 @@ jobs:
           sudo conda install -p $HOME/tempenv -c daf wxpython
           sudo find ~/tempenv -name *wx*
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp $HOME/tempenv/lib/python2.7/site-packages/wxPython* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo conda install -p $HOME/tempenv -c free vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp $HOME/tempenv/lib/libiconv* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+      - run: python2 -c "import wx; print wx.__version__"
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
