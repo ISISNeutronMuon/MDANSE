@@ -148,7 +148,7 @@ jobs:
           wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
           sudo tar -xf wxPython-src-3.0.2.0.tar.bz2
           cd wxPython-src-3.0.2.0/wxPython/
-          sudo python2 build-wxpython.py --build_dir=../bld --osx_cocoa --install
+          sudo python2 build-wxpython.py --prefix=../bld --build_dir=../bld --osx_cocoa --install
           sudo find $RUNNER_TOOL_CACHE/Python/2.7.18/x64 -name *wx*
       - if: ${{ (matrix.os == 'macos-10.15') }}
         run: python2 -c "import wx; print wx.__version__"
@@ -164,7 +164,11 @@ jobs:
       - if: ${{ (matrix.os == 'macos-11') }}
         run: |
           sudo conda install -p $HOME/tempenv -c travis wxpython
-          sudo find ~/tempenv -name *wx*
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wxPython* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp $HOME/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -r $HOME/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+      - run: python2 -c "import wx; print wx.__version__"
       - name: Prepare virtual machine
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
