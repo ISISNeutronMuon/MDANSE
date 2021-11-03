@@ -150,7 +150,7 @@ jobs:
       - name: Install wx and vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
+          sudo conda install -p $HOME/tempenv -c travis wxpython
           sudo find ~/tempenv -name *wx*
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo conda install -p $HOME/tempenv -c free vtk
