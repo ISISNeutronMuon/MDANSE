@@ -42,7 +42,7 @@ sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$HOME/Cont
 echo "Moving dirs"
 cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS"
 echo "Building mdanse app"
-sudo ${PYTHONEXE} build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR" --includes openssl
+sudo ${PYTHONEXE} build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR"
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Cannot build app.""${NORMAL}"
@@ -91,6 +91,9 @@ sudo install_name_tool -change /usr/lib/libc++abi.dylib @executable_path/../Fram
 sudo install_name_tool -change /usr/lib/libc++abi.dylib @executable_path/../Frameworks/libc++abi.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++abi.dylib
 # libz
 sudo install_name_tool -change /usr/lib/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libz.1.dylib
+# hashlib
+sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libssl.1.1.dylib @executable_path/../Frameworks/libssl.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
+sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib @executable_path/../Frameworks/libcrypto.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
 
 sudo ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python27
 
