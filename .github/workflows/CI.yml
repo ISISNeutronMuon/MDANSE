@@ -155,19 +155,6 @@ jobs:
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app
-      - name: Install vtk
-        run: |
-          sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c free vtk
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-      - if: ${{ (matrix.os == 'macos-11') }}
-        run: |
-          sudo conda install -p $HOME/tempenv -c travis wxpython
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wxPython* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -r $HOME/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - run: python2 -c "import wx; print wx.__version__"
       - name: Prepare virtual machine
         run: |
@@ -218,11 +205,10 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
-      - name: Install vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
-          ~/tempenv/bin/python -c "import wx; print wx.__version__"
+          sudo conda install -p $HOME/tempenv -c free vtk
+          sudo find ~/tempenv -name *vtk*.egg-info
 #      - run: sudo find / -name libssl* -print 2>/dev/null
 #      - run: sudo find / -name *openssl* -print 2>/dev/null
 
@@ -242,6 +228,20 @@ jobs:
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
           $HOME/Contents/Resources/bin/python -c "from hashlib import md5"
+      - name: Install vtk
+        run: |
+          sudo conda create -p $HOME/tempenv python=2.7
+          sudo conda install -p $HOME/tempenv -c free vtk
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk ~/Contents/Resources/lib/python2.7/site-packages
+          sudo cp $HOME/tempenv/lib/libvtk* ~/Contents/Resources/lib
+      - name: Install wx
+        run: |
+          sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
+          sudo cp -rv $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/* ~/Contents/Resources/lib/python2.7/site-packages
+          sudo cp -v $HOME/tempenv/lib/libwx*  ~/Contents/Resources/lib
+      - run: sudo otool -L ~/Contents/Resources/lib/libwx*.dylib
+      - run: sudo find /usr -name libicon*
+      - run: sudo find ~/ -name libicon*
       - name: Deploy MDANSE
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -279,6 +279,22 @@ jobs:
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
           sudo install_name_tool -change $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/libpython2.7.dylib ~/Contents/Resources/lib/libpython2.7.dylib ~/Contents/Resources/bin/python
+      - name: Install vtk
+        run: |
+          sudo conda create -p $HOME/tempenv python=2.7
+          sudo conda install -p $HOME/tempenv -c free vtk
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk ~/Contents/Resources/lib/python2.7/site-packages
+          sudo cp $HOME/tempenv/lib/libvtk* ~/Contents/Resources/lib
+      - name: Install wx
+        run: |
+          sudo conda install -p $HOME/tempenv -c travis wxpython
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wx ~/Contents/Resources/lib/python2.7/site-packages
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wxPython* ~/Contents/Resources/lib/python2.7/site-packages
+          sudo cp $HOME/tempenv/lib/libwx* ~/Contents/Resources/lib
+          sudo cp -r $HOME/tempenv/lib/wx ~/Contents/Resources/lib
+      - run: sudo otool -L ~/Contents/Resources/lib/libwx*.dylib
+      - run: sudo find /usr -name libicon*
+      - run: sudo find ~/ -name libicon*
       - name: Build MDANSE
         run: |
           cd $GITHUB_WORKSPACE
