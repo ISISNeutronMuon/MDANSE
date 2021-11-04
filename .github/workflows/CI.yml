@@ -205,7 +205,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
-        run: |
+      - run: |
           sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c free vtk
           sudo find ~/tempenv -name *vtk*.egg-info
