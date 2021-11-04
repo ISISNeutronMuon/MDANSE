@@ -16,11 +16,12 @@ do
     done
 done
 
-#files=(*.so)
-#for f in ${files[*]}
-#do
-#  sudo install_name_tool -add_rpath @executable_path/../Frameworks $f
-#done
+cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/wx
+files=(*.so)
+for f in ${files[*]}
+do
+  sudo install_name_tool -add_rpath @executable_path/../Frameworks $f
+done
 
 cd "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/"
 echo "Changing zlib paths"

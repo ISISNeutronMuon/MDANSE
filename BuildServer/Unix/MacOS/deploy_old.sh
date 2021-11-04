@@ -73,6 +73,14 @@ sudo cp -v /usr/lib/libz.* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp -v /usr/lib/libc++* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
 
+sudo find ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/wx -name *.so
+echo "---------------------------------------------------------------------------------------"
+sudo otool -L ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/wx/*.so
+echo "---------------------------------------------------------------------------------------"
+sudo sudo ls ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload
+echo "---------------------------------------------------------------------------------------"
+sudo find ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload -name *wx*
+
 echo "Change dylib links"
 # sudo install_name_tool -change /System/Library/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
 # sudo install_name_tool -id @loader_path/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib

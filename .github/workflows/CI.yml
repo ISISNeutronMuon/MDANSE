@@ -228,8 +228,7 @@ jobs:
           sudo cp -v $HOME/tempenv/lib/libwx*  ~/Contents/Resources/lib
       - run: sudo otool -L ~/Contents/Resources/lib/libwx*.dylib
       - run: sudo find /usr -name libicon*
-      - run: sudo find ~/Contents/Resources/lib/python2.7/site-packages/wx -name *.so
-      - run: ls ~/Contents/Resources/lib/python2.7/lib-dynload
+      - run: sudo otool -L ~/Contents/Resources/lib/python2.7/site-packages/wx/*.so
       - name: Deploy MDANSE
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -284,8 +283,7 @@ jobs:
           sudo cp -r $HOME/tempenv/lib/wx ~/Contents/Resources/lib
       - run: sudo otool -L ~/Contents/Resources/lib/libwx*.dylib
       - run: sudo find /usr -name libicon*
-      - run: sudo find ~/Contents/Resources/lib/python2.7/site-packages/wx -name *.so
-      - run: ls ~/Contents/Resources/lib/python2.7/lib-dynload/wx
+      - run: sudo otool -L ~/Contents/Resources/lib/python2.7/site-packages/wx/*.so
       - name: Build MDANSE
         run: |
           cd $GITHUB_WORKSPACE
@@ -304,6 +302,7 @@ jobs:
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/MacOS
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
       - run: sudo find $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents -name *wx*
+      - run: ls $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/lib-dynload/wx
       - name: Add MDANSE version file
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
