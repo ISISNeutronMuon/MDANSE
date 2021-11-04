@@ -8,18 +8,19 @@ echo "Changing links inside Frameworks"
 for f in ${files[*]}
 do
     sudo chmod 777 $f
-    sudo install_name_tool -change /usr/lib/liconv.2.dylib @executable_path/../Frameworks/liconv.2.dylib $f
+    # sudo install_name_tool -change /usr/lib/liconv.2.dylib @executable_path/../Frameworks/liconv.2.dylib $f
+    sudo install_name_tool -add_rpath @executable_path/../Frameworks $f
     for l in $libs
     do
         sudo install_name_tool -change /usr/local/lib/libwx_$l-3.0.dylib @executable_path/../Frameworks/libwx_$l-3.0.dylib $f
     done
 done
 
-files=(*.so)
-for f in ${files[*]}
-do
-  sudo install_name_tool -add_rpath @executable_path/../Frameworks $f
-done
+#files=(*.so)
+#for f in ${files[*]}
+#do
+#  sudo install_name_tool -add_rpath @executable_path/../Frameworks $f
+#done
 
 cd "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/"
 echo "Changing zlib paths"
