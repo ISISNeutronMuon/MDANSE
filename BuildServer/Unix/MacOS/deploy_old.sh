@@ -107,10 +107,10 @@ sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()
 
 # Create a bash script that will run the bundled python with $PYTHONHOME set
 echo "#!/bin/bash" | sudo tee "${MDANSE_APP_DIR}/Contents/Frameworks/python.sh"
-sudo sed -i '$ a echo $PWD'
-sudo sed -i '$ a export PYTHONHOME="$(dirname "$PWD")"'
-sudo sed -i '$ a echo $PYTHONHOME'
-sudo sed -i '$ a python'
+sudo sed -i '$ a echo $PWD' "${MDANSE_APP_DIR}/Contents/Frameworks/python.sh"
+sudo sed -i '$ a export PYTHONHOME="$(dirname "$PWD")"' "${MDANSE_APP_DIR}/Contents/Frameworks/python.sh"
+sudo sed -i '$ a echo $PYTHONHOME' "${MDANSE_APP_DIR}/Contents/Frameworks/python.sh"
+sudo sed -i '$ a python' "${MDANSE_APP_DIR}/Contents/Frameworks/python.sh"
 
 #############################
 # Cleanup
