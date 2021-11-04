@@ -105,6 +105,13 @@ echo "Comment out in __boot__.py"
 sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 
+# Create a bash script that will run the bundled python with $PYTHONHOME set
+echo "#!/bin/bash" | sudo tee "${MDANSE_APP_DIR}/Contents/Frameworks/python.sh"
+sudo sed -i '$ a echo $PWD'
+sudo sed -i '$ a export PYTHONHOME="$(dirname "$PWD")"'
+sudo sed -i '$ a echo $PYTHONHOME'
+sudo sed -i '$ a python'
+
 #############################
 # Cleanup
 #############################
