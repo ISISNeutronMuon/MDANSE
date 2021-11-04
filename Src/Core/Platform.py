@@ -198,7 +198,8 @@ class Platform(object):
         
         # An error occured.
         except OSError as e:
-            raise PlatformError(e)
+            raise PlatformError('The following exception was raised while trying to create a directory at '
+                                '{0}: /n {1}'.format(str(path), e))
         
     def get_path(self, path):
         '''
