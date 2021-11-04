@@ -170,7 +170,6 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           python2 setup.py install
-      - run: python2 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/mdanse_gui
       - name: Run tests
         run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Tar python
@@ -241,6 +240,8 @@ jobs:
           name: MacOS executable
           path: ${{ github.workspace }}/*.dmg
           retention-days: 90
+      - name: Start MDANSE
+        run: $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/MacOS/MDANSE
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
@@ -364,6 +365,8 @@ jobs:
           name: MacOS executable2
           path: ${{ github.workspace }}/*.dmg
           retention-days: 90
+      - name: Start MDANSE
+        run: $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/MacOS/MDANSE
     if: |
       contains( github.ref, 'master' ) ||
       contains( github.ref, 'develop' ) ||
