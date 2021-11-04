@@ -226,9 +226,6 @@ jobs:
           sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
           sudo cp -rv $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/* ~/Contents/Resources/lib/python2.7/site-packages
           sudo cp -v $HOME/tempenv/lib/libwx*  ~/Contents/Resources/lib
-      - run: sudo otool -L ~/Contents/Resources/lib/libwx*.dylib
-      - run: sudo find /usr -name libicon*
-      - run: sudo otool -L ~/Contents/Resources/lib/python2.7/site-packages/wx/*.so
       - name: Deploy MDANSE
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -281,9 +278,15 @@ jobs:
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wxPython* ~/Contents/Resources/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libwx* ~/Contents/Resources/lib
           sudo cp -r $HOME/tempenv/lib/wx ~/Contents/Resources/lib
-      - run: sudo otool -L ~/Contents/Resources/lib/libwx*.dylib
-      - run: sudo find /usr -name libicon*
-      - run: sudo otool -L ~/Contents/Resources/lib/python2.7/site-packages/wx/*.so
+      - name: Relink wx files
+        run: |
+          cd ~/Contents/Resources/lib
+          files=(libwx*.dylib)
+          echo $files
+          for f in ${files[*]}
+          do
+            sudo install_name_tool -add_rpath @loader_path $f
+          done
       - name: Build MDANSE
         run: |
           cd $GITHUB_WORKSPACE
@@ -298,11 +301,11 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS"
           sudo "$HOME/Contents/Resources/bin/python" build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR"
+      - name: Create directories if they don't exist
+        run: |
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/MacOS
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
-      - run: sudo find $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents -name *wx*
-      - run: ls $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/lib-dynload/wx
       - name: Add MDANSE version file
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
@@ -314,19 +317,14 @@ jobs:
           sudo cp -fv /usr/local/lib/libint*.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
       - name: Copy python files
         run: |
-          sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin
-          sudo cp -v /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin/python
           sudo cp -rv $HOME/Contents/Resources/lib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources
-          sudo chmod 777 $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/libpython2.7.dylib
+          sudo chmod 777 $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libpython2.7.dylib
       - name: Work with links
         run: |
-          sudo install_name_tool -change /System/Library/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Resources/lib/libpython2.7.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin/python
-          sudo install_name_tool -id @loader_path/libpython2.7.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/libpython2.7.dylib
-          sudo ln -s ../Resources/bin/python $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/MacOS/python27
           sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libpython2.7.dylib
-          sudo install_name_tool -change $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/libpython2.7.dylib  @executable_path/../Resources/lib/libpython2.7.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libpython2.7.dylib
+          sudo install_name_tool -change $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/libpython2.7.dylib  @executable_path/../Frameworks/libpython2.7.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libpython2.7.dylib
           sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libintl.8.dylib
-          sudo install_name_tool -change /usr/lib/liconv.2.dylib @executable_path/../Frameworks/liconv.2.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libintl.8.dylib
+#          sudo install_name_tool -change /usr/lib/liconv.2.dylib @executable_path/../Frameworks/liconv.2.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libintl.8.dylib
           sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libssl.1.1.dylib @executable_path/../Frameworks/libssl.1.1.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
           sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib @executable_path/../Frameworks/libcrypto.1.1.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
       - name: Copy site.py
