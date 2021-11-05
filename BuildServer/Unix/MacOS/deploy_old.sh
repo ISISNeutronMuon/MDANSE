@@ -106,11 +106,12 @@ sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_ex
 sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 
 # Create a bash script that will run the bundled python with $PYTHONHOME set
-echo "#!/bin/bash" | sudo tee "${MDANSE_APP_DIR}/Contents/Frameworks/python.sh"
-sudo sed -i '$ a echo $PWD' "${MDANSE_APP_DIR}/Contents/Frameworks/python.sh"
-sudo sed -i '$ a export PYTHONHOME="$(dirname "$PWD")"' "${MDANSE_APP_DIR}/Contents/Frameworks/python.sh"
-sudo sed -i '$ a echo $PYTHONHOME' "${MDANSE_APP_DIR}/Contents/Frameworks/python.sh"
-sudo sed -i '$ a python' "${MDANSE_APP_DIR}/Contents/Frameworks/python.sh"
+echo "#!/bin/bash" > ~/python.sh
+echo 'echo $PWD' >> ~/python.sh
+echo 'export PYTHONHOME="$(dirname "$PWD")"' >> ~/python.sh
+echo 'echo $PYTHONHOME' >> ~/python.sh
+echo 'python -c "import os; print os.environ"' >> ~/python.sh
+sudo cp -v ~/python.sh "${MDANSE_APP_DIR}/Contents/MacOS"
 
 #############################
 # Cleanup

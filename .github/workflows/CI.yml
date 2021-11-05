@@ -368,6 +368,7 @@ jobs:
           path: ${{ github.workspace }}/*.dmg
           retention-days: 90
       - name: Start bundled python
+        if: False
         run: $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/MacOS/python
     if: |
       contains( github.ref, 'master' ) ||
