@@ -65,6 +65,8 @@ sudo mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
 # sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin/python
 sudo cp -v ~/Contents/Resources/bin/python ${MDANSE_APP_DIR}/Contents/Resources/bin
 sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
+sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
+sudo ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python27
 
 echo "Copy lib"
 sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
@@ -92,14 +94,12 @@ sudo install_name_tool -change /usr/lib/libz.1.dylib @executable_path/../Framewo
 sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libssl.1.1.dylib @executable_path/../Frameworks/libssl.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
 sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib @executable_path/../Frameworks/libcrypto.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
 
-sudo ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python27
-
+echo "Copy site.py"
 sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
 sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/.
 
-chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
-
 echo -e "${BLUE}""Changing dyilib paths""${NORMAL}"
+chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
 
 # Comment the 'add_system_python_extras' call that add some System path to the sys.path
@@ -108,18 +108,16 @@ sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_ex
 sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 
 # Create a bash script that will run the bundled python with $PYTHONHOME set
-echo "#!/bin/bash" > ~/python.sh
+echo "#!/bin/bash" > ~/python2
 {
 echo 'SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"'
-echo 'echo $SCRIPT_DIR'
 echo 'PARENT_DIR="$(dirname "$SCRIPT_DIR")"'
-echo 'echo $PARENT_DIR'
 echo 'export PYTHONHOME=$PARENT_DIR:$PARENT_DIR/Resources'
 echo 'export PYTHONPATH=$PARENT_DIR/Resources/lib/python2.7:$PARENT_DIR/Resources:$PARENT_DIR/Resources/lib/python2.7/site-packages'
-echo '$SCRIPT_DIR/python -c "import os; print os.environ"'
+echo '$SCRIPT_DIR/python'
 } >> ~/python.sh
 sudo cp -v ~/python.sh "${MDANSE_APP_DIR}/Contents/MacOS"
-sudo chmod 755 "${MDANSE_APP_DIR}/Contents/MacOS/python.sh"
+sudo chmod 755 "${MDANSE_APP_DIR}/Contents/MacOS/python2"
 
 #############################
 # Cleanup

@@ -75,6 +75,7 @@ jobs:
     needs: ci_ubuntu
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
     if: |
@@ -186,7 +187,7 @@ jobs:
 
   test:
     runs-on: macos-11
-    if: True
+    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2
@@ -198,6 +199,15 @@ jobs:
   deploy_osx:
     needs: ci_osx
     runs-on: macos-10.15
+    if: |
+      contains( github.ref, 'master' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '19_continuous_integration' )
     steps:
       - uses: actions/checkout@v2
       - name: Download artifacts
@@ -233,22 +243,9 @@ jobs:
           name: MacOS executable
           path: ${{ github.workspace }}/*.dmg
           retention-days: 90
-      - name: Start bundled python
-        run: $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/MacOS/python
-      - name: Start python script
-        if: always()
-        run: $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/MacOS/python.sh
-    if: |
-      contains( github.ref, 'master' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) ||
-      contains( github.ref, '19_continuous_integration' )
 
   deploy_osx2:
+    if: False
     needs: ci_osx
     runs-on: macos-11
     steps:
@@ -365,24 +362,11 @@ jobs:
           name: MacOS executable2
           path: ${{ github.workspace }}/*.dmg
           retention-days: 90
-      - name: Start bundled python
-        if: False
-        run: $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/MacOS/python
-    if: |
-      contains( github.ref, 'master' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) ||
-      contains( github.ref, '19_continuous_integration' )
-
 
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
-    if: False
+    if: True
     steps:
       - name: Install python
         uses: actions/setup-python@v2
