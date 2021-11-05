@@ -366,7 +366,7 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
-    if: True
+    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2

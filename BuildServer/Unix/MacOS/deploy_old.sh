@@ -115,8 +115,8 @@ echo 'PARENT_DIR="$(dirname "$SCRIPT_DIR")"'
 echo 'export PYTHONHOME=$PARENT_DIR:$PARENT_DIR/Resources'
 echo 'export PYTHONPATH=$PARENT_DIR/Resources/lib/python2.7:$PARENT_DIR/Resources:$PARENT_DIR/Resources/lib/python2.7/site-packages'
 echo '$SCRIPT_DIR/python'
-} >> ~/python.sh
-sudo cp -v ~/python.sh "${MDANSE_APP_DIR}/Contents/MacOS"
+} >> ~/python2
+sudo cp -v ~/python2 "${MDANSE_APP_DIR}/Contents/MacOS"
 sudo chmod 755 "${MDANSE_APP_DIR}/Contents/MacOS/python2"
 
 #############################
