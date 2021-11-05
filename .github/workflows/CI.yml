@@ -186,17 +186,13 @@ jobs:
 
   test:
     runs-on: macos-11
-    if: False
+    if: True
     steps:
       - name: Install python
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
-      - run: |
-          sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c free vtk
-          sudo find ~/tempenv -name *vtk*.egg-info
-#      - run: sudo find / -name libssl* -print 2>/dev/null
+      - run: sudo find $RUNNER_TOOL_CACHE/Python/2.7.18/x64 -name *ython* -print 2>/dev/null
 #      - run: sudo find / -name *openssl* -print 2>/dev/null
 
   deploy_osx:
@@ -268,6 +264,7 @@ jobs:
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
           sudo install_name_tool -change $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/libpython2.7.dylib ~/Contents/Resources/lib/libpython2.7.dylib ~/Contents/Resources/bin/python
+      - run: sudo otool -L ~/Contents/Resources/bin/python
       - name: Install vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -304,6 +301,7 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS"
           sudo "$HOME/Contents/Resources/bin/python" build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR"
+      - run: sudo otool -L $GITHUB_WORKSPACE/temp/dist/MDANSE.app/MacOS/python
       - name: Create directories if they don't exist
         run: |
           sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin

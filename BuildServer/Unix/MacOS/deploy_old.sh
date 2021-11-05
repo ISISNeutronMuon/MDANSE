@@ -63,6 +63,8 @@ echo "${VERSION_NAME}" | sudo tee "${MDANSE_APP_DIR}/Contents/Resources/version"
 echo -e "${BLUE}""Copying python""${NORMAL}"
 sudo mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
 # sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin/python
+sudo cp -v ~/Contents/Resources/bin/python ${MDANSE_APP_DIR}/Contents/Resources/bin
+sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
 
 echo "Copy lib"
 sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
@@ -75,7 +77,7 @@ sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
 
 echo "Change dylib links"
 # sudo install_name_tool -change /System/Library/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
-# sudo install_name_tool -id @loader_path/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
+sudo install_name_tool -id @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
 sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
 sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib  @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
 sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
@@ -107,11 +109,17 @@ sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()
 
 # Create a bash script that will run the bundled python with $PYTHONHOME set
 echo "#!/bin/bash" > ~/python.sh
-echo 'echo $PWD' >> ~/python.sh
-echo 'export PYTHONHOME="$(dirname "$PWD")"' >> ~/python.sh
-echo 'echo $PYTHONHOME' >> ~/python.sh
-echo 'python -c "import os; print os.environ"' >> ~/python.sh
+{
+echo 'SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"'
+echo 'echo $SCRIPT_DIR'
+echo 'PARENT_DIR="$(dirname "$SCRIPT_DIR")"'
+echo 'echo $PARENT_DIR'
+echo 'export PYTHONHOME=$PARENT_DIR:$PARENT_DIR/Resources'
+echo 'export PYTHONPATH=$PARENT_DIR/Resources/lib/python2.7:$PARENT_DIR/Resources:$PARENT_DIR/Resources/lib/python2.7/site-packages'
+echo '$SCRIPT_DIR/python -c "import os; print os.environ"'
+} >> ~/python.sh
 sudo cp -v ~/python.sh "${MDANSE_APP_DIR}/Contents/MacOS"
+sudo chmod 755 "${MDANSE_APP_DIR}/Contents/MacOS/python.sh"
 
 #############################
 # Cleanup
