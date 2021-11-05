@@ -3,9 +3,13 @@ if __name__ == "__main__":
     import os
 
     script_dir = sys.argv[1]
-    arg1 = str(sys.argv[2]).strip()
+    try:
+        arg1 = str(sys.argv[2]).strip()
+    except IndexError:
+        os.system(str(os.path.join(script_dir, 'python')))
+
     if arg1 == '-c':
-        exec(str(sys.argv[3]))
+        exec(' '.join(sys.argv[3:]))
 
     elif arg1[:3] == '-m':
         if len(arg1) > 2:
@@ -17,7 +21,7 @@ if __name__ == "__main__":
 
         for path in sys.path:
             if os.path.exists(os.path.join(path, module)) or os.path.exists(os.path.join(path, module + '.py')):
-                command = [os.path.join(script_dir, 'python2'), '-m', module]
+                command = [os.path.join(script_dir, 'python'), '-m', module]
                 if args:
                     command.extend(args)
                 os.system(' '.join(command))

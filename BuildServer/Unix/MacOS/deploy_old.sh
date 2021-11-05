@@ -63,13 +63,6 @@ echo "${VERSION_NAME}" | sudo tee "${MDANSE_APP_DIR}/Contents/Resources/version"
 echo -e "${BLUE}""Copying python""${NORMAL}"
 sudo mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
 # sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin/python
-sudo cp -v ~/Contents/Resources/bin/python ${MDANSE_APP_DIR}/Contents/Resources/bin
-sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
-sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @rpath/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
-sudo install_name_tool -add_rpath @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
-sudo install_name_tool -add_rpath @loader_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
-sudo ln -s ../Resources/bin/python ${MDANSE_APP_DIR}/Contents/MacOS/python27
-sudo ln -s ../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/libintl.8.dylib
 
 echo "Copy lib"
 sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
