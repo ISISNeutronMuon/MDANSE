@@ -130,7 +130,7 @@ jobs:
 
   # OSX
   ci_osx:
-    if: True
+    if: False
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -366,7 +366,7 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
-    if: False
+    if: True
     steps:
       - name: Install python
         uses: actions/setup-python@v2
