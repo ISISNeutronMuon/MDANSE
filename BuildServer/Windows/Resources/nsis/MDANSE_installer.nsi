@@ -77,7 +77,7 @@ and time correlation functions."
 !define MUI_FINISHPAGE_LINK "View CHANGELOG"
 ; Insert in the finish page the possibility to create desktop shortcut
 Function CreateDesktopShortCut
-  CreateShortCut "$DESKTOP\MDANSE.lnk" "$INSTDIR\MDANSE_launcher.bat" "" "$ICONS_DIR\run.ico" 0
+  CopyFiles /SILENT "$INSTDIR\MDANSE.lnk" "$DESKTOP"
 FunctionEnd
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Create desktop shortcut"
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
