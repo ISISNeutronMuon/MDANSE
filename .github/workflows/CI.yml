@@ -477,6 +477,7 @@ jobs:
       - name: Install MDANSE
         run: |
           set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
+          set PATH=%PATH%;"C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC"
           cd %GITHUB_WORKSPACE%
           python setup.py build install
         shell: cmd
@@ -487,8 +488,10 @@ jobs:
           python DependenciesTests\AllTests.py
           python FunctionalTests\Jobs\BuildJobTests.py
           python FunctionalTests\Jobs\AllTests.py
+        shell: cmd
       - if: always()
         run: |
           "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat"
           cd %GITHUB_WORKSPACE%
           python setup.py build install
+        shell: cmd
