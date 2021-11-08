@@ -77,7 +77,7 @@ and time correlation functions."
 !define MUI_FINISHPAGE_LINK "View CHANGELOG"
 ; Insert in the finish page the possibility to create desktop shortcut
 Function CreateDesktopShortCut
-  CreateShortCut "$DESKTOP\MDANSE.lnk" "$INSTDIR\MDANSE_launcher.bat" "" "$ICONS_DIR\run.ico"
+  CreateShortCut "$DESKTOP\MDANSE.lnk" "$INSTDIR\MDANSE_launcher.bat" "" "$ICONS_DIR\run.ico" 0
 FunctionEnd
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Create desktop shortcut"
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
@@ -121,14 +121,14 @@ Section "MDANSE ${VERSION}" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite on
   CreateDirectory "$SMPROGRAMS\MDANSE"
-  CreateShortCut "$SMPROGRAMS\MDANSE\MDANSE.lnk" "$INSTDIR\MDANSE_launcher.bat" "" "${ICONS_DIR}\run.ico"
-  CreateShortCut "$SMPROGRAMS\MDANSE\MDANSE_command_shell.lnk" \
+  CreateShortCut "$INSTDIR\MDANSE.lnk" "$INSTDIR\MDANSE_launcher.bat" "" "${ICONS_DIR}\run.ico" 0
+  CreateShortCut "$INSTDIR\MDANSE_command_shell.lnk" \
 					"$SYSDIR\cmd.exe" \
 					'/K "$INSTDIR\MDANSE_command_shell.bat"' \
-					"${ICONS_DIR}\terminal.ico"
+					"${ICONS_DIR}\terminal.ico" 0
   WriteIniStr "$INSTDIR\MDANSE.url" "InternetShortcut" "URL" "${WEB_SITE}"
-  CreateShortCut "$SMPROGRAMS\MDANSE\Website.lnk" "$INSTDIR\MDANSE.url" "" "${ICONS_DIR}\web.ico"
-  CreateShortCut "$SMPROGRAMS\MDANSE\Uninstall.lnk" "$INSTDIR\uninst.exe" "" "${ICONS_DIR}\uninstall.ico"
+  CreateShortCut "$INSTDIR\Website.lnk" "$INSTDIR\MDANSE.url" "" "${ICONS_DIR}\web.ico" 0
+  CreateShortCut "$INSTDIR\Uninstall.lnk" "$INSTDIR\uninst.exe" "" "${ICONS_DIR}\uninstall.ico" 0
 
   WriteRegStr ${UNINST_ROOT_KEY} "${UNINST_KEY}" "DisplayName" "MDANSE"
   WriteRegStr ${UNINST_ROOT_KEY} "${UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
