@@ -417,7 +417,7 @@ jobs:
         id: vs2008-cache
         uses: actions/cache@v2
         with:
-          path: "C:\Program Files (x86)\Microsoft Visual Studio 9.0"
+          path: C:\Program Files (x86)\Microsoft Visual Studio 9.0
           key: vs2008
 
   ci_cache:
