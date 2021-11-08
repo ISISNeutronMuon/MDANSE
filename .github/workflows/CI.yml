@@ -5,7 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: False
+    if: True
     strategy:
       fail-fast: false
       matrix:
@@ -16,27 +16,29 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
-      - name: Install libraries
+      - name: Install libraries on ubuntu 18
         if: ${{ (matrix.os == 'ubuntu-18.04') }}
         run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev
-      - name: Install libraries
+      - name: Install libraries on ubuntu 20
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
         run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev libgtk2.0-0 libgtk2.0-dev
       - name: Install dependencies
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
-      - name: Install wx and vtk
+      - name: Install wx
         run: |
-          sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c daf wxpython
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-gtk2/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp -r $HOME/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -r $HOME/tempenv/include/wx-3.0/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
-          sudo cp $HOME/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo conda create -p ~/tempenv python=2.7
+          sudo conda install -p ~/tempenv -c daf wxpython
+          sudo cp -r ~/tempenv/lib/python2.7/site-packages/wx-3.0-gtk2/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp -r ~/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -r ~/tempenv/include/wx-3.0/wx $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
+          sudo cp ~/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+      - name: Install vtk
+        run: |
+          sudo conda install -p ~/tempenv -c ccordoba12 vtk
+          sudo cp -r ~/tempenv/lib/python2.7/site-packages/vtk $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp ~/tempenv/lib/libvtk* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
       - name: Install ScientificPython
         run: |
           cd $HOME
@@ -48,8 +50,7 @@ jobs:
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          sudo rm setup.py
-          sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
+          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/setup.py ~/mmtk
           sudo $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
       - name: Install MDANSE
         run: |
@@ -60,11 +61,29 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Tar artifacts
+        if: |
+          contains( github.ref, 'master' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '19_continuous_integration' )
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 python
           tar -czf python.tar.gz python
       - name: Upload artifacts
+        if: |
+          contains( github.ref, 'master' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '19_continuous_integration' )
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -130,7 +149,7 @@ jobs:
 
   # OSX
   ci_osx:
-    if: False
+    if: True
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -145,10 +164,6 @@ jobs:
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app
-      - name: Prepare virtual machine
-        run: |
-          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
-          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
       - name: Install NetCDF
         run: |
           brew install netcdf
@@ -164,8 +179,7 @@ jobs:
           cd $HOME
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          sudo rm setup.py
-          sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
+          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
           sudo python2 setup.py install
       - name: Install MDANSE
         run: |
@@ -174,27 +188,34 @@ jobs:
       - name: Run tests
         run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
       - name: Tar python
+        if: |
+          contains( github.ref, 'master' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '19_continuous_integration' ) && ${{ (matrix.os == 'macos-10.15') }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
       - name: Upload artifacts
+        if: |
+          contains( github.ref, 'master' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '19_continuous_integration' ) && ${{ (matrix.os == 'macos-10.15') }}
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
-
-  test:
-    runs-on: macos-11
-    if: False
-    steps:
-      - name: Install python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '2.7.18'
-      - run: sudo find $RUNNER_TOOL_CACHE/Python/2.7.18/x64 -name *ython* -print 2>/dev/null
-#      - run: sudo find / -name *openssl* -print 2>/dev/null
 
   deploy_osx:
     needs: ci_osx
@@ -220,7 +241,6 @@ jobs:
         run: |
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
-          $HOME/Contents/Resources/bin/python -c "from hashlib import md5"
       - name: Install vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
@@ -241,125 +261,6 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: MacOS executable
-          path: ${{ github.workspace }}/*.dmg
-          retention-days: 90
-
-  deploy_osx2:
-    if: False
-    needs: ci_osx
-    runs-on: macos-11
-    steps:
-      - uses: actions/checkout@v2
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: macos-11_artifacts
-          path: ~/
-      - run: brew install netcdf
-      - name: Untar python
-        run: |
-          mkdir -p ~/Contents
-          tar -xzf ~/python.tar.gz -C $HOME/Contents
-          sudo install_name_tool -change $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/libpython2.7.dylib ~/Contents/Resources/lib/libpython2.7.dylib ~/Contents/Resources/bin/python
-      - run: sudo otool -L ~/Contents/Resources/bin/python
-      - name: Install vtk
-        run: |
-          sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c free vtk
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk ~/Contents/Resources/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libvtk* ~/Contents/Resources/lib
-      - name: Install wx
-        run: |
-          sudo conda install -p $HOME/tempenv -c travis wxpython
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wx ~/Contents/Resources/lib/python2.7/site-packages
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wxPython* ~/Contents/Resources/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libwx* ~/Contents/Resources/lib
-          sudo cp -r $HOME/tempenv/lib/wx ~/Contents/Resources/lib
-      - name: Relink wx files
-        run: |
-          cd ~/Contents/Resources/lib
-          files=(libwx*.dylib)
-          echo $files
-          for f in ${files[*]}
-          do
-            sudo install_name_tool -add_rpath @loader_path $f
-          done
-      - name: Build MDANSE
-        run: |
-          cd $GITHUB_WORKSPACE
-          "$HOME/Contents/Resources/bin/python" setup.py build build_api build_help install
-      - name: Replace buggy py2app files with dummies
-        run: |
-          sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
-          sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
-      - name: Build MDANSE app
-        run: |
-          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
-          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-          cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS"
-          sudo "$HOME/Contents/Resources/bin/python" build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR"
-      - run: sudo otool -L $GITHUB_WORKSPACE/temp/dist/MDANSE.app/MacOS/python
-      - name: Create directories if they don't exist
-        run: |
-          sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/bin
-          sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/MacOS
-          sudo mkdir -p $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
-      - name: Add MDANSE version file
-        run: |
-          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
-          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-          echo "${VERSION_NAME}" | sudo tee "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/version"
-      - name: Copy dependency dylibs
-        run: |
-          sudo cp -fv $HOME/Contents/Resources/lib/lib* "$GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks"
-          sudo cp -fv /usr/local/lib/libint*.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks
-      - name: Copy python files
-        run: |
-          sudo cp -rv $HOME/Contents/Resources/lib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources
-          sudo chmod 777 $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libpython2.7.dylib
-      - name: Work with links
-        run: |
-          sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libpython2.7.dylib
-          sudo install_name_tool -change $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/libpython2.7.dylib  @executable_path/../Frameworks/libpython2.7.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libpython2.7.dylib
-          sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Frameworks/libintl.8.dylib
-          sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libssl.1.1.dylib @executable_path/../Frameworks/libssl.1.1.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
-          sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib @executable_path/../Frameworks/libcrypto.1.1.dylib $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
-      - name: Copy site.py
-        run: |
-          sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/.
-          sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/.
-      - name: Change wx dylib paths
-        run: |
-          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
-          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-          chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
-          "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
-      - name: Edit __boot__.py
-        run: |
-          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
-          sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/__boot__.py
-          sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/__boot__.py
-      - name: Delete unnecessary files
-        run: |
-          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/matplotlib/tests
-          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/matplotlib/mpl-data/sample_data
-          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/mpl-data/sample_data
-          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/scipy
-          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/zmq
-          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/sphinx*
-          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/Sphinx
-          sudo rm -rf $GITHUB_WORKSPACE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/py2app*
-      - name: Create dmg
-        run: |
-          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
-          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-          sleep 5
-          export MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
-          "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/create-dmg" --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" $GITHUB_WORKSPACE/temp/dist
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: MacOS executable2
           path: ${{ github.workspace }}/*.dmg
           retention-days: 90
 
@@ -391,9 +292,6 @@ jobs:
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
           mkdir "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           copy "%HOME%\netcdf" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          dir
-          set PATH=%PATH%;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf
         shell: cmd
       - name: Install VS2008
         run: |
@@ -434,8 +332,26 @@ jobs:
           python FunctionalTests\Jobs\AllTests.py
         shell: cmd
       - name: Zip python file
+        if: |
+          contains( github.ref, 'master' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '19_continuous_integration' )
         run: Compress-Archive -Path "$env:RUNNER_TOOL_CACHE\Python\2.7.18\x64\*" -DestinationPath "$env:GITHUB_WORKSPACE\python.zip"
       - name: Upload artifacts
+        if: |
+          contains( github.ref, 'master' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '19_continuous_integration' )
         uses: actions/upload-artifact@v2
         with:
           name: windows_artifacts
@@ -464,8 +380,6 @@ jobs:
           Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
       - name: Set up virtual machine
         run: |
-          call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
-          call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
           mkdir %GITHUB_WORKSPACE%\BuildServer\Windows\Build
         shell: cmd
       - name: Download artifacts

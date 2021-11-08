@@ -9,7 +9,7 @@ export PYTHONEXE=$HOME/Contents/Resources/bin/python
 #############################
 # PREPARATION
 #############################
-cd ${GITHUB_WORKSPACE}
+cd ${GITHUB_WORKSPACE} || exit
 
 export MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
 
@@ -39,9 +39,8 @@ echo "Replacing buggy python2 files"
 sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
 sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
 
-echo "Moving dirs"
-cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS"
 echo "Building mdanse app"
+cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS" || exit
 sudo ${PYTHONEXE} build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR"
 status=$?
 if [ $status -ne 0 ]; then
@@ -62,12 +61,9 @@ echo "${VERSION_NAME}" | sudo tee "${MDANSE_APP_DIR}/Contents/Resources/version"
 ### why we have to modify the python executable appropriately with the following commands
 echo -e "${BLUE}""Copying python""${NORMAL}"
 sudo mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
-# sudo cp /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python ${MDANSE_APP_DIR}/Contents/Resources/bin/python
 
 echo "Copy lib"
 sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
-
-SUDO CP $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/parse_command_line.py ${MDANSE_APP_DIR}/Contents/Resources
 
 echo "Copy dependency dylibs"
 sudo mv -v ${MDANSE_APP_DIR}/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
@@ -75,11 +71,13 @@ sudo cp -v /usr/lib/libz.* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp -v /usr/lib/libc++* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
 
+# It is necessary to interlink the following dylibs for them to work properly
 echo "Change dylib links"
-# sudo install_name_tool -change /System/Library/Frameworks/Python.framework/Versions/2.7/Python @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Resources/bin/python
+# libpython
 sudo install_name_tool -id @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
 sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
 sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib  @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
+# libintl
 sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
 sudo install_name_tool -change /usr/lib/libiconv.2.dylib @executable_path/../Frameworks/libiconv.2.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
 # libc++
@@ -96,11 +94,11 @@ echo "Copy site.py"
 sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
 sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/.
 
-echo -e "${BLUE}""Changing dyilib paths""${NORMAL}"
+echo -e "${BLUE}""Changing wx and vtk dyilib links""${NORMAL}"
 chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
 
-# Comment the 'add_system_python_extras' call that add some System path to the sys.path
+# Comment the 'add_system_python_extras' call that add some System path to the sys.path and '_boot_multiprocessing' which is bugged since python 2 doesn't have the functions it uses
 echo "Comment out in __boot__.py"
 sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
@@ -116,6 +114,7 @@ echo '$SCRIPT_DIR/python $PARENT_DIR/Resources/parse_command_line.py $SCRIPT_DIR
 } >> ~/python2
 sudo cp -v ~/python2 "${MDANSE_APP_DIR}/Contents/MacOS"
 sudo chmod 755 "${MDANSE_APP_DIR}/Contents/MacOS/python2"
+sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/parse_command_line.py ${MDANSE_APP_DIR}/Contents/Resources
 
 #############################
 # Cleanup
