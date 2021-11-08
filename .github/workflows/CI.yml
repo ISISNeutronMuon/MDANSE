@@ -420,9 +420,13 @@ jobs:
         with:
           path: |
             C:\Program Files (x86)\Microsoft Visual Studio 9.0
-            C:\Program Files (x86)\Microsoft SDKs\Windows\v5.0
-            C:\Program Files (x86)\Microsoft SDKs\Windows\v6.0A
+            C:\Program Files\Microsoft SDKs\Windows\v6.0A
           key: vs2008
+
+  test:
+    runs-on: windows-2019
+    steps:
+      dir /r C:\ mingw*
 
   ci_cache:
     runs-on: windows-2019
@@ -479,13 +483,13 @@ jobs:
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
         shell: cmd
       - run: |
-          cd "C:\Program Files (x86)\Microsoft SDKs\Windows\"
+          cd /d "C:\Program Files (x86)\Microsoft SDKs\Windows\"
           dir
         shell: cmd
       - name: Install MDANSE
         run: |
           set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
-          set PATH=%PATH%;"C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin"
+          set PATH=%PATH%;"C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64"
           cd %GITHUB_WORKSPACE%
           python setup.py build install
         shell: cmd
@@ -499,7 +503,7 @@ jobs:
         shell: cmd
       - if: always()
         run: |
-          set WindowsSDKDir="C:\Program Files\Microsoft SDKs\Windows\v6.0A\";"C:\Program Files\Microsoft SDKs\Windows\v5.0\"
+          set WindowsSdkDir="C:\Program Files\Microsoft SDKs\Windows\v6.0A\"
           "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat"
           cd %GITHUB_WORKSPACE%
           python setup.py build install
