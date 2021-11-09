@@ -405,7 +405,7 @@ jobs:
 
   cache_vs:
     runs-on: windows-2019
-    if: True
+    if: False
     steps:
       - name: download VS2008
         run: |
@@ -432,7 +432,6 @@ jobs:
 
   ci_cache:
     runs-on: windows-2019
-    needs: cache_vs
     if: True
     steps:
       - name: Install python
@@ -491,7 +490,7 @@ jobs:
       - name: Install MDANSE
         run: |
           set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
-          set PATH=%PATH%;"C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64";"C:\msys64\mingw64\bin";"C:\msys64\mingw64"
+          "%GITHUB_WORKSPACE%\BuildServer\Windows\Resources\vcvarsamd64.bat"
           cd %GITHUB_WORKSPACE%
           python setup.py build install
         shell: cmd
@@ -504,14 +503,15 @@ jobs:
           python FunctionalTests\Jobs\AllTests.py
         shell: cmd
       - if: always()
-        run: get-content "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat" | %{$_ -replace "@call :GetWindowsSdkDir","set WindowsSdkDir='C:\Program Files\Microsoft SDKs\Windows\v6.0A'"}
-      - if: always()
         run: |
-          set PATH="C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin\x64";"C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin\win64\x64";"C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64";"C:\Windows\Microsoft.NET\Framework64\v3.5"%PATH%
-          set INCLUDE="C:\Program Files\Microsoft SDKs\Windows\v6.0A\include";"%INCLUDE%"
-          set LIB="C:\Program Files\Microsoft SDKs\Windows\v6.0A\lib\x64";%LIB%
-          set WindowsSdkDir="C:\Program Files\Microsoft SDKs\Windows\v6.0A\"
-          "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat"
+          set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
+          set PATH="C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin\x64";"C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin\win64\x64";"C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin";%PATH%
+          set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64";"C:\Windows\Microsoft.NET\Framework64\v3.5";%PATH%
+          set PATH="C:\Windows\Microsoft.NET\Framework64\v3.5\Microsoft .NET Framework 3.5 (Pre-Release Version)";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\VCPackages";%PATH%
+          set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools\bin";%PATH%
+          set INCLUDE="C:\Program Files\Microsoft SDKs\Windows\v6.0A\include";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\ATLMFC\INCLUDE";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\INCLUDE";%INCLUDE%"
+          set LIB="C:\Program Files\Microsoft SDKs\Windows\v6.0A\lib\x64";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\ATLMFC\LIB\amd64";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\LIB\amd64";%LIB%
+          set LIBPATH="C:\Windows\Microsoft.NET\Framework64\v3.5";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\ATLMFC\LIB\amd64";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\LIB\amd64";%LIBPATH%
           cd %GITHUB_WORKSPACE%
           python setup.py build install
         shell: cmd
