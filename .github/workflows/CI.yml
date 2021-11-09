@@ -405,7 +405,7 @@ jobs:
 
   cache_vs:
     runs-on: windows-2019
-    if: True
+    if: False
     steps:
       - name: download VS2008
         run: |
@@ -427,11 +427,12 @@ jobs:
     runs-on: windows-2019
     steps:
       - run: dir /r C:\ mingw*
+        shell: cmd
 
   ci_cache:
     runs-on: windows-2019
     needs: cache_vs
-    if: True
+    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2
