@@ -476,21 +476,21 @@ jobs:
         id: vcpython-cache
         uses: actions/cache@v2
         with:
-          path: C:\vcpython.msi
+          path: ${{ github.workspace }}\vcpython.msi
           key: vcpython
       - name: Download VC++ For Python2.7
         if: steps.cache-primes.outputs.cache-hit != 'true'
         run: |
-          cd $env:HOME
-          Invoke-WebRequest https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi -UseBasicParsing -Outfile $env:HOME\vcpython.msi
+          Invoke-WebRequest https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi -UseBasicParsing -Outfile $env:GITHUB_WORKSPACE\vcpython.msi
       - name: Cache VC++ For Python2.7
+        id: vcpython-cache
         if: steps.cache-primes.outputs.cache-hit != 'true'
         uses: actions/cache@v2
         with:
-          path: C:\vcpython.msi
+          path: ${{ github.workspace }}\vcpython.msi
           key: vcpython
       - name: Install VC++ For Python2.7
-        run: Start-Process $env:HOME\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
+        run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
       - name: Install ScientificPython
         run: |
           cd "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"
