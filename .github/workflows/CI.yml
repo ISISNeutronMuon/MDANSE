@@ -498,7 +498,7 @@ jobs:
           cd $env:HOME
           Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
           Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
-          Start-Process E:\Setup\setup.exe -ArgumentList "/q /f /norestart" -Wait
+          Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
       - name: Install ScientificPython
         run: |
           cd "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"

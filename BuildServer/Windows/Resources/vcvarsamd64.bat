@@ -9,11 +9,12 @@
 @set WindowsSdkDir="C:\Program Files\Microsoft SDKs\Windows\v6.0A"
 @echo %WindowsSdkDir%
 
-@if not "%WindowsSdkDir%" == "" (
-	set "PATH=%WindowsSdkDir%bin\x64;%WindowsSdkDir%bin\win64\x64;%WindowsSdkDir%bin;%PATH%"
-	set "INCLUDE=%WindowsSdkDir%include;%INCLUDE%"
-	set "LIB=%WindowsSdkDir%lib\x64;%LIB%"
-)
+@set "PATH=%WindowsSdkDir%\bin\x64;%WindowsSdkDir%\bin\win64\x64;%WindowsSdkDir%\bin;%PATH%"
+@echo "include"
+@set "INCLUDE=%WindowsSdkDir%\include;%INCLUDE%"
+@echo "lib"
+@set "LIB=%WindowsSdkDir%\lib\x64;%LIB%"
+
 @echo "set windows sdks"
 @set PATH=%VCINSTALLDIR%\BIN\amd64;%FrameworkDir%\%Framework35Version%;%FrameworkDir%\%Framework35Version%\Microsoft .NET Framework 3.5 (Pre-Release Version);%FrameworkDir%\%FrameworkVersion%;%VCINSTALLDIR%\VCPackages;%VSINSTALLDIR%\Common7\IDE;%VSINSTALLDIR%\Common7\Tools;%VSINSTALLDIR%\Common7\Tools\bin;%PATH%
 @set INCLUDE=%VCINSTALLDIR%\ATLMFC\INCLUDE;%VCINSTALLDIR%\INCLUDE;%INCLUDE%
