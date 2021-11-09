@@ -472,6 +472,21 @@ jobs:
           mkdir "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           copy "%HOME%\netcdf" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
         shell: cmd
+      - name: cache vs
+        id: vs2008-cache
+        uses: actions/cache@v2
+        with:
+          key: vs2008
+      - name: cache sdk
+        id: sdk6-cache
+        uses: actions/cache@v2
+        with:
+          key: sdk6
+      - name: cache framework
+        id: framework3-cache
+        uses: actions/cache@v2
+        with:
+          key: framework3.5
       - name: download VS2008
         run: |
           cd $env:HOME
@@ -504,6 +519,7 @@ jobs:
         run: |
           "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\VC\bin\vcvars64.bat"
           set PATH="C:\Users\dni83241\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0";%PATH%
+          "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" x64
           cd %GITHUB_WORKSPACE%
           python setup.py build install
         shell: cmd
