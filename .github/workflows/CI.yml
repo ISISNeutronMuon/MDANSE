@@ -490,7 +490,7 @@ jobs:
           path: C:\vcpython.msi
           key: vcpython
       - name: Install VC++ For Python2.7
-        run: Start-Process $env:HOME\vs.msi -ArgumentList "/quiet /passive /norestart" -Wait
+        run: Start-Process $env:HOME\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
       - name: Install ScientificPython
         run: |
           cd "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"
