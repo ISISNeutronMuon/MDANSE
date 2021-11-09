@@ -437,7 +437,7 @@ jobs:
             C:\Program Files\Microsoft SDKs\Windows\v6.0A
           key: sdk6
       - name: cache framework
-        id: framework3.5-cache
+        id: framework3-cache
         uses: actions/cache@v2
         with:
           path: |
@@ -555,7 +555,7 @@ jobs:
             C:\Program Files\Microsoft SDKs\Windows\v6.0A
           key: sdk6
       - name: cache framework
-        id: framework3.5-cache
+        id: framework3-cache
         uses: actions/cache@v2
         with:
           path: |
