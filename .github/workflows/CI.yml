@@ -426,7 +426,7 @@ jobs:
   test:
     runs-on: windows-2019
     steps:
-      dir /r C:\ mingw*
+      - run: dir /r C:\ mingw*
 
   ci_cache:
     runs-on: windows-2019
