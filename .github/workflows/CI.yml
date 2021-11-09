@@ -5,7 +5,6 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: False
     strategy:
       fail-fast: false
       matrix:
@@ -149,7 +148,6 @@ jobs:
 
   # OSX
   ci_osx:
-    if: False
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -267,7 +265,6 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
-    if: False
     steps:
       - name: Install python
         uses: actions/setup-python@v2
@@ -282,23 +279,53 @@ jobs:
           python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
           mkdir %HOME%\netcdf
         shell: cmd
-      - name: Prepare NetCDF
+      - name: Restore cached netcdf
+        id: netcdf-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ runner.tool_cache }}\Python\2.7.18\x64\netcdf
+          key: netcdf
+      - name: Prepare NetCDF if not cached
+        if: steps.netcdf-cache.outputs.cache-hit != 'true'
         run: |
           choco install 7zip
           Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile "$env:HOME\netcdf\netCDF.exe"
-      - name: Extract NetCDF
+      - name: Extract NetCDF if not cached
+        if: steps.netcdf-cache.outputs.cache-hit != 'true'
         run: |
           cd %HOME%\netcdf
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
           mkdir "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           copy "%HOME%\netcdf" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
         shell: cmd
-      - name: Install VS2008
+      - name: Restore VS2008 from cache
+        id: vs2008-cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            C:\Program Files (x86)\Microsoft Visual Studio 9.0
+            C:\Program Files\Microsoft SDKs\Windows\v6.0A
+            C:\Windows\Microsoft.NET\Framework64\v3.5
+          key: vs2008
+      - name: Install VS2008 if not cached
+        if: steps.vs2008-cache.outputs.cache-hit != 'true'
         run: |
           cd $env:HOME
           Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
           Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
           Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
+      - name: Restore cached VC++ For Python2.7
+        id: vcpython-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}\vcpython.msi
+          key: vcpython
+      - name: Download VC++ For Python2.7 if not cached
+        if: steps.vcpython-cache.outputs.cache-hit != 'true'
+        run: |
+          Invoke-WebRequest https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi -UseBasicParsing -Outfile $env:GITHUB_WORKSPACE\vcpython.msi
+      - name: Install VC++ For Python2.7
+        run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
       - name: Install ScientificPython
         run: |
           cd "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"
@@ -320,6 +347,9 @@ jobs:
         shell: cmd
       - name: Install MDANSE
         run: |
+          "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\VC\bin\vcvars64.bat"
+          set PATH="C:\Users\dni83241\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0";%PATH%
+          "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" x64
           cd %GITHUB_WORKSPACE%
           python setup.py build install
         shell: cmd
@@ -372,16 +402,34 @@ jobs:
       contains( github.ref, '19_continuous_integration' )
     steps:
       - uses: actions/checkout@v2
-      - name: Install VS2008
+      - name: Restore VS2008 from cache
+        id: vs2008-cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            C:\Program Files (x86)\Microsoft Visual Studio 9.0
+            C:\Program Files\Microsoft SDKs\Windows\v6.0A
+            C:\Windows\Microsoft.NET\Framework64\v3.5
+          key: vs2008
+      - name: Install VS2008 if not cached
+        if: steps.vs2008-cache.outputs.cache-hit != 'true'
         run: |
           cd $env:HOME
           Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
           Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
           Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
-      - name: Set up virtual machine
+      - name: Restore cached VC++ For Python2.7
+        id: vcpython-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}\vcpython.msi
+          key: vcpython
+      - name: Download VC++ For Python2.7 if not cached
+        if: steps.vcpython-cache.outputs.cache-hit != 'true'
         run: |
-          mkdir %GITHUB_WORKSPACE%\BuildServer\Windows\Build
-        shell: cmd
+          Invoke-WebRequest https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi -UseBasicParsing -Outfile $env:GITHUB_WORKSPACE\vcpython.msi
+      - name: Install VC++ For Python2.7
+        run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
@@ -391,6 +439,7 @@ jobs:
         run: Expand-Archive -Path "$env:GITHUB_WORKSPACE\python.zip" -DestinationPath "$env:GITHUB_WORKSPACE\BuildServer\Windows\Build"
       - name: Deploy
         run: |
+          mkdir %GITHUB_WORKSPACE%\BuildServer\Windows\Build
           cd %GITHUB_WORKSPACE%\BuildServer\Windows\Build\
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
@@ -402,109 +451,3 @@ jobs:
           name: Windows_executable
           path: ${{ github.workspace }}\*.exe
           retention-days: 90
-
-  cache_vs:
-    runs-on: windows-2019
-    if: True
-    steps:
-      - name: download VS2008
-        run: |
-          cd $env:HOME
-          Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
-          Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
-          Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
-      - name: cache vs
-        id: vs2008-cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            C:\Program Files (x86)\Microsoft Visual Studio 9.0
-            C:\Program Files\Microsoft SDKs\Windows\v6.0A
-            C:\Windows\Microsoft.NET\Framework64\v3.5
-          key: vs2008
-
-  ci_cache:
-    runs-on: windows-2019
-    needs: cache_vs
-    if: True
-    steps:
-      - name: Install python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '2.7.18'
-      - uses: actions/checkout@v2
-      - name: Install dependencies
-        run: |
-          copy C:\Windows\System32\python27.dll %RUNNER_TOOL_CACHE%\Python\2.7.18\x64
-          python -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
-          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
-          python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
-          mkdir %HOME%\netcdf
-        shell: cmd
-      - name: Prepare NetCDF
-        run: |
-          choco install 7zip
-          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile "$env:HOME\netcdf\netCDF.exe"
-      - name: Extract NetCDF
-        run: |
-          cd %HOME%\netcdf
-          "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
-          mkdir "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          copy "%HOME%\netcdf" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-        shell: cmd
-      - name: cache vs
-        id: vs2008-cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            C:\Program Files (x86)\Microsoft Visual Studio 9.0
-            C:\Program Files\Microsoft SDKs\Windows\v6.0A
-            C:\Windows\Microsoft.NET\Framework64\v3.5
-          key: vs2008
-      - name: Restore cached VC++ For Python2.7
-        id: vcpython-cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ github.workspace }}\vcpython.msi
-          key: vcpython
-      - name: Download VC++ For Python2.7
-        if: steps.vcpython-cache.outputs.cache-hit != 'true'
-        run: |
-          Invoke-WebRequest https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi -UseBasicParsing -Outfile $env:GITHUB_WORKSPACE\vcpython.msi
-      - name: Install VC++ For Python2.7
-        run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
-      - name: Install ScientificPython
-        run: |
-          cd "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"
-          git clone https://code.ill.fr/scientific-software/scientific-python.git
-          cd scientific-python
-          python setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          python setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.h" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\Scientific"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.lib" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
-        shell: cmd
-      - name: Install MMTK
-        run: |
-          cd "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"
-          git clone https://code.ill.fr/scientific-software/mmtk.git
-          cd mmtk
-          python setup.py build install
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
-        shell: cmd
-      - name: Install MDANSE
-        run: |
-          "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\VC\bin\vcvars64.bat"
-          set PATH="C:\Users\dni83241\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0";%PATH%
-          "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" x64
-          cd %GITHUB_WORKSPACE%
-          python setup.py build install
-        shell: cmd
-      - name: Run tests
-        run: |
-          cd %GITHUB_WORKSPACE%\Tests
-          python UnitTests\AllTests.py
-          python DependenciesTests\AllTests.py
-          python FunctionalTests\Jobs\BuildJobTests.py
-          python FunctionalTests\Jobs\AllTests.py
-        shell: cmd
