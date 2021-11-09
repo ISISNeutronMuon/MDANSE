@@ -8,7 +8,7 @@
 
 @echo Setting environment for using Microsoft Visual Studio 2008 Beta2 x64 tools.
 
-@set WindowsSdkDir="C:\Program Files\Microsoft SDKs\Windows\v6.0A\"
+@set WindowsSdkDir="C:\Program Files\Microsoft SDKs\Windows\v6.0A"
 
 @if not "%WindowsSdkDir%" == "" (
 	set "PATH=%WindowsSdkDir%bin\x64;%WindowsSdkDir%bin\win64\x64;%WindowsSdkDir%bin;%PATH%"
