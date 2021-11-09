@@ -9,7 +9,10 @@ import numpy
 from Cython.Distutils import build_ext as cython_build_ext
 
 from distutils.command.build import build
-from distutils.core import setup, Extension
+try:
+    from setuptools import setup, Extension
+except ImportError:
+    from distutils.core import setup, Extension
 from distutils.sysconfig import get_config_vars
 from distutils.util import convert_path
 

@@ -503,6 +503,7 @@ jobs:
       - name: Install MDANSE
         run: |
           "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\VC\bin\vcvars64.bat"
+          set PATH="C:\Users\dni83241\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0";%PATH%
           cd %GITHUB_WORKSPACE%
           python setup.py build install
         shell: cmd
