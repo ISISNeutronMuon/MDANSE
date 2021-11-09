@@ -405,47 +405,27 @@ jobs:
 
   cache_vs:
     runs-on: windows-2019
-    if: False
+    if: True
     steps:
       - name: download VS2008
         run: |
           cd $env:HOME
           Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
-      - run: |
           Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
           Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
-      - run: |
-          cd /d "C:\Program Files (x86)\Microsoft SDKs\Windows\"
-          dir
-        shell: cmd
-      - run: |
-          cd /d "C:\Windows\Microsoft.NET\Framework64\"
-          dir
-        shell: cmd
       - name: cache vs
         id: vs2008-cache
         uses: actions/cache@v2
         with:
           path: |
             C:\Program Files (x86)\Microsoft Visual Studio 9.0
-          key: vs2008
-      - name: cache sdk
-        id: sdk6-cache
-        uses: actions/cache@v2
-        with:
-          path: |
             C:\Program Files\Microsoft SDKs\Windows\v6.0A
-          key: sdk6
-      - name: cache framework
-        id: framework3-cache
-        uses: actions/cache@v2
-        with:
-          path: |
             C:\Windows\Microsoft.NET\Framework64\v3.5
-          key: framework3.5
+          key: vs2008
 
   ci_cache:
     runs-on: windows-2019
+    needs: cache_vs
     if: True
     steps:
       - name: Install python
@@ -472,6 +452,15 @@ jobs:
           mkdir "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           copy "%HOME%\netcdf" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
         shell: cmd
+      - name: cache vs
+        id: vs2008-cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            C:\Program Files (x86)\Microsoft Visual Studio 9.0
+            C:\Program Files\Microsoft SDKs\Windows\v6.0A
+            C:\Windows\Microsoft.NET\Framework64\v3.5
+          key: vs2008
       - name: Restore cached VC++ For Python2.7
         id: vcpython-cache
         uses: actions/cache@v2
@@ -479,15 +468,9 @@ jobs:
           path: ${{ github.workspace }}\vcpython.msi
           key: vcpython
       - name: Download VC++ For Python2.7
-        if: steps.cache-primes.outputs.cache-hit != 'true'
+        if: steps.vcpython-cache.outputs.cache-hit != 'true'
         run: |
           Invoke-WebRequest https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi -UseBasicParsing -Outfile $env:GITHUB_WORKSPACE\vcpython.msi
-      - name: Cache VC++ For Python2.7
-        if: steps.cache-primes.outputs.cache-hit != 'true'
-        uses: actions/cache@v2
-        with:
-          path: ${{ github.workspace }}\vcpython.msi
-          key: vcpython
       - name: Install VC++ For Python2.7
         run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
       - name: Install ScientificPython
