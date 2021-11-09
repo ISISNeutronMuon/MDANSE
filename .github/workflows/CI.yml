@@ -426,8 +426,7 @@ jobs:
   test:
     runs-on: windows-2019
     steps:
-      - run: dir /r C:\ mingw*
-        shell: cmd
+      - run: ls C:\ *mingw* -Recurse -Directory
 
   ci_cache:
     runs-on: windows-2019
