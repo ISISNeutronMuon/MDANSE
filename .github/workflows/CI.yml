@@ -430,14 +430,14 @@ jobs:
             C:\Program Files (x86)\Microsoft Visual Studio 9.0
           key: vs2008
       - name: cache sdk
-        id: vs2008-cache
+        id: sdk6-cache
         uses: actions/cache@v2
         with:
           path: |
             C:\Program Files\Microsoft SDKs\Windows\v6.0A
           key: sdk6
       - name: cache framework
-        id: vs2008-cache
+        id: framework3.5-cache
         uses: actions/cache@v2
         with:
           path: |
@@ -548,14 +548,14 @@ jobs:
             C:\Program Files (x86)\Microsoft Visual Studio 9.0
           key: vs2008
       - name: cache sdk
-        id: vs2008-cache
+        id: sdk6-cache
         uses: actions/cache@v2
         with:
           path: |
             C:\Program Files\Microsoft SDKs\Windows\v6.0A
           key: sdk6
       - name: cache framework
-        id: vs2008-cache
+        id: framework3.5-cache
         uses: actions/cache@v2
         with:
           path: |
