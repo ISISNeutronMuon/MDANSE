@@ -2,7 +2,7 @@
 
 cd %MDANSE_SOURCE_DIR%
 
-set MDANSE_TEMPORARY_INSTALLATION_DIR="%GITHUB_WORKSPACE%\BuildServer\Windows\Build"
+set MDANSE_TEMPORARY_INSTALLATION_DIR="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"
 rem Set the path to python executable
 set PYTHON_EXE=%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe
 
@@ -12,7 +12,7 @@ rem For the sake of code safety, this should be the same framework used to build
 rem see http://p-nand-q.com/python/building-python-27-with-vs2010.html for more info
 set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
 
-"%GITHUB_WORKSPACE%\BuildServer\Windows\Build\python.exe" setup.py build build_api build_help install
+"%PYTHON_EXE%" setup.py build build_api build_help install
 
 set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build
