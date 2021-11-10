@@ -320,6 +320,7 @@ jobs:
         shell: cmd
 
       - name: Restore VS2008 from cache
+        if: steps.python-cache.outputs.cache-hit != 'true'
         id: vs2008-cache
         uses: actions/cache@v2
         with:
@@ -354,12 +355,8 @@ jobs:
       - name: Install ScientificPython
         if: steps.python-cache.outputs.cache-hit != 'true'
         run: |
-          "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\VC\bin\vcvars64.bat"
-          set PATH="C:\Users\dni83241\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0";%PATH%
-          "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" x64
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
-          copy /y "%GITHUB_WORKSPACE%\BuildServer\Windows\Resources\setup.py" scientific-python
           cd scientific-python
           python setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           python setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
