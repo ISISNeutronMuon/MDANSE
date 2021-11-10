@@ -320,7 +320,7 @@ jobs:
         shell: cmd
 
       - name: Restore VS2008 from cache
-        if: steps.python-cache.outputs.cache-hit != 'true'
+        if: steps.python-cache.outputs.cache-hit == 'true'
         id: vs2008-cache
         uses: actions/cache@v2
         with:
