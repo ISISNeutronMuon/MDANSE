@@ -253,7 +253,7 @@ jobs:
   deploy_osx:
     needs: ci_osx
     runs-on: macos-10.15
-    if: |
+        if: |
           (contains( github.ref, 'master' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
           (contains( github.ref, 'develop' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
           (contains( github.ref, 'release-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
