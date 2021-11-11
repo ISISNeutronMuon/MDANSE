@@ -32,14 +32,24 @@ class JobFileGenerator():
         self.job = job
         self.job.get_default_parameters()
 
-        # Check if reference data is present
+        # Check if reference data is present, first assuming that the tests are run from Jobs/
         self.reference_data_path = os.path.join(os.path.pardir, os.path.pardir, os.path.pardir, "Data",
                                                 "Jobs_reference_data", job._type)
         self.reference_data_file = self.reference_data_path + "_reference" + ".nc"
+
         if not os.path.isfile(self.reference_data_file):
             self.reference_data_path = os.path.abspath(os.path.join('Jobs', 'BuildJobTests.py')).split(os.sep)
-            self.reference_data_path = os.path.join(*self.reference_data_path[:-4])
+
+            # Add separators if they are missing to ensure os.path.join returns a valid path
+            if sys.platform == 'win32' and ':' in self.reference_data_path[0] and not '\\' in self.reference_data_path[0]:
+                self.reference_data_path[0] = ''.join([self.reference_data_path[0], '\\'])
+            if sys.platform != 'win32' and self.reference_data_path[0][0] != '/':
+                self.reference_data_path[0] = ''.join(['/', self.reference_data_path[0]])
+
+            # Get the absolute path to MDANSE directory and append it with path to the reference data
+            self.reference_data_path = os.path.join(os.path.join(*self.reference_data_path[:-4]), "Data", "Jobs_reference_data", job._type)
             self.reference_data_file = self.reference_data_path + "_reference" + ".nc"
+
             if not os.path.isfile(self.reference_data_file):
                 print r"/!\ Reference data file is not present for job " + str(job)
                 self.reference_data_file = None
