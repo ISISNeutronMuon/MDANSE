@@ -38,21 +38,8 @@ class JobFileGenerator():
         self.reference_data_file = self.reference_data_path + "_reference" + ".nc"
 
         if not os.path.isfile(self.reference_data_file):
-            self.reference_data_path = os.path.abspath(__file__).split(os.sep)
-
-            # Add separators if they are missing to ensure os.path.join returns a valid path
-            if sys.platform == 'win32' and ':' in self.reference_data_path[0] and not '\\' in self.reference_data_path[0]:
-                self.reference_data_path[0] = ''.join([self.reference_data_path[0], '\\'])
-            if sys.platform != 'win32' and self.reference_data_path[0][0] != '/':
-                self.reference_data_path[0] = ''.join(['/', self.reference_data_path[0]])
-
-            # Get the absolute path to MDANSE directory and append it with path to the reference data
-            self.reference_data_path = os.path.join(os.path.join(*self.reference_data_path[:-4]), "Data", "Jobs_reference_data", job._type)
-            self.reference_data_file = self.reference_data_path + "_reference" + ".nc"
-
-            if not os.path.isfile(self.reference_data_file):
-                print r"/!\ Reference data file is not present for job " + str(job)
-                self.reference_data_file = None
+            print r"/!\ Reference data file is not present for job " + str(job)
+            self.reference_data_file = None
 
         # Check if job can be launched on multiprocessor
         if job.settings.has_key('running_mode'):
@@ -62,7 +49,7 @@ class JobFileGenerator():
             self.multiprocessor = False
 
         # Create the job file
-        self.job_file_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Test_%s.py" % job._type)
+        self.job_file_name = "Test_%s.py" % job._type
 
         self.__generate_test_file(parameters, job_id)
 
@@ -251,6 +238,7 @@ class JobFileGenerator():
 
 if __name__ == '__main__':
     # Main script, automatically creates source files for testing jobs
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     for job_id,job in REGISTRY['job'].items():
         # Skip the mcstas test because mcstas executable is not available on all platform
         if job_id=='mvi':
