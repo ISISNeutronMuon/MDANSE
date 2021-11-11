@@ -388,10 +388,10 @@ jobs:
       - name: Run tests
         run: |
           cd %GITHUB_WORKSPACE%\Tests
-          python UnitTests\AllTests.py
-          python DependenciesTests\AllTests.py
-          python FunctionalTests\Jobs\BuildJobTests.py
-          python FunctionalTests\Jobs\AllTests.py
+          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe UnitTests\AllTests.py
+          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe DependenciesTests\AllTests.py
+          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe FunctionalTests\Jobs\BuildJobTests.py
+          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe FunctionalTests\Jobs\AllTests.py
         shell: cmd
 
   deploy_windows:
