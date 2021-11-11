@@ -301,7 +301,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: MacOS executable
-          path: ${{ github.workspace }}/*.dmg
+          path: |
+            ${{ github.workspace }}/*.dmg
+            ${{ github.workspace }}/BuildServer/Unix/MacOS/Resources/README.txt
           retention-days: 90
 
 

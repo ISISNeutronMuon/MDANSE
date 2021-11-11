@@ -52,6 +52,9 @@ fi
 echo "Add mdanse version file"
 echo "${VERSION_NAME}" | sudo tee "${MDANSE_APP_DIR}/Contents/Resources/version"
 
+# Copy over instruction for using bundled python
+sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/How to use the bundled python.txt" "$MDANSE_APP_DIR/Contents/MacOS"
+
 #############################
 # Copying Python
 #############################
@@ -98,7 +101,8 @@ echo -e "${BLUE}""Changing wx and vtk dyilib links""${NORMAL}"
 chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
 
-# Comment the 'add_system_python_extras' call that add some System path to the sys.path and '_boot_multiprocessing' which is bugged since python 2 doesn't have the functions it uses
+# Comment out the 'add_system_python_extras' call that add some System path to the sys.path and
+# '_boot_multiprocessing' which is bugged since python 2 doesn't have the functions it uses
 echo "Comment out in __boot__.py"
 sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
