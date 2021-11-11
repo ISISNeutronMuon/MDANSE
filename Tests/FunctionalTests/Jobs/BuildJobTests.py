@@ -38,7 +38,7 @@ class JobFileGenerator():
         self.reference_data_file = self.reference_data_path + "_reference" + ".nc"
 
         if not os.path.isfile(self.reference_data_file):
-            self.reference_data_path = os.path.abspath(os.path.join(__file__)).split(os.sep)
+            self.reference_data_path = os.path.abspath(__file__).split(os.sep)
 
             # Add separators if they are missing to ensure os.path.join returns a valid path
             if sys.platform == 'win32' and ':' in self.reference_data_path[0] and not '\\' in self.reference_data_path[0]:
@@ -62,7 +62,7 @@ class JobFileGenerator():
             self.multiprocessor = False
 
         # Create the job file
-        self.job_file_name = "Test_%s.py" % job._type
+        self.job_file_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Test_%s.py" % job._type)
 
         self.__generate_test_file(parameters, job_id)
 
@@ -214,8 +214,7 @@ class JobFileGenerator():
         :param job_id: The id of the job class for which the tests are being generated.
         :type job_id: str
         """
-        f = open(os.path.join(os.path.join(*self.reference_data_path[:-3]),
-                              "Tests", "FunctionalTests", "Jobs", self.job_file_name), 'w')
+        f = open(self.job_file_name, 'w')
         
         # The first line contains the call to the python executable. This is necessary for the file to
         # be autostartable.
