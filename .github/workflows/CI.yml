@@ -296,6 +296,7 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
+          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/README.txt $GITHUB_WORKSPACE
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
@@ -303,7 +304,7 @@ jobs:
           name: MacOS executable
           path: |
             ${{ github.workspace }}/*.dmg
-            ${{ github.workspace }}/BuildServer/Unix/MacOS/Resources/README.txt
+            ${{ github.workspace }}README.txt
           retention-days: 90
 
 
