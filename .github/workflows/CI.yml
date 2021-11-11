@@ -5,33 +5,39 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: false
     strategy:
       fail-fast: false
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
+
     steps:
       - uses: actions/checkout@v2
+
       - name: Install python
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
+
       - name: Install libraries on ubuntu 18
         if: ${{ (matrix.os == 'ubuntu-18.04') }}
         run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev
+
       - name: Install libraries on ubuntu 20
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
         run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev libgtk2.0-0 libgtk2.0-dev
+
       - name: Install dependencies
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
+
       - name: Install ScientificPython
         run: |
           cd $HOME
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python/
           sudo $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
+
       - name: Install MMTK
         run: |
           cd $HOME
@@ -39,14 +45,17 @@ jobs:
           cd mmtk
           sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/setup.py ~/mmtk
           sudo $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
+
       - name: Install MDANSE
         run: |
           cd $GITHUB_WORKSPACE
           $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
+
       - name: Run tests
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
+
       - name: Tar artifacts
         if: |
           contains( github.ref, 'master' ) ||
@@ -61,6 +70,7 @@ jobs:
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 python
           tar -czf python.tar.gz python
+
       - name: Upload artifacts
         if: |
           contains( github.ref, 'master' ) ||
@@ -76,6 +86,7 @@ jobs:
           name: ${{ matrix.os }}_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
+
 
   deploy_ubuntu:
     needs: ci_ubuntu
@@ -95,15 +106,18 @@ jobs:
       contains( github.ref, '19_continuous_integration' )
     steps:
       - uses: actions/checkout@v2
+
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
           path: ~/
+
       - name: Untar artifacts
         run: |
           tar -xzf ~/python.tar.gz -C $HOME
           sudo apt-get install netcdf-bin libnetcdf-dev
+
       - name: Install wx
         run: |
           sudo conda create -p ~/tempenv python=2.7
@@ -112,26 +126,32 @@ jobs:
           sudo cp -r ~/tempenv/lib/wx ~/python/lib
           sudo cp -r ~/tempenv/include/wx-3.0/wx ~/python/include
           sudo cp ~/tempenv/lib/libwx* ~/python/lib
+
       - name: Install vtk
         run: |
           sudo conda install -p ~/tempenv -c ccordoba12 vtk
           sudo cp -r ~/tempenv/lib/python2.7/site-packages/vtk ~/python/lib/python2.7/site-packages
           sudo cp ~/tempenv/lib/libvtk* ~/python/lib
+
       - run: sudo apt-get install dos2unix
+
       - name: Deploy
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_installer
           path: ${{ github.workspace }}/*.deb
           retention-days: 90
+
       - name: Edit postinst
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
         run: sed -i '$ a ln -s /usr/lib/x86_64-linux-gnu/libnetcdf.so.18 /usr/local/lib/libnetcdf.so.15' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/Resources/DEBIAN/postinst
+
       - name: Deploy for ubuntu 21
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
         run: |
@@ -139,6 +159,7 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           export DISTRO=ubuntu-21.04
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
+
       - name: Upload ubuntu21 artifacts
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
         uses: actions/upload-artifact@v2
@@ -147,33 +168,40 @@ jobs:
           path: ${{ github.workspace }}/*21*.deb
           retention-days: 90
 
+
+
   # OSX
   ci_osx:
     runs-on: ${{ matrix.os }}
-    if: false
     strategy:
       fail-fast: false
       matrix:
         os: ['macos-10.15', 'macos-11']
+
     steps:
       - uses: actions/checkout@v2
+
       - name: Install python
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
+
       - name: Install dependecies with pip
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app
+
       - name: Install NetCDF
         run: |
           brew install netcdf
           sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
+
       - name: Install ScientificPython
         run: |
           cd $HOME
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
           sudo python2 setup.py install
+
       - name: Install MMTK
         run: |
           cd $HOME
@@ -181,12 +209,20 @@ jobs:
           cd mmtk
           sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
           sudo python2 setup.py install
+
       - name: Install MDANSE
         run: |
           cd $GITHUB_WORKSPACE
           python2 setup.py install
+
       - name: Run tests
-        run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
+        run: |
+          cd $GITHUB_WORKSPACE/Tests
+          python2 UnitTests/AllTests.py
+          python2 DependenciesTests/AllTests.py
+          python2 FunctionalTests/Jobs/BuildJobTests.py
+          python2 FunctionalTests/Jobs/AllTests.py
+
       - name: Tar python
         if: |
           contains( github.ref, 'master' ) ||
@@ -201,6 +237,7 @@ jobs:
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
+
       - name: Upload artifacts
         if: |
           contains( github.ref, 'master' ) ||
@@ -217,6 +254,7 @@ jobs:
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
 
+
   deploy_osx:
     needs: ci_osx
     runs-on: macos-10.15
@@ -231,38 +269,47 @@ jobs:
       contains( github.ref, '19_continuous_integration' )
     steps:
       - uses: actions/checkout@v2
+
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
           name: macos-10.15_artifacts
           path: ~/
+
       - run: brew install netcdf
+
       - name: Untar python
         run: |
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
+
       - name: Install vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c free vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk ~/Contents/Resources/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* ~/Contents/Resources/lib
+
       - name: Install wx
         run: |
           sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
           sudo cp -rv $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/* ~/Contents/Resources/lib/python2.7/site-packages
           sudo cp -v $HOME/tempenv/lib/libwx*  ~/Contents/Resources/lib
+
       - name: Deploy MDANSE
         run: |
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: MacOS executable
           path: ${{ github.workspace }}/*.dmg
           retention-days: 90
+
+
 
   # WINDOWS
   ci_windows:
