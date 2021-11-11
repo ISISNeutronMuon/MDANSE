@@ -284,7 +284,7 @@ jobs:
           python-version: '2.7.18'
 
       - name: Always upgrade dependencies
-        run: python -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
+        run: %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
         shell: cmd
 
       - name: Install static dependencies
@@ -292,7 +292,7 @@ jobs:
         run: |
           copy C:\Windows\System32\python27.dll %RUNNER_TOOL_CACHE%\Python\2.7.18\x64
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
-          python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
+          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
           mkdir %HOME%\netcdf
         shell: cmd
 
@@ -358,8 +358,8 @@ jobs:
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          python setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          python setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.h" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\Scientific"
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.lib" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
@@ -371,7 +371,7 @@ jobs:
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          python setup.py build install
+          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe setup.py build install
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
         shell: cmd
 
@@ -381,7 +381,7 @@ jobs:
           set PATH="C:\Users\dni83241\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0";%PATH%
           "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" x64
           cd %GITHUB_WORKSPACE%
-          python setup.py build install
+          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe setup.py build install
         shell: cmd
 
       - name: Run tests
@@ -453,7 +453,7 @@ jobs:
         run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
 
       - name: Always upgrade dependencies
-        run: python -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
+        run: %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
         shell: cmd
 
       - name: Install MDANSE
@@ -462,7 +462,7 @@ jobs:
           set PATH="C:\Users\dni83241\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0";%PATH%
           "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" x64
           cd %GITHUB_WORKSPACE%
-          python setup.py build install
+          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe setup.py build install
         shell: cmd
 
       - name: Deploy
