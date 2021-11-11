@@ -214,7 +214,8 @@ class JobFileGenerator():
         :param job_id: The id of the job class for which the tests are being generated.
         :type job_id: str
         """
-        f = open(self.job_file_name, 'w')
+        f = open(os.path.join(os.path.join(*self.reference_data_path[:-3]),
+                              "Tests", "FunctionalTests", "Jobs", self.job_file_name), 'w')
         
         # The first line contains the call to the python executable. This is necessary for the file to
         # be autostartable.
