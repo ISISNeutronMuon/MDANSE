@@ -452,9 +452,6 @@ jobs:
       - name: Install VC++ For Python2.7
         run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
 
-      - name: Unzip artifacts
-        run: Expand-Archive -Path "$env:GITHUB_WORKSPACE\python.zip" -DestinationPath "$env:GITHUB_WORKSPACE\BuildServer\Windows\Build"
-
       - name: Always upgrade dependencies
         run: python -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
         shell: cmd
