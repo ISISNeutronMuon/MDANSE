@@ -38,7 +38,7 @@ class JobFileGenerator():
         self.reference_data_file = self.reference_data_path + "_reference" + ".nc"
         if not os.path.isfile(self.reference_data_file):
             self.reference_data_path = os.path.abspath(os.path.join('Jobs', 'BuildJobTests.py')).split(os.sep)
-            self.reference_data_path = os.path.join(self.reference_data_path[:-4])
+            self.reference_data_path = os.path.join(*self.reference_data_path[:-4])
             self.reference_data_file = self.reference_data_path + "_reference" + ".nc"
             if not os.path.isfile(self.reference_data_file):
                 print r"/!\ Reference data file is not present for job " + str(job)

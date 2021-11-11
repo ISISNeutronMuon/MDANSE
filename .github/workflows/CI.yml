@@ -216,12 +216,7 @@ jobs:
           python2 setup.py install
 
       - name: Run tests
-        run: |
-          cd $GITHUB_WORKSPACE/Tests
-          python2 UnitTests/AllTests.py
-          python2 DependenciesTests/AllTests.py
-          python2 FunctionalTests/Jobs/BuildJobTests.py
-          python2 FunctionalTests/Jobs/AllTests.py
+        run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
 
       - name: Tar python
         if: |
