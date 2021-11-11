@@ -38,7 +38,7 @@ class JobFileGenerator():
         self.reference_data_file = self.reference_data_path + "_reference" + ".nc"
 
         if not os.path.isfile(self.reference_data_file):
-            self.reference_data_path = os.path.abspath(os.path.join('Jobs', 'BuildJobTests.py')).split(os.sep)
+            self.reference_data_path = os.path.abspath(os.path.join(__file__)).split(os.sep)
 
             # Add separators if they are missing to ensure os.path.join returns a valid path
             if sys.platform == 'win32' and ':' in self.reference_data_path[0] and not '\\' in self.reference_data_path[0]:

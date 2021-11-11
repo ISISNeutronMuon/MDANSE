@@ -17,9 +17,10 @@ import os
 import sys
 import glob
 
+
 def suite():
     files = glob.glob("Test*.py")
-    #os.chdir("Jobs")
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     modules = [__import__(os.path.splitext(f)[0],globals(),locals(),[],-1) for f in files]
     test_suite = unittest.TestSuite()
     for m in modules:
