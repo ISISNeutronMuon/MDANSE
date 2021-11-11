@@ -235,14 +235,14 @@ jobs:
 
       - name: Upload artifacts
         if: |
-          contains( github.ref, 'master' ) ||
-          contains( github.ref, 'develop' ) ||
-          contains( github.ref, 'release-' ) ||
-          contains( github.ref, 'hotfix-' ) ||
-          contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' ) ||
-          contains( github.ref, '19_continuous_integration' ) && ${{ (matrix.os == 'macos-10.15') }}
+          (contains( github.ref, 'master' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, 'develop' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, 'release-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, 'hotfix-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, 'build-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, 'tags' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, '19_continuous_integration' ) && ${{ (matrix.os == 'macos-10.15') }})
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -254,14 +254,14 @@ jobs:
     needs: ci_osx
     runs-on: macos-10.15
     if: |
-      contains( github.ref, 'master' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) ||
-      contains( github.ref, '19_continuous_integration' )
+          (contains( github.ref, 'master' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, 'develop' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, 'release-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, 'hotfix-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, 'build-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, 'tags' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, '19_continuous_integration' ) && ${{ (matrix.os == 'macos-10.15') }})
     steps:
       - uses: actions/checkout@v2
 
@@ -304,7 +304,7 @@ jobs:
           name: MacOS executable
           path: |
             ${{ github.workspace }}/*.dmg
-            ${{ github.workspace }}README.txt
+            ${{ github.workspace }}/README.txt
           retention-days: 90
 
 
