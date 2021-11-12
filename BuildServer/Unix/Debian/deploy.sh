@@ -45,7 +45,15 @@ cp $GITHUB_WORKSPACE/Scripts/* ${DEBIAN_BIN_DIR}/
 dos2unix ${DEBIAN_BIN_DIR}/mdanse_*
 cp $PYTHONEXE/bin/* ${DEBIAN_BIN_DIR}/
 
-cd $GITHUB_WORKSPACE
+# Replace the shebang in mdanse scripts to point to the correct python location
+cd ${DEBIAN_BIN_DIR}/ || exit
+files=(mdanse*)
+for f in ${files[*]}
+do
+  sudo sed -i '1s%.*%#!/usr/local/bin/python%' $f
+done
+
+cd $GITHUB_WORKSPACE || exit
 
 # Build API
 sudo $PYTHONEXE/bin/python setup.py build build_api build_help install
