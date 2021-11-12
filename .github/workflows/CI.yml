@@ -342,22 +342,14 @@ jobs:
           mkdir %HOME%\netcdf
         shell: cmd
 
-      - name: Restore cached netcdf
-        if: steps.python-cache.outputs.cache-hit != 'true'
-        id: netcdf-cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ runner.tool_cache }}\Python\2.7.18\x64\netcdf
-          key: netcdf
-
       - name: Prepare NetCDF if not cached
-        if: steps.netcdf-cache.outputs.cache-hit != 'true' && steps.python-cache.outputs.cache-hit != 'true'
+        if: steps.python-cache.outputs.cache-hit != 'true'
         run: |
           choco install 7zip
           Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile "$env:HOME\netcdf\netCDF.exe"
 
       - name: Extract NetCDF if not cached
-        if: steps.netcdf-cache.outputs.cache-hit != 'true' && steps.python-cache.outputs.cache-hit != 'true'
+        if: steps.python-cache.outputs.cache-hit != 'true'
         run: |
           cd %HOME%\netcdf
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
