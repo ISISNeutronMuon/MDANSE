@@ -51,6 +51,13 @@ files=(mdanse*)
 for f in ${files[*]}
 do
   sudo sed -i '1s%.*%#!/usr/local/bin/python%' $f
+  sudo sed -i '2i import os' $f
+  sudo sed -i '3i if not "/usr/local/lib" in os.environ.get("LD_LIBRARY_PATH", ""):'
+  sudo sed -i '4i \ \ \ \ from sys import argv'
+  sudo sed -i '5i \ \ \ \ if os.environ.get("LD_LIBRARY_PATH"):'
+  sudo sed -i '6i \ \ \ \ \ \ \ \ os.environ["LD_LIBRARY_PATH"] = ":".join(["/usr/local/lib", os.environ["LD_LIBRARY_PATH"])'
+  sudo sed -i '7i \ \ \ \ else: os.environ["LD_LIBRARY_PATH"] = "/usr/local/lib"'
+  sudo sed -i '8i \ \ \ \ os.execve(os.path.realpath(__file__), argv, os.environ)'
 done
 
 cd $GITHUB_WORKSPACE || exit
