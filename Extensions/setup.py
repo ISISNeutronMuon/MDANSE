@@ -61,6 +61,7 @@ EXTENSIONS = [Extension('distance_histogram',
                         sources=['./xtc/src/xdrfile.c',
                                  './xtc/src/xdr_seek.c',
                                  './xtc/src/xdrfile_xtc.c',
+                                 './xtc/src/xtc_read_n_frames.c',
                                  './xtc/xtc.pyx'])
               ]
 

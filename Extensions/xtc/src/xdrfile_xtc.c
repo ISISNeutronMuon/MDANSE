@@ -26,7 +26,8 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
+#include <stdio.h>
 #include <stdlib.h>
 #include "xdrfile.h"
 #include "xdrfile_xtc.h"
@@ -35,7 +36,7 @@
 
 enum { FALSE, TRUE };
 
-static int xtc_header(XDRFILE *xd,int *natoms,int *step,float *time,mybool bRead)
+int xtc_header(XDRFILE *xd,int *natoms,int *step,float *time, mybool bRead)
 {
 	int result,magic,n=1;
 	

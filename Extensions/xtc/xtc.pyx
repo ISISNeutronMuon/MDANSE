@@ -53,6 +53,9 @@ from libc.stdio cimport SEEK_SET, SEEK_CUR
 from libc.math cimport ceil
 ctypedef np.npy_int64   int64_t
 
+from libc.stdlib cimport free
+from cpython cimport PyObject, Py_INCREF
+
 
 __all__ = ['load_xtc', 'XTCTrajectoryFile']
 
@@ -115,6 +118,96 @@ cdef int XTC_HEADER_SIZE = 11*sizeof(np.int32_t) + 2*sizeof(np.float32_t) + DIM*
 ###############################################################################
 # Code
 ###############################################################################
+
+cdef class ArrayWrapper:
+    """Helper class to construct an ndarray from a raw C-Pointer. This class
+    will take ownership of the past memory and free it up on destruction. So
+    make sure that all further access to that memory location happens over
+    this object. To deallocate the array `free` will be used, so please make
+    sure that the memory was allocated with malloc/realloc.
+
+    See Also
+    --------
+    ptr_to_ndarray
+
+    Notes
+    -----
+    Original from Gael Varoquaux,
+    https://gist.github.com/GaelVaroquaux/1249305#file-cython_wrapper-pyx
+    """
+    cdef void* data_ptr
+    cdef int* dim
+    cdef int ndim
+    cdef int data_type
+
+    cdef set_data(self, void* data_ptr, int* dim, int ndim, int data_type):
+        """ Set the data of the array
+        This cannot be done in the constructor as it must recieve C-level
+        arguments.
+
+        Parameters:
+        -----------
+        data_ptr: void*
+            Pointer to the data
+        dim: int*
+            length in each dimension
+        ndim: int
+            number of dimensions
+        data_type: int
+            Numpy DataType enum
+        """
+        self.data_ptr = data_ptr
+        self.dim = dim
+        self.data_type = data_type
+        self.ndim = ndim
+
+    def __array__(self):
+        """ Here we use the __array__ method, that is called when numpy
+            tries to get an array from the object."""
+        ndarray = np.PyArray_SimpleNewFromData(self.ndim,
+                                               <np.npy_intp*> self.dim,
+                                               self.data_type,
+                                               self.data_ptr)
+        return ndarray
+
+    def __dealloc__(self):
+        """ Frees the array. This is called by Python when all the
+        references to the object are gone. """
+        free(<void*>self.data_ptr)
+        # free(<int*>self.dim)
+
+
+cdef np.ndarray ptr_to_ndarray(void* data_ptr, np.int64_t[:] dim, int data_type):
+    """convert a pointer to an arbitrary C-pointer to a ndarray. The ndarray is
+    constructed so that the array it's holding will be freed when the array is
+    destroyed.
+
+    Parameters
+    ----------
+    data_ptr : void*
+        Pointer to the data
+    dim : int[:]
+        array containing length in each dimension
+    data_type : int
+        Numpy DataType enum
+
+    Returns
+    -------
+    ndarray
+        Numpy array containing the data
+
+    """
+    array_wrapper = ArrayWrapper()
+    array_wrapper.set_data(<void*> data_ptr, <int*> &dim[0], dim.size, data_type)
+
+    cdef np.ndarray ndarray = np.array(array_wrapper, copy=False)
+    # Assign our object to the 'base' of the ndarray object
+    ndarray.base = <PyObject*> array_wrapper
+    # Increment the reference count, as the above assignement was done in
+    # C, and Python does not know that there is this additional reference
+    Py_INCREF(array_wrapper)
+
+    return ndarray
 
 cdef class XTCTrajectoryFile(object):
     """XTCTrajectoryFile(filenamee, mode='r', force_overwrite=True, **kwargs)
@@ -179,6 +272,7 @@ cdef class XTCTrajectoryFile(object):
     def __cinit__(self, char* filename, char* mode='r', force_overwrite=True, **kwargs):
         """Open a GROMACS XTC file for reading/writing.
         """
+        import os
         self.distance_unit = 'nanometers'
         self.is_open = False
         self.frame_counter = 0
@@ -485,67 +579,24 @@ cdef class XTCTrajectoryFile(object):
         self.frame_counter = absolute
 
     def _calc_len_and_offsets(self):
-        cdef int byte_offset, status
-        cdef int64_t n_frames, filesize
-        cdef np.ndarray[dtype=int64_t, ndim=1] offsets
-
-        # restore old pos when done or in case of error
-        cdef int64_t old_pos = xdrlib.xdr_tell(self.fh)
-
-        if self.n_atoms <= 9:
-            filesize = os.stat(self.filename).st_size
-            byte_offset = XTC_SHORT_HEADER_SIZE + XTC_SHORT_BYTES_PER_ATOM*self.n_atoms
-            assert filesize % byte_offset == 0, ("filesize(%i) not divideable"
-                                                 " by bytes per frames(%i)"
-                                                 % (filesize, byte_offset))
-            n_frames = filesize / byte_offset
-            offsets = np.fromiter((i*byte_offset for i in range(n_frames)),
-                                  dtype=np.int64, count=n_frames)
-        else:
-            offsets = np.empty(self.approx_n_frames, dtype=np.int64)
-            assert len(offsets) >= 1
-
-            try:
-                # skip header
-                if xdrlib.xdr_seek(self.fh, XTC_HEADER_SIZE, SEEK_SET) != 0:
-                    raise RuntimeError('could not skip header for file ' + self.filename)
-
-                # init first byte_offset
-                status = xdrlib.xdrfile_read_int(&byte_offset, 1, self.fh)
-                if status == 0:
-                    raise RuntimeError("error reading from first frame: %i" % status)
-                byte_offset += 3 - ((byte_offset + 3) % 0x04)
-
-                n_frames = 1
-                offsets[0] = 0
-                resize = np.resize
-                while True:
-                    # relative seek
-                    status = xdrlib.xdr_seek(self.fh, byte_offset + XTC_HEADER_SIZE, SEEK_CUR)
-                    if status != 0:
-                        offset = byte_offset + XTC_HEADER_SIZE
-                        last_pos = xdrlib.xdr_tell(self.fh)
-                        raise RuntimeError("error during seek: status code "
-                                           "fseek=%s; offset=%s, last_pos=%s"
-                                           % (status, offset, last_pos))
-
-                    # return value == # ints read, so we're finished
-                    if xdrlib.xdrfile_read_int(&byte_offset, 1, self.fh) == 0:
-                        break
-
-                    if n_frames == len(offsets):
-                        new_len = int(ceil(len(offsets)*1.2))
-                        offsets = resize(offsets, new_len)
-
-                    offsets[n_frames] = xdrlib.xdr_tell(self.fh) - 4 - XTC_HEADER_SIZE
-                    n_frames += 1
-
-                    # truncate byte offset to next 32-bit boundary
-                    byte_offset += 3 - ((byte_offset + 3) % 0x04)
-            finally:
-                xdrlib.xdr_seek(self.fh, old_pos, SEEK_SET)
-
-        return n_frames, offsets[:n_frames]
+        """Calculate offsets from XTC file directly"""
+        if not self.is_open:
+            return np.array([])
+        cdef int n_frames = 0
+        cdef int est_nframes = 0
+        cdef int64_t* offsets = NULL
+        ok = xdrlib.read_xtc_n_frames(self.filename, &n_frames, &est_nframes, &offsets)
+        if ok != 0:
+            raise IOError("XTC couldn't calculate offsets. "
+                          "XDR error = {}".format(_EXDR_ERROR_MESSAGES[ok]))
+        # the read_xtc_n_frames allocates memory for the offsets with an
+        # overestimation. This number is saved in est_nframes and we need to
+        # tell the new numpy array about the whole allocated memory to avoid
+        # memory leaks.
+        cdef np.ndarray dims = np.array([est_nframes], dtype=np.int64)
+        # this handles freeing the allocated memory correctly.
+        cdef np.ndarray nd_offsets = ptr_to_ndarray(<void*> offsets, dims, np.NPY_INT64)
+        return n_frames, nd_offsets[:n_frames]
 
     def tell(self):
         """Current file position

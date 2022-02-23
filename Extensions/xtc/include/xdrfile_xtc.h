@@ -53,6 +53,9 @@ extern "C" {
   extern int write_xtc(XDRFILE *xd,
 		       int natoms,int step,float time,
 		       matrix box,rvec *x,float prec);
+
+  /* Read Header information of the current frame */
+  extern int xtc_header(XDRFILE *xd,int *natoms,int *step,float *time, mybool bRead);
   
 #ifdef __cplusplus
 }

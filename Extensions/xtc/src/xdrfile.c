@@ -2514,8 +2514,8 @@ static int xdrstdio_getlong (XDR *, int32_t *);
 static int xdrstdio_putlong (XDR *, int32_t *);
 static int xdrstdio_getbytes (XDR *, char *, unsigned int);
 static int xdrstdio_putbytes (XDR *, char *, unsigned int);
-static unsigned int xdrstdio_getpos (XDR *);
-static int xdrstdio_setpos (XDR *, unsigned int);
+static int64_t xdrstdio_getpos (XDR *);
+static int xdrstdio_setpos (XDR *, int64_t, int);
 static void xdrstdio_destroy (XDR *);
 
 /*
@@ -2597,18 +2597,49 @@ xdrstdio_putbytes (XDR *xdrs, char *addr, unsigned int len)
 }
 
 /* 32 bit fileseek operations */
-static unsigned int
+static int64_t
 xdrstdio_getpos (XDR *xdrs)
 {
-	return (unsigned int) ftell ((FILE *) xdrs->x_private);
+    #ifdef _WIN32
+        return _ftelli64((FILE *) xdrs->x_private);
+    #else /* __unix__ */
+        return ftello((FILE *) xdrs->x_private);
+    #endif
 }
 
 static int
-xdrstdio_setpos (XDR *xdrs, unsigned int pos)
+xdrstdio_setpos (XDR *xdrs, int64_t pos, int whence)
 {
-	return fseek ((FILE *) xdrs->x_private, pos, 0) < 0 ? 0 : 1;
+    /* A reason for failure can be filesystem limits on allocation units,
+     * before the actual off_t overflow (ext3, with a 4K clustersize,
+     * has a 16TB limit).*/
+    /* We return errno relying on the fact that it is never set to 0 on
+     * success, which means that if an error occurrs it'll never be the same
+     * as exdrOK, and xdr_seek won't be confused.*/
+    #ifdef _WIN32
+	    return _fseeki64((FILE *) xdrs->x_private, pos, whence) < 0 ? errno : exdrOK;
+    #else /*  __unix__ */
+	    return fseeko((FILE *) xdrs->x_private, pos, whence) < 0 ? errno : exdrOK;
+    #endif
+
+
 }
 
+int64_t xtc_tell(XDRFILE *xd)
+/* Reads position in file */
+{
+    return (int64_t)xdrstdio_getpos(xd->xdr);
+}
+
+int xtc_seek(XDRFILE *xd, int64_t pos, int whence)
+/* Seeks to position in file */
+{
+    int result;
+    if ((result = xdrstdio_setpos(xd->xdr, (int64_t) pos, whence)) != 0)
+        return result;
+
+    return exdrOK;
+}
 
 
 #endif /* HAVE_RPC_XDR_H not defined */
