@@ -169,37 +169,37 @@ class NewPropertyDialog(wx.Dialog):
         self.Center()
 
         panel = wx.Panel(self, wx.ID_ANY)
-        main_sizer = wx.FlexGridSizer(rows=3, cols=1, vgap=10, hgap=10)
 
-        # Add instructions
-        title_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add(title_sizer, 0, wx.EXPAND)
-        title = wx.StaticText(panel, -1, "Enter property settings")
-        title_sizer.Add(title, 0, wx.ALL | wx.ALIGN_LEFT, 5)
-
-        # Add the body; ie the fields to fill in for the property
-        body_sizer = wx.FlexGridSizer(rows=2, cols=2, vgap=15, hgap=20)
-        main_sizer.Add(body_sizer, 0, wx.EXPAND)
-        name_text = wx.StaticText(panel, wx.ID_ANY, "Name")
+        # Create text and answer box widgets
+        staticLabel0 = wx.StaticText(panel, -1, "Enter property settings")
+        staticLabel1 = wx.StaticText(panel, wx.ID_ANY, "Name")
         self.name = wx.TextCtrl(panel, wx.ID_ANY)
-        body_sizer.Add(name_text, 0, wx.ALIGN_LEFT | wx.LEFT, 10)
-        body_sizer.Add(self.name, 0, wx.ALIGN_LEFT | wx.EXPAND | wx.RIGHT, 10)
-
-        property_text = wx.StaticText(panel, wx.ID_ANY, "Numeric type")
+        staticLabel2 = wx.StaticText(panel, wx.ID_ANY, "Numeric type")
         self.propertyType = wx.ComboBox(panel, id=wx.ID_ANY, choices=ELEMENTS._TYPES.keys(), style=wx.CB_READONLY)
-        body_sizer.Add(property_text, 0, wx.ALIGN_LEFT | wx.LEFT, 10)
-        body_sizer.Add(self.propertyType, 0, wx.ALIGN_LEFT | wx.EXPAND | wx.RIGHT, 10)
 
-        # Add buttons
-        button_sizer = wx.StdDialogButtonSizer()
-        main_sizer.Add(button_sizer, 0, wx.EXPAND)
+        # Create button widgets
         cancel = wx.Button(panel, wx.ID_CANCEL, "Cancel")
-        button_sizer.AddButton(cancel)
-
         ok = wx.Button(panel, wx.ID_OK, "OK")
         ok.SetDefault()
+
+        # Create the main sizer and add the instruction
+        main_sizer = wx.FlexGridSizer(rows=3, cols=1, vgap=10, hgap=10)
+        main_sizer.Add(staticLabel0, 0, wx.ALL | wx.ALIGN_LEFT, 5)
+
+        # Create sizer for the other texts and the answer boxes, and add the widets
+        body_sizer = wx.FlexGridSizer(rows=2, cols=2, vgap=15, hgap=20)
+        main_sizer.Add(body_sizer, flag=wx.EXPAND)
+        body_sizer.Add(staticLabel1, flag=wx.ALIGN_LEFT | wx.LEFT, border=10)
+        body_sizer.Add(self.name, flag=wx.ALIGN_LEFT | wx.EXPAND | wx.RIGHT, border=10)
+        body_sizer.Add(staticLabel2, flag=wx.ALIGN_LEFT | wx.LEFT, border=10)
+        body_sizer.Add(self.propertyType, flag=wx.ALIGN_LEFT | wx.EXPAND | wx.RIGHT, border=10)
+
+        # Button sizer and widgets
+        button_sizer = wx.StdDialogButtonSizer()
+        button_sizer.AddButton(cancel)
         button_sizer.AddButton(ok)
         button_sizer.Realize()
+        main_sizer.Add(button_sizer, 0, wx.EXPAND)
 
         # Allow for changing size
         main_sizer.AddGrowableCol(0)
