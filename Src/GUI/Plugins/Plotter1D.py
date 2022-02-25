@@ -42,7 +42,7 @@ class Plotter1D(wx.Panel):
     def __init__(self, parent, data = None):
     
         wx.Panel.__init__(self, parent, wx.ID_ANY)
-        
+
         self.setting = None
                 
         ### Initialize variables ###
@@ -326,11 +326,17 @@ class Plotter1D(wx.Panel):
             xMax = max( xMax, max(line.get_xdata()) )
             yMin = min( yMin, min(line.get_ydata()) )
             yMax = max( yMax, max(line.get_ydata()) )
-   
-        self.Xmin =xMin
-        self.Xmax = xMax
-        self.Ymin = yMin
-        self.Ymax=  yMax + 0.05*(yMax-yMin)
+
+        try:
+            self.Xmin = xMin
+            self.Xmax = xMax
+            self.Ymin = yMin
+            self.Ymax = yMax + 0.05 * (yMax - yMin)
+        except TypeError as e:
+            if 'unsupported' in str(e):
+                return
+            else:
+                raise
         
         self.figure.gca().axis([self.Xmin, self.Xmax, self.Ymin, self.Ymax])
         self.figure.canvas.draw()
@@ -434,6 +440,7 @@ class Plotter1D(wx.Panel):
         self.show_legend = True
         
     def plot(self, data, varname):
+        self.data = data
         if data is None:
             return
         self.set_axis_property(varname, data)
