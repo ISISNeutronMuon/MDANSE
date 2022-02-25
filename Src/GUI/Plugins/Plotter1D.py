@@ -333,8 +333,14 @@ class Plotter1D(wx.Panel):
             self.Ymin = yMin
             self.Ymax = yMax + 0.05 * (yMax - yMin)
         except TypeError as e:
+            # If non-numeric data are plotted on one of the axes, the autofit will be skipped if it was called
+            # automatically from the plot() method, but a notification will be issued if user clicked an autofit button.
             if 'unsupported' in str(e):
-                return
+                if event:
+                    raise Plotter1DError('autofit unavailable in graphs where non-numeric values are plotted on one of'
+                                         'the axes.')
+                else:
+                    return
             else:
                 raise
         
