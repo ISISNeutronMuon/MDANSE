@@ -303,12 +303,22 @@ class Plotter1D(wx.Panel):
         if self.verticalCut is not None :        
             lines.remove(self.verticalCut)
             self.verticalCut = None
-            
-        for idx in range(len(lines)):
-            line = lines[idx]
-            
-            y = line.get_ydata()
-            line.set_ydata( (idx+1)*offset +y  )
+
+        try:
+            for idx in range(len(lines)):
+                line = lines[idx]
+
+                y = line.get_ydata()
+                line.set_ydata( (idx+1)*offset +y  )
+
+        except TypeError as e:
+            # If plot is of non-numeric values, a notification is shown if the error is expected, otherwise original
+            # exception is reraised.
+            if 'matching types' in str(e):
+                raise Plotter1DError('Modulation unavailable in graphs where non-numeric values are plotted on '
+                                     'the y axis.')
+            else:
+                raise
         
         # set activeFigure to this figure
         self.figure.canvas.draw()
@@ -338,7 +348,7 @@ class Plotter1D(wx.Panel):
             if 'unsupported' in str(e):
                 if event:
                     raise Plotter1DError('autofit unavailable in graphs where non-numeric values are plotted on one of'
-                                         'the axes.')
+                                         ' the axes.')
                 else:
                     return
             else:
