@@ -20,7 +20,8 @@ import numpy
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import correlation, normalize, get_spectrum
+from MDANSE.Mathematics.Signal import correlation, differentiate, normalize, get_spectrum
+from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory, sorted_atoms
 
 class CurrentCorrelationFunction(IJob):
     """
@@ -42,6 +43,9 @@ class CurrentCorrelationFunction(IJob):
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['instrument_resolution'] = ('instrument_resolution',{'dependencies':{'trajectory':'trajectory','frames' : 'frames'}})
+    settings['interpolation_order'] = ('interpolation_order', {'label': "velocities",
+                                                               'dependencies': {'trajectory': 'trajectory'},
+                                                               'default': 'no interpolation'})
     settings['q_vectors'] = ('q_vectors',{'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
     settings['normalize'] = ('boolean', {'default':False})
@@ -87,8 +91,24 @@ class CurrentCorrelationFunction(IJob):
         self._outputData.add("j(q,t)_long_total","surface", (nQShells,self._nFrames), axis="q|time"    , units="au")                                                 
         self._outputData.add("J(q,f)_long_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="au") 
         self._outputData.add("j(q,t)_trans_total","surface", (nQShells,self._nFrames), axis="q|time"    , units="au")                                                 
-        self._outputData.add("J(q,f)_trans_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="au") 
-         
+        self._outputData.add("J(q,f)_trans_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="au")
+
+        # Interpolate velocities of all atoms throughout the entire trajectory
+        order = self.configuration["interpolation_order"]["value"]
+        if order != "no interpolation":
+            traj = self.configuration['trajectory']['instance']
+            self._velocities = numpy.array([read_atoms_trajectory(traj, atom,
+                                                               first=self.configuration['frames']['first'],
+                                                               last=self.configuration['frames']['last']+1,
+                                                               step=self.configuration['frames']['step'],
+                                                               variable=self.configuration['interpolation_order']["variable"])
+                                         for atom in self.configuration['atom_selection']["indexes"]])
+
+            for index, atom in enumerate(self._velocities):
+                for axis in range(3):
+                    self._velocities[index, :, axis] = differentiate(atom[:, axis], order=order,
+                                                                  dt=self.configuration['frames']['time_step'])
+
     def run_step(self, index):
         """
         Runs a single step of the job.\n
@@ -128,11 +148,15 @@ class CurrentCorrelationFunction(IJob):
             # loop over the trajectory time steps
             for i, frame in enumerate(self.configuration['frames']['value']):
                 conf = traj.configuration[frame]
-                vel = traj.velocities[frame]
-                
-                for element,idxs in self._indexesPerElement.items():
+
+                try:
+                    vel = self._velocities[:, i, :]
+                except AttributeError:
+                    vel = traj.velocities[frame].array
+
+                for element, idxs in self._indexesPerElement.items():
                     selectedCoordinates = conf.array[idxs,:]
-                    selectedVelocities =  vel.array[idxs,:]
+                    selectedVelocities =  vel[idxs,:]
                     selectedVelocities = numpy.transpose(selectedVelocities)[:,:,numpy.newaxis]
                     tmp = numpy.exp(1j*numpy.dot(selectedCoordinates, qVectors))[numpy.newaxis,:,:]
                     rho[element][i,:,:] = numpy.add.reduce(selectedVelocities*tmp,1)
