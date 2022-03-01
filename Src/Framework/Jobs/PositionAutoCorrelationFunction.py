@@ -104,11 +104,13 @@ class PositionAutoCorrelationFunction(IJob):
         """ 
 
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
+        self.configuration['atom_selection']['n_atoms_per_element'] = nAtomsPerElement
+
         for element, number in nAtomsPerElement.items():
             self._outputData["pacf_%s" % element] /= number
                 
         if self.configuration['normalize']["value"]:
-            for element in self.configuration['atom_selection']['n_atoms_per_element'].keys():
+            for element in nAtomsPerElement.keys():
                 pacf = self._outputData["pacf_%s" % element]      
                 if pacf[0] == 0:
                     raise ValueError("The normalization factor is equal to zero !!!") 
