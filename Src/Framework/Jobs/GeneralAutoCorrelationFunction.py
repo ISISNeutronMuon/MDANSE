@@ -17,7 +17,7 @@ import collections
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import correlation
+from MDANSE.Mathematics.Signal import correlation, normalize
 from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
 class GeneralAutoCorrelationFunction(IJob):
@@ -96,8 +96,7 @@ class GeneralAutoCorrelationFunction(IJob):
         element = self.configuration['atom_selection']["names"][index]
         
         self._outputData["gacf_%s" % element] += x        
-        
-    
+
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
@@ -112,11 +111,11 @@ class GeneralAutoCorrelationFunction(IJob):
                 
         if self.configuration['normalize']["value"]:
             for element in nAtomsPerElement.keys():
-                pacf = self._outputData["gacf_%s" % element]      
-                if pacf[0] == 0:
+                gacf = self._outputData["gacf_%s" % element]
+                if gacf[0] == 0:
                     raise ValueError("The normalization factor is equal to zero !!!") 
                 else:
-                    pacf /= pacf[0]
+                    self._outputData["vacf_%s" % element] = normalize(gacf, axis=0)
 
         weights = self.configuration["weights"].get_weights()
         gacfTotal = weight(weights,self._outputData,nAtomsPerElement,1,"gacf_%s")
