@@ -111,11 +111,10 @@ class PositionAutoCorrelationFunction(IJob):
                 
         if self.configuration['normalize']["value"]:
             for element in nAtomsPerElement.keys():
-                pacf = self._outputData["pacf_%s" % element]
-                if pacf[0] == 0:
+                if self._outputData["pacf_%s" % element][0] == 0:
                     raise ValueError("The normalization factor is equal to zero !!!") 
                 else:
-                    self._outputData["vacf_%s" % element] = normalize(pacf, axis=0)
+                    self._outputData["pacf_%s" % element] = normalize(self._outputData["pacf_%s" % element], axis=0)
 
         weights = self.configuration["weights"].get_weights()
         pacfTotal = weight(weights,self._outputData,nAtomsPerElement,1,"pacf_%s")
