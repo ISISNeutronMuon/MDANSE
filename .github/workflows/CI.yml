@@ -188,7 +188,7 @@ jobs:
 
       - name: Install dependecies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app==0.26.1
 
       - name: Install NetCDF
         run: |
@@ -383,7 +383,7 @@ jobs:
           key: vcpython
 
       - name: Download VC++ For Python2.7 if not cached
-        if: steps.vcpython-cache.outputs.cache-hit == 'false'
+        if: steps.vcpython-cache.outputs.cache-hit != 'true'
         run: |
           Invoke-WebRequest https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi -UseBasicParsing -Outfile $env:GITHUB_WORKSPACE\vcpython.msi
 
