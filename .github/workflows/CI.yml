@@ -346,7 +346,7 @@ jobs:
         if: steps.python-cache.outputs.cache-hit != 'true'
         run: |
           choco install 7zip
-          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/windows_installers/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile "$env:HOME\netcdf\netCDF.exe"
+          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile "$env:HOME\netcdf\netCDF.exe"
 
       - name: Extract NetCDF if not cached
         if: steps.python-cache.outputs.cache-hit != 'true'
