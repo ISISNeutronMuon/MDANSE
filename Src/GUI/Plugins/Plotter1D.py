@@ -303,21 +303,11 @@ class Plotter1D(wx.Panel):
             lines.remove(self.verticalCut)
             self.verticalCut = None
 
-        try:
-            for idx in range(len(lines)):
-                line = lines[idx]
+        for idx in range(len(lines)):
+            line = lines[idx]
 
-                y = line.get_ydata()
-                line.set_ydata((idx + 1) * offset + y)
-
-        except TypeError as e:
-            # If plot is of non-numeric values, a notification is shown if the error is expected, otherwise original
-            # exception is reraised.
-            if 'matching types' in str(e):
-                raise Plotter1DError('Modulation unavailable in graphs where non-numeric values are plotted on '
-                                     'the y axis.')
-            else:
-                raise
+            y = line.get_ydata()
+            line.set_ydata((idx + 1) * offset + y)
 
         # set activeFigure to this figure
         self.figure.canvas.draw()
@@ -336,22 +326,10 @@ class Plotter1D(wx.Panel):
             yMin = min(yMin, min(line.get_ydata()))
             yMax = max(yMax, max(line.get_ydata()))
 
-        try:
-            self.Xmin = xMin
-            self.Xmax = xMax
-            self.Ymin = yMin
-            self.Ymax = yMax + 0.05 * (yMax - yMin)
-        except TypeError as e:
-            # If non-numeric data are plotted on one of the axes, the autofit will be skipped if it was called
-            # automatically from the plot() method, but a notification will be issued if user clicked an autofit button.
-            if 'unsupported' in str(e):
-                if event:
-                    raise Plotter1DError('autofit unavailable in graphs where non-numeric values are plotted on one of'
-                                         ' the axes.')
-                else:
-                    return
-            else:
-                raise
+        self.Xmin = xMin
+        self.Xmax = xMax
+        self.Ymin = yMin
+        self.Ymax = yMax + 0.05 * (yMax - yMin)
 
         self.figure.gca().axis([self.Xmin, self.Xmax, self.Ymin, self.Ymax])
         self.figure.canvas.draw()
@@ -458,6 +436,12 @@ class Plotter1D(wx.Panel):
     def plot(self, data, varname):
         if data is None:
             return
+
+        try:
+            [float(d) for d in data]
+        except ValueError:
+            raise Plotter1DError('Data containing non-numeric values cannot be plotted.')
+
         self.set_axis_property(varname, data)
         self.subplot = self.figure.add_subplot(111)
         name = self.unique(varname, self.plots)
