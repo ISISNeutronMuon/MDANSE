@@ -66,7 +66,18 @@ class OutputFilesWidget(IWidget):
         else:
             basename = "%s_%s" % (os.path.splitext(os.path.basename(datakey))[0], type)
             trajectoryDir = os.path.dirname(datakey)
+
+        path = os.path.join(trajectoryDir,basename)
+        for i in range(100):
+            if os.path.exists(''.join([path, '.nc'])) or os.path.exists(''.join([path, '.tar'])):
+                basename = ''.join([basename.split('(')[0], '(', str(i+1), ')'])
+                path = os.path.join(trajectoryDir, basename)
+            else:
+                break
+        else:
+            from random import randint
+            path = os.path.join(trajectoryDir, ''.join([basename.split('(')[0], '(', str(randint(100, 100000)), ')']))
             
-        self._filename.SetValue(os.path.join(trajectoryDir,basename))
+        self._filename.SetValue(path)
         
 REGISTRY["output_files"] = OutputFilesWidget
