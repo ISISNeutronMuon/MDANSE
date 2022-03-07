@@ -56,15 +56,15 @@ class OutputFilesWidget(IWidget):
                                     
         return (filename, formats)
     
-    def set_data(self, datakey):
+    def set_data(self, datakey, type):
 
         basename = "output"
                 
         if datakey is None:
-            basename = "output"
+            basename = "output_%s" % type
             trajectoryDir = os.getcwd()
         else:
-            basename = "output_%s" % os.path.splitext(os.path.basename(datakey))[0]
+            basename = "%s_%s" % (os.path.splitext(os.path.basename(datakey))[0], type)
             trajectoryDir = os.path.dirname(datakey)
             
         self._filename.SetValue(os.path.join(trajectoryDir,basename))
