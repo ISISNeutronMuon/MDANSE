@@ -419,13 +419,13 @@ cdef class TRRTrajectoryFile(object):
                     self._read_with_stride(int(n_frames), atom_indices, stride)
             else:
                 xyz, time, step, box, lambd, vel, forces = \
-                    self._read(int(n_frames) * stride, atom_indices)
-                xyz, time, step, box, lambd = (xyz[::stride], time[::stride],
-                                               step[::stride], box[::stride],
-                                               lambd[::stride])
+                    self._read(int(n_frames) * stride, atom_indices, get_velocities=True, get_forces=True)
+                xyz, time, step, box, lambd, vel, forces = (xyz[::stride], time[::stride],
+                                                            step[::stride], box[::stride],
+                                                            lambd[::stride], vel[::stride], forces[::stride])
             if np.all(np.logical_and(box < 1e-10, box > -1e-10)):
                 box = None
-            return xyz, time, step, box, lambd
+            return xyz, time, step, box, lambd, vel, forces
 
         if stride > 1 and self._offsets is not None:
             n_frames = len(self._offsets)
