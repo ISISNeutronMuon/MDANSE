@@ -473,6 +473,11 @@ cdef class TRRTrajectoryFile(object):
         cdef int status = _EXDROK
         cdef int n_atoms_to_read
 
+        # This has to be redefined because for some reason when it is referenced later in this method, its value is 0.
+        # Furthermore, when a check for its value is placed here, the compiler complains that it is referenced before
+        # assignment.
+        cdef int _EXDRENDOFFILE = 11
+
         # check that velocities/forces are present if requested
         if get_velocities and self.has_velocities == 0:
             raise RuntimeError("Velocities requested, but none in file")
@@ -519,7 +524,6 @@ cdef class TRRTrajectoryFile(object):
             vel = np.empty((n_frames, n_atoms_to_read, 3), dtype=np.float32)
         if get_forces:
             forces = np.empty((n_frames, n_atoms_to_read, 3), dtype=np.float32)
-
 
         while (i < n_frames) and (status != _EXDRENDOFFILE):
             if atom_indices is None:
