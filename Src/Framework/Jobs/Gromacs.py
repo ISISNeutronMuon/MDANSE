@@ -51,12 +51,25 @@ class GromacsConverter(Converter):
         Initialize the job.
         '''
 
+        # Create XTC or TRR object depending on which kind of trajectory was loaded
         if self.configuration["xtc_file"]["filename"][-4:] == '.xtc':
             self._xdr_file = xtc.XTCTrajectoryFile(self.configuration["xtc_file"]["filename"], "r")
             self._xtc = True
         elif self.configuration["xtc_file"]["filename"][-4:] == '.trr':
             self._xdr_file = trr.TRRTrajectoryFile(self.configuration["xtc_file"]["filename"], "r")
             self._xtc = False
+
+            # Extract information about whether velocities and forces are present in the TRR file
+            try:
+                self._read_velocities = self._xdr_file.has_velocities
+                self._read_forces = self._xdr_file.has_forces
+            except AttributeError:
+                self._read_velocities, self._read_forces = self._xdr_file._check_has_velocities_forces()
+                if self._read_velocities < 0 or self._read_forces < 0:
+                    raise RuntimeError("Could not determine whether velocities or forces are present!")
+
+            # The TRRTrajectoryFile object returns ints for these values, so turn them into bools
+            self._read_velocities, self._read_forces = bool(self._read_velocities), bool(self._read_forces)
         else:
             raise GromacsConverterError('Invalid file format: Gromacs converter can only convert XTC and TRR files, '
                                         'but %s was provided.' % self.configuration["xtc_file"]["filename"][-4:])
@@ -76,9 +89,11 @@ class GromacsConverter(Converter):
 
         # If a TRR trajectory is being read, initialise velocities and forces
         if not self._xtc:
-            self._universe.initializeVelocitiesToTemperature(0.)
-            self._velocities = ParticleVector(self._universe)
-            self._forces = ParticleVector(self._universe)
+            if self._read_velocities:
+                self._universe.initializeVelocitiesToTemperature(0.)
+                self._velocities = ParticleVector(self._universe)
+            if self._read_forces:
+                self._forces = ParticleVector(self._universe)
 
         # A MMTK trajectory is opened for writing.
         self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
@@ -100,7 +115,9 @@ class GromacsConverter(Converter):
         if self._xtc:
             coords, times, steps, box = self._xdr_file.read(1)
         else:
-            coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1)
+            coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1,
+                                                                                    get_velocities=self._read_velocities,
+                                                                                    get_forces=self._read_forces)
         
         conf = Configuration(self._universe, coords[0,:,:])
         
@@ -118,11 +135,12 @@ class GromacsConverter(Converter):
 
         # Set velocities and forces if available
         if not self._xtc:
-            self._velocities.array = velocities[0, :, :]  # already in nm/ps
-            self._universe.setVelocities(self._velocities)
-
-            self._forces.array = forces[0, :, :]  # already in kJ/(mol nm)
-            data["forces"] = self._forces
+            if self._read_velocities:
+                self._velocities.array = velocities[0, :, :]  # already in nm/ps
+                self._universe.setVelocities(self._velocities)
+            if self._read_forces:
+                self._forces.array = forces[0, :, :]  # already in kJ/(mol nm)
+                data["forces"] = self._forces
 
         # Store a snapshot of the current configuration in the output trajectory.
         self._snapshot(data=data)
