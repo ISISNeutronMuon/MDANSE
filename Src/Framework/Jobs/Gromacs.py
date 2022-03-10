@@ -121,9 +121,13 @@ class GromacsConverter(Converter):
         if self._xtc:
             coords, times, steps, box = self._xdr_file.read(1)
         else:
+<<<<<<< HEAD
             coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1,
                                                                                     get_velocities=self._read_velocities,
                                                                                     get_forces=self._read_forces)
+=======
+            coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1)
+>>>>>>> Remove problematic double import and unpack correctly
         
         conf = Configuration(self._universe, coords[0,:,:].astype(float))
         

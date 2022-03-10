@@ -862,7 +862,6 @@ cdef class TRRTrajectoryFile(object):
         cdef np.ndarray[ndim=1, dtype=np.npy_int64] offsets
         cdef trrlib.t_trnheader header
 
-        import os
         file_size = os.stat(self.filename).st_size
         cdef int64_t old_pos = xdrlib.xdr_tell(self.fh)
 
