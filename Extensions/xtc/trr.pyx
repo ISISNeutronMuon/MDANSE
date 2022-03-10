@@ -365,7 +365,7 @@ cdef class TRRTrajectoryFile(object):
         trajectory.unitcell_vectors = box
         return trajectory
 
-    def read(self, n_frames=None, stride=None, atom_indices=None):
+    def read(self, n_frames=None, stride=None, atom_indices=None, get_velocities=False, get_forces=False):
         """read(n_frames=None, stride=None, atom_indices=None)
 
         Read data from a TRR file
@@ -419,10 +419,15 @@ cdef class TRRTrajectoryFile(object):
                     self._read_with_stride(int(n_frames), atom_indices, stride)
             else:
                 xyz, time, step, box, lambd, vel, forces = \
-                    self._read(int(n_frames) * stride, atom_indices, get_velocities=True, get_forces=True)
-                xyz, time, step, box, lambd, vel, forces = (xyz[::stride], time[::stride],
-                                                            step[::stride], box[::stride],
-                                                            lambd[::stride], vel[::stride], forces[::stride])
+                    self._read(int(n_frames) * stride, atom_indices, get_velocities=get_velocities,
+                               get_forces=get_forces)
+                xyz, time, step, box, lambd = (xyz[::stride], time[::stride],
+                                               step[::stride], box[::stride],
+                                               lambd[::stride])
+                if get_velocities:
+                    vel = vel[::stride]
+                if get_forces:
+                    forces = forces[::stride]
             if np.all(np.logical_and(box < 1e-10, box > -1e-10)):
                 box = None
             return xyz, time, step, box, lambd, vel, forces

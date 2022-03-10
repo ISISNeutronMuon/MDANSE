@@ -96,10 +96,15 @@ class GromacsConverter(Converter):
             if self._read_velocities:
                 self._universe.initializeVelocitiesToTemperature(0.)
                 self._velocities = ParticleVector(self._universe)
+<<<<<<< HEAD
                 data_to_be_written.append('velocities')
             if self._read_forces:
                 self._forces = ParticleVector(self._universe)
                 data_to_be_written.append('gradients')
+=======
+            if self._read_forces:
+                self._forces = ParticleVector(self._universe)
+>>>>>>> Enable reading trr files not containing vels/forces
 
         # A MMTK trajectory is opened for writing.
         self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
@@ -122,12 +127,18 @@ class GromacsConverter(Converter):
             coords, times, steps, box = self._xdr_file.read(1)
         else:
 <<<<<<< HEAD
+<<<<<<< HEAD
             coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1,
                                                                                     get_velocities=self._read_velocities,
                                                                                     get_forces=self._read_forces)
 =======
             coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1)
 >>>>>>> Remove problematic double import and unpack correctly
+=======
+            coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1,
+                                                                                    get_velocities=self._read_velocities,
+                                                                                    get_forces=self._read_forces)
+>>>>>>> Enable reading trr files not containing vels/forces
         
         conf = Configuration(self._universe, coords[0,:,:].astype(float))
         
@@ -146,11 +157,19 @@ class GromacsConverter(Converter):
         # Set velocities and forces if available
         if not self._xtc:
             if self._read_velocities:
+<<<<<<< HEAD
                 self._velocities.array = velocities[0, :, :].astype(float)  # already in nm/ps
                 data['velocities'] = self._velocities
             if self._read_forces:
                 self._forces.array = forces[0, :, :].astype(float)  # already in kJ/(mol nm)
                 data["gradients"] = self._forces
+=======
+                self._velocities.array = velocities[0, :, :]  # already in nm/ps
+                self._universe.setVelocities(self._velocities)
+            if self._read_forces:
+                self._forces.array = forces[0, :, :]  # already in kJ/(mol nm)
+                data["forces"] = self._forces
+>>>>>>> Enable reading trr files not containing vels/forces
 
         # Store a snapshot of the current configuration in the output trajectory.
         self._snapshot(data=data)
