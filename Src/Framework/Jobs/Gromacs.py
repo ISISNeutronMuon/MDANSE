@@ -41,8 +41,11 @@ class GromacsConverter(Converter):
     label = "Gromacs"
 
     settings = collections.OrderedDict()           
-    settings['pdb_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Gromacs','md.pdb')})
-    settings['xtc_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Gromacs','md.xtc')})
+    settings['pdb_file'] = ('input_file',
+                            {'default': os.path.join('..','..','..','Data','Trajectories','Gromacs','md.pdb')})
+    settings['xtc_file'] = ('input_file',
+                            {'default': os.path.join('..','..','..','Data','Trajectories','Gromacs','md.xtc'),
+                             'label': 'xtc or trr file'})
     settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
     settings['output_files'] = ('output_files', {'formats':["netcdf"]})
                 
