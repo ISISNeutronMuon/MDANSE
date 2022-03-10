@@ -100,7 +100,7 @@ class GromacsConverter(Converter):
         if self._xtc:
             coords, times, steps, box = self._xdr_file.read(1)
         else:
-            coords, times, steps, box, velocities, forces = self._xdr_file.read(1)
+            coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1)
         
         conf = Configuration(self._universe, coords[0,:,:])
         
@@ -149,5 +149,6 @@ class GromacsConverter(Converter):
 
         # Close the output trajectory.
         self._trajectory.close()
-        
+
+
 REGISTRY['gromacs'] = GromacsConverter
