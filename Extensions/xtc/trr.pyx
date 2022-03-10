@@ -47,9 +47,6 @@ import numpy as np
 cimport numpy as np
 np.import_array()
 
-from mdtraj.utils import ensure_type, cast_indices, in_units_of
-from mdtraj.utils.six import string_types
-from mdtraj.formats.registry import FormatRegistry
 cimport trrlib
 cimport xdrlib
 from libc.stdio cimport SEEK_SET, SEEK_CUR
@@ -89,74 +86,6 @@ if sizeof(float) != sizeof(np.float32_t):
 ###############################################################################
 # Code
 ###############################################################################
-
-@FormatRegistry.register_loader('.trr')
-def load_trr(filename, top=None, stride=None, atom_indices=None, frame=None):
-    """load_trr(filename, top=None, stride=None, atom_indices=None, frame=None)
-
-    Load a Gromacs TRR file from disk.
-
-    The .trr format is a cross-platform compressed binary trajectory format
-    produced by the gromacs software that stores atomic coordinates, box
-    vectors, and time information.
-
-    Parameters
-    ----------
-    filename : str
-        Filename of TRR trajectory file.
-    top : {str, Trajectory, Topology}
-        The TRR format does not contain topology information. Pass in either the
-        path to a pdb file, a trajectory, or a topology to supply this information.
-    stride : int, default=None
-        Only read every stride-th frame
-    atom_indices : array_like, optional
-        If not none, then read only a subset of the atoms coordinates from the
-        file. This may be slightly slower than the standard read because it
-        requires an extra copy, but will save memory.
-    frame : int, optional
-        Use this option to load only a single frame from a trajectory on disk.
-        If frame is None, the default, the entire trajectory will be loaded.
-        If supplied, ``stride`` will be ignored.
-
-    Examples
-    --------
-    >>> import mdtraj as md                                        # doctest: +SKIP
-    >>> traj = md.load_trr('output.trr', top='topology.pdb')       # doctest: +SKIP
-    >>> print traj                                                 # doctest: +SKIP
-    <mdtraj.Trajectory with 500 frames, 423 atoms at 0x110740a90>  # doctest: +SKIP
-
-    Returns
-    -------
-    trajectory : md.Trajectory
-        The resulting trajectory, as an md.Trajectory object.
-
-    See Also
-    --------
-    mdtraj.TRRTrajectoryFile :  Low level interface to TRR files
-    """
-    # we make it not required in the signature, but required here. although this
-    # is a little wierd, its good because this function is usually called by a
-    # dispatch from load(), where top comes from **kwargs. So if its not supplied
-    # we want to give the user an informative error message
-    from mdtraj.core.trajectory import _parse_topology, Trajectory
-    if top is None:
-        raise ValueError('"top" argument is required for load_trr')
-
-    if not isinstance(filename, string_types):
-        raise TypeError('filename must be of type string for load_trr. '
-                        'you supplied %s' % type(filename))
-
-    topology = _parse_topology(top)
-    atom_indices = cast_indices(atom_indices)
-    with TRRTrajectoryFile(filename, 'r') as f:
-        if frame is not None:
-            f.seek(frame)
-            n_frames = 1
-        else:
-            n_frames = None
-
-        return f.read_as_traj(topology, n_frames=n_frames, stride=stride,
-                              atom_indices=atom_indices)
 
 
 cdef class TRRTrajectoryFile(object):
@@ -320,50 +249,6 @@ cdef class TRRTrajectoryFile(object):
         if self.is_open:
             trrlib.xdrfile_close(self.fh)
             self.is_open = False
-
-    def read_as_traj(self, topology, n_frames=None, stride=None, atom_indices=None):
-        """read_as_traj(topology, n_frames=None, stride=None, atom_indices=None)
-
-        Read a trajectory from an XTC file
-
-        Parameters
-        ----------
-        topology : Topology
-            The system topology
-        n_frames : int, None
-            The number of frames you would like to read from the file.
-            If None, all of the remaining frames will be loaded.
-        stride : int, optional
-            Read only every stride-th frame.
-        atom_indices : array_like, optional
-            If not none, then read only a subset of the atoms coordinates from the
-            file. This may be slightly slower than the standard read because it required
-            an extra copy, but will save memory.
-
-        Returns
-        -------
-        trajectory : Trajectory
-            A trajectory object containing the loaded portion of the file.
-
-        See Also
-        --------
-        read : Returns the raw data from the file
-        """
-
-        from mdtraj.core.trajectory import Trajectory
-        if atom_indices is not None:
-            topology = topology.subset(atom_indices)
-
-        xyz, time, step, box, _ = self.read(n_frames=n_frames, stride=stride, atom_indices=atom_indices)
-        if len(xyz) == 0:
-            return Trajectory(xyz=np.zeros((0, topology.n_atoms, 3)), topology=topology)
-
-        in_units_of(xyz, self.distance_unit, Trajectory._distance_unit, inplace=True)
-        in_units_of(box, self.distance_unit, Trajectory._distance_unit, inplace=True)
-
-        trajectory = Trajectory(xyz=xyz, topology=topology, time=time)
-        trajectory.unitcell_vectors = box
-        return trajectory
 
     def read(self, n_frames=None, stride=None, atom_indices=None, get_velocities=False, get_forces=False):
         """read(n_frames=None, stride=None, atom_indices=None)
@@ -689,116 +574,6 @@ cdef class TRRTrajectoryFile(object):
 
         return xyz, time, step, box, lambd, vel_return, forces_return
 
-    def write(self, xyz, time=None, step=None, box=None, lambd=None):
-        """write(xyz, time=None, step=None, box=None, lambd=None)
-
-        Write data to a TRR file
-
-        Parameters
-        ----------
-        xyz : np.ndarray, dtype=np.float32, shape=(n_frames, n_atoms, 3)
-            The cartesian coordinates of the atoms, in nanometers
-        time : np.ndarray, dtype=float32, shape=(n_frames), optional
-            The simulation time corresponding to each frame, in picoseconds.
-            If not supplied, the numbers 0..n_frames will be written.
-        step :  np.ndarray, dtype=int32, shape=(n_frames), optional
-            The simulation timestep corresponding to each frame, in steps.
-            If not supplied, the numbers 0..n_frames will be written
-        box : np.ndarray, dtype=float32, shape=(n_frames, 3, 3), optional
-            The periodic box vectors of the simulation in each frame, in nanometers.
-            If not supplied, the vectors (1,0,0), (0,1,0) and (0,0,1) will
-            be written for each frame.
-        lambd : np.ndarray, dtype=np.float32, shape=(n_frames), optional
-            The alchemical lambda value at each frame. If not supplied, all
-            zeros will be written.
-        """
-        if str(self.mode) != 'w':
-            raise ValueError('write() is only available when the file is opened in mode="w"')
-
-        # do typechecking, and then dispatch to the c level function
-        xyz = ensure_type(xyz, dtype=np.float32, ndim=3, name='xyz', can_be_none=False,
-                          add_newaxis_on_deficient_ndim=True, warn_on_cast=False)
-        n_frames = len(xyz)
-        time = ensure_type(time, dtype=np.float32, ndim=1, name='time', can_be_none=True,
-                           shape=(n_frames,), add_newaxis_on_deficient_ndim=True,
-                           warn_on_cast=False)
-        step = ensure_type(step, dtype=np.int32, ndim=1, name='step', can_be_none=True,
-                           shape=(n_frames,), add_newaxis_on_deficient_ndim=True,
-                           warn_on_cast=False)
-        box = ensure_type(box, dtype=np.float32, ndim=3, name='box', can_be_none=True,
-                          shape=(n_frames, 3, 3), add_newaxis_on_deficient_ndim=True,
-                          warn_on_cast=False)
-        lambd = ensure_type(lambd, dtype=np.float32, ndim=1, name='lambd', can_be_none=True,
-                            shape=(n_frames,), add_newaxis_on_deficient_ndim=True,
-                            warn_on_cast=False)
-
-        if self.frame_counter == 0:
-            self.n_atoms = xyz.shape[1]
-            self.with_unitcell = (box is not None)
-        else:
-            if not self.n_atoms == xyz.shape[1]:
-                raise ValueError("This file has %d atoms, but you're now trying to write %d atoms" % (self.n_atoms, xyz.shape[1]))
-            if self.with_unitcell and (box is None):
-                raise ValueError("The file that you're saving to expects each frame "
-                    "to contain unitcell information, but you did not supply it.")
-            if (not self.with_unitcell) and (box is not None):
-                raise ValueError("The file that you're saving to was created without "
-                    "unitcell information.")
-
-        if time is None:
-            time = np.arange(0, n_frames, dtype=np.float32)
-        if step is None:
-            step = np.arange(0, n_frames, dtype=np.int32)
-        if box is None:
-            # make each box[i] be the all zeros, which indicates the lack of
-            # a unitcell
-            box = np.zeros((n_frames, 3, 3), dtype=np.float32)
-        if lambd is None:
-            lambd = np.zeros(n_frames, dtype=np.float32)
-
-        self._write(xyz, time, step, box, lambd)
-
-    def _write(self,
-               np.ndarray[ndim=3, dtype=np.float32_t, mode='c'] xyz not None,
-               np.ndarray[ndim=1, dtype=np.float32_t, mode='c'] time not None,
-               np.ndarray[ndim=1, dtype=np.int32_t, mode='c'] step not None,
-               np.ndarray[ndim=3, dtype=np.float32_t, mode='c'] box not None,
-               np.ndarray[ndim=1, dtype=np.float32_t, mode='c'] lambd not None,
-               np.ndarray[ndim=3, dtype=np.float32_t, mode='c'] vel=None,
-               np.ndarray[ndim=3, dtype=np.float32_t, mode='c'] forces=None
-              ):
-
-        cdef int n_frames = len(xyz)
-        cdef int n_atoms = xyz.shape[1]
-        cdef int status, i
-
-        # all same length
-        assert n_frames == len(box) == len(step) == len(time) == len(lambd)
-
-        if vel is not None:
-            assert n_frames == len(vel)
-        if forces is not None:
-            assert n_frames == len(forces)
-
-        for i in range(n_frames):
-            if vel is not None:
-                write_vel = <trrlib.rvec*>&vel[i, 0, 0]
-            else:
-                write_vel = NULL
-            if forces is not None:
-                write_forces = <trrlib.rvec*>&forces[i, 0, 0]
-            else:
-                write_forces = NULL
-            status = trrlib.write_trr(self.fh, n_atoms, step[i], time[i],
-                                      lambd[i], <trrlib.matrix>&box[i, 0, 0],
-                                      <trrlib.rvec*>&xyz[i, 0, 0],
-                                      write_vel, write_forces)
-            if status != _EXDROK:
-                raise RuntimeError('TRR write error: %s' % status)
-
-        self.frame_counter += n_frames
-        return status
-
     def seek(self, int offset, int whence=0):
         """seek(offset, whence=0)
 
@@ -921,5 +696,3 @@ cdef class TRRTrajectoryFile(object):
         if self.n_frames == -1:
             self.offsets
         return int(self.n_frames)
-
-FormatRegistry.register_fileobject('.trr')(TRRTrajectoryFile)
