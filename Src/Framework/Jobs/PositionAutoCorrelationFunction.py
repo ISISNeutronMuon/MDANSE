@@ -17,7 +17,7 @@ import collections
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import correlation
+from MDANSE.Mathematics.Signal import correlation, normalize
 from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
 class PositionAutoCorrelationFunction(IJob):
@@ -104,16 +104,17 @@ class PositionAutoCorrelationFunction(IJob):
         """ 
 
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
+        self.configuration['atom_selection']['n_atoms_per_element'] = nAtomsPerElement
+
         for element, number in nAtomsPerElement.items():
             self._outputData["pacf_%s" % element] /= number
                 
         if self.configuration['normalize']["value"]:
-            for element in self.configuration['atom_selection']['n_atoms_per_element'].keys():
-                pacf = self._outputData["pacf_%s" % element]      
-                if pacf[0] == 0:
+            for element in nAtomsPerElement.keys():
+                if self._outputData["pacf_%s" % element][0] == 0:
                     raise ValueError("The normalization factor is equal to zero !!!") 
                 else:
-                    pacf /= pacf[0]
+                    self._outputData["pacf_%s" % element] = normalize(self._outputData["pacf_%s" % element], axis=0)
 
         weights = self.configuration["weights"].get_weights()
         pacfTotal = weight(weights,self._outputData,nAtomsPerElement,1,"pacf_%s")
