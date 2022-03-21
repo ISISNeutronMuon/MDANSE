@@ -222,7 +222,8 @@ class DataPanel(wx.Panel):
         
     def show_data(self):
         self.datalist.DeleteAllItems()
-        variables = [key for key in self.dataproxy.keys() if key not in ['description', 'step', 'time']]
+        forbidden_vars = ['description', 'step', 'time', 'box size', 'configuration', 'gradients']
+        variables = [key for key in self.dataproxy.keys() if key not in forbidden_vars]
         for i, var in enumerate(sorted(variables)):
             self.datalist.InsertStringItem(i, var)
             #self.datalist.SetStringItem(i, 1,self.dataproxy[var]['units'])
