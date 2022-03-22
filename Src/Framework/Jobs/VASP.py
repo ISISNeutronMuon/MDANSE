@@ -7,7 +7,8 @@
 #
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
-# @copyright Institut Laue Langevin 2013-now
+# @copyright Institut Laue Langevin 2013-2021
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -48,7 +49,8 @@ class XDATCARFile(dict):
             if not line or line.lower().startswith("direct"):
                 self._frameHeaderSize = self["instance"].tell() - self._headerSize
                 break
-            header.append(line)                                   
+            header.append(line)
+                                   
         self["scale_factor"] = float(header[0])
 
         cell = " ".join(header[1:4]).split()
