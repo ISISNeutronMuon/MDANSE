@@ -109,7 +109,9 @@ class JobFileGenerator():
                '    for k,v in f.variables.items():\n' \
                '        res2[k] = v.getValue()\n'      \
                '    f.close()\n'                       \
-               '    return Comparator.Comparator().compare(res1, res2)\n\n'
+               '    res1.pop("gradients", None)\n'     \
+               '    res2.pop("gradients", None)\n'     \
+               '    return Comparator.Comparator().compare(res1, res2)\n\n\n'
 
     def __create_test(self, parameters, test_name):
         """
