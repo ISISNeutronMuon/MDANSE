@@ -20,11 +20,15 @@ jobs:
 
       - name: Install libraries on ubuntu 18
         if: ${{ (matrix.os == 'ubuntu-18.04') }}
-        run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install netcdf-bin libnetcdf-dev python-dev
 
       - name: Install libraries on ubuntu 20
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
-        run: sudo apt-get install netcdf-bin libnetcdf-dev python-dev libgtk2.0-0 libgtk2.0-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install netcdf-bin libnetcdf-dev python-dev libgtk2.0-0 libgtk2.0-dev
 
       - name: Install dependencies
         run: |
