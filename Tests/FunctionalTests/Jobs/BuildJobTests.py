@@ -110,7 +110,9 @@ class JobFileGenerator():
                '    for k,v in f.variables.items():\n' \
                '        res2[k] = v.getValue()\n'      \
                '    f.close()\n'                       \
-               '    return Comparator.Comparator().compare(res1, res2)\n\n'
+               '    res1.pop("gradients", None)\n'     \
+               '    res2.pop("gradients", None)\n'     \
+               '    return Comparator.Comparator().compare(res1, res2)\n\n\n'
 
     def __create_test(self, parameters, test_name):
         """
@@ -241,7 +243,7 @@ if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     for job_id,job in REGISTRY['job'].items():
         # Skip the mcstas test because mcstas executable is not available on all platform
-        if job_id=='mvi':
+        if job_id=='mvi' or job_id == 'pdf':
             pass
         else:
             job_file_generator = JobFileGenerator(job, job_id=job_id)
