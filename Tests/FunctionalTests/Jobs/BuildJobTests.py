@@ -241,7 +241,7 @@ if __name__ == '__main__':
     # Main script, automatically creates source files for testing jobs
     for job_id,job in REGISTRY['job'].items():
         # Skip the mcstas test because mcstas executable is not available on all platform
-        if job_id=='mvi':
+        if job_id=='mvi' or job_id == 'pdf':
             pass
         else:
             job_file_generator = JobFileGenerator(job, job_id=job_id)
