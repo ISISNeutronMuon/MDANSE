@@ -307,23 +307,25 @@ class DL_POLYConverter(Converter):
 
         self._velocities = None
         
-        self._forces = None
-
+        self._gradients = None
+                                
+        dataToBeWritten = ['configuration']
         if self._historyFile["keytrj"] == 1:
             self._universe.initializeVelocitiesToTemperature(0.)
             self._velocities = ParticleVector(self._universe)
+            dataToBeWritten.append('velocities')
             
         elif self._historyFile["keytrj"] == 2:
             self._universe.initializeVelocitiesToTemperature(0.)
             self._velocities = ParticleVector(self._universe)
-            self._forces = ParticleVector(self._universe)
-            
-                        
+            self._gradients = ParticleVector(self._universe)
+            dataToBeWritten.extend(['velocities','gradients'])
+                                    
         # A MMTK trajectory is opened for writing.
         self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w', comment=self._fieldFile["title"])
 
         # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
+        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, dataToBeWritten, 0, None, 1)])
         
     def run_step(self, index):
         """Runs a single step of the job.
@@ -351,10 +353,10 @@ class DL_POLYConverter(Converter):
             self._velocities.array = config[:,3:6]
             self._universe.setVelocities(self._velocities)
 
-        if self._forces is not None:
-            self._forces.array = config[:,6:9]
-            data["forces"] = self._forces
-                                        
+        if self._gradients is not None:
+            self._gradients.array = config[:,6:9]
+            data["gradients"] = self._gradients
+
         # Store a snapshot of the current configuration in the output trajectory.
         self._snapshot(data=data)
                                                                         

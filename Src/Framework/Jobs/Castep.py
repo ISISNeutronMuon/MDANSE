@@ -196,7 +196,7 @@ class CASTEPConverter(Converter):
         self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
 
         # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions=[TrajectoryOutput(self._trajectory, ["all"],
+        self._snapshot = SnapshotGenerator(self._universe, actions=[TrajectoryOutput(self._trajectory, ["configuration","velocities","gradients"],
                                                                                      0, None, 1)])
     
     def run_step(self, index):
@@ -231,7 +231,7 @@ class CASTEPConverter(Converter):
 
         # Retrieve the forces multiplied by Units.Hartree/Units.Bohr and save them
         self._forces.array = config[2 * nAtoms:3 * nAtoms, :]
-        data["forces"] = self._forces
+        data["gradients"] = self._forces
 
         # Store a snapshot of the current configuration in the output trajectory.
         self._snapshot(data=data)                                          
