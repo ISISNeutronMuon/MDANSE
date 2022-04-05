@@ -301,15 +301,15 @@ class GenericConverter(Converter):
         
         self._gtFile.seek(pos,0)
         
-        dataToBeWritten = ["configuration"]
+        data_to_be_written = ["configuration","time"]
         if self._hasVelocities:
             self._universe.initializeVelocitiesToTemperature(0.0)
             self._velocities = ParticleVector(self._universe)
-            dataToBeWritten.append("velocities")
+            data_to_be_written.append("velocities")
             if self._hasForces:        
                 self._forces = ParticleVector(self._universe)
                 self._dataShape=(self._universe.numberOfAtoms(),9)
-                dataToBeWritten.append("gradients")
+                data_to_be_written.append("gradients")
             else:
                 self._dataShape=(self._universe.numberOfAtoms(),6)
         else:
@@ -319,7 +319,7 @@ class GenericConverter(Converter):
         self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
  
         # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, dataToBeWritten, 0, None, 1)])
+        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
             
     def run_step(self, index):
         """Runs a single step of the job.

@@ -309,23 +309,23 @@ class DL_POLYConverter(Converter):
         
         self._gradients = None
                                 
-        dataToBeWritten = ['configuration']
+        data_to_be_written = ['configuration','time']
         if self._historyFile["keytrj"] == 1:
             self._universe.initializeVelocitiesToTemperature(0.)
             self._velocities = ParticleVector(self._universe)
-            dataToBeWritten.append('velocities')
+            data_to_be_written.append('velocities')
             
         elif self._historyFile["keytrj"] == 2:
             self._universe.initializeVelocitiesToTemperature(0.)
             self._velocities = ParticleVector(self._universe)
             self._gradients = ParticleVector(self._universe)
-            dataToBeWritten.extend(['velocities','gradients'])
+            data_to_be_written.extend(['velocities','gradients'])
                                     
         # A MMTK trajectory is opened for writing.
         self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w', comment=self._fieldFile["title"])
 
         # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, dataToBeWritten, 0, None, 1)])
+        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
         
     def run_step(self, index):
         """Runs a single step of the job.
