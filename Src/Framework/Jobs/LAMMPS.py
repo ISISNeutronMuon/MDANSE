@@ -162,10 +162,11 @@ class LAMMPSConverter(Converter):
 
         self._nameToIndex = dict([(at.name,at.index) for at in self._universe.atomList()])
 
-        data_to_written = ["configuration","time"]
+        data_to_be_written = ["configuration", "time"]
 
         # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_written, 0, None, 1)])
+        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory,
+                                                                                       data_to_be_written, 0, None, 1)])
 
         # Estimate number of steps if needed
         if self.numberOfSteps == 0:
