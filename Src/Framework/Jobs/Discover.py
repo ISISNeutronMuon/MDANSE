@@ -244,7 +244,6 @@ class DiscoverConverter(Converter):
         self._universe.initializeVelocitiesToTemperature(0.)
         self._velocities = ParticleVector(self._universe)
         self._velocities.array = self._hisfile["initial_velocities"]
-        self._universe.setVelocities(self._velocities)
         
         self._universe.foldCoordinatesIntoBox()
             
@@ -279,7 +278,7 @@ class DiscoverConverter(Converter):
         data = {"time" : time}
         
         self._velocities.array[movableAtoms,:] = vel
-        self._universe.setVelocities(self._velocities)
+        data["velocities"] = self._velocities
 
         # Store a snapshot of the current configuration in the output trajectory.
         self._snapshot(data=data)

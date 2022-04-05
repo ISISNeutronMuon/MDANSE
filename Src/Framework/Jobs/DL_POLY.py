@@ -351,7 +351,7 @@ class DL_POLYConverter(Converter):
         
         if self._velocities is not None:
             self._velocities.array = config[:,3:6]
-            self._universe.setVelocities(self._velocities)
+            data["velocities"] = self._velocities
 
         if self._gradients is not None:
             self._gradients.array = config[:,6:9]

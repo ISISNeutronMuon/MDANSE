@@ -227,7 +227,7 @@ class CASTEPConverter(Converter):
 
         # Retrieve the velocities multiplied by Units.Bohr*Units.Hartree/Units.hbar and save them
         self._velocities.array = config[nAtoms:2*nAtoms, :]
-        self._universe.setVelocities(self._velocities)
+        data["velocities"] = self._velocities
 
         # Retrieve the forces multiplied by Units.Hartree/Units.Bohr and save them
         self._forces.array = config[2 * nAtoms:3 * nAtoms, :]
