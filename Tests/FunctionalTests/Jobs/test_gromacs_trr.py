@@ -13,7 +13,7 @@ def compare(file1, file2, array_tolerance):
     try:
         res1 = {}
         for k, v in f.variables.items():
-            if k not in ['velocities', 'forces', 'temperature', 'kinetic_energy']:
+            if k not in ['velocities', 'gradients', 'temperature', 'kinetic_energy']:
                 res1[k] = v.getValue()
     finally:
         f.close()
@@ -22,7 +22,7 @@ def compare(file1, file2, array_tolerance):
     try:
         res2 = {}
         for k, v in f.variables.items():
-            if k not in ['velocities', 'forces', 'temperature', 'kinetic_energy']:
+            if k not in ['velocities', 'gradients', 'temperature', 'kinetic_energy']:
                 res2[k] = v.getValue()
     finally:
         f.close()
@@ -82,6 +82,15 @@ class TestGromacsADK(unittest.TestCase):
 
         self.assertTrue(np.allclose(expected, velocities, 0, 0.000001))
 
+    def test_gradients(self):
+        # adk_oplsaa.trr does not contain forces
+
+        f = NetCDFFile(self.trr_copy, "r")
+        try:
+            self.assertFalse('gradients' in f.variables)
+        finally:
+            f.close()
+
     @classmethod
     def tearDownClass(cls):
         os.remove(cls.trr_copy)
@@ -139,6 +148,19 @@ class TestGromacsCobrotoxin(unittest.TestCase):
             f.close()
 
         self.assertTrue(np.allclose(expected, velocities, 0, 0.000001))
+
+    def test_gradients(self):
+        # Load forces that have been generated from the same trajectory with MDAnalysis + convert angstrom to nm
+        expected = np.load(r'../../../Data/Trajectories/Gromacs/cobrotoxin_forces.npy') * 10
+
+        f = NetCDFFile(self.trr_copy, "r")
+        try:
+            gradients = f.variables['gradients'].getValue()
+        finally:
+            f.close()
+
+        self.assertTrue(np.allclose(expected, gradients, 0, 0.001))
+        # Such a large tolerance is required because most gradients are > 100
 
     @classmethod
     def tearDownClass(cls):
