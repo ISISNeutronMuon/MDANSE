@@ -63,7 +63,16 @@ class MMTKTrajectoryInputData(InputFileData):
         
         for k,v in molSize.items():
             val.append('\t- %d molecule(s) of %s (%d atoms)' % (molNumber[k],k,v))
-        val.append('\n')            
+
+        val.append("\nVariables found in trajectory:")
+        variables = self._data.variables()
+        for v in variables:
+            try:
+                shape = getattr(self._data,v).var.shape
+            except AttributeError:
+                shape = getattr(self._data,v).shape
+            val.append('\t- %s: %s' % (v,shape))
+
         val = "\n".join(val)
         
         return val
