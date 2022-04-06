@@ -48,11 +48,12 @@ class GromacsConverter(Converter):
                              'label': 'xtc or trr file'})
     settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
     settings['output_files'] = ('output_files', {'formats':["netcdf"]})
-                
+
     def initialize(self):
         '''
         Initialize the job.
         '''
+        data_to_be_written = ["configuration", "time"]
 
         # Create XTC or TRR object depending on which kind of trajectory was loaded
         if self.configuration["xtc_file"]["filename"][-4:] == '.xtc':
@@ -73,63 +74,42 @@ class GromacsConverter(Converter):
 
             # The TRRTrajectoryFile object returns ints for these values, so turn them into bools
             self._read_velocities, self._read_forces = bool(self._read_velocities), bool(self._read_forces)
+
+            if self._read_velocities:
+                data_to_be_written.append("velocities")
+            if self._read_forces:
+                data_to_be_written.append("gradients")
         else:
             raise GromacsConverterError('Invalid file format: Gromacs converter can only convert XTC and TRR files, '
                                         'but %s was provided.' % self.configuration["xtc_file"]["filename"][-4:])
 
         # The number of steps of the analysis.
         self.numberOfSteps = len(self._xdr_file)
-        
-        # Create all objects from the PDB file.  
+
+        # Create all objects from the PDB file.
         conf = PDBConfiguration(self.configuration['pdb_file']['filename'])
 
         # Creates a collection of all the chemical objects stored in the PDB file
         molecules = conf.createAll()
-                                            
+
         # Create a universe and introduce dhe chemical objects found in the PDB file into the universe.
         self._universe = ParallelepipedicPeriodicUniverse()
         self._universe.addObject(molecules)
 
-<<<<<<< HEAD
-        data_to_be_written = ['configuration','time']
-=======
->>>>>>> 97f6c0563d27cc4e7f218c7f0554b461ab80efa1
         # If a TRR trajectory is being read, initialise velocities and forces
         if not self._xtc:
             if self._read_velocities:
                 self._universe.initializeVelocitiesToTemperature(0.)
                 self._velocities = ParticleVector(self._universe)
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> The coords, velocities and forces arrays are now casted to float64
-                data_to_be_written.append('velocities')
             if self._read_forces:
                 self._forces = ParticleVector(self._universe)
-                data_to_be_written.append('gradients')
-<<<<<<< HEAD
-=======
-            if self._read_forces:
-                self._forces = ParticleVector(self._universe)
->>>>>>> Enable reading trr files not containing vels/forces
-=======
->>>>>>> The coords, velocities and forces arrays are now casted to float64
-=======
-            if self._read_forces:
-                self._forces = ParticleVector(self._universe)
->>>>>>> 97f6c0563d27cc4e7f218c7f0554b461ab80efa1
 
         # A MMTK trajectory is opened for writing.
         self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
 
         # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe,
-<<<<<<< HEAD
-                                           actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
-=======
-                                           actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
->>>>>>> 97f6c0563d27cc4e7f218c7f0554b461ab80efa1
+        self._snapshot = SnapshotGenerator(self._universe, actions=[TrajectoryOutput(self._trajectory,
+                                                                                     data_to_be_written, 0, None, 1)])
 
     def run_step(self, index):
         """Runs a single step of the job.
@@ -144,30 +124,12 @@ class GromacsConverter(Converter):
         if self._xtc:
             coords, times, steps, box = self._xdr_file.read(1)
         else:
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
             coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1,
                                                                                     get_velocities=self._read_velocities,
                                                                                     get_forces=self._read_forces)
-=======
-            coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1)
->>>>>>> Remove problematic double import and unpack correctly
-=======
-            coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1,
-                                                                                    get_velocities=self._read_velocities,
-                                                                                    get_forces=self._read_forces)
->>>>>>> Enable reading trr files not containing vels/forces
-        
-        conf = Configuration(self._universe, coords[0,:,:].astype(float))
-=======
-            coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1,
-                                                                                    get_velocities=self._read_velocities,
-                                                                                    get_forces=self._read_forces)
-        
+
         conf = Configuration(self._universe, coords[0,:,:])
->>>>>>> 97f6c0563d27cc4e7f218c7f0554b461ab80efa1
-        
+
         # If the universe is periodic set its shape with the current dimensions of the unit cell.
         self._universe.setShape(box[0,:,:])
         
@@ -183,33 +145,11 @@ class GromacsConverter(Converter):
         # Set velocities and forces if available
         if not self._xtc:
             if self._read_velocities:
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
                 self._velocities.array = velocities[0, :, :].astype(float)  # already in nm/ps
                 data['velocities'] = self._velocities
             if self._read_forces:
                 self._forces.array = forces[0, :, :].astype(float)  # already in kJ/(mol nm)
                 data["gradients"] = self._forces
-=======
-=======
->>>>>>> 97f6c0563d27cc4e7f218c7f0554b461ab80efa1
-                self._velocities.array = velocities[0, :, :]  # already in nm/ps
-                self._universe.setVelocities(self._velocities)
-            if self._read_forces:
-                self._forces.array = forces[0, :, :]  # already in kJ/(mol nm)
-                data["forces"] = self._forces
-<<<<<<< HEAD
->>>>>>> Enable reading trr files not containing vels/forces
-=======
-                self._velocities.array = velocities[0, :, :].astype(float)  # already in nm/ps
-                data['velocities'] = self._velocities
-            if self._read_forces:
-                self._forces.array = forces[0, :, :].astype(float)  # already in kJ/(mol nm)
-                data["gradients"] = self._forces
->>>>>>> The coords, velocities and forces arrays are now casted to float64
-=======
->>>>>>> 97f6c0563d27cc4e7f218c7f0554b461ab80efa1
 
         # Store a snapshot of the current configuration in the output trajectory.
         self._snapshot(data=data)
