@@ -90,12 +90,16 @@ class GromacsConverter(Converter):
         self._universe = ParallelepipedicPeriodicUniverse()
         self._universe.addObject(molecules)
 
+<<<<<<< HEAD
         data_to_be_written = ['configuration','time']
+=======
+>>>>>>> 97f6c0563d27cc4e7f218c7f0554b461ab80efa1
         # If a TRR trajectory is being read, initialise velocities and forces
         if not self._xtc:
             if self._read_velocities:
                 self._universe.initializeVelocitiesToTemperature(0.)
                 self._velocities = ParticleVector(self._universe)
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -111,13 +115,21 @@ class GromacsConverter(Converter):
 >>>>>>> Enable reading trr files not containing vels/forces
 =======
 >>>>>>> The coords, velocities and forces arrays are now casted to float64
+=======
+            if self._read_forces:
+                self._forces = ParticleVector(self._universe)
+>>>>>>> 97f6c0563d27cc4e7f218c7f0554b461ab80efa1
 
         # A MMTK trajectory is opened for writing.
         self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
 
         # A frame generator is created.
         self._snapshot = SnapshotGenerator(self._universe,
+<<<<<<< HEAD
                                            actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
+=======
+                                           actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
+>>>>>>> 97f6c0563d27cc4e7f218c7f0554b461ab80efa1
 
     def run_step(self, index):
         """Runs a single step of the job.
@@ -134,6 +146,7 @@ class GromacsConverter(Converter):
         else:
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1,
                                                                                     get_velocities=self._read_velocities,
                                                                                     get_forces=self._read_forces)
@@ -147,6 +160,13 @@ class GromacsConverter(Converter):
 >>>>>>> Enable reading trr files not containing vels/forces
         
         conf = Configuration(self._universe, coords[0,:,:].astype(float))
+=======
+            coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1,
+                                                                                    get_velocities=self._read_velocities,
+                                                                                    get_forces=self._read_forces)
+        
+        conf = Configuration(self._universe, coords[0,:,:])
+>>>>>>> 97f6c0563d27cc4e7f218c7f0554b461ab80efa1
         
         # If the universe is periodic set its shape with the current dimensions of the unit cell.
         self._universe.setShape(box[0,:,:])
@@ -165,17 +185,21 @@ class GromacsConverter(Converter):
             if self._read_velocities:
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                 self._velocities.array = velocities[0, :, :].astype(float)  # already in nm/ps
                 data['velocities'] = self._velocities
             if self._read_forces:
                 self._forces.array = forces[0, :, :].astype(float)  # already in kJ/(mol nm)
                 data["gradients"] = self._forces
 =======
+=======
+>>>>>>> 97f6c0563d27cc4e7f218c7f0554b461ab80efa1
                 self._velocities.array = velocities[0, :, :]  # already in nm/ps
                 self._universe.setVelocities(self._velocities)
             if self._read_forces:
                 self._forces.array = forces[0, :, :]  # already in kJ/(mol nm)
                 data["forces"] = self._forces
+<<<<<<< HEAD
 >>>>>>> Enable reading trr files not containing vels/forces
 =======
                 self._velocities.array = velocities[0, :, :].astype(float)  # already in nm/ps
@@ -184,6 +208,8 @@ class GromacsConverter(Converter):
                 self._forces.array = forces[0, :, :].astype(float)  # already in kJ/(mol nm)
                 data["gradients"] = self._forces
 >>>>>>> The coords, velocities and forces arrays are now casted to float64
+=======
+>>>>>>> 97f6c0563d27cc4e7f218c7f0554b461ab80efa1
 
         # Store a snapshot of the current configuration in the output trajectory.
         self._snapshot(data=data)
