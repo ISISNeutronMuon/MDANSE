@@ -20,6 +20,7 @@ import webbrowser
 
 import wx
 import wx.aui as aui
+import wx.html as wxhtml
  
 from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE.__pkginfo__ import __author__, __commit__, __version__, __beta__
@@ -257,16 +258,17 @@ Authors:
 
     def on_simple_help(self,event):
 
-        path = os.path.join(PLATFORM.doc_path(),'simple_help.txt')
+        path = os.path.join(PLATFORM.doc_path(),'simple_help.html')
                 
         with open(path,'r') as f:
             info = f.read()
             frame = wx.Frame(self, style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
+            frame.SetMinSize((800,600))
             panel = wx.Panel(frame,wx.ID_ANY)
             sizer = wx.BoxSizer(wx.VERTICAL)
-            text = wx.TextCtrl(panel,wx.ID_ANY,style=wx.TE_MULTILINE|wx.TE_WORDWRAP|wx.TE_READONLY)
-            text.SetValue(info)
-            sizer.Add(text,1,wx.ALL|wx.EXPAND,5)
+            html = wxhtml.HtmlWindow(panel, -1, size=(300, 150), style=wx.VSCROLL|wx.HSCROLL|wx.TE_READONLY|wx.BORDER_SIMPLE)
+            html.SetPage(info)
+            sizer.Add(html,1,wx.ALL|wx.EXPAND,5)
             panel.SetSizer(sizer)
             frame.Show()
 
