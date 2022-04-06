@@ -97,14 +97,20 @@ class GromacsConverter(Converter):
                 self._universe.initializeVelocitiesToTemperature(0.)
                 self._velocities = ParticleVector(self._universe)
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> The coords, velocities and forces arrays are now casted to float64
                 data_to_be_written.append('velocities')
             if self._read_forces:
                 self._forces = ParticleVector(self._universe)
                 data_to_be_written.append('gradients')
+<<<<<<< HEAD
 =======
             if self._read_forces:
                 self._forces = ParticleVector(self._universe)
 >>>>>>> Enable reading trr files not containing vels/forces
+=======
+>>>>>>> The coords, velocities and forces arrays are now casted to float64
 
         # A MMTK trajectory is opened for writing.
         self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
@@ -158,6 +164,7 @@ class GromacsConverter(Converter):
         if not self._xtc:
             if self._read_velocities:
 <<<<<<< HEAD
+<<<<<<< HEAD
                 self._velocities.array = velocities[0, :, :].astype(float)  # already in nm/ps
                 data['velocities'] = self._velocities
             if self._read_forces:
@@ -170,6 +177,13 @@ class GromacsConverter(Converter):
                 self._forces.array = forces[0, :, :]  # already in kJ/(mol nm)
                 data["forces"] = self._forces
 >>>>>>> Enable reading trr files not containing vels/forces
+=======
+                self._velocities.array = velocities[0, :, :].astype(float)  # already in nm/ps
+                data['velocities'] = self._velocities
+            if self._read_forces:
+                self._forces.array = forces[0, :, :].astype(float)  # already in kJ/(mol nm)
+                data["gradients"] = self._forces
+>>>>>>> The coords, velocities and forces arrays are now casted to float64
 
         # Store a snapshot of the current configuration in the output trajectory.
         self._snapshot(data=data)
