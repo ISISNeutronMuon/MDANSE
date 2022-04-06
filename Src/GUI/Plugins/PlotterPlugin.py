@@ -13,12 +13,14 @@
 # **************************************************************************
 
 import collections
+from posixpath import split
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 
 import wx
 import wx.aui as wxaui
+import wx.lib.splitter as wxsplitter
 
 from Scientific.IO.NetCDF import NetCDFFile
 
@@ -108,44 +110,48 @@ class DataPanel(wx.Panel):
         
         sizer0 =  wx.BoxSizer(wx.VERTICAL)
         
+        splitterWindow = wxsplitter.MultiSplitterWindow(self.setup)
+        splitterWindow.SetOrientation(wx.VERTICAL)
+
         if self.standalone:
-            self.datasetlist = wx.ListCtrl(self.setup, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
+            self.datasetlist = wx.ListCtrl(splitterWindow, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
             self.datasetlist.InsertColumn(0, 'key', width=100)
             self.datasetlist.InsertColumn(1, 'filename', width=100)
             self.datasetlist.InsertColumn(2, 'path', width=500)
-            
-            sizer0.Add(self.datasetlist, 1, wx.ALL|wx.EXPAND, 2)
+            splitterWindow.AppendWindow(self.datasetlist)
             
             self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_dataset,  self.datasetlist) 
             self.Bind(wx.EVT_LIST_KEY_DOWN, self.delete_dataset, self.datasetlist)
 
-        self.datalist = wx.ListCtrl(self.setup, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
+        self.datalist = wx.ListCtrl(splitterWindow, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
         self.datalist.InsertColumn(0, 'Variable', width=100)
-#        self.datalist.InsertColumn(1, 'Unit', width=65)
         self.datalist.InsertColumn(1, 'Axis', width=50)
         self.datalist.InsertColumn(2, 'Dimension')
         self.datalist.InsertColumn(3, 'Size')
+        splitterWindow.AppendWindow(self.datalist)
         
         sizer1 =  wx.BoxSizer(wx.HORIZONTAL)
-       
-        self.plot_type_label = wx.StaticText(self.setup, label="Select Plotter")
+        plotTypePanel = wx.Panel(self.setup)
+        self.plot_type_label = wx.StaticText(plotTypePanel, label="Select Plotter")
         self.plotter_list = {'Line':1, 'Image':2, 'Elevation':2,'Iso-Surface':3,'Scalar-Field':3}
-        self.plot_type  = wx.ComboBox(self.setup, style=wx.CB_READONLY)
-        
+        self.plot_type  = wx.ComboBox(plotTypePanel, style=wx.CB_READONLY)        
         sizer1.Add(self.plot_type_label, 0, wx.ALIGN_CENTER_VERTICAL)
         sizer1.Add(self.plot_type, 1, wx.ALIGN_CENTER_VERTICAL)
+        plotTypePanel.SetSizer(sizer1)
+        sizer1.Fit(plotTypePanel)
         
         sizer2 =  wx.BoxSizer(wx.HORIZONTAL)
-        
-        self.plot_button  = wx.Button(self.setup, wx.ID_ANY, label="Plot in new window")
-        self.replot_button  = wx.Button(self.setup, wx.ID_ANY, label="Plot in current figure")
-        
+        plotButtonsPanel = wx.Panel(self.setup)
+        self.plot_button  = wx.Button(plotButtonsPanel, wx.ID_ANY, label="Plot in new window")
+        self.replot_button  = wx.Button(plotButtonsPanel, wx.ID_ANY, label="Plot in current figure")
         sizer2.Add(self.plot_button, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
         sizer2.Add(self.replot_button, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
+        plotButtonsPanel.SetSizer(sizer2)
+        sizer2.Fit(plotButtonsPanel)
         
-        sizer0.Add(self.datalist, 2, wx.ALL|wx.EXPAND, 2)
-        sizer0.Add(sizer1, 0, wx.ALL|wx.EXPAND, 2)
-        sizer0.Add(sizer2, 0, wx.ALL|wx.EXPAND, 2)
+        sizer0.Add(splitterWindow, 2, wx.ALL|wx.EXPAND, 2)
+        sizer0.Add(plotTypePanel, 0, wx.ALL|wx.EXPAND, 2)
+        sizer0.Add(plotButtonsPanel, 0, wx.ALL|wx.EXPAND, 2)
         
         self.setup.SetSizer(sizer0)        
         sizer0.Fit(self.setup)
@@ -378,6 +384,7 @@ class PlotterFrame(wx.Frame):
         wx.Frame.__init__(self, parent, wx.ID_ANY, title, style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
         self.__build_dialog()
         self.__build_menu()
+        self.SetMinSize((-1,800))
  
     def __build_menu(self):
         mainMenu = wx.MenuBar()
