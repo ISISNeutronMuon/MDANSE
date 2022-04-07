@@ -104,9 +104,9 @@ class CurrentCorrelationFunction(IJob):
                                                                variable=self.configuration['interpolation_order']["variable"])
                                          for atom in self.configuration['atom_selection']["indexes"]])
 
-            for index, atom in enumerate(self._velocities):
+            for index, velocity_per_atom in enumerate(self._velocities):
                 for axis in range(3):
-                    self._velocities[index, :, axis] = differentiate(atom[:, axis], order=order,
+                    self._velocities[index, :, axis] = differentiate(velocity_per_atom[:, axis], order=order,
                                                                   dt=self.configuration['frames']['time_step'])
 
     def run_step(self, index):
@@ -156,8 +156,7 @@ class CurrentCorrelationFunction(IJob):
 
                 for element, idxs in self._indexesPerElement.items():
                     selectedCoordinates = conf.array[idxs,:]
-                    selectedVelocities =  vel[idxs,:]
-                    selectedVelocities = numpy.transpose(selectedVelocities)[:,:,numpy.newaxis]
+                    selectedVelocities = numpy.transpose(vel)[:,:,numpy.newaxis]
                     tmp = numpy.exp(1j*numpy.dot(selectedCoordinates, qVectors))[numpy.newaxis,:,:]
                     rho[element][i,:,:] = numpy.add.reduce(selectedVelocities*tmp,1)
 
