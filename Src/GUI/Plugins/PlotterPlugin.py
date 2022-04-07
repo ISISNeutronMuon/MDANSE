@@ -110,26 +110,30 @@ class DataPanel(wx.Panel):
         
         sizer0 =  wx.BoxSizer(wx.VERTICAL)
         
-        splitterWindow = wxsplitter.MultiSplitterWindow(self.setup)
-        splitterWindow.SetOrientation(wx.VERTICAL)
-
         if self.standalone:
+            splitterWindow = wx.SplitterWindow(self.setup, style=wx.SP_LIVE_UPDATE)
+            splitterWindow.SetMinimumPaneSize(100)
+
             self.datasetlist = wx.ListCtrl(splitterWindow, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
             self.datasetlist.InsertColumn(0, 'key', width=100)
             self.datasetlist.InsertColumn(1, 'filename', width=100)
             self.datasetlist.InsertColumn(2, 'path', width=500)
-            splitterWindow.AppendWindow(self.datasetlist)
             
             self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_dataset,  self.datasetlist) 
             self.Bind(wx.EVT_LIST_KEY_DOWN, self.delete_dataset, self.datasetlist)
 
-        self.datalist = wx.ListCtrl(splitterWindow, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
+            self.datalist = wx.ListCtrl(splitterWindow, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
+        else:
+            self.datalist = wx.ListCtrl(self.setup, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
+
         self.datalist.InsertColumn(0, 'Variable', width=100)
         self.datalist.InsertColumn(1, 'Axis', width=50)
         self.datalist.InsertColumn(2, 'Dimension')
         self.datalist.InsertColumn(3, 'Size')
-        splitterWindow.AppendWindow(self.datalist)
-        
+
+        if self.standalone:
+            splitterWindow.SplitHorizontally(self.datasetlist,self.datalist)
+
         sizer1 =  wx.BoxSizer(wx.HORIZONTAL)
         plotTypePanel = wx.Panel(self.setup)
         self.plot_type_label = wx.StaticText(plotTypePanel, label="Select Plotter")
@@ -148,8 +152,11 @@ class DataPanel(wx.Panel):
         sizer2.Add(self.replot_button, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
         plotButtonsPanel.SetSizer(sizer2)
         sizer2.Fit(plotButtonsPanel)
-        
-        sizer0.Add(splitterWindow, 2, wx.ALL|wx.EXPAND, 2)
+
+        if self.standalone:        
+            sizer0.Add(splitterWindow, 2, wx.ALL|wx.EXPAND, 2)
+        else:
+            sizer0.Add(self.datalist, 2, wx.ALL|wx.EXPAND, 2)
         sizer0.Add(plotTypePanel, 0, wx.ALL|wx.EXPAND, 2)
         sizer0.Add(plotButtonsPanel, 0, wx.ALL|wx.EXPAND, 2)
         
