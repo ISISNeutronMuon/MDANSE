@@ -97,12 +97,18 @@ class CurrentCorrelationFunction(IJob):
         order = self.configuration["interpolation_order"]["value"]
         if order != "no interpolation":
             traj = self.configuration['trajectory']['instance']
-            self._velocities = numpy.array([read_atoms_trajectory(traj, atom,
-                                                               first=self.configuration['frames']['first'],
-                                                               last=self.configuration['frames']['last']+1,
-                                                               step=self.configuration['frames']['step'],
-                                                               variable=self.configuration['interpolation_order']["variable"])
-                                         for atom in self.configuration['atom_selection']["indexes"]])
+            nAtoms = traj.universe.numberOfAtoms()
+            nFrames = self.configuration['frames']['n_frames']
+            self._velocities = numpy.empty((nAtoms,nFrames,3),dtype=float)
+            # Loop over the selected indexes and fill only this part of the 
+            # self._velocities array, the rest, which is useless, remaining unset 
+            for idx in self.configuration['atom_selection']['flatten_indexes']:
+                self._velocities[idx,:,:] = read_atoms_trajectory(traj, 
+                                                                [idx],
+                                                                first=self.configuration['frames']['first'],
+                                                                last=self.configuration['frames']['last']+1,
+                                                                step=self.configuration['frames']['step'],
+                                                                variable=self.configuration['interpolation_order']["variable"])
 
             for index, velocity_per_atom in enumerate(self._velocities):
                 for axis in range(3):
@@ -156,7 +162,8 @@ class CurrentCorrelationFunction(IJob):
 
                 for element, idxs in self._indexesPerElement.items():
                     selectedCoordinates = conf.array[idxs,:]
-                    selectedVelocities = numpy.transpose(vel)[:,:,numpy.newaxis]
+                    selectedVelocities = vel[idxs,:]
+                    selectedVelocities = numpy.transpose(selectedVelocities)[:,:,numpy.newaxis]
                     tmp = numpy.exp(1j*numpy.dot(selectedCoordinates, qVectors))[numpy.newaxis,:,:]
                     rho[element][i,:,:] = numpy.add.reduce(selectedVelocities*tmp,1)
 
