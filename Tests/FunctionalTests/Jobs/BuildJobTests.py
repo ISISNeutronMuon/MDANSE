@@ -97,20 +97,20 @@ class JobFileGenerator():
         :return: String of python code of the compare function.
         :rtype: str
         """
-        return 'def compare(file1, file2):\n'          \
-               '    ret = True\n'                      \
-               '    f = NetCDFFile(file1,"r")\n'       \
-               '    res1 = {}\n'                       \
-               '    for k,v in f.variables.items():\n' \
-               '        res1[k] = v.getValue()\n'      \
-               '    f.close()\n'                       \
-               '    f = NetCDFFile(file2,"r")\n'       \
-               '    res2 = {}\n'                       \
-               '    for k,v in f.variables.items():\n' \
-               '        res2[k] = v.getValue()\n'      \
-               '    f.close()\n'                       \
-               '    res1.pop("gradients", None)\n'     \
-               '    res2.pop("gradients", None)\n'     \
+        return 'def compare(file1, file2):\n'                             \
+               '    ret = True\n'                                         \
+               '    f = NetCDFFile(file1,"r")\n'                          \
+               '    res1 = {}\n'                                          \
+               '    for k, v in f.variables.items():\n'                   \
+               '        if k not in ["temperature", "kinetic_energy"]:\n' \
+               '            res1[k] = v.getValue()\n'                     \
+               '    f.close()\n'                                          \
+               '    f = NetCDFFile(file2,"r")\n'                          \
+               '    res2 = {}\n'                                          \
+               '    for k,v in f.variables.items():\n'                    \
+               '        if k not in ["temperature", "kinetic_energy"]:\n' \
+               '            res2[k] = v.getValue()\n'                     \
+               '    f.close()\n\n'                                        \
                '    return Comparator.Comparator().compare(res1, res2)\n\n\n'
 
     def __create_test(self, parameters, test_name):
