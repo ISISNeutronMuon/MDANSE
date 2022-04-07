@@ -101,19 +101,16 @@ class CurrentCorrelationFunction(IJob):
             nFrames = self.configuration['frames']['n_frames']
             self._velocities = numpy.empty((nAtoms,nFrames,3),dtype=float)
             # Loop over the selected indexes and fill only this part of the 
-            # self._velocities array, the rest, which is useless, remaining unset 
+            # self._velocities array, the rest, which is useless, remaining unset. 
             for idx in self.configuration['atom_selection']['flatten_indexes']:
-                self._velocities[idx,:,:] = read_atoms_trajectory(traj, 
-                                                                [idx],
-                                                                first=self.configuration['frames']['first'],
-                                                                last=self.configuration['frames']['last']+1,
-                                                                step=self.configuration['frames']['step'],
-                                                                variable=self.configuration['interpolation_order']["variable"])
-
-            for index, velocity_per_atom in enumerate(self._velocities):
+                atomicTraj = read_atoms_trajectory(traj,
+                                                    [idx],
+                                                    first=self.configuration['frames']['first'],
+                                                    last=self.configuration['frames']['last']+1,
+                                                    step=self.configuration['frames']['step'],
+                                                    variable=self.configuration['interpolation_order']["variable"])
                 for axis in range(3):
-                    self._velocities[index, :, axis] = differentiate(velocity_per_atom[:, axis], order=order,
-                                                                  dt=self.configuration['frames']['time_step'])
+                    self._velocities[idx,:,axis] = differentiate(atomicTraj[:, axis], order=order, dt=self.configuration['frames']['time_step'])
 
     def run_step(self, index):
         """
