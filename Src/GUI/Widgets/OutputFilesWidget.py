@@ -13,6 +13,7 @@
 # **************************************************************************
 
 import os
+import os.path
 
 import wx.combo
 import wx.lib.filebrowsebutton as wxfile
@@ -56,28 +57,28 @@ class OutputFilesWidget(IWidget):
                                     
         return (filename, formats)
     
-    def set_data(self, datakey, type):
-
-        basename = "output"
+    def set_data(self, datakey, analysis):
                 
         if datakey is None:
-            basename = "output_%s" % type
+            basename = "output_%s" % analysis
             trajectoryDir = os.getcwd()
         else:
-            basename = "%s_%s" % (os.path.splitext(os.path.basename(datakey))[0], type)
-            trajectoryDir = os.path.dirname(datakey)
+            basename = "%s_%s" % (os.path.splitext(os.path.basename(datakey))[0], analysis)
+            trajectoryDir = os.path.dirname(datakey)        
 
-        path = os.path.join(trajectoryDir,basename)
-        for i in range(100):
-            if os.path.exists(''.join([path, '.nc'])) or os.path.exists(''.join([path, '.tar'])):
-                basename = ''.join([basename.split('(')[0], '(', str(i+1), ')'])
-                path = os.path.join(trajectoryDir, basename)
-            else:
-                break
-        else:
-            from random import randint
-            path = os.path.join(trajectoryDir, ''.join([basename.split('(')[0], '(', str(randint(100, 100000)), ')']))
-            
+        filesInDirectory = [os.path.join(trajectoryDir,e) for e in os.listdir(trajectoryDir) 
+                            if os.path.isfile(os.path.join(trajectoryDir,e))]
+        basenames = [os.path.splitext(f)[0] for f in filesInDirectory]
+
+        initialPath = path = os.path.join(trajectoryDir,basename)
+        comp = 1
+        while True:
+            if path in basenames:
+                path = '%s(%d)' % (initialPath,comp)
+                comp += 1
+                continue
+            break           
+
         self._filename.SetValue(path)
         
 REGISTRY["output_files"] = OutputFilesWidget
