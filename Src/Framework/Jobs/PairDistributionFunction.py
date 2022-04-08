@@ -94,7 +94,7 @@ class PairDistributionFunction(DistanceHistogram):
 
             pdf_intra = self.hIntra[idi,idj,:] / fact
             pdf_inter = self.hInter[idi,idj,:] / fact
-            pdf_total = self._outputData["pdf_intra_%s%s" % pair][:] + self._outputData["pdf_inter_%s%s" % pair][:]
+            pdf_total = pdf_intra + pdf_inter
 
             for i, pdf in zip(["intra", "inter", "total"], [pdf_intra, pdf_inter, pdf_total]):
                 self._outputData["pdf_%s_%s%s" % (i, pair[0], pair[1])][:] = pdf
@@ -104,7 +104,7 @@ class PairDistributionFunction(DistanceHistogram):
         weights = self.configuration["weights"].get_weights()
 
         for i in ['_intra', '_inter', '']:
-            pdf = weight(weights,self._outputData,nAtomsPerElement,2,"pdf{}_%s%s".format(i if i else '_total'))
+            pdf = weight(weights, self._outputData, nAtomsPerElement, 2, "pdf{}_%s%s".format(i if i else '_total'))
             self._outputData["pdf%s_total" % i][:] = pdf
             self._outputData["rdf%s_total" % i][:] = 4 * numpy.pi * rho * r_values ** 2 * pdf
             self._outputData["tcf%s_total" % i][:] = 4 * numpy.pi * rho * r_values * (pdf - 1)
