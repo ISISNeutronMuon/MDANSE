@@ -25,6 +25,17 @@ class NetCDFInputData(InputFileData):
         
     extension = "nc"
     
+    def info(self):
+        
+        val = ['Variables found in NetCDF file:']
+
+        for k, v in self._netcdf.variables.items():
+            val.append('\t - %s: %s' % (k,v.shape))
+        
+        val = "\n".join(val)
+        
+        return val
+
     def load(self):
         
         try:
