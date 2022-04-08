@@ -14,6 +14,8 @@
 
 import collections
 
+import numpy
+
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 
@@ -231,7 +233,9 @@ class DataPanel(wx.Panel):
         
     def show_data(self):
         self.datalist.DeleteAllItems()
-        for i, var in enumerate(sorted(self.dataproxy.keys())):
+        forbidden_vars = ['description', 'step', 'time', 'box_size', 'configuration', 'gradients', 'velocities']
+        variables = [key for key in self.dataproxy.keys() if key not in forbidden_vars]
+        for i, var in enumerate(sorted(variables)):
             self.datalist.InsertStringItem(i, var)
             #self.datalist.SetStringItem(i, 1,self.dataproxy[var]['units'])
             axis = ','.join(self.dataproxy[var]['axis'])
@@ -425,6 +429,9 @@ class PlotterFrame(wx.Frame):
             _vars = f.variables
             data = collections.OrderedDict()
             for k in _vars:
+                dtype = _vars[k].getValue().dtype
+                if not numpy.issubdtype(dtype,numpy.number):
+                    continue
                 data[k]={}
                 if hasattr(_vars[k], 'axis'):
                     if _vars[k].axis:
