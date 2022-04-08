@@ -14,6 +14,8 @@
 
 import collections
 
+import numpy
+
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 
@@ -425,6 +427,9 @@ class PlotterFrame(wx.Frame):
             _vars = f.variables
             data = collections.OrderedDict()
             for k in _vars:
+                dtype = _vars[k].getValue().dtype
+                if not numpy.issubdtype(dtype,numpy.number):
+                    continue
                 data[k]={}
                 if hasattr(_vars[k], 'axis'):
                     if _vars[k].axis:
