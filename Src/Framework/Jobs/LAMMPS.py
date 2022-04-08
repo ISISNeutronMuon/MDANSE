@@ -136,14 +136,15 @@ class LAMMPSConverter(Converter):
 
     settings = collections.OrderedDict()        
     settings['config_file'] = ('input_file', {'label':"LAMMPS configuration file",
-                                              'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.config')})
+                                                'wildcard':'Config files (*.config)|*.config|All files|*',
+                                                'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.config')})
     settings['trajectory_file'] = ('input_file', {'label':"LAMMPS trajectory file",
                                                   'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.lammps')})
     settings['mass_tolerance'] = ('float', {'label':"mass tolerance (uma)", 'default':1.0e-3, 'mini':1.0e-9})
     settings['smart_mass_association'] = ('boolean', {'label':"smart mass association", 'default':True})
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
     settings['n_steps'] = ('integer', {'label':"number of time steps (0 for automatic detection)", 'default':0, 'mini':0})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_files'] = ('output_files', {'formats':["netcdf"],'root':'config_file'})
     
     def initialize(self):
         '''

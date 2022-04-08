@@ -48,7 +48,8 @@ class XDATCARFile(dict):
             if not line or line.lower().startswith("direct"):
                 self._frameHeaderSize = self["instance"].tell() - self._headerSize
                 break
-            header.append(line)                                   
+            header.append(line)
+                                   
         self["scale_factor"] = float(header[0])
 
         cell = " ".join(header[1:4]).split()
@@ -157,9 +158,10 @@ class VASPConverter(Converter):
     label = "VASP (>=5)"
 
     settings = collections.OrderedDict()           
-    settings['xdatcar_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})
+    settings['xdatcar_file'] = ('input_file',{'wildcard':'XDATCAR files (XDATCAR*)|XDATCAR*|All files|*',
+                                                'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})
     settings['time_step'] = ('float', {'label':"time step", 'default':1.0, 'mini':1.0e-9})        
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_files'] = ('output_files', {'formats':["netcdf"],'root':'xdatcar_file'})
                 
     def initialize(self):
         '''

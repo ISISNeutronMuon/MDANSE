@@ -167,9 +167,10 @@ class CASTEPConverter(Converter):
     label = "CASTEP"
         
     settings = collections.OrderedDict()
-    settings['castep_file'] = ('input_file', {'default': os.path.join('..', '..', '..', 'Data', 'Trajectories',
+    settings['castep_file'] = ('input_file', {'wildcard':'MD files (*.md)|*.md|All files|*',
+                                                'default': os.path.join('..', '..', '..', 'Data', 'Trajectories',
                                                                       'CASTEP', 'PBAnew.md')})
-    settings['output_files'] = ('output_files', {'formats': ["netcdf"]})
+    settings['output_files'] = ('output_files', {'formats': ['netcdf'],'root':'castep_file'})
                 
     def initialize(self):
         """

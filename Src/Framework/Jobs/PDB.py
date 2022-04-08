@@ -30,10 +30,11 @@ class PDBConverter(Converter):
     label = "PDB"
 
     settings = collections.OrderedDict()  
-    settings['pdb_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','PDB','2f58_nma.pdb')})
+    settings['pdb_file'] = ('input_file',{'wildcard':'PDB files (*.pdb)|*.pdb|All files|*', 
+                            'default':os.path.join('..','..','..','Data','Trajectories','PDB','2f58_nma.pdb')})
     settings['nb_frame'] = ('range', {'valueType':int, 'includeLast':True, 'mini':0.0, 'default':(0,2,1)})
     settings['time_step'] = ('float', {'mini':1.0e-6, 'default':1.0})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_files'] = ('output_files', {'formats':["netcdf"],'root':'pdb_file'})
      
     def initialize(self):
         """

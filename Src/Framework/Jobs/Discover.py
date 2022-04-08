@@ -215,9 +215,11 @@ class DiscoverConverter(Converter):
     category = ('Converters','Materials Studio')
     
     settings = collections.OrderedDict()
-    settings['xtd_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.xtd')})
-    settings['his_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.his')})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['xtd_file'] = ('input_file',{'wildcard':'XTD files (*.xtd)|*.xtd|All files|*',
+                                            'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.xtd')})
+    settings['his_file'] = ('input_file',{'wildcard':'HIS files (*.his)|*.his|All files|*',
+                                            'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.his')})
+    settings['output_files'] = ('output_files', {'formats':["netcdf"],'root':'xtd_file'})
     
     def initialize(self):
         '''

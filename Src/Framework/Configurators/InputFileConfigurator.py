@@ -24,7 +24,7 @@ class InputFileConfigurator(IConfigurator):
         
     _default = ""
     
-    def __init__(self, name, wildcard="All files|*.*",**kwargs):
+    def __init__(self, name, wildcard="All files|*",**kwargs):
         '''
         Initializes the configurator object.
         
@@ -37,6 +37,8 @@ class InputFileConfigurator(IConfigurator):
         
         # The base class constructor.
         IConfigurator.__init__(self, name, **kwargs)
+
+        print(wildcard)
         
         self._wildcard = wildcard
                 

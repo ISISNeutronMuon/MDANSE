@@ -261,11 +261,13 @@ class DCDConverter(Converter):
     """
     
     settings = collections.OrderedDict()
-    settings['pdb_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.pdb')})
-    settings['dcd_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.dcd')})
+    settings['pdb_file'] = ('input_file',{'wildcard':'PDB files (*.pdb)|*.pdb|All files|*',
+                                            'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.pdb')})
+    settings['dcd_file'] = ('input_file',{'wildcard':'DCD files (*.dcd)|*.dcd|All files|*',
+                                            'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.dcd')})
     settings['time_step'] = ('float', {'default':1.0,'label':"Time step (ps)"})    
     settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_files'] = ('output_files', {'formats':['netcdf'],'root':'pdb_file'})
 
     def initialize(self):
         """

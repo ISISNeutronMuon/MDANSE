@@ -20,11 +20,33 @@ import wx.lib.filebrowsebutton as wxfile
 
 from MDANSE import REGISTRY
 
+from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.ComboWidgets.ComboCheckbox import ComboCheckbox
 from MDANSE.GUI.Widgets.IWidget import IWidget
 
+def get_unique_filename(directory,basename):
+
+    filesInDirectory = [os.path.join(directory,e) for e in os.listdir(directory) 
+                        if os.path.isfile(os.path.join(directory,e))]
+    basenames = [os.path.splitext(f)[0] for f in filesInDirectory]
+
+    initialPath = path = os.path.join(directory,basename)
+    comp = 1
+    while True:
+        if path in basenames:
+            path = '%s(%d)' % (initialPath,comp)
+            comp += 1
+            continue
+        return path
+
 class OutputFilesWidget(IWidget):
-            
+
+    def __init__(self, *args, **kwargs):
+
+        IWidget.__init__(self, *args, **kwargs)
+
+        PUBLISHER.subscribe(self.msg_input_file_set, 'input_file_loaded')
+
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -57,6 +79,20 @@ class OutputFilesWidget(IWidget):
                                     
         return (filename, formats)
     
+    def msg_input_file_set(self, message):
+
+        configurator, filename = message
+
+        if self._configurator.root is None:
+            return
+
+        if self._configurator.root == configurator.name:
+            filenameWithoutExt = os.path.splitext(filename)[0]
+            outputFileWithoutExt = '%s_converted' % filenameWithoutExt
+            directory,basename = os.path.split(outputFileWithoutExt)
+            path = get_unique_filename(directory,basename)
+            self._filename.SetValue(path)
+
     def set_data(self, datakey, analysis):
                 
         if datakey is None:
@@ -64,20 +100,9 @@ class OutputFilesWidget(IWidget):
             trajectoryDir = os.getcwd()
         else:
             basename = "%s_%s" % (os.path.splitext(os.path.basename(datakey))[0], analysis)
-            trajectoryDir = os.path.dirname(datakey)        
+            trajectoryDir = os.path.dirname(datakey)
 
-        filesInDirectory = [os.path.join(trajectoryDir,e) for e in os.listdir(trajectoryDir) 
-                            if os.path.isfile(os.path.join(trajectoryDir,e))]
-        basenames = [os.path.splitext(f)[0] for f in filesInDirectory]
-
-        initialPath = path = os.path.join(trajectoryDir,basename)
-        comp = 1
-        while True:
-            if path in basenames:
-                path = '%s(%d)' % (initialPath,comp)
-                comp += 1
-                continue
-            break           
+        path = get_unique_filename(trajectoryDir,basename)
 
         self._filename.SetValue(path)
         

@@ -146,9 +146,9 @@ class GenericConverter(Converter):
     label = "Generic"
 
     settings = collections.OrderedDict()   
-    settings['gt_file'] = ('input_file',{'wildcard':"Generic trajectory files|*.gtf|All files|*",
+    settings['gt_file'] = ('input_file',{'wildcard':"GTF files (*.gtf)|*.gtf|All files|*",
                                          'default':os.path.join('..','..','..','Data','Trajectories','Generic','test.gtf')})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_files'] = ('output_files', {'formats':["netcdf"],'root':'gt_file'})
                     
     def initialize(self):
         '''
