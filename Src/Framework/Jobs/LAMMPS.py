@@ -110,6 +110,7 @@ class LAMMPSConfigFile(dict):
                                     if numpy.abs(ELEMENTS[element]["atomic_weight"] - mass) < numpy.abs(ELEMENTS[matched_element]["atomic_weight"] - mass):
                                         matched_element = element
                             self["elements"][idx] = matched_element
+                            print(matched_element)
                         else:
                             # More than two elements are matching => error
                             raise LAMMPSConfigFileError("The atoms %s of MDANSE database matches the mass %f with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (el,mass,self._tolerance))
@@ -162,8 +163,11 @@ class LAMMPSConverter(Converter):
 
         self._nameToIndex = dict([(at.name,at.index) for at in self._universe.atomList()])
 
-        # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
+        data_to_be_written = ["configuration", "time"]
+
+        # A frame generator is created.<<<<<<< HEAD
+        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory,
+                                                                                       data_to_be_written, 0, None, 1)])
 
         # Estimate number of steps if needed
         if self.numberOfSteps == 0:
