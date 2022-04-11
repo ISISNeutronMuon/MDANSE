@@ -343,7 +343,7 @@ Authors:
         item = self.GetMenuBar().FindItemById(event.GetId())
         converter = item.GetText()
                         
-        f = JobFrame(self,self._converters[converter],os.path.join(PLATFORM.home_directory(),"trajectory_conversion.nc"))
+        f = JobFrame(self,self._converters[converter],None)
         f.Show()
 
     def on_open_periodic_table(self, event):

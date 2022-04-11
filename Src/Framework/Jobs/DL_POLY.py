@@ -281,7 +281,7 @@ class DL_POLYConverter(Converter):
                                               'default':os.path.join('..','..','..','Data','Trajectories','DL_Poly','HISTORY_cumen')})
     settings['atom_aliases'] = ('python_object',{'default':{}})
     settings['version'] = ('single_choice', {'choices':_HISTORY_FORMAT.keys(), 'default':'2'})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"],'root':'field_file'})
+    settings['output_file'] = ('output_file', {'format':"netcdf",'root':'field_file'})
                     
     def initialize(self):
         '''
@@ -322,7 +322,7 @@ class DL_POLYConverter(Converter):
             data_to_be_written.extend(['velocities','gradients'])
                                     
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w', comment=self._fieldFile["title"])
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w', comment=self._fieldFile["title"])
 
         # A frame generator is created.
         self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])

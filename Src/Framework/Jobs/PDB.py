@@ -34,7 +34,7 @@ class PDBConverter(Converter):
                             'default':os.path.join('..','..','..','Data','Trajectories','PDB','2f58_nma.pdb')})
     settings['nb_frame'] = ('range', {'valueType':int, 'includeLast':True, 'mini':0.0, 'default':(0,2,1)})
     settings['time_step'] = ('float', {'mini':1.0e-6, 'default':1.0})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"],'root':'pdb_file'})
+    settings['output_file'] = ('output_file', {'format':"netcdf",'root':'pdb_file'})
      
     def initialize(self):
         """
@@ -54,7 +54,7 @@ class PDBConverter(Converter):
         self._universe.addObject(pdb_config.createAll(None, 1))
         
         # Open the new trajectory 
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], "w", "Converted from PDB")
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], "w", "Converted from PDB")
         
         # Make a snapshot generator for saving.
         self._snapshot = SnapshotGenerator(self._universe,actions = [TrajectoryOutput(self._trajectory, None, 0, None, 1)])

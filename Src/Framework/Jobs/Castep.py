@@ -170,7 +170,7 @@ class CASTEPConverter(Converter):
     settings['castep_file'] = ('input_file', {'wildcard':'MD files (*.md)|*.md|All files|*',
                                                 'default': os.path.join('..', '..', '..', 'Data', 'Trajectories',
                                                                       'CASTEP', 'PBAnew.md')})
-    settings['output_files'] = ('output_files', {'formats': ['netcdf'],'root':'castep_file'})
+    settings['output_file'] = ('output_file', {'format': 'netcdf','root':'castep_file'})
                 
     def initialize(self):
         """
@@ -194,7 +194,7 @@ class CASTEPConverter(Converter):
         self._forces = ParticleVector(self._universe)
 
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
 
         data_to_be_written = ["configuration","time","velocities","gradients"]
 

@@ -219,7 +219,7 @@ class DiscoverConverter(Converter):
                                             'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.xtd')})
     settings['his_file'] = ('input_file',{'wildcard':'HIS files (*.his)|*.his|All files|*',
                                             'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.his')})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"],'root':'xtd_file'})
+    settings['output_file'] = ('output_file', {'format':"netcdf",'root':'xtd_file'})
     
     def initialize(self):
         '''
@@ -250,7 +250,7 @@ class DiscoverConverter(Converter):
         self._universe.foldCoordinatesIntoBox()
             
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w', comment=self._hisfile["title"])
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w', comment=self._hisfile["title"])
 
         data_to_written = ["configuration","time","velocities"]
 

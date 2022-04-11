@@ -41,7 +41,7 @@ class GromacsConverter(Converter):
     settings['xtc_file'] = ('input_file',{'wildcard':'XTC files (*.xtc)|*.xtc|TRR files (*.trr)|*.trr|All files|*',
                                             'default':os.path.join('..','..','..','Data','Trajectories','Gromacs','md.xtc')})
     settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
-    settings['output_files'] = ('output_files', {'formats':["netcdf"],'root':'pdb_file'})
+    settings['output_file'] = ('output_file', {'format':"netcdf",'root':'pdb_file'})
                 
     def initialize(self):
         '''
@@ -65,7 +65,7 @@ class GromacsConverter(Converter):
         self._universe.addObject(molecules)
         
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
 
         data_to_be_written = ["configuration", "time"]
 

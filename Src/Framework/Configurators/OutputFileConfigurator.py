@@ -18,7 +18,7 @@ import tempfile
 from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
                 
-class OutputFilesConfigurator(IConfigurator):
+class OutputFileConfigurator(IConfigurator):
     """
     This configurator allows to define the output directory, the basename, and the format(s) of the output file(s) resulting from an 
     analysis.
@@ -30,9 +30,9 @@ class OutputFilesConfigurator(IConfigurator):
     MDANSE.Framework.Formats.IFormat.IFormat interface.   
     """
         
-    _default = (os.path.join(tempfile.gettempdir(),"output"), ["netcdf"])
+    _default = (os.path.join(tempfile.gettempdir(),'output'), 'netcdf')
                     
-    def __init__(self, name, formats=None, **kwargs):
+    def __init__(self, name, format=None, **kwargs):
         '''
         Initializes the configurator.
         
@@ -44,7 +44,7 @@ class OutputFilesConfigurator(IConfigurator):
                         
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._formats = formats if formats is not None else OutputFilesConfigurator._default[-1]
+        self._format = format if format is not None else OutputFileConfigurator._default[-1]
     
     def configure(self, value):
         '''
@@ -55,7 +55,7 @@ class OutputFilesConfigurator(IConfigurator):
         :type value: 3-tuple
         '''
                 
-        root, formats = value
+        root, format = value
                 
         if not root:
             raise ConfiguratorError("empty root name for the output file.", self)
@@ -67,30 +67,29 @@ class OutputFilesConfigurator(IConfigurator):
         except:
             raise ConfiguratorError("the directory %r is not writable" % dirname)
                     
-        if not formats:
-            raise ConfiguratorError("no output formats specified", self)
-
-        for fmt in formats:
+        if not format:
+            raise ConfiguratorError("no output format specified", self)
             
-            if not fmt in self._formats:
-                raise ConfiguratorError("the output file format %r is not a valid output format" % fmt, self)
-            
-            if not REGISTRY["format"].has_key(fmt):
-                raise ConfiguratorError("the output file format %r is not registered as a valid file format." % fmt, self)
+        if format != self._format:
+            raise ConfiguratorError("the output file format %r is not a valid output format" % format, self)
+        
+        if not REGISTRY["format"].has_key(format):
+            raise ConfiguratorError("the output file format %r is not registered as a valid file format." % format, self)
 
         self['root'] = root
-        self["formats"] = formats
-        self["files"] = ["%s%s" % (root,REGISTRY["format"][f].extension) for f in formats]
+        self['format'] = format
+        self['extension'] = REGISTRY['format'][format].extension
+        self['file'] = '%s%s' % (root,REGISTRY['format'][format].extension)
 
     @property
-    def formats(self):
+    def format(self):
         '''
-        Returns the list of output file formats suported.
+        Returns the output file format supported.
         
-        :return: the list of file formats suported.
-        :rtype: list of str
+        :return: the file format supported.
+        :rtype: str
         '''
-        return self._formats
+        return self._format
 
     def get_information(self):
         '''
@@ -100,11 +99,8 @@ class OutputFilesConfigurator(IConfigurator):
         :rtype: str
         '''
         
-        info = ["Input files:\n"]
-        for f in self["files"]:
-            info.append(f)
-            info.append("\n")
-        
-        return "".join(info)
+        info = 'Output file: %s' % self['file']
+
+        return info
     
-REGISTRY['output_files'] = OutputFilesConfigurator
+REGISTRY['output_file'] = OutputFileConfigurator

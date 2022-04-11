@@ -144,7 +144,7 @@ class LAMMPSConverter(Converter):
     settings['smart_mass_association'] = ('boolean', {'label':"smart mass association", 'default':True})
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
     settings['n_steps'] = ('integer', {'label':"number of time steps (0 for automatic detection)", 'default':0, 'mini':0})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"],'root':'config_file'})
+    settings['output_file'] = ('output_file', {'format':"netcdf",'root':'config_file'})
     
     def initialize(self):
         '''
@@ -159,7 +159,7 @@ class LAMMPSConverter(Converter):
         self.parse_first_step()
         
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
 
         self._nameToIndex = dict([(at.name,at.index) for at in self._universe.atomList()])
 

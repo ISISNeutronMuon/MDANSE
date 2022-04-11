@@ -267,7 +267,7 @@ class DCDConverter(Converter):
                                             'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.dcd')})
     settings['time_step'] = ('float', {'default':1.0,'label':"Time step (ps)"})    
     settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
-    settings['output_files'] = ('output_files', {'formats':['netcdf'],'root':'pdb_file'})
+    settings['output_file'] = ('output_file', {'format':'netcdf','root':'pdb_file'})
 
     def initialize(self):
         """
@@ -299,7 +299,7 @@ class DCDConverter(Converter):
         resolve_undefined_molecules_name(self._universe)
         
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
         
         data_to_be_written = ["configuration","time"]
         
