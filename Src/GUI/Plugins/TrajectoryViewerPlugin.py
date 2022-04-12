@@ -36,7 +36,9 @@ class TrajectoryViewerPlugin(ComponentPlugin):
     
     ancestor = ["molecular_viewer"]
     
-    _dimension = {'x':0, 'y':1, 'z':2}
+    _dimensions = {'x':0, 'y':1, 'z':2}
+
+    _units = {'configuration' : 'nm','velocities':'nm/ps','gradients':'amu*nm/ps2'}
 
     def __init__(self, parent, *args, **kwargs):
 
@@ -70,7 +72,6 @@ class TrajectoryViewerPlugin(ComponentPlugin):
 
         self._figure = Figure(figsize=(1,1))
         self._figure.add_subplot(111)
-        self._figure.gca().set_xlabel('time (ps)')
         self._canvas = FigureCanvasWxAgg(panel, wx.ID_ANY, self._figure)
         self._toolbar = NavigationToolbar2WxAgg(self._canvas)
         self._toolbar.Realize()
@@ -165,7 +166,7 @@ class TrajectoryViewerPlugin(ComponentPlugin):
 
     def _plot(self, variable, atom, dimension):
 
-        dimensionNumber = self._dimension[self._selectedDimension.GetValue()]
+        dimensionNumber = TrajectoryViewerPlugin._dimensions[self._selectedDimension.GetValue()]
 
         time = self._trajectory.time
         data = self._trajectory.readParticleTrajectory(atom,
@@ -179,6 +180,9 @@ class TrajectoryViewerPlugin(ComponentPlugin):
         if not self._plotOnSameFigure.GetValue():
             self._figure.gca().clear()
 
+
+        self._figure.gca().set_xlabel('time (ps)')
+        self._figure.gca().set_ylabel('%s (%s)' % (variable,TrajectoryViewerPlugin._units.get(variable,'au')))
         self._figure.gca().plot(time,data[:,dimensionNumber],label=label)
         self._canvas.draw()
         
