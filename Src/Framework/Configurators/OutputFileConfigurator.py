@@ -19,42 +19,43 @@ import tempfile
 from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
+
 class OutputFileConfigurator(IConfigurator):
     """
-    This configurator allows to define the output directory, the basename, and the format(s) of the output file(s) resulting from an 
-    analysis.
+    This configurator allows to define the output directory, the basename, and the format(s) of the output file(s)
+    resulting from a trajectory conversion.
     
-    Once configured, this configurator will provide a list of files built by joining the given output directory, the basename and the 
-    extensions corresponding to the input file formats.
+    Once configured, this configurator will provide a list of files built by joining the given output directory,
+    the basename and the  extensions corresponding to the input file formats.
     
-    Currently MDANSE supports ASCII, NetCDF and SVG file formats. To define a new output file format for an analysis, you must inherit from
-    MDANSE.Framework.Formats.IFormat.IFormat interface.   
+    For trajectories, MDANSE supports only the MMTK NetCDF format. To define a new output file format for a trajectory
+    conversion, you must inherit from the MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
         
-    _default = (os.path.join(tempfile.gettempdir(),'output'), 'netcdf')
+    _default = (os.path.join(tempfile.gettempdir(), 'output'), 'netcdf')
                     
     def __init__(self, name, format=None, **kwargs):
-        '''
+        """
         Initializes the configurator.
-        
+
         :param name: the name of the configurator as it will appear in the configuration.
         :type name: str
-        :param formats: the list of output file formats suported.  
+        :param formats: the list of output file formats supported.
         :type formats: list of str
-        '''
+        """
                         
         IConfigurator.__init__(self, name, **kwargs)
 
         self._format = format if format is not None else OutputFileConfigurator._default[-1]
     
     def configure(self, value):
-        '''
-        Configure a set of output files for an analysis. 
-                
+        """
+        Configure a set of output files for an analysis.
+
         :param value: the output files specifications. Must be a 3-tuple whose 1st element \
-        if the output directory, 2nd element the basename and 3rd element a list of file formats.
+        is the output directory, 2nd element the basename and 3rd element a list of file formats.
         :type value: 3-tuple
-        '''
+        """
                 
         root, format = value
                 
@@ -80,28 +81,29 @@ class OutputFileConfigurator(IConfigurator):
         self['root'] = root
         self['format'] = format
         self['extension'] = REGISTRY['format'][format].extension
-        self['file'] = '%s%s' % (root,REGISTRY['format'][format].extension)
+        self['file'] = '%s%s' % (root, REGISTRY['format'][format].extension)
 
     @property
     def format(self):
-        '''
+        """
         Returns the output file format supported.
-        
+
         :return: the file format supported.
         :rtype: str
-        '''
+        """
         return self._format
 
     def get_information(self):
-        '''
+        """
         Returns string information about this configurator.
-        
+
         :return: the information about this configurator.
         :rtype: str
-        '''
+        """
         
         info = 'Output file: %s' % self['file']
 
         return info
-    
+
+
 REGISTRY['output_file'] = OutputFileConfigurator
