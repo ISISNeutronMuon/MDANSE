@@ -25,7 +25,7 @@ from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.ComboWidgets.ComboCheckbox import ComboCheckbox
 from MDANSE.GUI.Widgets.IWidget import IWidget
 
-class OutputFileWidget(IWidget):
+class SingleOutputFileWidget(IWidget):
 
     def __init__(self, *args, **kwargs):
 
@@ -81,7 +81,7 @@ class OutputFileWidget(IWidget):
             inputFileNameWithoutExtension = os.path.splitext(inputFilename)[0]
             filename = '%s%s' % (inputFileNameWithoutExtension,REGISTRY['format'][self._configurator.format].extension)
             
-            path = OutputFileWidget._get_unique_filename(filename)
+            path = SingleOutputFileWidget._get_unique_filename(filename)
             self._filename.SetValue(path)
 
     def set_data(self, datakey):
@@ -91,8 +91,8 @@ class OutputFileWidget(IWidget):
         else:
             filename = datakey
 
-        path = OutputFileWidget._get_unique_filename(filename)
+        path = SingleOutputFileWidget._get_unique_filename(filename)
 
         self._filename.SetValue(path)
         
-REGISTRY["output_file"] = OutputFileWidget
+REGISTRY["single_output_file"] = SingleOutputFileWidget

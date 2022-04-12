@@ -269,7 +269,7 @@ class ForciteConverter(Converter):
                                             'default':os.path.join('..','..','..','Data','Trajectories','Forcite','nylon66_rho100_500K_v300K.xtd')})
     settings['trj_file'] = ('input_file',{'wildcard':'TRJ files (*.trj)|*.trj|All files|*',
                                             'default':os.path.join('..','..','..','Data','Trajectories','Forcite','nylon66_rho100_500K_v300K.trj')})
-    settings['output_file'] = ('output_file', {'format':"netcdf",'root':'xtd_file'})
+    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'xtd_file'})
                 
     def initialize(self):
         '''

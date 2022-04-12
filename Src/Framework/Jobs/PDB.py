@@ -34,7 +34,7 @@ class PDBConverter(Converter):
                             'default':os.path.join('..','..','..','Data','Trajectories','PDB','2f58_nma.pdb')})
     settings['nb_frame'] = ('range', {'valueType':int, 'includeLast':True, 'mini':0.0, 'default':(0,2,1)})
     settings['time_step'] = ('float', {'mini':1.0e-6, 'default':1.0})
-    settings['output_file'] = ('output_file', {'format':"netcdf",'root':'pdb_file'})
+    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'pdb_file'})
      
     def initialize(self):
         """

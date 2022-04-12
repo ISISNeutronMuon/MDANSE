@@ -170,7 +170,7 @@ class CASTEPConverter(Converter):
     settings['castep_file'] = ('input_file', {'wildcard':'MD files (*.md)|*.md|All files|*',
                                                 'default': os.path.join('..', '..', '..', 'Data', 'Trajectories',
                                                                       'CASTEP', 'PBAnew.md')})
-    settings['output_file'] = ('output_file', {'format': 'netcdf','root':'castep_file'})
+    settings['output_file'] = ('single_output_file', {'format': 'netcdf','root':'castep_file'})
                 
     def initialize(self):
         """

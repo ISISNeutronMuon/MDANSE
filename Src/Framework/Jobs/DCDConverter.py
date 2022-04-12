@@ -267,7 +267,7 @@ class DCDConverter(Converter):
                                             'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.dcd')})
     settings['time_step'] = ('float', {'default':1.0,'label':"Time step (ps)"})    
     settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
-    settings['output_file'] = ('output_file', {'format':'netcdf','root':'pdb_file'})
+    settings['output_file'] = ('single_output_file', {'format':'netcdf','root':'pdb_file'})
 
     def initialize(self):
         """

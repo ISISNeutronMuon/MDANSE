@@ -144,7 +144,7 @@ class LAMMPSConverter(Converter):
     settings['smart_mass_association'] = ('boolean', {'label':"smart mass association", 'default':True})
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
     settings['n_steps'] = ('integer', {'label':"number of time steps (0 for automatic detection)", 'default':0, 'mini':0})
-    settings['output_file'] = ('output_file', {'format':"netcdf",'root':'config_file'})
+    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'config_file'})
     
     def initialize(self):
         '''

@@ -20,7 +20,7 @@ from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
 
-class OutputFileConfigurator(IConfigurator):
+class SingleOutputFileConfigurator(IConfigurator):
     """
     This configurator allows to define the output directory, the basename, and the format(s) of the output file(s)
     resulting from a trajectory conversion.
@@ -46,7 +46,7 @@ class OutputFileConfigurator(IConfigurator):
                         
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._format = format if format is not None else OutputFileConfigurator._default[-1]
+        self._format = format if format is not None else SingleOutputFileConfigurator._default[-1]
     
     def configure(self, value):
         """
@@ -106,4 +106,4 @@ class OutputFileConfigurator(IConfigurator):
         return info
 
 
-REGISTRY['output_file'] = OutputFileConfigurator
+REGISTRY['single_output_file'] = SingleOutputFileConfigurator

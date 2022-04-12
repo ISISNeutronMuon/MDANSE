@@ -281,7 +281,7 @@ class DL_POLYConverter(Converter):
                                               'default':os.path.join('..','..','..','Data','Trajectories','DL_Poly','HISTORY_cumen')})
     settings['atom_aliases'] = ('python_object',{'default':{}})
     settings['version'] = ('single_choice', {'choices':_HISTORY_FORMAT.keys(), 'default':'2'})
-    settings['output_file'] = ('output_file', {'format':"netcdf",'root':'field_file'})
+    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'field_file'})
                     
     def initialize(self):
         '''

@@ -219,7 +219,7 @@ class DiscoverConverter(Converter):
                                             'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.xtd')})
     settings['his_file'] = ('input_file',{'wildcard':'HIS files (*.his)|*.his|All files|*',
                                             'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.his')})
-    settings['output_file'] = ('output_file', {'format':"netcdf",'root':'xtd_file'})
+    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'xtd_file'})
     
     def initialize(self):
         '''

@@ -161,7 +161,7 @@ class VASPConverter(Converter):
     settings['xdatcar_file'] = ('input_file',{'wildcard':'XDATCAR files (XDATCAR*)|XDATCAR*|All files|*',
                                                 'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})
     settings['time_step'] = ('float', {'label':"time step", 'default':1.0, 'mini':1.0e-9})        
-    settings['output_file'] = ('output_file', {'format':"netcdf",'root':'xdatcar_file'})
+    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'xdatcar_file'})
                 
     def initialize(self):
         '''
