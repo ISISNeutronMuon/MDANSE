@@ -114,7 +114,7 @@ echo 'SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null &&
 echo 'PARENT_DIR="$(dirname "$SCRIPT_DIR")"'
 echo 'export PYTHONHOME=$PARENT_DIR:$PARENT_DIR/Resources'
 echo 'export PYTHONPATH=$PARENT_DIR/Resources/lib/python2.7:$PARENT_DIR/Resources:$PARENT_DIR/Resources/lib/python2.7/site-packages'
-echo '$SCRIPT_DIR/python $PARENT_DIR/Resources/parse_command_line.py $SCRIPT_DIR $@'
+echo '$SCRIPT_DIR/python "${@:2}"'
 } >> ~/python2
 sudo cp -v ~/python2 "${MDANSE_APP_DIR}/Contents/MacOS"
 sudo chmod 755 "${MDANSE_APP_DIR}/Contents/MacOS/python2"
