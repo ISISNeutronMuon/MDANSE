@@ -118,7 +118,6 @@ echo '$SCRIPT_DIR/python "${@:2}"'
 } >> ~/python2
 sudo cp -v ~/python2 "${MDANSE_APP_DIR}/Contents/MacOS"
 sudo chmod 755 "${MDANSE_APP_DIR}/Contents/MacOS/python2"
-sudo cp $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/parse_command_line.py ${MDANSE_APP_DIR}/Contents/Resources
 
 #############################
 # Cleanup
