@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -24,6 +25,17 @@ class NetCDFInputData(InputFileData):
         
     extension = "nc"
     
+    def info(self):
+        
+        val = ['Variables found in NetCDF file:']
+
+        for k, v in self._netcdf.variables.items():
+            val.append('\t - %s: %s' % (k,v.shape))
+        
+        val = "\n".join(val)
+        
+        return val
+
     def load(self):
         
         try:

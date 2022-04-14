@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -244,15 +245,16 @@ class DiscoverConverter(Converter):
         self._universe.initializeVelocitiesToTemperature(0.)
         self._velocities = ParticleVector(self._universe)
         self._velocities.array = self._hisfile["initial_velocities"]
-        self._universe.setVelocities(self._velocities)
         
         self._universe.foldCoordinatesIntoBox()
             
         # A MMTK trajectory is opened for writing.
         self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w', comment=self._hisfile["title"])
 
+        data_to_written = ["configuration","time","velocities"]
+
         # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
+        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_written, 0, None, 1)])
         
     def run_step(self, index):
         """Runs a single step of the job.
@@ -279,7 +281,7 @@ class DiscoverConverter(Converter):
         data = {"time" : time}
         
         self._velocities.array[movableAtoms,:] = vel
-        self._universe.setVelocities(self._velocities)
+        data["velocities"] = self._velocities
 
         # Store a snapshot of the current configuration in the output trajectory.
         self._snapshot(data=data)

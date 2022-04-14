@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -162,8 +163,11 @@ class LAMMPSConverter(Converter):
 
         self._nameToIndex = dict([(at.name,at.index) for at in self._universe.atomList()])
 
+        data_to_be_written = ["configuration", "time"]
+
         # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
+        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory,
+                                                                                       data_to_be_written, 0, None, 1)])
 
         # Estimate number of steps if needed
         if self.numberOfSteps == 0:

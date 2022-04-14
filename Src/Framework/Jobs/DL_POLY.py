@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -307,23 +308,25 @@ class DL_POLYConverter(Converter):
 
         self._velocities = None
         
-        self._forces = None
-
+        self._gradients = None
+                                
+        data_to_be_written = ['configuration','time']
         if self._historyFile["keytrj"] == 1:
             self._universe.initializeVelocitiesToTemperature(0.)
             self._velocities = ParticleVector(self._universe)
+            data_to_be_written.append('velocities')
             
         elif self._historyFile["keytrj"] == 2:
             self._universe.initializeVelocitiesToTemperature(0.)
             self._velocities = ParticleVector(self._universe)
-            self._forces = ParticleVector(self._universe)
-            
-                        
+            self._gradients = ParticleVector(self._universe)
+            data_to_be_written.extend(['velocities','gradients'])
+                                    
         # A MMTK trajectory is opened for writing.
         self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w', comment=self._fieldFile["title"])
 
         # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
+        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
         
     def run_step(self, index):
         """Runs a single step of the job.
@@ -349,12 +352,12 @@ class DL_POLYConverter(Converter):
         
         if self._velocities is not None:
             self._velocities.array = config[:,3:6]
-            self._universe.setVelocities(self._velocities)
+            data["velocities"] = self._velocities
 
-        if self._forces is not None:
-            self._forces.array = config[:,6:9]
-            data["forces"] = self._forces
-                                        
+        if self._gradients is not None:
+            self._gradients.array = config[:,6:9]
+            data["gradients"] = self._gradients
+
         # Store a snapshot of the current configuration in the output trajectory.
         self._snapshot(data=data)
                                                                         

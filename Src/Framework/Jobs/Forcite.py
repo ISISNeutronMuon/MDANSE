@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -127,10 +128,10 @@ class TrjFile(dict):
         
         if VERSION < 2010:
             self["velocities_written"] = DATA[-3]
-            self["forces_written"] = 0
+            self["gradients_written"] = 0
         else:
             self["velocities_written"] = DATA[-4]
-            self["forces_written"] = DATA[-3]
+            self["gradients_written"] = DATA[-3]
         
         # Frame record 2        
         rec = '!12%s8x' % self._fp
@@ -171,14 +172,14 @@ class TrjFile(dict):
         self._configRecPos = trjfile.tell() - self._headerSize
                     
         if self["velocities_written"]:
-            if self["forces_written"]:
+            if self["gradients_written"]:
                 # Frame record 8,9,10,11,12,13,14,15,16
                 self._configRec = '!' + ('%d%s8x'*9) % ((self['totmov'],self._fp)*9)
             else:
                 # Frame record 8,9,10,11,12,13
                 self._configRec = '!' + ('%d%s8x'*6) % ((self['totmov'],self._fp)*6)
         else:
-            if self["forces_written"]:
+            if self["gradients_written"]:
                 # Frame record 8,9,10,14,15,16
                 self._configRec = '!' + ('%d%s8x'*6) % ((self['totmov'],self._fp)*6)
             else:
@@ -228,29 +229,29 @@ class TrjFile(dict):
         config = struct.unpack(self._configRec,trjfile.read(self._configRecSize))
         
         if self["velocities_written"]:
-            if self["forces_written"]:
+            if self["gradients_written"]:
                 config = numpy.transpose(numpy.reshape(config,(3,3, self['totmov'])))
                 xyz    = config[:,:,0]*Units.Ang
                 vel    = config[:,:,1]*Units.Ang
-                forces = config[:,:,2]*FORCE_FACTOR
+                gradients = config[:,:,2]*FORCE_FACTOR
             else:
                 config = numpy.transpose(numpy.reshape(config,(2,3, self['totmov'])))
                 xyz    = config[:,:,0]*Units.Ang
                 vel    = config[:,:,1]*Units.Ang
-                forces = None
+                gradients = None
         else:
-            if self["forces_written"]:
+            if self["gradients_written"]:
                 config = numpy.transpose(numpy.reshape(config,(2,3, self['totmov'])))
                 xyz    = config[:,:,0]*Units.Ang
                 vel    = None
-                forces = config[:,:,1]*FORCE_FACTOR
+                gradients = config[:,:,1]*FORCE_FACTOR
             else:
                 config = numpy.transpose(numpy.reshape(config,(1,3, self['totmov'])))
                 xyz    = config[:,:,0]*Units.Ang
                 vel    = None
-                forces = None
+                gradients = None
             
-        return timeStep, cell, xyz, vel, forces
+        return timeStep, cell, xyz, vel, gradients
 
     def close(self):
         self["instance"].close()
@@ -286,21 +287,26 @@ class ForciteConverter(Converter):
         self.numberOfSteps = self._trjfile['n_frames']
         
         self._velocities = None
-        self._forces = None
-                                                          
-        if self._trjfile["velocities_written"]:
-            self._velocities = ParticleVector(self._universe)
-            self._velocities.array[:,:] = 0.00
+        self._gradients = None
 
-        if self._trjfile["forces_written"]:
-            self._forces = ParticleVector(self._universe)
-            self._forces.array[:,:] = 0.00
+        data_to_be_written = ["configuration","time"]              
+        if self._trjfile["velocities_written"]:
+            self._universe.initializeVelocitiesToTemperature(0.)
+            self._velocities = ParticleVector(self._universe)
+            self._velocities.array[:,:] = 0.0
+            data_to_be_written.append("velocities")
+
+        if self._trjfile["gradients_written"]:
+            self._universe.initializeVelocitiesToTemperature(0.)
+            self._gradients = ParticleVector(self._universe)
+            self._gradients.array[:,:] = 0.0
+            data_to_be_written.append("gradients")
 
         # A MMTK trajectory is opened for writing.
         self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w', comment=self._trjfile["title"])
 
         # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
+        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
                 
     def run_step(self, index):
         """Runs a single step of the job.
@@ -312,7 +318,7 @@ class ForciteConverter(Converter):
         """
                                                 
         # The x, y and z values of the current frame.
-        time, cell, xyz, vel, forces = self._trjfile.read_step(index)
+        time, cell, xyz, velocities, gradients = self._trjfile.read_step(index)
         
         # If the universe is periodic set its shape with the current dimensions of the unit cell.
         if self._universe.is_periodic and self._trjfile["defcel"]:
@@ -327,12 +333,12 @@ class ForciteConverter(Converter):
         data = {"time" : time}
 
         if self._velocities is not None:
-            self._velocities.array[movableAtoms,:] = vel
-            self._universe.setVelocities(self._velocities)
+            self._velocities.array[movableAtoms,:] = velocities
+            data["velocities"] = self._velocities
 
-        if self._forces is not None:
-            self._forces.array[movableAtoms,:] = forces
-            data["forces"] = self._forces
+        if self._gradients is not None:
+            self._gradients.array[movableAtoms,:] = gradients
+            data["gradients"] = self._gradients
 
         # Store a snapshot of the current configuration in the output trajectory.
         self._snapshot(data=data)
