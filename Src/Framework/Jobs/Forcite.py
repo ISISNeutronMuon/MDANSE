@@ -265,8 +265,10 @@ class ForciteConverter(Converter):
     category = ('Converters','Materials Studio')
     
     settings = collections.OrderedDict()
-    settings['xtd_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Forcite','nylon66_rho100_500K_v300K.xtd')})
-    settings['trj_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Forcite','nylon66_rho100_500K_v300K.trj')})
+    settings['xtd_file'] = ('input_file',
+                            {'default': os.path.join('..', '..', '..', 'Data', 'Trajectories', 'Forcite', 'H2O.xtd')})
+    settings['trj_file'] = ('input_file',
+                            {'default': os.path.join('..', '..', '..', 'Data', 'Trajectories', 'Forcite', 'H2O.trj')})
     settings['output_files'] = ('output_files', {'formats':["netcdf"]})
                 
     def initialize(self):

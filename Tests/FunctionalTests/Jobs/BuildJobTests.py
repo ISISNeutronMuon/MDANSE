@@ -88,7 +88,8 @@ class JobFileGenerator():
 
         return array_of_mdanse_dependencies_string, array_of_python_dependencies_string
 
-    def __create_compare_function(self):
+    @staticmethod
+    def __create_compare_function():
         """
         Creates a string with python code of a function that will compare the file generated in the test to
         a reference file.
@@ -96,35 +97,26 @@ class JobFileGenerator():
         :return: String of python code of the compare function.
         :rtype: str
         """
-        compare = 'def compare(file1, file2):\n' \
-                  '    ret = True\n'
-
-        if self.job._type in ['dftb', 'forcite']:
-            compare = ''.join([compare, '    ignored_vars = ["temperature", "kinetic_energy", "velocities"]\n\n'])
-        else:
-            compare = ''.join([compare, '    ignored_vars = ["temperature", "kinetic_energy"]\n\n'])
-
-        compare = ''.join([compare,
-                           '    f = NetCDFFile(file1,"r")\n'
-                           '    try:\n'
-                           '        res1 = {}\n'
-                           '        for k, v in f.variables.items():\n'
-                           '            if k not in ignored_vars:\n'
-                           '                res1[k] = v.getValue()\n'
-                           '    finally:\n'
-                           '        f.close()\n\n'
-                           '    f = NetCDFFile(file2,"r")\n'
-                           '    try:\n'
-                           '        res2 = {}\n'
-                           '        for k,v in f.variables.items():\n'
-                           '            if k not in ignored_vars:\n'
-                           '                res2[k] = v.getValue()\n'
-                           '    finally:\n'
-                           '        f.close()\n\n'
-                           '    return Comparator.Comparator().compare(res1, res2)\n\n\n'
-                           ])
-
-        return compare
+        return 'def compare(file1, file2):\n' \
+               '    ret = True\n' \
+               '    ignored_vars = ["temperature", "kinetic_energy"]\n\n' \
+               '    f = NetCDFFile(file1,"r")\n' \
+               '    try:\n' \
+               '        res1 = {}\n' \
+               '        for k, v in f.variables.items():\n' \
+               '            if k not in ignored_vars:\n' \
+               '                res1[k] = v.getValue()\n' \
+               '    finally:\n' \
+               '        f.close()\n\n' \
+               '    f = NetCDFFile(file2,"r")\n' \
+               '    try:\n' \
+               '        res2 = {}\n' \
+               '        for k,v in f.variables.items():\n' \
+               '            if k not in ignored_vars:\n' \
+               '                res2[k] = v.getValue()\n' \
+               '    finally:\n' \
+               '        f.close()\n\n' \
+               '    return Comparator.Comparator().compare(res1, res2)\n\n\n'
 
     def __create_test(self, parameters, test_name):
         """
