@@ -1,4 +1,3 @@
-from numbers import Real
 import h5py
 
 from ChemicalEntity import ChemicalSystem
@@ -116,29 +115,55 @@ class TrajectoryWriter:
                                                     maxshape=(None,3,3))
         else:
             dset = configuration_grp['unit_cell']
-            dset.resize((dset.shape[0]+1,n_atoms,3))
+            dset.resize((dset.shape[0]+1,3,3))
             dset[-1] = unit_cell
 
 if __name__ == '__main__':
 
-    t = Trajectory('test.h5')
-    cs = t.chemical_system
-    t.close()
+    # t = Trajectory('test.h5')
+    # cs = t.chemical_system
+    # t.close()
     
-    from Configuration import RealConfiguration
+    # from Configuration import RealConfiguration
+    # import numpy as np
+
+    # coordinates = np.random.uniform(0,10,(30714,3))
+    # unit_cell = np.random.uniform(0,10,(3,3))
+    # conf = RealConfiguration(cs,coordinates,unit_cell)
+
+    # cs.configuration = conf
+
+    # tw = TrajectoryWriter('toto.h5',cs)
+    # tw.dump_configuration()
+    # tw.close()
+
+    # t = Trajectory('toto.h5')
+    # print(t.read_atom_trajectory(2))
+    # t.close()
+
     import numpy as np
 
-    coordinates = np.random.uniform(0,10,(30714,3))
-    unit_cell = np.random.uniform(0,10,(3,3))
-    conf = RealConfiguration(cs,coordinates,unit_cell)
+    from Configuration import RealConfiguration
 
-    cs.configuration = conf
+    from ChemicalEntity import Atom
+    cs = ChemicalSystem()
+    for i in range(768):
+        cs.add_chemical_entity(Atom(symbol='H'))
 
-    tw = TrajectoryWriter('toto.h5',cs)
-    tw.dump_configuration()
+    coords = np.load('coords.npy')
+    unit_cell = np.load('unit_cell.npy')
+    
+    tw = TrajectoryWriter('waterbox.h5',cs)
+
+    n_frames = coords.shape[0]
+    for i in range(n_frames):
+        c = RealConfiguration(cs,coords[i,:,:],unit_cell[i,:,:])
+        cs.configuration = c
+        tw.dump_configuration()
+    
     tw.close()
 
-    t = Trajectory('toto.h5')
-    print(t.read_atom_trajectory(2))
+    t = Trajectory('waterbox.h5')
+    print(t.read_atom_trajectory(0))
     t.close()
 
