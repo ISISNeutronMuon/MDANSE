@@ -8,11 +8,14 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
 
 import collections
+
+import numpy
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
@@ -109,23 +112,29 @@ class DataPanel(wx.Panel):
         sizer0 =  wx.BoxSizer(wx.VERTICAL)
         
         if self.standalone:
-            self.datasetlist = wx.ListCtrl(self.setup, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
+            splitterWindow = wx.SplitterWindow(self.setup, style=wx.SP_LIVE_UPDATE)
+            splitterWindow.SetMinimumPaneSize(50)
+
+            self.datasetlist = wx.ListCtrl(splitterWindow, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
             self.datasetlist.InsertColumn(0, 'key', width=100)
             self.datasetlist.InsertColumn(1, 'filename', width=100)
             self.datasetlist.InsertColumn(2, 'path', width=500)
             
-            sizer0.Add(self.datasetlist, 1, wx.ALL|wx.EXPAND, 2)
-            
             self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_dataset,  self.datasetlist) 
             self.Bind(wx.EVT_LIST_KEY_DOWN, self.delete_dataset, self.datasetlist)
 
-        self.datalist = wx.ListCtrl(self.setup, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
+            self.datalist = wx.ListCtrl(splitterWindow, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
+        else:
+            self.datalist = wx.ListCtrl(self.setup, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
+
         self.datalist.InsertColumn(0, 'Variable', width=100)
-#        self.datalist.InsertColumn(1, 'Unit', width=65)
         self.datalist.InsertColumn(1, 'Axis', width=50)
         self.datalist.InsertColumn(2, 'Dimension')
         self.datalist.InsertColumn(3, 'Size')
         
+        if self.standalone:
+            splitterWindow.SplitHorizontally(self.datasetlist,self.datalist)
+
         sizer1 =  wx.BoxSizer(wx.HORIZONTAL)
        
         self.plot_type_label = wx.StaticText(self.setup, label="Select Plotter")
@@ -143,7 +152,10 @@ class DataPanel(wx.Panel):
         sizer2.Add(self.plot_button, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
         sizer2.Add(self.replot_button, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
         
-        sizer0.Add(self.datalist, 2, wx.ALL|wx.EXPAND, 2)
+        if self.standalone:        
+            sizer0.Add(splitterWindow, 2, wx.ALL|wx.EXPAND, 2)
+        else:
+            sizer0.Add(self.datalist, 2, wx.ALL|wx.EXPAND, 2)
         sizer0.Add(sizer1, 0, wx.ALL|wx.EXPAND, 2)
         sizer0.Add(sizer2, 0, wx.ALL|wx.EXPAND, 2)
         
@@ -222,7 +234,9 @@ class DataPanel(wx.Panel):
         
     def show_data(self):
         self.datalist.DeleteAllItems()
-        for i, var in enumerate(sorted(self.dataproxy.keys())):
+        forbidden_vars = ['description', 'step', 'time', 'box_size', 'configuration', 'gradients', 'velocities']
+        variables = [key for key in self.dataproxy.keys() if key not in forbidden_vars]
+        for i, var in enumerate(sorted(variables)):
             self.datalist.InsertStringItem(i, var)
             #self.datalist.SetStringItem(i, 1,self.dataproxy[var]['units'])
             axis = ','.join(self.dataproxy[var]['axis'])
@@ -416,6 +430,9 @@ class PlotterFrame(wx.Frame):
             _vars = f.variables
             data = collections.OrderedDict()
             for k in _vars:
+                dtype = _vars[k].getValue().dtype
+                if not numpy.issubdtype(dtype,numpy.number):
+                    continue
                 data[k]={}
                 if hasattr(_vars[k], 'axis'):
                     if _vars[k].axis:

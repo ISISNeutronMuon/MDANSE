@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -492,7 +493,7 @@ class AxesSettingsDialog(wx.Dialog, UnitsSettingsDialog):
         self.parent.canvas.draw()
     
     def auto_fit(self, event = None):
-        self.parent.on_auto_fit()
+        self.parent.on_auto_fit(event=event)
         self.Xmin.SetValue(str(self.parent.Xmin))
         self.Ymin.SetValue(str(self.parent.Ymin))
         self.Xmax.SetValue(str(self.parent.Xmax))
