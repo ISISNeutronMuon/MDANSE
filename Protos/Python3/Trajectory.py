@@ -1,3 +1,5 @@
+import numpy as np
+
 import h5py
 
 from ChemicalEntity import ChemicalSystem
@@ -37,8 +39,6 @@ class Trajectory:
     def read_atom_trajectory(self, index):
 
         grp = self._h5_file['/configuration']
-
-        n_frames = grp['coordinates'].shape[0]
 
         traj = grp['coordinates'][:,index,:]
 
@@ -86,14 +86,14 @@ class TrajectoryWriter:
     def close(self):
         self._h5_file.close()
 
-    def dump_configuration(self):
+    def dump_configuration(self, time):
 
         configuration = self._chemical_system.configuration
         if configuration is None:
             return
 
         n_atoms = self._chemical_system.number_of_atoms()
-        
+
         configuration_grp = self._h5_file['/configuration']
         for k, v in configuration.variables.items():
             if not k in configuration_grp:
@@ -117,6 +117,13 @@ class TrajectoryWriter:
             dset = configuration_grp['unit_cell']
             dset.resize((dset.shape[0]+1,3,3))
             dset[-1] = unit_cell
+
+        if 'time' not in configuration_grp:
+            configuration_grp.create_dataset('time',data=[time],maxshape=(None,),dtype=float)
+        else:
+            dset = configuration_grp['time']
+            dset.resize((dset.shape[0]+1,))
+            dset[-1] = time
 
 if __name__ == '__main__':
 

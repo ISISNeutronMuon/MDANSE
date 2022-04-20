@@ -93,19 +93,12 @@ class RealConfiguration(_Configuration):
     def fold_coordinates(self):
 
         box_coordinates = self.to_box_coordinates()
-        print('BOX')
-        print(box_coordinates)
 
         frac, _ = np.modf(box_coordinates)
-
-        print('FRAC 1')
-        print(frac)
         frac = np.where(frac < 0.0, frac + 1.0, frac)
-        print('FRAC 2')
-        print(frac)
         frac = np.where(frac > 0.5, frac - 1.0, frac)
-        
-        print(np.matmul(self._unit_cell,frac.T).T)
+
+        self._variables['coordinates'] = np.matmul(self._unit_cell,frac.T).T
 
     def to_box_coordinates(self):
         
