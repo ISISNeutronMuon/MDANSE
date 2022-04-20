@@ -20,9 +20,10 @@ import sys
 
 def parse_args():
 
-    parser = argparse.ArgumentParser(description='This is mdanse_job: a shortcut for running MDANSE job.')
-    parser.add_argument('--trajectory','-t',dest='trajectory', required=False, help='MMTK Trajectory file')
-    parser.add_argument('--job','-j',dest='job', required=True, help='Job to run')
+    parser = argparse.ArgumentParser(description='''This is mdanse_job: a shortcut for running MDANSE job. It opens a GUI dialog 
+    from where an analysis or a trajectory converter will be setup and eventually run.''')
+    parser.add_argument('job',nargs=1,help='Code for the job to be run. E.g. msd for Mean Square Displacement. For a complete list of available jobs please run "mdanse -r job"')
+    parser.add_argument('trajectory',nargs='*',help='MMTK Trajectory file. This is needed only for analysis job. Not required for trajectory conversion jobs.')
     args = parser.parse_args()
     
     return args
@@ -34,16 +35,18 @@ if __name__ == "__main__":
     
     args = parse_args()
     trajectory = args.trajectory
-    job = args.job
-
+    job = args.job[0]
+    
     if not REGISTRY['job'].has_key(job):
         print('Unknown job: %s' % job)
         sys.exit(1)
 
     for v in REGISTRY['job'][job].settings.values():
-        if v[0] == 'mmtk_trajectory' and trajectory is None:
+        if v[0] == 'mmtk_trajectory' and not trajectory:
             print('A trajectory is needed')
             sys.exit(1)
+
+    trajectory = trajectory[0] if trajectory else None
 
     app = JobApp(job,trajectory)
     app.MainLoop()
