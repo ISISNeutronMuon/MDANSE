@@ -1,0 +1,1655 @@
+5T1:
+  alternatives: []
+  atoms:
+    HO5':
+      alternatives: []
+      bonds: [+OR]
+      groups: []
+      symbol: H
+  is_3ter_terminus: false
+  is_5ter_terminus: true
+3T1:
+  alternatives: []
+  atoms:
+    HO3':
+        alternatives: []
+        bonds: [-OR]
+        groups: []
+        symbol: H
+  is_3ter_terminus: true
+  is_5ter_terminus: false
+DA:
+  alternatives: []
+  atoms:
+    C1':  
+      alternatives: []
+      bonds: [C2', H1', N9, O4']
+      groups: [sugar]
+      symbol: C
+    C2:   
+      alternatives: []
+      bonds: [N1, N3, H2]
+      groups: [base]
+      symbol: C
+    C2':  
+      alternatives: []
+      bonds: [C1', C3', H2', H2'']
+      groups: [sugar]
+      symbol: C
+    C3':
+      alternatives: []
+      bonds: [C2', C4', H3', O3']
+      groups: [sugar]
+      symbol: C
+    C4:
+      alternatives: []
+      bonds: [C5, N3, N9]
+      groups: [base]
+      symbol: C
+    C4':
+      alternatives: []
+      bonds: [C3', C5', H4', O4']
+      groups: [sugar]
+      symbol: C
+    C5:
+      alternatives: []
+      bonds: [C4, C6, N7]
+      groups: [base]
+      symbol: C
+    C5':
+      alternatives: []
+      bonds: [C4', H5', H5'', O5']
+      groups: [sugar]
+      symbol: C
+    C6:
+      alternatives: []
+      bonds: [C5, N1, N6]
+      groups: [base]
+      symbol: C
+    C8:
+      alternatives: []
+      bonds: [H8, N7, N9]
+      groups: [base]
+      symbol: C
+    H1':
+      alternatives: []
+      bonds: [C1']
+      groups: [sugar]
+      symbol: H
+    H2:
+      alternatives: []
+      bonds: [C2]
+      groups: [base]
+      symbol: H
+    H2':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H2'':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H3':
+      alternatives: []
+      bonds: [C3']
+      groups: [sugar]
+      symbol: H
+    H4':
+      alternatives: []
+      bonds: [C4']
+      groups: [sugar]
+      symbol: H
+    H5':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H5'':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H61:
+      alternatives: []
+      bonds: [N6]
+      groups: [base]
+      symbol: H
+    H62:
+      alternatives: []
+      bonds: [N6]
+      groups: [base]
+      symbol: H
+    H8:
+      alternatives: []
+      bonds: [C8]
+      groups: [base]
+      symbol: H
+    N1:
+      alternatives: []
+      bonds: [C2, C6]
+      groups: [base]
+      symbol: N
+    N3:
+      alternatives: []
+      bonds: [C2, C4]
+      groups: [base]
+      symbol: N
+    N6:
+      alternatives: []
+      bonds: [C6, H61, H62]
+      groups: [base]
+      symbol: N
+    N7:
+      alternatives: []
+      bonds: [C5, C8]
+      groups: [base]
+      symbol: N
+    N9:
+      alternatives: []
+      bonds: [C1', C4, C8]
+      groups: [base]
+      symbol: N
+    O3':
+      alternatives: []
+      bonds: [C3', +R]
+      groups: [phosphate]
+      symbol: O
+    O4':
+      alternatives: []
+      bonds: [C1', C3']
+      groups: [sugar]
+      symbol: O
+    O5':
+      alternatives: []
+      bonds: [C5', P]
+      groups: [phosphate]
+      symbol: O
+    OP1:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    OP2:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    P:
+      alternatives: []
+      bonds: [O5', OP1, OP2, -R]
+      groups: [phopshate]
+      symbol: P
+  is_3ter_terminus: false
+  is_5ter_terminus: false
+A:
+  alternatives: []
+  atoms:
+    C1':  
+      alternatives: []
+      bonds: [C2', H1', N9, O4']
+      groups: [sugar]
+      symbol: C
+    C2:   
+      alternatives: []
+      bonds: [N1, N3, H2]
+      groups: [base]
+      symbol: C
+    C2':  
+      alternatives: []
+      bonds: [C1', C3', H2', O2']
+      groups: [sugar]
+      symbol: C
+    C3':
+      alternatives: []
+      bonds: [C2', C4', H3', O3']
+      groups: [sugar]
+      symbol: C
+    C4:
+      alternatives: []
+      bonds: [C5, N3, N9]
+      groups: [base]
+      symbol: C
+    C4':
+      alternatives: []
+      bonds: [C3', C5', H4', O4']
+      groups: [sugar]
+      symbol: C
+    C5:
+      alternatives: []
+      bonds: [C4, C6, N7]
+      groups: [base]
+      symbol: C
+    C5':
+      alternatives: []
+      bonds: [C4', H5', H5'', O5']
+      groups: [sugar]
+      symbol: C
+    C6:
+      alternatives: []
+      bonds: [C5, N1, N6]
+      groups: [base]
+      symbol: C
+    C8:
+      alternatives: []
+      bonds: [H8, N7, N9]
+      groups: [base]
+      symbol: C
+    H1':
+      alternatives: []
+      bonds: [C1']
+      groups: [sugar]
+      symbol: H
+    H2:
+      alternatives: []
+      bonds: [C2]
+      groups: [base]
+      symbol: H
+    H2':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H3':
+      alternatives: []
+      bonds: [C3']
+      groups: [sugar]
+      symbol: H
+    H4':
+      alternatives: []
+      bonds: [C4']
+      groups: [sugar]
+      symbol: H
+    H5':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H5'':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H61:
+      alternatives: []
+      bonds: [N6]
+      groups: [base]
+      symbol: H
+    H62:
+      alternatives: []
+      bonds: [N6]
+      groups: [base]
+      symbol: H
+    H8:
+      alternatives: []
+      bonds: [C8]
+      groups: [base]
+      symbol: H
+    HO2':
+      alternatives: []
+      bonds: [O2']
+      groups: [sugar]
+      symbol: H
+    N1:
+      alternatives: []
+      bonds: [C2, C6]
+      groups: [base]
+      symbol: N
+    N3:
+      alternatives: []
+      bonds: [C2, C4]
+      groups: [base]
+      symbol: N
+    N6:
+      alternatives: []
+      bonds: [C6, H61, H62]
+      groups: [base]
+      symbol: N
+    N7:
+      alternatives: []
+      bonds: [C5, C8]
+      groups: [base]
+      symbol: N
+    N9:
+      alternatives: []
+      bonds: [C1', C4, C8]
+      groups: [base]
+      symbol: N
+    O2':
+      alternatives: []
+      bonds: [C2', HO2']
+      groups: [sugar]
+      symbol: O
+    O3':
+      alternatives: []
+      bonds: [C3', +R]
+      groups: [phosphate]
+      symbol: O
+    O4':
+      alternatives: []
+      bonds: [C1', C3']
+      groups: [sugar]
+      symbol: O
+    O5':
+      alternatives: []
+      bonds: [C5', P]
+      groups: [phosphate]
+      symbol: O
+    OP1:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    OP2:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    P:
+      alternatives: []
+      bonds: [O5', OP1, OP2, -R]
+      groups: [phopshate]
+      symbol: P
+  is_3ter_terminus: false
+  is_5ter_terminus: false
+DG:
+  alternatives: []
+  atoms:
+    C1':  
+      alternatives: []
+      bonds: [C2', H1', N9, O4']
+      groups: [sugar]
+      symbol: C
+    C2:   
+      alternatives: []
+      bonds: [N1, N2, N3]
+      groups: [base]
+      symbol: C
+    C2':  
+      alternatives: []
+      bonds: [C1', C3', H2', H2'']
+      groups: [sugar]
+      symbol: C
+    C3':
+      alternatives: []
+      bonds: [C2', C4', H3', O3']
+      groups: [sugar]
+      symbol: C
+    C4:
+      alternatives: []
+      bonds: [C5, N3, N9]
+      groups: [base]
+      symbol: C
+    C4':
+      alternatives: []
+      bonds: [C3', C5', H4', O4']
+      groups: [sugar]
+      symbol: C
+    C5:
+      alternatives: []
+      bonds: [C4, C6, N7]
+      groups: [base]
+      symbol: C
+    C5':
+      alternatives: []
+      bonds: [C4', H5', H5'', O5']
+      groups: [sugar]
+      symbol: C
+    C6:
+      alternatives: []
+      bonds: [C5, N1, O6]
+      groups: [base]
+      symbol: C
+    C8:
+      alternatives: []
+      bonds: [H8, N7, N9]
+      groups: [base]
+      symbol: C
+    H1':
+      alternatives: []
+      bonds: [C1']
+      groups: [sugar]
+      symbol: H
+    H21:
+      alternatives: []
+      bonds: [N2]
+      groups: [base]
+      symbol: H
+    H22:
+      alternatives: []
+      bonds: [N2]
+      groups: [base]
+      symbol: H
+    H2':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H2'':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H3':
+      alternatives: []
+      bonds: [C3']
+      groups: [sugar]
+      symbol: H
+    H4':
+      alternatives: []
+      bonds: [C4']
+      groups: [sugar]
+      symbol: H
+    H5':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H5'':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H8:
+      alternatives: []
+      bonds: [C8]
+      groups: [base]
+      symbol: H
+    N1:
+      alternatives: []
+      bonds: [C2, C6]
+      groups: [base]
+      symbol: N
+    N2:
+      alternatives: []
+      bonds: [C2, H21, H22]
+      groups: [base]
+      symbol: N
+    N3:
+      alternatives: []
+      bonds: [C2, C4]
+      groups: [base]
+      symbol: N
+    N7:
+      alternatives: []
+      bonds: [C5, C8]
+      groups: [base]
+      symbol: N
+    N9:
+      alternatives: []
+      bonds: [C1', C4, C8]
+      groups: [base]
+      symbol: N
+    O3':
+      alternatives: []
+      bonds: [C3', +R]
+      groups: [phosphate]
+      symbol: O
+    O4':
+      alternatives: []
+      bonds: [C1', C3']
+      groups: [sugar]
+      symbol: O
+    O5':
+      alternatives: []
+      bonds: [C5', P]
+      groups: [phosphate]
+      symbol: O
+    O6:
+      alternatives: []
+      bonds: [C6]
+      groups: [base]
+      symbol: O
+    OP1:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    OP2:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    P:
+      alternatives: []
+      bonds: [O5', OP1, OP2, -R]
+      groups: [phopshate]
+      symbol: P
+  is_3ter_terminus: false
+  is_5ter_terminus: false
+G:
+  alternatives: []
+  atoms:
+    C1':  
+      alternatives: []
+      bonds: [C2', H1', N9, O4']
+      groups: [sugar]
+      symbol: C
+    C2:   
+      alternatives: []
+      bonds: [N1, N2, N3]
+      groups: [base]
+      symbol: C
+    C2':  
+      alternatives: []
+      bonds: [C1', C3', H2', O2']
+      groups: [sugar]
+      symbol: C
+    C3':
+      alternatives: []
+      bonds: [C2', C4', H3', O3']
+      groups: [sugar]
+      symbol: C
+    C4:
+      alternatives: []
+      bonds: [C5, N3, N9]
+      groups: [base]
+      symbol: C
+    C4':
+      alternatives: []
+      bonds: [C3', C5', H4', O4']
+      groups: [sugar]
+      symbol: C
+    C5:
+      alternatives: []
+      bonds: [C4, C6, N7]
+      groups: [base]
+      symbol: C
+    C5':
+      alternatives: []
+      bonds: [C4', H5', H5'', O5']
+      groups: [sugar]
+      symbol: C
+    C6:
+      alternatives: []
+      bonds: [C5, N1, O6]
+      groups: [base]
+      symbol: C
+    C8:
+      alternatives: []
+      bonds: [H8, N7, N9]
+      groups: [base]
+      symbol: C
+    H1':
+      alternatives: []
+      bonds: [C1']
+      groups: [sugar]
+      symbol: H
+    H21:
+      alternatives: []
+      bonds: [N2]
+      groups: [base]
+      symbol: H
+    H22:
+      alternatives: []
+      bonds: [N2]
+      groups: [base]
+      symbol: H
+    H2':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H3':
+      alternatives: []
+      bonds: [C3']
+      groups: [sugar]
+      symbol: H
+    H4':
+      alternatives: []
+      bonds: [C4']
+      groups: [sugar]
+      symbol: H
+    H5':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H5'':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H8:
+      alternatives: []
+      bonds: [C8]
+      groups: [base]
+      symbol: H
+    HO2':
+      alternatives: []
+      bonds: [O2']
+      groups: [sugar]
+      symbol: H
+    N1:
+      alternatives: []
+      bonds: [C2, C6]
+      groups: [base]
+      symbol: N
+    N2:
+      alternatives: []
+      bonds: [C2, H21, H22]
+      groups: [base]
+      symbol: N
+    N3:
+      alternatives: []
+      bonds: [C2, C4]
+      groups: [base]
+      symbol: N
+    N7:
+      alternatives: []
+      bonds: [C5, C8]
+      groups: [base]
+      symbol: N
+    N9:
+      alternatives: []
+      bonds: [C1', C4, C8]
+      groups: [base]
+      symbol: N
+    O2':
+      alternatives: []
+      bonds: [C2', HO2']
+      groups: [sugar]
+      symbol: O
+    O3':
+      alternatives: []
+      bonds: [C3', +R]
+      groups: [phosphate]
+      symbol: O
+    O4':
+      alternatives: []
+      bonds: [C1', C3']
+      groups: [sugar]
+      symbol: O
+    O5':
+      alternatives: []
+      bonds: [C5', P]
+      groups: [phosphate]
+      symbol: O
+    O6:
+      alternatives: []
+      bonds: [C6]
+      groups: [base]
+      symbol: O
+    OP1:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    OP2:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    P:
+      alternatives: []
+      bonds: [O5', OP1, OP2, -R]
+      groups: [phopshate]
+      symbol: P
+  is_3ter_terminus: false
+  is_5ter_terminus: false
+DT:
+  alternatives: []
+  atoms:
+    C1':
+      alternatives: []
+      bonds: [C2', H1', N1, O4']
+      groups: [sugar]
+      symbol: C
+    C2:
+      alternatives: []
+      bonds: [N1, N3, O2]
+      groups: [base]
+      symbol: C
+    C2':
+      alternatives: []
+      bonds: [C1', C3', H2', H2'']
+      groups: [sugar]
+      symbol: C
+    C3':
+      alternatives: []
+      bonds: [C2', C4', H3', O3']
+      groups: [sugar]
+      symbol: C
+    C4:
+      alternatives: []
+      bonds: [C5, N3, O4]
+      groups: [base]
+      symbol: C
+    C4':
+      alternatives: []
+      bonds: [C3', C5', H4', O4']
+      groups: [sugar]
+      symbol: C
+    C5:
+      alternatives: []
+      bonds: [C4, C6, C7]
+      groups: [base]
+      symbol: C
+    C5':
+      alternatives: []
+      bonds: [C4', H5', H5'', O5']
+      groups: [sugar]
+      symbol: C
+    C6:
+      alternatives: []
+      bonds: [C5, H6, N1]
+      groups: [base]
+      symbol: C
+    C7:
+      alternatives: []
+      bonds: [C5, H71, H72, H73]
+      groups: [base]
+      symbol: C
+    H1':
+      alternatives: []
+      bonds: [C1']
+      groups: [sugar]
+      symbol: H
+    H3:
+      alternatives: []
+      bonds: [N3]
+      groups: [base]
+      symbol: H
+    H2':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H2'':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H3':
+      alternatives: []
+      bonds: [C3']
+      groups: [sugar]
+      symbol: H
+    H4':
+      alternatives: []
+      bonds: [C4']
+      groups: [sugar]
+      symbol: H
+    H5':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H5'':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H6:
+      alternatives: []
+      bonds: [C6]
+      groups: [base]
+      symbol: H
+    H71:
+      alternatives: []
+      bonds: [C7]
+      groups: [base]
+      symbol: H
+    H72:
+      alternatives: []
+      bonds: [C7]
+      groups: [base]
+      symbol: H
+    H73:
+      alternatives: []
+      bonds: [C7]
+      groups: [base]
+      symbol: H
+    N1:
+      alternatives: []
+      bonds: [C1', C2, C6]
+      groups: [base]
+      symbol: N
+    N3:
+      alternatives: []
+      bonds: [C2, C4, H3]
+      groups: [base]
+      symbol: N
+    O2:
+      alternatives: []
+      bonds: [C2]
+      groups: [base]
+      symbol: O
+    O3':
+      alternatives: []
+      bonds: [C3', +R]
+      groups: [phosphate]
+      symbol: O
+    O4:
+      alternatives: []
+      bonds: [C4]
+      groups: [base]
+      symbol: O
+    O4':
+      alternatives: []
+      bonds: [C1', C3']
+      groups: [sugar]
+      symbol: O
+    O5':
+      alternatives: []
+      bonds: [C5', P]
+      groups: [phosphate]
+      symbol: O
+    OP1:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    OP2:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    P:
+      alternatives: []
+      bonds: [O5', OP1, OP2, -R]
+      groups: [phopshate]
+      symbol: P
+  is_3ter_terminus: false
+  is_5ter_terminus: false
+T:
+  alternatives: []
+  atoms:
+    C1':
+      alternatives: []
+      bonds: [C2', H1', N1, O4']
+      groups: [sugar]
+      symbol: C
+    C2:
+      alternatives: []
+      bonds: [N1, N3, O2]
+      groups: [base]
+      symbol: C
+    C2':
+      alternatives: []
+      bonds: [C1', C3', H2', O2']
+      groups: [sugar]
+      symbol: C
+    C3':
+      alternatives: []
+      bonds: [C2', C4', H3', O3']
+      groups: [sugar]
+      symbol: C
+    C4:
+      alternatives: []
+      bonds: [C5, N3, O4]
+      groups: [base]
+      symbol: C
+    C4':
+      alternatives: []
+      bonds: [C3', C5', H4', O4']
+      groups: [sugar]
+      symbol: C
+    C5:
+      alternatives: []
+      bonds: [C4, C6, C7]
+      groups: [base]
+      symbol: C
+    C5':
+      alternatives: []
+      bonds: [C4', H5', H5'', O5']
+      groups: [sugar]
+      symbol: C
+    C6:
+      alternatives: []
+      bonds: [C5, H6, N1]
+      groups: [base]
+      symbol: C
+    C7:
+      alternatives: []
+      bonds: [C5, H71, H72, H73]
+      groups: [base]
+      symbol: C
+    H1':
+      alternatives: []
+      bonds: [C1']
+      groups: [sugar]
+      symbol: H
+    H3:
+      alternatives: []
+      bonds: [N3]
+      groups: [base]
+      symbol: H
+    H2':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H3':
+      alternatives: []
+      bonds: [C3']
+      groups: [sugar]
+      symbol: H
+    H4':
+      alternatives: []
+      bonds: [C4']
+      groups: [sugar]
+      symbol: H
+    H5':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H5'':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H6:
+      alternatives: []
+      bonds: [C6]
+      groups: [base]
+      symbol: H
+    H71:
+      alternatives: []
+      bonds: [C7]
+      groups: [base]
+      symbol: H
+    H72:
+      alternatives: []
+      bonds: [C7]
+      groups: [base]
+      symbol: H
+    H73:
+      alternatives: []
+      bonds: [C7]
+      groups: [base]
+      symbol: H
+    HO2':
+      alternatives: []
+      bonds: [O2']
+      groups: [sugar]
+      symbol: H
+    N1:
+      alternatives: []
+      bonds: [C1', C2, C6]
+      groups: [base]
+      symbol: N
+    N3:
+      alternatives: []
+      bonds: [C2, C4, H3]
+      groups: [base]
+      symbol: N
+    O2:
+      alternatives: []
+      bonds: [C2]
+      groups: [base]
+      symbol: O
+    O2':
+      alternatives: []
+      bonds: [C2', HO2']
+      groups: [sugar]
+      symbol: O
+    O3':
+      alternatives: []
+      bonds: [C3', +R]
+      groups: [phosphate]
+      symbol: O
+    O4:
+      alternatives: []
+      bonds: [C4]
+      groups: [base]
+      symbol: O
+    O4':
+      alternatives: []
+      bonds: [C1', C3']
+      groups: [sugar]
+      symbol: O
+    O5':
+      alternatives: []
+      bonds: [C5', P]
+      groups: [phosphate]
+      symbol: O
+    OP1:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    OP2:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    P:
+      alternatives: []
+      bonds: [O5', OP1, OP2, -R]
+      groups: [phopshate]
+      symbol: P
+  is_3ter_terminus: false
+  is_5ter_terminus: false
+DC:
+  alternatives: []
+  atoms:
+    C1':
+      alternatives: []
+      bonds: [C2', H1', N1, O4']
+      groups: [sugar]
+      symbol: C
+    C2:
+      alternatives: []
+      bonds: [N1, N3, O2]
+      groups: [base]
+      symbol: C
+    C2':
+      alternatives: []
+      bonds: [C1', C3', H2', H2'']
+      groups: [sugar]
+      symbol: C
+    C3':
+      alternatives: []
+      bonds: [C2', C4', H3', O3']
+      groups: [sugar]
+      symbol: C
+    C4:
+      alternatives: []
+      bonds: [C5, N3, N4]
+      groups: [base]
+      symbol: C
+    C4':
+      alternatives: []
+      bonds: [C3', C5', H4', O4']
+      groups: [sugar]
+      symbol: C
+    C5:
+      alternatives: []
+      bonds: [C4, C6, H5]
+      groups: [base]
+      symbol: C
+    C5':
+      alternatives: []
+      bonds: [C4', H5', H5'', O5']
+      groups: [sugar]
+      symbol: C
+    C6:
+      alternatives: []
+      bonds: [C5, H6, N1]
+      groups: [base]
+      symbol: C
+    H1':
+      alternatives: []
+      bonds: [C1']
+      groups: [sugar]
+      symbol: H
+    H3:
+      alternatives: []
+      bonds: [N3]
+      groups: [base]
+      symbol: H
+    H2':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H2'':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H3':
+      alternatives: []
+      bonds: [C3']
+      groups: [sugar]
+      symbol: H
+    H41:
+      alternatives: []
+      bonds: [N4]
+      groups: [base]
+      symbol: H
+    H42:
+      alternatives: []
+      bonds: [N4]
+      groups: [base]
+      symbol: H
+    H4':
+      alternatives: []
+      bonds: [C4']
+      groups: [sugar]
+      symbol: H
+    H5:
+      alternatives: []
+      bonds: [C5]
+      groups: [base]
+      symbol: H
+    H5':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H5'':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H6:
+      alternatives: []
+      bonds: [C6]
+      groups: [base]
+      symbol: H
+    N1:
+      alternatives: []
+      bonds: [C1', C2, C6]
+      groups: [base]
+      symbol: N
+    N3:
+      alternatives: []
+      bonds: [C2, C4, H3]
+      groups: [base]
+      symbol: N
+    N4:
+      alternatives: []
+      bonds: [C4, H41, H42]
+      groups: [base]
+      symbol: N
+    O2:
+      alternatives: []
+      bonds: [C2]
+      groups: [base]
+      symbol: O
+    O3':
+      alternatives: []
+      bonds: [C3', +R]
+      groups: [phosphate]
+      symbol: O
+    O4':
+      alternatives: []
+      bonds: [C1', C3']
+      groups: [sugar]
+      symbol: O
+    O5':
+      alternatives: []
+      bonds: [C5', P]
+      groups: [phosphate]
+      symbol: O
+    OP1:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    OP2:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    P:
+      alternatives: []
+      bonds: [O5', OP1, OP2, -R]
+      groups: [phopshate]
+      symbol: P
+  is_3ter_terminus: false
+  is_5ter_terminus: false
+C:
+  alternatives: []
+  atoms:
+    C1':
+      alternatives: []
+      bonds: [C2', H1', N1, O4']
+      groups: [sugar]
+      symbol: C
+    C2:
+      alternatives: []
+      bonds: [N1, N3, O2]
+      groups: [base]
+      symbol: C
+    C2':
+      alternatives: []
+      bonds: [C1', C3', H2', O2']
+      groups: [sugar]
+      symbol: C
+    C3':
+      alternatives: []
+      bonds: [C2', C4', H3', O3']
+      groups: [sugar]
+      symbol: C
+    C4:
+      alternatives: []
+      bonds: [C5, N3, N4]
+      groups: [base]
+      symbol: C
+    C4':
+      alternatives: []
+      bonds: [C3', C5', H4', O4']
+      groups: [sugar]
+      symbol: C
+    C5:
+      alternatives: []
+      bonds: [C4, C6, H5]
+      groups: [base]
+      symbol: C
+    C5':
+      alternatives: []
+      bonds: [C4', H5', H5'', O5']
+      groups: [sugar]
+      symbol: C
+    C6:
+      alternatives: []
+      bonds: [C5, H6, N1]
+      groups: [base]
+      symbol: C
+    H1':
+      alternatives: []
+      bonds: [C1']
+      groups: [sugar]
+      symbol: H
+    H3:
+      alternatives: []
+      bonds: [N3]
+      groups: [base]
+      symbol: H
+    H2':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H3':
+      alternatives: []
+      bonds: [C3']
+      groups: [sugar]
+      symbol: H
+    H41:
+      alternatives: []
+      bonds: [N4]
+      groups: [base]
+      symbol: H
+    H42:
+      alternatives: []
+      bonds: [N4]
+      groups: [base]
+      symbol: H
+    H4':
+      alternatives: []
+      bonds: [C4']
+      groups: [sugar]
+      symbol: H
+    H5:
+      alternatives: []
+      bonds: [C5]
+      groups: [base]
+      symbol: H
+    H5':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H5'':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H6:
+      alternatives: []
+      bonds: [C6]
+      groups: [base]
+      symbol: H
+    HO2':
+      alternatives: []
+      bonds: [O2']
+      groups: [sugar]
+      symbol: H
+    N1:
+      alternatives: []
+      bonds: [C1', C2, C6]
+      groups: [base]
+      symbol: N
+    N3:
+      alternatives: []
+      bonds: [C2, C4, H3]
+      groups: [base]
+      symbol: N
+    N4:
+      alternatives: []
+      bonds: [C4, H41, H42]
+      groups: [base]
+      symbol: N
+    O2:
+      alternatives: []
+      bonds: [C2]
+      groups: [base]
+      symbol: O
+    O2':
+      alternatives: []
+      bonds: [C2', HO2']
+      groups: [sugar]
+      symbol: O
+    O3':
+      alternatives: []
+      bonds: [C3', +R]
+      groups: [phosphate]
+      symbol: O
+    O4':
+      alternatives: []
+      bonds: [C1', C3']
+      groups: [sugar]
+      symbol: O
+    O5':
+      alternatives: []
+      bonds: [C5', P]
+      groups: [phosphate]
+      symbol: O
+    OP1:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    OP2:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    P:
+      alternatives: []
+      bonds: [O5', OP1, OP2, -R]
+      groups: [phopshate]
+      symbol: P
+  is_3ter_terminus: false
+  is_5ter_terminus: false
+DU:
+  alternatives: []
+  atoms:
+    C1':
+      alternatives: []
+      bonds: [C2', H1', N1, O4']
+      groups: [sugar]
+      symbol: C
+    C2:
+      alternatives: []
+      bonds: [N1, N3, O2]
+      groups: [base]
+      symbol: C
+    C2':
+      alternatives: []
+      bonds: [C1', C3', H2', H2'']
+      groups: [sugar]
+      symbol: C
+    C3':
+      alternatives: []
+      bonds: [C2', C4', H3', O3']
+      groups: [sugar]
+      symbol: C
+    C4:
+      alternatives: []
+      bonds: [C5, N3, O4]
+      groups: [base]
+      symbol: C
+    C4':
+      alternatives: []
+      bonds: [C3', C5', H4', O4']
+      groups: [sugar]
+      symbol: C
+    C5:
+      alternatives: []
+      bonds: [C4, C6, H5]
+      groups: [base]
+      symbol: C
+    C5':
+      alternatives: []
+      bonds: [C4', H5', H5'', O5']
+      groups: [sugar]
+      symbol: C
+    C6:
+      alternatives: []
+      bonds: [C5, H6, N1]
+      groups: [base]
+      symbol: C
+    H1':
+      alternatives: []
+      bonds: [C1']
+      groups: [sugar]
+      symbol: H
+    H3:
+      alternatives: []
+      bonds: [N3]
+      groups: [base]
+      symbol: H
+    H2':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H2'':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H3':
+      alternatives: []
+      bonds: [C3']
+      groups: [sugar]
+      symbol: H
+    H4':
+      alternatives: []
+      bonds: [C4']
+      groups: [sugar]
+      symbol: H
+    H5:
+      alternatives: []
+      bonds: [C5]
+      groups: [base]
+      symbol: H
+    H5':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H5'':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H6:
+      alternatives: []
+      bonds: [C6]
+      groups: [base]
+      symbol: H
+    N1:
+      alternatives: []
+      bonds: [C1', C2, C6]
+      groups: [base]
+      symbol: N
+    N3:
+      alternatives: []
+      bonds: [C2, C4, H3]
+      groups: [base]
+      symbol: N
+    O2:
+      alternatives: []
+      bonds: [C2]
+      groups: [base]
+      symbol: O
+    O3':
+      alternatives: []
+      bonds: [C3', +R]
+      groups: [phosphate]
+      symbol: O
+    O4:
+      alternatives: []
+      bonds: [C4]
+      groups: [base]
+      symbol: O
+    O4':
+      alternatives: []
+      bonds: [C1', C3']
+      groups: [sugar]
+      symbol: O
+    O5':
+      alternatives: []
+      bonds: [C5', P]
+      groups: [phosphate]
+      symbol: O
+    OP1:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    OP2:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    P:
+      alternatives: []
+      bonds: [O5', OP1, OP2, -R]
+      groups: [phopshate]
+      symbol: P
+  is_3ter_terminus: false
+  is_5ter_terminus: false
+U:
+  alternatives: []
+  atoms:
+    C1':
+      alternatives: []
+      bonds: [C2', H1', N1, O4']
+      groups: [sugar]
+      symbol: C
+    C2:
+      alternatives: []
+      bonds: [N1, N3, O2]
+      groups: [base]
+      symbol: C
+    C2':
+      alternatives: []
+      bonds: [C1', C3', H2', O2']
+      groups: [sugar]
+      symbol: C
+    C3':
+      alternatives: []
+      bonds: [C2', C4', H3', O3']
+      groups: [sugar]
+      symbol: C
+    C4:
+      alternatives: []
+      bonds: [C5, N3, O4]
+      groups: [base]
+      symbol: C
+    C4':
+      alternatives: []
+      bonds: [C3', C5', H4', O4']
+      groups: [sugar]
+      symbol: C
+    C5:
+      alternatives: []
+      bonds: [C4, C6, H5]
+      groups: [base]
+      symbol: C
+    C5':
+      alternatives: []
+      bonds: [C4', H5', H5'', O5']
+      groups: [sugar]
+      symbol: C
+    C6:
+      alternatives: []
+      bonds: [C5, H6, N1]
+      groups: [base]
+      symbol: C
+    H1':
+      alternatives: []
+      bonds: [C1']
+      groups: [sugar]
+      symbol: H
+    H3:
+      alternatives: []
+      bonds: [N3]
+      groups: [base]
+      symbol: H
+    H2':
+      alternatives: []
+      bonds: [C2']
+      groups: [sugar]
+      symbol: H
+    H3':
+      alternatives: []
+      bonds: [C3']
+      groups: [sugar]
+      symbol: H
+    H4':
+      alternatives: []
+      bonds: [C4']
+      groups: [sugar]
+      symbol: H
+    H5:
+      alternatives: []
+      bonds: [C5]
+      groups: [base]
+      symbol: H
+    H5':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H5'':
+      alternatives: []
+      bonds: [C5']
+      groups: [sugar]
+      symbol: H
+    H6:
+      alternatives: []
+      bonds: [C6]
+      groups: [base]
+      symbol: H
+    HO2':
+      alternatives: []
+      bonds: [O2']
+      groups: [sugar]
+      symbol: H
+    N1:
+      alternatives: []
+      bonds: [C1', C2, C6]
+      groups: [base]
+      symbol: N
+    N3:
+      alternatives: []
+      bonds: [C2, C4, H3]
+      groups: [base]
+      symbol: N
+    O2:
+      alternatives: []
+      bonds: [C2]
+      groups: [base]
+      symbol: O
+    O2':
+      alternatives: []
+      bonds: [C2', HO2']
+      groups: [sugar]
+      symbol: O
+    O3':
+      alternatives: []
+      bonds: [C3', +R]
+      groups: [phosphate]
+      symbol: O
+    O4:
+      alternatives: []
+      bonds: [C4]
+      groups: [base]
+      symbol: O
+    O4':
+      alternatives: []
+      bonds: [C1', C3']
+      groups: [sugar]
+      symbol: O
+    O5':
+      alternatives: []
+      bonds: [C5', P]
+      groups: [phosphate]
+      symbol: O
+    OP1:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    OP2:
+      alternatives: []
+      bonds: [P]
+      groups: [phosphate]
+      symbol: O
+    P:
+      alternatives: []
+      bonds: [O5', OP1, OP2, -R]
+      groups: [phopshate]
+      symbol: P
+  is_3ter_terminus: false
+  is_5ter_terminus: false
