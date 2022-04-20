@@ -48,6 +48,10 @@ class _Configuration:
         return self._coordinates
 
     @abc.abstractmethod
+    def fold_coordinates(self):
+        pass
+
+    @abc.abstractmethod
     def to_box_coordinates(self):
         pass
 
@@ -73,6 +77,9 @@ class BoxConfiguration(_Configuration):
 
         super(BoxConfiguration,self).__init__(chemical_system,coordinates,unit_cell)
 
+    def fold_coordinates(self):
+        pass
+
     def to_box_coordinates(self):
 
         return self._variables['coordinates']
@@ -82,6 +89,23 @@ class BoxConfiguration(_Configuration):
         return np.matmul(self._unit_cell,self._variables['coordinates'].T).T
 
 class RealConfiguration(_Configuration):
+
+    def fold_coordinates(self):
+
+        box_coordinates = self.to_box_coordinates()
+        print('BOX')
+        print(box_coordinates)
+
+        frac, _ = np.modf(box_coordinates)
+
+        print('FRAC 1')
+        print(frac)
+        frac = np.where(frac < 0.0, frac + 1.0, frac)
+        print('FRAC 2')
+        print(frac)
+        frac = np.where(frac > 0.5, frac - 1.0, frac)
+        
+        print(np.matmul(self._unit_cell,frac.T).T)
 
     def to_box_coordinates(self):
         
@@ -98,24 +122,26 @@ if __name__ == "__main__":
 
     from ChemicalEntity import Atom, ChemicalSystem
 
-    n_atoms = 100000
+    n_atoms = 5
     cs = ChemicalSystem()
     for i in range(n_atoms):
         cs.add_chemical_entity(Atom(symbol='H'))
         
-    coordinates = np.random.uniform(0,1,(n_atoms,3))
+    coordinates = np.random.uniform(-10,10,(n_atoms,3))
     print(coordinates)
 
-    uc = np.array([[1.0,2.0,3.0],[2.0,1.0,-3.0],[1.0,1.0,1.0]]).T
-    print(uc)
+    uc = np.array([[1.0,2.0,3.0],[2.0,-1.0,3.0],[1.0,1.0,1.0]]).T
+    # uc = np.array([[10.0,0.0,0.0],[0.0,10.0,0.0],[0.0,0.0,10.0]]).T
 
     conf = RealConfiguration(cs, coordinates, uc)
 
-    print(conf.to_box_coordinates())
+    conf.fold_coordinates()
 
-    conf = BoxConfiguration(cs, coordinates, uc)
+    # print(conf.to_box_coordinates())
 
-    print(conf.to_real_coordinates())
+    # conf = BoxConfiguration(cs, coordinates, uc)
+
+    # print(conf.to_real_coordinates())
 
 
 
