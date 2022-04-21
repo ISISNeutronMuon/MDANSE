@@ -71,10 +71,6 @@ class PairDistributionFunction(DistanceHistogram):
         shellVolumes  = shellSurfaces*self.configuration['r_values']['step']
   
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
-        box = numpy.array([i for i in self.configuration['trajectory']['instance'].box_size[0] if i])
-        rho = (len(self.configuration['atom_selection']['names']) /
-               numpy.prod(box))
-        r_values = self.configuration['r_values']['mid_points']
 
         for pair in self._elementsPairs:
             ni = nAtomsPerElement[pair[0]]
@@ -98,18 +94,20 @@ class PairDistributionFunction(DistanceHistogram):
 
             for i, pdf in zip(["intra", "inter", "total"], [pdf_intra, pdf_inter, pdf_total]):
                 self._outputData["pdf_%s_%s%s" % (i, pair[0], pair[1])][:] = pdf
-                self._outputData["rdf_%s_%s%s" % (i, pair[0], pair[1])][:] = 4 * numpy.pi * rho * r_values ** 2 * pdf
-                self._outputData["tcf_%s_%s%s" % (i, pair[0], pair[1])][:] = 4 * numpy.pi * rho * r_values * (pdf - 1)
+                self._outputData["rdf_%s_%s%s" % (i, pair[0], pair[1])][:] = shellSurfaces * self.averageDensity * pdf
+                self._outputData["tcf_%s_%s%s" % (i, pair[0], pair[1])][:] = densityFactor * self.averageDensity * \
+                                                                             (pdf - 1)
 
         weights = self.configuration["weights"].get_weights()
 
         for i in ['_intra', '_inter', '']:
             pdf = weight(weights, self._outputData, nAtomsPerElement, 2, "pdf{}_%s%s".format(i if i else '_total'))
             self._outputData["pdf%s_total" % i][:] = pdf
-            self._outputData["rdf%s_total" % i][:] = 4 * numpy.pi * rho * r_values ** 2 * pdf
-            self._outputData["tcf%s_total" % i][:] = 4 * numpy.pi * rho * r_values * (pdf - 1)
+            self._outputData["rdf%s_total" % i][:] = shellSurfaces * self.averageDensity * pdf
+            self._outputData["tcf%s_total" % i][:] = densityFactor * self.averageDensity * (pdf - 1)
 
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
+        self._outputData.write(self.configuration['output_files']['root'],
+                               self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     
   
