@@ -291,7 +291,7 @@ class LAMMPSConverter(Converter):
             netcdf.createDimension("MDANSE_NBONDS",self._lammpsConfig["n_bonds"])
             netcdf.createDimension("MDANSE_TWO",2)
             VAR = netcdf.createVariable("mdanse_bonds", numpy.dtype(numpy.int32).char, ("MDANSE_NBONDS","MDANSE_TWO"))
-            VAR.assignValue(self._lammpsConfig["bonds"]) 
+            VAR[:,:] = self._lammpsConfig["bonds"]
                 
         # Close the output trajectory.
         self._trajectory.close()

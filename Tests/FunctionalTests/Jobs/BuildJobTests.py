@@ -80,7 +80,7 @@ class JobFileGenerator():
             array_of_python_dependencies_string.append("time")
 
         # Add NetCDF
-        array_of_mdanse_dependencies_string.append('from Scientific.IO.NetCDF import NetCDFFile')
+        array_of_mdanse_dependencies_string.append('import netCDF4')
         array_of_mdanse_dependencies_string.append('import Comparator')
 
         # Sort arrays to write imports in the alphabetical order
@@ -100,15 +100,15 @@ class JobFileGenerator():
         """
         return 'def compare(file1, file2):\n'          \
                '    ret = True\n'                      \
-               '    f = NetCDFFile(file1,"r")\n'       \
+               '    f = netCDF4.Dataset(file1,"r")\n'       \
                '    res1 = {}\n'                       \
                '    for k,v in f.variables.items():\n' \
-               '        res1[k] = v.getValue()\n'      \
+               '        res1[k] = v[:]\n'      \
                '    f.close()\n'                       \
-               '    f = NetCDFFile(file2,"r")\n'       \
+               '    f = netCDF4.Dataset(file2,"r")\n'       \
                '    res2 = {}\n'                       \
                '    for k,v in f.variables.items():\n' \
-               '        res2[k] = v.getValue()\n'      \
+               '        res2[k] = v[:]\n'      \
                '    f.close()\n'                       \
                '    return Comparator.Comparator().compare(res1, res2)\n\n'
 

@@ -44,15 +44,15 @@ class IOutputVariable(numpy.ndarray):
     
     _registry = "output_variable"
         
-    def __new__(cls, value, name, axis='index', units="unitless"):
+    def __new__(cls, value, varname, axis='index', units="unitless"):
         '''
         Instanciate a new MDANSE output variable.
                 
         @param cls: the class to instantiate.
         @type cls: an OutputVariable object
         
-        @param name: the name of the output variable.
-        @type name: string
+        @param varname: the name of the output variable.
+        @type varname: string
         
         @param value: the input numpy array.
         @type value: numpy array
@@ -74,7 +74,7 @@ class IOutputVariable(numpy.ndarray):
         obj = numpy.asarray(value).view(cls)
                                                         
         # The name of the output variable.               
-        obj.name = name
+        obj.varname = varname
                         
         obj.units = units
 
@@ -87,7 +87,7 @@ class IOutputVariable(numpy.ndarray):
         if obj is None:
             return
                 
-        self.name = getattr(obj, 'name', None)
+        self.varname = getattr(obj, 'varname', None)
     
         self.axis = getattr(obj, 'axis',())
 
@@ -101,7 +101,7 @@ class IOutputVariable(numpy.ndarray):
         
         info = []
 
-        info.append("# variable name: %s"  % self.name)
+        info.append("# variable name: %s"  % self.varname)
         info.append("# \ttype: %s"  % self._type)
         info.append("# \taxis: %s" % str(self.axis))
         info.append("# \tunits: %s" % self.units)
