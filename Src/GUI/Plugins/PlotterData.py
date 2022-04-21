@@ -15,6 +15,13 @@ class IPlotterData:
     def variables(self):
         pass
 
+    @abc.abstractmethod
+    def close(self):
+        pass
+
+    def __del__(self):        
+        self.close()
+
 class NetCDFPlotterData(IPlotterData):
 
     def __init__(self, *args, **kwargs):
@@ -23,6 +30,9 @@ class NetCDFPlotterData(IPlotterData):
 
         self._variables = collections.OrderedDict()
         NetCDFPlotterData.find_numeric_variables(self._variables,self._netcdf)
+
+    def close(self):
+        self._netcdf.close()
 
     @property
     def variables(self):
