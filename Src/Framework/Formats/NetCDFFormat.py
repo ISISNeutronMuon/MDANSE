@@ -17,7 +17,7 @@ import os
 
 import numpy
 
-from Scientific.IO.NetCDF import NetCDFFile
+import netCDF4
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Formats.IFormat import IFormat
@@ -49,7 +49,7 @@ class NetCDFFormat(IFormat):
         filename = "%s%s" % (filename,cls.extensions[0])
        
         # The NetCDF output file is opened for writing.
-        outputFile = NetCDFFile(filename, 'w')
+        outputFile = netCDF4.Dataset(filename, 'w')
         
         if header:
             # This is to avoid any segmentation fault when writing the NetCDF header field
@@ -74,7 +74,7 @@ class NetCDFFormat(IFormat):
             NETCDFVAR = outputFile.createVariable(varName, numpy.dtype(var.dtype).char, tuple(dimensions))
 
             # The array stored in the OutputVariable instance is written to the NetCDF file.
-            NETCDFVAR.assignValue(var)  
+            NETCDFVAR[:] = var
 
             # All the attributes stored in the OutputVariable instance are written to the NetCDF file.
             for k, v in vars(var).items():

@@ -49,25 +49,25 @@ class StructureFactorFromScatteringFunction(IJob):
         
         resolution = self.configuration["instrument_resolution"]
         
-        self._outputData.add("time","line", inputFile.variables['time'].getValue(), units='ps')
+        self._outputData.add("time","line", inputFile.variables['time'][:], units='ps')
 
-        self._outputData.add("time_window","line", inputFile.variables['time_window'].getValue(), axis="time", units="au") 
+        self._outputData.add("time_window","line", inputFile.variables['time_window'][:], axis="time", units="au") 
 
-        self._outputData.add("q","line", inputFile.variables['q'].getValue(), units="inv_nm") 
+        self._outputData.add("q","line", inputFile.variables['q'][:], units="inv_nm") 
 
         self._outputData.add("omega","line", resolution["omega"], units='rad/ps')
         
         self._outputData.add("omega_window","line", resolution["omega_window"], axis="omega", units="au") 
 
-        nQVectors = len(inputFile.variables['q'].getValue())
+        nQVectors = len(inputFile.variables['q'][:])
         nOmegas = resolution['n_omegas']
 
         for k, v in inputFile.variables.items():
             if k.startswith('f(q,t)_'):
-                self._outputData.add(k,"surface", v.getValue(), axis="q|time", units="au")                                                 
+                self._outputData.add(k,"surface", v[:], axis="q|time", units="au")                                                 
                 suffix = k[7:]
                 self._outputData.add("s(q,f)_%s" % suffix,"surface", (nQVectors,nOmegas), axis="q|omega", units="au") 
-                self._outputData["s(q,f)_%s" % suffix][:] = get_spectrum(v.getValue(),
+                self._outputData["s(q,f)_%s" % suffix][:] = get_spectrum(v[:],
                                                                          self.configuration["instrument_resolution"]["time_window"],
                                                                          self.configuration["instrument_resolution"]["time_step"],
                                                                          axis=1)

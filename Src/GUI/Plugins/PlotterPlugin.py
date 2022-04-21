@@ -17,13 +17,13 @@ import collections
 
 import numpy
 
+import netCDF4
+
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 
 import wx
 import wx.aui as wxaui
-
-from Scientific.IO.NetCDF import NetCDFFile
 
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
@@ -472,11 +472,11 @@ class PlotterFrame(wx.Frame):
             basename = baselist[i]    
             filename = filelist[i]
             
-            f = NetCDFFile(filename,"r")
+            f = netCDF4.Dataset(filename,"r")
             _vars = f.variables
             data = collections.OrderedDict()
             for k in _vars:
-                dtype = _vars[k].getValue().dtype
+                dtype = _vars[k][:].dtype
                 if not numpy.issubdtype(dtype,numpy.number):
                     continue
                 data[k]={}
@@ -487,7 +487,7 @@ class PlotterFrame(wx.Frame):
                         data[k]['axis'] = []
                 else:
                     data[k]['axis'] = []
-                data[k]['data'] = _vars[k].getValue()
+                data[k]['data'] = _vars[k][:]
                 data[k]['units'] = getattr(_vars[k],"units","au")
             
             unique_name = self.unique(basename, self.plugin._dataDict)

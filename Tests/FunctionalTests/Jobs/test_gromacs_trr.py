@@ -3,27 +3,28 @@ from shutil import copy
 import os
 import unittest
 
+import netCDF4
+
 from MDANSE import REGISTRY
-from Scientific.IO.NetCDF import NetCDFFile
 import Comparator
 
 
 def compare(file1, file2, array_tolerance):
-    f = NetCDFFile(file1, "r")
+    f = netCDF4.Dataset(file1, "r")
     try:
         res1 = {}
         for k, v in f.variables.items():
             if k not in ['velocities', 'gradients', 'temperature', 'kinetic_energy']:
-                res1[k] = v.getValue()
+                res1[k] = v[:]
     finally:
         f.close()
 
-    f = NetCDFFile(file2, "r")
+    f = netCDF4.Dataset(file2, "r")
     try:
         res2 = {}
         for k, v in f.variables.items():
             if k not in ['velocities', 'gradients', 'temperature', 'kinetic_energy']:
-                res2[k] = v.getValue()
+                res2[k] = v[:]
     finally:
         f.close()
 
@@ -74,9 +75,9 @@ class TestGromacsADK(unittest.TestCase):
         # Load velocities that have been generated from the same trajectory with MDAnalysis + convert angstrom to nm
         expected = np.load(r'../../../Data/Trajectories/Gromacs/adk_oplsaa.npy') / 10
 
-        f = NetCDFFile(self.trr_copy, "r")
+        f = netCDF4.Dataset(self.trr_copy, "r")
         try:
-            velocities = f.variables['velocities'].getValue()
+            velocities = f.variables['velocities'][:]
         finally:
             f.close()
 
@@ -85,7 +86,7 @@ class TestGromacsADK(unittest.TestCase):
     def test_gradients(self):
         # adk_oplsaa.trr does not contain forces
 
-        f = NetCDFFile(self.trr_copy, "r")
+        f = netCDF4.Dataset(self.trr_copy, "r")
         try:
             self.assertFalse('gradients' in f.variables)
         finally:
@@ -141,9 +142,9 @@ class TestGromacsCobrotoxin(unittest.TestCase):
         # Load velocities that have been generated from the same trajectory with MDAnalysis + convert angstrom to nm
         expected = np.load(r'../../../Data/Trajectories/Gromacs/cobrotoxin_vels.npy') / 10
 
-        f = NetCDFFile(self.trr_copy, "r")
+        f = netCDF4.Dataset(self.trr_copy, "r")
         try:
-            velocities = f.variables['velocities'].getValue()
+            velocities = f.variables['velocities'][:]
         finally:
             f.close()
 
@@ -153,9 +154,9 @@ class TestGromacsCobrotoxin(unittest.TestCase):
         # Load forces that have been generated from the same trajectory with MDAnalysis + convert angstrom to nm
         expected = np.load(r'../../../Data/Trajectories/Gromacs/cobrotoxin_forces.npy') * 10
 
-        f = NetCDFFile(self.trr_copy, "r")
+        f = netCDF4.Dataset(self.trr_copy, "r")
         try:
-            gradients = f.variables['gradients'].getValue()
+            gradients = f.variables['gradients'][:]
         finally:
             f.close()
 

@@ -74,15 +74,15 @@ class SVGFormat(IFormat):
                 axis = numpy.arange(len(var))
                 xtitle = 'index'
                 
-            ytitle = "%s (%s)" % (var.name,format_unit_string(var.units))
+            ytitle = "%s (%s)" % (var.varname,format_unit_string(var.units))
                         
             pl = Poly(zip(axis,var),stroke='blue')
 
-            svgfilename = os.path.join(os.path.dirname(filename),'%s%s' % (var.name,cls.extensions[0]))
+            svgfilename = os.path.join(os.path.dirname(filename),'%s%s' % (var.varname,cls.extensions[0]))
             
             Frame(min(axis),max(axis),min(var),max(var),pl,xtitle=xtitle,ytitle=ytitle).SVG().save(svgfilename)
 
-            tf.add(svgfilename, arcname='%s%s' % (var.name,cls.extensions[0]))
+            tf.add(svgfilename, arcname='%s%s' % (var.varname,cls.extensions[0]))
             
             os.remove(svgfilename)
             
