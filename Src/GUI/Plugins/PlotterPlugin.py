@@ -14,6 +14,7 @@
 # **************************************************************************
 
 import collections
+import os
 
 import numpy
 
@@ -23,11 +24,10 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 import wx
 import wx.aui as wxaui
 
-from Scientific.IO.NetCDF import NetCDFFile
-
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.GUI.Plugins.ComponentPlugin import ComponentPlugin
+from MDANSE.GUI.Plugins.PlotterData import PLOTTER_DATA_TYPES
 from MDANSE.GUI.Plugins.Plotter1D import Plotter1D
 from MDANSE.GUI.Plugins.Plotter2D import Plotter2D
 from MDANSE.GUI.Plugins.Plotter3D import Plotter3D
@@ -425,12 +425,20 @@ class PlotterFrame(wx.Frame):
         for i in range(len(filelist)):
             basename = baselist[i]    
             filename = filelist[i]
+
+            ext = os.path.splitext(filename)[1]
+            for cls, exts in PLOTTER_DATA_TYPES.items():
+                if ext in exts:
+                    data_adapter = cls(filename,'r')
+                    break
+            else:
+                raise PlotterError('Unknown data')
             
-            f = NetCDFFile(filename,"r")
-            _vars = f.variables
+            _vars = data_adapter.variables
+
             data = collections.OrderedDict()
             for k in _vars:
-                dtype = _vars[k].getValue().dtype
+                dtype = _vars[k][:].dtype
                 if not numpy.issubdtype(dtype,numpy.number):
                     continue
                 data[k]={}
@@ -441,7 +449,7 @@ class PlotterFrame(wx.Frame):
                         data[k]['axis'] = []
                 else:
                     data[k]['axis'] = []
-                data[k]['data'] = _vars[k].getValue()
+                data[k]['data'] = _vars[k][:]
                 data[k]['units'] = getattr(_vars[k],"units","au")
             
             unique_name = self.unique(basename, self.plugin._dataDict)
