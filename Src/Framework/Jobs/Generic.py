@@ -384,5 +384,7 @@ class GenericConverter(Converter):
 
         # Close the output trajectory.
         self._trajectory.close()
-                
+
+        super(GenericConverter,self).finalize()
+
 REGISTRY['generic'] = GenericConverter
