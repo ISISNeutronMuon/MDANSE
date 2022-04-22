@@ -46,21 +46,21 @@ class Converter(IJob):
         if 'box_size' in f.variables:
             f.variables['box_size'].units = 'ps'
             f.variables['box_size'].axis = 'time'
-            f.variables['box_size'].name = 'time'
+            f.variables['box_size'].name = 'box_size'
 
         if 'configuration' in f.variables:
             f.variables['configuration'].units = 'nm'
             f.variables['configuration'].axis = 'time'
-            f.variables['configuration'].name = 'coordinates'
+            f.variables['configuration'].name = 'configuration'
 
         if 'velocities' in f.variables:
             f.variables['velocities'].units = 'nm/ps'
             f.variables['velocities'].axis = 'time'
-            f.variables['velocities'].name = 'coordinates'
+            f.variables['velocities'].name = 'velocities'
 
         if 'gradients' in f.variables:
             f.variables['gradients'].units = 'amu*nm/ps'
             f.variables['gradients'].axis = 'time'
-            f.variables['gradients'].name = 'coordinates'
+            f.variables['gradients'].name = 'gradients'
 
         f.close()
