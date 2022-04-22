@@ -13,10 +13,54 @@
 #
 # **************************************************************************
 
+import abc
+
+from Scientific.IO.NetCDF import NetCDFFile
+
 from MDANSE.Framework.Jobs.IJob import IJob
 
 class Converter(IJob):
+
+    __metaclass__ = abc.ABCMeta
     
     category = ('Converters',)
     
     ancestor = ['empty_data']
+
+    @abc.abstractmethod
+    def run_step(self,index):
+        pass
+
+    def finalize(self):
+
+        if not hasattr(self,'_trajectory'):
+            return
+
+        f = NetCDFFile(self._trajectory.filename,'a')
+
+        if 'time' in f.variables:
+            f.variables['time'].units = 'ps'
+            f.variables['time'].axis = 'time'
+            f.variables['time'].name = 'time'
+
+        if 'box_size' in f.variables:
+            f.variables['box_size'].units = 'ps'
+            f.variables['box_size'].axis = 'time'
+            f.variables['box_size'].name = 'time'
+
+        if 'configuration' in f.variables:
+            f.variables['configuration'].units = 'nm'
+            f.variables['configuration'].axis = 'time'
+            f.variables['configuration'].name = 'coordinates'
+
+        if 'velocities' in f.variables:
+            f.variables['velocities'].units = 'nm/ps'
+            f.variables['velocities'].axis = 'time'
+            f.variables['velocities'].name = 'coordinates'
+
+        if 'gradients' in f.variables:
+            f.variables['gradients'].units = 'amu*nm/ps'
+            f.variables['gradients'].axis = 'time'
+            f.variables['gradients'].name = 'coordinates'
+
+        f.close()

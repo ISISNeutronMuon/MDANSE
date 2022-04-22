@@ -309,4 +309,6 @@ class DiscoverConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
         
+        super(DiscoverConverter,self).finalize()
+
 REGISTRY['discover'] = DiscoverConverter
