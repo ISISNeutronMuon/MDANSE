@@ -38,6 +38,10 @@ class Converter(IJob):
 
         try:
             f = NetCDFFile(self._trajectory.filename,'a')
+        except:
+            return
+        
+        try:
             if 'time' in f.variables:
                 f.variables['time'].units = 'ps'
                 f.variables['time'].axis = 'time'
@@ -62,7 +66,6 @@ class Converter(IJob):
                 f.variables['gradients'].units = 'amu*nm/ps'
                 f.variables['gradients'].axis = 'time'
                 f.variables['gradients'].name = 'gradients'
-        except:
-            pass
-        else:
+        finally:
             f.close()
+
