@@ -231,6 +231,9 @@ class DataPanel(wx.Panel):
             
     def on_change_dimension(self,event):
 
+        if self.plot_type.GetValue() != '2D Slice':
+            return
+
         if self.selectedVar is None:
             return
         selectedDim = self._selectedDimension.GetValue()
@@ -263,8 +266,7 @@ class DataPanel(wx.Panel):
         
     def show_data(self):
         self.datalist.DeleteAllItems()
-        forbidden_vars = ['description', 'step', 'time', 'box_size']
-        variables = [key for key in self.dataproxy.keys() if key not in forbidden_vars]
+        variables = self.dataproxy.keys()
         for i, var in enumerate(sorted(variables)):
             self.datalist.InsertStringItem(i, var)
             #self.datalist.SetStringItem(i, 1,self.dataproxy[var]['units'])
