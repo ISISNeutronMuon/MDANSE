@@ -36,31 +36,33 @@ class Converter(IJob):
         if not hasattr(self,'_trajectory'):
             return
 
-        f = NetCDFFile(self._trajectory.filename,'a')
+        try:
+            f = NetCDFFile(self._trajectory.filename,'a')
+            if 'time' in f.variables:
+                f.variables['time'].units = 'ps'
+                f.variables['time'].axis = 'time'
+                f.variables['time'].name = 'time'
 
-        if 'time' in f.variables:
-            f.variables['time'].units = 'ps'
-            f.variables['time'].axis = 'time'
-            f.variables['time'].name = 'time'
+            if 'box_size' in f.variables:
+                f.variables['box_size'].units = 'ps'
+                f.variables['box_size'].axis = 'time'
+                f.variables['box_size'].name = 'box_size'
 
-        if 'box_size' in f.variables:
-            f.variables['box_size'].units = 'ps'
-            f.variables['box_size'].axis = 'time'
-            f.variables['box_size'].name = 'box_size'
+            if 'configuration' in f.variables:
+                f.variables['configuration'].units = 'nm'
+                f.variables['configuration'].axis = 'time'
+                f.variables['configuration'].name = 'configuration'
 
-        if 'configuration' in f.variables:
-            f.variables['configuration'].units = 'nm'
-            f.variables['configuration'].axis = 'time'
-            f.variables['configuration'].name = 'configuration'
+            if 'velocities' in f.variables:
+                f.variables['velocities'].units = 'nm/ps'
+                f.variables['velocities'].axis = 'time'
+                f.variables['velocities'].name = 'velocities'
 
-        if 'velocities' in f.variables:
-            f.variables['velocities'].units = 'nm/ps'
-            f.variables['velocities'].axis = 'time'
-            f.variables['velocities'].name = 'velocities'
-
-        if 'gradients' in f.variables:
-            f.variables['gradients'].units = 'amu*nm/ps'
-            f.variables['gradients'].axis = 'time'
-            f.variables['gradients'].name = 'gradients'
-
-        f.close()
+            if 'gradients' in f.variables:
+                f.variables['gradients'].units = 'amu*nm/ps'
+                f.variables['gradients'].axis = 'time'
+                f.variables['gradients'].name = 'gradients'
+        except:
+            pass
+        else:
+            f.close()
