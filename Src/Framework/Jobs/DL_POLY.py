@@ -19,16 +19,14 @@ import re
 
 import numpy
 
-from MMTK import Atom, AtomCluster
-from MMTK import Units
-from MMTK.ParticleProperties import Configuration, ParticleVector
-from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
-from MMTK.Universe import InfiniteUniverse, ParallelepipedicPeriodicUniverse
-
-from MDANSE import ELEMENTS, REGISTRY
+from MDANSE import REGISTRY
+from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.Converter import Converter
-       
+from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+
 _HISTORY_FORMAT = {}
 _HISTORY_FORMAT["2"] = {"rec1" : 81, "rec2" : 31, "reci" : 61, "recii" : 37, "reciii" : 37, "reciv" : 37, "reca" : 43, "recb" : 37, "recc" : 37, "recd" : 37}
 _HISTORY_FORMAT["3"] = {"rec1" : 73, "rec2" : 73, "reci" : 73, "recii" : 73, "reciii" : 73, "reciv" : 73, "reca" : 73, "recb" : 73, "recc" : 73, "recd" : 73}
@@ -115,7 +113,7 @@ class FieldFile(dict):
                         else:
                             element = sitnam
                             while 1:
-                                if ELEMENTS.has_element(element):
+                                if element in ATOMS_DATABASE:
                                     break
                                 element = element[:-1]
                                 if not element:
@@ -138,9 +136,9 @@ class FieldFile(dict):
 
             first = last + 1
         
-    def build_mmtk_contents(self, universe=None):
+    def build_mmtk_contents(self, chemicalSystem):
                 
-        self._mmtkObjects = []
+        chemicalEntities = []
             
         for moleculeName, nMolecules, atomicContents in self["molecules"]:
             
@@ -153,16 +151,16 @@ class FieldFile(dict):
                 # Loops over the atom of the molecule.
                 for i, (name, element) in enumerate(atomicContents):
                     # The atom is created.
-                    a = Atom(element, name="%s%s" % (name,i))
+                    a = Atom(symbol=element, name="%s%s" % (name,i))
                     temp.append(a)
 
                 if len(temp) > 1:
-                    temp = [AtomCluster(temp, name=moleculeName)]               
+                    temp = [AtomCluster(moleculeName, temp)]
                 
-                self._mmtkObjects.append(temp[0])
+                chemicalEntities.append(temp[0])
                     
-        if universe is not None:
-            [universe.addObject(obj) for obj in self._mmtkObjects]
+        for ce in chemicalEntities:
+            chemicalSystem.add_chemical_entity(ce)
             
 class HistoryFile(dict):
     
@@ -236,9 +234,9 @@ class HistoryFile(dict):
         
         cell = " ".join(data[1:]).split()
 
-        cell = numpy.array(cell,dtype=numpy.float64)
+        cell = numpy.array(cell,dtype=numpy.float64).T
         
-        cell = numpy.reshape(cell,(3,3))*Units.Ang
+        cell = numpy.reshape(cell,(3,3))*0.1
                 
         data = numpy.array(self['instance'].read(self._configSize).split())
         
@@ -254,14 +252,14 @@ class HistoryFile(dict):
 
         config = numpy.reshape(config,(self["natms"],3*(self["keytrj"]+1)))
                 
-        config[:,0:3] *= Units.Ang
+        config[:,0:3] *= 0.1
         
         if self["keytrj"] == 1:
-            config[:,3:6] *= Units.Ang/Units.ps
+            config[:,3:6] *= 0.1
             
         elif self["keytrj"] == 2:
-            config[:,3:6] *= Units.Ang/Units.ps
-            config[:,6:9] *= -Units.amu*Units.Ang/Units.ps**2
+            config[:,3:6] *= 0.1
+            config[:,6:9] *= -0.1
 
         return timeStep, cell, config
     
@@ -297,37 +295,17 @@ class DL_POLYConverter(Converter):
 
         # The number of steps of the analysis.
         self.numberOfSteps = self._historyFile['n_frames']
-                
-        if self._historyFile["imcon"] == 0:
-            self._universe = InfiniteUniverse()
 
-        else:
-            self._universe = ParallelepipedicPeriodicUniverse()
+        self._chemicalSystem = ChemicalSystem()
              
-        self._fieldFile.build_mmtk_contents(self._universe)
+        self._fieldFile.build_mmtk_contents(self._chemicalSystem)
+
+        self._trajectory = TrajectoryWriter(self.configuration['output_files']['files'][0],self._chemicalSystem)        
 
         self._velocities = None
         
         self._gradients = None
-                                
-        data_to_be_written = ['configuration','time']
-        if self._historyFile["keytrj"] == 1:
-            self._universe.initializeVelocitiesToTemperature(0.)
-            self._velocities = ParticleVector(self._universe)
-            data_to_be_written.append('velocities')
-            
-        elif self._historyFile["keytrj"] == 2:
-            self._universe.initializeVelocitiesToTemperature(0.)
-            self._velocities = ParticleVector(self._universe)
-            self._gradients = ParticleVector(self._universe)
-            data_to_be_written.extend(['velocities','gradients'])
-                                    
-        # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w', comment=self._fieldFile["title"])
-
-        # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
-        
+                                        
     def run_step(self, index):
         """Runs a single step of the job.
         
@@ -340,26 +318,19 @@ class DL_POLYConverter(Converter):
         # The x, y and z values of the current frame.
         time, cell, config = self._historyFile.read_step(index)
         
-        # If the universe is periodic set its shape with the current dimensions of the unit cell.
-        if self._universe.is_periodic:
-            self._universe.setShape(cell)
-                    
-        self._universe.setConfiguration(Configuration(self._universe, config[:,0:3]))
-                   
-        self._universe.foldCoordinatesIntoBox()
+        conf = RealConfiguration(self._chemicalSystem,config[:,0:3],cell)
         
-        data = {"time" : time}
-        
+        conf.fold_coordinates()
+
+        self._chemicalSystem.configuration = conf
+
         if self._velocities is not None:
-            self._velocities.array = config[:,3:6]
-            data["velocities"] = self._velocities
+            conf["velocities"] = config[:,3:6]
 
         if self._gradients is not None:
-            self._gradients.array = config[:,6:9]
-            data["gradients"] = self._gradients
+            config["gradients"] = config[:,6:9]
 
-        # Store a snapshot of the current configuration in the output trajectory.
-        self._snapshot(data=data)
+        self._trajectory.dump_configuration(time)
                                                                         
         return index, None
         
