@@ -28,8 +28,8 @@ class _Configuration:
             self._inverse_unit_cell = np.linalg.inv(self._unit_cell)
 
         else:
-
             self._unit_cell = None
+            self._inverse_unit_cell = None
 
     def __getitem__(self, name):
 
@@ -82,7 +82,12 @@ class BoxConfiguration(_Configuration):
         super(BoxConfiguration,self).__init__(chemical_system,coordinates,unit_cell)
 
     def fold_coordinates(self):
-        pass
+
+        frac, _ = np.modf(self._variables['coordinates'])
+        frac = np.where(frac < 0.0, frac + 1.0, frac)
+        frac = np.where(frac > 0.5, frac - 1.0, frac)
+
+        self._variables['coordinates'] = frac
 
     def to_box_coordinates(self):
 
@@ -96,6 +101,9 @@ class RealConfiguration(_Configuration):
 
     def fold_coordinates(self):
 
+        if self._unit_cell is None:
+            return
+
         box_coordinates = self.to_box_coordinates()
 
         frac, _ = np.modf(box_coordinates)
@@ -105,9 +113,11 @@ class RealConfiguration(_Configuration):
         self._variables['coordinates'] = np.matmul(self._unit_cell,frac.T).T
 
     def to_box_coordinates(self):
-        
-        # print(np.matmul(self._unit_cell,self._variables['coordinates'][0,:].T).T)
-        return np.matmul(self._inverse_unit_cell,self._variables['coordinates'].T).T
+
+        if self._inverse_unit_cell is None:
+            return self._variables['coordinates']
+        else:
+            return np.matmul(self._inverse_unit_cell,self._variables['coordinates'].T).T
 
     def to_real_coordinates(self):
 
@@ -117,7 +127,7 @@ if __name__ == "__main__":
 
     np.random.seed(1)
 
-    from ChemicalEntity import Atom, ChemicalSystem
+    from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 
     n_atoms = 5
     cs = ChemicalSystem()
