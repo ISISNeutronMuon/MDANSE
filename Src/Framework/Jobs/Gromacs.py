@@ -178,5 +178,6 @@ class GromacsConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
+        super(GromacsConverter,self).finalize()
 
 REGISTRY['gromacs'] = GromacsConverter
