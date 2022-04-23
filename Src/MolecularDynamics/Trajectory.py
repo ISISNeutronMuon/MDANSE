@@ -14,7 +14,7 @@
 
 import operator
 
-import numpy
+import numpy as np
 
 import h5py
 
@@ -23,9 +23,9 @@ from MMTK.Collections import Collection
 from MMTK.Trajectory import Trajectory
 from MMTK.ChemicalObjects import isChemicalObject
 
-from MDANSE import ELEMENTS
 from MDANSE.Core.Error import Error
 from MDANSE.Extensions import fast_calculation
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 
 class MolecularDynamicsError(Error):
@@ -70,9 +70,9 @@ def build_connectivity(universe ,tolerance=0.05):
         nAtoms = len(atoms)
         indexes = [at.index for at in atoms]
         coords = conf.array[indexes,:]
-        covRadii = numpy.zeros((nAtoms,), dtype=numpy.float64)
+        covRadii = np.zeros((nAtoms,), dtype=np.float64)
         for i,at in enumerate(atoms):
-            covRadii[i] = ELEMENTS[at.symbol.capitalize(),'covalent_radius']
+            covRadii[i] = ATOMS_DATABASE[at.symbol.capitalize()]['covalent_radius']
         
         bonds = []
         fast_calculation.cpt_cluster_connectivity(coords,covRadii,tolerance,bonds)
@@ -149,7 +149,7 @@ def partition_universe(universe,groups):
     
     return coll
 
-def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable="configuration", weights=None, dtype=numpy.float64):
+def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable="configuration", weights=None, dtype=np.float64):
     
     if not isinstance(atoms,(list,tuple)):
         atoms = [atoms]
@@ -159,7 +159,7 @@ def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable=
         
     nFrames = len(range(first, last, step))
     
-    serie = numpy.zeros((nFrames,3), dtype=dtype)
+    serie = np.zeros((nFrames,3), dtype=dtype)
     
     if weights is None or len(atoms) == 1:
         weights = [1.0]*len(atoms)
