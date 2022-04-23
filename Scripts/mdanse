@@ -25,7 +25,7 @@ import textwrap
 
 from MDANSE import LOGGER
 from MDANSE.Core.Error import Error
-from MDANSE import ELEMENTS, PLATFORM, REGISTRY
+from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Jobs.JobStatus import JobState
 
 class IndentedHelp(optparse.IndentedHelpFormatter):
@@ -143,9 +143,9 @@ class CommandLineParser(optparse.OptionParser):
             if not isinstance(info,JobState):
                 raise CommandLineParserError("Invalid contents for job %r." % basename)
             
-            print "Information about %s job:" % basename
+            print("Information about %s job:" % basename)
             for k,v in info.iteritems():            
-                print "%-20s [%s]" % (k,v)
+                print("%-20s [%s]" % (k,v))
 
     def display_element_info(self, option, opt_str, value, parser):        
     
@@ -153,9 +153,11 @@ class CommandLineParser(optparse.OptionParser):
             raise CommandLineParserError("Invalid number of arguments for %r option" % opt_str)
         
         element = parser.rargs[0]
-                
+
+        from MDANSE.Chemistry import ATOMS_DATABASE
+
         try:
-            print ELEMENTS.info(element)
+            print(ATOMS_DATABASE.info(element))
         except ValueError:
             raise CommandLineParserError("The entry %r is not registered in the database" % element)
         
