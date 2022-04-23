@@ -51,7 +51,6 @@ class FieldFile(dict):
         
         self.parse()        
         
-        
     def parse(self):
 
         # The FIELD file is opened for reading, its contents stored into |lines| and then closed.
@@ -168,16 +167,18 @@ class HistoryFile(dict):
 
         self['instance'] = open(filename, 'rb')
 
-        testLine = len(self['instance'].readline())
+        testLine = self['instance'].readline()
+
+        lenTestLine = len(testLine)
         
-        if (testLine not in [81,82]) and (testLine not in [73,74]):
+        if lenTestLine not in [73,74,81,82]:
             raise HistoryFileError('Invalid DLPOLY history file')
 
         self['instance'].seek(0,0)
         
         self["version"] = version
         
-        offset = testLine - _HISTORY_FORMAT[self["version"]]["rec1"]
+        offset = lenTestLine - _HISTORY_FORMAT[self["version"]]["rec1"]
 
         self._headerSize = _HISTORY_FORMAT[self["version"]]["rec1"] + _HISTORY_FORMAT[self["version"]]["rec2"] + 2*offset
 
@@ -193,8 +194,11 @@ class HistoryFile(dict):
         if self["imcon"] not in range(4):
             raise HistoryFileError("Invalid value for periodic boundary conditions key.")
 
-        self._configHeaderSize = _HISTORY_FORMAT[self["version"]]["reci"] + 3*_HISTORY_FORMAT[self["version"]]["recii"] + 4*offset
-        
+        if self["imcon"] == 0:
+            self._configHeaderSize = _HISTORY_FORMAT[self["version"]]["reci"]
+        else:
+            self._configHeaderSize = _HISTORY_FORMAT[self["version"]]["reci"] + 3*_HISTORY_FORMAT[self["version"]]["recii"] + 4*offset
+
         self._configSize = (_HISTORY_FORMAT[self["version"]]["reca"] + offset + (self["keytrj"]+1)*(_HISTORY_FORMAT[self["version"]]["recb"]+offset))*self["natms"]
 
         self._frameSize = self._configHeaderSize + self._configSize
@@ -227,19 +231,19 @@ class HistoryFile(dict):
         data = self['instance'].read(self._configHeaderSize).splitlines()
         
         line = data[0].split()
-        
         currentStep = int(line[1])
         
         timeStep = (currentStep - self._firstStep)*self._timeStep
-        
-        cell = " ".join(data[1:]).split()
-
-        cell = numpy.array(cell,dtype=numpy.float64).T
-        
-        cell = numpy.reshape(cell,(3,3))*0.1
+        if self['imcon'] > 0:        
+            cell = " ".join(data[1:]).split()
+            cell = numpy.array(cell,dtype=numpy.float64)
+            cell = numpy.reshape(cell,(3,3)).T            
+            cell *= 0.1
+        else:
+            cell = None
                 
         data = numpy.array(self['instance'].read(self._configSize).split())
-        
+
         mask = numpy.ones((len(data),), dtype=numpy.bool)
         mask[0::self._maskStep] = False
         mask[1::self._maskStep] = False
@@ -318,7 +322,6 @@ class DL_POLYConverter(Converter):
         # The x, y and z values of the current frame.
         time, cell, config = self._historyFile.read_step(index)
         
-        print(cell)
         conf = RealConfiguration(self._chemicalSystem,config[:,0:3],cell)
         
         conf.fold_coordinates()
