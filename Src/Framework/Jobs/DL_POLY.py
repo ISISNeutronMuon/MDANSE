@@ -318,6 +318,7 @@ class DL_POLYConverter(Converter):
         # The x, y and z values of the current frame.
         time, cell, config = self._historyFile.read_step(index)
         
+        print(cell)
         conf = RealConfiguration(self._chemicalSystem,config[:,0:3],cell)
         
         conf.fold_coordinates()
