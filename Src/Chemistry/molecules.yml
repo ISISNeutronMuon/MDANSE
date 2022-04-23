@@ -1,0 +1,18 @@
+WAT:
+  alternatives: [H2O,water,TIP3]
+  atoms:
+    OW:
+      alternatives: [O]
+      bonds: [HW1,HW2]
+      groups: []
+      symbol: O
+    HW1:
+      alternatives: [H1]
+      bonds: [OW]
+      groups: []
+      symbol: H
+    HW2:
+      alternatives: [H2]
+      bonds: [OW]
+      groups: []
+      symbol: H
