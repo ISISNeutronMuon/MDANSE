@@ -7,7 +7,31 @@ import netCDF4
 
 from MDANSE.Core.Decorators import compatibleabstractproperty
 
-class IPlotterData:
+class _IPlotterVariable:
+
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, variable):
+
+        self._variable = variable
+
+    def __getattr__(self,name):
+        return getattr(self._variable,name)
+
+    def __hasattr__(self,name):
+
+        return hasattr(self._variable,name)
+
+    @abc.abstractmethod
+    def get_array(self):
+        pass
+
+class NetCDFPlotterVariable(_IPlotterVariable):
+
+    def get_array(self):
+        return self._variable[:]
+
+class _IPlotterData:
 
     __metaclass__ = abc.ABCMeta
 
@@ -22,7 +46,7 @@ class IPlotterData:
     def __del__(self):        
         self.close()
 
-class NetCDFPlotterData(IPlotterData):
+class NetCDFPlotterData(_IPlotterData):
 
     def __init__(self, *args, **kwargs):
 
@@ -41,12 +65,14 @@ class NetCDFPlotterData(IPlotterData):
     @staticmethod
     def find_numeric_variables(var_dict, group):
         for var_key, var in group.variables.items():
-            var_name = '{}/{}'.format(group.path,var_key)
+            var_name = '{}{}'.format(group.path,var_key)
             if not numpy.issubdtype(var.dtype,numpy.number):
                 continue
-            var_dict[var_name] = var
+            if var.ndim > 3:
+                continue
+            var_dict[var_name] = NetCDFPlotterVariable(var)
 
         for _, sub_group in group.groups.items():
             NetCDFPlotterData.find_numeric_variables(var_dict, sub_group)
 
-PLOTTER_DATA_TYPES = {NetCDFPlotterData:('.nc','.cdf')}
+PLOTTER_DATA_TYPES = {NetCDFPlotterData:('.nc','.cdf','.netcdf')}

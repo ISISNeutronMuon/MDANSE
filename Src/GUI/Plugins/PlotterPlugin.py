@@ -27,7 +27,7 @@ import wx.aui as wxaui
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.GUI.Plugins.ComponentPlugin import ComponentPlugin
-from MDANSE.GUI.Plugins.PlotterData import PLOTTER_DATA_TYPES
+from MDANSE.GUI.Plugins.PlotterData import NetCDFPlotterData, PLOTTER_DATA_TYPES
 from MDANSE.GUI.Plugins.Plotter1D import Plotter1D
 from MDANSE.GUI.Plugins.Plotter2D import Plotter2D
 from MDANSE.GUI.Plugins.Plotter3D import Plotter3D
@@ -425,20 +425,20 @@ class PlotterFrame(wx.Frame):
         for i in range(len(filelist)):
             basename = baselist[i]    
             filename = filelist[i]
-
+            
             ext = os.path.splitext(filename)[1]
             for cls, exts in PLOTTER_DATA_TYPES.items():
                 if ext in exts:
-                    data_adapter = cls(filename,'r')
+                    f = cls(filename,"r")
                     break
             else:
-                raise PlotterError('Unknown data')
-            
-            _vars = data_adapter.variables
+                continue
 
+            _vars = f.variables
             data = collections.OrderedDict()
             for k in _vars:
-                dtype = _vars[k][:].dtype
+                arr = _vars[k].get_array()
+                dtype = arr.dtype
                 if not numpy.issubdtype(dtype,numpy.number):
                     continue
                 data[k]={}
@@ -449,7 +449,7 @@ class PlotterFrame(wx.Frame):
                         data[k]['axis'] = []
                 else:
                     data[k]['axis'] = []
-                data[k]['data'] = _vars[k][:]
+                data[k]['data'] = arr
                 data[k]['units'] = getattr(_vars[k],"units","au")
             
             unique_name = self.unique(basename, self.plugin._dataDict)
