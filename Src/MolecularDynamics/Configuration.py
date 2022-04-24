@@ -22,8 +22,6 @@ class _Configuration:
 
             unit_cell = np.array(unit_cell)
 
-            unit_cell = unit_cell.T
-
             if unit_cell.shape != (3,3):
                 raise ValueError('Invalid unit cell dimensions')
 

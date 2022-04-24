@@ -239,6 +239,7 @@ class HistoryFile(dict):
             cell = numpy.array(cell,dtype=numpy.float64)
             cell = numpy.reshape(cell,(3,3)).T            
             cell *= 0.1
+            cell = cell.T
         else:
             cell = None
                 

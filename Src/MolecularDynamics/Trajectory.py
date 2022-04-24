@@ -220,7 +220,7 @@ class Trajectory:
 
         configuration = {}
         for k, v in grp.items():
-            configuration[k] = v[item,:,:]
+            configuration[k] = v[item]
 
         return configuration
 
