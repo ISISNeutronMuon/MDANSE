@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/Selectors/Methyl.py
-# @brief     Implements module/class/test Methyl
+# @file      Src/Framework/Selectors/Amine.py
+# @brief     Implements module/class/test Amine
 #
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -15,8 +15,11 @@
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
-
-class Methyl(ISelector):
+                    
+class Ammonium(ISelector):
+    '''
+    Returns the amine atoms.
+    '''
 
     section = "chemical groups"
 
@@ -26,31 +29,25 @@ class Methyl(ISelector):
 
         for ce in self._chemicalSystem.chemical_entities:
                                         
-            carbons = [at for at in ce.atom_list() if at.element.strip().lower() == 'carbon']
+            nitrogens = [at for at in ce.atom_list() if at.element.strip().lower() == 'nitrogen']
             
-            for car in carbons:
-                neighbours = car.bonds
+            for nitro in nitrogens:
+                neighbours = nitro.bonds
                 hydrogens = [neigh.full_name().strip() for neigh in neighbours if neigh.element.strip().lower() == 'hydrogen']
                 if len(hydrogens) >= 3:
-                    self._choices.extend([car] + sorted(hydrogens))
+                    self._choices.extend([nitro.full_name().strip()] + sorted(hydrogens))
 
 
     def select(self, names):
-        '''
-        Returns the methyl atoms.
-
-        @param universe: the universe
-        @type universe: MMTK.universe
-        '''
 
         sel = set()
 
         if '*' in names:
             names = self._choices[1:]
 
-        vals = set([v for v in names])
+        vals = set(names)
         sel.update([at for at in self._chemicalSystem.atom_list() if at.full_name().strip() in vals])
 
         return sel
 
-REGISTRY["methyl"] = Methyl
+REGISTRY["ammonium"] = Ammonium

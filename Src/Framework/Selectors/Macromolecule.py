@@ -13,10 +13,8 @@
 #
 # **************************************************************************
 
-from MMTK.NucleicAcids import NucleotideChain
-from MMTK.Proteins import PeptideChain, Protein
-
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import NucleotideChain, PeptideChain, Protein
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class Macromolecule(ISelector):
@@ -44,15 +42,15 @@ class Macromolecule(ISelector):
         sel = set()
 
         if '*' in macromolecules:
-            for obj in self._universe.objectList():
-                if isinstance(obj, (NucleotideChain,PeptideChain,Protein)):
-                    sel.update([at for at in obj.atomList()])
+            for ce in self._chemicalSystem.chemical_entities:
+                if isinstance(ce, (NucleotideChain,PeptideChain,Protein)):
+                    sel.update([at for at in ce.atom_list()])
         
         else:
-            for obj in self._universe.objectList():
-                m = Macromolecule.lookup.get(obj.__class__,None)
+            for ce in self._chemicalSystem.chemical_entities:
+                m = Macromolecule.lookup.get(ce.__class__,None)
                 if m in macromolecules:
-                    sel.update([at for at in obj.atomList()])
+                    sel.update([at for at in ce.atom_list()])
 
         return sel
 

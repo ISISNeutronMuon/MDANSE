@@ -24,9 +24,9 @@ class ISelector(object):
     
     _registry = "selector"
         
-    def __init__(self,trajectory):
+    def __init__(self,chemicalSystem):
         
-        self._universe = trajectory.universe
+        self._chemicalSystem = chemicalSystem
                 
         self._choices = ["*"]
 

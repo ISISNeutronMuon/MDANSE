@@ -21,7 +21,7 @@ class All(ISelector):
     section = "miscellaneous"
                     
     def select(self, *args):
-        return set(self._universe.atomList())
+        return set(self._chemicalSystem.atom_list())
 
 REGISTRY["all"] = All
                     

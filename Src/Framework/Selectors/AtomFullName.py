@@ -20,11 +20,11 @@ class AtomFullName(ISelector):
 
     section = "atoms"
 
-    def __init__(self, trajectory):
+    def __init__(self, chemicalSystem):
         
-        ISelector.__init__(self,trajectory)
+        ISelector.__init__(self,chemicalSystem)
                 
-        self._choices.extend(sorted(set([at.fullName().strip().lower() for at in self._universe.atomList()])))
+        self._choices.extend(sorted(set([at.full_name().strip() for at in self._chemicalSystem.atom_list()])))
 
     def select(self, names):
         '''
@@ -41,12 +41,12 @@ class AtomFullName(ISelector):
 
         if '*' in names:
 
-            sel.update([at for at in self._universe.atomList()])
+            sel.update([at for at in self._chemicalSystem.atom_list()])
             
         else:
             
-            vals = set([v.lower() for v in names])
-            sel.update([at for at in self._universe.atomList() if at.fullName().strip().lower() in vals])
+            vals = set([v for v in names])
+            sel.update([at for at in self._chemicalSystem.atom_list() if at.full_name().strip() in vals])
         
         return sel
 

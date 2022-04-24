@@ -20,7 +20,22 @@ class Hydroxyl(ISelector):
 
     section = "chemical groups"
 
-    def select(self, *args):
+    def __init__(self, chemicalSystem):
+        
+        ISelector.__init__(self,chemicalSystem)
+
+        for ce in self._chemicalSystem.chemical_entities:
+                                        
+            oxygens = [at for at in ce.atom_list() if at.element.strip().lower() == 'oxygen']
+            
+            for oxy in oxygens:
+                neighbours = oxy.bonds
+                hydrogens = [neigh.full_name().strip() for neigh in neighbours if neigh.element.strip().lower() == 'hydrogen']
+                if len(hydrogens) >= 1:
+                    self._choices.extend([oxy.full_name().strip()] + sorted(hydrogens))
+
+
+    def select(self, names):
         '''
          Returns the hydroxyl atoms.
 
@@ -30,13 +45,11 @@ class Hydroxyl(ISelector):
         
         sel = set()
 
-        for obj in self._universe.objectList():            
-            oxygens = [at for at in obj.atomList() if at.type.name.strip().lower() == 'oxygen']
-            for oxy in oxygens:
-                neighbours = oxy.bondedTo()
-                hydrogens = [neigh for neigh in neighbours if neigh.type.name.strip().lower() == 'hydrogen']
-                if len(hydrogens) == 1:
-                    sel.update([oxy] + hydrogens)
+        if '*' in names:
+            names = self._choices[1:]
+            
+        vals = set(names)
+        sel.update([at for at in self._chemicalSystem.atom_list() if at.full_name().strip() in vals])
   
         return sel
     

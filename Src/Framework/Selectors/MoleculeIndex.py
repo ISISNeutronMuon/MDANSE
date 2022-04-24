@@ -20,11 +20,11 @@ class MoleculeIndex(ISelector):
 
     section = "molecules"
 
-    def __init__(self, trajectory):
+    def __init__(self, chemicalSystem):
 
-        ISelector.__init__(self,trajectory)
+        ISelector.__init__(self,chemicalSystem)
                 
-        self._choices.extend(range(len(self._universe.objectList())))    
+        self._choices.extend(range(len(self._chemicalSystem.chemical_entities)))    
 
     def select(self, values):
         '''
@@ -41,15 +41,15 @@ class MoleculeIndex(ISelector):
 
         if '*' in values:
 
-            sel.update([at for at in self._universe.atomList()])
+            sel.update([at for at in self._chemicalSystem.atom_list()])
 
         else:
 
             vals = set([int(v) for v in values])
 
-            objList = self._universe.objectList()
+            ceList = self._chemicalSystem.chemical_entities
         
-            sel.update([at for v in vals for at in objList[v].atomList()])
+            sel.update([at for v in vals for at in ceList[v].atom_list()])
         
         return sel
 

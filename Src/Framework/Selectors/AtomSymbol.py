@@ -20,13 +20,13 @@ class AtomSymbol(ISelector):
 
     section = "atoms"
 
-    def __init__(self, trajectory):
+    def __init__(self, chemicalSystem):
 
-        ISelector.__init__(self,trajectory)
+        ISelector.__init__(self,chemicalSystem)
                 
-        self._choices.extend(sorted(set([at.symbol.strip().lower() for at in self._universe.atomList()])))
+        self._choices.extend(sorted(set([at.symbol.strip() for at in self._chemicalSystem.atom_list()])))
 
-    def select(self, types):
+    def select(self, symbols):
         '''
         Returns the atoms that matches a given list of atom types.
         
@@ -39,14 +39,14 @@ class AtomSymbol(ISelector):
         
         sel = set()
 
-        if '*' in types:
+        if '*' in symbols:
 
-            sel.update([at for at in self._universe.atomList()])
+            sel.update([at for at in self._chemicalSystem.atom_list()])
 
         else:
 
-            vals = set([v.lower() for v in types])
-            sel.update([at for at in self._universe.atomList() if at.symbol.strip().lower() in vals])
+            vals = set([v for v in symbols])
+            sel.update([at for at in self._chemicalSystem.atom_list() if at.symbol.strip() in vals])
         
         return sel
 

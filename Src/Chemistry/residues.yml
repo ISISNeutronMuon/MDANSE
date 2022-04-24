@@ -4,17 +4,17 @@ NT1:
     HT1:
       alternatives: [1HT, H1, 1H]
       bonds: [+NR]
-      groups: []
+      groups: ['backbone']
       symbol: H
     HT2:
       alternatives: [2HT, H2, 2H]
       bonds: [+NR]
-      groups: []
+      groups: ['backbone']
       symbol: H
     HT3:
       alternatives: [3HT, H3, 3H]
       bonds: [+NR]
-      groups: []
+      groups: ['backbone']
       symbol: H
   is_c_terminus: false
   is_n_terminus: true
@@ -24,7 +24,7 @@ CT1:
     OXT:
       alternatives: [OT]
       bonds: [-CR]
-      groups: []
+      groups: ['backbone']
       symbol: O
   is_c_terminus: true
   is_n_terminus: false
@@ -43,7 +43,7 @@ ALA:
       symbol: C
     CB:
       alternatives: []
-      bonds: []
+      bonds: [CA, HB1, HB2, HB3]
       groups: [sidechain]
       symbol: C
     H:
@@ -1184,7 +1184,7 @@ LYS:
     H:
       alternatives: []
       bonds: [N]
-      groups: [sidechain]
+      groups: [backbone]
       symbol: H
     HA:
       alternatives: []
