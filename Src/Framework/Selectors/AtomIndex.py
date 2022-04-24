@@ -20,11 +20,11 @@ class AtomIndex(ISelector):
 
     section = "atoms"
 
-    def __init__(self, trajectory):
+    def __init__(self, chemicalSystem):
 
-        ISelector.__init__(self,trajectory)
+        ISelector.__init__(self,chemicalSystem)
                 
-        self._choices.extend(sorted([at.index for at in self._universe.atomList()]))
+        self._choices.extend(sorted([at.index for at in self._chemicalSystem.atom_list()]))
 
     def select(self, indexes):
         '''
@@ -41,11 +41,11 @@ class AtomIndex(ISelector):
         
         if '*' in indexes:
 
-            sel.update([at for at in self._universe.atomList()])
+            sel.update([at for at in self._chemicalSystem.atom_list()])
         
         else:
             vals = set([int(v) for v in indexes])
-            sel.update([at for at in self._universe.atomList() if at.index in vals])
+            sel.update([at for at in self._chemicalSystem.atom_list() if at.index in vals])
             
         return sel        
 

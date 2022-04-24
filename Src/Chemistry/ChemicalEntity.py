@@ -99,6 +99,9 @@ class Atom(_ChemicalEntity):
 
         self.symbol = kwargs.get('symbol','H')
 
+        if self.symbol not in ATOMS_DATABASE:
+            raise UnknownAtomError('Te atom {} is unknown'.format(self.symbol))
+
         self.name = kwargs.get('name',self.symbol)
 
         self.bonds = kwargs.get('bonds',[])
@@ -107,9 +110,16 @@ class Atom(_ChemicalEntity):
 
         self._index = None
 
+        for propName,propValue in ATOMS_DATABASE[self.symbol].items():
+            setattr(self,propName,propValue)
+
     def __getitem__(self,item):
 
         return getattr(self,item)
+
+    def __str__(self):
+        
+        return self.full_name()
 
     def atom_list(self):
         return [self]
@@ -736,6 +746,14 @@ class PeptideChain(_ChemicalEntity):
             atoms.extend(res.atom_list())
         return atoms
 
+    def backbone(self):
+
+        atoms = []
+        for at in self.atom_list():
+            if 'backbone' in at.groups:
+                atoms.append(at)
+        return atoms
+
     def number_of_atoms(self):
 
         number_of_atoms = 0
@@ -746,6 +764,10 @@ class PeptideChain(_ChemicalEntity):
     @property
     def name(self):
         return self._name
+
+    @property
+    def peptide_chains(self):
+        return [self]
 
     @property
     def residues(self):
@@ -792,6 +814,14 @@ class Protein(_ChemicalEntity):
 
         return atom_list
 
+    def backbone(self):
+
+        atoms = []
+        for at in self.atom_list():
+            if 'backbone' in at.groups:
+                atoms.append(at)
+        return atoms
+
     def number_of_atoms(self):
 
         number_of_atoms = 0
@@ -802,6 +832,10 @@ class Protein(_ChemicalEntity):
     def set_peptide_chains(self, peptide_chains):
 
         self._peptide_chains = peptide_chains
+
+    @property
+    def peptide_chains(self):
+        return self._peptide_chains
 
     @property
     def name(self):

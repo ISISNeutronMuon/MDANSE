@@ -20,11 +20,11 @@ class MoleculeName(ISelector):
 
     section = "molecules"
 
-    def __init__(self, trajectory):
+    def __init__(self, chemicalSystem):
 
-        ISelector.__init__(self,trajectory)
+        ISelector.__init__(self,chemicalSystem)
         
-        self._choices.extend(sorted(set([obj.name for obj in self._universe.objectList()])))
+        self._choices.extend(sorted(set([ce.name.strip() for ce in self._chemicalSystem.chemical_entities])))
 
     def select(self, names):
         '''
@@ -40,19 +40,13 @@ class MoleculeName(ISelector):
         sel = set()
         
         if '*' in names:
-
-            sel.update([at for at in self._universe.atomList()])
+            sel.update([at for at in self._chemicalSystem.atom_list()])
 
         else:
-
-            vals = set([v.lower() for v in names])
-
-            for obj in self._universe.objectList():
-                try:
-                    if obj.name.strip().lower() in vals:
-                        sel.update([at for at in obj.atomList()])
-                except AttributeError:
-                    pass
+            vals = set(names)
+            for ce in self._chemicalSystem.chemical_entities:
+                if ce.name.strip() in vals:
+                    sel.update([at for at in ce.atom_list()])
                 
         return sel
     

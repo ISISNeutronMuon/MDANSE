@@ -13,22 +13,21 @@
 #
 # **************************************************************************
 
-from MMTK.Proteins import PeptideChain, Protein
-
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class ChainName(ISelector):
 
     section = "proteins"
 
-    def __init__(self, trajectory):
+    def __init__(self, chemicalSystem):
         
-        ISelector.__init__(self,trajectory)
+        ISelector.__init__(self,chemicalSystem)
                 
-        for obj in self._universe.objectList():
-            if isinstance(obj, (PeptideChain, Protein)):
-                self._choices.extend([c.name for c in obj])
+        for ce in self._chemicalSystem.chemical_entities:
+            if isinstance(ce, (PeptideChain, Protein)):
+                self._choices.extend([c.name for c in ce.peptide_chains])
         
 
     def select(self, names):
@@ -45,22 +44,23 @@ class ChainName(ISelector):
         sel = set()
 
         if '*' in names:
-            for obj in self._universe.objectList():
+            for ce in self._chemicalSystem.chemical_entities:
                 try:
-                    sel.update([at for at in obj.atomList()])
+                    for pc in ce.peptide_chains:
+                        sel.update([at for at in pc.atom_list()])
                 except AttributeError:
                     pass
         
         else:
             
-            vals = set([v.lower() for v in names])
+            vals = set([v for v in names])
                 
-            for obj in self._universe.objectList():
+            for ce in self._chemicalSystem.chemical_entities:
                 try:
-                    for chain in obj:
-                        chainName = chain.name.strip().lower()
+                    for chain in ce.peptide_chains:
+                        chainName = chain.name.strip()
                         if chainName in vals:
-                            sel.update([at for at in chain.atomList()])
+                            sel.update([at for at in chain.atom_list()])
                 except (AttributeError,TypeError):
                     continue
                 

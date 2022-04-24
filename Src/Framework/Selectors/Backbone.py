@@ -32,9 +32,9 @@ class Backbone(ISelector):
         
         sel = set()
 
-        for obj in self._universe.objectList():
+        for obj in self._chemicalSystem.chemical_entities:
             try:
-                sel.update([at for at in obj.backbone().atomList()])
+                sel.update([at for at in obj.backbone()])
             except AttributeError:
                 pass
             
