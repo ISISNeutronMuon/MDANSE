@@ -79,7 +79,7 @@ class TestConfiguration(unittest.TestCase):
         conf = RealConfiguration(self._chemicalSystem,coordinates)
         self.assertTrue(np.allclose(conf.to_box_coordinates(),coordinates,rtol=1.0e-6))
 
-        unitCell = np.array([[1.0,2.0,1.0],[2.0,-1.0,1.0],[3.0,1.0,1.0]],dtype=np.float)
+        unitCell = np.array([[1.0,2.0,1.0],[2.0,-1.0,1.0],[3.0,1.0,1.0]],dtype=np.float).T
         coordinates = np.array(([1,2,3],[4,5,6],[7,8,9],[10,11,12]),dtype=np.float)
         conf = RealConfiguration(self._chemicalSystem,coordinates,unitCell)
 
@@ -110,7 +110,7 @@ class TestConfiguration(unittest.TestCase):
         conf = BoxConfiguration(self._chemicalSystem,coordinates)
         self.assertTrue(np.allclose(conf.to_box_coordinates(),coordinates,rtol=1.0e-6))
 
-        unitCell = np.array([[1.0,2.0,1.0],[2.0,-1.0,1.0],[3.0,1.0,1.0]],dtype=np.float)
+        unitCell = np.array([[1.0,2.0,1.0],[2.0,-1.0,1.0],[3.0,1.0,1.0]],dtype=np.float).T
         coordinates = np.array(([1,2,3],[4,5,6],[7,8,9],[10,11,12]),dtype=np.float)
         conf = BoxConfiguration(self._chemicalSystem,coordinates,unitCell)
 
