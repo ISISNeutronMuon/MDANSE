@@ -465,7 +465,7 @@ class PDBFile:
         Close the file. This method B{must} be called for write mode
         because otherwise the file will be incomplete.
         """
-        if self.open:
+        if getattr(self,'open',False):
             if self.output:
                 self.file.write('END\n')
             self.file.close()
