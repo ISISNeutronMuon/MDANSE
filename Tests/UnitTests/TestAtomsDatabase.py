@@ -47,78 +47,64 @@ Created on May 29, 2015
 
 import unittest
 
-from MDANSE import ELEMENTS
-from MDANSE.Data.ElementsDatabase import ElementsDatabaseError
+from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Chemistry.Databases import AtomsDatabaseError
 
-class TestElementsDatabase(unittest.TestCase):
+class TestAtomsDatabase(unittest.TestCase):
     '''
-    Unittest for the configurators used to setup an analysis in MDANSE
     '''
     
-    def setUp(self):
-        
-        self._types = {float:1.0,int:1,str:"toto"}
-    
-
     def test___contains__(self):
         
-        self.assertFalse("fhsdjfsd" in ELEMENTS)
-        self.assertTrue("h" in ELEMENTS)
-        self.assertTrue("H" in ELEMENTS)
+        self.assertFalse("fhsdjfsd" in ATOMS_DATABASE)
+        self.assertTrue("H" in ATOMS_DATABASE)
 
     def test___getitem__(self):
                 
-        for e in ELEMENTS.elements:
-            for p in ELEMENTS.properties:
-                _ = ELEMENTS[e,p]
-
-    def test_getelement(self):
-        
-        for e in ELEMENTS.elements:
-            _ = ELEMENTS.get_element(e)
+        for at in ATOMS_DATABASE.atoms:
+            _ = ATOMS_DATABASE[at]
 
     def test_get_property(self):
                 
-        for p in ELEMENTS.properties:
-            _ = ELEMENTS.get_property(p)
+        for p in ATOMS_DATABASE.properties:
+            _ = ATOMS_DATABASE.get_property(p)
 
     def test___setitem__(self):
         
-        ELEMENTS['C','atomic_weight'] = 20.0
+        ATOMS_DATABASE['C']['atomic_weight'] = 20.0
                                 
-    def test_add_element(self):
-        
-        # Otherwise, everything should be OK
-        ELEMENTS.add_element("element1")
+    def test_add_atom(self):
+
+        with self.assertRaises(AtomsDatabaseError):
+            ATOMS_DATABASE.add_atom("H")
+
+        ATOMS_DATABASE.add_atom("new_atom")
         
     def test_add_property(self):
-        
-        # Adding an already existing property must trigger an error
-        self.assertRaises(ElementsDatabaseError, ELEMENTS.add_property, "atomic_weight",0.0)
-                
-        # Otherwise, everything should be OK
-        ELEMENTS.add_property("prop1",'float')
-        ELEMENTS.add_property("prop2",'int')
-        ELEMENTS.add_property("prop3",'str')
+
+        with self.assertRaises(AtomsDatabaseError):
+            ATOMS_DATABASE.add_property("atomic_weight")
+
+        ATOMS_DATABASE.add_property("new_prop")
         
     def test_has_property(self):
         
-        for p in ELEMENTS.properties:
-            self.assertTrue(ELEMENTS.has_property(p))
+        for p in ATOMS_DATABASE.properties:
+            self.assertTrue(ATOMS_DATABASE.has_property(p))
             
-        self.assertFalse(ELEMENTS.has_property("gfkljfklsj"))
+        self.assertFalse(ATOMS_DATABASE.has_property("gfkljfklsj"))
             
     def test_has_element(self):
         
-        for e in ELEMENTS.elements:
-            self.assertTrue(ELEMENTS.has_element(e))
+        for at in ATOMS_DATABASE.atoms:
+            self.assertTrue(ATOMS_DATABASE.has_atom(at))
             
-        self.assertFalse(ELEMENTS.has_element("gfkljfklsj"))
+        self.assertFalse(ATOMS_DATABASE.has_atom("gfkljfklsj"))
             
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(TestElementsDatabase))
+    s.addTest(loader.loadTestsFromTestCase(TestAtomsDatabase))
     return s
 
 if __name__ == '__main__':
