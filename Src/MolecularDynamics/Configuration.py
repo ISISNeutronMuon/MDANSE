@@ -13,12 +13,16 @@ class _Configuration:
         self._variables = {}
 
         coordinates = np.array(coordinates)
+        if coordinates.shape != (self._chemical_system.number_of_atoms(),3):
+            raise ValueError('Invalid coordinates dimensions')
 
         self['coordinates'] = coordinates
 
         if unit_cell is not None:
 
             unit_cell = np.array(unit_cell)
+
+            unit_cell = unit_cell.T
 
             if unit_cell.shape != (3,3):
                 raise ValueError('Invalid unit cell dimensions')
@@ -68,6 +72,10 @@ class _Configuration:
         return self._variables['coordinates']
 
     @property
+    def inverse_unit_cell(self):
+        return self._inverse_unit_cell
+
+    @property
     def unit_cell(self):
         return self._unit_cell
 
@@ -77,11 +85,10 @@ class _Configuration:
 
 class BoxConfiguration(_Configuration):
 
-    def __init__(self, chemical_system, coordinates, unit_cell):
-
-        super(BoxConfiguration,self).__init__(chemical_system,coordinates,unit_cell)
-
     def fold_coordinates(self):
+
+        if self._unit_cell is None:
+            return
 
         frac, _ = np.modf(self._variables['coordinates'])
         frac = np.where(frac < 0.0, frac + 1.0, frac)
@@ -95,7 +102,10 @@ class BoxConfiguration(_Configuration):
 
     def to_real_coordinates(self):
 
-        return np.matmul(self._unit_cell,self._variables['coordinates'].T).T
+        if self._unit_cell is None:
+            return
+        else:
+            return np.matmul(self._unit_cell,self._variables['coordinates'].T).T
 
 class RealConfiguration(_Configuration):
 
