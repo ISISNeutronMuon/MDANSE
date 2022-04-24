@@ -84,10 +84,17 @@ class TestConfiguration(unittest.TestCase):
         conf = RealConfiguration(self._chemicalSystem,coordinates,unitCell)
 
         boxCoordinates = conf.to_box_coordinates()
-        self.assertTrue(np.allclose(boxCoordinates[0,:],[3.0,2.0,-2.0],rtol=1.0e-6))
-        self.assertTrue(np.allclose(boxCoordinates[1,:],[5.4,3.2,-2.6],rtol=1.0e-6))
-        self.assertTrue(np.allclose(boxCoordinates[2,:],[7.8,4.4,-3.2],rtol=1.0e-6))
-        self.assertTrue(np.allclose(boxCoordinates[3,:],[10.2,5.6,-3.8],rtol=1.0e-6))
+        self.assertTrue(np.allclose(boxCoordinates,[[3.0,2.0,-2.0],
+                                                    [5.4,3.2,-2.6],
+                                                    [7.8,4.4,-3.2],
+                                                    [10.2,5.6,-3.8]],rtol=1.0e-6))
+
+        conf.fold_coordinates()
+
+        self.assertTrue(np.allclose(conf.variables['coordinates'],[[0.0,0.0,0.0],
+                                                                   [2.0,1.0,1.0],
+                                                                   [0.0,-1.0,0.0],
+                                                                   [0.0,1.0,0.0]],rtol=1.0e-6))
 
     def test_box_configuration(self):
 
@@ -108,10 +115,10 @@ class TestConfiguration(unittest.TestCase):
         conf = BoxConfiguration(self._chemicalSystem,coordinates,unitCell)
 
         realCoordinates = conf.to_real_coordinates()
-        self.assertTrue(np.allclose(realCoordinates[0,:],[14.0,3.0,6.0],rtol=1.0e-6))
-        self.assertTrue(np.allclose(realCoordinates[1,:],[32.0,9.0,15.0],rtol=1.0e-6))
-        self.assertTrue(np.allclose(realCoordinates[2,:],[50.0,15.0,24.0],rtol=1.0e-6))
-        self.assertTrue(np.allclose(realCoordinates[3,:],[68.0,21.0,33.0],rtol=1.0e-6))
+        self.assertTrue(np.allclose(realCoordinates,[[14.0,3.0,6.0],
+                                                     [32.0,9.0,15.0],
+                                                     [50.0,15.0,24.0],
+                                                     [68.0,21.0,33.0]],rtol=1.0e-6))
 
 
 
