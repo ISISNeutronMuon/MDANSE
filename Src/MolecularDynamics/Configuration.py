@@ -2,6 +2,8 @@ import abc
 
 import numpy as np
 
+from MDANSE.Extensions import atoms_in_shell
+
 class _Configuration:
 
     __metaclass__ = abc.ABCMeta
@@ -105,6 +107,25 @@ class BoxConfiguration(_Configuration):
         else:
             return np.matmul(self._unit_cell,self._variables['coordinates'].T).T
 
+    def atomsInShell(self, ref, mini=0.0, maxi=10.0):
+
+        if self._unit_cell is not None:
+            indexes = atoms_in_shell.atoms_in_shell_box(self._variables['coordinates'],
+                                                        ref,
+                                                        mini,
+                                                        maxi)
+        else:
+            indexes = atoms_in_shell.atoms_in_shell_nopbc(self._variables['coordinates'],
+                                                          ref,
+                                                          mini,
+                                                          maxi)
+        
+        atom_list = self._chemical_system.atom_list()
+
+        selected_atoms = [atom_list[idx] for idx in indexes]
+
+        return selected_atoms
+
 class RealConfiguration(_Configuration):
 
     def fold_coordinates(self):
@@ -131,32 +152,50 @@ class RealConfiguration(_Configuration):
 
         return self._variables['coordinates']
 
+    def atomsInShell(self, ref, mini=0.0, maxi=10.0):
+
+        if self._unit_cell is not None:
+            indexes = atoms_in_shell.atoms_in_shell_real(self._variables['coordinates'],
+                                                    self._unit_cell,
+                                                    self._inverse_unit_cell,
+                                                    ref,
+                                                    mini,
+                                                    maxi)
+        else:
+            indexes = atoms_in_shell.atoms_in_shell_nopbc(self._variables['coordinates'],
+                                                          ref,
+                                                          mini,
+                                                          maxi)
+
+        atom_list = self._chemical_system.atom_list()
+
+        selected_atoms = [atom_list[idx] for idx in indexes]
+
+        return selected_atoms
+
+
 if __name__ == "__main__":
 
     np.random.seed(1)
 
     from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 
-    n_atoms = 5
+    n_atoms = 2
     cs = ChemicalSystem()
     for i in range(n_atoms):
         cs.add_chemical_entity(Atom(symbol='H'))
         
-    coordinates = np.random.uniform(-10,10,(n_atoms,3))
+    coordinates = np.empty((n_atoms,3),dtype=float)
+    coordinates[0,:] = [1,1,1]
+    coordinates[1,:] = [3,3,3]
     print(coordinates)
 
-    uc = np.array([[1.0,2.0,3.0],[2.0,-1.0,3.0],[1.0,1.0,1.0]]).T
-    # uc = np.array([[10.0,0.0,0.0],[0.0,10.0,0.0],[0.0,0.0,10.0]]).T
+    uc = np.array([[10.0,0.0,0.0],[0.0,10.0,0.0],[0.0,0.0,10.0]])
 
-    conf = RealConfiguration(cs, coordinates, uc)
+    conf = RealConfiguration(cs, coordinates)
 
-    conf.fold_coordinates()
+    print(conf.atomsInShell(0,0,5))
 
-    # print(conf.to_box_coordinates())
-
-    # conf = BoxConfiguration(cs, coordinates, uc)
-
-    # print(conf.to_real_coordinates())
 
 
 

@@ -315,7 +315,6 @@ class TestAtomsSelector(unittest.TestCase):
         selection = selector.select(['*'])
         self.assertEqual(len(selection),508)
 
-
     def test_phosphate(self):
 
         selector = Phosphate.Phosphate(self._nucleicAcidChemicalSystem)
@@ -388,6 +387,13 @@ class TestAtomsSelector(unittest.TestCase):
 
         selection = selector.select(['*'])
         self.assertEqual(len(selection),0)
+
+    def test_within_shell(self):
+
+        selector = WithinShell.WithinShell(self._proteinChemicalSystem)
+
+        selection = selector.select(0,0,0.3)
+        self.assertEqual(len(selection),16)
 
 
 def suite():

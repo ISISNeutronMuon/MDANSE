@@ -16,19 +16,19 @@
 from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
                
-class WithinSelection(ISelector):
+class WithinShell(ISelector):
 
     type = "within_selection"
 
     section = None
 
-    def select(self, atoms, mini=0.0, maxi=1.0):
+    def select(self, ref, mini=0.0, maxi=1.0):
 
         sel = set()
 
-        for at in atoms:
-            sel.update([a for a in self._universe.selectShell(at.position(),mini,maxi).atomList()])
+        if self._chemicalSystem.configuration is not None:
+            sel.update(self._chemicalSystem.configuration.atomsInShell(ref,mini,maxi))
         
         return sel
     
-REGISTRY["within_selection"] = WithinSelection
+REGISTRY["within_shell"] = WithinShell

@@ -884,6 +884,8 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._chemical_entities.append(chemical_entity)
 
+        self._configuration = None
+
     def atom_list(self):
 
         atom_list = []
