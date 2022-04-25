@@ -252,7 +252,10 @@ if 'linux' in sys.platform:
     (opt,) = get_config_vars('OPT')
     os.environ['OPT'] = " ".join(flag for flag in opt.split() if flag != '-Wstrict-prototypes')
 
-EXTENSIONS = [Extension('MDANSE.Extensions.distance_histogram',
+EXTENSIONS = [Extension('MDANSE.Extensions.atoms_in_shell',
+                        include_dirs=INCLUDE_DIR,
+                        sources = [os.path.join("Extensions",'atoms_in_shell.pyx')]),
+              Extension('MDANSE.Extensions.distance_histogram',
                         include_dirs=INCLUDE_DIR,
                         sources = [os.path.join("Extensions",'distance_histogram.pyx')]),
               Extension('MDANSE.Extensions.fast_calculation',

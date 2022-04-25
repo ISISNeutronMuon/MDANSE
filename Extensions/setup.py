@@ -34,7 +34,10 @@ QHULL_DIR = os.path.join("qhull_lib")
 
 QHULL_INCLUDE_DIR = INCLUDE_DIR + [os.path.join(QHULL_DIR,"ext")] + [os.path.join(QHULL_DIR,"src")]
 
-EXTENSIONS = [Extension('distance_histogram',
+EXTENSIONS = [Extension('atoms_in_shell',
+                        include_dirs=INCLUDE_DIR,
+                        sources = ['atoms_in_shell.pyx']),
+              Extension('distance_histogram',
                         include_dirs=INCLUDE_DIR,
                         sources = ['distance_histogram.pyx']),
               Extension('fast_calculation',
