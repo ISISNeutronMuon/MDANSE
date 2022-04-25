@@ -14,7 +14,7 @@ import numpy as np
 
 from math import atan2
 
-from Geometry import delta, epsilon, ex, ez, isTensor, isVector, nullVector, Quaternion, Tensor, Vector
+from MDANSE.Mathematics.LinearAlgebra import delta, epsilon, ex, ez, isTensor, isVector, nullVector, Quaternion, Tensor, Vector
 
 #
 # Abstract base classes

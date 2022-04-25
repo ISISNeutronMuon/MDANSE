@@ -13,28 +13,27 @@
 #
 # **************************************************************************
 
-from MMTK.Proteins import PeptideChain, Protein
-
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 # Dictionnary associating tuples of residue names (values) to their corresponding chemical family (key). 
-CHEMFAMILIES = {'acidic'      : ('asp','glu'),
-                'aliphatic'   : ('ile','leu','val'),
-                'aromatic'    : ('his','phe','trp','tyr'),
-                'basic'       : ('arg','his','lys'),
-                'charged'     : ('arg','asp','glu','his','lys'),
-                'hydrophobic' : ('ala','cys','cyx','gly','his','ile','leu','lys','met','phe','thr','trp','tyr','val'),
-                'polar'       : ('arg','asn','asp','cys','gln','glu','his','lys','ser','thr','trp','tyr'),
-                'small'       : ('ala','asn','asp','cys','cyx','gly','pro','ser','thr','val')}
+CHEMFAMILIES = {'acidic'      : ('ASP','GLU'),
+                'aliphatic'   : ('ILE','LEU','VAL'),
+                'aromatic'    : ('HIS','PHE','TRP','TYR'),
+                'basic'       : ('ARG','HIS','LYS'),
+                'charged'     : ('ARG','ASP','GLU','HIS','LYS'),
+                'hydrophobic' : ('ALA','CYS','CYX','GLY','HIS','HID','HIP','HIE','ILE','LEU','LYS','MET','PHE','THR','TRP','TYR','VAL'),
+                'polar'       : ('ARG','ASN','ASP','CYS','GLN','GLU','HIS','LYS','SER','THR','TRP','TYR'),
+                'small'       : ('ALA','ASN','ASP','CYS','CYX','GLY','PRO','SER','THR','VAL')}
                                          
 class ResidueClass(ISelector):
 
     section = "proteins"
 
-    def __init__(self, trajectory):
+    def __init__(self, chemicalSystem):
 
-        ISelector.__init__(self,trajectory)
+        ISelector.__init__(self,chemicalSystem)
                         
         self._choices.extend(sorted(CHEMFAMILIES.keys()))
 
@@ -52,27 +51,25 @@ class ResidueClass(ISelector):
         sel = set()
 
         if '*' in classes:
-            for obj in self._universe.objectList():
-                if isinstance(obj, (PeptideChain,Protein)):
-                    sel.update([at for at in obj.atomList()])
+            for ce in self._chemicalSystem.chemical_entities:
+                if isinstance(ce, (PeptideChain,Protein)):
+                    sel.update([at for at in ce.atom_list()])
         
         else:        
-            vals = set([v.lower() for v in classes])
+            vals = set(classes)
         
             selRes = set()
             for v in vals:
                 if CHEMFAMILIES.has_key(v):
                     selRes.update(CHEMFAMILIES[v])
-                                                                                 
-            for obj in self._universe.objectList():
-                try:        
-                    res = obj.residues()
+            
+            for ce in self._chemicalSystem.chemical_entities:
+                if isinstance(ce,(PeptideChain,Protein)):
+                    res = ce.residues
                     for r in res:
-                        resName = r.symbol.strip().lower()
+                        resName = r.code.strip()
                         if resName in selRes:
-                            sel.update([at for at in r.atomList()])
-                except AttributeError:
-                    pass
+                            sel.update([at for at in r.atom_list()])
                                                    
         return sel
     

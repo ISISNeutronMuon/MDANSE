@@ -22,36 +22,24 @@ from MDANSE.Framework.Selectors.ISelector import ISelector
 class PythonScript(ISelector):
         
     section = 'miscellaneous'
-    
-    def __init__(self, trajectory):
         
-        ISelector.__init__(self,trajectory)
-                
-        self._choices.extend(glob.glob(os.path.dirname(PLATFORM.get_path(trajectory.filename)),'*.py'))
-        
-        self._rindexes = dict([(at.index,at) for at in self._universe.atomList()])
-    
     def select(self, scripts):
         
         sel = set()
 
         if '*' in scripts:
-            scripts = self._choices[1:]
+            sel.update([at for at in self._chemicalSystem.atom_list()])
                                 
         for s in scripts:
-            
-            namespace = {"universe" : self._universe}
+            namespace = {"chemicalSystem" : self._chemicalSystem}
         
             try:
-                execfile(s,namespace)
+                exec(open(s,'r').read(),namespace)
             # Any kind of error that may occur in the script must be caught 
             except:
                 continue
             else:
-                if not namespace.has_key("selection"):
-                    continue
-                                
-                sel.update([self._rindexes[idx] for idx in namespace["selection"]])
+                sel.update(namespace.get("selection",[]))
                                         
         return sel
     

@@ -13,22 +13,21 @@
 #
 # **************************************************************************
 
-from MMTK.NucleicAcids import NucleotideChain
-
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import NucleotideChain
 from MDANSE.Framework.Selectors.ISelector import ISelector
     
 class NucleotideName(ISelector):
 
     section = "nucleic acids"
 
-    def __init__(self, trajectory):
+    def __init__(self, chemicalSystem):
 
-        ISelector.__init__(self,trajectory)
+        ISelector.__init__(self,chemicalSystem)
 
-        for obj in self._universe.objectList():
-            if isinstance(obj, NucleotideChain):
-                self._choices.extend([r.fullName() for r in obj.residues()])
+        for ce in self._chemicalSystem.chemical_entities:
+            if isinstance(ce, NucleotideChain):
+                self._choices.extend([n.name for n in ce.nucleotides])
         
 
     def select(self, names):
@@ -45,20 +44,18 @@ class NucleotideName(ISelector):
         sel = set()
 
         if '*' in names:
-            for obj in self._universe.objectList():
-                if isinstance(obj, NucleotideChain):
-                    sel.update([at for at in obj.atomList()])
+            for ce in self._chemicalSystem.chemical_entities:
+                if isinstance(ce, NucleotideChain):
+                    sel.update([at for at in ce.atom_list()])
         
         else:
-            vals = set([v.lower() for v in names])
+            vals = set([v for v in names])
 
-            for obj in self._universe.objectList():
+            for ce in self._chemicalSystem.chemical_entities:
                 try:
-                    res = obj.residues()
-                    for nucl in res:
-                        nuclName = nucl.fullName().strip().lower()
-                        if nuclName in vals:
-                            sel.update([at for at in nucl.atomList()])
+                    for nucl in ce.nucleotides:
+                        if nucl.name in vals:
+                            sel.update([at for at in nucl.atom_list()])
                 except AttributeError:
                     pass
                        

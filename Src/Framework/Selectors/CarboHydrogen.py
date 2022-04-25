@@ -39,6 +39,8 @@ class CarboHydrogen(ISelector):
         sel = set()
 
         if '*' in names:
+            if len(self._choices) == 1:
+                return sel
             names = self._choices[1:]
             
         vals = set([v for v in names])

@@ -113,7 +113,7 @@ class AtomsDatabase:
         try:
             return copy.deepcopy(self._data[item])
         except KeyError:                
-            raise AtomsDatabaseError("The element {}} is not registered in the database.".format(item))
+            raise AtomsDatabaseError("The element {} is not registered in the database.".format(item))
 
     def __iter__(self):
         '''
@@ -440,7 +440,7 @@ class MoleculesDatabase(object):
         try:
             return copy.deepcopy(self._data[item])
         except KeyError:                
-            raise MoleculesDatabaseError("The molecule {}} is not registered in the database.".format(item))
+            raise MoleculesDatabaseError("The molecule {} is not registered in the database.".format(item))
 
     def __iter__(self):
         '''
@@ -580,10 +580,11 @@ class NucleotidesDatabase(object):
         :type item: str or tuple
         '''
 
-        try:
-            return copy.deepcopy(self._data[item])
-        except KeyError:                
-            raise NucleotidesDatabaseError("The nucleotide {}} is not registered in the database.".format(item))
+        for k, v in self._data.items():
+            if item == k or item in v['alternatives']:
+                return copy.deepcopy(self._data[k])
+        else:
+            raise NucleotidesDatabaseError("The nucleotide {} is not registered in the database.".format(item))
 
     def __iter__(self):
         '''
@@ -730,7 +731,7 @@ class ResiduesDatabase(object):
         try:
             return copy.deepcopy(self._data[item])
         except KeyError:                
-            raise ResiduesDatabaseError("The residue {}} is not registered in the database.".format(item))
+            raise ResiduesDatabaseError("The residue {} is not registered in the database.".format(item))
 
     def __iter__(self):
         '''

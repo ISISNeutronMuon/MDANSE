@@ -17,7 +17,7 @@ from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import NucleotideChain
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
-class NucleotideBase(ISelector):
+class NucleotideSugar(ISelector):
 
     section = "nucleic acids"
 
@@ -32,7 +32,7 @@ class NucleotideBase(ISelector):
 
     def select(self, names):
         '''
-        Returns the bases atoms.
+        Returns the sugar atoms.
         
         Only for NucleotideChain objects.
 
@@ -45,13 +45,13 @@ class NucleotideBase(ISelector):
         if '*' in names:
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, NucleotideChain):
-                    sel.update([at for at in ce.bases])
+                    sel.update([at for at in ce.sugars])
         else:            
             vals = set(names)
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, NucleotideChain) and ce.name in vals:
-                    sel.update([at for at in ce.bases])
+                    sel.update([at for at in ce.sugars])
             
         return sel
     
-REGISTRY["nucleotide_base"] = NucleotideBase
+REGISTRY["nucleotide_sugar"] = NucleotideSugar

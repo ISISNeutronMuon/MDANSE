@@ -30,7 +30,7 @@ class Amine(ISelector):
         for ce in self._chemicalSystem.chemical_entities:
                                         
             nitrogens = [at for at in ce.atom_list() if at.element.strip().lower() == 'nitrogen']
-            
+                    
             for nitro in nitrogens:
                 neighbours = nitro.bonds
                 hydrogens = [neigh.full_name().strip() for neigh in neighbours if neigh.element.strip().lower() == 'hydrogen']
@@ -43,6 +43,8 @@ class Amine(ISelector):
         sel = set()
 
         if '*' in names:
+            if len(self._choices) == 1:
+                return sel
             names = self._choices[1:]
 
         vals = set(names)

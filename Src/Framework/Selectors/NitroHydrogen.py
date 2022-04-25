@@ -20,17 +20,17 @@ class NitroHydrogen(ISelector):
         
     section = "hydrogens"
 
-    def __init__(self, trajectory):
+    def __init__(self, chemicalSystem):
         
-        ISelector.__init__(self,trajectory)
+        ISelector.__init__(self,chemicalSystem)
 
-        for obj in self._universe.objectList():
+        for ce in self._chemicalSystem.chemical_entities:
                                         
-            nitrogens = [at for at in obj.atomList() if at.type.name.strip().lower() == 'nitrogen']
+            nitrogens = [at for at in ce.atom_list() if at.element.strip().lower() == 'nitrogen']
             
             for nitro in nitrogens:
-                neighbours = nitro.bondedTo()
-                hydrogens = [neigh.fullName().strip().lower() for neigh in neighbours if neigh.type.name.strip().lower() == 'hydrogen']
+                neighbours = nitro.bonds
+                hydrogens = [neigh.full_name().strip() for neigh in neighbours if neigh.element.strip().lower() == 'hydrogen']
                 self._choices.extend(sorted(hydrogens))
                 
     def select(self, names):
@@ -38,10 +38,12 @@ class NitroHydrogen(ISelector):
         sel = set()
 
         if '*' in names:
+            if len(self._choices) == 1:
+                return sel
             names = self._choices[1:]
             
-        vals = set([v.lower() for v in names])
-        sel.update([at for at in self._universe.atomList() if at.fullName().strip().lower() in vals])
+        vals = set([v for v in names])
+        sel.update([at for at in self._chemicalSystem.atom_list() if at.full_name().strip() in vals])
         
         return sel
     
