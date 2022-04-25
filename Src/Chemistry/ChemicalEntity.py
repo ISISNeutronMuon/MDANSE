@@ -63,6 +63,16 @@ class _ChemicalEntity:
     def atom_list(self):
         pass
 
+    def full_name(self):
+
+        full_name = self.name
+        parent = self._parent
+        while parent is not None:
+            full_name = '{}.{}'.format(parent.name,full_name)
+            parent = parent.parent
+            
+        return full_name
+
     @abc.abstractmethod
     def number_of_atoms(self):
         pass
@@ -108,6 +118,9 @@ class Atom(_ChemicalEntity):
 
         self.groups = kwargs.get('groups',[])
 
+        for k,v in kwargs.items():
+            setattr(self,k,v)
+
         self._index = None
 
         for propName,propValue in ATOMS_DATABASE[self.symbol].items():
@@ -126,16 +139,6 @@ class Atom(_ChemicalEntity):
 
     def number_of_atoms(self):
         return 1
-
-    def full_name(self):
-
-        full_name = self.name
-        parent = self._parent
-        while parent is not None:
-            full_name = '{}.{}'.format(parent.name,full_name)
-            parent = parent.parent
-            
-        return full_name
 
     @property
     def index(self):
@@ -338,36 +341,24 @@ class Residue(_ChemicalEntity):
 
         super(Residue,self).__init__()
 
-        self._atoms = collections.OrderedDict()
-
-        self._resname = None
-
-        self._code = code
-
-        self._number = number
-
-        self._variant = variant
-
-        self._build(code,number)
-
-    def __getitem__(self,item):
-        return self._atoms[item]
-
-    def _build(self, code, number):
-
         for resname, resinfo in RESIDUES_DATABASE.items():
 
             if code == resname or code in resinfo['alternatives']:
+                self._resname = resname
                 break
         else:
             raise UnknownResidueError(code)
 
-        self._resname = resname
+        self._number = number
+
+        self._code = code
 
         if number is not None:
             self._name = '{}{}'.format(self._resname,number)
         else:
-            self._name = code
+            self._name = self._code
+
+        self._variant = variant
 
         if self._variant is not None:
             try:
@@ -380,43 +371,41 @@ class Residue(_ChemicalEntity):
         else:
             self._selected_variant = None
 
-        atoms = list(resinfo['atoms'].items())
+        self._atoms = collections.OrderedDict()
+
+    def __getitem__(self,item):
+        return self._atoms[item]
+
+    def set_atoms(self, atoms):
+
+        replaced_atoms = set()
         if self._selected_variant is not None:
-            atoms = list(self._selected_variant['atoms'].items()) + atoms
+            for v in self._selected_variant['atoms'].values():
+                replaced_atoms.update(v['replaces'])
 
-        for at,atinfo in atoms:
-
-            if self._selected_variant is not None and self._selected_variant['is_n_terminus']:
-                if at == 'H':
-                    continue
-
-            info = copy.deepcopy(atinfo)
-            atom = Atom(name=at,**info)
-            atom.parent = self
-            self._atoms[at] = atom
-
-        self._set_bonds()
-
-    def reorder_atoms(self, atoms):
-        if set(atoms) != set(self._atoms.keys()):
+        res_atoms = set(RESIDUES_DATABASE[self._resname]['atoms'])
+        res_atoms.difference_update(replaced_atoms)
+        if self._selected_variant is not None:
+            res_atoms.update(self._selected_variant['atoms'])
+        
+        if res_atoms != set(atoms):
             raise InconsistentAtomNamesError('The set of atoms to reorder is inconsistent with residue contents')
 
-        reordered_atoms = collections.OrderedDict()
+        d = copy.deepcopy(RESIDUES_DATABASE[self._resname]['atoms'])
+        if self._selected_variant is not None:
+            d.update(self._selected_variant['atoms'])
+
+        self._atoms.clear()
         for at in atoms:
-            reordered_atoms[at] = self._atoms[at]
+            self._atoms[at] = Atom(name=at,**d[at])
+            self._atoms[at].parent = self
         
-        self._atoms = reordered_atoms
-
-    def _set_bonds(self):
-
         for at, atom in self._atoms.items():
 
-            if self._selected_variant is not None and self._selected_variant['is_n_terminus']:
-                if at == 'N':
-                    h_idx = atom.bonds.index('H')
-                    del atom.bonds[h_idx]
+            for i in range(len(atom.bonds)-1,-1,-1):
+                if atom.bonds[i] in replaced_atoms:
+                    del atom.bonds[i]
 
-            for i in range(len(atom.bonds)):
                 try:
                     atom.bonds[i] = self._atoms[atom.bonds[i]]
                 except KeyError:
@@ -466,33 +455,24 @@ class Nucleotide(_ChemicalEntity):
 
         super(Nucleotide,self).__init__()
 
-        self._atoms = collections.OrderedDict()
+        for resname, resinfo in NUCLEOTIDES_DATABASE.items():
 
-        self._nuclname = None
-
-        self._code = code
-
-        self._number = number
-
-        self._variant = variant
-
-        self._build(code,number)
-
-    def _build(self, code, number):
-
-        for nuclname, nuclinfo in NUCLEOTIDES_DATABASE.items():
-
-            if code == nuclname or code in nuclinfo['alternatives']:
+            if code == resname or code in resinfo['alternatives']:
+                self._resname = resname
                 break
         else:
             raise UnknownResidueError(code)
 
-        self._nuclname = nuclname
+        self._number = number
+
+        self._code = code
 
         if number is not None:
-            self._name = '{}{}'.format(self._nuclname,number)
+            self._name = '{}{}'.format(self._resname,number)
         else:
-            self._name = code
+            self._name = self._code
+
+        self._variant = variant
 
         if self._variant is not None:
             try:
@@ -505,56 +485,46 @@ class Nucleotide(_ChemicalEntity):
         else:
             self._selected_variant = None
 
-        atoms = list(nuclinfo['atoms'].items())
-        if self._selected_variant is not None:
-            atoms = list(self._selected_variant['atoms'].items()) + atoms
-
-        for at,atinfo in atoms:
-
-            if self._selected_variant is not None and self._selected_variant['is_5ter_terminus']:
-                if at in ['OP1','OP2','P']:
-                    continue
-
-            info = copy.deepcopy(atinfo)
-
-            atom = Atom(name=at,**info)
-            atom.parent = self
-            self._atoms[at] = atom
-
-        self._set_bonds()
+        self._atoms = collections.OrderedDict()
 
     def __getitem__(self,item):
         return self._atoms[item]
 
-    def _set_bonds(self):
+    def set_atoms(self, atoms):
 
-        if self._selected_variant is not None and self._selected_variant['is_5ter_terminus']:
-            idx = self._atoms["O5'"].bonds.index('P')
-            self._atoms["O5'"].bonds[idx] = '-R'
+        replaced_atoms = set()
+        if self._selected_variant is not None:
+            for v in self._selected_variant['atoms'].values():
+                replaced_atoms.update(v['replaces'])
 
-        for atom in self._atoms.values():
-            
-            bonds = []
-            for i in range(len(atom.bonds)):
-                bat = atom.bonds[i]
-                if self._selected_variant is not None and self._selected_variant['is_5ter_terminus']:
-                    if bat in ['OP1','OP2','P']:
-                        continue
-                if bat in self._atoms:
-                    bonds.append(self._atoms[bat])
-                else:
-                    bonds.append(bat)
-            atom.bonds = bonds
+        res_atoms = set(NUCLEOTIDES_DATABASE[self._resname]['atoms'])
+        res_atoms.difference_update(replaced_atoms)
+        if self._selected_variant is not None:
+            res_atoms.update(self._selected_variant['atoms'])
 
-    def reorder_atoms(self, atoms):
-        if set(atoms) != set(self._atoms.keys()):
+        if res_atoms != set(atoms):
             raise InconsistentAtomNamesError('The set of atoms to reorder is inconsistent with residue contents')
 
-        reordered_atoms = collections.OrderedDict()
+        d = copy.deepcopy(NUCLEOTIDES_DATABASE[self._resname]['atoms'])
+        if self._selected_variant is not None:
+            d.update(self._selected_variant['atoms'])
+
+        self._atoms.clear()
         for at in atoms:
-            reordered_atoms[at] = self._atoms[at]
+            self._atoms[at] = Atom(name=at,**d[at])
+            self._atoms[at].parent = self
         
-        self._atoms = reordered_atoms
+        for at, atom in self._atoms.items():
+
+            for i in range(len(atom.bonds)-1,-1,-1):
+                if atom.bonds[i] in replaced_atoms:
+                    del atom.bonds[i]
+                    continue
+                else:
+                    try:
+                        atom.bonds[i] = self._atoms[atom.bonds[i]]
+                    except KeyError:
+                        continue
 
     def atom_list(self):
         return list(self._atoms.values())
@@ -575,8 +545,8 @@ class Nucleotide(_ChemicalEntity):
         return self._number
 
     @property
-    def nuclname(self):
-        return self._nuclname
+    def resname(self):
+        return self._resname
 
     def serialize(self, h5_file, h5_contents):
 
@@ -612,42 +582,42 @@ class NucleotideChain(_ChemicalEntity):
 
     def _connect_nucleotides(self):
                 
-        ratom_in_first_residue = [at for at in self._nucleotides[0].atom_list() if '+OR' in at.bonds][0]
-        o5prime_atom_in_first_residue = self._nucleotides[0]["O5'"]
+        ratoms_in_first_residue = [at for at in self._nucleotides[0].atom_list() if getattr(at,'o5prime_connected',False)]
+        n_atom_in_first_residue = self._nucleotides[0]["O5'"]
+        n_atom_in_first_residue.bonds.extend(ratoms_in_first_residue)
 
-        idx = ratom_in_first_residue.bonds.index('+OR')
-        ratom_in_first_residue.bonds[idx] = o5prime_atom_in_first_residue
-        idx = o5prime_atom_in_first_residue.bonds.index('-R')
-        del o5prime_atom_in_first_residue.bonds[idx]
-        o5prime_atom_in_first_residue.bonds.append(ratom_in_first_residue)
-
-        ho3prime_in_last_residue = self._nucleotides[-1]["HO3'"]
-        o3prime_atom_in_last_residue = self._nucleotides[-1]["O3'"]
-        idx = ho3prime_in_last_residue.bonds.index('-OR')
-        ho3prime_in_last_residue.bonds[idx] = o3prime_atom_in_last_residue
-        idx = o3prime_atom_in_last_residue.bonds.index('+R')
-        del o3prime_atom_in_last_residue.bonds[idx]
-        o3prime_atom_in_last_residue.bonds.append(ho3prime_in_last_residue)
+        ratoms_in_last_residue = [at for at in self._nucleotides[-1].atom_list() if getattr(at,'o3prime_connected',False)]
+        c_atom_in_last_residue = self._nucleotides[-1]["O3'"]
+        idx = c_atom_in_last_residue.bonds.index('+R')
+        del c_atom_in_last_residue.bonds[idx]
+        c_atom_in_last_residue.bonds.extend(ratoms_in_last_residue)
 
         for i in range(len(self._nucleotides)-1):
             current_residue = self._nucleotides[i]
             next_residue = self._nucleotides[i+1]
 
-            ratom_in_current_residue = [at for at in current_residue.atom_list() if '+R' in at.bonds][0]
-            ratom_in_next_residue = [at for at in next_residue.atom_list() if '-R' in at.bonds][0]
-            # print(ratom_in_current_residue.name,ratom_in_next_residue.name)
+            ratoms_in_current_residue = [at for at in current_residue.atom_list() if '+R' in at.bonds][0]
+            ratoms_in_next_residue = [at for at in next_residue.atom_list() if '-R' in at.bonds][0]
 
-            idx = ratom_in_current_residue.bonds.index('+R')
-            ratom_in_current_residue.bonds[idx] = ratom_in_next_residue
+            idx = ratoms_in_current_residue.bonds.index('+R')
+            ratoms_in_current_residue.bonds[idx] = ratoms_in_next_residue
 
-            idx = ratom_in_next_residue.bonds.index('-R')
-            ratom_in_next_residue.bonds[idx] = ratom_in_current_residue
+            idx = ratoms_in_next_residue.bonds.index('-R')
+            ratoms_in_next_residue.bonds[idx] = ratoms_in_current_residue
 
     def atom_list(self):
 
         atoms = []
         for res in self._nucleotides:
             atoms.extend(res.atom_list())
+        return atoms
+
+    @property
+    def bases(self):
+        atoms = []
+        for at in self.atom_list():
+            if 'base' in at.groups:
+                atoms.append(at)
         return atoms
 
     @property
@@ -690,6 +660,14 @@ class NucleotideChain(_ChemicalEntity):
 
         self._connect_nucleotides()
 
+    @property
+    def sugars(self):
+        atoms = []
+        for at in self.atom_list():
+            if 'sugar' in at.groups:
+                atoms.append(at)
+        return atoms
+
 class PeptideChain(_ChemicalEntity):
 
     def __init__(self, name):
@@ -702,20 +680,14 @@ class PeptideChain(_ChemicalEntity):
 
     def _connect_residues(self):
                 
-        ratoms_in_first_residue = [at for at in self._residues[0].atom_list() if '+NR' in at.bonds]
+        ratoms_in_first_residue = [at for at in self._residues[0].atom_list() if getattr(at,'nter_connected',False)]
         n_atom_in_first_residue = self._residues[0]['N']
-        for at in ratoms_in_first_residue:
-            idx = at.bonds.index('+NR')
-            at.bonds[idx] = n_atom_in_first_residue
         idx = n_atom_in_first_residue.bonds.index('-R')
         del n_atom_in_first_residue.bonds[idx]
         n_atom_in_first_residue.bonds.extend(ratoms_in_first_residue)
 
-        ratoms_in_last_residue = [at for at in self._residues[-1].atom_list() if '-CR' in at.bonds]
+        ratoms_in_last_residue = [at for at in self._residues[-1].atom_list() if getattr(at,'cter_connected',False)]
         c_atom_in_last_residue = self._residues[-1]['C']
-        for at in ratoms_in_last_residue:
-            idx = at.bonds.index('-CR')
-            at.bonds[idx] = c_atom_in_last_residue
         idx = c_atom_in_last_residue.bonds.index('+R')
         del c_atom_in_last_residue.bonds[idx]
         c_atom_in_last_residue.bonds.extend(ratoms_in_last_residue)
@@ -769,6 +741,15 @@ class PeptideChain(_ChemicalEntity):
     def peptide_chains(self):
         return [self]
 
+
+    @property
+    def peptides(self):
+        atoms = []
+        for at in self.atom_list():
+            if 'peptide' in at.groups:
+                atoms.append(at)
+        return atoms
+
     @property
     def residues(self):
 
@@ -797,6 +778,14 @@ class PeptideChain(_ChemicalEntity):
             self._residues.append(residue)
 
         self._connect_residues()
+
+    @property
+    def sidechains(self):
+        atoms = []
+        for at in self.atom_list():
+            if 'sidechain' in at.groups:
+                atoms.append(at)
+        return atoms
 
 class Protein(_ChemicalEntity):
 
@@ -838,6 +827,14 @@ class Protein(_ChemicalEntity):
         return self._peptide_chains
 
     @property
+    def peptides(self):
+        atoms = []
+        for at in self.atom_list():
+            if 'peptide' in at.groups:
+                atoms.append(at)
+        return atoms
+
+    @property
     def name(self):
         return self._name
 
@@ -855,6 +852,14 @@ class Protein(_ChemicalEntity):
             pc.serialize(h5_file,h5_contents)
 
         return ('proteins',len(h5_contents['proteins'])-1)
+
+    @property
+    def sidechains(self):
+        atoms = []
+        for at in self.atom_list():
+            if 'sidechain' in at.groups:
+                atoms.append(at)
+        return atoms
 
 class ChemicalSystem(_ChemicalEntity):
 

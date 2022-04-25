@@ -23,9 +23,9 @@ class Macromolecule(ISelector):
     
     lookup = {NucleotideChain:"nucleotide_chain",PeptideChain:"peptide_chain",Protein:"protein"}
 
-    def __init__(self, trajectory):
+    def __init__(self, chemicalSystem):
 
-        ISelector.__init__(self,trajectory)
+        ISelector.__init__(self,chemicalSystem)
                 
         self._choices.extend(["peptide_chain","protein","nucleotide_chain"])
          

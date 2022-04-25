@@ -20,7 +20,21 @@ class Thiol(ISelector):
 
     section = "chemical groups"
 
-    def select(self, *args):
+    def __init__(self, chemicalSystem):
+        
+        ISelector.__init__(self,chemicalSystem)
+
+        for ce in self._chemicalSystem.chemical_entities:
+                                        
+            sulfur = [at for at in ce.atom_list() if at.element.strip().lower() in ['sulphur', 'sulfur']]
+            
+            for sulf in sulfur:
+                neighbours = sulf.bonds
+                hydrogens = [neigh.full_name().strip() for neigh in neighbours if neigh.element.strip().lower() == 'hydrogen']
+                if len(hydrogens) >= 1:
+                    self._choices.extend([sulf] + sorted(hydrogens))
+
+    def select(self, names):
         '''
         Returns the thiol atoms.
 
@@ -30,16 +44,13 @@ class Thiol(ISelector):
 
         sel = set()
 
-        for obj in self._universe.objectList():
-
-            sulphurs = [at for at in obj.atomList() if at.type.name.strip().lower() in ['sulphur', 'sulfur']]
-            for sul in sulphurs:
-                neighbours = sul.bondedTo()
-                if not neighbours:
-                    neighbours = self._universe.selectShell(sul,r1=0.0,r2=0.11)
-                hydrogens = [neigh for neigh in neighbours if neigh.type.name.strip().lower() == 'hydrogen'] 
-                if len(hydrogens)==1:
-                    sel.update([sul] + hydrogens)
+        if '*' in names:
+            if len(self._choices) == 1:
+                return sel
+            names = self._choices[1:]
+        
+        vals = set([v for v in names])
+        sel.update([at for at in self._chemicalSystem.atom_list() if at.full_name().strip() in vals])
                 
         return sel
     

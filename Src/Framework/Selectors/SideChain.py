@@ -14,13 +14,14 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
 from MDANSE.Framework.Selectors.ISelector import ISelector
     
 class SideChain(ISelector):
 
-    section = "biopolymers"
+    section = "proteins"
 
-    def select(self, *args):
+    def select(self, names):
         '''
         Returns the sidechains atoms.
     
@@ -31,13 +32,17 @@ class SideChain(ISelector):
         '''
         
         sel = set()
-    
-        for obj in self._universe.objectList():
-            try:
-                sel.update([at for at in obj.sidechains().atomList()])
-            except AttributeError:
-                pass
-        
+
+        if '*' in names:
+            for ce in self._chemicalSystem.chemical_entities:
+                if isinstance(ce, (PeptideChain, Protein)):
+                    sel.update(ce.sidechains)
+        else:            
+            vals = set(names)
+            for ce in self._chemicalSystem.chemical_entities:
+                if isinstance(ce, (PeptideChain, Protein)) and ce.name in vals:
+                    sel.update(ce.sidechains)
+
         return sel
-    
+
 REGISTRY["sidechain"] = SideChain

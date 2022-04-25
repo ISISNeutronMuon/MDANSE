@@ -107,7 +107,7 @@ class H5Residue(_H5ChemicalEntity):
             atoms.append(h5_atom_instance.build())
 
         atoms = [at.name for at in atoms]
-        res.reorder_atoms(atoms)
+        res.set_atoms(atoms)
         
         return res
 
@@ -136,7 +136,7 @@ class H5Nucleotide(_H5ChemicalEntity):
             atoms.append(h5_atom_instance.build())
 
         atoms = [at.name for at in atoms]
-        res.reorder_atoms(atoms)
+        res.set_atoms(atoms)
         
         return res
 

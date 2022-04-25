@@ -20,7 +20,21 @@ class Phosphate(ISelector):
 
     section = "chemical groups"
 
-    def select(self, *args):
+    def __init__(self, chemicalSystem):
+        
+        ISelector.__init__(self,chemicalSystem)
+
+        for ce in self._chemicalSystem.chemical_entities:
+                                        
+            phosphorus = [at for at in ce.atom_list() if at.element.strip().lower() == 'phosphorus']
+            
+            for phos in phosphorus:
+                neighbours = phos.bonds
+                oxygens = [neigh.full_name().strip() for neigh in neighbours if neigh.element.strip().lower() == 'oxygen']
+                if len(oxygens) == 4:
+                    self._choices.extend([phos] + sorted(oxygens))
+
+    def select(self, names):
         '''
         Returns the phosphate atoms.
 
@@ -30,15 +44,14 @@ class Phosphate(ISelector):
         
         sel = set()
 
-        for obj in self._universe.objectList():
+        if '*' in names:
+            if len(self._choices) == 1:
+                return sel
+            names = self._choices[1:]
 
-            phosphorus = [at for at in obj.atomList() if at.type.name.strip().lower() == 'phosphorus']
-            for pho in phosphorus:
-                neighbours = pho.bondedTo()
-                oxygens = [neigh for neigh in neighbours if neigh.type.name.strip().lower() == 'oxygen'] 
-                if len(oxygens) == 4:
-                    sel.update([pho] + oxygens)
-                
+        vals = set([v for v in names])
+        sel.update([at for at in self._chemicalSystem.atom_list() if at.full_name().strip() in vals])
+
         return sel
     
 REGISTRY["phosphate"] = Phosphate

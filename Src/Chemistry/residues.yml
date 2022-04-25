@@ -3,19 +3,25 @@ NT1:
   atoms:
     HT1:
       alternatives: [1HT, H1, 1H]
-      bonds: [+NR]
+      replaces: ['H']
+      bonds: [N]
       groups: ['backbone']
       symbol: H
+      nter_connected: True
     HT2:
       alternatives: [2HT, H2, 2H]
-      bonds: [+NR]
+      replaces: ['H']
+      bonds: [N]
       groups: ['backbone']
       symbol: H
+      nter_connected: True
     HT3:
       alternatives: [3HT, H3, 3H]
-      bonds: [+NR]
+      replaces: ['H']
+      bonds: [N]
       groups: ['backbone']
       symbol: H
+      nter_connected: True
   is_c_terminus: false
   is_n_terminus: true
 CT1:
@@ -23,9 +29,11 @@ CT1:
   atoms:
     OXT:
       alternatives: [OT]
-      bonds: [-CR]
+      replaces: []
+      bonds: [C]
       groups: ['backbone']
       symbol: O
+      cter_connected: True
   is_c_terminus: true
   is_n_terminus: false
 ALA:
@@ -702,8 +710,8 @@ HID:
       groups: [sidechain]
       symbol: C
     CG:
-      alternatives: [CB, CD2, ND1]
-      bonds: []
+      alternatives: []
+      bonds: [CB, CD2, ND1]
       groups: [sidechain]
       symbol: C
     H:
@@ -792,8 +800,8 @@ HIE:
       groups: [sidechain]
       symbol: C
     CG:
-      alternatives: [CB, CD2, ND1]
-      bonds: []
+      alternatives: []
+      bonds: [CB, CD2, ND1]
       groups: [sidechain]
       symbol: C
     H:
@@ -882,8 +890,8 @@ HIP:
       groups: [sidechain]
       symbol: C
     CG:
-      alternatives: [CB, CD2, ND1]
-      bonds: []
+      alternatives: []
+      bonds: [CB, CD2, ND1]
       groups: [sidechain]
       symbol: C
     H:

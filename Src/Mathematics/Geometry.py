@@ -16,9 +16,8 @@
 import numpy
 from numpy.linalg import det
 
-from Scientific.Geometry import Vector
-
 from MDANSE.Core.Error import Error
+from MDANSE.Mathematics.LinearAlgebra import Vector
 
 class GeometryError(Error):
     pass

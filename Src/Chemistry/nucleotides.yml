@@ -3,9 +3,11 @@
   atoms:
     HO5':
       alternatives: []
-      bonds: [+OR]
+      bonds: [O5']
       groups: []
       symbol: H
+      replaces: [OP1, OP2, P]
+      o5prime_connected: True
   is_3ter_terminus: false
   is_5ter_terminus: true
 3T1:
@@ -13,9 +15,11 @@
   atoms:
     HO3':
         alternatives: []
-        bonds: [-OR]
+        bonds: [O3']
         groups: []
         symbol: H
+        replaces: []
+        o3prime_connected: True
   is_3ter_terminus: true
   is_5ter_terminus: false
 DA:
@@ -184,7 +188,7 @@ DA:
   is_3ter_terminus: false
   is_5ter_terminus: false
 A:
-  alternatives: []
+  alternatives: [RA]
   atoms:
     C1':  
       alternatives: []
@@ -406,6 +410,11 @@ DG:
       bonds: [H8, N7, N9]
       groups: [base]
       symbol: C
+    H1:
+      alternatives: []
+      bonds: [N1]
+      groups: [base]
+      symbol: H
     H1':
       alternatives: []
       bonds: [C1']
@@ -458,7 +467,7 @@ DG:
       symbol: H
     N1:
       alternatives: []
-      bonds: [C2, C6]
+      bonds: [C2, C6, H1]
       groups: [base]
       symbol: N
     N2:
@@ -519,7 +528,7 @@ DG:
   is_3ter_terminus: false
   is_5ter_terminus: false
 G:
-  alternatives: []
+  alternatives: [RG]
   atoms:
     C1':  
       alternatives: []
@@ -571,6 +580,11 @@ G:
       bonds: [H8, N7, N9]
       groups: [base]
       symbol: C
+    H1:
+      alternatives: []
+      bonds: [N1]
+      groups: [base]
+      symbol: H
     H1':
       alternatives: []
       bonds: [C1']
@@ -623,7 +637,7 @@ G:
       symbol: H
     N1:
       alternatives: []
-      bonds: [C2, C6]
+      bonds: [C2, C6, H1]
       groups: [base]
       symbol: N
     N2:
@@ -854,7 +868,7 @@ DT:
   is_3ter_terminus: false
   is_5ter_terminus: false
 T:
-  alternatives: []
+  alternatives: [RT]
   atoms:
     C1':
       alternatives: []
@@ -1076,11 +1090,6 @@ DC:
       bonds: [C1']
       groups: [sugar]
       symbol: H
-    H3:
-      alternatives: []
-      bonds: [N3]
-      groups: [base]
-      symbol: H
     H2':
       alternatives: []
       bonds: [C2']
@@ -1138,7 +1147,7 @@ DC:
       symbol: N
     N3:
       alternatives: []
-      bonds: [C2, C4, H3]
+      bonds: [C2, C4]
       groups: [base]
       symbol: N
     N4:
@@ -1184,7 +1193,7 @@ DC:
   is_3ter_terminus: false
   is_5ter_terminus: false
 C:
-  alternatives: []
+  alternatives: [RC]
   atoms:
     C1':
       alternatives: []
@@ -1235,11 +1244,6 @@ C:
       alternatives: []
       bonds: [C1']
       groups: [sugar]
-      symbol: H
-    H3:
-      alternatives: []
-      bonds: [N3]
-      groups: [base]
       symbol: H
     H2':
       alternatives: []
@@ -1298,7 +1302,7 @@ C:
       symbol: N
     N3:
       alternatives: []
-      bonds: [C2, C4, H3]
+      bonds: [C2, C4]
       groups: [base]
       symbol: N
     N4:
@@ -1499,7 +1503,7 @@ DU:
   is_3ter_terminus: false
   is_5ter_terminus: false
 U:
-  alternatives: []
+  alternatives: [RU]
   atoms:
     C1':
       alternatives: []

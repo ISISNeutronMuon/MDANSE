@@ -1230,8 +1230,7 @@ class Structure:
                     self._scale_matrix = {}
                 self._scale_matrix[type[-1]] = data
                 if type[-1] == '3': # last line read
-                    from Scientific.Geometry.Transformation \
-                         import Shear, Translation
+                    from MDANSE.Mathematics.Transformation import Shear, Translation
                     l1 = self._scale_matrix['1']
                     l2 = self._scale_matrix['2']
                     l3 = self._scale_matrix['3']
@@ -1304,8 +1303,7 @@ class Structure:
 
     def findSpaceGroupTransformations(self):
         if self.space_group is not None and self.to_fractional is not None:
-            from Scientific.IO.PDBSpaceGroups import \
-                 getSpaceGroupTransformations
+            from MDANSE.IO.PDBSpaceGroups import getSpaceGroupTransformations
             try:
                 trs = getSpaceGroupTransformations(self.space_group)
             except KeyError:
