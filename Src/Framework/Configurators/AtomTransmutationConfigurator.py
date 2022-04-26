@@ -13,7 +13,8 @@
 #
 # **************************************************************************
 
-from MDANSE import ELEMENTS, REGISTRY
+from MDANSE import REGISTRY
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
@@ -68,7 +69,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         for expression,element in value:
                   
             # Otherwise, it must be a string that will be found as a user-definition keys
-            if not isinstance(expression,basestring):
+            if not isinstance(expression,str):
                 raise ConfiguratorError("Wrong format for atom transmutation configurator.",self)
                 
             if UD_STORE.has_definition(trajConfig["basename"],"atom_selection",expression):                
@@ -91,7 +92,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         :type element: str
         '''
         
-        if element not in ELEMENTS:
+        if element not in ATOMS_DATABASE:
             raise ConfiguratorError("the element %r is not registered in the database" % element, self)
 
         atomSelConfigurator = self._configurable[self._dependencies['atom_selection']]
@@ -106,7 +107,7 @@ class AtomTransmutationConfigurator(IConfigurator):
                 atomSelConfigurator["elements"][idxInSelection] = [element]
 
         atomSelConfigurator['unique_names'] = sorted(set(atomSelConfigurator['names']))
-        atomSelConfigurator['masses'] = [[ELEMENTS[n,'atomic_weight']] for n in atomSelConfigurator['names']]
+        atomSelConfigurator['masses'] = [[ATOMS_DATABASE[n]['atomic_weight']] for n in atomSelConfigurator['names']]
             
     def get_information(self):
         '''

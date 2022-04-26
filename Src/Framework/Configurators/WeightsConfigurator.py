@@ -13,7 +13,8 @@
 #
 # **************************************************************************
 
-from MDANSE import ELEMENTS, REGISTRY
+from MDANSE import REGISTRY
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import SingleChoiceConfigurator
 
@@ -35,7 +36,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         :type name: str
         '''
                 
-        SingleChoiceConfigurator.__init__(self, name, choices=ELEMENTS.numericProperties, **kwargs)
+        SingleChoiceConfigurator.__init__(self, name, choices=ATOMS_DATABASE.numeric_properties, **kwargs)
 
     def configure(self, value):
         '''
@@ -45,12 +46,12 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         :type value: one of the numeric properties of MDANSE.Data.ElementsDatabase.ElementsDatabase
         '''
         
-        if not isinstance(value,basestring):
+        if not isinstance(value,str):
             raise ConfiguratorError("Invalid type for weight. Must be a string.", self)
         
         value = value.lower()
         
-        if not value in ELEMENTS.numericProperties:
+        if not value in ATOMS_DATABASE.numeric_properties:
             raise ConfiguratorError("weight %r is not registered as a valid numeric property." % value, self)
                                          
         self['property'] = value
@@ -63,7 +64,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         for i in range(ascfg["selection_length"]):
             name = ascfg["names"][i]
             for el in ascfg["elements"][i]:
-                p = ELEMENTS[el,self["property"]]
+                p = ATOMS_DATABASE[el][self["property"]]
                 if weights.has_key(name):
                     weights[name] += p
                 else:

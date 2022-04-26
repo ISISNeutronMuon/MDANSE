@@ -27,11 +27,12 @@ cdef extern from "math.h":
 cdef inline double round(double r):
     return floor(r + 0.5) if (r > 0.0) else ceil(r - 0.5)
 
-def cog_trajectory(ndarray[np.float64_t, ndim=3]  config not None,
-                   ndarray[np.float64_t, ndim=3]  cell not None,
-                   ndarray[np.float64_t, ndim=3]  rcell not None):
+def com_trajectory(ndarray[np.float64_t, ndim=3] config not None,
+                   ndarray[np.float64_t, ndim=3] cell not None,
+                   ndarray[np.float64_t, ndim=3] rcell not None,
+                   ndarray[np.float64_t, ndim=1] masses not None):
 
-    cdef double x, y, z, refx, refy, refz, srefx, srefy, srefz, sx, sy, sz, sdx, sdy, sdz
+    cdef double x, y, z, refx, refy, refz, srefx, srefy, srefz, sx, sy, sz, sdx, sdy, sdz, sumMasses, comx, comy, comz
 
     cdef int i, j
 
@@ -48,6 +49,12 @@ def cog_trajectory(ndarray[np.float64_t, ndim=3]  config not None,
         srefx = refx*rcell[i,0,0] + refy*rcell[i,0,1] + refz*rcell[i,0,2]
         srefy = refx*rcell[i,1,0] + refy*rcell[i,1,1] + refz*rcell[i,1,2]
         srefz = refx*rcell[i,2,0] + refy*rcell[i,2,1] + refz*rcell[i,2,2]
+
+        comx = masses[0]*srefx
+        comy = masses[0]*srefy
+        comz = masses[0]*srefz
+
+        sumMasses = masses[0]
 
         # Loop over the atoms
         for 1 <= j < config.shape[1]:
@@ -72,13 +79,15 @@ def cog_trajectory(ndarray[np.float64_t, ndim=3]  config not None,
             sy = srefy + sdy
             sz = srefz + sdz
 
-            srefx += sx
-            srefy += sy
-            srefz += sz
+            comx += masses[j]*sx
+            comy += masses[j]*sy
+            comz += masses[j]*sz
 
-        srefx /= config.shape[1]
-        srefy /= config.shape[1]
-        srefz /= config.shape[1]
+            sumMasses += masses[j]
+
+        srefx /= sumMasses
+        srefy /= sumMasses
+        srefz /= sumMasses
 
         if srefx < 0.0:
             srefx += 1.0

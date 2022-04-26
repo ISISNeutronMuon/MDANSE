@@ -15,11 +15,12 @@
 
 import collections
 
+import numpy as np
+
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
-from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
 class MeanSquareDisplacement(IJob):
     """
@@ -54,14 +55,14 @@ class MeanSquareDisplacement(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
     
     settings = collections.OrderedDict()
-    settings['trajectory']=('mmtk_trajectory',{})
+    settings['trajectory']=('hdf_trajectory',{})
     settings['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['projection']=('projection', {"label":"project coordinates"})
     settings['atom_selection']=('atom_selection',{"dependencies":{'trajectory':'trajectory'}})
     settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection', 'atom_transmutation':'atom_transmutation'}})
     settings['atom_transmutation']=('atom_transmutation',{"dependencies":{'trajectory':'trajectory', 'atom_selection':'atom_selection'}})
     settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
-    settings['output_files']=('output_files', {"formats":["netcdf","ascii","svg"]})
+    settings['output_files']=('output_files', {"formats":["hdf","netcdf","ascii","svg"]})
     settings['running_mode']=('running_mode',{})
             
     def initialize(self):
@@ -91,14 +92,13 @@ class MeanSquareDisplacement(IJob):
                 
         # get atom index
         indexes = self.configuration['atom_selection']["indexes"][index]
-        masses = self.configuration['atom_selection']["masses"][index]
+        masses = np.array(self.configuration['atom_selection']["masses"][index])
                         
-        series = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
-                                       indexes,
-                                       first=self.configuration['frames']['first'],
-                                       last=self.configuration['frames']['last']+1,
-                                       step=self.configuration['frames']['step'],
-                                       weights=masses)
+        series = self.configuration["trajectory"]["instance"].read_com_trajectory(indexes,
+                                                                                  masses,
+                                                                                  first=self.configuration['frames']['first'],
+                                                                                  last=self.configuration['frames']['last']+1,
+                                                                                  step=self.configuration['frames']['step'])
          
         series = self.configuration['projection']["projector"](series)
         

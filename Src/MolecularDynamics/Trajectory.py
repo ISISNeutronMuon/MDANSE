@@ -24,7 +24,7 @@ from MMTK.Trajectory import Trajectory
 from MMTK.ChemicalObjects import isChemicalObject
 
 from MDANSE.Core.Error import Error
-from MDANSE.Extensions import cog_trajectory, fast_calculation
+from MDANSE.Extensions import com_trajectory, fast_calculation
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 
@@ -238,35 +238,36 @@ class Trajectory:
 
         return traj
 
-    def _read_cog_trajectory_nopbc(self, indexes, first, last, step=1):
+    def _read_com_trajectory_nopbc(self, coords, indexes, masses):
 
-        grp = self._h5_file['/configuration']
-        traj = grp['coordinates'][first:last:step,indexes,:]
-
-        cog_traj = np.sum(traj,axis=1)
-        cog_traj /= len(indexes)
+        cog_traj = np.sum(coords*masses[np.newaxis,:,np.newaxis],axis=1)
+        cog_traj /= np.sum(masses)
 
         return cog_traj
 
-    def read_cog_trajectory(self, indexes, first, last, step=1):
+    def read_com_trajectory(self, indexes, masses, first, last, step=1):
 
         grp = self._h5_file['/configuration']
 
-        traj = grp['coordinates'][first:last:step,indexes,:]
+        coords = grp['coordinates'][first:last:step,indexes,:]
 
         if 'unit_cell' in grp:
             unit_cell = grp['unit_cell'][first:last:step]
             inverse_unit_cell = grp['inverse_unit_cell'][first:last:step]
-            cog_traj = cog_trajectory.cog_trajectory(traj,unit_cell,inverse_unit_cell)
+            cog_traj = com_trajectory.com_trajectory(coords,unit_cell,inverse_unit_cell,masses)
         
         else:
-            cog_traj = self._cog_trajectory_nopbc(traj)
+            cog_traj = self._com_trajectory_nopbc(coords, indexes, masses)
 
         return cog_traj
 
     @property
     def chemical_system(self):
         return self._chemical_system
+
+    @property
+    def h5_file(self):
+        return self._h5_file
 
     @property
     def h5_filename(self):

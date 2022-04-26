@@ -160,7 +160,7 @@ class FieldFile(dict):
                         atoms.append(a)
 
                     if len(atoms) > 1:
-                        ac = AtomCluster(moleculeName, atoms)
+                        ac = AtomCluster(moleculeName, atoms,number=i)
                         chemicalEntities.append(ac)
                     else:                    
                         chemicalEntities.append(atoms[0])

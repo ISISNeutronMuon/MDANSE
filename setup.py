@@ -221,7 +221,7 @@ if sphinx:
             # The directory where the documentation will be built
             self.build_dir = os.path.join(buildDir,'MDANSE','Doc',self.doctype)
             
-            if isinstance(self.builder,basestring):
+            if isinstance(self.builder,str):
                 builders = [self.builder]
             else:
                 builders = self.builder
@@ -252,9 +252,9 @@ if 'linux' in sys.platform:
 EXTENSIONS = [Extension('MDANSE.Extensions.atoms_in_shell',
                         include_dirs=INCLUDE_DIR,
                         sources = [os.path.join("Extensions",'atoms_in_shell.pyx')]),
-              Extension('MDANSE.Extensions.cog_trajectory',
+              Extension('MDANSE.Extensions.com_trajectory',
                         include_dirs=INCLUDE_DIR,
-                        sources = [os.path.join("Extensions",'cog_trajectory.pyx')]),
+                        sources = [os.path.join("Extensions",'com_trajectory.pyx')]),
               Extension('MDANSE.Extensions.distance_histogram',
                         include_dirs=INCLUDE_DIR,
                         sources = [os.path.join("Extensions",'distance_histogram.pyx')]),
