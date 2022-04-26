@@ -76,6 +76,10 @@ class _Configuration:
         return self._inverse_unit_cell
 
     @property
+    def is_periodic(self):
+        return self._unit_cell is not None
+
+    @property
     def unit_cell(self):
         return self._unit_cell
 

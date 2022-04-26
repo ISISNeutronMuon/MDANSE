@@ -24,9 +24,9 @@ class AtomSelectionParserError(Error):
 
 class AtomSelectionParser(object):
         
-    def __init__(self, universe):
+    def __init__(self, chemicalSystem):
         
-        self._universe = universe
+        self._chemicalSystem = chemicalSystem
                 
     def operator_and(self, token):
         
@@ -36,7 +36,7 @@ class AtomSelectionParser(object):
 
     def operator_not(self, token):
                                 
-        return 'REGISTRY[%r]["all"](universe).select() - %s' % ("selector",token[0][1])
+        return 'REGISTRY[%r]["all"](chemicalSystem).select() - %s' % ("selector",token[0][1])
 
     def operator_or(self, token):
         
@@ -54,7 +54,7 @@ class AtomSelectionParser(object):
     
     def parse_keyword(self, token):
                             
-        return 'REGISTRY[%r]["%s"](universe).select' % ("selector",token[0])
+        return 'REGISTRY[%r]["%s"](chemicalSystem).select' % ("selector",token[0])
     
     def parse_selection_expression(self, expression):
                 
@@ -79,7 +79,7 @@ class AtomSelectionParser(object):
 
         try:          
             parsedExpression = grammar.transformString(expression)
-            namespace={"REGISTRY":REGISTRY,"universe":self._universe}
+            namespace={"REGISTRY":REGISTRY,"chemicalSystem":self._chemicalSystem}
             selection = eval(parsedExpression,namespace)
         except:
             raise AtomSelectionParserError("%r is not a valid selection string expression" % expression)

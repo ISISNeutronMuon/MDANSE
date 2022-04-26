@@ -15,6 +15,7 @@
 
 import copy
 import os
+import numbers
 
 import yaml
 
@@ -346,7 +347,7 @@ class AtomsDatabase:
         return len(self._data)
 
     @property
-    def nProperties(self):
+    def n_properties(self):
         '''
         Return the number of properties stored in the atoms database.
         
@@ -357,7 +358,7 @@ class AtomsDatabase:
         return len(self._properties)
     
     @property
-    def numericProperties(self):
+    def numeric_properties(self):
         '''
         Return the names of the numeric properties stored in the atoms database.
 
@@ -365,7 +366,15 @@ class AtomsDatabase:
         :rtype: list
         '''
 
-        return self.get_numeric_properties()    
+        num_properties = []
+        for prop in self._properties:
+            for v in self._data.values():
+                if not isinstance(v[prop],numbers.Number):
+                    break
+            else:
+                num_properties.append(prop)
+            
+        return num_properties
             
     def _reset(self):
         '''
@@ -829,4 +838,10 @@ class ResiduesDatabase(object):
         '''
         
         with open(ResiduesDatabaseError._USER_DATABASE,'w') as fout:
-            yaml.dump(self._data,fout)                        
+            yaml.dump(self._data,fout)
+
+if __name__ == '__main__':
+
+    from MDANSE.Chemistry import ATOMS_DATABASE
+
+    print(ATOMS_DATABASE.numeric_properties)

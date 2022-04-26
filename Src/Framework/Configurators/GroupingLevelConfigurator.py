@@ -80,7 +80,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         trajConfig = self._configurable[self._dependencies['trajectory']]
         atomSelectionConfig = self._configurable[self._dependencies['atom_selection']]
 
-        allAtoms = sorted(trajConfig["universe"].atomList(), key = operator.attrgetter('index'))
+        allAtoms = sorted(trajConfig["chemical_system"].atom_list(), key = operator.attrgetter('index'))
 
         groups = collections.OrderedDict()
         for i in range(atomSelectionConfig["selection_length"]):
@@ -88,7 +88,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
             el = atomSelectionConfig["elements"][i][0]
             mass = atomSelectionConfig["masses"][i][0]
             at = allAtoms[idx]
-            lvl = LEVELS[value][at.topLevelChemicalObject().__class__.__name__.lower()]
+            lvl = LEVELS[value][at.top_level_chemical_entity().__class__.__name__.lower()]
             parent = self.find_parent(at,lvl)
             d = groups.setdefault(parent,{})
             d.setdefault("indexes",[]).append(idx)

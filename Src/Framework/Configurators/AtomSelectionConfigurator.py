@@ -16,7 +16,8 @@
 import collections
 import operator
 
-from MDANSE import ELEMENTS, REGISTRY
+from MDANSE import REGISTRY
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
@@ -63,7 +64,7 @@ class AtomSelectionConfigurator(IConfigurator):
         if value is None:
             value = ['all']
 
-        if isinstance(value,basestring):
+        if isinstance(value,str):
             value = [value]
 
         if not isinstance(value,(list,tuple)):
@@ -79,14 +80,14 @@ class AtomSelectionConfigurator(IConfigurator):
                 ud = UD_STORE.get_definition(trajConfig["basename"],"atom_selection",v)
                 indexes.update(ud["indexes"])
             else:
-                parser = AtomSelectionParser(trajConfig["instance"])
+                parser = AtomSelectionParser(trajConfig["instance"].chemical_system)
                 indexes.update(parser.parse(v))
 
         self["flatten_indexes"] = sorted(list(indexes))
 
         trajConfig = self._configurable[self._dependencies['trajectory']]
 
-        atoms = sorted(trajConfig["universe"].atomList(), key = operator.attrgetter('index'))
+        atoms = sorted(trajConfig["chemical_system"].atom_list(), key = operator.attrgetter('index'))
         selectedAtoms = [atoms[idx] for idx in self["flatten_indexes"]]
 
         self["selection_length"] = len(self["flatten_indexes"])
@@ -95,7 +96,7 @@ class AtomSelectionConfigurator(IConfigurator):
         self['elements'] = [[at.symbol] for at in selectedAtoms]
         self['names'] = [at.symbol for at in selectedAtoms]
         self['unique_names'] = sorted(set(self['names']))
-        self['masses'] = [[ELEMENTS[n,'atomic_weight']] for n in self['names']]
+        self['masses'] = [[ATOMS_DATABASE[n]['atomic_weight']] for n in self['names']]
 
     def get_natoms(self):
 
