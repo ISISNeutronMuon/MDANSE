@@ -16,7 +16,7 @@
 import wx
 import wx.lib.fancytext as wxfancytext
 
-from MDANSE import ELEMENTS
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 
 _LAYOUT = {} 
@@ -210,11 +210,11 @@ class ElementInfoFrame(wx.Frame):
         mainSizer = wx.BoxSizer(wx.VERTICAL)
                         
         # A text widget is created to display the information about the selected element.
-        text = wx.StaticText(mainPanel,wx.ID_ANY,label=ELEMENTS.info(element))
+        text = wx.StaticText(mainPanel,wx.ID_ANY,label=ATOMS_DATABASE.info(element))
 
         # The background color of the text widget is set.
         mainPanel.SetBackgroundColour(wx.Colour(255,236,139))
-        info = ELEMENTS.get_element(element)
+        info = ATOMS_DATABASE[element]
         bgColor = _FAMILY[info['family']]
         mainPanel.SetBackgroundColour(bgColor)
 
@@ -225,7 +225,7 @@ class ElementInfoFrame(wx.Frame):
         mainSizer.Add(text, 1, wx.ALL|wx.EXPAND, 5)
         
         # An hyperlink widget is created for opening the url about the selected element.
-        hyperlink = wx.HyperlinkCtrl(mainPanel, wx.ID_ANY, label="More about %s" % ELEMENTS[element,'name'], url=ELEMENTS[element,'url'])
+        hyperlink = wx.HyperlinkCtrl(mainPanel, wx.ID_ANY, label="More about %s" % ATOMS_DATABASE[element]['element'], url=ATOMS_DATABASE[element]['url'])
         
         # The hyperlink widget is added to the main panel sizer.
         mainSizer.Add(hyperlink, 0, wx.ALL|wx.EXPAND, 5)
@@ -350,10 +350,10 @@ class ElementShortInfoPanel(wx.Panel):
         self.Freeze()
                 
         # The element database instance.
-        element = ELEMENTS.get_element(element)
+        info = ATOMS_DATABASE[element]
         
         # Its chemical family.
-        family = element['family']
+        family = info['family']
         color = _FAMILY.get(family,_FAMILY['default'])
 
         # Change the main panel background color according to the element chemical family.        
@@ -361,17 +361,17 @@ class ElementShortInfoPanel(wx.Panel):
                         
         # Updates the different static text according to the new element properties.
         self.family.SetLabel("%s " % family)
-        self.symbol.SetLabel(element['symbol'])
-        self.z.SetLabel("%4s" % element['proton'])
-        self.position.SetLabel("%2s,%s,%s" % (element['group'], element['period'], element['block']))
-        self.atom.SetLabel(element['name'])
-        self.atomicWeight.SetLabel("%s" % element['atomic_weight'])
-        self.electroNegativity.SetLabel("%s" % element['electronegativity'])
-        self.electroAffinity.SetLabel("%s" % element['electroaffinity'])
-        self.ionizationEnergy.SetLabel("%s" % element['ionization_energy'])
+        self.symbol.SetLabel(info['symbol'])
+        self.z.SetLabel("%4s" % info['proton'])
+        self.position.SetLabel("%2s,%s,%s" % (info['group'], info['period'], info['block']))
+        self.atom.SetLabel(info['element'])
+        self.atomicWeight.SetLabel("%s" % info['atomic_weight'])
+        self.electroNegativity.SetLabel("%s" % info['electronegativity'])
+        self.electroAffinity.SetLabel("%s" % info['electroaffinity'])
+        self.ionizationEnergy.SetLabel("%s" % info['ionization_energy'])
 
         label = []
-        for orb in element['configuration'].split():
+        for orb in info['configuration'].split():
             if not orb.startswith('[') and len(orb) > 2:
                 orb = orb[:2] + '<sup>' + orb[2:] + '</sup>'
             label.append(orb)
@@ -433,15 +433,14 @@ class PeriodicTableViewer(wx.Frame):
         mainSizer.Add(self.shortInfo, (1,5), (3,7), flag=wx.ALL|wx.ALIGN_CENTER|wx.FIXED_MINSIZE|wx.EXPAND, border=1)
 
         symbs = []
-        for el in ELEMENTS.elements:
-            info = ELEMENTS.get_element(el)
+        for el,info in ATOMS_DATABASE.items():
             if info['symbol'] in symbs:
                 continue
             symbs.append(info['symbol'])
             try:
                 r,c = _LAYOUT[info['symbol']]
                 wid = wx.TextCtrl(mainPanel,wx.ID_ANY,value=info["symbol"],size=(40,40),style=wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.TE_READONLY|wx.NO_BORDER)
-                wid.SetToolTipString(info['name'])
+                wid.SetToolTipString(info['element'])
                 bgColor = _FAMILY[info['family']]
                 wid.SetBackgroundColour(bgColor)
                 fgColor = _STATE[info['state']]
@@ -480,7 +479,7 @@ class PeriodicTableViewer(wx.Frame):
         menu = wx.Menu()
         
         # The natural element and its different isotopes are appended to the menu.
-        for iso in ELEMENTS.get_isotopes(element):
+        for iso in ATOMS_DATABASE.get_isotopes(element):
             item = menu.Append(wx.ID_ANY, iso)
             menu.Bind(wx.EVT_MENU, self.on_display_element_info, item)            
 
