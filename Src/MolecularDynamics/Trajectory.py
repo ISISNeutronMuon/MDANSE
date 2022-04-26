@@ -24,7 +24,7 @@ from MMTK.Trajectory import Trajectory
 from MMTK.ChemicalObjects import isChemicalObject
 
 from MDANSE.Core.Error import Error
-from MDANSE.Extensions import fast_calculation
+from MDANSE.Extensions import cog_trajectory, fast_calculation
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 
@@ -238,6 +238,32 @@ class Trajectory:
 
         return traj
 
+    def _read_cog_trajectory_nopbc(self, indexes, first, last, step=1):
+
+        grp = self._h5_file['/configuration']
+        traj = grp['coordinates'][first:last:step,indexes,:]
+
+        cog_traj = np.sum(traj,axis=1)
+        cog_traj /= len(indexes)
+
+        return cog_traj
+
+    def read_cog_trajectory(self, indexes, first, last, step=1):
+
+        grp = self._h5_file['/configuration']
+
+        traj = grp['coordinates'][first:last:step,indexes,:]
+
+        if 'unit_cell' in grp:
+            unit_cell = grp['unit_cell'][first:last:step]
+            inverse_unit_cell = grp['inverse_unit_cell'][first:last:step]
+            cog_traj = cog_trajectory.cog_trajectory(traj,unit_cell,inverse_unit_cell)
+        
+        else:
+            cog_traj = self._cog_trajectory_nopbc(traj)
+
+        return cog_traj
+
     @property
     def chemical_system(self):
         return self._chemical_system
@@ -300,17 +326,20 @@ class TrajectoryWriter:
                 dset[-1] = v
 
         unit_cell = configuration.unit_cell
-        if unit_cell is None:
-            return
+        inverse_unit_cell = configuration.inverse_unit_cell
+        if unit_cell is not None:
+            if 'unit_cell' not in configuration_grp:
+                configuration_grp.create_dataset('unit_cell',data=unit_cell[np.newaxis,:,:],maxshape=(None,3,3))
+                configuration_grp.create_dataset('inverse_unit_cell',data=inverse_unit_cell[np.newaxis,:,:],maxshape=(None,3,3))
+            else:
+                unit_cell_dset = configuration_grp['unit_cell']
+                unit_cell_dset.resize((unit_cell_dset.shape[0]+1,3,3))
+                unit_cell_dset[-1] = unit_cell
 
-        if 'unit_cell' not in configuration_grp:
-            dset = configuration_grp.create_dataset('unit_cell',
-                                                    data=unit_cell[np.newaxis,:,:],
-                                                    maxshape=(None,3,3))
-        else:
-            dset = configuration_grp['unit_cell']
-            dset.resize((dset.shape[0]+1,3,3))
-            dset[-1] = unit_cell
+                inverse_unit_cell_dset = configuration_grp['inverse_unit_cell']
+                inverse_unit_cell_dset.resize((inverse_unit_cell_dset.shape[0]+1,3,3))
+                inverse_unit_cell_dset[-1] = inverse_unit_cell
+
 
         if 'time' not in configuration_grp:
             configuration_grp.create_dataset('time',data=[time],maxshape=(None,),dtype=float)
@@ -342,28 +371,52 @@ if __name__ == '__main__':
     # print(t.read_atom_trajectory(2))
     # t.close()
 
-    import numpy as np
+    # import numpy as np
+
+    # from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+
+    # from MDANSE.Chemistry.ChemicalEntity import Atom
+    # cs = ChemicalSystem()
+    # for i in range(768):
+    #     cs.add_chemical_entity(Atom(symbol='H'))
+
+    # coords = np.load('coords.npy')
+    # unit_cell = np.load('unit_cell.npy')
+    
+    # tw = TrajectoryWriter('waterbox.h5',cs)
+
+    # n_frames = coords.shape[0]
+    # for i in range(n_frames):
+    #     c = RealConfiguration(cs,coords[i,:,:],unit_cell[i,:,:])
+    #     cs.configuration = c
+    #     tw.dump_configuration()
+    
+    # tw.close()
+
+    # t = Trajectory('waterbox.h5')
+    # t.close()
 
     from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 
     from MDANSE.Chemistry.ChemicalEntity import Atom
     cs = ChemicalSystem()
-    for i in range(768):
+    for i in range(2):
         cs.add_chemical_entity(Atom(symbol='H'))
 
-    coords = np.load('coords.npy')
-    unit_cell = np.load('unit_cell.npy')
-    
-    tw = TrajectoryWriter('waterbox.h5',cs)
+    tw = TrajectoryWriter('test.h5',cs)
+    unit_cell = 10.0*np.identity(3)
 
-    n_frames = coords.shape[0]
-    for i in range(n_frames):
-        c = RealConfiguration(cs,coords[i,:,:],unit_cell[i,:,:])
-        cs.configuration = c
-        tw.dump_configuration()
-    
+    coords = np.empty((2,3),dtype=np.float)
+    coords[0,:] = [-4,0,0]
+    coords[1,:] = [ 4,0,0]
+
+    c = RealConfiguration(cs,coords,unit_cell)
+    cs.configuration = c
+    tw.dump_configuration(1.0)
     tw.close()
 
-    t = Trajectory('waterbox.h5')
+    t = Trajectory('test.h5')
+    print(t.read_cog_trajectory([0,1],0,10,1).shape)
     t.close()
+
 
