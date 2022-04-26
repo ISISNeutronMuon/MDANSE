@@ -105,7 +105,7 @@ class BoxConfiguration(_Configuration):
         if self._unit_cell is None:
             return
         else:
-            return np.matmul(self._unit_cell,self._variables['coordinates'].T).T
+            return np.matmul(self._variables['coordinates'],self._unit_cell)
 
     def atomsInShell(self, ref, mini=0.0, maxi=10.0):
 
@@ -139,14 +139,14 @@ class RealConfiguration(_Configuration):
         frac = np.where(frac < 0.0, frac + 1.0, frac)
         frac = np.where(frac > 0.5, frac - 1.0, frac)
 
-        self._variables['coordinates'] = np.matmul(self._unit_cell,frac.T).T
+        self._variables['coordinates'] = np.matmul(frac,self._unit_cell)
 
     def to_box_coordinates(self):
 
         if self._inverse_unit_cell is None:
             return self._variables['coordinates']
         else:
-            return np.matmul(self._inverse_unit_cell,self._variables['coordinates'].T).T
+            return np.matmul(self._variables['coordinates'],self._inverse_unit_cell)
 
     def to_real_coordinates(self):
 
