@@ -460,8 +460,12 @@ class PDBReader:
 
 if __name__ == '__main__':
 
-    pdb_reader = PDBReader('/home/pellegrini/git/MDANSE/Data/PDB/1gip.pdb')
+    print('Reading')
+    pdb_reader = PDBReader('/home/pellegrini/git/MDANSE/Data/PDB/2vb1.pdb')
+    print('Building chemical system')
     cs = pdb_reader.build_chemical_system()
+    print('Serializing')
     cs.serialize('test.h5')
+    print('Loading')
     cs.load('test.h5')
     print(cs.chemical_entities)

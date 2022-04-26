@@ -20,8 +20,8 @@ import re
 import numpy
 
 from MDANSE import REGISTRY
-from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
+from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem, Molecule, translate_atom_names
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
@@ -142,21 +142,28 @@ class FieldFile(dict):
         for moleculeName, nMolecules, atomicContents in self["molecules"]:
             
             # Loops over the number of molecules of the current type.
-            for _ in range(nMolecules):
+            for i in range(nMolecules):
                 
-                # This list will contains the MMTK instance of the atoms of the molecule.
-                temp = []
-                
-                # Loops over the atom of the molecule.
-                for i, (name, element) in enumerate(atomicContents):
-                    # The atom is created.
-                    a = Atom(symbol=element, name="%s%s" % (name,i))
-                    temp.append(a)
+                try:
+                    mol = Molecule(moleculeName,number=i)
+                    renamedAtoms = translate_atom_names(MOLECULES_DATABASE,moleculeName,[name for name,_ in atomicContents])
+                    mol.reorder_atoms(renamedAtoms)
+                    chemicalEntities.append(mol)
+                except:
+                    # This list will contains the MMTK instance of the atoms of the molecule.
+                    atoms = []
+                    
+                    # Loops over the atom of the molecule.
+                    for j, (name, element) in enumerate(atomicContents):
+                        # The atom is created.
+                        a = Atom(symbol=element, name="%s%s" % (name,j))
+                        atoms.append(a)
 
-                if len(temp) > 1:
-                    temp = [AtomCluster(moleculeName, temp)]
-                
-                chemicalEntities.append(temp[0])
+                    if len(atoms) > 1:
+                        ac = AtomCluster(moleculeName, atoms)
+                        chemicalEntities.append(ac)
+                    else:                    
+                        chemicalEntities.append(atoms[0])
                     
         for ce in chemicalEntities:
             chemicalSystem.add_chemical_entity(ce)
@@ -326,13 +333,13 @@ class DL_POLYConverter(Converter):
         
         conf.fold_coordinates()
 
-        self._chemicalSystem.configuration = conf
-
         if self._velocities is not None:
             conf["velocities"] = config[:,3:6]
 
         if self._gradients is not None:
-            config["gradients"] = config[:,6:9]
+            conf["gradients"] = config[:,6:9]
+
+        self._chemicalSystem.configuration = conf
 
         self._trajectory.dump_configuration(time)
                                                                         
