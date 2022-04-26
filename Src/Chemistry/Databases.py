@@ -422,7 +422,11 @@ class MoleculesDatabase(object):
         :rtype: bool
         '''
         
-        return self._data.has_key(molecule)
+        for k, v in self._data.items():
+            if molecule == k or molecule in v['alternatives']:
+                return True
+
+        return False
 
     def __getitem__(self,item):
         '''
@@ -437,9 +441,10 @@ class MoleculesDatabase(object):
         :type item: str or tuple
         '''
 
-        try:
-            return copy.deepcopy(self._data[item])
-        except KeyError:                
+        for k, v in self._data.items():
+            if item == k or item in v['alternatives']:
+                return copy.deepcopy(self._data[k])
+        else:
             raise MoleculesDatabaseError("The molecule {} is not registered in the database.".format(item))
 
     def __iter__(self):
@@ -564,8 +569,12 @@ class NucleotidesDatabase(object):
         :return: True if the database contains a given element
         :rtype: bool
         '''
+
+        for k, v in self._data.items():
+            if nucleotide == k or nucleotide in v['alternatives']:
+                return True
         
-        return self._data.has_key(nucleotide)
+        return False
 
     def __getitem__(self,item):
         '''

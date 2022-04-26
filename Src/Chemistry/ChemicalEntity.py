@@ -248,7 +248,6 @@ class Molecule(_ChemicalEntity):
     def _build(self, code, number = None):
 
         for molname, molinfo in MOLECULES_DATABASE.items():
-
             if code == molname or code in molinfo['alternatives']:
                 break
         else:
@@ -861,13 +860,27 @@ class Protein(_ChemicalEntity):
                 atoms.append(at)
         return atoms
 
+def translate_atom_names(database, molname, atoms):
+
+    if not molname in database:
+        raise UnknownMoleculeError('The molecule {} is unknown'.format(molname))
+
+    renamed_atoms = []
+    for atom in atoms:
+        for dbat, dbinfo in database[molname]['atoms'].items():
+            if dbat == atom or atom in dbinfo['alternatives']:
+                renamed_atoms.append(dbat)
+                break
+        else:
+            raise UnknownAtomError('The atom {} is unknown'.format(atom))
+
+    return renamed_atoms
+
 class ChemicalSystem(_ChemicalEntity):
 
     def __init__(self):
 
         self._chemical_entities = []
-
-        self._unit_cell = None
 
         self._configuration = None
 
@@ -955,3 +968,4 @@ class ChemicalSystem(_ChemicalEntity):
         grp.create_dataset('contents', data=contents, dtype=string_dt)
 
         h5_file.close()
+
