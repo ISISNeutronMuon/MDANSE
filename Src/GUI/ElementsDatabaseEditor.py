@@ -13,51 +13,13 @@
 #
 # **************************************************************************
 
-import os
-
 import wx
 import wx.grid as wxgrid
 
-from MDANSE import ELEMENTS, PLATFORM
+from MDANSE import PLATFORM
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
-
-
-def create_mmtk_atom_entry(entryname, name, symbol, mass, **props):
-    """
-    Creates a new atom in mmtk database.
-
-    :param entryname: the basename of the file in which the atom entry will be stored
-    :type entryname: str
-    :param name: the name of the atom as will be recorded in the file
-    :type name: str
-    :param symbol:
-    :type symbol: str
-    :param mass: the mass of the atom
-    :type mass: float
-
-    :return: the absolute path of the file that stores the newly created atom
-    :rtype: str
-    """
-
-    # Every entry of the MMTK database is searched in lower case.
-    entryname = entryname.lower()
-
-    filename = os.path.join(PLATFORM.local_mmtk_database_directory(), "Atoms", entryname)
-
-    f = open(filename, 'w')
-    # This three entries are compulsory for a MMTK.Atom to be valid
-    f.write('name = "%s"' % name)
-    f.write('\n\nsymbol = "%s"' % symbol)
-    f.write('\n\nmass = %f' % mass)
-
-    for k, v in props.items():
-        f.write('\n\n%s = %r' % (k, v))
-
-    f.close()
-
-    return filename
-
 
 class ElementsDatabaseError(Error):
     pass
@@ -82,14 +44,12 @@ class NewElementDialog(wx.Dialog):
 
         # Create text and answer box widgets
         staticLabel0 = wx.StaticText(panel, -1, "Enter element settings")
-        staticLabel1 = wx.StaticText(panel, wx.ID_ANY, "Entry name")
+        staticLabel1 = wx.StaticText(panel, wx.ID_ANY, "Short name")
         self._entry = wx.TextCtrl(panel, wx.ID_ANY)
-        staticLabel2 = wx.StaticText(panel, wx.ID_ANY, "Atom name")
-        self._name = wx.TextCtrl(panel, id=wx.ID_ANY)
-        staticLabel3 = wx.StaticText(panel, wx.ID_ANY, "Atom symbol")
+        staticLabel2 = wx.StaticText(panel, wx.ID_ANY, "Long name")
+        self._element = wx.TextCtrl(panel, id=wx.ID_ANY)
+        staticLabel3 = wx.StaticText(panel, wx.ID_ANY, "Symbol")
         self._symbol = wx.TextCtrl(panel, wx.ID_ANY)
-        staticLabel4 = wx.StaticText(panel, wx.ID_ANY, "Atom Mass (uma)")
-        self._mass = wx.TextCtrl(panel, id=wx.ID_ANY)
 
         # Create buttons
         ok = wx.Button(panel, wx.ID_OK, "OK")
@@ -105,11 +65,9 @@ class NewElementDialog(wx.Dialog):
         body_sizer.Add(staticLabel1, flag=wx.ALIGN_CENTER_VERTICAL | wx.LEFT, border=10)
         body_sizer.Add(self._entry, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT | wx.EXPAND, border=10)
         body_sizer.Add(staticLabel2, flag=wx.ALIGN_CENTER_VERTICAL | wx.LEFT, border=10)
-        body_sizer.Add(self._name, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT | wx.EXPAND, border=10)
+        body_sizer.Add(self._element, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT | wx.EXPAND, border=10)
         body_sizer.Add(staticLabel3, flag=wx.ALIGN_CENTER_VERTICAL | wx.LEFT, border=10)
         body_sizer.Add(self._symbol, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT | wx.EXPAND, border=10)
-        body_sizer.Add(staticLabel4, flag=wx.ALIGN_CENTER_VERTICAL | wx.LEFT, border=10)
-        body_sizer.Add(self._mass, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT | wx.EXPAND, border=10)
         main_sizer.Add(body_sizer, 0, wx.ALL | wx.EXPAND, 5)
 
         # Place buttons to appear as a standard dialogue
@@ -138,26 +96,23 @@ class NewElementDialog(wx.Dialog):
         if not entry:
             raise ElementsDatabaseError("Empty entry name")
 
-        name = str(self._name.GetValue().strip())
-        if not name:
+        element = str(self._element.GetValue().strip())
+        if not element:
             raise ElementsDatabaseError("Empty name")
 
         symbol = str(self._symbol.GetValue().strip())
         if not symbol:
             raise ElementsDatabaseError("Empty symbol")
 
-        try:
-            mass = float(self._mass.GetValue().strip())
-        except ValueError:
-            raise ElementsDatabaseError("Invalid mass value")
-
-        return entry, name, symbol, mass
+        return entry, element, symbol
 
 
 class NewPropertyDialog(wx.Dialog):
     """
     This class pops up a dialog that prompts the user for registering a new property in the database.
     """
+
+    _PROPERTY_TYPES = {'str':str,'int':int,'float':float}
 
     def __init__(self, *args, **kwargs):
         """
@@ -176,7 +131,7 @@ class NewPropertyDialog(wx.Dialog):
         staticLabel1 = wx.StaticText(panel, wx.ID_ANY, "Name")
         self.name = wx.TextCtrl(panel, wx.ID_ANY)
         staticLabel2 = wx.StaticText(panel, wx.ID_ANY, "Numeric type")
-        self.propertyType = wx.ComboBox(panel, id=wx.ID_ANY, choices=ELEMENTS._TYPES.keys(), style=wx.CB_READONLY)
+        self.propertyType = wx.ComboBox(panel, id=wx.ID_ANY, choices=self._PROPERTY_TYPES.keys(), style=wx.CB_READONLY)
 
         # Create button widgets
         cancel = wx.Button(panel, wx.ID_CANCEL, "Cancel")
@@ -190,7 +145,7 @@ class NewPropertyDialog(wx.Dialog):
         # Create sizer for the other texts and the answer boxes, and add the widets
         body_sizer = wx.FlexGridSizer(rows=2, cols=2, vgap=15, hgap=20)
         main_sizer.Add(body_sizer, flag=wx.EXPAND)
-        body_sizer.Add(staticLabel1, flag=wx.ALIGN_LEFT | wx.LEFT, border=10)
+        body_sizer.Add(staticLabel1, flag=wx.ALIGN_LEFT | wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=10)
         body_sizer.Add(self.name, flag=wx.ALIGN_LEFT | wx.EXPAND | wx.RIGHT, border=10)
         body_sizer.Add(staticLabel2, flag=wx.ALIGN_LEFT | wx.LEFT, border=10)
         body_sizer.Add(self.propertyType, flag=wx.ALIGN_LEFT | wx.EXPAND | wx.RIGHT, border=10)
@@ -219,47 +174,52 @@ class NewPropertyDialog(wx.Dialog):
 
         pname = str(self.name.GetValue().strip())
 
-        pdefault = str(self.propertyType.GetValue())
+        pclass = str(self.propertyType.GetValue())
 
-        return pname, pdefault
+        pclass = self._PROPERTY_TYPES[pclass]
+
+        return pname, pclass
 
 
 class Database(wxgrid.PyGridTableBase):
     __metaclass__ = Singleton
 
     def GetColLabelValue(self, col):
-        return "%s" % ELEMENTS.properties[col]
+        return "%s" % ATOMS_DATABASE.properties[col]
 
     def GetNumberCols(self):
-        return ELEMENTS.nProperties
+        return ATOMS_DATABASE.n_properties
 
     def GetNumberRows(self):
-        return ELEMENTS.nElements
+        return ATOMS_DATABASE.n_elements
 
     def GetRowLabelValue(self, row):
-        return ELEMENTS.elements[row]
+        return ATOMS_DATABASE.atoms[row]
 
     def GetValue(self, row, col):
-        return ELEMENTS[ELEMENTS.elements[row], ELEMENTS.properties[col]]
+        return ATOMS_DATABASE[row].get(ATOMS_DATABASE.properties[col],None)
 
     def SetValue(self, row, col, val):
-        ELEMENTS[ELEMENTS.elements[row], ELEMENTS.properties[col]] = val
+        atom = ATOMS_DATABASE.atoms[row]
+        prop = ATOMS_DATABASE.properties[col]
 
-    def add_column(self, pname, pdefault):
-        ELEMENTS.add_property(pname, pdefault)
+        oldValue = ATOMS_DATABASE[atom].get(prop,str())
+
+        ATOMS_DATABASE.set_property(atom,prop,type(oldValue)(val))
+
+    def add_column(self, pname,pclass):
+        ATOMS_DATABASE.add_property(pname,default=pclass())
 
         self.notify_grid(wxgrid.GRIDTABLE_NOTIFY_COLS_APPENDED, 1)
 
-    def add_row(self, entry, name, symbol, mass):
-        if ELEMENTS.has_element(entry):
+    def add_row(self, entry, element, symbol):
+
+        if ATOMS_DATABASE.has_atom(entry):
             return
 
-        create_mmtk_atom_entry(entry, name, symbol, mass)
-
-        ELEMENTS.add_element(entry)
-        ELEMENTS[entry, "name"] = name
-        ELEMENTS[entry, "symbol"] = symbol
-        ELEMENTS[entry, "atomic_weight"] = mass
+        ATOMS_DATABASE.add_atom(entry)
+        ATOMS_DATABASE.set_property(entry,"element",element)
+        ATOMS_DATABASE.set_property(entry,"symbol",symbol)
 
         self.notify_grid(wxgrid.GRIDTABLE_NOTIFY_ROWS_APPENDED, 1)
 
@@ -271,13 +231,8 @@ class Database(wxgrid.PyGridTableBase):
         self.GetView().ProcessTableMessage(tbl_msg)
 
     @staticmethod
-    def saveas(fmt, filename):
-        ELEMENTS.export(fmt, filename)
-
-    @staticmethod
-    def save(fmt="csv", filename=None):
-        ELEMENTS.save()
-
+    def save():
+        ATOMS_DATABASE.save()
 
 class ElementsDatabaseEditor(wx.Frame):
 
@@ -339,7 +294,6 @@ class ElementsDatabaseEditor(wx.Frame):
 
         fileMenu = wx.Menu()
         saveItem = fileMenu.Append(wx.ID_ANY, '&Save database\tCtrl+S')
-        saveasItem = fileMenu.Append(wx.ID_ANY, '&Save database as ...\tCtrl+Shift+S')
         menubar.Append(fileMenu, "File")
 
         databaseMenu = wx.Menu()
@@ -351,7 +305,6 @@ class ElementsDatabaseEditor(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_add_property, addPropertyItem)
 
         self.Bind(wx.EVT_MENU, self.on_save_database, saveItem)
-        self.Bind(wx.EVT_MENU, self.on_saveas_database, saveasItem)
 
         self.SetMenuBar(menubar)
 
@@ -360,7 +313,6 @@ class ElementsDatabaseEditor(wx.Frame):
         menu = wx.Menu()
 
         saveItem = menu.Append(wx.ID_ANY, 'Save database')
-        saveasItem = menu.Append(wx.ID_ANY, 'Save database as ...')
         menu.AppendSeparator()
 
         addElementItem = menu.Append(wx.ID_ANY, 'New element')
@@ -370,7 +322,6 @@ class ElementsDatabaseEditor(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_add_property, addPropertyItem)
 
         self.Bind(wx.EVT_MENU, self.on_save_database, saveItem)
-        self.Bind(wx.EVT_MENU, self.on_saveas_database, saveasItem)
 
         self.PopupMenu(menu)
 
@@ -404,9 +355,9 @@ class ElementsDatabaseEditor(wx.Frame):
             return
 
         # Get rid of wxpython unicode string formatting
-        entry, name, symbol, mass = d.GetValue()
+        entry, element, symbol = d.GetValue()
 
-        self._database.add_row(entry, name, symbol, mass)
+        self._database.add_row(entry, element, symbol)
 
     def on_add_property(self, message):
         """
@@ -418,7 +369,7 @@ class ElementsDatabaseEditor(wx.Frame):
         if d.ShowModal() == wx.ID_CANCEL:
             return
 
-        pname, pdefault = d.GetValue()
+        pname, pclass = d.GetValue()
 
         if not pname:
             return
@@ -426,7 +377,7 @@ class ElementsDatabaseEditor(wx.Frame):
         # Get rid of wxpython unicode string formatting
         pname = str(pname)
 
-        self._database.add_column(pname, pdefault)
+        self._database.add_column(pname,pclass)
 
     def on_save_database(self, event=None):
         """
@@ -440,32 +391,6 @@ class ElementsDatabaseEditor(wx.Frame):
             return
 
         self._database.save()
-
-    def on_saveas_database(self, event=None):
-        """
-        Handler called when the user saves the database to any location.
-        """
-
-        d = wx.FileDialog(self,
-                          message="Save database as ...",
-                          defaultDir=os.getcwd(),
-                          defaultFile="elements_database",
-                          wildcard="XML file (*.xml)|*.xml|CSV file (*.csv)|*.csv",
-                          style=wx.SAVE | wx.FD_OVERWRITE_PROMPT)
-
-        if d.ShowModal() == wx.ID_CANCEL:
-            return
-
-        filename = str(d.GetPath())
-
-        if d.GetFilterIndex() == 0:
-            fmt = 'xml'
-
-        elif d.GetFilterIndex() == 1:
-            fmt = 'csv'
-
-        self._database.saveas(fmt, filename)
-
 
 if __name__ == "__main__":
     app = wx.App(False)

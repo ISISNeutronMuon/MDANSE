@@ -111,6 +111,12 @@ class AtomsDatabase:
         :type item: str or tuple
         '''
 
+        if isinstance(item,int):
+            elements = sorted(self._data.keys())
+            if item < 0 or item >= len(elements):
+                raise AtomsDatabaseError("Invalid element index")
+            item = elements[item]
+
         try:
             return copy.deepcopy(self._data[item])
         except KeyError:                
@@ -167,7 +173,7 @@ class AtomsDatabase:
 
         self._data[atom] = {}
             
-    def add_property(self, pname):
+    def add_property(self, pname, default=None):
         '''
         Add a new property to the elements database.
         
@@ -187,7 +193,7 @@ class AtomsDatabase:
         self._properties.add(pname)
 
         for element in self._data.values():
-            element[pname] = None
+            element[pname] = default
                                     
     @property
     def atoms(self):
@@ -198,7 +204,7 @@ class AtomsDatabase:
         :rtype: list
         '''
         
-        return self._data.keys()
+        return sorted(self._data.keys())
 
     def get_isotopes(self,atom):
         '''
@@ -228,7 +234,7 @@ class AtomsDatabase:
         :rtype: list
         '''
 
-        return self._properties
+        return sorted(self._properties)
         
     def get_property(self,pname):
         '''
@@ -245,6 +251,10 @@ class AtomsDatabase:
             raise AtomsDatabaseError("The property {} is not registered in the elements database".format(pname))
         
         return dict([(element,properties.get(pname,None)) for element, properties in self._data.items()])
+
+    def set_property(self, element, prop, value):
+
+        self._data[element][prop] = value
 
     def has_atom(self,atom):
         '''
@@ -336,7 +346,7 @@ class AtomsDatabase:
         return [ename for ename,pval in pvalues.items() if abs(pval-value)<tolerance]
            
     @property
-    def nAtoms(self):
+    def n_atoms(self):
         '''
         Return the number of atoms stored in the atoms database.
         
@@ -390,8 +400,12 @@ class AtomsDatabase:
         Save a copy of the elements database to MDANSE application directory. 
         '''
         
-        with open(AtomsDatabaseError._USER_DATABASE,'w') as fout:
+        with open(AtomsDatabase._USER_DATABASE,'w') as fout:
             yaml.dump(self._data,fout)
+
+    @property
+    def n_elements(self):
+        return len(self._data)
             
 class MoleculesDatabaseError(Error):
     '''

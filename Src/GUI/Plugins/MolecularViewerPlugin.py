@@ -25,7 +25,8 @@ import wx.aui as aui
 
 from MMTK.Trajectory import Trajectory
 
-from MDANSE import ELEMENTS, LOGGER, REGISTRY
+from MDANSE import LOGGER, REGISTRY
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
@@ -293,7 +294,7 @@ class MolecularViewerPlugin(ComponentPlugin):
         self.atomsColours = numpy.copy(self._atomsColours)
                         
         # The array that will store the scale for all the atoms.
-        self._atomsScales = numpy.array([ELEMENTS[at.symbol,'vdw_radius'] for at in self._atoms]).astype(numpy.float32)
+        self._atomsScales = numpy.array([ATOMS_DATABASE[at.symbol]['vdw_radius'] for at in self._atoms]).astype(numpy.float32)
         
         scalars = ndarray_to_vtkarray(self.atomsColours, self._atomsScales, self._nAtoms) 
 
@@ -342,7 +343,7 @@ class MolecularViewerPlugin(ComponentPlugin):
         colours = []
         unic_colours = {}
 
-        color_string_list = [self.color_string_to_RGB(ELEMENTS[at.symbol,'color']) for at in self._atoms]
+        color_string_list = [self.color_string_to_RGB(ATOMS_DATABASE[at.symbol]['color']) for at in self._atoms]
         col_ids = len(RGB_COLOURS)
         
         for col in color_string_list:
