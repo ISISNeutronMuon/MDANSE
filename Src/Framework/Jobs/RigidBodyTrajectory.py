@@ -14,20 +14,15 @@
 # **************************************************************************
 
 import collections
-import operator
 
-import numpy
-
-from Scientific.Geometry import Vector
-from Scientific.Geometry.Quaternion import Quaternion
-from Scientific.Geometry.Transformation import Translation
-from Scientific.IO.NetCDF import NetCDFFile
-
-from MMTK.Collections import Collection
-from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
+import numpy as np
 
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import AtomCluster
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
+from MDANSE.Mathematics.LinearAlgebra import Quaternion
+from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter, sorted_atoms
 
 class RigidBodyTrajectory(IJob):
     """
@@ -57,34 +52,37 @@ class RigidBodyTrajectory(IJob):
         if (self.configuration['reference']['value'] >= self.configuration['trajectory']['length']):
             raise JobError(self,'Invalid reference frame. Must be an integer in [%d,%d[' % (0,self.configuration['trajectory']['length']))
                            
-        self._quaternions = numpy.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number'], 4),dtype=numpy.float64)
-        self._coms = numpy.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number'], 3),dtype=numpy.float64)
-        self._fits = numpy.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number']),dtype=numpy.float64)
+        self._quaternions = np.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number'], 4),dtype=np.float64)
+        self._coms = np.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number'], 3),dtype=np.float64)
+        self._fits = np.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number']),dtype=np.float64)
             
-        atoms = sorted(self.configuration['trajectory']['universe'].atomList(), key=operator.attrgetter('index'))
+        atoms = sorted_atoms(self.configuration['trajectory'].chemical_system.atom_list())
 
         self._groups = []
 
         for i in range(self.configuration['atom_selection']['selection_length']):
             indexes = self.configuration['atom_selection']["indexes"][i]
-            self._groups.append(Collection([atoms[idx] for idx in indexes]))
+            self._groups.append(AtomCluster('',[atoms[idx] for idx in indexes]))
 
         self.referenceFrame = self.configuration['reference']['value']
 
-        trajectory = self.configuration['trajectory']['instance'] 
-        self.referenceConfiguration = trajectory.universe.contiguousObjectConfiguration(conf = trajectory.configuration[self.referenceFrame])
+        trajectory = self.configuration['trajectory']['instance']
 
-        selectedAtoms = Collection()
+        coords = trajectory.coordinates(self.referenceFrame)
+        unitCell = trajectory.unit_cell(self.referenceFrame)
+        
+        conf = RealConfiguration(trajectory.chemical_system,coords,unitCell)
+
+        self.referenceConfiguration = conf.contiguous_coordinates()
+
+        selectedAtoms = []        
         for indexes in self.configuration['atom_selection']['indexes']:
             for idx in indexes:
-                selectedAtoms.addObject(atoms[idx])
+                selectedAtoms.append(atoms[idx])
 
         # Create trajectory
-        self.outputFile = Trajectory(selectedAtoms, self.configuration['output_files']['files'][0], 'w')
+        self.outputFile = TrajectoryWriter(self.configuration['output_files']['files'][0], trajectory.chemical_system, selectedAtoms)
         
-        # Create the snapshot generator
-        self.snapshot = SnapshotGenerator(self.configuration['trajectory']['universe'], actions = [TrajectoryOutput(self.outputFile, ["configuration","time"], 0, None, 1)])
-
     
     def run_step(self, index):
         '''

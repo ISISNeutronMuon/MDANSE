@@ -1040,9 +1040,10 @@ class MolecularViewerPlugin(ComponentPlugin):
         unitCell = self._trajectory[self._currentFrame].get('unit_cell',None)
 
         conf = RealConfiguration(self.trajectory.chemical_system,coords,unitCell)
-        coords = conf.contiguous_coordinates()
-        conf = RealConfiguration(self.trajectory.chemical_system,coords,unitCell)
+        conf = conf.contiguous_configuration()
         self._trajectory.chemical_system.configuration = conf
+
+        coords = conf.variables['coordinates']
 
         points = vtk.vtkPoints()
         points.SetNumberOfPoints(self._nAtoms)

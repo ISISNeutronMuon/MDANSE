@@ -66,7 +66,7 @@ class PDBReader:
             if at == atname:
                 atom_found = Atom(name=at,**info)
             else:
-                for alt in info['alternatives']:
+                for alt in info.get('alternatives',[]):
                     if alt == atname:
                         copy_info = copy.deepcopy(info)                                            
                         atom_found = Atom(name=at,**copy_info)

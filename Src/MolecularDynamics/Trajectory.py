@@ -56,9 +56,7 @@ def build_connectivity(chemicalSystem ,tolerance=0.05):
     bonds = []
     
     conf = chemicalSystem.configuration
-    print(conf.variables['coordinates'][0:3,:])
-    conf = conf.contiguous_coordinates()
-    print(conf[0:3,:])
+    conf = conf.contiguous_configuration()
 
     scannedObjects = [ce for ce in chemicalSystem.chemical_entities if isinstance(ce,AtomCluster)]
 
@@ -78,7 +76,7 @@ def build_connectivity(chemicalSystem ,tolerance=0.05):
         atoms = sorted(ce.atom_list(), key = operator.attrgetter('index'))
         nAtoms = len(atoms)
         indexes = [at.index for at in atoms]
-        coords = conf[indexes,:]
+        coords = conf.variables['coordinates'][indexes,:]
         covRadii = np.zeros((nAtoms,), dtype=np.float64)
         for i,at in enumerate(atoms):
             covRadii[i] = ATOMS_DATABASE[at.symbol.capitalize()]['covalent_radius']
@@ -201,6 +199,9 @@ class MMTKTrajectory(Trajectory):
          
         build_connectivity(self.universe)
                
+class TrajectoryError(Exception):
+    pass
+
 class Trajectory:
 
     def __init__(self, h5_filename):
@@ -238,6 +239,27 @@ class Trajectory:
             configuration[k] = v[item]
 
         return configuration
+
+    def coordinates(self,frame):
+
+        if frame < 0 or frame >= len(self):
+            raise TrajectoryError('Invalid frame number')
+
+        grp = self._h5_file['/configuration']
+
+        return grp['coordinates'][frame]        
+
+    def unit_cell(self,frame):
+
+        if frame < 0 or frame >= len(self):
+            raise TrajectoryError('Invalid frame number')
+
+        grp = self._h5_file['/configuration']
+
+        if 'unit_cell' in grp:
+            return grp['unit_cell'][frame]        
+        else:
+            return None
 
     def __len__(self):
 
@@ -288,15 +310,27 @@ class Trajectory:
     def h5_filename(self):
         return self._h5_filename
 
+class TrajectoryWriterError(Exception):
+    pass
+
 class TrajectoryWriter:
 
-    def __init__(self, h5_filename, chemical_system):
+    def __init__(self, h5_filename, chemical_system, selected_atoms=None):
 
         self._h5_filename = h5_filename
 
         self._h5_file = h5py.File(self._h5_filename,'w')
 
         self._chemical_system = chemical_system
+
+        if selected_atoms is None:
+            self._selected_atoms = self._chemical_system.atom_list()
+        else:
+            for at in selected_atoms:
+                if at.root_chemical_system() != self._chemical_system:
+                    raise TrajectoryWriterError('One or more atoms of the selection comes from a different chemical system')
+            self._selected_atoms = sorted_atoms(selected_atoms)
+        self._selected_atoms = [at.index for at in self._selected_atoms]
 
         self._dump_chemical_system()
 

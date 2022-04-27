@@ -218,18 +218,16 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_bug_report, bugButton)
                                                                     
     def load_data(self,typ,filename):
+
+        ext = os.path.splitext(filename)[1]
         if typ == "automatic":
             # if type is set on automatic, find data type
-            if filename[-4:] == ".mvi":
-                # File is mvi
-                typ = "molecular_viewer"
+            if ext == ".mvi":
                 data = REGISTRY["input_data"]["molecular_viewer"](filename)
-            else:
-                # File is either netcdf or mmtk
-                try:
-                    data = REGISTRY["input_data"]["mmtk_trajectory"](filename)
-                except KeyError:
-                    data = REGISTRY["input_data"]["netcdf_data"](filename)
+            elif ext == '.h5':
+                data = REGISTRY["input_data"]["hdf_trajectory"](filename)
+            elif ext == '.nc':
+                data = REGISTRY["input_data"]["netcdf_data"](filename)
         else:
             data = REGISTRY["input_data"][typ](filename)
 
