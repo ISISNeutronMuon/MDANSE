@@ -125,6 +125,8 @@ class Atom(_ChemicalEntity):
 
         self.groups = kwargs.get('groups',[])
 
+        self.position = None
+
         for k,v in kwargs.items():
             setattr(self,k,v)
 
@@ -929,6 +931,9 @@ class ChemicalSystem(_ChemicalEntity):
             raise InconsistentChemicalSystemError('Mismatch between chemical systems')
 
         self._configuration = configuration
+
+        for comp, at in enumerate(self.atom_list()):
+            at.position = self._configuration['coordinates'][comp,:]
 
     def load(self, h5_filename):
 

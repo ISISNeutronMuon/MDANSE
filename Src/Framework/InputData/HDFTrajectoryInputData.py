@@ -53,7 +53,7 @@ class HDFTrajectoryInputData(InputFileData):
             val.append('\t- {}: {}'.format(k,v.shape))
 
         mol_types = {}
-        val.append("Molecular types found:")
+        val.append("\nMolecular types found:")
         for ce in self._data.chemical_system.chemical_entities:
             if ce.__class__.__name__ in mol_types:
                 mol_types[ce.__class__.__name__] += 1
