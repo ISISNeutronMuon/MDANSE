@@ -160,7 +160,7 @@ class FieldFile(dict):
                         atoms.append(a)
 
                     if len(atoms) > 1:
-                        ac = AtomCluster(moleculeName, atoms,number=i)
+                        ac = AtomCluster('{}{:d}'.format(moleculeName,i), atoms)
                         chemicalEntities.append(ac)
                     else:                    
                         chemicalEntities.append(atoms[0])
@@ -291,7 +291,7 @@ class DL_POLYConverter(Converter):
                                               'default':os.path.join('..','..','..','Data','Trajectories','DL_Poly','HISTORY_cumen')})
     settings['atom_aliases'] = ('python_object',{'default':{}})
     settings['version'] = ('single_choice', {'choices':_HISTORY_FORMAT.keys(), 'default':'2'})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf"]})
                     
     def initialize(self):
         '''

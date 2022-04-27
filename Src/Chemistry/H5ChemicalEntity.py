@@ -16,7 +16,7 @@ class _H5ChemicalEntity:
 
 class H5Atom(_H5ChemicalEntity):
 
-    def __init__(self, h5_file, h5_contents, symbol, name):
+    def __init__(self, h5_file, h5_contents, symbol, name, ghost):
 
         super(H5Atom,self).__init__(h5_file, h5_contents)
 
@@ -24,24 +24,24 @@ class H5Atom(_H5ChemicalEntity):
 
         self._name = name
 
+        self._ghost = ghost
+
     def build(self):
 
         from ChemicalEntity import Atom
-        a = Atom(symbol=self._symbol,name=self._name)
+        a = Atom(symbol=self._symbol,name=self._name, ghost=self._ghost)
 
         return a
 
 class H5AtomCluster(_H5ChemicalEntity):
 
-    def __init__(self, h5_file, h5_contents, atom_indexes, code, number):
+    def __init__(self, h5_file, h5_contents, atom_indexes, name):
 
         super(H5AtomCluster,self).__init__(h5_file, h5_contents)
 
         self._atom_indexes = atom_indexes
 
-        self._code = code
-
-        self._number = number
+        self._name = name
 
     def build(self):
 
@@ -51,7 +51,7 @@ class H5AtomCluster(_H5ChemicalEntity):
             atoms.append(h5_atom_instance.build())
 
         from ChemicalEntity import AtomCluster
-        ac = AtomCluster(self._code,atoms,self._number)
+        ac = AtomCluster(self._name,atoms)
         
         return ac
 

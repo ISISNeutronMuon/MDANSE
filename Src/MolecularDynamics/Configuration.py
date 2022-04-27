@@ -4,6 +4,9 @@ import numpy as np
 
 from MDANSE.Extensions import atoms_in_shell, contiguous_coordinates
 
+class ConfigurationError(Exception):
+    pass
+
 class _Configuration:
 
     __metaclass__ = abc.ABCMeta
@@ -177,25 +180,42 @@ class RealConfiguration(_Configuration):
 
         return selected_atoms
 
-    def contiguous_coordinates(self):
+    def contiguous_configuration(self):
 
         if self._unit_cell is None:
-            return self._variables['coordinates']
+            contiguous_coords =  self._variables['coordinates']
 
         else:
 
-            coords = np.empty((self._chemical_system.number_of_atoms(),3),dtype=np.float)
-
+            indexes = []
             for ce in self._chemical_system.chemical_entities:
-                if ce.number_of_atoms() == 1:
-                    idx = ce.atom_list()[0].index
-                    coords[idx,:] = self._variables['coordinates'][idx,:]
-                    
-                indexes = np.array(sorted([at.index for at in ce.atom_list()]),dtype=np.intc)
-                contiguous_coordinates.contiguous_coordinates(self._variables['coordinates'],self._unit_cell,self._inverse_unit_cell,indexes,coords)
+                indexes.append([at.index for at in ce.atom_list()])
 
-            return coords
+            contiguous_coords = contiguous_coordinates.contiguous_coordinates(self._variables['coordinates'],self._unit_cell,self._inverse_unit_cell,indexes)
 
+        return RealConfiguration(self._chemical_system,contiguous_coords,self._unit_cell)
+
+    def contiguous_offsets(self, chemical_entities=None):
+
+        if chemical_entities is None:
+            chemical_entities = self._chemical_system.chemical_entities
+        else:
+            for ce in chemical_entities:
+                if ce.root_chemical_system() is not self._chemical_system:
+                    raise ConfigurationError('One or more chemical entities comes from another chemical system')
+
+        if self._unit_cell is None:
+            offsets = np.zeros((self._chemical_system.number_of_atoms(),3))
+
+        else:
+
+            indexes = []
+            for ce in chemical_entities:
+                indexes.append([at.index for at in ce.atom_list()])
+            
+            offsets = contiguous_coordinates.contiguous_offsets(self._variables['coordinates'],self._unit_cell,self._inverse_unit_cell,indexes)
+
+        return offsets
 
 if __name__ == "__main__":
 

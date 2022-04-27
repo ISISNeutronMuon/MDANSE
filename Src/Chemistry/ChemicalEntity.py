@@ -101,9 +101,16 @@ class _ChemicalEntity:
 
         return selected_atoms
 
-    def top_level_chemical_entity(self):
+    def root_chemical_system(self):
 
         if self._parent is None:
+            return self
+        else:
+            return self._parent.top_level_chemical_entity()
+
+    def top_level_chemical_entity(self):
+
+        if isinstance(self._parent,ChemicalSystem):
             return self
         else:
             return self._parent.top_level_chemical_entity()
@@ -125,12 +132,16 @@ class Atom(_ChemicalEntity):
 
         self.groups = kwargs.get('groups',[])
 
+        self.ghost = kwargs.get('ghost',False)
+
         self.position = None
 
         for k,v in kwargs.items():
             setattr(self,k,v)
 
         self._index = None
+
+        self._true_index = None
 
         for propName,propValue in ATOMS_DATABASE[self.symbol].items():
             setattr(self,propName,propValue)
@@ -144,10 +155,13 @@ class Atom(_ChemicalEntity):
         return self.full_name()
 
     def atom_list(self):
-        return [self]
+        return [self] if not self.ghost else []
+
+    def total_number_of_atoms(self):
+        return 1
 
     def number_of_atoms(self):
-        return 1
+        return int(self.ghost)
 
     @property
     def index(self):
@@ -155,11 +169,23 @@ class Atom(_ChemicalEntity):
 
     @index.setter
     def index(self, index):
+        if self._index is not None:
+            return
         self._index = index
+
+    @property
+    def true_index(self):
+        return self._true_index
+
+    @true_index.setter
+    def true_index(self, true_index):
+        if self._true_index is not None:
+            return
+        self._true_index = true_index
 
     def serialize(self,h5_file, h5_contents):
 
-        atom_str = 'H5Atom(self._h5_file,h5_contents,symbol="{}", name="{}")'.format(self.symbol,self.name)
+        atom_str = 'H5Atom(self._h5_file,h5_contents,symbol="{}", name="{}", ghost={})'.format(self.symbol,self.name,self.ghost)
 
         h5_contents.setdefault('atoms',[]).append(atom_str)
 
@@ -167,56 +193,41 @@ class Atom(_ChemicalEntity):
 
 class AtomCluster(_ChemicalEntity):
 
-    def __init__(self, code, atoms, number=None):
+    def __init__(self, name, atoms):
 
         super(AtomCluster,self).__init__()
 
-        self._atoms = collections.OrderedDict()
+        self._atoms = []
 
-        self._code = code
-
-        self._number = number
-
-        self._build(code,atoms,number)
-
-    def _build(self, code, atoms, number = None):
-
-        if number is not None:
-            self._name = '{}{}'.format(self._code,self._number)
-        else:
-            self._name = code
+        self._name = name
 
         for at in atoms:
             at.parent = self
-            self._atoms[at.name] = at
+            self._atoms.append(at)
 
     def __getitem__(self,item):
+
         return self._atoms[item]
 
     def atom_list(self):
-        return list(self._atoms.values())
-
-    @property
-    def code(self):
-        return self._code
+        return list([at for at in self._atoms if not at.ghost])
 
     @property
     def name(self):
         return self._name
 
-    @property
-    def number(self):
-        return self._number
-
     def number_of_atoms(self):
+        return len([at for at in self._atoms if not at.ghost])
+
+    def total_number_of_atoms(self):
         return len(self._atoms)
 
     def reorder_atoms(self, atoms):
 
-        if set(atoms) != set(self._atoms.keys()):
+        if set(atoms) != set([at.name for at in self._atoms]):
             raise InconsistentAtomNamesError('The set of atoms to reorder is inconsistent with molecular contents')
 
-        reordered_atoms = collections.OrderedDict()
+        reordered_atoms = []
         for at in atoms:
             reordered_atoms[at] = self._atoms[at]
         
@@ -229,11 +240,11 @@ class AtomCluster(_ChemicalEntity):
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        ac_str = 'H5AtomCluster(self._h5_file,h5_contents,{},code="{}",number={})'.format(at_indexes,self._code,self._number)
+        ac_str = 'H5AtomCluster(self._h5_file,h5_contents,{},name="{}")'.format(at_indexes,self._name)
 
         h5_contents.setdefault('atom_clusters',[]).append(ac_str)
         
-        for at in self._atoms.values():
+        for at in self._atoms:
             at.serialize(h5_file,h5_contents)
 
         return ('atom_clusters',len(h5_contents['atom_clusters'])-1)
@@ -291,7 +302,7 @@ class Molecule(_ChemicalEntity):
                     continue
 
     def atom_list(self):
-        return list(self._atoms.values())
+        return list([at for at in self._atoms.values() if not at.ghost])
 
     @property
     def code(self):
@@ -310,6 +321,9 @@ class Molecule(_ChemicalEntity):
         return self._number
 
     def number_of_atoms(self):
+        return len([at for at in self._atoms.values() if not at.ghost])
+
+    def total_number_of_atoms(self):
         return len(self._atoms)
 
     def reorder_atoms(self, atoms):
@@ -420,9 +434,12 @@ class Residue(_ChemicalEntity):
                     continue
 
     def atom_list(self):
-        return list(self._atoms.values())
+        return list([at for at in self._atoms.values() if not at.ghost])
 
     def number_of_atoms(self):
+        return len([at for at in self._atoms.values() if not at.ghost])
+
+    def total_number_of_atoms(self):
         return len(self._atoms)
 
     @property
@@ -535,9 +552,12 @@ class Nucleotide(_ChemicalEntity):
                         continue
 
     def atom_list(self):
-        return list(self._atoms.values())
+        return list([at for at in self._atoms.values() if not at.ghost])
 
     def number_of_atoms(self):
+        return len([at for at in self._atoms.values() if not at.ghost])
+
+    def total_number_of_atoms(self):
         return len(self._atoms)
 
     @property
@@ -644,6 +664,13 @@ class NucleotideChain(_ChemicalEntity):
             number_of_atoms += nucleotide.number_of_atoms()
         return number_of_atoms
 
+    def total_number_of_atoms(self):
+
+        number_of_atoms = 0
+        for nucleotide in self._nucleotides:
+            number_of_atoms += nucleotide.total_number_of_atoms()
+        return number_of_atoms
+
     def serialize(self,h5_file, h5_contents):
         
         if 'nucleotides' in h5_contents:
@@ -741,6 +768,13 @@ class PeptideChain(_ChemicalEntity):
             number_of_atoms += residue.number_of_atoms()
         return number_of_atoms
 
+    def total_number_of_atoms(self):
+
+        number_of_atoms = 0
+        for residue in self._residues:
+            number_of_atoms += residue.total_number_of_atoms()
+        return number_of_atoms
+
     @property
     def name(self):
         return self._name
@@ -826,6 +860,13 @@ class Protein(_ChemicalEntity):
             number_of_atoms += peptide_chain.number_of_atoms()
         return number_of_atoms
 
+    def total_number_of_atoms(self):
+
+        number_of_atoms = 0
+        for peptide_chain in self._peptide_chains:
+            number_of_atoms += peptide_chain.total_number_of_atoms()
+        return number_of_atoms
+
     def set_peptide_chains(self, peptide_chains):
 
         self._peptide_chains = peptide_chains
@@ -895,16 +936,24 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._number_of_atoms = 0
 
+        self._total_number_of_atoms = 0
+
     def add_chemical_entity(self, chemical_entity):
 
         if not isinstance(chemical_entity,_ChemicalEntity):
             raise InvalidChemicalEntityError('invalid chemical entity')
 
         for at in chemical_entity.atom_list():
-            at.index = self._number_of_atoms
-            self._number_of_atoms += 1
+            if not at.ghost:
+                at.index = self._number_of_atoms
+                self._number_of_atoms += 1
+
+            at.true_index = self._total_number_of_atoms
+            self._total_number_of_atoms += 1
 
         self._chemical_entities.append(chemical_entity)
+
+        chemical_entity.parent = self
 
         self._configuration = None
 
@@ -958,7 +1007,17 @@ class ChemicalSystem(_ChemicalEntity):
 
     def number_of_atoms(self):
 
-        return self._number_of_atoms
+        number_of_atoms = 0
+        for ce in self._chemical_entities:
+            number_of_atoms += ce.number_of_atoms()
+        return number_of_atoms
+
+    def total_number_of_atoms(self):
+
+        number_of_atoms = 0
+        for ce in self._chemical_entities:
+            number_of_atoms += ce.total_number_of_atoms()
+        return number_of_atoms
 
     def serialize(self, h5_filename):
 
