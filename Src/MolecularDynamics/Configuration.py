@@ -2,7 +2,7 @@ import abc
 
 import numpy as np
 
-from MDANSE.Extensions import atoms_in_shell
+from MDANSE.Extensions import atoms_in_shell, contiguous_coordinates
 
 class _Configuration:
 
@@ -176,6 +176,25 @@ class RealConfiguration(_Configuration):
         selected_atoms = [atom_list[idx] for idx in indexes]
 
         return selected_atoms
+
+    def contiguous_coordinates(self):
+
+        if self._unit_cell is None:
+            return self._variables['coordinates']
+
+        else:
+
+            coords = np.empty((self._chemical_system.number_of_atoms(),3),dtype=np.float)
+
+            for ce in self._chemical_system.chemical_entities:
+                if ce.number_of_atoms() == 1:
+                    idx = ce.atom_list()[0].index
+                    coords[idx,:] = self._variables['coordinates'][idx,:]
+                    
+                indexes = np.array(sorted([at.index for at in ce.atom_list()]),dtype=np.intc)
+                contiguous_coordinates.contiguous_coordinates(self._variables['coordinates'],self._unit_cell,self._inverse_unit_cell,indexes,coords)
+
+            return coords
 
 
 if __name__ == "__main__":

@@ -18,15 +18,14 @@ import numpy as np
 
 import h5py
 
-from MMTK import Atom, AtomCluster
 from MMTK.Collections import Collection
 from MMTK.Trajectory import Trajectory
-from MMTK.ChemicalObjects import isChemicalObject
 
 from MDANSE.Core.Error import Error
-from MDANSE.Extensions import com_trajectory, fast_calculation
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
+from MDANSE.Extensions import com_trajectory, fast_calculation
+from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 
 class MolecularDynamicsError(Error):
     pass
@@ -38,9 +37,8 @@ def atomindex_to_moleculeindex(universe):
     
     d = {}
     for i,obj in enumerate(universe.objectList()):
-        if isChemicalObject(obj):
-            for at in obj.atomList():
-                d[at.index] = i
+        for at in obj.atomList():
+            d[at.index] = i
                 
     return d
     
@@ -48,53 +46,62 @@ def brute_formula(molecule, sep='_'):
     
     contents = {}
     
-    for at in molecule.atomList():
+    for at in molecule.atom_list():
         contents[at.symbol] = str(int(contents.get(at.symbol,0)) + 1)
     
     return sep.join([''.join(v) for v in sorted(contents.items())])
 
-def build_connectivity(universe ,tolerance=0.05):
+def build_connectivity(chemicalSystem ,tolerance=0.05):
     
     bonds = []
     
-    conf = universe.contiguousObjectConfiguration()
+    conf = chemicalSystem.configuration
+    print(conf.variables['coordinates'][0:3,:])
+    conf = conf.contiguous_coordinates()
+    print(conf[0:3,:])
 
-    scannedObjects = [obj for obj in universe.objectList() if isinstance(obj,AtomCluster)]
-    singleAtomsObjects = [obj for obj in universe.objectList() if isinstance(obj,Atom) or obj.numberOfAtoms()==1]
+    scannedObjects = [ce for ce in chemicalSystem.chemical_entities if isinstance(ce,AtomCluster)]
+
+    singleAtomsObjects = []
+    for ce in chemicalSystem.chemical_entities:
+        if isinstance(ce,Atom):
+            singleAtomsObjects.append(ce)
+        else:
+            if ce.number_of_atoms() == 1:
+                singleAtomsObjects.extend(ce.atom_list())
+
     if singleAtomsObjects:
-        scannedObjects.append(Collection(singleAtomsObjects))
+        scannedObjects.append(AtomCluster('',singleAtomsObjects))
                 
-    for obj in scannedObjects:
+    for ce in scannedObjects:
                                                         
-        atoms = sorted(obj.atomList(), key = operator.attrgetter('index'))
+        atoms = sorted(ce.atom_list(), key = operator.attrgetter('index'))
         nAtoms = len(atoms)
         indexes = [at.index for at in atoms]
-        coords = conf.array[indexes,:]
+        coords = conf[indexes,:]
         covRadii = np.zeros((nAtoms,), dtype=np.float64)
         for i,at in enumerate(atoms):
             covRadii[i] = ATOMS_DATABASE[at.symbol.capitalize()]['covalent_radius']
         
-        bonds = []
         fast_calculation.cpt_cluster_connectivity(coords,covRadii,tolerance,bonds)
                   
         for idx1,idx2 in bonds:
             if hasattr(atoms[idx1],"bonded_to__"):
-                atoms[idx1].bonded_to__.append(atoms[idx2])
+                atoms[idx1].bonds.append(atoms[idx2])
             else:
-                atoms[idx1].bonded_to__ = [atoms[idx2]]
+                atoms[idx1].bonds = [atoms[idx2]]
                   
             if hasattr(atoms[idx2],"bonded_to__"):
-                atoms[idx2].bonded_to__.append(atoms[idx1])
+                atoms[idx2].bonds.append(atoms[idx1])
             else:
-                atoms[idx2].bonded_to__ = [atoms[idx1]]    
+                atoms[idx2].bonds = [atoms[idx1]]    
 
 def find_atoms_in_molecule(universe, moleculeName, atomNames, indexes=False):
 
     molecules = []
     for obj in universe.objectList():
-        if isChemicalObject(obj):
-            if obj.name == moleculeName:
-                molecules.append(obj)
+        if obj.name == moleculeName:
+            molecules.append(obj)
                     
     match = []
     for mol in molecules:
@@ -113,10 +120,9 @@ def get_chemical_objects_size(universe):
     
     d = {}
     for obj in universe.objectList():
-        if isChemicalObject(obj):
-            if d.has_key(obj.name):
-                continue
-            d[obj.name] = obj.numberOfAtoms()
+        if d.has_key(obj.name):
+            continue
+        d[obj.name] = obj.numberOfAtoms()
         
     return d
 
@@ -124,8 +130,7 @@ def get_chemical_objects_dict(universe):
     
     d = {}
     for obj in universe.objectList():
-        if isChemicalObject(obj):
-            d.setdefault(obj.name, []).append(obj)
+        d.setdefault(obj.name, []).append(obj)
         
     return d
         
@@ -133,11 +138,10 @@ def get_chemical_objects_number(universe):
     
     d = {}
     for obj in universe.objectList():
-        if isChemicalObject(obj):
-            if d.has_key(obj.name):
-                d[obj.name] += 1
-            else:
-                d[obj.name] = 1
+        if d.has_key(obj.name):
+            d[obj.name] += 1
+        else:
+            d[obj.name] = 1
         
     return d
                                                                     
@@ -172,16 +176,15 @@ def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable=
     
     return serie
 
-def resolve_undefined_molecules_name(universe):
+def resolve_undefined_molecules_name(chemicalSystem):
     
-    for obj in universe.objectList():        
-        if isChemicalObject(obj):            
-            if not obj.name.strip():
-                obj.name = brute_formula(obj,sep="")
+    for ce in chemicalSystem.chemical_entities:
+        if not ce.name.strip():
+            ce.name = brute_formula(ce,sep="")
 
-def sorted_atoms(universe,attribute=None):
+def sorted_atoms(chemicalSystem,attribute=None):
 
-    atoms = sorted(universe.atomList(), key = operator.attrgetter('index'))
+    atoms = sorted(chemicalSystem.atom_list(), key = operator.attrgetter('index'))
     
     if attribute is None:
         return atoms
@@ -209,6 +212,18 @@ class Trajectory:
         self._h5_file = h5py.File(self._h5_filename,'r')
 
         self._chemical_system.load(self._h5_filename)
+
+        coords = self._h5_file['/configuration/coordinates'][0,:,:]
+        unit_cell = self._h5_file['/configuration'].get('unit_cell',None)
+        if unit_cell:
+            unit_cell = unit_cell[0,:,:]
+
+        conf = RealConfiguration(self._chemical_system,coords,unit_cell)
+        self._chemical_system.configuration = conf
+        
+        resolve_undefined_molecules_name(self._chemical_system)
+         
+        build_connectivity(self._chemical_system)
 
     def close(self):
 

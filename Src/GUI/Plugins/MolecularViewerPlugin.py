@@ -23,13 +23,12 @@ from vtk.wx.wxVTKRenderWindowInteractor import wxVTKRenderWindowInteractor
 import wx
 import wx.aui as aui
 
-from MMTK.Trajectory import Trajectory
-
 from MDANSE import LOGGER, REGISTRY
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
-from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
+from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+from MDANSE.MolecularDynamics.Trajectory import sorted_atoms, Trajectory
 
 from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.Plugins.DataPlugin import get_data_plugin 
@@ -139,7 +138,7 @@ class MolecularViewerPlugin(ComponentPlugin):
             
     label = "Molecular Viewer"
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["hdf_trajectory"]
     
     category = ("Viewer",)
                 
@@ -279,10 +278,10 @@ class MolecularViewerPlugin(ComponentPlugin):
         
         self._nFrames = len(trajectory)
 
-        self._atoms = sorted_atoms(trajectory.universe)
+        self._atoms = sorted_atoms(trajectory.chemical_system)
         
         # The number of atoms of the universe stored by the trajectory.
-        self._nAtoms = trajectory.universe.numberOfAtoms()
+        self._nAtoms = trajectory.chemical_system.number_of_atoms()
         
         # Hack for reducing objects resolution when the system is big
         self._resolution = int(numpy.sqrt(300000.0 / self._nAtoms))
@@ -301,7 +300,7 @@ class MolecularViewerPlugin(ComponentPlugin):
         bonds = vtk.vtkCellArray()
         for at in self._atoms:
             idx1 = at.index
-            for bat in at.bondedTo():
+            for bat in at.bonds:
                 idx2 = bat.index
                 line = vtk.vtkLine()
                 line.GetPointIds().SetId(0,idx1)
@@ -654,7 +653,7 @@ class MolecularViewerPlugin(ComponentPlugin):
         pid = self.picker.GetPointId()
         if pid > 0:
             idx = self.get_atom_index(pid)
-            info = '%s (id:%s) at  %s'%(self._atoms[idx].fullName(), self._atoms[idx].index, '%.3f %.3f %.3f'%tuple(self._atoms[idx].position()))
+            info = '%s (id:%s) at  %s'%(self._atoms[idx].full_name(), self._atoms[idx].index, '%.3f %.3f %.3f'%tuple(self._atoms[idx].position))
             LOGGER(info, "info")
         self.picker.InitializePickList()
                 
@@ -980,7 +979,7 @@ class MolecularViewerPlugin(ComponentPlugin):
         
         self.picking_domain = [lineActor,ballActor,tubeActor,ballActor,ballActor][rendmod]
         
-        basis_vector = self._trajectory.universe.basisVectors()
+        basis_vector = self._trajectory[0].get('unit_cell',None)
         if not basis_vector is None:
             self.bbox = self.build_bbox(basis_vector)
             if not self.display_bbox:
@@ -1037,9 +1036,13 @@ class MolecularViewerPlugin(ComponentPlugin):
         '''
         
         self._currentFrame = frame % len(self._trajectory)
-        self._trajectory.universe.setConfiguration(self._trajectory.configuration[self._currentFrame])
+        coords = self._trajectory[self._currentFrame]['coordinates']
+        unitCell = self._trajectory[self._currentFrame].get('unit_cell',None)
 
-        coords = self._trajectory.universe.contiguousObjectConfiguration().array
+        conf = RealConfiguration(self.trajectory.chemical_system,coords,unitCell)
+        coords = conf.contiguous_coordinates()
+        conf = RealConfiguration(self.trajectory.chemical_system,coords,unitCell)
+        self._trajectory.chemical_system.configuration = conf
 
         points = vtk.vtkPoints()
         points.SetNumberOfPoints(self._nAtoms)
@@ -1106,7 +1109,7 @@ def ndarray_to_vtkcellarray(array):
 
 def get_trajectory_filename():
 
-    filters = 'NC file (*.nc)|*.nc|All files (*.*)|*.*'
+    filters = 'HDF file (*.h5)|*.h5|All files (*.*)|*.*'
     
     dialog = wx.FileDialog ( None, message = 'Open Trajectory file...', wildcard=filters, style=wx.OPEN)
 
