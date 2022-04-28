@@ -21,11 +21,12 @@ from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 
 class ConfigurationPanel(wx.Panel):
     
-    def __init__(self, parent, configurable):
+    def __init__(self, parent, configurable, type):
         
         wx.Panel.__init__(self, parent, wx.ID_ANY)
         
         self._configurable = configurable
+        self._type = type
         
         self._widgets = {}
         
@@ -43,7 +44,7 @@ class ConfigurationPanel(wx.Panel):
                         
             widgetClass = REGISTRY["widget"][widget]
                         
-            self._widgets[cfgName] = widgetClass(self, cfgName, self._configurable.configuration[cfgName])
+            self._widgets[cfgName] = widgetClass(self, cfgName, self._configurable.configuration[cfgName], self._type)
             
             self.panelSizer.Add(self._widgets[cfgName], 0, wx.ALL|wx.EXPAND, 5)
                   

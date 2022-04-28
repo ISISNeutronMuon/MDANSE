@@ -48,7 +48,7 @@ class JobPlugin(ComponentPlugin):
                 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
                 
-        self._parametersPanel = ConfigurationPanel(self._main, self._job)
+        self._parametersPanel = ConfigurationPanel(self._main, self._job, self._type)
                     
         sb = wx.StaticBox(self._main, wx.ID_ANY)
         sbSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)

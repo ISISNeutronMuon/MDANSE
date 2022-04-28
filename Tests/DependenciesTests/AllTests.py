@@ -18,6 +18,7 @@
 # Written by Konrad Hinsen.
 #
 
+import os
 import unittest
 import sys
 
@@ -62,4 +63,5 @@ def run_test():
         sys.exit(1)
 
 if __name__ == '__main__':
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     run_test()
