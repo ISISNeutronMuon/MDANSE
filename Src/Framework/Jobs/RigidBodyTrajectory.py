@@ -169,9 +169,9 @@ class RigidBodyTrajectory(IJob):
                
             outputFile.info += 'Group %s: %s\n' % (comp, [index for index in aIndexes])
 
-        QUATERNIONS.assignValue(self._quaternions[comp,:,:])
-        COM.assignValue(self._coms[comp,:,:])
-        FIT.assignValue(self._fits[comp,:])
+            QUATERNIONS[comp,:,:] = self._quaternions[comp,:,:]
+            COM[comp,:,:] = self._coms[comp,:,:]
+            FIT[comp,:] = self._fits[comp,:]
                            
         outputFile.close()
         

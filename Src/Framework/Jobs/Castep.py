@@ -263,6 +263,8 @@ class CASTEPConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
+        super(CASTEPConverter,self).finalize()
+
 
 REGISTRY['castep'] = CASTEPConverter
         

@@ -97,4 +97,6 @@ class PDBConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
+        super(PDBConverter,self).finalize()
+
 REGISTRY['pdb'] = PDBConverter

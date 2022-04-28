@@ -356,3 +356,5 @@ class DCDConverter(Converter):
 
         # Close the output trajectory.
         self._trajectory.close()
+
+        super(DCDConverter,self).finalize()

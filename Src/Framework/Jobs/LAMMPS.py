@@ -297,6 +297,8 @@ class LAMMPSConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
                         
+        super(LAMMPSConverter,self).finalize()
+
     def parse_first_step(self):
 
         self._lammps = open(self.configuration["trajectory_file"]["value"], 'r')        
