@@ -76,6 +76,8 @@ class TrajectoryViewerPlugin(ComponentPlugin):
         self._toolbar = NavigationToolbar2WxAgg(self._canvas)
         self._toolbar.Realize()
 
+        self._selectedLine = None
+
         actionsSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         clearPlotButton = wx.Button(panel,label='Clear')
@@ -103,6 +105,9 @@ class TrajectoryViewerPlugin(ComponentPlugin):
         self.Bind(wx.EVT_COMBOBOX,self.on_select_option, self._selectedDimension)
         self.Bind(wx.EVT_BUTTON,self.on_clear_plot, clearPlotButton)
         self.Bind(wx.EVT_CHECKBOX,self.on_showhide_legend, self._showLegend)
+
+        self._canvas.mpl_connect("pick_event", self.on_pick_line)
+        self._canvas.mpl_connect('key_press_event', self.on_key_press)
 
     def plug(self):
         
@@ -148,7 +153,7 @@ class TrajectoryViewerPlugin(ComponentPlugin):
         if self._showLegend.GetValue():
             self._figure.gca().legend(loc='best')
         else:
-            self._figure.gca().legend().remove()#
+            self._figure.gca().legend().remove()
         self._canvas.draw()
 
     def on_select_option(self, event):
@@ -163,6 +168,48 @@ class TrajectoryViewerPlugin(ComponentPlugin):
         atom = self._selectedAtom.GetValue()
 
         self._plot(variable,atom,dimension)
+
+    def on_pick_line(self, event):
+        # set alpha of previous selection to 1
+        if self._selectedLine is not None:
+            self._selectedLine.set_alpha(1.0)
+            self._selectedLine.figure.canvas.draw()
+
+        # unselect previous selection
+        if event.artist == self._selectedLine:
+            self._selectedLine = None
+            return
+
+        self._selectedLine = event.artist
+        self._selectedLine.set_alpha(0.4)
+        self._selectedLine.figure.canvas.draw()
+
+    def on_key_press(self, event=None):
+        if event.key == 'delete':
+            if self._selectedLine is None:
+                return
+
+            d = wx.MessageDialog(None,'Do you really want delete this line ?','Question',wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+            if d.ShowModal() == wx.ID_NO:
+                return
+
+            self._selectedLine.remove()
+            self._selectedLine = None
+
+            if not self._figure.gca().lines:
+                self._figure.gca().set_prop_cycle(None)
+
+            if self._showLegend.GetValue():
+                self.update_legend()
+                
+            self._canvas.draw()
+
+    def update_legend(self):
+
+        self._figure.gca().legend().remove()
+        if self._figure.gca().lines:        
+            self._figure.gca().legend(loc='best')
+        self._canvas.draw()
 
     def _plot(self, variable, atom, dimension):
 
@@ -183,7 +230,7 @@ class TrajectoryViewerPlugin(ComponentPlugin):
 
         self._figure.gca().set_xlabel('time (ps)')
         self._figure.gca().set_ylabel('%s (%s)' % (variable,TrajectoryViewerPlugin._units.get(variable,'au')))
-        self._figure.gca().plot(time,data[:,dimensionNumber],label=label)
+        self._figure.gca().plot(time,data[:,dimensionNumber],label=label,picker=3)
         self._canvas.draw()
         
         self.on_showhide_legend(None)
