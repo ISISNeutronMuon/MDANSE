@@ -166,7 +166,7 @@ class LAMMPSConverter(Converter):
 
         data_to_be_written = ["configuration", "time"]
 
-        # A frame generator is created.<<<<<<< HEAD
+        # A frame generator is created.
         self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory,
                                                                                        data_to_be_written, 0, None, 1)])
 
