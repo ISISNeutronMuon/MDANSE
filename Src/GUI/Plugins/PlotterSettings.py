@@ -639,13 +639,6 @@ class LinesSettingsDialog(wx.Dialog):
         self.set_lines()
         
     def delete_line(self, event = None):
-        d = wx.MessageDialog(None,
-                 'Do you really want delete this line ?',
-                 'Question',
-                 wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
-        if d.ShowModal() == wx.ID_YES:
-            pass
-        else:
-            return
-        self.parent.delete_line(self.current_line)
+        if self.parent.delete_line(self.current_line):
+            self.parent.selectedLine = None
         self.set_lines()
