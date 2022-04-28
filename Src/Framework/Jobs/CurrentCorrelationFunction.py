@@ -164,6 +164,21 @@ class CurrentCorrelationFunction(IJob):
                     tmp = numpy.exp(1j*numpy.dot(selectedCoordinates, qVectors))[numpy.newaxis,:,:]
                     rho[element][i,:,:] = numpy.add.reduce(selectedVelocities*tmp,1)
 
+            for element, idxs in self._indexesPerElement.items():
+                coordinates = numpy.array([conf.array[idxs, :] for conf in traj.configuration])
+                velocities = numpy.empty(numpy.shape(coordinates))
+
+                order = self.configuration["interpolation_order"]["value"]
+                for i, idx in enumerate(idxs):
+                    for axis in range(3):
+                        velocities[:, i, axis] = differentiate(coordinates[:, i, axis], order=order,
+                                                               dt=self.configuration['frames']['time_step'])
+
+                for i, frame in enumerate(velocities):
+                    velocities[i, :, :] = frame.transpose()[:, :, numpy.newaxis]
+
+                raise Exception(numpy.shape(velocities), velocities)
+
             Q2 = numpy.sum(qVectors**2,axis=0)
             
             for element in self._elements:
