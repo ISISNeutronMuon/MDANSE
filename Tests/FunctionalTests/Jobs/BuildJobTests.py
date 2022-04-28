@@ -156,27 +156,33 @@ class JobFileGenerator():
                            '        shutil.copy(output_path + ".nc", reference_data_path + "_multi" + ".nc")\n' \
                            '        print "Multiprocessor execution completed"\n\n'
 
+        test_string += '        try:\n'
+
         # Compare reference data with monoprocessor if reference data exists
         if self.reference_data_file:
-            test_string += '        print "Comparing monoprocessor output with reference output"\n' \
-                           '        self.assertTrue(compare("' + self.reference_data_file.replace('\\', '/') + \
+            test_string += '            print "Comparing monoprocessor output with reference output"\n' \
+                           '            self.assertTrue(compare("' + self.reference_data_file.replace('\\', '/') + \
                            '", reference_data_path + "_mono" + ".nc"))\n\n'
         # Compare reference data with multiprocessor if reference data exists
         if self.reference_data_file and self.multiprocessor:
-            test_string += '        print "Comparing multiprocessor output with reference output"\n' \
-                           '        self.assertTrue(compare("' + self.reference_data_file.replace('\\', '/') + \
+            test_string += '            print "Comparing multiprocessor output with reference output"\n' \
+                           '            self.assertTrue(compare("' + self.reference_data_file.replace('\\', '/') + \
                            '", reference_data_path + "_multi" + ".nc"))\n\n'
         # If no reference data but multiprocessor, compare mono and multiprocessor
         elif self.multiprocessor:
-            test_string += '        print "Comparing monoprocessor output with multiprocessor output"\n' \
-                           '        self.assertTrue(compare(reference_data_path + "_mono" + ".nc", ' \
+            test_string += '            print "Comparing monoprocessor output with multiprocessor output"\n' \
+                           '            self.assertTrue(compare(reference_data_path + "_mono" + ".nc", ' \
                            'reference_data_path + "_multi" + ".nc"))\n\n'
-        test_string += '        try:\n' \
-                       '            os.remove(reference_data_path + "_mono" + ".nc")\n'
+
+        test_string += '        finally:\n' \
+                       '            try:\n' \
+                       '                os.remove(reference_data_path + "_mono" + ".nc")\n'
+
         if self.multiprocessor:
-            test_string += '            os.remove(reference_data_path + "_multi" + ".nc")\n'
-        test_string += '        except OSError:\n' \
-                       '            pass\n\n'
+            test_string += '                os.remove(reference_data_path + "_multi" + ".nc")\n'
+
+        test_string += '            except OSError:\n' \
+                       '                pass\n\n'
 
         # If test is GMTF, restore old_universe_name
         if self.job._type == "gmft":
