@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -168,9 +169,9 @@ class RigidBodyTrajectory(IJob):
                
             outputFile.info += 'Group %s: %s\n' % (comp, [index for index in aIndexes])
 
-        QUATERNIONS.assignValue(self._quaternions[comp,:,:])
-        COM.assignValue(self._coms[comp,:,:])
-        FIT.assignValue(self._fits[comp,:])
+            QUATERNIONS[comp,:,:] = self._quaternions[comp,:,:]
+            COM[comp,:,:] = self._coms[comp,:,:]
+            FIT[comp,:] = self._fits[comp,:]
                            
         outputFile.close()
         
