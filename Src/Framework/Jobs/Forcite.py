@@ -266,9 +266,11 @@ class ForciteConverter(Converter):
     category = ('Converters','Materials Studio')
     
     settings = collections.OrderedDict()
-    settings['xtd_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Forcite','nylon66_rho100_500K_v300K.xtd')})
-    settings['trj_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Forcite','nylon66_rho100_500K_v300K.trj')})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['xtd_file'] = ('input_file',{'wildcard':'XTD files (*.xtd)|*.xtd|All files|*',
+                                            'default':os.path.join('..','..','..','Data','Trajectories','Forcite','nylon66_rho100_500K_v300K.xtd')})
+    settings['trj_file'] = ('input_file',{'wildcard':'TRJ files (*.trj)|*.trj|All files|*',
+                                            'default':os.path.join('..','..','..','Data','Trajectories','Forcite','nylon66_rho100_500K_v300K.trj')})
+    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'xtd_file'})
                 
     def initialize(self):
         '''
@@ -303,7 +305,7 @@ class ForciteConverter(Converter):
             data_to_be_written.append("gradients")
 
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w', comment=self._trjfile["title"])
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w', comment=self._trjfile["title"])
 
         # A frame generator is created.
         self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])

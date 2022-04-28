@@ -147,9 +147,9 @@ class GenericConverter(Converter):
     label = "Generic"
 
     settings = collections.OrderedDict()   
-    settings['gt_file'] = ('input_file',{'wildcard':"Generic trajectory files|*.gtf|All files|*",
+    settings['gt_file'] = ('input_file',{'wildcard':"GTF files (*.gtf)|*.gtf|All files|*",
                                          'default':os.path.join('..','..','..','Data','Trajectories','Generic','test.gtf')})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'gt_file'})
                     
     def initialize(self):
         '''
@@ -317,7 +317,7 @@ class GenericConverter(Converter):
             self._dataShape=(self._universe.numberOfAtoms(),3)
                                     
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
  
         # A frame generator is created.
         self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
