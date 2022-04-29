@@ -134,12 +134,16 @@ class JobFileGenerator():
         # Writes the line that will initialize the |parameters| dictionary and create the job
         if parameters is None:
             parameters = self.job.get_default_parameters()
+
         test_string += '        parameters = {}\n'
         for k, v in sorted(parameters.items()):
             temp = 'parameters[%r] = %r\n' % (k, v)
             test_string = test_string + '        ' + temp.replace('\\\\', '/')
-        test_string += '        job = REGISTRY[%r][%r]()\n' % ('job', self.job._type)
-        test_string += '        output_path = parameters["output_files"][0]\n'
+        test_string += '        job = REGISTRY[%r][%r]()\n\n' % ('job', self.job._type)
+        test_string += '        try:\n' \
+                       '            output_path = parameters["output_files"][0]\n' \
+                       '        except KeyError:\n' \
+                       '            output_path = parameters["output_file"][0]\n\n'
         test_string += '        reference_data_path = "' + self.reference_data_path.replace('\\', '/') + '"\n'
 
         # Launch the job in monoprocessor mode and copy output file
