@@ -55,7 +55,7 @@ def get_byte_order(filename):
     byteOrder = None
 
     # The DCD file is opened for reading in binary mode.
-    data = file(filename, 'rb').read(4)
+    data = open(filename, 'rb').read(4)
 
     # Check for low and big endianness byte orders.
     for order in ['<', '>']:
@@ -83,7 +83,7 @@ class FortranBinaryFile(object):
         @param byte_order: the byte order to read the binary file.
         @type byte_order: string being one '@', '=', '<', '>' or '!'.
         """
-        self.file = file(filename, 'rb')
+        self.file = open(filename, 'rb')
         self.byteOrder = get_byte_order(filename)
 
     def __iter__(self):
@@ -262,11 +262,13 @@ class DCDConverter(Converter):
     """
     
     settings = collections.OrderedDict()
-    settings['pdb_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.pdb')})
-    settings['dcd_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.dcd')})
+    settings['pdb_file'] = ('input_file',{'wildcard':'PDB files (*.pdb)|*.pdb|All files|*',
+                                            'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.pdb')})
+    settings['dcd_file'] = ('input_file',{'wildcard':'DCD files (*.dcd)|*.dcd|All files|*',
+                                            'default':os.path.join('..','..','..','Data','Trajectories','CHARMM','2vb1.dcd')})
     settings['time_step'] = ('float', {'default':1.0,'label':"Time step (ps)"})    
     settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_file'] = ('single_output_file', {'format':'netcdf','root':'pdb_file'})
 
     def initialize(self):
         """
@@ -298,7 +300,7 @@ class DCDConverter(Converter):
         resolve_undefined_molecules_name(self._universe)
         
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
         
         data_to_be_written = ["configuration","time"]
         

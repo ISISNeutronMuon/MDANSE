@@ -109,7 +109,7 @@ class DataPanel(wx.Panel):
         
         self.setup = wx.Panel(self)
         
-        sizer0 =  wx.BoxSizer(wx.VERTICAL)
+        self._dataPanelSizer =  wx.BoxSizer(wx.VERTICAL)
         
         if self.standalone:
             splitterWindow = wx.SplitterWindow(self.setup, style=wx.SP_LIVE_UPDATE)
@@ -135,32 +135,44 @@ class DataPanel(wx.Panel):
         if self.standalone:
             splitterWindow.SplitHorizontally(self.datasetlist,self.datalist)
 
-        sizer1 =  wx.BoxSizer(wx.HORIZONTAL)
+        self._plotTypeSizer =  wx.BoxSizer(wx.HORIZONTAL)
        
         self.plot_type_label = wx.StaticText(self.setup, label="Select Plotter")
-        self.plotter_list = {'Line':1, 'Image':2, 'Elevation':2,'Iso-Surface':3,'Scalar-Field':3}
+        self.plotter_list = {'Line':1, 'Image':2, 'Elevation':2, '2D Slice':3,'Iso-Surface':3,'Scalar-Field':3}
         self.plot_type  = wx.ComboBox(self.setup, style=wx.CB_READONLY)
         
-        sizer1.Add(self.plot_type_label, 0, wx.ALIGN_CENTER_VERTICAL)
-        sizer1.Add(self.plot_type, 1, wx.ALIGN_CENTER_VERTICAL)
+        self._plotTypeSizer.Add(self.plot_type_label, 0, wx.ALIGN_CENTER_VERTICAL)
+        self._plotTypeSizer.Add(self.plot_type, 1, wx.ALIGN_CENTER_VERTICAL)
         
-        sizer2 =  wx.BoxSizer(wx.HORIZONTAL)
+        self._2DSliceSizer = wx.BoxSizer(wx.HORIZONTAL)
+        dimText = wx.StaticText(self.setup, label="Dim:")
+        self._selectedDimension = wx.SpinCtrl(self.setup, id=wx.ID_ANY, style=wx.SP_WRAP|wx.SP_ARROW_KEYS)
+        self._selectedDimension.SetRange(0,2)
+        sliceText = wx.StaticText(self.setup, label="Slice:")
+        self._selectedSlice = wx.SpinCtrl(self.setup, id=wx.ID_ANY, style=wx.SP_WRAP|wx.SP_ARROW_KEYS)
+        self._2DSliceSizer.Add(dimText,0,wx.CENTER|wx.ALL,2)
+        self._2DSliceSizer.Add(self._selectedDimension,0,wx.ALL,2)
+        self._2DSliceSizer.Add(sliceText,0,wx.CENTER|wx.ALL,2)
+        self._2DSliceSizer.Add(self._selectedSlice,0,wx.ALL,2)
+
+        self._plotSizer =  wx.BoxSizer(wx.HORIZONTAL)
         
         self.plot_button  = wx.Button(self.setup, wx.ID_ANY, label="Plot in new window")
         self.replot_button  = wx.Button(self.setup, wx.ID_ANY, label="Plot in current figure")
         
-        sizer2.Add(self.plot_button, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
-        sizer2.Add(self.replot_button, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
+        self._plotSizer.Add(self.plot_button, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
+        self._plotSizer.Add(self.replot_button, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND)
         
         if self.standalone:        
-            sizer0.Add(splitterWindow, 2, wx.ALL|wx.EXPAND, 2)
+            self._dataPanelSizer.Add(splitterWindow, 2, wx.ALL|wx.EXPAND, 2)
         else:
-            sizer0.Add(self.datalist, 2, wx.ALL|wx.EXPAND, 2)
-        sizer0.Add(sizer1, 0, wx.ALL|wx.EXPAND, 2)
-        sizer0.Add(sizer2, 0, wx.ALL|wx.EXPAND, 2)
+            self._dataPanelSizer.Add(self.datalist, 2, wx.ALL|wx.EXPAND, 2)
+        self._dataPanelSizer.Add(self._plotTypeSizer, 0, wx.ALL|wx.EXPAND, 2)
+        self._dataPanelSizer.Add(self._2DSliceSizer, 0, wx.ALL|wx.EXPAND, 2)
+        self._dataPanelSizer.Add(self._plotSizer, 0, wx.ALL|wx.EXPAND, 2)
         
-        self.setup.SetSizer(sizer0)        
-        sizer0.Fit(self.setup)
+        self.setup.SetSizer(self._dataPanelSizer)        
+        self._dataPanelSizer.Fit(self.setup)
         self.setup.Layout()
         
         qviewPanel = wx.Panel(self)
@@ -183,7 +195,9 @@ class DataPanel(wx.Panel):
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_variables,  self.datalist) 
         self.Bind(wx.EVT_BUTTON, self.on_plot, self.plot_button)
         self.Bind(wx.EVT_BUTTON, self.on_replot, self.replot_button)
-        
+        self.Bind(wx.EVT_COMBOBOX,self.on_select_plot_type, self.plot_type)
+        self.Bind(wx.EVT_SPINCTRL,self.on_change_dimension, self._selectedDimension)
+
     @property
     def dataDict(self):
         if self.standalone:
@@ -216,6 +230,17 @@ class DataPanel(wx.Panel):
             self.datalist.DeleteAllItems()
             self.datasetlist.Select(0,1) 
             
+    def on_change_dimension(self,event):
+
+        if self.plot_type.GetValue() != '2D Slice':
+            return
+
+        if self.selectedVar is None:
+            return
+        selectedDim = self._selectedDimension.GetValue()
+        data = self.dataproxy[self.selectedVar]['data']
+        self._selectedSlice.SetRange(0,data.shape[selectedDim]-1)
+
     def on_select_dataset(self, event):
         if event is None:
             return
@@ -224,6 +249,14 @@ class DataPanel(wx.Panel):
         self.parent._data = self.dataDict[var]['data']
         self.show_data()
         
+    def on_select_plot_type(self, event):
+
+        if self.plot_type.GetValue() == '2D Slice':
+            self._dataPanelSizer.Show(self._2DSliceSizer)
+        else:
+            self._dataPanelSizer.Hide(self._2DSliceSizer)
+        self._dataPanelSizer.Layout()
+
     def show_dataset(self, index=0):
         self.datasetlist.DeleteAllItems()
         for i, k in enumerate(self.dataDict.keys()):
@@ -234,8 +267,7 @@ class DataPanel(wx.Panel):
         
     def show_data(self):
         self.datalist.DeleteAllItems()
-        forbidden_vars = ['description', 'step', 'time', 'box_size', 'configuration', 'gradients', 'velocities']
-        variables = [key for key in self.dataproxy.keys() if key not in forbidden_vars]
+        variables = self.dataproxy.keys()
         for i, var in enumerate(sorted(variables)):
             self.datalist.InsertStringItem(i, var)
             #self.datalist.SetStringItem(i, 1,self.dataproxy[var]['units'])
@@ -262,6 +294,8 @@ class DataPanel(wx.Panel):
             self.plot_type.SetStringSelection(types[-1])
 
         self.selectedVar = var
+        self.on_change_dimension(None)
+        self.on_select_plot_type(None)
         self.plot_quickview(data)            
     
     def plot_quickview(self, data):
@@ -295,7 +329,19 @@ class DataPanel(wx.Panel):
             Plotter = Plotter2D(self)
             self.plotterNotebook.AddPage(Plotter, "%s(%s)"%(self.selectedVar,plot_type))
             Plotter.plot(data, self.selectedVar)
-            
+
+        elif plot_type == '2D Slice':
+            Plotter = Plotter2D(self)
+            self.plotterNotebook.AddPage(Plotter, "%s(%s)"%(self.selectedVar,plot_type))
+            dim = self._selectedDimension.GetValue()
+            slice = self._selectedSlice.GetValue()
+            if dim == 0:
+                Plotter.plot(data[slice,:,:], self.selectedVar)
+            elif dim == 1:
+                Plotter.plot(data[:,slice,:], self.selectedVar)
+            elif dim == 2:
+                Plotter.plot(data[:,:,slice], self.selectedVar)
+
         elif plot_type == 'Elevation':
             Plotter = Plotter3D(self.parent)
             self.plotterNotebook.AddPage(Plotter, "%s(%s)"%(self.selectedVar,plot_type))

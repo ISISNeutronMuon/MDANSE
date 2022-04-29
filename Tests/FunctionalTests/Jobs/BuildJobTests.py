@@ -33,12 +33,13 @@ class JobFileGenerator():
         self.job = job
         self.job.get_default_parameters()
 
-        # Check if reference data is present
+        # Check if reference data is present, first assuming that the tests are run from Jobs/
         self.reference_data_path = os.path.join(os.path.pardir, os.path.pardir, os.path.pardir, "Data",
                                                 "Jobs_reference_data", job._type)
         self.reference_data_file = self.reference_data_path + "_reference" + ".nc"
+
         if not os.path.isfile(self.reference_data_file):
-            print "/!\ Reference data file is not present for job " + str(job)
+            print r"/!\ Reference data file is not present for job " + str(job)
             self.reference_data_file = None
 
         # Check if job can be launched on multiprocessor
@@ -251,9 +252,10 @@ class JobFileGenerator():
 
 if __name__ == '__main__':
     # Main script, automatically creates source files for testing jobs
-    for job_id, job in REGISTRY['job'].items():
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    for job_id,job in REGISTRY['job'].items():
         # Skip the mcstas test because mcstas executable is not available on all platform
-        if job_id == 'mvi' or job_id == 'pdf':
+        if job_id=='mvi' or job_id == 'pdf':
             pass
         else:
             job_file_generator = JobFileGenerator(job, job_id=job_id)
