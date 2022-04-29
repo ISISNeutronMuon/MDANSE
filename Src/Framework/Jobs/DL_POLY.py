@@ -383,5 +383,7 @@ class DL_POLYConverter(Converter):
 
         # Close the output trajectory.
         self._trajectory.close()
+
+        super(DL_POLYConverter,self).finalize()
                 
 REGISTRY['dl_poly'] = DL_POLYConverter

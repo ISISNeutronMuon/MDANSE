@@ -238,5 +238,7 @@ class VASPConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
+        super(VASPConverter,self).finalize()
+
 
 REGISTRY['vasp'] = VASPConverter

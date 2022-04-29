@@ -368,4 +368,6 @@ class ForciteConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
+        super(ForciteConverter,self).finalize()
+
 REGISTRY['forcite'] = ForciteConverter
