@@ -1,0 +1,183 @@
+m:
+  factor: 1.0
+  dimension: [0,1,0,0,0,0,0,0,0]
+
+ft:
+  factor: 0.3048
+  dimension: [0,1,0,0,0,0,0,0,0]
+
+s:
+  factor: 1.0
+  dimension: [0,0,1,0,0,0,0,0,0]
+
+kg:
+  factor: 1.0
+  dimension: [1,0,0,0,0,0,0,0,0]
+
+g:
+  factor: 1.0e-03
+  dimension: [1,0,0,0,0,0,0,0,0]
+
+uma:
+  factor: 1.6605402e-27
+  dimension: [1,0,0,0,0,0,0,0,0]
+
+J:
+  factor: 1.0
+  dimension: [1,2,-2,0,0,0,0,0,0]
+
+eV:
+  factor: 1.60217649e-19
+  dimension: [1,2,-2,0,0,0,0,0,0]
+
+Hz:
+  factor: 1.0
+  dimension: [0,0,-1,0,0,0,0,0,0]
+
+K:
+  factor: 1.0
+  dimension: [0,0,0,1,0,0,0,0,0]
+
+mol:
+  factor: 1.0
+  dimension: [0,0,0,0,1,0,0,0,0]
+
+A:
+  factor: 1.0
+  dimension: [0,0,0,0,0,1,0,0,0]
+
+cd:
+  factor: 1.0
+  dimension: [0,0,0,0,0,0,1,0,0]
+
+N:
+  factor: 1.0
+  dimension: [1,1,-2,0,0,0,0,0,0]
+
+Pa:
+  factor: 1.0
+  dimension: [1,-1,-2,0,0,0,0,0,0]
+
+W:
+  factor: 1.0
+  dimension: [1,2,-3,0,0,0,0,0,0]
+
+C:
+  factor: 1.0
+  dimension: [0,0,1,0,0,1,0,0,0]
+
+V:
+  factor: 1.0
+  dimension: [1,2,-3,0,0,-1,0,0,0]
+
+F:
+  factor: 1.0
+  dimension: [-1,-2,4,0,0,2,0,0,0]
+
+ohm:
+  factor: 1.0
+  dimension: [1,2,-3,0,0,-2,0,0,0]
+
+S:
+  factor: 1.0
+  dimension: [-1,-2,3,0,0,2,0,0,0]
+
+Wb:
+  factor: 1.0
+  dimension: [1,2,-2,0,0,-1,0,0,0]
+
+T:
+  factor: 1.0
+  dimension: [1,0,-2,0,0,-1,0,0,0]
+
+H:
+  factor: 1.0
+  dimension: [1,2,-2,0,0,-2,0,0,0]
+
+lm:
+  factor: 1.0
+  dimension: [0,0,0,0,0,0,1,0,0]
+
+lux:
+  factor: 1.0
+  dimension: [0,-2,0,0,0,0,1,0,0]
+
+Bq:
+  factor: 1.0
+  dimension: [0,0,-1,0,0,0,0,0,0]
+
+Gy:
+  factor: 1.0
+  dimension: [0,2,-2,0,0,0,0,0,0]
+
+kat:
+  factor: 1.0
+  dimension: [0,0,-1,0,1,0,0,0,0]
+
+inch:
+  factor: 0.0254
+  dimension: [0,1,0,0,0,0,0,0,0]
+
+ly:
+  factor: 9460730472580800.0
+  dimension: [0,1,0,0,0,0,0,0,0]
+
+b:
+  factor: 1.0e-28
+  dimension: [0,2,0,0,0,0,0,0,0]
+
+l:
+  factor: 1.0e-03
+  dimension: [0,3,0,0,0,0,0,0,0]
+
+year:
+  factor: 31556925.974678401
+  dimension: [0,0,1,0,0,0,0,0,0]
+
+day:
+  factor: 86400
+  dimension: [0,0,1,0,0,0,0,0,0]
+
+h:
+  factor: 3600
+  dimension: [0,0,1,0,0,0,0,0,0]
+
+min:
+  factor: 60
+  dimension: [0,0,1,0,0,0,0,0,0]
+
+dpi:
+  factor: 39.37007874015748
+  dimension: [0,-1,0,0,0,0,0,0,0]
+
+gravity:
+  factor: 9.80665
+  dimension: [0,1,-2,0,0,0,0,0,0]
+
+ang:
+  factor: 1.0e-10
+  dimension: [0,1,0,0,0,0,0,0,0]
+
+c:
+  factor: 2.99792458e+08
+  dimension: [0,1,-1,0,0,0,0,0,0]
+
+cal:
+  factor: 4.184
+  dimension: [1,2,-2,0,0,0,0,0,0]
+
+cal_per_mole:
+  factor: 6.94778e-24
+  dimension: [1,2,-2,0,-1,0,0,0,0]
+
+Ha:
+  factor: 4.35974394e-18
+  dimension: [1,2,-2,0,0,0,0,0,0]
+
+cyc:
+  factor: 6.283185307179586
+  dimension: [0,0,0,0,0,0,0,1,0]
+
+au:
+  factor: 1.0
+  dimension: [0,0,0,0,0,0,0,0,0]
