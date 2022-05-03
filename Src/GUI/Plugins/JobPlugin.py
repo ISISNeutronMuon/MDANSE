@@ -33,9 +33,11 @@ from MDANSE.GUI.ComboWidgets.JobHelpFrame import JobHelpFrame
 
 class JobPlugin(ComponentPlugin):
         
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, standalone=False, *args, **kwargs):
                 
         self._job = REGISTRY["job"][self._type]()
+
+        self._standlone = standalone
         
         ComponentPlugin.__init__(self, parent, size=wx.Size(800,600), *args, **kwargs)
                 
@@ -102,14 +104,9 @@ class JobPlugin(ComponentPlugin):
             startupinfo.wShowWindow = subprocess.SW_HIDE
         else:
             startupinfo = None
-
-        #try:
-        #    from subprocess import DEVNULL
-        #except ImportError:
-        #    DEVNULL = os.open(os.devnull, os.O_RDWR)
             
         try:
-            subprocess.Popen([sys.executable, filename], startupinfo=startupinfo, stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen([sys.executable, filename], startupinfo=startupinfo, stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as e:
             message = e.output
         else:        
@@ -117,11 +114,14 @@ class JobPlugin(ComponentPlugin):
 
         PUBLISHER.sendMessage("msg_start_job",message=message)
         
-        if message is None:
+        if message is None and not self._standlone:
             d = wx.MessageDialog(None, 'Your analysis is performing. Do you want to close ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
             if d.ShowModal() == wx.ID_YES:
                 self.on_close(None)
         
+        if self._standlone:
+            p.wait()
+
     def on_save(self, event=None):
 
         if not self._parametersPanel.validate():
@@ -178,7 +178,7 @@ class JobFrame(wx.Frame):
         if not isinstance(data,EmptyData):
             DATA_CONTROLLER[data.name] = data
                         
-        plugin = REGISTRY['plugin'][self._jobType](self)
+        plugin = REGISTRY['plugin'][self._jobType](self, standalone=True)
 
         self.SetSize(plugin.GetSize())
         

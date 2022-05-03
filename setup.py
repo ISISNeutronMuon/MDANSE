@@ -189,7 +189,7 @@ if sphinx:
 
             sphinxDir = os.path.abspath(os.path.join(build.build_base,'sphinx',self.doctype))
 
-            if not os.path.exists(sphinxDir):
+            if not os.path.exists(sphinxDir):                
                 os.makedirs(sphinxDir)
                                  
             metadata = self.distribution.metadata
