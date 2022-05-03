@@ -38,14 +38,14 @@ class TestGromacsADK(unittest.TestCase):
         job = REGISTRY['job']['gromacs']()
 
         for k, v in job.get_default_parameters().items():
-            if k == 'output_files':
+            if k == 'output_file':
                 cls.output_path = v[0]
                 break
 
         parameters = {}
         parameters['fold'] = False
         parameters['pdb_file'] = '../../../Data/Trajectories/Gromacs/adk_oplsaa.pdb'
-        parameters['output_files'] = ('_'.join([cls.output_path, 'trr']), ['netcdf'])
+        parameters['output_file'] = ('_'.join([cls.output_path, 'trr']), 'netcdf')
         parameters['xtc_file'] = '../../../Data/Trajectories/Gromacs/adk_oplsaa.trr'
         print "Launching job in monoprocessor mode for trr"
         parameters["running_mode"] = ("monoprocessor", 1)
@@ -59,7 +59,7 @@ class TestGromacsADK(unittest.TestCase):
         parameters = {}
         parameters['fold'] = False
         parameters['pdb_file'] = '../../../Data/Trajectories/Gromacs/adk_oplsaa.pdb'
-        parameters['output_files'] = ('_'.join([self.output_path, 'xtc']), ['netcdf'])
+        parameters['output_file'] = ('_'.join([self.output_path, 'xtc']), 'netcdf')
         parameters['xtc_file'] = '../../../Data/Trajectories/Gromacs/adk_oplsaa.xtc'
         print "Launching job in monoprocessor mode for xtc"
         parameters["running_mode"] = ("monoprocessor",1)
@@ -105,14 +105,14 @@ class TestGromacsCobrotoxin(unittest.TestCase):
         job = REGISTRY['job']['gromacs']()
 
         for k, v in job.get_default_parameters().items():
-            if k == 'output_files':
+            if k == 'output_file':
                 cls.output_path = v[0]
                 break
 
         parameters = {}
         parameters['fold'] = False
         parameters['pdb_file'] = '../../../Data/Trajectories/Gromacs/cobrotoxin.pdb'
-        parameters['output_files'] = ('_'.join([cls.output_path, 'trr']), ['netcdf'])
+        parameters['output_file'] = ('_'.join([cls.output_path, 'trr']), 'netcdf')
         parameters['xtc_file'] = '../../../Data/Trajectories/Gromacs/cobrotoxin.trr'
         print "Launching job in monoprocessor mode for trr"
         parameters["running_mode"] = ("monoprocessor", 1)
@@ -127,7 +127,7 @@ class TestGromacsCobrotoxin(unittest.TestCase):
         parameters = {}
         parameters['fold'] = False
         parameters['pdb_file'] = '../../../Data/Trajectories/Gromacs/cobrotoxin.pdb'
-        parameters['output_files'] = ('_'.join([self.output_path, 'xtc']), ['netcdf'])
+        parameters['output_file'] = ('_'.join([self.output_path, 'xtc']), 'netcdf')
         parameters['xtc_file'] = '../../../Data/Trajectories/Gromacs/cobrotoxin.xtc'
         print "Launching job in monoprocessor mode for xtc"
         parameters["running_mode"] = ("monoprocessor",1)
