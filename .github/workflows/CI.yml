@@ -115,8 +115,11 @@ jobs:
           path: ~/
 
       - name: Untar artifacts
+        run: tar -xzf ~/python.tar.gz -C $HOME
+
+      - name: Install netcdf
         run: |
-          tar -xzf ~/python.tar.gz -C $HOME
+          sudo apt-get update
           sudo apt-get install netcdf-bin libnetcdf-dev
 
       - name: Install wx
