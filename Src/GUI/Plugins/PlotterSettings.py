@@ -25,17 +25,9 @@ class UnitsSettingsError(Error):
 class UnitsSettingsDialog():
     def checkUnits(self, oldUnit, newUnit):
         if oldUnit != newUnit:
-            print('ddddd',oldUnit,newUnit)
-            m = measure(1,0,oldUnit)
-            m.toval(newUnit,equivalent=True)
             try:
-<<<<<<< HEAD
-                m = measure(1.0,oldUnit,equivalent=True,transform=False)
+                m = measure(1.0,oldUnit,equivalent=True)
                 m.toval(newUnit)
-=======
-                m = measure(1,0,oldUnit)
-                m.toval(newUnit,equivalent=True)
->>>>>>> 3f4d59dd9770328a4e332214e5f9d3c79cae948e
             except UnitError:
                 raise UnitsSettingsError("the axis unit (%s) is inconsistent with the current unit (%s) "%(newUnit, oldUnit))
 

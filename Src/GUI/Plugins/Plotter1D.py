@@ -500,24 +500,14 @@ class Plotter1D(wx.Panel):
 
     def compute_conversion_factor(self):
         try:
-<<<<<<< HEAD
-            m = measure(1.0,self.Xinit_unit,equivalent=True,transform=False)
+            m = measure(1.0,self.Xinit_unit,equivalent=True)
             self.Xunit_conversion_factor = m.toval(self.Xunit)
-=======
-            m = measure(1., self.Xinit_unit)
-            self.Xunit_conversion_factor = m.toval(self.Xunit,equivalent=True)
->>>>>>> 3f4d59dd9770328a4e332214e5f9d3c79cae948e
         except UnitError:
             self.Xunit_conversion_factor = 1.0
 
         try:
-<<<<<<< HEAD
-            m = measure(1.0, self.Yinit_unit,equivalent=True,transform=False)
+            m = measure(1.0, self.Yinit_unit,equivalent=True)
             self.Yunit_conversion_factor = m.toval(self.Yunit)
-=======
-            m = measure(1., self.Yinit_unit)
-            self.Yunit_conversion_factor = m.toval(self.Yunit,equivalent=True)
->>>>>>> 3f4d59dd9770328a4e332214e5f9d3c79cae948e
         except UnitError:
             self.Yunit_conversion_factor = 1.0
 
