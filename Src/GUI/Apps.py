@@ -20,6 +20,7 @@ from MDANSE.GUI.Plugins.PlotterPlugin import PlotterFrame
 from MDANSE.GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE.GUI.MainFrame import MainFrame
 from MDANSE.GUI.PeriodicTableViewer import PeriodicTableViewer
+from MDANSE.GUI.UnitsEditor import UnitsEditor
 from MDANSE.GUI.UserDefinitionViewer import UserDefinitionViewer
 
 class ElementsDatabaseEditorApp(wx.App):
@@ -55,7 +56,16 @@ class PlotterApp(wx.App):
         f = PlotterFrame(None)
         f.Show()
         return True
-    
+
+class UnitsEditorApp(wx.App):  
+      
+    def OnInit(self):
+        
+        f = UnitsEditor(None)
+        self.SetTopWindow(f)
+        f.ShowModal()
+        return True
+
 class UserDefinitionViewerApp(wx.App):  
       
     def OnInit(self):

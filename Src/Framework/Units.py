@@ -32,83 +32,6 @@ _PREFIXES = {'y': 1e-24,  # yocto
              'Y': 1e24,   # yotta
         }
 
-_EQUIVALENCES = {}
-_EQUIVALENCES[(0,0,0,0,0,0,0,0,0)] = {}
-_EQUIVALENCES[(1, 2,-2,0,0,0,0,0,0)] = {}
-_EQUIVALENCES[(0, 0,-1,0,0,0,0,0,0)] = {}
-_EQUIVALENCES[(0, 0, 0,1,0,0,0,0,0)] = {}
-_EQUIVALENCES[(1, 0, 0,0,0,0,0,0,0)] = {}
-_EQUIVALENCES[(0,-1, 0,0,0,0,0,0,0)] = {}
-_EQUIVALENCES[(1,2,-2,0,-1,0,0,0,0)] = {}
-
-_EQUIVALENCES[(0,0,0,0,0,0,0,0,0)][(0,0,0,0,0,0,0,0,0)] = 1.0
-
-# 1J --> 1Hz
-_EQUIVALENCES[(1,2,-2,0,0,0,0,0,0)][(0,0,-1,0,0,0,0,0,0)] = 1.50919031167677e+33
-# 1J --> 1K
-_EQUIVALENCES[(1,2,-2,0,0,0,0,0,0)][(0,0,0,1,0,0,0,0,0)] = 7.242971666663e+22
-# 1J --> 1kg
-_EQUIVALENCES[(1,2,-2,0,0,0,0,0,0)][(1,0,0,0,0,0,0,0,0)] = 1.112650055999e-17
-# 1J --> 1/m
-_EQUIVALENCES[(1,2,-2,0,0,0,0,0,0)][(0,-1,0,0,0,0,0,0,0)] = 5.034117012218e+24
-# 1J --> 1J/mol
-_EQUIVALENCES[(1,2,-2,0,0,0,0,0,0)][(1,2,-2,0,-1,0,0,0,0)] = 6.02214076e+23
-
-# 1Hz --> 1J
-_EQUIVALENCES[(0,0,-1,0,0,0,0,0,0)][(1,2,-2,0,0,0,0,0,0)] = 6.62606957030801e-34
-# 1Hz --> 1K
-_EQUIVALENCES[(0,0,-1,0,0,0,0,0,0)][(0,0,0,1,0,0,0,0,0)] = 4.79924341590788e-11
-# 1Hz --> 1kg
-_EQUIVALENCES[(0,0,-1,0,0,0,0,0,0)][(1,0,0,0,0,0,0,0,0)] = 7.37249667845648e-51
-# 1Hz --> 1/m
-_EQUIVALENCES[(0,0,-1,0,0,0,0,0,0)][(0,-1,0,0,0,0,0,0,0)] = 3.33564095480276e-09
-# 1Hz --> 1J/mol
-_EQUIVALENCES[(0,0,-1,0,0,0,0,0,0)][(1,2,-2,0,-1,0,0,0,0)] = 3.9903124e-10
-
-# 1K --> 1J
-_EQUIVALENCES[(0,0,0,1,0,0,0,0,0)][(1,2,-2,0,0,0,0,0,0)] = 1.38064878066922e-23
-# 1K --> 1Hz
-_EQUIVALENCES[(0,0,0,1,0,0,0,0,0)][(0,0,-1,0,0,0,0,0,0)] = 2.08366176361327e+10
-# 1K --> 1kg
-_EQUIVALENCES[(0,0,0,1,0,0,0,0,0)][(1,0,0,0,0,0,0,0,0)] = 1.53617894312656e-40
-# 1K --> 1/m
-_EQUIVALENCES[(0,0,0,1,0,0,0,0,0)][(0,-1,0,0,0,0,0,0,0)] = 6.95034751466497e+01
-# 1K --> 1J/mol
-_EQUIVALENCES[(0,0,0,1,0,0,0,0,0)][(1,2,-2,0,-1,0,0,0,0)] = 8.31435
-
-# 1kg --> 1J
-_EQUIVALENCES[(1,0,0,0,0,0,0,0,0)][(1,2,-2,0,0,0,0,0,0)] = 8.98755178780936e+16
-# 1kg --> 1Hz
-_EQUIVALENCES[(1,0,0,0,0,0,0,0,0)][(0,0,-1,0,0,0,0,0,0)] = 1.35639260838482e+50
-# 1kg --> 1K
-_EQUIVALENCES[(1,0,0,0,0,0,0,0,0)][(0,0,0,1,0,0,0,0,0)] = 6.50965829517696e+39
-# 1kg --> 1/m
-_EQUIVALENCES[(1,0,0,0,0,0,0,0,0)][(0,-1,0,0,0,0,0,0,0)] = 4.52443873532014e+41
-# 1kg --> 1J/mol
-_EQUIVALENCES[(1,0,0,0,0,0,0,0,0)][(0,-1,0,0,0,0,0,0,0)] = 5.412430195397762e+40
-
-# 1/m --> 1J
-_EQUIVALENCES[(0,-1,0,0,0,0,0,0,0)][(1,2,-2,0,0,0,0,0,0)] = 1.98644568168154e-25
-# 1/m --> 1Hz
-_EQUIVALENCES[(0,-1,0,0,0,0,0,0,0)][(0,0,-1,0,0,0,0,0,0)] = 2.9979245774644e+08
-# 1/m --> 1K
-_EQUIVALENCES[(0,-1,0,0,0,0,0,0,0)][(0,0,0,1,0,0,0,0,0)] = 0.0143877697897844
-# 1/m --> kg
-_EQUIVALENCES[(0,-1,0,0,0,0,0,0,0)][(1,0,0,0,0,0,0,0,0)] = 2.21021889896193e-42
-# 1/m --> 1J/mol
-_EQUIVALENCES[(0,-1,0,0,0,0,0,0,0)][(1,2,-2,0,-1,0,0,0,0)] = 0.000119627
-
-# 1J/mol --> 1J
-_EQUIVALENCES[(1,2,-2,0,-1,0,0,0,0)][(1,2,-2,0,0,0,0,0,0)] = 1.66054e-24
-# 1J/mol --> 1Hz
-_EQUIVALENCES[(1,2,-2,0,-1,0,0,0,0)][(0,0,-1,0,0,0,0,0,0)] = 2506070880.151561
-# 1J/mol --> 1K
-_EQUIVALENCES[(1,2,-2,0,-1,0,0,0,0)][(0,0,0,1,0,0,0,0,0)] = 0.12027244171360577
-# 1J/mol --> 1/m
-_EQUIVALENCES[(1,2,-2,0,-1,0,0,0,0)][(0,0,0,1,0,0,0,0,0)] = 8.359352663468478
-# 1J/mol --> kg
-_EQUIVALENCES[(1,2,-2,0,-1,0,0,0,0)][(1,0,0,0,0,0,0,0,0)] = 1.8475999239885794e-41
-
 class UnitError(Exception):
     pass
 
@@ -211,140 +134,16 @@ class _Unit:
 
         self._out_factor = None
 
-        self._equivalent = None
-
-    def set_equivalent(self, equivalent):
-
-        self._equivalent = equivalent
-
-    def _set_unit_name(self):
-
-        num_dimensions = []
-        den_dimensions = []
-        for i in range(len(_UNAMES)):
-
-            dim = self._dimension[i]
-            if dim > 1:                
-                num_dimensions.append('{:s}{:d}'.format(_UNAMES[i],dim))
-            elif dim == 1:
-                num_dimensions.append('{:s}'.format(_UNAMES[i]))
-            elif dim == -1:
-                den_dimensions.append('{:s}'.format(_UNAMES[i]))
-            elif dim < -1:
-                den_dimensions.append('{:s}{:d}'.format(_UNAMES[i],-dim))
-
-        if not num_dimensions and not den_dimensions:
-            self._uname = None
-            return
-
-        if num_dimensions:
-            num_dimensions = ' '.join(num_dimensions)
-        else:
-            num_dimensions = '1'
-
-        if den_dimensions:
-            den_dimensions = ' '.join(den_dimensions)
-            num_dimensions += ' / {:s}'.format(den_dimensions)
-
-        self._uname = num_dimensions
-
-    def set_format(self, fmt):
-    
-        self._format = fmt
-
-    def __int__(self):
-    
-        return int(self._factor)
-    
-    def __float__(self):
-    
-        return float(self._factor)
-
-    @staticmethod
-    def _build_unit_from_dimension(dimension):
-
-        num_dimensions = []
-        den_dimensions = []
-        for i in range(len(_UNAMES)):
-            dim = dimension[i]
-            if dim > 1:                
-                num_dimensions.append('{:s}{:d}'.format(_UNAMES[i],dim))
-            elif dim == 1:
-                num_dimensions.append('{:s}'.format(_UNAMES[i]))
-            elif dim == -1:
-                den_dimensions.append('{:s}'.format(_UNAMES[i]))
-            elif dim < -1:
-                den_dimensions.append('{:s}{:d}'.format(_UNAMES[i],-dim))
-
-        if not num_dimensions and not den_dimensions:
-            
-            return None
-
-        if num_dimensions:
-            num_dimensions = ' '.join(num_dimensions)
-        else:
-            num_dimensions = '1'
-
-        if den_dimensions:
-            den_dimensions = ' '.join(den_dimensions)
-            num_dimensions += ' / {:s}'.format(den_dimensions)
-
-        return num_dimensions
-
-    def _mult_by(self, other):
-
-        if self.is_compatible(other):
-            self._factor *= other._factor
-            for i in range(len(self._dimension)):
-                self._dimension[i] = 2*self._dimension[i]
-        elif other._equivalent:
-            if self.is_equivalent(other):
-                dim = tuple(self._dimension)
-                other_dim = tuple(other._dimension)
-                conv_fact = _EQUIVALENCES[dim][other_dim]
-                self._factor *= other._factor/conv_fact
-                for i in range(len(self._dimension)):
-                    self._dimension[i] = 2*self._dimension[i]
-            else:
-                raise UnitError('The units are not equivalent')
-        else:
-            self._factor *= other._factor
-            for i in range(len(self._dimension)):
-                self._dimension[i] = self._dimension[i] + other._dimension[i]
-
-        self._ounit = None
-        self._out_factor = None
-
-    def _div_by(self, other):
-
-        if self.is_compatible(other):
-            self._factor /= other._factor
-            self._dimension = [0,0,0,0,0,0,0,0,0]
-        elif other._equivalent:
-            if self.is_equivalent(other):
-                dim = tuple(self._dimension)
-                other_dim = tuple(other._dimension)
-                conv_fact = _EQUIVALENCES[dim][other_dim]
-                self._factor /= other._factor/conv_fact
-                self._dimension = [0,0,0,0,0,0,0,0,0]
-            else:
-                raise UnitError('The units are not equivalent')
-        else:
-            self._factor /= other._factor
-            for i in range(len(self._dimension)):
-                self._dimension[i] = self._dimension[i] - other._dimension[i]
-
-        self._ounit = None
-        self._out_factor = None
+        self._equivalent = False
 
     def __add__(self, other):
 
         u = copy.deepcopy(self)
 
-        if u.is_compatible(other):
+        if u.is_analog(other):
             u._factor += other._factor
             return u
-        elif other._equivalent:
+        elif self._equivalent:
             if u.is_equivalent(other):
                 dim = tuple(u._dimension)
                 other_dim = tuple(other._dimension)
@@ -356,16 +155,35 @@ class _Unit:
         else:
             raise UnitError('Incompatible units')
 
-    def __radd__(self, other):
+    def __div__(self, other):
+    
+        u = copy.deepcopy(self)
+        if isinstance(other,numbers.Number):
+            u._factor /= other
+            return u
+        elif isinstance(other,_Unit):
+            u._div_by(other)
+            return u
+        else:
+            raise UnitError('Invalid operand')
 
-        return self.__add__(other)
+    def __float__(self):
+    
+        return float(self._factor)
+
+    def __floordiv__(self, other):
+
+        u = copy.deepcopy(self)
+        u._div_by(other)
+        u._factor = math.floor(u._factor)
+        return u
 
     def __iadd__(self, other):
 
-        if self.is_compatible(other):
+        if self.is_analog(other):
             self._factor += other._factor
             return self
-        elif other._equivalent:
+        elif self._equivalent:
             if self.is_equivalent(other):
                 dim = tuple(self._dimension)
                 other_dim = tuple(other._dimension)
@@ -376,46 +194,23 @@ class _Unit:
                 raise UnitError('The units are not equivalent')                
         else:
             raise UnitError('Incompatible units')
+
+    def __idiv__(self, other):
     
-    def __sub__(self, other):
-
-        u = copy.deepcopy(self)
-
-        if u.is_compatible(other):
-            u._factor -= other._factor
-            return u
-        elif other._equivalent:
-            if u.is_equivalent(other):
-                dim = tuple(u._dimension)
-                other_dim = tuple(other._dimension)
-                conv_fact = _EQUIVALENCES[dim][other_dim]
-                u._factor -= other._factor/conv_fact
-                return u
-            else:
-                raise UnitError('The units are not equivalent')                
-        else:
-            raise UnitError('Incompatible units')
-
-    def __rsub__(self, other):
-
-        return other.__sub__(self)
-
-    def __isub__(self, other):
-
-        if self.is_compatible(other):
-            self._factor -= other._factor
+        if isinstance(other,numbers.Number):
+            self._factor /= other
             return self
-        elif other._equivalent:
-            if self.is_equivalent(other):
-                dim = tuple(self._dimension)
-                other_dim = tuple(other._dimension)
-                conv_fact = _EQUIVALENCES[dim][other_dim]
-                self._factor -= other._factor/conv_fact
-                return self
-            else:
-                raise UnitError('The units are not equivalent')                
+        elif isinstance(other,_Unit):
+            self._div_by(other)
+            return self
         else:
-            raise UnitError('Incompatible units')
+            raise UnitError('Invalid operand')
+
+    def __ifloordiv__(self, other):
+
+        self._div_by(other)
+        self._factor = math.floor(self._factor)
+        return self
 
     def __imul__(self, other):
 
@@ -427,6 +222,42 @@ class _Unit:
             return self
         else:
             raise UnitError('Invalid operand')
+
+    def __int__(self):
+    
+        return int(self._factor)
+
+    def __ipow__(self, n):
+        self._factor = pow(self._factor, n)
+        for i in range(len(self._dimension)):
+            self._dimension[i] *= n
+
+        if self._uname is not None:
+            if n > 0:
+                self._uname = '{:s}{:d}'.format(self._uname,n)
+            elif n == 0:
+                self._uname = None
+            else:
+                self._uname = '1 / {:s}{:d}'.format(self._uname,-n)
+
+        return self
+
+    def __isub__(self, other):
+
+        if self.is_analog(other):
+            self._factor -= other._factor
+            return self
+        elif self._equivalent:
+            if self.is_equivalent(other):
+                dim = tuple(self._dimension)
+                other_dim = tuple(other._dimension)
+                conv_fact = _EQUIVALENCES[dim][other_dim]
+                self._factor -= other._factor/conv_fact
+                return self
+            else:
+                raise UnitError('The units are not equivalent')                
+        else:
+            raise UnitError('Incompatible units')
 
     def __mul__(self, other):
 
@@ -440,66 +271,6 @@ class _Unit:
         else:
             raise UnitError('Invalid operand')
 
-    def __rmul__(self, other):
-    
-        u = copy.deepcopy(self)
-        if isinstance(other,numbers.Number):
-            u._factor *= other
-            return u
-        elif isinstance(other,_Unit):
-            u._mult_by(other)
-            return u
-        else:
-            raise UnitError('Invalid operand')
-        
-    def __idiv__(self, other):
-    
-        if isinstance(other,numbers.Number):
-            self._factor /= other
-            return self
-        elif isinstance(other,_Unit):
-            self._div_by(other)
-            return self
-        else:
-            raise UnitError('Invalid operand')
-            
-    def __div__(self, other):
-    
-        u = copy.deepcopy(self)
-        if isinstance(other,numbers.Number):
-            u._factor /= other
-            return u
-        elif isinstance(other,_Unit):
-            u._div_by(other)
-            return u
-        else:
-            raise UnitError('Invalid operand')
-
-    def __rdiv__(self, other):
-    
-        u = copy.deepcopy(self)
-        if isinstance(other,numbers.Number):
-            u._factor /= other
-            return u
-        elif isinstance(other,_Unit):
-            u._div_by(other)
-            return u
-        else:
-            raise UnitError('Invalid operand')
-
-    def __floordiv__(self, other):
-
-        u = copy.deepcopy(self)
-        u._div_by(other)
-        u._factor = math.floor(u._factor)
-        return u
-
-    def __ifloordiv__(self, other):
-
-        self._div_by(other)
-        self._factor = math.floor(self._factor)
-        return self
-              
     def __pow__(self, n, modulo=None):
         output_unit = copy.copy(self)
         if modulo and (output_unit._factor == math.floor(output_unit._factor)):
@@ -518,29 +289,56 @@ class _Unit:
 
         return output_unit
 
-    def __ipow__(self, n):
-        self._factor = pow(self._factor, n)
-        for i in range(len(self._dimension)):
-            self._dimension[i] *= n
+    def __radd__(self, other):
 
-        if self._uname is not None:
-            if n > 0:
-                self._uname = '{:s}{:d}'.format(self._uname,n)
-            elif n == 0:
-                self._uname = None
-            else:
-                self._uname = '1 / {:s}{:d}'.format(self._uname,-n)
+        return self.__add__(other)
 
-        return self
-
-    def to_val(self):
-
-        if self._uname is None:
-            return self._val
-
+    def __rdiv__(self, other):
+    
+        u = copy.deepcopy(self)
+        if isinstance(other,numbers.Number):
+            u._factor /= other
+            return u
+        elif isinstance(other,_Unit):
+            u._div_by(other)
+            return u
         else:
-            u = _str_to_unit(self._uname)
-            return self._val/u._val
+            raise UnitError('Invalid operand')
+
+    def __rmul__(self, other):
+    
+        u = copy.deepcopy(self)
+        if isinstance(other,numbers.Number):
+            u._factor *= other
+            return u
+        elif isinstance(other,_Unit):
+            u._mult_by(other)
+            return u
+        else:
+            raise UnitError('Invalid operand')
+
+    def __rsub__(self, other):
+
+        return other.__sub__(self)
+
+    def __sub__(self, other):
+
+        u = copy.deepcopy(self)
+
+        if u.is_analog(other):
+            u._factor -= other._factor
+            return u
+        elif self._equivalent:
+            if u.is_equivalent(other):
+                dim = tuple(u._dimension)
+                other_dim = tuple(other._dimension)
+                conv_fact = _EQUIVALENCES[dim][other_dim]
+                u._factor -= other._factor/conv_fact
+                return u
+            else:
+                raise UnitError('The units are not equivalent')                
+        else:
+            raise UnitError('Incompatible units')
 
     def __str__(self):
 
@@ -592,25 +390,76 @@ class _Unit:
 
         return s
 
-    def is_compatible(self,other):
+    def _div_by(self, other):
+
+        if self._equivalent:
+            if self.is_equivalent(other):
+                dim = tuple(self._dimension)
+                other_dim = tuple(other._dimension)
+                conv_fact = _EQUIVALENCES[dim][other_dim]
+                self._factor /= other._factor/conv_fact
+                self._dimension = [0,0,0,0,0,0,0,0,0]
+            else:
+                raise UnitError('The units are not equivalent')
+        else:
+            self._factor /= other._factor
+            for i in range(len(self._dimension)):
+                self._dimension[i] = self._dimension[i] - other._dimension[i]
+
+        self._ounit = None
+        self._out_factor = None
+
+    def _mult_by(self, other):
+
+        if self._equivalent:
+            if self.is_equivalent(other):
+                dim = tuple(self._dimension)
+                other_dim = tuple(other._dimension)
+                conv_fact = _EQUIVALENCES[dim][other_dim]
+                self._factor *= other._factor/conv_fact
+                for i in range(len(self._dimension)):
+                    self._dimension[i] = 2*self._dimension[i]
+                return
+            else:
+                raise UnitError('The units are not equivalent')
+        else:
+            self._factor *= other._factor
+            for i in range(len(self._dimension)):
+                self._dimension[i] = self._dimension[i] + other._dimension[i]
+
+        self._ounit = None
+        self._out_factor = None
+
+    @staticmethod
+    def conversion_factor(u1,u2):
+
+        u1 = _str_to_unit(u1)
+        u2 = _str_to_unit(u2)
+
+        if u1.is_analog(u2):
+            return u1._factor/u2._factor
+        else:
+            factor = u1.is_equivalent(u2)
+            if factor is not None:
+                return factor*u1._factor/u2._factor
+            else:
+                raise UnitError('Incompatible units')
+
+    @property
+    def dimension(self):
+        return self._dimension
+
+    @property
+    def factor(self):
+        return self._factor
+
+    def is_analog(self,other):
         return self._dimension == other._dimension
-
-    def find_equivalence(self, other):
-
-        if tuple(self._dimension) not in _EQUIVALENCES:
-            return None
-
-        if tuple(other._dimension) in _EQUIVALENCES[tuple(self._dimension)]:
-            return _EQUIVALENCES[tuple(self._dimension)][tuple(other._dimension)]
-            
-        return None
 
     def is_equivalent(self,other):
         
         _,upower = get_trailing_digits(self._uname)
-        print(self._uname,' ---', self._dimension)
         dimension = tuple([d/upower for d in self._dimension])        
-        print(self._uname,' ---', dimension)
         if dimension not in _EQUIVALENCES:
             return None
 
@@ -620,45 +469,63 @@ class _Unit:
             powerized_equivalences[pk] = pow(v,upower)
            
         odimension = tuple(other._dimension)     
-        print(odimension)
         if odimension in powerized_equivalences:
             return powerized_equivalences[odimension]
         else:
             return None
-        
-    @staticmethod
-    def conversion_factor(u1,u2):
 
-        u1 = _str_to_unit(u1)
-        u2 = _str_to_unit(u2)
-
-        if u1.is_compatible(u2):
-            return u1._factor/u2._factor
-        else:
-            factor = u1.is_equivalent(u2)
-            if factor is not None:
-                return factor*u1._factor/u2._factor
-            else:
-                raise UnitError('Incompatible units')
-
-    def ounit(self, ounit, equivalent=False):
+    def ounit(self, ounit):
 
         self._ounit = ounit
         self._out_factor = _str_to_unit(ounit)
-        self._out_factor.set_equivalent(equivalent)
 
-        return self
+        if self.is_analog(self._out_factor):
+            return self
+        elif self._equivalent:
+            if self.is_equivalent(self._out_factor):
+                return self
+            else:
+                raise UnitError('The units are not equivalents')
+        else:
+            raise UnitError('The units are not compatible')
 
-    def toval(self, ounit='',equivalent=False):
+    def set_equivalent(self, equivalent):
+
+        self._equivalent = equivalent
+
+    def set_format(self, fmt):
+    
+        self._format = fmt
+                                                  
+    def toval(self, ounit=''):
 
         u = copy.deepcopy(self)
         if not ounit:
             ounit = self._ounit
-        if ounit:
-            out_factor = _str_to_unit(ounit)
-            out_factor.set_equivalent(equivalent)
+
+        out_factor = _str_to_unit(ounit)
+
+        if self.is_analog(out_factor):
             u._div_by(out_factor)
-        return u._factor
+            return u._factor
+        elif self._equivalent:
+            if self.is_equivalent(out_factor):
+                u._div_by(out_factor)
+                return u._factor
+            else:
+                raise UnitError('The units are not equivalents')
+        else:
+            raise UnitError('The units are not compatible')
+
+def noop(self, *args, **kw):
+    pass
+
+def represent_unit(dumper, data):
+    return dumper.represent_mapping("", dict(factor=data._factor,dimension=data._dimension))
+
+yaml.add_representer(_Unit, represent_unit)
+
+process_tag = yaml.emitter.Emitter.process_tag
 
 class UnitsManager:
 
@@ -684,13 +551,13 @@ class UnitsManager:
         if UnitsManager._UNITS.has_key(uname):
             del UnitsManager._UNITS[uname]
 
-    def has_unit(self, uname):
-
-        return uname in UnitsManager._UNITS
-
     def get_unit(self, uname):
 
         return UnitsManager._UNITS.get(uname,None)
+
+    def has_unit(self, uname):
+
+        return uname in UnitsManager._UNITS
 
     def load(self):
 
@@ -708,23 +575,41 @@ class UnitsManager:
                 factor = udict.get('factor',1.0)
                 dim = udict.get('dimension',[0,0,0,0,0,0,0,0,0])
                 UnitsManager._UNITS[uname] = _Unit(uname,factor,*dim)
-                
+
     def save(self):
+
+        yaml.emitter.Emitter.process_tag = noop
 
         try:
             with open(UnitsManager._USER_DATABASE, 'w') as fout:
-                yaml.dump(fout, UnitsManager._UNITS, default_flow_style=None)
-        except:
-            return
+                yaml.dump(UnitsManager._UNITS, fout, default_flow_style=None)
+        finally:
+            yaml.emitter.Emitter.process_tag = process_tag
 
-UNITS_MANAGER = UnitsManager()
+    @property
+    def units(self):
 
-def measure(val, iunit='au', ounit='', equivalent=False):
+        return UnitsManager._UNITS
 
-    unit = _Unit('au',val)
-    if iunit:        
-        u = _str_to_unit(iunit)
-        unit._mult_by(u)
+    @units.setter
+    def units(self,units):
+
+        UnitsManager._UNITS = units
+                
+_EQUIVALENCES = {}
+
+def add_equivalence(dim1,dim2,factor):
+
+    _EQUIVALENCES.setdefault(dim1,{}).__setitem__(dim2,factor)
+    _EQUIVALENCES.setdefault(dim2,{}).__setitem__(dim1,1.0/factor)
+
+def measure(val, iunit='au', ounit='',equivalent=False):
+
+    if iunit:
+        unit = _str_to_unit(iunit)
+        unit *= val
+    else:
+        unit = _Unit('au',val)
 
     unit.set_equivalent(equivalent)
 
@@ -735,7 +620,42 @@ def measure(val, iunit='au', ounit='', equivalent=False):
 
     return unit
 
+UNITS_MANAGER = UnitsManager()
+# au --> au
+add_equivalence((0,0,0,0,0,0,0,0,0),(0,0,0,0,0,0,0,0,0),1.0)
+# 1J --> 1Hz
+add_equivalence((1,2,-2,0,0,0,0,0,0),(0,0,-1,0,0,0,0,0,0),1.50919031167677e+33)
+# 1J --> 1K
+add_equivalence((1,2,-2,0,0,0,0,0,0),(0,0,0,1,0,0,0,0,0),7.242971666663e+22)
+# 1J --> 1kg
+add_equivalence((1,2,-2,0,0,0,0,0,0),(1,0,0,0,0,0,0,0,0),1.112650055999e-17)
+# 1J --> 1/m
+add_equivalence((1,2,-2,0,0,0,0,0,0),(0,-1,0,0,0,0,0,0,0),5.034117012218e+24)
+# 1J --> 1J/mol
+add_equivalence((1,2,-2,0,0,0,0,0,0),(1,2,-2,0,-1,0,0,0,0),6.02214076e+23)
+# 1Hz --> 1K
+add_equivalence((0,0,-1,0,0,0,0,0,0),(0,0,0,1,0,0,0,0,0),4.79924341590788e-11)
+# 1Hz --> 1kg
+add_equivalence((0,0,-1,0,0,0,0,0,0),(1,0,0,0,0,0,0,0,0),7.37249667845648e-51)
+# 1Hz --> 1/m
+add_equivalence((0,0,-1,0,0,0,0,0,0),(0,-1,0,0,0,0,0,0,0),3.33564095480276e-09)
+# 1Hz --> 1J/mol
+add_equivalence((0,0,-1,0,0,0,0,0,0),(1,2,-2,0,-1,0,0,0,0),3.9903124e-10)
+# 1K --> 1kg
+add_equivalence((0,0,0,1,0,0,0,0,0),(1,0,0,0,0,0,0,0,0),1.53617894312656e-40)
+# 1K --> 1/m
+add_equivalence((0,0,0,1,0,0,0,0,0),(0,-1,0,0,0,0,0,0,0),6.95034751466497e+01)
+# 1K --> 1J/mol
+add_equivalence((0,0,0,1,0,0,0,0,0),(1,2,-2,0,-1,0,0,0,0),8.31435)
+# 1kg --> 1/m
+add_equivalence((1,0,0,0,0,0,0,0,0),(0,-1,0,0,0,0,0,0,0),4.52443873532014e+41)
+# 1kg --> 1J/mol
+add_equivalence((1,0,0,0,0,0,0,0,0),(0,-1,0,0,0,0,0,0,0),5.412430195397762e+40)
+# 1/m --> 1J/mol
+add_equivalence((0,-1,0,0,0,0,0,0,0),(1,2,-2,0,-1,0,0,0,0),0.000119627)
+
 if __name__ == '__main__':
     
-    m = measure(1.0,'THz')
-    print(m.toval('eV',equivalent=True))
+    m1 = measure(1.0,'eV',equivalent=True)
+    print(m1.toval('THz'))
+
