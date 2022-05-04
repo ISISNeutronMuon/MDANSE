@@ -26,7 +26,7 @@ from matplotlib.colors import LogNorm, Normalize
 import wx
 
 from MDANSE.Core.Error import Error
-from MDANSE.Externals.magnitude import magnitude
+from MDANSE.Framework.Units import UnitError, measure
 
 from MDANSE.GUI.Plugins.PlotterSettings import ImageSettingsDialog
 from MDANSE.GUI.Plugins.PlotterTicker import ScaledFormatter, ScaledLocator
@@ -509,15 +509,16 @@ class Plotter2D(wx.Panel):
     def compute_conversion_factor(self):
 
         try:
-            self.Xunit_conversion_factor = magnitude.mg(1., self.Xinit_unit, self.Xunit).toval()
-        except magnitude.MagnitudeError:            
+            m = measure(1., self.Xinit_unit)
+            self.Xunit_conversion_factor = m.toval(self.Xunit,equivalent=True)
+        except UnitError:
             self.Xunit_conversion_factor = 1.0
 
         try:
-            self.Yunit_conversion_factor = magnitude.mg(1., self.Yinit_unit, self.Yunit).toval()
-        except magnitude.MagnitudeError:
+            m = measure(1., self.Yinit_unit)
+            self.Yunit_conversion_factor = m.toval(self.Yunit,equivalent=True)
+        except UnitError:
             self.Yunit_conversion_factor = 1.0
-
     
     def set_ticks(self):
 

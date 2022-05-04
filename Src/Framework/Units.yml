@@ -174,9 +174,17 @@ Ha:
   factor: 4.35974394e-18
   dimension: [1,2,-2,0,0,0,0,0,0]
 
+rad:
+  factor: 1.0
+  dimension: [0,0,0,0,0,0,0,1,0]
+
 cyc:
   factor: 6.283185307179586
   dimension: [0,0,0,0,0,0,0,1,0]
+
+sr:
+  factor: 1.0
+  dimension: [0,0,0,0,0,0,0,0,1]
 
 au:
   factor: 1.0
