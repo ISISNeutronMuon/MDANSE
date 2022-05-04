@@ -18,6 +18,7 @@ import copy
 
 import wx
 
+from MDANSE import LOGGER
 from MDANSE.Framework.Units import _UNAMES, UNITS_MANAGER
 
 class FloatValidator(wx.PyValidator):
@@ -42,6 +43,7 @@ class FloatValidator(wx.PyValidator):
         try:
             float(num_string)
         except:
+            wx.MessageBox("Please enter numbers only", "Invalid Input", wx.OK | wx.ICON_ERROR)
             return False
         else:
             return True
@@ -63,12 +65,96 @@ class FloatValidator(wx.PyValidator):
         """
         return True
 
+class NewUnitDialog(wx.Dialog):
+    """
+    This class pops up a dialog that prompts the user for registering a new element in the database.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        The constructor.
+        """
+
+        # The base class constructor
+        wx.Dialog.__init__(self, *args, **kwargs)
+
+        self.Center()
+
+        # Create text and answer box widgets
+        staticLabel = wx.StaticText(self, wx.ID_ANY, "Unit name")
+        self._unit = wx.TextCtrl(self, wx.ID_ANY)
+
+        self._labels = collections.OrderedDict()
+        self._dimensions = collections.OrderedDict()
+        for uname in _UNAMES:
+            self._labels[uname] = wx.StaticText(self,label=uname)
+            self._dimensions[uname] = wx.SpinCtrl(self,id=wx.ID_ANY,style=wx.SP_WRAP)
+            self._dimensions[uname].SetRange(-100,100)
+            self._dimensions[uname].SetValue(0)
+    
+        factorLabel = wx.StaticText(self,label='Factor')
+        self._factor = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_PROCESS_ENTER|wx.TE_PROCESS_TAB,validator=FloatValidator())
+        self._factor.SetValue('1.0')
+
+        # Create buttons
+        ok = wx.Button(self, wx.ID_OK, "OK")
+        ok.SetDefault()
+        cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
+
+        # Create main sizer and add the instruction text to the top
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        unitNameSizer = wx.BoxSizer(wx.HORIZONTAL)
+        unitNameSizer.Add(staticLabel, 0, wx.ALIGN_CENTER_VERTICAL, 5)
+        unitNameSizer.Add(self._unit, 1, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5)
+
+        factorSizer = wx.BoxSizer(wx.HORIZONTAL)
+        factorSizer.Add(factorLabel, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+        factorSizer.Add(self._factor, 1, wx.ALL, 5)
+
+        dimensionsSizer = wx.GridBagSizer(5,5)
+        for comp, k in enumerate(self._dimensions):
+            dimensionsSizer.Add(self._labels[k], (comp,0),flag=wx.ALIGN_CENTER_VERTICAL)
+            dimensionsSizer.Add(self._dimensions[k], (comp,1),flag=wx.EXPAND)
+        dimensionsSizer.AddGrowableCol(1)
+
+        # Place buttons to appear as a standard dialogue
+        button_sizer = wx.StdDialogButtonSizer()
+        button_sizer.AddButton(cancel)
+        button_sizer.AddButton(ok)
+        button_sizer.Realize()
+
+        main_sizer.Add(unitNameSizer, 0, wx.ALL | wx.EXPAND, 5)
+        main_sizer.Add(factorSizer, 0, wx.ALIGN_LEFT | wx.EXPAND, 5)
+        main_sizer.Add(dimensionsSizer, 0, wx.ALL | wx.EXPAND, 5)
+        main_sizer.Add(button_sizer, 0, wx.EXPAND)
+
+        # Give a minimum size for the dialog but ensure that everything fits inside
+        self.SetMinSize(wx.Size(400, 160))
+        self.SetSizerAndFit(main_sizer)
+        self.Fit()
+
+    def GetValue(self, event=None):
+        """
+        Handler called when the user clicks on the OK button of the property dialog.
+        """
+
+        unit = str(self._unit.GetValue().strip())
+
+        factor = float(self._factor.GetValue())
+
+        dim = [v.GetValue() for v in self._dimensions.values()]
+
+        return unit, factor, dim
+
 class UnitsEditor(wx.Dialog):
     
-    def __init__(self, parent, title="Units Editor", ud=None,editable=True):
+    def __init__(self, parent, title="Units Editor", standalone=False):
         
         wx.Dialog.__init__(self, parent, wx.ID_ANY, size = (600,500), title = title, style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
         
+        self._standalone = standalone
+
         self._dialogSizer = wx.BoxSizer(wx.VERTICAL)
 
         self._build()
@@ -98,6 +184,8 @@ class UnitsEditor(wx.Dialog):
             self._dimensions[uname].SetRange(-100,100)
             self._dimensions[uname].SetValue(0)
     
+        addUnit = wx.Button(mainPanel,wx.ID_ANY,label='Add unit')
+
         mainSizer = wx.BoxSizer(wx.VERTICAL)
 
         factorSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -112,8 +200,12 @@ class UnitsEditor(wx.Dialog):
         dimensionsSizer.AddGrowableCol(1)
         dimensionsPanel.SetSizer(dimensionsSizer)
 
+        unitsSizer = wx.BoxSizer(wx.VERTICAL)
+        unitsSizer.Add(self._unitsList, 1, wx.ALL|wx.EXPAND, 5)
+        unitsSizer.Add(addUnit, 0, wx.ALL|wx.EXPAND, 5)
+
         infoSizer = wx.BoxSizer(wx.HORIZONTAL)
-        infoSizer.Add(self._unitsList, 1, wx.ALL|wx.EXPAND, 5)
+        infoSizer.Add(unitsSizer, 1, wx.ALL|wx.EXPAND, 5)
         infoSizer.Add(factorPanel, 1, wx.ALL, 5)
         infoSizer.Add(dimensionsPanel, 1, wx.ALL|wx.EXPAND, 5)
 
@@ -134,6 +226,8 @@ class UnitsEditor(wx.Dialog):
         self._factor.Bind(wx.EVT_KILL_FOCUS,self.on_change_unit)
         self._factor.Bind(wx.EVT_TEXT_ENTER,self.on_change_unit)
         self._unitsList.Bind(wx.EVT_KEY_DOWN, self.on_delete_unit)
+        self.Bind(wx.EVT_BUTTON, self.on_add_unit, addUnit)
+
         for v in self._dimensions.values():
             self.Bind(wx.EVT_SPINCTRL,self.on_change_unit,v)
 
@@ -144,12 +238,29 @@ class UnitsEditor(wx.Dialog):
     def validate(self):
 
         if not self._factor.GetValidator().Validate(self._factor):
-            wx.MessageBox("Please enter numbers only for unit factor", "Invalid Input", wx.OK | wx.ICON_ERROR)
             return False
 
         else:
             return True
             
+    def on_add_unit(self,event):
+
+        d = NewUnitDialog(self, title="Add unit", size=(400, 220))
+
+        # If the new element dialog is closed by clicking on OK.
+        if d.ShowModal() == wx.ID_CANCEL:
+            return
+
+        # Get rid of wxpython unicode string formatting
+        unitName, factor, dimension = d.GetValue()
+        if not unitName:
+            return
+
+        UNITS_MANAGER.add_unit(unitName,factor,*dimension)
+
+        units = sorted(UNITS_MANAGER.units.keys())
+        self._unitsList.SetItems(units)
+
     def on_change_unit(self, event):
 
         if self._unitsList.GetSelection() < 0:
@@ -199,8 +310,13 @@ class UnitsEditor(wx.Dialog):
 
         if save:
             UNITS_MANAGER.save()
-
-        self.Destroy()
+            if self._standalone:
+                wx.MessageBox("Units database saved successfully", "Success", wx.OK | wx.ICON_INFORMATION)
+            else:
+                LOGGER("Units database saved successfully","info")
+                self.Destroy()
+        else:
+            self.Destroy()
 
 if __name__ == "__main__":
     app = wx.App(False)

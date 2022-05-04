@@ -61,7 +61,7 @@ class UnitsEditorApp(wx.App):
       
     def OnInit(self):
         
-        f = UnitsEditor(None)
+        f = UnitsEditor(None,standalone=True)
         self.SetTopWindow(f)
         f.ShowModal()
         return True
