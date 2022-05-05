@@ -69,7 +69,7 @@ jobs:
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
           contains( github.ref, 'web' )||
-          contains( github.ref, '79_fix_scripts_installation' )
+          contains( github.ref, '79_fix_script_installation' )
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 python
@@ -84,7 +84,7 @@ jobs:
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
           contains( github.ref, 'web' )||
-          contains( github.ref, '79_fix_scripts_installation' )
+          contains( github.ref, '79_fix_script_installation' )
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -107,7 +107,7 @@ jobs:
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
       contains( github.ref, 'web' )||
-      contains( github.ref, '79_fix_scripts_installation' )
+      contains( github.ref, '79_fix_script_installation' )
     steps:
       - uses: actions/checkout@v2
 
@@ -416,9 +416,8 @@ jobs:
 
       - name: Install MDANSE
         run: |
-          "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\VC\bin\vcvars64.bat"
-          set PATH="C:\Users\dni83241\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0";%PATH%
-          "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" x64
+          "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64\vcvarsx86_amd64.bat"
+          set PATH="C:\Users\dni83241\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";%PATH%
           cd %GITHUB_WORKSPACE%
           %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe setup.py build install
         shell: cmd
@@ -443,7 +442,7 @@ jobs:
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
       contains( github.ref, 'web' ) ||
-      contains( github.ref, '79_fix_scripts_installation' )
+      contains( github.ref, '79_fix_script_installation' )
     steps:
       - uses: actions/checkout@v2
 
