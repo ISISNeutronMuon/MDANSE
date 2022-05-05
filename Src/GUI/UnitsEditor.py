@@ -256,6 +256,11 @@ class UnitsEditor(wx.Dialog):
         if not unitName:
             return
 
+        if UNITS_MANAGER.has_unit(unitName):
+            d = wx.MessageDialog(None, 'This unit already exists. Do you want to overwrite it ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
+            if d.ShowModal() == wx.ID_NO:
+                return
+
         UNITS_MANAGER.add_unit(unitName,factor,*dimension)
 
         units = sorted(UNITS_MANAGER.units.keys())
