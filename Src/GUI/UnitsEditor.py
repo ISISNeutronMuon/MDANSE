@@ -283,6 +283,8 @@ class UnitsEditor(wx.Dialog):
 
         UNITS_MANAGER.units = self._defaultUnits
 
+        self.EndModal(wx.CANCEL)
+
         self.Destroy()
 
     def on_delete_unit(self,event):
