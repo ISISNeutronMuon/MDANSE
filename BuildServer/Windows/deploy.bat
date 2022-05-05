@@ -13,9 +13,8 @@ rem see http://p-nand-q.com/python/building-python-27-with-vs2010.html for more 
 set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
 
 rem Prepare the environment for building MDANSE
-"C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\VC\bin\vcvars64.bat"
-set PATH="C:\Users\dni83241\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0";%PATH%
-"C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" x64
+"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64\vcvarsx86_amd64.bat"
+set PATH="C:\Users\dni83241\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";%PATH%
 
 "%PYTHON_EXE%" setup.py build build_api build_help install
 
