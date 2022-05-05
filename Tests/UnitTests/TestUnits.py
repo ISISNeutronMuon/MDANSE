@@ -144,6 +144,37 @@ class TestUnits(unittest.TestCase):
         self.assertRaises(UnitError,m.toval,'au')
         self.assertAlmostEqual(m.toval('1/m'),4.0e-02,10)
 
+    def test_floor_unit(self):
+
+        self.assertAlmostEqual(measure(10.2, 'm/s').floor().toval(),10.0,6)
+        self.assertAlmostEqual(measure(3.6, 'm/s').ounit('km/h').floor().toval(),12.0,6)
+        self.assertAlmostEqual(measure(50.3, 'km/h').floor().toval(),50.0,6)
+
+    def test_ceil_unit(self):
+
+        self.assertAlmostEqual(measure(10.2, 'm/s').ceil().toval(),11.0,6)
+        self.assertAlmostEqual(measure(3.6, 'm/s').ounit('km/h').ceil().toval(),13.0,6)
+        self.assertAlmostEqual(measure(50.3, 'km/h').ceil().toval(),51.0,6)
+
+    def test_round_unit(self):
+
+        self.assertAlmostEqual(measure(10.2, 'm/s').round().toval(),10.0,6)
+        self.assertAlmostEqual(measure(3.6, 'm/s').ounit('km/h').round().toval(),13.0,6)
+        self.assertAlmostEqual(measure(50.3, 'km/h').round().toval(),50.0,6)
+
+    def test_int_unit(self):
+
+        self.assertEqual(int(measure(10.2, 'km/h')),10)
+
+    def test_sqrt_unit(self):
+
+        m = measure(4.0,'m2/s2')
+
+        m = m.sqrt()
+
+        self.assertAlmostEqual(m.toval(),2.0,6)
+        self.assertEqual(m.dimension,[0,1,-1,0,0,0,0,0,0])
+
     def test_equivalent_units(self):
 
         m = measure(1.0,'eV',equivalent=True)
