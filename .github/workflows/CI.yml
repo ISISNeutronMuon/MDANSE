@@ -68,7 +68,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' )||
+          contains( github.ref, '79_fix_scripts_installation' )
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 python
@@ -82,7 +83,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' )||
+          contains( github.ref, '79_fix_scripts_installation' )
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -104,7 +106,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' )||
+      contains( github.ref, '79_fix_scripts_installation' )
     steps:
       - uses: actions/checkout@v2
 
@@ -439,7 +442,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '79_fix_scripts_installation' )
     steps:
       - uses: actions/checkout@v2
 
