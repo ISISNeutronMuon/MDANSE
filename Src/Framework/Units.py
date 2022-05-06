@@ -419,7 +419,10 @@ class _Unit(object):
 
     def _div_by(self, other):
 
-        if self._equivalent:
+        if self.is_analog(other):
+            self._factor /= other._factor
+            self._dimension = [0,0,0,0,0,0,0,0,0]        
+        elif self._equivalent:
             equivalence_factor = self.get_equivalence_factor(other)
             if equivalence_factor is not None:
                 self._factor /= other._factor/equivalence_factor
@@ -436,7 +439,11 @@ class _Unit(object):
 
     def _mult_by(self, other):
 
-        if self._equivalent:
+        if self.is_analog(other):
+            self._factor *= other._factor
+            for i in range(len(self._dimension)):
+                self._dimension[i] = 2.0*self._dimension[i]
+        elif self._equivalent:
             equivalence_factor = self.get_equivalence_factor(other)
             if equivalence_factor is not None:
                 self._factor *= other._factor/equivalence_factor
@@ -806,4 +813,4 @@ add_equivalence((1,2,-2,0,-1,0,0,0,0),(0,0,-1,0,0,0,0,1,0),15746098887.375164)
 
 if __name__ == '__main__':
 
-    print(measure(1.0, 'rad/ps',equivalent=True).toval('eV'))
+    print(measure(1.0, 'KK',equivalent=True).toval('K'))
