@@ -39,9 +39,12 @@ jobs:
         run: |
           sudo conda create -p ~/tempenv python=2.7
           sudo conda install -p ~/tempenv netcdf4
-          sudo mkdir $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages/netCDF4
-          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4/* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages/netCDF4
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages
+          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4/ $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages/
+          cd $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages
+          ls
+          sudo mkdir netCDF4/
+          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4/* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages/netCDF4
 
       - name: Install ScientificPython
         run: |
@@ -203,8 +206,8 @@ jobs:
         run: |
           sudo conda create -p ~/tempenv python=2.7
           sudo conda install -p ~/tempenv netcdf4
-          sudo cp -r ~/tempenv/lib/python2.7/site-packages/netCDF4 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages
-          sudo cp -r ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages
+          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages
+          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages
 
       - name: Install NetCDF
         run: |
@@ -348,9 +351,11 @@ jobs:
 
       - name: Install netCDF4 python package
         run: |
+          echo %HOME%
           C:\Miniconda\condabin\conda.bat create -p %HOME%\tempenv python=2.7
           C:\Miniconda\condabin\conda.bat install -p %HOME%\tempenv netcdf4
-          cd %HOME%\tempenv\lib\site-packages\
+          echo %HOME%
+          cd "%HOME%\tempenv\lib\site-packages\"
           dir
           xcopy %HOME%\tempenv\lib\site-packages\netCDF4\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4 /e /r /h /a /y /I
           xcopy %HOME%\tempenv\lib\site-packages\cftime\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime /e /r /h /a /y /I
