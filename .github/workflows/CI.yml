@@ -44,6 +44,7 @@ jobs:
           sudo cp -rfv ~/tempenv/lib/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -rfv ~/tempenv/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -rfv ~/tempenv/lib/libmfhdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -rfv ~/tempenv/lib/libdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
 
       - name: Install ScientificPython
         run: |
@@ -212,6 +213,7 @@ jobs:
           sudo cp -rfv ~/tempenv/lib/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -rfv ~/tempenv/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -rfv ~/tempenv/lib/libmfhdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -rfv ~/tempenv/lib/libdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
 
       - name: Install NetCDF
         run: |
@@ -363,6 +365,8 @@ jobs:
         shell: cmd
 
       - run: |
+          cd /d "D:\tempenv\lib\site-packages\"
+          dir
           xcopy "D:\tempenv\lib\site-packages\netCDF4\" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\" /e /r /h /a /y /I /f
           xcopy "D:\tempenv\lib\site-packages\cftime\" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\" /e /r /h /a /y /I /f
           cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\"
