@@ -28,7 +28,7 @@ from MDANSE.Framework.Units import measure
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Framework.Jobs.MaterialsStudio import XTDFile
 
-FORCE_FACTOR = measure(1.0,"kcal_per_mole/ang").toval("uma nm/ps2")
+FORCE_FACTOR = measure(1.0,"kcal_per_mole/ang",equivalent=True).toval("uma nm/ps2 mol")
 
 class TrjFile(dict):
 
