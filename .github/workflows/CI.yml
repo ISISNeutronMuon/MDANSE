@@ -41,8 +41,8 @@ jobs:
           sudo conda install -p ~/tempenv netcdf4
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4/ $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/
-          cd $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          ls
+          sudo cp -rfv ~/tempenv/lib/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -rfv ~/tempenv/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
 
       - name: Install ScientificPython
         run: |
@@ -206,6 +206,8 @@ jobs:
           sudo conda install -p ~/tempenv netcdf4
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp -rfv ~/tempenv/lib/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -rfv ~/tempenv/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
 
       - name: Install NetCDF
         run: |
@@ -350,11 +352,12 @@ jobs:
       - name: Install netCDF4 python package
         run: |
           set HOME=%HOMEDRIVE%%HOMEPATH%
-          echo %HOME%
-          C:\Miniconda\condabin\conda.bat create -p %HOMEDRIVE%%HOMEPATH%\tempenv python=2.7
-          C:\Miniconda\condabin\conda.bat install -p %HOMEDRIVE%%HOMEPATH%\tempenv netcdf4
-          xcopy %HOMEDRIVE%%HOMEPATH%\tempenv\lib\site-packages\netCDF4\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4 /e /r /h /a /y /I
-          xcopy %HOMEDRIVE%%HOMEPATH%\tempenv\lib\site-packages\cftime\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime /e /r /h /a /y /I
+          C:\Miniconda\condabin\conda.bat create -p %HOME%\tempenv python=2.7
+          C:\Miniconda\condabin\conda.bat install -p %HOME%\tempenv netcdf4
+          xcopy %HOME%\tempenv\lib\site-packages\netCDF4\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4 /e /r /h /a /y /I /f
+          xcopy %HOME%\tempenv\lib\site-packages\cftime\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime /e /r /h /a /y /I /f
+          cd %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\
+          dir
         shell: cmd
 
       - name: Install static dependencies
