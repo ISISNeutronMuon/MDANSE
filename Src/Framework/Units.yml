@@ -170,6 +170,10 @@ cal_per_mole:
   factor: 6.94778e-24
   dimension: [1,2,-2,0,-1,0,0,0,0]
 
+J_per_mole:
+  factor: 1.660559273422562e-24
+  dimension: [1,2,-2,0,-1,0,0,0,0]
+
 Ha:
   factor: 4.35974394e-18
   dimension: [1,2,-2,0,0,0,0,0,0]
