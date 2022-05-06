@@ -194,6 +194,13 @@ class TestUnits(unittest.TestCase):
         self.assertAlmostEqual(m.toval(),2.0,delta=1.0e-09)
         self.assertEqual(m.dimension,[0,1,-1,0,0,0,0,0,0])
 
+    def test_power_unit(self):
+
+        m = measure(4.0,'m')
+        m **=3
+        self.assertAlmostEqual(m.toval(),64.0,delta=1.0e-09)
+        self.assertEqual(m.dimension,[0,3,0,0,0,0,0,0,0])
+
     def test_equivalent_units(self):
 
         m = measure(1.0,'eV',equivalent=True)

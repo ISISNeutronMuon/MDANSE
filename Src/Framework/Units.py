@@ -2,7 +2,6 @@ import copy
 import math
 import numbers
 import os
-import string
 
 import yaml
 
@@ -38,7 +37,7 @@ class UnitError(Exception):
 def get_trailing_digits(s):
 
     for i in range(len(s)):
-        if s[i:] in string.digits:
+        if s[i:].isdigit():
             return s[:i],int(s[i:])
     else:
         return s, 1
@@ -250,13 +249,8 @@ class _Unit(object):
         for i in range(len(self._dimension)):
             self._dimension[i] *= n
 
-        if self._uname is not None:
-            if n > 0:
-                self._uname = '{:s}{:d}'.format(self._uname,n)
-            elif n == 0:
-                self._uname = None
-            else:
-                self._uname = '1 / {:s}{:d}'.format(self._uname,-n)
+        self._ounit = None
+        self._out_factor = None
 
         return self
 
@@ -813,4 +807,5 @@ add_equivalence((0,-1,0,0,0,0,0,0,0),(0,0,-1,0,0,0,0,1,0),1883651565.7166505)
 add_equivalence((1,2,-2,0,-1,0,0,0,0),(0,0,-1,0,0,0,0,1,0),15746098887.375164)
 
 if __name__ == '__main__':
-    print(measure(1.0, 'inv_nm',equivalent=True).toval('1/pm'))
+    m = measure(1.0, 'm')
+    m **= 3
