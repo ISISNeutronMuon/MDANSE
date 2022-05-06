@@ -35,6 +35,13 @@ jobs:
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
 
+      - name: Install netCDF4 python package
+        run: |
+          sudo conda create -p ~/tempenv python=2.7
+          sudo conda install -p ~/tempenv netcdf4
+          sudo cp -r ~/tempenv/lib/python2.7/site-packages/netCDF4 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages
+          sudo cp -r ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages
+
       - name: Install ScientificPython
         run: |
           cd $HOME
@@ -191,6 +198,13 @@ jobs:
         run: |
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app==0.26.1
 
+      - name: Install netCDF4 python package
+        run: |
+          sudo conda create -p ~/tempenv python=2.7
+          sudo conda install -p ~/tempenv netcdf4
+          sudo cp -r ~/tempenv/lib/python2.7/site-packages/netCDF4 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages
+          sudo cp -r ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages
+
       - name: Install NetCDF
         run: |
           brew install netcdf
@@ -330,6 +344,13 @@ jobs:
         run: |
           "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe" -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
         shell: cmd
+
+      - name: Install netCDF4 python package
+        run: |
+          C:\Miniconda\condabin\conda.bat create -p %HOME%\tempenv python=2.7
+          C:\Miniconda\condabin\conda.bat install -p %HOME%\tempenv netcdf4
+          xcopy %HOME%\tempenv\lib\python2.7\site-packages\netCDF4 %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4 /e /r /h /a /y /I
+          xcopy %HOME%\tempenv\lib\python2.7\site-packages\cftime %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime /e /r /h /a /y /I
 
       - name: Install static dependencies
         if: steps.python-cache.outputs.cache-hit != 'true'
@@ -491,6 +512,13 @@ jobs:
         run: |
           "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe" -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
         shell: cmd
+
+      - name: Install netCDF4 python package
+        run: |
+          C:\Miniconda\condabin\conda.bat create -p %HOME%\tempenv python=2.7
+          C:\Miniconda\condabin\conda.bat install -p %HOME%\tempenv netcdf4
+          xcopy %HOME%\tempenv\lib\python2.7\site-packages\netCDF4 %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4 /e /r /h /a /y /I
+          xcopy %HOME%\tempenv\lib\python2.7\site-packages\cftime %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime /e /r /h /a /y /I
 
       - name: Deploy
         run: |
