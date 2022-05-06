@@ -43,8 +43,6 @@ jobs:
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4/ $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages/
           cd $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages
           ls
-          sudo mkdir netCDF4/
-          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4/* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/site-packages/netCDF4
 
       - name: Install ScientificPython
         run: |
@@ -351,14 +349,12 @@ jobs:
 
       - name: Install netCDF4 python package
         run: |
-          echo %HOME%
+          set HOME=%HOMEDRIVE%%HOMEPATH%
           C:\Miniconda\condabin\conda.bat create -p %HOME%\tempenv python=2.7
           C:\Miniconda\condabin\conda.bat install -p %HOME%\tempenv netcdf4
-          echo %HOME%
-          cd "%HOME%\tempenv\lib\site-packages\"
-          dir
           xcopy %HOME%\tempenv\lib\site-packages\netCDF4\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4 /e /r /h /a /y /I
           xcopy %HOME%\tempenv\lib\site-packages\cftime\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime /e /r /h /a /y /I
+        shell: cmd
 
       - name: Install static dependencies
         if: steps.python-cache.outputs.cache-hit != 'true'
