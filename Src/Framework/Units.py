@@ -140,7 +140,7 @@ class _Unit(object):
     def __add__(self, other):
         """Add _Unit instances. To be added, the units has to be analog or equivalent.
 
-        >>> print measure(10, 'm') + measure(20, 'km')
+        >>> print(measure(10, 'm') + measure(20, 'km'))
         20010 m
         """
 
@@ -162,7 +162,7 @@ class _Unit(object):
     def __div__(self, other):
         """Divide _Unit instances.
 
-        >>> print measure(100, 'V') / measure(10, 'kohm')
+        >>> print(measure(100, 'V') / measure(10, 'kohm'))
         0.0100 A
         """
     
@@ -239,7 +239,7 @@ class _Unit(object):
 
         Note that this will happen to the value in the default output unit:
 
-        >>> print int(measure(10.5, 'm/s'))
+        >>> print(int(measure(10.5, 'm/s')))
         10
         """
     
@@ -279,7 +279,7 @@ class _Unit(object):
     def __mul__(self, other):
         """Multiply _Unit instances.
 
-        >>> print measure(10, 'm/s') * measure(10, 's')
+        >>> print(measure(10, 'm/s') * measure(10, 's'))
         100.0000 m
         """
 
@@ -341,7 +341,7 @@ class _Unit(object):
     def __sub__(self, other):
         """Substract _Unit instances. To be substracted, the units has to be analog or equivalent.
 
-        >>> print measure(20, 'km') + measure(10, 'm')
+        >>> print(measure(20, 'km') + measure(10, 'm'))
         19990 m
         """
 
@@ -813,4 +813,4 @@ add_equivalence((0,-1,0,0,0,0,0,0,0),(0,0,-1,0,0,0,0,1,0),1883651565.7166505)
 add_equivalence((1,2,-2,0,-1,0,0,0,0),(0,0,-1,0,0,0,0,1,0),15746098887.375164)
 
 if __name__ == '__main__':
-    print(measure(1.0, '1/nm').toval('1/ang'))
+    print(measure(1.0, 'inv_nm',equivalent=True).toval('1/pm'))

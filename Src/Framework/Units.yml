@@ -195,5 +195,5 @@ au:
   dimension: [0,0,0,0,0,0,0,0,0]
 
 inv_nm:
-  factor: 1.0e09
+  factor: 1.0e+09
   dimension: [0,-1,0,0,0,0,0,0,0]
