@@ -352,13 +352,19 @@ jobs:
       - name: Install netCDF4 python package
         run: |
           set HOME=%HOMEDRIVE%%HOMEPATH%
-          C:\Miniconda\condabin\conda.bat create -p %HOME%\tempenv python=2.7
-          C:\Miniconda\condabin\conda.bat install -p %HOME%\tempenv netcdf4
-          xcopy %HOME%\tempenv\lib\site-packages\netCDF4\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4 /e /r /h /a /y /I /f
-          xcopy %HOME%\tempenv\lib\site-packages\cftime\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime /e /r /h /a /y /I /f
+          C:\Miniconda\condabin\conda.bat create -p D:\tempenv python=2.7
+          C:\Miniconda\condabin\conda.bat install -p D:\tempenv netcdf4
+          xcopy D:\tempenv\lib\site-packages\netCDF4\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4 /e /r /h /a /y /I /f
+          xcopy D:\tempenv\lib\site-packages\cftime\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime /e /r /h /a /y /I /f
           cd %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\
           dir
         shell: cmd
+
+      - run: |
+          xcopy D:\tempenv\lib\site-packages\netCDF4\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4 /e /r /h /a /y /I /f
+          xcopy D:\tempenv\lib\site-packages\cftime\ %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime /e /r /h /a /y /I /f
+          cd %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\
+          dir
 
       - name: Install static dependencies
         if: steps.python-cache.outputs.cache-hit != 'true'
