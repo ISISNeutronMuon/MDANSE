@@ -55,20 +55,21 @@ def _parse_unit(iunit):
     if not iunit:
         raise UnitError('Invalid unit')
 
-    for i in range(max_prefix_length,0,-1):
-        s = iunit[:i]
-        if s == iunit:
-            continue
-        if s in _PREFIXES:
-            prefix = _PREFIXES[s]
+    for i in range(len(iunit)):
+        if UNITS_MANAGER.has_unit(iunit[i:]):
+            prefix = iunit[:i]
             iunit = iunit[i:]
             break
     else:
-        prefix = 1.0
+       raise UnitError('The unit {} is unknown'.format(iunit))
 
-    if not UNITS_MANAGER.has_unit(iunit):
-        raise UnitError('The unit {} is unknown'.format(iunit))
-        
+    if prefix:
+        if prefix not in _PREFIXES:
+           raise UnitError('The prefix {} is unknown'.format(prefix))
+        prefix = _PREFIXES[prefix]
+    else:
+        prefix = 1.0
+    
     unit = UNITS_MANAGER.get_unit(iunit)
 
     unit = _Unit(iunit,prefix*unit._factor,*unit._dimension)
@@ -812,5 +813,4 @@ add_equivalence((0,-1,0,0,0,0,0,0,0),(0,0,-1,0,0,0,0,1,0),1883651565.7166505)
 add_equivalence((1,2,-2,0,-1,0,0,0,0),(0,0,-1,0,0,0,0,1,0),15746098887.375164)
 
 if __name__ == '__main__':
-
-    print(measure(1.0, 'KK',equivalent=True).toval('K'))
+    print(measure(1.0, '1/nm').toval('1/ang'))
