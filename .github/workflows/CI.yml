@@ -67,11 +67,11 @@ jobs:
           $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
 
       - run: |
-          cd $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          cd /usr/lib
           ls
-          cd python2.7
-          ls
-          cd site-packages
+          echo $PATH
+          echo $LD_LIBRARY_PATH
+          cd /usr/local/lib
           ls
           $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "import Scientific.IO.NetCDF"
 
@@ -374,8 +374,8 @@ jobs:
       - run: |
           cd /d "D:\tempenv\lib\site-packages\"
           dir
-          xcopy "D:\tempenv\lib\site-packages\netCDF4" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\" /e /r /h /a /y /I /f
-          xcopy "D:\tempenv\lib\site-packages\cftime" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\" /e /r /h /a /y /I /f
+          xcopy "D:\tempenv\lib\site-packages\netCDF4" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4\" /e /r /h /a /y /I /f
+          xcopy "D:\tempenv\lib\site-packages\cftime" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime\" /e /r /h /a /y /I /f
           cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\"
           dir
         shell: cmd
