@@ -43,6 +43,7 @@ jobs:
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4/ $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/
           sudo cp -rfv ~/tempenv/lib/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -rfv ~/tempenv/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -rfv ~/tempenv/lib/libmfhdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
 
       - name: Install ScientificPython
         run: |
@@ -210,6 +211,7 @@ jobs:
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp -rfv ~/tempenv/lib/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -rfv ~/tempenv/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -rfv ~/tempenv/lib/libmfhdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
 
       - name: Install NetCDF
         run: |
@@ -353,17 +355,14 @@ jobs:
 
       - name: Install netCDF4 python package
         run: |
-          set HOME=%HOMEDRIVE%%HOMEPATH%
           C:\Miniconda\condabin\conda.bat create -p D:\tempenv python=2.7
-          C:\Miniconda\condabin\conda.bat install -p D:\tempenv netcdf4
-          xcopy D:\tempenv\lib\site-packages\netCDF4\ "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages" /e /r /h /a /y /I /f
-          xcopy D:\tempenv\lib\site-packages\cftime\ "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages" /e /r /h /a /y /I /f
-          cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\"
-          dir
         shell: cmd
 
       - run: |
-          echo "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4"
+          C:\Miniconda\condabin\conda.bat install -p D:\tempenv netcdf4
+        shell: cmd
+
+      - run: |
           xcopy "D:\tempenv\lib\site-packages\netCDF4\" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\" /e /r /h /a /y /I /f
           xcopy "D:\tempenv\lib\site-packages\cftime\" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\" /e /r /h /a /y /I /f
           cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\"
