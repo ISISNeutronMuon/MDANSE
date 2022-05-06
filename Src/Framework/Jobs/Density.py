@@ -18,7 +18,7 @@ import collections
 from MMTK import Units
 
 from MDANSE import ELEMENTS, REGISTRY
-from MDANSE.Externals.magnitude.magnitude import mg
+from MDANSE.Framework.Units import measure
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
@@ -70,7 +70,7 @@ class Density(IJob):
                         
         self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
                 
-        cellVolume = self.configuration['trajectory']['instance'].universe.cellVolume()*mg(1.0,'nm3','cm3').toval()
+        cellVolume = self.configuration['trajectory']['instance'].universe.cellVolume()*measure(1.0,'nm3').toval('cm3')
                 
         atomicDensity = self.configuration['trajectory']['instance'].universe.numberOfAtoms()/cellVolume
                 

@@ -625,7 +625,7 @@ class _Unit(object):
         return self ** 0.5
 
     def toval(self, ounit=''):
-        """Returns the numeric value of a magnitude.
+        """Returns the numeric value of a unit.
 
         The value is given in ounit or in the default output unit.
 

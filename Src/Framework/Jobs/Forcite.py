@@ -24,11 +24,11 @@ from MMTK.ParticleProperties import ParticleVector
 from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
 
 from MDANSE import REGISTRY
-from MDANSE.Externals.magnitude.magnitude import mg
+from MDANSE.Framework.Units import measure
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Framework.Jobs.MaterialsStudio import XTDFile
 
-FORCE_FACTOR = mg(1.0,"kcal_per_mole/ang","uma nm/ps2").toval()
+FORCE_FACTOR = measure(1.0,"kcal_per_mole/ang").toval("uma nm/ps2")
 
 class TrjFile(dict):
 
