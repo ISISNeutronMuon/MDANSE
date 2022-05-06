@@ -134,18 +134,40 @@ class NewUnitDialog(wx.Dialog):
         self.SetSizerAndFit(main_sizer)
         self.Fit()
 
+        self.Bind(wx.EVT_BUTTON,self.on_ok,ok)
+
     def GetValue(self, event=None):
         """
         Handler called when the user clicks on the OK button of the property dialog.
         """
 
-        unit = str(self._unit.GetValue().strip())
+        unit = self._unit.GetValue().strip()
 
-        factor = float(self._factor.GetValue())
+        factor = self._factor.GetValue()
 
         dim = [v.GetValue() for v in self._dimensions.values()]
 
         return unit, factor, dim
+
+    def on_ok(self,event):
+
+        unit, factor, _ = self.GetValue()
+
+        if not unit:
+            wx.MessageBox("Please enter a unit name", "Invalid Input", wx.OK | wx.ICON_ERROR)
+            return
+
+        try:
+            float(factor)
+        except ValueError:
+            wx.MessageBox("Please enter a valid number for factor", "Invalid Input", wx.OK | wx.ICON_ERROR)
+            return
+
+        if UNITS_MANAGER.has_unit(unit):
+            wx.MessageBox("This unit already exists", "Invalid Input", wx.OK | wx.ICON_ERROR)
+            return
+        
+        self.EndModal(wx.ID_OK)
 
 class UnitsEditor(wx.Dialog):
     
@@ -173,16 +195,14 @@ class UnitsEditor(wx.Dialog):
 
         factorPanel = wx.Panel(mainPanel,wx.ID_ANY)
         factorLabel = wx.StaticText(factorPanel,label='Factor')
-        self._factor = wx.TextCtrl(factorPanel, wx.ID_ANY, style=wx.TE_PROCESS_ENTER|wx.TE_PROCESS_TAB,validator=FloatValidator())
+        self._factor = wx.TextCtrl(factorPanel, wx.ID_ANY,style=wx.TE_READONLY)
 
         dimensionsPanel = wx.Panel(mainPanel,wx.ID_ANY)
         self._labels = collections.OrderedDict()
         self._dimensions = collections.OrderedDict()
         for uname in _UNAMES:
             self._labels[uname] = wx.StaticText(dimensionsPanel,label=uname)
-            self._dimensions[uname] = wx.SpinCtrl(dimensionsPanel,id=wx.ID_ANY,style=wx.SP_WRAP)
-            self._dimensions[uname].SetRange(-100,100)
-            self._dimensions[uname].SetValue(0)
+            self._dimensions[uname] = wx.TextCtrl(dimensionsPanel,id=wx.ID_ANY,style=wx.TE_READONLY)
     
         addUnit = wx.Button(mainPanel,wx.ID_ANY,label='Add unit')
 
@@ -193,7 +213,7 @@ class UnitsEditor(wx.Dialog):
         factorSizer.Add(self._factor, 1, wx.ALL, 5)
         factorPanel.SetSizer(factorSizer)
 
-        dimensionsSizer = wx.GridBagSizer(len(_UNAMES),2)
+        dimensionsSizer = wx.GridBagSizer(5,5)
         for comp, k in enumerate(self._dimensions):
             dimensionsSizer.Add(self._labels[k], (comp,0),flag=wx.ALIGN_CENTER_VERTICAL)
             dimensionsSizer.Add(self._dimensions[k], (comp,1),flag=wx.EXPAND)
@@ -223,13 +243,8 @@ class UnitsEditor(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.on_close,self._cancel)
         self.Bind(wx.EVT_BUTTON, lambda evt : self.on_ok(evt,True), self._save)
         self.Bind(wx.EVT_BUTTON, lambda evt : self.on_ok(evt,False), self._ok)
-        self._factor.Bind(wx.EVT_KILL_FOCUS,self.on_change_unit)
-        self._factor.Bind(wx.EVT_TEXT_ENTER,self.on_change_unit)
         self._unitsList.Bind(wx.EVT_KEY_DOWN, self.on_delete_unit)
         self.Bind(wx.EVT_BUTTON, self.on_add_unit, addUnit)
-
-        for v in self._dimensions.values():
-            self.Bind(wx.EVT_SPINCTRL,self.on_change_unit,v)
 
         self._dialogSizer.Add(mainPanel,1,wx.EXPAND)
         
@@ -253,8 +268,8 @@ class UnitsEditor(wx.Dialog):
 
         # Get rid of wxpython unicode string formatting
         unitName, factor, dimension = d.GetValue()
-        if not unitName:
-            return
+
+        factor = float(factor)
 
         if UNITS_MANAGER.has_unit(unitName):
             d = wx.MessageDialog(None, 'This unit already exists. Do you want to overwrite it ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
@@ -265,24 +280,6 @@ class UnitsEditor(wx.Dialog):
 
         units = sorted(UNITS_MANAGER.units.keys())
         self._unitsList.SetItems(units)
-
-    def on_change_unit(self, event):
-
-        if self._unitsList.GetSelection() < 0:
-            return
-
-        selected_unit = self._unitsList.GetString(self._unitsList.GetSelection())
-        if not selected_unit:
-            return
-
-        dim = [v.GetValue() for v in self._dimensions.values()]
-
-        if not self.validate():
-            return
-
-        factor = float(self._factor.GetValue())
-
-        UNITS_MANAGER.add_unit(selected_unit,factor,*dim)
 
     def on_close(self,event):
 
@@ -299,6 +296,11 @@ class UnitsEditor(wx.Dialog):
 
             idx = self._unitsList.GetSelection()
             selected_unit = self._unitsList.GetString(idx)
+
+            d = wx.MessageDialog(None, 'Do you really want to delete this unit ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
+            if d.ShowModal() == wx.ID_NO:
+                return
+
             UNITS_MANAGER.delete_unit(selected_unit)
             self._unitsList.Delete(idx)
 
@@ -311,7 +313,7 @@ class UnitsEditor(wx.Dialog):
 
         dim = selected_unit.dimension
         for k,v in zip(_UNAMES,dim):
-            self._dimensions[k].SetValue(v)
+            self._dimensions[k].SetValue(str(v))
             
     def on_ok(self,event,save=False):
 

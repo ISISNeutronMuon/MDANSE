@@ -477,10 +477,10 @@ class _Unit(object):
 
     @property
     def dimension(self):
-        """Getter for _dimension attribute.
+        """Getter for _dimension attribute. Returns a copy.
         """
 
-        return self._dimension
+        return copy.copy(self._dimension)
 
     @property
     def equivalent(self):
