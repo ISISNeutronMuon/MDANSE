@@ -139,28 +139,28 @@ class FieldFile(dict):
                 
         chemicalEntities = []
             
-        for moleculeName, nMolecules, atomicContents in self["molecules"]:
+        for db_name, nMolecules, atomic_contents in self["molecules"]:
             
             # Loops over the number of molecules of the current type.
             for i in range(nMolecules):
                 
                 try:
-                    mol = Molecule(moleculeName,number=i)
-                    renamedAtoms = translate_atom_names(MOLECULES_DATABASE,moleculeName,[name for name,_ in atomicContents])
+                    mol_name = '{:s}_{:d}'.format(db_name,i)
+                    mol = Molecule(db_name,mol_name)
+                    renamedAtoms = translate_atom_names(MOLECULES_DATABASE,db_name,[name for name,_ in atomicContents])
                     mol.reorder_atoms(renamedAtoms)
                     chemicalEntities.append(mol)
                 except:
                     # This list will contains the MMTK instance of the atoms of the molecule.
                     atoms = []
-                    
                     # Loops over the atom of the molecule.
-                    for j, (name, element) in enumerate(atomicContents):
+                    for j, (name, element) in enumerate(atomic_contents):
                         # The atom is created.
-                        a = Atom(symbol=element, name="%s%s" % (name,j))
+                        a = Atom(symbol=element, name="%s_%s" % (name,j))
                         atoms.append(a)
 
                     if len(atoms) > 1:
-                        ac = AtomCluster('{}{:d}'.format(moleculeName,i), atoms)
+                        ac = AtomCluster('{:s}_{:d}'.format(db_name,i), atoms)
                         chemicalEntities.append(ac)
                     else:                    
                         chemicalEntities.append(atoms[0])

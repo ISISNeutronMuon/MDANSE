@@ -65,15 +65,23 @@ class TestConfiguration(unittest.TestCase):
         for i in range(self._nAtoms):
             self._chemicalSystem.add_chemical_entity(Atom(symbol="H"))
 
-    def test_real_configuration(self):
+    def test_assertion(self):
 
         coordinates = np.random.uniform(0,1,(2,3))
         with self.assertRaises(ValueError):
             _ = RealConfiguration(self._chemicalSystem,coordinates)
 
+        coordinates = np.random.uniform(0,1,(2,3))
+        with self.assertRaises(ValueError):
+            _ = BoxConfiguration(self._chemicalSystem,coordinates)
+
+    def test_real_configuration(self):
+
         coordinates = np.random.uniform(0,1,(self._nAtoms,3))
         conf = RealConfiguration(self._chemicalSystem,coordinates)
         self.assertTrue(np.allclose(conf.to_real_coordinates(),coordinates,rtol=1.0e-6))
+
+    def test_to_box_coordinates(self):
 
         coordinates = np.random.uniform(0,1,(self._nAtoms,3))
         conf = RealConfiguration(self._chemicalSystem,coordinates)
@@ -89,6 +97,11 @@ class TestConfiguration(unittest.TestCase):
                                                     [7.8,4.4,-3.2],
                                                     [10.2,5.6,-3.8]],rtol=1.0e-6))
 
+    def test_fold_coordinates(self):
+
+        unitCell = np.array([[1.0,2.0,1.0],[2.0,-1.0,1.0],[3.0,1.0,1.0]],dtype=np.float)
+        coordinates = np.array(([1,2,3],[4,5,6],[7,8,9],[10,11,12]),dtype=np.float)
+        conf = RealConfiguration(self._chemicalSystem,coordinates,unitCell)
         conf.fold_coordinates()
 
         self.assertTrue(np.allclose(conf.variables['coordinates'],[[0.0,0.0,0.0],
@@ -98,17 +111,11 @@ class TestConfiguration(unittest.TestCase):
 
     def test_box_configuration(self):
 
-        coordinates = np.random.uniform(0,1,(2,3))
-        with self.assertRaises(ValueError):
-            _ = BoxConfiguration(self._chemicalSystem,coordinates)
-
         coordinates = np.random.uniform(0,1,(self._nAtoms,3))
         conf = BoxConfiguration(self._chemicalSystem,coordinates)
         self.assertTrue(np.allclose(conf.to_box_coordinates(),coordinates,rtol=1.0e-6))
 
-        coordinates = np.random.uniform(0,1,(self._nAtoms,3))
-        conf = BoxConfiguration(self._chemicalSystem,coordinates)
-        self.assertTrue(np.allclose(conf.to_box_coordinates(),coordinates,rtol=1.0e-6))
+    def test_to_real_coordinates(self):
 
         unitCell = np.array([[1.0,2.0,1.0],[2.0,-1.0,1.0],[3.0,1.0,1.0]],dtype=np.float)
         coordinates = np.array(([1,2,3],[4,5,6],[7,8,9],[10,11,12]),dtype=np.float)
@@ -119,15 +126,6 @@ class TestConfiguration(unittest.TestCase):
                                                      [32.0,9.0,15.0],
                                                      [50.0,15.0,24.0],
                                                      [68.0,21.0,33.0]],rtol=1.0e-6))
-
-
-
-
-
-
-
-
-
             
 def suite():
     loader = unittest.TestLoader()

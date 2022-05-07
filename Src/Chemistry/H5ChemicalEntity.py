@@ -57,20 +57,20 @@ class H5AtomCluster(_H5ChemicalEntity):
 
 class H5Molecule(_H5ChemicalEntity):
 
-    def __init__(self, h5_file, h5_contents, atom_indexes, code, number):
+    def __init__(self, h5_file, h5_contents, atom_indexes, db_name, mol_name):
 
         super(H5Molecule,self).__init__(h5_file, h5_contents)
 
         self._atom_indexes = atom_indexes
 
-        self._code = code
+        self._db_name = db_name
 
-        self._number = number
+        self._mol_name = mol_name
 
     def build(self):
 
         from ChemicalEntity import Molecule
-        mol = Molecule(self._code,self._number)
+        mol = Molecule(self._db_name,self._mol_name)
 
         atoms = []
         for atom_index in self._atom_indexes:

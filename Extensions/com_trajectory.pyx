@@ -46,9 +46,9 @@ def com_trajectory(ndarray[np.float64_t, ndim=3] config not None,
         refy = config[i,0,1]
         refz = config[i,0,2]
 
-        srefx = refx*rcell[i,0,0] + refy*rcell[i,0,1] + refz*rcell[i,0,2]
-        srefy = refx*rcell[i,1,0] + refy*rcell[i,1,1] + refz*rcell[i,1,2]
-        srefz = refx*rcell[i,2,0] + refy*rcell[i,2,1] + refz*rcell[i,2,2]
+        srefx = refx*rcell[i,0,0] + refy*rcell[i,1,0] + refz*rcell[i,2,0]
+        srefy = refx*rcell[i,0,1] + refy*rcell[i,1,1] + refz*rcell[i,2,1]
+        srefz = refx*rcell[i,0,2] + refy*rcell[i,1,2] + refz*rcell[i,2,2]
 
         comx = masses[0]*srefx
         comy = masses[0]*srefy
@@ -63,9 +63,9 @@ def com_trajectory(ndarray[np.float64_t, ndim=3] config not None,
             y = config[i,j,1]
             z = config[i,j,2]
 
-            sx = x*rcell[i,0,0] + y*rcell[i,0,1] + z*rcell[i,0,2]
-            sy = x*rcell[i,1,0] + y*rcell[i,1,1] + z*rcell[i,1,2]
-            sz = x*rcell[i,2,0] + y*rcell[i,2,1] + z*rcell[i,2,2]
+            sx = x*rcell[i,0,0] + y*rcell[i,1,0] + z*rcell[i,2,0]
+            sy = x*rcell[i,0,1] + y*rcell[i,1,1] + z*rcell[i,2,1]
+            sz = x*rcell[i,0,2] + y*rcell[i,1,2] + z*rcell[i,2,2]
 
             sdx = sx - srefx
             sdy = sy - srefy
@@ -107,9 +107,9 @@ def com_trajectory(ndarray[np.float64_t, ndim=3] config not None,
         if srefz > 0.5:
             srefz -= 1.0
 
-        trajectory[i,0] = srefx*cell[i,0,0] + srefy*cell[i,0,1] + srefz*cell[i,0,2]
-        trajectory[i,1] = srefx*cell[i,1,0] + srefy*cell[i,1,1] + srefz*cell[i,1,2]
-        trajectory[i,2] = srefx*cell[i,2,0] + srefy*cell[i,2,1] + srefz*cell[i,2,2]
+        trajectory[i,0] = srefx*cell[i,0,0] + srefy*cell[i,1,0] + srefz*cell[i,2,0]
+        trajectory[i,1] = srefx*cell[i,0,1] + srefy*cell[i,1,1] + srefz*cell[i,2,1]
+        trajectory[i,2] = srefx*cell[i,0,2] + srefy*cell[i,1,2] + srefz*cell[i,2,2]
 
     return trajectory
 
