@@ -28,10 +28,10 @@ cdef extern from "math.h":
 cdef inline double round(double r):
     return floor(r + 0.5) if (r > 0.0) else ceil(r - 0.5)
 
-def contiguous_coordinates(ndarray[np.float64_t, ndim=2]  coords not None,
-                           ndarray[np.float64_t, ndim=2]  cell not None,
-                           ndarray[np.float64_t, ndim=2]  rcell not None,
-                           indexes):
+def contiguous_coordinates_real(ndarray[np.float64_t, ndim=2]  coords not None,
+                                ndarray[np.float64_t, ndim=2]  cell not None,
+                                ndarray[np.float64_t, ndim=2]  rcell not None,
+                                indexes):
 
     cdef double x, y, z, sdx, sdy, sdz, newx, newy, newz
 
@@ -116,10 +116,10 @@ def contiguous_coordinates_box(ndarray[np.float64_t, ndim=2]  coords not None,
 
     return contiguous_coords
 
-def contiguous_offsets(ndarray[np.float64_t, ndim=2]  coords not None,
-                       ndarray[np.float64_t, ndim=2]  cell not None,
-                       ndarray[np.float64_t, ndim=2]  rcell not None,
-                       indexes):
+def contiguous_offsets_real(ndarray[np.float64_t, ndim=2]  coords not None,
+                            ndarray[np.float64_t, ndim=2]  cell not None,
+                            ndarray[np.float64_t, ndim=2]  rcell not None,
+                            indexes):
 
     cdef double x, y, z, sdx, sdy, sdz
 
