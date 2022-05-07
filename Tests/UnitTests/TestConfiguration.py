@@ -129,7 +129,7 @@ class TestConfiguration(unittest.TestCase):
 
 
             
-    def test_fold_coordinates(self):
+    def test_fold_coordinates_real_pbc(self):
 
         unit_cell = np.array([[2,1,0],[-3,2,0],[2,1,-4]],dtype=np.float)
         coords = np.array([
@@ -147,6 +147,55 @@ class TestConfiguration(unittest.TestCase):
                                                       [ 1.04665145, -1.06488218, -0.1532281 ],
                                                       [-0.27479577, -0.08878546,  1.93534948],
                                                       [-0.22366532,  1.38389029, -0.29560999]],rtol=1.0e-6))
+
+    def test_fold_coordinates_real_nopbc(self):
+
+        coords = np.array([
+            [-1.65955991,  4.40648987, -9.9977125 ],
+            [-3.95334855, -7.06488218, -8.1532281 ],
+            [-6.27479577, -3.08878546, -2.06465052],
+            [ 0.77633468, -1.61610971,  3.70439001]])
+
+        conf = RealConfiguration(self._chemicalSystem,coords)
+        conf.fold_coordinates()
+
+        real_coordinates = conf['coordinates']
+
+        self.assertTrue(np.allclose(real_coordinates,coords,rtol=1.0e-6))
+
+    def test_fold_coordinates_box_pbc(self):
+
+        unit_cell = np.array([[2,1,0],[-3,2,0],[2,1,-4]],dtype=np.float)
+        coords = np.array([
+            [ 0.6, 0.8, -0.7],
+            [ 0.3, -0.1, 1.2],
+            [ 0.4, 0.2, -0.9],
+            [-0.2, 0.4, 0.6]])
+
+        conf = BoxConfiguration(self._chemicalSystem,coords,unit_cell)
+        conf.fold_coordinates()
+
+        real_coordinates = conf['coordinates']
+
+        self.assertTrue(np.allclose(real_coordinates,[[-0.4,-0.2, 0.3],
+                                                      [ 0.3,-0.1, 0.2],
+                                                      [ 0.4, 0.2, 0.1],
+                                                      [-0.2, 0.4,-0.4]],rtol=1.0e-6))
+
+    def test_fold_coordinates_box_nopbc(self):
+
+        coords = np.array([
+            [ 0.6, 0.8, -0.7],
+            [ 0.3, -0.1, 1.2],
+            [ 0.4, 0.2, -0.9],
+            [-0.2, 0.4, 0.6]])
+
+        conf = BoxConfiguration(self._chemicalSystem,coords)
+        conf.fold_coordinates()
+
+        real_coordinates = conf['coordinates']
+
+        self.assertTrue(np.allclose(real_coordinates,coords,rtol=1.0e-6))
 
 def suite():
     loader = unittest.TestLoader()
