@@ -181,7 +181,7 @@ class RealConfiguration(_Configuration):
         if self._unit_cell is not None:
             indexes = atoms_in_shell.atoms_in_shell_real(self._variables['coordinates'],
                                                     self._unit_cell,
-                                                    self._inverse_unit_cell,
+                                                    np.linalg.inv(self._unit_cell),
                                                     ref,
                                                     mini,
                                                     maxi)
