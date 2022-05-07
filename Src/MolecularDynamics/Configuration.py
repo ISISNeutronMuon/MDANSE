@@ -150,6 +150,27 @@ class BoxConfiguration(_Configuration):
             conf._variables['coordinates'] = contiguous_coords
             return conf
 
+    def contiguous_offsets(self, chemical_entities=None):
+
+        if chemical_entities is None:
+            chemical_entities = self._chemical_system.chemical_entities
+        else:
+            for ce in chemical_entities:
+                if ce.root_chemical_system() is not self._chemical_system:
+                    raise ConfigurationError('One or more chemical entities comes from another chemical system')
+
+        if self._unit_cell is None:
+            offsets = np.zeros((self._chemical_system.number_of_atoms(),3))
+
+        else:
+            indexes = []
+            for ce in chemical_entities:
+                indexes.append([at.index for at in ce.atom_list()])
+            
+            offsets = contiguous_coordinates.contiguous_offsets_box(self._variables['coordinates'],self._unit_cell,np.linalg.inv(self._unit_cell),indexes)
+
+        return offsets
+
 class RealConfiguration(_Configuration):
 
     def fold_coordinates(self):
@@ -208,7 +229,7 @@ class RealConfiguration(_Configuration):
             for ce in self._chemical_system.chemical_entities:
                 indexes.append([at.index for at in ce.atom_list()])
 
-            contiguous_coords = contiguous_coordinates.contiguous_coordinates(self._variables['coordinates'],self._unit_cell,self._inverse_unit_cell,indexes)
+            contiguous_coords = contiguous_coordinates.contiguous_coordinates_real(self._variables['coordinates'],self._unit_cell,np.linalg.inv(self._unit_cell),indexes)
 
             conf = copy.deepcopy(self)
             conf._variables['coordinates'] = contiguous_coords
@@ -232,7 +253,7 @@ class RealConfiguration(_Configuration):
             for ce in chemical_entities:
                 indexes.append([at.index for at in ce.atom_list()])
             
-            offsets = contiguous_coordinates.contiguous_offsets(self._variables['coordinates'],self._unit_cell,self._inverse_unit_cell,indexes)
+            offsets = contiguous_coordinates.contiguous_offsets_real(self._variables['coordinates'],self._unit_cell,np.linalg.inv(self._unit_cell),indexes)
 
         return offsets
 
