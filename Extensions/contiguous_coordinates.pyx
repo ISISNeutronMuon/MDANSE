@@ -80,6 +80,42 @@ def contiguous_coordinates(ndarray[np.float64_t, ndim=2]  coords not None,
 
     return contiguous_coords
 
+def contiguous_coordinates_box(ndarray[np.float64_t, ndim=2]  coords not None,
+                               ndarray[np.float64_t, ndim=2]  cell not None,
+                               indexes):
+
+    cdef double sdx, sdy, sdz, newx, newy, newz
+
+    cdef ndarray[np.float64_t, ndim=2] contiguous_coords = np.empty((coords.shape[0],3),dtype=np.float)
+
+    for idxs in indexes:
+        contiguous_coords[idxs[0],0] = coords[idxs[0],0]
+        contiguous_coords[idxs[0],1] = coords[idxs[0],1]
+        contiguous_coords[idxs[0],2] = coords[idxs[0],2]
+
+        if len(idxs) == 1:
+            continue
+
+        for idx in idxs[1:]:
+
+            sdx = coords[idx,0] - coords[idxs[0],0]
+            sdy = coords[idx,1] - coords[idxs[0],1]
+            sdz = coords[idx,2] - coords[idxs[0],2]
+
+            sdx -= round(sdx)
+            sdy -= round(sdy)
+            sdz -= round(sdz)
+
+            newx = coords[idxs[0],0] + sdx
+            newy = coords[idxs[0],1] + sdy
+            newz = coords[idxs[0],2] + sdz
+
+            contiguous_coords[idx,0] = newx*cell[0,0] + newy*cell[1,0] + newz*cell[2,0]
+            contiguous_coords[idx,1] = newx*cell[0,1] + newy*cell[1,1] + newz*cell[2,1]
+            contiguous_coords[idx,2] = newx*cell[0,2] + newy*cell[1,2] + newz*cell[2,2]
+
+    return contiguous_coords
+
 def contiguous_offsets(ndarray[np.float64_t, ndim=2]  coords not None,
                        ndarray[np.float64_t, ndim=2]  cell not None,
                        ndarray[np.float64_t, ndim=2]  rcell not None,
@@ -119,5 +155,28 @@ def contiguous_offsets(ndarray[np.float64_t, ndim=2]  coords not None,
 
     return offsets
 
+def contiguous_offsets_box(ndarray[np.float64_t, ndim=2]  coords not None,
+                           ndarray[np.float64_t, ndim=2]  cell not None,
+                           indexes):
+
+    cdef double sdx, sdy, sdz
+
+    cdef ndarray[np.float64_t, ndim=2] offsets = np.zeros((coords.shape[0],3),dtype=np.float)
+
+    for idxs in indexes:
+        if len(idxs) == 1:
+            continue
+        
+        for idx in idxs[1:]:
+
+            sdx = coords[idx,0] - coords[idxs[0],0]
+            sdy = coords[idx,1] - coords[idxs[0],1]
+            sdz = coords[idx,2] - coords[idxs[0],2]
+
+            offsets[idx,0] = -round(sdx)
+            offsets[idx,1] = -round(sdy)
+            offsets[idx,2] = -round(sdz)
+
+    return offsets
 
             

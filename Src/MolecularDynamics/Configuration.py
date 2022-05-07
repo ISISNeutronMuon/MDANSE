@@ -95,12 +95,12 @@ class BoxConfiguration(_Configuration):
 
     def to_box_coordinates(self):
 
-        return self._variables['coordinates']
+        return copy.copy(self._variables['coordinates'])
 
     def to_real_coordinates(self):
 
         if self._unit_cell is None:
-            return
+            return copy.copy(self._variables['coordinates'])
         else:
             return np.matmul(self._variables['coordinates'],self._unit_cell)
 
@@ -123,6 +123,23 @@ class BoxConfiguration(_Configuration):
 
         return selected_atoms
 
+    def contiguous_configuration(self):
+
+        if self._unit_cell is None:
+            return copy.deepcopy(self)
+
+        else:
+
+            indexes = []
+            for ce in self._chemical_system.chemical_entities:
+                indexes.append([at.index for at in ce.atom_list()])
+
+            contiguous_coords = contiguous_coordinates.contiguous_coordinates_box(self._variables['coordinates'],self._unit_cell,indexes)
+
+            conf = copy.deepcopy(self)
+            conf._variables['coordinates'] = contiguous_coords
+            return conf
+
 class RealConfiguration(_Configuration):
 
     def fold_coordinates(self):
@@ -141,13 +158,13 @@ class RealConfiguration(_Configuration):
     def to_box_coordinates(self):
 
         if self._unit_cell is None:
-            return self._variables['coordinates']
+            return copy.copy(self._variables['coordinates'])
         else:
             return np.matmul(self._variables['coordinates'],np.linalg.inv(self._unit_cell))
 
     def to_real_coordinates(self):
 
-        return self._variables['coordinates']
+        return copy.copy(self._variables['coordinates'])
 
     def atomsInShell(self, ref, mini=0.0, maxi=10.0):
 
@@ -173,7 +190,7 @@ class RealConfiguration(_Configuration):
     def contiguous_configuration(self):
 
         if self._unit_cell is None:
-            contiguous_coords =  self._variables['coordinates']
+            return copy.deepcopy(self)
 
         else:
 
@@ -183,10 +200,9 @@ class RealConfiguration(_Configuration):
 
             contiguous_coords = contiguous_coordinates.contiguous_coordinates(self._variables['coordinates'],self._unit_cell,np.linalg.inv(self._unit_cell),indexes)
 
-        conf = copy.copy(self)
-        conf.variables['coordinates'] = contiguous_coords
-
-        return conf
+            conf = copy.deepcopy(self)
+            conf._variables['coordinates'] = contiguous_coords
+            return conf
 
     def contiguous_offsets(self, chemical_entities=None):
 
