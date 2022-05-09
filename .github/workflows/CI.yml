@@ -41,10 +41,6 @@ jobs:
           sudo conda install -p ~/tempenv netcdf4
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4/ $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/
-          sudo cp -rfv ~/tempenv/lib/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -rfv ~/tempenv/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -rfv ~/tempenv/lib/libmfhdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -rfv ~/tempenv/lib/libdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
 
       - name: Install ScientificPython
         run: |
@@ -67,12 +63,12 @@ jobs:
           $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
 
       - run: |
-          cd /usr/lib
+          cd /usr/lib/x86_64-linux-gnu
           ls
+          export PATH=$PATH:/usr/lib/x86_64-linux-gnu
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu
           echo $PATH
           echo $LD_LIBRARY_PATH
-          cd /usr/local/lib
-          ls
           $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "import Scientific.IO.NetCDF"
 
       - name: Run tests
@@ -362,21 +358,18 @@ jobs:
           "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe" -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
         shell: cmd
 
-      - name: Install netCDF4 python package
-        run: |
-          C:\Miniconda\condabin\conda.bat create -p D:\tempenv python=2.7
+      - name: Create conda environment
+        run: C:\Miniconda\condabin\conda.bat create -p D:\tempenv python=2.7
+        shell: cmd
+
+      - name: Install netCDF4 into the environment
+        run: C:\Miniconda\condabin\conda.bat install -p D:\tempenv netcdf4
         shell: cmd
 
       - run: |
-          C:\Miniconda\condabin\conda.bat install -p D:\tempenv netcdf4
-        shell: cmd
-
-      - run: |
-          cd /d "D:\tempenv\lib\site-packages\"
-          dir
           xcopy "D:\tempenv\lib\site-packages\netCDF4" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4\" /e /r /h /a /y /I /f
           xcopy "D:\tempenv\lib\site-packages\cftime" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime\" /e /r /h /a /y /I /f
-          cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\"
+          cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4"
           dir
         shell: cmd
 
