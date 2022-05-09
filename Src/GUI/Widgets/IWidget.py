@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -22,17 +23,18 @@ class IWidget(wx.Panel):
         
     _registry = "widget"
 
-    def __init__(self, parent, name, configurator, *args, **kwargs):
+    def __init__(self, parent, name, configurator, type, *args, **kwargs):
         
         wx.Panel.__init__(self, parent, wx.ID_ANY, *args, **kwargs)
 
         self._parent = parent
-        
+
         self._name = name
                                 
         self._configurator = configurator
                                                         
         self._label = self._configurator.label
+        self._type = type
                         
         self.initialize()
                         
@@ -91,8 +93,11 @@ class IWidget(wx.Panel):
         plugin = message
         if not plugin.is_parent(self):
             return
-        
-        self.set_data(plugin.datakey)
+
+        try:
+            self.set_data(plugin.datakey, self._type)
+        except TypeError:
+            self.set_data(plugin.datakey)
 
     def OnDestroy(self,event):
                 

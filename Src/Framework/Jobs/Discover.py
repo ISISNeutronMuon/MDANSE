@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -215,9 +216,11 @@ class DiscoverConverter(Converter):
     category = ('Converters','Materials Studio')
     
     settings = collections.OrderedDict()
-    settings['xtd_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.xtd')})
-    settings['his_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.his')})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['xtd_file'] = ('input_file',{'wildcard':'XTD files (*.xtd)|*.xtd|All files|*',
+                                            'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.xtd')})
+    settings['his_file'] = ('input_file',{'wildcard':'HIS files (*.his)|*.his|All files|*',
+                                            'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.his')})
+    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'xtd_file'})
     
     def initialize(self):
         '''
@@ -248,7 +251,7 @@ class DiscoverConverter(Converter):
         self._universe.foldCoordinatesIntoBox()
             
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w', comment=self._hisfile["title"])
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w', comment=self._hisfile["title"])
 
         data_to_written = ["configuration","time","velocities"]
 
@@ -308,4 +311,6 @@ class DiscoverConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
         
+        super(DiscoverConverter,self).finalize()
+
 REGISTRY['discover'] = DiscoverConverter

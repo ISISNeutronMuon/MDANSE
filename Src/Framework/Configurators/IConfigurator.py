@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -95,9 +96,11 @@ class IConfigurator(dict):
         '''
 
         self._name = name
-        
+
         self._configurable = kwargs.get('configurable',None)
-                
+
+        self._root = kwargs.get('root',None)
+
         self._dependencies = kwargs.get('dependencies',{})
 
         self._default = kwargs.get('default',self.__class__._default) 
@@ -108,6 +111,11 @@ class IConfigurator(dict):
         
         self._configured = False
             
+    @property
+    def configurable(self):
+
+        return self._configurable
+
     @property
     def default(self):
         '''
@@ -151,6 +159,11 @@ class IConfigurator(dict):
         '''
         
         return self._name
+
+    @property
+    def root(self):
+
+        return self._root
 
     @property
     def widget(self):

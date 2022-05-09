@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -17,6 +18,7 @@ import wx.lib.filebrowsebutton as wxfile
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurable import ConfigurationError
+from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class InputFileWidget(IWidget):
@@ -28,7 +30,13 @@ class InputFileWidget(IWidget):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
                 
-        self._browser = wxfile.FileBrowseButton(self._widgetPanel, wx.ID_ANY, labelText="", initialValue=default, startDirectory=default,fileMask=wildcard)
+        self._browser = wxfile.FileBrowseButton(self._widgetPanel, 
+                                                    wx.ID_ANY, 
+                                                    labelText="", 
+                                                    initialValue=default, 
+                                                    startDirectory=default,
+                                                    fileMask=wildcard,
+                                                    changeCallback=self.on_file_browsed)        
 
         sizer.Add(self._browser, 1, wx.ALL|wx.EXPAND, 5)
 
@@ -43,4 +51,9 @@ class InputFileWidget(IWidget):
 
         return filename
     
+    def on_file_browsed(self,event):
+
+        filename = self._browser.GetValue()
+        PUBLISHER.sendMessage("input_file_loaded",message=(self._configurator,filename))
+
 REGISTRY["input_file"] = InputFileWidget
