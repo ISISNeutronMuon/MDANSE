@@ -68,7 +68,7 @@ class McStasParametersWidget(IWidget):
         self._sizer.Clear(deleteWindows=True)
  
         self._widgetPanel.Freeze()
-        self._configurationPanel = ConfigurationPanel(self._widgetPanel, self._parameters)
+        self._configurationPanel = ConfigurationPanel(self._widgetPanel, self._parameters,None)
          
         for name, value in parameters.items():
             typ, default = value
