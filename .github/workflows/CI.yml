@@ -35,6 +35,18 @@ jobs:
           python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
 
+      - name: Install netCDF4 python package
+        run: |
+          sudo conda create -p ~/tempenv python=2.7
+          sudo conda install -p ~/tempenv netcdf4
+          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4/ $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/
+          sudo cp -rfv ~/tempenv/lib/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -rfv ~/tempenv/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -rfv ~/tempenv/lib/libmfhdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -rfv ~/tempenv/lib/libdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          sudo cp -rfv ~/tempenv/lib/libjpeg* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+
       - name: Install ScientificPython
         run: |
           cd $HOME
@@ -57,15 +69,6 @@ jobs:
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu
           $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "from Scientific.IO import NetCDF"
           $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "from MMTK.Trajectory import Trajectory"
-
-      - name: Install netCDF4 python package
-        run: |
-          sudo conda create -p ~/tempenv python=2.7
-          sudo conda install -p ~/tempenv netcdf4
-          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4/ $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/
-          sudo cp -rfv ~/tempenv/lib/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -rfv ~/tempenv/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
 
       - name: Install MDANSE
         run: |
@@ -375,7 +378,7 @@ jobs:
         shell: cmd
 
       - run: |
-          copy %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\*.dll %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs
+          copy %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\*.dll %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4\
           "D:\tempenv\python.exe" -c "import netCDF4"
           "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe" -c "import netCDF4"
         shell: cmd
