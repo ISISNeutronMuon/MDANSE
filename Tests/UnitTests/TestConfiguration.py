@@ -49,7 +49,7 @@ import unittest
 
 import numpy as np
 
-from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.MolecularDynamics.Configuration import BoxConfiguration, RealConfiguration
 
 class TestConfiguration(unittest.TestCase):
@@ -62,8 +62,12 @@ class TestConfiguration(unittest.TestCase):
         self._chemicalSystem = ChemicalSystem()
         self._nAtoms = 4
 
+        atoms = []
         for i in range(self._nAtoms):
-            self._chemicalSystem.add_chemical_entity(Atom(symbol="H"))
+            atoms.append(Atom(symbol='H'))
+        ac = AtomCluster('',atoms)
+
+        self._chemicalSystem.add_chemical_entity(ac)
 
     def test_assertion(self):
 
@@ -194,6 +198,23 @@ class TestConfiguration(unittest.TestCase):
         real_coordinates = conf['coordinates']
 
         self.assertTrue(np.allclose(real_coordinates,coords,rtol=1.0e-6))
+
+    def test_contiguous_configuration_real_pbc(self):
+
+        unit_cell = np.array([[2,1,0],[-3,2,0],[2,1,-4]],dtype=np.float)
+
+        box_coords = [[0.1,0.1,0.1],[0.3,0.2,0.4],[-1.3,-1.1,-1.3],[1.9,1.5,1.9]]
+        box_conf = BoxConfiguration(self._chemicalSystem,box_coords,unit_cell)
+        real_coords = box_conf.to_real_coordinates()
+        real_conf = RealConfiguration(self._chemicalSystem,real_coords,unit_cell)
+
+        contiguous_conf = real_conf.contiguous_configuration()
+        real_coordinates = contiguous_conf['coordinates']
+
+        self.assertTrue(np.allclose(real_coordinates,[[ 0.1,  0.4,-0.4],
+                                                      [ 0.8,  1.1,-1.6],
+                                                      [-0.9, -0.8, 1.2],
+                                                      [-1.9,  0.8, 0.4]],rtol=1.0e-6))
 
 def suite():
     loader = unittest.TestLoader()

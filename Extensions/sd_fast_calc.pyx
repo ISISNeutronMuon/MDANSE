@@ -70,9 +70,9 @@ def spatial_density(ndarray[np.float64_t, ndim=2]  config not None,
         y = <float> config[i,1]
         z = <float> config[i,2]
         
-        scaleconfig[i,0] = x*rcell[0,0] + y*rcell[1,0] + z*rcell[2,0]
-        scaleconfig[i,1] = x*rcell[0,1] + y*rcell[1,1] + z*rcell[2,1]
-        scaleconfig[i,2] = x*rcell[0,2] + y*rcell[1,2] + z*rcell[2,2]
+        scaleconfig[i,0] = x*rcell[0,0] + y*rcell[0,1] + z*rcell[0,2]
+        scaleconfig[i,1] = x*rcell[1,0] + y*rcell[1,1] + z*rcell[1,2]
+        scaleconfig[i,2] = x*rcell[2,0] + y*rcell[2,1] + z*rcell[2,2]
         
     for 0 <= i < nbases:
         
@@ -80,9 +80,9 @@ def spatial_density(ndarray[np.float64_t, ndim=2]  config not None,
         yorigin = origins[i,1]
         zorigin = origins[i,2]
         
-        xscaledOrigin = xorigin*rcell[0,0] + yorigin*rcell[1,0] + zorigin*rcell[2,0]
-        yscaledOrigin = xorigin*rcell[0,1] + yorigin*rcell[1,1] + zorigin*rcell[2,1]
-        zscaledOrigin = xorigin*rcell[0,2] + yorigin*rcell[1,2] + zorigin*rcell[2,2]
+        xscaledOrigin = xorigin*rcell[0,0] + yorigin*rcell[0,1] + zorigin*rcell[0,2]
+        yscaledOrigin = xorigin*rcell[1,0] + yorigin*rcell[1,1] + zorigin*rcell[1,2]
+        zscaledOrigin = xorigin*rcell[2,0] + yorigin*rcell[2,1] + zorigin*rcell[2,2]
         
         basis = bases[i,:,:]
 
@@ -126,9 +126,9 @@ def spatial_density(ndarray[np.float64_t, ndim=2]  config not None,
             sdy -= round(sdy)
             sdz -= round(sdz)
 
-            micx =  sdx*cell[0,0] + sdy*cell[1,0] + sdz*cell[2,0]
-            micy =  sdx*cell[0,1] + sdy*cell[1,1] + sdz*cell[2,1]
-            micz =  sdx*cell[0,2] + sdy*cell[1,2] + sdz*cell[2,2]
+            micx =  sdx*cell[0,0] + sdy*cell[0,1] + sdz*cell[0,2]
+            micy =  sdx*cell[1,0] + sdy*cell[1,1] + sdz*cell[1,2]
+            micz =  sdx*cell[2,0] + sdy*cell[2,1] + sdz*cell[2,2]
             
             orthx = <float> (invBasis[0,0]*micx + invBasis[0,1]*micy + invBasis[0,2]*micz) 
             orthy = <float> (invBasis[1,0]*micx + invBasis[1,1]*micy + invBasis[1,2]*micz)

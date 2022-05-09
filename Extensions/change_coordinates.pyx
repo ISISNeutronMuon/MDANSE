@@ -43,9 +43,9 @@ def box_coordinates(ndarray[np.float64_t, ndim=2] real_coords not None,
         y = real_coords[i,1]
         z = real_coords[i,2]
 
-        box_coords[i,0] = x*rcell[0,0] + y*rcell[1,0] + z*rcell[2,0]
-        box_coords[i,1] = x*rcell[0,1] + y*rcell[1,1] + z*rcell[2,1]
-        box_coords[i,2] = x*rcell[0,2] + y*rcell[1,2] + z*rcell[2,2]
+        box_coords[i,0] = x*rcell[0,0] + y*rcell[0,1] + z*rcell[0,2]
+        box_coords[i,1] = x*rcell[1,0] + y*rcell[1,1] + z*rcell[1,2]
+        box_coords[i,2] = x*rcell[2,0] + y*rcell[2,1] + z*rcell[2,2]
 
     return box_coords
 
@@ -64,9 +64,9 @@ def real_coordinates(ndarray[np.float64_t, ndim=2] box_coords not None,
         y = box_coords[i,1]
         z = box_coords[i,2]
 
-        real_coords[i,0] = x*cell[0,0] + y*cell[1,0] + z*cell[2,0]
-        real_coords[i,1] = x*cell[0,1] + y*cell[1,1] + z*cell[2,1]
-        real_coords[i,2] = x*cell[0,2] + y*cell[1,2] + z*cell[2,2]
+        real_coords[i,0] = x*cell[0,0] + y*cell[0,1] + z*cell[0,2]
+        real_coords[i,1] = x*cell[1,0] + y*cell[1,1] + z*cell[1,2]
+        real_coords[i,2] = x*cell[2,0] + y*cell[2,1] + z*cell[2,2]
 
     return real_coords
 

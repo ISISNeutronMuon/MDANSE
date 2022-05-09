@@ -55,9 +55,9 @@ def distance_histogram(ndarray[np.float64_t, ndim=2]  config not None,
         y = config[i,1]
         z = config[i,2]
 
-        scaleconfig[i,0] = x*rcell[0,0] + y*rcell[1,0] + z*rcell[2,0]
-        scaleconfig[i,1] = x*rcell[0,1] + y*rcell[1,1] + z*rcell[2,1]
-        scaleconfig[i,2] = x*rcell[0,2] + y*rcell[1,2] + z*rcell[2,2]
+        scaleconfig[i,0] = x*rcell[0,0] + y*rcell[0,1] + z*rcell[0,2]
+        scaleconfig[i,1] = x*rcell[1,0] + y*rcell[1,1] + z*rcell[1,2]
+        scaleconfig[i,2] = x*rcell[2,0] + y*rcell[2,1] + z*rcell[2,2]
         
     for 0 <= i < indexes.shape[0] - 1:
 
@@ -75,9 +75,9 @@ def distance_histogram(ndarray[np.float64_t, ndim=2]  config not None,
             sdy -= round(sdy)
             sdz -= round(sdz)
             
-            rx = sdx*cell[0,0] + sdy*cell[1,0] + sdz*cell[2,0]
-            ry = sdx*cell[0,1] + sdy*cell[1,1] + sdz*cell[2,1]
-            rz = sdx*cell[0,2] + sdy*cell[1,2] + sdz*cell[2,2]
+            rx = sdx*cell[0,0] + sdy*cell[0,1] + sdz*cell[0,2]
+            ry = sdx*cell[1,0] + sdy*cell[1,1] + sdz*cell[1,2]
+            rz = sdx*cell[2,0] + sdy*cell[2,1] + sdz*cell[2,2]
 
             r = sqrt(rx*rx + ry*ry + rz*rz)
 

@@ -289,9 +289,16 @@ class Trajectory:
         coords = grp['coordinates'][first:last:step,indexes,:]
 
         if 'unit_cell' in grp:
-            unit_cell = grp['unit_cell'][first:last:step]
-            inverse_unit_cell = grp['inverse_unit_cell'][first:last:step]
-            cog_traj = com_trajectory.com_trajectory(coords,unit_cell,inverse_unit_cell,masses)
+            n_frames = coords.shape[0]
+            unit_cells = np.empty(n_frames,3,3)
+            inverse_unit_cells = np.empty(n_frames,3,3)
+            for i, uc in enumerate(grp['unit_cell'][first:last:step]):
+                unit_cells[i,:,:] = uc.T
+                inverse_unit_cells = np.linalg.inv(unit_cells[i,:,:])
+            cog_traj = com_trajectory.com_trajectory(coords,
+                                                     unit_cells,
+                                                     inverse_unit_cells,
+                                                     masses)
         
         else:
             cog_traj = self._com_trajectory_nopbc(coords, indexes, masses)
