@@ -99,19 +99,20 @@ class JobFileGenerator():
         :return: String of python code of the compare function.
         :rtype: str
         """
-        return 'def compare(file1, file2):\n'          \
-               '    ret = True\n'                      \
-               '    f = netCDF4.Dataset(file1,"r")\n'       \
-               '    res1 = {}\n'                       \
-               '    for k,v in f.variables.items():\n' \
-               '        res1[k] = v[:]\n'      \
-               '    f.close()\n'                       \
-               '    f = netCDF4.Dataset(file2,"r")\n'       \
-               '    res2 = {}\n'                       \
-               '    for k,v in f.variables.items():\n' \
-               '        res2[k] = v[:]\n'      \
-               '    f.close()\n'                       \
-               '    return Comparator.Comparator().compare(res1, res2)\n\n'
+        return 'def compare(file1, file2):\n' \
+               '    ret = True\n' \
+               '    ignored_vars = ["temperature", "kinetic_energy"]\n\n' \
+               '    res1 = {}\n' \
+               '    with netCDF4.Dataset(file1,"r") as f:\n' \
+               '        for k, v in f.variables.items():\n' \
+               '            if k not in ignored_vars:\n' \
+               '                res1[k] = v[:]\n\n' \
+               '    res2 = {}\n' \
+               '    with netCDF4.Dataset(file1,"r") as f:\n' \
+               '        for k, v in f.variables.items():\n' \
+               '            if k not in ignored_vars:\n' \
+               '                res2[k] = v[:]\n\n' \
+               '    return Comparator.Comparator().compare(res1, res2)\n\n\n'
 
     def __create_test(self, parameters, test_name):
         """
