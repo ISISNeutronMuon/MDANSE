@@ -288,13 +288,17 @@ class Trajectory:
 
         coords = grp['coordinates'][first:last:step,indexes,:]
 
+        if coords.ndim == 2:
+            coords = coords[np.newaxis,:,:]
+
         if 'unit_cell' in grp:
             n_frames = coords.shape[0]
-            unit_cells = np.empty(n_frames,3,3)
-            inverse_unit_cells = np.empty(n_frames,3,3)
+            unit_cells = np.empty((n_frames,3,3),dtype=np.float)
+            inverse_unit_cells = np.empty((n_frames,3,3),dtype=np.float)
             for i, uc in enumerate(grp['unit_cell'][first:last:step]):
                 unit_cells[i,:,:] = uc.T
-                inverse_unit_cells = np.linalg.inv(unit_cells[i,:,:])
+                inverse_unit_cells[i,:,:] = np.linalg.inv(unit_cells[i,:,:])
+
             cog_traj = com_trajectory.com_trajectory(coords,
                                                      unit_cells,
                                                      inverse_unit_cells,
@@ -383,20 +387,13 @@ class TrajectoryWriter:
                 dset[-1] = v
 
         unit_cell = configuration.unit_cell
-        inverse_unit_cell = configuration.inverse_unit_cell
         if unit_cell is not None:
             if 'unit_cell' not in configuration_grp:
                 configuration_grp.create_dataset('unit_cell',data=unit_cell[np.newaxis,:,:],maxshape=(None,3,3))
-                configuration_grp.create_dataset('inverse_unit_cell',data=inverse_unit_cell[np.newaxis,:,:],maxshape=(None,3,3))
             else:
                 unit_cell_dset = configuration_grp['unit_cell']
                 unit_cell_dset.resize((unit_cell_dset.shape[0]+1,3,3))
                 unit_cell_dset[-1] = unit_cell
-
-                inverse_unit_cell_dset = configuration_grp['inverse_unit_cell']
-                inverse_unit_cell_dset.resize((inverse_unit_cell_dset.shape[0]+1,3,3))
-                inverse_unit_cell_dset[-1] = inverse_unit_cell
-
 
         if 'time' not in configuration_grp:
             configuration_grp.create_dataset('time',data=[time],maxshape=(None,),dtype=float)

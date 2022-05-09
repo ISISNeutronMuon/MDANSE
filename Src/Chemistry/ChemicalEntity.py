@@ -1003,7 +1003,10 @@ class ChemicalSystem(_ChemicalEntity):
             entity_index = int(entity_index)
             h5_chemical_entity_instance = eval(grp[entity_type][entity_index])
             self.add_chemical_entity(h5_chemical_entity_instance.build())
+        
         self._h5_file.close()
+
+        self._h5_file = None
 
     def number_of_atoms(self):
 
