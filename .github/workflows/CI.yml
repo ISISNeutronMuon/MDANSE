@@ -67,7 +67,7 @@ jobs:
       - run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/Scientific
           ls
-          $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "from MMTK.Trajectory import Trajectory"
+          $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "from Scientific.IO import NetCDF"
 
       - name: Run tests
         run: |
@@ -368,11 +368,13 @@ jobs:
       - run: |
           xcopy "D:\tempenv\lib\site-packages\netCDF4" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4\" /e /r /h /a /y /I /f
           xcopy "D:\tempenv\lib\site-packages\cftime" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime\" /e /r /h /a /y /I /f
-          cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4"
+          copy "D:\tempenv\msvc*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"
+          cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"
           dir
         shell: cmd
 
       - run: |
+          "D:\tempenv\python.exe" -c "import netCDF4"
           "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe" -c "import netCDF4"
         shell: cmd
 
