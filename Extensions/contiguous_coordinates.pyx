@@ -110,9 +110,9 @@ def contiguous_coordinates_box(ndarray[np.float64_t, ndim=2]  coords not None,
             newy = coords[idxs[0],1] + sdy
             newz = coords[idxs[0],2] + sdz
 
-            contiguous_coords[idx,0] = newx*cell[0,0] + newy*cell[1,0] + newz*cell[2,0]
-            contiguous_coords[idx,1] = newx*cell[0,1] + newy*cell[1,1] + newz*cell[2,1]
-            contiguous_coords[idx,2] = newx*cell[0,2] + newy*cell[1,2] + newz*cell[2,2]
+            contiguous_coords[idx,0] = newx*cell[0,0] + newy*cell[0,1] + newz*cell[0,2]
+            contiguous_coords[idx,1] = newx*cell[1,0] + newy*cell[1,1] + newz*cell[1,2]
+            contiguous_coords[idx,2] = newx*cell[2,0] + newy*cell[2,1] + newz*cell[2,2]
 
     return contiguous_coords
 
