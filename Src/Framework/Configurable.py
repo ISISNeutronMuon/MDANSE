@@ -252,7 +252,8 @@ class Configurable(object):
             try:
                 cfg=REGISTRY["configurator"][typ](name, **kwds)
             except KeyError:
-                raise KeyError(typ, REGISTRY["configurator"])
+                from MDANSE.Framework.Configurators.NetCDFInputFileConfigurator import NetCDFInputFileConfigurator as nc
+                cfg = nc(name, **kwds)
             params[name] = cfg.default
             
         return params
