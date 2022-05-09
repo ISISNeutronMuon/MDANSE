@@ -249,11 +249,7 @@ class Configurable(object):
                                     
         params = collections.OrderedDict()
         for name,(typ,kwds) in settings.items():
-            try:
-                cfg=REGISTRY["configurator"][typ](name, **kwds)
-            except KeyError:
-                from MDANSE.Framework.Configurators.NetCDFInputFileConfigurator import NetCDFInputFileConfigurator as nc
-                cfg = nc(name, **kwds)
+            cfg=REGISTRY["configurator"][typ](name, **kwds)
             params[name] = cfg.default
             
         return params

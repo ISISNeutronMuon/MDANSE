@@ -64,10 +64,14 @@ jobs:
           cd $GITHUB_WORKSPACE
           $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
 
+      - run: |
+          cd $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/Scientific
+          ls
+          $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "from MMTK.Trajectory import Trajectory"
+
       - name: Run tests
         run: |
           export PATH=$PATH:/usr/lib/x86_64-linux-gnu
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
 
@@ -367,6 +371,8 @@ jobs:
           cd /d "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4"
           dir
         shell: cmd
+
+      - run: %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe -c "import netCDF4"
 
       - name: Install static dependencies
         if: steps.python-cache.outputs.cache-hit != 'true'
