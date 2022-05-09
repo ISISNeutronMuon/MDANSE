@@ -372,7 +372,8 @@ jobs:
           dir
         shell: cmd
 
-      - run: %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe -c "import netCDF4"
+      - run: "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe" -c "import netCDF4"
+        shell: cmd
 
       - name: Install static dependencies
         if: steps.python-cache.outputs.cache-hit != 'true'
