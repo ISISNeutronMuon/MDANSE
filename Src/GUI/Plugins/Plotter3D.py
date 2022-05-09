@@ -644,7 +644,6 @@ class Plotter3D(wx.Panel):
     
     def on_keyboard_input(self, obj, event):
         key = self.iren.GetKeyCode()        
-        print(key)
         if key in ['+']:
             self.on_move_slice(1)
         elif key in ['-']:

@@ -111,7 +111,6 @@ class LAMMPSConfigFile(dict):
                                     if numpy.abs(ELEMENTS[element]["atomic_weight"] - mass) < numpy.abs(ELEMENTS[matched_element]["atomic_weight"] - mass):
                                         matched_element = element
                             self["elements"][idx] = matched_element
-                            print(matched_element)
                         else:
                             # More than two elements are matching => error
                             raise LAMMPSConfigFileError("The atoms %s of MDANSE database matches the mass %f with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (el,mass,self._tolerance))
