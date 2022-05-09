@@ -62,17 +62,10 @@ jobs:
           cd $GITHUB_WORKSPACE
           $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
 
-      - run: |
-          cd /usr/lib/x86_64-linux-gnu
-          ls
-          export PATH=$PATH:/usr/lib/x86_64-linux-gnu
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu
-          echo $PATH
-          echo $LD_LIBRARY_PATH
-          $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "import Scientific.IO.NetCDF"
-
       - name: Run tests
         run: |
+          export PATH=$PATH:/usr/lib/x86_64-linux-gnu
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
 
