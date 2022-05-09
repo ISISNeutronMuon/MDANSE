@@ -53,14 +53,14 @@ from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import Trajectory, TrajectoryWriter
 
-class TestAtomsDatabase(unittest.TestCase):
+class TestTrajectory(unittest.TestCase):
     '''
     '''
 
     def setUp(self):
 
         self._chemicalSystem = ChemicalSystem()
-        self._nAtoms = 10
+        self._nAtoms = 4
 
         for i in range(self._nAtoms):
             self._chemicalSystem.add_chemical_entity(Atom(symbol="H"))
@@ -87,7 +87,7 @@ class TestAtomsDatabase(unittest.TestCase):
         t = Trajectory(self._filename)
 
         for i in range(len(t)):
-            self.assertTrue(np.allclose(t[i]['unit_cell'][:],allUnitCells[i].T,rtol=1.0e-6))
+            self.assertTrue(np.allclose(t[i]['unit_cell'][:],allUnitCells[i],rtol=1.0e-6))
             self.assertTrue(np.allclose(t[i]['time'],allTimes[i],rtol=1.0e-6))
             self.assertTrue(np.allclose(t[i]['coordinates'][:],allCoordinates[i],rtol=1.0e-6))
 
@@ -116,7 +116,7 @@ class TestAtomsDatabase(unittest.TestCase):
         t = Trajectory(self._filename)
 
         for i in range(len(t)):
-            self.assertTrue(np.allclose(t[i]['unit_cell'][:],allUnitCells[i].T,rtol=1.0e-6))
+            self.assertTrue(np.allclose(t[i]['unit_cell'][:],allUnitCells[i],rtol=1.0e-6))
             self.assertTrue(np.allclose(t[i]['time'],allTimes[i],rtol=1.0e-6))
             self.assertTrue(np.allclose(t[i]['coordinates'][:],allCoordinates[i],rtol=1.0e-6))
             self.assertTrue(np.allclose(t[i]['velocities'][:],allVelocities[i],rtol=1.0e-6))
@@ -149,7 +149,7 @@ class TestAtomsDatabase(unittest.TestCase):
         t = Trajectory(self._filename)
 
         for i in range(len(t)):
-            self.assertTrue(np.allclose(t[i]['unit_cell'][:],allUnitCells[i].T,rtol=1.0e-6))
+            self.assertTrue(np.allclose(t[i]['unit_cell'][:],allUnitCells[i],rtol=1.0e-6))
             self.assertTrue(np.allclose(t[i]['time'],allTimes[i],rtol=1.0e-6))
             self.assertTrue(np.allclose(t[i]['coordinates'][:],allCoordinates[i],rtol=1.0e-6))
             self.assertTrue(np.allclose(t[i]['velocities'][:],allVelocities[i],rtol=1.0e-6))
@@ -157,10 +157,40 @@ class TestAtomsDatabase(unittest.TestCase):
 
         t.close()
 
+    def test_read_com_trajectory(self):
+
+        tw = TrajectoryWriter(self._filename, self._chemicalSystem)
+
+        allCoordinates = []
+        allUnitCells = []
+        allTimes = []
+        for i in range(1):
+            allTimes.append(i)
+            allUnitCells.append([
+                [10.0, 0.0, 0.0],
+                [ 0.0,10.0, 0.0],
+                [ 0.0, 0.0,10.0]])
+            allCoordinates.append([
+                [0.0,0.0,0.0],
+                [8.0,8.0,8.0],
+                [4.0,4.0,4.0],
+                [2.0,2.0,2.0]])
+            conf = RealConfiguration(self._chemicalSystem,allCoordinates[-1],allUnitCells[-1])
+            self._chemicalSystem.configuration = conf
+            tw.dump_configuration(i)
+
+        tw.close()
+
+        t = Trajectory(self._filename)
+        com_trajectory = t.read_com_trajectory([0,1,2,3],np.array([1.0,1.0,1.0,1.0]),0,1,1)
+        self.assertTrue(np.allclose(com_trajectory,[[1.0,1.0,1.0]],rtol=1.0e-6))
+        t.close()
+
+
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(TestAtomsDatabase))
+    s.addTest(loader.loadTestsFromTestCase(TestTrajectory))
     return s
 
 if __name__ == '__main__':

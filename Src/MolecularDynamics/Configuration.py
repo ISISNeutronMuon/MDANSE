@@ -233,6 +233,7 @@ class RealConfiguration(_Configuration):
                 self._unit_cell.T,
                 np.linalg.inv(self._unit_cell.T),
                 indexes)
+
             conf = copy.deepcopy(self)
             conf._variables['coordinates'] = contiguous_coords
             return conf

@@ -85,31 +85,31 @@ def com_trajectory(ndarray[np.float64_t, ndim=3] config not None,
 
             sumMasses += masses[j]
 
-        srefx /= sumMasses
-        srefy /= sumMasses
-        srefz /= sumMasses
+        comx /= sumMasses
+        comy /= sumMasses
+        comz /= sumMasses
 
-        if srefx < 0.0:
-            srefx += 1.0
+        if comx < 0.0:
+            comx += 1.0
 
-        if srefy < 0.0:
-            srefy += 1.0
+        if comy < 0.0:
+            comy += 1.0
 
-        if srefz < 0.0:
-            srefz += 1.0
+        if comz < 0.0:
+            comz += 1.0
 
-        if srefx > 0.5:
-            srefx -= 1.0
+        if comx > 0.5:
+            comx -= 1.0
 
-        if srefy > 0.5:
-            srefy -= 1.0
+        if comy > 0.5:
+            comy -= 1.0
 
-        if srefz > 0.5:
-            srefz -= 1.0
+        if comz > 0.5:
+            comz -= 1.0
 
-        trajectory[i,0] = srefx*cell[i,0,0] + srefy*cell[i,0,1] + srefz*cell[i,0,2]
-        trajectory[i,1] = srefx*cell[i,1,0] + srefy*cell[i,1,1] + srefz*cell[i,1,2]
-        trajectory[i,2] = srefx*cell[i,2,0] + srefy*cell[i,2,1] + srefz*cell[i,2,2]
+        trajectory[i,0] = comx*cell[i,0,0] + comy*cell[i,0,1] + comz*cell[i,0,2]
+        trajectory[i,1] = comx*cell[i,1,0] + comy*cell[i,1,1] + comz*cell[i,1,2]
+        trajectory[i,2] = comx*cell[i,2,0] + comy*cell[i,2,1] + comz*cell[i,2,2]
 
     return trajectory
 
