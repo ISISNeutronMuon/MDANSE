@@ -252,7 +252,7 @@ class Configurable(object):
             try:
                 cfg=REGISTRY["configurator"][typ](name, **kwds)
             except KeyError:
-                raise KeyError(typ, settings.items(), cls)
+                raise KeyError(typ, REGISTRY["configurator"])
             params[name] = cfg.default
             
         return params
