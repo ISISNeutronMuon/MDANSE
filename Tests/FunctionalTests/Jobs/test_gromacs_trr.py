@@ -10,23 +10,17 @@ import Comparator
 
 
 def compare(file1, file2, array_tolerance):
-    f = netCDF4.Dataset(file1, "r")
-    try:
-        res1 = {}
+    res1 = {}
+    with netCDF4.Dataset(file1, "r") as f:
         for k, v in f.variables.items():
             if k not in ['velocities', 'gradients', 'temperature', 'kinetic_energy']:
                 res1[k] = v[:]
-    finally:
-        f.close()
 
-    f = netCDF4.Dataset(file2, "r")
-    try:
-        res2 = {}
+    res2 = {}
+    with netCDF4.Dataset(file2, "r") as f:
         for k, v in f.variables.items():
             if k not in ['velocities', 'gradients', 'temperature', 'kinetic_energy']:
                 res2[k] = v[:]
-    finally:
-        f.close()
 
     return Comparator.Comparator().compare(res1, res2, array_tolerance)
 
