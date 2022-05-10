@@ -58,6 +58,8 @@ class _ChemicalEntity:
     def __init__(self):
 
         self._parent = None
+
+        self._name = ''
     
     @abc.abstractmethod
     def atom_list(self):
@@ -84,6 +86,14 @@ class _ChemicalEntity:
     @parent.setter
     def parent(self,parent):
         self._parent = parent
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self,name):
+        self._name = name
 
     @abc.abstractmethod
     def serialize(self, h5_file):
@@ -126,7 +136,7 @@ class Atom(_ChemicalEntity):
         if self.symbol not in ATOMS_DATABASE:
             raise UnknownAtomError('Te atom {} is unknown'.format(self.symbol))
 
-        self.name = kwargs.get('name',self.symbol)
+        self._name = kwargs.get('name',self.symbol)
 
         self.bonds = kwargs.get('bonds',[])
 
@@ -197,10 +207,9 @@ class AtomCluster(_ChemicalEntity):
 
         super(AtomCluster,self).__init__()
 
-        self._atoms = []
-
         self._name = name
 
+        self._atoms = []
         for at in atoms:
             at.parent = self
             self._atoms.append(at)
@@ -211,10 +220,6 @@ class AtomCluster(_ChemicalEntity):
 
     def atom_list(self):
         return list([at for at in self._atoms if not at.ghost])
-
-    @property
-    def name(self):
-        return self._name
 
     def number_of_atoms(self):
         return len([at for at in self._atoms if not at.ghost])
@@ -251,7 +256,7 @@ class AtomCluster(_ChemicalEntity):
 
 class Molecule(_ChemicalEntity):
     
-    def __init__(self, code, number=None):
+    def __init__(self, code, name):
 
         super(Molecule,self).__init__()
 
@@ -259,26 +264,17 @@ class Molecule(_ChemicalEntity):
 
         self._code = code
 
-        self._number = number
+        self._name = name
 
-        self._molname = None
+        self._build(code)
 
-        self._build(code,number)
-
-    def _build(self, code, number = None):
+    def _build(self, code):
 
         for molname, molinfo in MOLECULES_DATABASE.items():
             if code == molname or code in molinfo['alternatives']:
                 break
         else:
             raise UnknownMoleculeError(code)
-
-        self._molname = molname
-
-        if number is not None:
-            self._name = '{}{}'.format(self._molname,number)
-        else:
-            self._name = code
 
         for at, atinfo in molinfo['atoms'].items():
 
@@ -308,18 +304,6 @@ class Molecule(_ChemicalEntity):
     def code(self):
         return self._code
 
-    @property
-    def molname(self):
-        return self._molname
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def number(self):
-        return self._number
-
     def number_of_atoms(self):
         return len([at for at in self._atoms.values() if not at.ghost])
 
@@ -344,7 +328,7 @@ class Molecule(_ChemicalEntity):
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        mol_str = 'H5Molecule(self._h5_file,h5_contents,{},code="{}",number={})'.format(at_indexes,self._code,self._number)
+        mol_str = 'H5Molecule(self._h5_file,h5_contents,{},code="{}",name={})'.format(at_indexes,self._code,self._name)
 
         h5_contents.setdefault('molecules',[]).append(mol_str)
         
@@ -353,32 +337,26 @@ class Molecule(_ChemicalEntity):
 
         return ('molecules',len(h5_contents['molecules'])-1)
 
-def is_molecule(molname):
+def is_molecule(name):
 
-    return molname in MOLECULES_DATABASE
+    return name in MOLECULES_DATABASE
 
 class Residue(_ChemicalEntity):
     
-    def __init__(self, code, number=None, variant=None):
+    def __init__(self, code, name, variant=None):
 
         super(Residue,self).__init__()
 
         for resname, resinfo in RESIDUES_DATABASE.items():
 
             if code == resname or code in resinfo['alternatives']:
-                self._resname = resname
                 break
         else:
             raise UnknownResidueError(code)
 
-        self._number = number
-
         self._code = code
 
-        if number is not None:
-            self._name = '{}{}'.format(self._resname,number)
-        else:
-            self._name = self._code
+        self._name = name
 
         self._variant = variant
 
@@ -446,18 +424,6 @@ class Residue(_ChemicalEntity):
     def code(self):
         return self._code
 
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def number(self):
-        return self._number
-
-    @property
-    def resname(self):
-        return self._resname
-
     def serialize(self,h5_file, h5_contents):
 
         if 'atoms' in h5_contents:
@@ -465,7 +431,7 @@ class Residue(_ChemicalEntity):
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        res_str = 'H5Residue(self._h5_file,h5_contents,{},code="{}",number={},variant={})'.format(at_indexes,self._code,self._number,repr(self._variant))
+        res_str = 'H5Residue(self._h5_file,h5_contents,{},code="{}",name={},variant={})'.format(at_indexes,self._code,self._name,repr(self._variant))
 
         h5_contents.setdefault('residues',[]).append(res_str)
         
@@ -476,7 +442,7 @@ class Residue(_ChemicalEntity):
 
 class Nucleotide(_ChemicalEntity):
     
-    def __init__(self, code, number=None, variant=None):
+    def __init__(self, code, name, variant=None):
 
         super(Nucleotide,self).__init__()
 
@@ -488,14 +454,9 @@ class Nucleotide(_ChemicalEntity):
         else:
             raise UnknownResidueError(code)
 
-        self._number = number
-
         self._code = code
 
-        if number is not None:
-            self._name = '{}{}'.format(self._resname,number)
-        else:
-            self._name = self._code
+        self._name = name
 
         self._variant = variant
 
@@ -564,18 +525,6 @@ class Nucleotide(_ChemicalEntity):
     def code(self):
         return self._code
 
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def number(self):
-        return self._number
-
-    @property
-    def resname(self):
-        return self._resname
-
     def serialize(self, h5_file, h5_contents):
 
         if 'atoms' in h5_contents:
@@ -583,7 +532,7 @@ class Nucleotide(_ChemicalEntity):
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        res_str = 'H5Nucleotide(self._h5_file,h5_contents,{},code="{}",number={},variant={})'.format(at_indexes,self._code,self._number,repr(self._variant))
+        res_str = 'H5Nucleotide(self._h5_file,h5_contents,{},code="{}",name={},variant={})'.format(at_indexes,self._code,self._name,repr(self._variant))
 
         h5_contents.setdefault('nucleotides',[]).append(res_str)
         
@@ -647,10 +596,6 @@ class NucleotideChain(_ChemicalEntity):
             if 'base' in at.groups:
                 atoms.append(at)
         return atoms
-
-    @property
-    def name(self):
-        return self._name
 
     @property
     def nucleotides(self):
@@ -776,10 +721,6 @@ class PeptideChain(_ChemicalEntity):
         return number_of_atoms
 
     @property
-    def name(self):
-        return self._name
-
-    @property
     def peptide_chains(self):
         return [self]
 
@@ -883,10 +824,6 @@ class Protein(_ChemicalEntity):
                 atoms.append(at)
         return atoms
 
-    @property
-    def name(self):
-        return self._name
-
     def serialize(self,h5_file, h5_contents):
         if 'peptide_chains' in h5_contents:
             pc_indexes = list(range(len(h5_contents['pepide_chains']),len(h5_contents['pepide_chains'])+len(self._peptide_chains)))
@@ -928,7 +865,7 @@ def translate_atom_names(database, molname, atoms):
 
 class ChemicalSystem(_ChemicalEntity):
 
-    def __init__(self):
+    def __init__(self, name=''):
 
         self._chemical_entities = []
 
@@ -937,6 +874,10 @@ class ChemicalSystem(_ChemicalEntity):
         self._number_of_atoms = 0
 
         self._total_number_of_atoms = 0
+
+        self._name = name
+
+        self._parent = None
 
     def add_chemical_entity(self, chemical_entity):
 
@@ -993,6 +934,8 @@ class ChemicalSystem(_ChemicalEntity):
         self._chemical_entities = []
         skeleton = self._h5_file['/chemical_system/contents'][:]
 
+        self._name = grp.attrs['name']
+
         h5_contents = {}
         for k in grp.keys():
             if k =='contents':
@@ -1022,13 +965,13 @@ class ChemicalSystem(_ChemicalEntity):
             number_of_atoms += ce.total_number_of_atoms()
         return number_of_atoms
 
-    def serialize(self, h5_filename):
+    def serialize(self, h5_file):
 
         string_dt = h5py.special_dtype(vlen=str)
 
-        h5_file = h5py.File(h5_filename, mode='w')
-
         grp = h5_file.create_group('/chemical_system')
+
+        grp.attrs['name'] = self._name
 
         h5_contents = {}
 
@@ -1040,6 +983,4 @@ class ChemicalSystem(_ChemicalEntity):
         for k,v in h5_contents.items():
             grp.create_dataset(k,data=v,dtype=string_dt)
         grp.create_dataset('contents', data=contents, dtype=string_dt)
-
-        h5_file.close()
 
