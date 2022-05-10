@@ -151,7 +151,14 @@ class JobFileGenerator():
         if self.multiprocessor:
             test_string += '        print "Launching job in multiprocessor mode"\n' \
                            '        parameters["running_mode"] = ("multiprocessor",2)\n' \
-                           '        job.run(parameters,False)\n' \
+                           '        try:\n' \
+                           '            job.run(parameters, status=False)\n' \
+                           '        except IOError:\n' \
+                           '            try:\n' \
+                           '                os.remove(output_path + ".nc")\n' \
+                           '            except OSError:\n' \
+                           '                pass\n' \
+                           '            job.run(parameters, status=False)\n' \
                            '        shutil.copy(output_path + ".nc", reference_data_path + "_multi" + ".nc")\n' \
                            '        print "Multiprocessor execution completed"\n\n'
 
