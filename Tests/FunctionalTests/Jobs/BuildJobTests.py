@@ -143,7 +143,14 @@ class JobFileGenerator():
         # Launch the job in monoprocessor mode and copy output file
         test_string += '        print "Launching job in monoprocessor mode"\n' \
                        '        parameters["running_mode"] = ("monoprocessor",1)\n' \
-                       '        job.run(parameters, status=False)\n' \
+                       '        try:\n' \
+                       '            job.run(parameters, status=False)\n' \
+                       '        except IOError:\n' \
+                       '            try:\n' \
+                       '                os.remove(output_path + ".nc")\n' \
+                       '            except OSError:\n' \
+                       '                pass\n' \
+                       '            job.run(parameters, status=False)\n' \
                        '        shutil.copy(output_path + ".nc", reference_data_path + "_mono" + ".nc")\n' \
                        '        print "Monoprocessor execution completed"\n\n'
 
