@@ -75,22 +75,16 @@ class TestGromacsADK(unittest.TestCase):
         # Load velocities that have been generated from the same trajectory with MDAnalysis + convert angstrom to nm
         expected = np.load(r'../../../Data/Trajectories/Gromacs/adk_oplsaa.npy') / 10
 
-        f = netCDF4.Dataset(self.trr_copy, "r")
-        try:
+        with netCDF4.Dataset(self.trr_copy, "r") as f:
             velocities = f.variables['velocities'][:]
-        finally:
-            f.close()
 
         self.assertTrue(np.allclose(expected, velocities, 0, 0.000001))
 
     def test_gradients(self):
         # adk_oplsaa.trr does not contain forces
 
-        f = netCDF4.Dataset(self.trr_copy, "r")
-        try:
+        with netCDF4.Dataset(self.trr_copy, "r") as f:
             self.assertFalse('gradients' in f.variables)
-        finally:
-            f.close()
 
     @classmethod
     def tearDownClass(cls):
@@ -142,11 +136,8 @@ class TestGromacsCobrotoxin(unittest.TestCase):
         # Load velocities that have been generated from the same trajectory with MDAnalysis + convert angstrom to nm
         expected = np.load(r'../../../Data/Trajectories/Gromacs/cobrotoxin_vels.npy') / 10
 
-        f = netCDF4.Dataset(self.trr_copy, "r")
-        try:
+        with netCDF4.Dataset(self.trr_copy, "r") as f:
             velocities = f.variables['velocities'][:]
-        finally:
-            f.close()
 
         self.assertTrue(np.allclose(expected, velocities, 0, 0.000001))
 
@@ -154,11 +145,8 @@ class TestGromacsCobrotoxin(unittest.TestCase):
         # Load forces that have been generated from the same trajectory with MDAnalysis + convert angstrom to nm
         expected = np.load(r'../../../Data/Trajectories/Gromacs/cobrotoxin_forces.npy') * 10
 
-        f = netCDF4.Dataset(self.trr_copy, "r")
-        try:
+        with netCDF4.Dataset(self.trr_copy, "r") as f:
             gradients = f.variables['gradients'][:]
-        finally:
-            f.close()
 
         self.assertTrue(np.allclose(expected, gradients, 0, 0.001))
         # Such a large tolerance is required because most gradients are > 100
