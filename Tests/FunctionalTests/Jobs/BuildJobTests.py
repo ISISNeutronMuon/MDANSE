@@ -130,46 +130,34 @@ class JobFileGenerator():
         if parameters is None:
             parameters = self.job.get_default_parameters()
 
+
         test_string += '        parameters = {}\n'
         for k, v in sorted(parameters.items()):
-            temp = 'parameters[%r] = %r\n' % (k, v)
+            if k in ["output_file", "output_files"]:
+                temp = 'parameters[%r] = (%r, %r)\n' % (k, self.reference_data_path.replace('\\', '/') + '_mono', v[1])
+                key = k
+            else:
+                temp = 'parameters[%r] = %r\n' % (k, v)
             test_string = test_string + '        ' + temp.replace('\\\\', '/')
-        if self.job._type == 'dp' and isinstance(PLATFORM, PlatformLinux):
-            test_string += '        parameters["output_files"] = ("../../../output", ["netcdf"])\n'
-        test_string += '        job = REGISTRY[%r][%r]()\n\n' % ('job', self.job._type)
-        test_string += '        try:\n' \
-                       '            output_path = parameters["output_files"][0]\n' \
-                       '        except KeyError:\n' \
-                       '            output_path = parameters["output_file"][0]\n\n'
+
+        if not 'key' in locals():
+            key = "output_file"
+
         test_string += '        reference_data_path = "' + self.reference_data_path.replace('\\', '/') + '"\n'
+        test_string += '        job = REGISTRY[%r][%r]()\n\n' % ('job', self.job._type)
 
         # Launch the job in monoprocessor mode and copy output file
         test_string += '        print "Launching job in monoprocessor mode"\n' \
                        '        parameters["running_mode"] = ("monoprocessor",1)\n' \
-                       '        try:\n' \
-                       '            job.run(parameters, status=False)\n' \
-                       '        except IOError:\n' \
-                       '            try:\n' \
-                       '                os.remove(output_path + ".nc")\n' \
-                       '            except OSError:\n' \
-                       '                pass\n' \
-                       '            job.run(parameters, status=False)\n' \
-                       '        shutil.copy(output_path + ".nc", reference_data_path + "_mono" + ".nc")\n' \
+                       '        job.run(parameters, status=False)\n' \
                        '        print "Monoprocessor execution completed"\n\n'
 
         # Launch the job in multiprocessor mode if avalaible
         if self.multiprocessor:
             test_string += '        print "Launching job in multiprocessor mode"\n' \
                            '        parameters["running_mode"] = ("multiprocessor",2)\n' \
-                           '        try:\n' \
-                           '            job.run(parameters, status=False)\n' \
-                           '        except IOError:\n' \
-                           '            try:\n' \
-                           '                os.remove(output_path + ".nc")\n' \
-                           '            except OSError:\n' \
-                           '                pass\n' \
-                           '            job.run(parameters, status=False)\n' \
-                           '        shutil.copy(output_path + ".nc", reference_data_path + "_multi" + ".nc")\n' \
+                           '        parameters["%s"] = (reference_data_path + "_multi", ["netcdf"])\n' % key
+            test_string += '        job.run(parameters, status=False)\n' \
                            '        print "Multiprocessor execution completed"\n\n'
 
         test_string += '        try:\n'
