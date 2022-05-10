@@ -34,9 +34,8 @@ fi
 #############################
 echo -e "${BLUE}""Performing functional tests""${NORMAL}"
 cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
-rm -rf Test_*
 python2 BuildJobTests.py
-python2 AllTests.py
+sudo $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python AllTests.py
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "One or several functional tests failed"
