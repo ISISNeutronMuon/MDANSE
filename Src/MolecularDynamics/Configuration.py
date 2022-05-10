@@ -126,7 +126,7 @@ class BoxConfiguration(_Configuration):
     def contiguous_configuration(self):
 
         if self._unit_cell is None:
-            return copy.deepcopy(self)
+            return self
 
         else:
 
@@ -139,7 +139,7 @@ class BoxConfiguration(_Configuration):
                 self._unit_cell.T,
                 indexes)
 
-            conf = copy.deepcopy(self)
+            conf = self
             conf._variables['coordinates'] = contiguous_coords
             return conf
 
@@ -186,13 +186,13 @@ class RealConfiguration(_Configuration):
     def to_box_coordinates(self):
 
         if self._unit_cell is None:
-            return copy.copy(self._variables['coordinates'])
+            return self._variables['coordinates']
         else:
             return np.matmul(self._variables['coordinates'],np.linalg.inv(self._unit_cell))
 
     def to_real_coordinates(self):
 
-        return copy.copy(self._variables['coordinates'])
+        return self._variables['coordinates']
 
     def atomsInShell(self, ref, mini=0.0, maxi=10.0):
 
@@ -220,7 +220,7 @@ class RealConfiguration(_Configuration):
     def contiguous_configuration(self):
 
         if self._unit_cell is None:
-            return copy.deepcopy(self)
+            return self
 
         else:
 
@@ -234,7 +234,7 @@ class RealConfiguration(_Configuration):
                 np.linalg.inv(self._unit_cell.T),
                 indexes)
 
-            conf = copy.deepcopy(self)
+            conf = self
             conf._variables['coordinates'] = contiguous_coords
             return conf
 

@@ -84,7 +84,7 @@ class H5Molecule(_H5ChemicalEntity):
 
 class H5Residue(_H5ChemicalEntity):
 
-    def __init__(self, h5_file, h5_contents, atom_indexes, code, number, variant):
+    def __init__(self, h5_file, h5_contents, atom_indexes, code, name, variant):
 
         super(H5Residue,self).__init__(h5_file, h5_contents)
 
@@ -92,14 +92,14 @@ class H5Residue(_H5ChemicalEntity):
 
         self._code = code
 
-        self._number = number
+        self._name = name
 
         self._variant = variant
 
     def build(self):
 
         from ChemicalEntity import Residue
-        res = Residue(self._code,self._number,self._variant)
+        res = Residue(self._code,self._name,self._variant)
 
         atoms = []
         for atom_index in self._atom_indexes:
@@ -113,7 +113,7 @@ class H5Residue(_H5ChemicalEntity):
 
 class H5Nucleotide(_H5ChemicalEntity):
 
-    def __init__(self, h5_file, h5_contents, atom_indexes, code, number, variant):
+    def __init__(self, h5_file, h5_contents, atom_indexes, code, name, variant):
 
         super(H5Nucleotide,self).__init__(h5_file, h5_contents)
 
@@ -121,14 +121,14 @@ class H5Nucleotide(_H5ChemicalEntity):
 
         self._code = code
 
-        self._number = number
+        self._name = name
 
         self._variant = variant
 
     def build(self):
 
         from ChemicalEntity import Nucleotide
-        res = Nucleotide(self._code,self._number,self._variant)
+        res = Nucleotide(self._code,self._name,self._variant)
 
         atoms = []
         for atom_index in self._atom_indexes:

@@ -349,20 +349,7 @@ class TrajectoryWriter:
 
     def _dump_chemical_system(self):
 
-        string_dt = h5py.special_dtype(vlen=str)
-
-        grp = self._h5_file.create_group('/chemical_system')
-
-        h5_contents = {}
-
-        contents = []
-        for ce in self._chemical_system.chemical_entities:
-            entity_type, entity_index = ce.serialize(self._h5_file, h5_contents)
-            contents.append((entity_type,str(entity_index)))
-
-        for k,v in h5_contents.items():
-            grp.create_dataset(k,data=v,dtype=string_dt)
-        grp.create_dataset('contents', data=contents, dtype=string_dt)
+        self._chemical_system.serialize(self._h5_file)
 
     def close(self):
         self._h5_file.close()

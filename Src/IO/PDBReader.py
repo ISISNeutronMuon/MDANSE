@@ -96,13 +96,13 @@ class PDBReader:
         return new_atom_cluster
 
     def _process_molecule(self, molecule):
-
-        molname = molecule.name
+Molecule(
+        code = molecule.name
 
         pdb_atoms = [at.name for at in molecule]
 
         atoms_found = [None]*len(pdb_atoms)
-        for at, info in MOLECULES_DATABASE[molname]['atoms'].items():
+        for at, info in MOLECULES_DATABASE[code]['atoms'].items():
 
             try:
                 idx = pdb_atoms.index(at)
@@ -119,7 +119,8 @@ class PDBReader:
                 else:
                     raise UnknownAtomError('The atom {} is unknown'.format(at))
 
-        new_molecule = Molecule(molname,molecule.number)
+        molname = '{}_{}'.format(code,molecule.number)
+        new_molecule = Molecule(code,molname)
         new_molecule.reorder_atoms(atoms_found)
 
         return new_molecule
@@ -168,7 +169,7 @@ class PDBReader:
 
     def _process_nter_residue(self, residue):
 
-        resname = residue.name
+        code = residue.name
 
         pdb_atoms = [at.name for at in residue]
 
@@ -179,7 +180,7 @@ class PDBReader:
         atoms_not_found = []
 
         for comp, pdb_atom in enumerate(pdb_atoms):
-            for at, info in RESIDUES_DATABASE[resname]['atoms'].items():
+            for at, info in RESIDUES_DATABASE[code]['atoms'].items():
                 if pdb_atom == at or pdb_atom in info['alternatives']:
                     atoms_found[comp] = at
                     break
@@ -203,7 +204,8 @@ class PDBReader:
             else:
                 raise UnknownAtomError('The atom {} is unknown'.format(at))
 
-        new_residue = Residue(resname,residue.number,variant=nter)
+        resname = '{}_{}'.format(code,residue.number)
+        new_residue = Residue(resname,resname,variant=nter)
         new_residue.set_atoms(atoms_found)
 
         return new_residue
@@ -252,7 +254,7 @@ class PDBReader:
 
     def _process_cter_residue(self, residue):
 
-        resname = residue.name
+        code = residue.name
 
         pdb_atoms = [at.name for at in residue]
 
@@ -263,7 +265,7 @@ class PDBReader:
         atoms_not_found = []
 
         for comp, pdb_atom in enumerate(pdb_atoms):
-            for at, info in RESIDUES_DATABASE[resname]['atoms'].items():
+            for at, info in RESIDUES_DATABASE[code]['atoms'].items():
                 if pdb_atom == at or pdb_atom in info['alternatives']:
                     atoms_found[comp] = at
                     break
@@ -287,7 +289,8 @@ class PDBReader:
             else:
                 raise UnknownAtomError('The atom {} is unknown'.format(at))
 
-        new_residue = Residue(resname,residue.number,variant=cter)
+        resname = '{}_{}'.format(code,residue.number)
+        new_residue = Residue(code,resname,variant=cter)
         new_residue.set_atoms(atoms_found)
 
         return new_residue
@@ -336,7 +339,7 @@ class PDBReader:
 
     def _process_residue(self, residue):
 
-        resname = residue.name
+        code = residue.name
 
         pdb_atoms = [at.name for at in residue]
 
@@ -345,7 +348,7 @@ class PDBReader:
         atoms_not_found = []
 
         for comp, pdb_atom in enumerate(pdb_atoms):
-            for at, info in RESIDUES_DATABASE[resname]['atoms'].items():
+            for at, info in RESIDUES_DATABASE[code]['atoms'].items():
                 if pdb_atom == at or pdb_atom in info['alternatives']:
                     atoms_found[comp] = at
                     break
@@ -355,7 +358,8 @@ class PDBReader:
         if atoms_not_found:
             raise UnknownAtomError('The atom {} is unknown'.format(at))
 
-        new_residue = Residue(resname,residue.number,variant=None)
+        resname = '{}_{}'.format(code,residue.number)
+        new_residue = Residue(resname,resname,variant=None)
         new_residue.set_atoms(atoms_found)
 
         return new_residue
