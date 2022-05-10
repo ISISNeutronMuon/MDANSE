@@ -18,6 +18,9 @@ jobs:
         with:
           python-version: '2.7.18'
 
+      - run: |
+          ls -lrth /
+
       - name: Install libraries on ubuntu 18
         if: ${{ (matrix.os == 'ubuntu-18.04') }}
         run: |
