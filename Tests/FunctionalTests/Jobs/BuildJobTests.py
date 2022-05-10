@@ -17,8 +17,7 @@ import os
 import stat
 import sys
 
-from MDANSE import REGISTRY, PLATFORM
-from MDANSE.Core.Platform import PlatformLinux
+from MDANSE import REGISTRY
 
 
 class JobFileGenerator():

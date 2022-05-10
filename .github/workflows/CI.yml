@@ -62,14 +62,6 @@ jobs:
           sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/setup.py ~/mmtk
           sudo $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
 
-      - run: |
-          cd $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/Scientific
-          ls
-          export PATH=$PATH:/usr/lib/x86_64-linux-gnu
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu
-          $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "from Scientific.IO import NetCDF"
-          $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python -c "from MMTK.Trajectory import Trajectory"
-
       - name: Install MDANSE
         run: |
           cd $GITHUB_WORKSPACE
