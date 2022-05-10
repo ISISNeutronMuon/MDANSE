@@ -135,7 +135,7 @@ class JobFileGenerator():
             temp = 'parameters[%r] = %r\n' % (k, v)
             test_string = test_string + '        ' + temp.replace('\\\\', '/')
         if self.job._type == 'dp' and isinstance(PLATFORM, PlatformLinux):
-            test_string += '        parameters["output_files"][0] = "~/output"'
+            test_string += '        parameters["output_files"][0] = "~/output"\n'
         test_string += '        job = REGISTRY[%r][%r]()\n\n' % ('job', self.job._type)
         test_string += '        try:\n' \
                        '            output_path = parameters["output_files"][0]\n' \
