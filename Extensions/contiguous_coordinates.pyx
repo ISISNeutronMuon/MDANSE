@@ -149,19 +149,9 @@ def contiguous_offsets_real(ndarray[np.float64_t, ndim=2]  coords not None,
             sdy = scaleconfig[idx,1] - scaleconfig[idxs[0],1]
             sdz = scaleconfig[idx,2] - scaleconfig[idxs[0],2]
 
-<<<<<<< HEAD
-            sdx = -round(sdx)
-            sdy = -round(sdy)
-            sdz = -round(sdz)
-
-            offsets[idx,0] = sdx*cell[0,0] + sdy*cell[0,1] + sdz*cell[0,2]
-            offsets[idx,1] = sdx*cell[1,0] + sdy*cell[1,1] + sdz*cell[1,2]
-            offsets[idx,2] = sdx*cell[2,0] + sdy*cell[2,1] + sdz*cell[2,2]
-=======
             offsets[idx,0] = -round(sdx)
             offsets[idx,1] = -round(sdy)
             offsets[idx,2] = -round(sdz)
->>>>>>> 82416221353bed156494402c6acc80e968c35351
 
     return offsets
 
