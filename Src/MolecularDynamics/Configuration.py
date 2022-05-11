@@ -12,7 +12,7 @@ class _Configuration:
 
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, chemical_system, coordinates, unit_cell=None):
+    def __init__(self, chemical_system, coordinates, unit_cell=None, **variables):
 
         self._chemical_system = chemical_system
 
@@ -23,6 +23,9 @@ class _Configuration:
             raise ValueError('Invalid coordinates dimensions')
 
         self['coordinates'] = coordinates
+
+        for k,v in variables.items():
+            self[k] = v
 
         if unit_cell is not None:
             unit_cell = np.array(unit_cell)
@@ -234,6 +237,33 @@ class RealConfiguration(_Configuration):
                 np.linalg.inv(self._unit_cell.T),
                 indexes)
 
+            conf = self
+            conf._variables['coordinates'] = contiguous_coords
+            return conf
+
+    def continuous_configuration(self):
+
+        if self._unit_cell is None:
+            return self
+
+        else:
+
+            indexes = []
+            for ce in self._chemical_system.chemical_entities:
+                indexes.append([at.index for at in ce.atom_list()])
+
+            bonds = {}
+            for at in self._chemical_system.atom_list():
+                bonds[at.index] = [bat.index for bat in at.bonds]
+
+            contiguous_coords = contiguous_coordinates.continuous_coordinates(
+                self._variables['coordinates'],
+                self._unit_cell.T,
+                np.linalg.inv(self._unit_cell.T),
+                indexes,
+                bonds)
+
+            print(bonds)
             conf = self
             conf._variables['coordinates'] = contiguous_coords
             return conf

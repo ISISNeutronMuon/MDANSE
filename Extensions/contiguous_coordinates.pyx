@@ -179,4 +179,95 @@ def contiguous_offsets_box(ndarray[np.float64_t, ndim=2]  coords not None,
 
     return offsets
 
+def _recursive_contiguity(
+    ndarray[np.float64_t, ndim=2] contiguous_coords,
+    ndarray[np.float64_t, ndim=2] cell not None,
+    ndarray[np.float64_t, ndim=2] rcell not None,
+    ndarray[np.int8_t, ndim=1] processed not None,
+    bonds,
+    ref):
+
+    cdef double refx, refy, refz, brefx, brefy, brefz,x, y, z, bx, by, bz, bdx, bdy, bdz
+
+    refx = contiguous_coords[ref,0]
+    refy = contiguous_coords[ref,1]
+    refz = contiguous_coords[ref,2]
+
+    brefx = refx*rcell[0,0] + refy*rcell[0,1] + refz*rcell[0,2]
+    brefy = refx*rcell[1,0] + refy*rcell[1,1] + refz*rcell[1,2]
+    brefz = refx*rcell[2,0] + refy*rcell[2,1] + refz*rcell[2,2]
+
+    bonded_atoms = bonds[ref]
+
+    processed[ref] = 1
+
+    for bat in bonded_atoms:
+
+        if processed[bat] == 1:
+            continue
+
+        x = contiguous_coords[bat,0]
+        y = contiguous_coords[bat,1]
+        z = contiguous_coords[bat,2]
+
+        bx = x*rcell[0,0] + y*rcell[0,1] + z*rcell[0,2]
+        by = x*rcell[1,0] + y*rcell[1,1] + z*rcell[1,2]
+        bz = x*rcell[2,0] + y*rcell[2,1] + z*rcell[2,2]
+
+        bdx = bx - brefx
+        bdy = by - brefy
+        bdz = bz - brefz
+
+        bdx -= round(bdx)
+        bdy -= round(bdy)
+        bdz -= round(bdz)
+
+        bx = brefx + bdx
+        by = brefy + bdy
+        bz = brefz + bdz
+
+        contiguous_coords[bat,0] = bx*cell[0,0] + by*cell[0,1] + bz*cell[0,2]
+        contiguous_coords[bat,1] = bx*cell[1,0] + by*cell[1,1] + bz*cell[1,2]
+        contiguous_coords[bat,2] = bx*cell[2,0] + by*cell[2,1] + bz*cell[2,2]
+
+        _recursive_contiguity(contiguous_coords,cell,rcell,processed, bonds, bat)
+
+def continuous_coordinates(
+    ndarray[np.float64_t, ndim=2] coords not None,
+    ndarray[np.float64_t, ndim=2] cell not None,
+    ndarray[np.float64_t, ndim=2] rcell not None,
+    indexes,
+    bonds):
+
+    cdef int ref_idx
+
+    cdef ndarray[np.float64_t, ndim=2] contiguous_coords = coords
+
+    cdef np.ndarray[np.int8_t] processed = np.zeros((coords.shape[0],), dtype=np.int8)
+
+    for idxs in indexes:
+
+        if len(idxs) == 1:
+
+            contiguous_coords[idxs[0],0] = coords[idxs[0],0]
+            contiguous_coords[idxs[0],1] = coords[idxs[0],1]
+            contiguous_coords[idxs[0],2] = coords[idxs[0],2]
+
+        else:
+
+            ref_idx = idxs.pop(0)
+
+            _recursive_contiguity(contiguous_coords, cell, rcell, processed, bonds, ref_idx)
+
+    return contiguous_coords
+
+
+
+
+
+
+
+
+
+
             

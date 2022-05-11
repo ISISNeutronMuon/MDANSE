@@ -51,8 +51,8 @@ def brute_formula(molecule, sep='_'):
     
     return sep.join([''.join(v) for v in sorted(contents.items())])
 
-def build_connectivity(chemicalSystem ,tolerance=0.05):
-    
+def build_connectivity(chemicalSystem ,tolerance=0.05, unit_cell=None):
+
     bonds = []
     
     conf = chemicalSystem.configuration
@@ -81,18 +81,15 @@ def build_connectivity(chemicalSystem ,tolerance=0.05):
         for i,at in enumerate(atoms):
             covRadii[i] = ATOMS_DATABASE[at.symbol.capitalize()]['covalent_radius']
         
-        fast_calculation.cpt_cluster_connectivity(coords,covRadii,tolerance,bonds)
+        if unit_cell is None :
+            fast_calculation.cpt_cluster_connectivity_nopbc(coords,covRadii,tolerance,bonds)
+        else:
+            inverse_unit_cell = np.linalg.inv(unit_cell)
+            fast_calculation.cpt_cluster_connectivity_pbc(coords,unit_cell.T, inverse_unit_cell.T, covRadii,tolerance,bonds)
                   
         for idx1,idx2 in bonds:
-            if hasattr(atoms[idx1],"bonded_to__"):
-                atoms[idx1].bonds.append(atoms[idx2])
-            else:
-                atoms[idx1].bonds = [atoms[idx2]]
-                  
-            if hasattr(atoms[idx2],"bonded_to__"):
-                atoms[idx2].bonds.append(atoms[idx1])
-            else:
-                atoms[idx2].bonds = [atoms[idx1]]    
+            atoms[idx1].bonds.append(atoms[idx2])                  
+            atoms[idx2].bonds.append(atoms[idx1])
 
 def find_atoms_in_molecule(universe, moleculeName, atomNames, indexes=False):
 
@@ -215,16 +212,16 @@ class Trajectory:
         self._chemical_system.load(self._h5_filename)
 
         coords = self._h5_file['/configuration/coordinates'][0,:,:]
-        unit_cell = self._h5_file['/configuration'].get('unit_cell',None)
+        unit_cell = self._h5_file.get('unit_cell',None)
         if unit_cell:
             unit_cell = unit_cell[0,:,:]
 
         conf = RealConfiguration(self._chemical_system,coords,unit_cell)
         self._chemical_system.configuration = conf
-        
+
         resolve_undefined_molecules_name(self._chemical_system)
          
-        build_connectivity(self._chemical_system)
+        build_connectivity(self._chemical_system, unit_cell=conf.unit_cell)
 
     def close(self):
 
@@ -247,7 +244,27 @@ class Trajectory:
 
         grp = self._h5_file['/configuration']
 
-        return grp['coordinates'][frame]        
+        return grp['coordinates'][frame]
+
+    def configuration(self, frame):
+
+        if frame < 0 or frame >= len(self):
+            raise TrajectoryError('Invalid frame number')
+
+        if 'unit_cell' in self._h5_file:
+            unit_cell = self._h5_file['unit_cell'][frame,:,:]
+        else:
+            unit_cell = None
+
+        variables = {}
+        for k,v in self._h5_file['configuration'].items():
+            variables[k] = v[frame,:,:]
+
+        coordinates = variables.pop('coordinates')
+
+        conf = RealConfiguration(self._chemical_system,coordinates,unit_cell,**variables)
+
+        return conf
 
     def unit_cell(self,frame):
 
@@ -376,16 +393,16 @@ class TrajectoryWriter:
         unit_cell = configuration.unit_cell
         if unit_cell is not None:
             if 'unit_cell' not in configuration_grp:
-                configuration_grp.create_dataset('unit_cell',data=unit_cell[np.newaxis,:,:],maxshape=(None,3,3))
+                self._h5_file.create_dataset('unit_cell',data=unit_cell[np.newaxis,:,:],maxshape=(None,3,3))
             else:
-                unit_cell_dset = configuration_grp['unit_cell']
+                unit_cell_dset = self._h5_file['unit_cell']
                 unit_cell_dset.resize((unit_cell_dset.shape[0]+1,3,3))
                 unit_cell_dset[-1] = unit_cell
 
         if 'time' not in configuration_grp:
-            configuration_grp.create_dataset('time',data=[time],maxshape=(None,),dtype=float)
+            self._h5_file.create_dataset('time',data=[time],maxshape=(None,),dtype=float)
         else:
-            dset = configuration_grp['time']
+            dset = self._h5_file['time']
             dset.resize((dset.shape[0]+1,))
             dset[-1] = time
 
