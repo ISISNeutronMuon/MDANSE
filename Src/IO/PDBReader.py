@@ -96,7 +96,7 @@ class PDBReader:
         return new_atom_cluster
 
     def _process_molecule(self, molecule):
-Molecule(
+
         code = molecule.name
 
         pdb_atoms = [at.name for at in molecule]
