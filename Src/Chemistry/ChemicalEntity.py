@@ -138,7 +138,7 @@ class Atom(_ChemicalEntity):
 
         self._name = kwargs.get('name',self.symbol)
 
-        self.bonds = kwargs.get('bonds',[])
+        self._bonds = kwargs.get('bonds',[])
 
         self.groups = kwargs.get('groups',[])
 
@@ -182,6 +182,10 @@ class Atom(_ChemicalEntity):
         if self._index is not None:
             return
         self._index = index
+
+    @property
+    def bonds(self):
+        return self._bonds
 
     @property
     def true_index(self):
