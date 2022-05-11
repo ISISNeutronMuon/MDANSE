@@ -134,7 +134,7 @@ class Atom(_ChemicalEntity):
         self.symbol = kwargs.get('symbol','H')
 
         if self.symbol not in ATOMS_DATABASE:
-            raise UnknownAtomError('Te atom {} is unknown'.format(self.symbol))
+            raise UnknownAtomError('The atom {} is unknown'.format(self.symbol))
 
         self._name = kwargs.get('name',self.symbol)
 
@@ -957,17 +957,11 @@ class ChemicalSystem(_ChemicalEntity):
 
     def number_of_atoms(self):
 
-        number_of_atoms = 0
-        for ce in self._chemical_entities:
-            number_of_atoms += ce.number_of_atoms()
-        return number_of_atoms
+        return self._number_of_atoms
 
     def total_number_of_atoms(self):
 
-        number_of_atoms = 0
-        for ce in self._chemical_entities:
-            number_of_atoms += ce.total_number_of_atoms()
-        return number_of_atoms
+        return self._total_number_of_atoms
 
     def serialize(self, h5_file):
 

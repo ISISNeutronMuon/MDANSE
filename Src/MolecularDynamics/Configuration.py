@@ -27,19 +27,12 @@ class _Configuration:
             self[k] = v
 
         if unit_cell is not None:
-
             unit_cell = np.array(unit_cell)
-
             if unit_cell.shape != (3,3):
                 raise ValueError('Invalid unit cell dimensions')
-
             self._unit_cell = unit_cell
-
-            self._inverse_unit_cell = np.linalg.inv(self._unit_cell)
-
         else:
             self._unit_cell = None
-            self._inverse_unit_cell = None
 
     def __getitem__(self, name):
 
@@ -76,10 +69,6 @@ class _Configuration:
     @property
     def coordinates(self):
         return self._variables['coordinates']
-
-    @property
-    def inverse_unit_cell(self):
-        return self._inverse_unit_cell
 
     @property
     def is_periodic(self):
@@ -201,7 +190,7 @@ class RealConfiguration(_Configuration):
         if self._unit_cell is None:
             return self._variables['coordinates']
         else:
-            return np.matmul(self._variables['coordinates'],self._inverse_unit_cell)
+            return np.matmul(self._variables['coordinates'],np.linalg.inv(self._unit_cell))
 
     def to_real_coordinates(self):
 
@@ -291,7 +280,6 @@ class RealConfiguration(_Configuration):
             offsets = np.zeros((self._chemical_system.number_of_atoms(),3))
 
         else:
-
             indexes = []
             for ce in chemical_entities:
                 indexes.append([at.index for at in ce.atom_list()])
@@ -318,7 +306,6 @@ if __name__ == "__main__":
     coordinates = np.empty((n_atoms,3),dtype=float)
     coordinates[0,:] = [1,1,1]
     coordinates[1,:] = [3,3,3]
-    print(coordinates)
 
     uc = np.array([[10.0,0.0,0.0],[0.0,10.0,0.0],[0.0,0.0,10.0]])
 
