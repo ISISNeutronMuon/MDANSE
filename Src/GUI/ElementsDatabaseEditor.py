@@ -112,8 +112,6 @@ class NewPropertyDialog(wx.Dialog):
     This class pops up a dialog that prompts the user for registering a new property in the database.
     """
 
-    _PROPERTY_TYPES = {'str':str,'int':int,'float':float}
-
     def __init__(self, *args, **kwargs):
         """
         The constructor.
@@ -130,8 +128,8 @@ class NewPropertyDialog(wx.Dialog):
         staticLabel0 = wx.StaticText(panel, -1, "Enter property settings")
         staticLabel1 = wx.StaticText(panel, wx.ID_ANY, "Name")
         self.name = wx.TextCtrl(panel, wx.ID_ANY)
-        staticLabel2 = wx.StaticText(panel, wx.ID_ANY, "Numeric type")
-        self.propertyType = wx.ComboBox(panel, id=wx.ID_ANY, choices=self._PROPERTY_TYPES.keys(), style=wx.CB_READONLY)
+        staticLabel2 = wx.StaticText(panel, wx.ID_ANY, "Property type")
+        self.propertyType = wx.ComboBox(panel, id=wx.ID_ANY, choices=ATOMS_DATABASE._TYPES.keys(), style=wx.CB_READONLY)
 
         # Create button widgets
         cancel = wx.Button(panel, wx.ID_CANCEL, "Cancel")
@@ -176,8 +174,6 @@ class NewPropertyDialog(wx.Dialog):
 
         pclass = str(self.propertyType.GetValue())
 
-        pclass = self._PROPERTY_TYPES[pclass]
-
         return pname, pclass
 
 
@@ -191,24 +187,24 @@ class Database(wxgrid.PyGridTableBase):
         return ATOMS_DATABASE.n_properties
 
     def GetNumberRows(self):
-        return ATOMS_DATABASE.n_elements
+        return ATOMS_DATABASE.n_atoms
 
     def GetRowLabelValue(self, row):
         return ATOMS_DATABASE.atoms[row]
 
     def GetValue(self, row, col):
-        return ATOMS_DATABASE[row].get(ATOMS_DATABASE.properties[col],None)
+        atom = ATOMS_DATABASE.atoms[row]
+        pname = ATOMS_DATABASE.properties[col] 
+        return ATOMS_DATABASE.get_value(atom,pname)
 
     def SetValue(self, row, col, val):
         atom = ATOMS_DATABASE.atoms[row]
-        prop = ATOMS_DATABASE.properties[col]
+        pname = ATOMS_DATABASE.properties[col]
 
-        oldValue = ATOMS_DATABASE[atom].get(prop,str())
+        ATOMS_DATABASE.set_value(atom,pname,val)
 
-        ATOMS_DATABASE.set_property(atom,prop,type(oldValue)(val))
-
-    def add_column(self, pname,pclass):
-        ATOMS_DATABASE.add_property(pname,default=pclass())
+    def add_column(self, pname, ptype):
+        ATOMS_DATABASE.add_property(pname,ptype)
 
         self.notify_grid(wxgrid.GRIDTABLE_NOTIFY_COLS_APPENDED, 1)
 
@@ -218,8 +214,8 @@ class Database(wxgrid.PyGridTableBase):
             return
 
         ATOMS_DATABASE.add_atom(entry)
-        ATOMS_DATABASE.set_property(entry,"element",element)
-        ATOMS_DATABASE.set_property(entry,"symbol",symbol)
+        ATOMS_DATABASE.set_value(entry,"element",element)
+        ATOMS_DATABASE.set_value(entry,"symbol",symbol)
 
         self.notify_grid(wxgrid.GRIDTABLE_NOTIFY_ROWS_APPENDED, 1)
 
@@ -369,7 +365,7 @@ class ElementsDatabaseEditor(wx.Frame):
         if d.ShowModal() == wx.ID_CANCEL:
             return
 
-        pname, pclass = d.GetValue()
+        pname, ptype = d.GetValue()
 
         if not pname:
             return
@@ -377,7 +373,7 @@ class ElementsDatabaseEditor(wx.Frame):
         # Get rid of wxpython unicode string formatting
         pname = str(pname)
 
-        self._database.add_column(pname,pclass)
+        self._database.add_column(pname,ptype)
 
     def on_save_database(self, event=None):
         """

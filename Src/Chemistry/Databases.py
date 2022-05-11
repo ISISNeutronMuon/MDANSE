@@ -73,6 +73,9 @@ class AtomsDatabase:
     # The user path
     _USER_DATABASE = os.path.join(PLATFORM.application_directory(), "atoms.yml")
     
+    # The python types supported by the database
+    _TYPES = {"str" : str, "int" : int, "float" : float, "list" : list}
+
     def __init__(self):
         '''
         Constructor
@@ -80,7 +83,7 @@ class AtomsDatabase:
 
         self._data = {}
 
-        self._properties = set()
+        self._properties = {}
 
         self._reset()
 
@@ -102,20 +105,11 @@ class AtomsDatabase:
 
     def __getitem__(self,item):
         '''
-        Return an entry of the database.
-        
-        If the item is a basestring, then the return value will be a deep copy of the 
-        list of properties related to element of the databse base that matches this item.
-        
+        Return an entry of the database. The return value is a deep copy of the element to preserve the database integrity.
+                
         :param item: the item to get from the database
-        :type item: str or tuple
+        :type item: str
         '''
-
-        if isinstance(item,int):
-            elements = sorted(self._data.keys())
-            if item < 0 or item >= len(elements):
-                raise AtomsDatabaseError("Invalid element index")
-            item = elements[item]
 
         try:
             return copy.deepcopy(self._data[item])
@@ -130,10 +124,6 @@ class AtomsDatabase:
         for v in self._data.values():
             yield copy.deepcopy(v)
 
-    def items(self):
-
-        return self._data.items()
-
     def _load(self):
         '''
         Load the elements database
@@ -147,18 +137,10 @@ class AtomsDatabase:
         else:
             databasePath = AtomsDatabase._DEFAULT_DATABASE
 
-        f = open(databasePath, "r")
-
-        # Try to open the input file
-        try:
-            self._data = yaml.safe_load(f)
-        except:
-            raise AtomsDatabaseError('An error occured while parsing the atoms database')
-        else:
-            for at in self._data.values():
-                self._properties.update(at.keys())
-        finally:
-            f.close()
+        with open(databasePath, "r") as f:
+            db = yaml.safe_load(f)
+            self._properties = db['properties']
+            self._data = db['atoms']
         
     def add_atom(self, atom):
         '''
@@ -173,7 +155,7 @@ class AtomsDatabase:
 
         self._data[atom] = {}
             
-    def add_property(self, pname, default=None):
+    def add_property(self, pname, ptype):
         '''
         Add a new property to the elements database.
         
@@ -181,19 +163,21 @@ class AtomsDatabase:
         
         :param pname: the name of the property to add
         :type pname: str
-        :param typ: the type of the property
-        :type typ: one of "str","int" or "float"
-        :param save: if True the elements database will be saved
-        :type save: bool
+        :param ptype: the type of the property
+        :type ptype: one of "str","int", "float" or "list"
         '''
         
         if pname in self._properties:
             raise AtomsDatabaseError("The property {} is already registered in the database.".format(pname))
 
-        self._properties.add(pname)
+        if ptype not in AtomsDatabase._TYPES:
+            raise AtomsDatabaseError("The property type {} is unknown".format(ptype))
+
+        self._properties[pname] = ptype
+        ptype = AtomsDatabase._TYPES[ptype]
 
         for element in self._data.values():
-            element[pname] = default
+            element[pname] = ptype()
                                     
     @property
     def atoms(self):
@@ -210,15 +194,15 @@ class AtomsDatabase:
         '''
         Get the name of the isotopes of a given atom.
         
-        :param ename: the name of the atom for which isotopes are searched
-        :type ename: str
+        :param atom: the name of the atom for which isotopes are searched
+        :type atom: str
 
         :return: the name of the isotopes corresponding to the selected atom
         :rtype: list
         '''
         
         if atom not in self._data:
-            return AtomsDatabaseError('The element {} is unknown'.format(atom))
+            return AtomsDatabaseError('The atom {} is unknown'.format(atom))
 
         # The isotopes are searched according to |symbol| property
         symbol = self._data[atom]["symbol"]
@@ -230,11 +214,11 @@ class AtomsDatabase:
         '''
         Return the names of the properties stored in the atoms database.
 
-        :return: the name of the properties stored in the atoms database
+        :return: the properties stored in the atoms database
         :rtype: list
         '''
 
-        return sorted(self._properties)
+        return sorted(self._properties.keys())
         
     def get_property(self,pname):
         '''
@@ -244,17 +228,61 @@ class AtomsDatabase:
         :type pname: str
         
         :return: a dictionary of the value of a given property for all the atoms of the database
-        :rtype: MDANSE.Data.ElementsDatabase.SortedDict
+        :rtype: dict
         '''
                 
         if pname not in self._properties:
-            raise AtomsDatabaseError("The property {} is not registered in the elements database".format(pname))
+            raise AtomsDatabaseError("The property {} is not registered in the database".format(pname))
         
-        return dict([(element,properties.get(pname,None)) for element, properties in self._data.items()])
+        ptype = AtomsDatabase._TYPES[self._properties[pname]]
 
-    def set_property(self, element, prop, value):
+        return dict([(element,properties.get(pname,ptype())) for element, properties in self._data.items()])
 
-        self._data[element][prop] = value
+    def get_value(self, atom, pname):
+        """Return the value of a given property for a given atom. If the property is not set for this element 
+        returns the default value for the property type.
+
+        :param atom: the name of the atom for which isotopes are searched
+        :type atom: str
+        :param pname: the name of the property to search in the database
+        :type pname: str
+
+        :return: the value
+        :rtype: any
+        """
+
+        if atom not in self._data:
+            return AtomsDatabaseError('The atom {} is unknown'.format(atom))
+
+        if pname not in self._properties:
+            raise AtomsDatabaseError("The property {} is not registered in the database".format(pname))
+
+        ptype = self._properties[pname]
+        ptype = AtomsDatabase._TYPES[ptype]
+
+        return self._data[atom].get(pname,ptype())
+
+    def set_value(self, atom, pname, value):
+        """Set the property of a given atom.
+
+        :param atom: the name of the atom
+        :type pname: str
+        :param pname: the name of the property
+        :type pname: str
+        :param value: the valur of the property
+        :type value: any
+        """
+        
+        if atom not in self._data:
+            raise AtomsDatabaseError('The element {} is unknown'.format(atom))
+
+        if pname not in self._properties:
+            raise AtomsDatabaseError("The property {} is not registered in the database".format(pname))
+
+        try:
+            self._data[atom][pname] = AtomsDatabase._TYPES[self._properties[pname]](value)
+        except:
+            raise AtomsDatabaseError("Can not coerce {} to {} type".format(value,self._properties[pname]))
 
     def has_atom(self,atom):
         '''
@@ -312,7 +340,7 @@ class AtomsDatabase:
         info.append(delimiter)
                         
         # The values for all element's properties
-        for pname in self._properties:
+        for pname in sorted(self._properties):
             info.append("%s" % " {0:<20}{1:>50}".format(pname,self._data[atom].get(pname,None)))
 
         # Append a delimiter.                
@@ -323,6 +351,10 @@ class AtomsDatabase:
                             
         # And returned.        
         return info
+
+    def items(self):
+
+        return self._data.items()
 
     def match_numeric_property(self, pname, value, tolerance=0.0):
         '''
@@ -377,12 +409,9 @@ class AtomsDatabase:
         '''
 
         num_properties = []
-        for prop in self._properties:
-            for v in self._data.values():
-                if not isinstance(v[prop],numbers.Number):
-                    break
-            else:
-                num_properties.append(prop)
+        for pname, prop in self._properties.items():
+            if not isinstance(prop,numbers.Number):
+                num_properties.append(pname)
             
         return num_properties
             
@@ -393,18 +422,20 @@ class AtomsDatabase:
         
         self._data.clear()
 
-        self._properties = set()
+        self._properties.clear()
         
     def save(self):
         '''
         Save a copy of the elements database to MDANSE application directory. 
         '''
         
+        d = {'properties':self._properties,'atoms':self._data}
+
         with open(AtomsDatabase._USER_DATABASE,'w') as fout:
-            yaml.dump(self._data,fout)
+            yaml.dump(d,fout)
 
     @property
-    def n_elements(self):
+    def n_atoms(self):
         return len(self._data)
             
 class MoleculesDatabaseError(Error):

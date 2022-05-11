@@ -69,10 +69,13 @@ class TestAtomsDatabase(unittest.TestCase):
         for p in ATOMS_DATABASE.properties:
             _ = ATOMS_DATABASE.get_property(p)
 
-    def test___setitem__(self):
+    def test_set_value_(self):
         
-        ATOMS_DATABASE['C']['atomic_weight'] = 20.0
-                                
+        ATOMS_DATABASE.set_value('C','atomic_weight',20.0)
+
+        with self.assertRaises(AtomsDatabaseError):
+            ATOMS_DATABASE.set_value('C','atomic_weight','xxxx')
+
     def test_add_atom(self):
 
         with self.assertRaises(AtomsDatabaseError):
@@ -83,18 +86,21 @@ class TestAtomsDatabase(unittest.TestCase):
     def test_add_property(self):
 
         with self.assertRaises(AtomsDatabaseError):
-            ATOMS_DATABASE.add_property("atomic_weight")
+            ATOMS_DATABASE.add_property('atomic_weight','float')
 
-        ATOMS_DATABASE.add_property("new_prop")
+        with self.assertRaises(AtomsDatabaseError):
+            ATOMS_DATABASE.add_property('atomic_weight','xxxx')
+
+        ATOMS_DATABASE.add_property('new_prop','str')
         
     def test_has_property(self):
         
         for p in ATOMS_DATABASE.properties:
             self.assertTrue(ATOMS_DATABASE.has_property(p))
             
-        self.assertFalse(ATOMS_DATABASE.has_property("gfkljfklsj"))
+        self.assertFalse(ATOMS_DATABASE.has_property('xxxxx'))
             
-    def test_has_element(self):
+    def test_has_atom(self):
         
         for at in ATOMS_DATABASE.atoms:
             self.assertTrue(ATOMS_DATABASE.has_atom(at))
