@@ -17,13 +17,13 @@ import collections
 
 import numpy
 
+import netCDF4
+
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 
 import wx
 import wx.aui as wxaui
-
-from Scientific.IO.NetCDF import NetCDFFile
 
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
@@ -468,32 +468,29 @@ class PlotterFrame(wx.Frame):
         baselist = dialog.GetFilenames()
         filelist = dialog.GetPaths()
         
-        for i in range(len(filelist)):
-            basename = baselist[i]    
-            filename = filelist[i]
-            
-            f = NetCDFFile(filename,"r")
-            _vars = f.variables
-            data = collections.OrderedDict()
-            for k in _vars:
-                dtype = _vars[k].getValue().dtype
-                if not numpy.issubdtype(dtype,numpy.number):
-                    continue
-                data[k]={}
-                if hasattr(_vars[k], 'axis'):
-                    if _vars[k].axis:
-                        data[k]['axis'] =  _vars[k].axis.split('|')
+        for basename, filename in zip(baselist, filelist):
+            with netCDF4.Dataset(filename, "r") as f:
+                _vars = f.variables
+                data = collections.OrderedDict()
+                for k in _vars:
+                    dtype = _vars[k][:].dtype
+                    if not numpy.issubdtype(dtype, numpy.number):
+                        continue
+                    data[k]={}
+                    if hasattr(_vars[k], 'axis'):
+                        if _vars[k].axis:
+                            data[k]['axis'] = _vars[k].axis.split('|')
+                        else:
+                            data[k]['axis'] = []
                     else:
                         data[k]['axis'] = []
-                else:
-                    data[k]['axis'] = []
-                data[k]['data'] = _vars[k].getValue()
-                data[k]['units'] = getattr(_vars[k],"units","au")
+                    data[k]['data'] = _vars[k][:]
+                    data[k]['units'] = getattr(_vars[k], "units", "au")
             
-            unique_name = self.unique(basename, self.plugin._dataDict)
+                unique_name = self.unique(basename, self.plugin._dataDict)
             
-            self.plugin._dataDict[unique_name]={'data':data,'path':filename,'basename':basename}
-            self.plugin._dataPanel.show_dataset(-1)
+                self.plugin._dataDict[unique_name]={'data': data, 'path': filename, 'basename': basename}
+                self.plugin._dataPanel.show_dataset(-1)
     
     def unique(self, key, dic):
         skey = key

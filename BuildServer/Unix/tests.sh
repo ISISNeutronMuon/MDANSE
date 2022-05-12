@@ -34,7 +34,6 @@ fi
 #############################
 echo -e "${BLUE}""Performing functional tests""${NORMAL}"
 cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
-rm -rf Test_*
 python2 BuildJobTests.py
 python2 AllTests.py
 status=$?

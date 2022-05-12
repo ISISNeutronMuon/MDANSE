@@ -126,7 +126,7 @@ class McStasVirtualInstrument(IJob):
             for var in self.configuration[typ].variables:
                 fout.write("# %s\n" %var)
                 
-                data = self.configuration[typ][var].getValue()
+                data = self.configuration[typ][var][:]
                 try:
                     data *= MCSTAS_UNITS_LUT[self.configuration[typ][var].units]
                 except KeyError:
