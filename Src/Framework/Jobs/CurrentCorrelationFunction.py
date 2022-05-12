@@ -46,6 +46,10 @@ class CurrentCorrelationFunction(IJob):
     settings['interpolation_order'] = ('interpolation_order', {'label': "velocities",
                                                                'dependencies': {'trajectory': 'trajectory'},
                                                                'default': 'no interpolation'})
+    settings['interpolation_mode'] = ('single_choice', {'choices': ['one-time in-memory interpolation',
+                                                                    'repeated interpolation',
+                                                                    'one-time disk interpolation'],
+                                                        'default': 'one-time in-memory interpolation'})
     settings['q_vectors'] = ('q_vectors',{'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
     settings['normalize'] = ('boolean', {'default':False})
@@ -95,7 +99,7 @@ class CurrentCorrelationFunction(IJob):
 
         # Interpolate velocities of all atoms throughout the entire trajectory
         order = self.configuration["interpolation_order"]["value"]
-        if order != "no interpolation":
+        if order != "no interpolation" and self.configuration['interpolation_mode']['index'] == 0:
             traj = self.configuration['trajectory']['instance']
             nAtoms = traj.universe.numberOfAtoms()
             nFrames = self.configuration['frames']['n_frames']
@@ -127,27 +131,28 @@ class CurrentCorrelationFunction(IJob):
         
         if not shell in self.configuration["q_vectors"]["value"]:
             return index, None
-            
-        else:
-            
-            traj = self.configuration['trajectory']['instance']
-            
-            qVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"]
-                        
-            nQVectors = qVectors.shape[1]
-            
-            rho = {}
-            rho_loop = {}
-            rhoLong = {}
-            rhoTrans = {}
-            rhoLong_loop = {}
-            rhoTrans_loop = {}
-            for element in self._elements:
-                rho[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
-                rho_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
-                rhoLong_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
-                rhoTrans_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
 
+        traj = self.configuration['trajectory']['instance']
+
+        qVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"]
+
+        nQVectors = qVectors.shape[1]
+
+        rho = {}
+        rho_loop = {}
+        rhoLong = {}
+        rhoTrans = {}
+        rhoLong_loop = {}
+        rhoTrans_loop = {}
+        for element in self._elements:
+            rho[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
+            rho_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
+            rhoLong_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
+            rhoTrans_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
+
+        order = self.configuration["interpolation_order"]["value"]
+        mode = self.configuration['interpolation_mode']['index']
+        if order == 'no interpolation' or (order != 'no interpolation' and mode == 0):
             # loop over the trajectory time steps
             for i, frame in enumerate(self.configuration['frames']['value']):
                 conf = traj.configuration[frame]
@@ -164,30 +169,44 @@ class CurrentCorrelationFunction(IJob):
                     tmp = numpy.exp(1j*numpy.dot(selectedCoordinates, qVectors))[numpy.newaxis,:,:]
                     rho[element][i,:,:] = numpy.add.reduce(selectedVelocities*tmp,1)
 
-            for element, idxs in self._indexesPerElement.items():
-                coordinates = numpy.array([conf.array[idxs, :] for conf in traj.configuration])
-                velocities = numpy.empty(numpy.shape(coordinates))
+            Q2 = numpy.sum(qVectors ** 2, axis=0)
 
-                order = self.configuration["interpolation_order"]["value"]
-                for i, idx in enumerate(idxs):
-                    for axis in range(3):
-                        velocities[:, i, axis] = differentiate(coordinates[:, i, axis], order=order,
-                                                               dt=self.configuration['frames']['time_step'])
-
-                for i, frame in enumerate(velocities):
-                    velocities[i, :, :] = frame.transpose()[:, :, numpy.newaxis]
-
-                raise Exception(numpy.shape(velocities), velocities)
-
-            Q2 = numpy.sum(qVectors**2,axis=0)
-            
             for element in self._elements:
-                qj = numpy.sum(rho[element]*qVectors,axis=1)
-                rhoLong[element] = (qj[:,numpy.newaxis,:]*qVectors[numpy.newaxis,:,:])/Q2
+                qj = numpy.sum(rho[element] * qVectors, axis=1)
+                rhoLong[element] = (qj[:, numpy.newaxis, :] * qVectors[numpy.newaxis, :, :]) / Q2
                 rhoTrans[element] = rho[element] - rhoLong[element]
 
-            return index, (rhoLong, rhoTrans)
-    
+        elif mode == 1:
+            for element, idxs in self._indexesPerElement.items():
+                nFrames = self.configuration['frames']['n_frames']
+                all_velocities = numpy.empty((len(idxs), nFrames, 3), dtype=float)
+                order = self.configuration["interpolation_order"]["value"]
+
+                for i, __ in enumerate(idxs):
+                    atomicTraj = read_atoms_trajectory(traj,
+                                                       [i],
+                                                       first=self.configuration['frames']['first'],
+                                                       last=self.configuration['frames']['last'] + 1,
+                                                       step=self.configuration['frames']['step'],
+                                                       variable=self.configuration['interpolation_order']["variable"])
+                    for axis in range(3):
+                        all_velocities[i, :, axis] = differentiate(atomicTraj[:, axis], order=order,
+                                                                       dt=self.configuration['frames']['time_step'])
+
+                for i, frame in enumerate(self.configuration['frames']['value']):
+                    coordinates = traj.configuration[frame].array[idxs, :]
+                    velocities = numpy.transpose(all_velocities[:, i, :])[:, :, numpy.newaxis]
+                    tmp = numpy.exp(1j * numpy.dot(coordinates, qVectors))[numpy.newaxis, :, :]
+                    rho[element][i, :, :] = numpy.add.reduce(velocities * tmp, 1)
+
+                Q2 = numpy.sum(qVectors ** 2, axis=0)
+
+                qj = numpy.sum(rho[element] * qVectors, axis=1)
+                rhoLong[element] = (qj[:, numpy.newaxis, :] * qVectors[numpy.newaxis, :, :]) / Q2
+                rhoTrans[element] = rho[element] - rhoLong[element]
+
+        return index, (rhoLong, rhoTrans)
+
     def combine(self, index, x):
         """
         Combines returned results of run_step.\n
@@ -212,7 +231,7 @@ class CurrentCorrelationFunction(IJob):
                             
             self._outputData["j(q,t)_long_%s%s" % (at1,at2)][index,:] += corrLong
             self._outputData["j(q,t)_trans_%s%s" % (at1,at2)][index,:] += corrTrans
-                                        
+
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
@@ -254,6 +273,7 @@ class CurrentCorrelationFunction(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()
-        
+
+
 REGISTRY['ccf'] = CurrentCorrelationFunction
         
