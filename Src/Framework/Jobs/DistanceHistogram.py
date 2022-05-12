@@ -101,8 +101,8 @@ class DistanceHistogram(IJob):
         
         universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
     
-        directCell = numpy.array(universe.basisVectors()).astype(numpy.float64)
-        reverseCell = numpy.array(universe.reciprocalBasisVectors()).astype(numpy.float64)
+        directCell = numpy.array(universe.basisVectors()).astype(numpy.float64).T
+        reverseCell = numpy.linalg.inv(directCell)
         
         cellVolume = universe.cellVolume()
             
