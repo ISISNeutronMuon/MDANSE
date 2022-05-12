@@ -97,12 +97,12 @@ class BoxConfiguration(_Configuration):
 
     def to_box_coordinates(self):
 
-        return copy.copy(self._variables['coordinates'])
+        return self._variables['coordinates']
 
     def to_real_coordinates(self):
 
         if self._unit_cell is None:
-            return copy.copy(self._variables['coordinates'])
+            return self._variables['coordinates']
         else:
             return np.matmul(self._variables['coordinates'],self._unit_cell)
 
