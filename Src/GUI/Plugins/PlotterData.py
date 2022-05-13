@@ -94,14 +94,24 @@ class NetCDFPlotterData(_IPlotterData):
         """
 
         for var_key, var in group.variables.items():
-            var_name = '{}{}'.format(group.path,var_key)
+            if group.path == '/':
+                path = '/{}'.format(var_key)
+            else:
+                path = '{}/{}'.format(group.path,var_key)
+
             # Non numeric variables are not supported by the plotter
             if not numpy.issubdtype(var.dtype,numpy.number):
                 continue
             # Variables with dimension higher than 3 are not supported by the plotter
             if var.ndim > 3:
                 continue
-            var_dict[var_name] = NetCDFPlotterVariable(var)
+
+            comp = 1
+            while var_key in var_dict:
+                var_key = '{:s}_{:d}'.format(var_key,comp)
+                comp += 1
+
+            var_dict[var_key] = (path, NetCDFPlotterVariable(var))
 
         for _, sub_group in group.groups.items():
             NetCDFPlotterData.find_numeric_variables(var_dict, sub_group)

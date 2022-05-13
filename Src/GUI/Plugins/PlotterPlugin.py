@@ -130,9 +130,10 @@ class DataPanel(wx.Panel):
             self.datalist = wx.ListCtrl(self.setup, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
 
         self.datalist.InsertColumn(0, 'Variable', width=100)
-        self.datalist.InsertColumn(1, 'Axis', width=50)
-        self.datalist.InsertColumn(2, 'Dimension')
-        self.datalist.InsertColumn(3, 'Size')
+        self.datalist.InsertColumn(1, 'Path', width=100)
+        self.datalist.InsertColumn(2, 'Axis', width=50)
+        self.datalist.InsertColumn(3, 'Dimension')
+        self.datalist.InsertColumn(4, 'Size')
         
         if self.standalone:
             splitterWindow.SplitHorizontally(self.datasetlist,self.datalist)
@@ -272,11 +273,11 @@ class DataPanel(wx.Panel):
         variables = self.dataproxy.keys()
         for i, var in enumerate(sorted(variables)):
             self.datalist.InsertStringItem(i, var)
-            #self.datalist.SetStringItem(i, 1,self.dataproxy[var]['units'])
             axis = ','.join(self.dataproxy[var]['axis'])
-            self.datalist.SetStringItem(i, 1,axis)
-            self.datalist.SetStringItem(i, 2,str(self.dataproxy[var]['data'].ndim))
-            self.datalist.SetStringItem(i, 3,str(self.dataproxy[var]['data'].shape))
+            self.datalist.SetStringItem(i, 1,self.dataproxy[var]['path'])
+            self.datalist.SetStringItem(i, 2,axis)
+            self.datalist.SetStringItem(i, 3,str(self.dataproxy[var]['data'].ndim))
+            self.datalist.SetStringItem(i, 4,str(self.dataproxy[var]['data'].shape))
         self.datalist.Select(0, True)
             
     def on_select_variables(self, event = None):
@@ -480,25 +481,26 @@ class PlotterFrame(wx.Frame):
             else:
                 continue
 
-            _vars = f.variables
             data = collections.OrderedDict()
-            for vname in _vars:
-                arr = _vars[vname].get_array()
+            for vname, vinfo in f.variables.items():
+                vpath, variable = vinfo
+                arr = variable.get_array()
 
                 if not numpy.issubdtype(arr.dtype, numpy.number):
                     continue
 
-                data[vname]={}
-                if hasattr(_vars[vname], 'axis'):
-                    axis = getattr(_vars[vname],'axis')
+                data[vname] = {}
+                if hasattr(variable, 'axis'):
+                    axis = getattr(variable,'axis')
                     if axis:
-                        data[vname]['axis'] = ['/{}'.format(a) if not a.startswith('/') else a for a in axis.split('|')]
+                        data[vname]['axis'] = axis.split('|')
                     else:
                         data[vname]['axis'] = []
                 else:
                     data[vname]['axis'] = []
+                data[vname]['path'] = vpath
                 data[vname]['data'] = arr
-                data[vname]['units'] = getattr(_vars[vname], "units", "au")
+                data[vname]['units'] = getattr(variable, "units", "au")
 
             unique_name = self.unique(basename, self.plugin._dataDict)
         
