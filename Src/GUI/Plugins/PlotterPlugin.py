@@ -471,28 +471,37 @@ class PlotterFrame(wx.Frame):
         filelist = dialog.GetPaths()
         
         for basename, filename in zip(baselist, filelist):
-            with netCDF4.Dataset(filename, "r") as f:
-                _vars = f.variables
-                data = collections.OrderedDict()
-                for k in _vars:
-                    dtype = _vars[k][:].dtype
-                    if not numpy.issubdtype(dtype, numpy.number):
-                        continue
-                    data[k]={}
-                    if hasattr(_vars[k], 'axis'):
-                        if _vars[k].axis:
-                            data[k]['axis'] = _vars[k].axis.split('|')
-                        else:
-                            data[k]['axis'] = []
+
+            ext = os.path.splitext(filename)[1]
+            for cls, exts in PLOTTER_DATA_TYPES.items():
+                if ext in exts:
+                    f = cls(filename,"r")
+                    break
+            else:
+                continue
+
+            _vars = f.variables
+            data = collections.OrderedDict()
+            for k in _vars:
+                arr = _vars[k].get_array()
+                dtype = arr.dtype
+                if not numpy.issubdtype(dtype, numpy.number):
+                    continue
+                data[k]={}
+                if hasattr(_vars[k], 'axis'):
+                    if _vars[k].axis:
+                        data[k]['axis'] = _vars[k].axis.split('|')
                     else:
                         data[k]['axis'] = []
-                    data[k]['data'] = _vars[k][:]
-                    data[k]['units'] = getattr(_vars[k], "units", "au")
-            
-                unique_name = self.unique(basename, self.plugin._dataDict)
-            
-                self.plugin._dataDict[unique_name]={'data': data, 'path': filename, 'basename': basename}
-                self.plugin._dataPanel.show_dataset(-1)
+                else:
+                    data[k]['axis'] = []
+                data[k]['data'] = arr
+                data[k]['units'] = getattr(_vars[k], "units", "au")
+        
+            unique_name = self.unique(basename, self.plugin._dataDict)
+        
+            self.plugin._dataDict[unique_name]={'data': data, 'path': filename, 'basename': basename}
+            self.plugin._dataPanel.show_dataset(-1)
     
     def unique(self, key, dic):
         skey = key
