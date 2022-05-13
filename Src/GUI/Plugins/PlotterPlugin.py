@@ -482,22 +482,24 @@ class PlotterFrame(wx.Frame):
 
             _vars = f.variables
             data = collections.OrderedDict()
-            for k in _vars:
-                arr = _vars[k].get_array()
-                dtype = arr.dtype
-                if not numpy.issubdtype(dtype, numpy.number):
+            for vname in _vars:
+                arr = _vars[vname].get_array()
+
+                if not numpy.issubdtype(arr.dtype, numpy.number):
                     continue
-                data[k]={}
-                if hasattr(_vars[k], 'axis'):
-                    if _vars[k].axis:
-                        data[k]['axis'] = _vars[k].axis.split('|')
+
+                data[vname]={}
+                if hasattr(_vars[vname], 'axis'):
+                    axis = getattr(_vars[vname],'axis')
+                    if axis:
+                        data[vname]['axis'] = ['/{}'.format(a) if not a.startswith('/') else a for a in axis.split('|')]
                     else:
-                        data[k]['axis'] = []
+                        data[vname]['axis'] = []
                 else:
                     data[k]['axis'] = []
-                data[k]['data'] = arr
-                data[k]['units'] = getattr(_vars[k], "units", "au")
-        
+                data[vname]['data'] = arr
+                data[vname]['units'] = getattr(_vars[vname], "units", "au")
+
             unique_name = self.unique(basename, self.plugin._dataDict)
         
             self.plugin._dataDict[unique_name]={'data': data, 'path': filename, 'basename': basename}

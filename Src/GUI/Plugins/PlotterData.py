@@ -62,7 +62,7 @@ class _IPlotterData:
     def close(self):
         """Close the data.
         """
-        
+
         self._file.close()
 
     def __del__(self):        
@@ -88,7 +88,7 @@ class NetCDFPlotterData(_IPlotterData):
 
     @staticmethod
     def find_numeric_variables(var_dict, group):
-        """This method retrieves all the variable stored in the NetCDF file.
+        """This method retrieves all the numeric variables stored in the NetCDF file.
 
         This is a recursive method.
         """
