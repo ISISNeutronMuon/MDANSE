@@ -81,7 +81,7 @@ class JobFileGenerator():
             array_of_python_dependencies_string.append("time")
 
         # Add NetCDF
-        array_of_mdanse_dependencies_string.append('from Scientific.IO.NetCDF import NetCDFFile')
+        array_of_mdanse_dependencies_string.append('import netCDF4')
         array_of_mdanse_dependencies_string.append('import Comparator')
 
         # Sort arrays to write imports in the alphabetical order
@@ -102,22 +102,16 @@ class JobFileGenerator():
         return 'def compare(file1, file2):\n' \
                '    ret = True\n' \
                '    ignored_vars = ["temperature", "kinetic_energy"]\n\n' \
-               '    f = NetCDFFile(file1,"r")\n' \
-               '    try:\n' \
-               '        res1 = {}\n' \
+               '    res1 = {}\n' \
+               '    with netCDF4.Dataset(file1,"r") as f:\n' \
                '        for k, v in f.variables.items():\n' \
                '            if k not in ignored_vars:\n' \
-               '                res1[k] = v.getValue()\n' \
-               '    finally:\n' \
-               '        f.close()\n\n' \
-               '    f = NetCDFFile(file2,"r")\n' \
-               '    try:\n' \
-               '        res2 = {}\n' \
-               '        for k,v in f.variables.items():\n' \
+               '                res1[k] = v[:]\n\n' \
+               '    res2 = {}\n' \
+               '    with netCDF4.Dataset(file1,"r") as f:\n' \
+               '        for k, v in f.variables.items():\n' \
                '            if k not in ignored_vars:\n' \
-               '                res2[k] = v.getValue()\n' \
-               '    finally:\n' \
-               '        f.close()\n\n' \
+               '                res2[k] = v[:]\n\n' \
                '    return Comparator.Comparator().compare(res1, res2)\n\n\n'
 
     def __create_test(self, parameters, test_name):
@@ -135,30 +129,34 @@ class JobFileGenerator():
         if parameters is None:
             parameters = self.job.get_default_parameters()
 
+
         test_string += '        parameters = {}\n'
         for k, v in sorted(parameters.items()):
-            temp = 'parameters[%r] = %r\n' % (k, v)
+            if k in ["output_file", "output_files"]:
+                temp = 'parameters[%r] = (%r, %r)\n' % (k, self.reference_data_path.replace('\\', '/') + '_mono', v[1])
+                key = k
+            else:
+                temp = 'parameters[%r] = %r\n' % (k, v)
             test_string = test_string + '        ' + temp.replace('\\\\', '/')
-        test_string += '        job = REGISTRY[%r][%r]()\n\n' % ('job', self.job._type)
-        test_string += '        try:\n' \
-                       '            output_path = parameters["output_files"][0]\n' \
-                       '        except KeyError:\n' \
-                       '            output_path = parameters["output_file"][0]\n\n'
+
+        if not 'key' in locals():
+            key = "output_file"
+
         test_string += '        reference_data_path = "' + self.reference_data_path.replace('\\', '/') + '"\n'
+        test_string += '        job = REGISTRY[%r][%r]()\n\n' % ('job', self.job._type)
 
         # Launch the job in monoprocessor mode and copy output file
         test_string += '        print "Launching job in monoprocessor mode"\n' \
                        '        parameters["running_mode"] = ("monoprocessor",1)\n' \
                        '        job.run(parameters, status=False)\n' \
-                       '        shutil.copy(output_path + ".nc", reference_data_path + "_mono" + ".nc")\n' \
                        '        print "Monoprocessor execution completed"\n\n'
 
         # Launch the job in multiprocessor mode if avalaible
         if self.multiprocessor:
             test_string += '        print "Launching job in multiprocessor mode"\n' \
                            '        parameters["running_mode"] = ("multiprocessor",2)\n' \
-                           '        job.run(parameters,False)\n' \
-                           '        shutil.copy(output_path + ".nc", reference_data_path + "_multi" + ".nc")\n' \
+                           '        parameters["%s"] = (reference_data_path + "_multi", ["netcdf"])\n' % key
+            test_string += '        job.run(parameters, status=False)\n' \
                            '        print "Multiprocessor execution completed"\n\n'
 
         test_string += '        try:\n'

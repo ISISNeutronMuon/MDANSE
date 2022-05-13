@@ -34,6 +34,7 @@ class IWidget(wx.Panel):
         self._configurator = configurator
                                                         
         self._label = self._configurator.label
+        
         self._type = type
                         
         self.initialize()
@@ -94,10 +95,7 @@ class IWidget(wx.Panel):
         if not plugin.is_parent(self):
             return
 
-        try:
-            self.set_data(plugin.datakey, self._type)
-        except TypeError:
-            self.set_data(plugin.datakey)
+        self.set_data(plugin.datakey)
 
     def OnDestroy(self,event):
                 
