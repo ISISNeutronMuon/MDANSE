@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ${CI_PROJECT_DIR}
+cd $GITHUB_WORKSPACE
 
 #############################
 # BUILDING DEPENDENCIES
@@ -12,7 +12,7 @@ git clone https://code.ill.fr/scientific-software/scientific-python.git
 cd scientific-python
 git checkout master
 
-${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
+sudo $HOME/mdanse_venv/bin/python setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to build/install Scientific""${NORMAL}"
@@ -21,7 +21,7 @@ fi
 
 cp ${CI_TEMP_INSTALL_DIR}/include/python2.7/Scientific/netcdf.h ${CI_TEMP_INSTALL_DIR}/include/python2.7/
 
-cd ${CI_PROJECT_DIR}
+cd $GITHUB_WORKSPACE
 
 # Build ILL version of MMTK
 echo -e "${BLUE}""Building MMTK""${NORMAL}"
@@ -31,9 +31,9 @@ cd mmtk
 git checkout master
 
 # Env var needed by MMTK
-export NETCDF_HEADER_FILE_PATH=${CI_TEMP_INSTALL_DIR}/include/python2.7/
+export NETCDF_HEADER_FILE_PATH=${CI_TEMP_INSTALL_DIR}/include/python2.7/:$NETCDF_HEADER_FILE_PATH
 
-${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
+python2 setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
 status=$?
 if [ $status -ne 0 ]; then
 	echo -e "${RED}" "Failed to build/install MMTK""${NORMAL}"
@@ -45,10 +45,10 @@ fi
 #############################
 echo -e "${BLUE}""Building MDANSE""${NORMAL}"
 
-cd ${CI_PROJECT_DIR}
+cd $GITHUB_WORKSPACE
 
 # Now build last version and install it
-${PYTHONEXE} setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
+python2 setup.py install --prefix=${CI_TEMP_INSTALL_DIR}
 
 status=$?
 if [ $status -ne 0 ]; then

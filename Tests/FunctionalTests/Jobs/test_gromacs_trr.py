@@ -3,29 +3,24 @@ from shutil import copy
 import os
 import unittest
 
+import netCDF4
+
 from MDANSE import REGISTRY
-from Scientific.IO.NetCDF import NetCDFFile
 import Comparator
 
 
 def compare(file1, file2, array_tolerance):
-    f = NetCDFFile(file1, "r")
-    try:
-        res1 = {}
+    res1 = {}
+    with netCDF4.Dataset(file1, "r") as f:
         for k, v in f.variables.items():
             if k not in ['velocities', 'gradients', 'temperature', 'kinetic_energy']:
-                res1[k] = v.getValue()
-    finally:
-        f.close()
+                res1[k] = v[:]
 
-    f = NetCDFFile(file2, "r")
-    try:
-        res2 = {}
+    res2 = {}
+    with netCDF4.Dataset(file2, "r") as f:
         for k, v in f.variables.items():
             if k not in ['velocities', 'gradients', 'temperature', 'kinetic_energy']:
-                res2[k] = v.getValue()
-    finally:
-        f.close()
+                res2[k] = v[:]
 
     return Comparator.Comparator().compare(res1, res2, array_tolerance)
 
@@ -38,14 +33,14 @@ class TestGromacsADK(unittest.TestCase):
         job = REGISTRY['job']['gromacs']()
 
         for k, v in job.get_default_parameters().items():
-            if k == 'output_files':
+            if k == 'output_file':
                 cls.output_path = v[0]
                 break
 
         parameters = {}
         parameters['fold'] = False
         parameters['pdb_file'] = '../../../Data/Trajectories/Gromacs/adk_oplsaa.pdb'
-        parameters['output_files'] = ('_'.join([cls.output_path, 'trr']), ['netcdf'])
+        parameters['output_file'] = ('_'.join([cls.output_path, 'trr']), 'netcdf')
         parameters['xtc_file'] = '../../../Data/Trajectories/Gromacs/adk_oplsaa.trr'
         print "Launching job in monoprocessor mode for trr"
         parameters["running_mode"] = ("monoprocessor", 1)
@@ -59,7 +54,7 @@ class TestGromacsADK(unittest.TestCase):
         parameters = {}
         parameters['fold'] = False
         parameters['pdb_file'] = '../../../Data/Trajectories/Gromacs/adk_oplsaa.pdb'
-        parameters['output_files'] = ('_'.join([self.output_path, 'xtc']), ['netcdf'])
+        parameters['output_file'] = ('_'.join([self.output_path, 'xtc']), 'netcdf')
         parameters['xtc_file'] = '../../../Data/Trajectories/Gromacs/adk_oplsaa.xtc'
         print "Launching job in monoprocessor mode for xtc"
         parameters["running_mode"] = ("monoprocessor",1)
@@ -74,22 +69,16 @@ class TestGromacsADK(unittest.TestCase):
         # Load velocities that have been generated from the same trajectory with MDAnalysis + convert angstrom to nm
         expected = np.load(r'../../../Data/Trajectories/Gromacs/adk_oplsaa.npy') / 10
 
-        f = NetCDFFile(self.trr_copy, "r")
-        try:
-            velocities = f.variables['velocities'].getValue()
-        finally:
-            f.close()
+        with netCDF4.Dataset(self.trr_copy, "r") as f:
+            velocities = f.variables['velocities'][:]
 
         self.assertTrue(np.allclose(expected, velocities, 0, 0.000001))
 
     def test_gradients(self):
         # adk_oplsaa.trr does not contain forces
 
-        f = NetCDFFile(self.trr_copy, "r")
-        try:
+        with netCDF4.Dataset(self.trr_copy, "r") as f:
             self.assertFalse('gradients' in f.variables)
-        finally:
-            f.close()
 
     @classmethod
     def tearDownClass(cls):
@@ -105,14 +94,14 @@ class TestGromacsCobrotoxin(unittest.TestCase):
         job = REGISTRY['job']['gromacs']()
 
         for k, v in job.get_default_parameters().items():
-            if k == 'output_files':
+            if k == 'output_file':
                 cls.output_path = v[0]
                 break
 
         parameters = {}
         parameters['fold'] = False
         parameters['pdb_file'] = '../../../Data/Trajectories/Gromacs/cobrotoxin.pdb'
-        parameters['output_files'] = ('_'.join([cls.output_path, 'trr']), ['netcdf'])
+        parameters['output_file'] = ('_'.join([cls.output_path, 'trr']), 'netcdf')
         parameters['xtc_file'] = '../../../Data/Trajectories/Gromacs/cobrotoxin.trr'
         print "Launching job in monoprocessor mode for trr"
         parameters["running_mode"] = ("monoprocessor", 1)
@@ -127,7 +116,7 @@ class TestGromacsCobrotoxin(unittest.TestCase):
         parameters = {}
         parameters['fold'] = False
         parameters['pdb_file'] = '../../../Data/Trajectories/Gromacs/cobrotoxin.pdb'
-        parameters['output_files'] = ('_'.join([self.output_path, 'xtc']), ['netcdf'])
+        parameters['output_file'] = ('_'.join([self.output_path, 'xtc']), 'netcdf')
         parameters['xtc_file'] = '../../../Data/Trajectories/Gromacs/cobrotoxin.xtc'
         print "Launching job in monoprocessor mode for xtc"
         parameters["running_mode"] = ("monoprocessor",1)
@@ -141,11 +130,8 @@ class TestGromacsCobrotoxin(unittest.TestCase):
         # Load velocities that have been generated from the same trajectory with MDAnalysis + convert angstrom to nm
         expected = np.load(r'../../../Data/Trajectories/Gromacs/cobrotoxin_vels.npy') / 10
 
-        f = NetCDFFile(self.trr_copy, "r")
-        try:
-            velocities = f.variables['velocities'].getValue()
-        finally:
-            f.close()
+        with netCDF4.Dataset(self.trr_copy, "r") as f:
+            velocities = f.variables['velocities'][:]
 
         self.assertTrue(np.allclose(expected, velocities, 0, 0.000001))
 
@@ -153,11 +139,8 @@ class TestGromacsCobrotoxin(unittest.TestCase):
         # Load forces that have been generated from the same trajectory with MDAnalysis + convert angstrom to nm
         expected = np.load(r'../../../Data/Trajectories/Gromacs/cobrotoxin_forces.npy') * 10
 
-        f = NetCDFFile(self.trr_copy, "r")
-        try:
-            gradients = f.variables['gradients'].getValue()
-        finally:
-            f.close()
+        with netCDF4.Dataset(self.trr_copy, "r") as f:
+            gradients = f.variables['gradients'][:]
 
         self.assertTrue(np.allclose(expected, gradients, 0, 0.001))
         # Such a large tolerance is required because most gradients are > 100

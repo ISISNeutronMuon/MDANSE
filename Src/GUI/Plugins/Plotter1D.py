@@ -117,7 +117,7 @@ class Plotter1D(wx.Panel):
         self.offset = 0.0
         self.verticalCut = None
 
-        self.show_legend = False
+        self.show_legend = True
         self.legend_location = 'best'
         self.legend_frameon = True
         self.legend_shadow = True
@@ -339,38 +339,45 @@ class Plotter1D(wx.Panel):
         if event.key == 'delete':
             if self.selectedLine is None:
                 return
-            # remove offset
-            self.add_offset(-self.offset)
-            # actualize plotsFileData
-            for k, v in self.plots.items():
-                if v[0] is self.selectedLine:
-                    d = wx.MessageDialog(None,
-                                         'Do you really want delete this line ?',
-                                         'Question',
-                                         wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
-                    if d.ShowModal() == wx.ID_YES:
-                        pass
-                    else:
-                        return
-                    self.plots.pop(k)
-            # remove line
-            self.selectedLine.remove()
-            # add offset
-            self.add_offset(self.offset)
-            self.update_legend()
-            self.selectedLine = None
+
+            if self.delete_line(self.selectedLine):
+                self.selectedLine = None
             self.canvas.draw()
 
     def delete_line(self, line):
-        self.add_offset(-self.offset)
 
+        self.add_offset(-self.offset)
         for k, v in self.plots.items():
             if v[0] is line:
+                d = wx.MessageDialog(None,
+                                    'Do you really want delete this line ?',
+                                    'Question',
+                                    wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+                if d.ShowModal() == wx.ID_NO:
+                    return False
                 self.plots.pop(k)
 
+        if not self.plots.values():
+            self.figure.gca().set_prop_cycle(None)
+
+        # remove line
         line.remove()
         self.add_offset(self.offset)
+        self.update_legend()
         self.canvas.draw()
+
+        return True
+
+
+        # self.add_offset(-self.offset)
+
+        # for k, v in self.plots.items():
+        #     if v[0] is line:
+        #         self.plots.pop(k)
+
+        # line.remove()
+        # self.add_offset(self.offset)
+        # self.canvas.draw()
 
     def on_close_figure(self, event=None):
         # remove any selection made in any figure
@@ -426,13 +433,20 @@ class Plotter1D(wx.Panel):
         self.selectedLine.figure.canvas.draw()
 
     def update_legend(self):
+
+        if not self.plots.values():
+            self.figure.gca().legend().remove()
+            return 
+
+        if not self.show_legend:
+            return
+            
         legend = [[], []]
         for v in self.plots.values():
             legend[0].append(v[0])
             legend[1].append(v[1])
         self.figure.gca().legend(tuple(legend[0]), tuple(legend[1]), loc=self.legend_location,
                                  frameon=self.legend_frameon, shadow=self.legend_shadow, fancybox=self.legend_fancybox)
-        self.show_legend = True
 
     def plot(self, data, varname):
         if data is None:
@@ -453,6 +467,7 @@ class Plotter1D(wx.Panel):
         self.figure.gca().set_xlabel(self.Xlabel + self.fmt_Xunit)
         self.figure.gca().set_ylabel(self.Ylabel + self.fmt_Yunit)
         self.on_auto_fit()
+        self.update_legend()
         self.canvas.draw()
 
     def set_axis_property(self, varname, data):

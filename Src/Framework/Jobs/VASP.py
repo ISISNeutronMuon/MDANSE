@@ -28,11 +28,14 @@ from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.Converter import Converter
 
+
 class XDATCARFileError(Error):
     pass
 
+
 class VASPConverterError(Error):
     pass
+
 
 class XDATCARFile(dict):
     
@@ -146,10 +149,10 @@ class XDATCARFile(dict):
         config = numpy.reshape(data,(self["n_atoms"],3))
                                                         
         return config
-    
                                 
     def close(self):
         self["instance"].close()
+
 
 class VASPConverter(Converter):
     """
@@ -159,9 +162,10 @@ class VASPConverter(Converter):
     label = "VASP (>=5)"
 
     settings = collections.OrderedDict()           
-    settings['xdatcar_file'] = ('input_file',{'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})
+    settings['xdatcar_file'] = ('input_file',{'wildcard':'XDATCAR files (XDATCAR*)|XDATCAR*|All files|*',
+                                                'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})
     settings['time_step'] = ('float', {'label':"time step", 'default':1.0, 'mini':1.0e-9})        
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'xdatcar_file'})
                 
     def initialize(self):
         '''
@@ -180,7 +184,7 @@ class VASPConverter(Converter):
                 self._universe.addObject(Atom(symbol, name="%s_%d" % (symbol,i)))        
 
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
 
         data_to_be_written = ["configuration","time"]
 
@@ -238,5 +242,8 @@ class VASPConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
+        super(VASPConverter,self).finalize()
+
 
 REGISTRY['vasp'] = VASPConverter
+

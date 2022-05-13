@@ -23,17 +23,19 @@ class IWidget(wx.Panel):
         
     _registry = "widget"
 
-    def __init__(self, parent, name, configurator, *args, **kwargs):
+    def __init__(self, parent, name, configurator, type, *args, **kwargs):
         
         wx.Panel.__init__(self, parent, wx.ID_ANY, *args, **kwargs)
 
         self._parent = parent
-        
+
         self._name = name
                                 
         self._configurator = configurator
                                                         
         self._label = self._configurator.label
+        
+        self._type = type
                         
         self.initialize()
                         
@@ -92,7 +94,7 @@ class IWidget(wx.Panel):
         plugin = message
         if not plugin.is_parent(self):
             return
-        
+
         self.set_data(plugin.datakey)
 
     def OnDestroy(self,event):
