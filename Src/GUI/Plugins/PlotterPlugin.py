@@ -496,7 +496,7 @@ class PlotterFrame(wx.Frame):
                     else:
                         data[vname]['axis'] = []
                 else:
-                    data[k]['axis'] = []
+                    data[vname]['axis'] = []
                 data[vname]['data'] = arr
                 data[vname]['units'] = getattr(_vars[vname], "units", "au")
 
