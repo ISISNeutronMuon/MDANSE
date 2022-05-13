@@ -35,8 +35,10 @@ from MDANSE.GUI.Plugins.Plotter2D import Plotter2D
 from MDANSE.GUI.Plugins.Plotter3D import Plotter3D
 from MDANSE.GUI.Icons import ICONS
 
+
 class PlotterError(Error):
     pass
+
 
 class PlotterPanel(wx.Panel):
     
@@ -130,10 +132,10 @@ class DataPanel(wx.Panel):
             self.datalist = wx.ListCtrl(self.setup, wx.ID_ANY,style = wx.LC_REPORT|wx.LC_SINGLE_SEL)
 
         self.datalist.InsertColumn(0, 'Variable', width=100)
-        self.datalist.InsertColumn(1, 'Path', width=100)
-        self.datalist.InsertColumn(2, 'Axis', width=50)
-        self.datalist.InsertColumn(3, 'Dimension')
-        self.datalist.InsertColumn(4, 'Size')
+        self.datalist.InsertColumn(1, 'Axis', width=50)
+        self.datalist.InsertColumn(2, 'Dimension')
+        self.datalist.InsertColumn(3, 'Size')
+        self.datalist.InsertColumn(4, 'Path', width=100)
         
         if self.standalone:
             splitterWindow.SplitHorizontally(self.datasetlist,self.datalist)
@@ -274,10 +276,10 @@ class DataPanel(wx.Panel):
         for i, var in enumerate(sorted(variables)):
             self.datalist.InsertStringItem(i, var)
             axis = ','.join(self.dataproxy[var]['axis'])
-            self.datalist.SetStringItem(i, 1,self.dataproxy[var]['path'])
-            self.datalist.SetStringItem(i, 2,axis)
-            self.datalist.SetStringItem(i, 3,str(self.dataproxy[var]['data'].ndim))
-            self.datalist.SetStringItem(i, 4,str(self.dataproxy[var]['data'].shape))
+            self.datalist.SetStringItem(i, 1,axis)
+            self.datalist.SetStringItem(i, 2,str(self.dataproxy[var]['data'].ndim))
+            self.datalist.SetStringItem(i, 3,str(self.dataproxy[var]['data'].shape))
+            self.datalist.SetStringItem(i, 4, self.dataproxy[var]['path'])
         self.datalist.Select(0, True)
             
     def on_select_variables(self, event = None):
@@ -435,6 +437,7 @@ class PlotterPlugin(ComponentPlugin):
         self._parent._mgr.GetPane(self).Dock().Floatable(False).Center().CloseButton(True).Caption("2D/3D Plotter")
         self._parent._mgr.Update()
 
+
 class PlotterFrame(wx.Frame):
     
     def __init__(self, parent, title="2D/3D Plotter"):
@@ -474,38 +477,29 @@ class PlotterFrame(wx.Frame):
         for basename, filename in zip(baselist, filelist):
 
             ext = os.path.splitext(filename)[1]
-            for cls, exts in PLOTTER_DATA_TYPES.items():
-                if ext in exts:
-                    f = cls(filename,"r")
-                    break
-            else:
-                continue
+            with PLOTTER_DATA_TYPES[ext](filename, 'r') as f:
+                data = collections.OrderedDict()
+                for vname, vinfo in f.variables.items():
+                    vpath, variable = vinfo
+                    arr = variable.get_array()
 
-            data = collections.OrderedDict()
-            for vname, vinfo in f.variables.items():
-                vpath, variable = vinfo
-                arr = variable.get_array()
-
-                if not numpy.issubdtype(arr.dtype, numpy.number):
-                    continue
-
-                data[vname] = {}
-                if hasattr(variable, 'axis'):
-                    axis = getattr(variable,'axis')
-                    if axis:
-                        data[vname]['axis'] = axis.split('|')
+                    data[vname] = {}
+                    if hasattr(variable, 'axis'):
+                        axis = getattr(variable,'axis')
+                        if axis:
+                            data[vname]['axis'] = axis.split('|')
+                        else:
+                            data[vname]['axis'] = []
                     else:
                         data[vname]['axis'] = []
-                else:
-                    data[vname]['axis'] = []
-                data[vname]['path'] = vpath
-                data[vname]['data'] = arr
-                data[vname]['units'] = getattr(variable, "units", "au")
+                    data[vname]['path'] = vpath
+                    data[vname]['data'] = arr
+                    data[vname]['units'] = getattr(variable, "units", "au")
 
-            unique_name = self.unique(basename, self.plugin._dataDict)
-        
-            self.plugin._dataDict[unique_name]={'data': data, 'path': filename, 'basename': basename}
-            self.plugin._dataPanel.show_dataset(-1)
+                unique_name = self.unique(basename, self.plugin._dataDict)
+
+                self.plugin._dataDict[unique_name]={'data': data, 'path': filename, 'basename': basename}
+                self.plugin._dataPanel.show_dataset(-1)
     
     def unique(self, key, dic):
         skey = key

@@ -7,24 +7,24 @@ import netCDF4
 
 from MDANSE.Core.Decorators import compatibleabstractproperty
 
+
 class _IPlotterVariable:
     """This is the base abstract class for plotter variable.
 
-    Basically, this class allows to have a common interface for the data supported by the plotter (netcdf currently, hdf in the future, ...)
+    Basically, this class allows to have a common interface for the data supported by the plotter (netcdf currently,
+    hdf in the future, ...)
     """
 
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, variable):
-
         self._variable = variable
 
-    def __getattr__(self,name):
-        return getattr(self._variable,name)
+    def __getattr__(self, name):
+        return getattr(self._variable, name)
 
-    def __hasattr__(self,name):
-
-        return hasattr(self._variable,name)
+    def __hasattr__(self, name):
+        return hasattr(self._variable, name)
 
     @abc.abstractmethod
     def get_array(self):
@@ -35,9 +35,9 @@ class _IPlotterVariable:
         """
         pass
 
+
 class NetCDFPlotterVariable(_IPlotterVariable):
-    """Wrapper for NetCDF plotter data.
-    """
+    """Wrapper for NetCDF plotter data."""
 
     def get_array(self):
         """Returns the actual data stored by the plotter data.
@@ -47,40 +47,49 @@ class NetCDFPlotterVariable(_IPlotterVariable):
         """
         return self._variable[:]
 
+
 class _IPlotterData:
-    """This is the interface for plotter data.
+    """
+    This is the interface for plotter data.
 
     Plotter data are data supported by the plotter. Currently, only NetCDF is supported but HDF should be supported soon.
     """
 
     __metaclass__ = abc.ABCMeta
 
+    @abc.abstractmethod
+    def __init__(self):
+        self._file = None
+
+    def __enter__(self):
+        return self
+
+    def  __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
     @compatibleabstractproperty
     def variables(self):
         pass
 
     def close(self):
-        """Close the data.
-        """
-
+        """Close the data."""
         self._file.close()
 
-    def __del__(self):        
+    def __del__(self):
         self.close()
 
+
 class NetCDFPlotterData(_IPlotterData):
-    """This class implements the plotter data interface for NetCDF data.
-    """
+    """This class implements the plotter data interface for NetCDF data."""
 
     def __init__(self, *args, **kwargs):
-        """Constructor.
-        """
+        """Constructor. It takes any arguments that can be passed to netCDF4.Dataset to create an instance of it."""
 
         self._file = netCDF4.Dataset(*args, **kwargs)
 
         self._variables = collections.OrderedDict()
 
-        NetCDFPlotterData.find_numeric_variables(self._variables,self._file)
+        NetCDFPlotterData.find_numeric_variables(self._variables, self._file)
 
     @property
     def variables(self):
@@ -97,10 +106,10 @@ class NetCDFPlotterData(_IPlotterData):
             if group.path == '/':
                 path = '/{}'.format(var_key)
             else:
-                path = '{}/{}'.format(group.path,var_key)
+                path = '{}/{}'.format(group.path, var_key)
 
             # Non numeric variables are not supported by the plotter
-            if not numpy.issubdtype(var.dtype,numpy.number):
+            if not numpy.issubdtype(var.dtype, numpy.number):
                 continue
             # Variables with dimension higher than 3 are not supported by the plotter
             if var.ndim > 3:
@@ -108,7 +117,7 @@ class NetCDFPlotterData(_IPlotterData):
 
             comp = 1
             while var_key in var_dict:
-                var_key = '{:s}_{:d}'.format(var_key,comp)
+                var_key = '{:s}_{:d}'.format(var_key, comp)
                 comp += 1
 
             var_dict[var_key] = (path, NetCDFPlotterVariable(var))
@@ -116,4 +125,5 @@ class NetCDFPlotterData(_IPlotterData):
         for _, sub_group in group.groups.items():
             NetCDFPlotterData.find_numeric_variables(var_dict, sub_group)
 
-PLOTTER_DATA_TYPES = {NetCDFPlotterData:('.nc','.cdf','.netcdf')}
+
+PLOTTER_DATA_TYPES = {'.nc': NetCDFPlotterData, '.cdf': NetCDFPlotterData, '.netcdf': NetCDFPlotterData}
