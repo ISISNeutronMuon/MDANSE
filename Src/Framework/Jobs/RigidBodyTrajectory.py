@@ -18,10 +18,11 @@ import operator
 
 import numpy
 
+import netCDF4
+
 from Scientific.Geometry import Vector
 from Scientific.Geometry.Quaternion import Quaternion
 from Scientific.Geometry.Transformation import Translation
-from Scientific.IO.NetCDF import NetCDFFile
 
 from MMTK.Collections import Collection
 from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
@@ -144,7 +145,7 @@ class RigidBodyTrajectory(IJob):
         '''
         '''
         
-        outputFile = NetCDFFile(self.configuration['output_files']['files'][0], 'a')
+        outputFile = netCDF4.Dataset(self.configuration['output_files']['files'][0], 'a')
  
         outputFile.createDimension('NGROUPS', self.configuration['atom_selection']['selection_length'])
         outputFile.createDimension('NFRAMES', self.configuration['frames']['number'])

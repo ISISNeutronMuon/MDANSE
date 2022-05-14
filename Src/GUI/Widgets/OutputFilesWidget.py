@@ -79,9 +79,9 @@ class OutputFilesWidget(IWidget):
                                     
         return (filename, formats)
     
-    def set_data(self, datakey, analysis):
+    def set_data(self, datakey):
 
-        basename = "%s_%s" % (os.path.splitext(os.path.basename(datakey))[0], analysis)
+        basename = "%s_%s" % (os.path.splitext(os.path.basename(datakey))[0], self._parent.type)
         trajectoryDir = os.path.dirname(datakey)
 
         path = OutputFilesWidget._get_unique_filename(trajectoryDir,basename)

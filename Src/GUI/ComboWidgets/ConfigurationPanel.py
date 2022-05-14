@@ -26,6 +26,7 @@ class ConfigurationPanel(wx.Panel):
         wx.Panel.__init__(self, parent, wx.ID_ANY)
         
         self._configurable = configurable
+        
         self._type = type
         
         self._widgets = {}
@@ -44,7 +45,7 @@ class ConfigurationPanel(wx.Panel):
                         
             widgetClass = REGISTRY["widget"][widget]
                         
-            self._widgets[cfgName] = widgetClass(self, cfgName, self._configurable.configuration[cfgName], self._type)
+            self._widgets[cfgName] = widgetClass(self, cfgName, self._configurable.configuration[cfgName], widget)
             
             self.panelSizer.Add(self._widgets[cfgName], 0, wx.ALL|wx.EXPAND, 5)
                   
@@ -54,6 +55,10 @@ class ConfigurationPanel(wx.Panel):
 
         self.Fit()
                     
+    @property
+    def type(self):
+        return self._type
+
     @property
     def widgets(self):
         return self._widgets

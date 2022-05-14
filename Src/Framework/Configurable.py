@@ -249,7 +249,7 @@ class Configurable(object):
                                     
         params = collections.OrderedDict()
         for name,(typ,kwds) in settings.items():
-            cfg=REGISTRY["configurator"][typ](name, **kwds)        
+            cfg=REGISTRY["configurator"][typ](name, **kwds)
             params[name] = cfg.default
             
         return params

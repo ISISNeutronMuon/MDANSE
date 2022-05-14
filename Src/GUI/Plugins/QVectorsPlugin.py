@@ -282,7 +282,7 @@ class QVectorsPlugin(UserDefinitionPlugin):
  
         self.Freeze()
                  
-        self._configurationPanel = ConfigurationPanel(self._mainPanel, self._currentGenerator)
+        self._configurationPanel = ConfigurationPanel(self._mainPanel, self._currentGenerator,None)
  
         self._parametersSizer.Add(self._configurationPanel, 1, wx.ALL|wx.EXPAND, 5)
                                          

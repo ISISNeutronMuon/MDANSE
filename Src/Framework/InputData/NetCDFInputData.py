@@ -15,7 +15,7 @@
 
 import collections
 
-from Scientific.IO.NetCDF import NetCDFFile
+import netCDF4
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.InputData.IInputData import InputDataError
@@ -39,7 +39,7 @@ class NetCDFInputData(InputFileData):
     def load(self):
         
         try:
-            self._netcdf = NetCDFFile(self._name,"r")
+            self._netcdf = netCDF4.Dataset(self._name,"r")
             
         except IOError:
             raise InputDataError("The data stored in %r filename could not be loaded properly." % self._name)
@@ -56,7 +56,7 @@ class NetCDFInputData(InputFileData):
                         self._data[k]['axis'] = []
                 except:
                     self._data[k]['axis'] = []
-                self._data[k]['data'] = variables[k].getValue()
+                self._data[k]['data'] = variables[k][:]
                 self._data[k]['units'] = getattr(variables[k], 'units', 'au')
 
     def close(self):
