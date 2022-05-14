@@ -38,7 +38,7 @@ class McStasOptionsWidget(IWidget):
         
         options.set_settings(settings)                    
          
-        self._panel = ConfigurationPanel(self._widgetPanel, options)
+        self._panel = ConfigurationPanel(self._widgetPanel, options,None)
          
         sizer.Add(self._panel, 0, wx.ALL|wx.EXPAND, 5)
          

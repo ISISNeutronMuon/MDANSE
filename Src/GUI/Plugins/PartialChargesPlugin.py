@@ -118,10 +118,11 @@ class PartialChargesPlugin(UserDefinitionPlugin):
          
         width,_ = self._grid.GetClientSizeTuple()
         w = 4*width/5
-        self._grid.SetColSize(0, w)                
-        self._grid.SetColSize(1, width-w-5)
+        if w > 0:
+            self._grid.SetColSize(0, w)
+            self._grid.SetColSize(1, width-w-5)
         
-        self._grid.ForceRefresh()
+            self._grid.ForceRefresh()
                                             
     def validate(self):
         

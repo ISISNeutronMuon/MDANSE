@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from Scientific.IO.NetCDF import NetCDFFile
+import netCDF4
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
@@ -59,7 +59,7 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
         InputFileConfigurator.configure(self, value)
         
         try:
-            self['instance'] = NetCDFFile(self['value'], 'r')
+            self['instance'] = netCDF4.Dataset(self['value'], 'r')
             
         except IOError:
             raise ConfiguratorError("can not open %r NetCDF file for reading" % self['value'])

@@ -142,7 +142,7 @@ class RigidBodyTrajectory(IJob):
         '''
         '''
         
-        outputFile = NetCDFFile(self.configuration['output_files']['files'][0], 'a')
+        outputFile = netCDF4.Dataset(self.configuration['output_files']['files'][0], 'a')
  
         outputFile.createDimension('NGROUPS', self.configuration['atom_selection']['selection_length'])
         outputFile.createDimension('NFRAMES', self.configuration['frames']['number'])
@@ -150,13 +150,13 @@ class RigidBodyTrajectory(IJob):
         outputFile.createDimension('XYZ',3)
 
         # The NetCDF variable that stores the quaternions.
-        QUATERNIONS = outputFile.createVariable('quaternions', numpy.dtype(numpy.float64).char, ('NGROUPS','NFRAMES','QUATERNIONLENGTH'))
+        QUATERNIONS = outputFile.createVariable('quaternions', np.dtype(np.float64).char, ('NGROUPS','NFRAMES','QUATERNIONLENGTH'))
   
         # The NetCDF variable that stores the centers of mass.
-        COM = outputFile.createVariable('coms', numpy.dtype(numpy.float64).char, ('NGROUPS','NFRAMES','XYZ'))
+        COM = outputFile.createVariable('coms', np.dtype(np.float64).char, ('NGROUPS','NFRAMES','XYZ'))
               
         # The NetCDF variable that stores the rigid-body fit.
-        FIT = outputFile.createVariable('fits', numpy.dtype(numpy.float64).char, ('NGROUPS','NFRAMES'))
+        FIT = outputFile.createVariable('fits', np.dtype(np.float64).char, ('NGROUPS','NFRAMES'))
   
         outputFile.info = str(self)
    

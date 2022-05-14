@@ -48,7 +48,7 @@ class ASCIIFormat(IFormat):
         '''
                 
         filename = os.path.splitext(filename)[0]
-        filename = "%s.tar" % filename
+        filename = "%s_ascii.tar" % filename
 
         tf = tarfile.open(filename,'w')
         
@@ -60,7 +60,7 @@ class ASCIIFormat(IFormat):
             cls.write_array(tempStr,var)
             tempStr.seek(0)
 
-            info = tarfile.TarInfo(name='%s%s' % (var.name,cls.extensions[0]))
+            info = tarfile.TarInfo(name='%s%s' % (var.varname,cls.extensions[0]))
             info.size=tempStr.len
             tf.addfile(tarinfo=info, fileobj=tempStr)
             
