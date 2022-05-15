@@ -262,7 +262,6 @@ class RealConfiguration(_Configuration):
                 indexes,
                 bonds)
 
-            print(bonds)
             conf = self
             conf._variables['coordinates'] = contiguous_coords
             return conf

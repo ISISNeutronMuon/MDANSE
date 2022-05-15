@@ -1037,10 +1037,10 @@ class MolecularViewerPlugin(ComponentPlugin):
         
         self._currentFrame = frame % len(self._trajectory)
         coords = self._trajectory[self._currentFrame]['coordinates']
-        unitCell = self._trajectory[self._currentFrame].get('unit_cell',None)
+        unitCell = self._trajectory.unit_cell(self._currentFrame)
 
         conf = RealConfiguration(self.trajectory.chemical_system,coords,unitCell)
-        conf = conf.contiguous_configuration()
+        conf = conf.continuous_configuration()
         self._trajectory.chemical_system.configuration = conf
 
         coords = conf.variables['coordinates']

@@ -271,10 +271,8 @@ class Trajectory:
         if frame < 0 or frame >= len(self):
             raise TrajectoryError('Invalid frame number')
 
-        grp = self._h5_file['/configuration']
-
-        if 'unit_cell' in grp:
-            return grp['unit_cell'][frame]        
+        if 'unit_cell' in self._h5_file:
+            return self._h5_file['unit_cell'][frame]        
         else:
             return None
 

@@ -131,7 +131,7 @@ ARG:
       symbol: C
     CD:
       alternatives: []
-      bonds: [CB, CG, HD2, HD3]
+      bonds: [CB, NE, HD2, HD3]
       groups: [sidechain]
       symbol: C
     CG:
@@ -196,7 +196,7 @@ ARG:
       symbol: N
     NE:
       alternatives: []
-      bonds: [HE]
+      bonds: [CD,CZ,HE]
       groups: [sidechain]
       symbol: N
     NH1:
