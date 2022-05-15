@@ -99,11 +99,11 @@ class MeanSquareDisplacement(IJob):
                                                                                   first=self.configuration['frames']['first'],
                                                                                   last=self.configuration['frames']['last']+1,
                                                                                   step=self.configuration['frames']['step'])
-         
+
         series = self.configuration['projection']["projector"](series)
-        
+
         msd = mean_square_displacement(series)
-                
+
         return index, msd
     
     
@@ -135,7 +135,7 @@ class MeanSquareDisplacement(IJob):
         msdTotal = weight(weights,self._outputData,nAtomsPerElement,1,"msd_%s")
         
         self._outputData.add("msd_total", "line", msdTotal, axis="time", units="nm2") 
-        
+
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()

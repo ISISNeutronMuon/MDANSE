@@ -112,7 +112,7 @@ class AtomsDatabase:
         '''
 
         try:
-            return copy.deepcopy(self._data[item])
+            return self._data[item]
         except KeyError:                
             raise AtomsDatabaseError("The element {} is not registered in the database.".format(item))
 

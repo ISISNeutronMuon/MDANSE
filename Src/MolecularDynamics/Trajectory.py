@@ -219,6 +219,8 @@ class Trajectory:
         conf = RealConfiguration(self._chemical_system,coords,unit_cell)
         self._chemical_system.configuration = conf
 
+        self.load_unit_cells()
+
         resolve_undefined_molecules_name(self._chemical_system)
          
         build_connectivity(self._chemical_system, unit_cell=conf.unit_cell)
@@ -266,6 +268,20 @@ class Trajectory:
 
         return conf
 
+    def load_unit_cells(self):
+
+        if 'unit_cell' in self._h5_file:
+            
+            self._unit_cells = np.empty((len(self),3,3),dtype=np.float)
+            self._inverse_unit_cells = np.empty((len(self),3,3),dtype=np.float)
+
+            for i, uc in enumerate(self._h5_file['unit_cell'][:]):
+                self._unit_cells[i,:,:] = uc.T
+                self._inverse_unit_cells[i,:,:] = np.linalg.inv(self._unit_cells[i,:,:])
+        else:
+            self._unit_cells = None
+            self._inverse_unit_cells = None
+
     def unit_cell(self,frame):
 
         if frame < 0 or frame >= len(self):
@@ -306,23 +322,18 @@ class Trajectory:
         if coords.ndim == 2:
             coords = coords[np.newaxis,:,:]
 
-        if 'unit_cell' in self._h5_file:
-            n_frames = coords.shape[0]
-            unit_cells = np.empty((n_frames,3,3),dtype=np.float)
-            inverse_unit_cells = np.empty((n_frames,3,3),dtype=np.float)
-            for i, uc in enumerate(self._h5_file['unit_cell'][first:last:step]):
-                unit_cells[i,:,:] = uc.T
-                inverse_unit_cells[i,:,:] = np.linalg.inv(unit_cells[i,:,:])
-
-            cog_traj = com_trajectory.com_trajectory(coords,
+        if self._unit_cells is not None:
+            unit_cells = self._unit_cells[first:last:step]
+            inverse_unit_cells = self._inverse_unit_cells[first:last:step]
+            com_traj = com_trajectory.com_trajectory(coords,
                                                      unit_cells,
                                                      inverse_unit_cells,
                                                      masses)
         
         else:
-            cog_traj = self._read_com_trajectory_nopbc(coords, indexes, masses)
+            com_traj = self._read_com_trajectory_nopbc(coords, indexes, masses)
 
-        return cog_traj
+        return com_traj
 
     @property
     def chemical_system(self):

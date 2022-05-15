@@ -27,12 +27,17 @@ cdef extern from "math.h":
 cdef inline double round(double r):
     return floor(r + 0.5) if (r > 0.0) else ceil(r - 0.5)
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
 def com_trajectory(ndarray[np.float64_t, ndim=3] config not None,
                    ndarray[np.float64_t, ndim=3] cell not None,
                    ndarray[np.float64_t, ndim=3] rcell not None,
                    ndarray[np.float64_t, ndim=1] masses not None):
 
-    cdef double x, y, z, refx, refy, refz, srefx, srefy, srefz, sx, sy, sz, sdx, sdy, sdz, sumMasses, comx, comy, comz
+    cdef double x, y, z, refx, refy, refz, \
+                srefx, srefy, srefz, sx, sy, sz, sdx, sdy, sdz, \
+                sumMasses, comx, comy, comz, refcomx, refcomy, refcomz
 
     cdef int i, j
 
@@ -85,31 +90,33 @@ def com_trajectory(ndarray[np.float64_t, ndim=3] config not None,
 
             sumMasses += masses[j]
 
-        comx /= sumMasses
-        comy /= sumMasses
-        comz /= sumMasses
+        if i == 0:
+            refcomx = comx/sumMasses
+            refcomy = comy/sumMasses
+            refcomz = comz/sumMasses
 
-        if comx < 0.0:
-            comx += 1.0
+        # The step i-1 is taken as the reference
+        else:
 
-        if comy < 0.0:
-            comy += 1.0
+            comx /= sumMasses
+            comy /= sumMasses
+            comz /= sumMasses
 
-        if comz < 0.0:
-            comz += 1.0
+            sdx = comx - refcomx
+            sdy = comy - refcomy
+            sdz = comz - refcomz
 
-        if comx > 0.5:
-            comx -= 1.0
+            sdx -= round(sdx)
+            sdy -= round(sdy)
+            sdz -= round(sdz)
 
-        if comy > 0.5:
-            comy -= 1.0
+            refcomx = refcomx + sdx
+            refcomy = refcomy + sdy
+            refcomz = refcomz + sdz
 
-        if comz > 0.5:
-            comz -= 1.0
-
-        trajectory[i,0] = comx*cell[i,0,0] + comy*cell[i,0,1] + comz*cell[i,0,2]
-        trajectory[i,1] = comx*cell[i,1,0] + comy*cell[i,1,1] + comz*cell[i,1,2]
-        trajectory[i,2] = comx*cell[i,2,0] + comy*cell[i,2,1] + comz*cell[i,2,2]
+        trajectory[i,0] = refcomx*cell[i,0,0] + refcomy*cell[i,0,1] + refcomz*cell[i,0,2]
+        trajectory[i,1] = refcomx*cell[i,1,0] + refcomy*cell[i,1,1] + refcomz*cell[i,1,2]
+        trajectory[i,2] = refcomx*cell[i,2,0] + refcomy*cell[i,2,1] + refcomz*cell[i,2,2]
 
     return trajectory
 
