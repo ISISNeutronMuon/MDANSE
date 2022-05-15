@@ -306,11 +306,11 @@ class Trajectory:
         if coords.ndim == 2:
             coords = coords[np.newaxis,:,:]
 
-        if 'unit_cell' in grp:
+        if 'unit_cell' in self._h5_file:
             n_frames = coords.shape[0]
             unit_cells = np.empty((n_frames,3,3),dtype=np.float)
             inverse_unit_cells = np.empty((n_frames,3,3),dtype=np.float)
-            for i, uc in enumerate(grp['unit_cell'][first:last:step]):
+            for i, uc in enumerate(self._h5_file['unit_cell'][first:last:step]):
                 unit_cells[i,:,:] = uc.T
                 inverse_unit_cells[i,:,:] = np.linalg.inv(unit_cells[i,:,:])
 
@@ -320,7 +320,7 @@ class Trajectory:
                                                      masses)
         
         else:
-            cog_traj = self._com_trajectory_nopbc(coords, indexes, masses)
+            cog_traj = self._read_com_trajectory_nopbc(coords, indexes, masses)
 
         return cog_traj
 

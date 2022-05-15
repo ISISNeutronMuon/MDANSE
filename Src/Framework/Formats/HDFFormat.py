@@ -59,7 +59,7 @@ class HDFFormat(IFormat):
         
         for var in data.values():
                                     
-            varName = str(var.name).strip().encode('string-escape').replace('/', '|')
+            varName = str(var.varname).strip().encode('string-escape').replace('/', '|')
             
             dset = outputFile.create_dataset(varName, data=var, shape=var.shape)
 

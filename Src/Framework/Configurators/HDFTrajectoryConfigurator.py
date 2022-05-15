@@ -54,7 +54,7 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         self['length'] = len(self['instance'])
 
         try:
-            self['md_time_step'] = self['instance'].h5_file['/configuration/time'][1] - self['instance'].h5_file['/configuration/time'][0]
+            self['md_time_step'] = self['instance'].h5_file['/time'][1] - self['instance'].h5_file['/time'][0]
         except IndexError:
             self['md_time_step'] = 1.0
             
