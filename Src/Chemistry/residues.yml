@@ -28,7 +28,7 @@ CT1:
   alternatives: []
   atoms:
     OXT:
-      alternatives: [OT]
+      alternatives: [OT,OT2]
       replaces: []
       bonds: [C]
       groups: ['backbone']
@@ -55,7 +55,7 @@ ALA:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -95,22 +95,22 @@ ARG:
   alternatives: []
   atoms:
     1HH1:
-      alternatives: []
+      alternatives: [HH11]
       bonds: [NH1]
       groups: [sidechain]
       symbol: H
     1HH2:
-      alternatives: []
+      alternatives: [HH21]
       bonds: [NH2]
       groups: [sidechain]
       symbol: H
     2HH1:
-      alternatives: []
+      alternatives: [HH12]
       bonds: [NH1]
       groups: [sidechain]
       symbol: H
     2HH2:
-      alternatives: []
+      alternatives: [HH22]
       bonds: [NH2]
       groups: [sidechain]
       symbol: H
@@ -145,7 +145,7 @@ ARG:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -160,7 +160,7 @@ ARG:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -170,7 +170,7 @@ ARG:
       groups: [sidechain]
       symbol: H
     HD3:
-      alternatives: []
+      alternatives: [HD1]
       bonds: [CD]
       groups: [sidechain]
       symbol: H
@@ -185,7 +185,7 @@ ARG:
       groups: [sidechain]
       symbol: H
     HG3:
-      alternatives: []
+      alternatives: [HG1]
       bonds: [CG]
       groups: [sidechain]
       symbol: H
@@ -220,12 +220,12 @@ ASN:
   alternatives: []
   atoms:
     1HD2:
-      alternatives: []
+      alternatives: [HD21]
       bonds: [ND2]
       groups: [sidechain]
       symbol: H
     2HD2:
-      alternatives: []
+      alternatives: [HD22]
       bonds: [ND2]
       groups: [sidechain]
       symbol: H
@@ -250,7 +250,7 @@ ASN:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -265,7 +265,7 @@ ASN:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -315,7 +315,7 @@ ASP:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -330,7 +330,7 @@ ASP:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -356,7 +356,7 @@ ASP:
       symbol: O
   is_c_terminus: false
   is_n_terminus: false
-CYX:
+CYS:
   alternatives: []
   atoms:
     C:
@@ -375,7 +375,7 @@ CYX:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -390,12 +390,12 @@ CYX:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
     HG:
-      alternatives: []
+      alternatives: [HG1]
       bonds: [SG]
       groups: [sidechain]
       symbol: H
@@ -435,7 +435,7 @@ CYX:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -450,7 +450,7 @@ CYX:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -475,12 +475,12 @@ GLN:
   alternatives: []
   atoms:
     1HE2:
-      alternatives: []
+      alternatives: [HE21]
       bonds: [NE2]
       groups: [sidechain]
       symbol: H
     2HE2:
-      alternatives: []
+      alternatives: [HE22]
       bonds: [NE2]
       groups: [sidechain]
       symbol: H
@@ -510,7 +510,7 @@ GLN:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -525,7 +525,7 @@ GLN:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -535,7 +535,7 @@ GLN:
       groups: [sidechain]
       symbol: H
     HG3:
-      alternatives: []
+      alternatives: [HG1]
       bonds: [CG]
       groups: [sidechain]
       symbol: H
@@ -590,7 +590,7 @@ GLU:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -605,7 +605,7 @@ GLU:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -615,7 +615,7 @@ GLU:
       groups: [sidechain]
       symbol: H
     HG3:
-      alternatives: []
+      alternatives: [HG1]
       bonds: [CG]
       groups: [sidechain]
       symbol: H
@@ -655,7 +655,7 @@ GLY:
       groups: [backbone]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -665,7 +665,7 @@ GLY:
       groups: [backbone]
       symbol: H
     HA3:
-      alternatives: []
+      alternatives: [HA1]
       bonds: [CA]
       groups: [sidechain]
       symbol: H
@@ -682,7 +682,7 @@ GLY:
   is_c_terminus: false
   is_n_terminus: false
 HID:
-  alternatives: []
+  alternatives: [HSD]
   atoms:
     C:
       alternatives: []
@@ -715,7 +715,7 @@ HID:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -730,7 +730,7 @@ HID:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -772,7 +772,7 @@ HID:
   is_c_terminus: false
   is_n_terminus: false
 HIE:
-  alternatives: []
+  alternatives: [HSE]
   atoms:
     C:
       alternatives: []
@@ -805,7 +805,7 @@ HIE:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -820,7 +820,7 @@ HIE:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -895,7 +895,7 @@ HIP:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -910,7 +910,7 @@ HIP:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -960,42 +960,42 @@ ILE:
   alternatives: []
   atoms:
     1HD1:
-      alternatives: []
+      alternatives: [HD11,HD1]
       bonds: [CD1]
       groups: [sidechain]
       symbol: H
     1HG2:
-      alternatives: []
+      alternatives: [HG21]
       bonds: [CG2]
       groups: [sidechain]
       symbol: H
     2HD1:
-      alternatives: []
+      alternatives: [HD12,HD2]
       bonds: [CD1]
       groups: [sidechain]
       symbol: H
     2HG1:
-      alternatives: []
+      alternatives: [HG12]
       bonds: [CG1]
       groups: [sidechain]
       symbol: H
     2HG2:
-      alternatives: []
+      alternatives: [HG22]
       bonds: [CG2]
       groups: [sidechain]
       symbol: H
     3HD1:
-      alternatives: []
+      alternatives: [HD13,HD3]
       bonds: [CD1]
       groups: [sidechain]
       symbol: H
     3HG1:
-      alternatives: []
+      alternatives: [HG13,HG11]
       bonds: [CG1]
       groups: [sidechain]
       symbol: H
     3HG2:
-      alternatives: []
+      alternatives: [HG23]
       bonds: [CG2]
       groups: [sidechain]
       symbol: H
@@ -1015,7 +1015,7 @@ ILE:
       groups: [sidechain]
       symbol: C
     CD1:
-      alternatives: []
+      alternatives: [CD]
       bonds: [CG1, 1HD1, 2HD1, 3HD1]
       groups: [sidechain]
       symbol: C
@@ -1030,7 +1030,7 @@ ILE:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -1060,32 +1060,32 @@ LEU:
   alternatives: []
   atoms:
     1HD1:
-      alternatives: []
+      alternatives: [HD11]
       bonds: [CD1]
       groups: [sidechain]
       symbol: H
     1HD2:
-      alternatives: []
+      alternatives: [HD21]
       bonds: [CD2]
       groups: [sidechain]
       symbol: H
     2HD1:
-      alternatives: []
+      alternatives: [HD12]
       bonds: [CD1]
       groups: [sidechain]
       symbol: H
     2HD2:
-      alternatives: []
+      alternatives: [HD22]
       bonds: [CD2]
       groups: [sidechain]
       symbol: H
     3HD1:
-      alternatives: []
+      alternatives: [HD13]
       bonds: [CD1]
       groups: [sidechain]
       symbol: H
     3HD2:
-      alternatives: []
+      alternatives: [HD23]
       bonds: [CD2]
       groups: [sidechain]
       symbol: H
@@ -1120,7 +1120,7 @@ LEU:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -1135,7 +1135,7 @@ LEU:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -1190,7 +1190,7 @@ LYS:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone]
       symbol: H
@@ -1205,7 +1205,7 @@ LYS:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -1215,7 +1215,7 @@ LYS:
       groups: [sidechain]
       symbol: H
     HD3:
-      alternatives: []
+      alternatives: [HD1]
       bonds: [CD]
       groups: [sidechain]
       symbol: H
@@ -1225,7 +1225,7 @@ LYS:
       groups: [sidechain]
       symbol: H
     HE3:
-      alternatives: []
+      alternatives: [HE1]
       bonds: [CE]
       groups: [sidechain]
       symbol: H
@@ -1235,7 +1235,7 @@ LYS:
       groups: [sidechain]
       symbol: H
     HG3:
-      alternatives: []
+      alternatives: [HG1]
       bonds: [CG]
       groups: [sidechain]
       symbol: H
@@ -1300,7 +1300,7 @@ MET:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -1315,7 +1315,7 @@ MET:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -1340,7 +1340,7 @@ MET:
       groups: [sidechain]
       symbol: H
     HG3:
-      alternatives: []
+      alternatives: [HG1]
       bonds: [CG]
       groups: [sidechain]
       symbol: H
@@ -1410,7 +1410,7 @@ PHE:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -1425,7 +1425,7 @@ PHE:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -1505,7 +1505,7 @@ PRO:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -1515,7 +1515,7 @@ PRO:
       groups: [sidechain]
       symbol: H
     HD3:
-      alternatives: []
+      alternatives: [HD1]
       bonds: [CD]
       groups: [sidechain]
       symbol: H
@@ -1525,7 +1525,7 @@ PRO:
       groups: [sidechain]
       symbol: H
     HG3:
-      alternatives: []
+      alternatives: [HG1]
       bonds: [CG]
       groups: [sidechain]
       symbol: H
@@ -1560,7 +1560,7 @@ SER:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -1575,12 +1575,12 @@ SER:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
     HG:
-      alternatives: []
+      alternatives: [HG1]
       bonds: [OG]
       groups: [sidechain]
       symbol: H
@@ -1605,17 +1605,17 @@ THR:
   alternatives: []
   atoms:
     1HG2:
-      alternatives: []
+      alternatives: [HG21]
       bonds: [CG2]
       groups: [sidechain]
       symbol: H
     2HG2:
-      alternatives: []
+      alternatives: [HG22]
       bonds: [CG2]
       groups: [sidechain]
       symbol: H
     3HG2:
-      alternatives: []
+      alternatives: [HG23]
       bonds: [CG2]
       groups: [sidechain]
       symbol: H
@@ -1640,7 +1640,7 @@ THR:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -1735,7 +1735,7 @@ TRP:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -1750,7 +1750,7 @@ TRP:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -1850,7 +1850,7 @@ TYR:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H
@@ -1865,7 +1865,7 @@ TYR:
       groups: [sidechain]
       symbol: H
     HB3:
-      alternatives: []
+      alternatives: [HB1]
       bonds: [CB]
       groups: [sidechain]
       symbol: H
@@ -1915,32 +1915,32 @@ VAL:
   alternatives: []
   atoms:
     1HG1:
-      alternatives: []
+      alternatives: [HG11]
       bonds: [CG1]
       groups: [sidechain]
       symbol: H
     1HG2:
-      alternatives: []
+      alternatives: [HG21]
       bonds: [CG2]
       groups: [sidechain]
       symbol: H
     2HG1:
-      alternatives: []
+      alternatives: [HG12]
       bonds: [CG1]
       groups: [sidechain]
       symbol: H
     2HG2:
-      alternatives: []
+      alternatives: [HG22]
       bonds: [CG2]
       groups: [sidechain]
       symbol: H
     3HG1:
-      alternatives: []
+      alternatives: [HG13]
       bonds: [CG1]
       groups: [sidechain]
       symbol: H
     3HG2:
-      alternatives: []
+      alternatives: [HG23]
       bonds: [CG2]
       groups: [sidechain]
       symbol: H
@@ -1970,7 +1970,7 @@ VAL:
       groups: [sidechain]
       symbol: C
     H:
-      alternatives: []
+      alternatives: [HN]
       bonds: [N]
       groups: [backbone, peptide]
       symbol: H

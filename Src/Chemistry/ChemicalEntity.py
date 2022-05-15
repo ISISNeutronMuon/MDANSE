@@ -136,13 +136,13 @@ class Atom(_ChemicalEntity):
         if self.symbol not in ATOMS_DATABASE:
             raise UnknownAtomError('The atom {} is unknown'.format(self.symbol))
 
-        self._name = kwargs.get('name',self.symbol)
+        self._name = kwargs.pop('name',self.symbol)
 
-        self._bonds = kwargs.get('bonds',[])
+        self._bonds = kwargs.pop('bonds',[])
 
-        self.groups = kwargs.get('groups',[])
+        self.groups = kwargs.pop('groups',[])
 
-        self.ghost = kwargs.get('ghost',False)
+        self.ghost = kwargs.pop('ghost',False)
 
         self.position = None
 
@@ -332,7 +332,7 @@ class Molecule(_ChemicalEntity):
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        mol_str = 'H5Molecule(self._h5_file,h5_contents,{},code="{}",name={})'.format(at_indexes,self._code,self._name)
+        mol_str = 'H5Molecule(self._h5_file,h5_contents,{},code="{}",name="{}")'.format(at_indexes,self._code,self._name)
 
         h5_contents.setdefault('molecules',[]).append(mol_str)
         
@@ -387,7 +387,7 @@ class Residue(_ChemicalEntity):
             for v in self._selected_variant['atoms'].values():
                 replaced_atoms.update(v['replaces'])
 
-        res_atoms = set(RESIDUES_DATABASE[self._resname]['atoms'])
+        res_atoms = set(RESIDUES_DATABASE[self._code]['atoms'])
         res_atoms.difference_update(replaced_atoms)
         if self._selected_variant is not None:
             res_atoms.update(self._selected_variant['atoms'])
@@ -395,7 +395,7 @@ class Residue(_ChemicalEntity):
         if res_atoms != set(atoms):
             raise InconsistentAtomNamesError('The set of atoms to reorder is inconsistent with residue contents')
 
-        d = copy.deepcopy(RESIDUES_DATABASE[self._resname]['atoms'])
+        d = copy.deepcopy(RESIDUES_DATABASE[self._code]['atoms'])
         if self._selected_variant is not None:
             d.update(self._selected_variant['atoms'])
 
@@ -435,7 +435,7 @@ class Residue(_ChemicalEntity):
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        res_str = 'H5Residue(self._h5_file,h5_contents,{},code="{}",name={},variant={})'.format(at_indexes,self._code,self._name,repr(self._variant))
+        res_str = 'H5Residue(self._h5_file,h5_contents,{},code="{}",name="{}",variant={})'.format(at_indexes,self._code,self._name,repr(self._variant))
 
         h5_contents.setdefault('residues',[]).append(res_str)
         
@@ -536,7 +536,7 @@ class Nucleotide(_ChemicalEntity):
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        res_str = 'H5Nucleotide(self._h5_file,h5_contents,{},code="{}",name={},variant={})'.format(at_indexes,self._code,self._name,repr(self._variant))
+        res_str = 'H5Nucleotide(self._h5_file,h5_contents,{},code="{}",name="{}",variant={})'.format(at_indexes,self._code,self._name,repr(self._variant))
 
         h5_contents.setdefault('nucleotides',[]).append(res_str)
         

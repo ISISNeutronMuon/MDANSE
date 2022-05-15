@@ -623,12 +623,8 @@ class NucleotidesDatabase(object):
         :return: True if the database contains a given element
         :rtype: bool
         '''
-
-        for k, v in self._data.items():
-            if nucleotide == k or nucleotide in v['alternatives']:
-                return True
         
-        return False
+        return self._residue_map.has_key(nucleotide)
 
     def __getitem__(self,item):
         '''
@@ -643,9 +639,8 @@ class NucleotidesDatabase(object):
         :type item: str or tuple
         '''
 
-        for k, v in self._data.items():
-            if item == k or item in v['alternatives']:
-                return copy.deepcopy(self._data[k])
+        if self._residue_map.has_key(item):
+            return copy.deepcopy(self._data[self._residue_map[item]])
         else:
             raise NucleotidesDatabaseError("The nucleotide {} is not registered in the database.".format(item))
 
@@ -679,7 +674,14 @@ class NucleotidesDatabase(object):
             raise NucleotidesDatabaseError('An error occured while parsing the molecules database')
         finally:
             f.close()
-        
+
+        self._residue_map = {}
+
+        for k, v in self._data.items():
+            self._residue_map[k] = k
+            for alt in v['alternatives']:
+                self._residue_map[alt] = k
+
     def add_nucleotide(self, nucleotide, is_5ter_terminus=False, is_3ter_terminus=False):
         '''
         Add a new molecule in the elements database.
@@ -776,7 +778,7 @@ class ResiduesDatabase(object):
         :rtype: bool
         '''
         
-        return self._data.has_key(residue)
+        return self._residue_map.has_key(residue)
 
     def __getitem__(self,item):
         '''
@@ -791,9 +793,9 @@ class ResiduesDatabase(object):
         :type item: str or tuple
         '''
 
-        try:
-            return copy.deepcopy(self._data[item])
-        except KeyError:                
+        if self._residue_map.has_key(item):
+            return copy.deepcopy(self._data[self._residue_map[item]])
+        else:
             raise ResiduesDatabaseError("The residue {} is not registered in the database.".format(item))
 
     def __iter__(self):
@@ -826,6 +828,13 @@ class ResiduesDatabase(object):
             raise ResiduesDatabaseError('An error occured while parsing the molecules database')
         finally:
             f.close()
+
+        self._residue_map = {}
+
+        for k, v in self._data.items():
+            self._residue_map[k] = k
+            for alt in v['alternatives']:
+                self._residue_map[alt] = k
         
     def add_residue(self, residue, is_c_terminus=False, is_n_terminus=False):
         '''

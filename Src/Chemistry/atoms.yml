@@ -9241,7 +9241,7 @@ atoms:
     xs_scattering: 5.21e-10
   Na:
     abundance: 100.0
-    alternatives: []
+    alternatives: [SOD]
     atomic_number: 11
     atomic_radius: 0.223
     atomic_weight: 22.98976967

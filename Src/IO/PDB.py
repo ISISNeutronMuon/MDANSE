@@ -967,6 +967,7 @@ class PDBPeptideChain(PDBChain):
         return self.residues and self.residues[-1].isCTerminus()
 
     def isCompatible(self, chain_data, residue_data):
+
         return chain_data['chain_id'] == self.chain_id and \
                chain_data['segment_id'] == self.segment_id and \
                residue_data['residue_name'] in RESIDUES_DATABASE

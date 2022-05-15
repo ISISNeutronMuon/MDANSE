@@ -2,7 +2,7 @@ WAT:
   alternatives: [H2O,water,TIP3]
   atoms:
     OW:
-      alternatives: [O]
+      alternatives: [O,OH2]
       bonds: [HW1,HW2]
       groups: []
       symbol: O

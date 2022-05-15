@@ -117,7 +117,7 @@ class PDBReader:
                     else:
                         break
                 else:
-                    raise UnknownAtomError('The atom {} is unknown'.format(at))
+                    raise UnknownAtomError('Unknown atom')
 
         molname = '{}_{}'.format(code,molecule.number)
         new_molecule = Molecule(code,molname)
@@ -204,8 +204,8 @@ class PDBReader:
             else:
                 raise UnknownAtomError('The atom {} is unknown'.format(at))
 
-        resname = '{}_{}'.format(code,residue.number)
-        new_residue = Residue(resname,resname,variant=nter)
+        resname = '{}{}'.format(code,residue.number)
+        new_residue = Residue(code,resname,variant=nter)
         new_residue.set_atoms(atoms_found)
 
         return new_residue
@@ -287,9 +287,9 @@ class PDBReader:
                     cter = name
                     break
             else:
-                raise UnknownAtomError('The atom {} is unknown'.format(at))
+                raise UnknownAtomError('The atoms {} are unknown'.format(atoms_not_found))
 
-        resname = '{}_{}'.format(code,residue.number)
+        resname = '{}{}'.format(code,residue.number)
         new_residue = Residue(code,resname,variant=cter)
         new_residue.set_atoms(atoms_found)
 
@@ -345,21 +345,16 @@ class PDBReader:
 
         atoms_found = [None]*len(pdb_atoms)
 
-        atoms_not_found = []
-
         for comp, pdb_atom in enumerate(pdb_atoms):
             for at, info in RESIDUES_DATABASE[code]['atoms'].items():
                 if pdb_atom == at or pdb_atom in info['alternatives']:
                     atoms_found[comp] = at
                     break
             else:
-                atoms_not_found.append(pdb_atom)
+                raise UnknownAtomError('The atom {}:{} is unknown'.format(code,pdb_atom))
 
-        if atoms_not_found:
-            raise UnknownAtomError('The atom {} is unknown'.format(at))
-
-        resname = '{}_{}'.format(code,residue.number)
-        new_residue = Residue(resname,resname,variant=None)
+        resname = '{}{}'.format(code,residue.number)
+        new_residue = Residue(code,resname,variant=None)
         new_residue.set_atoms(atoms_found)
 
         return new_residue
@@ -465,11 +460,11 @@ class PDBReader:
 if __name__ == '__main__':
 
     print('Reading')
-    pdb_reader = PDBReader('/home/pellegrini/git/MDANSE/Data/PDB/2vb1.pdb')
+    pdb_reader = PDBReader('/home/pellegrini/apoferritin.pdb')
     print('Building chemical system')
     cs = pdb_reader.build_chemical_system()
-    print('Serializing')
-    cs.serialize('test.h5')
-    print('Loading')
-    cs.load('test.h5')
-    print(cs.chemical_entities)
+    # print('Serializing')
+    # cs.serialize('test.h5')
+    # print('Loading')
+    # cs.load('test.h5')
+    # print(cs.chemical_entities)

@@ -392,14 +392,14 @@ class TrajectoryWriter:
 
         unit_cell = configuration.unit_cell
         if unit_cell is not None:
-            if 'unit_cell' not in configuration_grp:
+            if 'unit_cell' not in self._h5_file:
                 self._h5_file.create_dataset('unit_cell',data=unit_cell[np.newaxis,:,:],maxshape=(None,3,3))
             else:
                 unit_cell_dset = self._h5_file['unit_cell']
                 unit_cell_dset.resize((unit_cell_dset.shape[0]+1,3,3))
                 unit_cell_dset[-1] = unit_cell
 
-        if 'time' not in configuration_grp:
+        if 'time' not in self._h5_file:
             self._h5_file.create_dataset('time',data=[time],maxshape=(None,),dtype=float)
         else:
             dset = self._h5_file['time']
