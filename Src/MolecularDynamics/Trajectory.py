@@ -134,7 +134,7 @@ class Trajectory:
 
         traj = grp['coordinates'][:,index,:]
 
-        return traj
+        return traj    
 
     def read_com_trajectory(self, atoms, first=0, last=None, step=1, box_coordinates=False):
 
@@ -176,6 +176,19 @@ class Trajectory:
             com_traj /= np.sum(masses)
 
         return com_traj
+
+    def to_real_coordinates(self, box_coordinates, first, last, step):
+
+        if self._unit_cells is not None:
+            real_coordinates = np.empty(box_coordinates.shape,dtype=np.float)
+            comp = 0
+            for i in range(first,last,step):
+                unit_cell = self._unit_cells[i]
+                real_coordinates[comp,:] = np.matmul(unit_cell,box_coordinates[i,:])
+                comp += 1
+            return real_coordinates
+        else:
+            return box_coordinates
 
     def read_atomic_trajectory(self, index, first=0, last=None, step=1, box_coordinates=False):
 
@@ -311,25 +324,19 @@ class RigidBodyTrajectory:
         # relative coords of the CONTIGUOUS reference
         r_ref = np.zeros((len(atoms), 3), np.float)
         for a in range(len(atoms)):
-            if a == 0:
-                print(atoms[a])
-                print('ref',continuous_configuration['coordinates'][a,:], ref_cms)
             r_ref[a] = continuous_configuration['coordinates'][a,:] - ref_cms
         print(r_ref[0,:])
 
-        # main loop: storing data needed to fill M matrix 
         for a in range(len(atoms)):
             r = self._trajectory.read_atomic_trajectory(a,first, last, step, True)
 
             r = r - rcms
-            # if offset is not None:
-            #     numpy.add(r, offset[atoms[a]].array,r)
-            # trajectory._boxTransformation(r, r)
+            r = self._trajectory.to_real_coordinates(r,first,last,step)
             w = masses[a]/mass
             np.add(possq, w*np.add.reduce(r*r, -1), possq)
             np.add(possq, w*np.add.reduce(r_ref[a]*r_ref[a],-1),possq)
             np.add(cross, w*r[:,:,np.newaxis]*r_ref[np.newaxis,a,:],cross)
-        # self.trajectory._boxTransformation(rcms, rcms)
+        rcms = self._trajectory.to_real_coordinates(rcms, first, last, step)
 
         # filling matrix M (formula no 40)
         k = np.zeros((n_steps, 4, 4), np.float)

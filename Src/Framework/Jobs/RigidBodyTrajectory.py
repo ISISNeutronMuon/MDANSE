@@ -17,12 +17,15 @@ import collections
 
 import numpy as np
 
+import h5py
+
 from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import AtomCluster
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
-from MDANSE.Mathematics.LinearAlgebra import Quaternion
+from MDANSE.Mathematics.LinearAlgebra import Quaternion, Vector
+from MDANSE.Mathematics.Transformation import Translation
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
-from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter, sorted_atoms
+from MDANSE.MolecularDynamics.Trajectory import RigidBodyTrajectory, TrajectoryWriter, sorted_atoms
 
 class RigidBodyTrajectory(IJob):
     """
@@ -35,7 +38,7 @@ class RigidBodyTrajectory(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
     
     settings = collections.OrderedDict()
-    settings['trajectory']=('mmtk_trajectory',{})
+    settings['trajectory']=('hdf_trajectory',{})
     settings['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['atom_selection']=('atom_selection',{"dependencies":{'trajectory':'trajectory'}})
     settings['grouping_level']=('grouping_level',{"default" : "atom","dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection'}})
@@ -73,7 +76,7 @@ class RigidBodyTrajectory(IJob):
         
         conf = RealConfiguration(trajectory.chemical_system,coords,unitCell)
 
-        self.referenceConfiguration = conf.continuous_configuration()
+        self._reference_configuration = conf.continuous_configuration()
 
         selectedAtoms = []        
         for indexes in self.configuration['atom_selection']['indexes']:
@@ -81,7 +84,7 @@ class RigidBodyTrajectory(IJob):
                 selectedAtoms.append(atoms[idx])
 
         # Create trajectory
-        self.outputFile = TrajectoryWriter(self.configuration['output_files']['files'][0], trajectory.chemical_system, selectedAtoms)
+        self._output_trajectory = TrajectoryWriter(self.configuration['output_files']['files'][0], trajectory.chemical_system, selectedAtoms)
     
     def run_step(self, index):
         """
@@ -90,43 +93,48 @@ class RigidBodyTrajectory(IJob):
         trajectory = self.configuration['trajectory']['instance']
                                     
         currentFrame = self.configuration['frames']['value'][index]
-                
+
+        real_configuration = trajectory.configuration(currentFrame)
+
         for group_id, group in enumerate(self._groups):
             
-            rbt = trajectory.readRigidBodyTrajectory(group,
-                                                     first = currentFrame,
-                                                     last = currentFrame+1,
-                                                     skip = 1,
-                                                     reference = self.referenceConfiguration)
+            rbt = RigidBodyTrajectory(
+                trajectory,
+                group,
+                first = currentFrame,
+                last = currentFrame+1,
+                step = 1,
+                reference = self._reference_configuration)
 
-            centerOfMass = group.centerOfMass(self.referenceConfiguration)
+            center_of_mass = group.center_of_mass(self._reference_configuration)
                              
             # The rotation matrix corresponding to the selected frame in the RBT.
             transfo = Quaternion(rbt.quaternions[0]).asRotation()
 
             if self.configuration['remove_translation']['value']:
                 # The transformation matrix corresponding to the selected frame in the RBT.
-                transfo = Translation(centerOfMass)*transfo
+                transfo = Translation(center_of_mass)*transfo
                                
             # Compose with the CMS translation if the removeTranslation flag is set off.
             else:
                 # The transformation matrix corresponding to the selected frame in the RBT.
                 transfo = Translation(Vector(self._coms[group_id,index,:]))*transfo
 
-                             
             # Loop over the atoms of the group to set the RBT trajectory.
-            for atom in group:
+            for atom in group.atom_list():
                                                       
                 # The coordinates of the atoms are centered around the center of mass of the group.
-                xyz = self.referenceConfiguration[atom] - centerOfMass
-                                                                                          
-                atom.setPosition(transfo(Vector(xyz)))
-                
+                xyz = self.referenceConfiguration[atom] - center_of_mass
+
+                real_configuration['coordinates'][atom.index,:] = transfo(Vector(xyz))
+                                                                             
             self._quaternions[group_id,index,:] = rbt.quaternions[0]
             self._coms[group_id,index,:] = rbt.cms[0]
             self._fits[group_id,index] = rbt.fit[0]
-         
-        self.snapshot(data = {'time' : self.configuration['frames']['time'][currentFrame]})
+
+        self._output_trajectory._chemical_system.configuration = real_configuration
+
+        self._output_trajectory.dump_configuration(self.configuration['frames']['time'][currentFrame])
         
         return index, None
 
@@ -140,34 +148,29 @@ class RigidBodyTrajectory(IJob):
         '''
         '''
         
-        outputFile = netCDF4.Dataset(self.configuration['output_files']['files'][0], 'a')
+        outputFile = h5py.File(self.configuration['output_files']['files'][0], 'r+')
  
-        outputFile.createDimension('NGROUPS', self.configuration['atom_selection']['selection_length'])
-        outputFile.createDimension('NFRAMES', self.configuration['frames']['number'])
-        outputFile.createDimension('QUATERNIONLENGTH',4)
-        outputFile.createDimension('XYZ',3)
+        n_groups = self.configuration['atom_selection']['selection_length']
+        n_frames = self.configuration['frames']['number']
 
-        # The NetCDF variable that stores the quaternions.
-        QUATERNIONS = outputFile.createVariable('quaternions', np.dtype(np.float64).char, ('NGROUPS','NFRAMES','QUATERNIONLENGTH'))
-  
-        # The NetCDF variable that stores the centers of mass.
-        COM = outputFile.createVariable('coms', np.dtype(np.float64).char, ('NGROUPS','NFRAMES','XYZ'))
+        quaternions = outputFile.create_dataset('quaternions',shape=(n_groups, n_frames, 4),dtype=np.float)
+
+        coms = outputFile.create_dataset('coms',shape=(n_groups, n_frames, 3),dtype=np.float)
               
-        # The NetCDF variable that stores the rigid-body fit.
-        FIT = outputFile.createVariable('fits', np.dtype(np.float64).char, ('NGROUPS','NFRAMES'))
+        fits = outputFile.create_dataset('fits',shape=(n_groups, n_frames),dtype=np.float)
   
-        outputFile.info = str(self)
+        outputFile.attrs['info'] = str(self)
    
         # Loop over the groups.
         for comp in range(self.configuration['atom_selection']['selection_length']):
                
             aIndexes = self.configuration['atom_selection']['indexes'][comp]
                
-            outputFile.info += 'Group %s: %s\n' % (comp, [index for index in aIndexes])
+            outputFile.attrs['info'] += 'Group %s: %s\n' % (comp, [index for index in aIndexes])
 
-            QUATERNIONS[comp,:,:] = self._quaternions[comp,:,:]
-            COM[comp,:,:] = self._coms[comp,:,:]
-            FIT[comp,:] = self._fits[comp,:]
+            quaternions[comp,:,:] = self._quaternions[comp,:,:]
+            coms[comp,:,:] = self._coms[comp,:,:]
+            fits[comp,:] = self._fits[comp,:]
                            
         outputFile.close()
         

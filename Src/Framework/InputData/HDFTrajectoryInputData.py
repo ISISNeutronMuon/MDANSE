@@ -18,7 +18,7 @@ import numpy
 from MDANSE import REGISTRY
 from MDANSE.Framework.InputData.IInputData import InputDataError
 from MDANSE.Framework.InputData.InputFileData import InputFileData
-from MDANSE.MolecularDynamics.Trajectory import get_chemical_objects_size, get_chemical_objects_number, Trajectory
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 class HDFTrajectoryInputData(InputFileData):
         

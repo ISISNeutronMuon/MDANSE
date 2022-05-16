@@ -113,9 +113,9 @@ class _ChemicalEntity:
 
         return selected_atoms
 
-    def center_of_mass(self):
+    def center_of_mass(self, configuration):
 
-        coords = self.root_chemical_system().configuration['coordinates']
+        coords = configuration['coordinates']
 
         com = np.zeros((3,),dtype=np.float)
         sum_masses = 0.0
@@ -912,7 +912,7 @@ class ChemicalSystem(_ChemicalEntity):
     def add_chemical_entity(self, chemical_entity):
 
         if not isinstance(chemical_entity,_ChemicalEntity):
-            raise InvalidChemicalEntityError('invalid chemical entity')
+            raise InvalidChemicalEntityError('Invalid type')
 
         for at in chemical_entity.atom_list():
             if not at.ghost:
