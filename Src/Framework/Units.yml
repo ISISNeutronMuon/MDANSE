@@ -197,3 +197,7 @@ au:
 inv_nm:
   factor: 1.0e+09
   dimension: [0,-1,0,0,0,0,0,0,0]
+
+akma_time:
+  factor: 20.45482949774598e-12
+  dimension: [0,0,1,0,0,0,0,0,0]
