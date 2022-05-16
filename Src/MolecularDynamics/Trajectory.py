@@ -313,7 +313,13 @@ class Trajectory:
 
         return cog_traj
 
-    def read_com_trajectory(self, indexes, masses, first, last, step=1):
+    def read_com_trajectory(self, indexes, masses=None, first=0, last=None, step=1):
+
+        if last is None:
+            last = len(self)
+
+        if masses is None:
+            masses = np.ones(len(indexes),dtype=np.float)
 
         grp = self._h5_file['/configuration']
 
@@ -393,7 +399,7 @@ class TrajectoryWriter:
             if not k in configuration_grp:
                 dset = configuration_grp.create_dataset(k,
                                                         data=v[np.newaxis,:,:],
-                                                        maxshape=(None,n_atoms,3))
+                                                        maxshape=(None,n_atoms,3),chunks=(1,n_atoms,3))
             else:
                 dset = configuration_grp[k]
                 dset.resize((dset.shape[0]+1,n_atoms,3))
@@ -402,7 +408,7 @@ class TrajectoryWriter:
         unit_cell = configuration.unit_cell
         if unit_cell is not None:
             if 'unit_cell' not in self._h5_file:
-                self._h5_file.create_dataset('unit_cell',data=unit_cell[np.newaxis,:,:],maxshape=(None,3,3))
+                self._h5_file.create_dataset('unit_cell',data=unit_cell[np.newaxis,:,:],maxshape=(None,3,3),chunks=(1,3,3))
             else:
                 unit_cell_dset = self._h5_file['unit_cell']
                 unit_cell_dset.resize((unit_cell_dset.shape[0]+1,3,3))
