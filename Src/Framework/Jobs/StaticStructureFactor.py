@@ -60,7 +60,7 @@ class StaticStructureFactor(DistanceHistogram):
         
         shellVolumes  = shellSurfaces*self.configuration['r_values']['step']
 
-        self._outputData.add('q',"line", self.configuration['q_values']['value'], units="inv_nm") 
+        self._outputData.add('q',"line", self.configuration['q_values']['value'], units="1/nm") 
 
         q = self._outputData['q']
         r = self.configuration['r_values']['mid_points']

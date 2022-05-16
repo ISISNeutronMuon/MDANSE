@@ -1,8 +1,10 @@
+#!/usr/bin/env python
+
 # **************************************************************************
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Externals/magnitude/__init__.py
+# @file      Src/__init__.py
 # @brief     Implements module/class/test __init__
 #
 # @homepage  https://mdanse.org
@@ -13,3 +15,10 @@
 #
 # **************************************************************************
 
+if __name__ == "__main__":
+    
+    from MDANSE.GUI.Apps import UnitsEditorApp
+
+    app = UnitsEditorApp(None)
+    app.MainLoop()
+    

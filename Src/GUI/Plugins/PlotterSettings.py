@@ -17,7 +17,7 @@ import matplotlib
 
 import wx
 from MDANSE.Core.Error import Error
-from MDANSE.Externals.magnitude import magnitude
+from MDANSE.Framework.Units import UnitError, measure
 
 class UnitsSettingsError(Error):
     pass
@@ -26,8 +26,9 @@ class UnitsSettingsDialog():
     def checkUnits(self, oldUnit, newUnit):
         if oldUnit != newUnit:
             try:
-                magnitude.mg(1., oldUnit, newUnit).toval()
-            except magnitude.MagnitudeError:
+                m = measure(1.0,oldUnit,equivalent=True)
+                m.toval(newUnit)
+            except UnitError:
                 raise UnitsSettingsError("the axis unit (%s) is inconsistent with the current unit (%s) "%(newUnit, oldUnit))
 
 class ImageSettingsDialog(wx.Dialog, UnitsSettingsDialog):
