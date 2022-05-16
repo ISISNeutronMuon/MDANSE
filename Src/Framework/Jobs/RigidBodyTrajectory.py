@@ -104,7 +104,6 @@ class RigidBodyTrajectory(IJob):
             # The rotation matrix corresponding to the selected frame in the RBT.
             transfo = Quaternion(rbt.quaternions[0]).asRotation()
 
-
             if self.configuration['remove_translation']['value']:
                 # The transformation matrix corresponding to the selected frame in the RBT.
                 transfo = Translation(centerOfMass)*transfo
