@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
 
       - name: Install netCDF4 python package
@@ -65,6 +65,7 @@ jobs:
       - name: Install MDANSE
         run: |
           cd $GITHUB_WORKSPACE
+          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/setup.py $GITHUB_WORKSPACE
           $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
 
       - name: Run tests
@@ -203,7 +204,7 @@ jobs:
 
       - name: Install dependecies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app==0.26.1
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app==0.26.1 pyyaml
 
       - name: Install netCDF4 python package
         run: |
@@ -240,6 +241,7 @@ jobs:
       - name: Install MDANSE
         run: |
           cd $GITHUB_WORKSPACE
+          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/setup.py $GITHUB_WORKSPACE
           python2 setup.py install
 
       - name: Run tests
@@ -354,7 +356,7 @@ jobs:
 
       - name: Always upgrade dependencies
         run: |
-          "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe" -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
+          "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe" -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
         shell: cmd
 
       - name: Create conda environment
@@ -454,10 +456,9 @@ jobs:
 
       - name: Install MDANSE
         run: |
-          "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\VC\bin\vcvars64.bat"
-          set PATH="C:\Users\dni83241\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0";%PATH%
-          "C:\Users\runner\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat" x64
+          set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";%PATH%
           cd %GITHUB_WORKSPACE%
+          copy /y "%GITHUB_WORKSPACE%\BuildServer\setup.py" %GITHUB_WORKSPACE%
           %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe setup.py build install
         shell: cmd
 
@@ -530,7 +531,7 @@ jobs:
 
       - name: Always upgrade dependencies
         run: |
-          "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe" -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1
+          "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe" -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
         shell: cmd
 
       - name: Create conda environment
