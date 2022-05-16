@@ -2,6 +2,8 @@ import abc
 import collections
 import copy
 
+import numpy as np
+
 import h5py
 
 from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DATABASE, RESIDUES_DATABASE
@@ -111,12 +113,36 @@ class _ChemicalEntity:
 
         return selected_atoms
 
+    def center_of_mass(self):
+
+        coords = self.root_chemical_system().configuration['coordinates']
+
+        com = np.zeros((3,),dtype=np.float)
+        sum_masses = 0.0
+        for at in self.atom_list():
+            m = ATOMS_DATABASE[at.symbol]['atomic_weight']
+            com += m*coords[at.index,:]
+            sum_masses += m
+
+        com /= sum_masses
+
+        return com
+
+    def mass(self):
+
+        sum_masses = 0.0
+        for at in self.atom_list():
+            m = ATOMS_DATABASE[at.symbol]['atomic_weight']
+            sum_masses += m
+
+        return sum_masses
+
     def root_chemical_system(self):
 
-        if self._parent is None:
+        if isinstance(self,ChemicalSystem):
             return self
         else:
-            return self._parent.top_level_chemical_entity()
+            return self._parent.root_chemical_system()
 
     def top_level_chemical_entity(self):
 
@@ -896,9 +922,9 @@ class ChemicalSystem(_ChemicalEntity):
             at.true_index = self._total_number_of_atoms
             self._total_number_of_atoms += 1
 
-        self._chemical_entities.append(chemical_entity)
-
         chemical_entity.parent = self
+
+        self._chemical_entities.append(chemical_entity)
 
         self._configuration = None
 

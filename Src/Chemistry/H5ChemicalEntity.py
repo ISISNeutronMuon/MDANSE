@@ -75,7 +75,9 @@ class H5Molecule(_H5ChemicalEntity):
         atoms = []
         for atom_index in self._atom_indexes:
             h5_atom_instance = eval(self._h5_contents['atoms'][atom_index],globals(),{'self':self,'h5_contents':self._h5_contents})
-            atoms.append(h5_atom_instance.build())
+            atom = h5_atom_instance.build()
+            atom.parent = mol
+            atoms.append(atom)
 
         atoms = [at.name for at in atoms]
         mol.reorder_atoms(atoms)
@@ -104,7 +106,9 @@ class H5Residue(_H5ChemicalEntity):
         atoms = []
         for atom_index in self._atom_indexes:
             h5_atom_instance = eval(self._h5_contents['atoms'][atom_index],globals(),{'self':self,'h5_contents':self._h5_contents})
-            atoms.append(h5_atom_instance.build())
+            atom = h5_atom_instance.build()
+            atom.parent = res
+            atoms.append(atom)
 
         atoms = [at.name for at in atoms]
         res.set_atoms(atoms)
@@ -128,17 +132,19 @@ class H5Nucleotide(_H5ChemicalEntity):
     def build(self):
 
         from ChemicalEntity import Nucleotide
-        res = Nucleotide(self._code,self._name,self._variant)
+        nucl = Nucleotide(self._code,self._name,self._variant)
 
         atoms = []
         for atom_index in self._atom_indexes:
             h5_atom_instance = eval(self._h5_contents['atoms'][atom_index],globals(),{'self':self,'h5_contents':self._h5_contents})
-            atoms.append(h5_atom_instance.build())
+            atom = h5_atom_instance.build()
+            atom.parent = nucl
+            atoms.append(atom)
 
         atoms = [at.name for at in atoms]
-        res.set_atoms(atoms)
+        nucl.set_atoms(atoms)
         
-        return res
+        return nucl
 
 class H5PeptideChain(_H5ChemicalEntity):
 
@@ -159,7 +165,9 @@ class H5PeptideChain(_H5ChemicalEntity):
         residues = []
         for res_index in self._res_indexes:
             h5_residue_instance = eval(self._h5_contents['residues'][res_index],globals(),{'self':self,'h5_contents':self._h5_contents})
-            residues.append(h5_residue_instance.build())
+            res = h5_residue_instance.build()
+            res.parent = pc
+            residues.append(res)
 
         pc.set_residues(residues)
 
@@ -179,16 +187,18 @@ class H5NucleotideChain(_H5ChemicalEntity):
  
         from ChemicalEntity import NucleotideChain
 
-        pc = NucleotideChain(self._name)
+        nc = NucleotideChain(self._name)
 
         nucleotides = []
         for nucl_index in self._nucl_indexes:
             h5_nucleotide_instance = eval(self._h5_contents['nucleotides'][nucl_index],globals(),{'self':self,'h5_contents':self._h5_contents})
-            nucleotides.append(h5_nucleotide_instance.build())
+            nucl = h5_nucleotide_instance.build()
+            nucl.parent = nc
+            nucleotides.append(nucl)
 
-        pc.set_nucleotides(nucleotides)
+        nc.set_nucleotides(nucleotides)
 
-        return pc
+        return nc
 
 class H5Protein(_H5ChemicalEntity):
 
@@ -209,7 +219,9 @@ class H5Protein(_H5ChemicalEntity):
         peptide_chains = []
         for pc_index in self._peptide_chain_indexes:
             h5_peptide_chain_instance = eval(self._h5_contents['peptide_chains'][pc_index],globals(),{'self':self,'h5_contents':self._h5_contents})
-            peptide_chains.append(h5_peptide_chain_instance.build())
+            pc = h5_peptide_chain_instance.build()
+            pc.parent = p
+            peptide_chains.append(pc)
 
         p.set_peptide_chains(peptide_chains)
 

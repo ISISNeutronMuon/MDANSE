@@ -73,7 +73,7 @@ class RigidBodyTrajectory(IJob):
         
         conf = RealConfiguration(trajectory.chemical_system,coords,unitCell)
 
-        self.referenceConfiguration = conf.contiguous_coordinates()
+        self.referenceConfiguration = conf.continuous_configuration()
 
         selectedAtoms = []        
         for indexes in self.configuration['atom_selection']['indexes']:
@@ -82,11 +82,10 @@ class RigidBodyTrajectory(IJob):
 
         # Create trajectory
         self.outputFile = TrajectoryWriter(self.configuration['output_files']['files'][0], trajectory.chemical_system, selectedAtoms)
-        
     
     def run_step(self, index):
-        '''
-        '''
+        """
+        """
 
         trajectory = self.configuration['trajectory']['instance']
                                     

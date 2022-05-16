@@ -546,7 +546,7 @@ GLN:
       symbol: N
     NE2:
       alternatives: []
-      bonds: [CG, 1HE2, 2HE2]
+      bonds: [CD, 1HE2, 2HE2]
       groups: [sidechain]
       symbol: N
     O:
@@ -556,7 +556,7 @@ GLN:
       symbol: O
     OE1:
       alternatives: []
-      bonds: [CG]
+      bonds: [CD]
       groups: [sidechain]
       symbol: O
   is_c_terminus: false
@@ -631,12 +631,12 @@ GLU:
       symbol: O
     OE1:
       alternatives: []
-      bonds: [CG]
+      bonds: [CD]
       groups: [sidechain]
       symbol: O
     OE2:
       alternatives: []
-      bonds: [CG]
+      bonds: [CD]
       groups: [sidechain]
       symbol: O
   is_c_terminus: false

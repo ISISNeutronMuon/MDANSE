@@ -24,7 +24,7 @@ from MMTK.Trajectory import Trajectory
 from MDANSE.Core.Error import Error
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
-from MDANSE.Extensions import com_trajectory, fast_calculation
+from MDANSE.Extensions import atomic_trajectory, com_trajectory, fast_calculation
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 
 class MolecularDynamicsError(Error):
@@ -306,24 +306,17 @@ class Trajectory:
 
         return traj
 
-    def _read_com_trajectory_nopbc(self, coords, indexes, masses):
-
-        cog_traj = np.sum(coords*masses[np.newaxis,:,np.newaxis],axis=1)
-        cog_traj /= np.sum(masses)
-
-        return cog_traj
-
-    def read_com_trajectory(self, indexes, masses=None, first=0, last=None, step=1):
+    def read_com_trajectory(self, atoms, first=0, last=None, step=1, box_coordinates=False):
 
         if last is None:
             last = len(self)
 
-        if masses is None:
-            masses = np.ones(len(indexes),dtype=np.float)
+        indexes = [at.index for at in atoms]
+        masses = np.array([ATOMS_DATABASE[at.symbol]['atomic_weight'] for at in atoms])
 
         grp = self._h5_file['/configuration']
 
-        coords = grp['coordinates'][first:last:step,indexes,:]
+        coords = grp['coordinates'][first:last:step,:,:]
 
         if coords.ndim == 2:
             coords = coords[np.newaxis,:,:]
@@ -331,15 +324,44 @@ class Trajectory:
         if self._unit_cells is not None:
             unit_cells = self._unit_cells[first:last:step]
             inverse_unit_cells = self._inverse_unit_cells[first:last:step]
-            com_traj = com_trajectory.com_trajectory(coords,
-                                                     unit_cells,
-                                                     inverse_unit_cells,
-                                                     masses)
+
+            top_lvl_chemical_entities = set([at.top_level_chemical_entity() for at in atoms])
+            top_lvl_chemical_entities_indexes = [[at.index for at in e.atom_list()] for e in top_lvl_chemical_entities]
+            bonds = {}
+            for at in self._chemical_system.atom_list():
+                bonds[at.index] = [bat.index for bat in at.bonds]
+
+            com_traj = com_trajectory.com_trajectory(
+                coords,
+                unit_cells,
+                inverse_unit_cells,
+                masses,
+                top_lvl_chemical_entities_indexes,
+                indexes,
+                bonds,
+                box_coordinates=box_coordinates)
         
         else:
-            com_traj = self._read_com_trajectory_nopbc(coords, indexes, masses)
+            com_traj = np.sum(coords[:,indexes,:]*masses[np.newaxis,:,np.newaxis],axis=1)
+            com_traj /= np.sum(masses)
 
         return com_traj
+
+    def read_atomic_trajectory(self, index, first=0, last=None, step=1, box_coordinates=False):
+
+        if last is None:
+            last = len(self)
+
+        grp = self._h5_file['/configuration']
+        coords = grp['coordinates'][first:last:step,index,:]
+
+        if self._unit_cells is not None:
+            unit_cells = self._unit_cells[first:last:step]
+            inverse_unit_cells = self._inverse_unit_cells[first:last:step]
+            atomic_traj = atomic_trajectory.atomic_trajectory(coords,unit_cells,inverse_unit_cells,box_coordinates)
+            return atomic_traj
+        else:
+            return coords
 
     @property
     def chemical_system(self):
@@ -420,6 +442,111 @@ class TrajectoryWriter:
             dset = self._h5_file['time']
             dset.resize((dset.shape[0]+1,))
             dset[-1] = time
+
+class RigidBodyTrajectory:
+    """
+    Rigid-body trajectory data
+
+    If rbt is a RigidBodyTrajectory object, then
+
+     * len(rbt) is the number of steps stored in it
+     * rbt[i] is the value at step i (a vector for the center of mass
+       and a quaternion for the orientation)
+    """
+    
+    def __init__(self, trajectory, chemical_entity, first=0, last=None, step=1, reference=0):
+
+        self._trajectory = trajectory
+        
+        if last is None:
+            last = len(self._trajectory)
+
+        reference = self._trajectory.configuration(reference)
+        continuous_configuration = reference.continuous_configuration()
+        self._trajectory.chemical_system.configuration = continuous_configuration
+        mass = chemical_entity.mass()
+        ref_cms = chemical_entity.center_of_mass()
+        print(ref_cms)
+        atoms = chemical_entity.atom_list()
+
+        n_steps = len(range(first,last,step))
+
+        possq = np.zeros((n_steps,), np.float)
+        cross = np.zeros((n_steps, 3, 3), np.float)
+
+        masses = np.array([ATOMS_DATABASE[at.symbol]['atomic_weight'] for at in atoms])
+
+        rcms = self._trajectory.read_com_trajectory(chemical_entity.atom_list(),first,last,step,box_coordinates=True)
+
+        # relative coords of the CONTIGUOUS reference
+        r_ref = np.zeros((len(atoms), 3), np.float)
+        for a in range(len(atoms)):
+            if a == 0:
+                print(atoms[a])
+                print('ref',continuous_configuration['coordinates'][a,:], ref_cms)
+            r_ref[a] = continuous_configuration['coordinates'][a,:] - ref_cms
+        print(r_ref[0,:])
+
+        # main loop: storing data needed to fill M matrix 
+        for a in range(len(atoms)):
+            r = self._trajectory.read_atomic_trajectory(a,first, last, step, True)
+
+            r = r - rcms
+            # if offset is not None:
+            #     numpy.add(r, offset[atoms[a]].array,r)
+            # trajectory._boxTransformation(r, r)
+            w = masses[a]/mass
+            np.add(possq, w*np.add.reduce(r*r, -1), possq)
+            np.add(possq, w*np.add.reduce(r_ref[a]*r_ref[a],-1),possq)
+            np.add(cross, w*r[:,:,np.newaxis]*r_ref[np.newaxis,a,:],cross)
+        # self.trajectory._boxTransformation(rcms, rcms)
+
+        # filling matrix M (formula no 40)
+        k = np.zeros((n_steps, 4, 4), np.float)
+        k[:, 0, 0] = -cross[:, 0, 0]-cross[:, 1, 1]-cross[:, 2, 2]
+        k[:, 0, 1] = cross[:, 1, 2]-cross[:, 2, 1]
+        k[:, 0, 2] = cross[:, 2, 0]-cross[:, 0, 2]
+        k[:, 0, 3] = cross[:, 0, 1]-cross[:, 1, 0]
+        k[:, 1, 1] = -cross[:, 0, 0]+cross[:, 1, 1]+cross[:, 2, 2]
+        k[:, 1, 2] = -cross[:, 0, 1]-cross[:, 1, 0]
+        k[:, 1, 3] = -cross[:, 0, 2]-cross[:, 2, 0]
+        k[:, 2, 2] = cross[:, 0, 0]-cross[:, 1, 1]+cross[:, 2, 2]
+        k[:, 2, 3] = -cross[:, 1, 2]-cross[:, 2, 1]
+        k[:, 3, 3] = cross[:, 0, 0]+cross[:, 1, 1]-cross[:, 2, 2]
+        del cross
+        for i in range(1, 4):
+            for j in range(i):
+                k[:, i, j] = k[:, j, i]
+        np.multiply(k, 2., k)
+        for i in range(4):
+            np.add(k[:,i,i], possq, k[:,i,i])
+        del possq
+
+        quaternions = np.zeros((n_steps, 4), np.float)
+        fit = np.zeros((n_steps,), np.float)
+        for i in range(n_steps):
+            e, v = np.linalg.eig(k[i])
+            v = np.transpose(v)
+            j = np.argmin(e)
+            if e[j] < 0.0:
+                fit[i] = 0.
+            else:
+                fit[i] = np.sqrt(e[j])
+            if v[j,0] < 0.0:
+                quaternions[i] = -v[j]
+            else:
+                quaternions[i] = v[j]
+        self.fit = fit
+        self.cms = rcms
+        self.quaternions = quaternions
+
+    def __len__(self):
+        return self.cms.shape[0]
+
+    def __getitem__(self, index):
+        from MDANSE.Mathematics.Geometry import Vector
+        from MDANSE.Mathematics.LinearAlgebra import Quaternion
+        return Vector(self.cms[index]), Quaternion(self.quaternions[index])
 
 if __name__ == '__main__':
 
