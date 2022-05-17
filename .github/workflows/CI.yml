@@ -223,11 +223,6 @@ jobs:
           brew install netcdf
           sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
 
-      - run: |
-          cd $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          ls
-          python2 -c "import netCDF4"
-
       - name: Install ScientificPython
         run: |
           cd $HOME
