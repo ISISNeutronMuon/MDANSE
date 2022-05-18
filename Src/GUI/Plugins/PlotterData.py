@@ -74,10 +74,7 @@ class _IPlotterData:
     def close(self):
         """Close the data."""
         self._file.close()
-
-    def __del__(self):
-        self.close()
-
+        
 
 class NetCDFPlotterData(_IPlotterData):
     """This class implements the plotter data interface for NetCDF data."""
