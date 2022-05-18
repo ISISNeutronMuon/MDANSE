@@ -86,14 +86,27 @@ class BoxConfiguration(_Configuration):
 
     def fold_coordinates(self):
 
-        if self._unit_cell is None:
+        from MDANSE.Extensions import fold_coordinates
+
+        if self._unit_cell is not None:
+            coords = self._variables['coordinates']
+            coords = coords[np.newaxis,:,:]
+            unit_cell = self._unit_cell.T
+            inverse_unit_cell = np.linalg.inv(unit_cell)
+            unit_cells = unit_cell[np.newaxis,:,:]
+            inverse_unit_cells = inverse_unit_cell[np.newaxis,:,:]
+            coords = fold_coordinates.fold_coordinates(
+                coords,
+                unit_cells,
+                inverse_unit_cells,
+                True
+            )
+            coords = np.squeeze(coords)
+            self._variables['coordinates'] = coords
+
+        else:
             return
 
-        frac, _ = np.modf(self._variables['coordinates'])
-        frac = np.where(frac < 0.0, frac + 1.0, frac)
-        frac = np.where(frac > 0.5, frac - 1.0, frac)
-
-        self._variables['coordinates'] = frac
 
     def to_box_coordinates(self):
 
@@ -174,16 +187,26 @@ class RealConfiguration(_Configuration):
 
     def fold_coordinates(self):
 
-        if self._unit_cell is None:
+        from MDANSE.Extensions import fold_coordinates
+
+        if self._unit_cell is not None:
+            coords = self._variables['coordinates']
+            coords = coords[np.newaxis,:,:]
+            unit_cell = self._unit_cell.T
+            inverse_unit_cell = np.linalg.inv(unit_cell)
+            unit_cells = unit_cell[np.newaxis,:,:]
+            inverse_unit_cells = inverse_unit_cell[np.newaxis,:,:]
+            coords = fold_coordinates.fold_coordinates(
+                coords,
+                unit_cells,
+                inverse_unit_cells,
+                False
+            )
+            coords = np.squeeze(coords)
+            self._variables['coordinates'] = coords
+
+        else:
             return
-
-        box_coordinates = self.to_box_coordinates()
-
-        frac, _ = np.modf(box_coordinates)
-        frac = np.where(frac < 0.0, frac + 1.0, frac)
-        frac = np.where(frac > 0.5, frac - 1.0, frac)
-
-        self._variables['coordinates'] = np.matmul(frac,self._unit_cell)
 
     def to_box_coordinates(self):
 

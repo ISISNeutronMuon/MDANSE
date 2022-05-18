@@ -22,7 +22,7 @@ from MMTK.Trajectory import Trajectory
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
-from MDANSE.Extensions import atomic_trajectory, com_trajectory
+from MDANSE.Extensions import atomic_trajectory, com_trajectory, fold_coordinates
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 from MDANSE.MolecularDynamics.TrajectoryUtils import build_connectivity, resolve_undefined_molecules_name, sorted_atoms
 
@@ -144,6 +144,19 @@ class Trajectory:
         else:
             self._unit_cells = None
             self._inverse_unit_cells = None
+
+    def get_unit_cells(self):
+        """Return the direct and inverse unit cells.
+
+        :return: the directand inverse unit cells
+        :rtype: tuple
+        """
+
+        if self._unit_cells is None:
+            return (None,None)
+
+        else:
+            return (self._unit_cells, self._inverse_unit_cells)
 
     def unit_cell(self,frame):
         """Return the unit cell at a given frame. If no unit cell is defined, returns None.
@@ -470,14 +483,30 @@ class RigidBodyTrajectoryGenerator:
         for i, at in enumerate(atoms):
             r_ref[i] = reference['coordinates'][at.index,:] - ref_com
 
+        unit_cells, inverse_unit_cells = self._trajectory.get_unit_cells()
+        if unit_cells is not None:
+            unit_cells = unit_cells[first:last:step,:,:]
+            inverse_unit_cells = inverse_unit_cells[first:last:step,:,:]
+
         for i, at in enumerate(atoms):
             r = self._trajectory.read_atomic_trajectory(at.index,first, last, step, True)
             r = r - rcms
+
+            r = r[:,np.newaxis,:]
+            r = fold_coordinates.fold_coordinates(
+                r,
+                unit_cells,
+                inverse_unit_cells,
+                True
+            )
+            r = np.squeeze(r)            
+
             r = self._trajectory.to_real_coordinates(r,first,last,step)
             w = masses[i]/mass
             np.add(possq, w*np.add.reduce(r*r, -1), possq)
             np.add(possq, w*np.add.reduce(r_ref[i]*r_ref[i],-1),possq)
             np.add(cross, w*r[:,:,np.newaxis]*r_ref[np.newaxis,i,:],cross)
+            
         rcms = self._trajectory.to_real_coordinates(rcms, first, last, step)
 
         # filling matrix M
