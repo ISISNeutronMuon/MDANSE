@@ -14,6 +14,7 @@
 
 import collections
 import itertools
+from math import ceil
 import os
 from tempfile import gettempdir, tempdir
 
@@ -129,7 +130,8 @@ class CurrentCorrelationFunction(IJob):
                 velocities.createDimension('particles', nAtoms+1)
                 velocities.createDimension('time', nFrames)
                 velocities.createDimension('axis', 3)
-                velocities.createVariable('velocities', 'f8', ('particles', 'time', 'axis'))
+                velocities.createVariable('velocities', 'f8', ('particles', 'time', 'axis'),
+                                          chunksizes=(ceil((nAtoms + 1)/10), ceil(nFrames/10), 3))
 
                 vels = numpy.empty((nFrames, 3))
                 for idx in self.configuration['atom_selection']['flatten_indexes']:
@@ -143,7 +145,8 @@ class CurrentCorrelationFunction(IJob):
                         vels[:, axis] = differentiate(atomicTraj[:, axis], order=self._order,
                                                       dt=self.configuration['frames']['time_step'])
                     velocities['velocities'][idx, :, :] = vels
-            self._velocities = netCDF4.Dataset(os.path.join(gettempdir(), 'mdanse_ccf_velocities.nc'), 'r')
+            self._netcdf = netCDF4.Dataset(os.path.join(gettempdir(), 'mdanse_ccf_velocities.nc'), 'r')
+            self._velocities = self._netcdf['velocities']
 
     def run_step(self, index):
         """
@@ -179,7 +182,7 @@ class CurrentCorrelationFunction(IJob):
             rhoLong_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
             rhoTrans_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
 
-        if self._order == 'no interpolation' or (self._order != 'no interpolation' and self._mode == 0):
+        if self._order == 'no interpolation' or (self._order != 'no interpolation' and self._mode in [0, 3]):
             # loop over the trajectory time steps
             for i, frame in enumerate(self.configuration['frames']['value']):
                 conf = traj.configuration[frame]
@@ -220,15 +223,11 @@ class CurrentCorrelationFunction(IJob):
                             all_velocities[i, :, axis] = differentiate(atomicTraj[:, axis], order=self._order,
                                                                            dt=self.configuration['frames']['time_step'])
                 elif self._mode == 2:
-                    all_velocities[:, :, :] = self._velocities['velocities'][idxs, :, :]
+                    all_velocities[:, :, :] = self._velocities[idxs, :, :]
 
                 for i, frame in enumerate(self.configuration['frames']['value']):
                     coordinates = traj.configuration[frame].array[idxs, :]
-                    if self._mode == 3:
-                        velocities = self._velocities['velocities'][idxs, i, :]
-                    else:
-                        velocities = all_velocities[:, i, :]
-                    velocities = numpy.transpose(velocities)[:, :, numpy.newaxis]
+                    velocities = numpy.transpose(all_velocities[:, i, :])[:, :, numpy.newaxis]
                     tmp = numpy.exp(1j * numpy.dot(coordinates, qVectors))[numpy.newaxis, :, :]
                     rho[element][i, :, :] = numpy.add.reduce(velocities * tmp, 1)
 
@@ -307,12 +306,15 @@ class CurrentCorrelationFunction(IJob):
         
         self.configuration['trajectory']['instance'].close()
 
-        if self._order != 'no interpolation' and self._mode == 2:
-            self._velocities.close()
-            try:
-                os.remove(os.path.join(tempdir, 'mdanse_ccf_velocities.nc'))
-            except OSError:
-                pass
+        try:
+            self._netcdf.close()
+        except (AttributeError, RuntimeError):
+            pass
+
+        try:
+            os.remove(os.path.join(tempdir, 'mdanse_ccf_velocities.nc'))
+        except OSError:
+            pass
 
 
 REGISTRY['ccf'] = CurrentCorrelationFunction
