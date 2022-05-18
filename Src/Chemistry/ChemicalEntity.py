@@ -67,6 +67,10 @@ class _ChemicalEntity:
     def atom_list(self):
         pass
 
+    @abc.abstractmethod
+    def copy(self):
+        pass
+
     def full_name(self):
 
         full_name = self.name
@@ -157,30 +161,36 @@ class Atom(_ChemicalEntity):
 
         super(Atom,self).__init__()
 
-        self.symbol = kwargs.get('symbol','H')
+        self._symbol = kwargs.get('symbol','H')
 
-        if self.symbol not in ATOMS_DATABASE:
+        if self._symbol not in ATOMS_DATABASE:
             raise UnknownAtomError('The atom {} is unknown'.format(self.symbol))
 
         self._name = kwargs.pop('name',self.symbol)
 
         self._bonds = kwargs.pop('bonds',[])
 
-        self.groups = kwargs.pop('groups',[])
+        self._groups = kwargs.pop('_groups',[])
 
-        self.ghost = kwargs.pop('ghost',False)
+        self._ghost = kwargs.pop('ghost',False)
 
-        self.position = None
+        self._index = None
+
+        self._parent = None
 
         for k,v in kwargs.items():
             setattr(self,k,v)
 
-        self._index = None
+    def copy(self):
 
-        self._true_index = None
+        a = Atom(symbol=self._symbol)
 
-        for propName,propValue in ATOMS_DATABASE[self.symbol].items():
-            setattr(self,propName,propValue)
+        for k, v in self.__dict__.items():
+            setattr(a,k,v)
+
+        a._bonds = [bat.copy() for bat in self._bonds]
+
+        return a
 
     def __getitem__(self,item):
 
@@ -200,6 +210,16 @@ class Atom(_ChemicalEntity):
         return int(self.ghost)
 
     @property
+    def ghost(self):
+
+        return self._ghost
+
+    @ghost.setter
+    def ghost(self, ghost):
+
+        self._ghost = ghost
+
+    @property
     def index(self):
         return self._index
 
@@ -210,20 +230,30 @@ class Atom(_ChemicalEntity):
         self._index = index
 
     @property
+    def name(self):
+
+        return self._name
+
+    @name.setter
+    def name(self, name):
+
+        self._name = name
+
+    @property
     def bonds(self):
         return self._bonds
 
     @property
-    def true_index(self):
-        return self._true_index
+    def symbol(self):
 
-    @true_index.setter
-    def true_index(self, true_index):
-        if self._true_index is not None:
-            return
-        self._true_index = true_index
+        return self._symbol
 
-    def serialize(self,h5_file, h5_contents):
+    @symbol.setter
+    def symbol(self, symbol):
+
+        self._symbol = symbol
+
+    def serialize(self, h5_file, h5_contents):
 
         atom_str = 'H5Atom(self._h5_file,h5_contents,symbol="{}", name="{}", ghost={})'.format(self.symbol,self.name,self.ghost)
 
@@ -242,7 +272,7 @@ class AtomCluster(_ChemicalEntity):
         self._atoms = []
         for at in atoms:
             if not parentless:
-                at.parent = self
+                at._parent = self
             self._atoms.append(at)
 
     def __getitem__(self,item):
@@ -251,6 +281,17 @@ class AtomCluster(_ChemicalEntity):
 
     def atom_list(self):
         return list([at for at in self._atoms if not at.ghost])
+
+    def copy(self):
+
+        atoms = [atom.copy() for atom in self._atoms]
+
+        ac = AtomCluster(self._name,atoms,self._parentless)
+
+        for at in ac._atoms:
+            at._parent = ac
+
+        return ac
 
     def number_of_atoms(self):
         return len([at for at in self._atoms if not at.ghost])
@@ -303,18 +344,16 @@ class Molecule(_ChemicalEntity):
 
         for molname, molinfo in MOLECULES_DATABASE.items():
             if code == molname or code in molinfo['alternatives']:
+                for at, atinfo in molinfo['atoms'].items():
+                    info = copy.deepcopy(atinfo)
+                    atom = Atom(name=at,**info)
+                    atom.parent = self
+                    self._atoms[at] = atom
+
+                self._set_bonds()
                 break
         else:
             raise UnknownMoleculeError(code)
-
-        for at, atinfo in molinfo['atoms'].items():
-
-            info = copy.deepcopy(atinfo)
-            atom = Atom(name=at,**info)
-            atom.parent = self
-            self._atoms[at] = atom
-
-        self._set_bonds()
 
     def __getitem__(self,item):
         return self._atoms[item]
@@ -334,6 +373,19 @@ class Molecule(_ChemicalEntity):
     @property
     def code(self):
         return self._code
+
+    def copy(self):
+
+        m = Molecule(self._code, self._name)
+
+        atom_names = [at for at in self._atoms]
+
+        m.reorder_atoms(atom_names)
+
+        for at in m._atoms.values():
+            at._parent = m
+
+        return m
 
     def number_of_atoms(self):
         return len([at for at in self._atoms.values() if not at.ghost])
@@ -455,6 +507,17 @@ class Residue(_ChemicalEntity):
     def code(self):
         return self._code
 
+    def copy(self):
+
+        r  = Residue(self._code, self._name, self._variant)
+        atoms = [at for at in self._atoms]
+        r.set_atoms(atoms)
+
+        for at in r._atoms.values():
+            at._parent = r
+
+        return r
+
     def serialize(self,h5_file, h5_contents):
 
         if 'atoms' in h5_contents:
@@ -506,6 +569,17 @@ class Nucleotide(_ChemicalEntity):
 
     def __getitem__(self,item):
         return self._atoms[item]
+
+    def copy(self):
+
+        n  = Nucleotide(self._code, self._name, self._variant)
+        atoms = [at for at in self._atoms]
+        n.set_atoms(atoms)
+
+        for at in n._atoms.values():
+            at._parent = n
+
+        return n
 
     def set_atoms(self, atoms):
 
@@ -628,6 +702,21 @@ class NucleotideChain(_ChemicalEntity):
                 atoms.append(at)
         return atoms
 
+    def copy(self):
+
+        nc = NucleotideChain(self._code, self._name)
+
+        nucleotides = [nucl.copy() for nucl in self._nucleotides]
+
+        nc._nucleotides = nucleotides
+
+        for nucl in nc._nucleotides:
+            nucl._parent = nc
+
+        nc._connect_residues()
+
+        return nc
+
     @property
     def nucleotides(self):
 
@@ -737,6 +826,21 @@ class PeptideChain(_ChemicalEntity):
                 atoms.append(at)
         return atoms
 
+    def copy(self):
+
+        pc = PeptideChain(self._name)
+
+        residues = [res.copy() for res in self._residues]
+
+        pc._residues = residues
+
+        for res in pc._residues:
+            res._parent = pc
+
+        pc._connect_residues()
+
+        return pc
+
     def number_of_atoms(self):
 
         number_of_atoms = 0
@@ -754,7 +858,6 @@ class PeptideChain(_ChemicalEntity):
     @property
     def peptide_chains(self):
         return [self]
-
 
     @property
     def peptides(self):
@@ -824,6 +927,19 @@ class Protein(_ChemicalEntity):
             if 'backbone' in at.groups:
                 atoms.append(at)
         return atoms
+
+    def copy(self):
+
+        p = Protein(self._name)
+
+        peptide_chains = [pc.copy() for pc in self._peptide_chains]
+
+        p._peptide_chains = peptide_chains
+
+        for pc in p._peptide_chains:
+            pc._parent = p
+
+        return p
 
     def number_of_atoms(self):
 
@@ -900,6 +1016,8 @@ class ChemicalSystem(_ChemicalEntity):
 
     def __init__(self, name=''):
 
+        super(ChemicalSystem,self).__init__()
+
         self._chemical_entities = []
 
         self._configuration = None
@@ -909,8 +1027,6 @@ class ChemicalSystem(_ChemicalEntity):
         self._total_number_of_atoms = 0
 
         self._name = name
-
-        self._parent = None
 
     def add_chemical_entity(self, chemical_entity):
 
@@ -922,7 +1038,6 @@ class ChemicalSystem(_ChemicalEntity):
                 at.index = self._number_of_atoms
                 self._number_of_atoms += 1
 
-            at.true_index = self._total_number_of_atoms
             self._total_number_of_atoms += 1
 
         chemical_entity.parent = self
@@ -954,6 +1069,35 @@ class ChemicalSystem(_ChemicalEntity):
             raise InconsistentChemicalSystemError('Mismatch between chemical systems')
 
         self._configuration = configuration
+
+    def copy(self):
+
+        cs = ChemicalSystem(self._name)
+
+        cs._parent = self._parent
+
+        cs._chemical_entities = [ce.copy() for ce in self._chemical_entities]
+
+        cs._number_of_atoms = self._number_of_atoms
+
+        cs._total_number_of_atoms = self._total_number_of_atoms
+
+        for ce in cs._chemical_entities:
+            ce._parent = cs
+
+        if self._configuration is not None:
+
+            variables = copy.deepcopy(self._configuration.variables)
+            
+            conf = self._configuration.__class__(
+                cs,
+                variables.pop('coordinates'),
+                self._configuration.unit_cell,
+                **variables)
+
+            cs._configuration = conf
+
+        return cs
 
     def load(self, h5_filename):
 

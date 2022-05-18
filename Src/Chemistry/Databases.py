@@ -122,7 +122,7 @@ class AtomsDatabase:
         '''
                         
         for v in self._data.values():
-            yield copy.deepcopy(v)
+            yield copy.copy(v)
 
     def _load(self):
         '''
@@ -497,7 +497,7 @@ class MoleculesDatabase(object):
 
         for k, v in self._data.items():
             if item == k or item in v['alternatives']:
-                return copy.deepcopy(self._data[k])
+                return copy.copy(self._data[k])
         else:
             raise MoleculesDatabaseError("The molecule {} is not registered in the database.".format(item))
 
@@ -507,7 +507,7 @@ class MoleculesDatabase(object):
         '''
                         
         for v in self._data.values():
-            yield copy.deepcopy(v)
+            yield copy.copy(v)
             
     def _load(self):
         '''
@@ -640,7 +640,7 @@ class NucleotidesDatabase(object):
         '''
 
         if self._residue_map.has_key(item):
-            return copy.deepcopy(self._data[self._residue_map[item]])
+            return copy.copy(self._data[self._residue_map[item]])
         else:
             raise NucleotidesDatabaseError("The nucleotide {} is not registered in the database.".format(item))
 
@@ -650,7 +650,7 @@ class NucleotidesDatabase(object):
         '''
                         
         for v in self._data.values():
-            yield copy.deepcopy(v)
+            yield copy.copy(v)
             
     def _load(self):
         '''
@@ -794,7 +794,7 @@ class ResiduesDatabase(object):
         '''
 
         if self._residue_map.has_key(item):
-            return copy.deepcopy(self._data[self._residue_map[item]])
+            return copy.copy(self._data[self._residue_map[item]])
         else:
             raise ResiduesDatabaseError("The residue {} is not registered in the database.".format(item))
 
@@ -804,7 +804,7 @@ class ResiduesDatabase(object):
         '''
                         
         for v in self._data.values():
-            yield copy.deepcopy(v)
+            yield copy.copy(v)
             
     def _load(self):
         '''

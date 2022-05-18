@@ -477,6 +477,20 @@ if __name__ == '__main__':
     pdb_reader = PDBReader('/home/pellegrini/apoferritin.pdb')
     print('Building chemical system')
     cs = pdb_reader.build_chemical_system()
+
+    from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+
+    conf = RealConfiguration(
+        cs,
+        np.empty((cs.number_of_atoms(),3),dtype=np.float),
+        np.empty((3,3),dtype=np.float),
+        **{'velocities':np.empty((cs.number_of_atoms(),3),dtype=np.float)})
+    cs.configuration = conf
+
+    cs1 = cs.copy()
+
+    print(cs1.configuration['velocities'])
+
     # print('Serializing')
     # cs.serialize('test.h5')
     # print('Loading')
