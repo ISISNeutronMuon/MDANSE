@@ -233,7 +233,7 @@ class Atom(_ChemicalEntity):
 
 class AtomCluster(_ChemicalEntity):
 
-    def __init__(self, name, atoms):
+    def __init__(self, name, atoms, parentless=False):
 
         super(AtomCluster,self).__init__()
 
@@ -241,7 +241,8 @@ class AtomCluster(_ChemicalEntity):
 
         self._atoms = []
         for at in atoms:
-            at.parent = self
+            if not parentless:
+                at.parent = self
             self._atoms.append(at)
 
     def __getitem__(self,item):
@@ -841,6 +842,8 @@ class Protein(_ChemicalEntity):
     def set_peptide_chains(self, peptide_chains):
 
         self._peptide_chains = peptide_chains
+        for pc in self._peptide_chains:
+            pc.parent = self
 
     @property
     def peptide_chains(self):
@@ -951,9 +954,6 @@ class ChemicalSystem(_ChemicalEntity):
             raise InconsistentChemicalSystemError('Mismatch between chemical systems')
 
         self._configuration = configuration
-
-        for comp, at in enumerate(self.atom_list()):
-            at.position = self._configuration['coordinates'][comp,:]
 
     def load(self, h5_filename):
 

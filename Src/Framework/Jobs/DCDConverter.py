@@ -284,7 +284,7 @@ class DCDConverter(Converter):
         resolve_undefined_molecules_name(self._chemical_system)
                             
         # A trajectory is opened for writing.
-        self._trajectory = TrajectoryWriter(self.configuration['output_file']['file'], self._chemical_system)
+        self._trajectory = TrajectoryWriter(self.configuration['output_file']['file'], self._chemical_system,self.numberOfSteps)
                 
     def run_step(self, index):
         """
@@ -302,7 +302,7 @@ class DCDConverter(Converter):
 
         conf = RealConfiguration(self._chemical_system,config,unit_cell)
                         
-        if self.configuration['fold']["value"]:        
+        if self.configuration['fold']["value"]:
             conf.fold_coordinates()
 
         self._chemical_system.configuration = conf

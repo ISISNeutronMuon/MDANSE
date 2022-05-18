@@ -16,7 +16,6 @@
 import cython
 import numpy as np 
 cimport numpy as np 
-from numpy cimport ndarray
 
 cdef extern from "math.h":
 
@@ -28,22 +27,18 @@ cdef inline double round(double r):
     return floor(r + 0.5) if (r > 0.0) else ceil(r - 0.5)
 
 def _recursive_contiguity(
-    ndarray[np.float64_t, ndim=2] contiguous_coords,
-    ndarray[np.float64_t, ndim=2] cell not None,
-    ndarray[np.float64_t, ndim=2] rcell not None,
-    ndarray[np.int8_t, ndim=1] processed not None,
+    np.ndarray[np.float64_t, ndim=2] box_coords,
+    np.ndarray[np.int8_t, ndim=1] processed not None,
     bonds,
     ref):
 
-    cdef double refx, refy, refz, brefx, brefy, brefz,x, y, z, bx, by, bz, bdx, bdy, bdz
+    cdef int bat
 
-    refx = contiguous_coords[ref,0]
-    refy = contiguous_coords[ref,1]
-    refz = contiguous_coords[ref,2]
+    cdef double brefx, brefy, brefz, bx, by, bz, bdx, bdy, bdz
 
-    brefx = refx*rcell[0,0] + refy*rcell[0,1] + refz*rcell[0,2]
-    brefy = refx*rcell[1,0] + refy*rcell[1,1] + refz*rcell[1,2]
-    brefz = refx*rcell[2,0] + refy*rcell[2,1] + refz*rcell[2,2]
+    brefx = box_coords[ref,0]
+    brefy = box_coords[ref,1]
+    brefz = box_coords[ref,2]
 
     bonded_atoms = bonds[ref]
 
@@ -54,13 +49,9 @@ def _recursive_contiguity(
         if processed[bat] == 1:
             continue
 
-        x = contiguous_coords[bat,0]
-        y = contiguous_coords[bat,1]
-        z = contiguous_coords[bat,2]
-
-        bx = x*rcell[0,0] + y*rcell[0,1] + z*rcell[0,2]
-        by = x*rcell[1,0] + y*rcell[1,1] + z*rcell[1,2]
-        bz = x*rcell[2,0] + y*rcell[2,1] + z*rcell[2,2]
+        bx = box_coords[bat,0]
+        by = box_coords[bat,1]
+        bz = box_coords[bat,2]
 
         bdx = bx - brefx
         bdy = by - brefy
@@ -74,20 +65,20 @@ def _recursive_contiguity(
         by = brefy + bdy
         bz = brefz + bdz
 
-        contiguous_coords[bat,0] = bx*cell[0,0] + by*cell[0,1] + bz*cell[0,2]
-        contiguous_coords[bat,1] = bx*cell[1,0] + by*cell[1,1] + bz*cell[1,2]
-        contiguous_coords[bat,2] = bx*cell[2,0] + by*cell[2,1] + bz*cell[2,2]
+        box_coords[bat,0] = bx
+        box_coords[bat,1] = by
+        box_coords[bat,2] = bz
 
-        _recursive_contiguity(contiguous_coords,cell,rcell,processed, bonds, bat)
+        _recursive_contiguity(box_coords,processed, bonds, bat)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
 def com_trajectory(
-    ndarray[np.float64_t, ndim=3] coords not None,
-    ndarray[np.float64_t, ndim=3] cell not None,
-    ndarray[np.float64_t, ndim=3] rcell not None,
-    ndarray[np.float64_t, ndim=1] masses not None,
+    np.ndarray[np.float64_t, ndim=3] coords not None,
+    np.ndarray[np.float64_t, ndim=3] cell not None,
+    np.ndarray[np.float64_t, ndim=3] rcell not None,
+    np.ndarray[np.float64_t, ndim=1] masses not None,
     chemical_entity_indexes,
     selected_indexes,
     bonds,
@@ -95,37 +86,52 @@ def com_trajectory(
 
     cdef double x, y, z, refx, refy, refz, \
                 srefx, srefy, srefz, sx, sy, sz, sdx, sdy, sdz, \
-                sumMasses, comx, comy, comz, refcomx, refcomy, refcomz
+                sumMasses, comx, comy, comz
 
-    cdef int i, j
+    cdef int i, j, idx, idx0
 
-    cdef ndarray[np.float64_t, ndim=2] trajectory = np.empty((coords.shape[0],3),dtype=np.float)
+    cdef np.ndarray[np.float64_t, ndim=2] trajectory = np.empty((coords.shape[0],3),dtype=np.float)
 
-    cdef ndarray[np.float64_t, ndim=2] continuous_coords
+    cdef np.ndarray[np.float64_t, ndim=2] com_coords
 
     cdef np.ndarray[np.int8_t] processed
+
+    cdef np.ndarray[np.float64_t, ndim=3] box_coords = np.empty((coords.shape[0],coords.shape[1],3),dtype=np.float)
 
     # Loop over the time
     for 0 <= i < coords.shape[0]:
 
-        continuous_coords = coords[i,:,:]
+        # Loop over the atoms
+        for 0 <= j < coords.shape[1]:
 
-        processed = np.zeros((continuous_coords.shape[0],), dtype=np.int8)
+            x = coords[i,j,0]
+            y = coords[i,j,1]
+            z = coords[i,j,2]
+
+            # Convert the real coordinates to box coordinates
+            box_coords[i,j,0] = x*rcell[i,0,0] + y*rcell[i,0,1] + z*rcell[i,0,2]
+            box_coords[i,j,1] = x*rcell[i,1,0] + y*rcell[i,1,1] + z*rcell[i,1,2]
+            box_coords[i,j,2] = x*rcell[i,2,0] + y*rcell[i,2,1] + z*rcell[i,2,2]
+
+    # Loop over the time
+    for 0 <= i < coords.shape[0]:
+
+        com_coords = box_coords[i,:,:]
+
+        processed = np.zeros((com_coords.shape[0],), dtype=np.int8)
 
         for idxs in chemical_entity_indexes:
 
             if len(idxs) > 1:
                 ref_idx = idxs.pop(0)
-                _recursive_contiguity(continuous_coords, cell[i,:,:], rcell[i,:,:], processed, bonds, ref_idx)
+                _recursive_contiguity(com_coords, processed, bonds, ref_idx)
+
+        idx0 = selected_indexes[0]
 
         # The first atom is taken as reference
-        refx = continuous_coords[selected_indexes[0],0]
-        refy = continuous_coords[selected_indexes[0],1]
-        refz = continuous_coords[selected_indexes[0],2]
-
-        srefx = refx*rcell[i,0,0] + refy*rcell[i,0,1] + refz*rcell[i,0,2]
-        srefy = refx*rcell[i,1,0] + refy*rcell[i,1,1] + refz*rcell[i,1,2]
-        srefz = refx*rcell[i,2,0] + refy*rcell[i,2,1] + refz*rcell[i,2,2]
+        srefx = com_coords[idx0,0]
+        srefy = com_coords[idx0,1]
+        srefz = com_coords[idx0,2]
 
         comx = masses[0]*srefx
         comy = masses[0]*srefy
@@ -133,19 +139,16 @@ def com_trajectory(
 
         sumMasses = masses[0]
 
-        # Loop over the atoms
+        # Loop over the other atoms (if any)
         for j in range(1,len(selected_indexes)):
 
             idx = selected_indexes[j]
 
-            x = continuous_coords[idx,0]
-            y = continuous_coords[idx,1]
-            z = continuous_coords[idx,2]
+            sx = com_coords[idx,0]
+            sy = com_coords[idx,1]
+            sz = com_coords[idx,2]
 
-            sx = x*rcell[i,0,0] + y*rcell[i,0,1] + z*rcell[i,0,2]
-            sy = x*rcell[i,1,0] + y*rcell[i,1,1] + z*rcell[i,1,2]
-            sz = x*rcell[i,2,0] + y*rcell[i,2,1] + z*rcell[i,2,2]
-
+            # Update the center of mass
             comx += masses[j]*sx
             comy += masses[j]*sy
             comz += masses[j]*sz

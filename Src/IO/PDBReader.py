@@ -3,7 +3,7 @@ import string
 
 import numpy as np
 
-from MDANSE.Chemistry.ChemicalEntity import Nucleotide, is_molecule, Atom, AtomCluster, ChemicalSystem, Molecule, Nucleotide, NucleotideChain, Residue, PeptideChain, UnknownAtomError
+from MDANSE.Chemistry.ChemicalEntity import Nucleotide, is_molecule, Atom, AtomCluster, ChemicalSystem, Molecule, Nucleotide, NucleotideChain, Residue, PeptideChain, Protein, UnknownAtomError
 from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DATABASE, RESIDUES_DATABASE
 from MDANSE.IO.PDB import PDBMolecule, PDBNucleotideChain, PDBPeptideChain, Structure
 
@@ -28,22 +28,36 @@ class PDBReader:
 
     def _build_chemical_entities(self):
 
+        peptide_chains = []
         for pdb_element in self._struct.objects:
             if isinstance(pdb_element,PDBPeptideChain):
-                self._chemicalEntities.append(self._process_peptide_chain(pdb_element))
+                peptide_chains.append(self._process_peptide_chain(pdb_element))
+            else:
 
-            elif isinstance(pdb_element,PDBNucleotideChain):
-                self._chemicalEntities.append(self._process_nucleotide_chain(pdb_element))
+                if peptide_chains:
+                    p = Protein()
+                    p.set_peptide_chains(peptide_chains)
+                    self._chemicalEntities.append(p)
+                    peptide_chains = []
 
-            elif isinstance(pdb_element,PDBMolecule):
+                if isinstance(pdb_element,PDBNucleotideChain):
+                    self._chemicalEntities.append(self._process_nucleotide_chain(pdb_element))
 
-                if len(pdb_element) == 1:
-                    self._chemicalEntities.append(self._process_atom(pdb_element[0]))
-                else:                
-                    if is_molecule(pdb_element.name):
-                        self._chemicalEntities.append(self._process_molecule(pdb_element))            
-                    else:
-                        self._chemicalEntities.append(self._process_atom_cluster(pdb_element))            
+                elif isinstance(pdb_element,PDBMolecule):
+
+                    if len(pdb_element) == 1:
+                        self._chemicalEntities.append(self._process_atom(pdb_element[0]))
+                    else:                
+                        if is_molecule(pdb_element.name):
+                            self._chemicalEntities.append(self._process_molecule(pdb_element))            
+                        else:
+                            self._chemicalEntities.append(self._process_atom_cluster(pdb_element))            
+
+        if peptide_chains:
+            p = Protein()
+            p.set_peptide_chains(peptide_chains)
+            self._chemicalEntities.append(p)
+            peptide_chains = []
 
     def _guess_atom_symbol(self, atom):
 

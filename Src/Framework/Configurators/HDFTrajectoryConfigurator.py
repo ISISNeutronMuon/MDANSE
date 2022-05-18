@@ -59,7 +59,7 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
             self['md_time_step'] = 1.0
             
         self["chemical_system"] = inputTraj.chemical_system
-                        
+
         self['has_velocities'] = 'velocities' in self['instance'].h5_file['/configuration']
                 
     def get_information(self):

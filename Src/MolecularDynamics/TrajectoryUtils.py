@@ -66,7 +66,7 @@ def build_connectivity(chemicalSystem ,tolerance=0.05, unit_cell=None):
                 singleAtomsObjects.extend(ce.atom_list())
 
     if singleAtomsObjects:
-        scannedObjects.append(AtomCluster('',singleAtomsObjects))
+        scannedObjects.append(AtomCluster('',singleAtomsObjects, parentless=True))
                 
     for ce in scannedObjects:
                                                         
@@ -174,9 +174,9 @@ def resolve_undefined_molecules_name(chemicalSystem):
         if not ce.name.strip():
             ce.name = brute_formula(ce,sep="")
 
-def sorted_atoms(chemicalSystem,attribute=None):
+def sorted_atoms(atoms,attribute=None):
 
-    atoms = sorted(chemicalSystem.atom_list(), key = operator.attrgetter('index'))
+    atoms = sorted(atoms, key = operator.attrgetter('index'))
     
     if attribute is None:
         return atoms

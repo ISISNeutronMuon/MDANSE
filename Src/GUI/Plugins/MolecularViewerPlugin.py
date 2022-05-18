@@ -278,7 +278,7 @@ class MolecularViewerPlugin(ComponentPlugin):
         
         self._nFrames = len(trajectory)
 
-        self._atoms = sorted_atoms(trajectory.chemical_system)
+        self._atoms = sorted_atoms(trajectory.chemical_system.atom_list())
         
         # The number of atoms of the universe stored by the trajectory.
         self._nAtoms = trajectory.chemical_system.number_of_atoms()

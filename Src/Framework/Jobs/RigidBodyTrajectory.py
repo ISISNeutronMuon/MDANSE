@@ -20,12 +20,13 @@ import numpy as np
 import h5py
 
 from MDANSE import REGISTRY
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import AtomCluster
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.Mathematics.LinearAlgebra import Quaternion, Vector
 from MDANSE.Mathematics.Transformation import Translation
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
-from MDANSE.MolecularDynamics.Trajectory import RigidBodyTrajectory, TrajectoryWriter, sorted_atoms
+from MDANSE.MolecularDynamics.Trajectory import RigidBodyTrajectoryGenerator, TrajectoryWriter, sorted_atoms
 
 class RigidBodyTrajectory(IJob):
     """
@@ -44,13 +45,13 @@ class RigidBodyTrajectory(IJob):
     settings['grouping_level']=('grouping_level',{"default" : "atom","dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['reference']=('integer',{"mini":0})
     settings['remove_translation']=('boolean',{'default':False})
-    settings['output_files']=('output_files', {"formats":["netcdf"]})
+    settings['output_files']=('output_files', {"formats":["hdf"]})
     
     def initialize(self):
         """
         """
         
-        self.numberOfSteps = self.configuration['frames']['number']
+        # self.numberOfSteps = self.configuration['frames']['number']
          
         if (self.configuration['reference']['value'] >= self.configuration['trajectory']['length']):
             raise JobError(self,'Invalid reference frame. Must be an integer in [%d,%d[' % (0,self.configuration['trajectory']['length']))
@@ -58,14 +59,16 @@ class RigidBodyTrajectory(IJob):
         self._quaternions = np.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number'], 4),dtype=np.float64)
         self._coms = np.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number'], 3),dtype=np.float64)
         self._fits = np.zeros((self.configuration['atom_selection']['selection_length'],self.configuration['frames']['number']),dtype=np.float64)
-            
-        atoms = sorted_atoms(self.configuration['trajectory'].chemical_system.atom_list())
+
+        atoms = sorted_atoms(self.configuration['trajectory']['instance'].chemical_system.atom_list())
 
         self._groups = []
 
         for i in range(self.configuration['atom_selection']['selection_length']):
             indexes = self.configuration['atom_selection']["indexes"][i]
-            self._groups.append(AtomCluster('',[atoms[idx] for idx in indexes]))
+            self._groups.append(AtomCluster('',[atoms[idx] for idx in indexes],parentless=True))
+
+        self.numberOfSteps = len(self._groups)
 
         self.referenceFrame = self.configuration['reference']['value']
 
@@ -84,57 +87,27 @@ class RigidBodyTrajectory(IJob):
                 selectedAtoms.append(atoms[idx])
 
         # Create trajectory
-        self._output_trajectory = TrajectoryWriter(self.configuration['output_files']['files'][0], trajectory.chemical_system, selectedAtoms)
-    
+        self._output_trajectory = TrajectoryWriter(self.configuration['output_files']['files'][0], trajectory.chemical_system, self.configuration['frames']['number'], selectedAtoms)
+
+        self._group_atoms = [group.atom_list() for group in self._groups]
+
     def run_step(self, index):
         """
         """
 
-        trajectory = self.configuration['trajectory']['instance']
-                                    
-        currentFrame = self.configuration['frames']['value'][index]
+        trajectory = self.configuration['trajectory']['instance']        
 
-        real_configuration = trajectory.configuration(currentFrame)
+        rbt = RigidBodyTrajectoryGenerator(
+            trajectory,
+            self._groups[index],
+            self._reference_configuration,
+            first = self.configuration['frames']['first'],
+            last = self.configuration['frames']['last']+1,
+            step = self.configuration['frames']['step'])
 
-        for group_id, group in enumerate(self._groups):
-            
-            rbt = RigidBodyTrajectory(
-                trajectory,
-                group,
-                first = currentFrame,
-                last = currentFrame+1,
-                step = 1,
-                reference = self._reference_configuration)
-
-            center_of_mass = group.center_of_mass(self._reference_configuration)
-                             
-            # The rotation matrix corresponding to the selected frame in the RBT.
-            transfo = Quaternion(rbt.quaternions[0]).asRotation()
-
-            if self.configuration['remove_translation']['value']:
-                # The transformation matrix corresponding to the selected frame in the RBT.
-                transfo = Translation(center_of_mass)*transfo
-                               
-            # Compose with the CMS translation if the removeTranslation flag is set off.
-            else:
-                # The transformation matrix corresponding to the selected frame in the RBT.
-                transfo = Translation(Vector(self._coms[group_id,index,:]))*transfo
-
-            # Loop over the atoms of the group to set the RBT trajectory.
-            for atom in group.atom_list():
-                                                      
-                # The coordinates of the atoms are centered around the center of mass of the group.
-                xyz = self.referenceConfiguration[atom] - center_of_mass
-
-                real_configuration['coordinates'][atom.index,:] = transfo(Vector(xyz))
-                                                                             
-            self._quaternions[group_id,index,:] = rbt.quaternions[0]
-            self._coms[group_id,index,:] = rbt.cms[0]
-            self._fits[group_id,index] = rbt.fit[0]
-
-        self._output_trajectory._chemical_system.configuration = real_configuration
-
-        self._output_trajectory.dump_configuration(self.configuration['frames']['time'][currentFrame])
+        self._quaternions[index,:,:] = rbt.quaternions
+        self._coms[index,:,:] = rbt.cms
+        self._fits[index,:] = rbt.fit
         
         return index, None
 
@@ -147,7 +120,44 @@ class RigidBodyTrajectory(IJob):
     def finalize(self):
         '''
         '''
-        
+
+        group_coms = [group.center_of_mass(self._reference_configuration) for group in self._groups]
+
+        trajectory = self.configuration['trajectory']['instance']        
+
+        for i in range(self._quaternions.shape[1]):
+            current_frame = self.configuration['frames']['value'][i]
+            time = self.configuration['frames']['time'][i]
+
+            real_configuration = trajectory.configuration(current_frame)
+
+            for group_id in range(self._quaternions.shape[0]):
+
+                center_of_mass = group_coms[group_id]
+                                
+                # The rotation matrix corresponding to the selected frame in the RBT.
+                transfo = Quaternion(self._quaternions[group_id,i,:]).asRotation()
+
+                if self.configuration['remove_translation']['value']:
+                    # The transformation matrix corresponding to the selected frame in the RBT.
+                    transfo = Translation(center_of_mass)*transfo
+                                
+                # Compose with the CMS translation if the removeTranslation flag is set off.
+                else:
+                    # The transformation matrix corresponding to the selected frame in the RBT.
+                    transfo = Translation(Vector(self._coms[group_id,i,:]))*transfo
+
+                # Loop over the atoms of the group to set the RBT trajectory.
+                for atom in self._group_atoms[group_id]:
+                                                        
+                    # The coordinates of the atoms are centered around the center of mass of the group.
+                    xyz = self._reference_configuration['coordinates'][atom.index,:] - center_of_mass
+
+                    real_configuration['coordinates'][atom.index,:] = transfo(Vector(xyz))
+
+            self._output_trajectory._chemical_system.configuration = real_configuration
+            self._output_trajectory.dump_configuration(time)
+
         outputFile = h5py.File(self.configuration['output_files']['files'][0], 'r+')
  
         n_groups = self.configuration['atom_selection']['selection_length']

@@ -18,6 +18,7 @@ import operator
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import SingleChoiceConfigurator
+from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 LEVELS = collections.OrderedDict()
 LEVELS["atom"]     = {"atom" : 0, "atomcluster" : 0, "molecule" : 0, "nucleotidechain" : 0, "peptidechain" : 0, "protein" : 0}
@@ -79,7 +80,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         trajConfig = self._configurable[self._dependencies['trajectory']]
         atomSelectionConfig = self._configurable[self._dependencies['atom_selection']]
 
-        allAtoms = sorted(trajConfig["chemical_system"].atom_list(), key = operator.attrgetter('index'))
+        allAtoms = sorted_atoms(trajConfig["chemical_system"].atom_list())
 
         groups = collections.OrderedDict()
         for i in range(atomSelectionConfig["selection_length"]):
