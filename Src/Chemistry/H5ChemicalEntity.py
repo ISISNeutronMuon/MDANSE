@@ -30,7 +30,6 @@ class H5Atom(_H5ChemicalEntity):
 
         from ChemicalEntity import Atom
         a = Atom(symbol=self._symbol,name=self._name, ghost=self._ghost)
-
         return a
 
 class H5AtomCluster(_H5ChemicalEntity):
@@ -78,10 +77,13 @@ class H5Molecule(_H5ChemicalEntity):
             atom = h5_atom_instance.build()
             atom.parent = mol
             atoms.append(atom)
-
-        atoms = [at.name for at in atoms]
-        mol.reorder_atoms(atoms)
         
+        atom_names = [at.name for at in atoms]
+        mol.reorder_atoms(atom_names)
+
+        for i, at in enumerate(mol.atom_list()):
+            at.ghost = atoms[i].ghost
+
         return mol
 
 class H5Residue(_H5ChemicalEntity):

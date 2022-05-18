@@ -28,9 +28,9 @@ cdef extern from "math.h":
 cdef inline double round(double r):
     return floor(r + 0.5) if (r > 0.0) else ceil(r - 0.5)
 
-def contiguous_coordinates_real(ndarray[np.float64_t, ndim=2]  coords not None,
-                                ndarray[np.float64_t, ndim=2]  cell not None,
-                                ndarray[np.float64_t, ndim=2]  rcell not None,
+def contiguous_coordinates_real(ndarray[np.float64_t, ndim=2] coords not None,
+                                ndarray[np.float64_t, ndim=2] cell not None,
+                                ndarray[np.float64_t, ndim=2] rcell not None,
                                 indexes):
 
     cdef double x, y, z, sdx, sdy, sdz, newx, newy, newz
@@ -53,6 +53,10 @@ def contiguous_coordinates_real(ndarray[np.float64_t, ndim=2]  coords not None,
         scaleconfig[i,2] = x*rcell[2,0] + y*rcell[2,1] + z*rcell[2,2]
 
     for idxs in indexes:
+
+        if not idxs:
+            continue
+            
         contiguous_coords[idxs[0],0] = coords[idxs[0],0]
         contiguous_coords[idxs[0],1] = coords[idxs[0],1]
         contiguous_coords[idxs[0],2] = coords[idxs[0],2]

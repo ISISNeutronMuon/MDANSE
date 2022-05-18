@@ -975,7 +975,8 @@ class ChemicalSystem(_ChemicalEntity):
         for entity_type, entity_index in skeleton:
             entity_index = int(entity_index)
             h5_chemical_entity_instance = eval(grp[entity_type][entity_index])
-            self.add_chemical_entity(h5_chemical_entity_instance.build())
+            ce = h5_chemical_entity_instance.build()
+            self.add_chemical_entity(ce)
         
         self._h5_file.close()
 

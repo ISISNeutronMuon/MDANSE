@@ -12,7 +12,7 @@
 #
 # **************************************************************************
 
-import operator
+import copy
 
 import numpy as np
 
@@ -358,10 +358,18 @@ class TrajectoryWriter:
             self._selected_atoms = self._chemical_system.atom_list()
         else:
             for at in selected_atoms:
-                if at.root_chemical_system() != self._chemical_system:
+                if at.root_chemical_system() != chemical_system:
                     raise TrajectoryWriterError('One or more atoms of the selection comes from a different chemical system')
             self._selected_atoms = sorted_atoms(selected_atoms)
+            
         self._selected_atoms = [at.index for at in self._selected_atoms]
+
+        all_atoms = self._chemical_system.atom_list()
+        for at in all_atoms:
+            at.ghost = True
+
+        for idx in self._selected_atoms:
+            all_atoms[idx] = False
 
         self._dump_chemical_system()
 
@@ -397,10 +405,13 @@ class TrajectoryWriter:
         if configuration is None:
             return
 
-        n_atoms = self._chemical_system.number_of_atoms()
+        n_atoms = self._chemical_system.total_number_of_atoms()        
 
         configuration_grp = self._h5_file['/configuration']
         for k, v in configuration.variables.items():
+            data = np.empty(v.shape)
+            data[:] = np.nan
+            data[self._selected_atoms,:] = v
             dset = configuration_grp.get(k,None)
             if dset is None:
                 dset = configuration_grp.create_dataset(
@@ -408,7 +419,7 @@ class TrajectoryWriter:
                     shape=(self._n_steps,n_atoms,3),
                     chunks=(1,n_atoms,3),                    
                     dtype=np.float)
-            dset[self._current_index] = v
+            dset[self._current_index] = data
 
         unit_cell = configuration.unit_cell
         if unit_cell is not None:
