@@ -53,9 +53,9 @@ class CurrentCorrelationFunction(IJob):
                                                                'default': 'no interpolation'})
     settings['interpolation_mode'] = ('single_choice', {'choices': ['one-time in-memory interpolation',
                                                                     'repeated interpolation',
-                                                                    'one-time disk interpolation',
-                                                                    'one-time low-memory disk interpolation'],
-                                                        'default': 'one-time in-memory interpolation'})
+                                                                    'one-time disk interpolation'],
+                                                        'default': 'repeated interpolation'})
+    settings['preload'] = ('integer', {'default': 50, 'mini': -1})
     settings['q_vectors'] = ('q_vectors',{'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
     settings['normalize'] = ('boolean', {'default':False})
@@ -106,6 +106,7 @@ class CurrentCorrelationFunction(IJob):
         # Interpolate velocities of all atoms throughout the entire trajectory
         self._order = self.configuration["interpolation_order"]["value"]
         self._mode = self.configuration['interpolation_mode']['index']
+        self._preload = self.configuration['preload']['value']
 
         traj = self.configuration['trajectory']['instance']
         nAtoms = traj.universe.numberOfAtoms()
@@ -125,13 +126,21 @@ class CurrentCorrelationFunction(IJob):
                     self._velocities[idx,:,axis] = differentiate(atomicTraj[:, axis], order=self._order,
                                                                  dt=self.configuration['frames']['time_step'])
 
-        elif self._order != "no interpolation" and self._mode in [2, 3]:
+        # An alternative interpolation method which saves the velocities to an HDF5-style .nc file to save on memory
+        elif self._order != "no interpolation" and self._mode == 2:
             with netCDF4.Dataset(os.path.join(gettempdir(), 'mdanse_ccf_velocities.nc'), 'w') as velocities:
                 velocities.createDimension('particles', nAtoms+1)
                 velocities.createDimension('time', nFrames)
                 velocities.createDimension('axis', 3)
-                velocities.createVariable('velocities', 'f8', ('particles', 'time', 'axis'),
-                                          chunksizes=(ceil((nAtoms + 1)/10), ceil(nFrames/10), 3))
+
+                if self._preload < 25:
+                    # Chunking into 10x10 grid has shown to be faster at low self._preload values
+                    velocities.createVariable('velocities', 'f8', ('particles', 'time', 'axis'),
+                                              chunksizes=(ceil((nAtoms + 1) / 10), ceil(nFrames / 10), 3))
+                else:
+                    # At high self._preload values, chunks consisting of all atoms x preload number of frames are faster
+                    velocities.createVariable('velocities', 'f8', ('particles', 'time', 'axis'),
+                                              chunksizes=((nAtoms + 1), self._preload, 3))
 
                 vels = numpy.empty((nFrames, 3))
                 for idx in self.configuration['atom_selection']['flatten_indexes']:
@@ -145,7 +154,7 @@ class CurrentCorrelationFunction(IJob):
                         vels[:, axis] = differentiate(atomicTraj[:, axis], order=self._order,
                                                       dt=self.configuration['frames']['time_step'])
                     velocities['velocities'][idx, :, :] = vels
-            self._netcdf = netCDF4.Dataset(os.path.join(gettempdir(), 'mdanse_ccf_velocities.nc'), 'r')
+            self._netcdf = netCDF4.Dataset(os.path.join(tempdir, 'mdanse_ccf_velocities.nc'), 'r')
             self._velocities = self._netcdf['velocities']
 
     def run_step(self, index):
@@ -182,15 +191,62 @@ class CurrentCorrelationFunction(IJob):
             rhoLong_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
             rhoTrans_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
 
-        if self._order == 'no interpolation' or (self._order != 'no interpolation' and self._mode in [0, 3]):
+        # Certain interpolation strategies are faster when looping occurs primarily over elements
+        if self._order != 'no interpolation' and (self._mode == 1 or (self._mode == 2 and self._preload == -1)):
+            for element, idxs in self._indexesPerElement.items():
+                nFrames = self.configuration['frames']['n_frames']
+                all_velocities = numpy.empty((len(idxs), nFrames, 3), dtype=float)
+
+                if self._mode == 1:
+                    # Looping over elements is the only way to make repeated interpolation feasible at all
+                    for i, __ in enumerate(idxs):
+                        atomicTraj = read_atoms_trajectory(traj,
+                                                           [i],
+                                                           first=self.configuration['frames']['first'],
+                                                           last=self.configuration['frames']['last'] + 1,
+                                                           step=self.configuration['frames']['step'],
+                                                           variable=self.configuration['interpolation_order'][
+                                                               "variable"])
+                        for axis in range(3):
+                            all_velocities[i, :, axis] = differentiate(atomicTraj[:, axis], order=self._order,
+                                                                       dt=self.configuration['frames']['time_step'])
+                elif self._mode == 2:
+                    # Loading the whole trajectory of atoms of 1 element into memory can be faster than above, and
+                    # is much faster than accessing the disk repeatedly, but it takes more memory too.
+                    all_velocities[:, :, :] = self._velocities[idxs, :, :]
+
+                for i, frame in enumerate(self.configuration['frames']['value']):
+                    coordinates = traj.configuration[frame].array[idxs, :]
+                    velocities = numpy.transpose(all_velocities[:, i, :])[:, :, numpy.newaxis]
+                    tmp = numpy.exp(1j * numpy.dot(coordinates, qVectors))[numpy.newaxis, :, :]
+                    rho[element][i, :, :] = numpy.add.reduce(velocities * tmp, 1)
+
+                Q2 = numpy.sum(qVectors ** 2, axis=0)
+
+                qj = numpy.sum(rho[element] * qVectors, axis=1)
+                rhoLong[element] = (qj[:, numpy.newaxis, :] * qVectors[numpy.newaxis, :, :]) / Q2
+                rhoTrans[element] = rho[element] - rhoLong[element]
+
+        # No interpolation and some interpolation approaches are faster when looping occurs primarily over frames
+        else:
             # loop over the trajectory time steps
             for i, frame in enumerate(self.configuration['frames']['value']):
                 conf = traj.configuration[frame]
 
-                try:
-                    vel = self._velocities[:, i, :]
-                except AttributeError:
+                if self._order == 'no interpolation':
                     vel = traj.velocities[frame].array
+                elif self._mode == 0:
+                    vel = self._velocities[:, i, :]
+                else:
+                    # When accessing disk repeatedly (minimum memory usage), it is faster to load a whole frame at once
+                    # as it requires fewer I/O. This does take more memory, but only as much as if there were no
+                    # interpolation, since that also loads one whole frame at a time.
+                    if i % self._preload == 0:
+                        try:
+                            preloaded_velocities = self._velocities[:, [j+i for j in range(self._preload)], :]
+                        except IndexError:
+                            preloaded_velocities = vel = self._velocities[:, i:, :]
+                    vel = preloaded_velocities[:, i%self._preload, :]
 
                 for element, idxs in self._indexesPerElement.items():
                     selectedCoordinates = conf.array[idxs,:]
@@ -202,37 +258,6 @@ class CurrentCorrelationFunction(IJob):
             Q2 = numpy.sum(qVectors ** 2, axis=0)
 
             for element in self._elements:
-                qj = numpy.sum(rho[element] * qVectors, axis=1)
-                rhoLong[element] = (qj[:, numpy.newaxis, :] * qVectors[numpy.newaxis, :, :]) / Q2
-                rhoTrans[element] = rho[element] - rhoLong[element]
-
-        else:
-            for element, idxs in self._indexesPerElement.items():
-                nFrames = self.configuration['frames']['n_frames']
-                all_velocities = numpy.empty((len(idxs), nFrames, 3), dtype=float)
-
-                if self._mode == 1:
-                    for i, __ in enumerate(idxs):
-                        atomicTraj = read_atoms_trajectory(traj,
-                                                           [i],
-                                                           first=self.configuration['frames']['first'],
-                                                           last=self.configuration['frames']['last'] + 1,
-                                                           step=self.configuration['frames']['step'],
-                                                           variable=self.configuration['interpolation_order']["variable"])
-                        for axis in range(3):
-                            all_velocities[i, :, axis] = differentiate(atomicTraj[:, axis], order=self._order,
-                                                                           dt=self.configuration['frames']['time_step'])
-                elif self._mode == 2:
-                    all_velocities[:, :, :] = self._velocities[idxs, :, :]
-
-                for i, frame in enumerate(self.configuration['frames']['value']):
-                    coordinates = traj.configuration[frame].array[idxs, :]
-                    velocities = numpy.transpose(all_velocities[:, i, :])[:, :, numpy.newaxis]
-                    tmp = numpy.exp(1j * numpy.dot(coordinates, qVectors))[numpy.newaxis, :, :]
-                    rho[element][i, :, :] = numpy.add.reduce(velocities * tmp, 1)
-
-                Q2 = numpy.sum(qVectors ** 2, axis=0)
-
                 qj = numpy.sum(rho[element] * qVectors, axis=1)
                 rhoLong[element] = (qj[:, numpy.newaxis, :] * qVectors[numpy.newaxis, :, :]) / Q2
                 rhoTrans[element] = rho[element] - rhoLong[element]
