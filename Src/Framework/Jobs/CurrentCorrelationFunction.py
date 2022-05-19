@@ -294,7 +294,11 @@ class CurrentCorrelationFunction(IJob):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
-                        
+        try:
+            del self._velocities
+        except AttributeError:
+            pass
+
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
         for pair in self._elementsPairs:
             at1,at2 = pair
