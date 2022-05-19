@@ -272,9 +272,6 @@ def continuous_coordinates(
         # by recursively traverse the bonds network
         if len(idxs) > 1:
 
-            if np.isnan(continuous_coords[idxs,:]).any():
-                raise ValueError('One or more coordinates are undefined')
-
             ref_idx = idxs.pop(0)
             _recursive_contiguity(continuous_coords, cell, rcell, processed, bonds, ref_idx)
 

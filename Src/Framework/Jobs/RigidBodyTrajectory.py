@@ -140,7 +140,7 @@ class RigidBodyTrajectory(IJob):
 
                 if self.configuration['remove_translation']['value']:
                     # The transformation matrix corresponding to the selected frame in the RBT.
-                    transfo = Translation(center_of_mass)*transfo
+                    transfo = Translation(Vector(*center_of_mass))*transfo
                                 
                 # Compose with the CMS translation if the removeTranslation flag is set off.
                 else:
@@ -153,7 +153,7 @@ class RigidBodyTrajectory(IJob):
                     # The coordinates of the atoms are centered around the center of mass of the group.
                     xyz = self._reference_configuration['coordinates'][atom.index,:] - center_of_mass
 
-                    real_configuration['coordinates'][atom.index,:] = transfo(Vector(xyz))
+                    real_configuration['coordinates'][atom.index,:] = transfo(Vector(*xyz))
 
             self._output_trajectory._chemical_system.configuration = real_configuration
             self._output_trajectory.dump_configuration(time)
