@@ -240,32 +240,45 @@ def continuous_coordinates(
     ndarray[np.float64_t, ndim=2] coords not None,
     ndarray[np.float64_t, ndim=2] cell not None,
     ndarray[np.float64_t, ndim=2] rcell not None,
-    indexes,
-    bonds):
+    chemical_system,
+    selected_indexes=None):
 
     cdef int ref_idx
 
-    cdef ndarray[np.float64_t, ndim=2] contiguous_coords = coords
+    cdef ndarray[np.float64_t, ndim=2] continuous_coords = coords
 
     cdef np.ndarray[np.int8_t] processed = np.zeros((coords.shape[0],), dtype=np.int8)
 
-    for idxs in indexes:
+    # Retrieve the top level chemical entities to which belong each of the selected atom
+    atoms = chemical_system.atom_list()
+    if selected_indexes is None:
+        selected_indexes = [at.index for at in atoms]
 
-        if len(idxs) == 1:
+    chemical_entities = set([atoms[idx].top_level_chemical_entity() for idx in selected_indexes])
 
-            contiguous_coords[idxs[0],0] = coords[idxs[0],0]
-            contiguous_coords[idxs[0],1] = coords[idxs[0],1]
-            contiguous_coords[idxs[0],2] = coords[idxs[0],2]
+    # Set the bond network for these chemical entities
+    bonds = {}
+    chemical_entities_indexes = []
+    for ce in chemical_entities:
+        indexes = []
+        for at in ce.atom_list():
+            bonds[at.index] = [bat.index for bat in at.bonds]
+            indexes.append(at.index)
+        chemical_entities_indexes.append(indexes)
 
-        else:
+    for idxs in chemical_entities_indexes:
+
+        # If the chemical entities has more than one atom, compute the continuous coordinates
+        # by recursively traverse the bonds network
+        if len(idxs) > 1:
+
+            if np.isnan(continuous_coords[idxs,:]).any():
+                raise ValueError('One or more coordinates are undefined')
 
             ref_idx = idxs.pop(0)
+            _recursive_contiguity(continuous_coords, cell, rcell, processed, bonds, ref_idx)
 
-            _recursive_contiguity(contiguous_coords, cell, rcell, processed, bonds, ref_idx)
-
-    return contiguous_coords
-
-
+    return continuous_coords[selected_indexes,:]
 
 
 

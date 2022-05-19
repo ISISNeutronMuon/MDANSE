@@ -285,20 +285,11 @@ class RealConfiguration(_Configuration):
 
         else:
 
-            indexes = []
-            for ce in self._chemical_system.chemical_entities:
-                indexes.append([at.index for at in ce.atom_list()])
-
-            bonds = {}
-            for at in self._chemical_system.atom_list():
-                bonds[at.index] = [bat.index for bat in at.bonds]
-
             contiguous_coords = contiguous_coordinates.continuous_coordinates(
                 self._variables['coordinates'],
                 self._unit_cell.T,
                 np.linalg.inv(self._unit_cell.T),
-                indexes,
-                bonds)
+                self._chemical_system)
 
             conf = self
             conf._variables['coordinates'] = contiguous_coords
