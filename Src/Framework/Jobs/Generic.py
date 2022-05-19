@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -146,9 +147,9 @@ class GenericConverter(Converter):
     label = "Generic"
 
     settings = collections.OrderedDict()   
-    settings['gt_file'] = ('input_file',{'wildcard':"Generic trajectory files|*.gtf|All files|*",
+    settings['gt_file'] = ('input_file',{'wildcard':"GTF files (*.gtf)|*.gtf|All files|*",
                                          'default':os.path.join('..','..','..','Data','Trajectories','Generic','test.gtf')})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'gt_file'})
                     
     def initialize(self):
         '''
@@ -301,22 +302,25 @@ class GenericConverter(Converter):
         
         self._gtFile.seek(pos,0)
         
+        data_to_be_written = ["configuration","time"]
         if self._hasVelocities:
             self._universe.initializeVelocitiesToTemperature(0.0)
             self._velocities = ParticleVector(self._universe)
+            data_to_be_written.append("velocities")
             if self._hasForces:        
                 self._forces = ParticleVector(self._universe)
                 self._dataShape=(self._universe.numberOfAtoms(),9)
+                data_to_be_written.append("gradients")
             else:
                 self._dataShape=(self._universe.numberOfAtoms(),6)
         else:
             self._dataShape=(self._universe.numberOfAtoms(),3)
                                     
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
  
         # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
+        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
             
     def run_step(self, index):
         """Runs a single step of the job.
@@ -349,11 +353,11 @@ class GenericConverter(Converter):
         
         if self._hasVelocities:
             self._velocities.array = config[:,3:6]
-            self._universe.setVelocities(self._velocities)
+            data["velocities"] = self._velocities
 
         if self._hasForces:
             self._forces.array = config[:,6:9]
-            data["forces"] = self._forces
+            data["gradients"] = self._forces
                              
         # Store a snapshot of the current configuration in the output trajectory.
         self._snapshot(data=data)
@@ -380,5 +384,7 @@ class GenericConverter(Converter):
 
         # Close the output trajectory.
         self._trajectory.close()
-                
+
+        super(GenericConverter,self).finalize()
+
 REGISTRY['generic'] = GenericConverter

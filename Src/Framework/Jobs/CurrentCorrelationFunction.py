@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -79,7 +80,7 @@ class CurrentCorrelationFunction(IJob):
         
         self._nOmegas = self._instrResolution['n_omegas']
                 
-        self._outputData.add("q","line", numpy.array(self.configuration["q_vectors"]["shells"]), units="inv_nm") 
+        self._outputData.add("q","line", numpy.array(self.configuration["q_vectors"]["shells"]), units="1/nm") 
 
         self._outputData.add("time","line", self.configuration['frames']['duration'], units='ps')
         self._outputData.add("time_window","line", self._instrResolution["time_window"], units="au") 

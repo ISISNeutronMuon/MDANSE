@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -67,7 +68,7 @@ class McStasParametersWidget(IWidget):
         self._sizer.Clear(deleteWindows=True)
  
         self._widgetPanel.Freeze()
-        self._configurationPanel = ConfigurationPanel(self._widgetPanel, self._parameters)
+        self._configurationPanel = ConfigurationPanel(self._widgetPanel, self._parameters,None)
          
         for name, value in parameters.items():
             typ, default = value

@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -25,7 +26,7 @@ from matplotlib.colors import LogNorm, Normalize
 import wx
 
 from MDANSE.Core.Error import Error
-from MDANSE.Externals.magnitude import magnitude
+from MDANSE.Framework.Units import UnitError, measure
 
 from MDANSE.GUI.Plugins.PlotterSettings import ImageSettingsDialog
 from MDANSE.GUI.Plugins.PlotterTicker import ScaledFormatter, ScaledLocator
@@ -508,15 +509,16 @@ class Plotter2D(wx.Panel):
     def compute_conversion_factor(self):
 
         try:
-            self.Xunit_conversion_factor = magnitude.mg(1., self.Xinit_unit, self.Xunit).toval()
-        except magnitude.MagnitudeError:            
+            m = measure(1.0, self.Xinit_unit,equivalent=True)
+            self.Xunit_conversion_factor = m.toval(self.Xunit)
+        except UnitError:
             self.Xunit_conversion_factor = 1.0
 
         try:
-            self.Yunit_conversion_factor = magnitude.mg(1., self.Yinit_unit, self.Yunit).toval()
-        except magnitude.MagnitudeError:
+            m = measure(1., self.Yinit_unit,equivalent=True)
+            self.Yunit_conversion_factor = m.toval(self.Yunit)
+        except UnitError:
             self.Yunit_conversion_factor = 1.0
-
     
     def set_ticks(self):
 
@@ -538,15 +540,21 @@ class Plotter2D(wx.Panel):
             self.Xaxis_label = self.dataproxy[varname]['axis'][0]
             self.Xunit = self.Xinit_unit = self.dataproxy[self.Xaxis_label]['units']
             self.Xaxis = self.dataproxy[self.Xaxis_label]['data']
+            if self.Xaxis.shape[0] != data.shape[0]:
+                raise
         except:
+            self.Xaxis_label = 'x'
             self.Xunit = self.Xinit_unit = 'au'
-            self.Xaxis = numpy.arange(data.shape[0]) 
+            self.Xaxis = numpy.arange(data.shape[0])
             
         try :
             self.Yaxis_label = self.dataproxy[varname]['axis'][1]
             self.Yunit = self.Yinit_unit = self.dataproxy[self.Yaxis_label]['units']
             self.Yaxis = self.dataproxy[self.Yaxis_label]['data']
+            if self.Yaxis.shape[0] != data.shape[1]:
+                raise
         except:
+            self.Yaxis_label = 'y'
             self.Yunit = self.Yinit_unit = 'au'
             self.Yaxis = numpy.arange(data.shape[1]) 
             
@@ -556,11 +564,6 @@ class Plotter2D(wx.Panel):
         if not oldYunit is None:
             if oldYunit != self.Yinit_unit:
                 raise Plotter2DError('the y axis unit (%s) of data-set %r is inconsistent with the unit (%s) of the precedent data plotted '%(self.Yinit_unit, varname,  oldYunit))
-
-        if self.Yaxis.shape[0] != data.shape[1]:
-            raise Plotter2DError('the y axis dimension is inconsistent with the shape of data ')
-        if self.Xaxis.shape[0] != data.shape[0]:
-            raise Plotter2DError('the x axis dimension is inconsistent with the shape of data ')
             
     def image_setting_dialog(self, event = None):
         

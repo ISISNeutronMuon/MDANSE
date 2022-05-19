@@ -38,7 +38,7 @@ int xdr_seek(XDRFILE *xd, int64_t pos, int whence)
 #ifndef _WIN32
 	// use posix 64 bit ftell version
 	result = fseeko(fptr, pos, whence) < 0 ? exdrNR : exdrOK;
-#elif _MSVC_VER && !__INTEL_COMPILER
+#elif _MSC_VER && !__INTEL_COMPILER
 	result = _fseeki64(fptr, pos, whence) < 0 ? exdrNR : exdrOK;
 #else
 	result = fseek(fptr, pos, whence) < 0 ? exdrNR : exdrOK;

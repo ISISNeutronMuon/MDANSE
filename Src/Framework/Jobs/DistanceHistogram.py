@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -100,8 +101,8 @@ class DistanceHistogram(IJob):
         
         universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
     
-        directCell = numpy.array(universe.basisVectors()).astype(numpy.float64)
-        reverseCell = numpy.array(universe.reciprocalBasisVectors()).astype(numpy.float64)
+        directCell = numpy.array(universe.basisVectors()).astype(numpy.float64).T
+        reverseCell = numpy.linalg.inv(directCell)
         
         cellVolume = universe.cellVolume()
             

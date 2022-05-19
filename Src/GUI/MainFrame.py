@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -20,6 +21,7 @@ import webbrowser
 
 import wx
 import wx.aui as aui
+import wx.html as wxhtml
  
 from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE.__pkginfo__ import __author__, __commit__, __version__, __beta__
@@ -159,6 +161,7 @@ class MainFrame(wx.Frame):
         helpMenu.AppendSeparator()
         simpleHelpItem = helpMenu.Append(wx.ID_ANY, 'Simple help')
         theoryHelpItem = helpMenu.Append(wx.ID_ANY, 'Theoretical background')
+        user_guideHelpItem = helpMenu.Append(wx.ID_ANY, 'User guide')
         helpMenu.AppendSeparator()
         bugReportItem = helpMenu.Append(wx.ID_ANY, 'Bug report')
         self._mainMenu.Append(helpMenu, 'Help')
@@ -177,6 +180,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_bug_report, bugReportItem)
         self.Bind(wx.EVT_MENU, self.on_simple_help, simpleHelpItem)
         self.Bind(wx.EVT_MENU, self.on_theory_help, theoryHelpItem)
+        self.Bind(wx.EVT_MENU, self.on_user_guide, user_guideHelpItem)
 
     def build_toolbar(self):
         
@@ -187,6 +191,7 @@ class MainFrame(wx.Frame):
         elementsDatabaseButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["atom",32,32], 'Launch the elements database editor')
         plotButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["plot",32,32], 'Launch the NetCDF plotter')
         udButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["user",32,32], 'Launch the user definitions editor')
+        unitsButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["units",32,32], 'Launch the units editor')
         registryButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["registry",32,32], 'Inspect MDANSE classes framework')
         templateButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["template",32,32], 'Save a template for a new analysis')
         apiButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["api",32,32], 'Open MDANSE API')
@@ -205,6 +210,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_open_elements_database, elementsDatabaseButton)
         self.Bind(wx.EVT_MENU, self.on_start_plotter, plotButton)
         self.Bind(wx.EVT_MENU, self.on_open_user_definitions, udButton)
+        self.Bind(wx.EVT_MENU, self.on_open_units, unitsButton)
         self.Bind(wx.EVT_MENU, self.on_open_classes_registry, registryButton)
         self.Bind(wx.EVT_MENU, self.on_save_job_template, templateButton)
         self.Bind(wx.EVT_MENU, self.on_about, aboutButton)
@@ -257,22 +263,27 @@ Authors:
 
     def on_simple_help(self,event):
 
-        path = os.path.join(PLATFORM.doc_path(),'simple_help.txt')
+        path = os.path.join(PLATFORM.doc_path(),'simple_help.html')
                 
         with open(path,'r') as f:
             info = f.read()
             frame = wx.Frame(self, style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
+            frame.SetMinSize((800,600))
             panel = wx.Panel(frame,wx.ID_ANY)
             sizer = wx.BoxSizer(wx.VERTICAL)
-            text = wx.TextCtrl(panel,wx.ID_ANY,style=wx.TE_MULTILINE|wx.TE_WORDWRAP|wx.TE_READONLY)
-            text.SetValue(info)
-            sizer.Add(text,1,wx.ALL|wx.EXPAND,5)
+            html = wxhtml.HtmlWindow(panel, -1, size=(300, 150), style=wx.VSCROLL|wx.HSCROLL|wx.TE_READONLY|wx.BORDER_SIMPLE)
+            html.SetPage(info)
+            sizer.Add(html,1,wx.ALL|wx.EXPAND,5)
             panel.SetSizer(sizer)
             frame.Show()
 
-    def on_theory_help(self,event):
-
+    @staticmethod
+    def on_theory_help(event):
         webbrowser.open("file://%s" % os.path.join(PLATFORM.doc_path(),'theory_help.pdf'))
+
+    @staticmethod
+    def on_user_guide(event):
+        webbrowser.open("https://doi.org/10.5286/raltr.2022003")
                 
     def on_open_classes_registry(self,event):
         
@@ -336,6 +347,14 @@ Authors:
         f.ShowModal()
         f.Destroy()
 
+    def on_open_units(self,event):
+        
+        from MDANSE.GUI.UnitsEditor import UnitsEditor
+        
+        f = UnitsEditor(self)
+        f.ShowModal()
+        f.Destroy()
+
     def on_open_converter(self,event):
 
         from MDANSE.GUI.Plugins.JobPlugin import JobFrame
@@ -343,7 +362,7 @@ Authors:
         item = self.GetMenuBar().FindItemById(event.GetId())
         converter = item.GetText()
                         
-        f = JobFrame(self,self._converters[converter],os.path.join(PLATFORM.home_directory(),"trajectory_conversion.nc"))
+        f = JobFrame(self,self._converters[converter],None)
         f.Show()
 
     def on_open_periodic_table(self, event):
