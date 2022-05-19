@@ -55,7 +55,7 @@ class CurrentCorrelationFunction(IJob):
                                                                     'repeated interpolation',
                                                                     'one-time disk interpolation'],
                                                         'default': 'repeated interpolation'})
-    settings['preload'] = ('integer', {'default': 50, 'mini': -1})
+    settings['preload'] = ('integer', {'default': 50, 'mini': -1, 'exclude': (0,)})
     settings['q_vectors'] = ('q_vectors',{'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
     settings['normalize'] = ('boolean', {'default':False})

@@ -22,7 +22,7 @@ class IntegerConfigurator(IConfigurator):
         
     _default = 0
     
-    def __init__(self, name, mini=None, maxi=None, choices=None, **kwargs):
+    def __init__(self, name, mini=None, maxi=None, choices=None, exclude=None, **kwargs):
         '''
         Initializes the configurator.
         
@@ -43,7 +43,9 @@ class IntegerConfigurator(IConfigurator):
 
         self._maxi = int(maxi) if maxi is not None else None
         
-        self._choices = choices if choices is not None else []          
+        self._choices = choices if choices is not None else []
+
+        self._exclude = exclude if exclude is not None else ()
                 
     def configure(self, value):
         '''
@@ -69,6 +71,10 @@ class IntegerConfigurator(IConfigurator):
         if self._maxi is not None:
             if value > self._maxi:
                 raise ConfiguratorError("the input value is higher than %r." % self._maxi, self)
+
+        if self._exclude:
+            if value in self._exclude:
+                raise ConfiguratorError("the input value is forbidden; forbidden values are %r." % self._exclude, self)
 
         self['value'] = value
 
