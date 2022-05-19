@@ -301,7 +301,8 @@ class CurrentCorrelationFunction(IJob):
 
         try:
             os.remove(os.path.join(tempdir, 'mdanse_ccf_velocities.nc'))
-        except OSError:
+        except (OSError, AttributeError):
+            # OSError catches file not existing, and AttributeError caches gettempdir() having not been called
             pass
 
         try:
@@ -345,16 +346,6 @@ class CurrentCorrelationFunction(IJob):
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()
-
-        try:
-            self._netcdf.close()
-        except (AttributeError, RuntimeError):
-            pass
-
-        try:
-            os.remove(os.path.join(tempdir, 'mdanse_ccf_velocities.nc'))
-        except OSError:
-            pass
 
 
 REGISTRY['ccf'] = CurrentCorrelationFunction
