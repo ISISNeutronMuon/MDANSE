@@ -295,6 +295,16 @@ class CurrentCorrelationFunction(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
         try:
+            self._netcdf.close()
+        except (AttributeError, RuntimeError):
+            pass
+
+        try:
+            os.remove(os.path.join(tempdir, 'mdanse_ccf_velocities.nc'))
+        except OSError:
+            pass
+
+        try:
             del self._velocities
         except AttributeError:
             pass
