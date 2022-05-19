@@ -155,10 +155,12 @@ def get_euler_angles(rotation,tolerance=1e-5):
         
     fuzz=1e-3
     rotation=numpy.asarray(rotation,float)
+
     if det(rotation) < 0. :
         raise GeometryError("determinant is negative\n"+str(rotation))
+
     if not numpy.allclose(numpy.mat(rotation)*rotation.T,numpy.identity(3),atol=tolerance):
-        raise Exception, "not an orthogonal matrix\n"+str(rotation)
+        raise GeometryError("not an orthogonal matrix\n"+str(rotation))
     cang = 2.0-numpy.sum(numpy.square([rotation[0,2],rotation[1,2],rotation[2,0],rotation[2,1],rotation[2,2] ]))
     cang = numpy.sqrt(min(max(cang,0.0),1.0))
     if (rotation[2,2]<0.0): cang=-cang
@@ -175,7 +177,7 @@ def get_euler_angles(rotation,tolerance=1e-5):
         alpha,beta,gamma = alpha+gamma,  0.,0.
     elif almost(beta,180.,fuzz):
         alpha,beta,gamma = alpha-gamma,180.,0.
-    alpha=numpy.mod(alpha,360.);
+    alpha=numpy.mod(alpha,360.)
     gamma=numpy.mod(gamma,360.)
     if almost(alpha,360.,fuzz):
         alpha=0.
@@ -185,8 +187,7 @@ def get_euler_angles(rotation,tolerance=1e-5):
 
 def superposition_fit(confs):
     """
-    :param confs: the weight, reference position, and alternate
-                  position for each atom
+    :param confs: the weight, reference position, and alternate position for each atom
     :type confs: sequence of (float, Vector, Vector)
     :returns: the quaternion representing the rotation,
               the center of mass in the reference configuration,

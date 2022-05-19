@@ -160,6 +160,8 @@ class _ChemicalEntity:
         from MDANSE.Mathematics.LinearAlgebra import Vector
 
         chemical_system = self.root_chemical_system()
+        if chemical_system.configuration.unit_cell is not None:
+            raise ValueError("superposition in periodic configurations is not defined")
 
         if conf1.chemical_system != chemical_system:
             raise ValueError("conformations comes from different chemical systems")
@@ -182,10 +184,9 @@ class _ChemicalEntity:
     def find_transformation(self, conf1, conf2 = None):
         """
         :param conf1: a configuration object
-        :type conf1: :class:`~MMTK.ParticleProperties.Configuration`
-        :param conf2: a configuration object, or None for the
-                      current configuration
-        :type conf2: :class:`~MMTK.ParticleProperties.Configuration` or NoneType
+        :type conf1: :class:`~MDANSE.MolecularDynamics.Configuration.Configuration`
+        :param conf2: a configuration object, or None for the current configuration
+        :type conf2: :class:`~MDANSE.MolecularDynamics.Configuration.Configuration` or NoneType
         :returns: the linear transformation that, when applied to
                   the object in configuration conf1, minimizes the
                   RMS distance to the conformation in conf2, and the
@@ -196,15 +197,14 @@ class _ChemicalEntity:
         """
 
         from MDANSE.Mathematics.Transformation import Translation
-        
+
         q, cm1, cm2, rms = self.find_transformation_as_quaternion(conf1, conf2)
         return Translation(cm2) * q.asRotation() * Translation(-cm1), rms
 
     def center_and_moment_of_inertia(self, configuration):
         """
-        :param conf: a configuration object, or None for the
-                     current configuration
-        :type conf: :class:`~MMTK.ParticleProperties.Configuration` or NoneType
+        :param conf: a configuration object, or None for the current configuration
+        :type conf: :class:`~MDANSE.MolecularDynamics.Configuration.Configuration`
         :returns: the center of mass and the moment of inertia tensor
                   in the given configuration
         """
