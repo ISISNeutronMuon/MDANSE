@@ -14,7 +14,7 @@ import numpy as np
 
 from math import atan2
 
-from MDANSE.Mathematics.LinearAlgebra import delta, epsilon, ex, ez, isTensor, isVector, nullVector, Quaternion, Tensor, Vector
+from MDANSE.Mathematics.LinearAlgebra import delta, epsilon, ex, ez, is_tensor, is_vector, nullVector, Quaternion, Tensor, Vector
 
 #
 # Abstract base classes
@@ -170,7 +170,7 @@ class Rotation(RigidBodyTransformation):
         """
         if len(args) == 1:
             self.tensor = args[0]
-            if not isTensor(self.tensor):
+            if not is_tensor(self.tensor):
                 self.tensor = Tensor(self.tensor)
         elif len(args) == 2:
             axis, angle = args
@@ -199,12 +199,12 @@ class Rotation(RigidBodyTransformation):
             return self.asLinearTransformation()*other.asLinearTransformation()
 
     def __call__(self,other):
-        if isVector(other):
+        if is_vector(other):
             return self.tensor*other
-        elif isTensor(other) and other.rank == 2:
+        elif is_tensor(other) and other.rank == 2:
             _rinv=self.tensor.inverse()
             return _rinv.dot(other.dot(self.tensor))
-        elif isTensor(other) and other.rank == 1:
+        elif is_tensor(other) and other.rank == 1:
             return self.tensor.dot(other)
         else:
             raise ValueError('incompatible object')
@@ -467,13 +467,13 @@ class Shear(Transformation):
 
     def __init__(self, *args):
         if len(args) == 1:
-            if isTensor(args[0]):
+            if is_tensor(args[0]):
                 self.tensor = args[0]
             else:
                 self.tensor = Tensor(args[0])
                 assert self.tensor.rank == 2
-        elif len(args) == 3 and isVector(args[0]) \
-                 and isVector(args[1]) and isVector(args[2]):
+        elif len(args) == 3 and is_vector(args[0]) \
+                 and is_vector(args[1]) and is_vector(args[2]):
             self.tensor = Tensor([args[0].array, args[1].array,args[2].array]).transpose()
 
     def asLinearTransformation(self):

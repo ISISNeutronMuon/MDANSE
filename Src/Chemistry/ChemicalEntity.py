@@ -7,6 +7,7 @@ import numpy as np
 import h5py
 
 from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DATABASE, RESIDUES_DATABASE
+from MDANSE.Mathematics.Transformation import Transformation
 
 class UnknownAtomError(Exception):
     pass
@@ -51,6 +52,9 @@ class InvalidChemicalEntityError(Exception):
     pass
 
 class InconsistentChemicalSystemError(Exception):
+    pass
+
+class ChemicalEntityError(Exception):
     pass
 
 class _ChemicalEntity:
@@ -140,6 +144,126 @@ class _ChemicalEntity:
             sum_masses += m
 
         return sum_masses
+
+    def masses(self):
+
+        masses = []
+        for at in self.atom_list():
+            m = ATOMS_DATABASE[at.symbol]['atomic_weight']
+            masses.append(m)
+
+        return masses
+
+    def find_transformation_as_quaternion(self, conf1, conf2 = None):
+
+        from MDANSE.Mathematics.Geometry import superposition_fit
+        from MDANSE.Mathematics.LinearAlgebra import Vector
+
+        chemical_system = self.root_chemical_system()
+
+        if conf1.chemical_system != chemical_system:
+            raise ValueError("conformations comes from different chemical systems")
+
+        if conf2 is None:
+            conf2 = conf1
+            conf1 = chemical_system.configuration
+        else:
+            if conf2.chemical_system != chemical_system:
+                raise ValueError("conformations comes from different chemical systems")
+
+        weights = chemical_system.masses()
+
+        return superposition_fit([
+            (
+                weights[a.index],
+                Vector(*conf1['coordinates'][a.index,:]),
+                Vector(*conf2['coordinates'][a.index,:])) for a in self.atom_list()])
+
+    def find_transformation(self, conf1, conf2 = None):
+        """
+        :param conf1: a configuration object
+        :type conf1: :class:`~MMTK.ParticleProperties.Configuration`
+        :param conf2: a configuration object, or None for the
+                      current configuration
+        :type conf2: :class:`~MMTK.ParticleProperties.Configuration` or NoneType
+        :returns: the linear transformation that, when applied to
+                  the object in configuration conf1, minimizes the
+                  RMS distance to the conformation in conf2, and the
+                  minimal RMS distance.
+                  If conf2 is None, returns the transformation from the
+                  current configuration to conf1 and the associated
+                  RMS distance.
+        """
+
+        from MDANSE.Mathematics.Transformation import Translation
+        
+        q, cm1, cm2, rms = self.find_transformation_as_quaternion(conf1, conf2)
+        return Translation(cm2) * q.asRotation() * Translation(-cm1), rms
+
+    def center_and_moment_of_inertia(self, configuration):
+        """
+        :param conf: a configuration object, or None for the
+                     current configuration
+        :type conf: :class:`~MMTK.ParticleProperties.Configuration` or NoneType
+        :returns: the center of mass and the moment of inertia tensor
+                  in the given configuration
+        """
+        
+        from MDANSE.Mathematics.LinearAlgebra import delta, Tensor, Vector
+
+        m = 0.0
+        mr = Vector(0.0,0.0,0.0)
+        t = Tensor(3*[3*[0.0]])
+        for atom in self.atom_list():
+            ma = ATOMS_DATABASE[atom.symbol]['atomic_weight']
+            r = Vector(configuration['coordinates'][atom.index,:])
+            m += ma
+            mr += ma*r
+            t += ma*r.dyadic_product(r)
+        cm = mr/m
+        t -= m*cm.dyadic_product(cm)
+        t = t.trace()*delta - t
+        return cm, t
+
+    def normalizing_transformation(self, configuration, repr=None):
+        """
+        Calculate a linear transformation that shifts the center of mass
+        of the object to the coordinate origin and makes its
+        principal axes of inertia parallel to the three coordinate
+        axes.
+
+        :param repr: the specific representation for axis alignment:
+          Ir    : x y z <--> b c a
+          IIr   : x y z <--> c a b
+          IIIr  : x y z <--> a b c
+          Il    : x y z <--> c b a
+          IIl   : x y z <--> a c b
+          IIIl  : x y z <--> b a c
+        :returns: the normalizing transformation
+        :rtype: Scientific.Geometry.Transformation.RigidBodyTransformation
+        """
+
+        from MDANSE.Mathematics.Transformation import Rotation, Translation
+
+        cm, inertia = self.center_and_moment_of_inertia(configuration)
+        ev, diag = np.linalg.eig(inertia.array)
+        diag = np.transpose(diag)
+        if np.linalg.det(diag) < 0:
+            diag[0] = -diag[0]
+        if repr != None:
+            seq = np.argsort(ev)
+            if repr == 'Ir':
+                seq = np.array([seq[1], seq[2], seq[0]])
+            elif repr == 'IIr':
+                seq = np.array([seq[2], seq[0], seq[1]])
+            elif repr == 'Il':
+                seq = seq[2::-1]
+            elif repr == 'IIl':
+                seq[1:3] = np.array([seq[2], seq[1]])
+            elif repr == 'IIIl':
+                seq[0:2] = np.array([seq[1], seq[0]])
+            diag = np.take(diag, seq)
+        return Rotation(diag)*Translation(-cm)
 
     def root_chemical_system(self):
 
@@ -270,6 +394,36 @@ class Atom(_ChemicalEntity):
         h5_contents.setdefault('atoms',[]).append(atom_str)
 
         return ('atoms',len(h5_contents['atoms'])-1)
+
+class AtomGroup(_ChemicalEntity):
+
+    def __init__(self, atoms):
+
+        super(AtomGroup,self).__init__()
+
+        s = set([at.root_chemical_system() for at in atoms])
+        if len(s) != 1:
+            raise ChemicalEntityError('The atoms comes from different chemical systems')
+
+        self._atoms = atoms
+
+        self._chemical_system = list(s)[0]
+
+    def atom_list(self):
+        return list([at for at in self._atoms if not at.ghost])
+
+    def copy(self):
+        pass
+
+    def number_of_atoms(self):
+        return len([at for at in self._atoms if not at.ghost])
+
+    def root_chemical_system(self):
+
+        return self._chemical_system
+
+    def serialize(self):
+        pass
 
 class AtomCluster(_ChemicalEntity):
 

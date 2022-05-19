@@ -83,6 +83,17 @@ class _Configuration:
     def variables(self):
         return self._variables
 
+    def apply_transformation(self, transfo):
+        conf = self['coordinates']
+        rot = transfo.rotation().tensor.array
+        conf[:] = np.dot(conf, np.transpose(rot))
+        np.add(conf, transfo.translation().vector.array[np.newaxis, :], conf)
+
+        if 'velocities' in self._variables:
+            velocities = self._variables['velocities']
+            rot = transfo.rotation().tensor.array
+            velocities[:] = np.dot(velocities, np.transpose(rot))
+
     @staticmethod
     def clone(chemical_system, other):
 

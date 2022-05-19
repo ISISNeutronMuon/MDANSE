@@ -182,3 +182,61 @@ def get_euler_angles(rotation,tolerance=1e-5):
     if almost(gamma,360.,fuzz):
         gamma=0.
     return alpha,beta,gamma
+
+def superposition_fit(confs):
+    """
+    :param confs: the weight, reference position, and alternate
+                  position for each atom
+    :type confs: sequence of (float, Vector, Vector)
+    :returns: the quaternion representing the rotation,
+              the center of mass in the reference configuration,
+              the center of mass in the alternate configuraton,
+              and the RMS distance after the optimal superposition
+    """
+    w_sum = 0.
+    wr_sum = numpy.zeros((3,), numpy.float)
+    for w, r_ref, r in confs:
+        w_sum += w
+        wr_sum += w*r_ref.array
+    ref_cms = wr_sum/w_sum
+    pos = numpy.zeros((3,), numpy.float)
+    possq = 0.
+    cross = numpy.zeros((3, 3), numpy.float)
+    for w, r_ref, r in confs:
+        w = w/w_sum
+        r_ref = r_ref.array-ref_cms
+        r = r.array
+        pos = pos + w*r
+        possq = possq + w*numpy.add.reduce(r*r) \
+                      + w*numpy.add.reduce(r_ref*r_ref)
+        cross = cross + w*r[:, numpy.newaxis]*r_ref[numpy.newaxis, :]
+    k = numpy.zeros((4, 4), numpy.float)
+    k[0, 0] = -cross[0, 0]-cross[1, 1]-cross[2, 2]
+    k[0, 1] = cross[1, 2]-cross[2, 1]
+    k[0, 2] = cross[2, 0]-cross[0, 2]
+    k[0, 3] = cross[0, 1]-cross[1, 0]
+    k[1, 1] = -cross[0, 0]+cross[1, 1]+cross[2, 2]
+    k[1, 2] = -cross[0, 1]-cross[1, 0]
+    k[1, 3] = -cross[0, 2]-cross[2, 0]
+    k[2, 2] = cross[0, 0]-cross[1, 1]+cross[2, 2]
+    k[2, 3] = -cross[1, 2]-cross[2, 1]
+    k[3, 3] = cross[0, 0]+cross[1, 1]-cross[2, 2]
+    for i in range(1, 4):
+        for j in range(i):
+            k[i, j] = k[j, i]
+    k = 2.*k
+    for i in range(4):
+        k[i, i] = k[i, i] + possq - numpy.add.reduce(pos*pos)
+    e, v = numpy.linalg.eig(k)
+    v = numpy.transpose(v)
+    i = numpy.argmin(e)
+    v = v[i]
+    if v[0] < 0: v = -v
+    if e[i] <= 0.:
+        rms = 0.
+    else:
+        rms = numpy.sqrt(e[i])
+    
+    from MDANSE.Mathematics.LinearAlgebra import Quaternion, Vector
+    
+    return Quaternion(v), Vector(ref_cms), Vector(pos), rms

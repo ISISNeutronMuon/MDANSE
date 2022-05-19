@@ -14,13 +14,17 @@
 # **************************************************************************
 
 import collections
+import copy
 
-from MMTK.Collections import Collection
-from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
+import numpy as np
+
+import h5py
 
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import AtomGroup
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
+from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+from MDANSE.MolecularDynamics.Trajectory import sorted_atoms, TrajectoryWriter
 
 class GlobalMotionFilteredTrajectory(IJob):
     """
@@ -50,12 +54,11 @@ class GlobalMotionFilteredTrajectory(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
         
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['reference_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    settings['contiguous'] = ('boolean', {'default':False, 'label':"Make the chemical object contiguous"})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_file'] = ('single_output_file', {'format':"hdf"})
     
     def initialize(self):
         """
@@ -64,37 +67,31 @@ class GlobalMotionFilteredTrajectory(IJob):
 
         self.numberOfSteps = self.configuration['frames']['number']
         
-        # Store universe name for further restoration
-        self.old_universe_name = self.configuration['trajectory']['instance'].universe.__class__.__name__
-
-        self.configuration['trajectory']['instance'].universe.__class__.__name__ = 'InfiniteUniverse'
-        
-        self.configuration['trajectory']['instance'].universe._descriptionArguments = lambda: '()'
-
-        self.configuration['trajectory']['instance'].universe.is_periodic=False        
-        
-        self._cellParametersFunction = self.configuration['trajectory']['instance'].universe.cellParameters
-        
-
         # The collection of atoms corresponding to the atoms selected for output.
-        atoms = sorted_atoms(self.configuration['trajectory']['instance'].universe)
-        sIndexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
-        self._selectedAtoms = Collection([atoms[ind] for ind in sIndexes])
+        atoms = sorted_atoms(self.configuration['trajectory']['instance'].chemical_system.atom_list())
+        self._selected_atoms = []        
+        for indexes in self.configuration['atom_selection']['indexes']:
+            for idx in indexes:
+                self._selected_atoms.append(atoms[idx])
+        self._selected_atoms = AtomGroup(self._selected_atoms)
 
-        rIndexes  = [idx for idxs in self.configuration['reference_selection']['indexes'] for idx in idxs]
-        self._referenceAtoms = Collection([atoms[ind] for ind in rIndexes])
-                        
-        # The output trajectory is opened for writing.
-        self._gmft = Trajectory(self._selectedAtoms, self.configuration['output_files']['files'][0], "w")
-        
-        # The title for the trajectory is set. 
-        self._gmft.title = self.__class__.__name__
+        self._reference_atoms = []        
+        for indexes in self.configuration['reference_selection']['indexes']:
+            for idx in indexes:
+                self._reference_atoms.append(atoms[idx])
+        self._reference_atoms = AtomGroup(self._reference_atoms)
 
-        # Create the snapshot generator.
-        self.snapshot = SnapshotGenerator(self.configuration['trajectory']['instance'].universe, actions = [TrajectoryOutput(self._gmft, "all", 0, None, 1)])
-                
+        self._output_trajectory = TrajectoryWriter(
+            self.configuration['output_file']['file'],
+            self.configuration['trajectory']['instance'].chemical_system,
+            self.numberOfSteps,
+            self._selected_atoms.atom_list()
+        )
+                                        
         # This will store the configuration used as the reference for the following step. 
-        self._referenceConfig = None
+        self._reference_configuration = None
+
+        self._rms = []
 
     def run_step(self, index):
         """
@@ -108,23 +105,20 @@ class GlobalMotionFilteredTrajectory(IJob):
         """
 
         # get the Frame index
-        frameIndex = self.configuration['frames']['value'][index]   
-      
-        # The configuration corresponding to this index is set to the universe.
-        self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
+        frameIndex = self.configuration['frames']['value'][index]
         
-        if self.configuration['contiguous']["value"]:
-            # The configuration is made contiguous.
-            conf = self.configuration['trajectory']['instance'].universe.contiguousObjectConfiguration()        
-            # And set to the universe.
-            self.configuration['trajectory']['instance'].universe.setConfiguration(conf)
-        
+        trajectory = self.configuration['trajectory']['instance']
+
+        current_configuration = trajectory.configuration(frameIndex)
+        current_configuration = current_configuration.continuous_configuration()
+        current_configuration = RealConfiguration(trajectory.chemical_system,copy.copy(current_configuration['coordinates']),None)
+                      
         # Case of the first frame.
         if frameIndex == self.configuration['frames']['first']:
 
             # A a linear transformation that shifts the center of mass of the reference atoms to the coordinate origin 
             # and makes its principal axes of inertia parallel to the three coordinate axes is computed.
-            tr = self._referenceAtoms.normalizingTransformation()
+            transfo = self._reference_atoms.normalizing_transformation(current_configuration)
 
             # The first rms is set to zero by construction.
             rms = 0.0
@@ -134,35 +128,26 @@ class GlobalMotionFilteredTrajectory(IJob):
             
             # The linear transformation that minimizes the RMS distance between the current configuration and the previous 
             # one is applied to the reference atoms.
-            tr, rms = self._referenceAtoms.findTransformation(self._referenceConfig)
+            transfo, rms = self._reference_atoms.find_transformation(current_configuration,self._reference_configuration)
                  
         # And applied to the selected atoms for output.
-        self.configuration['trajectory']['instance'].universe.applyTransformation(tr)        
+        current_configuration.apply_transformation(transfo)
 
         # The current configuration becomes now the reference configuration for the next step.
-        self._referenceConfig = self.configuration['trajectory']['instance'].universe.copyConfiguration()
-        
-        velocities = self.configuration['trajectory']['instance'].universe.velocities()
-        
-        if velocities is not None:                    
-            rot = tr.rotation()
-            for atom in self._selectedAtoms:
-                velocities[atom] = rot(velocities[atom])
-            self.configuration['trajectory']['instance'].universe.setVelocities(velocities)
-                
-        # A MMTK.InfiniteUniverse.cellParameters is set to None.
-        self.configuration['trajectory']['instance'].universe.cellParameters = lambda: None
+        self._reference_configuration = current_configuration
+
+        variables = copy.deepcopy(current_configuration.variables)
+        coords = variables.pop('coordinates')
+        new_configuration = RealConfiguration(self._output_trajectory.chemical_system,coords,None,**variables)
+        self._output_trajectory.chemical_system.configuration = new_configuration
 
         # The times corresponding to the running index.
         t = self.configuration['frames']['time'][index]
         
         # Write the step.
-        self.snapshot(data = {'time' : t, 'rms' : rms})
-        
-        # A MMTK.PeriodicUniverse.cellParameters is et back to the universe.
-        self.configuration['trajectory']['instance'].universe.cellParameters = self._cellParametersFunction
-                                                                        
-        return index, None
+        self._output_trajectory.dump_configuration(t)
+                                                                                
+        return index, rms
 
     def combine(self, index, x):
         """
@@ -171,7 +156,8 @@ class GlobalMotionFilteredTrajectory(IJob):
             #. index (int): The index of the step.\n
             #. x (any): The returned result(s) of run_step
         """  
-        pass
+        
+        self._rms.append(x)
         
     def finalize(self):
         """
@@ -181,9 +167,14 @@ class GlobalMotionFilteredTrajectory(IJob):
         self.configuration['trajectory']['instance'].close()
                                  
         # The output trajectory is closed.
-        self._gmft.close()
-        
-        # Restore universe name
-        self.configuration['trajectory']['instance'].universe.__class__.__name__ = self.old_universe_name
-        
+        self._output_trajectory.close()
+
+        outputFile = h5py.File(self.configuration['output_file']['file'], 'r+')
+ 
+        outputFile.create_dataset('rms',data=self._rms,dtype=np.float)
+                           
+        outputFile.close()
+
+
+
 REGISTRY['gmft'] = GlobalMotionFilteredTrajectory

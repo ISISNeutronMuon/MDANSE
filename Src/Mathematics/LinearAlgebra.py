@@ -74,9 +74,9 @@ class Vector:
         return Vector(other.array-self.array)
 
     def __mul__(self, other):
-        if isVector(other):
+        if is_vector(other):
             return float(np.add.reduce(self.array*other.array))
-        elif isTensor(other):
+        elif is_tensor(other):
             product = Tensor(self.array).dot(other)
             if product.rank == 1:
                 return Vector(product.array)
@@ -88,7 +88,7 @@ class Vector:
             return Vector(np.multiply(self.array, other))
 
     def __rmul__(self, other):
-        if isTensor(other):
+        if is_tensor(other):
             product = other.dot(Tensor(self.array))
             if product.rank == 1:
                 return Vector(product.array)
@@ -98,7 +98,7 @@ class Vector:
             return Vector(np.multiply(self.array, other))
 
     def __div__(self, other):
-        if isVector(other):
+        if is_vector(other):
             raise TypeError("Can't divide by a vector")
         else:
             return Vector(np.divide(self.array,1.*other))
@@ -109,7 +109,7 @@ class Vector:
         raise TypeError("Can't divide by a vector")
 
     def __cmp__(self, other):
-        if isVector(other):
+        if is_vector(other):
             return cmp(np.add.reduce(abs(self.array-other.array)), 0)
         return NotImplemented
 
@@ -163,7 +163,7 @@ class Vector:
         @returns: cross product with other
         @rtype: L{Vector}
         """
-        if not isVector(other):
+        if not is_vector(other):
             raise TypeError("Cross product with non-vector")
         return Vector(self.array[1]*other.array[2]
                                 -self.array[2]*other.array[1],
@@ -179,7 +179,7 @@ class Vector:
         """
         return Tensor(self.array, 1)
 
-    def dyadicProduct(self, other):
+    def dyadic_product(self, other):
         """
         @param other: a vector or a tensor
         @type other: L{Vector} or L{Scientific.Geometry.Tensor}
@@ -188,10 +188,10 @@ class Vector:
         @raises TypeError: if other is not a vector or a tensor
         """
 
-        if isVector(other):
+        if is_vector(other):
             return Tensor(self.array[:, np.newaxis]
                                    * other.array[np.newaxis, :], 1)
-        elif isTensor(other):
+        elif is_tensor(other):
             return Tensor(self.array, 1)*other
         else:
             raise TypeError("Dyadic product with non-vector")
@@ -204,7 +204,7 @@ class Vector:
         @rtype: C{float}
         @raises TypeError: if other is not a vector
         """
-        if not isVector(other):
+        if not is_vector(other):
             raise TypeError("Angle between vector and non-vector")
         cosa = np.add.reduce(self.array*other.array) / \
                np.sqrt(np.add.reduce(self.array*self.array) * \
@@ -252,19 +252,19 @@ class Quaternion:
         return Quaternion(self.array-other.array)
 
     def __mul__(self, other):
-        if isQuaternion(other):
+        if is_quaternion(other):
             return Quaternion(np.dot(self.asMatrix(),
                                           other.asMatrix())[:, 0])
         else:
             return Quaternion(self.array*other)
 
     def __rmul__(self, other):
-        if isQuaternion(other):
+        if is_quaternion(other):
             raise ValueError('Not yet implemented')
         return Quaternion(self.array*other)
 
     def __div__(self, other):
-        if isQuaternion(other):
+        if is_quaternion(other):
             raise ValueError('Division by quaternions is not allowed.')
         return Quaternion(self.array/other)
 
@@ -421,11 +421,11 @@ class Tensor:
         return Tensor(other.array-self.array, 1)
 
     def __mul__(self, other):
-        if isTensor(other):
+        if is_tensor(other):
             a = self.array[self.rank*(slice(None),)+(np.newaxis,)]
             b = other.array[other.rank*(slice(None),)+(np.newaxis,)]
             return Tensor(np.inner(a, b), 1)
-        elif isVector(other):
+        elif is_vector(other):
             return other.__rmul__(self)
         else:
             return Tensor(self.array*other, 1)
@@ -434,7 +434,7 @@ class Tensor:
         return Tensor(self.array*other, 1)
 
     def __div__(self, other):
-        if isTensor(other):
+        if is_tensor(other):
             raise TypeError("Can't divide by a tensor")
         else:
             return Tensor(self.array/(1.*other), 1)
@@ -445,7 +445,7 @@ class Tensor:
         raise TypeError("Can't divide by a tensor")
 
     def __cmp__(self, other):
-        if not isTensor(other):
+        if not is_tensor(other):
             return NotImplemented
         if self.rank != other.rank:
             return 1
@@ -479,7 +479,7 @@ class Tensor:
         @returns: the contraction with other
         @rtype: L{Tensor}
         """
-        if isTensor(other):
+        if is_tensor(other):
             a = self.array
             b =  np.transpose(other.array, list(range(1, other.rank))+[0])
             return Tensor(np.inner(a, b), 1)
@@ -578,14 +578,14 @@ class Tensor:
 
 # Type check
 
-def isTensor(x):
+def is_tensor(x):
     """
     @returns: C{True} if x is a L{Tensor}
     """
     return isinstance(x,Tensor)
 
 # Type check
-def isQuaternion(x):
+def is_quaternion(x):
     """
     @param x: any object
     @type x: any
@@ -596,7 +596,7 @@ def isQuaternion(x):
 
 # Type check
 
-def isVector(x):
+def is_vector(x):
     """
     @returns: C{True} if x is a L{Vector}
     """
