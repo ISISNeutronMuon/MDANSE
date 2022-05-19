@@ -1,4 +1,5 @@
 import abc
+import copy
 
 import numpy as np
 
@@ -81,6 +82,20 @@ class _Configuration:
     @property
     def variables(self):
         return self._variables
+
+    @staticmethod
+    def clone(chemical_system, other):
+
+        if chemical_system.total_number_of_atoms() != other.chemical_system.total_number_of_atoms():
+            raise ConfigurationError('Mismatch between the chemical systems')
+
+        unit_cell = copy.copy(other._unit_cell)
+
+        variables = copy.deepcopy(other.variables)
+
+        coords = variables.pop('coordinates')
+
+        return other.__class__(chemical_system,coords,unit_cell,**variables)
 
 class BoxConfiguration(_Configuration):
 

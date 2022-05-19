@@ -25,7 +25,7 @@ from MDANSE.Chemistry.ChemicalEntity import AtomCluster
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.Mathematics.LinearAlgebra import Quaternion, Vector
 from MDANSE.Mathematics.Transformation import Translation
-from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+from MDANSE.MolecularDynamics.Configuration import _Configuration, RealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import RigidBodyTrajectoryGenerator, TrajectoryWriter, sorted_atoms
 
 class RigidBodyTrajectory(IJob):
@@ -76,10 +76,6 @@ class RigidBodyTrajectory(IJob):
 
         coords = trajectory.coordinates(self.referenceFrame)
         unitCell = trajectory.unit_cell(self.referenceFrame)
-        
-        conf = RealConfiguration(trajectory.chemical_system,coords,unitCell)
-
-        self._reference_configuration = conf.continuous_configuration()
 
         selectedAtoms = []        
         for indexes in self.configuration['atom_selection']['indexes']:
@@ -90,6 +86,10 @@ class RigidBodyTrajectory(IJob):
         self._output_trajectory = TrajectoryWriter(self.configuration['output_files']['files'][0], trajectory.chemical_system, self.configuration['frames']['number'], selectedAtoms)
 
         self._group_atoms = [group.atom_list() for group in self._groups]
+
+        conf = RealConfiguration(self._output_trajectory.chemical_system,coords,unitCell)
+
+        self._reference_configuration = conf.continuous_configuration()
 
     def run_step(self, index):
         """
@@ -129,7 +129,7 @@ class RigidBodyTrajectory(IJob):
             current_frame = self.configuration['frames']['value'][i]
             time = self.configuration['frames']['time'][i]
 
-            real_configuration = trajectory.configuration(current_frame)
+            real_configuration = _Configuration.clone(self._output_trajectory.chemical_system,trajectory.configuration(current_frame))
 
             for group_id in range(self._quaternions.shape[0]):
 

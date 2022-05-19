@@ -170,7 +170,7 @@ class Atom(_ChemicalEntity):
 
         self._bonds = kwargs.pop('bonds',[])
 
-        self._groups = kwargs.pop('_groups',[])
+        self._groups = kwargs.pop('groups',[])
 
         self._ghost = kwargs.pop('ghost',False)
 
@@ -208,6 +208,16 @@ class Atom(_ChemicalEntity):
 
     def number_of_atoms(self):
         return int(self.ghost)
+
+    @property
+    def bonds(self):
+
+        return self._bonds
+
+    @bonds.setter
+    def ghost(self, bonds):
+
+        self._bonds = bonds
 
     @property
     def ghost(self):
@@ -379,11 +389,12 @@ class Molecule(_ChemicalEntity):
         m = Molecule(self._code, self._name)
 
         atom_names = [at for at in self._atoms]
-
+        
         m.reorder_atoms(atom_names)
 
-        for at in m._atoms.values():
+        for atname, at in m._atoms.items():
             at._parent = m
+            at._index = self._atoms[atname]._index
 
         return m
 
@@ -513,8 +524,9 @@ class Residue(_ChemicalEntity):
         atoms = [at for at in self._atoms]
         r.set_atoms(atoms)
 
-        for at in r._atoms.values():
+        for atname, at in r._atoms.items():
             at._parent = r
+            at._index = self._atoms[atname]._index
 
         return r
 
@@ -576,8 +588,9 @@ class Nucleotide(_ChemicalEntity):
         atoms = [at for at in self._atoms]
         n.set_atoms(atoms)
 
-        for at in n._atoms.values():
+        for atname, at in n._atoms.items():
             at._parent = n
+            at._index = self._atoms[atname]._index
 
         return n
 

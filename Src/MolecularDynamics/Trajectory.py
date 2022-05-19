@@ -13,6 +13,7 @@
 # **************************************************************************
 
 import copy
+import os
 
 import numpy as np
 
@@ -38,26 +39,29 @@ class Trajectory:
         :type h5_filename: str
         """
 
-        self._chemical_system = ChemicalSystem()
-
         self._h5_filename = h5_filename
 
         self._h5_file = h5py.File(self._h5_filename,'r')
 
+        # Load the chemical system
+        self._chemical_system = ChemicalSystem(os.path.splitext(os.path.basename(self._h5_filename))[0])
         self._chemical_system.load(self._h5_filename)
 
+        # Load the first configuration
         coords = self._h5_file['/configuration/coordinates'][0,:,:]
         unit_cell = self._h5_file.get('unit_cell',None)
         if unit_cell:
             unit_cell = unit_cell[0,:,:]
-
         conf = RealConfiguration(self._chemical_system,coords,unit_cell)
         self._chemical_system.configuration = conf
 
+        # Load all the unit cells
         self._load_unit_cells()
 
+        # Define a default name for all chemical entities which have no name
         resolve_undefined_molecules_name(self._chemical_system)
 
+        # Retrieve the connectivity
         build_connectivity(self._chemical_system, unit_cell=conf.unit_cell)
 
     def close(self):
@@ -352,7 +356,7 @@ class TrajectoryWriter:
 
         self._h5_file = h5py.File(self._h5_filename,'w')
 
-        self._chemical_system = chemical_system
+        self._chemical_system = chemical_system.copy()
 
         if selected_atoms is None:
             self._selected_atoms = self._chemical_system.atom_list()
@@ -365,9 +369,6 @@ class TrajectoryWriter:
         self._selected_atoms = [at.index for at in self._selected_atoms]
 
         all_atoms = self._chemical_system.atom_list()
-        for at in all_atoms:
-            at.ghost = True
-
         for idx in self._selected_atoms:
             all_atoms[idx] = False
 
@@ -384,6 +385,11 @@ class TrajectoryWriter:
         """
 
         self._chemical_system.serialize(self._h5_file)
+
+    @property
+    def chemical_system(self):
+
+        return self._chemical_system
 
     def close(self):
         """Close the trajectory file
@@ -405,13 +411,14 @@ class TrajectoryWriter:
         if configuration is None:
             return
 
-        n_atoms = self._chemical_system.total_number_of_atoms()        
+        n_atoms = self._chemical_system.total_number_of_atoms()
 
+        # Write the configuration variables
         configuration_grp = self._h5_file['/configuration']
         for k, v in configuration.variables.items():
             data = np.empty(v.shape)
             data[:] = np.nan
-            data[self._selected_atoms,:] = v
+            data[self._selected_atoms,:] = v[self._selected_atoms,:]
             dset = configuration_grp.get(k,None)
             if dset is None:
                 dset = configuration_grp.create_dataset(
@@ -421,6 +428,7 @@ class TrajectoryWriter:
                     dtype=np.float)
             dset[self._current_index] = data
 
+        # Write the unit cell
         unit_cell = configuration.unit_cell
         if unit_cell is not None:
             unit_cell_dset = self._h5_file.get('unit_cell',None)
@@ -432,6 +440,7 @@ class TrajectoryWriter:
                     dtype=np.float)
             unit_cell_dset[self._current_index] = unit_cell
 
+        # Write the time
         time_dset = self._h5_file.get('time',None)
         if time_dset is None:
             time_dset = self._h5_file.create_dataset(
