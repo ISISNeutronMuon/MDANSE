@@ -24,6 +24,7 @@ from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem, Molecule, translate_atom_names
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.Converter import Converter
+from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
@@ -147,7 +148,7 @@ class FieldFile(dict):
                 try:
                     mol_name = '{:s}_{:d}'.format(db_name,i)
                     mol = Molecule(db_name,mol_name)
-                    renamedAtoms = translate_atom_names(MOLECULES_DATABASE,db_name,[name for name,_ in atomicContents])
+                    renamedAtoms = translate_atom_names(MOLECULES_DATABASE,db_name,[name for name,_ in atomic_contents])
                     mol.reorder_atoms(renamedAtoms)
                     chemicalEntities.append(mol)
                 except:
@@ -245,7 +246,7 @@ class HistoryFile(dict):
             cell = " ".join(data[1:]).split()
             cell = numpy.array(cell,dtype=numpy.float64)
             cell = numpy.reshape(cell,(3,3)).T            
-            cell *= 0.1
+            cell *= measure(1.0,'ang').toval('nm')
         else:
             cell = None
                 
@@ -263,14 +264,16 @@ class HistoryFile(dict):
 
         config = numpy.reshape(config,(self["natms"],3*(self["keytrj"]+1)))
                 
-        config[:,0:3] *= 0.1
+        config[:,0:3] *= measure(1.0,'ang').toval('nm')
         
+        # Case of the velocities
         if self["keytrj"] == 1:
-            config[:,3:6] *= 0.1
+            config[:,3:6] *= measure(1.0,'ang/ps').toval('nm/ps')
             
+        # Case of the velocities + gradients
         elif self["keytrj"] == 2:
-            config[:,3:6] *= 0.1
-            config[:,6:9] *= -0.1
+            config[:,3:6] *= measure(1.0,'ang/ps').toval('nm/ps')
+            config[:,6:9] *= measure(1.0,'uma ang / ps2').toval('uma nm / ps2')
 
         return timeStep, cell, config
     
@@ -311,7 +314,7 @@ class DL_POLYConverter(Converter):
              
         self._fieldFile.build_mmtk_contents(self._chemicalSystem)
 
-        self._trajectory = TrajectoryWriter(self.configuration['output_files']['files'][0],self._chemicalSystem)        
+        self._trajectory = TrajectoryWriter(self.configuration['output_files']['files'][0],self._chemicalSystem,self.numberOfSteps)        
 
         self._velocities = None
         
@@ -329,7 +332,7 @@ class DL_POLYConverter(Converter):
         # The x, y and z values of the current frame.
         time, cell, config = self._historyFile.read_step(index)
         
-        conf = RealConfiguration(self._chemicalSystem,config[:,0:3],cell)
+        conf = RealConfiguration(self._trajectory.chemical_system,config[:,0:3],cell)
         
         conf.fold_coordinates()
 
@@ -339,7 +342,7 @@ class DL_POLYConverter(Converter):
         if self._gradients is not None:
             conf["gradients"] = config[:,6:9]
 
-        self._chemicalSystem.configuration = conf
+        self._trajectory.chemical_system.configuration = conf
 
         self._trajectory.dump_configuration(time)
                                                                         

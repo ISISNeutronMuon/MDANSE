@@ -193,6 +193,8 @@ def _recursive_contiguity(
 
     cdef double refx, refy, refz, brefx, brefy, brefz,x, y, z, bx, by, bz, bdx, bdy, bdz
 
+    processed[ref] = 1
+
     refx = contiguous_coords[ref,0]
     refy = contiguous_coords[ref,1]
     refz = contiguous_coords[ref,2]
@@ -202,9 +204,7 @@ def _recursive_contiguity(
     brefz = refx*rcell[2,0] + refy*rcell[2,1] + refz*rcell[2,2]
 
     bonded_atoms = bonds[ref]
-
-    processed[ref] = 1
-
+        
     for bat in bonded_atoms:
 
         if processed[bat] == 1:
@@ -234,7 +234,7 @@ def _recursive_contiguity(
         contiguous_coords[bat,1] = bx*cell[1,0] + by*cell[1,1] + bz*cell[1,2]
         contiguous_coords[bat,2] = bx*cell[2,0] + by*cell[2,1] + bz*cell[2,2]
 
-        _recursive_contiguity(contiguous_coords,cell,rcell,processed, bonds, bat)
+        _recursive_contiguity(contiguous_coords,cell,rcell,processed,bonds,bat)
 
 def continuous_coordinates(
     ndarray[np.float64_t, ndim=2] coords not None,
@@ -260,20 +260,15 @@ def continuous_coordinates(
     bonds = {}
     chemical_entities_indexes = []
     for ce in chemical_entities:
-        indexes = []
         for at in ce.atom_list():
             bonds[at.index] = [bat.index for bat in at.bonds]
-            indexes.append(at.index)
-        chemical_entities_indexes.append(indexes)
+            chemical_entities_indexes.append(at.index)
 
-    for idxs in chemical_entities_indexes:
+    chemical_entities_indexes.sort()
 
-        # If the chemical entities has more than one atom, compute the continuous coordinates
-        # by recursively traverse the bonds network
-        if len(idxs) > 1:
+    for idx in chemical_entities_indexes:
 
-            ref_idx = idxs.pop(0)
-            _recursive_contiguity(continuous_coords, cell, rcell, processed, bonds, ref_idx)
+        _recursive_contiguity(continuous_coords, cell, rcell, processed, bonds, idx)
 
     return continuous_coords[selected_indexes,:]
 

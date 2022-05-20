@@ -433,6 +433,8 @@ class AtomCluster(_ChemicalEntity):
 
         self._name = name
 
+        self._parentless = parentless
+
         self._atoms = []
         for at in atoms:
             if not parentless:

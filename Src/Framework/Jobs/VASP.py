@@ -18,16 +18,13 @@ import os
 
 import numpy
 
-from MMTK import Atom
-from MMTK import Units
-from MMTK.ParticleProperties import Configuration
-from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
-from MMTK.Universe import ParallelepipedicPeriodicUniverse
-
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
+from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.Framework.Jobs.Converter import Converter
-
+from MDANSE.Framework.Units import measure
+from MDANSE.MolecularDynamics.Configuration import BoxConfiguration
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 class XDATCARFileError(Error):
     pass
@@ -60,7 +57,7 @@ class XDATCARFile(dict):
 
         cell = numpy.array(cell,dtype=numpy.float64)
                 
-        self["cell_shape"] = numpy.reshape(cell,(3,3))*Units.Ang*self["scale_factor"]
+        self["cell_shape"] = numpy.reshape(cell,(3,3))*self["scale_factor"]*measure(1.0,'ang').toval('nm')
                     
         self["atoms"] = zip(header[4].split(),[int(v) for v in header[5].split()])
                     
@@ -140,7 +137,7 @@ class XDATCARFile(dict):
                 header.append(line)
             cell = " ".join(header[1:4]).split()
             cell = numpy.array(cell,dtype=numpy.float64)
-            self["cell_shape"] = numpy.reshape(cell,(3,3))*Units.Ang*self["scale_factor"]
+            self["cell_shape"] = numpy.reshape(cell,(3,3))*self["scale_factor"]*measure(1.0,'ang').toval('nm')
         else:
             self['instance'].read(self._frameHeaderSize)
                         
@@ -165,7 +162,7 @@ class VASPConverter(Converter):
     settings['xdatcar_file'] = ('input_file',{'wildcard':'XDATCAR files (XDATCAR*)|XDATCAR*|All files|*',
                                                 'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})
     settings['time_step'] = ('float', {'label':"time step", 'default':1.0, 'mini':1.0e-9})        
-    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'xdatcar_file'})
+    settings['output_file'] = ('single_output_file', {'format':"hdf",'root':'xdatcar_file'})
                 
     def initialize(self):
         '''
@@ -177,19 +174,14 @@ class VASPConverter(Converter):
         # The number of steps of the analysis.
         self.numberOfSteps = self._xdatcarFile['n_frames']
         
-        self._universe = ParallelepipedicPeriodicUniverse()
+        self._chemicalSystem = ChemicalSystem()
         
         for symbol,number in self._xdatcarFile["atoms"]:
             for i in range(number):
-                self._universe.addObject(Atom(symbol, name="%s_%d" % (symbol,i)))        
+                self._chemicalSystem.add_chemical_entity(Atom(symbol=symbol, name="{:s}_{:d}".format(symbol,i)))
 
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
-
-        data_to_be_written = ["configuration","time"]
-
-        # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
+        self._trajectory = TrajectoryWriter(self.configuration['output_file']['file'],self._chemicalSystem, self.numberOfSteps)
 
     def run_step(self, index):
         """Runs a single step of the job.
@@ -202,22 +194,25 @@ class VASPConverter(Converter):
 
         # Read the current step in the xdatcar file.
         config = self._xdatcarFile.read_step(index)
-        
-        self._universe.setShape(self._xdatcarFile["cell_shape"])
-        
-        conf = Configuration(self._universe,config)
-        
-        conf.convertFromBoxCoordinates()
-        
-        self._universe.setConfiguration(conf)
-                                        
-        # The real coordinates are foled then into the simulation box (-L/2,L/2). 
-        self._universe.foldCoordinatesIntoBox()
+                
+        conf = BoxConfiguration(self._trajectory.chemical_system,config,self._xdatcarFile["cell_shape"])
 
-        time = index*self.configuration["time_step"]["value"]*Units.fs
+        # The coordinates in VASP are in box format. Convert them into real coordinates.
+        real_conf = conf.to_real_configuration()
 
-        # A call to the snapshot generator produces the step corresponding to the current frame.
-        self._snapshot(data = {'time': time})
+        # The real coordinates are folded then into the simulation box (-L/2,L/2). 
+        real_conf.fold_coordinates()
+
+        print(real_conf['coordinates'][118,:],real_conf['coordinates'][160,:])
+
+        # Bind the configuration to the chemcial system
+        self._trajectory.chemical_system.configuration = real_conf
+
+        # Compute the actual time
+        time = index*self.configuration["time_step"]["value"]*measure(1.0,'fs').toval('ps')
+
+        # Dump the configuration to the output trajectory
+        self._trajectory.dump_configuration(time)
 
         return index, None
 

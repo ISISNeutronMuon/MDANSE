@@ -143,7 +143,7 @@ class MolecularViewerPlugin(ComponentPlugin):
     category = ("Viewer",)
                 
     # 0 line / 1 sphere / 2 tube / 3 sphere + tube / 4 sphere + line
-    _rendmod = 0
+    _rendmod = 4
     
     def __init__(self, parent, *args, **kwargs):
         
@@ -653,7 +653,8 @@ class MolecularViewerPlugin(ComponentPlugin):
         pid = self.picker.GetPointId()
         if pid > 0:
             idx = self.get_atom_index(pid)
-            info = '%s (id:%s) at  %s'%(self._atoms[idx].full_name(), self._atoms[idx].index, '%.3f %.3f %.3f'%tuple(self._atoms[idx].position))
+            xyz = self._trajectory.chemical_system.configuration['coordinates'][idx,:]
+            info = '%s (id:%s) at  %s'%(self._atoms[idx].full_name(), self._atoms[idx].index, '%.3f %.3f %.3f'%tuple(xyz))
             LOGGER(info, "info")
         self.picker.InitializePickList()
                 

@@ -141,9 +141,20 @@ class BoxConfiguration(_Configuration):
     def to_real_coordinates(self):
 
         if self._unit_cell is None:
-            return self._variables['coordinates']
+            return copy.copy(self._variables['coordinates'])
         else:
             return np.matmul(self._variables['coordinates'],self._unit_cell)
+
+    def to_real_configuration(self):
+
+        coords = self.to_real_coordinates()
+
+        variables = copy.deepcopy(self._variables)
+        variables.pop('coordinates')
+
+        real_conf = RealConfiguration(self._chemical_system,coords,self._unit_cell,**variables)
+
+        return real_conf
 
     def atomsInShell(self, ref, mini=0.0, maxi=10.0):
 
@@ -237,9 +248,20 @@ class RealConfiguration(_Configuration):
     def to_box_coordinates(self):
 
         if self._unit_cell is None:
-            return self._variables['coordinates']
+            return copy.copy(self._variables['coordinates'])
         else:
             return np.matmul(self._variables['coordinates'],np.linalg.inv(self._unit_cell))
+
+    def to_box_configuration(self):
+
+        coords = self.to_box_coordinates()
+
+        variables = copy.deepcopy(self._variables)
+        variables.pop('coordinates')
+
+        box_conf = BoxConfiguration(self._chemical_system,coords,self._unit_cell,**variables)
+
+        return box_conf
 
     def to_real_coordinates(self):
 

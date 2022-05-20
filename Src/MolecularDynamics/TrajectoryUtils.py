@@ -21,7 +21,7 @@ from MMTK.Trajectory import Trajectory
 
 from MDANSE.Core.Error import Error
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, AtomGroup
 from MDANSE.Extensions import fast_calculation
 
 class MolecularDynamicsError(Error):
@@ -56,17 +56,6 @@ def build_connectivity(chemicalSystem ,tolerance=0.05, unit_cell=None):
     conf = conf.contiguous_configuration()
 
     scannedObjects = [ce for ce in chemicalSystem.chemical_entities if isinstance(ce,AtomCluster)]
-
-    singleAtomsObjects = []
-    for ce in chemicalSystem.chemical_entities:
-        if isinstance(ce,Atom):
-            singleAtomsObjects.append(ce)
-        else:
-            if ce.number_of_atoms() == 1:
-                singleAtomsObjects.extend(ce.atom_list())
-
-    if singleAtomsObjects:
-        scannedObjects.append(AtomCluster('',singleAtomsObjects, parentless=True))
                 
     for ce in scannedObjects:
                                                         
@@ -82,7 +71,7 @@ def build_connectivity(chemicalSystem ,tolerance=0.05, unit_cell=None):
             fast_calculation.cpt_cluster_connectivity_nopbc(coords,covRadii,tolerance,bonds)
         else:
             inverse_unit_cell = np.linalg.inv(unit_cell)
-            fast_calculation.cpt_cluster_connectivity_pbc(coords,unit_cell.T, inverse_unit_cell.T, covRadii,tolerance,bonds)
+            fast_calculation.cpt_cluster_connectivity_pbc(coords,unit_cell.T,inverse_unit_cell.T,covRadii,tolerance,bonds)
                   
         for idx1,idx2 in bonds:
             atoms[idx1].bonds.append(atoms[idx2])                  

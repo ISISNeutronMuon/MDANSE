@@ -83,8 +83,8 @@ class MainFrame(wx.Frame):
         LOGGER.start()
         
         # Redirect all output to the console logger
-        sys.stdout = consoleHandler
-        sys.stderr = consoleHandler
+        # sys.stdout = consoleHandler
+        # sys.stderr = consoleHandler
                 
         sys.excepthook = excepthook
                  
