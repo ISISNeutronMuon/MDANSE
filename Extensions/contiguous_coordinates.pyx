@@ -189,27 +189,32 @@ def _recursive_contiguity(
     ndarray[np.float64_t, ndim=2] rcell not None,
     ndarray[np.int8_t, ndim=1] processed not None,
     bonds,
-    ref):
+    seed):
 
     cdef double refx, refy, refz, brefx, brefy, brefz,x, y, z, bx, by, bz, bdx, bdy, bdz
 
-    processed[ref] = 1
+    # The seed atom is marked as processed
+    processed[seed] = 1
 
-    refx = contiguous_coords[ref,0]
-    refy = contiguous_coords[ref,1]
-    refz = contiguous_coords[ref,2]
+    # Convert from real to box coordinates for the seed atom
+    refx = contiguous_coords[seed,0]
+    refy = contiguous_coords[seed,1]
+    refz = contiguous_coords[seed,2]
 
     brefx = refx*rcell[0,0] + refy*rcell[0,1] + refz*rcell[0,2]
     brefy = refx*rcell[1,0] + refy*rcell[1,1] + refz*rcell[1,2]
     brefz = refx*rcell[2,0] + refy*rcell[2,1] + refz*rcell[2,2]
 
-    bonded_atoms = bonds[ref]
+    bonded_atoms = bonds[seed]
         
+    # Loop over the atoms bonded to the seed
     for bat in bonded_atoms:
 
+        # If the bonded atom is marked as processed skip it
         if processed[bat] == 1:
             continue
 
+        # Convert from real to box coordinates for the bonded atom
         x = contiguous_coords[bat,0]
         y = contiguous_coords[bat,1]
         z = contiguous_coords[bat,2]
@@ -218,6 +223,7 @@ def _recursive_contiguity(
         by = x*rcell[1,0] + y*rcell[1,1] + z*rcell[1,2]
         bz = x*rcell[2,0] + y*rcell[2,1] + z*rcell[2,2]
 
+        # Apply the PBC
         bdx = bx - brefx
         bdy = by - brefy
         bdz = bz - brefz
@@ -230,6 +236,7 @@ def _recursive_contiguity(
         by = brefy + bdy
         bz = brefz + bdz
 
+        # Convert back from box to real coordinates
         contiguous_coords[bat,0] = bx*cell[0,0] + by*cell[0,1] + bz*cell[0,2]
         contiguous_coords[bat,1] = bx*cell[1,0] + by*cell[1,1] + bz*cell[1,2]
         contiguous_coords[bat,2] = bx*cell[2,0] + by*cell[2,1] + bz*cell[2,2]
