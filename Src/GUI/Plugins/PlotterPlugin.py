@@ -14,6 +14,7 @@
 # **************************************************************************
 
 import collections
+import os
 
 import numpy
 
@@ -28,13 +29,16 @@ import wx.aui as wxaui
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.GUI.Plugins.ComponentPlugin import ComponentPlugin
+from MDANSE.GUI.Plugins.PlotterData import NetCDFPlotterData, PLOTTER_DATA_TYPES
 from MDANSE.GUI.Plugins.Plotter1D import Plotter1D
 from MDANSE.GUI.Plugins.Plotter2D import Plotter2D
 from MDANSE.GUI.Plugins.Plotter3D import Plotter3D
 from MDANSE.GUI.Icons import ICONS
 
+
 class PlotterError(Error):
     pass
+
 
 class PlotterPanel(wx.Panel):
     
@@ -131,6 +135,7 @@ class DataPanel(wx.Panel):
         self.datalist.InsertColumn(1, 'Axis', width=50)
         self.datalist.InsertColumn(2, 'Dimension')
         self.datalist.InsertColumn(3, 'Size')
+        self.datalist.InsertColumn(4, 'Path', width=100)
         
         if self.standalone:
             splitterWindow.SplitHorizontally(self.datasetlist,self.datalist)
@@ -270,11 +275,11 @@ class DataPanel(wx.Panel):
         variables = self.dataproxy.keys()
         for i, var in enumerate(sorted(variables)):
             self.datalist.InsertStringItem(i, var)
-            #self.datalist.SetStringItem(i, 1,self.dataproxy[var]['units'])
             axis = ','.join(self.dataproxy[var]['axis'])
             self.datalist.SetStringItem(i, 1,axis)
             self.datalist.SetStringItem(i, 2,str(self.dataproxy[var]['data'].ndim))
             self.datalist.SetStringItem(i, 3,str(self.dataproxy[var]['data'].shape))
+            self.datalist.SetStringItem(i, 4, self.dataproxy[var]['path'])
         self.datalist.Select(0, True)
             
     def on_select_variables(self, event = None):
@@ -432,6 +437,7 @@ class PlotterPlugin(ComponentPlugin):
         self._parent._mgr.GetPane(self).Dock().Floatable(False).Center().CloseButton(True).Caption("2D/3D Plotter")
         self._parent._mgr.Update()
 
+
 class PlotterFrame(wx.Frame):
     
     def __init__(self, parent, title="2D/3D Plotter"):
@@ -469,26 +475,29 @@ class PlotterFrame(wx.Frame):
         filelist = dialog.GetPaths()
         
         for basename, filename in zip(baselist, filelist):
-            with netCDF4.Dataset(filename, "r") as f:
-                _vars = f.variables
+
+            ext = os.path.splitext(filename)[1]
+            with PLOTTER_DATA_TYPES[ext](filename, 'r') as f:
                 data = collections.OrderedDict()
-                for k in _vars:
-                    dtype = _vars[k][:].dtype
-                    if not numpy.issubdtype(dtype, numpy.number):
-                        continue
-                    data[k]={}
-                    if hasattr(_vars[k], 'axis'):
-                        if _vars[k].axis:
-                            data[k]['axis'] = _vars[k].axis.split('|')
+                for vname, vinfo in f.variables.items():
+                    vpath, variable = vinfo
+                    arr = variable.get_array()
+
+                    data[vname] = {}
+                    if hasattr(variable, 'axis'):
+                        axis = getattr(variable,'axis')
+                        if axis:
+                            data[vname]['axis'] = axis.split('|')
                         else:
-                            data[k]['axis'] = []
+                            data[vname]['axis'] = []
                     else:
-                        data[k]['axis'] = []
-                    data[k]['data'] = _vars[k][:]
-                    data[k]['units'] = getattr(_vars[k], "units", "au")
-            
+                        data[vname]['axis'] = []
+                    data[vname]['path'] = vpath
+                    data[vname]['data'] = arr
+                    data[vname]['units'] = getattr(variable, "units", "au")
+
                 unique_name = self.unique(basename, self.plugin._dataDict)
-            
+
                 self.plugin._dataDict[unique_name]={'data': data, 'path': filename, 'basename': basename}
                 self.plugin._dataPanel.show_dataset(-1)
     
