@@ -17,16 +17,13 @@ import collections
 import os
 import struct
 
-import numpy
-
-from MMTK import Units
-from MMTK.ParticleProperties import ParticleVector
-from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Units import measure
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Framework.Jobs.MaterialsStudio import XTDFile
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 FORCE_FACTOR = measure(1.0,"kcal_per_mole/ang",equivalent=True).toval("uma nm/ps2 mol")
 
@@ -95,7 +92,7 @@ class TrjFile(dict):
 
         rec = '!%di8x' % self["totmov"]
         recSize = struct.calcsize(rec)
-        self["mvofst"] = numpy.array(struct.unpack(rec,trjfile.read(recSize)), dtype=numpy.int32) - 1
+        self["mvofst"] = np.array(struct.unpack(rec,trjfile.read(recSize)), dtype=np.int32) - 1
 
         # Record 4a
         rec = "!i"
@@ -211,9 +208,9 @@ class TrjFile(dict):
         
         if self["defcel"]:
             trjfile.seek(pos + self._defCellRecPos,0)
-            cell = numpy.zeros((3,3),dtype=numpy.float64)
+            cell = np.zeros((3,3),dtype=np.float64)
             # ax,by,cz,bz,az,ay            
-            cellData = numpy.array(struct.unpack(self._defCellRec,trjfile.read(self._defCellRecSize)),dtype=numpy.float64)[2:8]*Units.Ang
+            cellData = np.array(struct.unpack(self._defCellRec,trjfile.read(self._defCellRecSize)),dtype=np.float64)[2:8]*measure(1.0,'ang').toval('nm')
             cell[0,0] = cellData[0]
             cell[1,1] = cellData[1]
             cell[2,2] = cellData[2]
@@ -230,24 +227,24 @@ class TrjFile(dict):
         
         if self["velocities_written"]:
             if self["gradients_written"]:
-                config = numpy.transpose(numpy.reshape(config,(3,3, self['totmov'])))
-                xyz    = config[:,:,0]*Units.Ang
-                vel    = config[:,:,1]*Units.Ang
+                config = np.transpose(np.reshape(config,(3,3, self['totmov'])))
+                xyz    = config[:,:,0]*measure(1.0,'ang').toval('nm')
+                vel    = config[:,:,1]*measure(1.0,'ang/fs').toval('nm/ps')
                 gradients = config[:,:,2]*FORCE_FACTOR
             else:
-                config = numpy.transpose(numpy.reshape(config,(2,3, self['totmov'])))
-                xyz    = config[:,:,0]*Units.Ang
-                vel    = config[:,:,1]*Units.Ang
+                config = np.transpose(np.reshape(config,(2,3, self['totmov'])))
+                xyz    = config[:,:,0]*measure(1.0,'ang').toval('nm')
+                vel    = config[:,:,1]*measure(1.0,'ang/fs').toval('nm/ps')
                 gradients = None
         else:
             if self["gradients_written"]:
-                config = numpy.transpose(numpy.reshape(config,(2,3, self['totmov'])))
-                xyz    = config[:,:,0]*Units.Ang
+                config = np.transpose(np.reshape(config,(2,3, self['totmov'])))
+                xyz    = config[:,:,0]*measure(1.0,'ang').toval('nm')
                 vel    = None
                 gradients = config[:,:,1]*FORCE_FACTOR
             else:
-                config = numpy.transpose(numpy.reshape(config,(1,3, self['totmov'])))
-                xyz    = config[:,:,0]*Units.Ang
+                config = np.transpose(np.reshape(config,(1,3, self['totmov'])))
+                xyz    = config[:,:,0]*measure(1.0,'ang').toval('nm')
                 vel    = None
                 gradients = None
             
@@ -281,36 +278,30 @@ class ForciteConverter(Converter):
         
         self._xtdfile = XTDFile(self.configuration["xtd_file"]["filename"])
         
-        self._xtdfile.build_universe()
+        self._xtdfile.build_chemical_system()
         
-        self._universe = self._xtdfile.universe
+        self._chemicalSystem = self._xtdfile.chemicalSystem
         
         self._trjfile = TrjFile(self.configuration["trj_file"]["filename"])
 
         # The number of steps of the analysis.
         self.numberOfSteps = self._trjfile['n_frames']
         
-        self._velocities = None
-        self._gradients = None
-
-        data_to_be_written = ["configuration","time"]              
         if self._trjfile["velocities_written"]:
-            self._universe.initializeVelocitiesToTemperature(0.)
-            self._velocities = ParticleVector(self._universe)
-            self._velocities.array[:,:] = 0.0
-            data_to_be_written.append("velocities")
+            self._velocities = np.zeros((self._chemicalSystem.number_of_atoms(),3),dtype=np.float)
+        else:
+            self._velocities = None
 
         if self._trjfile["gradients_written"]:
-            self._universe.initializeVelocitiesToTemperature(0.)
-            self._gradients = ParticleVector(self._universe)
-            self._gradients.array[:,:] = 0.0
-            data_to_be_written.append("gradients")
+            self._gradients = np.zeros((self._chemicalSystem.number_of_atoms(),3),dtype=np.float)
+        else:
+            self._gradients = None
 
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w', comment=self._trjfile["title"])
-
-        # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
+        self._trajectory = TrajectoryWriter(
+            self.configuration['output_file']['file'], 
+            self._chemicalSystem,
+            self.numberOfSteps)
                 
     def run_step(self, index):
         """Runs a single step of the job.
@@ -325,28 +316,23 @@ class ForciteConverter(Converter):
         time, cell, xyz, velocities, gradients = self._trjfile.read_step(index)
         
         # If the universe is periodic set its shape with the current dimensions of the unit cell.
-        if self._universe.is_periodic and self._trjfile["defcel"]:
-            self._universe.setShape(cell)
-            
+        conf = self._trajectory.chemical_system.configuration
         movableAtoms = self._trjfile['mvofst']
-                    
-        self._universe.configuration().array[movableAtoms,:] = xyz
-                   
-        self._universe.foldCoordinatesIntoBox()
-        
-        data = {"time" : time}
-
+        conf['coordinates'][movableAtoms,:] = xyz
+        if conf.is_periodic and self._trjfile["defcel"]:
+            conf.unit_cell = cell            
+            conf.fold_coordinates()
+                           
         if self._velocities is not None:
-            self._velocities.array[movableAtoms,:] = velocities
-            data["velocities"] = self._velocities
+            self._velocities[movableAtoms,:] = velocities
+            conf["velocities"] = self._velocities
 
         if self._gradients is not None:
-            self._gradients.array[movableAtoms,:] = gradients
-            data["gradients"] = self._gradients
+            self._gradients[movableAtoms,:] = gradients
+            conf["gradients"] = self._gradients
 
-        # Store a snapshot of the current configuration in the output trajectory.
-        self._snapshot(data=data)
-                                                                        
+        self._trajectory.dump_configuration(time)
+
         return index, None
         
     def combine(self, index, x):
