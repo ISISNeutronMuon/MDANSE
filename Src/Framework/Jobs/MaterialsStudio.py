@@ -15,13 +15,13 @@
 
 import collections
 import xml.etree.ElementTree as ElementTree
+from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration, RealConfiguration
 
-import numpy
+import numpy as np
 
-from MMTK import Units
-from MMTK import Atom, AtomCluster
-from MMTK.ParticleProperties import Configuration
-from MMTK.Universe import InfiniteUniverse, ParallelepipedicPeriodicUniverse
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
+from MDANSE.Framework.Units import measure
+from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration, RealConfiguration
 
 class XTDFile(object):
     
@@ -31,34 +31,29 @@ class XTDFile(object):
         
         self._atoms = None
         
-        self._universe = None
+        self._chemicalSystem = None
         
         self._pbc = False
         
         self._cell = None
         
         self.parse()
-        
 
     @property
     def clusters(self):
         return self._clusters
     
-    
     @property
-    def universe(self):
-        return self._universe
-        
-        
+    def chemicalSystem(self):
+        return self._chemicalSystem
+            
     @property
     def pbc(self):
         return self._pbc
     
-    
     @property
     def cell(self):
         return self._cell
-        
         
     def parse(self):
         """
@@ -75,11 +70,11 @@ class XTDFile(object):
         if SPACEGROUP:
             self._pbc = True
             SPACEGROUP = SPACEGROUP[0]
-            self._cell = numpy.empty((3,3),dtype=numpy.float64)
+            self._cell = np.empty((3,3),dtype=np.float64)
             self._cell[0,:] = SPACEGROUP.attrib["AVector"].split(',')
             self._cell[1,:] = SPACEGROUP.attrib["BVector"].split(',')
             self._cell[2,:] = SPACEGROUP.attrib["CVector"].split(',')
-            self._cell *= Units.Ang
+            self._cell *= measure(1.0,'ang').toval('nm')
 
         self._atoms = collections.OrderedDict()
         
@@ -101,7 +96,7 @@ class XTDFile(object):
                 info["xtd_index"] = idx
                 info["bonded_to"] = set()
                 info["element"] = node.attrib['Components'].split(',')[0].strip()
-                info["xyz"] = numpy.array(node.attrib["XYZ"].split(','),dtype=numpy.float64)
+                info["xyz"] = np.array(node.attrib["XYZ"].split(','),dtype=np.float64)
     
                 name = node.attrib.get('Name','').strip()
                 if name:
@@ -137,15 +132,11 @@ class XTDFile(object):
                 self._atoms[idx1]["bonded_to"].add(idx2)
                 self._atoms[idx2]["bonded_to"].add(idx1)            
 
-    def build_universe(self):        
+    def build_chemical_system(self):        
 
-        if self._pbc:
-            self._universe = ParallelepipedicPeriodicUniverse()
-            self._universe.setShape(self._cell)
-        else:
-            self._universe = InfiniteUniverse()
+        self._chemicalSystem = ChemicalSystem()
                     
-        configuration = numpy.empty((self._nAtoms,3),dtype=numpy.float64)
+        coordinates = np.empty((self._nAtoms,3),dtype=np.float64)
                             
         nclusters = 0
          
@@ -173,23 +164,26 @@ class XTDFile(object):
                 mergedClusters.setdefault(clusterId,[]).append(idx)
                  
         for k,indexes in mergedClusters.items():
-            atomCluster = AtomCluster([])
             bruteFormula = collections.defaultdict(lambda : 0)
+            atoms = []
             for idx in indexes:
                 element = self._atoms[idx]["element"]
                 name = self._atoms[idx]["name"]
-                at = Atom(element, name=name, xtdIndex=idx)
+                at = Atom(symbol=element, name=name, xtdIndex=idx)
                 at.index = self._atoms[idx]["mmtk_index"]
-                configuration[at.index] = self._atoms[idx]["xyz"]
-                atomCluster.atoms.append(at)
+                coordinates[at.index] = self._atoms[idx]["xyz"]
+                atoms.append(at)
                 bruteFormula[element] += 1
-            atomCluster.name = "".join(["%s%d" % (k,v) for k,v in sorted(bruteFormula.items())])
-            self._universe.addObject(atomCluster)
+            name = "".join(["%s%d" % (k,v) for k,v in sorted(bruteFormula.items())])
+            ac = AtomCluster(name,atoms)
+            self._chemicalSystem.add_chemical_entity(ac)
 
         if self._pbc:
-            configuration = self._universe._boxToRealPointArray(configuration)
+            boxConf = PeriodicBoxConfiguration(self._chemicalSystem,coordinates,self._cell)
+            realConf = boxConf.to_real_configuration()
         else:
-            configuration *= Units.Ang
-            
-        self._universe.setConfiguration(Configuration(self._universe,configuration))
-        self._universe.foldCoordinatesIntoBox()
+            coordinates *= measure(1.0,'ang').toval('nm')
+            realConf = RealConfiguration(self._chemicalSystem,coordinates,self._cell)
+
+        realConf.fold_coordinates()            
+        self._chemicalSystem.configuration = realConf

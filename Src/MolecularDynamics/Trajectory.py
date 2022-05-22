@@ -24,7 +24,7 @@ from MMTK.Trajectory import Trajectory
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.Extensions import atomic_trajectory, com_trajectory, fold_coordinates
-from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration, RealConfiguration
 from MDANSE.MolecularDynamics.TrajectoryUtils import build_connectivity, resolve_undefined_molecules_name, sorted_atoms
 
 class TrajectoryError(Exception):
@@ -52,7 +52,9 @@ class Trajectory:
         unit_cell = self._h5_file.get('unit_cell',None)
         if unit_cell:
             unit_cell = unit_cell[0,:,:]
-        conf = RealConfiguration(self._chemical_system,coords,unit_cell)
+            conf = PeriodicRealConfiguration(self._chemical_system,coords,unit_cell)
+        else:
+            conf = RealConfiguration(self._chemical_system,coords)
         self._chemical_system.configuration = conf
 
         # Load all the unit cells
@@ -429,8 +431,8 @@ class TrajectoryWriter:
             dset[self._current_index] = data
 
         # Write the unit cell
-        unit_cell = configuration.unit_cell
-        if unit_cell is not None:
+        if configuration.is_periodic:
+            unit_cell = configuration.unit_cell
             unit_cell_dset = self._h5_file.get('unit_cell',None)
             if unit_cell_dset is None:
                 unit_cell_dset = self._h5_file.create_dataset(

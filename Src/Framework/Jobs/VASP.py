@@ -23,7 +23,7 @@ from MDANSE.Core.Error import Error
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Framework.Units import measure
-from MDANSE.MolecularDynamics.Configuration import BoxConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 class XDATCARFileError(Error):
@@ -195,7 +195,7 @@ class VASPConverter(Converter):
         # Read the current step in the xdatcar file.
         config = self._xdatcarFile.read_step(index)
                 
-        conf = BoxConfiguration(self._trajectory.chemical_system,config,self._xdatcarFile["cell_shape"])
+        conf = PeriodicBoxConfiguration(self._trajectory.chemical_system,config,self._xdatcarFile["cell_shape"])
 
         # The coordinates in VASP are in box format. Convert them into real coordinates.
         real_conf = conf.to_real_configuration()

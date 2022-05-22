@@ -452,13 +452,13 @@ class PDBReader:
         return peptide_chain
 
     def build_chemical_system(self):
-        
+
+        from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+
         chemical_system = ChemicalSystem()
 
         for ce in self._chemicalEntities:
             chemical_system.add_chemical_entity(ce)
-
-        from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 
         coordinates = []
         for obj in self._struct:

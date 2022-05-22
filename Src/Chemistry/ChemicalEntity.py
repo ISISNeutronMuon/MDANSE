@@ -160,7 +160,7 @@ class _ChemicalEntity:
         from MDANSE.Mathematics.LinearAlgebra import Vector
 
         chemical_system = self.root_chemical_system()
-        if chemical_system.configuration.unit_cell is not None:
+        if chemical_system.configuration.is_periodic:
             raise ValueError("superposition in periodic configurations is not defined")
 
         if conf1.chemical_system != chemical_system:

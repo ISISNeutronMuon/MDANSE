@@ -24,7 +24,7 @@ from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.IO.PDBReader import PDBReader
 from MDANSE.Mathematics.Geometry import get_basis_vectors_from_cell_parameters
-from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import resolve_undefined_molecules_name, TrajectoryWriter
 
 PI_2 = 0.5*np.pi
@@ -301,7 +301,7 @@ class DCDConverter(Converter):
         unit_cell, config = self.configuration["dcd_file"]["instance"].read_step()
         unit_cell = get_basis_vectors_from_cell_parameters(unit_cell)
 
-        conf = RealConfiguration(self._trajectory._chemical_system,config,unit_cell)
+        conf = PeriodicRealConfiguration(self._trajectory._chemical_system,config,unit_cell)
                         
         if self.configuration['fold']["value"]:
             conf.fold_coordinates()

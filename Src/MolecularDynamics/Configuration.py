@@ -12,7 +12,7 @@ class _Configuration:
 
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, chemical_system, coordinates, unit_cell=None, **variables):
+    def __init__(self, chemical_system, coordinates, **variables):
 
         self._chemical_system = chemical_system
 
@@ -27,14 +27,6 @@ class _Configuration:
         for k,v in variables.items():
             self[k] = v
 
-        if unit_cell is not None:
-            unit_cell = np.array(unit_cell)
-            if unit_cell.shape != (3,3):
-                raise ValueError('Invalid unit cell dimensions')
-            self._unit_cell = unit_cell
-        else:
-            self._unit_cell = None
-
     def __getitem__(self, name):
 
         return self._variables[name]
@@ -47,42 +39,6 @@ class _Configuration:
 
         self._variables[name] = item
 
-    @property
-    def chemical_system(self):
-        return self._chemical_system
-
-    @property
-    def coordinates(self):
-        return self._coordinates
-
-    @abc.abstractmethod
-    def fold_coordinates(self):
-        pass
-
-    @abc.abstractmethod
-    def to_box_coordinates(self):
-        pass
-
-    @abc.abstractmethod
-    def to_real_coordinates(self):
-        pass
-
-    @property
-    def coordinates(self):
-        return self._variables['coordinates']
-
-    @property
-    def is_periodic(self):
-        return self._unit_cell is not None
-
-    @property
-    def unit_cell(self):
-        return self._unit_cell
-
-    @property
-    def variables(self):
-        return self._variables
-
     def apply_transformation(self, transfo):
         conf = self['coordinates']
         rot = transfo.rotation().tensor.array
@@ -93,6 +49,10 @@ class _Configuration:
             velocities = self._variables['velocities']
             rot = transfo.rotation().tensor.array
             velocities[:] = np.dot(velocities, np.transpose(rot))
+
+    @property
+    def chemical_system(self):
+        return self._chemical_system
 
     @staticmethod
     def clone(chemical_system, other):
@@ -108,31 +68,67 @@ class _Configuration:
 
         return other.__class__(chemical_system,coords,unit_cell,**variables)
 
-class BoxConfiguration(_Configuration):
+    @property
+    def coordinates(self):
+        return self._variables['coordinates']
+
+    @abc.abstractmethod
+    def to_real_coordinates(self):
+        pass
+
+    @property
+    def variables(self):
+        return self._variables
+
+class _PeriodicConfiguration(_Configuration):
+
+    def __init__(self, chemical_system, coordinates, unit_cell, **variables):
+
+        super(_PeriodicConfiguration,self).__init__(chemical_system,coordinates,**variables)
+
+        unit_cell = np.array(unit_cell)
+        if unit_cell.shape != (3,3):
+            raise ValueError('Invalid unit cell dimensions')
+        self._unit_cell = unit_cell
+
+    @abc.abstractmethod
+    def fold_coordinates(self):
+        pass
+
+    @abc.abstractmethod
+    def to_box_coordinates(self):
+        pass
+
+    @property
+    def unit_cell(self):
+        return self._unit_cell
+
+    @unit_cell.setter
+    def unit_cell(self, unit_cell):
+        self._unit_cell = unit_cell
+
+class PeriodicBoxConfiguration(_PeriodicConfiguration):
+
+    is_periodic = True
 
     def fold_coordinates(self):
 
         from MDANSE.Extensions import fold_coordinates
 
-        if self._unit_cell is not None:
-            coords = self._variables['coordinates']
-            coords = coords[np.newaxis,:,:]
-            unit_cell = self._unit_cell.T
-            inverse_unit_cell = np.linalg.inv(unit_cell)
-            unit_cells = unit_cell[np.newaxis,:,:]
-            inverse_unit_cells = inverse_unit_cell[np.newaxis,:,:]
-            coords = fold_coordinates.fold_coordinates(
-                coords,
-                unit_cells,
-                inverse_unit_cells,
-                True
-            )
-            coords = np.squeeze(coords)
-            self._variables['coordinates'] = coords
-
-        else:
-            return
-
+        coords = self._variables['coordinates']
+        coords = coords[np.newaxis,:,:]
+        unit_cell = self._unit_cell.T
+        inverse_unit_cell = np.linalg.inv(unit_cell)
+        unit_cells = unit_cell[np.newaxis,:,:]
+        inverse_unit_cells = inverse_unit_cell[np.newaxis,:,:]
+        coords = fold_coordinates.fold_coordinates(
+            coords,
+            unit_cells,
+            inverse_unit_cells,
+            True
+        )
+        coords = np.squeeze(coords)
+        self._variables['coordinates'] = coords
 
     def to_box_coordinates(self):
 
@@ -140,10 +136,7 @@ class BoxConfiguration(_Configuration):
 
     def to_real_coordinates(self):
 
-        if self._unit_cell is None:
-            return copy.copy(self._variables['coordinates'])
-        else:
-            return np.matmul(self._variables['coordinates'],self._unit_cell)
+        return np.matmul(self._variables['coordinates'],self._unit_cell)
 
     def to_real_configuration(self):
 
@@ -152,22 +145,16 @@ class BoxConfiguration(_Configuration):
         variables = copy.deepcopy(self._variables)
         variables.pop('coordinates')
 
-        real_conf = RealConfiguration(self._chemical_system,coords,self._unit_cell,**variables)
+        real_conf = PeriodicRealConfiguration(self._chemical_system,coords,self._unit_cell,**variables)
 
         return real_conf
 
     def atomsInShell(self, ref, mini=0.0, maxi=10.0):
 
-        if self._unit_cell is not None:
-            indexes = atoms_in_shell.atoms_in_shell_box(self._variables['coordinates'],
-                                                        ref,
-                                                        mini,
-                                                        maxi)
-        else:
-            indexes = atoms_in_shell.atoms_in_shell_nopbc(self._variables['coordinates'],
-                                                          ref,
-                                                          mini,
-                                                          maxi)
+        indexes = atoms_in_shell.atoms_in_shell_box(self._variables['coordinates'],
+                                                    ref,
+                                                    mini,
+                                                    maxi)
         
         atom_list = self._chemical_system.atom_list()
 
@@ -177,23 +164,18 @@ class BoxConfiguration(_Configuration):
 
     def contiguous_configuration(self):
 
-        if self._unit_cell is None:
-            return self
+        indexes = []
+        for ce in self._chemical_system.chemical_entities:
+            indexes.append([at.index for at in ce.atom_list()])
 
-        else:
+        contiguous_coords = contiguous_coordinates.contiguous_coordinates_box(
+            self._variables['coordinates'],
+            self._unit_cell.T,
+            indexes)
 
-            indexes = []
-            for ce in self._chemical_system.chemical_entities:
-                indexes.append([at.index for at in ce.atom_list()])
-
-            contiguous_coords = contiguous_coordinates.contiguous_coordinates_box(
-                self._variables['coordinates'],
-                self._unit_cell.T,
-                indexes)
-
-            conf = self
-            conf._variables['coordinates'] = contiguous_coords
-            return conf
+        conf = self
+        conf._variables['coordinates'] = contiguous_coords
+        return conf
 
     def contiguous_offsets(self, chemical_entities=None):
 
@@ -220,37 +202,32 @@ class BoxConfiguration(_Configuration):
 
         return offsets
 
-class RealConfiguration(_Configuration):
+class PeriodicRealConfiguration(_PeriodicConfiguration):
+
+    is_periodic = True
 
     def fold_coordinates(self):
 
         from MDANSE.Extensions import fold_coordinates
 
-        if self._unit_cell is not None:
-            coords = self._variables['coordinates']
-            coords = coords[np.newaxis,:,:]
-            unit_cell = self._unit_cell.T
-            inverse_unit_cell = np.linalg.inv(unit_cell)
-            unit_cells = unit_cell[np.newaxis,:,:]
-            inverse_unit_cells = inverse_unit_cell[np.newaxis,:,:]
-            coords = fold_coordinates.fold_coordinates(
-                coords,
-                unit_cells,
-                inverse_unit_cells,
-                False
-            )
-            coords = np.squeeze(coords)
-            self._variables['coordinates'] = coords
-
-        else:
-            return
+        coords = self._variables['coordinates']
+        coords = coords[np.newaxis,:,:]
+        unit_cell = self._unit_cell.T
+        inverse_unit_cell = np.linalg.inv(unit_cell)
+        unit_cells = unit_cell[np.newaxis,:,:]
+        inverse_unit_cells = inverse_unit_cell[np.newaxis,:,:]
+        coords = fold_coordinates.fold_coordinates(
+            coords,
+            unit_cells,
+            inverse_unit_cells,
+            False
+        )
+        coords = np.squeeze(coords)
+        self._variables['coordinates'] = coords
 
     def to_box_coordinates(self):
 
-        if self._unit_cell is None:
-            return copy.copy(self._variables['coordinates'])
-        else:
-            return np.matmul(self._variables['coordinates'],np.linalg.inv(self._unit_cell))
+        return np.matmul(self._variables['coordinates'],np.linalg.inv(self._unit_cell))
 
     def to_box_configuration(self):
 
@@ -259,7 +236,7 @@ class RealConfiguration(_Configuration):
         variables = copy.deepcopy(self._variables)
         variables.pop('coordinates')
 
-        box_conf = BoxConfiguration(self._chemical_system,coords,self._unit_cell,**variables)
+        box_conf = PeriodicBoxConfiguration(self._chemical_system,coords,self._unit_cell,**variables)
 
         return box_conf
 
@@ -269,20 +246,13 @@ class RealConfiguration(_Configuration):
 
     def atomsInShell(self, ref, mini=0.0, maxi=10.0):
 
-        if self._unit_cell is not None:
-            indexes = atoms_in_shell.atoms_in_shell_real(
-                self._variables['coordinates'],
-                self._unit_cell.T,
-                np.linalg.inv(self._unit_cell.T),
-                ref,
-                mini,
-                maxi)
-        else:
-            indexes = atoms_in_shell.atoms_in_shell_nopbc(
-                self._variables['coordinates'],
-                ref,
-                mini,
-                maxi)
+        indexes = atoms_in_shell.atoms_in_shell_real(
+            self._variables['coordinates'],
+            self._unit_cell.T,
+            np.linalg.inv(self._unit_cell.T),
+            ref,
+            mini,
+            maxi)
 
         atom_list = self._chemical_system.atom_list()
 
@@ -292,41 +262,31 @@ class RealConfiguration(_Configuration):
 
     def contiguous_configuration(self):
 
-        if self._unit_cell is None:
-            return self
+        indexes = []
+        for ce in self._chemical_system.chemical_entities:
+            indexes.append([at.index for at in ce.atom_list()])
 
-        else:
+        contiguous_coords = contiguous_coordinates.contiguous_coordinates_real(
+            self._variables['coordinates'],
+            self._unit_cell.T,
+            np.linalg.inv(self._unit_cell.T),
+            indexes)
 
-            indexes = []
-            for ce in self._chemical_system.chemical_entities:
-                indexes.append([at.index for at in ce.atom_list()])
-
-            contiguous_coords = contiguous_coordinates.contiguous_coordinates_real(
-                self._variables['coordinates'],
-                self._unit_cell.T,
-                np.linalg.inv(self._unit_cell.T),
-                indexes)
-
-            conf = self
-            conf._variables['coordinates'] = contiguous_coords
-            return conf
+        conf = self
+        conf._variables['coordinates'] = contiguous_coords
+        return conf
 
     def continuous_configuration(self):
 
-        if self._unit_cell is None:
-            return self
+        contiguous_coords = contiguous_coordinates.continuous_coordinates(
+            self._variables['coordinates'],
+            self._unit_cell.T,
+            np.linalg.inv(self._unit_cell.T),
+            self._chemical_system)
 
-        else:
-
-            contiguous_coords = contiguous_coordinates.continuous_coordinates(
-                self._variables['coordinates'],
-                self._unit_cell.T,
-                np.linalg.inv(self._unit_cell.T),
-                self._chemical_system)
-
-            conf = self
-            conf._variables['coordinates'] = contiguous_coords
-            return conf
+        conf = self
+        conf._variables['coordinates'] = contiguous_coords
+        return conf
 
     def contiguous_offsets(self, chemical_entities=None):
 
@@ -337,19 +297,62 @@ class RealConfiguration(_Configuration):
                 if ce.root_chemical_system() is not self._chemical_system:
                     raise ConfigurationError('One or more chemical entities comes from another chemical system')
 
-        if self._unit_cell is None:
-            offsets = np.zeros((self._chemical_system.number_of_atoms(),3))
+        indexes = []
+        for ce in chemical_entities:
+            indexes.append([at.index for at in ce.atom_list()])
+        
+        offsets = contiguous_coordinates.contiguous_offsets_real(
+            self._variables['coordinates'],
+            self._unit_cell.T,
+            np.linalg.inv(self._unit_cell.T),
+            indexes)
 
+        return offsets
+
+class RealConfiguration(_Configuration):
+
+    is_periodic = False
+
+    def fold_coordinates(self):
+
+        return
+
+    def to_real_coordinates(self):
+
+        return self._variables['coordinates']
+
+    def atomsInShell(self, ref, mini=0.0, maxi=10.0):
+
+        indexes = atoms_in_shell.atoms_in_shell_nopbc(
+            self._variables['coordinates'],
+            ref,
+            mini,
+            maxi)
+
+        atom_list = self._chemical_system.atom_list()
+
+        selected_atoms = [atom_list[idx] for idx in indexes]
+
+        return selected_atoms
+
+    def contiguous_configuration(self):
+
+        return self
+
+    def continuous_configuration(self):
+
+        return self
+
+    def contiguous_offsets(self, chemical_entities=None):
+
+        if chemical_entities is None:
+            chemical_entities = self._chemical_system.chemical_entities
         else:
-            indexes = []
             for ce in chemical_entities:
-                indexes.append([at.index for at in ce.atom_list()])
-            
-            offsets = contiguous_coordinates.contiguous_offsets_real(
-                self._variables['coordinates'],
-                self._unit_cell.T,
-                np.linalg.inv(self._unit_cell.T),
-                indexes)
+                if ce.root_chemical_system() is not self._chemical_system:
+                    raise ConfigurationError('One or more chemical entities comes from another chemical system')
+
+        offsets = np.zeros((self._chemical_system.number_of_atoms(),3))
 
         return offsets
 

@@ -18,15 +18,14 @@ import collections
 
 import struct
 
-import numpy
-
-from MMTK import Units
-from MMTK.ParticleProperties import Configuration, ParticleVector
-from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Framework.Jobs.MaterialsStudio import XTDFile
+from MDANSE.Framework.Units import measure
+from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration, RealConfiguration
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 class HisFile(dict):
 
@@ -47,7 +46,7 @@ class HisFile(dict):
         
         rec = "!i8x"
         self._rec1Size = struct.calcsize(rec)
-        rec,hisfile.read(self._rec1Size)
+        hisfile.read(self._rec1Size)
                         
         # Record 2
         rec = "!80sd8x"
@@ -97,7 +96,7 @@ class HisFile(dict):
         if VERSION >= 2.6:
             rec = "!" + "%di" % N_MOVAT
             recSize = struct.calcsize(rec)
-            self["movable_atoms"] = numpy.array(struct.unpack(rec,hisfile.read(recSize)), dtype=numpy.int32) - 1
+            self["movable_atoms"] = np.array(struct.unpack(rec,hisfile.read(recSize)), dtype=np.int32) - 1
         else:
             self["movable_atoms"] = range(self["n_atoms"])
         rec = "!8x"
@@ -138,7 +137,7 @@ class HisFile(dict):
         _ = struct.unpack(rec,hisfile.read(recSize))
         rec = "!9d"
         recSize = struct.calcsize(rec)
-        self["initial_cell"] = numpy.reshape(numpy.array(struct.unpack(rec,hisfile.read(recSize)),dtype=numpy.float64),(3,3))*Units.Ang
+        self["initial_cell"] = np.reshape(np.array(struct.unpack(rec,hisfile.read(recSize)),dtype=np.float64),(3,3))*measure(1.0,'ang').toval('nm')
         
         rec = "!4134di4di6d6i8x"
         recSize = struct.calcsize(rec)
@@ -148,7 +147,7 @@ class HisFile(dict):
         rec = "!idii8x"
         recSize = struct.calcsize(rec)
         N_ENER, TIME_STEP, _, _ = struct.unpack(rec,hisfile.read(recSize))
-        self["time_step"] = TIME_STEP*Units.fs
+        self["time_step"] = TIME_STEP*measure(1.0,'fs').toval('ps')
 
         # Record 14
         rec = "!3d" + "%dd" % N_ENER + "%dd" % N_MOL + "%dd" % (N_MOL*N_ENER) + "%dd" % (4*N_MOL+2+54) + "8x"
@@ -158,12 +157,14 @@ class HisFile(dict):
         # Record 15
         rec = "!" + "%df" % (3*N_ATOMS) + "8x"
         recSize = struct.calcsize(rec)
-        self["initial_coordinates"] = numpy.reshape(struct.unpack(rec,hisfile.read(recSize)),(N_ATOMS,3))
+        self["initial_coordinates"] = np.reshape(struct.unpack(rec,hisfile.read(recSize)),(N_ATOMS,3))
+        self["initial_coordinates"] *= measure(1.0,'ang').toval('nm')
             
         # Record 16
         rec = "!" + "%df" % (3*N_ATOMS) + "8x"
         recSize = struct.calcsize(rec)
-        self["initial_velocities"] = numpy.reshape(struct.unpack(rec,hisfile.read(recSize)),(N_ATOMS,3))
+        self["initial_velocities"] = np.reshape(struct.unpack(rec,hisfile.read(recSize)),(N_ATOMS,3))
+        self["initial_velocities"] *= measure(1.0,'ang / fs').toval('nm/ps')
 
         self._headerSize = hisfile.tell()
                                 
@@ -193,13 +194,13 @@ class HisFile(dict):
         
         hisfile.seek(self._headerSize + index*self._frameSize + self._rec1Size + self._rec14Size)
         
-        cell = numpy.reshape(numpy.array(struct.unpack(self._recN2,hisfile.read(self._recN2Size))[6:]),(3,3))*Units.Ang
+        cell = np.reshape(np.array(struct.unpack(self._recN2,hisfile.read(self._recN2Size))[6:]),(3,3))*measure(1.0,'ang').toval('nm')
         
-        coords = numpy.reshape(struct.unpack(self._recCoord,hisfile.read(self._recCoordSize)),(self["n_movable_atoms"],3))
-        coords *= Units.Ang
+        coords = np.reshape(struct.unpack(self._recCoord,hisfile.read(self._recCoordSize)),(self["n_movable_atoms"],3))
+        coords *= measure(1.0,'ang').toval('nm')
         
-        vels = numpy.reshape(struct.unpack(self._recVel,hisfile.read(self._recVelSize)),(self["n_movable_atoms"],3))
-        vels *= Units.Ang/Units.fs
+        vels = np.reshape(struct.unpack(self._recVel,hisfile.read(self._recVelSize)),(self["n_movable_atoms"],3))
+        vels *= measure(1.0,'ang / fs').toval('nm/ps')
         
         return time, cell, coords, vels
         
@@ -220,7 +221,7 @@ class DiscoverConverter(Converter):
                                             'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.xtd')})
     settings['his_file'] = ('input_file',{'wildcard':'HIS files (*.his)|*.his|All files|*',
                                             'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.his')})
-    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'xtd_file'})
+    settings['output_file'] = ('single_output_file', {'format':"hdf",'root':'xtd_file'})
     
     def initialize(self):
         '''
@@ -229,34 +230,35 @@ class DiscoverConverter(Converter):
         
         self._xtdfile = XTDFile(self.configuration["xtd_file"]["filename"])
         
-        self._xtdfile.build_universe()
+        self._xtdfile.build_chemical_system()
         
-        self._universe = self._xtdfile.universe
+        self._chemicalSystem = self._xtdfile.chemicalSystem
         
         self._hisfile = HisFile(self.configuration["his_file"]["filename"])
 
         # The number of steps of the analysis.
         self.numberOfSteps = self._hisfile['n_frames']
                              
-        if self._universe.is_periodic:
-            self._universe.setShape(self._hisfile['initial_cell'])
+        if self._chemicalSystem.configuration.is_periodic:
+            realConf = PeriodicRealConfiguration(
+                self._chemicalSystem,
+                self._hisfile["initial_coordinates"],
+                self._hisfile['initial_cell'])
+        else:
+            realConf = RealConfiguration(
+                self._chemicalSystem,
+                self._hisfile["initial_coordinates"])
 
-        conf = Configuration(self._universe, self._hisfile["initial_coordinates"])
-        self._universe.setConfiguration(conf)        
-                             
-        self._universe.initializeVelocitiesToTemperature(0.)
-        self._velocities = ParticleVector(self._universe)
-        self._velocities.array = self._hisfile["initial_velocities"]
-        
-        self._universe.foldCoordinatesIntoBox()
-            
+        realConf.fold_coordinates()
+        realConf['velocities'] = self._hisfile["initial_velocities"]
+
+        self._chemicalSystem.configuration = realConf
+                    
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w', comment=self._hisfile["title"])
-
-        data_to_written = ["configuration","time","velocities"]
-
-        # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_written, 0, None, 1)])
+        self._trajectory = TrajectoryWriter(
+            self.configuration['output_file']['file'],
+            self._chemicalSystem,
+            self.numberOfSteps)
         
     def run_step(self, index):
         """Runs a single step of the job.
@@ -267,27 +269,23 @@ class DiscoverConverter(Converter):
         @note: the argument index is the index of the loop note the index of the frame.      
         """
                                                 
-        # The x, y and z values of the current frame.
         time, cell, config, vel = self._hisfile.read_step(index)
         
-        # If the universe is periodic set its shape with the current dimensions of the unit cell.
-        if self._universe.is_periodic:
-            self._universe.setShape(cell)
+        conf = self._trajectory.chemical_system.configuration
+        if conf.is_periodic:
+            conf.unit_cell = cell
             
         movableAtoms = self._hisfile['movable_atoms']
             
-        self._universe.configuration().array[movableAtoms,:] = config
-                   
-        self._universe.foldCoordinatesIntoBox()
+        conf['coordinates'][movableAtoms,:] = config
+        conf['velocities'][movableAtoms,:] = vel
         
-        data = {"time" : time}
-        
-        self._velocities.array[movableAtoms,:] = vel
-        data["velocities"] = self._velocities
+        conf.fold_coordinates()
 
-        # Store a snapshot of the current configuration in the output trajectory.
-        self._snapshot(data=data)
-                                                                        
+        self._trajectory.chemical_system.configuration = conf
+
+        self._trajectory.dump_configuration(time)
+                                                                                           
         return index, None
         
     def combine(self, index, x):
