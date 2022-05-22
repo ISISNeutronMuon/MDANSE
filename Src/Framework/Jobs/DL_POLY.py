@@ -25,7 +25,7 @@ from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem, M
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Framework.Units import measure
-from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration, RealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 _HISTORY_FORMAT = {}
@@ -331,8 +331,11 @@ class DL_POLYConverter(Converter):
                                                 
         # The x, y and z values of the current frame.
         time, cell, config = self._historyFile.read_step(index)
-        
-        conf = RealConfiguration(self._trajectory.chemical_system,config[:,0:3],cell)
+
+        if self._historyFile['imcon'] > 0:
+            conf = PeriodicRealConfiguration(self._trajectory.chemical_system,config[:,0:3],cell)
+        else:
+            conf = RealConfiguration(self._trajectory.chemical_system,config[:,0:3])
         
         conf.fold_coordinates()
 

@@ -17,17 +17,17 @@ import collections
 import os
 import re
 
-import numpy
+import numpy as np
 
-from MMTK import Atom, AtomCluster
-from MMTK import Units
-from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
-from MMTK.Universe import ParallelepipedicPeriodicUniverse
-
-from MDANSE import ELEMENTS, REGISTRY
+from MDANSE import REGISTRY
+from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.Converter import Converter
+from MDANSE.Framework.Units import measure
 from MDANSE.Mathematics.Graph import Graph
+from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration, PeriodicRealConfiguration
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 class LAMMPSConfigFileError(Error):
     pass
@@ -88,7 +88,7 @@ class LAMMPSConfigFile(dict):
                     idx, mass = data_line.split()[0:2]
                     idx = int(idx)
                     mass = float(mass)
-                    el = ELEMENTS.match_numeric_property("atomic_weight", mass, tolerance=self._tolerance)
+                    el = ATOMS_DATABASE.match_numeric_property("atomic_weight", mass, tolerance=self._tolerance)
                     nElements = len(el)
                     if nElements == 0:
                         # No element is matching
@@ -108,7 +108,7 @@ class LAMMPSConfigFile(dict):
                                 if matched_element is None:
                                     matched_element=element
                                 else:
-                                    if numpy.abs(ELEMENTS[element]["atomic_weight"] - mass) < numpy.abs(ELEMENTS[matched_element]["atomic_weight"] - mass):
+                                    if np.abs(ATOMS_DATABASE[element]["atomic_weight"] - mass) < np.abs(ATOMS_DATABASE[matched_element]["atomic_weight"] - mass):
                                         matched_element = element
                             self["elements"][idx] = matched_element
                         else:
@@ -122,7 +122,7 @@ class LAMMPSConfigFile(dict):
                     at1 = int(at1)-1
                     at2 = int(at2)-1
                     self['bonds'].append([at1,at2])
-                self['bonds'] = numpy.array(self['bonds'], dtype=numpy.int32)
+                self['bonds'] = np.array(self['bonds'], dtype=np.int32)
                                                    
         unit.close()
 
@@ -144,7 +144,7 @@ class LAMMPSConverter(Converter):
     settings['smart_mass_association'] = ('boolean', {'label':"smart mass association", 'default':True})
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
     settings['n_steps'] = ('integer', {'label':"number of time steps (0 for automatic detection)", 'default':0, 'mini':0})
-    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'config_file'})
+    settings['output_file'] = ('single_output_file', {'format':"hdf",'root':'config_file'})
     
     def initialize(self):
         '''
@@ -158,23 +158,20 @@ class LAMMPSConverter(Converter):
         
         self.parse_first_step()
         
-        # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
-
-        self._nameToIndex = dict([(at.name,at.index) for at in self._universe.atomList()])
-
-        data_to_be_written = ["configuration", "time"]
-
-        # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory,
-                                                                                       data_to_be_written, 0, None, 1)])
-
         # Estimate number of steps if needed
         if self.numberOfSteps == 0:
             self.numberOfSteps = 1
             for line in self._lammps:
                 if line.startswith("ITEM: TIMESTEP"):
                     self.numberOfSteps += 1
+
+        # A MMTK trajectory is opened for writing.
+        self._trajectory = TrajectoryWriter(
+            self.configuration['output_file']['file'],
+            self._chemicalSystem,
+            self.numberOfSteps)
+
+        self._nameToIndex = dict([(at.name,at.index) for at in self._trajectory.chemical_system.atom_list()])
 
         self._lammps.seek(0,0)
 
@@ -194,12 +191,12 @@ class LAMMPSConverter(Converter):
             if not line:
                 return index, None
 
-        timeStep = Units.fs*float(self._lammps.readline())*self.configuration['time_step']['value']
+        time = float(self._lammps.readline())*self.configuration['time_step']['value']*measure(1.0,'fs').toval('ps')
 
         for _ in range(self._itemsPosition["TIMESTEP"][1], self._itemsPosition["BOX BOUNDS"][0]):
             self._lammps.readline()
 
-        abcVectors = numpy.zeros((9), dtype=numpy.float64)
+        abcVectors = np.zeros((9), dtype=np.float64)
         temp = [float(v) for v in self._lammps.readline().split()]
         if len(temp) == 2:
             xlo, xhi = temp
@@ -239,30 +236,41 @@ class LAMMPSConverter(Converter):
         abcVectors[7] = yz
         abcVectors[8] = zhi - zlo
 
-        abcVectors *= Units.Ang
+        abcVectors = np.reshape(abcVectors,(3,3))
+
+        abcVectors *= measure(1.0,'ang').toval('nm')
 
         for _ in range(self._itemsPosition["BOX BOUNDS"][1], self._itemsPosition["ATOMS"][0]):
             self._lammps.readline()
 
-        self._universe.setCellParameters(abcVectors)
-
-        conf = self._universe.configuration()
+        coords = np.empty((self._trajectory.chemical_system.number_of_atoms(),3),dtype=np.float)
 
         for i,_ in enumerate(range(self._itemsPosition["ATOMS"][0], self._itemsPosition["ATOMS"][1])):
             temp = self._lammps.readline().split()
             idx = self._nameToIndex[self._rankToName[int(temp[0])-1]]
-            conf.array[idx,:] = numpy.array([temp[self._x],temp[self._y],temp[self._z]],dtype=numpy.float64)
+            coords[idx,:] = np.array([temp[self._x],temp[self._y],temp[self._z]],dtype=np.float)
 
         if self._fractionalCoordinates:
-            conf.array = self._universe._boxToRealPointArray(conf.array)
+            conf = PeriodicBoxConfiguration(
+                self._trajectory.chemical_system,
+                coords,
+                abcVectors)
+            realConf = conf.to_real_configuration()
         else:
-            conf.array *= Units.Ang
+            coords *= measure(1.0,'ang').toval('nm')
+            realConf = PeriodicRealConfiguration(
+                self._trajectory.chemical_system,
+                coords,
+                abcVectors
+            )
             
         # The whole configuration is folded in to the simulation box.
-        self._universe.foldCoordinatesIntoBox()
+        realConf.fold_coordinates()
+
+        self._trajectory.chemical_system.configuration = conf
 
         # A snapshot is created out of the current configuration.
-        self._snapshot(data = {'time': timeStep})
+        self._trajectory.dump_configuration(time)
 
         self._start += self._last
         
@@ -286,13 +294,6 @@ class LAMMPSConverter(Converter):
         
         self._lammps.close()
 
-        if self._lammpsConfig["n_bonds"] is not None:
-            netcdf = self._trajectory.trajectory.file
-            netcdf.createDimension("MDANSE_NBONDS",self._lammpsConfig["n_bonds"])
-            netcdf.createDimension("MDANSE_TWO",2)
-            VAR = netcdf.createVariable("mdanse_bonds", numpy.dtype(numpy.int32).char, ("MDANSE_NBONDS","MDANSE_TWO"))
-            VAR[:,:] = self._lammpsConfig["bonds"]
-                
         # Close the output trajectory.
         self._trajectory.close()
                         
@@ -304,7 +305,6 @@ class LAMMPSConverter(Converter):
 
         self._itemsPosition = collections.OrderedDict()
 
-        self._universe = None
         comp = -1
 
         while True:
@@ -353,13 +353,12 @@ class LAMMPSConverter(Converter):
                 self._rankToName = {}
                 
                 g = Graph()
-                self._universe = ParallelepipedicPeriodicUniverse()
                 self._itemsPosition["ATOMS"] = [comp+1,comp+self._nAtoms+1]                                
                 for i in range(self._nAtoms):
                     temp = self._lammps.readline().split()
                     idx = int(temp[self._id])-1
                     ty = int(temp[self._type])
-                    name = "%s%d" % (self._lammpsConfig["elements"][ty],idx)
+                    name = "{:s}_{:d}".format(self._lammpsConfig["elements"][ty],idx)
                     self._rankToName[int(temp[0])-1] = name
                     g.add_node(idx, element=self._lammpsConfig["elements"][ty], atomName=name)
                     
@@ -367,6 +366,8 @@ class LAMMPSConverter(Converter):
                     for idx1,idx2 in self._lammpsConfig["bonds"]:
                         g.add_link(idx1,idx2)
                 
+                self._chemicalSystem = ChemicalSystem()
+
                 for cluster in g.build_connected_components():
                     if len(cluster) == 1:
                         node = cluster.pop()
@@ -375,13 +376,13 @@ class LAMMPSConverter(Converter):
                     else:
                         atList = []
                         for atom in cluster:
-                            at = Atom(atom.element, name=atom.atomName)
+                            at = Atom(symbol=atom.element, name=atom.atomName)
                             atList.append(at) 
                         c = collections.Counter([at.element for at in cluster])
-                        name = "".join(["%s%d" % (k,v) for k,v in sorted(c.items())])
-                        obj = AtomCluster(atList, name=name)
+                        name = "".join(["{:s}{:d}".format(k,v) for k,v in sorted(c.items())])
+                        obj = AtomCluster(name, atList)
                         
-                    self._universe.addObject(obj)
+                    self._chemicalSystem.add_chemical_entity(obj)
                 self._last = comp + self._nAtoms + 1
 
                 break
