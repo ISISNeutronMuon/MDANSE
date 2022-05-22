@@ -52,7 +52,7 @@ class Voronoi(IJob):
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}, 'default':(0,5,1)})
     settings['pbc'] = ('boolean', {'label':'apply periodic_boundary_condition', 'default':True})
     settings['pbc_border_size'] = ('float', {'mini':0.0, 'default':0.})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
                 
     def initialize(self):
 

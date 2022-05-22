@@ -78,7 +78,7 @@ class Eccentricity(IJob):
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['center_of_mass'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
             
     def initialize(self):
         """
