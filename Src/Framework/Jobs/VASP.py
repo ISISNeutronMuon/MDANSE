@@ -203,8 +203,6 @@ class VASPConverter(Converter):
         # The real coordinates are folded then into the simulation box (-L/2,L/2). 
         real_conf.fold_coordinates()
 
-        print(real_conf['coordinates'][118,:],real_conf['coordinates'][160,:])
-
         # Bind the configuration to the chemcial system
         self._trajectory.chemical_system.configuration = real_conf
 
