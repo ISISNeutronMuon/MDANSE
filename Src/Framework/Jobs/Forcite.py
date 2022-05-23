@@ -269,7 +269,7 @@ class ForciteConverter(Converter):
     settings['trj_file'] = ('input_file', {'wildcard': 'TRJ files (*.trj)|*.trj|All files|*',
                                            'default': os.path.join('..', '..', '..', 'Data', 'Trajectories', 'Forcite',
                                                                    'H2O.trj')})
-    settings['output_file'] = ('single_output_file', {'format': 'netcdf', 'root': 'xtd_file'})
+    settings['output_file'] = ('single_output_file', {'format': 'hdf', 'root': 'xtd_file'})
 
     def initialize(self):
         '''
@@ -319,8 +319,9 @@ class ForciteConverter(Converter):
         conf = self._trajectory.chemical_system.configuration
         movableAtoms = self._trjfile['mvofst']
         conf['coordinates'][movableAtoms,:] = xyz
-        if conf.is_periodic and self._trjfile["defcel"]:
-            conf.unit_cell = cell            
+        if conf.is_periodic:
+            if self._trjfile["defcel"]:
+                conf.unit_cell = cell            
             conf.fold_coordinates()
                            
         if self._velocities is not None:

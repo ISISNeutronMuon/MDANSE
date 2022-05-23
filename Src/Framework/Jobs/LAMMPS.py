@@ -196,7 +196,7 @@ class LAMMPSConverter(Converter):
         for _ in range(self._itemsPosition["TIMESTEP"][1], self._itemsPosition["BOX BOUNDS"][0]):
             self._lammps.readline()
 
-        abcVectors = np.zeros((9), dtype=np.float64)
+        unitCell = np.zeros((9), dtype=np.float64)
         temp = [float(v) for v in self._lammps.readline().split()]
         if len(temp) == 2:
             xlo, xhi = temp
@@ -225,20 +225,20 @@ class LAMMPSConverter(Converter):
             raise LAMMPSTrajectoryFileError("Bad format for C vector components")
                       
         # The ax component.                                      
-        abcVectors[0] = xhi - xlo
+        unitCell[0] = xhi - xlo
         
         # The bx and by components.                                      
-        abcVectors[3] = xy
-        abcVectors[4] = yhi - ylo
+        unitCell[3] = xy
+        unitCell[4] = yhi - ylo
         
         # The cx, cy and cz components.                                      
-        abcVectors[6] = xz
-        abcVectors[7] = yz
-        abcVectors[8] = zhi - zlo
+        unitCell[6] = xz
+        unitCell[7] = yz
+        unitCell[8] = zhi - zlo
 
-        abcVectors = np.reshape(abcVectors,(3,3))
+        unitCell = np.reshape(unitCell,(3,3))
 
-        abcVectors *= measure(1.0,'ang').toval('nm')
+        unitCell *= measure(1.0,'ang').toval('nm')
 
         for _ in range(self._itemsPosition["BOX BOUNDS"][1], self._itemsPosition["ATOMS"][0]):
             self._lammps.readline()
@@ -254,20 +254,20 @@ class LAMMPSConverter(Converter):
             conf = PeriodicBoxConfiguration(
                 self._trajectory.chemical_system,
                 coords,
-                abcVectors)
+                unitCell)
             realConf = conf.to_real_configuration()
         else:
             coords *= measure(1.0,'ang').toval('nm')
             realConf = PeriodicRealConfiguration(
                 self._trajectory.chemical_system,
                 coords,
-                abcVectors
+                unitCell
             )
             
         # The whole configuration is folded in to the simulation box.
         realConf.fold_coordinates()
 
-        self._trajectory.chemical_system.configuration = conf
+        self._trajectory.chemical_system.configuration = realConf
 
         # A snapshot is created out of the current configuration.
         self._trajectory.dump_configuration(time)
