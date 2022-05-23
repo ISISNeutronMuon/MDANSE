@@ -129,7 +129,10 @@ class CurrentCorrelationFunction(IJob):
 
         # An alternative interpolation method which saves the velocities to an HDF5-style .nc file to save on memory
         elif self._order != "no interpolation" and self._mode == 2:
-            with netCDF4.Dataset(os.path.join(gettempdir(), 'mdanse_ccf_velocities.nc'), 'w') as velocities:
+            if not hasattr(self, '_name'):
+                self._name = '_'.join([self._type, IJob.define_unique_name()])
+
+            with netCDF4.Dataset(os.path.join(gettempdir(), 'mdanse_' + self.name + '.nc'), 'w') as velocities:
                 velocities.createDimension('particles', nAtoms+1)
                 velocities.createDimension('time', nFrames)
                 velocities.createDimension('axis', 3)
@@ -155,7 +158,7 @@ class CurrentCorrelationFunction(IJob):
                         vels[:, axis] = differentiate(atomicTraj[:, axis], order=self._order,
                                                       dt=self.configuration['frames']['time_step'])
                     velocities['velocities'][idx, :, :] = vels
-            self._netcdf = netCDF4.Dataset(os.path.join(tempdir, 'mdanse_ccf_velocities.nc'), 'r')
+            self._netcdf = netCDF4.Dataset(os.path.join(tempdir, 'mdanse_' + self.name + '.nc'), 'r')
             self._velocities = self._netcdf['velocities']
 
     def run_step(self, index):
@@ -300,7 +303,7 @@ class CurrentCorrelationFunction(IJob):
             pass
 
         try:
-            os.remove(os.path.join(tempdir, 'mdanse_ccf_velocities.nc'))
+            os.remove(os.path.join(tempdir,  'mdanse_' + self.name + '.nc'))
         except (OSError, AttributeError):
             # OSError catches file not existing, and AttributeError caches gettempdir() having not been called
             pass
