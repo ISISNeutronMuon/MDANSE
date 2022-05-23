@@ -332,7 +332,7 @@ class ForciteConverter(Converter):
             self._gradients[movableAtoms,:] = gradients
             conf["gradients"] = self._gradients
 
-        self._trajectory.dump_configuration(time)
+        self._trajectory.dump_configuration(time,units={'time':'ps','unit_cell':'nm','coordinates':'nm','velocities':'nm/ps','gradients':'uma nm/ps2'})
 
         return index, None
         

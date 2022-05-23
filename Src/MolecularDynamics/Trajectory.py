@@ -399,11 +399,14 @@ class TrajectoryWriter:
 
         self._h5_file.close()
 
-    def dump_configuration(self, time):
+    def dump_configuration(self, time, units=None):
         """Dump the chemical system configuration at a given time.
 
         :param time: the time
         :type time: float
+
+        :param units: the units
+        :type units: dict
         """
 
         if self._current_index >= self._n_steps:
@@ -412,6 +415,9 @@ class TrajectoryWriter:
         configuration = self._chemical_system.configuration
         if configuration is None:
             return
+
+        if units is None:
+            units = {}
 
         n_atoms = self._chemical_system.total_number_of_atoms()
 
@@ -428,18 +434,20 @@ class TrajectoryWriter:
                     shape=(self._n_steps,n_atoms,3),
                     chunks=(1,n_atoms,3),                    
                     dtype=np.float)
+                dset.attrs['units'] = units.get(k,'')
             dset[self._current_index] = data
 
         # Write the unit cell
         if configuration.is_periodic:
             unit_cell = configuration.unit_cell
-            unit_cell_dset = self._h5_file.get('unit_cell',None)
+            unit_cell_dset = self._h5_file.get('unit_cell',None)            
             if unit_cell_dset is None:
                 unit_cell_dset = self._h5_file.create_dataset(
                     'unit_cell',
                     shape=(self._n_steps,3,3),
                     chunks=(1,3,3),
                     dtype=np.float)
+                unit_cell_dset.attrs['units'] = units.get('unit_cell','')
             unit_cell_dset[self._current_index] = unit_cell
 
         # Write the time
@@ -449,6 +457,7 @@ class TrajectoryWriter:
                 'time',
                 shape=(self._n_steps,),
                 dtype=np.float)
+            time_dset.attrs['units'] = units.get('time','')
         time_dset[self._current_index] = time
 
         self._current_index += 1

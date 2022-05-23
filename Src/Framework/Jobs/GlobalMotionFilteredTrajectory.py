@@ -146,10 +146,10 @@ class GlobalMotionFilteredTrajectory(IJob):
         self._output_trajectory.chemical_system.configuration = new_configuration
 
         # The times corresponding to the running index.
-        t = self.configuration['frames']['time'][index]
+        time = self.configuration['frames']['time'][index]
         
         # Write the step.
-        self._output_trajectory.dump_configuration(t)
+        self._output_trajectory.dump_configuration(time,units={'time':'ps','unit_cell':'nm','coordinates':'nm'})
                                                                                 
         return index, rms
 

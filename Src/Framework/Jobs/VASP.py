@@ -210,7 +210,7 @@ class VASPConverter(Converter):
         time = index*self.configuration["time_step"]["value"]*measure(1.0,'fs').toval('ps')
 
         # Dump the configuration to the output trajectory
-        self._trajectory.dump_configuration(time)
+        self._trajectory.dump_configuration(time,units={'time':'ps','unit_cell':'nm','coordinates':'nm'})
 
         return index, None
 

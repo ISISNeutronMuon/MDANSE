@@ -270,7 +270,7 @@ class LAMMPSConverter(Converter):
         self._trajectory.chemical_system.configuration = realConf
 
         # A snapshot is created out of the current configuration.
-        self._trajectory.dump_configuration(time)
+        self._trajectory.dump_configuration(time,units={'time':'ps','unit_cell':'nm','coordinates':'nm'})
 
         self._start += self._last
         

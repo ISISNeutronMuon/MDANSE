@@ -284,7 +284,7 @@ class DiscoverConverter(Converter):
 
         self._trajectory.chemical_system.configuration = conf
 
-        self._trajectory.dump_configuration(time)
+        self._trajectory.dump_configuration(time,units={'time':'ps','unit_cell':'nm','coordinates':'nm','velocities':'nm/ps'})
                                                                                            
         return index, None
         

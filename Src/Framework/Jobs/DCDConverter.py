@@ -309,10 +309,10 @@ class DCDConverter(Converter):
         self._trajectory._chemical_system.configuration = conf
 
         # The current time.
-        t = (index+1)*self.configuration["time_step"]["value"]
+        time = (index+1)*self.configuration["time_step"]["value"]
 
         # Store a snapshot of the current configuration in the output trajectory.
-        self._trajectory.dump_configuration(t)
+        self._trajectory.dump_configuration(time,units={'time':'ps','unit_cell':'nm','coordinates':'nm'})
                                         
         return index, None
 
