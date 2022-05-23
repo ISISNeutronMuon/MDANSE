@@ -264,28 +264,14 @@ jobs:
           python2 AllTests.py
 
       - name: Tar python
-        if: |
-          (contains( github.ref, 'main' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'develop' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'release-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'hotfix-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'build-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'tags' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }})
+        if: ${{ (matrix.os == 'macos-10.15') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
 
       - name: Upload artifacts
-        if: |
-          (contains( github.ref, 'main' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'develop' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'release-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'hotfix-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'build-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'tags' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }})
+        if: ${{ (matrix.os == 'macos-10.15') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
