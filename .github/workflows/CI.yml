@@ -369,18 +369,22 @@ jobs:
 
       - name: Copy installed packages to main python and copy netcdf dlls into netCDF directory
         run: |
-          echo %PATH%
-          echo %PYTHONPATH%
           xcopy "D:\tempenv\lib\site-packages\netCDF4" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4\" /e /r /h /a /y /I /f
           xcopy "D:\tempenv\lib\site-packages\cftime" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime\" /e /r /h /a /y /I /f
           xcopy "D:\tempenv\lib\site-packages\h5py" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\h5py\" /e /r /h /a /y /I /f
-          copy "D:\tempenv\Library\bin\h5*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
-          copy "D:\tempenv\Library\bin\hdf5*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
-          copy "D:\tempenv\Library\bin\mfhdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
+          copy "D:\tempenv\Library\bin\hdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
+          copy "D:\tempenv\Library\bin\mfhdf.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
+          copy "D:\tempenv\Library\bin\netcdf.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
+          copy "D:\tempenv\Library\bin\zlib.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
           copy "D:\tempenv\Library\include\H5*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\"
           copy "D:\tempenv\Library\include\hdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\"
+          copy "D:\tempenv\Library\include\mfhdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\"
+          copy "D:\tempenv\Library\include\netcdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\"
+          copy "D:\tempenv\Library\include\zlib.h" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\"
           copy "D:\tempenv\Library\lib\hdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs\"
           copy "D:\tempenv\Library\lib\lib*hdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs\"
+          copy "D:\tempenv\Library\lib\*netcdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs\"
+          copy "D:\tempenv\Library\lib\z*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs\"
           copy %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\*.dll %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4\
         shell: cmd
 
@@ -555,20 +559,22 @@ jobs:
 
       - name: Copy installed packages to main python and copy netcdf dlls into netCDF directory
         run: |
-          cd /d %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages
-          dir
-          cd %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs
-          dir
           xcopy "D:\tempenv\lib\site-packages\netCDF4" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4\" /e /r /h /a /y /I /f
           xcopy "D:\tempenv\lib\site-packages\cftime" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime\" /e /r /h /a /y /I /f
           xcopy "D:\tempenv\lib\site-packages\h5py" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\h5py\" /e /r /h /a /y /I /f
-          copy "D:\tempenv\Library\bin\h5*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
-          copy "D:\tempenv\Library\bin\hdf5*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
-          copy "D:\tempenv\Library\bin\mfhdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
+          copy "D:\tempenv\Library\bin\hdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
+          copy "D:\tempenv\Library\bin\mfhdf.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
+          copy "D:\tempenv\Library\bin\netcdf.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
+          copy "D:\tempenv\Library\bin\zlib.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\"
           copy "D:\tempenv\Library\include\H5*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\"
           copy "D:\tempenv\Library\include\hdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\"
+          copy "D:\tempenv\Library\include\mfhdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\"
+          copy "D:\tempenv\Library\include\netcdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\"
+          copy "D:\tempenv\Library\include\zlib.h" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\"
           copy "D:\tempenv\Library\lib\hdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs\"
           copy "D:\tempenv\Library\lib\lib*hdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs\"
+          copy "D:\tempenv\Library\lib\*netcdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs\"
+          copy "D:\tempenv\Library\lib\z*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs\"
           copy %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\*.dll %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4\
         shell: cmd
 
