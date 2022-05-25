@@ -5,7 +5,6 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -120,7 +119,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '93' )
     steps:
       - uses: actions/checkout@v2
 
@@ -190,7 +190,6 @@ jobs:
   # OSX
   ci_osx:
     runs-on: ${{ matrix.os }}
-    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -289,7 +288,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '93' )
     steps:
       - uses: actions/checkout@v2
 
@@ -340,7 +340,6 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
-    if: false
     steps:
       - uses: actions/checkout@v2
 
@@ -348,57 +347,8 @@ jobs:
         id: python-cache
         uses: actions/cache@v2
         with:
-          path: ${{ runner.tool_cache }}\Python\2.7.18\x64
+          path: C:\Miniconda\envs\mdanse
           key: mdanse
-
-      - name: Install python if not restored
-        if: steps.python-cache.outputs.cache-hit != 'true'
-        uses: actions/setup-python@v2
-        with:
-          python-version: '2.7.18'
-
-      - name: Always upgrade dependencies
-        run: |
-          "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe" -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
-        shell: cmd
-
-      - name: Create conda environment
-        run: C:\Miniconda\condabin\conda.bat create -p D:\tempenv python=2.7
-        shell: cmd
-
-      - name: Install hdf5, h5py, and netCDF4 into the environment
-        run: C:\Miniconda\condabin\conda.bat install -p D:\tempenv hdf5=1.10.4 h5py netcdf4
-        shell: cmd
-
-      - name: Copy installed packages to main python and copy netcdf dlls into netCDF directory
-        run: |
-          xcopy "D:\tempenv\lib\site-packages\netCDF4" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4\" /e /r /h /a /y /I /f
-          xcopy "D:\tempenv\lib\site-packages\cftime" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime\" /e /r /h /a /y /I /f
-          xcopy "D:\tempenv\lib\site-packages\h5py" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\h5py\" /e /r /h /a /y /I /f
-          copy "D:\tempenv\Library\bin\hdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\" /y
-          copy "D:\tempenv\Library\bin\mfhdf.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\" /y
-          copy "D:\tempenv\Library\bin\netcdf.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\" /y
-          copy "D:\tempenv\Library\bin\zlib.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\" /y
-          copy "D:\tempenv\Library\include\H5*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\" /y
-          copy "D:\tempenv\Library\include\hdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\" /y
-          copy "D:\tempenv\Library\include\mfhdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\" /y
-          copy "D:\tempenv\Library\include\netcdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\" /y
-          copy "D:\tempenv\Library\include\zlib.h" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\" /y
-          copy "D:\tempenv\Library\lib\hdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs\" /y
-          copy "D:\tempenv\Library\lib\lib*hdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs\" /y
-          copy "D:\tempenv\Library\lib\*netcdf*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs\" /y
-          copy "D:\tempenv\Library\lib\z*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs\" /y
-          copy %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\*.dll %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4\
-        shell: cmd
-
-      - name: Install static dependencies
-        if: steps.python-cache.outputs.cache-hit != 'true'
-        run: |
-          copy C:\Windows\System32\python27.dll %RUNNER_TOOL_CACHE%\Python\2.7.18\x64
-          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
-          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
-          mkdir %HOME%\netcdf
-        shell: cmd
 
       - name: Prepare NetCDF if not cached
         if: steps.python-cache.outputs.cache-hit != 'true'
@@ -411,8 +361,8 @@ jobs:
         run: |
           cd %HOME%\netcdf
           "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
-          mkdir "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          copy "%HOME%\netcdf" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          mkdir "%GITHUB_WORKSPACE%\netcdf"
+          copy "%HOME%\netcdf" "%GITHUB_WORKSPACE%\netcdf"
         shell: cmd
 
       - name: Restore VS2008 from cache
@@ -448,51 +398,73 @@ jobs:
       - name: Install VC++ For Python2.7
         run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
 
+      - name: Initialise conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 2.7
+          activate-environment: mdanse
+
+      - name: Install hdf5, h5py, and netCDF4 into the environment
+        run: conda install hdf5=1.10.4 h5py netcdf4
+        shell: cmd /C CALL {0}
+
+      - name: Always upgrade dependencies
+        run: |
+          python -m pip install matplotlib Cython Pyro docutils==0.17.1 sphinx==1.6.7 stdeb pyyaml
+        shell: cmd /C CALL {0}
+
+      - name: Install static dependencies
+        if: steps.python-cache.outputs.cache-hit != 'true'
+        run: |
+          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
+          python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
+        shell: cmd /C CALL {0}
+
       - name: Install ScientificPython
         if: steps.python-cache.outputs.cache-hit != 'true'
         run: |
-          set PATH=%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs;%PATH%
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
+          copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\scientific-setup.py %GITHUB_WORKSPACE%\scientific-python\
           cd scientific-python
-          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.h" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\Scientific"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.lib" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
-        shell: cmd
+          python scientific-setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          python setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.dll" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.h" "%CONDA%\envs\mdanse\Include\Scientific"
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.lib" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
+        shell: cmd /C CALL {0}
 
       - name: Install MMTK
         if: steps.python-cache.outputs.cache-hit != 'true'
         run: |
-          set PATH=%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs;%PATH%
-          cd %GITHUB_WORKSPACE%
+          cd /D %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/mmtk.git
+          copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\mmtk-setup.py %GITHUB_WORKSPACE%\mmtk\setup.py
           cd mmtk
-          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe setup.py build install
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Lib\site-packages\Scientific"
-        shell: cmd
+          python setup.py build install
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
+        shell: cmd /C CALL {0}
 
       - name: Install MDANSE
         run: |
           set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";%PATH%
-          set PATH=%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include;%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs;%PATH%
           cd %GITHUB_WORKSPACE%
           copy /y "%GITHUB_WORKSPACE%\BuildServer\setup.py" %GITHUB_WORKSPACE%
-          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe setup.py build install
-        shell: cmd
+          python setup.py build install
+        shell: cmd /C CALL {0}
 
       - name: Run tests
         run: |
           cd %GITHUB_WORKSPACE%\Tests
-          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe UnitTests\AllTests.py
-          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe DependenciesTests\AllTests.py
-          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe FunctionalTests\Jobs\BuildJobTests.py
-          %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe FunctionalTests\Jobs\AllTests.py
-        shell: cmd
+          python UnitTests\AllTests.py
+          python DependenciesTests\AllTests.py
+          python FunctionalTests\Jobs\BuildJobTests.py
+          python FunctionalTests\Jobs\AllTests.py
+        shell: cmd /C CALL {0}
 
   deploy_windows:
     runs-on: windows-2019
+    needs: ci_windows
     if: |
       contains( github.ref, 'main' ) ||
       contains( github.ref, 'develop' ) ||
@@ -509,7 +481,7 @@ jobs:
         id: python-cache
         uses: actions/cache@v2
         with:
-          path: ${{ runner.tool_cache }}\Python\2.7.18\x64
+          path: C:\Miniconda\envs\mdanse
           key: mdanse
 
       - name: Error out if python cache has not been restored
@@ -549,7 +521,8 @@ jobs:
       - name: Install VC++ For Python2.7
         run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - name: Initialise conda environment
+        uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: 2.7
           activate-environment: mdanse
@@ -561,35 +534,6 @@ jobs:
       - name: Always upgrade dependencies
         run: |
           python -m pip install matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
-        shell: cmd /C CALL {0}
-
-      - name: Install static dependencies
-        run: |
-          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
-          python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
-        shell: cmd /C CALL {0}
-
-      - name: Install ScientificPython
-        run: |
-          cd %GITHUB_WORKSPACE%
-          git clone https://code.ill.fr/scientific-software/scientific-python.git
-          copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\scientific-setup.py %GITHUB_WORKSPACE%\scientific-python\
-          cd scientific-python
-          python scientific-setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          python setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.dll" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.h" "%CONDA%\envs\mdanse\Include\Scientific"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.lib" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
-        shell: cmd /C CALL {0}
-
-      - name: Install MMTK
-        run: |
-          cd /D %GITHUB_WORKSPACE%
-          git clone https://code.ill.fr/scientific-software/mmtk.git
-          copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\mmtk-setup.py %GITHUB_WORKSPACE%\mmtk\setup.py
-          cd mmtk
-          python setup.py build install
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
         shell: cmd /C CALL {0}
 
       - name: Deploy
