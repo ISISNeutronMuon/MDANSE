@@ -558,26 +558,31 @@ jobs:
         shell: cmd
 
       - run: |
+          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           "D:\tempenv\python.exe" -c "import h5py, numpy"
         shell: cmd
 
       - name: Always upgrade dependencies
         run: |
+          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           "D:\tempenv\python.exe" -m pip install matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
         shell: cmd
 
       - run: |
+          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           "D:\tempenv\python.exe" -c "import matplotlib, numpy"
         shell: cmd
 
       - name: Install static dependencies
         run: |
+          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
           D:\tempenv\python.exe -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd
 
       - name: Install ScientificPython
         run: |
+          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
@@ -590,6 +595,7 @@ jobs:
 
       - name: Install MMTK
         run: |
+          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
@@ -598,11 +604,13 @@ jobs:
         shell: cmd
 
       - run: |
+          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           D:\tempenv\python.exe -c "import numpy"
         shell: cmd
 
       - name: Deploy
         run: |
+          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           mkdir %GITHUB_WORKSPACE%\BuildServer\Windows\Build
           cd %GITHUB_WORKSPACE%\BuildServer\Windows\Build\
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
