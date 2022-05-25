@@ -573,23 +573,6 @@ jobs:
         run: |
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
-          copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\scientific-setup.py %GITHUB_WORKSPACE%\scientific-python\setup.py
-          cd scientific-python
-          python setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          python setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.dll" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.h" "%CONDA%\envs\mdanse\Include\Scientific"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.lib" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
-          cd /D "%CONDA%\envs\mdanse\lib\site-packages"
-          dir /s netcdfmodule.h
-          dir /s arrayobject.h
-          dir /s mpimodule.h
-        shell: cmd /C CALL {0}
-
-      - name: Install ScientificPython
-        run: |
-          cd %GITHUB_WORKSPACE%
-          git clone https://code.ill.fr/scientific-software/scientific-python.git
           copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\scientific-setup.py %GITHUB_WORKSPACE%\scientific-python\
           cd scientific-python
           python scientific-setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
