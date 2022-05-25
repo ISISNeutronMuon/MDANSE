@@ -572,8 +572,10 @@ jobs:
       - name: Install ScientificPython
         run: |
           call "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\x86_amd64\vcvarsx86_amd64.bat"
+          call "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\x86_amd64\vcvarsamd64.bat"
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
+          copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\setup.py %GITHUB_WORKSPACE%\scientific-python
           cd scientific-python
           python setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           python setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
