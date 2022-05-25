@@ -571,7 +571,6 @@ jobs:
 
       - name: Install ScientificPython
         run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat"
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\scientific-setup.py %GITHUB_WORKSPACE%\scientific-python\setup.py
@@ -585,8 +584,9 @@ jobs:
 
       - name: Install MMTK
         run: |
-          python -c "import Scientific"
-          cd %GITHUB_WORKSPACE%
+          cd /D "%CONDA%\envs\mdanse\Include\Scientific"
+          dir
+          cd /D %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/mmtk.git
           copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\mmtk-setup.py %GITHUB_WORKSPACE%\mmtk\setup.py
           cd mmtk
