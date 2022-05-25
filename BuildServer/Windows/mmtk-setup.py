@@ -46,7 +46,8 @@ netcdf_h_search_paths = [os.environ.get('NETCDF_HEADER_FILE_PATH', '/tmp/'),
                          os.path.join(sys.prefix,'include','Scientific'),
                          os.path.join(sys.prefix,'include',python_version,'Scientific'),
                          os.path.join(sys.prefix,'local','include',python_version,'Scientific'),
-                         os.path.join(site.USER_BASE,'include',python_version,'Scientific')]
+                         os.path.join(site.USER_BASE,'include',python_version,'Scientific'),
+                         os.path.join(os.environ.get('CONDA', 'C:'), 'envs', 'mdanse', 'Include', 'Scientific')]
 netcdf_h = None
 for path in netcdf_h_search_paths:
     test_path = os.path.join(path,'netcdf.h')
