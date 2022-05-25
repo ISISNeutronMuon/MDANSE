@@ -553,13 +553,13 @@ jobs:
         run: C:\Miniconda\condabin\conda.bat create -p D:\tempenv python=2.7
         shell: cmd
 
+      - name: Install hdf5, h5py, and netCDF4 into the environment
+        run: C:\Miniconda\condabin\conda.bat install -p D:\tempenv hdf5=1.10.4 h5py netcdf4
+        shell: cmd
+
       - name: Always upgrade dependencies
         run: |
           "D:\tempenv\python.exe" -m pip install matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
-        shell: cmd
-
-      - name: Install hdf5, h5py, and netCDF4 into the environment
-        run: C:\Miniconda\condabin\conda.bat install -p D:\tempenv hdf5=1.10.4 h5py netcdf4
         shell: cmd
 
       - name: Install static dependencies
