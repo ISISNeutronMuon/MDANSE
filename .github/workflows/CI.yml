@@ -549,40 +549,37 @@ jobs:
       - name: Install VC++ For Python2.7
         run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
 
-      - name: Create conda environment
-        run: C:\Miniconda\condabin\conda.bat create -p D:\tempenv python=2.7
-        shell: cmd
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 2.7
+          activate-environment: mdanse
 
       - name: Install hdf5, h5py, and netCDF4 into the environment
-        run: C:\Miniconda\condabin\conda.bat install -p D:\tempenv hdf5=1.10.4 h5py netcdf4
-        shell: cmd
+        run: conda install hdf5=1.10.4 h5py netcdf4
+        shell: cmd /C CALL {0}
 
       - run: |
-          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
-          "D:\tempenv\python.exe" -c "import h5py, numpy"
-        shell: cmd
+          "%CONDA%\envs\mdanse\python.exe" -c "import h5py, numpy"
+          python -c "import h5py, numpy"
+        shell: cmd /C CALL {0}
 
       - name: Always upgrade dependencies
         run: |
-          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           "D:\tempenv\python.exe" -m pip install matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
-        shell: cmd
+        shell: cmd /C CALL {0}
 
       - run: |
-          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           "D:\tempenv\python.exe" -c "import matplotlib, numpy"
-        shell: cmd
+        shell: cmd /C CALL {0}
 
       - name: Install static dependencies
         run: |
-          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
           D:\tempenv\python.exe -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
-        shell: cmd
+        shell: cmd /C CALL {0}
 
       - name: Install ScientificPython
         run: |
-          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
@@ -591,32 +588,29 @@ jobs:
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.dll" "D:\tempenv\Lib\site-packages\Scientific"
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.h" "D:\tempenv\Include\Scientific"
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.lib" "D:\tempenv\Lib\site-packages\Scientific"
-        shell: cmd
+        shell: cmd /C CALL {0}
 
       - name: Install MMTK
         run: |
-          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
           D:\tempenv\python.exe setup.py build install
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "D:\tempenv\Lib\site-packages\Scientific"
-        shell: cmd
+        shell: cmd /C CALL {0}
 
       - run: |
-          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           D:\tempenv\python.exe -c "import numpy"
-        shell: cmd
+        shell: cmd /C CALL {0}
 
       - name: Deploy
         run: |
-          set PATH=D:\tempenv;D:\tempenv\DLLs;D:\tempenv\Include;D:\tempenv\Library;D:\tempenv\libs;D:\tempenv\Lib;%PATH%
           mkdir %GITHUB_WORKSPACE%\BuildServer\Windows\Build
           cd %GITHUB_WORKSPACE%\BuildServer\Windows\Build\
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\deploy.bat"
-        shell: cmd
+        shell: cmd /C CALL {0}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
