@@ -5,6 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -189,6 +190,7 @@ jobs:
   # OSX
   ci_osx:
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -338,6 +340,7 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
+    if: false
     steps:
       - uses: actions/checkout@v2
 
@@ -489,7 +492,6 @@ jobs:
         shell: cmd
 
   deploy_windows:
-    needs: ci_windows
     runs-on: windows-2019
     if: |
       contains( github.ref, 'main' ) ||
@@ -553,7 +555,7 @@ jobs:
 
       - name: Always upgrade dependencies
         run: |
-          "D:\tempenv\python.exe" -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
+          "D:\tempenv\python.exe" -m pip install matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
         shell: cmd
 
       - name: Install hdf5, h5py, and netCDF4 into the environment
@@ -585,6 +587,10 @@ jobs:
           cd mmtk
           D:\tempenv\python.exe setup.py build install
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "D:\tempenv\Lib\site-packages\Scientific"
+        shell: cmd
+
+      - run: |
+          D:\tempenv\python.exe -c "import numpy"
         shell: cmd
 
       - name: Deploy
