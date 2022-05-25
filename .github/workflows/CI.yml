@@ -83,7 +83,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '93' )
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 python
@@ -97,7 +98,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '93' )
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -256,7 +258,8 @@ jobs:
           (contains( github.ref, 'hotfix-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
           (contains( github.ref, 'build-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
           (contains( github.ref, 'tags' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }})
+          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, '93' ) && ${{ (matrix.os == 'macos-10.15') }})
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
@@ -270,7 +273,8 @@ jobs:
           (contains( github.ref, 'hotfix-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
           (contains( github.ref, 'build-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
           (contains( github.ref, 'tags' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }})
+          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
+          (contains( github.ref, '93' ) && ${{ (matrix.os == 'macos-10.15') }})
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -350,21 +354,6 @@ jobs:
           path: C:\Miniconda\envs\mdanse
           key: mdanse
 
-      - name: Prepare NetCDF if not cached
-        if: steps.python-cache.outputs.cache-hit != 'true'
-        run: |
-          choco install 7zip
-          Invoke-WebRequest https://downloads.unidata.ucar.edu/netcdf-c/4.8.1/netCDF4.8.1-NC3-64.exe -UseBasicParsing -Outfile "$env:HOME\netcdf\netCDF.exe"
-
-      - name: Extract NetCDF if not cached
-        if: steps.python-cache.outputs.cache-hit != 'true'
-        run: |
-          cd %HOME%\netcdf
-          "C:\Program Files\7-Zip\7z.exe" e netCDF.exe
-          mkdir "%GITHUB_WORKSPACE%\netcdf"
-          copy "%HOME%\netcdf" "%GITHUB_WORKSPACE%\netcdf"
-        shell: cmd
-
       - name: Restore VS2008 from cache
         if: steps.python-cache.outputs.cache-hit == 'true'
         id: vs2008-cache
@@ -427,11 +416,11 @@ jobs:
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\scientific-setup.py %GITHUB_WORKSPACE%\scientific-python\
           cd scientific-python
-          python scientific-setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          python setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.dll" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.h" "%CONDA%\envs\mdanse\Include\Scientific"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.lib" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
+          python scientific-setup.py build --netcdf_prefix="%CONDA%\envs\mdanse\Library\include" --netcdf_dll="%CONDA%\envs\mdanse\Library\bin"
+          python setup.py install --netcdf_prefix="%CONDA%\envs\mdanse\Library\include" --netcdf_dll="%CONDA%\envs\mdanse\Library\bin"
+          copy "%CONDA%\envs\mdanse\Library\bin\netcdf.dll" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
+          copy "%CONDA%\envs\mdanse\Library\lib\netcdf.lib" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
+          copy "%CONDA%\envs\mdanse\Library\include\netcdf.h" "%CONDA%\envs\mdanse\Include\Scientific"
         shell: cmd /C CALL {0}
 
       - name: Install MMTK
@@ -442,7 +431,6 @@ jobs:
           copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\mmtk-setup.py %GITHUB_WORKSPACE%\mmtk\setup.py
           cd mmtk
           python setup.py build install
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
         shell: cmd /C CALL {0}
 
       - name: Install MDANSE
