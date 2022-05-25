@@ -558,24 +558,15 @@ jobs:
         run: conda install hdf5=1.10.4 h5py netcdf4
         shell: cmd /C CALL {0}
 
-      - run: |
-          "%CONDA%\envs\mdanse\python.exe" -c "import h5py, numpy"
-          python -c "import h5py, numpy"
-        shell: cmd /C CALL {0}
-
       - name: Always upgrade dependencies
         run: |
-          "D:\tempenv\python.exe" -m pip install matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
-        shell: cmd /C CALL {0}
-
-      - run: |
-          "D:\tempenv\python.exe" -c "import matplotlib, numpy"
+          python -m pip install matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
         shell: cmd /C CALL {0}
 
       - name: Install static dependencies
         run: |
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
-          D:\tempenv\python.exe -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
+          python -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd /C CALL {0}
 
       - name: Install ScientificPython
@@ -583,11 +574,10 @@ jobs:
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          "D:\tempenv\python.exe" setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          "D:\tempenv\python.exe" setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.dll" "D:\tempenv\Lib\site-packages\Scientific"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.h" "D:\tempenv\Include\Scientific"
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.lib" "D:\tempenv\Lib\site-packages\Scientific"
+          python setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.dll" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.h" "%CONDA%\envs\mdanse\Include\Scientific"
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.lib" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
         shell: cmd /C CALL {0}
 
       - name: Install MMTK
@@ -595,12 +585,8 @@ jobs:
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/mmtk.git
           cd mmtk
-          D:\tempenv\python.exe setup.py build install
-          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "D:\tempenv\Lib\site-packages\Scientific"
-        shell: cmd /C CALL {0}
-
-      - run: |
-          D:\tempenv\python.exe -c "import numpy"
+          python setup.py build install
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
         shell: cmd /C CALL {0}
 
       - name: Deploy
