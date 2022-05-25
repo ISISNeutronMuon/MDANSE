@@ -557,9 +557,17 @@ jobs:
         run: C:\Miniconda\condabin\conda.bat install -p D:\tempenv hdf5=1.10.4 h5py netcdf4
         shell: cmd
 
+      - run: |
+          "D:\tempenv\python.exe" -c "import h5py, numpy"
+        shell: cmd
+
       - name: Always upgrade dependencies
         run: |
           "D:\tempenv\python.exe" -m pip install matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
+        shell: cmd
+
+      - run: |
+          "D:\tempenv\python.exe" -c "import matplotlib, numpy"
         shell: cmd
 
       - name: Install static dependencies
