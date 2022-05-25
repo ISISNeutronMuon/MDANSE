@@ -580,20 +580,11 @@ jobs:
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.dll" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.h" "%CONDA%\envs\mdanse\Include\Scientific"
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.lib" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
-          cd /D "%CONDA%\envs\mdanse\lib\site-packages"
-          dir /s netcdfmodule.h
-          dir /s arrayobject.h
-          dir /s mpimodule.h
         shell: cmd /C CALL {0}
 
       - name: Install MMTK
         run: |
-          cd /D "%CONDA%\envs\mdanse\Include"
-          dir
-          cd Scientific\
-          dir
           cd /D %GITHUB_WORKSPACE%
-          copy "%CONDA%\envs\mdanse\Include\Scientific\*" "%CONDA%\envs\mdanse\Include"
           git clone https://code.ill.fr/scientific-software/mmtk.git
           copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\mmtk-setup.py %GITHUB_WORKSPACE%\mmtk\setup.py
           cd mmtk
