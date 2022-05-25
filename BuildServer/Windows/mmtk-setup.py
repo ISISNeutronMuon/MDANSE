@@ -60,7 +60,9 @@ for path in netcdf_h_search_paths:
 
 if netcdf_h is None:
     print("/!\ No suitable NetCDF header found.")
-    sys.exit(1)
+    #sys.exit(1)
+    netcdf_h = os.path.join(os.environ.get('CONDA', r'C:\Miniconda'), 'envs', 'mdanse', 'Include', 'Scientific', 'netcdf.h')
+    include_dirs.append(os.path.dirname(os.path.join(os.environ.get('CONDA', r'C:\Miniconda'), 'envs', 'mdanse', 'Include', 'Scientific')))
 
 compile_args.append("-DNUMPY=1")
 import numpy.distutils.misc_util
