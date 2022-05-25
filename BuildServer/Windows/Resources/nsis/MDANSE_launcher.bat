@@ -9,4 +9,4 @@ set dirname=%~dp0
 
 set PATH=%dirname%DLLs;%dirname%Include;%dirname%libs;%PATH%
 
-start /B /D %dirname% pythonw.exe Scripts\mdanse_gui
+start /B /D "%dirname%" pythonw.exe Scripts\mdanse_gui
