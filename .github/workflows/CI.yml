@@ -571,11 +571,10 @@ jobs:
 
       - name: Install ScientificPython
         run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\x86_amd64\vcvarsx86_amd64.bat"
-          call "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\x86_amd64\vcvarsamd64.bat"
+          call "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat"
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
-          copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\setup.py %GITHUB_WORKSPACE%\scientific-python
+          copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\scientific-setup.py %GITHUB_WORKSPACE%\scientific-python\setup.py
           cd scientific-python
           python setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
           python setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
@@ -586,8 +585,10 @@ jobs:
 
       - name: Install MMTK
         run: |
+          python -c "import Scientific"
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/mmtk.git
+          copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\mmtk-setup.py %GITHUB_WORKSPACE%\mmtk\setup.py
           cd mmtk
           python setup.py build install
           copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
