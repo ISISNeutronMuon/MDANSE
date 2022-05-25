@@ -63,7 +63,7 @@ class Graph(object):
         while nodes:
     
             # Get a random node and remove it from the global set.
-            n = nodes.pop()
+            n = nodes.pop(0)
     
             # This set will contain the next group of nodes connected to each other.
             group = set([n])

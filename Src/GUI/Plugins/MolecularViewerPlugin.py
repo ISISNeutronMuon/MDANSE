@@ -1044,7 +1044,7 @@ class MolecularViewerPlugin(ComponentPlugin):
             conf = RealConfiguration(self.trajectory.chemical_system,coords)
         else:
             conf = PeriodicRealConfiguration(self.trajectory.chemical_system,coords,unitCell)
-        conf = conf.continuous_configuration()
+        
         self._trajectory.chemical_system.configuration = conf
 
         coords = conf.variables['coordinates']

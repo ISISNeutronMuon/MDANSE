@@ -1258,11 +1258,7 @@ class ChemicalSystem(_ChemicalEntity):
 
             variables = copy.deepcopy(self._configuration.variables)
             
-            conf = self._configuration.__class__(
-                cs,
-                variables.pop('coordinates'),
-                self._configuration.unit_cell,
-                **variables)
+            conf = self._configuration.clone(cs)
 
             cs._configuration = conf
 

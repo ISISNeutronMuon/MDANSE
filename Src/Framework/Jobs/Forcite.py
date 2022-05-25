@@ -269,6 +269,7 @@ class ForciteConverter(Converter):
     settings['trj_file'] = ('input_file', {'wildcard': 'TRJ files (*.trj)|*.trj|All files|*',
                                            'default': os.path.join('..', '..', '..', 'Data', 'Trajectories', 'Forcite',
                                                                    'H2O.trj')})
+    settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
     settings['output_file'] = ('single_output_file', {'format': 'hdf', 'root': 'xtd_file'})
 
     def initialize(self):
@@ -321,8 +322,9 @@ class ForciteConverter(Converter):
         conf['coordinates'][movableAtoms,:] = xyz
         if conf.is_periodic:
             if self._trjfile["defcel"]:
-                conf.unit_cell = cell            
-            conf.fold_coordinates()
+                conf.unit_cell = cell
+            if self._configuration['fold']['value']:
+                conf.fold_coordinates()
                            
         if self._velocities is not None:
             self._velocities[movableAtoms,:] = velocities

@@ -15,13 +15,16 @@
 
 import collections
 import xml.etree.ElementTree as ElementTree
+
 from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration, RealConfiguration
 
 import numpy as np
 
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Framework.Units import measure
+from MDANSE.Mathematics.Graph import Graph
 from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration, RealConfiguration
+
 
 class XTDFile(object):
     
@@ -92,7 +95,7 @@ class XTDFile(object):
                 atomsMapping[idx] = idx
     
                 info = {}
-                info["mmtk_index"] = comp
+                info["index"] = comp
                 info["xtd_index"] = idx
                 info["bonded_to"] = set()
                 info["element"] = node.attrib['Components'].split(',')[0].strip()
@@ -104,9 +107,9 @@ class XTDFile(object):
                 else:                
                     name = node.attrib.get('ForcefieldType','').strip()
                     if name:
-                        info['name'] = name + '_ff'
+                        info['atom_name'] = name + '_ff'
                     else:
-                        info['name'] = info['element'] + '_el'
+                        info['atom_name'] = info['element'] + '_el'
                     
                 self._atoms[idx] = info
                 
@@ -138,45 +141,39 @@ class XTDFile(object):
                     
         coordinates = np.empty((self._nAtoms,3),dtype=np.float64)
                             
-        nclusters = 0
-         
-        clusters = {}
-         
-        equivalences = {}
-         
-        for idx,atom in self._atoms.items():
-         
-            if not clusters.has_key(idx):
-                nclusters += 1
-                clusters[idx] = nclusters
-             
-            for neighbor in atom["bonded_to"]:
-                if (neighbor in clusters) and (clusters[idx] != clusters[neighbor]):
-                    equivalences[clusters[neighbor]] = equivalences.get(clusters[idx],clusters[idx])
-                     
-                clusters[neighbor] = clusters[idx]
-                         
-        mergedClusters = {}
-        for idx,clusterId in clusters.items():
-            if equivalences.has_key(clusterId):
-                mergedClusters.setdefault(equivalences[clusterId],[]).append(idx)
-            else:
-                mergedClusters.setdefault(clusterId,[]).append(idx)
-                 
-        for k,indexes in mergedClusters.items():
+        graph = Graph()
+
+        for idx, at in self._atoms.items():
+            graph.add_node(name=idx,**at)
+
+        for idx, at in self._atoms.items():
+            for bat in at['bonded_to']:
+                graph.add_link(idx,bat)
+
+        clusters = graph.build_connected_components()
+
+        prev = 0
+
+        for cluster in clusters:
+            atomCluster = AtomCluster([])
             bruteFormula = collections.defaultdict(lambda : 0)
-            atoms = []
-            for idx in indexes:
-                element = self._atoms[idx]["element"]
-                name = self._atoms[idx]["name"]
-                at = Atom(symbol=element, name=name, xtdIndex=idx)
-                at.index = self._atoms[idx]["mmtk_index"]
-                coordinates[at.index] = self._atoms[idx]["xyz"]
-                atoms.append(at)
-                bruteFormula[element] += 1
-            name = "".join(["%s%d" % (k,v) for k,v in sorted(bruteFormula.items())])
-            ac = AtomCluster(name,atoms)
-            self._chemicalSystem.add_chemical_entity(ac)
+
+            clusterList = [None]*len(cluster)
+            for node in cluster:
+                clusterList[node.index-prev] = node
+
+            prev += len(cluster)
+
+            for node in clusterList:
+                element = node.element
+                name = node.atom_name
+                atom = Atom(element, name=name, xtdIndex=node.index)
+                atom.index = node.index
+                configuration[atom.index] = node.xyz
+                atomCluster.atoms.append(atom)
+                bruteFormula[element] += 1                
+            atomCluster.name = "".join(["%s%d" % (k,v) for k,v in sorted(bruteFormula.items())])
+            self._universe.addObject(atomCluster)
 
         if self._pbc:
             boxConf = PeriodicBoxConfiguration(self._chemicalSystem,coordinates,self._cell)

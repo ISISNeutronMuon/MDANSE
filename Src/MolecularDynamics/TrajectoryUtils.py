@@ -53,7 +53,6 @@ def build_connectivity(chemicalSystem ,tolerance=0.05, unit_cell=None):
     bonds = []
     
     conf = chemicalSystem.configuration
-    conf = conf.contiguous_configuration()
 
     scannedObjects = [ce for ce in chemicalSystem.chemical_entities if isinstance(ce,AtomCluster)]
                 
@@ -68,9 +67,10 @@ def build_connectivity(chemicalSystem ,tolerance=0.05, unit_cell=None):
     if singleAtomsObjects:
         scannedObjects.append(AtomCluster('',singleAtomsObjects, parentless=True))
 
+    atoms = sorted(chemicalSystem.atom_list(), key = operator.attrgetter('index'))
+
     for ce in scannedObjects:
                                                         
-        atoms = sorted(ce.atom_list(), key = operator.attrgetter('index'))
         nAtoms = len(atoms)
         indexes = [at.index for at in atoms]
         coords = conf.variables['coordinates'][indexes,:]

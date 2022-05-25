@@ -129,7 +129,7 @@ class RigidBodyTrajectory(IJob):
             current_frame = self.configuration['frames']['value'][i]
             time = self.configuration['frames']['time'][i]
 
-            real_configuration = _Configuration.clone(self._output_trajectory.chemical_system,trajectory.configuration(current_frame))
+            real_configuration = trajectory.configuration(current_frame).clone(self._output_trajectory.chemical_system)
 
             for group_id in range(self._quaternions.shape[0]):
 

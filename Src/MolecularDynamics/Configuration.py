@@ -54,19 +54,9 @@ class _Configuration:
     def chemical_system(self):
         return self._chemical_system
 
-    @staticmethod
-    def clone(chemical_system, other):
-
-        if chemical_system.total_number_of_atoms() != other.chemical_system.total_number_of_atoms():
-            raise ConfigurationError('Mismatch between the chemical systems')
-
-        unit_cell = copy.copy(other._unit_cell)
-
-        variables = copy.deepcopy(other.variables)
-
-        coords = variables.pop('coordinates')
-
-        return other.__class__(chemical_system,coords,unit_cell,**variables)
+    @abc.abstractmethod
+    def clone(self,chemical_system):
+        pass
 
     @property
     def coordinates(self):
@@ -91,6 +81,19 @@ class _PeriodicConfiguration(_Configuration):
             raise ValueError('Invalid unit cell dimensions')
         self._unit_cell = unit_cell
 
+    def clone(self,chemical_system):
+
+        if chemical_system.total_number_of_atoms() != self.chemical_system.total_number_of_atoms():
+            raise ConfigurationError('Mismatch between the chemical systems')
+
+        unit_cell = copy.copy(self._unit_cell)
+
+        variables = copy.deepcopy(self.variables)
+
+        coords = variables.pop('coordinates')
+
+        return self.__class__(chemical_system,coords,unit_cell,**variables)
+        
     @abc.abstractmethod
     def fold_coordinates(self):
         pass
@@ -312,6 +315,17 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 class RealConfiguration(_Configuration):
 
     is_periodic = False
+
+    def clone(self, chemical_system):
+
+        if chemical_system.total_number_of_atoms() != self.chemical_system.total_number_of_atoms():
+            raise ConfigurationError('Mismatch between the chemical systems')
+
+        variables = copy.deepcopy(self.variables)
+
+        coords = variables.pop('coordinates')
+
+        return self.__class__(chemical_system,coords,**variables)        
 
     def fold_coordinates(self):
 
