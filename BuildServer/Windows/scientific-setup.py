@@ -83,7 +83,15 @@ else:
             raise SystemExit
         netcdf_include = netcdf_prefix
         netcdf_h_file = os.path.join(netcdf_prefix, 'netcdf.h')
-        netcdf_lib = netcdf_dll
+
+        if os.path.exists(os.path.join(netcdf_dll, 'netcdf.lib')):
+            netcdf_lib = netcdf_dll
+        elif os.path.exists(os.path.join(os.path.dirname(netcdf_dll), 'lib', 'netcdf.lib')):
+            netcdf_lib = os.path.join(os.path.dirname(netcdf_dll), 'lib')
+        else:
+            print "netcdf.lib could not be found"
+            raise SystemExit
+
         data_files.append(('DLLs', [os.path.join(netcdf_dll, 'netcdf.dll')]))
         scripts.append('scientific_win32_postinstall.py')
         options['bdist_wininst'] = {'install_script': "scientific_win32_postinstall.py"}
