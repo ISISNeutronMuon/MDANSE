@@ -547,11 +547,6 @@ jobs:
       - name: Install VC++ For Python2.7
         run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
 
-      - name: Always upgrade dependencies
-        run: |
-          "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\python.exe" -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
-        shell: cmd
-
       - name: Create conda environment
         run: C:\Miniconda\condabin\conda.bat create -p D:\tempenv python=2.7
         shell: cmd
@@ -560,15 +555,36 @@ jobs:
         run: C:\Miniconda\condabin\conda.bat install -p D:\tempenv hdf5=1.10.4 h5py netcdf4
         shell: cmd
 
-      - name: Copy installed packages to main python and copy netcdf dlls into netCDF directory
+      - name: Always upgrade dependencies
         run: |
-          xcopy "D:\tempenv\lib\site-packages\netCDF4" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4\" /e /r /h /a /y /I /f
-          xcopy "D:\tempenv\lib\site-packages\cftime" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\cftime\" /e /r /h /a /y /I /f
-          xcopy "D:\tempenv\lib\site-packages\h5py" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\h5py\" /e /r /h /a /y /I /f
-          copy "D:\tempenv\Library\bin\*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\DLLs\" /y
-          copy "D:\tempenv\Library\include\*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\Include\" /y
-          copy "D:\tempenv\Library\lib\*" "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\libs\" /y
-          copy %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\*.dll %RUNNER_TOOL_CACHE%\Python\2.7.18\x64\lib\site-packages\netCDF4\
+          "D:\tempenv\python.exe" -m pip install --upgrade numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
+        shell: cmd
+
+      - name: Install static dependencies
+        run: |
+          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
+          D:\tempenv\python.exe -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
+        shell: cmd
+
+      - name: Install ScientificPython
+        run: |
+          cd %GITHUB_WORKSPACE%
+          git clone https://code.ill.fr/scientific-software/scientific-python.git
+          cd scientific-python
+          "D:\tempenv\python.exe" setup.py build --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          "D:\tempenv\python.exe" setup.py install --netcdf_prefix="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf" --netcdf_dll="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf"
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.dll" "D:\tempenv\Lib\site-packages\Scientific"
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.h" "D:\tempenv\Include\Scientific"
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\netcdf.lib" "D:\tempenv\Lib\site-packages\Scientific"
+        shell: cmd
+
+      - name: Install MMTK
+        run: |
+          cd %GITHUB_WORKSPACE%
+          git clone https://code.ill.fr/scientific-software/mmtk.git
+          cd mmtk
+          D:\tempenv\python.exe setup.py build install
+          copy "%RUNNER_TOOL_CACHE%\Python\2.7.18\x64\netcdf\vcruntime140.dll" "D:\tempenv\Lib\site-packages\Scientific"
         shell: cmd
 
       - name: Deploy
