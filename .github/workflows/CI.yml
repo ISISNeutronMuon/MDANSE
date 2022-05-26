@@ -421,9 +421,10 @@ jobs:
         run: |
           cd /D %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/mmtk.git
-          copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\mmtk-setup.py %GITHUB_WORKSPACE%\mmtk\setup.py
+          copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\mmtk-setup.py %GITHUB_WORKSPACE%\mmtk
           cd mmtk
-          python setup.py build install
+          python mmtk-setup.py build 
+          python setup.py install
         shell: cmd /C CALL {0}
 
       - name: Install MDANSE
