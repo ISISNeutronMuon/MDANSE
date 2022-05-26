@@ -434,23 +434,23 @@ jobs:
           python setup.py build install
         shell: cmd /C CALL {0}
 
-      - name: Run unit tests
-        run: |
-          cd %GITHUB_WORKSPACE%\Tests\UnitTests\
-          python AllTests.py
-        shell: cmd /C CALL {0}
-
       - name: Run dependencies tests
         run: |
           cd %GITHUB_WORKSPACE%\Tests\DependenciesTests
-          python AllTests.py
+          %CONDA%\envs\mdanse\python.exe AllTests.py
+        shell: cmd /C CALL {0}
+
+      - name: Run unit tests
+        run: |
+          cd %GITHUB_WORKSPACE%\Tests\UnitTests\
+          %CONDA%\envs\mdanse\python.exe AllTests.py
         shell: cmd /C CALL {0}
 
       - name: Run functional tests
         run: |
           cd %GITHUB_WORKSPACE%\Tests\FunctionalTests\Jobs
-          python BuildJobTests.py
-          python AllTests.py
+          %CONDA%\envs\mdanse\python.exe BuildJobTests.py
+          %CONDA%\envs\mdanse\python.exe AllTests.py
         shell: cmd /C CALL {0}
 
   deploy_windows:
