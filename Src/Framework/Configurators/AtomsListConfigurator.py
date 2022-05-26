@@ -16,7 +16,7 @@
 from MDANSE import REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
+from MDANSE.MolecularDynamics.TrajectoryUtils import find_atoms_in_molecule
 
 class AtomsListConfigurator(IConfigurator):    
     '''
@@ -59,16 +59,20 @@ class AtomsListConfigurator(IConfigurator):
         :type value: str
         '''
                           
-        trajConfig = self._configurable[self._dependencies['trajectory']]
+        traj_configurator = self._configurable[self._dependencies['trajectory']]
                 
-        if UD_STORE.has_definition(trajConfig["basename"],"%d_atoms_list" % self._nAtoms,value): 
-            molecule,atoms = UD_STORE.get_definition(trajConfig["basename"],"%d_atoms_list" % self._nAtoms,value)
+        if UD_STORE.has_definition(traj_configurator["basename"],"%d_atoms_list" % self._nAtoms,value): 
+            molecule,atoms = UD_STORE.get_definition(traj_configurator["basename"],"%d_atoms_list" % self._nAtoms,value)
         else:
             molecule,atoms=value
 
         self["value"] = value
         
-        self['atoms'] = find_atoms_in_molecule(trajConfig['instance'].universe,molecule, atoms, True)
+        self['atoms'] = find_atoms_in_molecule(
+            traj_configurator['instance'].chemical_system,
+            molecule,
+            atoms,
+            True)
                         
         self['n_values'] = len(self['atoms'])
                                     

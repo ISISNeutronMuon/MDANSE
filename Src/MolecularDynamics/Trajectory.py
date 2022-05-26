@@ -131,7 +131,10 @@ class Trajectory:
 
         coordinates = variables.pop('coordinates')
 
-        conf = RealConfiguration(self._chemical_system,coordinates,unit_cell,**variables)
+        if unit_cell is None:
+            conf = RealConfiguration(self._chemical_system,coordinates,**variables)
+        else:
+            conf = PeriodicRealConfiguration(self._chemical_system,coordinates,unit_cell,**variables)
 
         return conf
 

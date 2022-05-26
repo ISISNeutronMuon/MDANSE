@@ -21,7 +21,7 @@ import numpy
 
 from MDANSE import REGISTRY
 from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE
-from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem, Molecule, translate_atom_names
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem, Molecule, is_molecule, translate_atom_names
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Framework.Units import measure
@@ -136,7 +136,7 @@ class FieldFile(dict):
 
             first = last + 1
         
-    def build_mmtk_contents(self, chemicalSystem):
+    def build_chemical_system(self, chemicalSystem):
                 
         chemicalEntities = []
             
@@ -145,14 +145,14 @@ class FieldFile(dict):
             # Loops over the number of molecules of the current type.
             for i in range(nMolecules):
                 
-                try:
-                    mol_name = '{:s}_{:d}'.format(db_name,i)
+                if is_molecule(db_name):
+                    mol_name = '{:s}'.format(db_name)
                     mol = Molecule(db_name,mol_name)
                     renamedAtoms = translate_atom_names(MOLECULES_DATABASE,db_name,[name for name,_ in atomic_contents])
                     mol.reorder_atoms(renamedAtoms)
                     chemicalEntities.append(mol)
-                except:
-                    # This list will contains the MMTK instance of the atoms of the molecule.
+                else:
+                    # This list will contains the instances of the atoms of the molecule.
                     atoms = []
                     # Loops over the atom of the molecule.
                     for j, (name, element) in enumerate(atomic_contents):
@@ -161,7 +161,7 @@ class FieldFile(dict):
                         atoms.append(a)
 
                     if len(atoms) > 1:
-                        ac = AtomCluster('{:s}_{:d}'.format(db_name,i), atoms)
+                        ac = AtomCluster('{:s}'.format(db_name), atoms)
                         chemicalEntities.append(ac)
                     else:                    
                         chemicalEntities.append(atoms[0])
@@ -312,7 +312,7 @@ class DL_POLYConverter(Converter):
 
         self._chemicalSystem = ChemicalSystem()
              
-        self._fieldFile.build_mmtk_contents(self._chemicalSystem)
+        self._fieldFile.build_chemical_system(self._chemicalSystem)
 
         self._trajectory = TrajectoryWriter(self.configuration['output_files']['files'][0],self._chemicalSystem,self.numberOfSteps)        
 

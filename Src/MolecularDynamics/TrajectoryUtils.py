@@ -84,23 +84,23 @@ def build_connectivity(chemicalSystem ,tolerance=0.05, unit_cell=None):
             atoms[idx1].bonds.append(atoms[idx2])                  
             atoms[idx2].bonds.append(atoms[idx1])
 
-def find_atoms_in_molecule(universe, moleculeName, atomNames, indexes=False):
+def find_atoms_in_molecule(chemical_system, molecule_name, atom_names, indexes=False):
 
     molecules = []
-    for obj in universe.objectList():
-        if obj.name == moleculeName:
-            molecules.append(obj)
+    for ce in chemical_system.chemical_entities:
+        if ce.name == molecule_name:
+            molecules.append(ce)
                     
     match = []
     for mol in molecules:
-        atoms = mol.atomList()
-        names = [at.name for at in mol.atomList()]
-        l = [atoms[names.index(atName)] for atName in atomNames]
+        atoms = mol.atom_list()
+        names = [at.name for at in atoms]
+        l = [atoms[names.index(at_name)] for at_name in atom_names]
 
         match.append(l)
         
     if indexes is True:
-        match = [[at.index for at in atList] for atList in match]
+        match = [[at.index for at in at_list] for at_list in match]
         
     return match
 

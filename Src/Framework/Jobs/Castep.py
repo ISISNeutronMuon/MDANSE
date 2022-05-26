@@ -22,20 +22,20 @@ import numpy
 
 from Scientific.Geometry import Vector
 
-from MMTK import Atom
-from MMTK import Units
-from MMTK.ParticleProperties import Configuration, ParticleVector
-from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
-from MMTK.Universe import ParallelepipedicPeriodicUniverse
-
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.Converter import Converter
+from MDANSE.Framework.Units import measure
+from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
+HBAR = measure(1.05457182e-34,'kg m2/s').toval('uma nm2/ps')
+HARTREE = measure(27.2113845,'eV').toval('uma nm2/ps2')
+BOHR = measure(5.29177210903e-11,'m').toval('nm')
 
 class CASTEPError(Error):
     pass
-
 
 class MDFile(dict):
     """
@@ -134,13 +134,13 @@ class MDFile(dict):
 
         # Read the time stored in the line and convert its units
         timeStep = float(self['instance'].read(self._frameInfo["time_step"][1]))
-        timeStep *= Units.hbar/Units.Hartree
+        timeStep *= HBAR/HARTREE
 
         # Read and process the cell data
         self['instance'].seek(start+self._frameInfo["cell_data"][0])  # Move to the start of cell data
         basisVectors = self['instance'].read(self._frameInfo["cell_data"][1]).splitlines()  # Read the cell data by line
         # Generate a tuple of three vectors where each vector is constructed from its components stored in each line
-        basisVectors = tuple([Vector([float(bb) for bb in b.strip().split()[:3]])*Units.Bohr for b in basisVectors])
+        basisVectors = tuple([Vector([float(bb) for bb in b.strip().split()[:3]])*BOHR for b in basisVectors])
         
         self['instance'].seek(start+self._frameInfo["data"][0])  # Move to the start of positional data
         # Create an array composed of the data points in each line of the positional data
@@ -149,9 +149,9 @@ class MDFile(dict):
         config = config[:, 2:5].astype(numpy.float64)  # Extract the coordintates only
 
         # Convert the units of the positions
-        config[0:self["n_atoms"], :] *= Units.Bohr
-        config[self["n_atoms"]:2*self["n_atoms"], :] *= Units.Bohr*Units.Hartree/Units.hbar
-        config[2*self["n_atoms"]:3*self["n_atoms"], :] *= Units.Hartree/Units.Bohr
+        config[0:self["n_atoms"], :] *= BOHR
+        config[self["n_atoms"]:2*self["n_atoms"], :] *= BOHR*HARTREE/HBAR
+        config[2*self["n_atoms"]:3*self["n_atoms"], :] *= HARTREE/BOHR
         
         return timeStep, basisVectors, config
 
@@ -171,38 +171,34 @@ class CASTEPConverter(Converter):
     settings['castep_file'] = ('input_file', {'wildcard':'MD files (*.md)|*.md|All files|*',
                                                 'default': os.path.join('..', '..', '..', 'Data', 'Trajectories',
                                                                       'CASTEP', 'PBAnew.md')})
-    settings['output_file'] = ('single_output_file', {'format': 'netcdf','root':'castep_file'})
+    settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
+    settings['output_file'] = ('single_output_file', {'format': 'hdf','root':'castep_file'})
                 
     def initialize(self):
         """
         Initialize the input parameters and analysis self variables
         """
 
-        self._castepFile = MDFile(self.configuration["castep_file"]["filename"])  # Create a representation of md file
+        # Create a representation of md file
+        self._castepFile = MDFile(self.configuration["castep_file"]["filename"])
         
-        self.numberOfSteps = self._castepFile["n_frames"]  # Save the number of steps
+        # Save the number of steps
+        self.numberOfSteps = self._castepFile["n_frames"]
 
-        self._universe = ParallelepipedicPeriodicUniverse()  # Create a bound universe
+        # Create a bound universe
+        self._chemical_system = ChemicalSystem()
 
         # Populate the universe with atoms based on how many of each atom is in the read trajectory
         for symbol, number in self._castepFile["atoms"]:
             for i in range(number):
-                self._universe.addObject(Atom(symbol, name="%s_%d" % (symbol, i)))
+                self._chemical_system.add_chemical_entity(Atom(symbol=symbol, name="%s_%d" % (symbol, i)))
                 
-        self._universe.initializeVelocitiesToTemperature(0.)
-        self._velocities = ParticleVector(self._universe)
+        # A trajectory is opened for writing.
+        self._trajectory = TrajectoryWriter(
+            self.configuration['output_file']['file'],
+            self._chemical_system,
+            self.numberOfSteps)
 
-        self._forces = ParticleVector(self._universe)
-
-        # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
-
-        data_to_be_written = ["configuration","time","velocities","gradients"]
-
-        # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions=[TrajectoryOutput(self._trajectory, data_to_be_written,
-                                                                                     0, None, 1)])
-    
     def run_step(self, index):
         """Runs a single step of the job.
         
@@ -215,31 +211,40 @@ class CASTEPConverter(Converter):
         @note: the argument index is the index of the loop not the index of the frame.
         """
                 
-        nAtoms = self._castepFile["n_atoms"]  # Retrieve the number of atoms
+        # Retrieve the number of atoms
+        nAtoms = self._castepFile["n_atoms"]
         
-        timeStep, basisVectors, config = self._castepFile.read_step(index)  # Read the informatino in the frame
+        # Read the informatino in the frame
+        time_step, unit_cell, config = self._castepFile.read_step(index)
         
-        self._universe.setShape(basisVectors)  # Set the boundaries of the universe using the cell vectors
+        coords = config[0:nAtoms, :]
+        variables = {}
+        variables['velocities'] = config[nAtoms:2*nAtoms, :]
+        variables['gradients'] = config[2*nAtoms:3*nAtoms, :]
+
+        conf = PeriodicRealConfiguration(
+            self._trajectory.chemical_system,
+            coords,
+            unit_cell,
+            **variables
+        )
             
-        conf = Configuration(self._universe, config[0:nAtoms, :])
+        if self.configuration['fold']['value']:
+            conf.fold_coordinates()
         
-        self._universe.setConfiguration(conf)
-                   
-        self._universe.foldCoordinatesIntoBox()
-        
-        data = {"time": timeStep}
+        self._trajectory.chemical_system.configuration = conf
 
-        # Retrieve the velocities multiplied by Units.Bohr*Units.Hartree/Units.hbar and save them
-        self._velocities.array = config[nAtoms:2*nAtoms, :]
-        data["velocities"] = self._velocities
+        self._trajectory.dump_configuration(
+            time_step,
+            units = {
+                'time':'ps',
+                'coordinates':'nm',
+                'unit_cell':'nm',
+                'velocities':'nm/ps',
+                'gradients':'uma nm/ps2'
+            }
+        )
 
-        # Retrieve the forces multiplied by Units.Hartree/Units.Bohr and save them
-        self._forces.array = config[2 * nAtoms:3 * nAtoms, :]
-        data["gradients"] = self._forces
-
-        # Store a snapshot of the current configuration in the output trajectory.
-        self._snapshot(data=data)                                          
-        
         return index, None
 
     def combine(self, index, x):

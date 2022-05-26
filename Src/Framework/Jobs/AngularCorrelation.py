@@ -15,12 +15,12 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Mathematics.Signal import correlation
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
+from MDANSE.MolecularDynamics.TrajectoryUtils import read_atoms_trajectory
 
 class AngularCorrelation(IJob):
     '''
@@ -52,13 +52,13 @@ class AngularCorrelation(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
     
     settings = collections.OrderedDict()    
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['axis_selection'] = ('atoms_list',{"nAtoms" : 2,
                                                 "dependencies":{'trajectory':'trajectory'},
                                                 'default' : ('Water',('OW','HW'))})
     settings['per_axis'] = ('boolean', {"label":"output contribution per axis", "default":False})
-    settings['output_files'] = ('output_files', {"formats":["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {"formats":["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
         
     def initialize(self):
@@ -70,7 +70,7 @@ class AngularCorrelation(IJob):
 
         self._outputData.add("time","line", self.configuration['frames']['duration'],units='ps')
 
-        self._outputData.add("axis_index","line", numpy.arange(self.configuration['axis_selection']['n_values']), units='au')
+        self._outputData.add("axis_index","line", np.arange(self.configuration['axis_selection']['n_values']), units='au')
                         
         self._outputData.add('ac',"line", (self.configuration['frames']['number'],), axis="time", units="au") 
 
@@ -90,23 +90,25 @@ class AngularCorrelation(IJob):
 
         e1, e2 = self.configuration['axis_selection']['atoms'][index]
                 
-        e1 = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
-                                   e1,
-                                   first=self.configuration['frames']['first'],
-                                   last=self.configuration['frames']['last']+1,
-                                   step=self.configuration['frames']['step'])
+        at1_traj = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
+            e1,
+            first=self.configuration['frames']['first'],
+            last=self.configuration['frames']['last']+1,
+            step=self.configuration['frames']['step']            
+        )
 
-        e2 = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
-                                   e2,
-                                   first=self.configuration['frames']['first'],
-                                   last=self.configuration['frames']['last']+1,
-                                   step=self.configuration['frames']['step'])
+        at2_traj = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
+            e2,
+            first=self.configuration['frames']['first'],
+            last=self.configuration['frames']['last']+1,
+            step=self.configuration['frames']['step']            
+        )
 
-        diff = e2 - e1
+        diff = at2_traj - at1_traj
         
-        modulus = numpy.sqrt(numpy.sum(diff**2,1))
+        modulus = np.sqrt(np.sum(diff**2,1))
                                 
-        diff /= modulus[:,numpy.newaxis]
+        diff /= modulus[:,np.newaxis]
 
         ac = correlation(diff,axis=0,average=1)
                         

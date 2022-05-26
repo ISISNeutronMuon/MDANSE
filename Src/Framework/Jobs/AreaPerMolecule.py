@@ -16,7 +16,7 @@
 import collections
 import os
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
@@ -41,11 +41,11 @@ class AreaPerMolecule(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{'default':os.path.join('..','..','..','Data','Trajectories','MMTK','dmpc_in_periodic_universe.nc')})
+    settings['trajectory'] = ('hdf_trajectory',{'default':os.path.join('..','..','..','Data','Trajectories','MMTK','dmpc_in_periodic_universe.nc')})
     settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['axis'] = ('multiple_choices', {'label':'area vectors','choices':['a','b','c'],'nChoices':2,'default':['a','b']})
     settings['name'] = ('string', {'label':'molecule name','default':'DMPC'})    
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):
@@ -60,7 +60,7 @@ class AreaPerMolecule(IJob):
         self._axisIndexes = self.configuration["axis"]["indexes"]
 
         # The number of molecules that match the input name. Must be > 0.
-        self._nMolecules = len([obj for obj in self.configuration["trajectory"]["instance"].universe.objectList() if obj.name == self.configuration["name"]["value"]])
+        self._nMolecules = len([ce for ce in self.configuration["trajectory"]["instance"].chemical_system.chemical_entities if ce.name == self.configuration["name"]["value"]])
         if self._nMolecules == 0:
             raise AreaPerMoleculeError("No molecule matches %r name." % self.configuration["name"]["value"])
 
@@ -80,16 +80,19 @@ class AreaPerMolecule(IJob):
         """
 
         # Get the frame index
-        frameIndex = self.configuration['frames']['value'][index]
+        frame_index = self.configuration['frames']['value'][index]
 
-        # Set the universe configuration to this frame index
-        universe = self.configuration['trajectory']['instance'].universe        
-        universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
+        configuration = self.configuration['trajectory']['instance'].configuration(frame_index)
+
+        if not configuration.is_periodic:
+            raise AreaPerMoleculeError('The configuration must be periodic')
 
         # Compute the area and then the area per molecule 
-        basisVectors = universe.basisVectors()
-        normalVect = numpy.cross(basisVectors[self._axisIndexes[0]], basisVectors[self._axisIndexes[1]])
-        apm = numpy.sqrt(numpy.sum(normalVect**2))/self._nMolecules
+        unit_cell = configuration.unit_cell
+        normalVect = np.cross(
+            unit_cell[self._axisIndexes[0]], 
+            unit_cell[self._axisIndexes[1]])
+        apm = np.sqrt(np.sum(normalVect**2))/self._nMolecules
                   
         return index, apm
     
