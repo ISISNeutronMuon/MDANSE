@@ -16,7 +16,6 @@ import operator
 
 import numpy as np
 
-from MMTK.Collections import Collection
 from MMTK.Trajectory import Trajectory
 
 from MDANSE.Core.Error import Error
@@ -67,10 +66,10 @@ def build_connectivity(chemicalSystem ,tolerance=0.05, unit_cell=None):
     if singleAtomsObjects:
         scannedObjects.append(AtomCluster('',singleAtomsObjects, parentless=True))
 
-    atoms = sorted(chemicalSystem.atom_list(), key = operator.attrgetter('index'))
-
     for ce in scannedObjects:
-                                                        
+
+        atoms = sorted(ce.atom_list(), key = operator.attrgetter('index'))
+
         nAtoms = len(atoms)
         indexes = [at.index for at in atoms]
         coords = conf.variables['coordinates'][indexes,:]
@@ -133,13 +132,13 @@ def get_chemical_objects_number(universe):
         
     return d
                                                                     
-def partition_universe(universe,groups):
+def group_atoms(chemical_system,groups):
     
-    atoms = sorted(universe.atomList(), key = operator.attrgetter('index'))
+    atoms = sorted(chemical_system.atom_list(), key = operator.attrgetter('index'))
                                         
-    coll = [Collection([atoms[index] for index in gr]) for gr in groups]
-    
-    return coll
+    groups = [AtomGroup([atoms[index] for index in gr]) for gr in groups]
+
+    return groups
 
 def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable="configuration", weights=None, dtype=np.float64):
     

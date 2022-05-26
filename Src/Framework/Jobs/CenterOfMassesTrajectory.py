@@ -14,14 +14,15 @@
 # **************************************************************************
 
 import collections
-import copy
 
-from MMTK import Atom
-from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
+import numpy as np
 
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.Trajectory import partition_universe
+from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration, RealConfiguration
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atoms
 
 class CenterOfMassesTrajectory(IJob):
     """
@@ -36,11 +37,12 @@ class CenterOfMassesTrajectory(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}, 'default':(0,1,1)})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
+    settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
     settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection'}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf"]})
                 
     def initialize(self):
         """
@@ -48,27 +50,22 @@ class CenterOfMassesTrajectory(IJob):
         """
 
         self.numberOfSteps = self.configuration['frames']['number']
-                                        
-        self._partition = partition_universe(self.configuration['trajectory']['instance'].universe,self.configuration['atom_selection']['indexes'])
 
-        self._newUniverse = copy.copy(self.configuration['trajectory']['instance'].universe)
-        
-        self._newUniverse.removeObject(self._newUniverse.objectList()[:])
-        
-        for i,g in enumerate(self._partition):
-            at = Atom("H", name="com_%d" % i)
-            at._mass = g.mass()
-            at.index = i
-            self._newUniverse.addObject(at)    
-                            
+        chemical_system = ChemicalSystem()
+        for i in range(len(self.configuration['atom_selection']['indexes'])):
+            at = Atom(symbol='H',name='com_{:d}'.format(i))
+            chemical_system.add_chemical_entity(at)
+                                                    
         # The output trajectory is opened for writing.
-        self._comt = Trajectory(self._newUniverse, self.configuration['output_files']['files'][0], "w")
-        
-        # The title for the trajectory is set. 
-        self._comt.title = self.__class__.__name__
-        
-        # Create the snapshot generator.
-        self._snapshot = SnapshotGenerator(self._newUniverse, actions = [TrajectoryOutput(self._comt, ("configuration","time"), 0, None, 1)])
+        self._output_trajectory = TrajectoryWriter(
+            self.configuration['output_files']['files'][0],
+            chemical_system,
+            self.numberOfSteps)
+
+        self._grouped_atoms = group_atoms(
+            self.configuration['trajectory']['instance'].chemical_system,
+            self.configuration['atom_selection']['indexes']
+        )
 
     def run_step(self, index):
         """
@@ -83,23 +80,38 @@ class CenterOfMassesTrajectory(IJob):
 
         # get the Frame index
         frameIndex = self.configuration['frames']['value'][index]
-              
-        # The configuration corresponding to this index is set to the universe.
-        self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
-        
-        comConf = self._newUniverse.configuration().array
 
-        for i, atoms in enumerate(self._partition):
-            comConf[i,:] = atoms.centerOfMass()
-            
+        n_coms = self._output_trajectory.chemical_system.number_of_atoms()
+
+        conf = self.configuration['trajectory']['instance'].configuration(frameIndex)
+        conf = conf.continuous_configuration()
+
+        com_coords = np.empty((n_coms,3),dtype=np.float) 
+        for i, group in enumerate(self._grouped_atoms):
+            com_coords[i,:] = group.center_of_mass(conf)
+
+        if conf.is_periodic:
+            com_conf = PeriodicRealConfiguration(
+                self._output_trajectory.chemical_system,
+                com_coords,
+                conf.unit_cell
+            )
+        else:
+            com_conf = RealConfiguration(
+                self._output_trajectory.chemical_system,
+                com_coords
+            )
+
+        if self.configuration['fold']['value']:
+            com_conf.fold_coordinates()
+
+        self._output_trajectory.chemical_system.configuration = com_conf
+
         # The times corresponding to the running index.
-        t = self.configuration['frames']['time'][index]
-        
-        self._newUniverse.foldCoordinatesIntoBox()
-        
-        # A snapshot of the universe is written to the output trajectory.
-        self._snapshot(data={'time': t})
-                                
+        time = self.configuration['frames']['time'][index]
+
+        self._output_trajectory.dump_configuration(time)
+                                                
         return index, None
         
     def combine(self, index, x):
@@ -115,10 +127,11 @@ class CenterOfMassesTrajectory(IJob):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """ 
+
         # The input trajectory is closed.
         self.configuration['trajectory']['instance'].close()
         
         # The output trajectory is closed.
-        self._comt.close()   
+        self._output_trajectory.close()   
 
 REGISTRY['comt'] = CenterOfMassesTrajectory
