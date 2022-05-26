@@ -83,8 +83,7 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' ) ||
-          contains( github.ref, '93' )
+          contains( github.ref, 'web' )
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 python
@@ -98,8 +97,7 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' ) ||
-          contains( github.ref, '93' )
+          contains( github.ref, 'web' )
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -121,8 +119,7 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) ||
-      contains( github.ref, '93' )
+      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
@@ -258,8 +255,7 @@ jobs:
           (contains( github.ref, 'hotfix-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
           (contains( github.ref, 'build-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
           (contains( github.ref, 'tags' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, '93' ) && ${{ (matrix.os == 'macos-10.15') }})
+          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }})
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
@@ -273,8 +269,7 @@ jobs:
           (contains( github.ref, 'hotfix-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
           (contains( github.ref, 'build-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
           (contains( github.ref, 'tags' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, '93' ) && ${{ (matrix.os == 'macos-10.15') }})
+          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }})
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -292,8 +287,7 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) ||
-      contains( github.ref, '93' )
+      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
@@ -440,13 +434,23 @@ jobs:
           python setup.py build install
         shell: cmd /C CALL {0}
 
-      - name: Run tests
+      - name: Run unit tests
         run: |
-          cd %GITHUB_WORKSPACE%\Tests
-          python UnitTests\AllTests.py
-          python DependenciesTests\AllTests.py
-          python FunctionalTests\Jobs\BuildJobTests.py
-          python FunctionalTests\Jobs\AllTests.py
+          cd %GITHUB_WORKSPACE%\Tests\UnitTests\
+          python AllTests.py
+        shell: cmd /C CALL {0}
+
+      - name: Run dependencies tests
+        run: |
+          cd %GITHUB_WORKSPACE%\Tests\DependenciesTests
+          python AllTests.py
+        shell: cmd /C CALL {0}
+
+      - name: Run functional tests
+        run: |
+          cd %GITHUB_WORKSPACE%\Tests\FunctionalTests\Jobs
+          python BuildJobTests.py
+          python AllTests.py
         shell: cmd /C CALL {0}
 
   deploy_windows:
