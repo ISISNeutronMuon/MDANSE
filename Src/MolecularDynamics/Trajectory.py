@@ -439,7 +439,7 @@ class TrajectoryWriter:
                     chunks=(1,3,3),
                     dtype=np.float)
                 unit_cell_dset.attrs['units'] = units.get('unit_cell','')
-            unit_cell_dset[self._current_index] = unit_cell
+            unit_cell_dset[self._current_index] = unit_cell.direct
 
         # Write the time
         time_dset = self._h5_file.get('time',None)

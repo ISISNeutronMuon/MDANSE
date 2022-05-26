@@ -119,8 +119,8 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
 
         coords = self._variables['coordinates']
         coords = coords[np.newaxis,:,:]
-        unit_cell = self._unit_cell.T
-        inverse_unit_cell = np.linalg.inv(unit_cell)
+        unit_cell = self._unit_cell.transposed_direct
+        inverse_unit_cell = self._unit_cell.transposed_inverse
         unit_cells = unit_cell[np.newaxis,:,:]
         inverse_unit_cells = inverse_unit_cell[np.newaxis,:,:]
         coords = fold_coordinates.fold_coordinates(
@@ -138,7 +138,7 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
 
     def to_real_coordinates(self):
 
-        return np.matmul(self._variables['coordinates'],self._unit_cell)
+        return np.matmul(self._variables['coordinates'],self._unit_cell.direct)
 
     def to_real_configuration(self):
 
@@ -172,7 +172,7 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
 
         contiguous_coords = contiguous_coordinates.contiguous_coordinates_box(
             self._variables['coordinates'],
-            self._unit_cell.T,
+            self._unit_cell.transposed_direct,
             indexes)
 
         conf = self
@@ -198,8 +198,8 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
             
             offsets = contiguous_coordinates.contiguous_offsets_box(
                 self._variables['coordinates'],
-                self._unit_cell.T,
-                np.linalg.inv(self._unit_cell.T),
+                self._unit_cell.transposed_direct,
+                self._unit_cell.transposed_inverse,
                 indexes)
 
         return offsets
@@ -214,8 +214,8 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 
         coords = self._variables['coordinates']
         coords = coords[np.newaxis,:,:]
-        unit_cell = self._unit_cell.T
-        inverse_unit_cell = np.linalg.inv(unit_cell)
+        unit_cell = self._unit_cell.transposed_direct
+        inverse_unit_cell = self._unit_cell.transposed_inverse
         unit_cells = unit_cell[np.newaxis,:,:]
         inverse_unit_cells = inverse_unit_cell[np.newaxis,:,:]
         coords = fold_coordinates.fold_coordinates(
@@ -229,7 +229,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 
     def to_box_coordinates(self):
 
-        return np.matmul(self._variables['coordinates'],np.linalg.inv(self._unit_cell))
+        return np.matmul(self._variables['coordinates'],self._unit_cell.inverse)
 
     def to_box_configuration(self):
 
@@ -250,8 +250,8 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 
         indexes = atoms_in_shell.atoms_in_shell_real(
             self._variables['coordinates'],
-            self._unit_cell.T,
-            np.linalg.inv(self._unit_cell.T),
+            self._unit_cell.transposed_direct,
+            self._unit_cell.transposed_inverse,
             ref,
             mini,
             maxi)
@@ -270,8 +270,8 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 
         contiguous_coords = contiguous_coordinates.contiguous_coordinates_real(
             self._variables['coordinates'],
-            self._unit_cell.T,
-            np.linalg.inv(self._unit_cell.T),
+            self._unit_cell.transposed_direct,
+            self._unit_cell.transposed_inverse,
             indexes)
 
         conf = self
@@ -282,8 +282,8 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 
         contiguous_coords = contiguous_coordinates.continuous_coordinates(
             self._variables['coordinates'],
-            self._unit_cell.T,
-            np.linalg.inv(self._unit_cell.T),
+            self._unit_cell.transposed_direct,
+            self._unit_cell.transposed_inverse,
             self._chemical_system)
 
         conf = self
@@ -305,8 +305,8 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         
         offsets = contiguous_coordinates.contiguous_offsets_real(
             self._variables['coordinates'],
-            self._unit_cell.T,
-            np.linalg.inv(self._unit_cell.T),
+            self._unit_cell.transposed_direct,
+            self._unit_cell.transposed_inverse,
             indexes)
 
         return offsets

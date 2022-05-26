@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
@@ -39,14 +39,14 @@ class DensityProfile(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
     
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
     settings['atom_transmutation'] = ('atom_transmutation',{'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['axis'] = ('single_choice', {'choices':['a','b','c'], 'default':'c'})
     settings['dr'] = ('float', {'default':0.01, 'mini':1.0e-9})
     settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):
@@ -57,21 +57,24 @@ class DensityProfile(IJob):
         # The number of steps of the analysis.
         self.numberOfSteps = self.configuration['frames']['number']
                 
-        self.dr = self.configuration["dr"]["value"]
-                
-        if not self.configuration['trajectory']['instance'].universe.is_periodic:
-            raise DensityProfileError('Cannot start %s analysis on non-periodic system' % self.label)
-        
-        axis = self.configuration["axis"]["index"]
-        dr = self.configuration["dr"]["value"]
-        self._nBins = int(self.configuration['trajectory']['instance'].universe.basisVectors()[axis].length()/dr)+1
+        self._dr = self.configuration["dr"]["value"]
+                        
+        axis_index = self.configuration["axis"]["index"]
+
+        first_conf = self.configuration['trajectory']['instance'].chemical_system.configuration
+        if not first_conf.is_periodic:
+            raise DensityProfileError('Density profile cannot be computed for chemical system without periodc boundary conditions')
+
+        axis = first_conf.unit_cell.direct[axis_index,:]
+        axis_length = np.sqrt(np.sum(axis**2))
+        self._n_bins = int(axis_length/self._dr)+1
                                 
-        self._outputData.add('r',"line", (self._nBins,), units="nm") 
+        self._outputData.add('r','line', (self._n_bins,), units="nm") 
 
-        self._indexesPerElement = self.configuration['atom_selection'].get_indexes()
+        self._indexes_per_element = self.configuration['atom_selection'].get_indexes()
 
-        for element in self._indexesPerElement.keys():
-            self._outputData.add("dp_%s" % element,"line", (self._nBins,), axis="r", units="au") 
+        for element in self._indexes_per_element.keys():
+            self._outputData.add("dp_%s" % element,"line", (self._n_bins,), axis="r", units="au") 
 
         self._extent = 0.0
                                 
@@ -87,24 +90,23 @@ class DensityProfile(IJob):
         """
 
         # get the Frame index
-        frameIndex = self.configuration['frames']['value'][index]
-                  
-        self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
-                        
-        conf = self.configuration['trajectory']['instance'].universe.configuration()
+        frame_index = self.configuration['frames']['value'][index]
 
-        conf.convertToBoxCoordinates()
+        conf = self.configuration['trajectory']['instance'].configuration(frame_index)
 
-        axis = self.configuration["axis"]["index"]
-        extent = self.configuration['trajectory']['instance'].universe.basisVectors()[axis].length()
+        box_coords = conf.to_box_coordinates()
+
+        axis_index = self.configuration["axis"]["index"]
+        axis = conf.unit_cell.direct[axis_index,:]
+        axis_length = np.sqrt(np.sum(axis**2))
         
-        dpPerFrame = {}
+        dp_per_frame = {}
         
-        for k,v in self._indexesPerElement.iteritems():
-            h = numpy.histogram(conf.array[v,self.configuration["axis"]["index"]],bins=self._nBins, range=[-0.5,0.5])
-            dpPerFrame[k] = h[0]
+        for k,v in self._indexes_per_element.iteritems():
+            h = np.histogram(box_coords[v,axis_index],bins=self._n_bins, range=[-0.5,0.5])
+            dp_per_frame[k] = h[0]
             
-        return index, (extent,dpPerFrame)
+        return index, (axis_length,dp_per_frame)
     
     def combine(self, index, x):
         """
@@ -125,18 +127,22 @@ class DensityProfile(IJob):
         Finalize the job.
         """
  
-        nAtomsPerElement = self.configuration['atom_selection'].get_natoms()        
-        for element in nAtomsPerElement.keys():
+        n_atoms_per_element = self.configuration['atom_selection'].get_natoms()        
+        for element in n_atoms_per_element.keys():
             self._outputData["dp_%s" % element] += self.numberOfSteps
 
-        dpTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,1,"dp_%s")
+        dp_total = weight(
+            self.configuration["weights"].get_weights(),
+            self._outputData,n_atoms_per_element,
+            1,
+            "dp_%s")
             
-        self._outputData.add("dp_total","line", dpTotal, axis="r", units="au") 
+        self._outputData.add("dp_total","line", dp_total, axis="r", units="au") 
         
         self._extent /= self.numberOfSteps
                 
-        rValues = self._extent*numpy.linspace(0,1,self._nBins+1)
-        self._outputData["r"][:] = (rValues[1:]+rValues[:-1])/2
+        r_values = self._extent*np.linspace(0,1,self._n_bins+1)
+        self._outputData["r"][:] = (r_values[1:]+r_values[:-1])/2
 
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
          

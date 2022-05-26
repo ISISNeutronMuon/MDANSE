@@ -15,12 +15,11 @@
 
 import collections
 
-from MMTK.Collections import Collection
-from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
-
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import AtomGroup
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 class CroppedTrajectory(IJob):
     """
@@ -34,10 +33,10 @@ class CroppedTrajectory(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf"]})
                 
     def initialize(self):
         """
@@ -46,21 +45,19 @@ class CroppedTrajectory(IJob):
 
         self.numberOfSteps = self.configuration['frames']['number']
                 
-        atoms = sorted_atoms(self.configuration['trajectory']['instance'].universe)
+        atoms = sorted_atoms(self.configuration['trajectory']['instance'].chemical_system.atom_list())
         
         # The collection of atoms corresponding to the atoms selected for output.
         indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]        
-        self._selectedAtoms = Collection([atoms[ind] for ind in indexes])
+        self._selectedAtoms = [atoms[ind] for ind in indexes]
 
         # The output trajectory is opened for writing.
-        self._ct = Trajectory(self._selectedAtoms, self.configuration['output_files']['files'][0], "w")
-        
-        # The title for the trajectory is set. 
-        self._ct.title = self.__class__.__name__
-
-        # Create the snapshot generator.
-        self.snapshot = SnapshotGenerator(self.configuration['trajectory']['instance'].universe, actions = [TrajectoryOutput(self._ct, "all", 0, None, 1)])
-                
+        self._output_trajectory = TrajectoryWriter(
+            self.configuration['output_files']['files'][0],
+            self.configuration['trajectory']['instance'].chemical_system,
+            self.numberOfSteps,
+            self._selectedAtoms)
+                        
     def run_step(self, index):
         """
         Runs a single step of the job.\n
@@ -73,17 +70,18 @@ class CroppedTrajectory(IJob):
         """
 
         # get the Frame index
-        frameIndex = self.configuration['frames']['value'][index]
+        frame_index = self.configuration['frames']['value'][index]
               
-        # The configuration corresponding to this index is set to the universe.
-        self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
-                                        
-        # The times corresponding to the running index.
-        t = self.configuration['frames']['time'][index]
-        
-        # A snapshot of the universe is written to the output trajectory.
-        self.snapshot(data = {'time': t})
-                                
+        conf = self.configuration['trajectory']['instance'].configuration(frame_index)
+
+        cloned_conf = conf.clone(self._output_trajectory.chemical_system)
+
+        self._output_trajectory.chemical_system.configuration = cloned_conf
+
+        time = self.configuration['frames']['time'][index]
+
+        self._output_trajectory.dump_configuration(time)
+
         return index, None
 
     def combine(self, index, x):
@@ -103,6 +101,6 @@ class CroppedTrajectory(IJob):
         self.configuration['trajectory']['instance'].close()
                                                     
         # The output trajectory is closed.
-        self._ct.close()   
+        self._output_trajectory.close()   
 
 REGISTRY['ct'] = CroppedTrajectory

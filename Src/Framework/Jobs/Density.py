@@ -15,12 +15,16 @@
 
 import collections
 
-from MMTK import Units
-
-from MDANSE import ELEMENTS, REGISTRY
-from MDANSE.Framework.Units import measure
+from MDANSE import REGISTRY
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
+from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
+
+NAVOGADRO = 6.02214129e+23
+
+class DensityError(Exception):
+    pass
 
 class Density(IJob):
     """
@@ -34,28 +38,29 @@ class Density(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
     def initialize(self):
 
         self.numberOfSteps = self.configuration['frames']['number']
 
-        self._nFrames = self.numberOfSteps
+        self._n_frames = self.numberOfSteps
+
+        self._n_atoms = self.configuration['trajectory']['instance'].chemical_system.number_of_atoms()        
         
-        self._symbols = sorted_atoms(self.configuration['trajectory']['instance'].universe,"symbol")
+        self._symbols = sorted_atoms(
+            self.configuration['trajectory']['instance'].chemical_system.atom_list(),
+            "symbol")
 
         # Will store the time.
         self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
 
-        self._outputData.add("mass_density","line", (self._nFrames,), axis='time', units='g/cm3')
+        self._outputData.add("mass_density","line", (self._n_frames,), axis='time', units='g/cm3')
 
-        self._outputData.add("atomic_density","line", (self._nFrames,), axis='time', units='1/cm3')
-
-        if not self.configuration['trajectory']['instance'].universe.is_periodic:
-            raise JobError("Pair distribution function cannot be calculated for infinite universe trajectories")
+        self._outputData.add("atomic_density","line", (self._n_frames,), axis='time', units='1/cm3')
                                 
     def run_step(self, index):
         """
@@ -66,17 +71,19 @@ class Density(IJob):
         """
 
         # get the Frame index
-        frameIndex = self.configuration['frames']['value'][index]
+        frame_index = self.configuration['frames']['value'][index]
+
+        conf = self.configuration['trajectory']['instance'].configuration(frame_index)
+        if not conf.is_periodic:
+            raise DensityError("Density cannot be computed for chemical system without periodc boundary conditions")
+                
+        cell_volume = conf.unit_cell.volume*measure(1.0,'nm3').toval('cm3')
+                
+        atomic_density = self._n_atoms/cell_volume
+                
+        mass_density = sum([ATOMS_DATABASE[s]['atomic_weight'] for s in self._symbols])/NAVOGADRO/cell_volume
                         
-        self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
-                
-        cellVolume = self.configuration['trajectory']['instance'].universe.cellVolume()*measure(1.0,'nm3').toval('cm3')
-                
-        atomicDensity = self.configuration['trajectory']['instance'].universe.numberOfAtoms()/cellVolume
-                
-        massDensity = sum([ELEMENTS[s,'atomic_weight'] for s in self._symbols])/Units.Nav/cellVolume
-                        
-        return index, (atomicDensity, massDensity)
+        return index, (atomic_density, mass_density)
     
     def combine(self, index, x):
         """
