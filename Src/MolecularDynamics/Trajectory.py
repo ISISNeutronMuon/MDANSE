@@ -12,7 +12,6 @@
 #
 # **************************************************************************
 
-import copy
 import os
 
 import numpy as np
@@ -26,6 +25,7 @@ from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.Extensions import atomic_trajectory, com_trajectory, fold_coordinates
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration, RealConfiguration
 from MDANSE.MolecularDynamics.TrajectoryUtils import build_connectivity, resolve_undefined_molecules_name, sorted_atoms
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 class TrajectoryError(Exception):
     pass
@@ -47,18 +47,17 @@ class Trajectory:
         self._chemical_system = ChemicalSystem(os.path.splitext(os.path.basename(self._h5_filename))[0])
         self._chemical_system.load(self._h5_filename)
 
+        # Load all the unit cells
+        self._load_unit_cells()
+
         # Load the first configuration
         coords = self._h5_file['/configuration/coordinates'][0,:,:]
-        unit_cell = self._h5_file.get('unit_cell',None)
-        if unit_cell:
-            unit_cell = unit_cell[0,:,:]
+        if self._unit_cells:
+            unit_cell = self._unit_cells[0]
             conf = PeriodicRealConfiguration(self._chemical_system,coords,unit_cell)
         else:
             conf = RealConfiguration(self._chemical_system,coords)
         self._chemical_system.configuration = conf
-
-        # Load all the unit cells
-        self._load_unit_cells()
 
         # Define a default name for all chemical entities which have no name
         resolve_undefined_molecules_name(self._chemical_system)
@@ -120,8 +119,8 @@ class Trajectory:
         if frame < 0 or frame >= len(self):
             raise TrajectoryError('Invalid frame number')
 
-        if 'unit_cell' in self._h5_file:
-            unit_cell = self._h5_file['unit_cell'][frame,:,:]
+        if self._unit_cells is not None:
+            unit_cell = self._unit_cells[frame]
         else:
             unit_cell = None
 
@@ -139,36 +138,20 @@ class Trajectory:
         return conf
 
     def _load_unit_cells(self):
-        """Load all the unit cells and their corresponding inverse.
+        """Load all the unit cells.
         """
 
         if 'unit_cell' in self._h5_file:
             
-            self._unit_cells = np.empty((len(self),3,3),dtype=np.float)
-            self._inverse_unit_cells = np.empty((len(self),3,3),dtype=np.float)
-
-            for i, uc in enumerate(self._h5_file['unit_cell'][:]):
-                self._unit_cells[i,:,:] = uc.T
-                self._inverse_unit_cells[i,:,:] = np.linalg.inv(self._unit_cells[i,:,:])
+            self._unit_cells = [UnitCell(uc) for uc in self._h5_file['unit_cell'][:]]
         else:
             self._unit_cells = None
-            self._inverse_unit_cells = None
-
-    def get_unit_cells(self):
-        """Return the direct and inverse unit cells.
-
-        :return: the directand inverse unit cells
-        :rtype: tuple
-        """
-
-        if self._unit_cells is None:
-            return (None,None)
-
-        else:
-            return (self._unit_cells, self._inverse_unit_cells)
 
     def unit_cell(self,frame):
         """Return the unit cell at a given frame. If no unit cell is defined, returns None.
+
+        :param frame: the frame number
+        :type frame: int
 
         :return: the unit cell
         :rtype: ndarray
@@ -177,8 +160,8 @@ class Trajectory:
         if frame < 0 or frame >= len(self):
             raise TrajectoryError('Invalid frame number')
 
-        if 'unit_cell' in self._h5_file:
-            return self._h5_file['unit_cell'][frame]        
+        if self._unit_cells is not None:
+            return self._unit_cells[frame]
         else:
             return None
 
@@ -225,8 +208,9 @@ class Trajectory:
             coords = coords[np.newaxis,:,:]
 
         if self._unit_cells is not None:
-            unit_cells = self._unit_cells[first:last:step]
-            inverse_unit_cells = self._inverse_unit_cells[first:last:step]
+
+            direct_cells = np.array([uc.transposed_direct for uc in self._unit_cells])
+            inverse_cells = np.array([uc.transposed_inverse for uc in self._unit_cells])
 
             top_lvl_chemical_entities = set([at.top_level_chemical_entity() for at in atoms])
             top_lvl_chemical_entities_indexes = [[at.index for at in e.atom_list()] for e in top_lvl_chemical_entities]
@@ -237,8 +221,8 @@ class Trajectory:
 
             com_traj = com_trajectory.com_trajectory(
                 coords,
-                unit_cells,
-                inverse_unit_cells,
+                direct_cells,
+                inverse_cells,
                 masses,
                 top_lvl_chemical_entities_indexes,
                 indexes,
@@ -271,8 +255,8 @@ class Trajectory:
             real_coordinates = np.empty(box_coordinates.shape,dtype=np.float)
             comp = 0
             for i in range(first,last,step):
-                unit_cell = self._unit_cells[i]
-                real_coordinates[comp,:] = np.matmul(unit_cell,box_coordinates[comp,:])
+                direct_cell = self._unit_cells[i].transposed_direct
+                real_coordinates[comp,:] = np.matmul(direct_cell,box_coordinates[comp,:])
                 comp += 1
             return real_coordinates
         else:
@@ -303,9 +287,13 @@ class Trajectory:
         coords = grp['coordinates'][first:last:step,index,:]
 
         if self._unit_cells is not None:
-            unit_cells = self._unit_cells[first:last:step]
-            inverse_unit_cells = self._inverse_unit_cells[first:last:step]
-            atomic_traj = atomic_trajectory.atomic_trajectory(coords,unit_cells,inverse_unit_cells,box_coordinates)
+            direct_cells = np.array([uc.transposed_direct for uc in self._unit_cells])
+            inverse_cells = np.array([uc.transposed_inverse for uc in self._unit_cells])
+            atomic_traj = atomic_trajectory.atomic_trajectory(
+                coords,
+                direct_cells,
+                inverse_cells,
+                box_coordinates)
             return atomic_traj
         else:
             return coords

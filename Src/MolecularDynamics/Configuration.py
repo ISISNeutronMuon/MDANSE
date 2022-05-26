@@ -76,8 +76,7 @@ class _PeriodicConfiguration(_Configuration):
 
         super(_PeriodicConfiguration,self).__init__(chemical_system,coordinates,**variables)
 
-        unit_cell = np.array(unit_cell)
-        if unit_cell.shape != (3,3):
+        if unit_cell.direct.shape != (3,3):
             raise ValueError('Invalid unit cell dimensions')
         self._unit_cell = unit_cell
 
@@ -86,7 +85,7 @@ class _PeriodicConfiguration(_Configuration):
         if chemical_system.total_number_of_atoms() != self.chemical_system.total_number_of_atoms():
             raise ConfigurationError('Mismatch between the chemical systems')
 
-        unit_cell = copy.copy(self._unit_cell)
+        unit_cell = copy.deepcopy(self._unit_cell)
 
         variables = copy.deepcopy(self.variables)
 

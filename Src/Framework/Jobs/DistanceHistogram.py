@@ -16,12 +16,12 @@
 import collections
 import itertools
 
-import numpy
+import numpy as np
 
 from MDANSE.Core.Error import Error 
 from MDANSE.Extensions import distance_histogram
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.Trajectory import atomindex_to_moleculeindex
+from MDANSE.MolecularDynamics.TrajectoryUtils import atomindex_to_moleculeindex
 
 class DistanceHistogram(IJob):
     """
@@ -31,13 +31,13 @@ class DistanceHistogram(IJob):
     type = None
     
     settings = collections.OrderedDict()    
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['r_values'] = ('range', {'label':'r values (nm)','valueType':float, 'includeLast':True, 'mini':0.0})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):
@@ -48,25 +48,25 @@ class DistanceHistogram(IJob):
         self.numberOfSteps = self.configuration['frames']['number']
 
         self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]        
-        self._indexes = numpy.array(self._indexes,dtype=numpy.int32)
+        self._indexes = np.array(self._indexes,dtype=np.int32)
         
         self.selectedElements = self.configuration['atom_selection']['unique_names']
                 
-        self.indexToSymbol = numpy.array([self.selectedElements.index(name) for name in self.configuration['atom_selection']['names']], dtype = numpy.int32)
+        self.indexToSymbol = np.array([self.selectedElements.index(name) for name in self.configuration['atom_selection']['names']], dtype = np.int32)
                         
-        lut = atomindex_to_moleculeindex(self.configuration['trajectory']['instance'].universe)
+        lut = atomindex_to_moleculeindex(self.configuration['trajectory']['instance'].chemical_system)
                         
-        self.indexToMolecule = numpy.array([lut[i] for i in self._indexes], dtype=numpy.int32)
+        self.indexToMolecule = np.array([lut[i] for i in self._indexes], dtype=np.int32)
         
         nElements = len(self.selectedElements)
         
         # The histogram of the intramolecular distances.
-        self.hIntra = numpy.zeros((nElements,nElements,len(self.configuration['r_values']['mid_points'])),dtype=numpy.float64)
+        self.hIntra = np.zeros((nElements,nElements,len(self.configuration['r_values']['mid_points'])),dtype=np.float64)
         
         # The histogram of the intermolecular distances.
-        self.hInter = numpy.zeros((nElements,nElements,len(self.configuration['r_values']['mid_points'])),dtype=numpy.float64)
+        self.hInter = np.zeros((nElements,nElements,len(self.configuration['r_values']['mid_points'])),dtype=np.float64)
         
-        self.scaleconfig = numpy.zeros((self.configuration['atom_selection']['selection_length'],3), dtype=numpy.float64)
+        self.scaleconfig = np.zeros((self.configuration['atom_selection']['selection_length'],3), dtype=np.float64)
 
         self.averageDensity = 0.0
         
@@ -76,9 +76,6 @@ class DistanceHistogram(IJob):
             self._concentrations[k] = 0.0
         
         self._elementsPairs = sorted(itertools.combinations_with_replacement(self.selectedElements,2))
-
-        if not self.configuration['trajectory']['instance'].universe.is_periodic:
-            raise Error("Pair distribution function cannot be calculated for infinite universe trajectories")
  
     def run_step(self, index):
         """
@@ -93,25 +90,27 @@ class DistanceHistogram(IJob):
             #. hInterTemp (np.array): The calculated distance inter-molecular histogram
         """
 
-
         # get the Frame index
-        frameIndex = self.configuration['frames']['value'][index]   
+        frame_index = self.configuration['frames']['value'][index]   
 
-        universe = self.configuration['trajectory']['instance'].universe
-        
-        universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
+        conf = self.configuration['trajectory']['instance'].configuration(frame_index)
+
+        if not conf.is_periodic:
+            raise Error("Pair distribution function cannot be calculated for infinite universe trajectories")
     
-        directCell = numpy.array(universe.basisVectors()).astype(numpy.float64).T
-        reverseCell = numpy.linalg.inv(directCell)
+        direct_cell = conf.unit_cell.transposed_direct
+        inverse_cell = conf.unit_cell.transposed_inverse
         
-        cellVolume = universe.cellVolume()
-            
-        hIntraTemp = numpy.zeros(self.hIntra.shape, dtype=numpy.float64)
-        hInterTemp = numpy.zeros(self.hInter.shape, dtype=numpy.float64)
+        cell_volume = conf.unit_cell.volume
         
-        distance_histogram.distance_histogram(universe.configuration().array[self._indexes,:],
-                                              directCell,
-                                              reverseCell,
+        coords = conf['coordinates']
+
+        hIntraTemp = np.zeros(self.hIntra.shape, dtype=np.float64)
+        hInterTemp = np.zeros(self.hInter.shape, dtype=np.float64)
+        
+        distance_histogram.distance_histogram(coords[self._indexes,:],
+                                              direct_cell,
+                                              inverse_cell,
                                               self._indexes,
                                               self.indexToMolecule,
                                               self.indexToSymbol,
@@ -121,10 +120,10 @@ class DistanceHistogram(IJob):
                                               self.configuration['r_values']['first'],
                                               self.configuration['r_values']['step'])
 
-        numpy.multiply(hIntraTemp, cellVolume, hIntraTemp)
-        numpy.multiply(hInterTemp, cellVolume, hInterTemp)
+        np.multiply(hIntraTemp, cell_volume, hIntraTemp)
+        np.multiply(hInterTemp, cell_volume, hInterTemp)
                                                                                                 
-        return index, (cellVolume, hIntraTemp, hInterTemp)
+        return index, (cell_volume, hIntraTemp, hInterTemp)
                     
     def combine(self, index, x):
         """
@@ -134,7 +133,7 @@ class DistanceHistogram(IJob):
             #. x (any): The returned result(s) of run_step
         """
         
-        nAtoms = self.configuration['trajectory']['instance'].universe.numberOfAtoms()
+        nAtoms = self.configuration['trajectory']['instance'].chemical_system.number_of_atoms()
         
         self.averageDensity += nAtoms/x[0]
 
@@ -146,4 +145,3 @@ class DistanceHistogram(IJob):
         
         for k,v in self._nAtomsPerElement.items():
             self._concentrations[k] += float(v)/nAtoms
-                

@@ -29,14 +29,14 @@ class MolecularDynamicsError(Error):
 class UniverseAdapterError(Error):
     pass
 
-def atomindex_to_moleculeindex(universe):
+def atomindex_to_moleculeindex(chemical_system):
     
-    d = {}
-    for i,obj in enumerate(universe.objectList()):
-        for at in obj.atomList():
-            d[at.index] = i
+    lut = {}
+    for i,ce in enumerate(chemical_system.chemical_entities):
+        for at in ce.atom_list():
+            lut[at.index] = i
                 
-    return d
+    return lut
     
 def brute_formula(molecule, sep='_'):
     

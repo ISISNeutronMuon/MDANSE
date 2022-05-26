@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
@@ -33,12 +33,12 @@ class CoordinationNumber(DistanceHistogram):
     ancestor = ["mmtk_trajectory","molecular_viewer"]        
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['r_values'] = ('range', {'valueType':float, 'includeLast':True, 'mini':0.0})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
     def finalize(self):
@@ -61,13 +61,13 @@ class CoordinationNumber(DistanceHistogram):
         
         nFrames = self.configuration['frames']['number']
         
-        densityFactor = 4.0*numpy.pi*self.configuration['r_values']['mid_points']
+        densityFactor = 4.0*np.pi*self.configuration['r_values']['mid_points']
         
         shellSurfaces = densityFactor*self.configuration['r_values']['mid_points']
         
         shellVolumes  = shellSurfaces*self.configuration['r_values']['step']
   
-        self.averageDensity *= 4.0*numpy.pi/nFrames
+        self.averageDensity *= 4.0*np.pi/nFrames
 
         r2 = self.configuration['r_values']['mid_points']**2
         dr = self.configuration['r_values']['step']
@@ -96,8 +96,8 @@ class CoordinationNumber(DistanceHistogram):
             self.hIntra[idi,idj,:] /= fact             
             self.hInter[idi,idj,:] /= fact
                          
-            cnIntra = numpy.add.accumulate(self.hIntra[idi,idj,:]*r2)*dr
-            cnInter = numpy.add.accumulate(self.hInter[idi,idj,:]*r2)*dr
+            cnIntra = np.add.accumulate(self.hIntra[idi,idj,:]*r2)*dr
+            cnInter = np.add.accumulate(self.hInter[idi,idj,:]*r2)*dr
             cnTotal = cnIntra + cnInter
             
             cAlpha = self._concentrations[pair[0]]

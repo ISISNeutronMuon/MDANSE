@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
@@ -65,7 +65,7 @@ class PairDistributionFunction(DistanceHistogram):
 
         self.averageDensity /= nFrames
         
-        densityFactor = 4.0*numpy.pi*self.configuration['r_values']['mid_points']
+        densityFactor = 4.0*np.pi*self.configuration['r_values']['mid_points']
         
         shellSurfaces = densityFactor*self.configuration['r_values']['mid_points']
         
