@@ -17,7 +17,7 @@ import collections
 import itertools
 import operator
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
@@ -43,23 +43,23 @@ class GridLatticeQVectors(LatticeQVectors):
         nk = self._configuration["krange"]["number"]
         nl = self._configuration["lrange"]["number"]
         
-        hkls = numpy.mgrid[hrange[0]:hrange[-1]+1,krange[0]:krange[-1]+1,lrange[0]:lrange[-1]+1]
+        hkls = np.mgrid[hrange[0]:hrange[-1]+1,krange[0]:krange[-1]+1,lrange[0]:lrange[-1]+1]
         hkls = hkls.reshape(3,nh*nk*nl)
                 
         # The k matrix (3,n_hkls)
-        vects = numpy.dot(self._reciprocalMatrix,hkls)
+        vects = np.dot(self._inverseUnitCell,hkls)
         
-        dists = numpy.sqrt(numpy.sum(vects**2,axis=0))
+        dists = np.sqrt(np.sum(vects**2,axis=0))
         
         minDist = dists.min()
         maxDist = dists.max()
         
-        bins = numpy.arange(minDist,maxDist+qstep/2,qstep)
-        inds = numpy.digitize(dists, bins)-1
+        bins = np.arange(minDist,maxDist+qstep/2,qstep)
+        inds = np.digitize(dists, bins)-1
             
         dists = bins[inds]
         
-        dists = zip(xrange(len(dists)),dists)
+        dists = zip(range(len(dists)),dists)
         dists.sort(key=operator.itemgetter(1))
         qGroups = itertools.groupby(dists, key=operator.itemgetter(1))
         qGroups = collections.OrderedDict([(k,[item[0] for item in v]) for k,v in qGroups])

@@ -16,7 +16,7 @@
 import collections
 import random
 
-import numpy
+import numpy as np
 
 from Scientific.Geometry import Vector
 
@@ -37,21 +37,21 @@ class LinearLatticeQVectors(LatticeQVectors):
     def _generate(self):
 
         if self._configuration["seed"]["value"] != 0:           
-            numpy.random.seed(self._configuration["seed"]["value"])
+            np.random.seed(self._configuration["seed"]["value"])
             random.seed(self._configuration["seed"]["value"])
 
         # The Q vector corresponding to the input hkl.
-        qVect = numpy.dot(self._reciprocalMatrix,self._configuration["axis"]["vector"])
+        qVect = np.dot(self._inverseUnitCell,self._configuration["axis"]["vector"])
 
         qMax = self._configuration["shells"]["last"] + 0.5*self._configuration["width"]["value"]
 
-        uMax = numpy.ceil(qMax/Vector(qVect).length()) + 1
+        uMax = np.ceil(qMax/Vector(qVect).length()) + 1
 
-        idxs = numpy.mgrid[-uMax:uMax+1]
+        idxs = np.mgrid[-uMax:uMax+1]
         
-        vects = numpy.dot(qVect[:,numpy.newaxis],idxs[numpy.newaxis,:])
+        vects = np.dot(qVect[:,np.newaxis],idxs[np.newaxis,:])
                         
-        dists2 = numpy.sum(vects**2,axis=0)
+        dists2 = np.sum(vects**2,axis=0)
         
         halfWidth = self._configuration["width"]["value"]/2
 
@@ -69,7 +69,7 @@ class LinearLatticeQVectors(LatticeQVectors):
             q2low = qmin*qmin
             q2up = (q + halfWidth)*(q + halfWidth)
             
-            hits = numpy.where((dists2 >= q2low) & (dists2 <= q2up))[0]            
+            hits = np.where((dists2 >= q2low) & (dists2 <= q2up))[0]            
             
             nHits = len(hits)
 
@@ -84,7 +84,7 @@ class LinearLatticeQVectors(LatticeQVectors):
                 self._configuration["q_vectors"][q]['q_vectors'] = vects[:,hits]
                 self._configuration["q_vectors"][q]['n_q_vectors'] = n
                 self._configuration["q_vectors"][q]['q'] = q
-                self._configuration["q_vectors"][q]['hkls'] = numpy.rint(numpy.dot(self._invReciprocalMatrix,self._configuration["q_vectors"][q]['q_vectors']))
+                self._configuration["q_vectors"][q]['hkls'] = np.rint(np.dot(self._directUnitCell,self._configuration["q_vectors"][q]['q_vectors']))
                 
             if self._status is not None:
                 if self._status.is_stopped():

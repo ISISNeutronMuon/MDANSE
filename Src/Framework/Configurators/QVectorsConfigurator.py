@@ -50,7 +50,7 @@ class QVectorsConfigurator(IConfigurator):
         '''
 
         trajConfig = self._configurable[self._dependencies['trajectory']]
-        if isinstance(value,basestring): 
+        if isinstance(value,str): 
             if UD_STORE.has_definition(trajConfig["basename"],"q_vectors",value):
                 ud = UD_STORE.get_definition(trajConfig["basename"],"q_vectors",value)
                 self["parameters"] = ud['parameters']
@@ -66,7 +66,7 @@ class QVectorsConfigurator(IConfigurator):
                     generator, parameters = value
                 except ValueError:
                     raise ConfiguratorError("Invalid q vectors settings %s" % value, self)
-                generator = REGISTRY["q_vectors"][generator](trajConfig["universe"])
+                generator = REGISTRY["q_vectors"][generator](trajConfig['instance'].chemical_system)
                 generator.setup(parameters)
                 generator.generate()
                             

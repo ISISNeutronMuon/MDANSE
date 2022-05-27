@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Mathematics.Geometry import random_points_on_sphere
@@ -34,7 +34,7 @@ class SphericalQVectors(IQVectors):
     def _generate(self):
 
         if self._configuration["seed"]["value"] != 0:           
-            numpy.random.seed(self._configuration["seed"]["value"])
+            np.random.seed(self._configuration["seed"]["value"])
 
         width = self._configuration["width"]["value"]
 
@@ -47,7 +47,7 @@ class SphericalQVectors(IQVectors):
 
         for q in self._configuration["shells"]["value"]:
 
-            fact = q*numpy.sign(numpy.random.uniform(-0.5,0.5,nVectors)) + width*numpy.random.uniform(-0.5,0.5,nVectors)
+            fact = q*np.sign(np.random.uniform(-0.5,0.5,nVectors)) + width*np.random.uniform(-0.5,0.5,nVectors)
 
             v = random_points_on_sphere(radius=1.0, nPoints=nVectors)
             

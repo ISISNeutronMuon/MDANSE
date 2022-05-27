@@ -16,7 +16,7 @@
 import collections
 import itertools
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
@@ -41,14 +41,14 @@ class DynamicCoherentStructureFactor(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['instrument_resolution'] = ('instrument_resolution',{'dependencies':{'trajectory':'trajectory','frames' : 'frames'}})
     settings['q_vectors'] = ('q_vectors',{'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['weights'] = ('weights', {'default':'b_coherent',"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection', 'atom_transmutation':'atom_transmutation'}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):
@@ -56,12 +56,12 @@ class DynamicCoherentStructureFactor(IJob):
         Initialize the input parameters and analysis self variables
         """
 
-        if not self.configuration['trajectory']['instance'].universe.is_periodic:
+        if not self.configuration['trajectory']['instance'].chemical_system.configuration.is_periodic:
             raise DynamicCoherentStructureFactorError('Cannot start %s analysis on non-periodic system' % self.label)
         
         if not self.configuration['q_vectors']['is_lattice']:
             raise DynamicCoherentStructureFactorError('The Q vectors must be generated on a lattice to run %s analysis' % self.label)
-        
+
         self.numberOfSteps = self.configuration['q_vectors']['n_shells']
         
         nQShells = self.configuration["q_vectors"]["n_shells"]
@@ -114,19 +114,19 @@ class DynamicCoherentStructureFactor(IJob):
                                                                                     
             rho = {}
             for element in self.configuration['atom_selection']['unique_names']:
-                rho[element] = numpy.zeros((self._nFrames, nQVectors), dtype = numpy.complex64)
+                rho[element] = np.zeros((self._nFrames, nQVectors), dtype = np.complex64)
 
             # loop over the trajectory time steps
             for i, frame in enumerate(self.configuration['frames']['value']):
             
                 qVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"]
-                                
-                conf = traj.configuration[frame]
 
+                coords = traj.configuration(frame)['coordinates']
+                                
                 for element,idxs in self._indexesPerElement.items():
 
-                    selectedCoordinates = numpy.take(conf.array, idxs, axis=0)
-                    rho[element][i,:] = numpy.sum(numpy.exp(1j*numpy.dot(selectedCoordinates, qVectors)),axis=0)
+                    selectedCoordinates = np.take(coords, idxs, axis=0)
+                    rho[element][i,:] = np.sum(np.exp(1j*np.dot(selectedCoordinates, qVectors)),axis=0)
 
             return index, rho
     
@@ -153,7 +153,7 @@ class DynamicCoherentStructureFactor(IJob):
         for pair in self._elementsPairs:
             ni = nAtomsPerElement[pair[0]]
             nj = nAtomsPerElement[pair[1]]
-            self._outputData["f(q,t)_%s%s" % pair][:] /= numpy.sqrt(ni*nj)
+            self._outputData["f(q,t)_%s%s" % pair][:] /= np.sqrt(ni*nj)
             self._outputData["s(q,f)_%s%s" % pair][:] = get_spectrum(self._outputData["f(q,t)_%s%s" % pair],
                                                                      self.configuration["instrument_resolution"]["time_window"],
                                                                      self.configuration["instrument_resolution"]["time_step"],

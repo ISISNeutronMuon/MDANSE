@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
@@ -35,12 +35,12 @@ class DispersionLatticeQVectors(LatticeQVectors):
         direction = self._configuration["direction"]["value"]
         n_steps = self._configuration["n_steps"]["value"]
 
-        hkls = numpy.array(start)[:,numpy.newaxis] + numpy.outer(direction,numpy.arange(0,n_steps))
+        hkls = np.array(start)[:,np.newaxis] + np.outer(direction,np.arange(0,n_steps))
         
         # The k matrix (3,n_hkls)
-        vects = numpy.dot(self._reciprocalMatrix,hkls)
+        vects = np.dot(self._inverseUnitCell,hkls)
                 
-        dists = numpy.sqrt(numpy.sum(vects**2,axis=0))
+        dists = np.sqrt(np.sum(vects**2,axis=0))
 
         if self._status is not None:
             self._status.start(len(dists))
@@ -50,10 +50,10 @@ class DispersionLatticeQVectors(LatticeQVectors):
         for i,v in enumerate(dists):
 
             self._configuration["q_vectors"][v] = {}
-            self._configuration["q_vectors"][v]['q_vectors'] = vects[:,i][:,numpy.newaxis]
+            self._configuration["q_vectors"][v]['q_vectors'] = vects[:,i][:,np.newaxis]
             self._configuration["q_vectors"][v]['n_q_vectors'] = 1
             self._configuration["q_vectors"][v]['q'] = v
-            self._configuration["q_vectors"][v]['hkls'] = hkls[:,i][:,numpy.newaxis]
+            self._configuration["q_vectors"][v]['hkls'] = hkls[:,i][:,np.newaxis]
 
             if self._status is not None:
                 if self._status.is_stopped():

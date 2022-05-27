@@ -17,7 +17,7 @@ import collections
 import itertools
 import operator
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
@@ -42,12 +42,12 @@ class ApproximatedDispersionQVectors(LatticeQVectors):
         n = (qEnd-qStart).normal()
         nSteps = int(d/qStep)+1
         
-        vects = numpy.array(qStart)[:,numpy.newaxis] + numpy.outer(n,numpy.arange(0,nSteps))*qStep
+        vects = np.array(qStart)[:,np.newaxis] + np.outer(n,np.arange(0,nSteps))*qStep
         
-        hkls = numpy.rint(numpy.dot(self._invReciprocalMatrix,vects)) 
+        hkls = np.rint(np.dot(self._directUnitCell,vects)) 
         
-        dists = numpy.sqrt(numpy.sum(vects**2,axis=0))        
-        dists = zip(xrange(len(dists)),dists)
+        dists = np.sqrt(np.sum(vects**2,axis=0))        
+        dists = zip(range(len(dists)),dists)
         dists.sort(key=operator.itemgetter(1))
         qGroups = itertools.groupby(dists, key=operator.itemgetter(1))
         qGroups = collections.OrderedDict([(k,[item[0] for item in v]) for k,v in qGroups])

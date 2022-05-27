@@ -16,7 +16,7 @@
 import collections
 import random
 
-import numpy
+import numpy as np
 
 from Scientific.Geometry import Vector
 
@@ -38,26 +38,26 @@ class CircularLatticeQVectors(LatticeQVectors):
     def _generate(self):
 
         if self._configuration["seed"]["value"] != 0:           
-            numpy.random.seed(self._configuration["seed"]["value"])
+            np.random.seed(self._configuration["seed"]["value"])
             random.seed(self._configuration["seed"]["value"])
                 
-        hkls = numpy.transpose([self._configuration["axis_1"]["vector"],self._configuration["axis_2"]["vector"]])
+        hkls = np.transpose([self._configuration["axis_1"]["vector"],self._configuration["axis_2"]["vector"]])
 
-        qVects = numpy.dot(self._reciprocalMatrix,hkls)
+        qVects = np.dot(self._inverseUnitCell,hkls)
                                                                 
         qMax = self._configuration["shells"]["last"] + 0.5*self._configuration["width"]["value"]
                 
-        uvMax = numpy.ceil([qMax/Vector(v).length() for v in qVects.T]) + 1
+        uvMax = np.ceil([qMax/Vector(v).length() for v in qVects.T]) + 1
         # Enforce integers in uvMax
-        uvMax = uvMax.astype(numpy.int64)
+        uvMax = uvMax.astype(np.int64)
                 
-        idxs = numpy.mgrid[-uvMax[0]:uvMax[0]+1,-uvMax[1]:uvMax[1]+1]
+        idxs = np.mgrid[-uvMax[0]:uvMax[0]+1,-uvMax[1]:uvMax[1]+1]
 
         idxs = idxs.reshape(2,(2*uvMax[0]+1)*(2*uvMax[1]+1))
                 
-        vects = numpy.dot(qVects,idxs)
+        vects = np.dot(qVects,idxs)
 
-        dists2 = numpy.sum(vects**2,axis=0)
+        dists2 = np.sum(vects**2,axis=0)
 
         halfWidth = self._configuration["width"]["value"]/2
 
@@ -75,7 +75,7 @@ class CircularLatticeQVectors(LatticeQVectors):
             q2low = qmin*qmin
             q2up = (q + halfWidth)*(q + halfWidth)
             
-            hits = numpy.where((dists2 >= q2low) & (dists2 <= q2up))[0]            
+            hits = np.where((dists2 >= q2low) & (dists2 <= q2up))[0]            
 
             nHits = len(hits)
 
@@ -90,8 +90,9 @@ class CircularLatticeQVectors(LatticeQVectors):
                 self._configuration["q_vectors"][q]['q_vectors'] = vects[:,hits]
                 self._configuration["q_vectors"][q]['n_q_vectors'] = n
                 self._configuration["q_vectors"][q]['q'] = q
-                self._configuration["q_vectors"][q]['hkls'] = numpy.rint(numpy.dot(self._invReciprocalMatrix,
-                                                                                self._configuration["q_vectors"][q]['q_vectors']))
+                self._configuration["q_vectors"][q]['hkls'] = np.rint(
+                    np.dot(self._directUnitCell,
+                    self._configuration["q_vectors"][q]['q_vectors']))
 
             if self._status is not None:
                 if self._status.is_stopped():

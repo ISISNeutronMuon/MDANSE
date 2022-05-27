@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
@@ -34,7 +34,7 @@ class LinearQVectors(IQVectors):
     def _generate(self):
 
         if self._configuration["seed"]["value"] != 0:           
-            numpy.random.seed(self._configuration["seed"]["value"])
+            np.random.seed(self._configuration["seed"]["value"])
     
         axis = self._configuration["axis"]["vector"]
         
@@ -49,10 +49,10 @@ class LinearQVectors(IQVectors):
 
         for q in self._configuration["shells"]["value"]:
 
-            fact = q*numpy.sign(numpy.random.uniform(-0.5,0.5,nVectors)) + width*numpy.random.uniform(-0.5,0.5,nVectors)
+            fact = q*np.sign(np.random.uniform(-0.5,0.5,nVectors)) + width*np.random.uniform(-0.5,0.5,nVectors)
 
             self._configuration["q_vectors"][q] = {}
-            self._configuration["q_vectors"][q]['q_vectors'] = axis.array[:,numpy.newaxis]*fact
+            self._configuration["q_vectors"][q]['q_vectors'] = axis.array[:,np.newaxis]*fact
             self._configuration["q_vectors"][q]['n_q_vectors'] = nVectors
             self._configuration["q_vectors"][q]['q'] = q
             self._configuration["q_vectors"][q]['hkls'] = None

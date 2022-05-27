@@ -27,11 +27,11 @@ class IQVectors(Configurable):
 
     is_lattice = False
             
-    def __init__(self, universe, status=None):
+    def __init__(self, chemical_system, status=None):
         
         Configurable.__init__(self)
                                 
-        self._universe = universe
+        self._chemical_system = chemical_system
         
         self._status = status
             

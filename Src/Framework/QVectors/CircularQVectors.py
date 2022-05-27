@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.IQVectors import IQVectors, QVectorsError
@@ -36,7 +36,7 @@ class CircularQVectors(IQVectors):
     def _generate(self):
 
         if self._configuration["seed"]["value"] != 0:           
-            numpy.random.seed(self._configuration["seed"]["value"])
+            np.random.seed(self._configuration["seed"]["value"])
 
         try:
             axis = self._configuration["axis_1"]["vector"].cross(self._configuration["axis_2"]["vector"]).normal()
@@ -54,7 +54,7 @@ class CircularQVectors(IQVectors):
         
         for q in self._configuration["shells"]["value"]:
 
-            fact = q*numpy.sign(numpy.random.uniform(-0.5,0.5,nVectors)) + width*numpy.random.uniform(-0.5,0.5,nVectors)
+            fact = q*np.sign(np.random.uniform(-0.5,0.5,nVectors)) + width*np.random.uniform(-0.5,0.5,nVectors)
             v = random_points_on_circle(axis, radius=1.0, nPoints=nVectors)
 
             self._configuration["q_vectors"][q] = {}

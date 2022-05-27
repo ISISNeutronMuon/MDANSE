@@ -16,7 +16,7 @@
 import collections
 import random
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
@@ -34,20 +34,20 @@ class SphericalLatticeQVectors(LatticeQVectors):
     def _generate(self):
                      
         if self._configuration["seed"]["value"] != 0:           
-            numpy.random.seed(self._configuration["seed"]["value"])
+            np.random.seed(self._configuration["seed"]["value"])
             random.seed(self._configuration["seed"]["value"])
                 
         qMax = self._configuration["shells"]["last"] + 0.5*self._configuration["width"]["value"]
         
-        hklMax = numpy.ceil([qMax/v.length()for v in self._reciprocalBasis]) + 1
+        hklMax = np.ceil([qMax/np.sqrt(np.sum(v**2)) for v in self._inverseUnitCell.T]) + 1
                 
-        vects = numpy.mgrid[-hklMax[0]:hklMax[0]+1,-hklMax[1]:hklMax[1]+1,-hklMax[2]:hklMax[2]+1]
+        vects = np.mgrid[-hklMax[0]:hklMax[0]+1,-hklMax[1]:hklMax[1]+1,-hklMax[2]:hklMax[2]+1]
                 
         vects = vects.reshape(3,int(2*hklMax[0]+1)*int(2*hklMax[1]+1)*int(2*hklMax[2]+1))
                     
-        vects = numpy.dot(self._reciprocalMatrix,vects)
+        vects = np.dot(self._inverseUnitCell,vects)
                 
-        dists2 = numpy.sum(vects**2,axis=0)
+        dists2 = np.sum(vects**2,axis=0)
                 
         halfWidth = self._configuration["width"]["value"]/2
         
@@ -65,7 +65,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
             q2low = qmin*qmin
             q2up = (q + halfWidth)*(q + halfWidth)
             
-            hits = numpy.where((dists2 >= q2low) & (dists2 <= q2up))[0]            
+            hits = np.where((dists2 >= q2low) & (dists2 <= q2up))[0]            
 
             nHits = len(hits)
                                     
@@ -80,8 +80,9 @@ class SphericalLatticeQVectors(LatticeQVectors):
                 self._configuration["q_vectors"][q]['q_vectors'] = vects[:,hits]
                 self._configuration["q_vectors"][q]['n_q_vectors'] = n
                 self._configuration["q_vectors"][q]['q'] = q
-                self._configuration["q_vectors"][q]['hkls'] = numpy.rint(numpy.dot(self._invReciprocalMatrix,
-                                                                                self._configuration["q_vectors"][q]['q_vectors']))
+                self._configuration["q_vectors"][q]['hkls'] = np.rint(np.dot(
+                    self._directUnitCell,
+                    self._configuration["q_vectors"][q]['q_vectors']))
 
             if self._status is not None:
                 if self._status.is_stopped():
