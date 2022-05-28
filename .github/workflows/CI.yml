@@ -130,8 +130,11 @@ jobs:
           path: ~/
 
       - name: Untar artifacts
+        run: tar -xzf ~/python.tar.gz -C $HOME
+
+      - name: Install netcdf
         run: |
-          tar -xzf ~/python.tar.gz -C $HOME
+          sudo apt-get update
           sudo apt-get install netcdf-bin libnetcdf-dev
 
       - name: Install wx
@@ -211,7 +214,7 @@ jobs:
           sudo conda create -p ~/tempenv python=2.7
           sudo conda install -p ~/tempenv netcdf4
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4/ $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/
+          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp -rfv ~/tempenv/lib/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -rfv ~/tempenv/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -rfv ~/tempenv/lib/libmfhdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
@@ -244,32 +247,31 @@ jobs:
           sudo cp -fv $GITHUB_WORKSPACE/BuildServer/setup.py $GITHUB_WORKSPACE
           python2 setup.py install
 
-      - name: Run tests
-        run: $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
+      - name: Run unit tests
+        run: |
+          cd $GITHUB_WORKSPACE/Tests/UnitTests
+          python2 AllTests.py
+
+      - name: Run dependency tests
+        run: |
+          cd $GITHUB_WORKSPACE/Tests/DependenciesTests
+          python2 AllTests.py
+
+      - name: Run functional tests
+        run: |
+          cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
+          python2 BuildJobTests.py
+          python2 AllTests.py
 
       - name: Tar python
-        if: |
-          (contains( github.ref, 'main' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'develop' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'release-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'hotfix-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'build-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'tags' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }})
+        if: ${{ (matrix.os == 'macos-10.15') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
 
       - name: Upload artifacts
-        if: |
-          (contains( github.ref, 'main' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'develop' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'release-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'hotfix-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'build-' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'tags' ) && ${{ (matrix.os == 'macos-10.15') }}) ||
-          (contains( github.ref, 'web' ) && ${{ (matrix.os == 'macos-10.15') }})
+        if: ${{ (matrix.os == 'macos-10.15') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
