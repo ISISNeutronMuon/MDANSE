@@ -15,11 +15,13 @@
 
 import collections
 
-import numpy
+import numpy as np
 
-from MDANSE import ELEMENTS, REGISTRY
+from MDANSE import REGISTRY
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass
+from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 class Eccentricity(IJob):
     """
@@ -73,40 +75,47 @@ class Eccentricity(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['center_of_mass'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['weights']=('weights',{"dependencies":{'atom_selection':'atom_selection'}})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
             
     def initialize(self):
         """
         Initialize the input parameters and analysis self variables
         """
         self.numberOfSteps = self.configuration['frames']['number']
-                       
-        self._masses = [m for masses in self._configuration['atom_selection']['masses'] for m in masses]
-        self._totalMass = numpy.sum(self._masses)
-                
+                                       
         # Will store the time.
         self._outputData.add('time',"line", self.configuration['frames']['time'], units="ps")
         
-        npoints = numpy.zeros((self.configuration['frames']['number']), dtype=numpy.float64)
+        npoints = np.zeros((self.configuration['frames']['number']), dtype=np.float64)
         
         for axis in ['xx','xy','xz','yy','yz','zz']:
-            self._outputData.add('moment_of_inertia_%s' %axis,"line",npoints,axis='time',units="uma*nm2")
+            self._outputData.add('moment_of_inertia_{}'.format(axis),'line',npoints,axis='time',units="uma*nm2")
         for axis in ['a','b','c']:
-            self._outputData.add('semiaxis_%s' %axis,"line",npoints,axis='time',units="nm")
+            self._outputData.add('semiaxis_{}'.format(axis),'line',npoints,axis='time',units="nm")
  
-        self._outputData.add('eccentricity',"line",npoints,axis='time') 
+        self._outputData.add('eccentricity','line',npoints,axis='time') 
         
-        self._outputData.add('ratio_of_largest_to_smallest',"line",npoints,axis='time') 
+        self._outputData.add('ratio_of_largest_to_smallest','line',npoints,axis='time') 
         
-        self._outputData.add('radius_of_gyration',"line",npoints,axis='time')
+        self._outputData.add('radius_of_gyration','line',npoints,axis='time')
         
         self._indexes = self.configuration['atom_selection'].get_indexes()
+
+        self._comIndexes = self.configuration['center_of_mass']['flatten_indexes']
     
+        self._atoms = sorted_atoms(
+            self.configuration['trajectory']['instance'].chemical_system.atom_list())
+
+        self._selectionMasses = [m for masses in self._configuration['atom_selection']['masses'] for m in masses]
+        self._selectionTotalMass = np.sum(self._selectionMasses)
+
+        self._comMasses = [ATOMS_DATABASE[self._atoms[idx].symbol]['atomic_weight'] for idx in self._comIndexes]
+
     def run_step(self, index):
         """
         Runs a single step of the job.\n
@@ -125,12 +134,13 @@ class Eccentricity(IJob):
         """
         # get the Frame index
         frameIndex = self.configuration['frames']['value'][index]  
-        self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
-        
-        # read frame atoms coordinates                                                                             
-        series = self.configuration['trajectory']['instance'].universe.configuration().array
-        
-        com = center_of_mass(series,masses=self._masses)
+
+        conf = self.configuration['trajectory']['instance'].configuration(frameIndex)
+        conf = conf.continuous_configuration()
+
+        series = conf['coordinates']
+
+        com = center_of_mass(series[self._comIndexes,:],masses=self._comMasses)
 
         # calculate the inertia moments and the radius of gyration
         xx = xy = xz = yy = yz = zz = 0
@@ -138,19 +148,18 @@ class Eccentricity(IJob):
             atomsCoordinates = series[idxs,:]
             difference = atomsCoordinates-com
             
-            w = ELEMENTS[name,self.configuration["weights"]["property"]]
+            w = ATOMS_DATABASE[name][self.configuration['weights']['property']]
                                             
-            xx += numpy.add.reduce(w * (difference[:,1]*difference[:,1] + difference[:,2]*difference[:,2]) )
-            xy -= numpy.add.reduce(w * (difference[:,0]*difference[:,1]) )
-            xz -= numpy.add.reduce(w * (difference[:,0]*difference[:,2]) )
+            xx += np.add.reduce(w * (difference[:,1]*difference[:,1] + difference[:,2]*difference[:,2]) )
+            xy -= np.add.reduce(w * (difference[:,0]*difference[:,1]) )
+            xz -= np.add.reduce(w * (difference[:,0]*difference[:,2]) )
             
-            yy += numpy.add.reduce(w * (difference[:,0]*difference[:,0] + difference[:,2]*difference[:,2]) )
-            yz -= numpy.add.reduce(w * (difference[:,1]*difference[:,2]) )
+            yy += np.add.reduce(w * (difference[:,0]*difference[:,0] + difference[:,2]*difference[:,2]) )
+            yz -= np.add.reduce(w * (difference[:,1]*difference[:,2]) )
             
-            zz += numpy.add.reduce(w * (difference[:,0]*difference[:,0] + difference[:,1]*difference[:,1]) )
+            zz += np.add.reduce(w * (difference[:,0]*difference[:,0] + difference[:,1]*difference[:,1]) )
 
-        rog =  numpy.sum( (series-com)**2 )
-        
+        rog =  np.sum( (series-com)**2 )
         
         return index, (xx ,xy, xz, yy, yz, zz, rog)
     
@@ -186,14 +195,14 @@ class Eccentricity(IJob):
         self._outputData['ratio_of_largest_to_smallest'][index] = Imax/Imin
         
         # semiaxis
-        self._outputData["semiaxis_a"][index] = numpy.sqrt( 5.0/(2.0*self._totalMass) * (Imax+Imid-Imin) ) 
-        self._outputData["semiaxis_b"][index] = numpy.sqrt( 5.0/(2.0*self._totalMass) * (Imax+Imin-Imid) ) 
-        self._outputData["semiaxis_c"][index] = numpy.sqrt( 5.0/(2.0*self._totalMass) * (Imid+Imin-Imax) )
+        self._outputData['semiaxis_a'][index] = np.sqrt( 5.0/(2.0*self._selectionTotalMass) * (Imax+Imid-Imin) ) 
+        self._outputData['semiaxis_b'][index] = np.sqrt( 5.0/(2.0*self._selectionTotalMass) * (Imax+Imin-Imid) ) 
+        self._outputData['semiaxis_c'][index] = np.sqrt( 5.0/(2.0*self._selectionTotalMass) * (Imid+Imin-Imax) )
 
         # radius_of_gyration is a measure of the distribution of the mass 
         # of atomic groups or molecules that constitute the aqueous core 
         # relative to its center of mass 
-        self._outputData['radius_of_gyration'][index] = numpy.sqrt(x[6]/self.configuration['atom_selection']['selection_length'] )
+        self._outputData['radius_of_gyration'][index] = np.sqrt(x[6]/self.configuration['atom_selection']['selection_length'] )
         
     def finalize(self):
         """

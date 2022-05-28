@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
@@ -32,11 +32,11 @@ class DipoleAutoCorrelationFunction(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
     
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'},'default' : 'atom_index 0,1,2'})
     settings['atom_charges'] = ('partial_charges',{'dependencies':{'trajectory':'trajectory'},'default':{0:0.5,1:1.2,2:-0.2}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
     settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):
@@ -47,18 +47,18 @@ class DipoleAutoCorrelationFunction(IJob):
         self.numberOfSteps = self.configuration['frames']['number']
                         
         # Will store the time.
-        self._outputData.add("time","line", self.configuration['frames']['duration'], units='ps')
+        self._outputData.add('time','line', self.configuration['frames']['duration'], units='ps')
         
-        self._dipoleMoments = numpy.zeros((self.configuration['frames']['number'],3),dtype=numpy.float64)
+        self._dipoleMoments = np.zeros((self.configuration['frames']['number'],3),dtype=np.float64)
             
-        self._outputData.add("dacf","line", (self.configuration['frames']['number'],), axis="time")
+        self._outputData.add('dacf','line', (self.configuration['frames']['number'],), axis="time")
         
-        if not isinstance(self.configuration["atom_charges"]["charges"],dict):
+        if not isinstance(self.configuration['atom_charges']['charges'],dict):
             raise JobError(self,'Invalid type for partial charges. Must be a dictionary that maps atom index to to partial charge.')
             
         self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
         for idx in self._indexes: 
-            if not self.configuration["atom_charges"]["charges"].has_key(idx):
+            if not self.configuration['atom_charges']['charges'].has_key(idx):
                 raise JobError(self,'Partial charge not defined for atom: %d' % idx)                         
         
     def run_step(self, index):
@@ -69,20 +69,18 @@ class DipoleAutoCorrelationFunction(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step. 
-            #. dipolarAC (numpy.array): The calculated dipolar auto-correlation function for atom of index=index
+            #. dipoleMomemt (numpy.array): The calculated dipolar auto-correlation function for atom of index=index
         """
 
         # get the Frame index
         frameIndex = self.configuration['frames']['value'][index]   
 
-        self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
-        conf = self.configuration['trajectory']['instance'].universe.contiguousObjectConfiguration()
+        conf = self.configuration['trajectory']['instance'].configuration(frameIndex)
+        conf = conf.continuous_configuration()
 
-        dipoleMoment = numpy.zeros((3,),dtype=numpy.float64)
+        dipoleMoment = np.zeros((3,),dtype=np.float64)
         for idx in self._indexes:
-            temp = self.configuration["atom_charges"]["charges"][idx]*conf[idx]
-            # Loop to sum temp because MMTK redefines __add__ operator, leading to a crash
-            #dipoleMoment = dipoleMoment + self.configuration["atom_charges"]["charges"][idx]*conf[idx]
+            temp = self.configuration['atom_charges']['charges'][idx]*conf['coordinates'][idx,:]
             for k in range(len(temp)):
                 dipoleMoment[k] = dipoleMoment[k] + temp[k]
                 
@@ -103,7 +101,7 @@ class DipoleAutoCorrelationFunction(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
         
-        self._outputData["dacf"][:] = correlation(self._dipoleMoments,axis=0,average=1)
+        self._outputData['dacf'][:] = correlation(self._dipoleMoments,axis=0,average=1)
                 
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
