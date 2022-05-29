@@ -15,14 +15,14 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import get_spectrum
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
-from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
+from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 class GaussianDynamicIncoherentStructureFactor(IJob):
     """
@@ -36,16 +36,16 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
     
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies' : {'trajectory':'trajectory'}})
     settings['q_shells'] = ('range', {'valueType':float, 'includeLast':True, 'mini':0.0})
     settings['instrument_resolution'] = ('instrument_resolution', {'dependencies':{'trajectory':'trajectory','frames' : 'frames'}})
-    settings['projection'] = ('projection', {'label':"project coordinates"})
+    settings['projection'] = ('projection', {'label':'project coordinates'})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['grouping_level']=('grouping_level',{'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection', 'atom_transmutation':'atom_transmutation'}})
     settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['weights'] = ('weights', {'default':'b_incoherent2','dependencies':{'atom_selection':'atom_selection'}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
     settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):
@@ -82,6 +82,8 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         self._outputData.add("f(q,t)_total","surface",(self._nQShells,self._nFrames), axis="q|time", units="au")                                                 
         self._outputData.add("s(q,f)_total","surface",(self._nQShells,self._nOmegas), axis="q|omega", units="nm2/ps") 
         
+        self._atoms = sorted_atoms(self.configuration["trajectory"]["instance"].chemical_system.atom_list())
+
     def run_step(self, index):
         """
         Runs a single step of the job.\n
@@ -95,24 +97,23 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         # get atom index
         indexes = self.configuration['atom_selection']["indexes"][index]
-        masses = self.configuration['atom_selection']["masses"][index]
-                
-        series = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
-                                       indexes,
-                                       first=self.configuration['frames']['first'],
-                                       last=self.configuration['frames']['last']+1,
-                                       step=self.configuration['frames']['step'],
-                                       weights=masses)
+        atoms = [self._atoms[idx] for idx in indexes]
+                        
+        series = self.configuration["trajectory"]["instance"].read_com_trajectory(
+            atoms,
+            first=self.configuration['frames']['first'],
+            last=self.configuration['frames']['last']+1,
+            step=self.configuration['frames']['step'])
         
-        series = self.configuration['projection']["projector"](series)
+        series = self.configuration['projection']['projector'](series)
 
-        atomicSF = numpy.zeros((self._nQShells,self._nFrames), dtype=numpy.float64)
+        atomicSF = np.zeros((self._nQShells,self._nFrames), dtype=np.float64)
                 
         msd  = mean_square_displacement(series)
 
         for i, q2 in enumerate(self._kSquare):
             
-            gaussian = numpy.exp(-msd*q2/6.0)
+            gaussian = np.exp(-msd*q2/6.0)
 
             atomicSF[i,:] += gaussian
 
@@ -127,9 +128,9 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         """
 
         # The symbol of the atom.
-        element = self.configuration['atom_selection']["names"][index]
+        element = self.configuration['atom_selection']['names'][index]
         
-        self._outputData["f(q,t)_%s" % element] += x
+        self._outputData['f(q,t)_%s' % element] += x
                 
     def finalize(self):
         """
@@ -138,16 +139,16 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()        
         for element, number in nAtomsPerElement.items():
-            self._outputData["f(q,t)_%s" % element][:] /= number
-            self._outputData["s(q,f)_%s" % element][:] = get_spectrum(self._outputData["f(q,t)_%s" % element],
+            self._outputData['f(q,t)_%s' % element][:] /= number
+            self._outputData['s(q,f)_%s' % element][:] = get_spectrum(self._outputData["f(q,t)_%s" % element],
                                                                       self.configuration["instrument_resolution"]["time_window"],
                                                                       self.configuration["instrument_resolution"]["time_step"],
                                                                       axis=1)
-        weights = self.configuration["weights"].get_weights()
+        weights = self.configuration['weights'].get_weights()
         
-        self._outputData["f(q,t)_total"][:] = weight(weights,self._outputData,nAtomsPerElement,1,"f(q,t)_%s")
+        self._outputData['f(q,t)_total'][:] = weight(weights,self._outputData,nAtomsPerElement,1,"f(q,t)_%s")
         
-        self._outputData["s(q,f)_total"][:] = weight(weights,self._outputData,nAtomsPerElement,1,"s(q,f)_%s")
+        self._outputData['s(q,f)_total'][:] = weight(weights,self._outputData,nAtomsPerElement,1,"s(q,f)_%s")
     
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
