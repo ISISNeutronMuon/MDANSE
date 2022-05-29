@@ -296,7 +296,37 @@ class Trajectory:
                 box_coordinates)
             return atomic_traj
         else:
-            return coords
+            return coords    
+
+    def read_configuration_trajectory(self, index, first=0, last=None, step=1,variable='velocities'):
+        """Read a given configuration variable through the trajectory for a given ato.
+
+        :param index: the index of the atom
+        :type index: int
+        :param first: the index of the first frame
+        :type first: int
+        :param last: the index of the last frame
+        :type last: int
+        :param step: the step in frame
+        :type step: int
+        :param variable: the configuration variable to read
+        :type variable: str
+
+        :return: 2D array containing the atomic trajectory for the selected frames
+        :rtype: ndarray
+        """
+
+        if last is None:
+            last = len(self)
+
+        grp = self._h5_file['/configuration']
+
+        if variable not in grp:
+            raise TrajectoryError('The variable {} is not stored in the trajectory'.format(variable))
+
+        variable = grp['coordinates'][first:last:step,index,:]
+
+        return variable
 
     @property
     def chemical_system(self):
@@ -326,6 +356,17 @@ class Trajectory:
         """
 
         return self._h5_filename
+
+    def variables(self):
+        """Return the configuration variables stored in this trajectory.
+
+        :return; the configuration variable
+        :rtype: list
+        """
+
+        grp = self._h5_file['/configuration']
+
+        return list(grp.keys())
 
 class TrajectoryWriterError(Exception):
     pass

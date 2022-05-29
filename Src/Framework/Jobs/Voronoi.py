@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy 
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Extensions import mic_fast_calc, qhull
@@ -26,8 +26,11 @@ def no_exc_min(l):
     try:
         return min(l)
     except:
-        return - numpy.pi
-    
+        return -np.pi
+
+class VoronoiError(Exception):
+    pass
+
 class Voronoi(IJob):
     """
     Computes the volume of each Voronoi cell and corresponding 'neighbourhood' statistics for 3d systems. 
@@ -48,11 +51,11 @@ class Voronoi(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()   
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}, 'default':(0,5,1)})
     settings['pbc'] = ('boolean', {'label':'apply periodic_boundary_condition', 'default':True})
     settings['pbc_border_size'] = ('float', {'mini':0.0, 'default':0.})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
                 
     def initialize(self):
 
@@ -62,15 +65,19 @@ class Voronoi(IJob):
         self._outputData.add('time',"line",self.configuration['frames']['time'],units="ps")
         
         # Will store mean volume for voronoi regions.
-        self.mean_volume = numpy.zeros((self.numberOfSteps)) 
+        self.mean_volume = np.zeros((self.numberOfSteps)) 
                 
-        self.nb_init_pts = self.configuration['trajectory']['instance'].universe.numberOfAtoms()
+        self.nb_init_pts = self.configuration['trajectory']['instance'].chemical_system.number_of_atoms()
         
         # Will store neighbourhood histogram for voronoi regions.
         self.neighbourhood_hist = {}
         
-        cell = numpy.array(self.configuration['trajectory']['instance'].universe.basisVectors()).astype(numpy.float64)
-        self.cell_param = numpy.array([cell[0,0], cell[1,1], cell[2,2]], dtype = numpy.float64)
+        first_conf = self.configuration['trajectory']['instance'].chemical_system.configuration
+        if not first_conf.is_periodic:
+            raise VoronoiError('Voronoi analysis cannot be computed for chemical system without periodc boundary conditions')
+
+        cell = first_conf.unit_cell.direct
+        self.cell_param = np.array([cell[0,0], cell[1,1], cell[2,2]], dtype=np.float64)
         
         self.dim = 3
     
@@ -84,14 +91,14 @@ class Voronoi(IJob):
         
         # This is the actual index of the frame corresponding to the loop index.
         frameIndex = self.configuration['frames']['value'][index]
-                                             
-        # The configuration corresponding to this index is set to the universe.
-        self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
-        
-        conf = self.configuration['trajectory']['instance'].universe.configuration().array.astype(numpy.float64)
 
+        conf = self.configuration['trajectory']['instance'].configuration(frameIndex)
+        
         if self.configuration['pbc']["value"]:
-            conf, _ = mic_fast_calc.mic_generator_3D(conf,self.configuration['pbc_border_size']["value"],self.cell_param)
+            conf, _ = mic_fast_calc.mic_generator_3D(
+                conf['coordinates'],
+                self.configuration['pbc_border_size']["value"],self.cell_param)
+        
         # Computing Voronoi Diagram ...
         Voronoi = qhull.Voronoi(conf)
         vertices_coords = Voronoi.vertices # Option qhull v p 
@@ -118,7 +125,7 @@ class Voronoi(IJob):
         self.max_region_id = input_sites.max()
         
         # Calculating neighbourhood ...
-        neighbourhood = numpy.zeros((self.max_region_id+1), dtype = numpy.int32)
+        neighbourhood = np.zeros((self.max_region_id+1), dtype = np.int32)
         for s in input_sites.ravel():
             neighbourhood[s] +=  1
         
@@ -139,7 +146,7 @@ class Voronoi(IJob):
             if len(ids) == 3:
                 delaunay_regions_for_each_valid_voronoi_region[vrid] = [ids]
                 continue
-            lut = numpy.array(ids)
+            lut = np.array(ids)
             Delaunay = qhull.Delaunay(vertices_coords[ids])
             delaunay_regions_for_each_valid_voronoi_region[vrid] = [lut[dv] for dv in Delaunay.vertices]
             
@@ -150,12 +157,12 @@ class Voronoi(IJob):
             for vidx in regions:
                 coords = vertices_coords[vidx]
                 delta = coords[1:,:]-coords[0,:]
-                vidx_volume = numpy.abs(numpy.linalg.det(delta))/factorial(self.dim)
+                vidx_volume = np.abs(np.linalg.det(delta))/factorial(self.dim)
                 regions_volumes.append(vidx_volume)
             global_volumes[vrid] = sum(regions_volumes)
         
         # Mean volume of Voronoi regions  
-        mean =  numpy.array(global_volumes.values()).mean()
+        mean =  np.array(global_volumes.values()).mean()
         self.mean_volume[index] = mean
         
         return index, None
@@ -175,7 +182,7 @@ class Voronoi(IJob):
         Finalize the job.
         """
         max_nb_neighbour = max(self.neighbourhood_hist.keys())
-        self.neighbourhood = numpy.zeros((max_nb_neighbour+1), dtype=numpy.int32)
+        self.neighbourhood = np.zeros((max_nb_neighbour+1), dtype=np.int32)
         for k, v in self.neighbourhood_hist.items():
             self.neighbourhood[k] = v 
             

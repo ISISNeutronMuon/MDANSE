@@ -66,6 +66,6 @@ class InterpolationOrderConfigurator(SingleChoiceConfigurator):
             
         else:
 
-            self["variable"] = "configuration"
+            self["variable"] = "coordinates"
             
 REGISTRY["interpolation_order"] = InterpolationOrderConfigurator

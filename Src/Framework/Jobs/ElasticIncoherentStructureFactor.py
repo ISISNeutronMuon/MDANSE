@@ -15,12 +15,12 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
+from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 class ElasticIncoherentStructureFactor(IJob):
     """
@@ -40,7 +40,7 @@ class ElasticIncoherentStructureFactor(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['q_vectors'] = ('q_vectors', {'dependencies':{'trajectory':'trajectory'}})
     settings['projection'] = ('projection', {'label':"project coordinates"})
@@ -48,7 +48,7 @@ class ElasticIncoherentStructureFactor(IJob):
     settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection', 'atom_transmutation':'atom_transmutation'}})
     settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
     settings['weights'] = ('weights', {'default':'b_incoherent',"dependencies":{"atom_selection":"atom_selection"}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
     settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):
@@ -69,6 +69,8 @@ class ElasticIncoherentStructureFactor(IJob):
 
         self._outputData.add("eisf_total","line", (self._nQShells,), axis="q", units="au")                                                 
         
+        self._atoms = sorted_atoms(self.configuration["trajectory"]["instance"].chemical_system.atom_list())
+
     def run_step(self, index):
         """
         Runs a single step of the job.\n
@@ -82,18 +84,17 @@ class ElasticIncoherentStructureFactor(IJob):
 
         # get atom index
         indexes = self.configuration['atom_selection']["indexes"][index]
-        masses = self.configuration['atom_selection']["masses"][index]
-                
-        series = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
-                                       indexes,
-                                       first=self.configuration['frames']['first'],
-                                       last=self.configuration['frames']['last']+1,
-                                       step=self.configuration['frames']['step'],
-                                       weights=masses)
-        
+        atoms = [self._atoms[idx] for idx in indexes]
+                        
+        series = self.configuration["trajectory"]["instance"].read_com_trajectory(
+            atoms,
+            first=self.configuration['frames']['first'],
+            last=self.configuration['frames']['last']+1,
+            step=self.configuration['frames']['step'])
+                        
         series = self.configuration['projection']["projector"](series)
 
-        atomicEISF = numpy.zeros((self._nQShells,), dtype=numpy.float64)
+        atomicEISF = np.zeros((self._nQShells,), dtype=np.float64)
 
         for i,q in enumerate(self.configuration["q_vectors"]["shells"]):
             
@@ -102,10 +103,10 @@ class ElasticIncoherentStructureFactor(IJob):
 
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
             
-            a = numpy.average(numpy.exp(1j * numpy.dot(series, qVectors)),axis=0)
-            a = numpy.abs(a)**2
+            a = np.average(np.exp(1j * np.dot(series, qVectors)),axis=0)
+            a = np.abs(a)**2
             
-            atomicEISF[i] = numpy.average(a)
+            atomicEISF[i] = np.average(a)
             
         return index, atomicEISF
     

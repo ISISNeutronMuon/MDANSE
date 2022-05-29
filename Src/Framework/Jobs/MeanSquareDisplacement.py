@@ -21,6 +21,7 @@ from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
+from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 class MeanSquareDisplacement(IJob):
     """
@@ -79,6 +80,8 @@ class MeanSquareDisplacement(IJob):
         for element in self.configuration['atom_selection']['unique_names']:
             self._outputData.add("msd_%s" % element, "line", (self.configuration['frames']['number'],), axis="time", units="nm2") 
 
+        self._atoms = sorted_atoms(self.configuration["trajectory"]["instance"].chemical_system.atom_list())
+
     def run_step(self, index):
         """
         Runs a single step of the job.\n
@@ -92,13 +95,13 @@ class MeanSquareDisplacement(IJob):
                 
         # get atom index
         indexes = self.configuration['atom_selection']["indexes"][index]
-        masses = np.array(self.configuration['atom_selection']["masses"][index])
+        atoms = [self._atoms[idx] for idx in indexes]
                         
-        series = self.configuration["trajectory"]["instance"].read_com_trajectory(indexes,
-                                                                                  masses,
-                                                                                  first=self.configuration['frames']['first'],
-                                                                                  last=self.configuration['frames']['last']+1,
-                                                                                  step=self.configuration['frames']['step'])
+        series = self.configuration["trajectory"]["instance"].read_com_trajectory(
+            atoms,
+            first=self.configuration['frames']['first'],
+            last=self.configuration['frames']['last']+1,
+            step=self.configuration['frames']['step'])
 
         series = self.configuration['projection']["projector"](series)
 

@@ -14,28 +14,11 @@
 # **************************************************************************
 
 import collections
-import sys
-
-import numpy
-
-from MMTK import Atom
-from MMTK.ChemicalObjects import isChemicalObject
-from MMTK.Collections import Collection
-from MMTK.Trajectory import SnapshotGenerator, Trajectory, TrajectoryOutput
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
-
-def contiguous_configuration(seed,atoms,boxCoords):
-
-    atoms.remove(seed)
-    
-    for bAt in seed.bondedTo():        
-        if bAt in atoms:
-            diff = boxCoords[bAt.index,:] - boxCoords[seed.index,:]
-            boxCoords[bAt.index,:] = numpy.where(numpy.abs(diff)>0.5,boxCoords[bAt.index,:]-numpy.round(diff),boxCoords[bAt.index,:])
-            contiguous_configuration(bAt,atoms,boxCoords)
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 class UnfoldedTrajectory(IJob):
     """
@@ -51,10 +34,10 @@ class UnfoldedTrajectory(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
         
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_file'] = ('single_output_file', {'format':'hdf','root':'trajectory'})
         
     def initialize(self):
         """
@@ -63,30 +46,19 @@ class UnfoldedTrajectory(IJob):
 
         self.numberOfSteps = self.configuration['frames']['number']
          
-        atoms = sorted_atoms(self.configuration['trajectory']['instance'].universe)
+        atoms = sorted_atoms(self.configuration['trajectory']['instance'].chemical_system.atom_list())
          
         # The collection of atoms corresponding to the atoms selected for output.
         indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
-        self._selectedAtoms = Collection([atoms[ind] for ind in indexes])
-        
-        self._chemicalObjects = set([at.topLevelChemicalObject() for at in self._selectedAtoms])
-                                         
+        self._selectedAtoms = [atoms[ind] for ind in indexes]
+                                                         
         # The output trajectory is opened for writing.
-        self._outputTraj = Trajectory(self._selectedAtoms, self.configuration['output_files']['files'][0], "w")
-         
-        # The title for the trajectory is set. 
-        self._outputTraj.title = self.__class__.__name__
- 
-        # Create the snapshot generator.
-        self.snapshot = SnapshotGenerator(self.configuration['trajectory']['instance'].universe, actions = [TrajectoryOutput(self._outputTraj, "all", 0, None, 1)])
-                 
-        # This will store the configuration used as the reference for the following step. 
-        self._refCoords = None
-        
-        # Increase the recursion limit to avoid maximum recursion depth error when calling the contiguous_object recursive function 
-        self._oldRecursionLimit = sys.getrecursionlimit()
-        sys.setrecursionlimit(100000)
-
+        self._outputTraj = TrajectoryWriter(
+            self.configuration['output_file']['file'],
+            self.configuration['trajectory']['instance'].chemical_system,
+            self.numberOfSteps,
+            self._selectedAtoms)
+                                   
     def run_step(self, index):
         """
         Runs a single step of the job.\n
@@ -101,48 +73,19 @@ class UnfoldedTrajectory(IJob):
         # get the Frame index
         frameIndex = self.configuration['frames']['value'][index]
         
-        universe = self.configuration['trajectory']['instance'].universe 
-      
-        # The configuration corresponding to this index is set to the universe.
-        universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
-                
-        # Case of the first frame.
-        if self._refCoords is None:
-                        
-            self._refCoords = universe._realToBoxPointArray(universe.configuration().array)
+        conf = self.configuration['trajectory']['instance'].configuration(frameIndex)
 
-            for obj in universe.objectList():
-                                            
-                if not isChemicalObject(obj):
-                    continue
-            
-                if isinstance(obj,Atom):
-                    continue
-                
-                if not obj in self._chemicalObjects:
-                    continue
-                
-                atoms = obj.atomList()[:]
-                contiguous_configuration(atoms[0],atoms,self._refCoords)
-                                                                    
-        # Case of the other frames.
-        else:
-                                
-            currentCoords = universe._realToBoxPointArray(universe.configuration().array)
-        
-            diff = currentCoords - self._refCoords
-        
-            self._refCoords = numpy.where(numpy.abs(diff)>0.5,currentCoords-numpy.round(diff),currentCoords)
-        
-        corrCoords = universe._boxToRealPointArray(self._refCoords)
-        
-        universe.configuration().array = corrCoords
-                                 
-        # The times corresponding to the running index.
-        t = self.configuration['frames']['time'][index]
+        conf = conf.continuous_configuration()
+
+        cloned_conf = conf.clone(self._outputTraj.chemical_system)
+
+        self._outputTraj.chemical_system.configuration = cloned_conf
+
+        # The time corresponding to the running index.
+        time = self.configuration['frames']['time'][index]
         
         # Write the step.
-        self.snapshot(data = {'time' : t})
+        self._outputTraj.dump_configuration(time)
                                                                                 
         return index, None
     
@@ -164,8 +107,6 @@ class UnfoldedTrajectory(IJob):
                                  
         # The output trajectory is closed.
         self._outputTraj.close()
-        
-        sys.setrecursionlimit(self._oldRecursionLimit)
-        
+                
 REGISTRY['ut'] = UnfoldedTrajectory
                 
