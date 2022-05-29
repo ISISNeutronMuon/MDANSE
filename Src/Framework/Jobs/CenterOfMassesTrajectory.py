@@ -34,7 +34,7 @@ class CenterOfMassesTrajectory(IJob):
 
     category = ('Analysis','Trajectory',)
     
-    ancestor = ["mmtk_trajectory","molecular_viewer"]
+    ancestor = ['hdf_trajectory','molecular_viewer']
 
     settings = collections.OrderedDict()
     settings['trajectory'] = ('hdf_trajectory',{})
@@ -42,7 +42,7 @@ class CenterOfMassesTrajectory(IJob):
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
     settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
     settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection'}})
-    settings['output_files'] = ('output_files', {'formats':["hdf"]})
+    settings['output_file'] = ('single_output_file', {'format': 'hdf','root':'trajectory'})
                 
     def initialize(self):
         """
@@ -58,7 +58,7 @@ class CenterOfMassesTrajectory(IJob):
                                                     
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
-            self.configuration['output_files']['files'][0],
+            self.configuration['output_file']['file'],
             chemical_system,
             self.numberOfSteps)
 

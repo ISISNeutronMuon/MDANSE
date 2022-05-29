@@ -49,16 +49,16 @@ class AngularCorrelation(IJob):
 
     category = ('Analysis','Dynamics',)
     
-    ancestor = ["mmtk_trajectory","molecular_viewer"]
+    ancestor = ['hdf_trajectory','molecular_viewer']
     
     settings = collections.OrderedDict()    
     settings['trajectory'] = ('hdf_trajectory',{})
-    settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
-    settings['axis_selection'] = ('atoms_list',{"nAtoms" : 2,
-                                                "dependencies":{'trajectory':'trajectory'},
+    settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
+    settings['axis_selection'] = ('atoms_list',{'nAtoms' : 2,
+                                                'dependencies':{'trajectory':'trajectory'},
                                                 'default' : ('Water',('OW','HW'))})
-    settings['per_axis'] = ('boolean', {"label":"output contribution per axis", "default":False})
-    settings['output_files'] = ('output_files', {"formats":["hdf","netcdf","ascii"]})
+    settings['per_axis'] = ('boolean', {'label':'output contribution per axis', 'default':False})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
     settings['running_mode'] = ('running_mode',{})
         
     def initialize(self):
@@ -90,14 +90,14 @@ class AngularCorrelation(IJob):
 
         e1, e2 = self.configuration['axis_selection']['atoms'][index]
                 
-        at1_traj = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
+        at1_traj = self.configuration['trajectory']['instance'].read_atomic_trajectory(
             e1,
             first=self.configuration['frames']['first'],
             last=self.configuration['frames']['last']+1,
             step=self.configuration['frames']['step']            
         )
 
-        at2_traj = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
+        at2_traj = self.configuration['trajectory']['instance'].read_atomic_trajectory(
             e2,
             first=self.configuration['frames']['first'],
             last=self.configuration['frames']['last']+1,

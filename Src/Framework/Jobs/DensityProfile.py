@@ -36,7 +36,7 @@ class DensityProfile(IJob):
     
     category = ('Analysis','Structure',)
     
-    ancestor = ["mmtk_trajectory","molecular_viewer"]
+    ancestor = ['hdf_trajectory','molecular_viewer']
     
     settings = collections.OrderedDict()
     settings['trajectory'] = ('hdf_trajectory',{})

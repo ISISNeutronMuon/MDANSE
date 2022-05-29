@@ -35,12 +35,12 @@ class Density(IJob):
 
     category = ('Analysis','Thermodynamics',)
     
-    ancestor = ["mmtk_trajectory","molecular_viewer"]
+    ancestor = ['hdf_trajectory','molecular_viewer']
 
     settings = collections.OrderedDict()
     settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
     settings['running_mode'] = ('running_mode',{})
                 
     def initialize(self):

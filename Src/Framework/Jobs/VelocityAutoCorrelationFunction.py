@@ -53,7 +53,7 @@ class VelocityAutoCorrelationFunction(IJob):
 
     category = ('Analysis','Dynamics',)
     
-    ancestor = ["mmtk_trajectory","molecular_viewer"]
+    ancestor = ['hdf_trajectory','molecular_viewer']
 
     settings = collections.OrderedDict()
     settings['trajectory'] = ('hdf_trajectory',{})
@@ -157,7 +157,7 @@ class VelocityAutoCorrelationFunction(IJob):
         
         if self.configuration['normalize']['value']:
             for element in nAtomsPerElement.keys():
-                self._outputData['vacf_%s' % element] = normalize(self._outputData[vacf_%s' % element], axis=0)
+                self._outputData['vacf_%s' % element] = normalize(self._outputData['vacf_%s' % element], axis=0)
             self._outputData['vacf_total'] = normalize(self._outputData['vacf_total'], axis=0)
                                     
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)

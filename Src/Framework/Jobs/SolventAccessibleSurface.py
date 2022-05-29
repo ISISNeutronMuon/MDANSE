@@ -15,9 +15,10 @@
 
 import collections
 
-import numpy
+import numpy as np
 
-from MDANSE import ELEMENTS, REGISTRY
+from MDANSE import REGISTRY
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import generate_sphere_points
 from MDANSE.Extensions import sas_fast_calc
@@ -47,15 +48,15 @@ class SolventAccessibleSurface(IJob):
     
     category = ('Analysis','Structure',)
     
-    ancestor = ["mmtk_trajectory","molecular_viewer"]
+    ancestor = ['hdf_trajectory','molecular_viewer']
     
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}, 'default':(0,2,1)})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['n_sphere_points'] = ('integer', {'mini':1, 'default':1000})
     settings['probe_radius'] = ('float', {'mini':0.0, 'default':0.14})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
     settings['running_mode'] = ('running_mode',{})
                 
     def initialize(self):
@@ -63,21 +64,22 @@ class SolventAccessibleSurface(IJob):
         self.numberOfSteps = self.configuration['frames']['number']
 
         # Will store the time.
-        self._outputData.add('time',"line",self.configuration['frames']['time'],units="ps")
+        self._outputData.add('time',"line",self.configuration['frames']['time'],units='ps')
         
         # Will store the solvent accessible surface.                
-        self._outputData.add('sas',"line",(self.configuration['frames']['number'],),axis="time",units="nm2")
+        self._outputData.add('sas',"line",(self.configuration['frames']['number'],),axis='time',units='nm2')
         
         # Generate the sphere points that will be used to evaluate the sas per atom.
-        self.spherePoints = numpy.array(generate_sphere_points(self.configuration['n_sphere_points']['value']), dtype = numpy.float64)
+        self.spherePoints = np.array(generate_sphere_points(self.configuration['n_sphere_points']['value']), dtype=np.float64)
         # The solid angle increment used to convert the sas from a number of accessible point to a surface.
-        self.solidAngleIncr = 4.0*numpy.pi/len(self.spherePoints)
+        self.solidAngleIncr = 4.0*np.pi/len(self.spherePoints)
         
         # A mapping between the atom indexes and covalent_radius radius for the whole universe.
-        self.vdwRadii = dict([(at.index,ELEMENTS[at.symbol,'covalent_radius']) for at in self.configuration['trajectory']['instance'].universe.atomList()])
-        self.vdwRadii_list = numpy.zeros( (max(self.vdwRadii.keys())+1,2), dtype = numpy.float64)
+        self.vdwRadii = dict(
+            [(at.index,ATOMS_DATABASE[at.symbol]['covalent_radius']) for at in self.configuration['trajectory']['instance'].chemical_system.atom_list()])
+        self.vdwRadii_list = np.zeros( (max(self.vdwRadii.keys())+1,2), dtype=np.float64)
         for k,v in self.vdwRadii.items():
-            self.vdwRadii_list[k] = numpy.array([k,v])[:]   
+            self.vdwRadii_list[k] = np.array([k,v])[:]   
 
         self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
         
@@ -92,19 +94,16 @@ class SolventAccessibleSurface(IJob):
         # This is the actual index of the frame corresponding to the loop index.
         frameIndex = self.configuration['frames']['value'][index]                        
         
-        # The configuration corresponding to this index is set to the universe.
-        self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
+        # Fetch the configuration.
+        conf = self.configuration['trajectory']['instance'].configuration(frameIndex)
         
-        # The configuration is made contiguous.
-        conf = self.configuration['trajectory']['instance'].universe.contiguousObjectConfiguration()
-        
-        # And set to the universe.
-        self.configuration['trajectory']['instance'].universe.setConfiguration(conf)
-        
+        # The configuration is made continuous.
+        conf = conf.continuous_configuration()
+                
         # Loop over the indexes of the selected atoms for the sas calculation.
         sas = sas_fast_calc.sas(index,
-                                conf.array[self._indexes,:],
-                                numpy.array(self.configuration['atom_selection']['indexes'], dtype=numpy.int32).ravel(),
+                                conf['coordinates'][self._indexes,:],
+                                np.array(self.configuration['atom_selection']['indexes'], dtype=np.int32).ravel(),
                                 self.vdwRadii_list,
                                 self.spherePoints,
                                 self.configuration['probe_radius']['value'])

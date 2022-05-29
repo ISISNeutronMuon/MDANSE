@@ -30,13 +30,13 @@ class CroppedTrajectory(IJob):
 
     category = ('Analysis','Trajectory',)
     
-    ancestor = ["mmtk_trajectory","molecular_viewer"]
+    ancestor = ['hdf_trajectory','molecular_viewer']
 
     settings = collections.OrderedDict()
     settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
-    settings['output_files'] = ('output_files', {'formats':["hdf"]})
+    settings['output_file'] = ('single_output_file', {'format': 'hdf','root':'trajectory'})
                 
     def initialize(self):
         """
@@ -53,7 +53,7 @@ class CroppedTrajectory(IJob):
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
-            self.configuration['output_files']['files'][0],
+            self.configuration['output_file']['file'],
             self.configuration['trajectory']['instance'].chemical_system,
             self.numberOfSteps,
             self._selectedAtoms)
