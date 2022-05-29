@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
@@ -33,14 +33,14 @@ class StaticStructureFactor(DistanceHistogram):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
     
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['r_values'] = ('range', {'valueType':float, 'includeLast':True, 'mini':0.0})
     settings['q_values'] = ('range', {'valueType':float, 'includeLast':True, 'mini':0.0})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
-    settings['weights'] = ('weights', {'default':'b_coherent',"dependencies":{'atom_selection':'atom_selection','atom_transmutation':'atom_transmutation'}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['weights'] = ('weights', {'default':'b_coherent','dependencies':{'atom_selection':'atom_selection','atom_transmutation':'atom_transmutation'}})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
     settings['running_mode'] = ('running_mode',{})
                 
     def finalize(self):
@@ -54,7 +54,7 @@ class StaticStructureFactor(DistanceHistogram):
 
         self.averageDensity /= nFrames
         
-        densityFactor = 4.0*numpy.pi*self.configuration['r_values']['mid_points']
+        densityFactor = 4.0*np.pi*self.configuration['r_values']['mid_points']
         
         shellSurfaces = densityFactor*self.configuration['r_values']['mid_points']
         
@@ -65,18 +65,18 @@ class StaticStructureFactor(DistanceHistogram):
         q = self._outputData['q']
         r = self.configuration['r_values']['mid_points']
   
-        fact1 = 4.0*numpy.pi*self.averageDensity
+        fact1 = 4.0*np.pi*self.averageDensity
 
-        sincqr = numpy.sinc(numpy.outer(q,r)/numpy.pi)
+        sincqr = np.sinc(np.outer(q,r)/np.pi)
         
         dr = self.configuration['r_values']['step']
         
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
         for pair in self._elementsPairs:
 
-            self._outputData.add("ssf_intra_%s%s" % pair,"line", (nq,), axis='q', units="au")                                                 
-            self._outputData.add("ssf_inter_%s%s" % pair,"line", (nq,), axis='q', units="au",)                                                 
-            self._outputData.add("ssf_total_%s%s" % pair,"line", (nq,), axis='q', units="au")                                                 
+            self._outputData.add('ssf_intra_%s%s' % pair,"line", (nq,), axis='q', units="au")                                                 
+            self._outputData.add('ssf_inter_%s%s' % pair,"line", (nq,), axis='q', units="au",)                                                 
+            self._outputData.add('ssf_total_%s%s' % pair,"line", (nq,), axis='q', units="au")                                                 
 
             ni = nAtomsPerElement[pair[0]]
             nj = nAtomsPerElement[pair[1]]
@@ -96,8 +96,8 @@ class StaticStructureFactor(DistanceHistogram):
             pdfIntra = self.hIntra[idi,idj,:] / fact
             pdfInter = self.hInter[idi,idj,:] / fact
                         
-            self._outputData["ssf_intra_%s%s" % pair][:] = fact1*numpy.sum((r**2)*pdfIntra*sincqr,axis=1)*dr
-            self._outputData["ssf_inter_%s%s" % pair][:] = 1.0 + fact1*numpy.sum((r**2)*(pdfInter-1.0)*sincqr,axis=1)*dr
+            self._outputData["ssf_intra_%s%s" % pair][:] = fact1*np.sum((r**2)*pdfIntra*sincqr,axis=1)*dr
+            self._outputData["ssf_inter_%s%s" % pair][:] = 1.0 + fact1*np.sum((r**2)*(pdfInter-1.0)*sincqr,axis=1)*dr
             self._outputData["ssf_total_%s%s" % pair][:] = self._outputData["ssf_intra_%s%s" % pair][:] + self._outputData["ssf_inter_%s%s" % pair][:]
 
         self._outputData.add("ssf_intra","line", (nq,), axis='q', units="au")                                                 
