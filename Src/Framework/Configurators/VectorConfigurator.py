@@ -13,12 +13,11 @@
 #
 # **************************************************************************
 
-import numpy
-
-from Scientific.Geometry import Vector
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
+from MDANSE.Mathematics.LinearAlgebra import Vector
 
 class VectorConfigurator(IConfigurator):
     """
@@ -68,7 +67,7 @@ class VectorConfigurator(IConfigurator):
         if len(value) != self._dimension:
             raise ConfiguratorError("Invalid dimension",self)
 
-        vector = Vector(numpy.array(value,dtype=self._valueType))
+        vector = Vector(np.array(value,dtype=self._valueType))
 
         if self._normalize:
             vector = vector.normal()

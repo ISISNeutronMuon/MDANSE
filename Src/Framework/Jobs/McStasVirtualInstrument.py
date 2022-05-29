@@ -21,11 +21,10 @@ import tempfile
 import string
 import StringIO
 
-import numpy
+import numpy as np
 
-from MMTK import Units
-
-from MDANSE import ELEMENTS, REGISTRY
+from MDANSE import REGISTRY
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
@@ -35,6 +34,8 @@ MCSTAS_UNITS_LUT = {'THz': measure(1,"THz",equivalent=True).toval("meV"),
                     'nm2' : measure(1,"nm2").toval("b"),
                     '1/nm' : measure(1,"1/nm").toval("1/ang")
                     } 
+
+NAVOGADRO = 6.02214129e+23
 
 class McStasError(Error):
     pass
@@ -73,7 +74,7 @@ class McStasVirtualInstrument(IJob):
     settings['parameters'] = ('mcstas_parameters', {'label':'instrument parameters',
                                                     'dependencies':{'instrument':'instrument'},
                                                     'exclude':['sample_coh','sample_inc']}) 
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
     
     def initialize(self):
         """
@@ -87,17 +88,17 @@ class McStasVirtualInstrument(IJob):
 
         # Compute some parameters used for a proper McStas run
         self._mcStasPhysicalParameters = {"density"   : 0.0}
-        self._mcStasPhysicalParameters["weight"]    = sum([ELEMENTS[s,'atomic_weight'] for s in symbols])
-        self._mcStasPhysicalParameters["sigma_abs"] = sum([ELEMENTS[s,'xs_absorption'] for s in symbols])*MCSTAS_UNITS_LUT['nm2']
-        self._mcStasPhysicalParameters["sigma_coh"] = sum([ELEMENTS[s,'xs_coherent']   for s in symbols])*MCSTAS_UNITS_LUT['nm2']
-        self._mcStasPhysicalParameters["sigma_inc"] = sum([ELEMENTS[s,'xs_incoherent'] for s in symbols])*MCSTAS_UNITS_LUT['nm2']
+        self._mcStasPhysicalParameters["weight"]    = sum([ATOMS_DATABASE[s]['atomic_weight'] for s in symbols])
+        self._mcStasPhysicalParameters["sigma_abs"] = sum([ATOMS_DATABASE[s]['xs_absorption'] for s in symbols])*MCSTAS_UNITS_LUT['nm2']
+        self._mcStasPhysicalParameters["sigma_coh"] = sum([ATOMS_DATABASE[s]['xs_coherent']   for s in symbols])*MCSTAS_UNITS_LUT['nm2']
+        self._mcStasPhysicalParameters["sigma_inc"] = sum([ATOMS_DATABASE[s]['xs_incoherent'] for s in symbols])*MCSTAS_UNITS_LUT['nm2']
         for frameIndex in self.configuration['frames']['value']:
             self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)                
             cellVolume = self.configuration['trajectory']['instance'].universe.cellVolume()
             self._mcStasPhysicalParameters["density"] += self._mcStasPhysicalParameters["weight"]/cellVolume
         self._mcStasPhysicalParameters["density"] /= self.configuration['frames']['n_frames']
         # The density is converty in g/cm3
-        self._mcStasPhysicalParameters["density"] /= (Units.Nav/Units.cm**3)
+        self._mcStasPhysicalParameters["density"] /= (NAVOGADRO/measure(1.0,'cm3').toval('nm3'))
         
     def run_step(self, index):
         """
@@ -132,7 +133,7 @@ class McStasVirtualInstrument(IJob):
                 except KeyError:
                     pass
                 
-                numpy.savetxt(fout, data)
+                np.savetxt(fout, data)
                 fout.write('\n')                
                 
             fout.close()
@@ -197,7 +198,7 @@ class McStasVirtualInstrument(IJob):
             for k, v in d.items():
                 if v.shape != value.shape:
                     continue
-                if numpy.allclose(v, value):
+                if np.allclose(v, value):
                     return k
         while d.has_key(key):
             key = skey + '_%d'%i
@@ -299,8 +300,8 @@ class McStasVirtualInstrument(IJob):
             Ymin = eval(FileStruct['xylimits'].split()[2])
             Ymax = eval(FileStruct['xylimits'].split()[3])
             
-            x = numpy.linspace(Xmin,Xmax,mysize[1])
-            y = numpy.linspace(Ymin,Ymax,mysize[0])
+            x = np.linspace(Xmin,Xmax,mysize[1])
+            y = np.linspace(Ymin,Ymax,mysize[0])
 
             title = self.unique(self.treat_str_var(FileStruct['component']), self._outputData)
             xlabel = self.unique(self.treat_str_var(FileStruct['xlabel']), self._outputData, x)
@@ -364,7 +365,7 @@ class McStasVirtualInstrument(IJob):
                 data.append(l)
         
         
-        Filestruct['data'] = numpy.genfromtxt(StringIO.StringIO(' '.join(data)))
+        Filestruct['data'] = np.genfromtxt(StringIO.StringIO(' '.join(data)))
         Filestruct['fullpath'] = simFile
         
         return Filestruct

@@ -16,15 +16,13 @@
 import collections
 import os
 
-import numpy
-
-from Scientific.Geometry import Vector
-from Scientific.Geometry.Transformation import angleFromSineAndCosine, Rotation 
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Mathematics.Signal import correlation
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
+from MDANSE.Mathematics.LinearAlgebra import Vector
+from MDANSE.Mathematics.Transformation import Rotation
 
 class OrderParameter(IJob):
     """
@@ -62,14 +60,14 @@ class OrderParameter(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'MMTK', 'protein_in_periodic_universe.nc')})
+    settings['trajectory'] = ('hdf_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'MMTK', 'protein_in_periodic_universe.nc')})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['axis_selection'] = ('atoms_list', {'dependencies':{'trajectory':'trajectory'},
                                                  'nAtoms':2,
                                                  'default':('C284H438N84O79S7',('C','C_beta'))})
     settings['reference_direction'] = ('vector', {'default':[0,0,1], 'notNull':True, 'normalize':True})
-    settings['per_axis'] = ('boolean', {'label':"output contribution per axis", 'default':False})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['per_axis'] = ('boolean', {'label':'output contribution per axis', 'default':False})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
     settings['running_mode'] = ('running_mode',{})
                 
     def initialize(self):
@@ -82,15 +80,15 @@ class OrderParameter(IJob):
         
         self.numberOfSteps = self._nAxis
 
-        self._outputData.add("time","line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add('time','line', self.configuration['frames']['time'], units='ps')
 
-        self._outputData.add("axis_index","line", numpy.arange(self.configuration['axis_selection']['n_values']), units='au')
+        self._outputData.add('axis_index','line', np.arange(self.configuration['axis_selection']['n_values']), units='au')
                         
         self._zAxis = Vector([0,0,1])
         refAxis = self.configuration['reference_direction']['value']
         axis = self._zAxis.cross(refAxis)
 
-        theta = angleFromSineAndCosine(axis.length(),self._zAxis*refAxis)
+        theta = np.arctan2(axis.length(),self._zAxis*refAxis)
 
         try:
             self._rotation = Rotation(axis,theta).tensor.array
@@ -119,32 +117,32 @@ class OrderParameter(IJob):
 
         e1, e2 = self.configuration['axis_selection']['atoms'][index]
         
-        e1 = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
-                                   e1,
-                                   first=self.configuration['frames']['first'],
-                                   last=self.configuration['frames']['last']+1,
-                                   step=self.configuration['frames']['step'])
+        serie1 = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
+            e1,
+            first=self.configuration['frames']['first'],
+            last=self.configuration['frames']['last']+1,
+            step=self.configuration['frames']['step'])
 
-        e2 = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
-                                   e2,
-                                   first=self.configuration['frames']['first'],
-                                   last=self.configuration['frames']['last']+1,
-                                   step=self.configuration['frames']['step'])
+        serie2 = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
+            e2,
+            first=self.configuration['frames']['first'],
+            last=self.configuration['frames']['last']+1,
+            step=self.configuration['frames']['step'])
 
-        diff = e2 - e1
+        diff = serie2 - serie1
 
-        modulus = numpy.sqrt(numpy.sum(diff**2,1))
+        modulus = np.sqrt(np.sum(diff**2,1))
         
-        diff /= modulus[:,numpy.newaxis]
+        diff /= modulus[:,np.newaxis]
         
         # shape (3,n)
         tDiff = diff.T
         
         if self._doRotation:
-            diff = numpy.dot(self._rotation,tDiff)
+            diff = np.dot(self._rotation,tDiff)
                 
-        costheta = numpy.dot(self._zAxis.array,tDiff)
-        sintheta = numpy.sqrt(numpy.sum(numpy.cross(self._zAxis,tDiff,axisb=0)**2,1))
+        costheta = np.dot(self._zAxis.array,tDiff)
+        sintheta = np.sqrt(np.sum(np.cross(self._zAxis,tDiff,axisb=0)**2,1))
         
         cosphi = tDiff[0,:]/sintheta
         sinphi = tDiff[1,:]/sintheta
@@ -166,9 +164,9 @@ class OrderParameter(IJob):
               0.75*correlation(sin2phi*sintheta_sq))
 
         # s2 calculation (s2 = lim (t->+inf) p2)
-        s2 = (0.75 * (numpy.sum(cos2phi*sintheta_sq)**2 + numpy.sum(sin2phi*sintheta_sq)**2) + \
-              3.00 * (numpy.sum(cosphi*cossintheta)**2 + numpy.sum(sinphi*cossintheta)**2) +
-              0.25 *  numpy.sum(tr2)**2) / self._nFrames**2
+        s2 = (0.75 * (np.sum(cos2phi*sintheta_sq)**2 + np.sum(sin2phi*sintheta_sq)**2) + \
+              3.00 * (np.sum(cosphi*cossintheta)**2 + np.sum(sinphi*cossintheta)**2) +
+              0.25 *  np.sum(tr2)**2) / self._nFrames**2
         
         return index, (p1, p2, s2)
 

@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy 
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -43,11 +43,11 @@ class MolecularTrace(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['spatial_resolution'] = ('float', {'mini':0.01, 'default':0.1})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
     settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):
@@ -64,16 +64,17 @@ class MolecularTrace(IJob):
         minx, miny, minz = 10**9,10**9,10**9
         for i in range(self.numberOfSteps):
             frameIndex = self.configuration['frames']['value'][i]
-            self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
-            conf = self.configuration['trajectory']['instance'].universe.contiguousObjectConfiguration()
+            conf = self.configuration['trajectory']['instance'].configuration(frameIndex)
+            conf = conf.continuous_configuration()
+            coords = conf['coordinates']
             
-            minx_loc = conf.array[:,0].min()
-            miny_loc = conf.array[:,1].min()
-            minz_loc = conf.array[:,2].min()
+            minx_loc = coords[:,0].min()
+            miny_loc = coords[:,1].min()
+            minz_loc = coords[:,2].min()
              
-            maxx_loc = conf.array[:,0].max()
-            maxy_loc = conf.array[:,1].max()
-            maxz_loc = conf.array[:,2].max()
+            maxx_loc = coords[:,0].max()
+            maxy_loc = coords[:,1].max()
+            maxz_loc = coords[:,2].max()
             
             maxx = max(maxx_loc, maxx)
             maxy = max(maxy_loc, maxy)
@@ -87,15 +88,15 @@ class MolecularTrace(IJob):
         dimy = maxy - miny
         dimz = maxz - minz
             
-        self.min = numpy.array([minx, miny, minz], dtype = numpy.float64)
-        self._outputData.add('origin',"line", self.min, units = 'nm')
+        self.min = np.array([minx, miny, minz], dtype=np.float64)
+        self._outputData.add('origin','line', self.min, units='nm')
         
-        self.gdim = numpy.ceil(numpy.array([dimx, dimy, dimz])/self.resolution).astype(numpy.int)
+        self.gdim = np.ceil(np.array([dimx, dimy, dimz])/self.resolution).astype(np.int)
         spacing = self.configuration['spatial_resolution']['value']
-        self._outputData.add('spacing',"line",numpy.array([spacing, spacing, spacing]), units = 'nm')
-        self.grid = numpy.zeros(self.gdim, dtype = numpy.int32)
+        self._outputData.add('spacing','line',np.array([spacing, spacing, spacing]), units = 'nm')
+        self.grid = np.zeros(self.gdim, dtype=np.int32)
 
-        self._outputData.add('molecular_trace',"volume", tuple(numpy.ceil(numpy.array([dimx, dimy, dimz])/self.resolution).astype(numpy.int)))
+        self._outputData.add('molecular_trace','volume', tuple(np.ceil(np.array([dimx, dimy, dimz])/self.resolution).astype(np.int)))
         
         self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
         
@@ -109,16 +110,14 @@ class MolecularTrace(IJob):
         
         # This is the actual index of the frame corresponding to the loop index.
         frameIndex = self.configuration['frames']['value'][index]
-                            
-        # The configuration corresponding to this index is set to the universe.
-        self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
-        
-        conf = self.configuration['trajectory']['instance'].universe.contiguousObjectConfiguration()
 
-        grid = numpy.zeros(self.gdim, dtype = numpy.int32)
+        conf = self.configuration['trajectory']['instance'].configuration(frameIndex)
+        conf = conf.continuous_configuration()
+        
+        grid = np.zeros(self.gdim, dtype= np.int32)
 
         # Loop over the indexes of the selected atoms for the molecular trace calculation.
-        mt_fast_calc.mt(conf.array[self._indexes,:], grid, self.configuration['spatial_resolution']['value'], self.min)
+        mt_fast_calc.mt(conf['coordinates'][self._indexes,:], grid, self.configuration['spatial_resolution']['value'], self.min)
 
         return index, grid
     
@@ -131,7 +130,7 @@ class MolecularTrace(IJob):
         @type x: no specific type.
         """
 
-        numpy.add(self.grid,x,self.grid)
+        np.add(self.grid,x,self.grid)
     
     def finalize(self):
         """
