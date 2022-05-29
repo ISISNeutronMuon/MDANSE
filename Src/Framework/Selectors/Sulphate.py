@@ -35,11 +35,7 @@ class Sulphate(ISelector):
                     self._choices.extend([sulf] + sorted(oxygens))
 
     def select(self, names):
-        '''
-        Returns the sulphate atoms.
-
-        @param universe: the universe
-        @type universe: MMTK.universe
+        '''Returns the sulphate atoms.
         '''
 
         sel = set()

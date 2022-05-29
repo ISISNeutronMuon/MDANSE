@@ -31,13 +31,9 @@ class Peptide(ISelector):
 
 
     def select(self, names):
-        '''
-        Returns the sugar atoms.
+        '''Returns the sugar atoms.
         
         Only for NucleotideChain objects.
-
-        @param universe: the universe
-        @type universe: MMTK.universe
         '''
 
         sel = set()

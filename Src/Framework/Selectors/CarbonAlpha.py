@@ -21,13 +21,9 @@ class CarbonAlpha(ISelector):
     section = "proteins"
 
     def select(self, *args):
-        '''
-        Returns the c_alpha atoms.
+        '''Returns the c_alpha atoms.
         
         Only for Protein and PeptideChain objects.
-
-        @param universe: the universe
-        @type universe: MMTK.universe
         '''
         
         sel = set()

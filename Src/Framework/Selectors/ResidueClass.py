@@ -38,12 +38,8 @@ class ResidueClass(ISelector):
         self._choices.extend(sorted(CHEMFAMILIES.keys()))
 
     def select(self, classes):
-        '''
-        Returns the atoms that matches a given list of peptide classes.
-    
-        @param universe: the universe
-        @type universe: MMTK.universe
-    
+        '''Returns the atoms that matches a given list of peptide classes.
+        
         @param classes: the residue classes list.
         @type classes: list
         '''

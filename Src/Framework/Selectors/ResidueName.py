@@ -31,12 +31,8 @@ class ResidueName(ISelector):
                 self._choices.extend([r.full_name() for r in ce.residues])
                         
     def select(self, names):
-        '''
-        Returns the atoms that matches a given list of peptide names.
-    
-        @param universe: the universe
-        @type universe: MMTK.universe
-    
+        '''Returns the atoms that matches a given list of peptide names.
+        
         @param names: the residue names list.
         @type names: list
         '''

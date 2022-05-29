@@ -22,13 +22,9 @@ class SideChain(ISelector):
     section = "proteins"
 
     def select(self, names):
-        '''
-        Returns the sidechains atoms.
+        '''Returns the sidechains atoms.
     
         Only for Protein, PeptideChain and NucleotideChain objects.
-
-        @param universe: the universe
-        @type universe: MMTK.universe
         '''
         
         sel = set()

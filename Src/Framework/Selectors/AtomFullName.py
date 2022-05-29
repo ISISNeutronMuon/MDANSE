@@ -27,12 +27,8 @@ class AtomFullName(ISelector):
         self._choices.extend(sorted(set([at.full_name().strip() for at in self._chemicalSystem.atom_list()])))
 
     def select(self, names):
-        '''
-        Returns the atoms that matches a given list of atom names.
-        
-        @param universe: the universe
-        @type universe: MMTK.universe
-    
+        '''Returns the atoms that matches a given list of atom names.
+            
         @param names: the atom names list.
         @type names: list
         '''

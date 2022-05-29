@@ -35,11 +35,7 @@ class Thiol(ISelector):
                     self._choices.extend([sulf] + sorted(hydrogens))
 
     def select(self, names):
-        '''
-        Returns the thiol atoms.
-
-        @param universe: the universe
-        @type universe: MMTK.universe
+        '''Returns the thiol atoms.
         '''
 
         sel = set()

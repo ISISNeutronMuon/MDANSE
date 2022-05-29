@@ -27,12 +27,8 @@ class AtomSymbol(ISelector):
         self._choices.extend(sorted(set([at.symbol.strip() for at in self._chemicalSystem.atom_list()])))
 
     def select(self, symbols):
-        '''
-        Returns the atoms that matches a given list of atom types.
-        
-        @param universe: the universe
-        @type universe: MMTK.universe
-    
+        '''Returns the atoms that matches a given list of atom types.
+            
         @param types: the atom types list.
         @type types: list
         '''

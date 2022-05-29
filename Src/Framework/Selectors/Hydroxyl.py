@@ -36,11 +36,7 @@ class Hydroxyl(ISelector):
 
 
     def select(self, names):
-        '''
-         Returns the hydroxyl atoms.
-
-         @param universe: the universe
-         @type universe: MMTK.universe
+        '''Returns the hydroxyl atoms.
          '''
         
         sel = set()

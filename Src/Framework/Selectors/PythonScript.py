@@ -13,9 +13,6 @@
 #
 # **************************************************************************
 
-import glob
-import os
-
 from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
                 

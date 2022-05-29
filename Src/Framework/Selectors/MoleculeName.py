@@ -27,11 +27,7 @@ class MoleculeName(ISelector):
         self._choices.extend(sorted(set([ce.name.strip() for ce in self._chemicalSystem.chemical_entities])))
 
     def select(self, names):
-        '''
-        Returns the atoms that matches a given list of molecule names.
-    
-        @param universe: the universe
-        @type universe: MMTK.universe
+        '''Returns the atoms that matches a given list of molecule names.
     
         @param names: the molecule names list.
         @type names: list

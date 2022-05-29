@@ -27,11 +27,7 @@ class MoleculeIndex(ISelector):
         self._choices.extend(range(len(self._chemicalSystem.chemical_entities)))    
 
     def select(self, values):
-        '''
-        Returns the atoms that matches a given list of molecule indexes.
-    
-        @param universe: the universe
-        @type universe: MMTK.universe
+        '''Returns the atoms that matches a given list of molecule indexes.
     
         @param indexes: the molecule indexes list.
         @type indexes: list

@@ -30,11 +30,8 @@ class Macromolecule(ISelector):
         self._choices.extend(["peptide_chain","protein","nucleotide_chain"])
          
     def select(self, macromolecules):
-        '''
-    
-        @param universe: the universe
-        @type universe: MMTK.universe
-    
+        '''Return the macromolecules.
+
         @param classes: the residue classes list.
         @type classes: list
         '''

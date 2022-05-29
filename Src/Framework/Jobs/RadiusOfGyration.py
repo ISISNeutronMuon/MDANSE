@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -35,11 +35,11 @@ class RadiusOfGyration(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    settings['weights'] = ('weights',{"dependencies":{"atom_selection":"atom_selection"}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['weights'] = ('weights',{'dependencies':{'atom_selection':'atom_selection'}})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
     settings['running_mode'] = ('running_mode',{})
                 
     def initialize(self):
@@ -55,7 +55,7 @@ class RadiusOfGyration(IJob):
 
         self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
         
-        self._masses = numpy.array([m for masses in self._configuration['atom_selection']['masses'] for m in masses],dtype=numpy.float64)
+        self._masses = np.array([m for masses in self._configuration['atom_selection']['masses'] for m in masses],dtype=np.float64)
 
     def run_step(self, index):
         """
@@ -69,14 +69,14 @@ class RadiusOfGyration(IJob):
         """                
 
         # get the Frame index
-        frameIndex = self.configuration['frames']['value'][index] 
-        
-        self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
-        
-        # read the particle trajectory                                              
-        series = self.configuration['trajectory']['instance'].universe.configuration().array[self._indexes,:]
-                        
-        rog = radius_of_gyration(series, masses=self._masses, root=True)
+        frameIndex = self.configuration['frames']['value'][index]
+
+        conf = self.configuration['trajectory']['instance'].configuration(frameIndex)
+                                
+        rog = radius_of_gyration(
+            conf['coordinates'][self._indexes,:],
+            masses=self._masses,
+            root=True)
                                                  
         return index, rog
                         

@@ -31,13 +31,9 @@ class NucleotideBase(ISelector):
 
 
     def select(self, names):
-        '''
-        Returns the bases atoms.
+        '''Returns the bases atoms.
         
         Only for NucleotideChain objects.
-
-        @param universe: the universe
-        @type universe: MMTK.universe
         '''
 
         sel = set()

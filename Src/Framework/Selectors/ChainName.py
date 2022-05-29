@@ -31,11 +31,7 @@ class ChainName(ISelector):
         
 
     def select(self, names):
-        '''
-        Returns the atoms that matches a given list of chain names.
-        
-        @param universe: the universe
-        @type universe: MMTK.universe
+        '''Returns the atoms that matches a given list of chain names.
     
         @param names: the chain names list.
         @type names: list

@@ -27,12 +27,8 @@ class AtomIndex(ISelector):
         self._choices.extend(sorted([at.index for at in self._chemicalSystem.atom_list()]))
 
     def select(self, indexes):
-        '''
-        Returns the atoms that matches a given list of indexes.
-        
-        @param universe: the universe
-        @type universe: MMTK.universe
-    
+        '''Returns the atoms that matches a given list of indexes.
+            
         @param indexes: the atom indexes list.
         @type indexes: list
         '''

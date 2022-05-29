@@ -35,11 +35,7 @@ class Phosphate(ISelector):
                     self._choices.extend([phos] + sorted(oxygens))
 
     def select(self, names):
-        '''
-        Returns the phosphate atoms.
-
-        @param universe: the universe
-        @type universe: MMTK.universe
+        '''Returns the phosphate atoms.
         '''
         
         sel = set()

@@ -31,12 +31,8 @@ class NucleotideName(ISelector):
         
 
     def select(self, names):
-        '''
-        Returns the atoms that matches a given list of nucleotide names.
+        '''Returns the atoms that matches a given list of nucleotide names.
         
-        @param universe: the universe
-        @type universe: MMTK.universe
-    
         @param names: the nucletodide names list.
         @type names: list
         '''

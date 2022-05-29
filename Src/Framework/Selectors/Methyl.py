@@ -36,11 +36,7 @@ class Methyl(ISelector):
 
 
     def select(self, names):
-        '''
-        Returns the methyl atoms.
-
-        @param universe: the universe
-        @type universe: MMTK.universe
+        '''Returns the methyl atoms.
         '''
 
         sel = set()

@@ -27,12 +27,8 @@ class AtomElement(ISelector):
         self._choices.extend(sorted(set([at.element.lower() for at in self._chemicalSystem.atom_list()])))
 
     def select(self, elements):
-        '''
-        Returns the atoms that matches a given list of elements.
-    
-        @param universe: the universe
-        @type universe: MMTK.universe
-    
+        '''Returns the atoms that matches a given list of elements.
+        
         @param elements: the atom elements list.
         @type elements: list
         '''

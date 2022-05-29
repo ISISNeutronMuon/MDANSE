@@ -30,13 +30,9 @@ class Backbone(ISelector):
                 self._choices.extend([c.name for c in ce.peptide_chains])
 
     def select(self, names):
-        '''
-        Returns the backbone atoms.
+        '''Returns the backbone atoms.
         
         Only for Protein, PeptideChain and NucleotideChain objects.
-
-        @param universe: the universe
-        @type universe: MMTK.universe
         '''
 
         sel = set()

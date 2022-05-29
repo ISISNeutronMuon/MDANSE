@@ -33,12 +33,8 @@ class NucleotideType(ISelector):
 
 
     def select(self, types):
-        '''
-        Returns the atoms that matches a given list of nucleotide types.
-    
-        @param universe: the universe
-        @type universe: MMTK.universe
-    
+        '''Returns the atoms that matches a given list of nucleotide types.
+        
         @param types: the nucleotide types list.
         @type types: list
         '''
