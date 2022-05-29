@@ -15,12 +15,12 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
+from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 class RootMeanSquareDeviation(IJob):
     """
@@ -38,14 +38,14 @@ class RootMeanSquareDeviation(IJob):
     ancestor = ["mmtk_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['reference_frame'] = ('integer', {'mini':0, 'default':0})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['grouping_level']=('grouping_level',{"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection', 'atom_transmutation':'atom_transmutation'}})
     settings['atom_transmutation'] = ('atom_transmutation', {'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
-    settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['weights']=('weights',{'dependencies':{'atom_selection':'atom_selection'}})
+    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
     settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):
@@ -55,12 +55,14 @@ class RootMeanSquareDeviation(IJob):
         self._referenceIndex = self.configuration['reference_frame']['value']
         
         # Will store the time.
-        self._outputData.add("time","line", self.configuration['frames']['duration'], units='ps')
+        self._outputData.add('time','line', self.configuration['frames']['duration'], units='ps')
                                     
         # Will store the mean square deviation
         for element in self.configuration['atom_selection']['unique_names']:
-            self._outputData.add("rmsd_%s" % element,"line", (self.configuration['frames']['number'],), axis="time", units="nm")
-                
+            self._outputData.add('rmsd_{}'.format(element),'line', (self.configuration['frames']['number'],), axis="time", units="nm")
+
+        self._atoms = sorted_atoms(self.configuration["trajectory"]["instance"].chemical_system.atom_list())
+
     def run_step(self, index):
         """
         Runs a single step of the job.
@@ -70,17 +72,16 @@ class RootMeanSquareDeviation(IJob):
         """
         
         indexes = self.configuration['atom_selection']["indexes"][index]
-        masses = self.configuration['atom_selection']["masses"][index]
-        
-        series = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
-                                       indexes,
-                                       first=self.configuration['frames']['first'],
-                                       last=self.configuration['frames']['last']+1,
-                                       step=self.configuration['frames']['step'],
-                                       weights=masses)
+        atoms = [self._atoms[idx] for idx in indexes]
+                        
+        series = self.configuration["trajectory"]["instance"].read_com_trajectory(
+            atoms,
+            first=self.configuration['frames']['first'],
+            last=self.configuration['frames']['last']+1,
+            step=self.configuration['frames']['step'])
 
         # Compute the squared sum of the difference between all the coordinate of atoms i and the reference ones 
-        squaredDiff = numpy.sum((series-series[self._referenceIndex,:])**2,axis=1)
+        squaredDiff = np.sum((series-series[self._referenceIndex,:])**2,axis=1)
                 
         return index, squaredDiff
                         
@@ -104,18 +105,17 @@ class RootMeanSquareDeviation(IJob):
         # The RMSDs per element are averaged.
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData["rmsd_%s" % element] /= number
+            self._outputData['rmsd_{}'.format(element)] /= number
 
-        weights = self.configuration["weights"].get_weights()
-        rmsdTotal = weight(weights,self._outputData,nAtomsPerElement,1,"rmsd_%s")
-        rmsdTotal = numpy.sqrt(rmsdTotal)
-        self._outputData.add("rmsd_total","line", rmsdTotal, axis="time", units="nm") 
+        weights = self.configuration['weights'].get_weights()
+        rmsdTotal = weight(weights,self._outputData,nAtomsPerElement,1,'rmsd_%s')
+        rmsdTotal = np.sqrt(rmsdTotal)
+        self._outputData.add('rmsd_total','line', rmsdTotal, axis='time', units='nm') 
             
         for element, number in nAtomsPerElement.items():
-            self._outputData["rmsd_%s" % element]  = numpy.sqrt(self._outputData["rmsd_%s" % element])
-      
-        # Write the output variables.
-         
+            self._outputData['rmsd_{}'.format(element)]  = np.sqrt(
+                self._outputData['rmsd_{}'.format(element)])
+               
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     
