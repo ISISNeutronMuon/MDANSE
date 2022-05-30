@@ -27,6 +27,10 @@ class _Configuration:
         for k,v in variables.items():
             self[k] = v
 
+    def __contains__(self,item):
+
+        return item in self._variables
+
     def __getitem__(self, name):
 
         return self._variables[name]
