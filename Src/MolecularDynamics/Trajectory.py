@@ -336,7 +336,7 @@ class Trajectory:
         return self._chemical_system
 
     @property
-    def h5_file(self):
+    def file(self):
         """Return the trajectory file object.
 
         :return: the trajectory file object
@@ -346,7 +346,7 @@ class Trajectory:
         return self._h5_file
 
     @property
-    def h5_filename(self):
+    def filename(self):
         """Return the trajectory filename.
 
         :return: the trajectory filename

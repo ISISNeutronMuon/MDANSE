@@ -887,7 +887,7 @@ class NucleotideChain(_ChemicalEntity):
         return nc
 
     @property
-    def nucleotides(self):
+    def residues(self):
 
         return self._nucleotides
 
@@ -1141,6 +1141,15 @@ class Protein(_ChemicalEntity):
             if 'peptide' in at.groups:
                 atoms.append(at)
         return atoms
+
+    @property
+    def residues(self):
+
+        residues = []
+        for pc in self._peptide_chains:
+            residues.extend(pc.residues)
+
+        return residues
 
     def serialize(self,h5_file, h5_contents):
         if 'peptide_chains' in h5_contents:

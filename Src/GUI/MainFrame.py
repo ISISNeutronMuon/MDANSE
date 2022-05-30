@@ -18,7 +18,6 @@ import os
 import sys
 import webbrowser
 
-
 import wx
 import wx.aui as aui
 import wx.html as wxhtml

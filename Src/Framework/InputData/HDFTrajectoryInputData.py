@@ -45,9 +45,9 @@ class HDFTrajectoryInputData(InputFileData):
         val.append("Number of steps:")
         val.append("%s\n" % len(self._data))
         val.append("Configuration:")
-        val.append("\tIs periodic: {}\n".format('unit_cell' in self._data._h5_file['/configuration']))
+        val.append("\tIs periodic: {}\n".format('unit_cell' in self._data.file['/configuration']))
         val.append("Variables:")
-        for k,v in self._data.h5_file['/configuration'].items():
+        for k,v in self._data.file['/configuration'].items():
             val.append('\t- {}: {}'.format(k,v.shape))
 
         mol_types = {}
@@ -76,6 +76,6 @@ class HDFTrajectoryInputData(InputFileData):
     
     @property
     def hdf(self):
-        return self._data.h5_file
+        return self._data.file
 
 REGISTRY["hdf_trajectory"] = HDFTrajectoryInputData    

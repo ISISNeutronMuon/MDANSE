@@ -13,6 +13,7 @@
 #
 # **************************************************************************
 
+import collections
 import os
 
 import wx
@@ -64,26 +65,9 @@ class PartialChargesPlugin(UserDefinitionPlugin):
 
         self._target = os.path.basename(self._trajectory.filename)
 
-        self._contents = {}
-        for ce in self._trajectory.chemical_system.chemical_entities:
-        
-            cename = ce.name
-            if isinstance(ce, (PeptideChain,Protein,NucleotideChain)):
-                for res in ce.residues():
-                    resname = res.type.symbol.strip()
-                    for at in res.atom_list():
-                        descr = (cename,resname,at.name)
-                        d = self._contents.setdefault(descr,[0.0,[]])
-                        d[1].append(at.index)
-            elif isinstance(ce, (Molecule,AtomCluster)):
-                for at in ce.atom_list():
-                    descr = (cename,at.name)
-                    d = self._contents.setdefault(descr,[0.0,[]])
-                    d[1].append(at.index)
-            else:
-                descr = (ce.name,)
-                d = self._contents.setdefault(descr,[0.0,[]])
-                d[1].append(ce.index)
+        self._contents = collections.OrderedDict()
+        for at in self._trajectory.chemical_system.atom_list():
+            self._contents[at.full_name()] = 0.0
             
         self._grid.CreateGrid(0,2)
         
@@ -104,10 +88,10 @@ class PartialChargesPlugin(UserDefinitionPlugin):
         self._grid.SetColLabelValue(0,'name')
         self._grid.SetColLabelValue(1,'charge')
 
-        for i,(k,v) in enumerate(sorted(self._contents.items())):
+        for i,(k,v) in enumerate(self._contents.items()):
             self._grid.AppendRows(1)
-            self._grid.SetCellValue(i,0,".".join(k))
-            self._grid.SetCellValue(i,1,str(v[0]))
+            self._grid.SetCellValue(i,0,k)
+            self._grid.SetCellValue(i,1,str(v))
             
         self._grid.Bind(wx.EVT_SIZE, self.OnSize)
  

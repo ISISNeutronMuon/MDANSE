@@ -55,13 +55,13 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         self['length'] = len(self['instance'])
 
         try:
-            self['md_time_step'] = self['instance'].h5_file['/time'][1] - self['instance'].h5_file['/time'][0]
+            self['md_time_step'] = self['instance'].file['/time'][1] - self['instance'].file['/time'][0]
         except IndexError:
             self['md_time_step'] = 1.0
             
         self["chemical_system"] = inputTraj.chemical_system
 
-        self['has_velocities'] = 'velocities' in self['instance'].h5_file['/configuration']
+        self['has_velocities'] = 'velocities' in self['instance'].file['/configuration']
                 
     def get_information(self):
         '''
