@@ -101,9 +101,8 @@ class SolventAccessibleSurface(IJob):
         conf = conf.continuous_configuration()
                 
         # Loop over the indexes of the selected atoms for the sas calculation.
-        sas = sas_fast_calc.sas(index,
-                                conf['coordinates'][self._indexes,:],
-                                np.array(self.configuration['atom_selection']['indexes'], dtype=np.int32).ravel(),
+        sas = sas_fast_calc.sas(conf['coordinates'],
+                                self._indexes,
                                 self.vdwRadii_list,
                                 self.spherePoints,
                                 self.configuration['probe_radius']['value'])

@@ -30,9 +30,8 @@ cdef packed struct neighbour_t:
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def sas(int index,
-        ndarray[np.float64_t, ndim = 2] config not None,
-        ndarray[np.int32_t, ndim = 1] indexes not None,
+def sas(ndarray[np.float64_t, ndim = 2] config not None,
+        indexes not None,
         ndarray[np.float64_t, ndim = 2] vdwRadii_list not None,
         ndarray[np.float64_t, ndim = 2] sphere_points not None,
         double probe_radius_value): 
@@ -44,32 +43,33 @@ def sas(int index,
     cdef double Xposi, Yposi, Zposi, Xposj, Yposj, Zposj, Xposk, Yposk, Zposk, Xs, Ys, Zs, Xguess, Yguess, Zguess, dx, dy, dz
     
     # The solvent accessible surface for the running frame (given by index var).
-    total = len(indexes)
+    total = (<object> config).shape[0]
     
     # The list of the neighbors indexes. 
     neighbour_dtype=[("index",np.int32),("dist",np.float64)]
-    
-    cdef np.ndarray[neighbour_t, ndim = 1] neighbors = np.recarray(shape=(total ,),dtype=neighbour_dtype)
+
+    cdef np.ndarray[neighbour_t, ndim = 1] neighbors = np.recarray(shape=(total,),dtype=neighbour_dtype)
+
     memset(&neighbors[0], -1, total *sizeof(neighbour_t))
     
     sas = 0.
     two_times_prob_radius = 2.0*probe_radius_value
-    for i in indexes:
+    for idx in indexes:
         
-        # The position of atoms |i| in the current configuration.
-        Xposi = config[i,0]
-        Yposi = config[i,1]
-        Zposi = config[i,2]
+        # The position of atoms |idx| in the current configuration.
+        Xposi = config[idx,0]
+        Yposi = config[idx,1]
+        Zposi = config[idx,2]
         
         # The probe radius of atom |index|.
-        radius = vdwRadii_list[i][1] 
+        radius = vdwRadii_list[idx][1] 
         radius = radius + two_times_prob_radius
         # Loop over all the atoms.
         for item in vdwRadii_list:
             k = item[0]
             v = item[1]
             # Skip the case where the atoms is itself.
-            if k == i:
+            if k == idx:
                 neighbors[k].index = k
                 neighbors[k].dist  = -1
                 continue
@@ -83,7 +83,7 @@ def sas(int index,
             dy = Yposi - Yposk
             dz = Zposi - Zposk
 
-            dist = (dx) * (dx) + (dy) * (dy) + (dz) * (dz)       
+            dist = dx*dx + dy*dy + dz*dz       
 
             # If the distance is less than the probe radius + the VDW radius of atoms |k|, atom |k| is considered to be a neighbor of atom |index|.
             if dist < (radius + v)*(radius + v):
@@ -92,17 +92,17 @@ def sas(int index,
             else:
                 neighbors[k].index = k
                 neighbors[k].dist = -1.
-                
-        
+                        
         # Sort the neighbors by increasing distance. -> not usefull ? cost of the sort / cost to parse the full list
+
         neighbors.sort(order = 'dist')
-        # The probe radius of atoms |i|.
+        # The probe radius of atoms |idx|.
         radi = radius + probe_radius_value
 
-        # A counter for the number of atoms |i| sphere points accessible to solvent.
+        # A counter for the number of atoms |idx| sphere points accessible to solvent.
         nAccessiblePoints = 0
             
-        # Loop over the sphere points surrounding atoms |i|.\
+        # Loop over the sphere points surrounding atoms |idx|.\
         nb_neighbors = neighbors.shape[0] 
         for Spoint in sphere_points:
         
@@ -116,7 +116,7 @@ def sas(int index,
             Yguess = Ys*radi + Yposi
             Zguess = Zs*radi + Zposi
             
-            # Loop over the neighbors of atoms |i|.
+            # Loop over the neighbors of atoms |idx|.
             
             for 0 <=  n < nb_neighbors:
                 if neighbors[n].dist == -1:
@@ -136,7 +136,7 @@ def sas(int index,
                 dy = Yposj - Yguess
                 dz = Zposj - Zguess
                 
-                dist = (dx) * (dx) + (dy) * (dy) + (dz) * (dz)    
+                dist = dx*dx + dy*dy + dz*dz    
 
                 # If the squared distance is less than the squared probe radius, the running sphere point is not accessible.
                 if dist < r*r:
