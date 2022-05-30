@@ -39,11 +39,11 @@
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-''' 
+"""
 Created on May 29, 2015
 
 @author: Eric C. Pellegrini
-'''
+"""
 
 import os
 import unittest
@@ -59,15 +59,15 @@ from MDANSE.Framework.AtomSelectionParser import AtomSelectionParserError
 
 TRAJECTORIES_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),"UserData","Trajectories")
 
+
 class TestConfigurator(unittest.TestCase):
-    '''
-    Unittest for the configurators used to setup an analysis in MDANSE
-    '''
+    """Unittest for the configurators used to setup an analysis in MDANSE"""
 
     def setUp(self):
                 
         self._configurable = Configurable()
-        self._validTrajectory = Trajectory(None, os.path.join('..','..','Data','Trajectories','MMTK','protein_in_periodic_universe.nc'), "r")
+        self._validTrajectory = Trajectory(None, os.path.join('..','..','Data','Trajectories','MMTK',
+                                                              'waterbox_in_periodic_universe.nc'), "r")
         self._parameters = {}
 
     def tearDown(self):
@@ -76,9 +76,7 @@ class TestConfigurator(unittest.TestCase):
         self._parameters.clear()
         
     def test_integer(self):
-        '''
-        Test the integer configurator
-        '''
+        """Test the integer configurator"""
  
         self._configurable.set_settings({"test_integer":('integer',{})})
           
@@ -105,9 +103,7 @@ class TestConfigurator(unittest.TestCase):
         self.assertRaises(ConfiguratorError, self._configurable.setup,self._parameters)
  
     def test_float(self):
-        '''
-        Test the float configurator
-        '''
+        """Test the float configurator"""
  
         self._configurable.set_settings({"test_float":('float',{})})
  
@@ -135,9 +131,7 @@ class TestConfigurator(unittest.TestCase):
         self.assertRaises(ConfiguratorError, self._configurable.setup, self._parameters)
  
     def test_mmtk_trajectory(self):
-        '''
-        Test the mmtk_trajectory configurator
-        '''
+        """Test the mmtk_trajectory configurator"""
  
         self._configurable.set_settings({"trajectory":('mmtk_trajectory',{})})
            
@@ -268,9 +262,11 @@ class TestConfigurator(unittest.TestCase):
   
         # Test a valid atom selection string
         self._parameters["trajectory"] = self._validTrajectory.filename
-        self._parameters["atom_selection"] = 'atom_type carbon'
+        self._parameters["atom_selection"] = 'atom_type oxygen'
         self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable['atom_selection']['selection_length'],sum([True for at in self._configurable['trajectory']['instance'].universe.atomList() if at.symbol=='C']))
+        self.assertEqual(self._configurable['atom_selection']['selection_length'],
+                         sum([True for at in self._configurable['trajectory']['instance'].universe.atomList()
+                              if at.symbol=='O']))
   
     def test_atom_transmutation(self):
 
@@ -305,11 +301,13 @@ class TestConfigurator(unittest.TestCase):
         self._parameters["atom_transmutation"] = None
         self._configurable.setup(self._parameters)
 
+
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
     s.addTest(loader.loadTestsFromTestCase(TestConfigurator))
     return s
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
