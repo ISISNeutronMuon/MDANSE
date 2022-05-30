@@ -23,7 +23,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='''This is mdanse_job: a shortcut for running MDANSE job. It opens a GUI dialog 
     from where an analysis or a trajectory converter will be setup and eventually run.''')
     parser.add_argument('job',nargs=1,help='Code for the job to be run. E.g. msd for Mean Square Displacement. For a complete list of available jobs please run "mdanse -r job"')
-    parser.add_argument('trajectory',nargs='*',help='MMTK Trajectory file. This is needed only for analysis job. Not required for trajectory conversion jobs.')
+    parser.add_argument('trajectory',nargs='*',help='HDF Trajectory file. This is needed only for analysis job. Not required for trajectory conversion jobs.')
     args = parser.parse_args()
     
     return args
@@ -42,7 +42,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     for v in REGISTRY['job'][job].settings.values():
-        if v[0] == 'mmtk_trajectory' and not trajectory:
+        if v[0] == 'hdf_trajectory' and not trajectory:
             print('A trajectory is needed')
             sys.exit(1)
 

@@ -90,17 +90,6 @@ class CommandLineParser(optparse.OptionParser):
         LOGGER.add_handler("terminal", REGISTRY['handler']['terminal'](), level="info", start=True)
         LOGGER.start()
     
-    def add_mmtk_definition(self, option, opt_str, value, parser):
-        
-        if len(parser.rargs) != 3:
-            raise CommandLineParserError("Invalid number of arguments for %r option" % opt_str)
-        
-        from MDANSE.Framework.MMTKDefinitions import MMTK_DEFINITIONS
-        
-        MMTK_DEFINITIONS.add(*parser.rargs)
-        
-        MMTK_DEFINITIONS.save()
-
     def check_job(self, option, opt_str, value, parser):
         '''Display the jobs list
             
@@ -219,9 +208,8 @@ class CommandLineParser(optparse.OptionParser):
         '''
                 
         trajName = parser.rargs[0]
-        inputTraj = REGISTRY["input_data"]["mmtk_trajectory"](trajName)
-        print inputTraj.info()
-       
+        inputTraj = REGISTRY['input_data']['hdf_trajectory'](trajName)
+        print(inputTraj.info())
        
     def error(self, msg):
         '''Called when an error occured in the command line.
@@ -370,7 +358,6 @@ if __name__ == "__main__":
 
     # Creates a first the group of general options.
     group = optparse.OptionGroup(parser, "General options")
-    group.add_option('--add-mmtk-def', action='callback', callback=parser.add_mmtk_definition, help='Add a definition to the MMTK database.')
     group.add_option('-d', '--database', action='callback', callback=parser.display_element_info, help='Display chemical informations about a given element.')
     group.add_option('-r', '--registry', action='callback', callback=parser.query_classes_registry, help='Display the contents of MDANSE classes registry.')
     group.add_option('-t', '--traj', action='callback', callback=parser.display_trajectory_contents, help='Display the chemical contents of a trajectory.')
