@@ -129,7 +129,7 @@ class LAMMPSConfigFile(dict):
                 
 class LAMMPSConverter(Converter):
     """
-    Converts a LAMMPS trajectory to a MMTK trajectory.
+    Converts a LAMMPS trajectory to a HDF trajectory.
     """
                   
     label = "LAMMPS"
@@ -165,7 +165,7 @@ class LAMMPSConverter(Converter):
                 if line.startswith("ITEM: TIMESTEP"):
                     self.numberOfSteps += 1
 
-        # A MMTK trajectory is opened for writing.
+        # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
             self.configuration['output_file']['file'],
             self._chemicalSystem,

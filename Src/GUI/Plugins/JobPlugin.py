@@ -186,7 +186,7 @@ class JobFrame(wx.Frame):
                         
 if __name__ == "__main__":
             
-    filename = os.path.join(os.path.dirname(PLATFORM.package_directory()),'Data','Trajectories','MMTK','protein_in_periodic_universe.nc')
+    filename = os.path.join(os.path.dirname(PLATFORM.package_directory()),'Data','Trajectories','HDF','waterbox.h5')
     
     app = wx.App(False)
     f = JobFrame(None,'dacf',filename)

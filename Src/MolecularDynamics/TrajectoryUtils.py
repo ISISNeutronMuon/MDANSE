@@ -16,8 +16,6 @@ import operator
 
 import numpy as np
 
-from MMTK.Trajectory import Trajectory
-
 from MDANSE.Core.Error import Error
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, AtomGroup
@@ -178,12 +176,3 @@ def sorted_atoms(atoms,attribute=None):
     else:
         return [getattr(at,attribute) for at in atoms]
     
-class MMTKTrajectory(Trajectory):
-    
-    def __init__(self,*args,**kwargs):
-        
-        Trajectory.__init__(self,*args,**kwargs)
-        
-        resolve_undefined_molecules_name(self.universe)
-         
-        build_connectivity(self.universe)

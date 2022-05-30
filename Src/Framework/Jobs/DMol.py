@@ -18,7 +18,7 @@ from MDANSE.Framework.Jobs.Discover import DiscoverConverter
         
 class DMolConverter(DiscoverConverter):
     """
-    Converts a DMol trajectory to a MMTK trajectory.
+    Converts a DMol trajectory to a HDF trajectory.
     """
     
     label = "DMol"

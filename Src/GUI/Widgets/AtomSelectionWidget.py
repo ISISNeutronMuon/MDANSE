@@ -131,12 +131,15 @@ class AtomSelectionWidget(UserDefinitionWidget):
 REGISTRY["atom_selection"] = AtomSelectionWidget
    
 if __name__ == "__main__":
-    
-    from MMTK.Trajectory import Trajectory
-    
+        
     from MDANSE import PLATFORM
-    
-    t = Trajectory(None,os.path.join(PLATFORM.example_data_directory(),"Trajectories","MMTK","protein_in_periodic_universe.nc"),"r")
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
+    t = Trajectory(os.path.join(
+        PLATFORM.example_data_directory(),
+        'Trajectories',
+        'HDF',
+        'waterbox.h5'))
     
     app = wx.App(False)
     

@@ -60,7 +60,7 @@ class OrderParameter(IJob):
     ancestor = ['hdf_trajectory','molecular_viewer']
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('hdf_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'MMTK', 'protein_in_periodic_universe.nc')})
+    settings['trajectory'] = ('hdf_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'HDF', 'waterbox.h5')})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['axis_selection'] = ('atoms_list', {'dependencies':{'trajectory':'trajectory'},
                                                  'nAtoms':2,

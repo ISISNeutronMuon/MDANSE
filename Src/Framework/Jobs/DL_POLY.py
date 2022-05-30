@@ -282,7 +282,7 @@ class HistoryFile(dict):
                                            
 class DL_POLYConverter(Converter):
     """
-    Converts a DL_POLY trajectory to a MMTK trajectory.
+    Converts a DL_POLY trajectory to a HDF trajectory.
     """
     
     label = "DL-POLY"

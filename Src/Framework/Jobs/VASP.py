@@ -153,7 +153,7 @@ class XDATCARFile(dict):
 
 class VASPConverter(Converter):
     """
-    Converts a VASP trajectory to a MMTK trajectory.
+    Converts a VASP trajectory to a HDF trajectory.
     """
                   
     label = "VASP (>=5)"
@@ -180,7 +180,7 @@ class VASPConverter(Converter):
             for i in range(number):
                 self._chemicalSystem.add_chemical_entity(Atom(symbol=symbol, name="{:s}_{:d}".format(symbol,i)))
 
-        # A MMTK trajectory is opened for writing.
+        # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(self.configuration['output_file']['file'],self._chemicalSystem, self.numberOfSteps)
 
     def run_step(self, index):

@@ -57,7 +57,7 @@ class McStasVirtualInstrument(IJob):
     ancestor = ['hdf_trajectory','molecular_viewer']
     
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'MMTK', 'protein_in_periodic_universe.nc')})
+    settings['trajectory'] = ('hdf_trajectory', {'default':os.path.join('..','..','..','Data','Trajectories', 'HDF', 'waterbox.h5')})
     settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['sample_coh'] = ('netcdf_input_file', {"widget":'input_file',
                                                     "label":'MDANSE Coherent Structure Factor',

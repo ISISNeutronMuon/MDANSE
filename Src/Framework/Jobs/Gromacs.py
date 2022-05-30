@@ -16,27 +16,21 @@
 import collections
 import os
 
-import numpy
-
-from MMTK import Units
-from MMTK.PDB import PDBConfiguration
-from MMTK.ParticleProperties import Configuration, ParticleVector
-from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
-from MMTK.Universe import ParallelepipedicPeriodicUniverse
-
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Extensions import xtc, trr
 from MDANSE.Framework.Jobs.Converter import Converter
-
+from MDANSE.Framework.Units import measure
+from MDANSE.IO.PDBReader import PDBReader
+from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 class GromacsConverterError(Error):
     pass
 
-
 class GromacsConverter(Converter):
     """
-    Converts a Gromacs trajectory to a MMTK trajectory.
+    Converts a Gromacs trajectory to a HDF trajectory.
     """
                   
     label = "Gromacs"
@@ -49,8 +43,8 @@ class GromacsConverter(Converter):
                             {'wildcard': 'XTC files (*.xtc)|*.xtc|TRR files (*.trr)|*.trr|All files|*',
                              'default': os.path.join('..', '..', '..', 'Data', 'Trajectories', 'Gromacs', 'md.xtc'),
                              'label': 'xtc or trr file'})
-    settings['fold'] = ('boolean', {'default': False, 'label': "Fold coordinates in to box"})
-    settings['output_file'] = ('single_output_file', {'format': "netcdf", 'root': 'pdb_file'})
+    settings['fold'] = ('boolean', {'default': False, 'label': 'Fold coordinates in to box'})
+    settings['output_file'] = ('single_output_file', {'format': 'hdf', 'root': 'pdb_file'})
 
     def initialize(self):
         '''
@@ -89,30 +83,15 @@ class GromacsConverter(Converter):
         # The number of steps of the analysis.
         self.numberOfSteps = len(self._xdr_file)
 
-        # Create all objects from the PDB file.
-        conf = PDBConfiguration(self.configuration['pdb_file']['filename'])
+        # Create all chemical entities from the PDB file.  
+        pdb_reader = PDBReader(self.configuration['pdb_file']['filename'])
+        chemical_system = pdb_reader.build_chemical_system()
 
-        # Creates a collection of all the chemical objects stored in the PDB file
-        molecules = conf.createAll()
-
-        # Create a universe and introduce dhe chemical objects found in the PDB file into the universe.
-        self._universe = ParallelepipedicPeriodicUniverse()
-        self._universe.addObject(molecules)
-
-        # If a TRR trajectory is being read, initialise velocities and forces
-        if not self._xtc:
-            if self._read_velocities:
-                self._universe.initializeVelocitiesToTemperature(0.)
-                self._velocities = ParticleVector(self._universe)
-            if self._read_forces:
-                self._forces = ParticleVector(self._universe)
-
-        # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
-
-        # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions=[TrajectoryOutput(self._trajectory,
-                                                                                     data_to_be_written, 0, None, 1)])
+        # A trajectory is opened for writing.
+        self._trajectory = TrajectoryWriter(
+            self.configuration['output_file']['file'],
+            chemical_system,
+            self.numberOfSteps)
 
     def run_step(self, index):
         """Runs a single step of the job.
@@ -123,6 +102,8 @@ class GromacsConverter(Converter):
         @note: the argument index is the index of the loop note the index of the frame.      
         """
 
+        variables = {}
+
         # The x, y and z values of the current frame.
         if self._xtc:
             coords, times, steps, box = self._xdr_file.read(1)
@@ -130,32 +111,27 @@ class GromacsConverter(Converter):
             coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1,
                                                                                     get_velocities=self._read_velocities,
                                                                                     get_forces=self._read_forces)
+            if self._read_velocities:
+                variables['velocities'] = velocities[0,:,:].astype(float)
+            if self._read_forces:
+                variables['gradients'] = forces[0,:,:].astype(float)
 
-        conf = Configuration(self._universe, coords[0,:,:])
-
-        # If the universe is periodic set its shape with the current dimensions of the unit cell.
-        self._universe.setShape(box[0,:,:])
+        conf = PeriodicRealConfiguration(
+            self._trajectory.chemical_system,
+            coords,
+            box[0,:,:],
+            **variables
+        )
         
-        self._universe.setConfiguration(conf)
-
         if self.configuration['fold']["value"]:        
-            self._universe.foldCoordinatesIntoBox()
+            conf.fold_coordinates()
+
+        self._trajectory.chemical_system.configuration = conf
 
         # The current time.
-        t = times[0] * Units.ps
-        data = {'time': t}
+        time = times[0]
 
-        # Set velocities and forces if available
-        if not self._xtc:
-            if self._read_velocities:
-                self._velocities.array = velocities[0, :, :].astype(float)  # already in nm/ps
-                data['velocities'] = self._velocities
-            if self._read_forces:
-                self._forces.array = forces[0, :, :].astype(float)  # already in kJ/(mol nm)
-                data["gradients"] = self._forces
-
-        # Store a snapshot of the current configuration in the output trajectory.
-        self._snapshot(data=data)
+        self._trajectory.dump_configuration(time)
                                         
         return index, None
 

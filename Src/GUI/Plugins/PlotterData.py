@@ -7,7 +7,6 @@ import netCDF4
 
 from MDANSE.Core.Decorators import compatibleabstractproperty
 
-
 class _IPlotterVariable:
     """This is the base abstract class for plotter variable.
 
@@ -47,7 +46,6 @@ class NetCDFPlotterVariable(_IPlotterVariable):
         """
         return self._variable[:]
 
-
 class _IPlotterData:
     """
     This is the interface for plotter data.
@@ -75,7 +73,6 @@ class _IPlotterData:
         """Close the data."""
         self._file.close()
         
-
 class NetCDFPlotterData(_IPlotterData):
     """This class implements the plotter data interface for NetCDF data."""
 
@@ -121,6 +118,5 @@ class NetCDFPlotterData(_IPlotterData):
 
         for _, sub_group in group.groups.items():
             NetCDFPlotterData.find_numeric_variables(var_dict, sub_group)
-
 
 PLOTTER_DATA_TYPES = {'.nc': NetCDFPlotterData, '.cdf': NetCDFPlotterData, '.netcdf': NetCDFPlotterData}

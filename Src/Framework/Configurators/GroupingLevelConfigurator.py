@@ -14,7 +14,6 @@
 # **************************************************************************
 
 import collections
-import operator
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import SingleChoiceConfigurator
@@ -36,10 +35,10 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
     The level of granularity currently supported are:
     
     * 'atom': no grouping will be performed
-    * 'group': the atoms that belongs to a MMTK AtomCluster object will be grouped as a single atom per object while the ones that belongs to a MMTK Molecule, NucleotideChain, PeptideChain and Protein object will be grouped according to the chemical group they belong to (e.g. peptide group, methyl group ...)
-    * 'residue': the atoms that belongs to a MMTK AtomCluster or Molecule object will be grouped as a single atom per object while the ones thta belongs to a MMTK NucleotideChain, PeptideChain or Protein object will be grouped according to the residue to which they belong to (e.g. Histidine, Cytosyl ...)
-    * 'chain': the atoms that belongs to a MMTK AtomCluster or Molecule object will be grouped as a single atom per object while the ones that belongs to a MMTK NucleotideChain, PeptideChain or Protein object will be grouped according to the chain they belong to
-    * 'molecule': the atoms that belongs to any MMTK chemical object will be grouped as a single atom per object
+    * 'group': the atoms that belongs to an AtomCluster object will be grouped as a single atom per object while the ones that belongs to a Molecule, NucleotideChain, PeptideChain and Protein object will be grouped according to the chemical group they belong to (e.g. peptide group, methyl group ...)
+    * 'residue': the atoms that belongs to anAtomCluster or Molecule object will be grouped as a single atom per object while the ones thta belongs to a NucleotideChain, PeptideChain or Protein object will be grouped according to the residue to which they belong to (e.g. Histidine, Cytosyl ...)
+    * 'chain': the atoms that belongs to an AtomCluster or Molecule object will be grouped as a single atom per object while the ones that belongs to a NucleotideChain, PeptideChain or Protein object will be grouped according to the chain they belong to
+    * 'molecule': the atoms that belongs to any chemical entity will be grouped as a single atom per object
     """
         
     _default = "atom"
@@ -117,13 +116,13 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
     @staticmethod                                                                                                                        
     def find_parent(atom, level):
         '''
-        Retrieve recursively the parent of a given MMTK atom at a given level.
+        Retrieve recursively the parent of a given atom at a given level.
         For example, a level of 1 will return the direct parent of the atom. 
         
         :note: this is a static method
         
         :param atom: the atom for which the parent is searched for
-        :type atom: MMTK.Atom object
+        :type atom: Atom object
         :param level: the level of the parent
         :type level: int
         '''

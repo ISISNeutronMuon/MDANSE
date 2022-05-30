@@ -13,6 +13,8 @@
 #
 # **************************************************************************
 
+import nupmpy as np
+
 import netCDF4
 
 from MDANSE import REGISTRY
@@ -48,11 +50,11 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
            
     def configure(self, value):
         '''
-        Configure a MMTK trajectory file. 
+        Configure a NetCDF file. 
                 
         :param configuration: the current configuration.
         :type configuration: a MDANSE.Framework.Configurable.Configurable object
-        :param value: the path for the MMTK trajectory file.
+        :param value: the path for the NetCDF file.
         :type value: str 
         '''
                 
@@ -81,11 +83,34 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
         
         return self._variables
 
+    @staticmethod
+    def find_numeric_variables(var_dict, group):
+        """This method retrieves all the numeric variables stored in the NetCDF file.
+
+        This is a recursive method.
+        """
+
+        for var_key in group.variables:
+            if group.path == '/':
+                path = '/{}'.format(var_key)
+            else:
+                path = '{}/{}'.format(group.path, var_key)
+
+            comp = 1
+            while var_key in var_dict:
+                var_key = '{:s}_{:d}'.format(var_key, comp)
+                comp += 1
+
+            var_dict[var_key] = path
+
+        for _, sub_group in group.groups.items():
+            NetCDFInputFileConfigurator.find_numeric_variables(var_dict, sub_group)
+
     def get_information(self):
         '''
-        Returns some basic informations about the contents of the MMTK trajectory file.
+        Returns some basic informations about the contents of the NetCDF file.
         
-        :return: the informations about the contents of the MMTK trajectory file.
+        :return: the informations about the contents of the NetCDF file.
         :rtype: str
         '''
         
@@ -93,8 +118,14 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
         
         if self.has_key('instance'):
             info.append("Contains the following variables:")
-            for v in self['instance'].variables:
-                info.append(v)
+            variables = {}
+            NetCDFInputFileConfigurator.find_numeric_variables(
+                variables,
+                '/'
+            )
+
+            for k,v in variables.items():
+                info.append('{}: {}'.format(k,v))
             
         return "\n".join(info)
     

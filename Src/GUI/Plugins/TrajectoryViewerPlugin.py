@@ -18,11 +18,8 @@ import os
 import wx
 import wx.aui as wxaui
 
-import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg, NavigationToolbar2WxAgg
-
-from MMTK.Trajectory import TrajectoryVariable
 
 from MDANSE import LOGGER, REGISTRY
 
@@ -125,14 +122,9 @@ class TrajectoryViewerPlugin(ComponentPlugin):
 
         self._target = os.path.basename(self._trajectory.filename)
 
-        targetShape = (len(self._trajectory),nAtoms,3)
-
         trajectoryVariables = []
-        for v in self._trajectory.variables():
-            data = getattr(self._trajectory,v)
-            if isinstance(data,TrajectoryVariable):
-                if data.var.shape == targetShape:
-                    trajectoryVariables.append(v)
+        for k in self._trajectory['/configuration']:
+            trajectoryVariables.append(v)
         self._selectedVariable.SetItems(trajectoryVariables)
 
         self._selectedAtom.SetRange(0,nAtoms-1)

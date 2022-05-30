@@ -41,7 +41,7 @@ class AreaPerMolecule(IJob):
     ancestor = ['hdf_trajectory','molecular_viewer']
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('hdf_trajectory',{'default':os.path.join('..','..','..','Data','Trajectories','MMTK','dmpc_in_periodic_universe.nc')})
+    settings['trajectory'] = ('hdf_trajectory',{'default':os.path.join('..','..','..','Data','Trajectories','HDF','waterbox.h5')})
     settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['axis'] = ('multiple_choices', {'label':'area vectors','choices':['a','b','c'],'nChoices':2,'default':['a','b']})
     settings['name'] = ('string', {'label':'molecule name','default':'DMPC'})    

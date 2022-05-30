@@ -359,14 +359,14 @@ class %(classname)s(IJob):
     # You should enter the category under which your job will be references.
     category = ('My jobs',)
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["hdf_trajectory"]
 
     # You should enter the configuration of your job here
-    # Here a basic example of a job that will use a MMTK trajectory, a frame selection and an output file in NetCDF and ASCII file formats
+    # Here a basic example of a job that will use a HDF trajectory, a frame selection and an output file in NetCDF and ASCII file formats
     settings = collections.OrderedDict()
-    settings['trajectory']=('mmtk_trajectory',{})
+    settings['trajectory']=('hdf_trajectory',{})
     settings['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
-    settings['output_files']=('output_files', {"formats":["netcdf","ascii"]})
+    settings['output_files']=('output_files', {"formats":["hdf","netcdf","ascii"]})
             
     def initialize(self):
         """

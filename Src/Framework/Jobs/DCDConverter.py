@@ -256,7 +256,7 @@ class DCDFile(FortranBinaryFile, dict):
 
 class DCDConverter(Converter):
     """
-    Converts a DCD trajectory to a MMTK trajectory.
+    Converts a DCD trajectory to a HDF trajectory.
     """
     
     settings = collections.OrderedDict()

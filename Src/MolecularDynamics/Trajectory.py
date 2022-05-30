@@ -18,8 +18,6 @@ import numpy as np
 
 import h5py
 
-from MMTK.Trajectory import Trajectory
-
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.Extensions import atomic_trajectory, com_trajectory, fold_coordinates

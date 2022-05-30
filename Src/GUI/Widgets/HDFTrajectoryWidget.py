@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/GUI/Widgets/MMTKTrajectoryWidget.py
-# @brief     Implements module/class/test MMTKTrajectoryWidget
+# @file      Src/GUI/Widgets/HDFTrajectoryWidget.py
+# @brief     Implements module/class/test HDFTrajectoryWidget
 #
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)

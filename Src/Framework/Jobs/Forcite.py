@@ -255,7 +255,7 @@ class TrjFile(dict):
         
 class ForciteConverter(Converter):
     """
-    Converts a Forcite trajectory to a MMTK trajectory.
+    Converts a Forcite trajectory to a HDF trajectory.
     """
     
     label = "Forcite"
@@ -298,7 +298,7 @@ class ForciteConverter(Converter):
         else:
             self._gradients = None
 
-        # A MMTK trajectory is opened for writing.
+        # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
             self.configuration['output_file']['file'], 
             self._chemicalSystem,

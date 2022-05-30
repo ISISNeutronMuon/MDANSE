@@ -28,7 +28,7 @@ class SingleOutputFileConfigurator(IConfigurator):
     Once configured, this configurator will provide a list of files built by joining the given output directory,
     the basename and the  extensions corresponding to the input file formats.
     
-    For trajectories, MDANSE supports only the MMTK NetCDF format. To define a new output file format for a trajectory
+    For trajectories, MDANSE supports only the HDF format. To define a new output file format for a trajectory
     conversion, you must inherit from the MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
         

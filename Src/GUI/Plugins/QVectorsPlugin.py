@@ -138,7 +138,7 @@ class QVectorsPlugin(UserDefinitionPlugin):
     
     label = "Q vectors"
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["hdf_trajectory"]
             
     def __init__(self, parent, *args, **kwargs):
 

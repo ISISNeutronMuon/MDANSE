@@ -163,7 +163,7 @@ class MDFile(dict):
 
 class CASTEPConverter(Converter):
     """
-    Converts a Castep Trajectory into a MMTK trajectory file. 
+    Converts a Castep Trajectory into a HDF trajectory file. 
     """
     
     label = "CASTEP"

@@ -58,8 +58,7 @@ class Platform(object):
         '''
         Returns the path for MDANSE application directory.
         
-        This directory data used by MDANSE for running such a version of the MMTK database, 
-        the preference file, the user definitions, the temporary job files directory ...
+        The directory data used by MDANSE for storing preferences, databses, jobs temporary files ...
         
         :return: the path for MDANSE application directory.
         :rtype: str
@@ -105,25 +104,7 @@ class Platform(object):
         '''
         
         return os.path.join(self.package_directory(), 'Doc', 'help','html')
-    
-    def local_mmtk_database_directory(self):
-        '''
-        Returns the path for MDANSE local MMTK database.
-        
-        :return: the path for MDANSE local MMTK database
-        :rtype: str
-        '''
-        
-        path = os.path.join(self.application_directory(), 'mmtk_database')
-        
-        # The first time the path for MMTK database directory is required, check whether some of the 
-        # MMTK database subdirectories are present. If not, create them.
-        if not os.path.exists(path):
-            for mmtkDatabaseType in ['Atoms', 'Complexes', 'Crystals', 'Groups', 'Molecules', 'Proteins']:
-                os.makedirs(os.path.join(path, mmtkDatabaseType))
-                        
-        return path
-        
+            
     def full_dotted_module(self,obj):
         '''
         Returns the fully dotted name of a module given the module object itself or a class stored in this module.
@@ -391,8 +372,7 @@ class PlatformPosix(Platform):
         '''
         Returns the path for MDANSE application directory.
         
-        This directory data used by MDANSE for running such a version of the MMTK database, 
-        the preference file, the user definitions, the temporary job files directory ...
+        The directory data used by MDANSE for storing preferences, databses, jobs temporary files ...
         
         :return: the path for MDANSE application directory.
         :rtype: str
@@ -472,8 +452,7 @@ class PlatformWin(Platform):
         '''
         Returns the path for MDANSE application directory.
         
-        This directory data used by MDANSE for running such a version of the MMTK database, 
-        the preference file, the user definitions, the temporary job files directory ...
+        The directory data used by MDANSE for storing preferences, databses, jobs temporary files ...
         
         :return: the path for MDANSE application directory.
         :rtype: str

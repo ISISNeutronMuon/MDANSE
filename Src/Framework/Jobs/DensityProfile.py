@@ -84,9 +84,6 @@ class DensityProfile(IJob):
         
         @param index: the index of the step.
         @type index: int.
-
-        @param trajectory: the trajectory.
-        @type trajectory: MMTK trajectory.                
         """
 
         # get the Frame index

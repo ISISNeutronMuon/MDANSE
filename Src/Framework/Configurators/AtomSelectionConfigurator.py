@@ -40,11 +40,11 @@ class AtomSelectionConfigurator(IConfigurator):
     the following keys will be available for this configurator
 
     #. value: the input value used to configure this configurator
-    #. indexes: the sorted (in increasing order) MMTK indexes of the selected atoms
+    #. indexes: the sorted (in increasing order) indexes of the selected atoms
     #. n_selected_atoms: the number of selected atoms
     #. elements: a nested-list of the chemical symbols of the selected atoms. The size of the nested list depends on the grouping_level selected via :py:class:`~MDANSE.Framework.Configurators.GroupingLevelConfigurator.GroupingLevelConfigurator` configurator.
     
-    :note: this configurator depends on :py:class:`~MDANSE.Framework.Configurators.MMTKTrajectoryConfigurator.MMTKTrajectoryConfigurator` and :py:class:`~MDANSE.Framework.Configurators.GroupingLevelConfigurator.GroupingLevelConfigurator` configurators to be configured
+    :note: this configurator depends on :py:class:`~MDANSE.Framework.Configurators.HDFTrajectoryConfigurator.HDFTrajectoryConfigurator` and :py:class:`~MDANSE.Framework.Configurators.GroupingLevelConfigurator.GroupingLevelConfigurator` configurators to be configured
     '''
 
     _default = "all"

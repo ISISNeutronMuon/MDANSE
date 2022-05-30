@@ -71,22 +71,5 @@ class PythonScriptConfigurator(InputFileConfigurator):
         '''
         
         return self._variables
-
-    def get_information(self):
-        '''
-        Returns some basic informations about the contents of the MMTK trajectory file.
-        
-        :return: the informations about the contents of the MMTK trajectory file.
-        :rtype: str
-        '''
-        
-        info = ["NetCDF input file: %r" % self["value"]]
-        
-        if self.has_key('instance'):
-            info.append("Contains the following variables:")
-            for v in self['instance'].variables:
-                info.append(v)
-            
-        return "\n".join(info)
     
 REGISTRY['python_script'] = PythonScriptConfigurator

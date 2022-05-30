@@ -18,7 +18,7 @@ from MDANSE.Framework.Jobs.DCDConverter import DCDConverter
 
 class NAMDConverter(DCDConverter):
     """
-    Converts a NAMD trajectory to a MMTK trajectory.
+    Converts a NAMD trajectory to a HDF trajectory.
     """
     
     label = "NAMD"

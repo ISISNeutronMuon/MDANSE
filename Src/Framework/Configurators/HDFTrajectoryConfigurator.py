@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/Configurators/MMTKTrajectoryConfigurator.py
-# @brief     Implements module/class/test MMTKTrajectoryConfigurator
+# @file      Src/Framework/Configurators/HDFTrajectoryConfigurator.py
+# @brief     Implements module/class/test HDFTrajectoryConfigurator
 #
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -21,23 +21,24 @@ from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfig
 
 class HDFTrajectoryConfigurator(InputFileConfigurator):
     '''
-    This configurator allow to input a MMTK trajectory file.
+    This configurator allow to input a HDF trajectory file.
     
-    MMTK trajectory file is the format used in MDANSE to store Molecular Dynamics trajectories. It is a NetCDF file 
+    HDF trajectory file is the format used in MDANSE to store Molecular Dynamics trajectories. It is a NetCDF file 
     that store various data related to the molecular dynamics : atomic positions, velocities, energies, energy gradients etc...
     
-    To use trajectories derived from MD packages different from MMTK, it is compulsory to convert them before to a MMTK trajectory file.
+    To use trajectories derived from MD packages different from HDF, it is compulsory to convert them before to a 
+    HDF trajectory file.
     
-    :attention: once configured, the MMTK trajectory file will be opened for reading.    
+    :attention: once configured, the HDF trajectory file will be opened for reading.    
     '''
         
-    _default = os.path.join('..','..','..','Data','Trajectories','MMTK','waterbox_in_periodic_universe.nc')
+    _default = os.path.join('..','..','..','Data','Trajectories','HDF','waterbox.h5')
                         
     def configure(self, value):
         '''
-        Configure a MMTK trajectory file. 
+        Configure a HDF trajectory file. 
                 
-        :param value: the path for the MMTK trajectory file.
+        :param value: the path for the HDF trajectory file.
         :type value: str 
         '''
                 
@@ -64,9 +65,9 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
                 
     def get_information(self):
         '''
-        Returns some basic informations about the contents of the MMTK trajectory file.
+        Returns some basic informations about the contents of the HDF trajectory file.
         
-        :return: the informations about the contents of the MMTK trajectory file.
+        :return: the informations about the contents of the HDF trajectory file.
         :rtype: str
         '''
                 

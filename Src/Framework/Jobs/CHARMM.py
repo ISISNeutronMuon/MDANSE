@@ -18,7 +18,7 @@ from MDANSE.Framework.Jobs.DCDConverter import DCDConverter
 
 class CHARMMConverter(DCDConverter):
     """
-    Converts a CHARMM trajectory to a MMTK trajectory.
+    Converts a CHARMM trajectory to a HDF trajectory.
     """
     
     label = "CHARMM"

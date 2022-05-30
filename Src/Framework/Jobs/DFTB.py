@@ -22,7 +22,7 @@ from MDANSE.Framework.Jobs.Forcite import ForciteConverter
 
 class DFTBConverter(ForciteConverter):
     """
-    Converts a DFTB trajectory to a MMTK trajectory.
+    Converts a DFTB trajectory to a HDF trajectory.
     """
     
     label = "DFTB"

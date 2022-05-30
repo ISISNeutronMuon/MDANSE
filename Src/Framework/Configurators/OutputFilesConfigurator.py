@@ -19,7 +19,6 @@ import tempfile
 from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
 
-
 class OutputFilesConfigurator(IConfigurator):
     """
     This configurator allows to define the output directory, the basename, and the format(s) of the output file(s)
@@ -28,7 +27,7 @@ class OutputFilesConfigurator(IConfigurator):
     Once configured, this configurator will provide a list of files built by joining the given output directory, the
     basename and the extensions corresponding to the input file formats.
     
-    For analyses, MDANSE currently supports only the MMTK NetCDF and ASCII formats. To define a new output file format
+    For analysis, MDANSE currently supports only the HDF, NetCDF, SVG and ASCII formats. To define a new output file format
     for an analysis, you must inherit from MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
         

@@ -209,7 +209,7 @@ class HisFile(dict):
         
 class DiscoverConverter(Converter):
     """
-    Converts a Discover trajectory to a MMTK trajectory.
+    Converts a Discover trajectory to a HDF trajectory.
     """
     
     label = "Discover"
@@ -254,7 +254,7 @@ class DiscoverConverter(Converter):
 
         self._chemicalSystem.configuration = realConf
                     
-        # A MMTK trajectory is opened for writing.
+        # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
             self.configuration['output_file']['file'],
             self._chemicalSystem,

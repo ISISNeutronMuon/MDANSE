@@ -18,18 +18,15 @@ import os
 import wx
 import wx.grid as wxgrid
 
-from MMTK import AtomCluster, Molecule
-from MMTK.NucleicAcids import NucleotideChain
-from MMTK.Proteins import PeptideChain, Protein
-
 from MDANSE import LOGGER, REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster,Molecule,NucleotideChain,PeptideChain,Protein
 from MDANSE.GUI.Plugins.UserDefinitionPlugin import UserDefinitionPlugin
 
 class PartialChargesPlugin(UserDefinitionPlugin):
 
     label = "Partial charges"
     
-    ancestor = ["mmtk_trajectory"]
+    ancestor = ["hdf_trajectory"]
 
     def __init__(self, parent, *args, **kwargs):
         
@@ -68,25 +65,25 @@ class PartialChargesPlugin(UserDefinitionPlugin):
         self._target = os.path.basename(self._trajectory.filename)
 
         self._contents = {}
-        for obj in self._trajectory.universe.objectList():
+        for ce in self._trajectory.chemical_system.chemical_entities:
         
-            objname = obj.name
-            if isinstance(obj, (PeptideChain,Protein,NucleotideChain)):
-                for res in obj.residues():
+            cename = ce.name
+            if isinstance(ce, (PeptideChain,Protein,NucleotideChain)):
+                for res in ce.residues():
                     resname = res.type.symbol.strip()
-                    for at in res.atomList():
-                        descr = (objname,resname,at.name)
+                    for at in res.atom_list():
+                        descr = (cename,resname,at.name)
                         d = self._contents.setdefault(descr,[0.0,[]])
                         d[1].append(at.index)
-            elif isinstance(obj, (Molecule,AtomCluster)):
-                for at in obj.atomList():
-                    descr = (objname,at.name)
+            elif isinstance(ce, (Molecule,AtomCluster)):
+                for at in ce.atom_list():
+                    descr = (cename,at.name)
                     d = self._contents.setdefault(descr,[0.0,[]])
                     d[1].append(at.index)
             else:
-                descr = (obj.name,)
+                descr = (ce.name,)
                 d = self._contents.setdefault(descr,[0.0,[]])
-                d[1].append(obj.index)
+                d[1].append(ce.index)
             
         self._grid.CreateGrid(0,2)
         

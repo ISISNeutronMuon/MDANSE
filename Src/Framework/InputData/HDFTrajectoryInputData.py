@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/InputData/MMTKTrajectoryInputData.py
-# @brief     Implements module/class/test MMTKTrajectoryInputData
+# @file      Src/Framework/InputData/HDFTrajectoryInputData.py
+# @brief     Implements module/class/test HDFTrajectoryInputData
 #
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -12,8 +12,6 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
-import numpy
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.InputData.IInputData import InputDataError

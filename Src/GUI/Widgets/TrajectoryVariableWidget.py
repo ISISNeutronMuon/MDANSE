@@ -15,8 +15,6 @@
 
 import wx
 
-from MMTK.Trajectory import TrajectoryVariable
-
 from MDANSE import REGISTRY
 
 from MDANSE.GUI.DataController import DATA_CONTROLLER
@@ -40,9 +38,8 @@ class TrajectoryVariableWidget(IWidget):
 
     def set_data(self, datakey):
 
-
         trajectory = DATA_CONTROLLER[datakey].data
-        self._variable.SetItems([v for v in trajectory.variables() if isinstance(getattr(trajectory,v),TrajectoryVariable)])
+        self._variable.SetItems([v for v in trajectory['/configuration']])
         self._variable.SetSelection(0)
 
 REGISTRY["trajectory_variable"] = TrajectoryVariableWidget

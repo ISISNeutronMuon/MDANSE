@@ -281,7 +281,7 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
         
         text.append("List of selected atoms:")
         for idx in self._selection:
-            text.append("\t%s (MMTK index: %d)" % (self._atoms[idx].fullName(),self._atoms[idx].index))
+            text.append("\t%s (Index: %d)" % (self._atoms[idx].fullName(),self._atoms[idx].index))
             
         self._selectionSummary.SetValue("\n".join(text))
 
