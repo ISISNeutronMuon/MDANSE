@@ -18,9 +18,7 @@ import os
 import itertools
 import re
 
-import numpy
-
-from Scientific.Geometry import Vector
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
@@ -29,6 +27,7 @@ from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 HBAR = measure(1.05457182e-34,'kg m2/s').toval('uma nm2/ps')
 HARTREE = measure(27.2113845,'eV').toval('uma nm2/ps2')
@@ -138,22 +137,24 @@ class MDFile(dict):
 
         # Read and process the cell data
         self['instance'].seek(start+self._frameInfo["cell_data"][0])  # Move to the start of cell data
-        basisVectors = self['instance'].read(self._frameInfo["cell_data"][1]).splitlines()  # Read the cell data by line
-        # Generate a tuple of three vectors where each vector is constructed from its components stored in each line
-        basisVectors = tuple([Vector([float(bb) for bb in b.strip().split()[:3]])*BOHR for b in basisVectors])
+        unitCell = self['instance'].read(self._frameInfo["cell_data"][1]).splitlines()  # Read the cell data by line
+        # Generate an array of three vectors where each vector is constructed from its components stored in each line
+        unitCell = np.array([[float(bb) for bb in b.strip().split()[:3]] for b in unitCell])
+        unitCell *= BOHR
+        unitCell = UnitCell(unitCell)
         
         self['instance'].seek(start+self._frameInfo["data"][0])  # Move to the start of positional data
         # Create an array composed of the data points in each line of the positional data
-        config = numpy.array(self['instance'].read(self._frameInfo["data"][1]).split(), dtype=str)
-        config = numpy.reshape(config, (3*self["n_atoms"], 7))  # Reshape the 1D array so that it is organised by lines
-        config = config[:, 2:5].astype(numpy.float64)  # Extract the coordintates only
+        config = np.array(self['instance'].read(self._frameInfo["data"][1]).split(), dtype=str)
+        config = np.reshape(config, (3*self["n_atoms"], 7))  # Reshape the 1D array so that it is organised by lines
+        config = config[:, 2:5].astype(np.float64)  # Extract the coordintates only
 
         # Convert the units of the positions
         config[0:self["n_atoms"], :] *= BOHR
         config[self["n_atoms"]:2*self["n_atoms"], :] *= BOHR*HARTREE/HBAR
         config[2*self["n_atoms"]:3*self["n_atoms"], :] *= HARTREE/BOHR
         
-        return timeStep, basisVectors, config
+        return timeStep, unitCell, config
 
     def close(self):
         """Closes the file."""
@@ -231,6 +232,8 @@ class CASTEPConverter(Converter):
             
         if self.configuration['fold']['value']:
             conf.fold_coordinates()
+
+        print(conf['coordinates'][0,:])
         
         self._trajectory.chemical_system.configuration = conf
 
