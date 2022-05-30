@@ -61,7 +61,7 @@ class Trajectory:
         resolve_undefined_molecules_name(self._chemical_system)
 
         # Retrieve the connectivity
-        build_connectivity(self._chemical_system, unit_cell=conf.unit_cell)
+        build_connectivity(self._chemical_system)
 
     def close(self):
         """Close the trajectory.

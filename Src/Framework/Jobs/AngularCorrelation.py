@@ -20,7 +20,6 @@ import numpy as np
 from MDANSE import REGISTRY
 from MDANSE.Mathematics.Signal import correlation
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.TrajectoryUtils import read_atoms_trajectory
 
 class AngularCorrelation(IJob):
     '''

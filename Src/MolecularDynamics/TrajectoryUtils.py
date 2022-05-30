@@ -27,25 +27,49 @@ class MolecularDynamicsError(Error):
 class UniverseAdapterError(Error):
     pass
 
-def atomindex_to_moleculeindex(chemical_system):
+def atomindex_to_moleculeindex(chemicalSystem):
+    """Returns a lookup between the index of the atoms of a chemical system and the index 
+    of their corresponding chemical entity.
+
+    Args:
+        chemicalSystem (MDANSE.Chemistry.ChemicalEntitiy.ChemicalSystem): the chemical system
+
+    Returns:
+        dict: the lookup table        
+    """
     
     lut = {}
-    for i,ce in enumerate(chemical_system.chemical_entities):
+    for i,ce in enumerate(chemicalSystem.chemical_entities):
         for at in ce.atom_list():
             lut[at.index] = i
                 
     return lut
     
-def brute_formula(molecule, sep='_'):
+def brute_formula(chemicalEntity, sep='_'):
+    """Define the brute formula of a given chemical entity.
+
+    Args:
+        chemicalEntity (MDANSE.Chemistry.ChemicalEntity.ChemicalEntity): the chemical entity
+        sep (str): the separator
+
+    Returns:
+        the brute formula
+    """
     
     contents = {}
     
-    for at in molecule.atom_list():
+    for at in chemicalEntity.atom_list():
         contents[at.symbol] = str(int(contents.get(at.symbol,0)) + 1)
     
     return sep.join([''.join(v) for v in sorted(contents.items())])
 
-def build_connectivity(chemicalSystem ,tolerance=0.05, unit_cell=None):
+def build_connectivity(chemicalSystem ,tolerance=0.05):
+    """Build the connectivity of the AtomCluster of a given chemical system.
+
+    Args:
+        chemicalSystem (MDANSE.Chemistry.ChemicalEntitiy.ChemicalSystem): the chemical system
+        tolerance (float): the tolerance used for defining whether two atoms are bonded
+    """
 
     bonds = []
     
@@ -81,95 +105,98 @@ def build_connectivity(chemicalSystem ,tolerance=0.05, unit_cell=None):
             atoms[idx1].bonds.append(atoms[idx2])                  
             atoms[idx2].bonds.append(atoms[idx1])
 
-def find_atoms_in_molecule(chemical_system, molecule_name, atom_names, indexes=False):
+def find_atoms_in_molecule(chemicalSystem, ceName, atomNames, indexes=False):
+    """Find the atoms of a chemical system whose chemical entity match a given value 
+    and atom names are within a given list.
 
-    molecules = []
-    for ce in chemical_system.chemical_entities:
-        if ce.name == molecule_name:
-            molecules.append(ce)
+    Args:
+        chemicalSystem (MDANSE.Chemistry.ChemicalEntitiy.ChemicalSystem): the chemical system
+        ceName (str): the name of the chemical entity to match
+        atomNames (list): the list of atom names to search
+        indexes (bool): if True the indexes of the atoms will be returned otherwise the Atom instances will be returned
+
+    Returns:
+        list: the list of indexes or atom instances found
+    """
+
+    # Loop over the chemical entities of the chemical entity and keep only those
+    # whose name match |ce_name|
+    chemicalEntities = []
+    for ce in chemicalSystem.chemical_entities:
+        if ce.name == ceName:
+            chemicalEntities.append(ce)
                     
     match = []
-    for mol in molecules:
-        atoms = mol.atom_list()
+    for ce in chemicalEntities:
+        atoms = ce.atom_list()
         names = [at.name for at in atoms]
-        l = [atoms[names.index(at_name)] for at_name in atom_names]
+        l = [atoms[names.index(at_name)] for at_name in atomNames]
 
         match.append(l)
         
     if indexes is True:
-        match = [[at.index for at in at_list] for at_list in match]
+        match = [[at.index for at in atList] for atList in match]
         
     return match
 
-def get_chemical_objects_size(universe):
-    
-    d = {}
-    for obj in universe.objectList():
-        if d.has_key(obj.name):
-            continue
-        d[obj.name] = obj.numberOfAtoms()
-        
-    return d
+def get_chemical_objects_dict(chemical_system):
+    """Return a dict of the chemical entities found in a chemical system.
 
-def get_chemical_objects_dict(universe):
+    Args:
+        chemicalSystem (MDANSE.Chemistry.ChemicalEntitiy.ChemicalSystem): the chemical system
+
+    Returns:
+        dict: a dict whose key and value are respectively the name and the instance of the
+    chemical entities defined in the chemical system
+    """
     
     d = {}
-    for obj in universe.objectList():
-        d.setdefault(obj.name, []).append(obj)
+    for ce in chemical_system.chemical_entities:
+        d.setdefault(ce.name, []).append(ce)
         
     return d
-        
-def get_chemical_objects_number(universe):
+                                                                            
+def group_atoms(chemicalSystem,groups):
+    """Group the atoms of a chemical system.
+
+    Args:
+        chemicalSystem (MDANSE.Chemistry.ChemicalEntitiy.ChemicalSystem): the chemical system
+        groups (list): the nested list of indexes, each sublist defining a group
+
+    Returns:
+        list: the list of AtomGroup
+    """
     
-    d = {}
-    for obj in universe.objectList():
-        if d.has_key(obj.name):
-            d[obj.name] += 1
-        else:
-            d[obj.name] = 1
-        
-    return d
-                                                                    
-def group_atoms(chemical_system,groups):
-    
-    atoms = sorted(chemical_system.atom_list(), key = operator.attrgetter('index'))
+    atoms = sorted(chemicalSystem.atom_list(), key=operator.attrgetter('index'))
                                         
     groups = [AtomGroup([atoms[index] for index in gr]) for gr in groups]
 
     return groups
 
-def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable="configuration", weights=None, dtype=np.float64):
-    
-    if not isinstance(atoms,(list,tuple)):
-        atoms = [atoms]
-        
-    if last is None:
-        last = len(trajectory)
-        
-    nFrames = len(range(first, last, step))
-    
-    serie = np.zeros((nFrames,3), dtype=dtype)
-    
-    if weights is None or len(atoms) == 1:
-        weights = [1.0]*len(atoms)
-
-    for i,at in enumerate(atoms):
-        w = weights[i]
-        serie += w*trajectory.readParticleTrajectory(at, first, last, step, variable).array
-                
-    serie /= sum(weights)
-    
-    return serie
-
 def resolve_undefined_molecules_name(chemicalSystem):
+    """Resolve the name of the chemical entities with no names by using their
+    brute formula.
+
+    Args:
+        chemicalSystem (MDANSE.Chemistry.ChemicalEntitiy.ChemicalSystem): the chemical system
+    """
     
     for ce in chemicalSystem.chemical_entities:
         if not ce.name.strip():
             ce.name = brute_formula(ce,sep="")
 
 def sorted_atoms(atoms,attribute=None):
+    """Sort a list of atoms according.
 
-    atoms = sorted(atoms, key = operator.attrgetter('index'))
+    Args:
+        atoms (list): the atom list
+        attribute (str): if not None, return the attribute of the atom instead of the atom instance
+
+    Returns:
+        list: the sorted atoms
+    """
+
+    atoms = sorted(atoms, key=operator.attrgetter('index'))
     
     if attribute is None:
         return atoms
