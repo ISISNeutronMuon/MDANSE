@@ -104,7 +104,7 @@ class Trajectory:
 
         return grp['coordinates'][frame]
 
-    def configuration(self, frame):
+    def configuration(self,frame):
         """Build and return a configuration at a given frame.
 
         :param frame: the frame
