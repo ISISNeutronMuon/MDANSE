@@ -27,6 +27,7 @@ from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration, RealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 _HISTORY_FORMAT = {}
 _HISTORY_FORMAT["2"] = {"rec1" : 81, "rec2" : 31, "reci" : 61, "recii" : 37, "reciii" : 37, "reciv" : 37, "reca" : 43, "recb" : 37, "recc" : 37, "recd" : 37}
@@ -293,6 +294,7 @@ class DL_POLYConverter(Converter):
     settings['history_file'] = ('input_file',{'wildcard':"HISTORY files|HISTORY*|All files|*",
                                               'default':os.path.join('..','..','..','Data','Trajectories','DL_Poly','HISTORY_cumen')})
     settings['atom_aliases'] = ('python_object',{'default':{}})
+    settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
     settings['version'] = ('single_choice', {'choices':_HISTORY_FORMAT.keys(), 'default':'2'})
     settings['output_files'] = ('output_files', {'formats':["hdf"]})
                     
@@ -330,14 +332,17 @@ class DL_POLYConverter(Converter):
         """
                                                 
         # The x, y and z values of the current frame.
-        time, cell, config = self._historyFile.read_step(index)
+        time, unitCell, config = self._historyFile.read_step(index)
+
+        unitCell = UnitCell(unitCell)
 
         if self._historyFile['imcon'] > 0:
-            conf = PeriodicRealConfiguration(self._trajectory.chemical_system,config[:,0:3],cell)
+            conf = PeriodicRealConfiguration(self._trajectory.chemical_system,config[:,0:3],unitCell)
         else:
             conf = RealConfiguration(self._trajectory.chemical_system,config[:,0:3])
         
-        conf.fold_coordinates()
+        if self.configuration['fold']['value']:
+            conf.fold_coordinates()
 
         if self._velocities is not None:
             conf["velocities"] = config[:,3:6]

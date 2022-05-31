@@ -85,7 +85,7 @@ ALA:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -210,7 +210,7 @@ ARG:
       groups: [sidechain]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -280,7 +280,7 @@ ASN:
       groups: [sidechain]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -340,7 +340,7 @@ ASP:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -405,7 +405,7 @@ CYS:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -460,7 +460,7 @@ CYX:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -550,7 +550,7 @@ GLN:
       groups: [sidechain]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -625,7 +625,7 @@ GLU:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -675,7 +675,7 @@ GLY:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -765,7 +765,7 @@ HID:
       groups: [sidechain]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -855,7 +855,7 @@ HIE:
       groups: [sidechain]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -950,7 +950,7 @@ HIP:
       groups: [sidechain]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -990,7 +990,7 @@ ILE:
       groups: [sidechain]
       symbol: H
     3HG1:
-      alternatives: [HG13,HG11]
+      alternatives: [HG13,HG11,1HG1]
       bonds: [CG1]
       groups: [sidechain]
       symbol: H
@@ -1050,7 +1050,7 @@ ILE:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -1150,7 +1150,7 @@ LEU:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -1265,7 +1265,7 @@ LYS:
       groups: [sidechain]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -1350,7 +1350,7 @@ MET:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -1460,7 +1460,7 @@ PHE:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -1535,7 +1535,7 @@ PRO:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -1590,7 +1590,7 @@ SER:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -1665,7 +1665,7 @@ THR:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -1795,7 +1795,7 @@ TRP:
       groups: [sidechain]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -1900,7 +1900,7 @@ TYR:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O
@@ -1990,7 +1990,7 @@ VAL:
       groups: [backbone, peptide]
       symbol: N
     O:
-      alternatives: []
+      alternatives: [OT1]
       bonds: [C]
       groups: [backbone, peptide]
       symbol: O

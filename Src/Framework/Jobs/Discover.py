@@ -26,6 +26,7 @@ from MDANSE.Framework.Jobs.MaterialsStudio import XTDFile
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration, RealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 class HisFile(dict):
 
@@ -221,6 +222,7 @@ class DiscoverConverter(Converter):
                                             'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.xtd')})
     settings['his_file'] = ('input_file',{'wildcard':'HIS files (*.his)|*.his|All files|*',
                                             'default':os.path.join('..','..','..','Data','Trajectories','Discover','sushi.his')})
+    settings['fold'] = ('boolean', {'default':True,'label':'Fold coordinates in to box'})
     settings['output_file'] = ('single_output_file', {'format':"hdf",'root':'xtd_file'})
     
     def initialize(self):
@@ -238,19 +240,25 @@ class DiscoverConverter(Converter):
 
         # The number of steps of the analysis.
         self.numberOfSteps = self._hisfile['n_frames']
-                             
+
+        variables = {}
+        variables['velocities'] = self._hisfile["initial_velocities"]
+
         if self._chemicalSystem.configuration.is_periodic:
+            unitCell = UnitCell(self._hisfile['initial_cell'])
             realConf = PeriodicRealConfiguration(
                 self._chemicalSystem,
                 self._hisfile["initial_coordinates"],
-                self._hisfile['initial_cell'])
+                unitCell,
+                **variables)
         else:
             realConf = RealConfiguration(
                 self._chemicalSystem,
-                self._hisfile["initial_coordinates"])
+                self._hisfile["initial_coordinates"],
+                **variables)
 
-        realConf.fold_coordinates()
-        realConf['velocities'] = self._hisfile["initial_velocities"]
+        if self.configuration['fold']['value']:
+            realConf.fold_coordinates()
 
         self._chemicalSystem.configuration = realConf
                     

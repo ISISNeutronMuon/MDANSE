@@ -26,6 +26,7 @@ from MDANSE.IO.PDBReader import PDBReader
 from MDANSE.Mathematics.Geometry import get_basis_vectors_from_cell_parameters
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import resolve_undefined_molecules_name, TrajectoryWriter
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 PI_2 = 0.5*np.pi
 RECSCALE32BIT = 1
@@ -300,6 +301,7 @@ class DCDConverter(Converter):
         # The x, y and z values of the current frame.
         unit_cell, config = self.configuration["dcd_file"]["instance"].read_step()
         unit_cell = get_basis_vectors_from_cell_parameters(unit_cell)
+        unit_cell = UnitCell(unit_cell)
 
         conf = PeriodicRealConfiguration(self._trajectory._chemical_system,config,unit_cell)
                         

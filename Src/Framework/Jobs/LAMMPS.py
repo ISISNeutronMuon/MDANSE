@@ -28,6 +28,7 @@ from MDANSE.Framework.Units import measure
 from MDANSE.Mathematics.Graph import Graph
 from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration, PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 class LAMMPSConfigFileError(Error):
     pass
@@ -144,6 +145,7 @@ class LAMMPSConverter(Converter):
     settings['smart_mass_association'] = ('boolean', {'label':"smart mass association", 'default':True})
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
     settings['n_steps'] = ('integer', {'label':"number of time steps (0 for automatic detection)", 'default':0, 'mini':0})
+    settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
     settings['output_file'] = ('single_output_file', {'format':"hdf",'root':'config_file'})
     
     def initialize(self):
@@ -239,6 +241,7 @@ class LAMMPSConverter(Converter):
         unitCell = np.reshape(unitCell,(3,3))
 
         unitCell *= measure(1.0,'ang').toval('nm')
+        unitCell = UnitCell(unitCell)
 
         for _ in range(self._itemsPosition["BOX BOUNDS"][1], self._itemsPosition["ATOMS"][0]):
             self._lammps.readline()
@@ -264,8 +267,9 @@ class LAMMPSConverter(Converter):
                 unitCell
             )
             
-        # The whole configuration is folded in to the simulation box.
-        realConf.fold_coordinates()
+        if self.configuration['fold']['value']:
+            # The whole configuration is folded in to the simulation box.
+            realConf.fold_coordinates()
 
         self._trajectory.chemical_system.configuration = realConf
 

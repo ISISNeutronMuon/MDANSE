@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from collections import OrderedDict
+import collections
 import os
 
 from MDANSE import REGISTRY
@@ -27,7 +27,7 @@ class DFTBConverter(ForciteConverter):
     
     label = "DFTB"
 
-    settings = OrderedDict()
+    settings = collections.OrderedDict()
     settings['xtd_file'] = ('input_file',
                             {'default': os.path.join('..', '..', '..', 'Data', 'Trajectories', 'DFTB', 'H2O.xtd')})
     settings['trj_file'] = ('input_file',

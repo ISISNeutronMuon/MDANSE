@@ -22,5 +22,5 @@ class DMolConverter(DiscoverConverter):
     """
     
     label = "DMol"
-    
+
 REGISTRY['dmol'] = DMolConverter

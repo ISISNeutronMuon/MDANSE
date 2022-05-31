@@ -25,6 +25,7 @@ from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 class XDATCARFileError(Error):
     pass
@@ -162,6 +163,7 @@ class VASPConverter(Converter):
     settings['xdatcar_file'] = ('input_file',{'wildcard':'XDATCAR files (XDATCAR*)|XDATCAR*|All files|*',
                                                 'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})
     settings['time_step'] = ('float', {'label':"time step", 'default':1.0, 'mini':1.0e-9})        
+    settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
     settings['output_file'] = ('single_output_file', {'format':"hdf",'root':'xdatcar_file'})
                 
     def initialize(self):
@@ -193,15 +195,18 @@ class VASPConverter(Converter):
         """
 
         # Read the current step in the xdatcar file.
-        config = self._xdatcarFile.read_step(index)
+        coords = self._xdatcarFile.read_step(index)
                 
-        conf = PeriodicBoxConfiguration(self._trajectory.chemical_system,config,self._xdatcarFile["cell_shape"])
+        unitCell = UnitCell(self._xdatcarFile["cell_shape"])
+
+        conf = PeriodicBoxConfiguration(self._trajectory.chemical_system,coords,unitCell)
 
         # The coordinates in VASP are in box format. Convert them into real coordinates.
         real_conf = conf.to_real_configuration()
 
-        # The real coordinates are folded then into the simulation box (-L/2,L/2). 
-        real_conf.fold_coordinates()
+        if self.configuration['fold']['value']:
+            # The real coordinates are folded then into the simulation box (-L/2,L/2). 
+            real_conf.fold_coordinates()
 
         # Bind the configuration to the chemcial system
         self._trajectory.chemical_system.configuration = real_conf

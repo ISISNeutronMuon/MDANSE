@@ -16,6 +16,8 @@
 import collections
 import os
 
+import numpy as np
+
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Extensions import xtc, trr
@@ -111,10 +113,13 @@ class GromacsConverter(Converter):
             coords, times, steps, box, __, velocities, forces = self._xdr_file.read(1,
                                                                                     get_velocities=self._read_velocities,
                                                                                     get_forces=self._read_forces)
+
             if self._read_velocities:
                 variables['velocities'] = velocities[0,:,:].astype(float)
             if self._read_forces:
                 variables['gradients'] = forces[0,:,:].astype(float)
+
+        coords = np.squeeze(coords)
 
         conf = PeriodicRealConfiguration(
             self._trajectory.chemical_system,

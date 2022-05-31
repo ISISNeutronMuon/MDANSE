@@ -24,7 +24,7 @@ from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Framework.Units import measure
 from MDANSE.Mathematics.Graph import Graph
 from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration, RealConfiguration
-
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 class XTDFile(object):
     
@@ -78,6 +78,7 @@ class XTDFile(object):
             self._cell[1,:] = SPACEGROUP.attrib["BVector"].split(',')
             self._cell[2,:] = SPACEGROUP.attrib["CVector"].split(',')
             self._cell *= measure(1.0,'ang').toval('nm')
+            self._cell = UnitCell(self._cell)
 
         self._atoms = collections.OrderedDict()
         
@@ -169,7 +170,7 @@ class XTDFile(object):
                 name = node.atom_name
                 atom = Atom(element, name=name, xtdIndex=node.index)
                 atom.index = node.index
-                configuration[atom.index] = node.xyz
+                coordinates[atom.index] = node.xyz
                 atomCluster.atoms.append(atom)
                 bruteFormula[element] += 1                
             atomCluster.name = "".join(["%s%d" % (k,v) for k,v in sorted(bruteFormula.items())])
