@@ -107,7 +107,7 @@ class CurrentCorrelationFunction(IJob):
         # Interpolate velocities of all atoms throughout the entire trajectory
         self._order = self.configuration["interpolation_order"]["value"]
         self._mode = self.configuration['interpolation_mode']['index']
-        self._preload = self.configuration['preload']['value']
+        self._preload = self.configuration['number_of_preloaded_fames']['value']
 
         traj = self.configuration['trajectory']['instance']
         nAtoms = traj.universe.numberOfAtoms()
