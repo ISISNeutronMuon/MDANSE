@@ -388,7 +388,7 @@ jobs:
           path: |
             C:\Miniconda\envs\mdanse\Lib\site-packages
             C:\Miniconda\envs\mdanse\Library
-          key: package
+          key: packages
 
       - name: Install h5py and netCDF4 into the environment
         run: conda install h5py netCDF4
@@ -518,7 +518,7 @@ jobs:
           path: |
             C:\Miniconda\envs\mdanse\lib\site-packages
             C:\Miniconda\envs\mdanse\Library
-          key: package
+          key: packages
 
       - name: Install h5py and netCDF4 into the environment
         run: conda install h5py netCDF4
