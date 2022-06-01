@@ -343,21 +343,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Initialise mamba environment
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          activate-environment: mdanse
-          use-mamba: true
-
-      - name: Restore cached python
-        id: python-cache
-        uses: actions/cache@v2
-        with:
-          path: C:\Miniconda\envs\mdanse
-          key: mdanse-hdf
-
       - name: Restore VS2008 from cache
         id: vs2008-cache
         uses: actions/cache@v2
@@ -390,15 +375,43 @@ jobs:
       - name: Install VC++ For Python2.7
         run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
 
+      - name: Restore cached conda packages
+        id: conda-cache
+        uses: actions/cache@v2
+        with:
+          path: C:\Users\runneradmin\conda_pkgs_dir
+          key: conda
+
+      - name: Initialise conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 2.7.18
+          activate-environment: mdanse
+
+      - name: Restore cached pip packages
+        id: python-cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\MMTK*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\Scientific*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\Pyro*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\docutils*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\sphinx*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\PyQt4*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\VTK*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\wxPython*
+          key: pip
+
       - name: Install h5py and netCDF4 into the environment
-        run: mamba install h5py netCDF4
+        run: conda install h5py netCDF4 matplotlib Cython pyyaml
         shell: cmd /C CALL {0}
 
       - name: Always upgrade dependencies
         run: |
           cd /D C:\Miniconda\envs\mdanse\lib\site-packages
           dir
-          %CONDA%\envs\mdanse\python.exe -m pip install -U matplotlib Cython Pyro docutils==0.17.1 sphinx==1.6.7 stdeb pyyaml
+          %CONDA%\envs\mdanse\python.exe -m pip install -U Pyro docutils==0.17.1 sphinx==1.6.7 stdeb
         shell: cmd /C CALL {0}
 
       - name: Install static dependencies
@@ -475,21 +488,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Initialise mamba environment
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          activate-environment: mdanse
-          use-mamba: true
-
-      - name: Restore cached python
-        id: python-cache
-        uses: actions/cache@v2
-        with:
-          path: C:\Miniconda\envs\mdanse
-          key: mdanse-hdf
-
       - name: Error out if python cache has not been restored
         if: steps.python-cache.outputs.cache-hit != 'true'
         run: exit
@@ -527,19 +525,43 @@ jobs:
       - name: Install VC++ For Python2.7
         run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
 
-      - run: |
-          cd C:\Miniconda\envs\mdanse\lib\site-packages
-          dir
+      - name: Restore cached conda packages
+        id: conda-cache
+        uses: actions/cache@v2
+        with:
+          path: C:\Users\runneradmin\conda_pkgs_dir
+          key: conda
 
-      - name: Install hdf5, h5py, and netCDF4 into the environment
-        run: mamba install h5py netCDF4
+      - name: Initialise conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 2.7.18
+          activate-environment: mdanse
+
+      - name: Restore cached pip packages
+        id: python-cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\MMTK*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\Scientific*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\Pyro*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\docutils*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\sphinx*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\PyQt4*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\VTK*
+            ${{ env.CONDA }}\envs\mdanse\lib\site-packages\wxPython*
+          key: pip
+
+      - name: Install h5py and netCDF4 into the environment
+        run: conda install h5py netCDF4 matplotlib Cython pyyaml
         shell: cmd /C CALL {0}
 
       - name: Always upgrade dependencies
         run: |
           cd /D C:\Miniconda\envs\mdanse\lib\site-packages
           dir
-          %CONDA%\envs\mdanse\python.exe -m pip install -U matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml
+          %CONDA%\envs\mdanse\python.exe -m pip install -U Pyro docutils==0.17.1 sphinx==1.6.7 stdeb
         shell: cmd /C CALL {0}
 
       - name: Deploy
