@@ -25,7 +25,19 @@ if %STATUS% neq 0 (
     exit %STATUS%
 )
 
-cd "%GITHUB_WORKSPACE%\BuildServer\Windows"
+rem remove unneeded packages
+cd /D %MDANSE_TEMPORARY_INSTALLATION_DIR%\Lib\site-packages
+rmdir /s /q PyQT4
+rmdir /s /q PyQT4-4.11.4.dist-info
+rmdir /s /q matplotlib\mpl-data\sample_data
+"%PYTHON_EXE%" -m pip uninstall sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3 -y
+cd %MDANSE_TEMPORARY_INSTALLATION_DIR%\Library
+rmdir /s /q cmake
+del /f /q USING*
+cd bin
+del /f /q *.exe
+
+cd /D "%GITHUB_WORKSPACE%\BuildServer\Windows"
 
 rem copy LICENSE
 copy "%GITHUB_WORKSPACE%\\LICENSE" "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\Resources\\nsis\\"
@@ -35,18 +47,6 @@ copy "%GITHUB_WORKSPACE%\CHANGELOG" "%GITHUB_WORKSPACE%\BuildServer\Windows\Reso
 
 rem Copy site.py 
 copy "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\Resources\\site.py" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\"
-
-rem remove unneeded packages
-cd %MDANSE_TEMPORARY_INSTALLATION_DIR%\Lib\site-packages
-rmdir /s /q PyQT4
-rmdir /s /q PyQT4-4.11.4.dist-info
-rmdir /s /q matplotlib\mpl-data\sample_data
-"%PYTHON_EXE%" -m pip uninstall sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3
-cd %MDANSE_TEMPORARY_INSTALLATION_DIR%\Library
-rmdir /s /q cmake
-del /f /q USING*
-cd bin
-del /f /q *.exe
 
 rem create the MDANSE installer
 echo "Creating nsis installer for target %MDANSE_TEMPORARY_INSTALLATION_DIR%..."
