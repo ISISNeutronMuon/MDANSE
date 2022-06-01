@@ -381,33 +381,16 @@ jobs:
           python-version: 2.7.18
           activate-environment: mdanse
 
-      - name: Restore cached packages
-        id: python-cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            C:\Miniconda\envs\mdanse\Lib\site-packages
-            C:\Miniconda\envs\mdanse\Library
-          key: packages
-
       - name: Install h5py and netCDF4 into the environment
         run: conda install h5py netCDF4
         shell: cmd /C CALL {0}
 
       - name: Always upgrade dependencies
         run: |
-          %CONDA%\envs\mdanse\python.exe -m pip install -U matplotlib Cython pyyaml Pyro docutils==0.17.1 sphinx==1.6.7 stdeb
-        shell: cmd /C CALL {0}
-
-      - name: Install static dependencies
-        if: steps.python-cache.outputs.cache-hit != 'true'
-        run: |
-          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
-          %CONDA%\envs\mdanse\python.exe -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
+          %CONDA%\envs\mdanse\python.exe -m pip install numpy matplotlib Cython pyyaml Pyro
         shell: cmd /C CALL {0}
 
       - name: Install ScientificPython
-        if: steps.python-cache.outputs.cache-hit != 'true'
         run: |
           cd %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/scientific-python.git
@@ -421,7 +404,6 @@ jobs:
         shell: cmd /C CALL {0}
 
       - name: Install MMTK
-        if: steps.python-cache.outputs.cache-hit != 'true'
         run: |
           cd /D %GITHUB_WORKSPACE%
           git clone https://code.ill.fr/scientific-software/mmtk.git
@@ -457,6 +439,37 @@ jobs:
           %CONDA%\envs\mdanse\python.exe BuildJobTests.py
           %CONDA%\envs\mdanse\python.exe AllTests.py
         shell: cmd /C CALL {0}
+
+      - name: Tar artifacts
+        if: |
+          contains( github.ref, 'main' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '93' )
+        run: |
+          cd /D %CONDA%\envs
+          tar -czf mdanse.tar.gz mdanse
+        shell: cmd /C CALL {0}
+
+      - name: Upload artifacts
+        if: |
+          contains( github.ref, 'main' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' ) ||
+           contains( github.ref, '93' )
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows_artifacts
+          path: C:\Miniconda\envs\mdanse.tar.gz
+          retention-days: 1
 
   deploy_windows:
     runs-on: windows-2019
@@ -511,24 +524,28 @@ jobs:
           python-version: 2.7.18
           activate-environment: mdanse
 
-      - name: Restore cached packages
-        id: python-cache
-        uses: actions/cache@v2
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
         with:
-          path: |
-            C:\Miniconda\envs\mdanse\lib\site-packages
-            C:\Miniconda\envs\mdanse\Library
-          key: packages
+          name: macos-10.15_artifacts
+          path: C:\Miniconda\envs
 
-      - name: Install h5py and netCDF4 into the environment
-        run: conda install h5py netCDF4
-        shell: cmd /C CALL {0}
+      - name: Untar python
+        run: |
+          cd /D C:\Miniconda\envs
+          tar -xkf mdanse.tar.gz
 
-      - name: Always upgrade dependencies
+      - name: Install packages required for documentation
         run: |
           cd /D C:\Miniconda\envs\mdanse\lib\site-packages
           dir
-          %CONDA%\envs\mdanse\python.exe -m pip install -U matplotlib Cython pyyaml Pyro docutils==0.17.1 sphinx==1.6.7 stdeb
+          %CONDA%\envs\mdanse\python.exe -m pip install docutils==0.17.1 sphinx==1.6.7 stdeb
+        shell: cmd /C CALL {0}
+
+      - name: Install GUI dependencies
+        run: |
+          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
+          %CONDA%\envs\mdanse\python.exe -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd /C CALL {0}
 
       - name: Deploy
