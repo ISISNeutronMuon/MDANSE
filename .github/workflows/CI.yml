@@ -348,7 +348,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: C:\Miniconda\envs\mdanse
-          key: mdanse-new
+          key: mdanse-hdf
 
       - name: Restore VS2008 from cache
         id: vs2008-cache
@@ -383,20 +383,14 @@ jobs:
         run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
 
       - name: Initialise conda environment
-        if: steps.python-cache.outputs.cache-hit != 'true'
         uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: 2.7
           activate-environment: mdanse
+          use-only-tar-bz2: true
 
-      - name: Initialise conda environment
-        if: steps.python-cache.outputs.cache-hit == 'true'
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: mdanse
-
-      - name: Install hdf5, h5py, and netCDF4 into the environment
-        run: conda install -p %CONDA%\envs\mdanse h5py netcdf4
+      - name: Install h5py and netCDF4 into the environment
+        run: conda install h5py netCDF4
         shell: cmd /C CALL {0}
 
       - name: Always upgrade dependencies
@@ -485,7 +479,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: C:\Miniconda\envs\mdanse
-          key: mdanse-new
+          key: mdanse-hdf
 
       - name: Error out if python cache has not been restored
         if: steps.python-cache.outputs.cache-hit != 'true'
@@ -529,20 +523,14 @@ jobs:
           dir
 
       - name: Initialise conda environment
-        if: steps.python-cache.outputs.cache-hit != 'true'
         uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: 2.7
           activate-environment: mdanse
-
-      - name: Initialise conda environment
-        if: steps.python-cache.outputs.cache-hit == 'true'
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: mdanse
+          use-only-tar-bz2: true
 
       - name: Install hdf5, h5py, and netCDF4 into the environment
-        run: conda install -p %CONDA%\envs\mdanse hdf5=1.10.4 h5py netcdf4
+        run: conda install hdf5=1.10.4 h5py netcdf4
         shell: cmd /C CALL {0}
 
       - name: Always upgrade dependencies
