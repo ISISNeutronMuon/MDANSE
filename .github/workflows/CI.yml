@@ -346,7 +346,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: C:\Miniconda\envs\mdanse
-          key: mdanse
+          key: mdanse-new
 
       - name: Restore VS2008 from cache
         id: vs2008-cache
@@ -474,7 +474,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: C:\Miniconda\envs\mdanse
-          key: mdanse
+          key: mdanse-new
 
       - name: Error out if python cache has not been restored
         if: steps.python-cache.outputs.cache-hit != 'true'
