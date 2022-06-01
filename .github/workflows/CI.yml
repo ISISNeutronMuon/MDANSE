@@ -392,6 +392,8 @@ jobs:
       - name: Initialise conda environment
         if: steps.python-cache.outputs.cache-hit == 'true'
         uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: mdanse
 
       - name: Install hdf5, h5py, and netCDF4 into the environment
         run: conda install -p %CONDA%\envs\mdanse h5py netcdf4
@@ -441,7 +443,6 @@ jobs:
           set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";%PATH%
           cd %GITHUB_WORKSPACE%
           copy /y "%GITHUB_WORKSPACE%\BuildServer\setup.py" %GITHUB_WORKSPACE%
-          conda activate mdanse
           %CONDA%\envs\mdanse\python.exe setup.py install
         shell: cmd /C CALL {0}
 
@@ -537,6 +538,8 @@ jobs:
       - name: Initialise conda environment
         if: steps.python-cache.outputs.cache-hit == 'true'
         uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: mdanse
 
       - name: Install hdf5, h5py, and netCDF4 into the environment
         run: conda install -p %CONDA%\envs\mdanse hdf5=1.10.4 h5py netcdf4
@@ -551,7 +554,6 @@ jobs:
 
       - name: Deploy
         run: |
-          conda activate mdanse
           mkdir %GITHUB_WORKSPACE%\BuildServer\Windows\Build
           cd %GITHUB_WORKSPACE%\BuildServer\Windows\Build\
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
