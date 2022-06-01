@@ -5,6 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -189,6 +190,7 @@ jobs:
   # OSX
   ci_osx:
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -389,6 +391,7 @@ jobs:
         with:
           python-version: 2.7
           activate-environment: mdanse
+          use-only-tar-bz2: true
 
       - name: Install hdf5, h5py, and netCDF4 into the environment
         run: conda install hdf5=1.10.4 h5py netcdf4
@@ -396,7 +399,7 @@ jobs:
 
       - name: Always upgrade dependencies
         run: |
-          cd C:\Miniconda\envs\mdanse\lib\site-packages
+          cd /D C:\Miniconda\envs\mdanse\lib\site-packages
           dir
           python -m pip install -U matplotlib Cython Pyro docutils==0.17.1 sphinx==1.6.7 stdeb pyyaml
         shell: cmd /C CALL {0}
@@ -528,6 +531,7 @@ jobs:
         with:
           python-version: 2.7
           activate-environment: mdanse
+          use-only-tar-bz2: true
 
       - name: Install hdf5, h5py, and netCDF4 into the environment
         run: conda install hdf5=1.10.4 h5py netcdf4
