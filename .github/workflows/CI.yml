@@ -348,6 +348,10 @@ jobs:
           path: C:\Miniconda\envs\mdanse
           key: mdanse-new
 
+      - run: |
+          cd C:\Miniconda\envs\mdanse\lib\site-packages
+          dir
+
       - name: Restore VS2008 from cache
         id: vs2008-cache
         uses: actions/cache@v2
@@ -392,6 +396,8 @@ jobs:
 
       - name: Always upgrade dependencies
         run: |
+          cd C:\Miniconda\envs\mdanse\lib\site-packages
+          dir
           python -m pip install -U matplotlib Cython Pyro docutils==0.17.1 sphinx==1.6.7 stdeb pyyaml
         shell: cmd /C CALL {0}
 
