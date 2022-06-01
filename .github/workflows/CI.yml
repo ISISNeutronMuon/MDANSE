@@ -386,9 +386,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            ${{ env.CONDA }}\envs\mdanse\Lib\site-packages
-            ${{ env.CONDA }}\envs\mdanse\Library
-          key: pip2
+            C:\Miniconda\envs\mdanse\Lib\site-packages
+            C:\Miniconda\envs\mdanse\Library
+          key: package
 
       - name: Install h5py and netCDF4 into the environment
         run: conda install h5py netCDF4 matplotlib Cython pyyaml
@@ -516,9 +516,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            ${{ env.CONDA }}\envs\mdanse\lib\site-packages
-            ${{ env.CONDA }}\envs\mdanse\Library
-          key: pip2
+            C:\Miniconda\envs\mdanse\lib\site-packages
+            C:\Miniconda\envs\mdanse\Library
+          key: package
 
       - name: Install h5py and netCDF4 into the environment
         run: conda install h5py netCDF4 matplotlib Cython pyyaml
