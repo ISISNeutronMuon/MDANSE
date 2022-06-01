@@ -387,7 +387,7 @@ jobs:
         with:
           miniforge-variant: Mambaforge
           miniforge-version: latest
-          python-version: 2.7
+          python-version: 2.7.18
           activate-environment: mdanse
           use-mamba: true
 
@@ -529,7 +529,7 @@ jobs:
         with:
           miniforge-variant: Mambaforge
           miniforge-version: latest
-          python-version: 2.7
+          python-version: 2.7.18
           activate-environment: mdanse
           use-mamba: true
 
