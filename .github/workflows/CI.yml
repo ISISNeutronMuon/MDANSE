@@ -351,8 +351,7 @@ jobs:
           key: mdanse-new
 
       - run: |
-          cd C:\Miniconda\envs\mdanse\lib\site-packages
-          dir
+          C:\Miniconda\envs\mdanse\python.exe -c "import h5py, numpy"
 
       - name: Restore VS2008 from cache
         id: vs2008-cache
