@@ -350,9 +350,6 @@ jobs:
           path: C:\Miniconda\envs\mdanse
           key: mdanse-new
 
-      - run: |
-          C:\Miniconda\envs\mdanse\python.exe -c "import h5py, numpy"
-
       - name: Restore VS2008 from cache
         id: vs2008-cache
         uses: actions/cache@v2
@@ -444,6 +441,7 @@ jobs:
           set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";%PATH%
           cd %GITHUB_WORKSPACE%
           copy /y "%GITHUB_WORKSPACE%\BuildServer\setup.py" %GITHUB_WORKSPACE%
+          conda activate mdanse
           %CONDA%\envs\mdanse\python.exe setup.py install
         shell: cmd /C CALL {0}
 
@@ -553,6 +551,7 @@ jobs:
 
       - name: Deploy
         run: |
+          conda activate mdanse
           mkdir %GITHUB_WORKSPACE%\BuildServer\Windows\Build
           cd %GITHUB_WORKSPACE%\BuildServer\Windows\Build\
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
