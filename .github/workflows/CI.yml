@@ -534,6 +534,7 @@ jobs:
         run: |
           cd /D C:\Miniconda\envs
           tar -xkf mdanse.tar.gz
+        shell: cmd /C CALL {0}
 
       - name: Install packages required for documentation
         run: |
