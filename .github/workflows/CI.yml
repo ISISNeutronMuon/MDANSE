@@ -391,12 +391,12 @@ jobs:
           key: package
 
       - name: Install h5py and netCDF4 into the environment
-        run: conda install h5py netCDF4 matplotlib Cython pyyaml
+        run: conda install h5py netCDF4
         shell: cmd /C CALL {0}
 
       - name: Always upgrade dependencies
         run: |
-          %CONDA%\envs\mdanse\python.exe -m pip install -U Pyro docutils==0.17.1 sphinx==1.6.7 stdeb
+          %CONDA%\envs\mdanse\python.exe -m pip install -U matplotlib Cython pyyaml Pyro docutils==0.17.1 sphinx==1.6.7 stdeb
         shell: cmd /C CALL {0}
 
       - name: Install static dependencies
@@ -521,14 +521,14 @@ jobs:
           key: package
 
       - name: Install h5py and netCDF4 into the environment
-        run: conda install h5py netCDF4 matplotlib Cython pyyaml
+        run: conda install h5py netCDF4
         shell: cmd /C CALL {0}
 
       - name: Always upgrade dependencies
         run: |
           cd /D C:\Miniconda\envs\mdanse\lib\site-packages
           dir
-          %CONDA%\envs\mdanse\python.exe -m pip install -U Pyro docutils==0.17.1 sphinx==1.6.7 stdeb
+          %CONDA%\envs\mdanse\python.exe -m pip install -U matplotlib Cython pyyaml Pyro docutils==0.17.1 sphinx==1.6.7 stdeb
         shell: cmd /C CALL {0}
 
       - name: Deploy
