@@ -5,6 +5,7 @@ import numpy as np
 
 from MDANSE.Chemistry.ChemicalEntity import Nucleotide, is_molecule, Atom, AtomCluster, ChemicalSystem, Molecule, Nucleotide, NucleotideChain, Residue, PeptideChain, Protein, UnknownAtomError
 from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DATABASE, RESIDUES_DATABASE
+from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 from MDANSE.IO.PDB import PDBMolecule, PDBNucleotideChain, PDBPeptideChain, Structure
 
 class PDBReaderError(Exception):
@@ -13,6 +14,11 @@ class PDBReaderError(Exception):
 class PDBReader:
 
     def __init__(self, filename):
+        """Constructor.
+
+        Args:
+            filename (str): the input PDB file
+        """
 
         self._chemicalEntities = []
 
@@ -21,6 +27,8 @@ class PDBReader:
         self._build_chemical_entities()
 
     def _build_chemical_entities(self):
+        """Build the chemical entities stored in the PDB file.
+        """
 
         peptide_chains = []
         for pdb_element in self._struct.objects:
@@ -54,6 +62,14 @@ class PDBReader:
             peptide_chains = []
 
     def _guess_atom_symbol(self, atom):
+        """Guess the atom symbol from an atom name.
+
+        Args:
+            atom (str): thhe atom name
+
+        Returns:
+            str: the atom symbol
+        """
 
         atom_without_digits = ''.join([at for at in atom if at not in string.digits])
         
@@ -66,6 +82,14 @@ class PDBReader:
                 raise PDBReaderError(atom)
 
     def _process_atom(self, atom):
+        """Process a PDB atom.
+
+        Args:
+            atom (MDANSE.IO.PDB.PDBAtom): the PDB entry corresponding to the atom
+
+        Returns:
+            MDANSE.Chemistry.ChemicalEntity.Atom: the processed atom
+        """
 
         atname = atom.name.capitalize()
 
@@ -89,6 +113,14 @@ class PDBReader:
         return atom_found
 
     def _process_atom_cluster(self, atom_cluster):
+        """Process a PDB atom cluster.
+
+        Args:
+            atom (MDANSE.IO.PDB.PDBAtomCluster): the PDB entry corresponding to the atom cluster
+
+        Returns:
+            MDANSE.Chemistry.ChemicalEntity.AtomCluster: the processed atom cluster
+        """
 
         ac_name = atom_cluster.name
 
@@ -104,6 +136,14 @@ class PDBReader:
         return new_atom_cluster
 
     def _process_molecule(self, molecule):
+        """Process a PDB molecule.
+
+        Args:
+            atom (MDANSE.IO.PDB.PDBMolecule): the PDB entry corresponding to the molecule
+
+        Returns:
+            MDANSE.Chemistry.ChemicalEntity.Molecule: the processed molecule
+        """
 
         code = molecule.name
 
@@ -133,49 +173,15 @@ class PDBReader:
 
         return new_molecule
 
-    def _guess_prot_terminus_type(self, pdb_atoms, nter=True):
-
-        for resname,residue in RESIDUES_DATABASE.items():
-            if nter and not residue['is_n_terminus']:
-                continue
-            if not nter and not residue['is_c_terminus']:
-                continue
-            atoms_map = {}
-            for at,info in residue['atoms'].items():
-                alt = [at] + info['alternatives']
-                for a in alt:
-                    if a in pdb_atoms:
-                        atoms_map[a] = at
-                        break
-                else:
-                    break
-            else:
-                return (resname,atoms_map)
-        else:
-            raise PDBReaderError()
-
-    def _guess_nucl_terminus_type(self, pdb_atoms, ter5=True):
-
-        for nuclname,nucleotide in NUCLEOTIDES_DATABASE.items():
-            if ter5 and not nucleotide['is_5ter_terminus']:
-                continue
-            if not ter5 and not nucleotide['is_3ter_terminus']:
-                continue
-            atoms_map = {}
-            for at,info in nucleotide['atoms'].items():
-                alt = [at] + info['alternatives']
-                for a in alt:
-                    if a in pdb_atoms:
-                        atoms_map[a] = at
-                        break
-                else:
-                    break
-            else:
-                return (nuclname,atoms_map)
-        else:
-            raise PDBReaderError()
-
     def _process_nter_residue(self, residue):
+        """Process a N terminus residue.
+
+        Args:
+            residue (MDANSE.IO.PDB.PDBResidue): the residue
+
+        Returns:
+            MDANSE.Chemistry.ChemicalEntity.Residue: the processed residue
+        """
 
         code = residue.name
 
@@ -183,29 +189,41 @@ class PDBReader:
 
         atoms_found = [None]*len(pdb_atoms)
 
-        nter_variants = [(name,res) for name,res in RESIDUES_DATABASE.items() if res['is_n_terminus']]
-
         atoms_not_found = []
 
+        # Loop over the PDB atoms of this residue
         for comp, pdb_atom in enumerate(pdb_atoms):
+            # Loop over the atoms of this residue stored in the corresponding residue database entry
             for at, info in RESIDUES_DATABASE[code]['atoms'].items():
+                # A match was found, pass to the next PDB atom
                 if pdb_atom == at or pdb_atom in info['alternatives']:
                     atoms_found[comp] = at
                     break
+            # No match was found, the PDB atom is marked as not found
             else:
                 atoms_not_found.append(pdb_atom)
 
+        # Fetch all the N ter variants from the residues database
+        nter_variants = [(name,res) for name,res in RESIDUES_DATABASE.items() if res['is_n_terminus']]
+
+        # The atoms that has not been found so far will be searched now in the N ter variants entries of the database
         if atoms_not_found:
+            # Loop over the N ter variants of the residues database
             for name,res in nter_variants:
+                # Loop over the atom of the current variant
                 for at, info in res['atoms'].items():
+                    # These are all the names the atoms can take (actual DB name + alternatives)
                     allNames = [at] + info['alternatives']
                     for aa in allNames:                        
+                        # The variant atom match one of the not found atoms, mark it as known and pass to the next variant atom     
                         if aa in atoms_not_found:
                             idx = pdb_atoms.index(aa)
                             atoms_found[idx] = at
                             break
+                    # The variant atom was not found in the not found atoms, this variant can not be the right one. Skip it.
                     else:
                         break
+                # All the variant atoms has been found in the not found atoms, this variant is the right one
                 else:
                     nter = name
                     break
@@ -219,14 +237,20 @@ class PDBReader:
         return new_residue
 
     def _process_5ter_residue(self, residue):
+        """Process a 5 ter terminus nucleotide.
+
+        Args:
+            residue (MDANSE.IO.PDB.PDBNucleotide): the nucleotide
+
+        Returns:
+            MDANSE.Chemistry.ChemicalEntity.Nucleotide: the processed nucleotide
+        """
 
         resname = residue.name
 
         pdb_atoms = [at.name for at in residue]
 
         atoms_found = [None]*len(pdb_atoms)
-
-        nter_variants = [(name,res) for name,res in NUCLEOTIDES_DATABASE.items() if res['is_5ter_terminus']]
 
         atoms_not_found = []
 
@@ -238,8 +262,10 @@ class PDBReader:
             else:
                 atoms_not_found.append(pdb_atom)
 
+        ter5_variants = [(name,res) for name,res in NUCLEOTIDES_DATABASE.items() if res['is_5ter_terminus']]
+
         if atoms_not_found:
-            for name,res in nter_variants:
+            for name,res in ter5_variants:
                 for at, info in res['atoms'].items():
                     allNames = [at] + info['alternatives']
                     for aa in allNames:                        
@@ -327,14 +353,20 @@ class PDBReader:
         return new_residue
 
     def _process_3ter_residue(self, residue):
+        """Process the 3 ter terminal nucleotide.
+
+        Args:
+            residue: MDANSE.IO.PDB.PDBNucleotide
+
+        Returns:
+            MDANSE.Chemistry.ChemicalEntity.Nucleotide: the 3 ter nucleotide
+        """
 
         resname = residue.name
 
         pdb_atoms = [at.name for at in residue]
 
         atoms_found = [None]*len(pdb_atoms)
-
-        cter_variants = [(name,res) for name,res in NUCLEOTIDES_DATABASE.items() if res['is_3ter_terminus']]
 
         atoms_not_found = []
 
@@ -346,8 +378,10 @@ class PDBReader:
             else:
                 atoms_not_found.append(pdb_atom)
 
+        ter3_variants = [(name,res) for name,res in NUCLEOTIDES_DATABASE.items() if res['is_3ter_terminus']]
+
         if atoms_not_found:
-            for name,res in cter_variants:
+            for name,res in ter3_variants:
                 for at, info in res['atoms'].items():
                     allNames = [at] + info['alternatives']
                     for aa in allNames:                        
@@ -369,6 +403,14 @@ class PDBReader:
         return new_residue
 
     def _process_residue(self, residue):
+        """Process a residue.
+
+        Args:
+            residue (MDANSE.IO.PDB.PDBResidue): the PDB residue
+
+        Returns:
+            MDANSE.Chemistry.ChemicalEntity.Residue: the processed residue
+        """
 
         code = residue.name
 
@@ -391,6 +433,14 @@ class PDBReader:
         return new_residue
 
     def _process_nucleotide(self, residue):
+        """Process a nucleotide.
+
+        Args:
+            residue (MDANSE.IO.PDB.PDBNucleotide): the PDB nucleotide
+
+        Returns:
+            MDANSE.Chemistry.ChemicalEntity.Nucleotide: the processed nucleotide
+        """
 
         resname = residue.name
 
@@ -415,36 +465,28 @@ class PDBReader:
         new_residue.set_atoms(atoms_found)
 
         return new_residue
-
-    def _is_ter_nucleotide(self, nucleotide, ter5=True):
-
-        terminus_keyword = 'is_5ter_terminus' if ter5 else 'is_3ter_terminus'
-
-        pdb_atoms = [at.name for at in nucleotide.atom_list]
-
-        for nucl in NUCLEOTIDES_DATABASE:
-
-            if not nucl[terminus_keyword]:
-                continue
-            atoms = nucl['atoms'].keys()
-
-            for at in atoms:
-                if at not in pdb_atoms:
-                    break
-            else:
-                return True
-        else:
-            return False
                     
     def _process_nucleotide_chain(self, pdb_element):
+        """Process a PDB nucleotide chain.
+
+        Args:
+            pdb_element (MDANSE.IO.PDB.PDBNucleotideChain): the PDB nucleotide chain to process 
+
+        Returns:
+            MDANSE.Chemistry.ChemicalEntity.NucleotideChain: the process nucleotide chain
+        """
         
         nucleotide_chain = NucleotideChain(pdb_element.chain_id)
         residues = []
+        # Loop over the residues of the nucleotide chain
         for comp, residue in enumerate(pdb_element.residues):
+            # Case the 5 ter residue
             if comp == 0:
                 res = self._process_5ter_residue(residue)
+            # Case the 3 ter residue
             elif comp == len(pdb_element.residues) - 1:
                 res = self._process_3ter_residue(residue)
+            # Normal residue
             else:
                 res = self._process_nucleotide(residue)
             residues.append(res)
@@ -453,6 +495,14 @@ class PDBReader:
         return nucleotide_chain
 
     def _process_peptide_chain(self, pdb_element):
+        """Process a PDB peptide chain.
+
+        Args:
+            pdb_element (MDANSE.IO.PDB.PeptideChain): the PDB peptide chain to process 
+
+        Returns:
+            MDANSE.Chemistry.ChemicalEntity.PeptideChain: the process peptide chain
+        """
 
         peptide_chain = PeptideChain(pdb_element.chain_id)
         residues = []
@@ -469,8 +519,11 @@ class PDBReader:
         return peptide_chain
 
     def build_chemical_system(self):
+        """Build the chemical system.
 
-        from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+        Returns:
+            MDANSE.Chemistry.ChemicalEntity.ChemicalSystem: the chemical system
+        """
 
         chemical_system = ChemicalSystem()
 
