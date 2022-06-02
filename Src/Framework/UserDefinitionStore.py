@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-import cPickle
+import pickle
 import os
 
 from MDANSE import PLATFORM
@@ -60,7 +60,7 @@ class UserDefinitionStore(object):
         # Try to open the UD file.
         try:
             f = open(UserDefinitionStore.UD_PATH, "rb")
-            UD = cPickle.load(f)
+            UD = pickle.load(f)
   
         # If for whatever reason the pickle file loading failed do not even try to restore it
         except:
@@ -83,7 +83,7 @@ class UserDefinitionStore(object):
         except IOError:
             return
         else:
-            cPickle.dump(self._definitions, f, protocol=2)
+            pickle.dump(self._definitions, f, protocol=2)
             f.close()
                                     
     def remove_definition(self,*defs):

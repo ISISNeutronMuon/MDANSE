@@ -14,7 +14,7 @@
 # **************************************************************************
 
 import collections
-import cPickle
+import pickle
 
 import wx
 
@@ -114,7 +114,7 @@ class PluginsTreePanel(wx.Panel):
         if data is None:
             return
 
-        draginfo = cPickle.dumps(data)
+        draginfo = pickle.dumps(data)
         
         tdo = wx.CustomDataObject(wx.CustomDataFormat("Plugin"))
         

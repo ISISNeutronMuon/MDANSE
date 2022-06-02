@@ -66,14 +66,14 @@ class ClassRegistry(object):
             return
         
         # And this attribute must be a string for the class to be registerable otherwise return
-        if not isinstance(clsRegistry,basestring):
+        if not isinstance(clsRegistry,str):
             return
         
         # Fetch the branch of the registry corresponding the one of the class to be registred, otherwise create a new branch        
         d = self._registry.setdefault(clsRegistry,{})
         
         # If a class has already been registered with that name return
-        if d.has_key(name):
+        if name in d:
             return
 
         setattr(cls,"_type",name)

@@ -15,7 +15,7 @@
 
 import abc
 
-from Scientific.IO.NetCDF import NetCDFFile
+import netCDF4
 
 from MDANSE.Framework.Jobs.IJob import IJob
 
@@ -37,7 +37,7 @@ class Converter(IJob):
             return
 
         try:
-            f = NetCDFFile(self._trajectory.filename,'a')
+            f = netCDF4.Dataset(self._trajectory.filename,'a')
         except:
             return
         

@@ -14,7 +14,7 @@
 # **************************************************************************
 
 import collections
-import cPickle
+import pickle
 import datetime
 import glob
 import os
@@ -137,7 +137,7 @@ class JobController(threading.Thread):
             # Open the job temporary file
             try:
                 f = open(job, 'rb')
-                info = cPickle.load(f)
+                info = pickle.load(f)
                 f.close()
                 
             # If the file could not be opened/unpickled for whatever reason, try at the next checkpoint

@@ -194,7 +194,7 @@ class Platform(object):
         :rtype: str
         '''
         
-        path = str(path).encode('string-escape')      
+        path = str(path).encode('unicode-escape')      
                 
         path = os.path.abspath(os.path.expanduser(path))
         
@@ -488,10 +488,10 @@ class PlatformWin(Platform):
                                                     ctypes.byref(usertime))
         
         
-        creationtime.value -= ctypes.c_longlong(116444736000000000L).value
+        creationtime.value -= ctypes.c_longlong(116444736000000000).value
         creationtime.value /= 10000000
         
-        return creationtime.value    
+        return creationtime.value
 
     def get_processes_info(self):
         '''

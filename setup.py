@@ -133,7 +133,7 @@ def find_data(where=".", exclude=EXCLUDE, exclude_directories=EXCLUDE_DIRECTORIE
 #################################
 
 PACKAGE_INFO = {}
-execfile('Src/__pkginfo__.py', {}, PACKAGE_INFO)
+exec(open('Src/__pkginfo__.py','r').read(), {}, PACKAGE_INFO)
 
 PACKAGES = find_packages(path="Src",base="MDANSE")
 
