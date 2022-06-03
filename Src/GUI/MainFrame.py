@@ -315,7 +315,7 @@ Authors:
 
         wildcards = collections.OrderedDict([kls._type, "%s (*.%s)|*.%s" % (kls._type,kls.extension,kls.extension)] for kls in REGISTRY["input_data"].values() if kls.extension is not None)
 
-        dialog = wx.FileDialog ( None, message='Open data ...', wildcard="automatic (*.mvi,*.nc,*.h5)|*.mvi;*.nc;*.h5|" + "|".join(wildcards.values()), style=wx.OPEN)
+        dialog = wx.FileDialog ( None, message='Open data ...', wildcard="automatic (*.mvi,*.nc,*.h5)|*.mvi;*.nc;*.h5|" + "|".join(wildcards.values()), style=wx.FD_OPEN)
         
         if dialog.ShowModal() == wx.ID_CANCEL:
             return ""

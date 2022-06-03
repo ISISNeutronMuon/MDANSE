@@ -357,7 +357,7 @@ class Topic(PublisherMixin):
         else:
             unsubd = []
             for listener in py2and3.keys(self.__listeners):
-                if filter(listener):
+                if list(filter(listener)):
                     unsubd.append(listener)
                     listener._unlinkFromTopic_()
                     del self.__listeners[listener]

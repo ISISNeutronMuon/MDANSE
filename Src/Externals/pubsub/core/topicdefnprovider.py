@@ -627,7 +627,7 @@ class TopicTreeSpecPrinter:
             # but ignore the arg keys that are in parent args docs:
             parentMsgKeys = ()
             if topicObj.getParent() is not None:
-                parentMsgKeys = topicObj.getParent().getArgDescriptions().keys() # keys iter ok
+                parentMsgKeys = list(topicObj.getParent().getArgDescriptions().keys()) # keys iter ok
             argsDocs = topicObj.getArgDescriptions()
             for key in sorted(py2and3.iterkeys(argsDocs)):
                 if key not in parentMsgKeys:

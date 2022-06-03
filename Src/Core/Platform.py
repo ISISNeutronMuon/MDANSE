@@ -417,7 +417,7 @@ class PlatformPosix(Platform):
         procs = subprocess.Popen(['ps', '-eo', 'pid,etime'], stdout=subprocess.PIPE)
 
         # The output of the ps command is splitted according to line feeds.
-        procs = procs.communicate()[0].split('\n')[1:]
+        procs = procs.communicate()[0].decode('utf-8').split('\n')[1:]
         
         # The list of (pid,executable).
         procs = [p.split() for p in procs if p]

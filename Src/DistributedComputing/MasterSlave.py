@@ -68,7 +68,7 @@ import Pyro.core
 import Pyro.errors
 import Pyro.naming
 
-from Scientific.DistributedComputing.TaskManager import TaskManager, TaskManagerTermination
+from MDANSE.DistributedComputing.TaskManager import TaskManager, TaskManagerTermination
 
 from MDANSE import PLATFORM
 
@@ -117,7 +117,7 @@ class MasterProcess(object):
             except AttributeError:
                 nTrials += 1
                 if debug:
-                    print "Failed to access pyro_daemon. Trial no: %d" % nTrials
+                    print("Failed to access pyro_daemon. Trial no: %d" % nTrials)
                     continue
                 if maxTrials is not None:
                     if nTrials == maxTrials:
@@ -201,7 +201,7 @@ class MasterProcess(object):
         for name, value in kw.items():
             label = "state_%d_%s" % (state_id, name)
             if debug:
-                print "Storing state value ", label
+                print("Storing state value ", label)
             self.task_manager.storeData(**{label: value})
         return state_id
 
@@ -209,7 +209,7 @@ class MasterProcess(object):
         for name in self.global_states[state_id]:
             label = "state_%d_%s" % (state_id, name)
             if debug:
-                print "Deleting state value ", label
+                print("Deleting state value ", label)
             self.task_manager.deleteData(label)
 
     def start(self):
@@ -320,16 +320,16 @@ class SlaveProcess(object):
         import inspect
         self.task_methods = {}
         if debug:
-            print "Scanning task handler methods..."
+            print("Scanning task handler methods...")
         for name, value in inspect.getmembers(self, inspect.isroutine):
             if name[:3] == "do_":
                 self.task_methods[name] = value
                 if debug:
-                    print "   found handler for task ", name[:3]
+                    print("   found handler for task ", name[:3])
         if debug:
-            print len(self.task_methods), "task handlers found in class"
-            print "If the slave is defined by a script or module, it is"
-            print "normal that none have been found!"
+            print(len(self.task_methods), "task handlers found in class")
+            print("If the slave is defined by a script or module, it is")
+            print("normal that none have been found!")
 
     def watchdogThread(self):
         """
@@ -347,11 +347,11 @@ class SlaveProcess(object):
         if isinstance(parameter, GlobalStateValue):
             try:
                 if debug:
-                    print "Returning state value", parameter.label
+                    print("Returning state value", parameter.label)
                 return self.global_state_cache[parameter.label]
             except KeyError:
                 if debug:
-                    print "Retrieving state value", parameter.label
+                    print("Retrieving state value", parameter.label)
                 self.global_state_cache[parameter.label] = \
                         self.task_manager.retrieveData(parameter.label)
                 return self.global_state_cache[parameter.label]
@@ -363,7 +363,7 @@ class SlaveProcess(object):
         Starts the slave process.
         """
         if debug:
-            print "Starting slave process"
+            print("Starting slave process")
         if namespace is None:
             namespace = self.task_methods
         self.process_id = \
@@ -384,7 +384,7 @@ class SlaveProcess(object):
                 task_id, tag, parameters = \
                        self.task_manager.getAnyTask(self.process_id)
                 if debug:
-                    print "Got task", task_id, "of type", tag
+                    print("Got task", task_id, "of type", tag)
             except TaskManagerTermination:
                 break
             # Find the method to call
@@ -392,7 +392,7 @@ class SlaveProcess(object):
                 method = namespace["do_%s" % tag]
             except KeyError:
                 if debug:
-                    print "No suitable handler was found, returning task."
+                    print("No suitable handler was found, returning task.")
                 self.task_manager.returnTask(task_id)
                 continue
             # Replace GlobalStateValue objects by the associated values
@@ -400,31 +400,31 @@ class SlaveProcess(object):
             # Call the method
             try:
                 if debug:
-                    print "Executing task handler..."
+                    print("Executing task handler...")
                 result = method(*parameters)
                 if debug:
-                    print "...done."
+                    print("...done.")
             except KeyboardInterrupt:
                 if debug:
-                    print "Keyboard interrupt"
+                    print("Keyboard interrupt")
                 self.task_manager.returnTask(task_id)
                 self.task_manager.unregisterProcess(self.process_id)
                 raise
-            except Exception, e:
-                import traceback, StringIO
+            except Exception as e:
+                import traceback, io
                 if debug:
-                    print "Exception:"
+                    print("Exception:")
                     traceback.print_exc()
-                tb_text = StringIO.StringIO()
+                tb_text = io.StringIO()
                 traceback.print_exc(None, tb_text)
                 tb_text = tb_text.getvalue()
                 self.task_manager.storeException(task_id, e, tb_text)
             else:
                 if debug:
-                    print "Storing result..."
+                    print("Storing result...")
                 self.task_manager.storeResult(task_id, result)
                 if debug:
-                    print "...done."
+                    print("...done.")
         self.task_manager.unregisterProcess(self.process_id)
         self.done = True
 
@@ -489,7 +489,7 @@ def runJob(label, master_class, slave_class, watchdog_period=120.,
         master = True
     if master:
         filename = inspect.getsourcefile(main_module)
-        source = file(filename).read()
+        source = open(filename,'r').read()
         process = master_class(label)
         process.task_manager.storeData(slave_code = source,
                                        cwd = os.getcwd())
@@ -535,15 +535,15 @@ def initializeMasterProcess(label, slave_script=None, slave_module=None,
     atexit.register(process.shutdown)
     if slave_script is not None or slave_module is not None:
         if slave_script is not None:
-            source = file(slave_script).read()
+            source = open(slave_script,'r').read()
         else:
             source = """
 import MDANSE.DistributedComputing.MasterSlave
 from %s import *
 """ % slave_module
             if debug:
-                source += "print 'Slave definitions:'\n"
-                source += "print dir()\n"
+                source += "print('Slave definitions:'\n)"
+                source += "print(dir()\n)"
                 source += "MDANSE.DistributedComputing.MasterSlave.debug=True\n"
             source += """
 MDANSE.DistributedComputing.MasterSlave.startSlaveProcess()
@@ -551,10 +551,10 @@ MDANSE.DistributedComputing.MasterSlave.startSlaveProcess()
         process.task_manager.storeData(slave_code = source,
                                        cwd = PLATFORM.home_directory())
         if debug:
-            print "Slave source code:"
-            print 50*'-'
-            print source
-            print 50*'-'
+            print("Slave source code:")
+            print(50*'-')
+            print(source)
+            print(50*'-')
     return process
 
 def startSlaveProcess(label=None, master_host=None):
@@ -583,6 +583,6 @@ def startSlaveProcess(label=None, master_host=None):
     else:
         namespace = main_module.__dict__
     if debug:
-        print "Initializing slave process", label
+        print("Initializing slave process", label)
     process = SlaveProcess(label, master_host)
     process.start(namespace)

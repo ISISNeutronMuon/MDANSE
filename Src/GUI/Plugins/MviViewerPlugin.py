@@ -317,13 +317,13 @@ class MviViewerPlugin(ComponentPlugin):
         points.append(points[0])
         return points
 
-    def rotate(self, point, (origin, rotm)):
+    def rotate(self, point, origin, rotm):
         ''' 
         Rotate and move v according to origin and rotation matrix 
         '''
         return numpy.dot(point, rotm) + origin
 
-    def rotate_points(self, points, (origin, rotm)):
+    def rotate_points(self, points, origin, rotm):
         ''' 
         Rotate and move v according to origin and rotation matrix 
         '''

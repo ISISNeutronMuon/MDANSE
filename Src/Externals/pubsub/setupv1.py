@@ -27,7 +27,7 @@ a version of wxPython where legacy v1 API is *not* the default:
 
 '''
 
-import pubsubconf
+from . import pubsubconf
 pubsubconf.setVersion(1)
 
 

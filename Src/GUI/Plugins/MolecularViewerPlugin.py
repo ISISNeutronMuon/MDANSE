@@ -1118,7 +1118,7 @@ def get_trajectory_filename():
 
     filters = 'HDF file (*.h5)|*.h5|All files (*.*)|*.*'
     
-    dialog = wx.FileDialog ( None, message = 'Open Trajectory file...', wildcard=filters, style=wx.OPEN)
+    dialog = wx.FileDialog ( None, message = 'Open Trajectory file...', wildcard=filters, style=wx.FD_OPEN)
 
     if dialog.ShowModal() == wx.ID_CANCEL:
         return ""

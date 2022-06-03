@@ -97,7 +97,7 @@ from core.weakmethod import getWeakRef as _getWeakRef
 def _isbound(method):
     """Return true if method is a bound method, false otherwise"""
     assert ismethod(method)
-    return method.im_self is not None
+    return method.__self__ is not None
 
 
 def _paramMinCountFunc(function):
@@ -119,15 +119,15 @@ def _paramMinCount(callableObject):
     of methods, is not counted.
     """
     try:
-        func = callableObject.__call__.im_func
+        func = callableObject.__call__.__func__
     except AttributeError:
         try:
-            func = callableObject.im_func
+            func = callableObject.__func__
         except AttributeError:
             try:
                 return _paramMinCountFunc(callableObject)
             except exc:
-                raise Exception, 'Cannot determine type of callable: %s' % repr(callableObject)
+                raise Exception('Cannot determine type of callable: %s' % repr(callableObject))
  
     min, d = _paramMinCountFunc(func)
     return min-1, d
@@ -137,8 +137,8 @@ def _tupleize(items):
     """Convert items to tuple if not already one, 
     so items must be a list, tuple or non-sequence"""
     if isinstance(items, list):
-        raise TypeError, 'Not allowed to tuple-ize a list'
-    elif isinstance(items, (str, unicode)) and items.find('.') != -1:
+        raise TypeError('Not allowed to tuple-ize a list')
+    elif isinstance(items, str) and items.find('.') != -1:
         items = tuple(items.split('.'))
     elif not isinstance(items, tuple):
         items = (items,)
@@ -149,7 +149,7 @@ def _getCallableName(callable):
     """Get name for a callable, ie function, bound 
     method or callable instance"""
     if ismethod(callable):
-        return '%s.%s ' % (callable.im_self, callable.im_func.func_name)
+        return '%s.%s ' % (callable.__self__, callable.__func__.__name__)
     elif isfunction(callable):
         return '%s ' % callable.__name__
     else:
@@ -311,7 +311,7 @@ class _TopicTreeNode:
         strVal = []
         for callable in self.getCallables():
             strVal.append(_getCallableName(callable))
-        for topic, node in self.__subtopics.iteritems():
+        for topic, node in self.__subtopics.items():
             strVal.append(' (%s: %s)' %(topic, node))
         return ''.join(strVal)
       
@@ -462,7 +462,7 @@ class _TopicTreeRoot(_TopicTreeNode):
             self.__callbackDictCleanup = 0
             oldDict = self.__callbackDict
             self.__callbackDict = {}
-            for weakCB, weakNodes in oldDict.iteritems():
+            for weakCB, weakNodes in oldDict.items():
                 if weakCB() is not None:
                     self.__callbackDict[weakCB] = weakNodes
         
@@ -479,7 +479,7 @@ class _TopicTreeRoot(_TopicTreeNode):
         for topicItem in topic:
             path += (topicItem,)
             if topicItem == ALL_TOPICS:
-                raise ValueError, 'Topic tuple must not contain ""'
+                raise ValueError('Topic tuple must not contain ""')
             if make: 
                 node = node.createSubtopic(topicItem, path)
             elif node.hasSubtopic(topicItem):
@@ -491,7 +491,7 @@ class _TopicTreeRoot(_TopicTreeNode):
         
     def printCallbacks(self):
         strVal = ['Callbacks:\n']
-        for listener, weakTopicNodes in self.__callbackDict.iteritems():
+        for listener, weakTopicNodes in self.__callbackDict.items():
             topics = [topic() for topic in weakTopicNodes if topic() is not None]
             strVal.append('  %s: %s\n' % (_getCallableName(listener()), topics))
         return ''.join(strVal)
@@ -646,8 +646,8 @@ class PublisherClass:
         self.validate(listener)
 
         if topic is None: 
-            raise TypeError, 'Topic must be either a word, tuple of '\
-                             'words, or getStrAllTopics()'
+            raise TypeError('Topic must be either a word, tuple of '\
+                             'words, or getStrAllTopics()')
             
         self.__topicTree.addTopic(_tupleize(topic), listener)
 
@@ -662,20 +662,20 @@ class PublisherClass:
         """Similar to isValid(), but raises a TypeError exception if not valid"""
         # check callable
         if not callable(listener):
-            raise TypeError, 'Listener '+`listener`+' must be a '\
-                             'function, bound method or instance.'
+            raise TypeError('Listener '+repr(listener)+' must be a '\
+                             'function, bound method or instance.')
         # ok, callable, but if method, is it bound:
         elif ismethod(listener) and not _isbound(listener):
-            raise TypeError, 'Listener '+`listener`+\
-                             ' is a method but it is unbound!'
+            raise TypeError('Listener '+repr(listener)+\
+                             ' is a method but it is unbound!')
                              
         # check that it takes the right number of parameters
         min, d = _paramMinCount(listener)
         if min > 1:
-            raise TypeError, 'Listener '+`listener`+" can't"\
-                             ' require more than one parameter!'
+            raise TypeError('Listener '+repr(listener)+" can't"\
+                             ' require more than one parameter!')
         if min <= 0 and d == 0:
-            raise TypeError, 'Listener '+`listener`+' lacking arguments!'
+            raise TypeError('Listener '+repr(listener)+' lacking arguments!')
                              
         assert (min == 0 and d>0) or (min == 1)
 

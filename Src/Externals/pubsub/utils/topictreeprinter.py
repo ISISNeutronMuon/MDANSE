@@ -154,7 +154,7 @@ class TopicTreePrinter(ITopicTreeVisitor):
             self.__output.append( self.__formatDefn(indent, head) )
             tmpIndent = indent + self.__indentStep
             required = topicObj.getArgs()[0]
-            for key, arg in args.items(): # iter in 3, list in 2 ok
+            for key, arg in list(args.items()): # iter in 3, list in 2 ok
                 if not desc:
                     arg = ''
                 elif key in required:

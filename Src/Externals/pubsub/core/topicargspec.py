@@ -68,9 +68,9 @@ class ArgSpecGiven:
             self.argsDocs = argsDocs
 
             # check that all args marked as required are in argsDocs
-            missingArgs = set(self.reqdArgs).difference(self.argsDocs.keys()) # py3: iter keys ok
+            missingArgs = set(self.reqdArgs).difference(list(self.argsDocs.keys())) # py3: iter keys ok
             if missingArgs:
-                msg = 'Params [%s] missing inherited required args [%%s]' % ','.join(argsDocs.keys()) # iter keys ok
+                msg = 'Params [%s] missing inherited required args [%%s]' % ','.join(list(argsDocs.keys())) # iter keys ok
                 raise MessageDataSpecError(msg, missingArgs)
 
     def setAll(self, allArgsDocs, reqdArgs = None):

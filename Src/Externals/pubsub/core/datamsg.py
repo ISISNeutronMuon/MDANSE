@@ -32,5 +32,5 @@ class Message:
         self.data  = data
 
     def __str__(self):
-        return '[Topic: '+`self.topic`+',  Data: '+`self.data`+']'
+        return '[Topic: '+repr(self.topic)+',  Data: '+repr(self.data)+']'
 
