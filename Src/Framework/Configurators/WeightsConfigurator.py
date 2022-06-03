@@ -65,7 +65,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
             name = ascfg["names"][i]
             for el in ascfg["elements"][i]:
                 p = ATOMS_DATABASE[el][self["property"]]
-                if weights.has_key(name):
+                if name in weights:
                     weights[name] += p
                 else:
                     weights[name] = p

@@ -26,7 +26,7 @@ class DataController(collections.OrderedDict):
     
     def __delitem__(self, item):
         
-        if not self.has_key(item):
+        if item not in self:
             return
         
         if self.has_proxy(item):
@@ -43,7 +43,7 @@ class DataController(collections.OrderedDict):
 
     def __setitem__(self, item, value):
         
-        if self.has_key(item):
+        if item in self:
             return
         
         collections.OrderedDict.__setitem__(self, item,value)

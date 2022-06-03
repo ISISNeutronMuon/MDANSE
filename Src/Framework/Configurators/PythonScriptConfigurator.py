@@ -53,10 +53,10 @@ class PythonScriptConfigurator(InputFileConfigurator):
         
         namespace = {}
         
-        execfile(value,self.__dict__,namespace)
+        exec(open(value,'r').read(),self.__dict__,namespace)
                 
         for v in self._variables:
-            if not namespace.has_key(v):
+            if v not in namespace:
                 raise ConfiguratorError("The variable %r is not defined in the %r python script file" % (v,self["value"]))
             
         self.update(namespace)

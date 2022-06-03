@@ -126,7 +126,7 @@ class ClassRegistry(object):
         :rtype: str
         '''
                 
-        if not self._registry.has_key(interface):
+        if interface not in self._registry:
             return "The interface " + interface + " is not registered"
 
         words = ["Name", "Class","File"]

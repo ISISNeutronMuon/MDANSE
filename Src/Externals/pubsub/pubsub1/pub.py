@@ -239,7 +239,7 @@ class _TopicTreeNode:
     
     def hasSubtopic(self, subtopic):
         """Return true only if topic string is one of subtopics of this node"""
-        return self.__subtopics.has_key(subtopic)
+        return subtopic in self.__subtopics
     
     def getNode(self, subtopic):
         """Return ref to node associated with subtopic"""
@@ -353,7 +353,7 @@ class _TopicTreeRoot(_TopicTreeNode):
         assert topicNode.hasCallable(listener)
 
         theList = self.__callbackDict.setdefault(weakCB, [])
-        assert self.__callbackDict.has_key(weakCB)
+        assert weakCB in self.__callbackDict
         # add it only if we don't already have it
         try:
             weakTopicNode = WeakRef(topicNode)
@@ -375,7 +375,7 @@ class _TopicTreeRoot(_TopicTreeNode):
         messages for all topics."""
         weakCB = _getWeakRef(listener)
         if topic is None: 
-            return self.__callbackDict.has_key(weakCB)
+            return weakCB in self.__callbackDict
         else:
             topicPath = _tupleize(topic)
             for weakNode in self.__callbackDict[weakCB]:
@@ -388,7 +388,7 @@ class _TopicTreeRoot(_TopicTreeNode):
         doesn't have any topics for which listener has subscribed,
         nothing happens."""
         weakCB = _getWeakRef(listener)
-        if not self.__callbackDict.has_key(weakCB):
+        if weakCB not in self.__callbackDict:
             return
         
         cbNodes = self.__callbackDict[weakCB] 

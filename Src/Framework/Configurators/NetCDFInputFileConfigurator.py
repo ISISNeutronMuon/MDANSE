@@ -116,7 +116,7 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
         
         info = ["NetCDF input file: %r" % self["value"]]
         
-        if self.has_key('instance'):
+        if 'instance' in self:
             info.append("Contains the following variables:")
             variables = {}
             NetCDFInputFileConfigurator.find_numeric_variables(

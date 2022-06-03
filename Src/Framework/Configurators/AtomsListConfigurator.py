@@ -84,7 +84,7 @@ class AtomsListConfigurator(IConfigurator):
         :rtype: str
         '''
 
-        if not self.has_key("atoms"):
+        if "atoms" not in self:
             return "No configured yet"
         
         info = []

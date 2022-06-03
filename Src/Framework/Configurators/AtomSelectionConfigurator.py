@@ -102,7 +102,7 @@ class AtomSelectionConfigurator(IConfigurator):
 
         nAtomsPerElement = {}
         for v in self["names"]:
-            if nAtomsPerElement.has_key(v):
+            if v in nAtomsPerElement:
                 nAtomsPerElement[v] += 1
             else:
                 nAtomsPerElement[v] = 1
@@ -113,7 +113,7 @@ class AtomSelectionConfigurator(IConfigurator):
 
         indexesPerElement = {}
         for i,v in enumerate(self["names"]):
-            if indexesPerElement.has_key(v):
+            if v in indexesPerElement:
                 indexesPerElement[v].extend(self['indexes'][i])
             else:
                 indexesPerElement[v] = self['indexes'][i][:]
@@ -128,7 +128,7 @@ class AtomSelectionConfigurator(IConfigurator):
         :rtype: str
         '''
 
-        if not self.has_key("selection_length"):
+        if "selection_length" not in self:
             return "Not configured yet\n"
 
         info = []

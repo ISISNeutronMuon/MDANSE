@@ -688,7 +688,7 @@ class UnitsManager:
 
     def delete_unit(self, uname):
 
-        if UnitsManager._UNITS.has_key(uname):
+        if uname in UnitsManager._UNITS:
             del UnitsManager._UNITS[uname]
 
     def get_unit(self, uname):

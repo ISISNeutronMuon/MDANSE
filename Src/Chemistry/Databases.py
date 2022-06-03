@@ -101,7 +101,7 @@ class AtomsDatabase:
         :rtype: bool
         '''
         
-        return self._data.has_key(element)
+        return element in self._data
 
     def __getitem__(self,item):
         '''
@@ -150,7 +150,7 @@ class AtomsDatabase:
         :type ename: str
         '''
                     
-        if self._data.has_key(atom):
+        if atom in self._data:
             raise AtomsDatabaseError('The atom {} is already stored in the database'.format(atom))
 
         self._data[atom] = {}
@@ -295,7 +295,7 @@ class AtomsDatabase:
         :rtype: bool
         '''
         
-        return self._data.has_key(atom)
+        return atom in self._data
 
     def has_property(self,pname):
         '''
@@ -540,7 +540,7 @@ class MoleculesDatabase(object):
         :type ename: str
         '''
                     
-        if self._data.has_key(molecule):
+        if molecule in self._data:
             raise MoleculesDatabaseError('The element {} is already stored in the database'.format(molecule))
 
         self._data[molecule] = {'alternatives':[],'atoms':{}}
@@ -624,7 +624,7 @@ class NucleotidesDatabase(object):
         :rtype: bool
         '''
         
-        return self._residue_map.has_key(nucleotide)
+        return nucleotide in self._residue_map
 
     def __getitem__(self,item):
         '''
@@ -639,7 +639,7 @@ class NucleotidesDatabase(object):
         :type item: str or tuple
         '''
 
-        if self._residue_map.has_key(item):
+        if item in self._residue_map:
             return copy.deepcopy(self._data[self._residue_map[item]])
         else:
             raise NucleotidesDatabaseError("The nucleotide {} is not registered in the database.".format(item))
@@ -690,7 +690,7 @@ class NucleotidesDatabase(object):
         :type ename: str
         '''
                     
-        if self._data.has_key(nucleotide):
+        if nucleotide in self._data:
             raise NucleotidesDatabaseError('The nucleotide {} is already stored in the database'.format(nucleotide))
 
         self._data[nucleotide] = {
@@ -778,7 +778,7 @@ class ResiduesDatabase(object):
         :rtype: bool
         '''
         
-        return self._residue_map.has_key(residue)
+        return residue in self._residue_map
 
     def __getitem__(self,item):
         '''
@@ -793,7 +793,7 @@ class ResiduesDatabase(object):
         :type item: str or tuple
         '''
 
-        if self._residue_map.has_key(item):
+        if item in self._residue_map:
             return copy.deepcopy(self._data[self._residue_map[item]])
         else:
             raise ResiduesDatabaseError("The residue {} is not registered in the database.".format(item))
@@ -844,7 +844,7 @@ class ResiduesDatabase(object):
         :type ename: str
         '''
                     
-        if self._data.has_key(residue):
+        if residue in self._data:
             raise ResiduesDatabaseError('The element {} is already stored in the database'.format(residue))
 
         self._data[residue] = {

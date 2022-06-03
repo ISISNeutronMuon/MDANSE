@@ -75,7 +75,7 @@ class SingleOutputFileConfigurator(IConfigurator):
         if format != self._format:
             raise ConfiguratorError("the output file format %r is not a valid output format" % format, self)
         
-        if not REGISTRY["format"].has_key(format):
+        if format not in REGISTRY["format"]:
             raise ConfiguratorError("the output file format %r is not registered as a valid file format." % format, self)
 
         self['root'] = root

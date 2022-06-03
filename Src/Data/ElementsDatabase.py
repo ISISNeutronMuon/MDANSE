@@ -130,7 +130,7 @@ class ElementsDatabase(object):
         
         ename = ename.lower()
 
-        return self._data.has_key(ename)
+        return ename in self._data
 
     def __getitem__(self,item):
         '''
@@ -304,7 +304,7 @@ class ElementsDatabase(object):
                 
                 pname = pname.lower()
                 
-                if self._properties.has_key(pname):
+                if pname in self._properties:
                     continue
                 
                 self._properties[pname] = self._TYPES[ptype]
@@ -339,7 +339,7 @@ class ElementsDatabase(object):
         
         ename = ename.lower()
 
-        if not self._data.has_key(ename):
+        if ename not in self._data:
             self._data[ename] = collections.OrderedDict([(pname,prop()) for pname,prop in self._properties.iteritems()])
             
     def add_property(self, pname, typ):
@@ -358,7 +358,7 @@ class ElementsDatabase(object):
         
         pname = pname.lower()
 
-        if self._properties.has_key(pname):
+        if pname in self._properties:
             raise ElementsDatabaseError("The property %r is already registered in the database." % pname)
 
         if typ not in self._TYPES.keys():
@@ -465,7 +465,7 @@ class ElementsDatabase(object):
         
         pname = pname.lower()
         
-        if not self._properties.has_key(pname):
+        if pname not in self._properties:
             raise ElementsDatabaseError("The property %r is not registered in the elements database" % pname)
         
         return collections.OrderedDict([(k,self[k,pname]) for k in self._data.iterkeys()])
@@ -508,7 +508,7 @@ class ElementsDatabase(object):
         
         ename = ename.lower()
 
-        return self._data.has_key(ename)
+        return ename in self._data
 
     def has_property(self,pname):
         '''
@@ -523,7 +523,7 @@ class ElementsDatabase(object):
         
         pname = pname.lower()
 
-        return self._properties.has_key(pname)
+        return pname in self._properties
 
     def info(self, ename):
         '''

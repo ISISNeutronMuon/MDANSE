@@ -524,7 +524,7 @@ class Plotter1D(wx.Panel):
     def unique(key, dic):
         skey = key
         i = 0
-        while dic.has_key(key):
+        while key in dic:
             key = skey + '_%d' % i
             i += 1
         return key

@@ -93,7 +93,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
         :rtype: str
         '''
         
-        if not self.has_key("kernel"):
+        if "kernel" not in self:
             return "No configured yet"
         
         info = ["Instrument resolution kernel: %s" % self["kernel"]]

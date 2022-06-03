@@ -133,7 +133,7 @@ class Voronoi(IJob):
         for i in range(len(neighbourhood)):
             v = neighbourhood[i]
             if i in valid_region_id:
-                if not self.neighbourhood_hist.has_key(v):
+                if v not int self.neighbourhood_hist:
                     self.neighbourhood_hist[v] = 1
                 else:
                     self.neighbourhood_hist[v] += 1

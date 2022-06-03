@@ -58,7 +58,7 @@ class DipoleAutoCorrelationFunction(IJob):
             
         self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
         for idx in self._indexes: 
-            if not self.configuration['atom_charges']['charges'].has_key(idx):
+            if idx not in self.configuration['atom_charges']['charges']:
                 raise JobError(self,'Partial charge not defined for atom: %d' % idx)                         
         
     def run_step(self, index):

@@ -488,7 +488,7 @@ class Plotter2D(wx.Panel):
         
     def scale(self, onReplot = False):
         
-        if not NORMALIZER.has_key(self.normType):
+        if self.normType not in NORMALIZER:
             self.color_bar.set_clim(self.data.min(), self.data.max())
             self.ax.set_norm(None)
             return

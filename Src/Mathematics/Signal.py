@@ -117,7 +117,7 @@ def normalize(x, axis=0):
 
 def differentiate(a, dt=1.0, order="1st order"):
         
-    if not INTERPOLATION_ORDER.has_key(order):
+    if order not in INTERPOLATION_ORDER:
         raise SignalError("Invalid differentiation order")
         
     coefs = INTERPOLATION_ORDER[order]

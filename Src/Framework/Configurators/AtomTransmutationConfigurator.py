@@ -117,7 +117,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         :rtype: str
         '''
 
-        if not self.has_key("value"):
+        if "value" not in self:
             return "Not configured yet"
                 
         if self["value"] is None:

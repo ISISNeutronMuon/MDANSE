@@ -89,7 +89,7 @@ def weight(props,values,contents,dim,key,symmetric=True):
             
     for k,val in values.iteritems():
         
-        if not matches.has_key(k):
+        if k not in matches:
             continue
                     
         if symmetric:

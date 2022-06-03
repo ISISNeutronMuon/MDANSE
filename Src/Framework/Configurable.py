@@ -115,7 +115,7 @@ class Configurable(object):
             # Loop over the configuration items          
             for k,v in self._configuration.items():
                 # If no input parameter has been set for this item, use its default value.
-                if not parameters.has_key(k):
+                if k not in parameters:
                     parameters[k] = v.default
         else:
             raise ConfigurationError("Invalid type for configuration parameters")             

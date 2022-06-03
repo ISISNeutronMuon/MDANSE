@@ -40,7 +40,7 @@ class Logger(object):
         if loggers is None:
             loggers=logging.Logger.manager.loggerDict.keys()
         else:
-            loggers = [n for n in loggers if logging.Logger.manager.loggerDict.has_key(n)]
+            loggers = [n for n in loggers if n in logging.Logger.manager.loggerDict]
 
         for n in loggers:
             logging.getLogger(n).log(lvl,message)
@@ -50,7 +50,7 @@ class Logger(object):
         if loggers is None:
             loggers=logging.Logger.manager.loggerDict.keys()
         else:
-            loggers = [n for n in loggers if logging.Logger.manager.loggerDict.has_key(n)]
+            loggers = [n for n in loggers if n in logging.Logger.manager.loggerDict]
 
         for n in loggers:
             logging.getLogger(n).disabled=False
@@ -60,7 +60,7 @@ class Logger(object):
         if loggers is None:
             loggers=logging.Logger.manager.loggerDict.keys()
         else:
-            loggers = [n for n in loggers if logging.Logger.manager.loggerDict.has_key(n)]
+            loggers = [n for n in loggers if n in logging.Logger.manager.loggerDict]
 
         for n in loggers:
             logging.getLogger(n).disabled=True
@@ -74,14 +74,14 @@ class Logger(object):
         if loggers is None:
             loggers = logging.Logger.manager.loggerDict.keys()
         else:
-            loggers = [n for n in loggers if logging.Logger.manager.loggerDict.has_key(n)]
+            loggers = [n for n in loggers if n in logging.Logger.manager.loggerDict]
 
         for loggerName in loggers:
             logging.getLogger(loggerName).setLevel(lvl)
 
     def add_handler(self,name,handler,level="error",start=True):
 
-        if logging.Logger.manager.loggerDict.has_key(name):
+        if name in logging.Logger.manager.loggerDict:
             return
                         
         logging.getLogger(name).addHandler(handler)

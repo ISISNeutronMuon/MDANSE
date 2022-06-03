@@ -56,7 +56,7 @@ class ResidueClass(ISelector):
         
             selRes = set()
             for v in vals:
-                if CHEMFAMILIES.has_key(v):
+                if v in CHEMFAMILIES:
                     selRes.update(CHEMFAMILIES[v])
             
             for ce in self._chemicalSystem.chemical_entities:

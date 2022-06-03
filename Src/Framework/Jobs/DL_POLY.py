@@ -109,7 +109,7 @@ class FieldFile(dict):
                     
                         vals = lines[comp][8:].split()
 
-                        if self._aliases.has_key(sitnam):
+                        if sitnam in self._aliases:
                             element = self._aliases[sitnam]
                         else:
                             element = sitnam

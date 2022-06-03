@@ -171,7 +171,7 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
         self.__filters = collections.OrderedDict()
         for selector in selectors:            
             if selector.section is not None:
-                if self.__filters.has_key(selector.section):
+                if selector.section in self.__filters:
                     self.__filters[selector.section].append(selector._type)
                 else:
                     self.__filters[selector.section] = [selector._type]
@@ -333,10 +333,10 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
 
         selectionFilter = self.filterTree.GetItemText(item)
         
-        if not REGISTRY["selector"].has_key(selectionFilter):
+        if selectionFilter not in REGISTRY["selector"]:
             return
                                 
-        if not self._selectors.has_key(selectionFilter):
+        if selectionFilter not in self._selectors:
             self._selectors[selectionFilter] = [str(v) for v in REGISTRY["selector"][selectionFilter](self._trajectory).choices]
         
         self.values.DeselectAll()

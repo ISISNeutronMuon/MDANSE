@@ -200,7 +200,7 @@ class McStasVirtualInstrument(IJob):
                     continue
                 if np.allclose(v, value):
                     return k
-        while d.has_key(key):
+        while key in d:
             key = skey + '_%d'%i
             i += 1
         return key 

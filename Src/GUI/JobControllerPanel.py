@@ -81,7 +81,7 @@ class JobController(threading.Thread):
 
     def kill_job(self, info):
                 
-        if self._runningJobs.has_key(info["name"]):
+        if info["name"] in self._runningJobs:
 
             if info['state'] == 'running':
                 try:
@@ -288,7 +288,7 @@ class JobControllerPanel(wx.ScrolledWindow):
         # Remove the widgets corresponding to the jobs that are not running anymore  
         for k,v in self._jobs.items():
 
-            if runningJobs.has_key(k):
+            if k in runningJobs:
                 continue
                                     
             row,_ = self._gbSizer.GetItemPosition(v['name'])            
@@ -306,7 +306,7 @@ class JobControllerPanel(wx.ScrolledWindow):
 
         for jobName, jobStatus in runningJobs.items():
                         
-            if self._jobs.has_key(jobName):
+            if jobName in self._jobs:
                 self._jobs[jobName]['progress'].SetValue(jobStatus['progress'])
                 self._jobs[jobName]['elapsed'].SetValue(jobStatus['elapsed'])
                 self._jobs[jobName]['state'].SetLabel(jobStatus['state'])

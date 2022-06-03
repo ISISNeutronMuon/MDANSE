@@ -41,7 +41,7 @@ class BooleanConfigurator(IConfigurator):
         :type value: one of True/False, 'true'/'false', 'yes'/'no', 'y'/'n', '1'/'0', 1/0
         '''
 
-        if not self._shortCuts.has_key(value):
+        if value not in self._shortCuts:
             raise ConfiguratorError('the input value can not be interpreted as a boolean', self)
                         
         self["value"] = self._shortCuts[value]
