@@ -1,5 +1,7 @@
 import abc
 
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, Molecule, Nucleotide, NucleotideChain, PeptideChain, Protein, Residue
+
 class _H5ChemicalEntity:
 
     __metaclass__ = abc.ABCMeta
@@ -28,7 +30,6 @@ class H5Atom(_H5ChemicalEntity):
 
     def build(self):
 
-        from ChemicalEntity import Atom
         a = Atom(symbol=self._symbol,name=self._name, ghost=self._ghost)
         return a
 
@@ -49,7 +50,6 @@ class H5AtomCluster(_H5ChemicalEntity):
             h5_atom_instance = eval(self._h5_contents['atoms'][atom_index],globals(),{'self':self,'h5_contents':self._h5_contents})
             atoms.append(h5_atom_instance.build())
 
-        from ChemicalEntity import AtomCluster
         ac = AtomCluster(self._name,atoms)
         
         return ac
@@ -68,7 +68,6 @@ class H5Molecule(_H5ChemicalEntity):
 
     def build(self):
 
-        from ChemicalEntity import Molecule
         mol = Molecule(self._code,self._name)
 
         atoms = []
@@ -102,7 +101,6 @@ class H5Residue(_H5ChemicalEntity):
 
     def build(self):
 
-        from ChemicalEntity import Residue
         res = Residue(self._code,self._name,self._variant)
 
         atoms = []
@@ -133,7 +131,6 @@ class H5Nucleotide(_H5ChemicalEntity):
 
     def build(self):
 
-        from ChemicalEntity import Nucleotide
         nucl = Nucleotide(self._code,self._name,self._variant)
 
         atoms = []
@@ -160,8 +157,6 @@ class H5PeptideChain(_H5ChemicalEntity):
 
     def build(self):
  
-        from ChemicalEntity import PeptideChain
-
         pc = PeptideChain(self._name)
 
         residues = []
@@ -187,8 +182,6 @@ class H5NucleotideChain(_H5ChemicalEntity):
 
     def build(self):
  
-        from ChemicalEntity import NucleotideChain
-
         nc = NucleotideChain(self._name)
 
         nucleotides = []
@@ -213,8 +206,6 @@ class H5Protein(_H5ChemicalEntity):
         self._peptide_chain_indexes = peptide_chain_indexes
 
     def build(self):
-
-        from ChemicalEntity import Protein
 
         p = Protein(self._name)
         

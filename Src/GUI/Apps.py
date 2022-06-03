@@ -15,7 +15,7 @@
 
 import wx
 
-from MDANSE.GUI.Plugins.JobPlugin import JobFrame
+from MDANSE.GUI.Plugins.JobPlugin import JobDialog
 from MDANSE.GUI.Plugins.PlotterPlugin import PlotterFrame
 from MDANSE.GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE.GUI.MainFrame import MainFrame
@@ -72,7 +72,7 @@ class UserDefinitionViewerApp(wx.App):
         
         f = UserDefinitionViewer(None)
         self.SetTopWindow(f)
-        f.Show()
+        f.ShowModal()
         return True
     
 class JobApp(wx.App):  
@@ -87,8 +87,8 @@ class JobApp(wx.App):
 
     def OnInit(self):
         
-        f = JobFrame(None,self._job,self._data)
+        f = JobDialog(None,self._job,self._data)
         self.SetTopWindow(f)
-        f.Show()
+        f.ShowModal()
         return True
 

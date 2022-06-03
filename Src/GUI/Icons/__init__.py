@@ -14,7 +14,6 @@
 # **************************************************************************
 
 import os
-import sys
 
 import wx
 
@@ -30,10 +29,10 @@ class Icons(object):
 
         icon = os.path.join(os.path.dirname(__file__),name+".png")
 
-        image = wx.ImageFromBitmap(wx.Bitmap(icon))
+        image = wx.Bitmap(icon).ConvertToImage()
         image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
         
-        return wx.BitmapFromImage(image)
+        return wx.Bitmap(image)
 
     def add_icon(self,name,path):
         

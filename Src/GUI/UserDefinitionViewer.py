@@ -56,6 +56,7 @@ class UserDefinitionViewer(wx.Dialog):
         self.Bind(wx.EVT_TREE_KEY_DOWN, self.on_delete, self._tree)
         self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.on_rename, self._tree)
         self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.on_try_rename, self._tree)
+        self.Bind(wx.EVT_CLOSE, self.on_close,self)
 
         self.Bind(wx.EVT_BUTTON, self.on_save_ud, self._save)
         
@@ -126,7 +127,13 @@ class UserDefinitionViewer(wx.Dialog):
             if item == self._root:
                 break
             self._tree.Expand(item)
-        
+
+    def on_close(self,event):
+
+        self.EndModal(wx.CANCEL)
+
+        self.Destroy()
+
     def on_show_info(self, event=None):
 
         currentItem = self._tree.GetSelection()

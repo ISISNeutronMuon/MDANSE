@@ -13,6 +13,8 @@
 #
 # **************************************************************************
 
+import sys
+
 import cython
 import numpy as np
 cimport numpy as np 
@@ -206,7 +208,7 @@ def _recursive_contiguity(
     brefz = refx*rcell[2,0] + refy*rcell[2,1] + refz*rcell[2,2]
 
     bonded_atoms = bonds[seed]
-        
+
     # Loop over the atoms bonded to the seed
     for bat in bonded_atoms:
 
@@ -256,6 +258,9 @@ def continuous_coordinates(
 
     cdef np.ndarray[np.int8_t] processed = np.zeros((coords.shape[0],), dtype=np.int8)
 
+    old_recursionlimit = sys.getrecursionlimit()
+    sys.setrecursionlimit(100000)
+
     # Retrieve the top level chemical entities to which belong each of the selected atom
     atoms = chemical_system.atom_list()
     if selected_indexes is None:
@@ -276,6 +281,8 @@ def continuous_coordinates(
     for idx in chemical_entities_indexes:
 
         _recursive_contiguity(continuous_coords, cell, rcell, processed, bonds, idx)
+
+    sys.setrecursionlimit(old_recursionlimit)
 
     return continuous_coords[selected_indexes,:]
 

@@ -106,7 +106,7 @@ __all__ = [
 'indentedBlock', 'originalTextFor', 'ungroup', 'infixNotation',
 ]
 
-_MAX_INT = sys.maxint
+_MAX_INT = sys.maxsize
 set = lambda s : dict( [(c,0) for c in s] )
 
 def _ustr(obj):

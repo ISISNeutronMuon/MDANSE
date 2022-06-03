@@ -15,8 +15,8 @@
 
 import wx
 
-from MDANSE import ELEMENTS,REGISTRY
-
+from MDANSE import REGISTRY
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.GUI.Widgets.AtomSelectionWidget import AtomSelectionWidget
@@ -36,7 +36,7 @@ class AtomTransmutationWidget(AtomSelectionWidget):
         availableUDs.SetItems(uds)
          
         view = wx.Button(panel, wx.ID_ANY, label="View selected definition")
-        elements = wx.ComboBox(panel, wx.ID_ANY, value="Transmutate to", choices=ELEMENTS.elements)
+        elements = wx.ComboBox(panel, wx.ID_ANY, value="Transmutate to", choices=ATOMS_DATABASE.atoms)
         remove = wx.BitmapButton(panel, wx.ID_ANY, ICONS["minus",16,16])
  
         sizer.Add(availableUDs, 1, wx.ALL|wx.EXPAND, 5)

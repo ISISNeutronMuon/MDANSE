@@ -101,8 +101,6 @@ class DataTreePanel(wx.Panel):
                 
     def add_data(self,data):
                 
-        dataItem = wx.TreeItemData(data.name)
-
         item = None
         for cItem in self.get_children(self._root):
             if data._type == self._tree.GetItemText(cItem):
@@ -111,7 +109,7 @@ class DataTreePanel(wx.Panel):
         if item is None:    
             item = self._tree.AppendItem(self._root, data._type, data=None)
 
-        self._tree.AppendItem(item, data.shortname, data=dataItem)
+        self._tree.AppendItem(item, data.shortname, data=data.name)
 
         self._tree.ExpandAll()
           
@@ -149,13 +147,8 @@ class DataTreePanel(wx.Panel):
     def on_double_click_data(self, event):
         
         itemData = self._tree.GetItemData(event.GetItem())
-        
-        if itemData.GetData() is None:
-            return
-        
-        containerStr = itemData.GetData()
-       
-        self.TopLevelParent.panels["working"].drop(containerStr)
+               
+        self.TopLevelParent.panels["working"].drop(itemData)
                                            
     def on_drag_data(self, event):
 

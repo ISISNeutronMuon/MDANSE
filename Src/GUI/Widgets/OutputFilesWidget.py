@@ -16,12 +16,11 @@
 import os
 import os.path
 
-import wx.combo
+import wx
 import wx.lib.filebrowsebutton as wxfile
 
 from MDANSE import REGISTRY
 
-from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.ComboWidgets.ComboCheckbox import ComboCheckbox
 from MDANSE.GUI.Widgets.IWidget import IWidget
 
@@ -53,7 +52,7 @@ class OutputFilesWidget(IWidget):
                         
         self._filename = wxfile.FileBrowseButton(self._widgetPanel, wx.ID_ANY, fileMode=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT, labelText="Basename")
         
-        self._formats = wx.combo.ComboCtrl(self._widgetPanel, value="output formats", style=wx.CB_READONLY)
+        self._formats = wx.ComboCtrl(self._widgetPanel, value="output formats", style=wx.CB_READONLY)
         
         tcp = ComboCheckbox(self._configurator.formats)
 

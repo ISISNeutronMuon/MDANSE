@@ -301,6 +301,9 @@ EXTENSIONS = [Extension('MDANSE.Extensions.atoms_in_shell',
                                 [os.path.join('Extensions','xtc','trr.pyx')])
               ]
 
+for ext in EXTENSIONS:
+    ext.cython_directives = {'language_level':'3'}
+
 CMDCLASS = {'build_ext' : cython_build_ext}
 
 if sphinx:

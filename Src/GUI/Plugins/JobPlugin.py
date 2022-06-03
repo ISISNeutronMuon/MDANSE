@@ -97,7 +97,6 @@ class JobPlugin(ComponentPlugin):
                         
         self._job.save(filename, parameters)
                             
-        
         if PLATFORM.name == "windows":
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -157,13 +156,12 @@ class JobPlugin(ComponentPlugin):
         except AttributeError:
             # If the job is a converter, the parent has no mgr attribute
             self.parent.Close()
-            
 
-class JobFrame(wx.Frame):
+class JobDialog(wx.Dialog):
     
     def __init__(self, parent, jobType, datakey=None):
                 
-        wx.Frame.__init__(self, parent, wx.ID_ANY, style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
 
         self._jobType = jobType
 
@@ -178,11 +176,22 @@ class JobFrame(wx.Frame):
         if not isinstance(data,EmptyData):
             DATA_CONTROLLER[data.name] = data
                         
-        plugin = REGISTRY['plugin'][self._jobType](self, standalone=True)
+        self._plugin = REGISTRY['plugin'][self._jobType](self, standalone=True)
 
-        self.SetSize(plugin.GetSize())
+        self.SetSize(self._plugin.GetSize())
         
-        PUBLISHER.sendMessage("msg_set_data", message=plugin)
+        self.Bind(wx.EVT_CLOSE, self.on_close,self)
+
+        PUBLISHER.sendMessage("msg_set_data", message=self._plugin)
+
+    def on_close(self,event):
+
+        self._plugin._mgr.UnInit()
+
+        self.EndModal(wx.CANCEL)
+
+        self.Destroy()
+
                         
 if __name__ == "__main__":
             

@@ -85,7 +85,7 @@ class MainFrame(wx.Frame):
         # sys.stdout = consoleHandler
         # sys.stderr = consoleHandler
                 
-        sys.excepthook = excepthook
+        # sys.excepthook = excepthook
                  
     def build_dialog(self):
         
@@ -93,7 +93,7 @@ class MainFrame(wx.Frame):
         
         self.build_toolbar()
 
-        icon = wx.EmptyIcon()
+        icon = wx.Icon()
         icon.CopyFromBitmap(ICONS["mdanse",32,32])
         self.SetIcon(icon) 
         
@@ -140,7 +140,7 @@ class MainFrame(wx.Frame):
             self._converters[job.label] = name
             self.Bind(wx.EVT_MENU, self.on_open_converter, item)
 
-        fileMenu.AppendMenu(wx.ID_ANY,'Trajectory converters',converterMenu)
+        fileMenu.Append(wx.ID_ANY,'Trajectory converters',converterMenu)
         fileMenu.AppendSeparator()
         quitItem = fileMenu.Append(wx.ID_ANY, 'Quit')
 
@@ -185,19 +185,19 @@ class MainFrame(wx.Frame):
         
         self._toolbar = self.CreateToolBar()
                 
-        loadDataButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["load",32,32], 'Load a trajectory')
-        periodicTableButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["periodic_table",32,32], 'Launch the periodic table viewer')
-        elementsDatabaseButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["atom",32,32], 'Launch the elements database editor')
-        plotButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["plot",32,32], 'Launch the NetCDF plotter')
-        udButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["user",32,32], 'Launch the user definitions editor')
-        unitsButton = self._toolbar.AddSimpleTool(wx.ID_ANY,ICONS["units",32,32], 'Launch the units editor')
-        registryButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["registry",32,32], 'Inspect MDANSE classes framework')
-        templateButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["template",32,32], 'Save a template for a new analysis')
-        apiButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["api",32,32], 'Open MDANSE API')
-        websiteButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["web",32,32], 'Open MDANSE website')
-        aboutButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["about",32,32], 'About MDANSE')
-        bugButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["bug",32,32], 'Bug report')
-        quitButton = self._toolbar.AddSimpleTool(wx.ID_ANY, ICONS["quit",32,32], 'Quit MDANSE')
+        loadDataButton = self._toolbar.AddTool(wx.ID_ANY, 'Load a trajectory', ICONS["load",32,32])
+        periodicTableButton = self._toolbar.AddTool(wx.ID_ANY, 'Launch the periodic table viewer', ICONS["periodic_table",32,32])
+        elementsDatabaseButton = self._toolbar.AddTool(wx.ID_ANY, 'Launch the elements database editor', ICONS["atom",32,32])
+        plotButton = self._toolbar.AddTool(wx.ID_ANY, 'Launch the NetCDF plotter',ICONS["plot",32,32])
+        udButton = self._toolbar.AddTool(wx.ID_ANY, 'Launch the user definitions editor',ICONS["user",32,32])
+        unitsButton = self._toolbar.AddTool(wx.ID_ANY, 'Launch the units editor',ICONS["units",32,32])
+        registryButton = self._toolbar.AddTool(wx.ID_ANY, 'Inspect MDANSE classes framework', ICONS["registry",32,32])
+        templateButton = self._toolbar.AddTool(wx.ID_ANY, 'Save a template for a new analysis', ICONS["template",32,32])
+        apiButton = self._toolbar.AddTool(wx.ID_ANY, 'Open MDANSE API', ICONS["api",32,32])
+        websiteButton = self._toolbar.AddTool(wx.ID_ANY, 'Open MDANSE website', ICONS["web",32,32])
+        aboutButton = self._toolbar.AddTool(wx.ID_ANY, 'About MDANSE', ICONS["about",32,32])
+        bugButton = self._toolbar.AddTool(wx.ID_ANY, 'Bug report', ICONS["bug",32,32])
+        quitButton = self._toolbar.AddTool(wx.ID_ANY, 'Quit MDANSE', ICONS["quit",32,32])
         
         self._toolbar.Realize()
         

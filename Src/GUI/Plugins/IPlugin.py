@@ -125,9 +125,9 @@ class IPlugin(wx.Panel):
         if d.ShowModal() == wx.ID_NO:
             event.Veto()
             return
-                
+
         window = event.GetPane().window
-                
+
         # Call the 'close' method the plugin to be closed
         window.close()
         

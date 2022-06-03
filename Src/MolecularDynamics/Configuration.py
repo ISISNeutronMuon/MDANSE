@@ -60,7 +60,7 @@ class _Configuration:
             value (ndarray): the value
         """
 
-        item = np.array(item)
+        item = np.array(value)
         if item.shape != (self._chemical_system.number_of_atoms(),3):
             raise ValueError('Invalid item dimensions')
 

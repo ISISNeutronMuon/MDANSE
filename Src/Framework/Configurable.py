@@ -63,7 +63,7 @@ class Configurable(object):
                 self._configuration[name] = REGISTRY["configurator"][typ](name, configurable=self,**kwds)
             # Any kind of error has to be caught
             except:
-                raise ConfigurationError("Invalid type for %r configurator" % name)
+                raise ConfigurationError("Could not set %r configuration item" % name)
             
     def set_settings(self,settings):
         

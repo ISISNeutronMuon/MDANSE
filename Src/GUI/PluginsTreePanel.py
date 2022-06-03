@@ -100,7 +100,7 @@ class PluginsTreePanel(wx.Panel):
                             
     def on_double_click(self, event):
         
-        data = self._tree.GetPyData(event.GetItem())
+        data = self._tree.GetItemData(event.GetItem())
         
         self.TopLevelParent.panels["working"].active_page.currentWindow.drop(data)
         
@@ -143,7 +143,7 @@ class PluginsTreePanel(wx.Panel):
                 data = None
             else:
                 label = getattr(plugin,"label",plugin._type)
-                data = wx.TreeItemData(k)
+                data = k
                 
             subnode = self._tree.AppendItem(node, label, data=data)
             

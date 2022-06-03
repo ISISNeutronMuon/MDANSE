@@ -37,7 +37,7 @@ if __name__ == "__main__":
     trajectory = args.trajectory
     job = args.job[0]
     
-    if not REGISTRY['job'].has_key(job):
+    if job not in REGISTRY['job']:
         print('Unknown job: %s' % job)
         sys.exit(1)
 
