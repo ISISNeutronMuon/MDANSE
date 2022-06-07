@@ -54,8 +54,9 @@ class CurrentCorrelationFunction(IJob):
                                                                'default': 'no interpolation'})
     settings['interpolation_mode'] = ('single_choice', {'choices': ['one-time in-memory interpolation',
                                                                     'repeated interpolation',
-                                                                    'one-time disk interpolation'],
-                                                        'default': 'one-time in-memory interpolation'})
+                                                                    'one-time disk interpolation',
+                                                                    'automatic'],
+                                                        'default': 'automatic'})
     settings['number_of_preloaded_fames'] = ('integer', {'default': 50, 'mini': -1, 'exclude': (0,)})
     settings['q_vectors'] = ('q_vectors',{'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
@@ -104,14 +105,32 @@ class CurrentCorrelationFunction(IJob):
         self._outputData.add("j(q,t)_trans_total","surface", (nQShells,self._nFrames), axis="q|time"    , units="au")                                                 
         self._outputData.add("J(q,f)_trans_total","surface", (nQShells,self._nOmegas), axis="q|omega", units="au")
 
+        traj = self.configuration['trajectory']['instance']
+        nAtoms = traj.universe.numberOfAtoms()
+        nFrames = self.configuration['frames']['n_frames']
+
         # Interpolate velocities of all atoms throughout the entire trajectory
         self._order = self.configuration["interpolation_order"]["value"]
         self._mode = self.configuration['interpolation_mode']['index']
         self._preload = self.configuration['number_of_preloaded_fames']['value']
 
-        traj = self.configuration['trajectory']['instance']
-        nAtoms = traj.universe.numberOfAtoms()
-        nFrames = self.configuration['frames']['n_frames']
+        if self._order != "no interpolation" and self._mode == 3:
+            from psutil import virtual_memory
+            max_memory = virtual_memory().total
+
+            if max_memory > nFrames * nAtoms * 3 * 8:
+                self._mode = 0
+            else:
+                most_atoms = 0
+                for idxs in self._indexesPerElement.values():
+                    if len(idxs) > most_atoms:
+                        most_atoms = len(idxs)
+
+                if max_memory > nFrames * most_atoms * 3 * 8:
+                    self._mode = 1
+                else:
+                    self._mode = 2
+
         if self._order != "no interpolation" and self._mode == 0:
             self._velocities = numpy.empty((nAtoms,nFrames,3),dtype=float)
             # Loop over the selected indexes and fill only this part of the 
