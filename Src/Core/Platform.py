@@ -196,7 +196,7 @@ class Platform(object):
         
         path = str(path).encode('unicode-escape')      
                 
-        path = os.path.abspath(os.path.expanduser(path))
+        path = os.path.abspath(os.path.expanduser(path)).decode('utf-8')
         
         return path
         

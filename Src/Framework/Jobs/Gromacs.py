@@ -22,10 +22,10 @@ from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Extensions import xtc, trr
 from MDANSE.Framework.Jobs.Converter import Converter
-from MDANSE.Framework.Units import measure
 from MDANSE.IO.PDBReader import PDBReader
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 class GromacsConverterError(Error):
     pass
@@ -55,10 +55,10 @@ class GromacsConverter(Converter):
         data_to_be_written = ["configuration", "time"]
 
         # Create XTC or TRR object depending on which kind of trajectory was loaded
-        if self.configuration["xtc_file"]["filename"][-4:] == b'.xtc':
+        if self.configuration["xtc_file"]["filename"][-4:] == '.xtc':
             self._xdr_file = xtc.XTCTrajectoryFile(self.configuration["xtc_file"]["filename"], "r")
             self._xtc = True
-        elif self.configuration["xtc_file"]["filename"][-4:] == b'.trr':
+        elif self.configuration["xtc_file"]["filename"][-4:] == '.trr':
             self._xdr_file = trr.TRRTrajectoryFile(self.configuration["xtc_file"]["filename"], "r")
             self._xtc = False
 
@@ -124,7 +124,7 @@ class GromacsConverter(Converter):
         conf = PeriodicRealConfiguration(
             self._trajectory.chemical_system,
             coords,
-            box[0,:,:],
+            UnitCell(box[0,:,:]),
             **variables
         )
         

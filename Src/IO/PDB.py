@@ -1114,6 +1114,7 @@ class Structure:
                                from a file with alternate positions.
         @type alternate_code: single-letter C{str}
         """
+
         if isinstance(file_or_filename, str):
             self.filename = file_or_filename
         else:
@@ -1132,7 +1133,7 @@ class Structure:
         self.a = self.b = self.c = None
         self.alpha = self.beta = self.gamma = None
         self.space_group = None
-        self.parseFile(PDBFile(file_or_filename))
+        self.parseFile(PDBFile(file_or_filename,'rt'))
         self.findSpaceGroupTransformations()
 
     peptide_chain_constructor = PDBPeptideChain

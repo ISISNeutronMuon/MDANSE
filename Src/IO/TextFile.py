@@ -48,6 +48,7 @@ class TextFile:
         @param mode: file access mode: 'r' (read), 'w' (write), or 'a' (append)
         @type mode: C{str}
         """
+
         self.file = None
         if filename.find(':/') > 1: # URL
             if mode != 'r':
@@ -56,7 +57,7 @@ class TextFile:
             self.file = urllib.request.urlopen(filename)
         else:
             filename = os.path.expanduser(filename)
-            if mode == 'r':
+            if mode in ['r','rt']:
                 if not os.path.exists(filename):
                     raise IOError((2, 'No such file or directory: '
                                    + filename))
