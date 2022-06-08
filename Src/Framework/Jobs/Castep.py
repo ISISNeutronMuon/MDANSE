@@ -29,8 +29,8 @@ from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
-HBAR = measure(1.05457182e-34,'kg m2/s').toval('uma nm2/ps')
-HARTREE = measure(27.2113845,'eV').toval('uma nm2/ps2')
+HBAR = measure(1.05457182e-34,'kg m2 / s').toval('uma nm2 / ps')
+HARTREE = measure(27.2113845,'eV').toval('uma nm2 / ps2')
 BOHR = measure(5.29177210903e-11,'m').toval('nm')
 
 class CASTEPError(Error):
@@ -49,7 +49,7 @@ class MDFile(dict):
         :type filename: str
         """
 
-        self['instance'] = open(filename, 'rb')  # Open the provided file.
+        self['instance'] = open(filename, 'rt')  # Open the provided file.
 
         # Skip over the header
         while True:
@@ -104,15 +104,17 @@ class MDFile(dict):
         # Read the whole ionic data block (positions, velocities, and forces) of the first frame
         self["instance"].seek(self._headerSize + self._frameInfo["data"][0])
         frame = self["instance"].read(self._frameInfo["data"][1]).splitlines()
-        self["n_atoms"] = len(frame)/3  # Save the number of atoms (length of positional data)
+        self["n_atoms"] = len(frame)//3  # Save the number of atoms (length of positional data)
 
         # Create a list storing the chemical symbol of the element described on each line of positional data
         tmp = [f.split()[0] for f in frame[:self["n_atoms"]]]
         # Save a list of tuples where each tuple consists of the symbol on the amount of those atoms in the simulation
         self["atoms"] = [(element, len(list(group))) for element, group in itertools.groupby(tmp)]
-                                                    
-        self["instance"].seek(0, 2)  # Move file handle to the end of the file
-        self["n_frames"] = (self['instance'].tell()-self._headerSize)/self._frameSize  # Save the number of frames
+
+        # Move file handle to the end of the file               
+        self["instance"].seek(0, 2)
+        # Save the number of frames
+        self["n_frames"] = (self['instance'].tell()-self._headerSize)//self._frameSize
         self["instance"].seek(0)  # Move file handle to the beginning of the file
         
     def read_step(self, step):
@@ -232,8 +234,6 @@ class CASTEPConverter(Converter):
             
         if self.configuration['fold']['value']:
             conf.fold_coordinates()
-
-        print(conf['coordinates'][0,:])
         
         self._trajectory.chemical_system.configuration = conf
 

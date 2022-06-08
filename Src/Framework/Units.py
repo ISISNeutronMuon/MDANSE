@@ -203,7 +203,7 @@ class _Unit(object):
         else:
             raise UnitError('Incompatible units')
 
-    def __idiv__(self, other):
+    def __itruediv__(self, other):
         """Divide _Unit instances.  See __div__. """
     
         if isinstance(other,numbers.Number):

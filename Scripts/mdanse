@@ -15,7 +15,7 @@
 #
 # **************************************************************************
 
-import cPickle
+import pickle
 import glob
 import optparse
 import os
@@ -119,7 +119,7 @@ class CommandLineParser(optparse.OptionParser):
         # Open the job temporary file
         try:
             f = open(filename, 'rb')
-            info = cPickle.load(f)
+            info = pickle.load(f)
             f.close()
             
         # If the file could not be opened/unpickled for whatever reason, try at the next checkpoint
@@ -176,7 +176,7 @@ class CommandLineParser(optparse.OptionParser):
             # Open the job temporary file
             try:
                 f = open(j, 'rb')
-                info = cPickle.load(f)
+                info = pickle.load(f)
                 f.close()
                 
             # If the file could not be opened/unpickled for whatever reason, try at the next checkpoint
@@ -189,7 +189,7 @@ class CommandLineParser(optparse.OptionParser):
                 if not isinstance(info,JobState):
                     continue
                 
-                print "%-20s [%s]" % (os.path.basename(j),info["state"])
+                print("%-20s [%s]" % (os.path.basename(j),info["state"]))
 
     def display_trajectory_contents(self, option, opt_str, value, parser):
         '''Displays trajectory contents
@@ -219,7 +219,7 @@ class CommandLineParser(optparse.OptionParser):
         '''
         
         self.print_help(sys.stderr)
-        print "\n"
+        print("\n")
         self.exit(2, "Error: %s\n" % msg)
     
 
@@ -237,16 +237,15 @@ class CommandLineParser(optparse.OptionParser):
         '''
             
         if len(parser.rargs) == 0:
-            print "Registered interfaces:"
+            print("Registered interfaces:")
             for interfaceName in REGISTRY.interfaces:
-                print "\t- %s" % interfaceName
+                print("\t- %s" % interfaceName)
         elif len(parser.rargs) == 1:
             val = parser.rargs[0]                    
-            print REGISTRY.info(val.lower())
+            print(REGISTRY.info(val.lower()))
         else:
             raise CommandLineParserError("Invalid number of arguments for %r option" % opt_str)
             
-
 
     def run_job(self, option, opt_str, value, parser):
         '''Run job file(s).
@@ -314,7 +313,7 @@ class CommandLineParser(optparse.OptionParser):
             raise CommandLineParserError("The job %r is not a valid MDANSE job" % name)
         # Otherwise, print some information about the saved template.
         else:
-            print "Saved template for job %r as %r" % (name, filename)
+            print("Saved template for job %r as %r" % (name, filename))
 
     def save_job_template(self, option, opt_str, value, parser):
         '''
@@ -338,7 +337,7 @@ class CommandLineParser(optparse.OptionParser):
         from MDANSE.Framework.Jobs.IJob import IJob        
 
         if nargs != 2:
-            print "Two arguments required resp. the name and the shortname of the class to be templated"
+            print("Two arguments required resp. the name and the shortname of the class to be templated")
             return
 
         classname,shortname = parser.rargs
