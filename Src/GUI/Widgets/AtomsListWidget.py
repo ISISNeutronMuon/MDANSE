@@ -29,7 +29,7 @@ class AtomListWidget(UserDefinitionWidget):
         
         dlg.ShowModal()
         
-    def msg_set_ud(self, message=None):
+    def msg_set_ud(self, message):
          
         uds = UD_STORE.filter(self._basename, self._type)
                                 
