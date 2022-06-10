@@ -41,7 +41,7 @@ class GeneralAutoCorrelationFunction(IJob):
     settings['trajectory_variable'] = ('trajectory_variable', {'dependencies':{'trajectory':'trajectory'}})
     settings['normalize'] = ('boolean', {'default':False})
     settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
     def initialize(self):
