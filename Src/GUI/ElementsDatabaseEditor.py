@@ -129,7 +129,7 @@ class NewPropertyDialog(wx.Dialog):
         staticLabel1 = wx.StaticText(panel, wx.ID_ANY, "Name")
         self.name = wx.TextCtrl(panel, wx.ID_ANY)
         staticLabel2 = wx.StaticText(panel, wx.ID_ANY, "Property type")
-        self.propertyType = wx.ComboBox(panel, id=wx.ID_ANY, choices=ATOMS_DATABASE._TYPES.keys(), style=wx.CB_READONLY)
+        self.propertyType = wx.ComboBox(panel, id=wx.ID_ANY, choices=list(ATOMS_DATABASE._TYPES.keys()), style=wx.CB_READONLY)
 
         # Create button widgets
         cancel = wx.Button(panel, wx.ID_CANCEL, "Cancel")

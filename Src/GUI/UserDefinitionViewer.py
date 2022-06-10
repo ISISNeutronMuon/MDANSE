@@ -148,7 +148,7 @@ class UserDefinitionViewer(wx.Dialog):
         level = self.get_item_level(currentItem)
 
         if level <= 3:
-            self._info.SetValue("Contains the followings definitions: %s" % data.keys())
+            self._info.SetValue("Contains the followings definitions: %s" % list(data.keys()))
             return
                        
         self._info.SetValue(str(itemData.GetData()))       

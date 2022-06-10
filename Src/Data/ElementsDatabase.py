@@ -216,7 +216,7 @@ class ElementsDatabase(object):
 
         f = open(filename, 'w')
 
-        propNames = ["id"] + self._properties.keys()
+        propNames = ["id"] + list(self._properties.keys())
                 
         # Return a csv writer object.            
         databaseWriter = csv.DictWriter(f, propNames, delimiter=delimiter, lineterminator=lineterminator, restval=restval)
@@ -378,7 +378,7 @@ class ElementsDatabase(object):
         :rtype: list
         '''
         
-        return self._data.keys()
+        return list(self._data.keys())
 
     def export(self, fmt, filename, *args, **kwargs):
         '''
@@ -422,7 +422,7 @@ class ElementsDatabase(object):
         :rtype: list
         '''
         
-        return self._data.keys()
+        return list(self._data.keys())
 
     def get_isotopes(self,ename):
         '''
@@ -450,7 +450,7 @@ class ElementsDatabase(object):
         :rtype: list
         '''
 
-        return self._properties.keys()
+        return list(self._properties.keys())
         
     def get_property(self,pname):
         '''
@@ -468,7 +468,7 @@ class ElementsDatabase(object):
         if pname not in self._properties:
             raise ElementsDatabaseError("The property %r is not registered in the elements database" % pname)
         
-        return collections.OrderedDict([(k,self[k,pname]) for k in self._data.iterkeys()])
+        return collections.OrderedDict([(k,self[k,pname]) for k in self._data.keys()])
 
     def get_property_type(self,pname):
         '''
@@ -654,7 +654,7 @@ class ElementsDatabase(object):
         :rtype: list
         '''
         
-        return self._properties.keys()
+        return list(self._properties.keys())
     
     def _reset(self):
         '''

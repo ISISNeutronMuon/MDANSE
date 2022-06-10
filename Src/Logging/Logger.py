@@ -38,7 +38,7 @@ class Logger(object):
             return
     
         if loggers is None:
-            loggers=logging.Logger.manager.loggerDict.keys()
+            loggers=list(logging.Logger.manager.loggerDict.keys())
         else:
             loggers = [n for n in loggers if n in logging.Logger.manager.loggerDict]
 
@@ -48,7 +48,7 @@ class Logger(object):
     def start(self, loggers=None):
         
         if loggers is None:
-            loggers=logging.Logger.manager.loggerDict.keys()
+            loggers=list(logging.Logger.manager.loggerDict.keys())
         else:
             loggers = [n for n in loggers if n in logging.Logger.manager.loggerDict]
 
@@ -58,7 +58,7 @@ class Logger(object):
     def stop(self, loggers=None):
 
         if loggers is None:
-            loggers=logging.Logger.manager.loggerDict.keys()
+            loggers=list(logging.Logger.manager.loggerDict.keys())
         else:
             loggers = [n for n in loggers if n in logging.Logger.manager.loggerDict]
 
@@ -72,7 +72,7 @@ class Logger(object):
             return
 
         if loggers is None:
-            loggers = logging.Logger.manager.loggerDict.keys()
+            loggers = list(logging.Logger.manager.loggerDict.keys())
         else:
             loggers = [n for n in loggers if n in logging.Logger.manager.loggerDict]
 

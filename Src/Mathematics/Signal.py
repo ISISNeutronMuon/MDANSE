@@ -239,7 +239,7 @@ def get_spectrum(signal,window=None,timeStep=1.0,axis=0):
     if window is None:
         window = numpy.ones(signal.shape[axis])
 
-    window /= window[len(window)/2]
+    window /= window[len(window)//2]
 
     s = [numpy.newaxis]*signal.ndim
     s[axis] = slice(None)

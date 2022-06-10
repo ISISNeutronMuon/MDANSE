@@ -2761,7 +2761,7 @@ class Ticks:
       if self.low <= x <= self.high: output[x] = label
 
     for i in range(1, len(output)):
-      keys = output.keys()
+      keys = list(output.keys())
       keys.sort()
       keys = keys[::i]
       values = map(lambda k: output[k], keys)

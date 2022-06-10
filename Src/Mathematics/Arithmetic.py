@@ -62,7 +62,7 @@ def get_weights(props, contents, dim):
 
     weights = {}
                 
-    cartesianProduct = set(itertools.product(props.keys(), repeat=dim))
+    cartesianProduct = set(itertools.product(list(props.keys()), repeat=dim))
     for elements in cartesianProduct:
     
         n = numpy.product([contents[el] for el in elements])        
@@ -87,7 +87,7 @@ def weight(props,values,contents,dim,key,symmetric=True):
     weightedSum = None      
     matches = dict([(key%k,k) for k in weights.keys()])
             
-    for k,val in values.iteritems():
+    for k,val in values.items():
         
         if k not in matches:
             continue

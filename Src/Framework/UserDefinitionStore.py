@@ -111,7 +111,7 @@ class UserDefinitionStore(object):
         if d is None:
             return [] 
         
-        return d.keys()
+        return list(d.keys())
 
     def get_definition(self,*defs):
         '''

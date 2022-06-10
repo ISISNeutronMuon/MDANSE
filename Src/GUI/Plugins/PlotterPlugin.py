@@ -272,7 +272,7 @@ class DataPanel(wx.Panel):
         
     def show_data(self):
         self.datalist.DeleteAllItems()
-        variables = self.dataproxy.keys()
+        variables = list(self.dataproxy.keys())
         for i, var in enumerate(sorted(variables)):
             self.datalist.InsertStringItem(i, var)
             axis = ','.join(self.dataproxy[var]['axis'])

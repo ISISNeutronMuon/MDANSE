@@ -64,7 +64,7 @@ class IOutputVariable(numpy.ndarray):
         if isinstance(value, tuple):
             value = numpy.zeros(value, dtype=numpy.float64)
         else:        
-            value = numpy.array(value, dtype=numpy.float64)
+            value = numpy.array(list(value), dtype=numpy.float64)
             
         if value.ndim != cls._nDimensions:
             raise OutputVariableError("Invalid number of dimensions for an output variable of type %r" % cls.name)

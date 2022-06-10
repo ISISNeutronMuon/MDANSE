@@ -194,7 +194,7 @@ class QVectorsPlugin(UserDefinitionPlugin):
         self._target = os.path.basename(self._trajectory.filename)
 
         if self._trajectory.universe.is_periodic:
-            choices = REGISTRY["q_vectors"].keys()
+            choices = list(REGISTRY["q_vectors"].keys())
         else:
             choices = [k for k,v in REGISTRY["q_vectors"].items() if not v.is_lattice]        
         self._availableGenerators.SetItems(choices)

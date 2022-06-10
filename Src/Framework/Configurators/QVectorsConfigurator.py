@@ -80,7 +80,7 @@ class QVectorsConfigurator(IConfigurator):
             else:
                 raise ConfiguratorError("Q vectors setting must be a tuple %s" % value, self)
                                         
-        self["shells"] = self["q_vectors"].keys()
+        self["shells"] = list(self["q_vectors"].keys())
         self["n_shells"] = len(self["q_vectors"])    
         self["value"] = self["q_vectors"]
 

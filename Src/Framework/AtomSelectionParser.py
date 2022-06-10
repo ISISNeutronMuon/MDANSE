@@ -62,7 +62,7 @@ class AtomSelectionParser(object):
         expression = expression.replace(")"," )")
         
         linkers   = oneOf(["and","&","or","|","not","~"], caseless=True)
-        keyword   = oneOf(REGISTRY["selector"].keys(), caseless=True).setParseAction(self.parse_keyword)
+        keyword   = oneOf(list(REGISTRY["selector"].keys()), caseless=True).setParseAction(self.parse_keyword)
         arguments = Optional(~linkers + delimitedList(Word(printables,excludeChars=","),combine=False)).setParseAction(self.parse_arguments)
         
         selector = OneOrMore((keyword+arguments))

@@ -558,7 +558,7 @@ class MoleculesDatabase(object):
         :rtype: list
         '''
         
-        return self._data.keys()
+        return list(self._data.keys())
            
     @property
     def n_molecules(self):
@@ -712,7 +712,7 @@ class NucleotidesDatabase(object):
         :rtype: list
         '''
         
-        return self._data.keys()
+        return list(self._data.keys())
            
     @property
     def n_nucleotides(self):
@@ -866,7 +866,7 @@ class ResiduesDatabase(object):
         :rtype: list
         '''
         
-        return self._data.keys()
+        return list(self._data.keys())
            
     @property
     def n_residues(self):

@@ -196,8 +196,8 @@ class MasterProcess(object):
             return None, None, None
 
     def setGlobalState(self, **kw):
-        state_id = min(self.global_states.keys() + [0]) + 1
-        self.global_states[state_id] = kw.keys()
+        state_id = min(list(self.global_states.keys()) + [0]) + 1
+        self.global_states[state_id] = list(kw.keys())
         for name, value in kw.items():
             label = "state_%d_%s" % (state_id, name)
             if debug:

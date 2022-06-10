@@ -52,7 +52,7 @@ class InstrumentResolutionDialog(wx.Dialog):
         
         sb = wx.StaticBox(self, wx.ID_ANY, label="kernel")
         sbSizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
-        self._kernelChoice = wx.Choice(self, wx.ID_ANY, choices=REGISTRY["instrument_resolution"].keys())
+        self._kernelChoice = wx.Choice(self, wx.ID_ANY, choices=list(REGISTRY["instrument_resolution"].keys()))
         self._kernelChoice.SetSelection(0)
         sbSizer.Add(self._kernelChoice, 1, wx.ALL|wx.EXPAND, 5)
         sizer.Add(sbSizer, (0,0), flag=wx.EXPAND)

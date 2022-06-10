@@ -61,7 +61,7 @@ class NetCDFFormat(IFormat):
         
         for var in data.values():
                                     
-            varName = str(var.varname).strip().encode('string-escape').replace('/', '|')
+            varName = str(var.varname).strip().replace('/', '|')
             
             # The NetCDF dimensions are created for all the dimensions of the OutputVariable instance.
             dimensions = []

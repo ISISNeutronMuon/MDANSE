@@ -325,7 +325,7 @@ Authors:
         if idx <= 0:
             dataType = "automatic"
         else:
-            dataType = wildcards.keys()[idx-1]
+            dataType = list(wildcards.keys())[idx-1]
                         
         filename = dialog.GetPath()
         

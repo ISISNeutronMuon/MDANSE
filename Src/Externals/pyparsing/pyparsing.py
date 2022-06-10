@@ -369,7 +369,7 @@ class ParseResults(object):
     def __reversed__( self ): return iter( self.__toklist[::-1] )
     def keys( self ):
         """Returns all named result keys."""
-        return self.__tokdict.keys()
+        return list(self.__tokdict.keys())
 
     def pop( self, index=-1 ):
         """Removes and returns item at specified index (default=last).
@@ -566,7 +566,7 @@ class ParseResults(object):
         elif (len(self) == 1 and
                len(self.__tokdict) == 1 and
                self.__tokdict.values()[0][0][1] in (0,-1)):
-            return self.__tokdict.keys()[0]
+            return list(self.__tokdict.keys())[0]
         else:
             return None
 
