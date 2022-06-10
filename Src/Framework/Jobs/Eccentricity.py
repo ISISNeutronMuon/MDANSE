@@ -129,8 +129,9 @@ class Eccentricity(IJob):
         
         # read frame atoms coordinates                                                                             
         series = self.configuration['trajectory']['instance'].universe.configuration().array
-        
-        com = center_of_mass(series,masses=self._masses)
+
+        com = center_of_mass(series[self.configuration['center_of_mass']['flatten_indexes']],
+                             masses=numpy.array(self.configuration['center_of_mass']['masses']).flatten())
 
         # calculate the inertia moments and the radius of gyration
         xx = xy = xz = yy = yz = zz = 0
