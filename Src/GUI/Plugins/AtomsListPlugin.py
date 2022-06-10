@@ -136,7 +136,7 @@ class AtomsListPlugin(UserDefinitionPlugin):
         
     def enable_natoms_selection(self,state):
         
-        self._nAtomsSelectionSizer.ShowItems(state)
+        self._nAtomsSpinCtrl.Enable(state)
 
     def set_natoms(self,nAtoms):
         
