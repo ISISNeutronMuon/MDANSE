@@ -29,7 +29,7 @@ import wx.aui as wxaui
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.GUI.Plugins.ComponentPlugin import ComponentPlugin
-from MDANSE.GUI.Plugins.PlotterData import NetCDFPlotterData, PLOTTER_DATA_TYPES
+from MDANSE.GUI.Plugins.PlotterData import PLOTTER_DATA_TYPES
 from MDANSE.GUI.Plugins.Plotter1D import Plotter1D
 from MDANSE.GUI.Plugins.Plotter2D import Plotter2D
 from MDANSE.GUI.Plugins.Plotter3D import Plotter3D
@@ -466,7 +466,7 @@ class PlotterFrame(wx.Frame):
                 
     def on_load_data(self, event=None):
         
-        filters = 'NC file (*.nc)|*.nc|All files (*.*)|*.*'
+        filters = 'NetCDF file (*.nc)|*.nc|HDF file (*.h5)|*.h5|All files (*.*)|*.*'
         dialog = wx.FileDialog ( self, message = 'Open file...', wildcard=filters, style=wx.MULTIPLE)
         if dialog.ShowModal() == wx.ID_CANCEL:
             return
@@ -482,10 +482,11 @@ class PlotterFrame(wx.Frame):
                 for vname, vinfo in f.variables.items():
                     vpath, variable = vinfo
                     arr = variable.get_array()
+                    attributes = variable.get_attributes()
 
                     data[vname] = {}
-                    if hasattr(variable, 'axis'):
-                        axis = getattr(variable,'axis')
+                    if 'axis' in attributes:
+                        axis = attributes['axis']
                         if axis:
                             data[vname]['axis'] = axis.split('|')
                         else:
@@ -494,7 +495,7 @@ class PlotterFrame(wx.Frame):
                         data[vname]['axis'] = []
                     data[vname]['path'] = vpath
                     data[vname]['data'] = arr
-                    data[vname]['units'] = getattr(variable, "units", "au")
+                    data[vname]['units'] = attributes.get('units', 'au')
 
                 unique_name = self.unique(basename, self.plugin._dataDict)
 

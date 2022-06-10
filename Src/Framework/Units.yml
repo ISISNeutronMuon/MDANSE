@@ -96,11 +96,11 @@ H:
 
 lm:
   factor: 1.0
-  dimension: [0,0,0,0,0,0,1,0,0]
+  dimension: [0,0,0,0,0,0,1,0,1]
 
 lux:
   factor: 1.0
-  dimension: [0,-2,0,0,0,0,1,0,0]
+  dimension: [0,-2,0,0,0,0,1,0,1]
 
 Bq:
   factor: 1.0

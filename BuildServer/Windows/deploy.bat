@@ -2,7 +2,7 @@
 
 cd %MDANSE_SOURCE_DIR%
 
-set MDANSE_TEMPORARY_INSTALLATION_DIR="%RUNNER_TOOL_CACHE%\Python\2.7.18\x64"
+set MDANSE_TEMPORARY_INSTALLATION_DIR="%CONDA%\envs\mdanse"
 rem Set the path to python executable
 set PYTHON_EXE=%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe
 
@@ -25,7 +25,19 @@ if %STATUS% neq 0 (
     exit %STATUS%
 )
 
-cd "%GITHUB_WORKSPACE%\BuildServer\Windows"
+rem remove unneeded packages
+cd /D %MDANSE_TEMPORARY_INSTALLATION_DIR%\Lib\site-packages
+rmdir /s /q PyQT4
+rmdir /s /q PyQT4-4.11.4.dist-info
+rmdir /s /q matplotlib\mpl-data\sample_data
+"%PYTHON_EXE%" -m pip uninstall sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3 -y
+cd %MDANSE_TEMPORARY_INSTALLATION_DIR%\Library
+rmdir /s /q cmake
+del /f /q USING*
+cd bin
+del /f /q *.exe
+
+cd /D "%GITHUB_WORKSPACE%\BuildServer\Windows"
 
 rem copy LICENSE
 copy "%GITHUB_WORKSPACE%\\LICENSE" "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\Resources\\nsis\\"

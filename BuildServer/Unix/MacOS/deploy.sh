@@ -135,10 +135,8 @@ sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/zmq
 # Remove python
 sudo rm -rf $HOME/Contents
 #Uninstall Sphinx and py2app
-sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/sphinx*
-sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/Sphinx
-sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/alabaster*
-sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/py2app*
+sudo $PYTHON_EXE -m pip uninstall sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3 py2app
+
 
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/conf_
 #############################
