@@ -31,7 +31,7 @@ class OutputFilesConfigurator(IConfigurator):
     for an analysis, you must inherit from MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
         
-    _default = (os.path.join(tempfile.gettempdir(),"output"), ["netcdf"])
+    _default = (os.path.join(tempfile.gettempdir(),"output"), ["hdf"])
                     
     def __init__(self, name, formats=None, **kwargs):
         """
