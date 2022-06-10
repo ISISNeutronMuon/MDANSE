@@ -61,8 +61,6 @@ class NetCDFPlotterVariable(_IPlotterVariable):
         """
         return self._variable[:]
 
-<<<<<<< HEAD
-=======
     def get_attributes(self):
         """Returns the attributes stored by the plotter data.
 
@@ -92,7 +90,6 @@ class HDFPlotterVariable(_IPlotterVariable):
         return self._variable.attrs
 
 
->>>>>>> develop
 class _IPlotterData:
     """
     This is the interface for plotter data.
@@ -166,9 +163,6 @@ class NetCDFPlotterData(_IPlotterData):
         for _, sub_group in group.groups.items():
             NetCDFPlotterData.find_numeric_variables(var_dict, sub_group)
 
-<<<<<<< HEAD
-PLOTTER_DATA_TYPES = {'.nc': NetCDFPlotterData, '.cdf': NetCDFPlotterData, '.netcdf': NetCDFPlotterData}
-=======
 
 class HDFPlotterData(_IPlotterData):
     """This class implements the plotter data interface for HDF data."""
@@ -225,4 +219,3 @@ PLOTTER_DATA_TYPES = {
     '.netcdf': NetCDFPlotterData,
     '.hdf': HDFPlotterData,
     '.h5': HDFPlotterData}
->>>>>>> develop

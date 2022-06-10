@@ -19,12 +19,9 @@ from math import ceil
 import os
 from tempfile import gettempdir, tempdir
 
-<<<<<<< HEAD
 import numpy as np
-=======
+
 import netCDF4
-import numpy
->>>>>>> develop
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -139,7 +136,7 @@ class CurrentCorrelationFunction(IJob):
                     self._mode = 2
 
         if self._order != "no interpolation" and self._mode == 0:
-            self._velocities = numpy.empty((nAtoms,nFrames,3),dtype=float)
+            self._velocities = np.empty((nAtoms,nFrames,3),dtype=float)
             # Loop over the selected indexes and fill only this part of the 
             # self._velocities array, the rest, which is useless, remaining unset. 
             for idx in self.configuration['atom_selection']['flatten_indexes']:
@@ -172,7 +169,7 @@ class CurrentCorrelationFunction(IJob):
                     velocities.createVariable('velocities', 'f8', ('particles', 'time', 'axis'),
                                               chunksizes=((nAtoms + 1), self._preload, 3))
 
-                vels = numpy.empty((nFrames, 3))
+                vels = np.empty((nFrames, 3))
                 for idx in self.configuration['atom_selection']['flatten_indexes']:
                     atomicTraj = read_atoms_trajectory(traj,
                                                        [idx],
@@ -216,16 +213,16 @@ class CurrentCorrelationFunction(IJob):
         rhoLong_loop = {}
         rhoTrans_loop = {}
         for element in self._elements:
-            rho[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
-            rho_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
-            rhoLong_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
-            rhoTrans_loop[element] = numpy.zeros((self._nFrames, 3, nQVectors), dtype = numpy.complex64)
+            rho[element] = np.zeros((self._nFrames, 3, nQVectors), dtype = np.complex64)
+            rho_loop[element] = np.zeros((self._nFrames, 3, nQVectors), dtype = np.complex64)
+            rhoLong_loop[element] = np.zeros((self._nFrames, 3, nQVectors), dtype = np.complex64)
+            rhoTrans_loop[element] = np.zeros((self._nFrames, 3, nQVectors), dtype = np.complex64)
 
         # Certain interpolation strategies are faster when looping occurs primarily over elements
         if self._order != 'no interpolation' and (self._mode == 1 or (self._mode == 2 and self._preload == -1)):
             for element, idxs in self._indexesPerElement.items():
                 nFrames = self.configuration['frames']['n_frames']
-                all_velocities = numpy.empty((len(idxs), nFrames, 3), dtype=float)
+                all_velocities = np.empty((len(idxs), nFrames, 3), dtype=float)
 
                 if self._mode == 1:
                     # Looping over elements is the only way to make repeated interpolation feasible at all
@@ -247,14 +244,14 @@ class CurrentCorrelationFunction(IJob):
 
                 for i, frame in enumerate(self.configuration['frames']['value']):
                     coordinates = traj.configuration[frame].array[idxs, :]
-                    velocities = numpy.transpose(all_velocities[:, i, :])[:, :, numpy.newaxis]
-                    tmp = numpy.exp(1j * numpy.dot(coordinates, qVectors))[numpy.newaxis, :, :]
-                    rho[element][i, :, :] = numpy.add.reduce(velocities * tmp, 1)
+                    velocities = np.transpose(all_velocities[:, i, :])[:, :, np.newaxis]
+                    tmp = np.exp(1j * np.dot(coordinates, qVectors))[np.newaxis, :, :]
+                    rho[element][i, :, :] = np.add.reduce(velocities * tmp, 1)
 
-                Q2 = numpy.sum(qVectors ** 2, axis=0)
+                Q2 = np.sum(qVectors ** 2, axis=0)
 
-                qj = numpy.sum(rho[element] * qVectors, axis=1)
-                rhoLong[element] = (qj[:, numpy.newaxis, :] * qVectors[numpy.newaxis, :, :]) / Q2
+                qj = np.sum(rho[element] * qVectors, axis=1)
+                rhoLong[element] = (qj[:, np.newaxis, :] * qVectors[np.newaxis, :, :]) / Q2
                 rhoTrans[element] = rho[element] - rhoLong[element]
 
         # No interpolation and some interpolation approaches are faster when looping occurs primarily over frames
@@ -281,15 +278,15 @@ class CurrentCorrelationFunction(IJob):
                 for element, idxs in self._indexesPerElement.items():
                     selectedCoordinates = conf.array[idxs,:]
                     selectedVelocities = vel[idxs,:]
-                    selectedVelocities = numpy.transpose(selectedVelocities)[:,:,numpy.newaxis]
-                    tmp = numpy.exp(1j*numpy.dot(selectedCoordinates, qVectors))[numpy.newaxis,:,:]
-                    rho[element][i,:,:] = numpy.add.reduce(selectedVelocities*tmp,1)
+                    selectedVelocities = np.transpose(selectedVelocities)[:,:,np.newaxis]
+                    tmp = np.exp(1j*np.dot(selectedCoordinates, qVectors))[np.newaxis,:,:]
+                    rho[element][i,:,:] = np.add.reduce(selectedVelocities*tmp,1)
 
-            Q2 = numpy.sum(qVectors ** 2, axis=0)
+            Q2 = np.sum(qVectors ** 2, axis=0)
 
             for element in self._elements:
-                qj = numpy.sum(rho[element] * qVectors, axis=1)
-                rhoLong[element] = (qj[:, numpy.newaxis, :] * qVectors[numpy.newaxis, :, :]) / Q2
+                qj = np.sum(rho[element] * qVectors, axis=1)
+                rhoLong[element] = (qj[:, np.newaxis, :] * qVectors[np.newaxis, :, :]) / Q2
                 rhoTrans[element] = rho[element] - rhoLong[element]
 
         return index, (rhoLong, rhoTrans)
