@@ -264,48 +264,48 @@ class ElementShortInfoPanel(wx.Panel):
 
         # The static texts that will display the informations about a given element.
         self.family = wx.StaticText(self, label="", style=wx.ALIGN_RIGHT|wx.ST_NO_AUTORESIZE|wx.EXPAND)
-        self.family.SetToolTipString("Chemical family")        
+        self.family.SetToolTip("Chemical family")        
         self.family.SetFont(wx.Font(8, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD))
 
         # The element symbol.
         self.symbol = wx.StaticText(self, label="",style=wx.ALIGN_LEFT|wx.ST_NO_AUTORESIZE)        
-        self.symbol.SetToolTipString("Symbol")        
+        self.symbol.SetToolTip("Symbol")        
         self.symbol.SetFont(wx.Font(18, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
 
         # The element atomic number.
         self.z = wx.StaticText(self, label="", style=wx.ALIGN_RIGHT|wx.ST_NO_AUTORESIZE|wx.EXPAND)
-        self.z.SetToolTipString("Atomic number")
+        self.z.SetToolTip("Atomic number")
         self.z.SetFont(wx.Font(8, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
         
         # The element position in the periodic table.
         self.position = wx.StaticText(self, label="", size=(40,15), style=wx.ALIGN_CENTER_VERTICAL|wx.ST_NO_AUTORESIZE)        
-        self.position.SetToolTipString("Group,Period,Block")
+        self.position.SetToolTip("Group,Period,Block")
         self.position.SetFont(wx.Font(8, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
                 
         # The element full name.
         self.atom = wx.StaticText(self, label="" , style=wx.ALIGN_CENTER|wx.ST_NO_AUTORESIZE)        
-        self.atom.SetToolTipString("Atom")
+        self.atom.SetToolTip("Atom")
         self.atom.SetFont(wx.Font(8, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
                 
         # The element electronic configuration.
         self.configuration = StaticFancyText(self, wx.ID_ANY, "", style=wx.EXPAND|wx.ALIGN_LEFT|wx.ST_NO_AUTORESIZE)
-        self.configuration.SetToolTipString("Electron configuration")
+        self.configuration.SetToolTip("Electron configuration")
         
         # The element atomic weight.
         self.atomicWeight = wx.StaticText(self, label="", style=wx.ALIGN_RIGHT|wx.ST_NO_AUTORESIZE)
-        self.atomicWeight.SetToolTipString("Relative atomic mass (uma)")
+        self.atomicWeight.SetToolTip("Relative atomic mass (uma)")
        
         # The element electronegativity.
         self.electroNegativity = wx.StaticText(self, label="", style=wx.EXPAND|wx.ALIGN_RIGHT|wx.ST_NO_AUTORESIZE)
-        self.electroNegativity.SetToolTipString("Electronegativity")
+        self.electroNegativity.SetToolTip("Electronegativity")
         
         # The element electroaffinity.
         self.electroAffinity = wx.StaticText(self, label="", style=wx.ALIGN_RIGHT|wx.ST_NO_AUTORESIZE)        
-        self.electroAffinity.SetToolTipString("Electroaffinity (eV)")
+        self.electroAffinity.SetToolTip("Electroaffinity (eV)")
         
         # The element ionization energy.
         self.ionizationEnergy = wx.StaticText(self, label="", style=wx.ALIGN_RIGHT|wx.ST_NO_AUTORESIZE)        
-        self.ionizationEnergy.SetToolTipString("Ionization energy (eV)")
+        self.ionizationEnergy.SetToolTip("Ionization energy (eV)")
 
         # The widgets are placed into the gridbag top sizer.
         self.sizer.Add(self.family           , pos=(0,1), span=(1,16), flag=wx.EXPAND)
@@ -404,7 +404,7 @@ class PeriodicTableViewer(wx.Frame):
         mainSizer = wx.GridBagSizer(0,0)
         mainSizer.SetEmptyCellSize((20,20))
 
-        self.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DFACE)) 
+        self.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DFACE)) 
         
         for i in _COLS:
             wid = wx.TextCtrl(mainPanel,wx.ID_ANY, value=str(i), size=(40,40), style = wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.TE_READONLY|wx.NO_BORDER)
@@ -440,7 +440,7 @@ class PeriodicTableViewer(wx.Frame):
             try:
                 r,c = _LAYOUT[info['symbol']]
                 wid = wx.TextCtrl(mainPanel,wx.ID_ANY,value=info["symbol"],size=(40,40),style=wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND|wx.TE_READONLY|wx.NO_BORDER)
-                wid.SetToolTipString(info['element'])
+                wid.SetToolTip(info['element'])
                 bgColor = _FAMILY[info['family']]
                 wid.SetBackgroundColour(bgColor)
                 fgColor = _STATE[info['state']]
