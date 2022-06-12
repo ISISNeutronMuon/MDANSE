@@ -37,10 +37,10 @@ class NeutronDynamicTotalStructureFactor(IJob):
 
     category = ('Analysis','Scattering',)
     
-    ancestor = ["mmtk_trajectory","molecular_viewer"]
+    ancestor = ["hdf_trajectory","molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('mmtk_trajectory',{})
+    settings['trajectory'] = ('hdf_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['instrument_resolution'] = ('instrument_resolution',{'dependencies':{'trajectory':'trajectory','frames' : 'frames'}})
     settings['q_vectors'] = ('q_vectors',{'dependencies':{'trajectory':'trajectory'}})

@@ -117,14 +117,13 @@ class TrajectoryViewerPlugin(ComponentPlugin):
     def set_trajectory(self,trajectory):
 
         self._trajectory = trajectory 
-        universe = self._trajectory.universe
-        nAtoms = universe.numberOfAtoms()
+        nAtoms = self._trajectory.chemical_system.number_of_atoms()
 
         self._target = os.path.basename(self._trajectory.filename)
 
         trajectoryVariables = []
         for k in self._trajectory['/configuration']:
-            trajectoryVariables.append(v)
+            trajectoryVariables.append(k)
         self._selectedVariable.SetItems(trajectoryVariables)
 
         self._selectedAtom.SetRange(0,nAtoms-1)
