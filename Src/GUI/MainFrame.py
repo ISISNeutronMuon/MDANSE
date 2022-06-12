@@ -30,6 +30,7 @@ from MDANSE.GUI.ControllerPanel import ControllerPanel
 from MDANSE.GUI.DataController import DATA_CONTROLLER
 from MDANSE.GUI.DataTreePanel import DataTreePanel
 from MDANSE.GUI.Icons import ICONS
+from MDANSE.GUI.Plugins.IPlugin import IPlugin, uninit_aui_managers
 from MDANSE.GUI.PluginsTreePanel import PluginsTreePanel
 from MDANSE.GUI.WorkingPanel import WorkingPanel
 
@@ -382,10 +383,18 @@ Authors:
 
         webbrowser.open('http://mdanse.org')
 
+    def _uninit_aui_managers(self):
+
+        nPages = self._panels["working"].notebook.GetPageCount()
+        for i in range(nPages):
+            page = self._panels["working"].notebook.GetPage(i)
+            uninit_aui_managers(page._mgr)
+
     def on_quit(self, event=None):
         
         d = wx.MessageDialog(None, 'Do you really want to quit ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
         if d.ShowModal() == wx.ID_YES:
+            self._uninit_aui_managers()
             self._mgr.UnInit()
             self.Destroy()
                                                                          

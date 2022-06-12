@@ -116,3 +116,6 @@ class WorkingPanel(wx.Panel):
         if self._notebook.GetPageCount() == 1:
             PUBLISHER.sendMessage('msg_set_plugins_tree', message=None)
         
+    @property
+    def notebook(self):
+        return self._notebook

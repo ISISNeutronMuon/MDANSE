@@ -34,6 +34,16 @@ def plugin_parent(window):
     else:
         return plugin_parent(window.Parent)
 
+def uninit_aui_managers(mgr):
+
+    panes = mgr.GetAllPanes()
+    for pane in panes: 
+        window = pane.window
+        if isinstance(window,IPlugin):
+            window.close()
+            uninit_aui_managers(window._mgr)
+    mgr.UnInit()
+
 class PluginDropTarget(wx.DropTarget):
 
     def __init__(self, targetPanel):
@@ -131,10 +141,11 @@ class IPlugin(wx.Panel):
         # Call the 'close' method the plugin to be closed
         window.close()
         
+        uninit_aui_managers(self._mgr)
         self._mgr.DetachPane(window)
-        window.Destroy()
         self._mgr.Update()
-            
+        window.Destroy()
+
         self.SetFocus()
         
         self._currentWindow = self

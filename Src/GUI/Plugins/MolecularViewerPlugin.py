@@ -258,6 +258,8 @@ class MolecularViewerPlugin(ComponentPlugin):
         # Clear the viewer
         self.clear_universe()
 
+        self._iren.GetRenderWindow().Finalize()
+
     def __del__(self):
         # Ensure unsubscription
         self.__unsubscribe()
