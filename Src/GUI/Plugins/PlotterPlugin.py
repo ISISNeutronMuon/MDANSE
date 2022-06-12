@@ -441,7 +441,7 @@ class PlotterPlugin(ComponentPlugin):
 class PlotterFrame(wx.Frame):
     
     def __init__(self, parent, title="2D/3D Plotter"):
-        wx.Frame.__init__(self, parent, wx.ID_ANY, title, style=wx.DEFAULT_DIALOG_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
+        wx.Frame.__init__(self, parent, wx.ID_ANY, title, style=wx.DEFAULT_FRAME_STYLE|wx.MINIMIZE_BOX|wx.MAXIMIZE_BOX|wx.RESIZE_BORDER)
         self.__build_dialog()
         self.__build_menu()
  
@@ -452,16 +452,20 @@ class PlotterFrame(wx.Frame):
 
         mainMenu.Append(fileMenu, 'File')
 
-        icon = wx.EmptyIcon()
+        icon = wx.Icon()
         icon.CopyFromBitmap(ICONS["plot",32,32])        
         self.SetIcon(icon) 
         
         self.SetMenuBar(mainMenu)
         
         self.Bind(wx.EVT_MENU, self.on_load_data, loadData)
+        self.Bind(wx.EVT_CLOSE,self.on_close,self)
    
-    def on_quit(self, event=None):
-
+    def on_close(self, event=None):
+    
+        self.plugin._dataPanel._mgr.UnInit()
+        self.plugin._plotterPanel._mgr.UnInit()
+        self.plugin._mgr.UnInit()
         self.Destroy()
                 
     def on_load_data(self, event=None):

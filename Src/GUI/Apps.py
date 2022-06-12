@@ -38,6 +38,7 @@ class MainApplication(wx.App):
         
         f = MainFrame(None)
         f.Show()
+        self.SetTopWindow(f)
         return True
 
 class PeriodicTableViewerApp(wx.App):
@@ -54,7 +55,8 @@ class PlotterApp(wx.App):
     def OnInit(self):
         
         f = PlotterFrame(None)
-        f.Show()
+        self.SetTopWindow(f)
+        f.Show(True)
         return True
 
 class UnitsEditorApp(wx.App):  

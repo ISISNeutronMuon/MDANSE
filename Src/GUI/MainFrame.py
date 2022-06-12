@@ -386,6 +386,7 @@ Authors:
         
         d = wx.MessageDialog(None, 'Do you really want to quit ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
         if d.ShowModal() == wx.ID_YES:
+            self._mgr.UnInit()
             self.Destroy()
                                                                          
     def on_start_plotter(self, event = None):
