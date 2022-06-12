@@ -322,7 +322,7 @@ class Trajectory:
         if variable not in grp:
             raise TrajectoryError('The variable {} is not stored in the trajectory'.format(variable))
 
-        variable = grp['coordinates'][first:last:step,index,:]
+        variable = grp[variable][first:last:step,index,:]
 
         return variable
 

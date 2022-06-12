@@ -122,7 +122,7 @@ class TrajectoryViewerPlugin(ComponentPlugin):
         self._target = os.path.basename(self._trajectory.filename)
 
         trajectoryVariables = []
-        for k in self._trajectory['/configuration']:
+        for k in self._trajectory.file['/configuration']:
             trajectoryVariables.append(k)
         self._selectedVariable.SetItems(trajectoryVariables)
 
@@ -206,22 +206,21 @@ class TrajectoryViewerPlugin(ComponentPlugin):
 
         dimensionNumber = TrajectoryViewerPlugin._dimensions[self._selectedDimension.GetValue()]
 
-        time = self._trajectory.time
-        data = self._trajectory.readParticleTrajectory(atom,
+        time = self._trajectory.file['time']
+        data = self._trajectory.read_configuration_trajectory(atom,
                                                         0,
                                                         len(self._trajectory),
                                                         1,
-                                                        variable=variable).array
+                                                        variable=variable)
 
         label = '%s - %d - %s' % (variable, atom, dimension)
 
         if not self._plotOnSameFigure.GetValue():
             self._figure.gca().clear()
 
-
         self._figure.gca().set_xlabel('time (ps)')
         self._figure.gca().set_ylabel('%s (%s)' % (variable,TrajectoryViewerPlugin._units.get(variable,'au')))
-        self._figure.gca().plot(time,data[:,dimensionNumber],label=label,picker=3)
+        self._figure.gca().plot(time[:],data[:,dimensionNumber],label=label,picker=3)
         self._canvas.draw()
         
         self.on_showhide_legend(None)
