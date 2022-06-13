@@ -42,7 +42,7 @@ class StructureFactorFromScatteringFunction(IJob):
         Initialize the input parameters and analysis self variables
         """
 
-        # The number of steps is set to 1 as the job is defined as single McStas run.            
+        # The number of steps is set to 1 as everything is performed in the finalize method
         self.numberOfSteps = 1
         
         inputFile = self.configuration['netcdf_input_file']['instance'] 

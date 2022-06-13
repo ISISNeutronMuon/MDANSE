@@ -13,21 +13,16 @@
 #
 # **************************************************************************
 
-import netCDF4
+import h5py
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
-from MDANSE.IO.NetCDF import find_numeric_variables
+from MDANSE.IO.HDF import find_numeric_variables
 
-class NetCDFInputFileConfigurator(InputFileConfigurator):
+class HDFInputFileConfigurator(InputFileConfigurator):
     """
-    This configurator allows to input a NetCDF file as input file.
-    
-    NetCDF is a set of software libraries and self-describing, machine-independent data formats that 
-    support the creation, access, and sharing of array-oriented scientific data.
-    
-    For more information, please consult the NetCDF website: http://www.unidata.ucar.edu/software/netcdf/
+    This configurator allows to input a HDF file as input file.    
     """
         
     _default = ''
@@ -60,15 +55,15 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
         InputFileConfigurator.configure(self, value)
         
         try:
-            self['instance'] = netCDF4.Dataset(self['value'], 'r')
+            self['instance'] = h5py.File(self['value'], 'r')
             
         except IOError:
             raise ConfiguratorError("can not open %r NetCDF file for reading" % self['value'])
 
         for v in self._variables:
-            try:                
-                self[v] = self['instance'].variables[v]
-            except KeyError:
+            if v in self['instance']:
+                self[v] = self['instance'][v][:]
+            else:
                 raise ConfiguratorError("the variable %r was not  found in %r NetCDF file" % (v,self["value"]))
 
     @property
@@ -84,13 +79,13 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
 
     def get_information(self):
         '''
-        Returns some basic informations about the contents of the NetCDF file.
+        Returns some basic informations about the contents of theHDF file.
         
-        :return: the informations about the contents of the NetCDF file.
+        :return: the informations about the contents of the HDF file.
         :rtype: str
         '''
         
-        info = ["NetCDF input file: %r" % self["value"]]
+        info = ["HDF input file: %r" % self["value"]]
         
         if 'instance' in self:
             info.append("Contains the following variables:")
@@ -102,4 +97,4 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
             
         return "\n".join(info)
     
-REGISTRY['netcdf_input_file'] = NetCDFInputFileConfigurator
+REGISTRY['hdf_input_file'] = HDFInputFileConfigurator
