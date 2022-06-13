@@ -20,6 +20,7 @@ from MDANSE import REGISTRY
 
 from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.DataController import DATA_CONTROLLER
+from MDANSE.GUI.Plugins.IPlugin import uninit_aui_managers
 
 class DropTarget(wx.TextDropTarget):
 
@@ -47,6 +48,7 @@ class WorkingPanel(wx.Panel):
                 
         self.SetDropTarget(DropTarget(self))
 
+        self._notebook.Bind(wxaui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_page, self._notebook)
         self._notebook.Bind(wxaui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_changing_page)        
         self._notebook.Bind(wx.EVT_CHILD_FOCUS, self.on_changing_page)
 
@@ -64,8 +66,6 @@ class WorkingPanel(wx.Panel):
         sizer.Add(self._notebook, 1, wx.EXPAND, 0)
         
         self.SetSizer(sizer)
-        
-        self._notebook.Bind(wxaui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_page, self._notebook)
         
     def drop(self, filename):
                 
@@ -115,7 +115,11 @@ class WorkingPanel(wx.Panel):
         
         if self._notebook.GetPageCount() == 1:
             PUBLISHER.sendMessage('msg_set_plugins_tree', message=None)
-        
+
+        currentPage = self._notebook.GetCurrentPage()
+
+        uninit_aui_managers(currentPage._mgr)
+
     @property
     def notebook(self):
         return self._notebook

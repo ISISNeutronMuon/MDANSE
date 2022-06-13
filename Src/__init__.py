@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-import os
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -27,3 +26,6 @@ from MDANSE.Core.ClassRegistry import REGISTRY
 import MDANSE.Framework
 
 PLATFORM.create_directory(PLATFORM.macros_directory())
+
+import vtk
+vtk.vtkObject.GlobalWarningDisplayOff()
