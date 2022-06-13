@@ -39,6 +39,9 @@ echo "Replacing buggy python2 files"
 sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
 sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
 
+echo "Uninstall sphinx and its dependencies"
+sudo ${PYTHONEXE} -m pip uninstall sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3
+
 echo "Building mdanse app"
 cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS" || exit
 sudo ${PYTHONEXE} build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR"
@@ -134,9 +137,8 @@ sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/sci
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/zmq
 # Remove python
 sudo rm -rf $HOME/Contents
-#Uninstall Sphinx and py2app
-sudo ${PYTHONEXE} -m pip uninstall sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3 py2app
-
+#Remove py2app
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/py2app
 
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/conf_
 #############################
