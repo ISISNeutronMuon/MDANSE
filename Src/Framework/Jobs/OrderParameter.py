@@ -69,7 +69,7 @@ class OrderParameter(IJob):
                                                  'default':('C284H438N84O79S7',('C','C_beta'))})
     settings['reference_direction'] = ('vector', {'default':[0,0,1], 'notNull':True, 'normalize':True})
     settings['per_axis'] = ('boolean', {'label':"output contribution per axis", 'default':False})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
     def initialize(self):

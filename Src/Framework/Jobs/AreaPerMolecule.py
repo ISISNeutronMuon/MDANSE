@@ -45,7 +45,7 @@ class AreaPerMolecule(IJob):
     settings['frames'] = ('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['axis'] = ('multiple_choices', {'label':'area vectors','choices':['a','b','c'],'nChoices':2,'default':['a','b']})
     settings['name'] = ('string', {'label':'molecule name','default':'DMPC'})    
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):

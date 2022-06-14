@@ -78,7 +78,7 @@ class Eccentricity(IJob):
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['center_of_mass'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
             
     def initialize(self):
         """
@@ -129,8 +129,9 @@ class Eccentricity(IJob):
         
         # read frame atoms coordinates                                                                             
         series = self.configuration['trajectory']['instance'].universe.configuration().array
-        
-        com = center_of_mass(series,masses=self._masses)
+
+        com = center_of_mass(series[self.configuration['center_of_mass']['flatten_indexes']],
+                             masses=numpy.array(self.configuration['center_of_mass']['masses']).flatten())
 
         # calculate the inertia moments and the radius of gyration
         xx = xy = xz = yy = yz = zz = 0
