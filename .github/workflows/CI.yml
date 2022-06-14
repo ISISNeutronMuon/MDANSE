@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
 
       - name: Install netCDF4 python package
@@ -207,7 +207,7 @@ jobs:
 
       - name: Install dependecies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app==0.26.1 pyyaml h5py
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app==0.26.1 pyyaml h5py psutil
 
       - name: Install netCDF4 python package
         run: |
@@ -535,9 +535,9 @@ jobs:
           tar -xkf mdanse.tar.gz
         shell: cmd /C CALL {0}
 
-      - name: Install packages required for documentation
+      - name: Install packages required for documentation and psutil
         run: |
-          %CONDA%\envs\mdanse\python.exe -m pip install docutils==0.17.1 sphinx==1.6.7 stdeb
+          %CONDA%\envs\mdanse\python.exe -m pip install docutils==0.17.1 sphinx==1.6.7 stdeb psutil
         shell: cmd /C CALL {0}
 
       - name: Install GUI dependencies
