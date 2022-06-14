@@ -75,12 +75,28 @@ jobs:
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
 
       - name: Tar artifacts
+        if: |
+          contains( github.ref, 'main' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' )
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 python
           tar -czf python.tar.gz python
 
       - name: Upload artifacts
+        if: |
+          contains( github.ref, 'main' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' )
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -95,6 +111,14 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
+    if: |
+      contains( github.ref, 'main' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
