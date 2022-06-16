@@ -23,6 +23,8 @@ from MMTK import Atom, AtomCluster
 from MMTK.ParticleProperties import Configuration
 from MMTK.Universe import InfiniteUniverse, ParallelepipedicPeriodicUniverse
 
+from MDANSE.Mathematics.Graph import Graph
+
 class XTDFile(object):
     
     def __init__(self, filename):
@@ -105,13 +107,13 @@ class XTDFile(object):
     
                 name = node.attrib.get('Name','').strip()
                 if name:
-                    info['name'] = name
+                    info['atom_name'] = name
                 else:                
                     name = node.attrib.get('ForcefieldType','').strip()
                     if name:
-                        info['name'] = name + '_ff'
+                        info['atom_name'] = name + '_ff'
                     else:
-                        info['name'] = info['element'] + '_el'
+                        info['atom_name'] = info['element'] + '_el'
                     
                 self._atoms[idx] = info
                 
@@ -146,41 +148,31 @@ class XTDFile(object):
             self._universe = InfiniteUniverse()
                     
         configuration = numpy.empty((self._nAtoms,3),dtype=numpy.float64)
-                            
-        nclusters = 0
-         
-        clusters = {}
-         
-        equivalences = {}
-         
-        for idx,atom in self._atoms.items():
-         
-            if not clusters.has_key(idx):
-                nclusters += 1
-                clusters[idx] = nclusters
-             
-            for neighbor in atom["bonded_to"]:
-                if (neighbor in clusters) and (clusters[idx] != clusters[neighbor]):
-                    equivalences[clusters[neighbor]] = equivalences.get(clusters[idx],clusters[idx])
-                     
-                clusters[neighbor] = clusters[idx]
-                         
-        mergedClusters = {}
-        for idx,clusterId in clusters.items():
-            if equivalences.has_key(clusterId):
-                mergedClusters.setdefault(equivalences[clusterId],[]).append(idx)
-            else:
-                mergedClusters.setdefault(clusterId,[]).append(idx)
-                 
-        for k,indexes in mergedClusters.items():
+                                     
+        graph = Graph()
+
+        for idx, at in self._atoms.items():
+            graph.add_node(name=idx,**at)
+
+        for idx, at in self._atoms.items():
+            for bat in at['bonded_to']:
+                graph.add_link(idx,bat)
+
+        clusters = graph.build_connected_components()
+
+        prev = 0 
+        for cluster in clusters:
+
             atomCluster = AtomCluster([])
+
             bruteFormula = collections.defaultdict(lambda : 0)
-            for idx in indexes:
-                element = self._atoms[idx]["element"]
-                name = self._atoms[idx]["name"]
-                at = Atom(element, name=name, xtdIndex=idx)
-                at.index = self._atoms[idx]["mmtk_index"]
-                configuration[at.index] = self._atoms[idx]["xyz"]
+            
+            for node in cluster:
+                element = node.element
+                name = node.atom_name
+                at = Atom(element, name=name, xtdIndex=node.xtd_index)
+                at.index = node.mmtk_index
+                configuration[at.index] = node.xyz
                 atomCluster.atoms.append(at)
                 bruteFormula[element] += 1
             atomCluster.name = "".join(["%s%d" % (k,v) for k,v in sorted(bruteFormula.items())])
