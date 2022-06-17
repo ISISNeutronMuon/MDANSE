@@ -65,7 +65,6 @@ jobs:
       - name: Install MDANSE
         run: |
           cd $GITHUB_WORKSPACE
-          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/setup.py $GITHUB_WORKSPACE
           $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
 
       - name: Run tests
