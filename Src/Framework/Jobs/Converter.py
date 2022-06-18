@@ -19,9 +19,7 @@ import netCDF4
 
 from MDANSE.Framework.Jobs.IJob import IJob
 
-class Converter(IJob):
-
-    __metaclass__ = abc.ABCMeta
+class Converter(IJob,metaclass=abc.ABCMeta):
     
     category = ('Converters',)
     

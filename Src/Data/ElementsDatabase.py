@@ -56,7 +56,7 @@ def indent(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
-class ElementsDatabase(object):
+class ElementsDatabase(object,metaclass=Singleton):
     '''
     This class implements the elements database of MDANSE.
     
@@ -92,9 +92,7 @@ class ElementsDatabase(object):
     >>> # Returns the elements stored currently in the database
     >>> elements = ELEMENTS.get_elements()
     '''
-    
-    __metaclass__ = Singleton
-    
+        
     _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),"elements_database.csv")
     
     # The user path

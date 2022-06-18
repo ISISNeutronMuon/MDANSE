@@ -30,13 +30,11 @@ class PlatformError(Error):
     '''
     pass
 
-class Platform(object):
+class Platform(object,metaclass=abc.ABCMeta):
     """
     This is the base class for OS-free standard operations.
     """
     
-    __metaclass__ = abc.ABCMeta    
-
     __instance = None
 
     def __new__(cls, *args, **kwargs):

@@ -9,14 +9,12 @@ import h5py
 
 from MDANSE.Core.Decorators import compatibleabstractproperty
 
-class _IPlotterVariable:
+class _IPlotterVariable(metaclass=abc.ABCMeta):
     """This is the base abstract class for plotter variable.
 
     Basically, this class allows to have a common interface for the data supported by the plotter (netcdf currently,
     hdf in the future, ...)
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, variable):
         self._variable = variable
@@ -90,14 +88,12 @@ class HDFPlotterVariable(_IPlotterVariable):
         return self._variable.attrs
 
 
-class _IPlotterData:
+class _IPlotterData(metaclass=abc.ABCMeta):
     """
     This is the interface for plotter data.
 
     Plotter data are data supported by the plotter. Currently, only NetCDF is supported but HDF should be supported soon.
     """
-
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def __init__(self):

@@ -8,9 +8,7 @@ from MDANSE.Extensions import atoms_in_shell, contiguous_coordinates
 class ConfigurationError(Exception):
     pass
 
-class _Configuration:
-
-    __metaclass__ = abc.ABCMeta
+class _Configuration(metaclass=abc.ABCMeta):
 
     def __init__(self, chemical_system,coordinates,**variables):
         """Constructor.

@@ -32,7 +32,7 @@ from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.Icons import ICONS
 from MDANSE.GUI.Events.JobControllerEvent import EVT_JOB_CONTROLLER, JobControllerEvent
         
-class JobController(threading.Thread):
+class JobController(threading.Thread,metaclass=Singleton):
     '''
     This class sets up the job controlling daemon that will regurlarly check for the status of running MDANSE jobs.
     
@@ -45,9 +45,7 @@ class JobController(threading.Thread):
     to EVT_JOB_CONTROLLER and it will receive the updated version of :py:attr:`_runningJobs` dictionnary every time 
     the :py:meth:run is called.     
     '''
-    
-    __metaclass__ = Singleton
-    
+        
     def __init__(self, window, start=False):
         '''
         

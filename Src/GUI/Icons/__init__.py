@@ -19,10 +19,8 @@ import wx
 
 from MDANSE.Core.Singleton import Singleton
 
-class Icons(object):
-    
-    __metaclass__ = Singleton
-        
+class Icons(object,metaclass=Singleton):
+            
     def __getitem__(self,item):
 
         name, width, height = item

@@ -29,7 +29,7 @@ class AtomsDatabaseError(Error):
     '''
     pass
 
-class AtomsDatabase:
+class AtomsDatabase(metaclass=Singleton):
     '''
     This class implements the atoms database of MDANSE.
     
@@ -65,9 +65,7 @@ class AtomsDatabase:
     >>> # Returns the atoms stored currently in the database
     >>> atoms = ATOMS_DATABASE.atoms()
     '''
-    
-    __metaclass__ = Singleton
-    
+        
     _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),'atoms.json')
     
     # The user path
@@ -444,10 +442,8 @@ class MoleculesDatabaseError(Error):
     '''
     pass
 
-class MoleculesDatabase(object):
-    
-    __metaclass__ = Singleton
-    
+class MoleculesDatabase(object,metaclass=Singleton):
+        
     _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),'molecules.json')
     
     # The user path
@@ -592,10 +588,8 @@ class NucleotidesDatabaseError(Error):
     '''
     pass
 
-class NucleotidesDatabase(object):
-    
-    __metaclass__ = Singleton
-    
+class NucleotidesDatabase(object,metaclass=Singleton):
+        
     _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),'nucleotides.json')
     
     # The user path
@@ -746,10 +740,8 @@ class ResiduesDatabaseError(Error):
     '''
     pass
 
-class ResiduesDatabase(object):
-    
-    __metaclass__ = Singleton
-    
+class ResiduesDatabase(object,metaclass=Singleton):
+        
     _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),'residues.json')
     
     # The user path

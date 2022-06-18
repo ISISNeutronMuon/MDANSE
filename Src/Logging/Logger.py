@@ -17,9 +17,7 @@ import logging
 
 from MDANSE.Core.Singleton import Singleton
                                         
-class Logger(object):
-
-    __metaclass__ = Singleton
+class Logger(metaclass=Singleton):
 
     levels = {"debug"    : logging.DEBUG,
               "info"     : logging.INFO,

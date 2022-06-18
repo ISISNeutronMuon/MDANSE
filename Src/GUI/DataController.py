@@ -20,10 +20,8 @@ from MDANSE.Core.Singleton import Singleton
 
 from MDANSE.GUI import PUBLISHER
 
-class DataController(collections.OrderedDict):
-    
-    __metaclass__ = Singleton
-    
+class DataController(collections.OrderedDict,metaclass=Singleton):
+        
     def __delitem__(self, item):
         
         if item not in self:

@@ -669,9 +669,7 @@ class UnitsManagerEncoder(json.JSONEncoder):
                 return {'factor':obj.factor,'dimension':obj.dimension}
         return json.JSONEncoder.default(self, obj)
 
-class UnitsManager:
-
-    __metaclass__ = Singleton
+class UnitsManager(metaclass=Singleton):
 
     _UNITS = {}
 

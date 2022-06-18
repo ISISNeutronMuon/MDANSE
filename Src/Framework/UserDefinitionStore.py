@@ -24,7 +24,7 @@ class UserDefinitionStoreError(Error):
     pass
 
 
-class UserDefinitionStore(object):
+class UserDefinitionStore(object,metaclass=Singleton):
     '''
     This class is used to register, save and delete MDANSE user definitions (a.k.a. UD).
     
@@ -33,9 +33,7 @@ class UserDefinitionStore(object):
     This definitions can be selections of atoms, Q vectors definitions, axis definitions ... The 
     user definitions are loaded when MDANSE starts through a cPickle file that will store these definitions.    
     '''
-    
-    __metaclass__ = Singleton
-        
+            
     UD_PATH = os.path.join(PLATFORM.application_directory(),"user_definitions.ud")
     
     def __init__(self):

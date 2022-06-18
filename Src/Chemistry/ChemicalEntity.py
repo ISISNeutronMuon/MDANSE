@@ -57,9 +57,7 @@ class InconsistentChemicalSystemError(Exception):
 class ChemicalEntityError(Exception):
     pass
 
-class _ChemicalEntity:
-
-    __metaclass__ = abc.ABCMeta
+class _ChemicalEntity(metaclass=abc.ABCMeta):
 
     def __init__(self):
 

@@ -176,9 +176,7 @@ class NewPropertyDialog(wx.Dialog):
 
         return pname, pclass
 
-
-class Database(wxgrid.PyGridTableBase):
-    __metaclass__ = Singleton
+class Database(wxgrid.GridTableBase):
 
     def GetColLabelValue(self, col):
         return "%s" % ATOMS_DATABASE.properties[col]
@@ -264,7 +262,7 @@ class ElementsDatabaseEditor(wx.Frame):
 
         self._grid.SetTable(self._database)
 
-        self._grid.SetDefaultCellBackgroundColour(wx.NamedColour("LIGHT BLUE"))
+        self._grid.SetDefaultCellBackgroundColour(wx.Colour("LIGHT BLUE"))
 
         self._grid.SetColLabelAlignment(wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
 
@@ -272,7 +270,7 @@ class ElementsDatabaseEditor(wx.Frame):
 
         self._grid.SetColMinimalAcceptableWidth(100)
 
-        self._grid.Bind(wxgrid.EVT_GRID_CELL_CHANGE, self.on_edit_cell)
+        self._grid.Bind(wxgrid.EVT_GRID_CELL_CHANGED, self.on_edit_cell)
         self._grid.Bind(wxgrid.EVT_GRID_CELL_RIGHT_CLICK, self.on_show_popup_menu)
         mainSizer.Add(self._grid, 1, wx.EXPAND | wx.ALL, 5)
 

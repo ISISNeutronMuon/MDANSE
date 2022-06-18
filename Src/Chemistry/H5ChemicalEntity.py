@@ -2,9 +2,7 @@ import abc
 
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, Molecule, Nucleotide, NucleotideChain, PeptideChain, Protein, Residue
 
-class _H5ChemicalEntity:
-
-    __metaclass__ = abc.ABCMeta
+class _H5ChemicalEntity(metaclass=abc.ABCMeta):
 
     def __init__(self, h5_file, h5_contents):
 

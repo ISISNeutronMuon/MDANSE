@@ -35,7 +35,7 @@ def path_to_module(path,stop=""):
             
     return module
         
-class ClassRegistry(object):
+class ClassRegistry(object,metaclass=Singleton):
     '''
     Metaclass that registers the classes that make the MDANSE framework.
 
@@ -50,8 +50,6 @@ class ClassRegistry(object):
     class attribute will not be registered.    
     '''
     
-    __metaclass__ = Singleton
-
     def __init__(self):
         
         self._registry = {}

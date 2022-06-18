@@ -32,13 +32,11 @@ def convert_duration(seconds):
 
     return (d.day-1,d.hour,d.minute,d.second)
 
-class Status(object):
+class Status(object,metaclass=abc.ABCMeta):
     """
     This class defines an interface for status objects.
     This kind of object is used to store the status a loop-based task.  
     """
-
-    __metaclass__ = abc.ABCMeta
         
     def __init__(self):
         
