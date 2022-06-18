@@ -13,6 +13,8 @@
 #
 # **************************************************************************
 
+import sys
+
 import cython
 import numpy as np 
 cimport numpy as np 
@@ -97,6 +99,10 @@ def com_trajectory(
     cdef np.ndarray[np.int8_t] processed
 
     cdef np.ndarray[np.float64_t, ndim=3] box_coords = np.empty((coords.shape[0],coords.shape[1],3),dtype=np.float)
+
+
+    old_recursionlimit = sys.getrecursionlimit()
+    sys.setrecursionlimit(100000)
 
     # Loop over the time
     for 0 <= i < coords.shape[0]:
@@ -191,6 +197,8 @@ def com_trajectory(
             trajectory[i,0] = x*cell[i,0,0] + y*cell[i,0,1] + z*cell[i,0,2]
             trajectory[i,1] = x*cell[i,1,0] + y*cell[i,1,1] + z*cell[i,1,2]
             trajectory[i,2] = x*cell[i,2,0] + y*cell[i,2,1] + z*cell[i,2,2]
+
+    sys.setrecursionlimit(old_recursionlimit)
 
     return trajectory
 

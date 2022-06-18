@@ -59,8 +59,6 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         except IndexError:
             self['md_time_step'] = 1.0
             
-        self["chemical_system"] = inputTraj.chemical_system
-
         self['has_velocities'] = 'velocities' in self['instance'].file['/configuration']
                 
     def get_information(self):
@@ -73,7 +71,7 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
                 
         info = ["HDF input trajectory: %r\n" % self["filename"]]
         info.append("Number of steps: %d\n" % self["length"])
-        info.append("Size of the chemical system: %d\n" % self["chemical_system"].number_of_atoms())
+        info.append("Size of the chemical system: %d\n" % self['instance'].chemical_system.number_of_atoms())
         if (self['has_velocities']):
             info.append("The trajectory contains atomic velocities\n")
         else:

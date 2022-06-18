@@ -138,7 +138,10 @@ def _ustr(obj):
 
 # build list of single arg builtins, tolerant of Python version, that can be used as parse actions
 singleArgBuiltins = []
-import builtins
+try:
+    import __builtin__ as builtins
+except ImportError:
+    import builtins
 for fname in "sum len sorted reversed list tuple set any all min max".split():
     try:
         singleArgBuiltins.append(getattr(builtins,fname))

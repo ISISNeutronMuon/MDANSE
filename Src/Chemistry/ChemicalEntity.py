@@ -1264,15 +1264,13 @@ class ChemicalSystem(_ChemicalEntity):
             ce._parent = cs
 
         if self._configuration is not None:
-
-            variables = copy.deepcopy(self._configuration.variables)
             
             conf = self._configuration.clone(cs)
 
             cs._configuration = conf
 
         return cs
-
+        
     def load(self, h5_filename):
 
         from MDANSE.Chemistry.H5ChemicalEntity import H5Atom, H5AtomCluster, H5Molecule, H5Nucleotide, H5NucleotideChain, H5Residue, H5PeptideChain, H5Protein
@@ -1280,6 +1278,7 @@ class ChemicalSystem(_ChemicalEntity):
         self._h5_file = h5py.File(h5_filename,'r',libver='latest')
         grp = self._h5_file['/chemical_system']
         self._chemical_entities = []
+
         skeleton = self._h5_file['/chemical_system/contents'][:]
 
         self._name = grp.attrs['name']
@@ -1292,7 +1291,7 @@ class ChemicalSystem(_ChemicalEntity):
 
         for entity_type, entity_index in skeleton:
             entity_index = int(entity_index)
-            h5_chemical_entity_instance = eval(grp[entity_type][entity_index])
+            h5_chemical_entity_instance = eval(h5_contents[entity_type.decode('utf-8')][entity_index])
             ce = h5_chemical_entity_instance.build()
             self.add_chemical_entity(ce)
         
