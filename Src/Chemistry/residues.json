@@ -1,0 +1,4636 @@
+{
+    "HIP": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "CE1": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "ND1", 
+                    "NE2", 
+                    "HE1"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "CD2", 
+                    "ND1"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "CD2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG", 
+                    "HD2", 
+                    "NE2"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HE1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE1"
+                ]
+            }, 
+            "HD1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "ND1"
+                ]
+            }, 
+            "HE2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NE2"
+                ]
+            }, 
+            "HD2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "ND1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE1", 
+                    "CG", 
+                    "HD1"
+                ]
+            }, 
+            "NE2": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2", 
+                    "CE1", 
+                    "HE2"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "ILE": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "1HD1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD11", 
+                    "HD1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD1"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "3HD1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD13", 
+                    "HD3"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD1"
+                ]
+            }, 
+            "CG1": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "CD1", 
+                    "2HG1", 
+                    "3HG1"
+                ]
+            }, 
+            "CD1": {
+                "symbol": "C", 
+                "alternatives": [
+                    "CD"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG1", 
+                    "1HD1", 
+                    "2HD1", 
+                    "3HD1"
+                ]
+            }, 
+            "HB": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "2HG2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG22"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG2"
+                ]
+            }, 
+            "2HG1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG12"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG1"
+                ]
+            }, 
+            "CG2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "1HG2", 
+                    "2HG2", 
+                    "3HG2"
+                ]
+            }, 
+            "3HG1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG13", 
+                    "HG11", 
+                    "1HG1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG1"
+                ]
+            }, 
+            "3HG2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG23"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG2"
+                ]
+            }, 
+            "2HD1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD12", 
+                    "HD2"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD1"
+                ]
+            }, 
+            "1HG2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG21"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG2"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG1", 
+                    "CG2", 
+                    "HB"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "GLN": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "1HE2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HE21"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NE2"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "CD", 
+                    "HG2", 
+                    "HG3"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "CD": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG", 
+                    "NE2", 
+                    "OE1"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "2HE2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HE22"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NE2"
+                ]
+            }, 
+            "HG2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "HG3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "NE2": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD", 
+                    "1HE2", 
+                    "2HE2"
+                ]
+            }, 
+            "OE1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "NT1": {
+        "is_n_terminus": true, 
+        "atoms": {
+            "HT3": {
+                "replaces": [
+                    "H"
+                ], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "N"
+                ], 
+                "nter_connected": true, 
+                "symbol": "H", 
+                "alternatives": [
+                    "3HT", 
+                    "H3", 
+                    "3H"
+                ]
+            }, 
+            "HT2": {
+                "replaces": [
+                    "H"
+                ], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "N"
+                ], 
+                "nter_connected": true, 
+                "symbol": "H", 
+                "alternatives": [
+                    "2HT", 
+                    "H2", 
+                    "2H"
+                ]
+            }, 
+            "HT1": {
+                "replaces": [
+                    "H"
+                ], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "N"
+                ], 
+                "nter_connected": true, 
+                "symbol": "H", 
+                "alternatives": [
+                    "1HT", 
+                    "H1", 
+                    "1H"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "THR": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "2HG2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG22"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG2"
+                ]
+            }, 
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "CG2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "1HG2", 
+                    "2HG2", 
+                    "3HG2"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG2", 
+                    "HB", 
+                    "OG1"
+                ]
+            }, 
+            "3HG2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG23"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG2"
+                ]
+            }, 
+            "OG1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "HG1"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "HG1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "OG1"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "1HG2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG21"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG2"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "HB": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "GLY": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "HA2", 
+                    "HA3", 
+                    "N"
+                ]
+            }, 
+            "HA3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HA1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HA2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HA"
+                ], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "TRP": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "HH2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CH2"
+                ]
+            }, 
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "CZ2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE2", 
+                    "CH2", 
+                    "HZ2"
+                ]
+            }, 
+            "CZ3": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE3", 
+                    "CH2", 
+                    "HZ3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "HZ2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CZ2"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "CD1", 
+                    "CD2"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "CE3": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2", 
+                    "CZ3", 
+                    "HE3"
+                ]
+            }, 
+            "CD1": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG", 
+                    "HD1", 
+                    "NE1"
+                ]
+            }, 
+            "CD2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE2", 
+                    "CE3", 
+                    "CG"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HE1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NE1"
+                ]
+            }, 
+            "HD1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD1"
+                ]
+            }, 
+            "HE3": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE3"
+                ]
+            }, 
+            "CH2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CZ2", 
+                    "CZ3", 
+                    "HH2"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HZ3": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CZ3"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "NE1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD1", 
+                    "CE2", 
+                    "HE1"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CE2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2", 
+                    "CZ2", 
+                    "NE1"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "GLU": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "HG2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "HG3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "CD": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG", 
+                    "OE1", 
+                    "OE2"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "CD", 
+                    "HG2", 
+                    "HG3"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "OE2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD"
+                ]
+            }, 
+            "OE1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "CT1": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "OXT": {
+                "cter_connected": true, 
+                "replaces": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C"
+                ], 
+                "symbol": "O", 
+                "alternatives": [
+                    "OT", 
+                    "OT2"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": true
+    }, 
+    "CYS": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "SG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "SG": {
+                "symbol": "S", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "HG"
+                ]
+            }, 
+            "HG": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "SG"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "ASP": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "OD1", 
+                    "OD2"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "OD1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "OD2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "SER": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "OG": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "HG"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "HB2", 
+                    "HB3", 
+                    "OG"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HG": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "OG"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "LYS": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "CD", 
+                    "HG2", 
+                    "HG3"
+                ]
+            }, 
+            "CE": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD", 
+                    "NZ", 
+                    "HE2", 
+                    "HE3"
+                ]
+            }, 
+            "CD": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG", 
+                    "CE", 
+                    "HD2", 
+                    "HD3"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HD3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD"
+                ]
+            }, 
+            "HD2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD"
+                ]
+            }, 
+            "HE2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE"
+                ]
+            }, 
+            "HE3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HE1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "HG2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "HG3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "NZ": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE", 
+                    "HZ1", 
+                    "HZ2", 
+                    "HZ3"
+                ]
+            }, 
+            "HZ1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NZ"
+                ]
+            }, 
+            "HZ3": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NZ"
+                ]
+            }, 
+            "HZ2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NZ"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "PRO": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HD3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD"
+                ]
+            }, 
+            "HD2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "HG2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "HG3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "CD": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG", 
+                    "HD2", 
+                    "HD3", 
+                    "N"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "CG", 
+                    "HG2", 
+                    "HG3"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CD", 
+                    "-R"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "CYX": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "SG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "SG": {
+                "symbol": "S", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "PHE": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "HZ": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CZ"
+                ]
+            }, 
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "CE1": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD1", 
+                    "CZ", 
+                    "HE1"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "CD1", 
+                    "CD2"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "CZ": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE1", 
+                    "CE2", 
+                    "HZ"
+                ]
+            }, 
+            "CE2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2", 
+                    "CZ", 
+                    "HE2"
+                ]
+            }, 
+            "CD1": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE1", 
+                    "CG", 
+                    "HD1"
+                ]
+            }, 
+            "CD2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE2", 
+                    "CG", 
+                    "HD2"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HE1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE1"
+                ]
+            }, 
+            "HD1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD1"
+                ]
+            }, 
+            "HE2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE2"
+                ]
+            }, 
+            "HD2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "ALA": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "HB1", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HB1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "MET": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "HG2", 
+                    "HG3", 
+                    "SD"
+                ]
+            }, 
+            "CE": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "HE1", 
+                    "HE2", 
+                    "HE3", 
+                    "SD"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HE1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE"
+                ]
+            }, 
+            "HE2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE"
+                ]
+            }, 
+            "HE3": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE"
+                ]
+            }, 
+            "HG2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "HG3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "SD": {
+                "symbol": "S", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE", 
+                    "CG"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "HID": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "CE1": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "ND1", 
+                    "NE2", 
+                    "HE1"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "CD2", 
+                    "ND1"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "CD2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG", 
+                    "HD2", 
+                    "NE2"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HD2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2"
+                ]
+            }, 
+            "HE1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE1"
+                ]
+            }, 
+            "HD1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "ND1"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "ND1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE1", 
+                    "CG", 
+                    "HD1"
+                ]
+            }, 
+            "NE2": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2", 
+                    "CE1"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [
+            "HSD"
+        ], 
+        "is_c_terminus": false
+    }, 
+    "HIE": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "CE1": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "ND1", 
+                    "NE2", 
+                    "HE1"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "CD2", 
+                    "ND1"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "CD2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG", 
+                    "HD2", 
+                    "NE2"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HD2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2"
+                ]
+            }, 
+            "HE1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE1"
+                ]
+            }, 
+            "HE2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NE2"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "ND1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE1", 
+                    "CG"
+                ]
+            }, 
+            "NE2": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2", 
+                    "CE1", 
+                    "HE2"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [
+            "HSE"
+        ], 
+        "is_c_terminus": false
+    }, 
+    "ARG": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "2HH2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HH22"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NH2"
+                ]
+            }, 
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "2HH1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HH12"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NH1"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "CD", 
+                    "HG2", 
+                    "HG3"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "HG3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "CZ": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NE", 
+                    "NH1", 
+                    "NH2"
+                ]
+            }, 
+            "NH1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "1HH1", 
+                    "2HH1"
+                ]
+            }, 
+            "NH2": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "1HH2", 
+                    "2HH2"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HE": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NE"
+                ]
+            }, 
+            "HD3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD"
+                ]
+            }, 
+            "HD2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD"
+                ]
+            }, 
+            "HG2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "NE": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD", 
+                    "CZ", 
+                    "HE"
+                ]
+            }, 
+            "CD": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "NE", 
+                    "HD2", 
+                    "HD3"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "1HH2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HH21"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NH2"
+                ]
+            }, 
+            "1HH1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HH11"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "NH1"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "VAL": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "CG1": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "1HG1", 
+                    "2HG1", 
+                    "3HG1"
+                ]
+            }, 
+            "HB": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "2HG2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG22"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG2"
+                ]
+            }, 
+            "2HG1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG12"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG1"
+                ]
+            }, 
+            "CG2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "1HG2", 
+                    "2HG2", 
+                    "3HG2"
+                ]
+            }, 
+            "3HG1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG13"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG1"
+                ]
+            }, 
+            "3HG2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG23"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG2"
+                ]
+            }, 
+            "1HG2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG21"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG2"
+                ]
+            }, 
+            "1HG1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HG11"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG1"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG1", 
+                    "CG2", 
+                    "HB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "ASN": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "1HD2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD21"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "ND2"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "ND2", 
+                    "OD1"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "2HD2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD22"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "ND2"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "OD1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "ND2": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG", 
+                    "1HD2", 
+                    "2HD2"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "TYR": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "CE1": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD1", 
+                    "CZ", 
+                    "HE1"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "CD1", 
+                    "CD2"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "CZ": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE1", 
+                    "CE2", 
+                    "OH"
+                ]
+            }, 
+            "HH": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "OH"
+                ]
+            }, 
+            "CD1": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE1", 
+                    "CG", 
+                    "HD1"
+                ]
+            }, 
+            "CD2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE2", 
+                    "CG", 
+                    "HD2"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HE1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE1"
+                ]
+            }, 
+            "HD1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD1"
+                ]
+            }, 
+            "HE2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CE2"
+                ]
+            }, 
+            "OH": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CZ", 
+                    "HH"
+                ]
+            }, 
+            "CE2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2", 
+                    "CZ", 
+                    "HE2"
+                ]
+            }, 
+            "HD2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }, 
+    "LEU": {
+        "is_n_terminus": false, 
+        "atoms": {
+            "C": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "O", 
+                    "+R"
+                ]
+            }, 
+            "1HD2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD21"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2"
+                ]
+            }, 
+            "1HD1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD11"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD1"
+                ]
+            }, 
+            "CG": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB", 
+                    "CD1", 
+                    "CD2", 
+                    "HG"
+                ]
+            }, 
+            "O": {
+                "symbol": "O", 
+                "alternatives": [
+                    "OT1"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "C"
+                ]
+            }, 
+            "N": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "H", 
+                    "-R"
+                ]
+            }, 
+            "3HD1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD13"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD1"
+                ]
+            }, 
+            "3HD2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD23"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2"
+                ]
+            }, 
+            "CD1": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG", 
+                    "1HD1", 
+                    "2HD1", 
+                    "3HD1"
+                ]
+            }, 
+            "CD2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG", 
+                    "1HD2", 
+                    "2HD2", 
+                    "3HD2"
+                ]
+            }, 
+            "HA": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "CA"
+                ]
+            }, 
+            "HG": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CG"
+                ]
+            }, 
+            "2HD2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD22"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD2"
+                ]
+            }, 
+            "2HD1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HD12"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CD1"
+                ]
+            }, 
+            "H": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HN"
+                ], 
+                "groups": [
+                    "backbone", 
+                    "peptide"
+                ], 
+                "bonds": [
+                    "N"
+                ]
+            }, 
+            "CB": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CA", 
+                    "CG", 
+                    "HB2", 
+                    "HB3"
+                ]
+            }, 
+            "CA": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "backbone"
+                ], 
+                "bonds": [
+                    "C", 
+                    "CB", 
+                    "HA", 
+                    "N"
+                ]
+            }, 
+            "HB3": {
+                "symbol": "H", 
+                "alternatives": [
+                    "HB1"
+                ], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }, 
+            "HB2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sidechain"
+                ], 
+                "bonds": [
+                    "CB"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_c_terminus": false
+    }
+}

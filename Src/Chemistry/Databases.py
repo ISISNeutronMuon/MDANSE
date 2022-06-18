@@ -17,7 +17,7 @@ import copy
 import os
 import numbers
 
-import yaml
+import json
 
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Error import Error
@@ -37,7 +37,7 @@ class AtomsDatabase:
     on molecular dynamics trajectories. Indeed, most of them use atomic physico-chemical 
     properties such as atomic weight, neutron scattering length, atomic radius ...
     
-    The first time the user launches MDANSE, the database is initially loaded though a yaml file stored 
+    The first time the user launches MDANSE, the database is initially loaded though a json file stored 
     in a MDANSE default database path. Once modified, the user can save the database to a new csv file that
     will be stored in its MDANSE application directory (OS dependent). This is this file that will be loaded 
     thereafter when starting MDANSE again. 
@@ -68,10 +68,10 @@ class AtomsDatabase:
     
     __metaclass__ = Singleton
     
-    _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),"atoms.yml")
+    _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),'atoms.json')
     
     # The user path
-    _USER_DATABASE = os.path.join(PLATFORM.application_directory(), "atoms.yml")
+    _USER_DATABASE = os.path.join(PLATFORM.application_directory(), 'atoms.json')
     
     # The python types supported by the database
     _TYPES = {"str" : str, "int" : int, "float" : float, "list" : list}
@@ -138,7 +138,7 @@ class AtomsDatabase:
             databasePath = AtomsDatabase._DEFAULT_DATABASE
 
         with open(databasePath, "r") as f:
-            db = yaml.safe_load(f)
+            db = json.load(f)
             self._properties = db['properties']
             self._data = db['atoms']
         
@@ -432,7 +432,7 @@ class AtomsDatabase:
         d = {'properties':self._properties,'atoms':self._data}
 
         with open(AtomsDatabase._USER_DATABASE,'w') as fout:
-            yaml.dump(d,fout)
+            json.dump(d,fout)
 
     @property
     def n_atoms(self):
@@ -448,10 +448,10 @@ class MoleculesDatabase(object):
     
     __metaclass__ = Singleton
     
-    _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),"molecules.yml")
+    _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),'molecules.json')
     
     # The user path
-    _USER_DATABASE = os.path.join(PLATFORM.application_directory(), "molecules.yml")
+    _USER_DATABASE = os.path.join(PLATFORM.application_directory(),'molecules.json')
     
     def __init__(self):
         '''
@@ -526,7 +526,7 @@ class MoleculesDatabase(object):
 
         # Try to open the input file
         try:
-            self._data = yaml.safe_load(f)
+            self._data = json.load(f)
         except:
             raise MoleculesDatabaseError('An error occured while parsing the molecules database')
         finally:
@@ -584,7 +584,7 @@ class MoleculesDatabase(object):
         '''
         
         with open(MoleculesDatabaseError._USER_DATABASE,'w') as fout:
-            yaml.dump(self._data,fout)
+            json.dump(self._data,fout)
 
 class NucleotidesDatabaseError(Error):
     '''
@@ -596,10 +596,10 @@ class NucleotidesDatabase(object):
     
     __metaclass__ = Singleton
     
-    _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),'nucleotides.yml')
+    _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),'nucleotides.json')
     
     # The user path
-    _USER_DATABASE = os.path.join(PLATFORM.application_directory(), 'nucleotides.yml')
+    _USER_DATABASE = os.path.join(PLATFORM.application_directory(), 'nucleotides.json')
     
     def __init__(self):
         '''
@@ -669,7 +669,7 @@ class NucleotidesDatabase(object):
 
         # Try to open the input file
         try:
-            self._data = yaml.safe_load(f)
+            self._data = json.load(f)
         except:
             raise NucleotidesDatabaseError('An error occured while parsing the molecules database')
         finally:
@@ -738,7 +738,7 @@ class NucleotidesDatabase(object):
         '''
         
         with open(NucleotidesDatabaseError._USER_DATABASE,'w') as fout:
-            yaml.dump(self._data,fout)
+            json.dump(self._data,fout)
 
 class ResiduesDatabaseError(Error):
     '''
@@ -750,10 +750,10 @@ class ResiduesDatabase(object):
     
     __metaclass__ = Singleton
     
-    _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),'residues.yml')
+    _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),'residues.json')
     
     # The user path
-    _USER_DATABASE = os.path.join(PLATFORM.application_directory(), 'residues.yml')
+    _USER_DATABASE = os.path.join(PLATFORM.application_directory(), 'residues.json')
     
     def __init__(self):
         '''
@@ -823,7 +823,7 @@ class ResiduesDatabase(object):
 
         # Try to open the input file
         try:
-            self._data = yaml.safe_load(f)
+            self._data = json.load(f)
         except:
             raise ResiduesDatabaseError('An error occured while parsing the molecules database')
         finally:
@@ -892,7 +892,7 @@ class ResiduesDatabase(object):
         '''
         
         with open(ResiduesDatabaseError._USER_DATABASE,'w') as fout:
-            yaml.dump(self._data,fout)
+            json.dump(self._data,fout)
 
 if __name__ == '__main__':
 

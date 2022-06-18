@@ -1,0 +1,43 @@
+{
+    "WAT": {
+        "alternatives": [
+            "H2O", 
+            "water", 
+            "TIP3"
+        ], 
+        "atoms": {
+            "OW": {
+                "symbol": "O", 
+                "alternatives": [
+                    "O", 
+                    "OH2"
+                ], 
+                "groups": [], 
+                "bonds": [
+                    "HW1", 
+                    "HW2"
+                ]
+            }, 
+            "HW2": {
+                "symbol": "H", 
+                "alternatives": [
+                    "H2"
+                ], 
+                "groups": [], 
+                "bonds": [
+                    "OW"
+                ]
+            }, 
+            "HW1": {
+                "symbol": "H", 
+                "alternatives": [
+                    "H1"
+                ], 
+                "groups": [], 
+                "bonds": [
+                    "OW"
+                ]
+            }
+        }
+    }
+}

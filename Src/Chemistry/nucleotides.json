@@ -1,0 +1,3655 @@
+{
+    "A": {
+        "is_3ter_terminus": false, 
+        "atoms": {
+            "OP1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "OP2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "C3'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "C4'", 
+                    "H3'", 
+                    "O3'"
+                ]
+            }, 
+            "C1'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "H1'", 
+                    "N9", 
+                    "O4'"
+                ]
+            }, 
+            "C5'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'", 
+                    "H5'", 
+                    "H5''", 
+                    "O5'"
+                ]
+            }, 
+            "H2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "H5'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "H3'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'"
+                ]
+            }, 
+            "O4'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'"
+                ]
+            }, 
+            "C8": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "H8", 
+                    "N7", 
+                    "N9"
+                ]
+            }, 
+            "C2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N1", 
+                    "N3", 
+                    "H2"
+                ]
+            }, 
+            "H1'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'"
+                ]
+            }, 
+            "C6": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N1", 
+                    "N6"
+                ]
+            }, 
+            "C5": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4", 
+                    "C6", 
+                    "N7"
+                ]
+            }, 
+            "C4": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N3", 
+                    "N9"
+                ]
+            }, 
+            "H5''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "HO2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "O2'"
+                ]
+            }, 
+            "N9": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C4", 
+                    "C8"
+                ]
+            }, 
+            "C4'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "C5'", 
+                    "H4'", 
+                    "O4'"
+                ]
+            }, 
+            "C2'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'", 
+                    "H2'", 
+                    "O2'"
+                ]
+            }, 
+            "O2'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "HO2'"
+                ]
+            }, 
+            "N1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C6"
+                ]
+            }, 
+            "N3": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C4"
+                ]
+            }, 
+            "N6": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C6", 
+                    "H61", 
+                    "H62"
+                ]
+            }, 
+            "N7": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "C8"
+                ]
+            }, 
+            "H4'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'"
+                ]
+            }, 
+            "H8": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C8"
+                ]
+            }, 
+            "P": {
+                "symbol": "P", 
+                "alternatives": [], 
+                "groups": [
+                    "phopshate"
+                ], 
+                "bonds": [
+                    "O5'", 
+                    "OP1", 
+                    "OP2", 
+                    "-R"
+                ]
+            }, 
+            "H2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2"
+                ]
+            }, 
+            "O5'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C5'", 
+                    "P"
+                ]
+            }, 
+            "H61": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N6"
+                ]
+            }, 
+            "H62": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N6"
+                ]
+            }, 
+            "O3'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "+R"
+                ]
+            }
+        }, 
+        "alternatives": [
+            "RA"
+        ], 
+        "is_5ter_terminus": false
+    }, 
+    "C": {
+        "is_3ter_terminus": false, 
+        "atoms": {
+            "H5''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "OP1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "OP2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "H6": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C6"
+                ]
+            }, 
+            "C3'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "C4'", 
+                    "H3'", 
+                    "O3'"
+                ]
+            }, 
+            "O3'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "+R"
+                ]
+            }, 
+            "C1'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "H1'", 
+                    "N1", 
+                    "O4'"
+                ]
+            }, 
+            "HO2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "O2'"
+                ]
+            }, 
+            "C5'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'", 
+                    "H5'", 
+                    "H5''", 
+                    "O5'"
+                ]
+            }, 
+            "P": {
+                "symbol": "P", 
+                "alternatives": [], 
+                "groups": [
+                    "phopshate"
+                ], 
+                "bonds": [
+                    "O5'", 
+                    "OP1", 
+                    "OP2", 
+                    "-R"
+                ]
+            }, 
+            "C4'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "C5'", 
+                    "H4'", 
+                    "O4'"
+                ]
+            }, 
+            "C2'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'", 
+                    "H2'", 
+                    "O2'"
+                ]
+            }, 
+            "O2'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "HO2'"
+                ]
+            }, 
+            "N1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C2", 
+                    "C6"
+                ]
+            }, 
+            "H2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "N3": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C4"
+                ]
+            }, 
+            "N4": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4", 
+                    "H41", 
+                    "H42"
+                ]
+            }, 
+            "O2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2"
+                ]
+            }, 
+            "H1'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'"
+                ]
+            }, 
+            "H4'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'"
+                ]
+            }, 
+            "H5'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "H3'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'"
+                ]
+            }, 
+            "O5'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C5'", 
+                    "P"
+                ]
+            }, 
+            "O4'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'"
+                ]
+            }, 
+            "H5": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5"
+                ]
+            }, 
+            "H41": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N4"
+                ]
+            }, 
+            "C2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N1", 
+                    "N3", 
+                    "O2"
+                ]
+            }, 
+            "H42": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N4"
+                ]
+            }, 
+            "C6": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "H6", 
+                    "N1"
+                ]
+            }, 
+            "C5": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4", 
+                    "C6", 
+                    "H5"
+                ]
+            }, 
+            "C4": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N3", 
+                    "N4"
+                ]
+            }
+        }, 
+        "alternatives": [
+            "RC"
+        ], 
+        "is_5ter_terminus": false
+    }, 
+    "G": {
+        "is_3ter_terminus": false, 
+        "atoms": {
+            "OP1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "OP2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "C3'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "C4'", 
+                    "H3'", 
+                    "O3'"
+                ]
+            }, 
+            "H21": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N2"
+                ]
+            }, 
+            "H22": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N2"
+                ]
+            }, 
+            "C5'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'", 
+                    "H5'", 
+                    "H5''", 
+                    "O5'"
+                ]
+            }, 
+            "O6": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C6"
+                ]
+            }, 
+            "H2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "H5'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "H3'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'"
+                ]
+            }, 
+            "O4'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'"
+                ]
+            }, 
+            "C8": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "H8", 
+                    "N7", 
+                    "N9"
+                ]
+            }, 
+            "C2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N1", 
+                    "N2", 
+                    "N3"
+                ]
+            }, 
+            "H1'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'"
+                ]
+            }, 
+            "C6": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N1", 
+                    "O6"
+                ]
+            }, 
+            "C5": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4", 
+                    "C6", 
+                    "N7"
+                ]
+            }, 
+            "C4": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N3", 
+                    "N9"
+                ]
+            }, 
+            "H5''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "HO2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "O2'"
+                ]
+            }, 
+            "C1'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "H1'", 
+                    "N9", 
+                    "O4'"
+                ]
+            }, 
+            "N9": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C4", 
+                    "C8"
+                ]
+            }, 
+            "C4'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "C5'", 
+                    "H4'", 
+                    "O4'"
+                ]
+            }, 
+            "C2'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'", 
+                    "H2'", 
+                    "O2'"
+                ]
+            }, 
+            "O2'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "HO2'"
+                ]
+            }, 
+            "N1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C6", 
+                    "H1"
+                ]
+            }, 
+            "N2": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "H21", 
+                    "H22"
+                ]
+            }, 
+            "N3": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C4"
+                ]
+            }, 
+            "N7": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "C8"
+                ]
+            }, 
+            "H4'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'"
+                ]
+            }, 
+            "H8": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C8"
+                ]
+            }, 
+            "P": {
+                "symbol": "P", 
+                "alternatives": [], 
+                "groups": [
+                    "phopshate"
+                ], 
+                "bonds": [
+                    "O5'", 
+                    "OP1", 
+                    "OP2", 
+                    "-R"
+                ]
+            }, 
+            "H1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N1"
+                ]
+            }, 
+            "O5'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C5'", 
+                    "P"
+                ]
+            }, 
+            "O3'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "+R"
+                ]
+            }
+        }, 
+        "alternatives": [
+            "RG"
+        ], 
+        "is_5ter_terminus": false
+    }, 
+    "DG": {
+        "is_3ter_terminus": false, 
+        "atoms": {
+            "OP1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "OP2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "C3'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "C4'", 
+                    "H3'", 
+                    "O3'"
+                ]
+            }, 
+            "H21": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N2"
+                ]
+            }, 
+            "H22": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N2"
+                ]
+            }, 
+            "C5'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'", 
+                    "H5'", 
+                    "H5''", 
+                    "O5'"
+                ]
+            }, 
+            "O6": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C6"
+                ]
+            }, 
+            "H2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "H5'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "H3'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'"
+                ]
+            }, 
+            "H2''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "O4'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'"
+                ]
+            }, 
+            "C8": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "H8", 
+                    "N7", 
+                    "N9"
+                ]
+            }, 
+            "C2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N1", 
+                    "N2", 
+                    "N3"
+                ]
+            }, 
+            "H1'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'"
+                ]
+            }, 
+            "C6": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N1", 
+                    "O6"
+                ]
+            }, 
+            "C5": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4", 
+                    "C6", 
+                    "N7"
+                ]
+            }, 
+            "C4": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N3", 
+                    "N9"
+                ]
+            }, 
+            "H5''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "C1'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "H1'", 
+                    "N9", 
+                    "O4'"
+                ]
+            }, 
+            "N9": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C4", 
+                    "C8"
+                ]
+            }, 
+            "C4'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "C5'", 
+                    "H4'", 
+                    "O4'"
+                ]
+            }, 
+            "C2'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'", 
+                    "H2'", 
+                    "H2''"
+                ]
+            }, 
+            "N1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C6", 
+                    "H1"
+                ]
+            }, 
+            "N2": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "H21", 
+                    "H22"
+                ]
+            }, 
+            "N3": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C4"
+                ]
+            }, 
+            "N7": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "C8"
+                ]
+            }, 
+            "H4'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'"
+                ]
+            }, 
+            "H8": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C8"
+                ]
+            }, 
+            "P": {
+                "symbol": "P", 
+                "alternatives": [], 
+                "groups": [
+                    "phopshate"
+                ], 
+                "bonds": [
+                    "O5'", 
+                    "OP1", 
+                    "OP2", 
+                    "-R"
+                ]
+            }, 
+            "H1": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N1"
+                ]
+            }, 
+            "O5'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C5'", 
+                    "P"
+                ]
+            }, 
+            "O3'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "+R"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_5ter_terminus": false
+    }, 
+    "DC": {
+        "is_3ter_terminus": false, 
+        "atoms": {
+            "H5''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "OP1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "OP2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "H6": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C6"
+                ]
+            }, 
+            "C3'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "C4'", 
+                    "H3'", 
+                    "O3'"
+                ]
+            }, 
+            "O3'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "+R"
+                ]
+            }, 
+            "C1'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "H1'", 
+                    "N1", 
+                    "O4'"
+                ]
+            }, 
+            "C5'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'", 
+                    "H5'", 
+                    "H5''", 
+                    "O5'"
+                ]
+            }, 
+            "P": {
+                "symbol": "P", 
+                "alternatives": [], 
+                "groups": [
+                    "phopshate"
+                ], 
+                "bonds": [
+                    "O5'", 
+                    "OP1", 
+                    "OP2", 
+                    "-R"
+                ]
+            }, 
+            "C4'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "C5'", 
+                    "H4'", 
+                    "O4'"
+                ]
+            }, 
+            "C2'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'", 
+                    "H2'", 
+                    "H2''"
+                ]
+            }, 
+            "N1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C2", 
+                    "C6"
+                ]
+            }, 
+            "H2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "N3": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C4"
+                ]
+            }, 
+            "N4": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4", 
+                    "H41", 
+                    "H42"
+                ]
+            }, 
+            "O2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2"
+                ]
+            }, 
+            "H1'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'"
+                ]
+            }, 
+            "H4'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'"
+                ]
+            }, 
+            "H5'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "H3'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'"
+                ]
+            }, 
+            "H2''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "O5'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C5'", 
+                    "P"
+                ]
+            }, 
+            "O4'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'"
+                ]
+            }, 
+            "H5": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5"
+                ]
+            }, 
+            "H41": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N4"
+                ]
+            }, 
+            "C2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N1", 
+                    "N3", 
+                    "O2"
+                ]
+            }, 
+            "H42": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N4"
+                ]
+            }, 
+            "C6": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "H6", 
+                    "N1"
+                ]
+            }, 
+            "C5": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4", 
+                    "C6", 
+                    "H5"
+                ]
+            }, 
+            "C4": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N3", 
+                    "N4"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_5ter_terminus": false
+    }, 
+    "DA": {
+        "is_3ter_terminus": false, 
+        "atoms": {
+            "OP1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "OP2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "C3'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "C4'", 
+                    "H3'", 
+                    "O3'"
+                ]
+            }, 
+            "C1'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "H1'", 
+                    "N9", 
+                    "O4'"
+                ]
+            }, 
+            "C5'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'", 
+                    "H5'", 
+                    "H5''", 
+                    "O5'"
+                ]
+            }, 
+            "H2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "H5'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "H3'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'"
+                ]
+            }, 
+            "H2''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "O4'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'"
+                ]
+            }, 
+            "C8": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "H8", 
+                    "N7", 
+                    "N9"
+                ]
+            }, 
+            "C2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N1", 
+                    "N3", 
+                    "H2"
+                ]
+            }, 
+            "H1'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'"
+                ]
+            }, 
+            "C6": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N1", 
+                    "N6"
+                ]
+            }, 
+            "C5": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4", 
+                    "C6", 
+                    "N7"
+                ]
+            }, 
+            "C4": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N3", 
+                    "N9"
+                ]
+            }, 
+            "H5''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "N9": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C4", 
+                    "C8"
+                ]
+            }, 
+            "C4'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "C5'", 
+                    "H4'", 
+                    "O4'"
+                ]
+            }, 
+            "C2'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'", 
+                    "H2'", 
+                    "H2''"
+                ]
+            }, 
+            "N1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C6"
+                ]
+            }, 
+            "N3": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C4"
+                ]
+            }, 
+            "N6": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C6", 
+                    "H61", 
+                    "H62"
+                ]
+            }, 
+            "N7": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "C8"
+                ]
+            }, 
+            "H4'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'"
+                ]
+            }, 
+            "H8": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C8"
+                ]
+            }, 
+            "P": {
+                "symbol": "P", 
+                "alternatives": [], 
+                "groups": [
+                    "phopshate"
+                ], 
+                "bonds": [
+                    "O5'", 
+                    "OP1", 
+                    "OP2", 
+                    "-R"
+                ]
+            }, 
+            "H2": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2"
+                ]
+            }, 
+            "O5'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C5'", 
+                    "P"
+                ]
+            }, 
+            "H61": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N6"
+                ]
+            }, 
+            "H62": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N6"
+                ]
+            }, 
+            "O3'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "+R"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_5ter_terminus": false
+    }, 
+    "5T1": {
+        "is_3ter_terminus": false, 
+        "atoms": {
+            "HO5'": {
+                "replaces": [
+                    "OP1", 
+                    "OP2", 
+                    "P"
+                ], 
+                "o5prime_connected": true, 
+                "groups": [], 
+                "bonds": [
+                    "O5'"
+                ], 
+                "symbol": "H", 
+                "alternatives": []
+            }
+        }, 
+        "alternatives": [], 
+        "is_5ter_terminus": true
+    }, 
+    "U": {
+        "is_3ter_terminus": false, 
+        "atoms": {
+            "H5''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "OP1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "OP2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "H6": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C6"
+                ]
+            }, 
+            "C3'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "C4'", 
+                    "H3'", 
+                    "O3'"
+                ]
+            }, 
+            "O3'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "+R"
+                ]
+            }, 
+            "C1'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "H1'", 
+                    "N1", 
+                    "O4'"
+                ]
+            }, 
+            "HO2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "O2'"
+                ]
+            }, 
+            "C5'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'", 
+                    "H5'", 
+                    "H5''", 
+                    "O5'"
+                ]
+            }, 
+            "P": {
+                "symbol": "P", 
+                "alternatives": [], 
+                "groups": [
+                    "phopshate"
+                ], 
+                "bonds": [
+                    "O5'", 
+                    "OP1", 
+                    "OP2", 
+                    "-R"
+                ]
+            }, 
+            "C4'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "C5'", 
+                    "H4'", 
+                    "O4'"
+                ]
+            }, 
+            "C2'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'", 
+                    "H2'", 
+                    "O2'"
+                ]
+            }, 
+            "O2'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "HO2'"
+                ]
+            }, 
+            "N1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C2", 
+                    "C6"
+                ]
+            }, 
+            "H2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "O4": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4"
+                ]
+            }, 
+            "O2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2"
+                ]
+            }, 
+            "H1'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'"
+                ]
+            }, 
+            "H4'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'"
+                ]
+            }, 
+            "H5'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "H3'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'"
+                ]
+            }, 
+            "H3": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N3"
+                ]
+            }, 
+            "N3": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C4", 
+                    "H3"
+                ]
+            }, 
+            "O5'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C5'", 
+                    "P"
+                ]
+            }, 
+            "O4'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'"
+                ]
+            }, 
+            "H5": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5"
+                ]
+            }, 
+            "C2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N1", 
+                    "N3", 
+                    "O2"
+                ]
+            }, 
+            "C6": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "H6", 
+                    "N1"
+                ]
+            }, 
+            "C5": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4", 
+                    "C6", 
+                    "H5"
+                ]
+            }, 
+            "C4": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N3", 
+                    "O4"
+                ]
+            }
+        }, 
+        "alternatives": [
+            "RU"
+        ], 
+        "is_5ter_terminus": false
+    }, 
+    "3T1": {
+        "is_3ter_terminus": true, 
+        "atoms": {
+            "HO3'": {
+                "o3prime_connected": true, 
+                "replaces": [], 
+                "groups": [], 
+                "bonds": [
+                    "O3'"
+                ], 
+                "symbol": "H", 
+                "alternatives": []
+            }
+        }, 
+        "alternatives": [], 
+        "is_5ter_terminus": false
+    }, 
+    "DT": {
+        "is_3ter_terminus": false, 
+        "atoms": {
+            "OP1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "OP2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "H6": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C6"
+                ]
+            }, 
+            "C3'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "C4'", 
+                    "H3'", 
+                    "O3'"
+                ]
+            }, 
+            "C1'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "H1'", 
+                    "N1", 
+                    "O4'"
+                ]
+            }, 
+            "C5'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'", 
+                    "H5'", 
+                    "H5''", 
+                    "O5'"
+                ]
+            }, 
+            "H2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "O4": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4"
+                ]
+            }, 
+            "O2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2"
+                ]
+            }, 
+            "H5'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "H3'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'"
+                ]
+            }, 
+            "H2''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "O4'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'"
+                ]
+            }, 
+            "C2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N1", 
+                    "N3", 
+                    "O2"
+                ]
+            }, 
+            "C7": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "H71", 
+                    "H72", 
+                    "H73"
+                ]
+            }, 
+            "H73": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C7"
+                ]
+            }, 
+            "C5": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4", 
+                    "C6", 
+                    "C7"
+                ]
+            }, 
+            "H71": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C7"
+                ]
+            }, 
+            "H5''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "P": {
+                "symbol": "P", 
+                "alternatives": [], 
+                "groups": [
+                    "phopshate"
+                ], 
+                "bonds": [
+                    "O5'", 
+                    "OP1", 
+                    "OP2", 
+                    "-R"
+                ]
+            }, 
+            "C4'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "C5'", 
+                    "H4'", 
+                    "O4'"
+                ]
+            }, 
+            "C2'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'", 
+                    "H2'", 
+                    "H2''"
+                ]
+            }, 
+            "N1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C2", 
+                    "C6"
+                ]
+            }, 
+            "N3": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C4", 
+                    "H3"
+                ]
+            }, 
+            "H1'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'"
+                ]
+            }, 
+            "H4'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'"
+                ]
+            }, 
+            "H72": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C7"
+                ]
+            }, 
+            "O5'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C5'", 
+                    "P"
+                ]
+            }, 
+            "C6": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "H6", 
+                    "N1"
+                ]
+            }, 
+            "H3": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N3"
+                ]
+            }, 
+            "C4": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N3", 
+                    "O4"
+                ]
+            }, 
+            "O3'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "+R"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_5ter_terminus": false
+    }, 
+    "DU": {
+        "is_3ter_terminus": false, 
+        "atoms": {
+            "H5''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "OP1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "OP2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "H6": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C6"
+                ]
+            }, 
+            "C3'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "C4'", 
+                    "H3'", 
+                    "O3'"
+                ]
+            }, 
+            "O3'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "+R"
+                ]
+            }, 
+            "C1'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "H1'", 
+                    "N1", 
+                    "O4'"
+                ]
+            }, 
+            "C5'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'", 
+                    "H5'", 
+                    "H5''", 
+                    "O5'"
+                ]
+            }, 
+            "P": {
+                "symbol": "P", 
+                "alternatives": [], 
+                "groups": [
+                    "phopshate"
+                ], 
+                "bonds": [
+                    "O5'", 
+                    "OP1", 
+                    "OP2", 
+                    "-R"
+                ]
+            }, 
+            "C4'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "C5'", 
+                    "H4'", 
+                    "O4'"
+                ]
+            }, 
+            "C2'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'", 
+                    "H2'", 
+                    "H2''"
+                ]
+            }, 
+            "N1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C2", 
+                    "C6"
+                ]
+            }, 
+            "H2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "O4": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4"
+                ]
+            }, 
+            "O2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2"
+                ]
+            }, 
+            "H1'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'"
+                ]
+            }, 
+            "H4'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'"
+                ]
+            }, 
+            "H5'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "H3'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'"
+                ]
+            }, 
+            "H2''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "H3": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N3"
+                ]
+            }, 
+            "N3": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C4", 
+                    "H3"
+                ]
+            }, 
+            "O5'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C5'", 
+                    "P"
+                ]
+            }, 
+            "O4'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'"
+                ]
+            }, 
+            "H5": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5"
+                ]
+            }, 
+            "C2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N1", 
+                    "N3", 
+                    "O2"
+                ]
+            }, 
+            "C6": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "H6", 
+                    "N1"
+                ]
+            }, 
+            "C5": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4", 
+                    "C6", 
+                    "H5"
+                ]
+            }, 
+            "C4": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N3", 
+                    "O4"
+                ]
+            }
+        }, 
+        "alternatives": [], 
+        "is_5ter_terminus": false
+    }, 
+    "T": {
+        "is_3ter_terminus": false, 
+        "atoms": {
+            "OP1": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "OP2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "P"
+                ]
+            }, 
+            "H6": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C6"
+                ]
+            }, 
+            "C3'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "C4'", 
+                    "H3'", 
+                    "O3'"
+                ]
+            }, 
+            "C1'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "H1'", 
+                    "N1", 
+                    "O4'"
+                ]
+            }, 
+            "C5'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'", 
+                    "H5'", 
+                    "H5''", 
+                    "O5'"
+                ]
+            }, 
+            "H2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'"
+                ]
+            }, 
+            "O4": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4"
+                ]
+            }, 
+            "O2": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2"
+                ]
+            }, 
+            "H5'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "H3'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'"
+                ]
+            }, 
+            "O4'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'"
+                ]
+            }, 
+            "C2": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N1", 
+                    "N3", 
+                    "O2"
+                ]
+            }, 
+            "C7": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "H71", 
+                    "H72", 
+                    "H73"
+                ]
+            }, 
+            "H73": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C7"
+                ]
+            }, 
+            "C5": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C4", 
+                    "C6", 
+                    "C7"
+                ]
+            }, 
+            "H71": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C7"
+                ]
+            }, 
+            "H5''": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C5'"
+                ]
+            }, 
+            "HO2'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "O2'"
+                ]
+            }, 
+            "P": {
+                "symbol": "P", 
+                "alternatives": [], 
+                "groups": [
+                    "phopshate"
+                ], 
+                "bonds": [
+                    "O5'", 
+                    "OP1", 
+                    "OP2", 
+                    "-R"
+                ]
+            }, 
+            "C4'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "C5'", 
+                    "H4'", 
+                    "O4'"
+                ]
+            }, 
+            "C2'": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C3'", 
+                    "H2'", 
+                    "O2'"
+                ]
+            }, 
+            "O2'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C2'", 
+                    "HO2'"
+                ]
+            }, 
+            "N1": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C1'", 
+                    "C2", 
+                    "C6"
+                ]
+            }, 
+            "N3": {
+                "symbol": "N", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C2", 
+                    "C4", 
+                    "H3"
+                ]
+            }, 
+            "H1'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C1'"
+                ]
+            }, 
+            "H4'": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "sugar"
+                ], 
+                "bonds": [
+                    "C4'"
+                ]
+            }, 
+            "H72": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C7"
+                ]
+            }, 
+            "O5'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C5'", 
+                    "P"
+                ]
+            }, 
+            "C6": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "H6", 
+                    "N1"
+                ]
+            }, 
+            "H3": {
+                "symbol": "H", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "N3"
+                ]
+            }, 
+            "C4": {
+                "symbol": "C", 
+                "alternatives": [], 
+                "groups": [
+                    "base"
+                ], 
+                "bonds": [
+                    "C5", 
+                    "N3", 
+                    "O4"
+                ]
+            }, 
+            "O3'": {
+                "symbol": "O", 
+                "alternatives": [], 
+                "groups": [
+                    "phosphate"
+                ], 
+                "bonds": [
+                    "C3'", 
+                    "+R"
+                ]
+            }
+        }, 
+        "alternatives": [
+            "RT"
+        ], 
+        "is_5ter_terminus": false
+    }
+}

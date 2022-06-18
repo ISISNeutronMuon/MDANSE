@@ -1,9 +1,10 @@
 import copy
+from json.encoder import JSONEncoder
 import math
 import numbers
 import os
 
-import yaml
+import json
 
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
@@ -373,7 +374,7 @@ class _Unit(object):
                     if uval == 1:
                         positive_units.append("{:s}".format(uname))
                     else:
-                        if uval.is_integer():
+                        if isinstance(uval,int):
                             positive_units.append("{:s}{:d}".format(uname,int(uval)))
                         else:
                             positive_units.append("{:s}{}".format(uname,uval))
@@ -381,7 +382,7 @@ class _Unit(object):
                     if uval == -1:
                         negative_units.append("{:s}".format(uname))
                     else:
-                        if uval.is_integer():
+                        if isinstance(uval,int):
                             negative_units.append("{:s}{:d}".format(uname,int(-uval)))
                         else:
                             negative_units.append("{:s}{}".format(uname,-uval))
@@ -657,15 +658,16 @@ class _Unit(object):
         else:
             return newu._factor
 
-def noop(self, *args, **kw):
-    pass
-
-def represent_unit(dumper, data):
-    return dumper.represent_mapping("", dict(factor=data._factor,dimension=data._dimension))
-
-yaml.add_representer(_Unit, represent_unit)
-
-process_tag = yaml.emitter.Emitter.process_tag
+class UnitsManagerEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, UnitsManager):
+            d = {}
+            for k,v in obj.units:
+                d[k] = {'factor':v.factor,'dimension':v.dimension}
+            return d
+        elif isinstance(obj,_Unit):
+                return {'factor':obj.factor,'dimension':obj.dimension}
+        return json.JSONEncoder.default(self, obj)
 
 class UnitsManager:
 
@@ -673,10 +675,10 @@ class UnitsManager:
 
     _UNITS = {}
 
-    _DEFAULT_DATABASE = os.path.join(PLATFORM.base_directory(),"MDANSE", "Framework","Units.yml")
+    _DEFAULT_DATABASE = os.path.join(PLATFORM.base_directory(),"MDANSE", "Framework",'units.json')
 
     # The user path
-    _USER_DATABASE = os.path.join(PLATFORM.application_directory(), "Units.yml")
+    _USER_DATABASE = os.path.join(PLATFORM.application_directory(),'units.json')
 
     def __init__(self):
 
@@ -706,10 +708,10 @@ class UnitsManager:
         d = {}
         try:
             with open(UnitsManager._USER_DATABASE, 'r') as fin:
-                d.update(yaml.safe_load(fin))
+                d.update(json.load(fin))
         except:
             with open(UnitsManager._DEFAULT_DATABASE, 'r') as fin:
-                d.update(yaml.safe_load(fin))
+                d.update(json.load(fin))
         finally:
             for uname, udict in d.items():
                 factor = udict.get('factor',1.0)
@@ -718,13 +720,8 @@ class UnitsManager:
 
     def save(self):
 
-        yaml.emitter.Emitter.process_tag = noop
-
-        try:
-            with open(UnitsManager._USER_DATABASE, 'w') as fout:
-                yaml.dump(UnitsManager._UNITS, fout, default_flow_style=None)
-        finally:
-            yaml.emitter.Emitter.process_tag = process_tag
+        with open(UnitsManager._USER_DATABASE, 'w') as fout:
+            json.dump(UnitsManager._UNITS, fout, indent=4, cls=UnitsManagerEncoder)
 
     @property
     def units(self):
