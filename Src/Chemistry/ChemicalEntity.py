@@ -7,7 +7,9 @@ import numpy as np
 import h5py
 
 from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DATABASE, RESIDUES_DATABASE
-from MDANSE.Mathematics.Transformation import Transformation
+from MDANSE.Mathematics.Geometry import superposition_fit
+from MDANSE.Mathematics.LinearAlgebra import delta, Tensor, Vector
+from MDANSE.Mathematics.Transformation import Rotation, Transformation, Translation
 
 class UnknownAtomError(Exception):
     pass
@@ -65,6 +67,12 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 
         self._name = ''
     
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self,state):
+        self.__dict__ = state
+
     @abc.abstractmethod
     def atom_list(self):
         pass
@@ -154,9 +162,6 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 
     def find_transformation_as_quaternion(self, conf1, conf2 = None):
 
-        from MDANSE.Mathematics.Geometry import superposition_fit
-        from MDANSE.Mathematics.LinearAlgebra import Vector
-
         chemical_system = self.root_chemical_system()
         if chemical_system.configuration.is_periodic:
             raise ValueError("superposition in periodic configurations is not defined")
@@ -194,8 +199,6 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
                   RMS distance.
         """
 
-        from MDANSE.Mathematics.Transformation import Translation
-
         q, cm1, cm2, rms = self.find_transformation_as_quaternion(conf1, conf2)
         return Translation(cm2) * q.asRotation() * Translation(-cm1), rms
 
@@ -207,8 +210,6 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
                   in the given configuration
         """
         
-        from MDANSE.Mathematics.LinearAlgebra import delta, Tensor, Vector
-
         m = 0.0
         mr = Vector(0.0,0.0,0.0)
         t = Tensor(3*[3*[0.0]])
@@ -240,8 +241,6 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         :returns: the normalizing transformation
         :rtype: Scientific.Geometry.Transformation.RigidBodyTransformation
         """
-
-        from MDANSE.Mathematics.Transformation import Rotation, Translation
 
         cm, inertia = self.center_and_moment_of_inertia(configuration)
         ev, diag = np.linalg.eig(inertia.array)
@@ -317,6 +316,13 @@ class Atom(_ChemicalEntity):
     def __getitem__(self,item):
 
         return getattr(self,item)
+
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self,state):
+
+        self.__dict__ = state
 
     def __str__(self):
         
@@ -407,6 +413,12 @@ class AtomGroup(_ChemicalEntity):
 
         self._chemical_system = list(s)[0]
 
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self,state):
+        self.__dict = state
+
     def atom_list(self):
         return list([at for at in self._atoms if not at.ghost])
 
@@ -438,6 +450,12 @@ class AtomCluster(_ChemicalEntity):
             if not parentless:
                 at._parent = self
             self._atoms.append(at)
+
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self,state):
+        self.__dict__ = state
 
     def __getitem__(self,item):
 
@@ -521,6 +539,12 @@ class Molecule(_ChemicalEntity):
 
     def __getitem__(self,item):
         return self._atoms[item]
+
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__ = state
 
     def _set_bonds(self):
 
@@ -623,6 +647,12 @@ class Residue(_ChemicalEntity):
 
     def __getitem__(self,item):
         return self._atoms[item]
+
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__ = state
 
     def set_atoms(self, atoms):
 
@@ -736,6 +766,12 @@ class Nucleotide(_ChemicalEntity):
     def __getitem__(self,item):
         return self._atoms[item]
 
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__ = state
+
     def copy(self):
 
         n  = Nucleotide(self._code, self._name, self._variant)
@@ -825,6 +861,12 @@ class NucleotideChain(_ChemicalEntity):
 
     def __getitem__(self, item):
         return self._nucleotides[item]
+
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__ = state
 
     def __str__(self):
         return 'NucleotideChain of {} nucleotides'.format(len(self._nucleotides))
@@ -975,6 +1017,12 @@ class PeptideChain(_ChemicalEntity):
     def __getitem__(self, item):
         return self._residues[item]
 
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__ = state
+
     def __str__(self):
         return 'PeptideChain of {} residues'.format(len(self._residues))
 
@@ -1078,6 +1126,12 @@ class Protein(_ChemicalEntity):
         self._name = name
 
         self._peptide_chains = []
+
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__ = state
 
     def atom_list(self):
 
@@ -1204,6 +1258,14 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._name = name
 
+        self._atoms = None
+
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__ = state
+
     def add_chemical_entity(self, chemical_entity):
 
         if not isinstance(chemical_entity,_ChemicalEntity):
@@ -1222,6 +1284,8 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._configuration = None
 
+        self._atoms = None
+
     def atom_list(self):
 
         atom_list = []
@@ -1230,6 +1294,16 @@ class ChemicalSystem(_ChemicalEntity):
 
         return atom_list
 
+    @property
+    def atoms(self):
+
+        from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
+
+        if self._atoms is None:
+            self._atoms = sorted_atoms(self._atom_list())
+
+        return self._atoms
+            
     @property
     def chemical_entities(self):
         return self._chemical_entities

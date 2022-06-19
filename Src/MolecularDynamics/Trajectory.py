@@ -87,6 +87,15 @@ class Trajectory:
 
         return configuration
 
+    def __getstate__(self):
+        d = self.__dict__.copy()
+        del d['_h5_file']
+        return d
+
+    def __setstate__(self,state):
+        self.__dict__ = state
+        self._h5_file = h5py.File(state['_h5_filename'],'r')
+
     def coordinates(self,frame):
         """Return the coordinates at a given frame.
 
@@ -215,7 +224,7 @@ class Trajectory:
             bonds = {}
             for e in top_lvl_chemical_entities:
                 for at in e.atom_list():
-                    bonds[at.index] = [bat.index for bat in at.bonds]
+                    bonds[at.index] = [idx for idx in at.bonds]
 
             com_traj = com_trajectory.com_trajectory(
                 coords,
