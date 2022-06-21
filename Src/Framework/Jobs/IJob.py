@@ -16,6 +16,8 @@
 import abc
 import glob
 import os
+import multiprocessing
+import queue
 import random
 import stat
 import string
@@ -121,32 +123,7 @@ class IJob(Configurable):
         self._outputData = OutputData()
         
         self._status = None
-                                            
-  
-    @staticmethod
-    def set_pyro_server():
-    
-        import Pyro.errors
-        import Pyro.naming
-    
-        # Gets a Pyro proxy for the name server.
-        locator = Pyro.naming.NameServerLocator()
-    
-        # Try to get an existing name server.        
-        try:
-            ns = locator.getNS()
-            
-        # Otherwise, start a new one.        
-        except Pyro.errors.NamingError:
-            
-            subprocess.Popen([sys.executable, '-O', '-c', "import Pyro.naming; Pyro.naming.main([])"], stdout = subprocess.PIPE)
-            ns = None
-            while ns is None:
-                try:
-                    ns = locator.getNS()
-                except Pyro.errors.NamingError:
-                    pass
-                            
+
     @property
     def name(self):
         return self._name
@@ -164,7 +141,7 @@ class IJob(Configurable):
         pass
 
     @abc.abstractmethod
-    def run_step(self):
+    def run_step(self,index):
         pass
             
     @classmethod
@@ -217,47 +194,65 @@ class IJob(Configurable):
         
         os.chmod(jobFile,stat.S_IRWXU)
         
+    def combine(self):
+
+        if self._status is not None:
+            if self._status.is_stopped():
+                self._status.cleanup()
+            else:
+                self._status.update()
+
     def _run_monoprocessor(self):
 
         for index in range(self.numberOfSteps):
-            idx, x = self.run_step(index)                            
-            self.combine(idx, x)
-            
-            if self._status is not None:
-                if self._status.is_stopped():
-                    self._status.cleanup()
-                    return
-                else:
-                    self._status.update()
-        
+            idx, result = self.run_step(index)                            
+            self.combine(idx,result)
+
+    def process_tasks_queue(self,tasks,outputs):
+
+        while True:
+            try:
+                index = tasks.get_nowait()
+            except queue.Empty:
+                if tasks.empty():
+                    self.configuration['trajectory']['instance'].close()
+                    break
+            else:
+                output = self.run_step(index)
+                outputs.put(output)
+
+        return True
+
     def _run_multiprocessor(self):
 
-        import MDANSE.DistributedComputing.MasterSlave as MasterSlave
+        ctx = multiprocessing.get_context('spawn')
 
-        script = os.path.abspath(os.path.join(PLATFORM.package_directory(),'DistributedComputing','Slave.py'))
-                
-        master = MasterSlave.initializeMasterProcess(self._name, slave_script=script, use_name_server=False)
+        manager = ctx.Manager()
+        inputQueue = manager.Queue()
+        outputQueue = manager.Queue()
 
-        master.setGlobalState(job=self)
-        master.launchSlaveJobs(n=self.configuration['running_mode']['slots'],port=master.pyro_daemon.port)
+        processes = []
 
-        for index in range(self.numberOfSteps):
-            master.requestTask('run_step',MasterSlave.GlobalStateValue(1,'job'),index)
-        
-        for index in range(self.numberOfSteps):
-            _, _, (idx, x) = master.retrieveResult('run_step')
-            self.combine(idx, x)
+        for i in range(self.numberOfSteps):
+            inputQueue.put(i)
 
-            if self._status is not None:
-                if self._status.is_stopped():
-                    self._status.cleanup()
-                    # Break to ensure the master will be shutdowned
-                    break
-                else:
-                    self._status.update()
-            
-        master.shutdown()
-        
+        for i in range(self.configuration['running_mode']['slots']):
+            p = multiprocessing.Process(target=self.process_tasks_queue,args=(inputQueue,outputQueue))
+            processes.append(p)
+            p.daemon = False
+            p.start()
+
+        for p in processes:
+            p.join()
+
+        while True:
+            try:
+                index,result = outputQueue.get_nowait()
+            except queue.Empty:
+                break
+            else:
+                self.combine(index,result)
+                            
     def _run_remote(self):
 
         IJob.set_pyro_server()

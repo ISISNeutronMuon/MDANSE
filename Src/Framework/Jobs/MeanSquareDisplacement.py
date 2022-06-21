@@ -84,45 +84,54 @@ class MeanSquareDisplacement(IJob):
 
     def run_step(self, index):
         """
-        Runs a single step of the job.\n
- 
-        :Parameters:
-            #. index (int): The index of the step.
-        :Returns:
-            #. index (int): The index of the step. 
-            #. atomicMSD (numpy.array): The calculated mean square displacement for atom index
+        Runs a single step of the job.
+
+        Args:
+            index (int): the index of the step
+        
+        Returns:
+            tuple: the result of the step
         """
-                
-        # get atom index
+
+        # get selected atom indexes sublist
         indexes = self.configuration['atom_selection']["indexes"][index]
-        atoms = [self._atoms[idx] for idx in indexes]
-                        
-        series = self.configuration["trajectory"]["instance"].read_com_trajectory(
-            atoms,
-            first=self.configuration['frames']['first'],
-            last=self.configuration['frames']['last']+1,
-            step=self.configuration['frames']['step'])
+        if len(indexes) == 1:
+            series = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
+                indexes[0],
+                first=self.configuration['frames']['first'],
+                last=self.configuration['frames']['last']+1,
+                step=self.configuration['frames']['step'],
+            )
+
+        else:
+            selected_atoms = [self._atoms[idx] for idx in indexes]
+            series = self.configuration["trajectory"]["instance"].read_com_trajectory(
+                selected_atoms,
+                first=self.configuration['frames']['first'],
+                last=self.configuration['frames']['last']+1,
+                step=self.configuration['frames']['step'],
+            )
 
         series = self.configuration['projection']["projector"](series)
 
         msd = mean_square_displacement(series)
 
         return index, msd
-    
-    
-    def combine(self, index, x):
+
+    def combine(self, index, result):
         """
-        Combines returned results of run_step.\n
-        :Parameters:
-            #. index (int): The index of the step.\n
-            #. x (any): The returned result(s) of run_step
+        Combines returned results of run_step.
+
+        Args:
+            result (tuple): the output of run_step method
         """     
                 
         # The symbol of the atom.
         element = self.configuration['atom_selection']["names"][index]
         
-        self._outputData["msd_%s" % element] += x
+        self._outputData["msd_%s" % element] += result
             
+        IJob.combine(self)
     
     def finalize(self):
         """

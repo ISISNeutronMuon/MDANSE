@@ -149,24 +149,24 @@ class DynamicCoherentStructureFactor(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
         
-        nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
-        for pair in self._elementsPairs:
-            ni = nAtomsPerElement[pair[0]]
-            nj = nAtomsPerElement[pair[1]]
-            self._outputData["f(q,t)_%s%s" % pair][:] /= np.sqrt(ni*nj)
-            self._outputData["s(q,f)_%s%s" % pair][:] = get_spectrum(self._outputData["f(q,t)_%s%s" % pair],
-                                                                     self.configuration["instrument_resolution"]["time_window"],
-                                                                     self.configuration["instrument_resolution"]["time_step"],
-                                                                     axis=1)
+        # nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
+        # for pair in self._elementsPairs:
+        #     ni = nAtomsPerElement[pair[0]]
+        #     nj = nAtomsPerElement[pair[1]]
+        #     self._outputData["f(q,t)_%s%s" % pair][:] /= np.sqrt(ni*nj)
+        #     self._outputData["s(q,f)_%s%s" % pair][:] = get_spectrum(self._outputData["f(q,t)_%s%s" % pair],
+        #                                                              self.configuration["instrument_resolution"]["time_window"],
+        #                                                              self.configuration["instrument_resolution"]["time_step"],
+        #                                                              axis=1)
         
-        fqtTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,2,"f(q,t)_%s%s")
+        # fqtTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,2,"f(q,t)_%s%s")
 
-        self._outputData["f(q,t)_total"][:] = fqtTotal
+        # self._outputData["f(q,t)_total"][:] = fqtTotal
         
-        sqfTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,2,"s(q,f)_%s%s")
-        self._outputData["s(q,f)_total"][:] = sqfTotal
+        # sqfTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,2,"s(q,f)_%s%s")
+        # self._outputData["s(q,f)_total"][:] = sqfTotal
     
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
+        # self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
         
         self.configuration['trajectory']['instance'].close()     
   
