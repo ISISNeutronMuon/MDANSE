@@ -8,6 +8,7 @@ import netCDF4
 import h5py
 
 from MDANSE.Core.Decorators import compatibleabstractproperty
+from MDANSE.IO.IOUtils import netcdf_find_numeric_variables
 
 
 class _IPlotterVariable:
@@ -127,43 +128,13 @@ class NetCDFPlotterData(_IPlotterData):
 
         self._file = netCDF4.Dataset(*args, **kwargs)
 
-        self._variables = collections.OrderedDict()
-
-        NetCDFPlotterData.find_numeric_variables(self._variables, self._file)
+        self._variables = netcdf_find_numeric_variables(collections.OrderedDict(), self._file)
+        for name, (path, var) in self._variables.items():
+            self._variables[name] = (path, NetCDFPlotterVariable(var))
 
     @property
     def variables(self):
         return self._variables
-
-    @staticmethod
-    def find_numeric_variables(var_dict, group):
-        """This method retrieves all the numeric variables stored in the NetCDF file.
-
-        This is a recursive method.
-        """
-
-        for var_key, var in group.variables.items():
-            if group.path == '/':
-                path = '/{}'.format(var_key)
-            else:
-                path = '{}/{}'.format(group.path, var_key)
-
-            # Non numeric variables are not supported by the plotter
-            if not numpy.issubdtype(var.dtype, numpy.number):
-                continue
-            # Variables with dimension higher than 3 are not supported by the plotter
-            if var.ndim > 3:
-                continue
-
-            comp = 1
-            while var_key in var_dict:
-                var_key = '{:s}_{:d}'.format(var_key, comp)
-                comp += 1
-
-            var_dict[var_key] = (path, NetCDFPlotterVariable(var))
-
-        for _, sub_group in group.groups.items():
-            NetCDFPlotterData.find_numeric_variables(var_dict, sub_group)
 
 
 class HDFPlotterData(_IPlotterData):

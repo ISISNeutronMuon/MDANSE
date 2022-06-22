@@ -136,8 +136,7 @@ class DataPanel(wx.Panel):
         self.datalist.InsertColumn(1, 'Axis', width=50)
         self.datalist.InsertColumn(2, 'Dimension')
         self.datalist.InsertColumn(3, 'Size')
-        if self.parent.standalone:
-            self.datalist.InsertColumn(4, 'Path', width=100)
+        self.datalist.InsertColumn(4, 'Path', width=100)
         
         if self.standalone:
             splitterWindow.SplitHorizontally(self.datasetlist,self.datalist)
@@ -281,10 +280,7 @@ class DataPanel(wx.Panel):
             self.datalist.SetStringItem(i, 1,axis)
             self.datalist.SetStringItem(i, 2,str(self.dataproxy[var]['data'].ndim))
             self.datalist.SetStringItem(i, 3,str(self.dataproxy[var]['data'].shape))
-            try:
-                self.datalist.SetStringItem(i, 4, self.dataproxy[var]['path'])
-            except KeyError:
-                pass
+            self.datalist.SetStringItem(i, 4, self.dataproxy[var]['path'])
         self.datalist.Select(0, True)
             
     def on_select_variables(self, event = None):

@@ -20,6 +20,8 @@ import netCDF4
 from MDANSE import REGISTRY
 from MDANSE.Framework.InputData.IInputData import InputDataError
 from MDANSE.Framework.InputData.InputFileData import InputFileData
+from MDANSE.IO.IOUtils import netcdf_find_numeric_variables
+
 
 class NetCDFInputData(InputFileData):
         
@@ -46,18 +48,20 @@ class NetCDFInputData(InputFileData):
 
         else:
             self._data = collections.OrderedDict()
-            variables = self._netcdf.variables
-            for k in variables:
-                self._data[k]={}
+            variables = netcdf_find_numeric_variables(collections.OrderedDict(), self._netcdf)
+
+            for name, (path, var) in variables.items():
+                self._data[name]={}
                 try :
-                    if vars[k].axis:
-                        self._data[k]['axis'] =  variables[k].axis.split('|')
+                    if vars[name].axis:
+                        self._data[name]['axis'] =  var.axis.split('|')
                     else:
-                        self._data[k]['axis'] = []
+                        self._data[name]['axis'] = []
                 except:
-                    self._data[k]['axis'] = []
-                self._data[k]['data'] = variables[k][:]
-                self._data[k]['units'] = getattr(variables[k], 'units', 'au')
+                    self._data[name]['axis'] = []
+                self._data[name]['path'] = path
+                self._data[name]['data'] = var[:]
+                self._data[name]['units'] = getattr(var, 'units', 'au')
 
     def close(self):
         self._netcdf.close()
