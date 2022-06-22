@@ -8,88 +8,7 @@ import netCDF4
 import h5py
 
 from MDANSE.Core.Decorators import compatibleabstractproperty
-from MDANSE.IO.IOUtils import netcdf_find_numeric_variables
-
-
-class _IPlotterVariable:
-    """This is the base abstract class for plotter variable.
-
-    Basically, this class allows to have a common interface for the data supported by the plotter (netcdf currently,
-    hdf in the future, ...)
-    """
-
-    __metaclass__ = abc.ABCMeta
-
-    def __init__(self, variable):
-        self._variable = variable
-
-    def __getattr__(self, name):
-        return getattr(self._variable, name)
-
-    def __hasattr__(self, name):
-        return hasattr(self._variable, name)
-
-    @property
-    def variable(self):
-        return self._variable
-
-    @abc.abstractmethod
-    def get_array(self):
-        """Returns the actual data stored by the plotter data.
-
-        :return: the data
-        :rtype: numpy array
-        """
-        pass
-
-    @abc.abstractmethod
-    def get_attributes(self):
-        """Returns the attributes stored by the plotter data.
-
-        :return: the attributes
-        :rtype: dict
-        """
-        pass
-
-
-class NetCDFPlotterVariable(_IPlotterVariable):
-    """Wrapper for NetCDF plotter data."""
-
-    def get_array(self):
-        """Returns the actual data stored by the plotter data.
-
-        :return: the data
-        :rtype: numpy array
-        """
-        return self._variable[:]
-
-    def get_attributes(self):
-        """Returns the attributes stored by the plotter data.
-
-        :return: the attributes
-        :rtype: dict
-        """
-        return self._variable.__dict__
-
-
-class HDFPlotterVariable(_IPlotterVariable):
-    """Wrapper for HDF plotter data."""
-
-    def get_array(self):
-        """Returns the actual data stored by the plotter data.
-
-        :return: the data
-        :rtype: numpy array
-        """
-        return self._variable[:]
-
-    def get_attributes(self):
-        """Returns the attributes stored by the plotter data.
-
-        :return: the attributes
-        :rtype: dict
-        """
-        return self._variable.attrs
+from MDANSE.IO.IOUtils import HDFFileVariable, netcdf_find_numeric_variables
 
 
 class _IPlotterData:
@@ -129,8 +48,6 @@ class NetCDFPlotterData(_IPlotterData):
         self._file = netCDF4.Dataset(*args, **kwargs)
 
         self._variables = netcdf_find_numeric_variables(collections.OrderedDict(), self._file)
-        for name, (path, var) in self._variables.items():
-            self._variables[name] = (path, NetCDFPlotterVariable(var))
 
     @property
     def variables(self):
@@ -184,7 +101,7 @@ class HDFPlotterData(_IPlotterData):
                     var_key = '{:s}_{:d}'.format(var_key, comp)
                     comp += 1
 
-                var_dict[var_key] = (path,HDFPlotterVariable(var))
+                var_dict[var_key] = (path,HDFFileVariable(var))
 
 PLOTTER_DATA_TYPES = {
     '.nc': NetCDFPlotterData,
