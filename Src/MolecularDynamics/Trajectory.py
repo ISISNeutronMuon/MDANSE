@@ -83,7 +83,7 @@ class Trajectory:
 
         configuration = {}
         for k, v in grp.items():
-            configuration[k] = v[frame]
+            configuration[k] = v[frame].astype(np.float64)
 
         return configuration
 
@@ -111,7 +111,7 @@ class Trajectory:
 
         grp = self._h5_file['/configuration']
 
-        return grp['coordinates'][frame]
+        return grp['coordinates'][frame].astype(np.float64)
 
     def configuration(self,frame):
         """Build and return a configuration at a given frame.
@@ -133,7 +133,7 @@ class Trajectory:
 
         variables = {}
         for k,v in self._h5_file['configuration'].items():
-            variables[k] = v[frame,:,:]
+            variables[k] = v[frame,:,:].astype(np.float64)
 
         coordinates = variables.pop('coordinates')
 
@@ -209,7 +209,7 @@ class Trajectory:
 
         grp = self._h5_file['/configuration']
 
-        coords = grp['coordinates'][first:last:step,:,:]
+        coords = grp['coordinates'][first:last:step,:,:].astype(np.float64)
 
         if coords.ndim == 2:
             coords = coords[np.newaxis,:,:]
@@ -291,7 +291,7 @@ class Trajectory:
             last = len(self)
 
         grp = self._h5_file['/configuration']
-        coords = grp['coordinates'][first:last:step,index,:]
+        coords = grp['coordinates'][first:last:step,index,:].astype(np.float64)
 
         if self._unit_cells is not None:
             direct_cells = np.array([uc.transposed_direct for uc in self._unit_cells])
@@ -331,7 +331,7 @@ class Trajectory:
         if variable not in grp:
             raise TrajectoryError('The variable {} is not stored in the trajectory'.format(variable))
 
-        variable = grp[variable][first:last:step,index,:]
+        variable = grp[variable][first:last:step,index,:].astype(np.float64)
 
         return variable
 

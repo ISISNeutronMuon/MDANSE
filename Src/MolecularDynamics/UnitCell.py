@@ -12,7 +12,7 @@ class UnitCell:
         :type unit_cell: 3x3 numpy array
         """
 
-        self._unit_cell = unit_cell
+        self._unit_cell = unit_cell.astype(np.float64)
 
         self._inverse_unit_cell = np.linalg.inv(self._unit_cell)
 
