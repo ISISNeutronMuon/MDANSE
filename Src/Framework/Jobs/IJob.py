@@ -225,6 +225,9 @@ class IJob(Configurable):
 
     def _run_multiprocessor(self):
 
+        oldrecursionlimit = sys.getrecursionlimit()
+        sys.setrecursionlimit(100000)
+
         ctx = multiprocessing.get_context('spawn')
 
         manager = ctx.Manager()
@@ -252,7 +255,9 @@ class IJob(Configurable):
                 break
             else:
                 self.combine(index,result)
-                            
+
+        sys.setrecursionlimit(oldrecursionlimit)
+
     def _run_remote(self):
 
         IJob.set_pyro_server()
