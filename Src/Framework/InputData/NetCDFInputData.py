@@ -20,6 +20,9 @@ import netCDF4
 from MDANSE import REGISTRY
 from MDANSE.Framework.InputData.IInputData import InputDataError
 from MDANSE.Framework.InputData.InputFileData import InputFileData
+from MDANSE.IO.IOUtils import load_variables
+from MDANSE.IO.NetCDF import find_numeric_variables
+
 
 class NetCDFInputData(InputFileData):
         
@@ -45,19 +48,9 @@ class NetCDFInputData(InputFileData):
             raise InputDataError("The data stored in %r filename could not be loaded properly." % self._name)
 
         else:
-            self._data = collections.OrderedDict()
-            variables = self._netcdf.variables
-            for k in variables:
-                self._data[k]={}
-                try :
-                    if vars[k].axis:
-                        self._data[k]['axis'] =  variables[k].axis.split('|')
-                    else:
-                        self._data[k]['axis'] = []
-                except:
-                    self._data[k]['axis'] = []
-                self._data[k]['data'] = variables[k][:]
-                self._data[k]['units'] = getattr(variables[k], 'units', 'au')
+            variables = find_numeric_variables(collections.OrderedDict(), self._netcdf)
+
+            self._data = load_variables(variables)
 
     def close(self):
         self._netcdf.close()
@@ -66,5 +59,6 @@ class NetCDFInputData(InputFileData):
     def netcdf(self):
         
         return self._netcdf
+
 
 REGISTRY["netcdf_data"] = NetCDFInputData
