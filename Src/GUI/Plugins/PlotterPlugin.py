@@ -466,7 +466,8 @@ class PlotterFrame(wx.Frame):
                 
     def on_load_data(self, event=None):
         
-        filters = 'NetCDF file (*.nc)|*.nc|HDF file (*.h5)|*.h5|All files (*.*)|*.*'
+        filters = 'NetCDF and HDF files (*.nc;*.netcdf;*.h5;*.hdf)|*.nc;*.netcdf;*.h5;*.hdf|' \
+                  'NetCDF file (*.nc)|*.nc|HDF file (*.h5)|*.h5|All files (*.*)|*.*'
         dialog = wx.FileDialog ( self, message = 'Open file...', wildcard=filters, style=wx.MULTIPLE)
         if dialog.ShowModal() == wx.ID_CANCEL:
             return
