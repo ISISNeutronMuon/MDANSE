@@ -487,7 +487,7 @@ class PlatformWin(Platform):
         
         
         creationtime.value -= ctypes.c_longlong(116444736000000000).value
-        creationtime.value /= 10000000
+        creationtime.value //= 10000000
         
         return creationtime.value
 
@@ -516,7 +516,7 @@ class PlatformWin(Platform):
         ctypes.windll.psapi.EnumProcesses(ctypes.byref(aProcesses), ctypes.sizeof(aProcesses), ctypes.byref(cbNeeded))
     
         # Number of processes returned
-        nReturned = cbNeeded.value / ctypes.sizeof(ctypes.c_ulong())
+        nReturned = cbNeeded.value // ctypes.sizeof(ctypes.c_ulong())
     
         pidProcess = [i for i in aProcesses][:nReturned]
     

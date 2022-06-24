@@ -249,8 +249,8 @@ class DataPanel(wx.Panel):
     def on_select_dataset(self, event):
         if event is None:
             return
-        currentItem = event.m_itemIndex
-        var = self.datasetlist.GetItemText(currentItem)
+        currentItem = event.GetItem()
+        var = currentItem.GetText()
         self.parent._data = self.dataDict[var]['data']
         self.show_data()
         
@@ -285,8 +285,8 @@ class DataPanel(wx.Panel):
     def on_select_variables(self, event = None):
         if event is None:
             return
-        currentItem = event.m_itemIndex
-        var = self.datalist.GetItemText(currentItem)
+        currentItem = event.GetItem()
+        var = currentItem.GetText()
         data = self.dataproxy[var]['data']
         ndim = data.ndim
         self.plot_type.Clear()
@@ -471,7 +471,7 @@ class PlotterFrame(wx.Frame):
     def on_load_data(self, event=None):
         
         filters = 'NetCDF file (*.nc)|*.nc|HDF file (*.h5)|*.h5|All files (*.*)|*.*'
-        dialog = wx.FileDialog ( self, message = 'Open file...', wildcard=filters, style=wx.MULTIPLE)
+        dialog = wx.FileDialog ( self, message = 'Open file...', wildcard=filters, style=wx.FD_MULTIPLE)
         if dialog.ShowModal() == wx.ID_CANCEL:
             return
         
