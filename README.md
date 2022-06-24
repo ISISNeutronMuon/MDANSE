@@ -12,7 +12,7 @@ G. Goret, B. Aoun, E. Pellegrini, "MDANSE: An Interactive Analysis Environment f
 
 Download MDANSE from [here](https://github.com/ISISNeutronMuon/MDANSE/releases/tag/v1.5.0) \
 Users Guide is availble [here](https://epubs.stfc.ac.uk/work/51935555) \
-Visit Webpage [https://mdanse.org/](https://mdanse.org/) \
+Visit Webpage [https://mdanse.org/](https://mdanse.org/) 
 
 To join the project contact: \
 Dr. Sanghamitra Mukhopadhyay (sanghamitra.mukhopadhyay@stfc.ac.uk) \
