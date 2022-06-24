@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -49,7 +50,7 @@ class SpatialDensity(IJob):
     settings['spatial_resolution'] = ('float', {'mini':0.01, 'default':0.1})
     settings['reference_basis'] = ('atoms_list', {'dependencies':{'trajectory':'trajectory'},'nAtoms':3,'default':('C284H438N84O79S7',('O','C_beta','C_delta'))})
     settings['target_molecule'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'},'default':'atom_index 151'})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
     def initialize(self):

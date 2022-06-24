@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -23,19 +24,20 @@ of complex systems, rigid-body motions of arbitrarily chosen molecular
 subunits can be studied.
 """
 
-__author__           = "R. Perenon, E.C. Pellegrini"
+__author__           = "R. Perenon, E.C. Pellegrini, S. Mukhopadhyay, R. Turanyi"
 
-__author_email__     = "perenon@ill.fr, pellegrini@ill.fr"
+__author_email__     = "perenon@ill.fr, pellegrini@ill.fr, sanghamitra.mukhopadhyay@stfc.ac.uk, " \
+                       "rastislav.turanyi@stfc.ac.uk"
 
-__maintainer__       = "R. Perenon, E.C. Pellegrini"
+__maintainer__       = "R. Perenon, S. Mukhopadhyay"
 
-__maintainer_email__ = "perenon@ill.fr, pellegrini@ill.fr"
+__maintainer_email__ = "perenon@ill.fr, sanghamitra.mukhopadhyay@stfc.ac.uk"
 
-__former_contributors__ = "G. Goret, B. Aoun"
+__former_contributors__ = "G. Goret, B. Aoun, E.C. Pellegrini"
 
 __url__              = "https://mdanse.org/"
 
-__repo__             = "https://code.ill.fr/scientific-software/mdanse/"
+__repo__             = "https://github.com/ISISNeutronMuon/MDANSE"
 
 __license__          = "GPL 3"
 

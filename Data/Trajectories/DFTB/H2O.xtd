@@ -1,0 +1,1287 @@
+<?xml version="1.0" encoding="latin1"?>
+<!DOCTYPE XSD []>
+<XSD Version="21.1" WrittenBy="Materials Studio 21.1">
+	<AtomisticTreeRoot ID="1" NumProperties="63" HasProperties="1" NumChildren="2">
+		<Property Name="AngleAxisType" DefinedOn="AngleBetweenPlanesBender" Type="Enumerated"/>
+		<Property Name="AngleEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="BeadDocumentID" DefinedOn="MesoMoleculeSet" Type="String"/>
+		<Property Name="BendBendEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="BendTorsionBendEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="BondEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="EFGAsymmetry" DefinedOn="Atom" Type="Double"/>
+		<Property Name="EFGQuadrupolarCoupling" DefinedOn="Atom" Type="Double"/>
+		<Property Name="ElectrostaticEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="FaceMillerIndex" DefinedOn="GrowthFace" Type="MillerIndex"/>
+		<Property Name="FacetTransparency" DefinedOn="GrowthFace" Type="Float"/>
+		<Property Name="FermiLevel" DefinedOn="ScalarFieldBase" Type="Double"/>
+		<Property Name="Force" DefinedOn="Matter" Type="CoDirection"/>
+		<Property Name="FrameFilter" DefinedOn="Trajectory" Type="String"/>
+		<Property Name="HarmonicForceConstant" DefinedOn="HarmonicRestraint" Type="Double"/>
+		<Property Name="HarmonicMinimum" DefinedOn="HarmonicRestraint" Type="Double"/>
+		<Property Name="HydrogenBondEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="ImportOrder" DefinedOn="Bondable" Type="UnsignedInteger"/>
+		<Property Name="InversionEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="IsBackboneAtom" DefinedOn="Atom" Type="Boolean"/>
+		<Property Name="IsChiralCenter" DefinedOn="Atom" Type="Boolean"/>
+		<Property Name="IsOutOfPlane" DefinedOn="Atom" Type="Boolean"/>
+		<Property Name="IsRepeatArrowVisible" DefinedOn="ElectrodeWire" Type="Boolean"/>
+		<Property Name="KineticEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="LineExtentPadding" DefinedOn="BestFitLineMonitor" Type="Double"/>
+		<Property Name="LinkageGroupName" DefinedOn="Linkage" Type="String"/>
+		<Property Name="ListIdentifier" DefinedOn="PropertyList" Type="String"/>
+		<Property Name="NMRShielding" DefinedOn="Atom" Type="Double"/>
+		<Property Name="NonBondEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="NormalMode" DefinedOn="Bondable" Type="Direction"/>
+		<Property Name="NormalModeFrequency" DefinedOn="Bondable" Type="Double"/>
+		<Property Name="NumScanSteps" DefinedOn="LinearScan" Type="UnsignedInteger"/>
+		<Property Name="OrbitalCutoffRadius" DefinedOn="Bondable" Type="Double"/>
+		<Property Name="PlaneExtentPadding" DefinedOn="BestFitPlaneMonitor" Type="Double"/>
+		<Property Name="PotentialEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="QuantizationValue" DefinedOn="ScalarFieldBase" Type="Double"/>
+		<Property Name="RelativeVelocity" DefinedOn="Matter" Type="Direction"/>
+		<Property Name="RepeatArrowScale" DefinedOn="ElectrodeWire" Type="Float"/>
+		<Property Name="RestraintEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="ScanEnd" DefinedOn="LinearScan" Type="Double"/>
+		<Property Name="ScanStart" DefinedOn="LinearScan" Type="Double"/>
+		<Property Name="SeparatedStretchStretchEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="ServerDipoleMoment" DefinedOn="MatterGroupProperties" Type="Direction"/>
+		<Property Name="SimulationStep" DefinedOn="Trajectory" Type="Integer"/>
+		<Property Name="SpinQuantizationDirection" DefinedOn="Atom" Type="Direction"/>
+		<Property Name="Stiffness" DefinedOn="SymmetryMatterHessian" Type="Matrix6x6"/>
+		<Property Name="StretchBendStretchEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="StretchStretchEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="StretchTorsionStretchEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="Temperature" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="ThreeBodyNonBondEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="TorsionBendBendEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="TorsionEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="TorsionStretchEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="TotalEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="Units" DefinedOn="ScalarFieldBase" Type="String"/>
+		<Property Name="UreyBradleyEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="ValenceCrossTermEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="ValenceDiagonalEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="VanDerWaalsEnergy" DefinedOn="ClassicalEnergyHolder" Type="Double"/>
+		<Property Name="_ServerAtomNames" DefinedOn="IndexProvider" Type="String"/>
+		<Property Name="_Stress" DefinedOn="MatterSymmetrySystem" Type="Matrix"/>
+		<Property Name="_TrajectoryStress" DefinedOn="MatterSymmetrySystem" Type="Matrix"/>
+		<Properties TotalEnergy="-256189.250011368" KineticEnergy="265.595795680775" PotentialEnergy="-256454.845807049" ValenceDiagonalEnergy="0" BondEnergy="0" AngleEnergy="0" TorsionEnergy="0" InversionEnergy="0" UreyBradleyEnergy="0" ValenceCrossTermEnergy="0" StretchStretchEnergy="0" StretchBendStretchEnergy="0" StretchTorsionStretchEnergy="0" SeparatedStretchStretchEnergy="0" TorsionStretchEnergy="0" BendBendEnergy="0" TorsionBendBendEnergy="0" BendTorsionBendEnergy="0" NonBondEnergy="0" HydrogenBondEnergy="0" VanDerWaalsEnergy="0" ElectrostaticEnergy="0" RestraintEnergy="0" ThreeBodyNonBondEnergy="0" Temperature="298"/>
+		<SymmetrySystem ID="2" HasProperties="1" Mapping="3" Children="ci(101):101+4" Normalized="1" OverspecificationTolerance="0.01" PeriodicDisplayType="Original" HasSymmetryHistory="1">
+			<Properties _Stress="0.000206438778866075,-4.38626340835829e-005,2.42605319820886e-006,-4.38626340835829e-005,0.000223094959226887,-3.01014079592889e-005,2.42605319820886e-006,-3.01014079592889e-005,0.000113107085240863" _TrajectoryStress="-0.0032438062216926,0.000227759114863,-6.44038727276318e-005,0.000227759114863,-0.00358444087889667,0.00029450771560405,-6.44038727276318e-005,0.00029450771560405,-0.00288413524583498"/>
+			<MappingSet ID="105" SymmetryDefinition="4" ActiveSystem="2" NumFamilies="1" OwnsTotalConstraintMapping="1" TotalConstraintMapping="3">
+				<MappingFamily ID="106" NumImageMappings="0">
+					<IdentityMapping ID="107" Element="1,0,0,0,0,1,0,0,0,0,1,0" Constraint="1,0,0,0,0,1,0,0,0,0,1,0" MappedObjects="ci(600):5+108,5,5+113,6,5+118,7,5+123,8,5+128,9,5+133,10,5+138,11,5+143,12,5+148,13,5+153,14,5+158,15,5+163,16,5+168,17,5+173,18,5+178,19,5+183,20,5+188,21,5+193,22,5+198,23,5+203,24,5+208,25,5+213,26,5+218,27,5+223,28,5+228,29,5+233,30,5+238,31,5+243,32,5+248,33,5+253,34,5+258,35,5+263,36,5+268,37,5+273,38,5+278,39,5+283,40,5+288,41,5+293,42,5+298,43,5+303,44,5+308,45,5+313,46,5+318,47,5+323,48,5+328,49,5+333,50,5+338,51,5+343,52,5+348,53,5+353,54,5+358,55,5+363,56,5+368,57,5+373,58,5+378,59,5+383,60,5+388,61,5+393,62,5+398,63,5+403,64,5+408,65,5+413,66,5+418,67,5+423,68,5+428,69,5+433,70,5+438,71,5+443,72,5+448,73,5+453,74,5+458,75,5+463,76,5+468,77,5+473,78,5+478,79,5+483,80,5+488,81,5+493,82,5+498,83,5+503,84,5+508,85,5+513,86,5+518,87,5+523,88,5+528,89,5+533,90,5+538,91,5+543,92,5+548,93,5+553,94,5+558,95,5+563,96,5+568,97,5+573,98,5+578,99,5+583,100,5+588,101,5+593,102,5+598,103,5+603,104" DefectObjects="4,608" NumImages="600" NumDefects="2">
+						<Atom3d ID="108" HasProperties="1" Mapping="107" Parent="5" UserID="1" DisplayStyle="Line" XYZ="0.34350633278346,0.536144623425658,0.799629197758904" Connections="110,112" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.244340355113939,-0.0471704191427301,0.258769626066215"/>
+						</Atom3d>
+						<Atom3d ID="109" HasProperties="1" Mapping="107" Parent="5" UserID="2" DisplayStyle="Line" XYZ="0.356817758575242,0.5850760531904,0.844551586883431" Connections="110" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.0976043472985,1.92190658235733,0.465251393493684"/>
+						</Atom3d>
+						<Bond ID="110" Mapping="107" Parent="5" Connects="108,109"/>
+						<Atom3d ID="111" HasProperties="1" Mapping="107" Parent="5" UserID="3" DisplayStyle="Line" XYZ="0.382224880976005,0.557191158603652,0.748384796161255" Connections="112" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.720058139451336,-0.801395902047869,1.54529251304952"/>
+						</Atom3d>
+						<Bond ID="112" Mapping="107" Parent="5" Connects="108,111"/>
+						<Molecule ID="5" Mapping="107" Parent="2" Children="108,109,110,111,112" Name="Sketch 2"/>
+						<Atom3d ID="113" HasProperties="1" Mapping="107" Parent="6" UserID="4" DisplayStyle="Line" XYZ="0.384517264413078,0.374898360267393,0.226688712470965" Connections="115,117" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.172530085215408,-0.236501556488317,0.572556318446869"/>
+						</Atom3d>
+						<Atom3d ID="114" HasProperties="1" Mapping="107" Parent="6" UserID="5" DisplayStyle="Line" XYZ="0.345759009173142,0.385015567656302,0.281492936737635" Connections="115" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.110666271734851,0.77298359000278,-2.46363302105199"/>
+						</Atom3d>
+						<Bond ID="115" Mapping="107" Parent="6" Connects="113,114"/>
+						<Atom3d ID="116" HasProperties="1" Mapping="107" Parent="6" UserID="6" DisplayStyle="Line" XYZ="0.383047342489797,0.30689810184944,0.225140988655847" Connections="117" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.596966545479468,-0.099060140665331,-1.14346494929999"/>
+						</Atom3d>
+						<Bond ID="117" Mapping="107" Parent="6" Connects="113,116"/>
+						<Molecule ID="6" Mapping="107" Parent="2" Children="113,114,115,116,117" Name="Sketch 2"/>
+						<Atom3d ID="118" HasProperties="1" Mapping="107" Parent="7" UserID="7" DisplayStyle="Line" XYZ="0.999294708074611,0.390761817351378,0.55054564628868" Connections="120,122" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.156491389650276,0.106586255430037,-0.182609292967066"/>
+						</Atom3d>
+						<Atom3d ID="119" HasProperties="1" Mapping="107" Parent="7" UserID="8" DisplayStyle="Line" XYZ="0.990661253493129,0.39093659431249,0.483265079281106" Connections="120" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.40922143602721,-0.408623641480403,-0.67745063421409"/>
+						</Atom3d>
+						<Bond ID="120" Mapping="107" Parent="7" Connects="118,119"/>
+						<Atom3d ID="121" HasProperties="1" Mapping="107" Parent="7" UserID="9" DisplayStyle="Line" XYZ="0.976776635032449,0.453459348345758,0.563180810812032" Connections="122" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.659268087031896,-1.26779902742419,1.06662876887777"/>
+						</Atom3d>
+						<Bond ID="122" Mapping="107" Parent="7" Connects="118,121"/>
+						<Molecule ID="7" Mapping="107" Parent="2" Children="118,119,120,121,122" Name="Sketch 2"/>
+						<Atom3d ID="123" HasProperties="1" Mapping="107" Parent="8" UserID="10" DisplayStyle="Line" XYZ="0.82736098992144,0.92113743318158,0.330675874775258" Connections="125,127" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.0607091858181885,-0.0966393097551827,0.259414285615103"/>
+						</Atom3d>
+						<Atom3d ID="124" HasProperties="1" Mapping="107" Parent="8" UserID="11" DisplayStyle="Line" XYZ="0.761749751632248,0.903554806709041,0.328041222222101" Connections="125" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.96310478354539,-1.55673073659339,1.01896962564475"/>
+						</Atom3d>
+						<Bond ID="125" Mapping="107" Parent="8" Connects="123,124"/>
+						<Atom3d ID="126" HasProperties="1" Mapping="107" Parent="8" UserID="12" DisplayStyle="Line" XYZ="0.82625771039504,0.957702420752996,0.387281584418654" Connections="127" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.107304640795544,-1.78941925772389,0.676185340930663"/>
+						</Atom3d>
+						<Bond ID="127" Mapping="107" Parent="8" Connects="123,126"/>
+						<Molecule ID="8" Mapping="107" Parent="2" Children="123,124,125,126,127" Name="Sketch 2"/>
+						<Atom3d ID="128" HasProperties="1" Mapping="107" Parent="9" UserID="13" DisplayStyle="Line" XYZ="0.159003590151371,0.386764646871433,0.668358288107051" Connections="130,132" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.166083489726525,-0.00814501322226796,0.52600921293568"/>
+						</Atom3d>
+						<Atom3d ID="129" HasProperties="1" Mapping="107" Parent="9" UserID="14" DisplayStyle="Line" XYZ="0.108538739331763,0.376588148432691,0.624645466410964" Connections="130" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.606968169772325,-0.311072549805971,-0.0689349973667921"/>
+						</Atom3d>
+						<Bond ID="130" Mapping="107" Parent="9" Connects="128,129"/>
+						<Atom3d ID="131" HasProperties="1" Mapping="107" Parent="9" UserID="15" DisplayStyle="Line" XYZ="0.199647962370651,0.334224169235051,0.655406837068874" Connections="132" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.13644374207829,1.65725570648887,-1.74418020560574"/>
+						</Atom3d>
+						<Bond ID="132" Mapping="107" Parent="9" Connects="128,131"/>
+						<Molecule ID="9" Mapping="107" Parent="2" Children="128,129,130,131,132" Name="Sketch 2"/>
+						<Atom3d ID="133" HasProperties="1" Mapping="107" Parent="10" UserID="16" DisplayStyle="Line" XYZ="0.733166263057749,0.593036328668875,0.174522174895412" Connections="135,137" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.115771841057974,0.311279092609342,-0.68555521348027"/>
+						</Atom3d>
+						<Atom3d ID="134" HasProperties="1" Mapping="107" Parent="10" UserID="17" DisplayStyle="Line" XYZ="0.739476133420655,0.525874559331854,0.167670159631801" Connections="135" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.179604552244094,-0.844233529071497,0.170241753515129"/>
+						</Atom3d>
+						<Bond ID="135" Mapping="107" Parent="10" Connects="133,134"/>
+						<Atom3d ID="136" HasProperties="1" Mapping="107" Parent="10" UserID="18" DisplayStyle="Line" XYZ="0.773993086143506,0.60180297386072,0.227766939243882" Connections="137" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.511152855032265,1.07261060400025,0.731219792315185"/>
+						</Atom3d>
+						<Bond ID="137" Mapping="107" Parent="10" Connects="133,136"/>
+						<Molecule ID="10" Mapping="107" Parent="2" Children="133,134,135,136,137" Name="Sketch 2"/>
+						<Atom3d ID="138" HasProperties="1" Mapping="107" Parent="11" UserID="19" DisplayStyle="Line" XYZ="0.846192993342266,0.683722754528526,0.669782808392981" Connections="140,142" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.0910544163159325,0.132333689204491,0.349859348803769"/>
+						</Atom3d>
+						<Atom3d ID="139" HasProperties="1" Mapping="107" Parent="11" UserID="20" DisplayStyle="Line" XYZ="0.857270119316138,0.746422765801336,0.647512079825534" Connections="140" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.787100046454266,1.57344123536866,3.43708490744332"/>
+						</Atom3d>
+						<Bond ID="140" Mapping="107" Parent="11" Connects="138,139"/>
+						<Atom3d ID="141" HasProperties="1" Mapping="107" Parent="11" UserID="21" DisplayStyle="Line" XYZ="0.824507598928294,0.698512425994406,0.732440454668628" Connections="142" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.40481091484303,0.291953408070324,0.0403959045228468"/>
+						</Atom3d>
+						<Bond ID="142" Mapping="107" Parent="11" Connects="138,141"/>
+						<Molecule ID="11" Mapping="107" Parent="2" Children="138,139,140,141,142" Name="Sketch 2"/>
+						<Atom3d ID="143" HasProperties="1" Mapping="107" Parent="12" UserID="22" DisplayStyle="Line" XYZ="0.623612484041279,0.994443101557186,0.82068805943996" Connections="145,147" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.28560202704969,-0.0390315923380153,-0.210142299387867"/>
+						</Atom3d>
+						<Atom3d ID="144" HasProperties="1" Mapping="107" Parent="12" UserID="23" DisplayStyle="Line" XYZ="0.56913425899918,1.03074172067873,0.802828365921432" Connections="145" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.0632803340846615,0.161041184740923,0.247001231697186"/>
+						</Atom3d>
+						<Bond ID="145" Mapping="107" Parent="12" Connects="143,144"/>
+						<Atom3d ID="146" HasProperties="1" Mapping="107" Parent="12" UserID="24" DisplayStyle="Line" XYZ="0.599693691335176,0.959546704455739,0.873410351508975" Connections="147" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.825934172276234,1.14741730096546,-0.117033314917494"/>
+						</Atom3d>
+						<Bond ID="147" Mapping="107" Parent="12" Connects="143,146"/>
+						<Molecule ID="12" Mapping="107" Parent="2" Children="143,144,145,146,147" Name="Sketch 2"/>
+						<Atom3d ID="148" HasProperties="1" Mapping="107" Parent="13" UserID="25" DisplayStyle="Line" XYZ="0.926888080437913,0.971661264889824,0.880409261595742" Connections="150,152" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.281898592245399,-0.0623709540892255,-0.197455265161673"/>
+						</Atom3d>
+						<Atom3d ID="149" HasProperties="1" Mapping="107" Parent="13" UserID="26" DisplayStyle="Line" XYZ="0.966621203768453,0.95005296155168,0.82986721206926" Connections="150" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.19223768299385,0.397574831472402,1.23545301736508"/>
+						</Atom3d>
+						<Bond ID="150" Mapping="107" Parent="13" Connects="148,149"/>
+						<Atom3d ID="151" HasProperties="1" Mapping="107" Parent="13" UserID="27" DisplayStyle="Line" XYZ="0.975027212525726,0.98523517044984,0.926476806109411" Connections="152" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.60542232989572,-1.69984918556877,0.768726890693943"/>
+						</Atom3d>
+						<Bond ID="152" Mapping="107" Parent="13" Connects="148,151"/>
+						<Molecule ID="13" Mapping="107" Parent="2" Children="148,149,150,151,152" Name="Sketch 2"/>
+						<Atom3d ID="153" HasProperties="1" Mapping="107" Parent="14" UserID="28" DisplayStyle="Line" XYZ="0.196195340351876,0.84344722906458,0.772548048522124" Connections="155,157" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.41616505979011,-0.268398773751019,0.377211716246809"/>
+						</Atom3d>
+						<Atom3d ID="154" HasProperties="1" Mapping="107" Parent="14" UserID="29" DisplayStyle="Line" XYZ="0.139585341557718,0.880495866338309,0.768011814946723" Connections="155" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.243200888262288,1.03728258920081,-0.422844359941745"/>
+						</Atom3d>
+						<Bond ID="155" Mapping="107" Parent="14" Connects="153,154"/>
+						<Atom3d ID="156" HasProperties="1" Mapping="107" Parent="14" UserID="30" DisplayStyle="Line" XYZ="0.171417660810558,0.786534231359034,0.79923220486039" Connections="157" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.0875156072057636,-0.83177346872814,1.52021659963849"/>
+						</Atom3d>
+						<Bond ID="157" Mapping="107" Parent="14" Connects="153,156"/>
+						<Molecule ID="14" Mapping="107" Parent="2" Children="153,154,155,156,157" Name="Sketch 2"/>
+						<Atom3d ID="158" HasProperties="1" Mapping="107" Parent="15" UserID="31" DisplayStyle="Line" XYZ="0.906768806990896,0.19831996358461,0.102588402235075" Connections="160,162" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.620634952208757,0.0674077428667142,-0.191026129202239"/>
+						</Atom3d>
+						<Atom3d ID="159" HasProperties="1" Mapping="107" Parent="15" UserID="32" DisplayStyle="Line" XYZ="0.856654679126125,0.20343392336708,0.0573656943049757" Connections="160" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.385914978773807,0.346956969518128,0.983192363722175"/>
+						</Atom3d>
+						<Bond ID="160" Mapping="107" Parent="15" Connects="158,159"/>
+						<Atom3d ID="161" HasProperties="1" Mapping="107" Parent="15" UserID="33" DisplayStyle="Line" XYZ="0.954975653547209,0.232111276625274,0.0687001076002793" Connections="162" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.66097039115318,0.557676701959175,1.48172505240695"/>
+						</Atom3d>
+						<Bond ID="162" Mapping="107" Parent="15" Connects="158,161"/>
+						<Molecule ID="15" Mapping="107" Parent="2" Children="158,159,160,161,162" Name="Sketch 2"/>
+						<Atom3d ID="163" HasProperties="1" Mapping="107" Parent="16" UserID="34" DisplayStyle="Line" XYZ="0.623998160944614,0.882131037832284,-0.0185899973766147" Connections="165,167" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.186926707081801,0.250409129266654,0.113220273375232"/>
+						</Atom3d>
+						<Atom3d ID="164" HasProperties="1" Mapping="107" Parent="16" UserID="35" DisplayStyle="Line" XYZ="0.618137450746588,0.911403410059837,0.0424662919839401" Connections="165" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.331601171944324,1.15425069218368,0.107384089896702"/>
+						</Atom3d>
+						<Bond ID="165" Mapping="107" Parent="16" Connects="163,164"/>
+						<Atom3d ID="166" HasProperties="1" Mapping="107" Parent="16" UserID="36" DisplayStyle="Line" XYZ="0.691492995219244,0.875578143628714,-0.0210942286370869" Connections="167" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.195219983570104,0.494946627209799,1.2696246740987"/>
+						</Atom3d>
+						<Bond ID="167" Mapping="107" Parent="16" Connects="163,166"/>
+						<Molecule ID="16" Mapping="107" Parent="2" Children="163,164,165,166,167" Name="Sketch 2"/>
+						<Atom3d ID="168" HasProperties="1" Mapping="107" Parent="17" UserID="37" DisplayStyle="Line" XYZ="0.0904134138508974,0.642369312304669,0.468342908607857" Connections="170,172" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.300432451070855,0.0200796591728614,-0.492292995927191"/>
+						</Atom3d>
+						<Atom3d ID="169" HasProperties="1" Mapping="107" Parent="17" UserID="38" DisplayStyle="Line" XYZ="0.0368103414111326,0.61148923253908,0.496523352435615" Connections="170" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.81850111337348,0.472488300175403,0.149417235524947"/>
+						</Atom3d>
+						<Bond ID="170" Mapping="107" Parent="17" Connects="168,169"/>
+						<Atom3d ID="171" HasProperties="1" Mapping="107" Parent="17" UserID="39" DisplayStyle="Line" XYZ="0.110718486320356,0.678402664111105,0.522363769401047" Connections="172" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.600522814119086,0.27077567036898,-1.69070032386255"/>
+						</Atom3d>
+						<Bond ID="172" Mapping="107" Parent="17" Connects="168,171"/>
+						<Molecule ID="17" Mapping="107" Parent="2" Children="168,169,170,171,172" Name="Sketch 2"/>
+						<Atom3d ID="173" HasProperties="1" Mapping="107" Parent="18" UserID="40" DisplayStyle="Line" XYZ="0.120366652270244,0.669296149430574,0.808307474360174" Connections="175,177" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.0787569671056072,-0.0339817592050569,-0.219068148058516"/>
+						</Atom3d>
+						<Atom3d ID="174" HasProperties="1" Mapping="107" Parent="18" UserID="41" DisplayStyle="Line" XYZ="0.140739309764446,0.604902624055076,0.811193223127379" Connections="175" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.633668490942479,-0.42239921021571,-0.28540697324094"/>
+						</Atom3d>
+						<Bond ID="175" Mapping="107" Parent="18" Connects="173,174"/>
+						<Atom3d ID="176" HasProperties="1" Mapping="107" Parent="18" UserID="42" DisplayStyle="Line" XYZ="0.0865071257704934,0.67189428735447,0.866928744664942" Connections="177" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.660214259223963,0.481251640918103,0.861373869154279"/>
+						</Atom3d>
+						<Bond ID="177" Mapping="107" Parent="18" Connects="173,176"/>
+						<Molecule ID="18" Mapping="107" Parent="2" Children="173,174,175,176,177" Name="Sketch 2"/>
+						<Atom3d ID="178" HasProperties="1" Mapping="107" Parent="19" UserID="43" DisplayStyle="Line" XYZ="0.554576686629947,0.110466202756459,0.231414132248921" Connections="180,182" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.0785098476118667,-0.0599172186812694,0.30288112721926"/>
+						</Atom3d>
+						<Atom3d ID="179" HasProperties="1" Mapping="107" Parent="19" UserID="44" DisplayStyle="Line" XYZ="0.575442428717002,0.0582861990199431,0.193577753389218" Connections="180" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.116905264226353,0.568400882163077,-1.61525098190953"/>
+						</Atom3d>
+						<Bond ID="180" Mapping="107" Parent="19" Connects="178,179"/>
+						<Atom3d ID="181" HasProperties="1" Mapping="107" Parent="19" UserID="45" DisplayStyle="Line" XYZ="0.570402730452574,0.161638464209863,0.189302704064647" Connections="182" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.0434469801508949,0.239167206862551,-0.274988334802396"/>
+						</Atom3d>
+						<Bond ID="182" Mapping="107" Parent="19" Connects="178,181"/>
+						<Molecule ID="19" Mapping="107" Parent="2" Children="178,179,180,181,182" Name="Sketch 2"/>
+						<Atom3d ID="183" HasProperties="1" Mapping="107" Parent="20" UserID="46" DisplayStyle="Line" XYZ="0.56379017155017,0.709135113705307,0.937258499882737" Connections="185,187" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.280333846593536,0.12607579093773,0.323884941146477"/>
+						</Atom3d>
+						<Atom3d ID="184" HasProperties="1" Mapping="107" Parent="20" UserID="47" DisplayStyle="Line" XYZ="0.576060871639515,0.775006172220276,0.94912560137581" Connections="185" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.749723223026013,0.230413267404938,0.0601983685198959"/>
+						</Atom3d>
+						<Bond ID="185" Mapping="107" Parent="20" Connects="183,184"/>
+						<Atom3d ID="186" HasProperties="1" Mapping="107" Parent="20" UserID="48" DisplayStyle="Line" XYZ="0.616881254269607,0.682068982794878,0.969464792567061" Connections="187" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.0842332156693406,0.744644759145868,-0.910125053416963"/>
+						</Atom3d>
+						<Bond ID="187" Mapping="107" Parent="20" Connects="183,186"/>
+						<Molecule ID="20" Mapping="107" Parent="2" Children="183,184,185,186,187" Name="Sketch 2"/>
+						<Atom3d ID="188" HasProperties="1" Mapping="107" Parent="21" UserID="49" DisplayStyle="Line" XYZ="0.572357961460502,0.253163178241562,0.113210602039899" Connections="190,192" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.165381750946746,-0.00799929330340467,0.48305944201136"/>
+						</Atom3d>
+						<Atom3d ID="189" HasProperties="1" Mapping="107" Parent="21" UserID="50" DisplayStyle="Line" XYZ="0.582057762691697,0.264982971523229,0.0475582942905291" Connections="190" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="2.57892051826349,0.766174373517647,0.889046551810673"/>
+						</Atom3d>
+						<Bond ID="190" Mapping="107" Parent="21" Connects="188,189"/>
+						<Atom3d ID="191" HasProperties="1" Mapping="107" Parent="21" UserID="51" DisplayStyle="Line" XYZ="0.559811176849553,0.31555402998246,0.135115940195253" Connections="192" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.42820534126404,-0.774216786858593,0.128290533371223"/>
+						</Atom3d>
+						<Bond ID="192" Mapping="107" Parent="21" Connects="188,191"/>
+						<Molecule ID="21" Mapping="107" Parent="2" Children="188,189,190,191,192" Name="Sketch 2"/>
+						<Atom3d ID="193" HasProperties="1" Mapping="107" Parent="22" UserID="52" DisplayStyle="Line" XYZ="0.660021525072385,0.423233845638717,0.522776105263378" Connections="195,197" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.199651346448348,0.506281219424055,0.134770033357914"/>
+						</Atom3d>
+						<Atom3d ID="194" HasProperties="1" Mapping="107" Parent="22" UserID="53" DisplayStyle="Line" XYZ="0.689831438005513,0.460937192138446,0.570607116204702" Connections="195" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.691442642204693,-1.38077359880578,0.736320660995764"/>
+						</Atom3d>
+						<Bond ID="195" Mapping="107" Parent="22" Connects="193,194"/>
+						<Atom3d ID="196" HasProperties="1" Mapping="107" Parent="22" UserID="54" DisplayStyle="Line" XYZ="0.596732746763248,0.4474002214369,0.526732908761434" Connections="197" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.863658843252742,-0.32330765082758,0.440874532780982"/>
+						</Atom3d>
+						<Bond ID="197" Mapping="107" Parent="22" Connects="193,196"/>
+						<Molecule ID="22" Mapping="107" Parent="2" Children="193,194,195,196,197" Name="Sketch 2"/>
+						<Atom3d ID="198" HasProperties="1" Mapping="107" Parent="23" UserID="55" DisplayStyle="Line" XYZ="0.423042625840107,0.76967097622218,0.111231454676584" Connections="200,202" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.402860898349928,-0.288177063014985,0.161248752808137"/>
+						</Atom3d>
+						<Atom3d ID="199" HasProperties="1" Mapping="107" Parent="23" UserID="56" DisplayStyle="Line" XYZ="0.370811283657036,0.730910791069981,0.0939311703241832" Connections="200" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.764334163093421,1.29603617323766,-0.989099877277961"/>
+						</Atom3d>
+						<Bond ID="200" Mapping="107" Parent="23" Connects="198,199"/>
+						<Atom3d ID="201" HasProperties="1" Mapping="107" Parent="23" UserID="57" DisplayStyle="Line" XYZ="0.47031697339196,0.72258334072729,0.123462680565652" Connections="202" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.08865700997622,-2.53849082183974,0.888550969782465"/>
+						</Atom3d>
+						<Bond ID="202" Mapping="107" Parent="23" Connects="198,201"/>
+						<Molecule ID="23" Mapping="107" Parent="2" Children="198,199,200,201,202" Name="Sketch 2"/>
+						<Atom3d ID="203" HasProperties="1" Mapping="107" Parent="24" UserID="58" DisplayStyle="Line" XYZ="0.286366709983133,0.23976694782395,0.942428933806436" Connections="205,207" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.543471218767918,-0.298165928420937,0.295131782225332"/>
+						</Atom3d>
+						<Atom3d ID="204" HasProperties="1" Mapping="107" Parent="24" UserID="59" DisplayStyle="Line" XYZ="0.345104196532604,0.25077812151392,0.910367220116838" Connections="205" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.892913524680283,-0.3423358518456,-1.25101565070619"/>
+						</Atom3d>
+						<Bond ID="205" Mapping="107" Parent="24" Connects="203,204"/>
+						<Atom3d ID="206" HasProperties="1" Mapping="107" Parent="24" UserID="60" DisplayStyle="Line" XYZ="0.30725239081775,0.193754040056296,0.987863961130604" Connections="207" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.278839713784914,1.82992575209751,0.836518885942818"/>
+						</Atom3d>
+						<Bond ID="207" Mapping="107" Parent="24" Connects="203,206"/>
+						<Molecule ID="24" Mapping="107" Parent="2" Children="203,204,205,206,207" Name="Sketch 2"/>
+						<Atom3d ID="208" HasProperties="1" Mapping="107" Parent="25" UserID="61" DisplayStyle="Line" XYZ="0.269856755280325,0.970507305820485,0.261513051475079" Connections="210,212" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.518197878370043,0.092917458432515,-0.0198723765742117"/>
+						</Atom3d>
+						<Atom3d ID="209" HasProperties="1" Mapping="107" Parent="25" UserID="62" DisplayStyle="Line" XYZ="0.256610511966728,1.03032890256253,0.290274786937614" Connections="210" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.33508426942712,-0.846346803655197,-0.50296546906311"/>
+						</Atom3d>
+						<Bond ID="210" Mapping="107" Parent="25" Connects="208,209"/>
+						<Atom3d ID="211" HasProperties="1" Mapping="107" Parent="25" UserID="63" DisplayStyle="Line" XYZ="0.244178528120926,0.928772714105304,0.308464688405825" Connections="212" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.862243949847005,2.18091400109156,1.60341461506507"/>
+						</Atom3d>
+						<Bond ID="212" Mapping="107" Parent="25" Connects="208,211"/>
+						<Molecule ID="25" Mapping="107" Parent="2" Children="208,209,210,211,212" Name="Sketch 2"/>
+						<Atom3d ID="213" HasProperties="1" Mapping="107" Parent="26" UserID="64" DisplayStyle="Line" XYZ="0.308881500401646,0.637210678036599,0.565417302769891" Connections="215,217" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.0352033961694857,-0.219745108859765,0.243563718956812"/>
+						</Atom3d>
+						<Atom3d ID="214" HasProperties="1" Mapping="107" Parent="26" UserID="65" DisplayStyle="Line" XYZ="0.36156918228822,0.643862167745897,0.60763550474764" Connections="215" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.134082858327855,-0.647134244161806,-2.9106553972195"/>
+						</Atom3d>
+						<Bond ID="215" Mapping="107" Parent="26" Connects="213,214"/>
+						<Atom3d ID="216" HasProperties="1" Mapping="107" Parent="26" UserID="66" DisplayStyle="Line" XYZ="0.261885234445377,0.674965465646597,0.596211542226376" Connections="217" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.810881940124973,-0.356296088680849,0.329584134470868"/>
+						</Atom3d>
+						<Bond ID="217" Mapping="107" Parent="26" Connects="213,216"/>
+						<Molecule ID="26" Mapping="107" Parent="2" Children="213,214,215,216,217" Name="Sketch 2"/>
+						<Atom3d ID="218" HasProperties="1" Mapping="107" Parent="27" UserID="67" DisplayStyle="Line" XYZ="0.485417766450236,0.289657804702541,0.54724220175202" Connections="220,222" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.00570629589074783,-0.133922120332556,0.356055467197094"/>
+						</Atom3d>
+						<Atom3d ID="219" HasProperties="1" Mapping="107" Parent="27" UserID="68" DisplayStyle="Line" XYZ="0.48045069694462,0.352883744904034,0.523704277108307" Connections="220" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.7968008541871,1.08924483492266,0.546195115060245"/>
+						</Atom3d>
+						<Bond ID="220" Mapping="107" Parent="27" Connects="218,219"/>
+						<Atom3d ID="221" HasProperties="1" Mapping="107" Parent="27" UserID="69" DisplayStyle="Line" XYZ="0.526666861833567,0.264012793483293,0.500147113545139" Connections="222" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.592551299089947,0.586493655314846,-1.36389285163508"/>
+						</Atom3d>
+						<Bond ID="222" Mapping="107" Parent="27" Connects="218,221"/>
+						<Molecule ID="27" Mapping="107" Parent="2" Children="218,219,220,221,222" Name="Sketch 2"/>
+						<Atom3d ID="223" HasProperties="1" Mapping="107" Parent="28" UserID="70" DisplayStyle="Line" XYZ="0.262288530108853,0.415423053694474,0.361195766881773" Connections="225,227" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.117454671088718,0.28058188223608,-0.212808235230666"/>
+						</Atom3d>
+						<Atom3d ID="224" HasProperties="1" Mapping="107" Parent="28" UserID="71" DisplayStyle="Line" XYZ="0.276120871615355,0.413438438398323,0.427682285586839" Connections="225" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.28701818485387,-0.751281008845802,1.12596430819003"/>
+						</Atom3d>
+						<Bond ID="225" Mapping="107" Parent="28" Connects="223,224"/>
+						<Atom3d ID="226" HasProperties="1" Mapping="107" Parent="28" UserID="72" DisplayStyle="Line" XYZ="0.252807160245095,0.482243289954573,0.355752915645552" Connections="227" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.308392085143618,1.79265972952922,0.787697340960708"/>
+						</Atom3d>
+						<Bond ID="227" Mapping="107" Parent="28" Connects="223,226"/>
+						<Molecule ID="28" Mapping="107" Parent="2" Children="223,224,225,226,227" Name="Sketch 2"/>
+						<Atom3d ID="228" HasProperties="1" Mapping="107" Parent="29" UserID="73" DisplayStyle="Line" XYZ="0.251921108569864,0.13517366134571,0.353174897815208" Connections="230,232" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.472336395149911,0.0353930095404123,0.540948526460803"/>
+						</Atom3d>
+						<Atom3d ID="229" HasProperties="1" Mapping="107" Parent="29" UserID="74" DisplayStyle="Line" XYZ="0.203789770727005,0.180184016503257,0.337866421912732" Connections="230" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="3.02658151029661,0.875379701099325,-0.82061944721673"/>
+						</Atom3d>
+						<Bond ID="230" Mapping="107" Parent="29" Connects="228,229"/>
+						<Atom3d ID="231" HasProperties="1" Mapping="107" Parent="29" UserID="75" DisplayStyle="Line" XYZ="0.302403459734844,0.160661083601165,0.315497584229723" Connections="232" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.249240439205853,0.731607191289966,-3.53722754511894"/>
+						</Atom3d>
+						<Bond ID="232" Mapping="107" Parent="29" Connects="228,231"/>
+						<Molecule ID="29" Mapping="107" Parent="2" Children="228,229,230,231,232" Name="Sketch 2"/>
+						<Atom3d ID="233" HasProperties="1" Mapping="107" Parent="30" UserID="76" DisplayStyle="Line" XYZ="-0.00616888005443434,0.483921400724464,0.923758110967281" Connections="235,237" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.0705636439463725,0.182755467212644,-0.501166466009493"/>
+						</Atom3d>
+						<Atom3d ID="234" HasProperties="1" Mapping="107" Parent="30" UserID="77" DisplayStyle="Line" XYZ="0.0468236458954522,0.480039448809378,0.881983561611853" Connections="235" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.367505248010502,0.875231295099008,1.38917947352149"/>
+						</Atom3d>
+						<Bond ID="235" Mapping="107" Parent="30" Connects="233,234"/>
+						<Atom3d ID="236" HasProperties="1" Mapping="107" Parent="30" UserID="78" DisplayStyle="Line" XYZ="0.0086331203089991,0.542818100409533,0.954037699737479" Connections="237" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.816932441804518,-1.91883063304104,-0.320969348647217"/>
+						</Atom3d>
+						<Bond ID="237" Mapping="107" Parent="30" Connects="233,236"/>
+						<Molecule ID="30" Mapping="107" Parent="2" Children="233,234,235,236,237" Name="Sketch 2"/>
+						<Atom3d ID="238" HasProperties="1" Mapping="107" Parent="31" UserID="79" DisplayStyle="Line" XYZ="0.157395070368963,0.283482767512479,0.268797007968011" Connections="240,242" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.00584586892125785,0.243441433975753,-0.429260737014274"/>
+						</Atom3d>
+						<Atom3d ID="239" HasProperties="1" Mapping="107" Parent="31" UserID="80" DisplayStyle="Line" XYZ="0.196294345753901,0.326707583574336,0.303699282908013" Connections="240" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.40894143659846,0.609620816631213,-1.54738579094104"/>
+						</Atom3d>
+						<Bond ID="240" Mapping="107" Parent="31" Connects="238,239"/>
+						<Atom3d ID="241" HasProperties="1" Mapping="107" Parent="31" UserID="81" DisplayStyle="Line" XYZ="0.112086970706155,0.327634491957434,0.245693497831564" Connections="242" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.203349409089731,-1.10903549702173,2.51859479931853"/>
+						</Atom3d>
+						<Bond ID="242" Mapping="107" Parent="31" Connects="238,241"/>
+						<Molecule ID="31" Mapping="107" Parent="2" Children="238,239,240,241,242" Name="Sketch 2"/>
+						<Atom3d ID="243" HasProperties="1" Mapping="107" Parent="32" UserID="82" DisplayStyle="Line" XYZ="0.639056690048074,0.254653809478529,0.43568285483563" Connections="245,247" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.126383774156102,0.422845485788823,-0.0165550659788907"/>
+						</Atom3d>
+						<Atom3d ID="244" HasProperties="1" Mapping="107" Parent="32" UserID="83" DisplayStyle="Line" XYZ="0.670038894991893,0.269275857463267,0.37707764987193" Connections="245" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.944980527578828,0.311320726871874,-1.61238090387625"/>
+						</Atom3d>
+						<Bond ID="245" Mapping="107" Parent="32" Connects="243,244"/>
+						<Atom3d ID="246" HasProperties="1" Mapping="107" Parent="32" UserID="84" DisplayStyle="Line" XYZ="0.660707432575438,0.307155708075796,0.472851930836908" Connections="247" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.864194716502755,-0.923023684832552,-0.165594309998595"/>
+						</Atom3d>
+						<Bond ID="247" Mapping="107" Parent="32" Connects="243,246"/>
+						<Molecule ID="32" Mapping="107" Parent="2" Children="243,244,245,246,247" Name="Sketch 2"/>
+						<Atom3d ID="248" HasProperties="1" Mapping="107" Parent="33" UserID="85" DisplayStyle="Line" XYZ="0.770886228203222,0.726139792080185,0.837202396324368" Connections="250,252" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.271052763650634,-0.339385862889073,-0.0177779045606882"/>
+						</Atom3d>
+						<Atom3d ID="249" HasProperties="1" Mapping="107" Parent="33" UserID="86" DisplayStyle="Line" XYZ="0.788686307882122,0.775570628155329,0.880077247699849" Connections="250" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.35530449773251,-1.15035884562583,-0.68937616434816"/>
+						</Atom3d>
+						<Bond ID="250" Mapping="107" Parent="33" Connects="248,249"/>
+						<Atom3d ID="251" HasProperties="1" Mapping="107" Parent="33" UserID="87" DisplayStyle="Line" XYZ="0.751375168021854,0.680359805380096,0.883022114180253" Connections="252" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.06370408799678,2.90869165448319,0.195239099043636"/>
+						</Atom3d>
+						<Bond ID="252" Mapping="107" Parent="33" Connects="248,251"/>
+						<Molecule ID="33" Mapping="107" Parent="2" Children="248,249,250,251,252" Name="Sketch 2"/>
+						<Atom3d ID="253" HasProperties="1" Mapping="107" Parent="34" UserID="88" DisplayStyle="Line" XYZ="0.645958738186564,0.468584057893749,0.338048922601549" Connections="255,257" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.171350792252151,-0.144407239287079,-0.539131541276107"/>
+						</Atom3d>
+						<Atom3d ID="254" HasProperties="1" Mapping="107" Parent="34" UserID="89" DisplayStyle="Line" XYZ="0.640338168307938,0.451635905160149,0.403263079566677" Connections="255" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.22964808244027,2.13714296076277,0.482609523367865"/>
+						</Atom3d>
+						<Bond ID="255" Mapping="107" Parent="34" Connects="253,254"/>
+						<Atom3d ID="256" HasProperties="1" Mapping="107" Parent="34" UserID="90" DisplayStyle="Line" XYZ="0.690207754573331,0.420868377682088,0.319148648260745" Connections="257" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.252005191747158,-0.00454969319648883,0.0176609110987193"/>
+						</Atom3d>
+						<Bond ID="257" Mapping="107" Parent="34" Connects="253,256"/>
+						<Molecule ID="34" Mapping="107" Parent="2" Children="253,254,255,256,257" Name="Sketch 2"/>
+						<Atom3d ID="258" HasProperties="1" Mapping="107" Parent="35" UserID="91" DisplayStyle="Line" XYZ="0.521199675289298,0.769247442833238,0.39663925835715" Connections="260,262" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.428440348828442,-0.354973865085265,-0.219646998611789"/>
+						</Atom3d>
+						<Atom3d ID="259" HasProperties="1" Mapping="107" Parent="35" UserID="92" DisplayStyle="Line" XYZ="0.480086945777439,0.807550449729473,0.358128442626044" Connections="260" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.29512217124197,0.959836145686964,-0.0481655440464105"/>
+						</Atom3d>
+						<Bond ID="260" Mapping="107" Parent="35" Connects="258,259"/>
+						<Atom3d ID="261" HasProperties="1" Mapping="107" Parent="35" UserID="93" DisplayStyle="Line" XYZ="0.498477441052236,0.707854871893063,0.379505070940486" Connections="262" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.228748323795566,-0.155665949700268,0.61819418538598"/>
+						</Atom3d>
+						<Bond ID="262" Mapping="107" Parent="35" Connects="258,261"/>
+						<Molecule ID="35" Mapping="107" Parent="2" Children="258,259,260,261,262" Name="Sketch 2"/>
+						<Atom3d ID="263" HasProperties="1" Mapping="107" Parent="36" UserID="94" DisplayStyle="Line" XYZ="0.0645023265630148,0.0892290797252967,0.52013174269802" Connections="265,267" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.136127637834486,0.492827308942829,-0.117022570591679"/>
+						</Atom3d>
+						<Atom3d ID="264" HasProperties="1" Mapping="107" Parent="36" UserID="95" DisplayStyle="Line" XYZ="0.0333282361179935,0.137935252666677,0.555308582554128" Connections="265" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.00944715398802,-1.04783783174169,-1.81128859312465"/>
+						</Atom3d>
+						<Bond ID="265" Mapping="107" Parent="36" Connects="263,264"/>
+						<Atom3d ID="266" HasProperties="1" Mapping="107" Parent="36" UserID="96" DisplayStyle="Line" XYZ="0.114401756710786,0.0753443171522764,0.562796336549583" Connections="267" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.49546001701709,0.221602248716435,-1.06244131681018"/>
+						</Atom3d>
+						<Bond ID="267" Mapping="107" Parent="36" Connects="263,266"/>
+						<Molecule ID="36" Mapping="107" Parent="2" Children="263,264,265,266,267" Name="Sketch 2"/>
+						<Atom3d ID="268" HasProperties="1" Mapping="107" Parent="37" UserID="97" DisplayStyle="Line" XYZ="0.0385553731658719,0.016587772584678,0.234882094108413" Connections="270,272" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.0718826131452223,-0.176021074956416,0.244475643610344"/>
+						</Atom3d>
+						<Atom3d ID="269" HasProperties="1" Mapping="107" Parent="37" UserID="98" DisplayStyle="Line" XYZ="0.00502990025357305,0.0396814415030946,0.288866602477255" Connections="270" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.91371254945945,0.539932447876024,0.464494590044104"/>
+						</Atom3d>
+						<Bond ID="270" Mapping="107" Parent="37" Connects="268,269"/>
+						<Atom3d ID="271" HasProperties="1" Mapping="107" Parent="37" UserID="99" DisplayStyle="Line" XYZ="0.0213499013812426,-0.048676450610031,0.23611727553818" Connections="272" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.140229284214287,-0.929733516303898,-0.186575963753819"/>
+						</Atom3d>
+						<Bond ID="272" Mapping="107" Parent="37" Connects="268,271"/>
+						<Molecule ID="37" Mapping="107" Parent="2" Children="268,269,270,271,272" Name="Sketch 2"/>
+						<Atom3d ID="273" HasProperties="1" Mapping="107" Parent="38" UserID="100" DisplayStyle="Line" XYZ="0.0352802732569684,0.648523288025859,0.28833637514455" Connections="275,277" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.0992557977195283,0.165209311636704,-0.0484160211419682"/>
+						</Atom3d>
+						<Atom3d ID="274" HasProperties="1" Mapping="107" Parent="38" UserID="101" DisplayStyle="Line" XYZ="0.0840588608501567,0.684092592752926,0.256895798247866" Connections="275" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.276181267871196,1.29449167640179,0.136404513922491"/>
+						</Atom3d>
+						<Bond ID="275" Mapping="107" Parent="38" Connects="273,274"/>
+						<Atom3d ID="276" HasProperties="1" Mapping="107" Parent="38" UserID="102" DisplayStyle="Line" XYZ="0.058003655294997,0.651537203437472,0.352294836133889" Connections="277" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.79549598691589,1.14404358265962,-0.841546036302153"/>
+						</Atom3d>
+						<Bond ID="277" Mapping="107" Parent="38" Connects="273,276"/>
+						<Molecule ID="38" Mapping="107" Parent="2" Children="273,274,275,276,277" Name="Sketch 2"/>
+						<Atom3d ID="278" HasProperties="1" Mapping="107" Parent="39" UserID="103" DisplayStyle="Line" XYZ="0.932033673105874,0.571914171645425,0.548101314449976" Connections="280,282" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.12890063247822,0.420867858318536,0.172264372849766"/>
+						</Atom3d>
+						<Atom3d ID="279" HasProperties="1" Mapping="107" Parent="39" UserID="104" DisplayStyle="Line" XYZ="0.876127752364506,0.573664238823207,0.511029027636464" Connections="280" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.850534649269957,-1.23129182286658,0.291365896027243"/>
+						</Atom3d>
+						<Bond ID="280" Mapping="107" Parent="39" Connects="278,279"/>
+						<Atom3d ID="281" HasProperties="1" Mapping="107" Parent="39" UserID="105" DisplayStyle="Line" XYZ="0.911176752318505,0.609926054575331,0.600533843153444" Connections="282" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.74678542464111,1.41814476460256,0.82056490514856"/>
+						</Atom3d>
+						<Bond ID="282" Mapping="107" Parent="39" Connects="278,281"/>
+						<Molecule ID="39" Mapping="107" Parent="2" Children="278,279,280,281,282" Name="Sketch 2"/>
+						<Atom3d ID="283" HasProperties="1" Mapping="107" Parent="40" UserID="106" DisplayStyle="Line" XYZ="0.480011633445787,0.850960564963192,0.676234544904002" Connections="285,287" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.0120642506916587,-0.0624018440259431,-0.190090701335987"/>
+						</Atom3d>
+						<Atom3d ID="284" HasProperties="1" Mapping="107" Parent="40" UserID="107" DisplayStyle="Line" XYZ="0.479910773890077,0.901605704791159,0.630939780782637" Connections="285" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.64971831730134,-0.770623481393904,-0.80738445237398"/>
+						</Atom3d>
+						<Bond ID="285" Mapping="107" Parent="40" Connects="283,284"/>
+						<Atom3d ID="286" HasProperties="1" Mapping="107" Parent="40" UserID="108" DisplayStyle="Line" XYZ="0.522613683658026,0.808615438602054,0.646027835767787" Connections="287" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-2.42688841118908,-2.86967123467384,-0.195282225265628"/>
+						</Atom3d>
+						<Bond ID="287" Mapping="107" Parent="40" Connects="283,286"/>
+						<Molecule ID="40" Mapping="107" Parent="2" Children="283,284,285,286,287" Name="Sketch 2"/>
+						<Atom3d ID="288" HasProperties="1" Mapping="107" Parent="41" UserID="109" DisplayStyle="Line" XYZ="0.257267242361834,0.663449772025945,0.059411400445909" Connections="290,292" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.434708423105737,-0.0486598513088074,-0.054594008485481"/>
+						</Atom3d>
+						<Atom3d ID="289" HasProperties="1" Mapping="107" Parent="41" UserID="110" DisplayStyle="Line" XYZ="0.26698215580292,0.599460290307364,0.0805420925222206" Connections="290" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.0174248945478005,0.699979253692997,-0.396510688890022"/>
+						</Atom3d>
+						<Bond ID="290" Mapping="107" Parent="41" Connects="288,289"/>
+						<Atom3d ID="291" HasProperties="1" Mapping="107" Parent="41" UserID="111" DisplayStyle="Line" XYZ="0.291864576772961,0.662619363568622,0.000962625455117271" Connections="292" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.25320041935177,0.539715546798638,0.000407538401232741"/>
+						</Atom3d>
+						<Bond ID="292" Mapping="107" Parent="41" Connects="288,291"/>
+						<Molecule ID="41" Mapping="107" Parent="2" Children="288,289,290,291,292" Name="Sketch 2"/>
+						<Atom3d ID="293" HasProperties="1" Mapping="107" Parent="42" UserID="112" DisplayStyle="Line" XYZ="0.307897148584607,0.452692293418219,0.537228864617552" Connections="295,297" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.210581011883458,0.00350317900170754,-0.096727882168239"/>
+						</Atom3d>
+						<Atom3d ID="294" HasProperties="1" Mapping="107" Parent="42" UserID="113" DisplayStyle="Line" XYZ="0.28538898008346,0.413553968536003,0.587521704143135" Connections="295" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.271109171361162,0.526632315558023,0.187605927072581"/>
+						</Atom3d>
+						<Bond ID="295" Mapping="107" Parent="42" Connects="293,294"/>
+						<Atom3d ID="296" HasProperties="1" Mapping="107" Parent="42" UserID="114" DisplayStyle="Line" XYZ="0.294127957330358,0.514362345926257,0.561482169393587" Connections="297" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.39888944827834,2.90839014184001,-1.1354396094367"/>
+						</Atom3d>
+						<Bond ID="297" Mapping="107" Parent="42" Connects="293,296"/>
+						<Molecule ID="42" Mapping="107" Parent="2" Children="293,294,295,296,297" Name="Sketch 2"/>
+						<Atom3d ID="298" HasProperties="1" Mapping="107" Parent="43" UserID="115" DisplayStyle="Line" XYZ="0.594703846255429,0.583382991636331,0.801351601620179" Connections="300,302" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.463832829582773,-0.0946952583030664,-0.149803508652649"/>
+						</Atom3d>
+						<Atom3d ID="299" HasProperties="1" Mapping="107" Parent="43" UserID="116" DisplayStyle="Line" XYZ="0.61282069856745,0.541459853726509,0.85043791585147" Connections="300" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.591455274651755,-2.21967444193703,-1.05956855269545"/>
+						</Atom3d>
+						<Bond ID="300" Mapping="107" Parent="43" Connects="298,299"/>
+						<Atom3d ID="301" HasProperties="1" Mapping="107" Parent="43" UserID="117" DisplayStyle="Line" XYZ="0.583222839333931,0.639259933869501,0.838215210976649" Connections="302" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.56835027350738,0.821926008650307,0.205276985436118"/>
+						</Atom3d>
+						<Bond ID="302" Mapping="107" Parent="43" Connects="298,301"/>
+						<Molecule ID="43" Mapping="107" Parent="2" Children="298,299,300,301,302" Name="Sketch 2"/>
+						<Atom3d ID="303" HasProperties="1" Mapping="107" Parent="44" UserID="118" DisplayStyle="Line" XYZ="0.78909237346477,0.159907611990385,0.639669638927361" Connections="305,307" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.0565705026133158,0.176413628900455,-0.212678631800525"/>
+						</Atom3d>
+						<Atom3d ID="304" HasProperties="1" Mapping="107" Parent="44" UserID="119" DisplayStyle="Line" XYZ="0.794654329810378,0.134151758082745,0.702337735847311" Connections="305" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.00666512376463673,-0.969521097836848,0.250996777859567"/>
+						</Atom3d>
+						<Bond ID="305" Mapping="107" Parent="44" Connects="303,304"/>
+						<Atom3d ID="306" HasProperties="1" Mapping="107" Parent="44" UserID="120" DisplayStyle="Line" XYZ="0.72931928748752,0.191140386904826,0.646787548960056" Connections="307" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.512265667479543,-1.34053206950715,-0.905306223289023"/>
+						</Atom3d>
+						<Bond ID="307" Mapping="107" Parent="44" Connects="303,306"/>
+						<Molecule ID="44" Mapping="107" Parent="2" Children="303,304,305,306,307" Name="Sketch 2"/>
+						<Atom3d ID="308" HasProperties="1" Mapping="107" Parent="45" UserID="121" DisplayStyle="Line" XYZ="0.710392450864047,0.373790171273667,0.782474518490952" Connections="310,312" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.243233689555014,-0.0102018800954397,-0.251141303656436"/>
+						</Atom3d>
+						<Atom3d ID="309" HasProperties="1" Mapping="107" Parent="45" UserID="122" DisplayStyle="Line" XYZ="0.684077013015608,0.324899707548155,0.743421810317283" Connections="310" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.198065990075383,0.578332668338138,1.46216097813892"/>
+						</Atom3d>
+						<Bond ID="310" Mapping="107" Parent="45" Connects="308,309"/>
+						<Atom3d ID="311" HasProperties="1" Mapping="107" Parent="45" UserID="123" DisplayStyle="Line" XYZ="0.719696731050751,0.422020637635352,0.735740619650677" Connections="312" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.464257230452458,1.05124282603605,0.460867037040881"/>
+						</Atom3d>
+						<Bond ID="312" Mapping="107" Parent="45" Connects="308,311"/>
+						<Molecule ID="45" Mapping="107" Parent="2" Children="308,309,310,311,312" Name="Sketch 2"/>
+						<Atom3d ID="313" HasProperties="1" Mapping="107" Parent="46" UserID="124" DisplayStyle="Line" XYZ="0.28871882062139,1.02621936900722,0.505292208238951" Connections="315,317" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.0836711531251537,-0.196949678602929,0.0912299960341431"/>
+						</Atom3d>
+						<Atom3d ID="314" HasProperties="1" Mapping="107" Parent="46" UserID="125" DisplayStyle="Line" XYZ="0.256992411642088,0.97272038081936,0.480071503591429" Connections="315" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.0229165880798928,0.182169901455737,-1.12122889550589"/>
+						</Atom3d>
+						<Bond ID="315" Mapping="107" Parent="46" Connects="313,314"/>
+						<Atom3d ID="316" HasProperties="1" Mapping="107" Parent="46" UserID="126" DisplayStyle="Line" XYZ="0.273790935814035,1.07233107678669,0.457619634836642" Connections="317" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-2.33700272446314,-2.47407724553926,-1.629097060283"/>
+						</Atom3d>
+						<Bond ID="317" Mapping="107" Parent="46" Connects="313,316"/>
+						<Molecule ID="46" Mapping="107" Parent="2" Children="313,314,315,316,317" Name="Sketch 2"/>
+						<Atom3d ID="318" HasProperties="1" Mapping="107" Parent="47" UserID="127" DisplayStyle="Line" XYZ="0.10778112876591,0.104769330273197,0.713365686973008" Connections="320,322" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.00382603887315695,-0.0733308379406901,0.297440469234789"/>
+						</Atom3d>
+						<Atom3d ID="319" HasProperties="1" Mapping="107" Parent="47" UserID="128" DisplayStyle="Line" XYZ="0.112173568966685,0.12505554358756,0.778450763321162" Connections="320" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.00876891842096,-0.734076657134845,-1.36002489434175"/>
+						</Atom3d>
+						<Bond ID="320" Mapping="107" Parent="47" Connects="318,319"/>
+						<Atom3d ID="321" HasProperties="1" Mapping="107" Parent="47" UserID="129" DisplayStyle="Line" XYZ="0.0630949754150635,0.151157680321543,0.69218646114892" Connections="322" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.455219237881117,0.120003903811638,0.858935578714682"/>
+						</Atom3d>
+						<Bond ID="322" Mapping="107" Parent="47" Connects="318,321"/>
+						<Molecule ID="47" Mapping="107" Parent="2" Children="318,319,320,321,322" Name="Sketch 2"/>
+						<Atom3d ID="323" HasProperties="1" Mapping="107" Parent="48" UserID="130" DisplayStyle="Line" XYZ="0.741113181342093,0.319336159879566,0.284633312068777" Connections="325,327" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.076565692954668,0.348825810689541,0.184356440033966"/>
+						</Atom3d>
+						<Atom3d ID="324" HasProperties="1" Mapping="107" Parent="48" UserID="131" DisplayStyle="Line" XYZ="0.744180787894921,0.338162502330421,0.219533286512293" Connections="325" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.316577143648327,0.64834135230668,0.991628674047888"/>
+						</Atom3d>
+						<Bond ID="325" Mapping="107" Parent="48" Connects="323,324"/>
+						<Atom3d ID="326" HasProperties="1" Mapping="107" Parent="48" UserID="132" DisplayStyle="Line" XYZ="0.802820924902664,0.291742227491325,0.290233842487841" Connections="327" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.751728382831201,-0.825350376451977,-0.88698110409151"/>
+						</Atom3d>
+						<Bond ID="327" Mapping="107" Parent="48" Connects="323,326"/>
+						<Molecule ID="48" Mapping="107" Parent="2" Children="323,324,325,326,327" Name="Sketch 2"/>
+						<Atom3d ID="328" HasProperties="1" Mapping="107" Parent="49" UserID="133" DisplayStyle="Line" XYZ="0.45231289101136,0.282438995748529,0.864574738323264" Connections="330,332" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.263489429797375,0.0907565059030123,-0.292358552043119"/>
+						</Atom3d>
+						<Atom3d ID="329" HasProperties="1" Mapping="107" Parent="49" UserID="134" DisplayStyle="Line" XYZ="0.447793913110689,0.34135205199266,0.832881214038876" Connections="330" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.848390381544458,-1.15093366705692,0.407679266655778"/>
+						</Atom3d>
+						<Bond ID="330" Mapping="107" Parent="49" Connects="328,329"/>
+						<Atom3d ID="331" HasProperties="1" Mapping="107" Parent="49" UserID="135" DisplayStyle="Line" XYZ="0.512705881223832,0.288505155576257,0.894762975887671" Connections="332" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.366658460832223,-0.637381082403417,-2.91087968502088"/>
+						</Atom3d>
+						<Bond ID="332" Mapping="107" Parent="49" Connects="328,331"/>
+						<Molecule ID="49" Mapping="107" Parent="2" Children="328,329,330,331,332" Name="Sketch 2"/>
+						<Atom3d ID="333" HasProperties="1" Mapping="107" Parent="50" UserID="136" DisplayStyle="Line" XYZ="0.804611012385408,0.45194106529826,0.937358223397574" Connections="335,337" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.122429862256254,-0.183874505606675,0.31475562180571"/>
+						</Atom3d>
+						<Atom3d ID="334" HasProperties="1" Mapping="107" Parent="50" UserID="137" DisplayStyle="Line" XYZ="0.786882479926087,0.420342879769509,0.88021790420923" Connections="335" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.505156952912323,0.621127989578869,0.988624291941923"/>
+						</Atom3d>
+						<Bond ID="335" Mapping="107" Parent="50" Connects="333,334"/>
+						<Atom3d ID="336" HasProperties="1" Mapping="107" Parent="50" UserID="138" DisplayStyle="Line" XYZ="0.871263528976965,0.460106163041494,0.92714336921238" Connections="337" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.0676163410712988,0.597089575129333,-0.175714121875415"/>
+						</Atom3d>
+						<Bond ID="337" Mapping="107" Parent="50" Connects="333,336"/>
+						<Molecule ID="50" Mapping="107" Parent="2" Children="333,334,335,336,337" Name="Sketch 2"/>
+						<Atom3d ID="338" HasProperties="1" Mapping="107" Parent="51" UserID="139" DisplayStyle="Line" XYZ="0.946817841179258,0.0929988667945079,0.379509012672236" Connections="340,342" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.140453468810589,-0.071461325248914,-0.257994840485555"/>
+						</Atom3d>
+						<Atom3d ID="339" HasProperties="1" Mapping="107" Parent="51" UserID="140" DisplayStyle="Line" XYZ="0.894329072796483,0.0782837673456624,0.419533983027025" Connections="340" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.463905456987106,0.136548151005348,-0.459712842454885"/>
+						</Atom3d>
+						<Bond ID="340" Mapping="107" Parent="51" Connects="338,339"/>
+						<Atom3d ID="341" HasProperties="1" Mapping="107" Parent="51" UserID="141" DisplayStyle="Line" XYZ="0.997068267408056,0.0889178861334327,0.42542642213098" Connections="342" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.17605269919457,1.37012434341402,-0.182115725499948"/>
+						</Atom3d>
+						<Bond ID="342" Mapping="107" Parent="51" Connects="338,341"/>
+						<Molecule ID="51" Mapping="107" Parent="2" Children="338,339,340,341,342" Name="Sketch 2"/>
+						<Atom3d ID="343" HasProperties="1" Mapping="107" Parent="52" UserID="142" DisplayStyle="Line" XYZ="0.484897976620721,0.119059270773753,0.768172475482248" Connections="345,347" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.467555738477603,-0.426427660875898,0.109294565330647"/>
+						</Atom3d>
+						<Atom3d ID="344" HasProperties="1" Mapping="107" Parent="52" UserID="143" DisplayStyle="Line" XYZ="0.463016598092463,0.169997777569034,0.806863516333192" Connections="345" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.618226208665151,-0.156906247811514,-2.12200979504627"/>
+						</Atom3d>
+						<Bond ID="345" Mapping="107" Parent="52" Connects="343,344"/>
+						<Atom3d ID="346" HasProperties="1" Mapping="107" Parent="52" UserID="144" DisplayStyle="Line" XYZ="0.426563989961873,0.100825673817979,0.738753649899081" Connections="347" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.344830123103802,-0.548470443245179,-0.219668487263419"/>
+						</Atom3d>
+						<Bond ID="347" Mapping="107" Parent="52" Connects="343,346"/>
+						<Molecule ID="52" Mapping="107" Parent="2" Children="343,344,345,346,347" Name="Sketch 2"/>
+						<Atom3d ID="348" HasProperties="1" Mapping="107" Parent="53" UserID="145" DisplayStyle="Line" XYZ="0.595876347465303,0.0725950676995798,0.412414903876486" Connections="350,352" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.320751314227378,0.865528497367876,-0.155769295561319"/>
+						</Atom3d>
+						<Atom3d ID="349" HasProperties="1" Mapping="107" Parent="53" UserID="146" DisplayStyle="Line" XYZ="0.575947075581925,0.0845451803935411,0.348392381718139" Connections="350" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.30813613268007,1.86457821741134,-1.8213399099244"/>
+						</Atom3d>
+						<Bond ID="350" Mapping="107" Parent="53" Connects="348,349"/>
+						<Atom3d ID="351" HasProperties="1" Mapping="107" Parent="53" UserID="147" DisplayStyle="Line" XYZ="0.61092621534753,0.136634275955704,0.429308185153283" Connections="352" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.194386058483812,0.896920059796919,1.84654259176538"/>
+						</Atom3d>
+						<Bond ID="352" Mapping="107" Parent="53" Connects="348,351"/>
+						<Molecule ID="53" Mapping="107" Parent="2" Children="348,349,350,351,352" Name="Sketch 2"/>
+						<Atom3d ID="353" HasProperties="1" Mapping="107" Parent="54" UserID="148" DisplayStyle="Line" XYZ="0.763799991665788,0.176093095034489,0.975998006700016" Connections="355,357" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.0951568374211802,0.203360398043986,-0.0535558380036255"/>
+						</Atom3d>
+						<Atom3d ID="354" HasProperties="1" Mapping="107" Parent="54" UserID="149" DisplayStyle="Line" XYZ="0.779749087002571,0.151172158932226,0.914882188572402" Connections="355" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.29813980190784,-1.14407207198344,-1.39725734089186"/>
+						</Atom3d>
+						<Bond ID="355" Mapping="107" Parent="54" Connects="353,354"/>
+						<Atom3d ID="356" HasProperties="1" Mapping="107" Parent="54" UserID="150" DisplayStyle="Line" XYZ="0.747241725917008,0.119834905322772,1.00875945149294" Connections="357" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.282564740445917,0.0260058263800898,-0.0577353807455847"/>
+						</Atom3d>
+						<Bond ID="357" Mapping="107" Parent="54" Connects="353,356"/>
+						<Molecule ID="54" Mapping="107" Parent="2" Children="353,354,355,356,357" Name="Sketch 2"/>
+						<Atom3d ID="358" HasProperties="1" Mapping="107" Parent="55" UserID="151" DisplayStyle="Line" XYZ="0.713824632795754,0.625201172818459,0.436632942289552" Connections="360,362" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.427167146219388,-0.111337547469836,-0.133494293586138"/>
+						</Atom3d>
+						<Atom3d ID="359" HasProperties="1" Mapping="107" Parent="55" UserID="152" DisplayStyle="Line" XYZ="0.675154787669493,0.584457783686973,0.399420276882473" Connections="360" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.876555288627242,-0.208862449850094,0.0813452162845224"/>
+						</Atom3d>
+						<Bond ID="360" Mapping="107" Parent="55" Connects="358,359"/>
+						<Atom3d ID="361" HasProperties="1" Mapping="107" Parent="55" UserID="153" DisplayStyle="Line" XYZ="0.76930519454033,0.624235954586743,0.398202383176698" Connections="362" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.672125790635483,1.12239376614278,0.806808138983429"/>
+						</Atom3d>
+						<Bond ID="362" Mapping="107" Parent="55" Connects="358,361"/>
+						<Molecule ID="55" Mapping="107" Parent="2" Children="358,359,360,361,362" Name="Sketch 2"/>
+						<Atom3d ID="363" HasProperties="1" Mapping="107" Parent="56" UserID="154" DisplayStyle="Line" XYZ="0.913835741932179,0.250802931030825,0.283115796712406" Connections="365,367" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.360138772828809,0.22341669673841,-0.268816391142154"/>
+						</Atom3d>
+						<Atom3d ID="364" HasProperties="1" Mapping="107" Parent="56" UserID="155" DisplayStyle="Line" XYZ="0.931506520936418,0.193666857580527,0.315288170973602" Connections="365" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.0143783098640223,-0.722445252919955,-0.161750527438349"/>
+						</Atom3d>
+						<Bond ID="365" Mapping="107" Parent="56" Connects="363,364"/>
+						<Atom3d ID="366" HasProperties="1" Mapping="107" Parent="56" UserID="156" DisplayStyle="Line" XYZ="0.917663119957134,0.229555296595583,0.218685245215571" Connections="367" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.686807137135969,-0.834490440118559,2.44930665669994"/>
+						</Atom3d>
+						<Bond ID="367" Mapping="107" Parent="56" Connects="363,366"/>
+						<Molecule ID="56" Mapping="107" Parent="2" Children="363,364,365,366,367" Name="Sketch 2"/>
+						<Atom3d ID="368" HasProperties="1" Mapping="107" Parent="57" UserID="157" DisplayStyle="Line" XYZ="0.730702593290453,0.876420624864173,0.718833260414371" Connections="370,372" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.021448076250164,0.0817829792865599,-0.161481247772615"/>
+						</Atom3d>
+						<Atom3d ID="369" HasProperties="1" Mapping="107" Parent="57" UserID="158" DisplayStyle="Line" XYZ="0.682061875107054,0.916241116930946,0.743684083439304" Connections="370" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.14399382737165,1.03274982674768,-0.0270670457479506"/>
+						</Atom3d>
+						<Bond ID="370" Mapping="107" Parent="57" Connects="368,369"/>
+						<Atom3d ID="371" HasProperties="1" Mapping="107" Parent="57" UserID="159" DisplayStyle="Line" XYZ="0.722049262059117,0.821298609899197,0.756464475537093" Connections="372" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.147136439467398,1.34545335678213,3.10296927910069"/>
+						</Atom3d>
+						<Bond ID="372" Mapping="107" Parent="57" Connects="368,371"/>
+						<Molecule ID="57" Mapping="107" Parent="2" Children="368,369,370,371,372" Name="Sketch 2"/>
+						<Atom3d ID="373" HasProperties="1" Mapping="107" Parent="58" UserID="160" DisplayStyle="Line" XYZ="0.883230284503929,0.894159485175163,0.619005565920131" Connections="375,377" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.307677484271851,-0.0423012249875331,0.165329582056673"/>
+						</Atom3d>
+						<Atom3d ID="374" HasProperties="1" Mapping="107" Parent="58" UserID="161" DisplayStyle="Line" XYZ="0.864656471520698,0.933519670348603,0.567768285820794" Connections="375" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.187542594460145,-1.09544526790673,1.2589629452886"/>
+						</Atom3d>
+						<Bond ID="375" Mapping="107" Parent="58" Connects="373,374"/>
+						<Atom3d ID="376" HasProperties="1" Mapping="107" Parent="58" UserID="162" DisplayStyle="Line" XYZ="0.825806867348496,0.894266038258136,0.655679438728729" Connections="377" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.622665526582673,-0.0480810007555348,0.219202303212469"/>
+						</Atom3d>
+						<Bond ID="377" Mapping="107" Parent="58" Connects="373,376"/>
+						<Molecule ID="58" Mapping="107" Parent="2" Children="373,374,375,376,377" Name="Sketch 2"/>
+						<Atom3d ID="378" HasProperties="1" Mapping="107" Parent="59" UserID="163" DisplayStyle="Line" XYZ="0.271319325426989,0.492005394811937,0.127575571407375" Connections="380,382" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.187491558912524,-0.0333451579005297,-0.0767159038178012"/>
+						</Atom3d>
+						<Atom3d ID="379" HasProperties="1" Mapping="107" Parent="59" UserID="164" DisplayStyle="Line" XYZ="0.317013734622836,0.452486283754236,0.158166773934472" Connections="380" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.48913171231726,0.238261997412653,-0.822051800151916"/>
+						</Atom3d>
+						<Bond ID="380" Mapping="107" Parent="59" Connects="378,379"/>
+						<Atom3d ID="381" HasProperties="1" Mapping="107" Parent="59" UserID="165" DisplayStyle="Line" XYZ="0.247964118763222,0.448912158313884,0.0805001423540651" Connections="382" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-2.02452415375044,1.93952123301034,1.0427213008991"/>
+						</Atom3d>
+						<Bond ID="382" Mapping="107" Parent="59" Connects="378,381"/>
+						<Molecule ID="59" Mapping="107" Parent="2" Children="378,379,380,381,382" Name="Sketch 2"/>
+						<Atom3d ID="383" HasProperties="1" Mapping="107" Parent="60" UserID="166" DisplayStyle="Line" XYZ="0.976274449612437,0.215724830151904,0.625437364734594" Connections="385,387" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.664507960427704,-0.221977914068154,-0.308111748248713"/>
+						</Atom3d>
+						<Atom3d ID="384" HasProperties="1" Mapping="107" Parent="60" UserID="167" DisplayStyle="Line" XYZ="0.978244622386719,0.280000241800361,0.603634498190308" Connections="385" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.111337688893194,-1.48376937758686,0.34619754826201"/>
+						</Atom3d>
+						<Bond ID="385" Mapping="107" Parent="60" Connects="383,384"/>
+						<Atom3d ID="386" HasProperties="1" Mapping="107" Parent="60" UserID="168" DisplayStyle="Line" XYZ="0.909453179751369,0.206011078681949,0.630122542183419" Connections="387" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="2.05276081030703,1.06609954255648,0.101302801485523"/>
+						</Atom3d>
+						<Bond ID="387" Mapping="107" Parent="60" Connects="383,386"/>
+						<Molecule ID="60" Mapping="107" Parent="2" Children="383,384,385,386,387" Name="Sketch 2"/>
+						<Atom3d ID="388" HasProperties="1" Mapping="107" Parent="61" UserID="169" DisplayStyle="Line" XYZ="0.326358490076332,0.106003217303777,0.0667076826019642" Connections="390,392" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.0160490525282245,0.312371656240635,-0.178994498850747"/>
+						</Atom3d>
+						<Atom3d ID="389" HasProperties="1" Mapping="107" Parent="61" UserID="170" DisplayStyle="Line" XYZ="0.262195078870281,0.0991205539047835,0.087941128846316" Connections="390" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.469466213911549,2.34382752733999,-1.40695812406191"/>
+						</Atom3d>
+						<Bond ID="390" Mapping="107" Parent="61" Connects="388,389"/>
+						<Atom3d ID="391" HasProperties="1" Mapping="107" Parent="61" UserID="171" DisplayStyle="Line" XYZ="0.340780611973693,0.0430230642933956,0.046316908428977" Connections="392" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.0113887012060528,-1.61736499628851,-1.37881134802893"/>
+						</Atom3d>
+						<Bond ID="392" Mapping="107" Parent="61" Connects="388,391"/>
+						<Molecule ID="61" Mapping="107" Parent="2" Children="388,389,390,391,392" Name="Sketch 2"/>
+						<Atom3d ID="393" HasProperties="1" Mapping="107" Parent="62" UserID="172" DisplayStyle="Line" XYZ="0.789616442045081,1.08439401239872,0.813710963165698" Connections="395,397" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.303483271286979,0.0428092804340815,0.245743474056491"/>
+						</Atom3d>
+						<Atom3d ID="394" HasProperties="1" Mapping="107" Parent="62" UserID="173" DisplayStyle="Line" XYZ="0.837582816025304,1.0396439337229,0.831057180350966" Connections="395" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.364780321580805,2.12342312821763,-0.820868581271561"/>
+						</Atom3d>
+						<Bond ID="395" Mapping="107" Parent="62" Connects="393,394"/>
+						<Atom3d ID="396" HasProperties="1" Mapping="107" Parent="62" UserID="174" DisplayStyle="Line" XYZ="0.734185969075405,1.04509931724332,0.813777192021641" Connections="397" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.73310905907222,0.679342761404573,1.19570908465575"/>
+						</Atom3d>
+						<Bond ID="397" Mapping="107" Parent="62" Connects="393,396"/>
+						<Molecule ID="62" Mapping="107" Parent="2" Children="393,394,395,396,397" Name="Sketch 2"/>
+						<Atom3d ID="398" HasProperties="1" Mapping="107" Parent="63" UserID="175" DisplayStyle="Line" XYZ="0.861507755814559,0.578348345888206,0.323728548299335" Connections="400,402" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.341366421069255,0.0140547784722095,0.0543413679101003"/>
+						</Atom3d>
+						<Atom3d ID="399" HasProperties="1" Mapping="107" Parent="63" UserID="176" DisplayStyle="Line" XYZ="0.884638939162157,0.51725282079193,0.341961469530369" Connections="400" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.07598350936237,1.6957694138924,-1.35517853187891"/>
+						</Atom3d>
+						<Bond ID="400" Mapping="107" Parent="63" Connects="398,399"/>
+						<Atom3d ID="401" HasProperties="1" Mapping="107" Parent="63" UserID="177" DisplayStyle="Line" XYZ="0.920369488248328,0.607094032356263,0.306442231650024" Connections="402" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.0257013830270175,-0.198057015682218,-1.2071546266487"/>
+						</Atom3d>
+						<Bond ID="402" Mapping="107" Parent="63" Connects="398,401"/>
+						<Molecule ID="63" Mapping="107" Parent="2" Children="398,399,400,401,402" Name="Sketch 2"/>
+						<Atom3d ID="403" HasProperties="1" Mapping="107" Parent="64" UserID="178" DisplayStyle="Line" XYZ="0.0834867151276447,0.466456108363474,0.22727144029912" Connections="405,407" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.0217878655540573,-0.00324291456926317,-0.36615461086138"/>
+						</Atom3d>
+						<Atom3d ID="404" HasProperties="1" Mapping="107" Parent="64" UserID="179" DisplayStyle="Line" XYZ="0.0628868955941338,0.529968859331918,0.238234242086537" Connections="405" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.947347740064985,0.691313954923356,0.0314633406485632"/>
+						</Atom3d>
+						<Bond ID="405" Mapping="107" Parent="64" Connects="403,404"/>
+						<Atom3d ID="406" HasProperties="1" Mapping="107" Parent="64" UserID="180" DisplayStyle="Line" XYZ="0.138380898589971,0.477345163995787,0.188984212571846" Connections="407" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.935761327714445,-0.948697251367029,-1.27463705101004"/>
+						</Atom3d>
+						<Bond ID="407" Mapping="107" Parent="64" Connects="403,406"/>
+						<Molecule ID="64" Mapping="107" Parent="2" Children="403,404,405,406,407" Name="Sketch 2"/>
+						<Atom3d ID="408" HasProperties="1" Mapping="107" Parent="65" UserID="181" DisplayStyle="Line" XYZ="0.193316378734992,0.39009854167818,0.995188128795913" Connections="410,412" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.206996539388576,0.102281138380118,0.115279154809494"/>
+						</Atom3d>
+						<Atom3d ID="409" HasProperties="1" Mapping="107" Parent="65" UserID="182" DisplayStyle="Line" XYZ="0.228887324325657,0.335487720994092,0.975820486384884" Connections="410" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.17340164000485,0.436232244233707,-0.783006920140915"/>
+						</Atom3d>
+						<Bond ID="410" Mapping="107" Parent="65" Connects="408,409"/>
+						<Atom3d ID="411" HasProperties="1" Mapping="107" Parent="65" UserID="183" DisplayStyle="Line" XYZ="0.186388465224542,0.421490478636853,0.935600561179849" Connections="412" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.98198465720538,1.75791056528305,0.72354364304087"/>
+						</Atom3d>
+						<Bond ID="412" Mapping="107" Parent="65" Connects="408,411"/>
+						<Molecule ID="65" Mapping="107" Parent="2" Children="408,409,410,411,412" Name="Sketch 2"/>
+						<Atom3d ID="413" HasProperties="1" Mapping="107" Parent="66" UserID="184" DisplayStyle="Line" XYZ="0.551359310617233,0.436160952929584,0.17521180948597" Connections="415,417" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.228019155885969,0.0179448959375323,0.266827870427319"/>
+						</Atom3d>
+						<Atom3d ID="414" HasProperties="1" Mapping="107" Parent="66" UserID="185" DisplayStyle="Line" XYZ="0.488643380632084,0.418495598219223,0.194950375416712" Connections="415" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.05186048334705,0.6579984866531,1.43329231771526"/>
+						</Atom3d>
+						<Bond ID="415" Mapping="107" Parent="66" Connects="413,414"/>
+						<Atom3d ID="416" HasProperties="1" Mapping="107" Parent="66" UserID="186" DisplayStyle="Line" XYZ="0.579246185386322,0.448123635557825,0.236099091149219" Connections="417" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.996260508611439,0.411884258896632,-1.7079120622975"/>
+						</Atom3d>
+						<Bond ID="417" Mapping="107" Parent="66" Connects="413,416"/>
+						<Molecule ID="66" Mapping="107" Parent="2" Children="413,414,415,416,417" Name="Sketch 2"/>
+						<Atom3d ID="418" HasProperties="1" Mapping="107" Parent="67" UserID="187" DisplayStyle="Line" XYZ="0.151974128346757,0.125273432566915,0.137117595598234" Connections="420,422" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.447909170409952,0.0208297474188075,-0.227669652393631"/>
+						</Atom3d>
+						<Atom3d ID="419" HasProperties="1" Mapping="107" Parent="67" UserID="188" DisplayStyle="Line" XYZ="0.111349818547715,0.0857003108715844,0.174697954124385" Connections="420" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.272277616793522,0.401700652585287,-1.04784313562968"/>
+						</Atom3d>
+						<Bond ID="420" Mapping="107" Parent="67" Connects="418,419"/>
+						<Atom3d ID="421" HasProperties="1" Mapping="107" Parent="67" UserID="189" DisplayStyle="Line" XYZ="0.152969777627585,0.180589341337981,0.175750736481619" Connections="422" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-2.4064641193355,-0.274975644190407,-0.310384844678908"/>
+						</Atom3d>
+						<Bond ID="422" Mapping="107" Parent="67" Connects="418,421"/>
+						<Molecule ID="67" Mapping="107" Parent="2" Children="418,419,420,421,422" Name="Sketch 2"/>
+						<Atom3d ID="423" HasProperties="1" Mapping="107" Parent="68" UserID="190" DisplayStyle="Line" XYZ="0.584698740360767,0.709345456135323,0.560670720867339" Connections="425,427" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.0714695249166332,0.547041162443245,-0.110706921573664"/>
+						</Atom3d>
+						<Atom3d ID="424" HasProperties="1" Mapping="107" Parent="68" UserID="191" DisplayStyle="Line" XYZ="0.560524474392264,0.741492783274656,0.50594141823402" Connections="425" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.217511773554371,1.7449508937893,-1.73544909784048"/>
+						</Atom3d>
+						<Bond ID="425" Mapping="107" Parent="68" Connects="423,424"/>
+						<Atom3d ID="426" HasProperties="1" Mapping="107" Parent="68" UserID="192" DisplayStyle="Line" XYZ="0.640000098101473,0.682733832757354,0.531887902745702" Connections="427" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.0409348224713208,-1.58818609345696,-1.04178467891086"/>
+						</Atom3d>
+						<Bond ID="427" Mapping="107" Parent="68" Connects="423,426"/>
+						<Molecule ID="68" Mapping="107" Parent="2" Children="423,424,425,426,427" Name="Sketch 2"/>
+						<Atom3d ID="428" HasProperties="1" Mapping="107" Parent="69" UserID="193" DisplayStyle="Line" XYZ="0.0572636580153165,0.980797854563288,0.0157443801462599" Connections="430,432" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.159238579457049,-0.229980422239094,0.138032279283434"/>
+						</Atom3d>
+						<Atom3d ID="429" HasProperties="1" Mapping="107" Parent="69" UserID="194" DisplayStyle="Line" XYZ="0.112746000977257,0.951345281453782,0.0416291804905889" Connections="430" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.77489250233035,-0.492158088609058,0.210592740632993"/>
+						</Atom3d>
+						<Bond ID="430" Mapping="107" Parent="69" Connects="428,429"/>
+						<Atom3d ID="431" HasProperties="1" Mapping="107" Parent="69" UserID="195" DisplayStyle="Line" XYZ="0.0673877966544543,1.04302084266428,0.0396407568701283" Connections="432" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.774908025940999,-0.0539386728856938,0.869652372194587"/>
+						</Atom3d>
+						<Bond ID="432" Mapping="107" Parent="69" Connects="428,431"/>
+						<Molecule ID="69" Mapping="107" Parent="2" Children="428,429,430,431,432" Name="Sketch 2"/>
+						<Atom3d ID="433" HasProperties="1" Mapping="107" Parent="70" UserID="196" DisplayStyle="Line" XYZ="0.811140712738542,0.854642755526979,-0.0335400543911597" Connections="435,437" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.221887503447532,-0.0828563542958781,-0.41134524523845"/>
+						</Atom3d>
+						<Atom3d ID="434" HasProperties="1" Mapping="107" Parent="70" UserID="197" DisplayStyle="Line" XYZ="0.847185133054917,0.902932930727853,-0.0648837348999725" Connections="435" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.8134626960867,0.256920862230789,-1.41964784436955"/>
+						</Atom3d>
+						<Bond ID="435" Mapping="107" Parent="70" Connects="433,434"/>
+						<Atom3d ID="436" HasProperties="1" Mapping="107" Parent="70" UserID="198" DisplayStyle="Line" XYZ="0.859873540718287,0.830708194848664,0.00705863972618462" Connections="437" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.2370886312721,-0.517201769042642,0.551475279677858"/>
+						</Atom3d>
+						<Bond ID="437" Mapping="107" Parent="70" Connects="433,436"/>
+						<Molecule ID="70" Mapping="107" Parent="2" Children="433,434,435,436,437" Name="Sketch 2"/>
+						<Atom3d ID="438" HasProperties="1" Mapping="107" Parent="71" UserID="199" DisplayStyle="Line" XYZ="0.74117732243089,0.412256902959654,0.116222026867802" Connections="440,442" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.255828157176138,-0.313330201267807,-0.169944418912864"/>
+						</Atom3d>
+						<Atom3d ID="439" HasProperties="1" Mapping="107" Parent="71" UserID="200" DisplayStyle="Line" XYZ="0.766818282209284,0.413116117189043,0.0535374751190793" Connections="440" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.42781653097362,1.96422109501784,-0.30049670732747"/>
+						</Atom3d>
+						<Bond ID="440" Mapping="107" Parent="71" Connects="438,439"/>
+						<Atom3d ID="441" HasProperties="1" Mapping="107" Parent="71" UserID="201" DisplayStyle="Line" XYZ="0.675235709464383,0.408425982490862,0.103465069052197" Connections="442" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.903507429933681,-0.503612882968367,1.42528913802396"/>
+						</Atom3d>
+						<Bond ID="442" Mapping="107" Parent="71" Connects="438,441"/>
+						<Molecule ID="71" Mapping="107" Parent="2" Children="438,439,440,441,442" Name="Sketch 2"/>
+						<Atom3d ID="443" HasProperties="1" Mapping="107" Parent="72" UserID="202" DisplayStyle="Line" XYZ="0.540521765835349,0.625740723525762,0.166383530250703" Connections="445,447" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.523691586463225,0.0507238194374122,-0.13389854884492"/>
+						</Atom3d>
+						<Atom3d ID="444" HasProperties="1" Mapping="107" Parent="72" UserID="203" DisplayStyle="Line" XYZ="0.541464999279045,0.56014102654584,0.150078924366664" Connections="445" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.303651151377835,-0.594802662240072,1.28554239279333"/>
+						</Atom3d>
+						<Bond ID="445" Mapping="107" Parent="72" Connects="443,444"/>
+						<Atom3d ID="446" HasProperties="1" Mapping="107" Parent="72" UserID="204" DisplayStyle="Line" XYZ="0.606895174812596,0.634032222767557,0.177413549250053" Connections="447" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.00781468798453,-0.232619497267355,0.640588717985851"/>
+						</Atom3d>
+						<Bond ID="447" Mapping="107" Parent="72" Connects="443,446"/>
+						<Molecule ID="72" Mapping="107" Parent="2" Children="443,444,445,446,447" Name="Sketch 2"/>
+						<Atom3d ID="448" HasProperties="1" Mapping="107" Parent="73" UserID="205" DisplayStyle="Line" XYZ="0.812043853147471,0.0357986685509793,0.159619493409757" Connections="450,452" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.73337035913588,0.0543379420333672,0.120658032920531"/>
+						</Atom3d>
+						<Atom3d ID="449" HasProperties="1" Mapping="107" Parent="73" UserID="206" DisplayStyle="Line" XYZ="0.840495940361519,0.00696554276535059,0.213338005295792" Connections="450" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.285491226189724,1.40322962581052,-1.30690763359481"/>
+						</Atom3d>
+						<Bond ID="450" Mapping="107" Parent="73" Connects="448,449"/>
+						<Atom3d ID="451" HasProperties="1" Mapping="107" Parent="73" UserID="207" DisplayStyle="Line" XYZ="0.85678780740043,0.0842528757441881,0.145386731542266" Connections="452" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.37418958627083,2.10598038677766,0.573517935607294"/>
+						</Atom3d>
+						<Bond ID="452" Mapping="107" Parent="73" Connects="448,451"/>
+						<Molecule ID="73" Mapping="107" Parent="2" Children="448,449,450,451,452" Name="Sketch 2"/>
+						<Atom3d ID="453" HasProperties="1" Mapping="107" Parent="74" UserID="208" DisplayStyle="Line" XYZ="0.96519013891755,0.83783435777796,0.241585136096793" Connections="455,457" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.28540046773558,-0.261471369681924,-0.0322793868088579"/>
+						</Atom3d>
+						<Atom3d ID="454" HasProperties="1" Mapping="107" Parent="74" UserID="209" DisplayStyle="Line" XYZ="0.974521905653946,0.779470295010027,0.273474856552828" Connections="455" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.18990482125131,0.318628211466668,0.42864278936119"/>
+						</Atom3d>
+						<Bond ID="455" Mapping="107" Parent="74" Connects="453,454"/>
+						<Atom3d ID="456" HasProperties="1" Mapping="107" Parent="74" UserID="210" DisplayStyle="Line" XYZ="0.912215943640012,0.862710237018203,0.276318367818693" Connections="457" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.7380924116892,-0.599022496203836,0.0203832546520456"/>
+						</Atom3d>
+						<Bond ID="457" Mapping="107" Parent="74" Connects="453,456"/>
+						<Molecule ID="74" Mapping="107" Parent="2" Children="453,454,455,456,457" Name="Sketch 2"/>
+						<Atom3d ID="458" HasProperties="1" Mapping="107" Parent="75" UserID="211" DisplayStyle="Line" XYZ="0.382503043224,0.187376265190572,0.228947335745293" Connections="460,462" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.278338759593799,0.278972919445313,-0.00461811999864231"/>
+						</Atom3d>
+						<Atom3d ID="459" HasProperties="1" Mapping="107" Parent="75" UserID="212" DisplayStyle="Line" XYZ="0.366488150250063,0.1611679998024,0.168327496127913" Connections="460" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.728651688747173,0.694193434241724,0.196016048104119"/>
+						</Atom3d>
+						<Bond ID="460" Mapping="107" Parent="75" Connects="458,459"/>
+						<Atom3d ID="461" HasProperties="1" Mapping="107" Parent="75" UserID="213" DisplayStyle="Line" XYZ="0.442928331771635,0.157670153618611,0.237410178917518" Connections="462" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.46966759137829,-2.08439532168428,1.30435637881542"/>
+						</Atom3d>
+						<Bond ID="462" Mapping="107" Parent="75" Connects="458,461"/>
+						<Molecule ID="75" Mapping="107" Parent="2" Children="458,459,460,461,462" Name="Sketch 2"/>
+						<Atom3d ID="463" HasProperties="1" Mapping="107" Parent="76" UserID="214" DisplayStyle="Line" XYZ="0.477068834776512,-0.0188429036340737,0.540421145872652" Connections="465,467" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.32226895024872,-0.295368374586907,0.19855103747605"/>
+						</Atom3d>
+						<Atom3d ID="464" HasProperties="1" Mapping="107" Parent="76" UserID="215" DisplayStyle="Line" XYZ="0.415447300747587,0.0016451337309575,0.522304781593707" Connections="465" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.13906401453638,-2.2987177608751,1.13309451140888"/>
+						</Atom3d>
+						<Bond ID="465" Mapping="107" Parent="76" Connects="463,464"/>
+						<Atom3d ID="466" HasProperties="1" Mapping="107" Parent="76" UserID="216" DisplayStyle="Line" XYZ="0.516220807921902,0.0153723227898499,0.49758077006067" Connections="467" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.141108201164929,-0.28256919646002,-0.072842574361564"/>
+						</Atom3d>
+						<Bond ID="467" Mapping="107" Parent="76" Connects="463,466"/>
+						<Molecule ID="76" Mapping="107" Parent="2" Children="463,464,465,466,467" Name="Sketch 2"/>
+						<Atom3d ID="468" HasProperties="1" Mapping="107" Parent="77" UserID="217" DisplayStyle="Line" XYZ="-0.0413397345990984,0.414767132712839,0.361873660305682" Connections="470,472" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.226249699728343,0.265731209398929,-0.250326077935238"/>
+						</Atom3d>
+						<Atom3d ID="469" HasProperties="1" Mapping="107" Parent="77" UserID="218" DisplayStyle="Line" XYZ="0.00806206771241715,0.426815745369051,0.317168381340153" Connections="470" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.197105044435321,-1.26309569879876,-0.138933608529883"/>
+						</Atom3d>
+						<Bond ID="470" Mapping="107" Parent="77" Connects="468,469"/>
+						<Atom3d ID="471" HasProperties="1" Mapping="107" Parent="77" UserID="219" DisplayStyle="Line" XYZ="-0.0625029572078575,0.35469787952435,0.338337368187003" Connections="472" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.339895688268271,-1.07671052128752,1.60307482576117"/>
+						</Atom3d>
+						<Bond ID="472" Mapping="107" Parent="77" Connects="468,471"/>
+						<Molecule ID="77" Mapping="107" Parent="2" Children="468,469,470,471,472" Name="Sketch 2"/>
+						<Atom3d ID="473" HasProperties="1" Mapping="107" Parent="78" UserID="220" DisplayStyle="Line" XYZ="0.463775976145241,0.616451308688005,0.671413196492045" Connections="475,477" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.21771131830739,-0.311417039752408,-0.0284490346558799"/>
+						</Atom3d>
+						<Atom3d ID="474" HasProperties="1" Mapping="107" Parent="78" UserID="221" DisplayStyle="Line" XYZ="0.51162699113869,0.601389219410868,0.716945358859304" Connections="475" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.2513564244338,-1.24440191492173,-0.881740559175339"/>
+						</Atom3d>
+						<Bond ID="475" Mapping="107" Parent="78" Connects="473,474"/>
+						<Atom3d ID="476" HasProperties="1" Mapping="107" Parent="78" UserID="222" DisplayStyle="Line" XYZ="0.503335492576143,0.649582231529701,0.627055262624405" Connections="477" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.189757940139085,-0.00022577357639323,1.84859878711819"/>
+						</Atom3d>
+						<Bond ID="477" Mapping="107" Parent="78" Connects="473,476"/>
+						<Molecule ID="78" Mapping="107" Parent="2" Children="473,474,475,476,477" Name="Sketch 2"/>
+						<Atom3d ID="478" HasProperties="1" Mapping="107" Parent="79" UserID="223" DisplayStyle="Line" XYZ="0.644773992533707,0.899502944039003,0.335470905401541" Connections="480,482" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.13368196067089,-0.621772263075959,0.410656116426843"/>
+						</Atom3d>
+						<Atom3d ID="479" HasProperties="1" Mapping="107" Parent="79" UserID="224" DisplayStyle="Line" XYZ="0.61581521417074,0.94974373603049,0.370123884816384" Connections="480" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.921034886144528,-2.03827731768532,1.17319972207373"/>
+						</Atom3d>
+						<Bond ID="480" Mapping="107" Parent="79" Connects="478,479"/>
+						<Atom3d ID="481" HasProperties="1" Mapping="107" Parent="79" UserID="225" DisplayStyle="Line" XYZ="0.607723600142602,0.847204183619484,0.357840940208582" Connections="482" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.08816891787709,-1.77861919571892,0.126710445956083"/>
+						</Atom3d>
+						<Bond ID="482" Mapping="107" Parent="79" Connects="478,481"/>
+						<Molecule ID="79" Mapping="107" Parent="2" Children="478,479,480,481,482" Name="Sketch 2"/>
+						<Atom3d ID="483" HasProperties="1" Mapping="107" Parent="80" UserID="226" DisplayStyle="Line" XYZ="0.307459330236635,0.276649850843533,0.629388161908432" Connections="485,487" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.198685131850461,-0.53633539875772,-0.147872887607801"/>
+						</Atom3d>
+						<Atom3d ID="484" HasProperties="1" Mapping="107" Parent="80" UserID="227" DisplayStyle="Line" XYZ="0.367700973670208,0.279536635091431,0.598722212139884" Connections="485" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.91195920979055,-1.01309471117879,0.240019434478653"/>
+						</Atom3d>
+						<Bond ID="485" Mapping="107" Parent="80" Connects="483,484"/>
+						<Atom3d ID="486" HasProperties="1" Mapping="107" Parent="80" UserID="228" DisplayStyle="Line" XYZ="0.310278615683128,0.213549949391146,0.653716891972679" Connections="487" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.44025634250099,-0.696901961335983,-0.228634627155873"/>
+						</Atom3d>
+						<Bond ID="487" Mapping="107" Parent="80" Connects="483,486"/>
+						<Molecule ID="80" Mapping="107" Parent="2" Children="483,484,485,486,487" Name="Sketch 2"/>
+						<Atom3d ID="488" HasProperties="1" Mapping="107" Parent="81" UserID="229" DisplayStyle="Line" XYZ="0.641350882752903,-0.0391704428444118,0.15107181172636" Connections="490,492" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.336060738677831,0.0838653639335417,0.0108584098172209"/>
+						</Atom3d>
+						<Atom3d ID="489" HasProperties="1" Mapping="107" Parent="81" UserID="230" DisplayStyle="Line" XYZ="0.704454501223416,-0.013847586094358,0.152352665206916" Connections="490" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.6071728016358,-1.78533977151608,0.37569072262365"/>
+						</Atom3d>
+						<Bond ID="490" Mapping="107" Parent="81" Connects="488,489"/>
+						<Atom3d ID="491" HasProperties="1" Mapping="107" Parent="81" UserID="231" DisplayStyle="Line" XYZ="0.639872771325822,-0.0706185923147717,0.211046745176481" Connections="492" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.108248695221438,-0.781374522412344,-0.68804319642676"/>
+						</Atom3d>
+						<Bond ID="492" Mapping="107" Parent="81" Connects="488,491"/>
+						<Molecule ID="81" Mapping="107" Parent="2" Children="488,489,490,491,492" Name="Sketch 2"/>
+						<Atom3d ID="493" HasProperties="1" Mapping="107" Parent="82" UserID="232" DisplayStyle="Line" XYZ="0.795592889754581,0.0407098460472032,0.488792924375482" Connections="495,497" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.160110884409138,-0.177983257458345,-0.00725585198617694"/>
+						</Atom3d>
+						<Atom3d ID="494" HasProperties="1" Mapping="107" Parent="82" UserID="233" DisplayStyle="Line" XYZ="0.730128570533393,0.0448773340399848,0.4728675409247" Connections="495" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.927572705197754,-1.11386977211803,1.07815743047706"/>
+						</Atom3d>
+						<Bond ID="495" Mapping="107" Parent="82" Connects="493,494"/>
+						<Atom3d ID="496" HasProperties="1" Mapping="107" Parent="82" UserID="234" DisplayStyle="Line" XYZ="0.796643936440396,0.0830031541833973,0.542115809403295" Connections="497" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.615486405582375,-0.295986844841621,-1.48816911073311"/>
+						</Atom3d>
+						<Bond ID="497" Mapping="107" Parent="82" Connects="493,496"/>
+						<Molecule ID="82" Mapping="107" Parent="2" Children="493,494,495,496,497" Name="Sketch 2"/>
+						<Atom3d ID="498" HasProperties="1" Mapping="107" Parent="83" UserID="235" DisplayStyle="Line" XYZ="0.20236023426263,0.90240193871196,0.101615196625147" Connections="500,502" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.284688759355431,0.111002173339922,-0.0846331289025856"/>
+						</Atom3d>
+						<Atom3d ID="499" HasProperties="1" Mapping="107" Parent="83" UserID="236" DisplayStyle="Line" XYZ="0.224966408414668,0.9360214377545,0.156225010512418" Connections="500" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.671879342662106,0.020721632640296,0.388944520036576"/>
+						</Atom3d>
+						<Bond ID="500" Mapping="107" Parent="83" Connects="498,499"/>
+						<Atom3d ID="501" HasProperties="1" Mapping="107" Parent="83" UserID="237" DisplayStyle="Line" XYZ="0.258318881712314,0.904640383119123,0.0632557410268161" Connections="502" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.656577408140734,-0.129471283363773,-0.825863349734718"/>
+						</Atom3d>
+						<Bond ID="502" Mapping="107" Parent="83" Connects="498,501"/>
+						<Molecule ID="83" Mapping="107" Parent="2" Children="498,499,500,501,502" Name="Sketch 2"/>
+						<Atom3d ID="503" HasProperties="1" Mapping="107" Parent="84" UserID="238" DisplayStyle="Line" XYZ="0.720908408462248,0.615188930287788,0.985707905332917" Connections="505,507" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.0190775061621902,0.35324642924197,0.436619779758319"/>
+						</Atom3d>
+						<Atom3d ID="504" HasProperties="1" Mapping="107" Parent="84" UserID="239" DisplayStyle="Line" XYZ="0.731027338742136,0.618706457983105,1.05275716851326" Connections="505" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.209289006704228,-2.45253285771949,-0.305332996984859"/>
+						</Atom3d>
+						<Bond ID="505" Mapping="107" Parent="84" Connects="503,504"/>
+						<Atom3d ID="506" HasProperties="1" Mapping="107" Parent="84" UserID="240" DisplayStyle="Line" XYZ="0.753549042993746,0.55719507293121,0.972566453918119" Connections="507" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.609701257651466,-0.451412247517501,1.58538160722564"/>
+						</Atom3d>
+						<Bond ID="507" Mapping="107" Parent="84" Connects="503,506"/>
+						<Molecule ID="84" Mapping="107" Parent="2" Children="503,504,505,506,507" Name="Sketch 2"/>
+						<Atom3d ID="508" HasProperties="1" Mapping="107" Parent="85" UserID="241" DisplayStyle="Line" XYZ="0.219672424214256,0.830224798635888,0.371112636156192" Connections="510,512" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.253901462048388,-0.419652020408937,0.144787774139492"/>
+						</Atom3d>
+						<Atom3d ID="509" HasProperties="1" Mapping="107" Parent="85" UserID="242" DisplayStyle="Line" XYZ="0.255403299632487,0.782723109880694,0.401897073321314" Connections="510" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.199238464629923,-0.994239090894171,1.4799320930366"/>
+						</Atom3d>
+						<Bond ID="510" Mapping="107" Parent="85" Connects="508,509"/>
+						<Atom3d ID="511" HasProperties="1" Mapping="107" Parent="85" UserID="243" DisplayStyle="Line" XYZ="0.198277302963361,0.796151475285962,0.316787178824671" Connections="512" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.40771849481158,0.564927778843442,-0.64652644995799"/>
+						</Atom3d>
+						<Bond ID="512" Mapping="107" Parent="85" Connects="508,511"/>
+						<Molecule ID="85" Mapping="107" Parent="2" Children="508,509,510,511,512" Name="Sketch 2"/>
+						<Atom3d ID="513" HasProperties="1" Mapping="107" Parent="86" UserID="244" DisplayStyle="Line" XYZ="0.155038475440388,0.723422727534799,0.629379432311188" Connections="515,517" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.163703621558546,-0.265016325680446,0.107194049633853"/>
+						</Atom3d>
+						<Atom3d ID="514" HasProperties="1" Mapping="107" Parent="86" UserID="245" DisplayStyle="Line" XYZ="0.17278034717602,0.783735129393968,0.654106451967651" Connections="515" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.33844254276461,-1.25395697817291,-0.580226572956646"/>
+						</Atom3d>
+						<Bond ID="515" Mapping="107" Parent="86" Connects="513,514"/>
+						<Atom3d ID="516" HasProperties="1" Mapping="107" Parent="86" UserID="246" DisplayStyle="Line" XYZ="0.129207638709528,0.696829499057819,0.686215915806712" Connections="517" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.29858378007314,-0.139607211729315,-2.03527488186553"/>
+						</Atom3d>
+						<Bond ID="517" Mapping="107" Parent="86" Connects="513,516"/>
+						<Molecule ID="86" Mapping="107" Parent="2" Children="513,514,515,516,517" Name="Sketch 2"/>
+						<Atom3d ID="518" HasProperties="1" Mapping="107" Parent="87" UserID="247" DisplayStyle="Line" XYZ="0.425452768295886,0.863870488013625,0.273067570377422" Connections="520,522" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.464646815468327,-0.0174697449887919,-0.0687805476832042"/>
+						</Atom3d>
+						<Atom3d ID="519" HasProperties="1" Mapping="107" Parent="87" UserID="248" DisplayStyle="Line" XYZ="0.377301300098188,0.910540947426441,0.265173267436545" Connections="520" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.18148806365842,-0.0549721427250054,2.82760228127269"/>
+						</Atom3d>
+						<Bond ID="520" Mapping="107" Parent="87" Connects="518,519"/>
+						<Atom3d ID="521" HasProperties="1" Mapping="107" Parent="87" UserID="249" DisplayStyle="Line" XYZ="0.428067179349992,0.83844184124713,0.21044544407688" Connections="522" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.251758640568698,0.456342936077568,2.29092052074172"/>
+						</Atom3d>
+						<Bond ID="522" Mapping="107" Parent="87" Connects="518,521"/>
+						<Molecule ID="87" Mapping="107" Parent="2" Children="518,519,520,521,522" Name="Sketch 2"/>
+						<Atom3d ID="523" HasProperties="1" Mapping="107" Parent="88" UserID="250" DisplayStyle="Line" XYZ="0.11485348819063,0.180562235324844,0.881460435907543" Connections="525,527" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.0737111630948294,-0.0891350696939048,-0.271439349681693"/>
+						</Atom3d>
+						<Atom3d ID="524" HasProperties="1" Mapping="107" Parent="88" UserID="251" DisplayStyle="Line" XYZ="0.0753868299758102,0.215934229107289,0.923092821842695" Connections="525" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.356834221120393,0.121273748818876,1.18137413945771"/>
+						</Atom3d>
+						<Bond ID="525" Mapping="107" Parent="88" Connects="523,524"/>
+						<Atom3d ID="526" HasProperties="1" Mapping="107" Parent="88" UserID="252" DisplayStyle="Line" XYZ="0.176122492549471,0.198560293958392,0.903697625169972" Connections="527" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.18852014626192,0.193145901795924,1.02581510422951"/>
+						</Atom3d>
+						<Bond ID="527" Mapping="107" Parent="88" Connects="523,526"/>
+						<Molecule ID="88" Mapping="107" Parent="2" Children="523,524,525,526,527" Name="Sketch 2"/>
+						<Atom3d ID="528" HasProperties="1" Mapping="107" Parent="89" UserID="253" DisplayStyle="Line" XYZ="0.308509826844684,0.095142718281604,0.684201817090175" Connections="530,532" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.63763304396306,-0.25178401691915,-0.149070208415788"/>
+						</Atom3d>
+						<Atom3d ID="529" HasProperties="1" Mapping="107" Parent="89" UserID="254" DisplayStyle="Line" XYZ="0.307162406613049,0.0620349651140145,0.625102360817068" Connections="530" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.662892282433303,-1.43707252303463,0.475279207080714"/>
+						</Atom3d>
+						<Bond ID="530" Mapping="107" Parent="89" Connects="528,529"/>
+						<Atom3d ID="531" HasProperties="1" Mapping="107" Parent="89" UserID="255" DisplayStyle="Line" XYZ="0.244446706066564,0.0867791404554169,0.703886839619583" Connections="532" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.215424688264845,-0.765464861962071,1.02670822631286"/>
+						</Atom3d>
+						<Bond ID="532" Mapping="107" Parent="89" Connects="528,531"/>
+						<Molecule ID="89" Mapping="107" Parent="2" Children="528,529,530,531,532" Name="Sketch 2"/>
+						<Atom3d ID="533" HasProperties="1" Mapping="107" Parent="90" UserID="256" DisplayStyle="Line" XYZ="0.259024811384193,0.608093001385013,0.38912462658648" Connections="535,537" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.118153723787044,-0.315994794069879,0.257789206335614"/>
+						</Atom3d>
+						<Atom3d ID="534" HasProperties="1" Mapping="107" Parent="90" UserID="257" DisplayStyle="Line" XYZ="0.289308414653594,0.616768455052645,0.449424377441846" Connections="535" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.271983490874342,0.0434149918018911,0.560635488955343"/>
+						</Atom3d>
+						<Bond ID="535" Mapping="107" Parent="90" Connects="533,534"/>
+						<Atom3d ID="536" HasProperties="1" Mapping="107" Parent="90" UserID="258" DisplayStyle="Line" XYZ="0.194968825314072,0.616399558212781,0.4096490452678" Connections="537" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.966633030177114,1.79836362349615,0.171570692314348"/>
+						</Atom3d>
+						<Bond ID="537" Mapping="107" Parent="90" Connects="533,536"/>
+						<Molecule ID="90" Mapping="107" Parent="2" Children="533,534,535,536,537" Name="Sketch 2"/>
+						<Atom3d ID="538" HasProperties="1" Mapping="107" Parent="91" UserID="259" DisplayStyle="Line" XYZ="0.169191949147283,0.747039225292672,0.202558112891002" Connections="540,542" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.188759957673952,-0.114266047774734,-0.152528538287429"/>
+						</Atom3d>
+						<Atom3d ID="539" HasProperties="1" Mapping="107" Parent="91" UserID="260" DisplayStyle="Line" XYZ="0.206906490148242,0.712632219584676,0.157848557062437" Connections="540" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.821109298465024,-0.721564889723505,-1.97223255014716"/>
+						</Atom3d>
+						<Bond ID="540" Mapping="107" Parent="91" Connects="538,539"/>
+						<Atom3d ID="541" HasProperties="1" Mapping="107" Parent="91" UserID="261" DisplayStyle="Line" XYZ="0.166515116957357,0.805689325336746,0.168380976892521" Connections="542" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.146899495984191,2.98026498089852,1.45539406743668"/>
+						</Atom3d>
+						<Bond ID="542" Mapping="107" Parent="91" Connects="538,541"/>
+						<Molecule ID="91" Mapping="107" Parent="2" Children="538,539,540,541,542" Name="Sketch 2"/>
+						<Atom3d ID="543" HasProperties="1" Mapping="107" Parent="92" UserID="262" DisplayStyle="Line" XYZ="0.0232527399881407,0.308097462895745,1.00145893973559" Connections="545,547" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.121109756426842,0.00511079875174774,0.30202628179662"/>
+						</Atom3d>
+						<Atom3d ID="544" HasProperties="1" Mapping="107" Parent="92" UserID="263" DisplayStyle="Line" XYZ="-0.00317052045768325,0.364365618630429,0.974780814148944" Connections="545" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.438582424082337,1.79313247986507,-0.251591222299931"/>
+						</Atom3d>
+						<Bond ID="545" Mapping="107" Parent="92" Connects="543,544"/>
+						<Atom3d ID="546" HasProperties="1" Mapping="107" Parent="92" UserID="264" DisplayStyle="Line" XYZ="0.0833360870344432,0.333350476954685,1.01974973228176" Connections="547" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.20296935312683,-0.260118256149622,0.666465755190445"/>
+						</Atom3d>
+						<Bond ID="547" Mapping="107" Parent="92" Connects="543,546"/>
+						<Molecule ID="92" Mapping="107" Parent="2" Children="543,544,545,546,547" Name="Sketch 2"/>
+						<Atom3d ID="548" HasProperties="1" Mapping="107" Parent="93" UserID="265" DisplayStyle="Line" XYZ="0.446537507405349,0.603395524253762,0.338975606981633" Connections="550,552" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.349746220479357,-0.00246529398841665,0.0945560363941886"/>
+						</Atom3d>
+						<Atom3d ID="549" HasProperties="1" Mapping="107" Parent="93" UserID="266" DisplayStyle="Line" XYZ="0.467352267301283,0.610295815784322,0.27512684512728" Connections="550" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.059779026909762,0.0772314142632631,1.45300479798361"/>
+						</Atom3d>
+						<Bond ID="550" Mapping="107" Parent="93" Connects="548,549"/>
+						<Atom3d ID="551" HasProperties="1" Mapping="107" Parent="93" UserID="267" DisplayStyle="Line" XYZ="0.379309715287952,0.60651456963804,0.332825153731605" Connections="552" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.22908813766226,-0.789857839163496,-1.80515089700294"/>
+						</Atom3d>
+						<Bond ID="552" Mapping="107" Parent="93" Connects="548,551"/>
+						<Molecule ID="93" Mapping="107" Parent="2" Children="548,549,550,551,552" Name="Sketch 2"/>
+						<Atom3d ID="553" HasProperties="1" Mapping="107" Parent="94" UserID="268" DisplayStyle="Line" XYZ="0.720457861059198,0.529171220635369,0.669534596422719" Connections="555,557" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.296791570865446,-0.254793099667659,-0.418787705426293"/>
+						</Atom3d>
+						<Atom3d ID="554" HasProperties="1" Mapping="107" Parent="94" UserID="269" DisplayStyle="Line" XYZ="0.673509595903826,0.559121476233984,0.708228892783946" Connections="555" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.36051146663051,0.675453986979977,0.199085567685337"/>
+						</Atom3d>
+						<Bond ID="555" Mapping="107" Parent="94" Connects="553,554"/>
+						<Atom3d ID="556" HasProperties="1" Mapping="107" Parent="94" UserID="270" DisplayStyle="Line" XYZ="0.763734678220865,0.580716071863772,0.66252430372803" Connections="557" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.31373854842984,-0.382991709208459,-0.927469752883876"/>
+						</Atom3d>
+						<Bond ID="557" Mapping="107" Parent="94" Connects="553,556"/>
+						<Molecule ID="94" Mapping="107" Parent="2" Children="553,554,555,556,557" Name="Sketch 2"/>
+						<Atom3d ID="558" HasProperties="1" Mapping="107" Parent="95" UserID="271" DisplayStyle="Line" XYZ="0.379379024015087,0.680715893387946,0.915884065625069" Connections="560,562" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.218365275936284,-0.122623118697562,-0.439916422141107"/>
+						</Atom3d>
+						<Atom3d ID="559" HasProperties="1" Mapping="107" Parent="95" UserID="272" DisplayStyle="Line" XYZ="0.445665541781871,0.686621302887827,0.929945680125949" Connections="560" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="2.04205476115294,-0.083069226251084,0.725642815696938"/>
+						</Atom3d>
+						<Bond ID="560" Mapping="107" Parent="95" Connects="558,559"/>
+						<Atom3d ID="561" HasProperties="1" Mapping="107" Parent="95" UserID="273" DisplayStyle="Line" XYZ="0.371717968605807,0.740347711537998,0.883975464676819" Connections="562" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.05592576442214,-0.992769132818632,-1.54396170860794"/>
+						</Atom3d>
+						<Bond ID="562" Mapping="107" Parent="95" Connects="558,561"/>
+						<Molecule ID="95" Mapping="107" Parent="2" Children="558,559,560,561,562" Name="Sketch 2"/>
+						<Atom3d ID="563" HasProperties="1" Mapping="107" Parent="96" UserID="274" DisplayStyle="Line" XYZ="0.034666417791512,0.92946456181142,0.729946029349627" Connections="565,567" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.274574216436437,0.626955443292674,-0.176621345886402"/>
+						</Atom3d>
+						<Atom3d ID="564" HasProperties="1" Mapping="107" Parent="96" UserID="275" DisplayStyle="Line" XYZ="-0.0132424801616848,0.915502202174342,0.683925793888983" Connections="565" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.34043484047782,2.17427065013619,-1.2734571897315"/>
+						</Atom3d>
+						<Bond ID="565" Mapping="107" Parent="96" Connects="563,564"/>
+						<Atom3d ID="566" HasProperties="1" Mapping="107" Parent="96" UserID="276" DisplayStyle="Line" XYZ="0.0543240402947181,0.991376364953911,0.710575924134236" Connections="567" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.728646884899546,0.618843477302496,-0.682464876767786"/>
+						</Atom3d>
+						<Bond ID="567" Mapping="107" Parent="96" Connects="563,566"/>
+						<Molecule ID="96" Mapping="107" Parent="2" Children="563,564,565,566,567" Name="Sketch 2"/>
+						<Atom3d ID="568" HasProperties="1" Mapping="107" Parent="97" UserID="277" DisplayStyle="Line" XYZ="0.485247549808389,0.470565849441529,0.47960501558374" Connections="570,572" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.0540826228719075,-0.033693005448784,-0.0470676082522101"/>
+						</Atom3d>
+						<Atom3d ID="569" HasProperties="1" Mapping="107" Parent="97" UserID="278" DisplayStyle="Line" XYZ="0.481661156836316,0.515896953764906,0.429225641433415" Connections="570" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.632177715735675,-0.46403750187026,-0.158090741457681"/>
+						</Atom3d>
+						<Bond ID="570" Mapping="107" Parent="97" Connects="568,569"/>
+						<Atom3d ID="571" HasProperties="1" Mapping="107" Parent="97" UserID="279" DisplayStyle="Line" XYZ="0.421435758369704,0.47422957621718,0.501861577983839" Connections="572" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.3169062131892,-0.541690773656037,1.00379057934988"/>
+						</Atom3d>
+						<Bond ID="572" Mapping="107" Parent="97" Connects="568,571"/>
+						<Molecule ID="97" Mapping="107" Parent="2" Children="568,569,570,571,572" Name="Sketch 2"/>
+						<Atom3d ID="573" HasProperties="1" Mapping="107" Parent="98" UserID="280" DisplayStyle="Line" XYZ="0.168572223167414,0.480765674692477,0.827033322515598" Connections="575,577" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.189079033051662,0.264211558816498,0.163077974278108"/>
+						</Atom3d>
+						<Atom3d ID="574" HasProperties="1" Mapping="107" Parent="98" UserID="281" DisplayStyle="Line" XYZ="0.234413014085122,0.495874222405089,0.816831406324252" Connections="575" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.990370706708918,-1.06104327968845,0.926023820622688"/>
+						</Atom3d>
+						<Bond ID="575" Mapping="107" Parent="98" Connects="573,574"/>
+						<Atom3d ID="576" HasProperties="1" Mapping="107" Parent="98" UserID="282" DisplayStyle="Line" XYZ="0.158903267034491,0.444255567911251,0.770011199148901" Connections="577" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.568721055953073,1.25221745496307,-0.152963011962565"/>
+						</Atom3d>
+						<Bond ID="577" Mapping="107" Parent="98" Connects="573,576"/>
+						<Molecule ID="98" Mapping="107" Parent="2" Children="573,574,575,576,577" Name="Sketch 2"/>
+						<Atom3d ID="578" HasProperties="1" Mapping="107" Parent="99" UserID="283" DisplayStyle="Line" XYZ="0.374236466997465,0.848856919009893,0.832696013657494" Connections="580,582" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.302142813436499,0.19511748558294,0.400765964514315"/>
+						</Atom3d>
+						<Atom3d ID="579" HasProperties="1" Mapping="107" Parent="99" UserID="284" DisplayStyle="Line" XYZ="0.313391094895954,0.85738393051893,0.803623225334285" Connections="580" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.394670261272147,0.171045495115233,1.27470069652583"/>
+						</Atom3d>
+						<Bond ID="580" Mapping="107" Parent="99" Connects="578,579"/>
+						<Atom3d ID="581" HasProperties="1" Mapping="107" Parent="99" UserID="285" DisplayStyle="Line" XYZ="0.414032051197104,0.853633721164767,0.777512928607186" Connections="582" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.236094756571439,-0.74187838071712,-0.996872725484609"/>
+						</Atom3d>
+						<Bond ID="582" Mapping="107" Parent="99" Connects="578,581"/>
+						<Molecule ID="99" Mapping="107" Parent="2" Children="578,579,580,581,582" Name="Sketch 2"/>
+						<Atom3d ID="583" HasProperties="1" Mapping="107" Parent="100" UserID="286" DisplayStyle="Line" XYZ="0.628136450580266,0.301717554208926,0.936749097690798" Connections="585,587" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.00507439522876461,-0.0167847942180981,-0.0425845383059827"/>
+						</Atom3d>
+						<Atom3d ID="584" HasProperties="1" Mapping="107" Parent="100" UserID="287" DisplayStyle="Line" XYZ="0.658041404707143,0.332699531621529,0.884347433220047" Connections="585" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.782022009466044,-0.799279269862353,0.561480261572532"/>
+						</Atom3d>
+						<Bond ID="585" Mapping="107" Parent="100" Connects="583,584"/>
+						<Atom3d ID="586" HasProperties="1" Mapping="107" Parent="100" UserID="288" DisplayStyle="Line" XYZ="0.677794200191732,0.257823527548693,0.951958810666938" Connections="587" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-1.11450863261209,-0.261614403519333,-1.4458122922897"/>
+						</Atom3d>
+						<Bond ID="587" Mapping="107" Parent="100" Connects="583,586"/>
+						<Molecule ID="100" Mapping="107" Parent="2" Children="583,584,585,586,587" Name="Sketch 2"/>
+						<Atom3d ID="588" HasProperties="1" Mapping="107" Parent="101" UserID="289" DisplayStyle="Line" XYZ="0.0594586744053599,0.656044099405626,-0.0133064380318906" Connections="590,592" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.127182315073297,-0.410808768742989,-0.305983028696655"/>
+						</Atom3d>
+						<Atom3d ID="589" HasProperties="1" Mapping="107" Parent="101" UserID="290" DisplayStyle="Line" XYZ="0.117512638937719,0.66563138962454,0.0195975059630686" Connections="590" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.343817367190675,-0.518851694575578,-0.404590421902755"/>
+						</Atom3d>
+						<Bond ID="590" Mapping="107" Parent="101" Connects="588,589"/>
+						<Atom3d ID="591" HasProperties="1" Mapping="107" Parent="101" UserID="291" DisplayStyle="Line" XYZ="0.0227413952852747,0.707497316780842,0.0117619554071028" Connections="592" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.40344829682056,-0.178963677188946,-0.567193705743287"/>
+						</Atom3d>
+						<Bond ID="592" Mapping="107" Parent="101" Connects="588,591"/>
+						<Molecule ID="101" Mapping="107" Parent="2" Children="588,589,590,591,592" Name="Sketch 2"/>
+						<Atom3d ID="593" HasProperties="1" Mapping="107" Parent="102" UserID="292" DisplayStyle="Line" XYZ="0.61586439982334,0.235130459553107,0.683613569165097" Connections="595,597" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.000552945416739521,0.291154298837848,-0.0971113202957548"/>
+						</Atom3d>
+						<Atom3d ID="594" HasProperties="1" Mapping="107" Parent="102" UserID="293" DisplayStyle="Line" XYZ="0.578906373657215,0.186898346385501,0.713870258561964" Connections="595" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.86933972367995,-0.0966547547235415,-0.582530559323558"/>
+						</Atom3d>
+						<Bond ID="595" Mapping="107" Parent="102" Connects="593,594"/>
+						<Atom3d ID="596" HasProperties="1" Mapping="107" Parent="102" UserID="294" DisplayStyle="Line" XYZ="0.570094809914916,0.256507107287848,0.638515464081092" Connections="597" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.410453004373732,-0.333008433997622,1.69323919343793"/>
+						</Atom3d>
+						<Bond ID="597" Mapping="107" Parent="102" Connects="593,596"/>
+						<Molecule ID="102" Mapping="107" Parent="2" Children="593,594,595,596,597" Name="Sketch 2"/>
+						<Atom3d ID="598" HasProperties="1" Mapping="107" Parent="103" UserID="295" DisplayStyle="Line" XYZ="0.362522023636017,0.923331654848086,1.00886497394419" Connections="600,602" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="0.624162345472748,0.14992685120587,0.371256002143589"/>
+						</Atom3d>
+						<Atom3d ID="599" HasProperties="1" Mapping="107" Parent="103" UserID="296" DisplayStyle="Line" XYZ="0.371096179577192,0.905806948237695,0.943791295469828" Connections="600" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="-0.149261904622721,-0.192823185969681,0.733654725152965"/>
+						</Atom3d>
+						<Bond ID="600" Mapping="107" Parent="103" Connects="598,599"/>
+						<Atom3d ID="601" HasProperties="1" Mapping="107" Parent="103" UserID="297" DisplayStyle="Line" XYZ="0.402480198145982,0.877398662856205,1.03847789251361" Connections="602" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="0.510548486705182,-0.254129637548595,0.333311072487879"/>
+						</Atom3d>
+						<Bond ID="602" Mapping="107" Parent="103" Connects="598,601"/>
+						<Molecule ID="103" Mapping="107" Parent="2" Children="598,599,600,601,602" Name="Sketch 2"/>
+						<Atom3d ID="603" HasProperties="1" Mapping="107" Parent="104" UserID="298" DisplayStyle="Line" XYZ="-0.0255468417668223,0.812247874452899,1.05618957516512" Connections="605,607" ForcefieldType="o2*" Charge="-0.82" Components="O">
+							<Properties RelativeVelocity="-0.120865323014555,-0.456530575727528,0.258347911277984"/>
+						</Atom3d>
+						<Atom3d ID="604" HasProperties="1" Mapping="107" Parent="104" UserID="299" DisplayStyle="Line" XYZ="-0.0295401585597655,0.819731865721326,1.12360327654437" Connections="605" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.65921562980126,0.426066097451811,0.164756103666308"/>
+						</Atom3d>
+						<Bond ID="605" Mapping="107" Parent="104" Connects="603,604"/>
+						<Atom3d ID="606" HasProperties="1" Mapping="107" Parent="104" UserID="300" DisplayStyle="Line" XYZ="0.00271683928161074,0.871708022198983,1.04009259529885" Connections="607" ForcefieldType="h1o" Charge="0.41" Components="H">
+							<Properties RelativeVelocity="1.50904017332664,1.55792105672918,0.810482698412092"/>
+						</Atom3d>
+						<Bond ID="607" Mapping="107" Parent="104" Connects="603,606"/>
+						<Molecule ID="104" Mapping="107" Parent="2" Children="603,604,605,606,607" Name="Sketch 2"/>
+						<SpaceGroup ID="4" Parent="2" Children="608" AVector="14.4087985787674,0,0" BVector="0,14.4087985787674,0" CVector="0,0,14.4087985787674" OrientationBase="C along Z, B in YZ plane" Centering="3D Primitive-Centered" Lattice="3D Triclinic" GroupName="P1" Operators="1,0,0,0,0,1,0,0,0,0,1,0" DisplayRange="0,1,0,1,0,1" LineThickness="2" CylinderRadius="0.2" LabelAxes="1" ActiveSystem="2" ITNumber="1" LongName="P 1" Qualifier="Origin-1" SchoenfliesName="C1-1" System="Triclinic" Class="1"/>
+						<ReciprocalLattice3D ID="608" Parent="4" Visible="0"/>
+					</IdentityMapping>
+					<MappingRepairs NumRepairs="0"/>
+				</MappingFamily>
+				<InfiniteMapping ID="3" Element="1,0,0,0,0,1,0,0,0,0,1,0" MappedObjects="2"/>
+			</MappingSet>
+			<OriginalObjects ID="609">
+				<SetCollection/>
+			</OriginalObjects>
+		</SymmetrySystem>
+		<Trajectory ID="610" End="101" Type="trj" FrameClassType="Bondable"/>
+	</AtomisticTreeRoot>
+</XSD>

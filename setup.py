@@ -186,8 +186,8 @@ if sphinx:
 
             sphinxDir = os.path.abspath(os.path.join(build.build_base,'sphinx',self.doctype))
 
-            if not os.path.exists(sphinxDir):
-                os.mkdir(sphinxDir)
+            if not os.path.exists(sphinxDir):                
+                os.makedirs(sphinxDir)
                                  
             metadata = self.distribution.metadata
             args = ["-F",
@@ -270,11 +270,17 @@ EXTENSIONS = [Extension('MDANSE.Extensions.distance_histogram',
                         language="c++"),
               Extension('MDANSE.Extensions.qhull',
                         include_dirs  = QHULL_INCLUDE_DIR,
-                        sources =  glob.glob(os.path.join(QHULL_DIR, 'src','*.c')) + [os.path.join("Extensions",'qhull.pyx')],
+                        sources =  glob.glob(os.path.join(QHULL_DIR, 'src','*.c')) +
+                                   [os.path.join("Extensions",'qhull.pyx')],
                         define_macros = [('qh_QHpointer','1')]),
               Extension('MDANSE.Extensions.xtc',
                         include_dirs=[numpy.get_include(),os.path.join('Extensions','xtc','include')],
-                        sources=glob.glob(os.path.join('Extensions','xtc','src','*.c')) + [os.path.join('Extensions','xtc','xtc.pyx')])
+                        sources=glob.glob(os.path.join('Extensions','xtc','src','*.c')) +
+                                [os.path.join('Extensions','xtc','xtc.pyx')]),
+              Extension('MDANSE.Extensions.trr',
+                        include_dirs=[numpy.get_include(),os.path.join('Extensions','xtc','include')],
+                        sources=glob.glob(os.path.join('Extensions','xtc','src','*.c')) +
+                                [os.path.join('Extensions','xtc','trr.pyx')])
               ]
 
 CMDCLASS = {'build_ext' : cython_build_ext}

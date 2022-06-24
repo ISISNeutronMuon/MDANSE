@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -110,7 +111,6 @@ class LAMMPSConfigFile(dict):
                                     if numpy.abs(ELEMENTS[element]["atomic_weight"] - mass) < numpy.abs(ELEMENTS[matched_element]["atomic_weight"] - mass):
                                         matched_element = element
                             self["elements"][idx] = matched_element
-                            print(matched_element)
                         else:
                             # More than two elements are matching => error
                             raise LAMMPSConfigFileError("The atoms %s of MDANSE database matches the mass %f with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database" % (el,mass,self._tolerance))
@@ -136,14 +136,15 @@ class LAMMPSConverter(Converter):
 
     settings = collections.OrderedDict()        
     settings['config_file'] = ('input_file', {'label':"LAMMPS configuration file",
-                                              'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.config')})
+                                                'wildcard':'Config files (*.config)|*.config|All files|*',
+                                                'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.config')})
     settings['trajectory_file'] = ('input_file', {'label':"LAMMPS trajectory file",
                                                   'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.lammps')})
     settings['mass_tolerance'] = ('float', {'label':"mass tolerance (uma)", 'default':1.0e-3, 'mini':1.0e-9})
     settings['smart_mass_association'] = ('boolean', {'label':"smart mass association", 'default':True})
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})        
     settings['n_steps'] = ('integer', {'label':"number of time steps (0 for automatic detection)", 'default':0, 'mini':0})
-    settings['output_files'] = ('output_files', {'formats':["netcdf"]})
+    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'config_file'})
     
     def initialize(self):
         '''
@@ -158,12 +159,15 @@ class LAMMPSConverter(Converter):
         self.parse_first_step()
         
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_files']['files'][0], mode='w')
+        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
 
         self._nameToIndex = dict([(at.name,at.index) for at in self._universe.atomList()])
 
+        data_to_be_written = ["configuration", "time"]
+
         # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, ["all"], 0, None, 1)])
+        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory,
+                                                                                       data_to_be_written, 0, None, 1)])
 
         # Estimate number of steps if needed
         if self.numberOfSteps == 0:
@@ -287,11 +291,13 @@ class LAMMPSConverter(Converter):
             netcdf.createDimension("MDANSE_NBONDS",self._lammpsConfig["n_bonds"])
             netcdf.createDimension("MDANSE_TWO",2)
             VAR = netcdf.createVariable("mdanse_bonds", numpy.dtype(numpy.int32).char, ("MDANSE_NBONDS","MDANSE_TWO"))
-            VAR.assignValue(self._lammpsConfig["bonds"]) 
+            VAR[:,:] = self._lammpsConfig["bonds"]
                 
         # Close the output trajectory.
         self._trajectory.close()
                         
+        super(LAMMPSConverter,self).finalize()
+
     def parse_first_step(self):
 
         self._lammps = open(self.configuration["trajectory_file"]["value"], 'r')        

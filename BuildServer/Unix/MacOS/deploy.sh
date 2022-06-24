@@ -5,19 +5,18 @@
 #############################
 # Debug option for py2app, if needed
 export DISTUTILS_DEBUG=0
-export MDANSE_DEPENDENCIES_DIR=/Users/ci/Projects/mdanse/bundle
-
+export PYTHONEXE=$HOME/Contents/Resources/bin/python
 #############################
 # PREPARATION
 #############################
-cd ${CI_PROJECT_DIR}
+cd ${GITHUB_WORKSPACE} || exit
 
 export MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
 
 export PYTHONPATH=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages:${PYTHONPATH}
 
 # Build API
-${PYTHONEXE} setup.py build_api build_help install --prefix=${CI_TEMP_INSTALL_DIR}
+sudo ${PYTHONEXE} setup.py build build_api build_help install
 
 status=$?
 if [ $status -ne 0 ]; then
@@ -25,34 +24,127 @@ if [ $status -ne 0 ]; then
 	exit $status
 fi
 
+# Create directories
+mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
+mkdir -p ${MDANSE_APP_DIR}/Contents/MacOS
+mkdir -p ${MDANSE_APP_DIR}/Contents/Frameworks
 #############################
 # PACKAGING
 #############################
 echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
+MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
-# Copy the bundle
-mkdir ${CI_TEMP_DIR}/dist
-mkdir ${CI_TEMP_DIR}/dist/MDANSE.app
-cp -R ${MDANSE_DEPENDENCIES_DIR} ${MDANSE_APP_DIR}/Contents
-cp -R ${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages/* ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/
+# Replace buggy py2app files
+echo "Replacing buggy python2 files"
+sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
+sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
+
+echo "Uninstall sphinx and its dependencies"
+sudo ${PYTHONEXE} -m pip uninstall -y sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3
+
+echo "Building mdanse app"
+cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS" || exit
+sudo ${PYTHONEXE} build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR"
+status=$?
+if [ $status -ne 0 ]; then
+	echo -e "${RED}" "Cannot build app.""${NORMAL}"
+	exit $status
+fi
 
 # Add MDANSE version file (should read the version from the bundle with pyobjc, but will figure that out later)
-echo "${VERSION_NAME}" > ${MDANSE_APP_DIR}/Contents/Resources/version
+echo "Add mdanse version file"
+echo "${VERSION_NAME}" | sudo tee "${MDANSE_APP_DIR}/Contents/Resources/version"
 
-# Copy MDANSE GUI
-cp ${CI_PROJECT_DIR}/Scripts/mdanse_gui ${MDANSE_APP_DIR}/Contents/Resources/
+# Copy over instruction for using bundled python
+sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/How to use the bundled python.txt" "$MDANSE_APP_DIR/Contents/MacOS"
 
-# Modify Info.plist and copy it
-sed -i "" "s/<MDANSE_VERSION>/${VERSION_NAME}/" ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/Resources/Info.plist
-cp ${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/Resources/Info.plist ${MDANSE_APP_DIR}/Contents/
+#############################
+# Copying Python
+#############################
+### When launching the bundle, the executable target (i.e. MDANSE) modify the python that is shipped with the bundle (si.e. package path, dylib dependencies ...)
+### see http://joaoventura.net/blog/2016/embeddable-python-osx/ for technical details
+### In our case we also want the user to be able to start directly python without launching the bundle executable (e.g. to run scripts in command line) which is the reason
+### why we have to modify the python executable appropriately with the following commands
+echo -e "${BLUE}""Copying python""${NORMAL}"
+sudo mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
 
-# Relink netcdf
-install_name_tool -change /usr/local/opt/netcdf/lib/libnetcdf.18.dylib @executable_path/../Frameworks/libnetcdf.18.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/Scientific/_netcdf.so
+echo "Copy lib"
+sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
 
+echo "Copy dependency dylibs"
+sudo mv -v ${MDANSE_APP_DIR}/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
+sudo cp -v /usr/lib/libz.* ${MDANSE_APP_DIR}/Contents/Frameworks
+sudo cp -v /usr/lib/libc++* ${MDANSE_APP_DIR}/Contents/Frameworks
+sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
+
+# It is necessary to interlink the following dylibs for them to work properly
+echo "Change dylib links"
+# libpython
+sudo install_name_tool -id @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
+sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
+sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib  @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
+# libintl
+sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
+sudo install_name_tool -change /usr/lib/libiconv.2.dylib @executable_path/../Frameworks/libiconv.2.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
+# libc++
+sudo install_name_tool -change /usr/lib/libc++.1.dylib @executable_path/../Frameworks/libc++.1.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++.1.dylib
+sudo install_name_tool -change /usr/lib/libc++abi.dylib @executable_path/../Frameworks/libc++abi.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++.1.dylib
+sudo install_name_tool -change /usr/lib/libc++abi.dylib @executable_path/../Frameworks/libc++abi.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++abi.dylib
+# libz
+sudo install_name_tool -change /usr/lib/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libz.1.dylib
+# hashlib
+sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libssl.1.1.dylib @executable_path/../Frameworks/libssl.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
+sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib @executable_path/../Frameworks/libcrypto.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
+
+echo "Copy site.py"
+sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
+sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/.
+
+echo -e "${BLUE}""Changing wx and vtk dyilib links""${NORMAL}"
+chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
+"${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
+
+# Comment out the 'add_system_python_extras' call that add some System path to the sys.path and
+# '_boot_multiprocessing' which is bugged since python 2 doesn't have the functions it uses
+echo "Comment out in __boot__.py"
+sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
+sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
+
+# Create a bash script that will run the bundled python with $PYTHONHOME set
+echo "#!/bin/bash" > ~/python2
+{
+echo 'SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"'
+echo 'PARENT_DIR="$(dirname "$SCRIPT_DIR")"'
+echo 'export PYTHONHOME=$PARENT_DIR:$PARENT_DIR/Resources'
+echo 'export PYTHONPATH=$PARENT_DIR/Resources/lib/python2.7:$PARENT_DIR/Resources:$PARENT_DIR/Resources/lib/python2.7/site-packages'
+echo '$SCRIPT_DIR/python "${@:2}"'
+} >> ~/python2
+sudo cp -v ~/python2 "${MDANSE_APP_DIR}/Contents/MacOS"
+sudo chmod 755 "${MDANSE_APP_DIR}/Contents/MacOS/python2"
+
+#############################
+# Cleanup
+#############################
+# Removing matplotlib/tests ==> 45.2 Mb
+echo "Remove files"
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/matplotlib/tests
+# Sample data for matplotlib is useless
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/matplotlib/mpl-data/sample_data
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/mpl-data/sample_data
+# Scipy package is useless
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/scipy
+# ZMQ package is useless
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/zmq
+# Remove python
+sudo rm -rf $HOME/Contents
+#Remove py2app
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/py2app
+
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/conf_
 #############################
 # Create DMG
 #############################
-MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
-hdiutil unmount /Volumes/MDANSE -force -quiet
 sleep 5
-${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/create-dmg --background "${CI_PROJECT_DIR}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
+echo "Create dmg"
+"$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/create-dmg" --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
+sudo mv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/${MDANSE_DMG} ${GITHUB_WORKSPACE}

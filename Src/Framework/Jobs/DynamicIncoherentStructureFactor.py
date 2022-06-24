@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -44,7 +45,7 @@ class DynamicIncoherentStructureFactor(IJob):
     settings['atom_transmutation']=('atom_transmutation',{"dependencies":{'trajectory':'trajectory', 'atom_selection':'atom_selection'}})
     settings['projection']=('projection', {"label":"project coordinates"})
     settings['weights'] = ('weights', {'default':'b_incoherent2',"dependencies":{'trajectory':'trajectory','atom_selection':'atom_selection', 'atom_transmutation':'atom_transmutation'}})
-    settings['output_files']=('output_files', {"formats":["netcdf","ascii"]})
+    settings['output_files']=('output_files', {"formats":["hdf","netcdf","ascii"]})
     settings['running_mode']=('running_mode',{})
                     
     def initialize(self):
@@ -62,7 +63,7 @@ class DynamicIncoherentStructureFactor(IJob):
         
         self._nOmegas = self._instrResolution['n_omegas']
 
-        self._outputData.add("q","line", self.configuration["q_vectors"]["shells"], units="inv_nm") 
+        self._outputData.add("q","line", self.configuration["q_vectors"]["shells"], units="1/nm") 
 
         self._outputData.add("time","line", self.configuration['frames']['duration'], units='ps')
         self._outputData.add("time_window","line", self._instrResolution["time_window"], axis="time", units="au") 

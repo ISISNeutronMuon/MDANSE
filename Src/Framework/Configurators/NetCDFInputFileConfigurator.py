@@ -8,11 +8,12 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
 
-from Scientific.IO.NetCDF import NetCDFFile
+import netCDF4
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
@@ -58,7 +59,7 @@ class NetCDFInputFileConfigurator(InputFileConfigurator):
         InputFileConfigurator.configure(self, value)
         
         try:
-            self['instance'] = NetCDFFile(self['value'], 'r')
+            self['instance'] = netCDF4.Dataset(self['value'], 'r')
             
         except IOError:
             raise ConfiguratorError("can not open %r NetCDF file for reading" % self['value'])

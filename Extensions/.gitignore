@@ -5,3 +5,5 @@
 /qhull.c
 /sas_fast_calc.c
 /sd_fast_calc.c
+/xtc/xtc.c
+/xtc/trr.c
