@@ -52,10 +52,42 @@ class ScaledLocator(matplotlib.ticker.MaxNLocator):
 class ScaledFormatter(matplotlib.ticker.ScalarFormatter):
     """Formats tick labels scaled by *dx* and shifted by *x0*."""
     def __init__(self, dx=1.0, x0=0.0, **kwargs):
+        super(ScaledFormatter,self).__init__(**kwargs)
         self.dx, self.x0 = dx, x0
 
     def rescale(self, x):
         return x * self.dx + self.x0
+
+    def pprint_val(self, x, d):
+        """
+        Formats the value `x` based on the size of the axis range `d`.
+        """
+        # If the number is not too big and it's an int, format it as an int.
+        if abs(x) < 1e4 and x == int(x):
+            return '%d' % x
+
+        if d < 1e-2:
+            fmt = '%1.3e'
+        elif d < 1e-1:
+            fmt = '%1.3f'
+        elif d > 1e5:
+            fmt = '%1.1e'
+        elif d > 10:
+            fmt = '%1.1f'
+        elif d > 1:
+            fmt = '%1.2f'
+        else:
+            fmt = '%1.3f'
+        s = fmt % x
+        tup = s.split('e')
+        if len(tup) == 2:
+            mantissa = tup[0].rstrip('0').rstrip('.')
+            sign = tup[1][0].replace('+', '')
+            exponent = tup[1][1:].lstrip('0')
+            s = '%se%s%s' % (mantissa, sign, exponent)
+        else:
+            s = s.rstrip('0').rstrip('.')
+        return s
 
     def __call__(self, x, pos=None):
         xmin, xmax = self.axis.get_view_interval()

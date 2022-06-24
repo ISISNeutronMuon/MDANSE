@@ -425,19 +425,8 @@ Authors:
         self.toggle_window(pane)    
 
     def on_toggle_toolbar(self, event=None):
-
-        self._prevSize = self.GetSize()
-
-        if self.GetToolBar():
-            sizeH = self._prevSize[1] - self._toolbar.GetSize()[1]
-            self._toolbar.Hide()
-            self.SetToolBar(None)
-        else:
-            sizeH = self._prevSize[1] + self._toolbar.GetSize()[1]
-            self.SetToolBar(self._toolbar)
-            self._toolbar.Show()
-            
-        self.SetSize((-1,sizeH))
+        self.toggle_window(self._toolbar)
+        self.Layout()
             
     @property
     def panels(self):
@@ -451,7 +440,8 @@ Authors:
             window.Show()
 
         self._mgr.Update()
-        
+
+
 if __name__ == "__main__":
     
     from MDANSE.GUI.Apps import MainApplication

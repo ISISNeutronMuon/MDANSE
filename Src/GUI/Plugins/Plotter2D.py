@@ -525,11 +525,13 @@ class Plotter2D(wx.Panel):
         self.compute_conversion_factor()
                 
         self.figure.gca().xaxis.set_major_locator(ScaledLocator(dx = self.Xunit_conversion_factor))
-        self.figure.gca().xaxis.set_major_formatter(ScaledFormatter(dx = self.Xunit_conversion_factor))      
+        xAxisFormatter = ScaledFormatter(dx = self.Xunit_conversion_factor)
+        self.figure.gca().xaxis.set_major_formatter(xAxisFormatter)
         
         self.figure.gca().yaxis.set_major_locator(ScaledLocator(dx = self.Yunit_conversion_factor))
-        self.figure.gca().yaxis.set_major_formatter(ScaledFormatter(dx = self.Yunit_conversion_factor)) 
-        
+        yAxisFormatter = ScaledFormatter(dx = self.Yunit_conversion_factor)
+        self.figure.gca().yaxis.set_major_formatter(yAxisFormatter)
+
         self.ax.set_extent([self.Xmin, self.Xmax, self.Ymin, self.Ymax])
         
     def set_axis_property(self, varname, data):

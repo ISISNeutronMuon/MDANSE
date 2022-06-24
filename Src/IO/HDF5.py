@@ -13,13 +13,14 @@
 #
 # **************************************************************************
 
+import h5py
 import numpy
 
 from MDANSE.IO.IOUtils import _IFileVariable
 
 
-class NetCDFFileVariable(_IFileVariable):
-    """Wrapper for NetCDF plotter data."""
+class HDFFileVariable(_IFileVariable):
+    """Wrapper for HDF plotter data."""
 
     def get_array(self):
         """Returns the actual data stored by the plotter data.
@@ -35,44 +36,42 @@ class NetCDFFileVariable(_IFileVariable):
         :return: the attributes
         :rtype: dict
         """
-        return self._variable.__dict__
+        return self._variable.attrs
 
 
 def find_numeric_variables(var_dict, group):
     """
-    This function recursively retrieves all the numeric variables stored in a NetCDF file.
+    Recursively retrieves all the numeric variables stored in an HDF5 file.
 
     :param var_dict: The dictionary into which the variables are saved.
     :type var_dict: dict
 
     :param group: The file whose variables are to be retrieved.
-    :type group: netCDF4.Dataset or netCDF4.Group
-
-    :return: All the variable objects in the provided file.
-    :rtype: collections.OrderedDict[str, (str, NetCDFFileVariable)]
+    :type group: h5py.File or h5py.Group
     """
 
-    for var_key, var in group.variables.items():
-        if group.path == '/':
-            path = '/{}'.format(var_key)
+    for var_key, var in group.items():
+
+        if isinstance(var, h5py.Group):
+            find_numeric_variables(var_dict, var)
         else:
-            path = '{}/{}'.format(group.path, var_key)
 
-        # Non-numeric variables are not supported
-        if not numpy.issubdtype(var.dtype, numpy.number):
-            continue
-        # Variables with dimension higher than 3 are not supported
-        if var.ndim > 3:
-            continue
+            if var.parent.name == '/':
+                path = '/{}'.format(var_key)
+            else:
+                path = '{}/{}'.format(var.parent.name, var_key)
 
-        comp = 1
-        while var_key in var_dict:
-            var_key = '{:s}_{:d}'.format(var_key, comp)
-            comp += 1
+            # Non-numeric variables are not supported by the plotter
+            if not numpy.issubdtype(var.dtype, numpy.number):
+                continue
 
-        var_dict[var_key] = (path, NetCDFFileVariable(var))
+            # Variables with dimension higher than 3 are not supported by the plotter
+            if var.ndim > 3:
+                continue
 
-    for _, sub_group in group.groups.items():
-        var_dict.update(find_numeric_variables(var_dict, sub_group))
+            comp = 1
+            while var_key in var_dict:
+                var_key = '{:s}_{:d}'.format(var_key, comp)
+                comp += 1
 
-    return var_dict
+            var_dict[var_key] = (path, HDFFileVariable(var))

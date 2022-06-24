@@ -1,5 +1,5 @@
 Package: mdanse
-Version: 1.0.0
+Version: 1.5.0
 Architecture: amd64
 Depends: netcdf-bin, libnetcdf-dev, libgtk2.0-0
 Section: Science

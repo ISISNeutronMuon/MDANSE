@@ -26,6 +26,8 @@ from MDANSE.Mathematics.Graph import Graph
 from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration, RealConfiguration
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
+from MDANSE.Mathematics.Graph import Graph
+
 class XTDFile(object):
     
     def __init__(self, filename):
@@ -104,7 +106,7 @@ class XTDFile(object):
     
                 name = node.attrib.get('Name','').strip()
                 if name:
-                    info['name'] = name
+                    info['atom_name'] = name
                 else:                
                     name = node.attrib.get('ForcefieldType','').strip()
                     if name:
@@ -157,6 +159,7 @@ class XTDFile(object):
 
         for cluster in clusters:
             atomCluster = AtomCluster([])
+
             bruteFormula = collections.defaultdict(lambda : 0)
 
             clusterList = [None]*len(cluster)

@@ -34,6 +34,7 @@ from MDANSE.GUI.Plugins.Plotter1D import Plotter1D
 from MDANSE.GUI.Plugins.Plotter2D import Plotter2D
 from MDANSE.GUI.Plugins.Plotter3D import Plotter3D
 from MDANSE.GUI.Icons import ICONS
+from MDANSE.IO.IOUtils import load_variables
 
 
 class PlotterError(Error):
@@ -92,7 +93,8 @@ class MultiViewPanel(wx.Panel):
 
     def Update(self):
         self._mgr.Update()
-        
+
+
 class DataPanel(wx.Panel):
 
     def __init__(self, parent, *args,**kwds):
@@ -265,21 +267,21 @@ class DataPanel(wx.Panel):
     def show_dataset(self, index=0):
         self.datasetlist.DeleteAllItems()
         for i, k in enumerate(self.dataDict.keys()):
-            self.datasetlist.InsertStringItem(i, k)
-            self.datasetlist.SetStringItem(i, 1,self.dataDict[k]['basename'])
-            self.datasetlist.SetStringItem(i, 2,self.dataDict[k]['path'])
+            self.datasetlist.InsertItem(i, k)
+            self.datasetlist.SetItem(i, 1,self.dataDict[k]['basename'])
+            self.datasetlist.SetItem(i, 2,self.dataDict[k]['path'])
         self.datasetlist.Select(index, True)
         
     def show_data(self):
         self.datalist.DeleteAllItems()
         variables = list(self.dataproxy.keys())
         for i, var in enumerate(sorted(variables)):
-            self.datalist.InsertStringItem(i, var)
+            self.datalist.InsertItem(i, var)
             axis = ','.join(self.dataproxy[var]['axis'])
-            self.datalist.SetStringItem(i, 1,axis)
-            self.datalist.SetStringItem(i, 2,str(self.dataproxy[var]['data'].ndim))
-            self.datalist.SetStringItem(i, 3,str(self.dataproxy[var]['data'].shape))
-            self.datalist.SetStringItem(i, 4, self.dataproxy[var]['path'])
+            self.datalist.SetItem(i, 1,axis)
+            self.datalist.SetItem(i, 2,str(self.dataproxy[var]['data'].ndim))
+            self.datalist.SetItem(i, 3,str(self.dataproxy[var]['data'].shape))
+            self.datalist.SetItem(i, 4, self.dataproxy[var]['path'])
         self.datalist.Select(0, True)
             
     def on_select_variables(self, event = None):
@@ -470,7 +472,8 @@ class PlotterFrame(wx.Frame):
                 
     def on_load_data(self, event=None):
         
-        filters = 'NetCDF file (*.nc)|*.nc|HDF file (*.h5)|*.h5|All files (*.*)|*.*'
+        filters = 'NetCDF and HDF files (*.nc;*.netcdf;*.h5;*.hdf)|*.nc;*.netcdf;*.h5;*.hdf|' \
+                  'NetCDF file (*.nc)|*.nc|HDF file (*.h5)|*.h5|All files (*.*)|*.*'
         dialog = wx.FileDialog ( self, message = 'Open file...', wildcard=filters, style=wx.FD_MULTIPLE)
         if dialog.ShowModal() == wx.ID_CANCEL:
             return
@@ -482,24 +485,7 @@ class PlotterFrame(wx.Frame):
 
             ext = os.path.splitext(filename)[1]
             with PLOTTER_DATA_TYPES[ext](filename, 'r') as f:
-                data = collections.OrderedDict()
-                for vname, vinfo in f.variables.items():
-                    vpath, variable = vinfo
-                    arr = variable.get_array()
-                    attributes = variable.get_attributes()
-
-                    data[vname] = {}
-                    if 'axis' in attributes:
-                        axis = attributes['axis']
-                        if axis:
-                            data[vname]['axis'] = axis.split('|')
-                        else:
-                            data[vname]['axis'] = []
-                    else:
-                        data[vname]['axis'] = []
-                    data[vname]['path'] = vpath
-                    data[vname]['data'] = arr
-                    data[vname]['units'] = attributes.get('units', 'au')
+                data = load_variables(f.variables)
 
                 unique_name = self.unique(basename, self.plugin._dataDict)
 
