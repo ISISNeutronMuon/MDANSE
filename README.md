@@ -10,6 +10,10 @@ MDANSE can be run on Linux, Windows and McOS.
 This project is built on the development published previously: \
 G. Goret, B. Aoun, E. Pellegrini, "MDANSE: An Interactive Analysis Environment for Molecular Dynamics Simulations", J Chem Inf Model. 57(1):1-5 (2017).
 
+Download MDANSE from [here](https://github.com/ISISNeutronMuon/MDANSE/releases/tag/v1.5.0)
+Users Guide is availble [here](https://epubs.stfc.ac.uk/work/51935555)
+Visit Webpage [https://mdanse.org/](https://mdanse.org/)
+
 To join the project contact: \
 Dr. Sanghamitra Mukhopadhyay (sanghamitra.mukhopadhyay@stfc.ac.uk) \
 ISIS Neutron and Muon Source \
