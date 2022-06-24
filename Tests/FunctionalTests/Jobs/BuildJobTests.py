@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -32,12 +33,13 @@ class JobFileGenerator():
         self.job = job
         self.job.get_default_parameters()
 
-        # Check if reference data is present
+        # Check if reference data is present, first assuming that the tests are run from Jobs/
         self.reference_data_path = os.path.join(os.path.pardir, os.path.pardir, os.path.pardir, "Data",
                                                 "Jobs_reference_data", job._type)
         self.reference_data_file = self.reference_data_path + "_reference" + ".nc"
+
         if not os.path.isfile(self.reference_data_file):
-            print "/!\ Reference data file is not present for job " + str(job)
+            print r"/!\ Reference data file is not present for job " + str(job)
             self.reference_data_file = None
 
         # Check if job can be launched on multiprocessor
@@ -79,7 +81,7 @@ class JobFileGenerator():
             array_of_python_dependencies_string.append("time")
 
         # Add NetCDF
-        array_of_mdanse_dependencies_string.append('from Scientific.IO.NetCDF import NetCDFFile')
+        array_of_mdanse_dependencies_string.append('import netCDF4')
         array_of_mdanse_dependencies_string.append('import Comparator')
 
         # Sort arrays to write imports in the alphabetical order
@@ -97,19 +99,20 @@ class JobFileGenerator():
         :return: String of python code of the compare function.
         :rtype: str
         """
-        return 'def compare(file1, file2):\n'          \
-               '    ret = True\n'                      \
-               '    f = NetCDFFile(file1,"r")\n'       \
-               '    res1 = {}\n'                       \
-               '    for k,v in f.variables.items():\n' \
-               '        res1[k] = v.getValue()\n'      \
-               '    f.close()\n'                       \
-               '    f = NetCDFFile(file2,"r")\n'       \
-               '    res2 = {}\n'                       \
-               '    for k,v in f.variables.items():\n' \
-               '        res2[k] = v.getValue()\n'      \
-               '    f.close()\n'                       \
-               '    return Comparator.Comparator().compare(res1, res2)\n\n'
+        return 'def compare(file1, file2):\n' \
+               '    ret = True\n' \
+               '    ignored_vars = ["temperature", "kinetic_energy"]\n\n' \
+               '    res1 = {}\n' \
+               '    with netCDF4.Dataset(file1,"r") as f:\n' \
+               '        for k, v in f.variables.items():\n' \
+               '            if k not in ignored_vars:\n' \
+               '                res1[k] = v[:]\n\n' \
+               '    res2 = {}\n' \
+               '    with netCDF4.Dataset(file1,"r") as f:\n' \
+               '        for k, v in f.variables.items():\n' \
+               '            if k not in ignored_vars:\n' \
+               '                res2[k] = v[:]\n\n' \
+               '    return Comparator.Comparator().compare(res1, res2)\n\n\n'
 
     def __create_test(self, parameters, test_name):
         """
@@ -120,55 +123,69 @@ class JobFileGenerator():
         # test_name (str): A name for the test.
         """
         # Name each test after the file it is testing
-        test_string =      '    def test_{}(self):\n'.format(test_name)
+        test_string = '    def test_{}(self):\n'.format(test_name)
 
         # Writes the line that will initialize the |parameters| dictionary and create the job
         if parameters is None:
             parameters = self.job.get_default_parameters()
-        test_string +=     '        parameters = {}\n'
+
+
+        test_string += '        parameters = {}\n'
         for k, v in sorted(parameters.items()):
-            temp = 'parameters[%r] = %r\n' % (k, v)
+            if k in ["output_file", "output_files"]:
+                temp = 'parameters[%r] = (%r, %r)\n' % (k, self.reference_data_path.replace('\\', '/') + '_mono', v[1])
+                key = k
+            else:
+                temp = 'parameters[%r] = %r\n' % (k, v)
             test_string = test_string + '        ' + temp.replace('\\\\', '/')
-        test_string +=     '        job = REGISTRY[%r][%r]()\n' % ('job', self.job._type)
-        test_string +=     '        output_path = parameters["output_files"][0]\n'
-        test_string +=     '        reference_data_path = "' + self.reference_data_path.replace('\\', '/') + '"\n'
+
+        if not 'key' in locals():
+            key = "output_file"
+
+        test_string += '        reference_data_path = "' + self.reference_data_path.replace('\\', '/') + '"\n'
+        test_string += '        job = REGISTRY[%r][%r]()\n\n' % ('job', self.job._type)
 
         # Launch the job in monoprocessor mode and copy output file
-        test_string +=     '        print "Launching job in monoprocessor mode"\n'                              \
-                           '        parameters["running_mode"] = ("monoprocessor",1)\n'                         \
-                           '        job.run(parameters, status=False)\n'                                        \
-                           '        shutil.copy(output_path + ".nc", reference_data_path + "_mono" + ".nc")\n'  \
-                           '        print "Monoprocessor execution completed"\n\n'
+        test_string += '        print "Launching job in monoprocessor mode"\n' \
+                       '        parameters["running_mode"] = ("monoprocessor",1)\n' \
+                       '        job.run(parameters, status=False)\n' \
+                       '        print "Monoprocessor execution completed"\n\n'
 
         # Launch the job in multiprocessor mode if avalaible
         if self.multiprocessor:
-            test_string += '        print "Launching job in multiprocessor mode"\n'                             \
-                           '        parameters["running_mode"] = ("multiprocessor",2)\n'                        \
-                           '        job.run(parameters,False)\n'                                                \
-                           '        shutil.copy(output_path + ".nc", reference_data_path + "_multi" + ".nc")\n' \
+            test_string += '        print "Launching job in multiprocessor mode"\n' \
+                           '        parameters["running_mode"] = ("multiprocessor",2)\n' \
+                           '        parameters["%s"] = (reference_data_path + "_multi", ["netcdf"])\n' % key
+            test_string += '        job.run(parameters, status=False)\n' \
                            '        print "Multiprocessor execution completed"\n\n'
+
+        test_string += '        try:\n'
 
         # Compare reference data with monoprocessor if reference data exists
         if self.reference_data_file:
-            test_string += '        print "Comparing monoprocessor output with reference output"\n'             \
-                           '        self.assertTrue(compare("' +  self.reference_data_file.replace('\\', '/') + \
-                                                            '", reference_data_path + "_mono" + ".nc"))\n\n'
+            test_string += '            print "Comparing monoprocessor output with reference output"\n' \
+                           '            self.assertTrue(compare("' + self.reference_data_file.replace('\\', '/') + \
+                           '", reference_data_path + "_mono" + ".nc"))\n\n'
         # Compare reference data with multiprocessor if reference data exists
         if self.reference_data_file and self.multiprocessor:
-            test_string += '        print "Comparing multiprocessor output with reference output"\n'            \
-                           '        self.assertTrue(compare("' +  self.reference_data_file.replace('\\', '/') + \
-                                                            '", reference_data_path + "_multi" + ".nc"))\n\n'
+            test_string += '            print "Comparing multiprocessor output with reference output"\n' \
+                           '            self.assertTrue(compare("' + self.reference_data_file.replace('\\', '/') + \
+                           '", reference_data_path + "_multi" + ".nc"))\n\n'
         # If no reference data but multiprocessor, compare mono and multiprocessor
         elif self.multiprocessor:
-            test_string += '        print "Comparing monoprocessor output with multiprocessor output"\n'        \
-                           '        self.assertTrue(compare(reference_data_path + "_mono" + ".nc", '            \
-                                                                         'reference_data_path + "_multi" + ".nc"))\n\n'
-        test_string +=     '        try:\n'         \
-                           '            os.remove(reference_data_path + "_mono" + ".nc")\n'
+            test_string += '            print "Comparing monoprocessor output with multiprocessor output"\n' \
+                           '            self.assertTrue(compare(reference_data_path + "_mono" + ".nc", ' \
+                           'reference_data_path + "_multi" + ".nc"))\n\n'
+
+        test_string += '        finally:\n' \
+                       '            try:\n' \
+                       '                os.remove(reference_data_path + "_mono" + ".nc")\n'
+
         if self.multiprocessor:
-            test_string += '            os.remove(reference_data_path + "_multi" + ".nc")\n'
-        test_string +=     '        except OSError:\n'      \
-                           '            pass\n\n'
+            test_string += '                os.remove(reference_data_path + "_multi" + ".nc")\n'
+
+        test_string += '            except OSError:\n' \
+                       '                pass\n\n'
 
         # If test is GMTF, restore old_universe_name
         if self.job._type == "gmft":
@@ -183,10 +200,10 @@ class JobFileGenerator():
         :return: Python code defining suite function.
         :rtype: str
         """
-        test_string =  '\ndef suite():\n'                   \
-                       '    loader = unittest.TestLoader()\n' \
-                       '    s = unittest.TestSuite()\n'       \
-                       '    s.addTest(loader.loadTestsFromTestCase(Test%s))\n' % self.job._type.upper()
+        test_string = '\ndef suite():\n' \
+                      '    loader = unittest.TestLoader()\n' \
+                      '    s = unittest.TestSuite()\n' \
+                      '    s.addTest(loader.loadTestsFromTestCase(Test%s))\n' % self.job._type.upper()
         test_string += '    return s'
         return test_string
 
@@ -201,7 +218,7 @@ class JobFileGenerator():
         :type job_id: str
         """
         f = open(self.job_file_name, 'w')
-        
+
         # The first line contains the call to the python executable. This is necessary for the file to
         # be autostartable.
         f.write('#!%s\n\n' % sys.executable)
@@ -221,25 +238,26 @@ class JobFileGenerator():
         # If the job is CASTEP converter, create an additional test that uses a different input file.
         if job_id == 'castep':
             self.job.settings['castep_file'] = ('input_file', {'default': os.path.join('..', '..', '..', 'Data',
-                                                                                      'Trajectories', 'CASTEP',
-                                                                                      'PBAnew_short.md')})
+                                                                                       'Trajectories', 'CASTEP',
+                                                                                       'PBAnew_short.md')})
             file_body += self.__create_test(parameters=None, test_name='short_header')
         f.write(file_body)
         f.write(self.__create_test_suite())
-        
+
         # Write file ending
         f.write("\n\n")
         f.write("if __name__ == '__main__':\n")
         f.write('    unittest.main(verbosity=2)\n')
         f.close()
-        os.chmod(self.job_file_name,stat.S_IRWXU)
+        os.chmod(self.job_file_name, stat.S_IRWXU)
 
 
 if __name__ == '__main__':
     # Main script, automatically creates source files for testing jobs
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     for job_id,job in REGISTRY['job'].items():
         # Skip the mcstas test because mcstas executable is not available on all platform
-        if job_id=='mvi':
+        if job_id=='mvi' or job_id == 'pdf':
             pass
         else:
             job_file_generator = JobFileGenerator(job, job_id=job_id)

@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -26,13 +27,13 @@ from MMTK import Units
 
 from MDANSE import ELEMENTS, REGISTRY
 from MDANSE.Core.Error import Error
-from MDANSE.Externals.magnitude import magnitude
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
-MCSTAS_UNITS_LUT = {'THz': magnitude.mg(1,"THz","meV(freq)").toval(), 
-                    'nm**2' : magnitude.mg(1,"nm2","b").toval(),
-                    'inv_nm' : magnitude.mg(1,"1/nm","1/ang").toval()
+MCSTAS_UNITS_LUT = {'THz': measure(1,"THz",equivalent=True).toval("meV"), 
+                    'nm2' : measure(1,"nm2").toval("b"),
+                    '1/nm' : measure(1,"1/nm").toval("1/ang")
                     } 
 
 class McStasError(Error):
@@ -87,9 +88,9 @@ class McStasVirtualInstrument(IJob):
         # Compute some parameters used for a proper McStas run
         self._mcStasPhysicalParameters = {"density"   : 0.0}
         self._mcStasPhysicalParameters["weight"]    = sum([ELEMENTS[s,'atomic_weight'] for s in symbols])
-        self._mcStasPhysicalParameters["sigma_abs"] = sum([ELEMENTS[s,'xs_absorption'] for s in symbols])*MCSTAS_UNITS_LUT['nm**2']
-        self._mcStasPhysicalParameters["sigma_coh"] = sum([ELEMENTS[s,'xs_coherent']   for s in symbols])*MCSTAS_UNITS_LUT['nm**2']
-        self._mcStasPhysicalParameters["sigma_inc"] = sum([ELEMENTS[s,'xs_incoherent'] for s in symbols])*MCSTAS_UNITS_LUT['nm**2']
+        self._mcStasPhysicalParameters["sigma_abs"] = sum([ELEMENTS[s,'xs_absorption'] for s in symbols])*MCSTAS_UNITS_LUT['nm2']
+        self._mcStasPhysicalParameters["sigma_coh"] = sum([ELEMENTS[s,'xs_coherent']   for s in symbols])*MCSTAS_UNITS_LUT['nm2']
+        self._mcStasPhysicalParameters["sigma_inc"] = sum([ELEMENTS[s,'xs_incoherent'] for s in symbols])*MCSTAS_UNITS_LUT['nm2']
         for frameIndex in self.configuration['frames']['value']:
             self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)                
             cellVolume = self.configuration['trajectory']['instance'].universe.cellVolume()
@@ -125,7 +126,7 @@ class McStasVirtualInstrument(IJob):
             for var in self.configuration[typ].variables:
                 fout.write("# %s\n" %var)
                 
-                data = self.configuration[typ][var].getValue()
+                data = self.configuration[typ][var][:]
                 try:
                     data *= MCSTAS_UNITS_LUT[self.configuration[typ][var].units]
                 except KeyError:

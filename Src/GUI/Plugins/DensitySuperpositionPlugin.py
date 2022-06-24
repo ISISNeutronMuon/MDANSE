@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -19,7 +20,7 @@ import vtk
 
 import numpy
 
-from Scientific.IO.NetCDF import NetCDFFile
+import netCDF4
 
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
@@ -201,13 +202,13 @@ class DensitySuperpositionPlugin(ComponentPlugin):
 
     def select_file(self, filename):
         self.currentFilename = filename
-        f = NetCDFFile(filename,"r")
+        f = netCDF4.Dataset(filename,"r")
         variables = f.variables
         
         if not variables.has_key('molecular_trace'):
             raise DensitySuperpositionError('Trace file format not compatible with Plugin')
         
-        self.dim.SetValue(str(variables['molecular_trace'].getValue().shape))
+        self.dim.SetValue(str(variables['molecular_trace'][:].shape))
         f.close()
             
     def on_select_file(self, event):
@@ -241,12 +242,12 @@ class DensitySuperpositionPlugin(ComponentPlugin):
         opacity = float(self.opacity.GetValue())
         filename = self.get_file()
         
-        f = NetCDFFile(filename,"r")
+        f = netCDF4.Dataset(filename,"r")
         variables = f.variables
         
-        data = variables['molecular_trace'].getValue()
-        origin = variables['origin'].getValue()
-        spacing = variables['spacing'].getValue()
+        data = variables['molecular_trace'][:]
+        origin = variables['origin'][:]
+        spacing = variables['spacing'][:]
         
         f.close()
         

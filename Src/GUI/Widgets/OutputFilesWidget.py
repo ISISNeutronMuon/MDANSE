@@ -8,22 +8,45 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
 
 import os
+import os.path
 
 import wx.combo
 import wx.lib.filebrowsebutton as wxfile
 
 from MDANSE import REGISTRY
 
+from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.ComboWidgets.ComboCheckbox import ComboCheckbox
 from MDANSE.GUI.Widgets.IWidget import IWidget
 
 class OutputFilesWidget(IWidget):
-            
+
+    def __init__(self, *args, **kwargs):
+
+        IWidget.__init__(self, *args, **kwargs)
+
+    @staticmethod
+    def _get_unique_filename(directory,basename):
+
+        filesInDirectory = [os.path.join(directory,e) for e in os.listdir(directory) 
+                            if os.path.isfile(os.path.join(directory,e))]
+        basenames = [os.path.splitext(f)[0] for f in filesInDirectory]
+
+        initialPath = path = os.path.join(directory,basename)
+        comp = 1
+        while True:
+            if path in basenames:
+                path = '%s(%d)' % (initialPath,comp)
+                comp += 1
+                continue
+            return path
+
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -38,8 +61,8 @@ class OutputFilesWidget(IWidget):
         
         hSizer = wx.BoxSizer(wx.HORIZONTAL)
         
-        hSizer.Add(self._filename, 1, wx.EXPAND|wx.ALL, 5)
-        hSizer.Add(self._formats, 0, wx.EXPAND|wx.ALL, 5)
+        hSizer.Add(self._filename, 4, wx.EXPAND|wx.ALL, 5)
+        hSizer.Add(self._formats, 1, wx.EXPAND|wx.ALL, 5)
 
         sizer.Add(hSizer, 0, wx.ALL|wx.EXPAND, 0)
 
@@ -58,15 +81,11 @@ class OutputFilesWidget(IWidget):
     
     def set_data(self, datakey):
 
-        basename = "output"
-                
-        if datakey is None:
-            basename = "output"
-            trajectoryDir = os.getcwd()
-        else:
-            basename = "output_%s" % os.path.splitext(os.path.basename(datakey))[0]
-            trajectoryDir = os.path.dirname(datakey)
-            
-        self._filename.SetValue(os.path.join(trajectoryDir,basename))
+        basename = "%s_%s" % (os.path.splitext(os.path.basename(datakey))[0], self._parent.type)
+        trajectoryDir = os.path.dirname(datakey)
+
+        path = OutputFilesWidget._get_unique_filename(trajectoryDir,basename)
+
+        self._filename.SetValue(path)
         
 REGISTRY["output_files"] = OutputFilesWidget

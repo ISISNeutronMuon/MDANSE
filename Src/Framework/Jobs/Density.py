@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -17,7 +18,7 @@ import collections
 from MMTK import Units
 
 from MDANSE import ELEMENTS, REGISTRY
-from MDANSE.Externals.magnitude.magnitude import mg
+from MDANSE.Framework.Units import measure
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
@@ -35,7 +36,7 @@ class Density(IJob):
     settings = collections.OrderedDict()
     settings['trajectory'] = ('mmtk_trajectory',{})
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
     def initialize(self):
@@ -69,7 +70,7 @@ class Density(IJob):
                         
         self.configuration['trajectory']['instance'].universe.setFromTrajectory(self.configuration['trajectory']['instance'], frameIndex)
                 
-        cellVolume = self.configuration['trajectory']['instance'].universe.cellVolume()*mg(1.0,'nm3','cm3').toval()
+        cellVolume = self.configuration['trajectory']['instance'].universe.cellVolume()*measure(1.0,'nm3').toval('cm3')
                 
         atomicDensity = self.configuration['trajectory']['instance'].universe.numberOfAtoms()/cellVolume
                 

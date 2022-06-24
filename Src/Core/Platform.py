@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -198,7 +199,8 @@ class Platform(object):
         
         # An error occured.
         except OSError as e:
-            raise PlatformError(e)
+            raise PlatformError('The following exception was raised while trying to create a directory at '
+                                '{0}: /n {1}'.format(str(path), e))
         
     def get_path(self, path):
         '''

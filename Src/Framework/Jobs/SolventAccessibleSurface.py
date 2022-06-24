@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -54,7 +55,7 @@ class SolventAccessibleSurface(IJob):
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['n_sphere_points'] = ('integer', {'mini':1, 'default':1000})
     settings['probe_radius'] = ('float', {'mini':0.0, 'default':0.14})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
     def initialize(self):

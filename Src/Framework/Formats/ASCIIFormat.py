@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -47,7 +48,7 @@ class ASCIIFormat(IFormat):
         '''
                 
         filename = os.path.splitext(filename)[0]
-        filename = "%s.tar" % filename
+        filename = "%s_ascii.tar" % filename
 
         tf = tarfile.open(filename,'w')
         
@@ -59,7 +60,7 @@ class ASCIIFormat(IFormat):
             cls.write_array(tempStr,var)
             tempStr.seek(0)
 
-            info = tarfile.TarInfo(name='%s%s' % (var.name,cls.extensions[0]))
+            info = tarfile.TarInfo(name='%s%s' % (var.varname,cls.extensions[0]))
             info.size=tempStr.len
             tf.addfile(tarinfo=info, fileobj=tempStr)
             

@@ -8,13 +8,14 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
 
 import wx
 
-from Scientific.IO.NetCDF import _NetCDFFile
+import netCDF4
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurable import ConfigurationError
@@ -27,7 +28,7 @@ class NetCDFInputFileWidget(IWidget):
         
     def __getattr__(self, attr):
         
-        return self._netcdf.variables[attr].getValue()
+        return self._netcdf.variables[attr][:]
 
     def add_widgets(self):
 
@@ -51,7 +52,7 @@ class NetCDFInputFileWidget(IWidget):
                         
         self._netcdf = DATA_CONTROLLER[datakey].netcdf
                         
-        if not isinstance(self._netcdf, _NetCDFFile):
+        if not isinstance(self._netcdf, netCDF4.Dataset):
             return
 
         self._selectNetCDF.SetItems(DATA_CONTROLLER.keys())

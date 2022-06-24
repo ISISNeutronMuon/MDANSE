@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -17,7 +18,7 @@ import collections
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import correlation
+from MDANSE.Mathematics.Signal import correlation, normalize
 from MDANSE.MolecularDynamics.Trajectory import read_atoms_trajectory
 
 class GeneralAutoCorrelationFunction(IJob):
@@ -40,7 +41,7 @@ class GeneralAutoCorrelationFunction(IJob):
     settings['trajectory_variable'] = ('trajectory_variable', {'dependencies':{'trajectory':'trajectory'}})
     settings['normalize'] = ('boolean', {'default':False})
     settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
-    settings['output_files'] = ('output_files', {'formats':["netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
                 
     def initialize(self):
@@ -96,8 +97,7 @@ class GeneralAutoCorrelationFunction(IJob):
         element = self.configuration['atom_selection']["names"][index]
         
         self._outputData["gacf_%s" % element] += x        
-        
-    
+
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
@@ -105,16 +105,17 @@ class GeneralAutoCorrelationFunction(IJob):
         
         # The MSDs per element are averaged.
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
+        self.configuration['atom_selection']['n_atoms_per_element'] = nAtomsPerElement
+
         for element, number in nAtomsPerElement.items():
             self._outputData["gacf_%s" % element] /= number
                 
         if self.configuration['normalize']["value"]:
-            for element in self.configuration['atom_selection']['n_atoms_per_element'].keys():
-                pacf = self._outputData["gacf_%s" % element]      
-                if pacf[0] == 0:
+            for element in nAtomsPerElement.keys():
+                if self._outputData["gacf_%s" % element][0] == 0:
                     raise ValueError("The normalization factor is equal to zero !!!") 
                 else:
-                    pacf /= pacf[0]
+                    self._outputData["gacf_%s" % element] = normalize(self._outputData["gacf_%s" % element], axis=0)
 
         weights = self.configuration["weights"].get_weights()
         gacfTotal = weight(weights,self._outputData,nAtomsPerElement,1,"gacf_%s")

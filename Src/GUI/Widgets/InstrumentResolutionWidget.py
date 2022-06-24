@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -161,7 +162,7 @@ class InstrumentResolutionDialog(wx.Dialog):
         
         self.Freeze()
         
-        self._parametersPanel = ConfigurationPanel(self, resolution)
+        self._parametersPanel = ConfigurationPanel(self, resolution,None)
         for w in self._parametersPanel.widgets.values():
             self.Bind(wx.EVT_TEXT_ENTER,self.plot,w.widget)
         

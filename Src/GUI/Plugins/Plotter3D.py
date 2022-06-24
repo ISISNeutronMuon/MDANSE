@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -642,7 +643,7 @@ class Plotter3D(wx.Panel):
         self.iren.Render()
     
     def on_keyboard_input(self, obj, event):
-        key = self.iren.GetKeyCode()
+        key = self.iren.GetKeyCode()        
         if key in ['+']:
             self.on_move_slice(1)
         elif key in ['-']:
@@ -698,13 +699,11 @@ class Plotter3D(wx.Panel):
             self.axes.GetZAxisCaptionActor2D().SetCaptionTextProperty(txtprop)
             
             self.renderer.AddActor(self.axes)   
-            self.iren.Render()
         else :
             if self.axes.GetVisibility():
                 self.axes.VisibilityOff()
             else:
                 self.axes.VisibilityOn()
-            self.iren.Render()    
     
     def on_slice_selection(self, event=None):
         orientation = str(event.GetEventObject().GetLabelText()).lower().split()[0]

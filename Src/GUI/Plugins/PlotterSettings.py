@@ -8,6 +8,7 @@
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
@@ -16,7 +17,7 @@ import matplotlib
 
 import wx
 from MDANSE.Core.Error import Error
-from MDANSE.Externals.magnitude import magnitude
+from MDANSE.Framework.Units import UnitError, measure
 
 class UnitsSettingsError(Error):
     pass
@@ -25,8 +26,9 @@ class UnitsSettingsDialog():
     def checkUnits(self, oldUnit, newUnit):
         if oldUnit != newUnit:
             try:
-                magnitude.mg(1., oldUnit, newUnit).toval()
-            except magnitude.MagnitudeError:
+                m = measure(1.0,oldUnit,equivalent=True)
+                m.toval(newUnit)
+            except UnitError:
                 raise UnitsSettingsError("the axis unit (%s) is inconsistent with the current unit (%s) "%(newUnit, oldUnit))
 
 class ImageSettingsDialog(wx.Dialog, UnitsSettingsDialog):
@@ -492,7 +494,7 @@ class AxesSettingsDialog(wx.Dialog, UnitsSettingsDialog):
         self.parent.canvas.draw()
     
     def auto_fit(self, event = None):
-        self.parent.on_auto_fit()
+        self.parent.on_auto_fit(event=event)
         self.Xmin.SetValue(str(self.parent.Xmin))
         self.Ymin.SetValue(str(self.parent.Ymin))
         self.Xmax.SetValue(str(self.parent.Xmax))
@@ -638,13 +640,6 @@ class LinesSettingsDialog(wx.Dialog):
         self.set_lines()
         
     def delete_line(self, event = None):
-        d = wx.MessageDialog(None,
-                 'Do you really want delete this line ?',
-                 'Question',
-                 wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
-        if d.ShowModal() == wx.ID_YES:
-            pass
-        else:
-            return
-        self.parent.delete_line(self.current_line)
+        if self.parent.delete_line(self.current_line):
+            self.parent.selectedLine = None
         self.set_lines()
