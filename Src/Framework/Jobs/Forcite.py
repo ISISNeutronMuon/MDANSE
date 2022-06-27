@@ -60,7 +60,7 @@ class TrjFile(dict):
         rec = '!%ds8x' % (80*NTRJTI)
         recSize = struct.calcsize(rec)
         self["title"] = struct.unpack(rec, trjfile.read(recSize))
-        self["title"] = "".join(self["title"])
+        self["title"] = "".join([t.decode('utf-8') for t in self["title"]])
         
         # Record 2
         rec = "!i"
@@ -190,7 +190,7 @@ class TrjFile(dict):
         
         trjfile.seek(0,2)
         
-        self["n_frames"] = (trjfile.tell()-self._headerSize)/self._frameSize
+        self["n_frames"] = (trjfile.tell()-self._headerSize)//self._frameSize
         
     def read_step(self, index):
         """

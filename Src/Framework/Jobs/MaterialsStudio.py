@@ -155,29 +155,22 @@ class XTDFile(object):
 
         clusters = graph.build_connected_components()
 
-        prev = 0
-
         for cluster in clusters:
-            atomCluster = AtomCluster([])
 
             bruteFormula = collections.defaultdict(lambda : 0)
 
-            clusterList = [None]*len(cluster)
+            atoms = []
             for node in cluster:
-                clusterList[node.index-prev] = node
-
-            prev += len(cluster)
-
-            for node in clusterList:
                 element = node.element
                 name = node.atom_name
-                atom = Atom(element, name=name, xtdIndex=node.index)
-                atom.index = node.index
-                coordinates[atom.index] = node.xyz
-                atomCluster.atoms.append(atom)
-                bruteFormula[element] += 1                
-            atomCluster.name = "".join(["%s%d" % (k,v) for k,v in sorted(bruteFormula.items())])
-            self._universe.addObject(atomCluster)
+                at = Atom(symbol=element, name=name,xtdIndex=node.xtd_index)
+                at.index = node.index
+                coordinates[at.index] = node.xyz
+                bruteFormula[element] += 1
+                atoms.append(at)
+            name = "".join(["%s%d" % (k,v) for k,v in sorted(bruteFormula.items())])
+            ac = AtomCluster(name,atoms)
+            self._chemicalSystem.add_chemical_entity(ac)
 
         if self._pbc:
             boxConf = PeriodicBoxConfiguration(self._chemicalSystem,coordinates,self._cell)
