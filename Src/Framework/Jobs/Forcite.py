@@ -60,7 +60,7 @@ class TrjFile(dict):
         rec = '!%ds8x' % (80*NTRJTI)
         recSize = struct.calcsize(rec)
         self["title"] = struct.unpack(rec, trjfile.read(recSize))
-        self["title"] = "".join([t.decode('utf-8') for t in self["title"]])
+        self["title"] = "\n".join([t.decode('utf-8') for t in self["title"]])
         
         # Record 2
         rec = "!i"

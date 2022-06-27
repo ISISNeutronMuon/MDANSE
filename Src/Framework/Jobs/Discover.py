@@ -59,7 +59,7 @@ class HisFile(dict):
         rec = "!80s8x80s8x"
         recSize = struct.calcsize(rec)
         self["title"] = struct.unpack(rec,hisfile.read(recSize))
-        self["title"] = "\n".join(self["title"])
+        self["title"] = "\n".join([t.decode('utf-8') for t in self["title"]])
 
         # Record 5
         rec = "!i"
@@ -185,7 +185,7 @@ class HisFile(dict):
 
         hisfile.seek(0,2)
         
-        self["n_frames"] = (hisfile.tell()-self._headerSize)/self._frameSize
+        self["n_frames"] = (hisfile.tell()-self._headerSize)//self._frameSize
                 
     def read_step(self, index):
         
