@@ -27,7 +27,7 @@ set cmd="sed -n "s/__version__.*=.*\"\(.*\)\"/\1/p" Src/__pkginfo__.py"
 for /F %%i in (' %cmd% ') do set MDANSE_VERSION=%%i
 
 rem Check if branch is main, tag as draft otherwise
-if %MDANSE_GIT_BRANCH_NAME% == refs/heads/hotfix-windows-installer-version (
+if %MDANSE_GIT_BRANCH_NAME% == refs/heads/main (
     set VERSION_NAME=%MDANSE_VERSION%
     sed "s/.*__beta__.*/__beta__ = None/" Src\\__pkginfo__.py >> Src\\__pkginfo__.pybak
     move /Y Src\\__pkginfo__.pybak Src\\__pkginfo__.py

@@ -342,10 +342,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - run: |
-          call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
-        shell: cmd
-
       - name: Restore VS2008 from cache
         id: vs2008-cache
         uses: actions/cache@v2
