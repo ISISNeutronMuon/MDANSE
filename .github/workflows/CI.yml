@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python3 -m pip install numpy matplotlib Cython netCDF4 pyyaml h5py psutil
+          python3 -m pip install numpy matplotlib Cython netCDF4 pyyaml h5py psutil vtk
 
       - name: Install MDANSE
         run: |
@@ -110,7 +110,7 @@ jobs:
 
       - name: Install wx and vtk
         run: |
-          python3 -m pip install wxpython vtk sphinx
+          python3 -m pip install wxpython sphinx
 
       - run: sudo apt-get install dos2unix
 
@@ -167,7 +167,7 @@ jobs:
 
       - name: Install dependecies with pip
         run: |
-          python3 -m pip install numpy matplotlib Cython pyyaml h5py psutil
+          python3 -m pip install numpy matplotlib Cython pyyaml h5py psutil vtk
 
       - name: Install NetCDF
         run: |
@@ -234,7 +234,7 @@ jobs:
 
       - name: Install vtk
         run: |
-          python3 -m pip install py2app wxpython vtk sphinx
+          python3 -m pip install py2app wxpython sphinx
 
       - name: Deploy MDANSE
         run: |
@@ -267,8 +267,8 @@ jobs:
 
       - name: Install backend dependencies
         run: |
-          python3 -m pip install numpy matplotlib Cython pyyaml h5py netCDF4
-        shell: cmd /C CALL {0}
+          python3 -m pip install numpy matplotlib Cython pyyaml h5py netCDF4 vtk
+        shell: cmd
 
       - name: Install MDANSE
         run: |
@@ -280,14 +280,14 @@ jobs:
         run: |
           cd %GITHUB_WORKSPACE%\Tests\UnitTests\
           python3 AllTests.py
-        shell: cmd /C CALL {0}
+        shell: cmd
 
       - name: Run functional tests
         run: |
           cd %GITHUB_WORKSPACE%\Tests\FunctionalTests\Jobs
           python3 BuildJobTests.py
           python3 AllTests.py
-        shell: cmd /C CALL {0}
+        shell: cmd
 
       - name: Tar artifacts
         if: |
@@ -301,7 +301,7 @@ jobs:
         run: |
           cd /D %CONDA%\envs
           tar -czf mdanse.tar.gz mdanse
-        shell: cmd /C CALL {0}
+        shell: cmd
 
       - name: Upload artifacts
         if: |
@@ -342,17 +342,17 @@ jobs:
         run: |
           cd /D C:\Miniconda\envs
           tar -xkf mdanse.tar.gz
-        shell: cmd /C CALL {0}
+        shell: cmd
 
       - name: Install packages required for documentation and psutil
         run: |
           python3 -m pip install docutils==0.17.1 sphinx==1.6.7 stdeb psutil
-        shell: cmd /C CALL {0}
+        shell: cmd
 
       - name: Install GUI dependencies
         run: |
-          python3 -m pip install wxpython vtk
-        shell: cmd /C CALL {0}
+          python3 -m pip install wxpython
+        shell: cmd
 
       - name: Deploy
         run: |
@@ -361,7 +361,7 @@ jobs:
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\deploy.bat"
-        shell: cmd /C CALL {0}
+        shell: cmd
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
