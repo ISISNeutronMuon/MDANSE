@@ -16,7 +16,7 @@ jobs:
       - name: Install python
         uses: actions/setup-python@v2
         with:
-          python-version: '2.7.18'
+          python-version: '3.9'
 
       - name: Install libraries on ubuntu 18
         if: ${{ (matrix.os == 'ubuntu-18.04') }}
@@ -32,40 +32,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
-          sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
-
-      - name: Install netCDF4 python package
-        run: |
-          sudo conda create -p ~/tempenv python=2.7
-          sudo conda install -p ~/tempenv netcdf4
-          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4/ $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/
-          sudo cp -rfv ~/tempenv/lib/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -rfv ~/tempenv/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -rfv ~/tempenv/lib/libmfhdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -rfv ~/tempenv/lib/libdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -rfv ~/tempenv/lib/libjpeg* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-
-      - name: Install ScientificPython
-        run: |
-          cd $HOME
-          git clone https://code.ill.fr/scientific-software/scientific-python.git
-          cd scientific-python/
-          sudo $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
-
-      - name: Install MMTK
-        run: |
-          cd $HOME
-          git clone https://code.ill.fr/scientific-software/mmtk.git
-          cd mmtk
-          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/setup.py ~/mmtk
-          sudo $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
+          python3 -m pip install numpy matplotlib Cython netCDF4 sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
 
       - name: Install MDANSE
         run: |
           cd $GITHUB_WORKSPACE
-          $RUNNER_TOOL_CACHE/Python/2.7.18/x64/bin/python setup.py install
+          python3 setup.py install
 
       - name: Run tests
         run: |
@@ -136,20 +108,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install netcdf-bin libnetcdf-dev
 
-      - name: Install wx
+      - name: Install wx and vtk
         run: |
-          sudo conda create -p ~/tempenv python=2.7
-          sudo conda install -p ~/tempenv -c daf wxpython
-          sudo cp -r ~/tempenv/lib/python2.7/site-packages/wx-3.0-gtk2/wx ~/python/lib/python2.7/site-packages
-          sudo cp -r ~/tempenv/lib/wx ~/python/lib
-          sudo cp -r ~/tempenv/include/wx-3.0/wx ~/python/include
-          sudo cp ~/tempenv/lib/libwx* ~/python/lib
-
-      - name: Install vtk
-        run: |
-          sudo conda install -p ~/tempenv -c ccordoba12 vtk
-          sudo cp -r ~/tempenv/lib/python2.7/site-packages/vtk ~/python/lib/python2.7/site-packages
-          sudo cp ~/tempenv/lib/libvtk* ~/python/lib
+          python3 -m pip install wxpython vtk
 
       - run: sudo apt-get install dos2unix
 
@@ -202,65 +163,31 @@ jobs:
       - name: Install python
         uses: actions/setup-python@v2
         with:
-          python-version: '2.7.18'
+          python-version: '3.9'
 
       - name: Install dependecies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app==0.26.1 pyyaml h5py psutil
-
-      - name: Install netCDF4 python package
-        run: |
-          sudo conda create -p ~/tempenv python=2.7
-          sudo conda install -p ~/tempenv netcdf4
-          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
-          sudo cp -rfv ~/tempenv/lib/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -rfv ~/tempenv/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -rfv ~/tempenv/lib/libmfhdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -rfv ~/tempenv/lib/libdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -rfv ~/tempenv/lib/libjpeg* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
+          python2 -m pip install numpy matplotlib Cython sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil netCDF4
 
       - name: Install NetCDF
         run: |
           brew install netcdf
-          sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
-
-      - name: Install ScientificPython
-        run: |
-          cd $HOME
-          git clone https://code.ill.fr/scientific-software/scientific-python.git
-          cd scientific-python
-          sudo python2 setup.py install
-
-      - name: Install MMTK
-        run: |
-          cd $HOME
-          git clone https://code.ill.fr/scientific-software/mmtk.git
-          cd mmtk
-          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/setup.py $HOME/mmtk
-          sudo python2 setup.py install
 
       - name: Install MDANSE
         run: |
           cd $GITHUB_WORKSPACE
-          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/setup.py $GITHUB_WORKSPACE
-          python2 setup.py install
+          python3 setup.py install
 
       - name: Run unit tests
         run: |
           cd $GITHUB_WORKSPACE/Tests/UnitTests
-          python2 AllTests.py
-
-      - name: Run dependency tests
-        run: |
-          cd $GITHUB_WORKSPACE/Tests/DependenciesTests
-          python2 AllTests.py
+          python3 AllTests.py
 
       - name: Run functional tests
         run: |
           cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
-          python2 BuildJobTests.py
-          python2 AllTests.py
+          python3 BuildJobTests.py
+          python3 AllTests.py
 
       - name: Tar python
         if: ${{ (matrix.os == 'macos-10.15') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
@@ -307,16 +234,7 @@ jobs:
 
       - name: Install vtk
         run: |
-          sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c free vtk
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk ~/Contents/Resources/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libvtk* ~/Contents/Resources/lib
-
-      - name: Install wx
-        run: |
-          sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
-          sudo cp -rv $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/* ~/Contents/Resources/lib/python2.7/site-packages
-          sudo cp -v $HOME/tempenv/lib/libwx*  ~/Contents/Resources/lib
+          python3 -m pip install py2app wxpython vtk
 
       - name: Deploy MDANSE
         run: |
@@ -342,101 +260,33 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Restore VS2008 from cache
-        id: vs2008-cache
-        uses: actions/cache@v2
+      - name: Install python
+        uses: actions/setup-python@v2
         with:
-          path: |
-            C:\Program Files (x86)\Microsoft Visual Studio 9.0
-            C:\Program Files\Microsoft SDKs\Windows\v6.0A
-          key: vs2008
-
-      - name: Install VS2008 if not cached
-        if: steps.vs2008-cache.outputs.cache-hit != 'true'
-        run: |
-          cd $env:HOME
-          Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
-          Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
-          Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
-
-      - name: Restore cached VC++ For Python2.7
-        id: vcpython-cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ github.workspace }}\vcpython.msi
-          key: vcpython
-
-      - name: Download VC++ For Python2.7 if not cached
-        if: steps.vcpython-cache.outputs.cache-hit != 'true'
-        run: |
-          Invoke-WebRequest https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi -UseBasicParsing -Outfile $env:GITHUB_WORKSPACE\vcpython.msi
-
-      - name: Install VC++ For Python2.7
-        run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
-
-      - name: Create conda environment
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: 2.7.18
-          activate-environment: mdanse
-
-      - name: Install h5py and netCDF4
-        run: conda install h5py netCDF4
-        shell: cmd /C CALL {0}
+          python-version: '3.9'
 
       - name: Install backend dependencies
         run: |
-          %CONDA%\envs\mdanse\python.exe -m pip install numpy matplotlib Cython pyyaml Pyro
-        shell: cmd /C CALL {0}
-
-      - name: Install ScientificPython
-        run: |
-          cd %GITHUB_WORKSPACE%
-          git clone https://code.ill.fr/scientific-software/scientific-python.git
-          copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\scientific-setup.py %GITHUB_WORKSPACE%\scientific-python\
-          cd scientific-python
-          %CONDA%\envs\mdanse\python.exe scientific-setup.py build --netcdf_prefix="%CONDA%\envs\mdanse\Library\include" --netcdf_dll="%CONDA%\envs\mdanse\Library\bin"
-          %CONDA%\envs\mdanse\python.exe setup.py install --netcdf_prefix="%CONDA%\envs\mdanse\Library\include" --netcdf_dll="%CONDA%\envs\mdanse\Library\bin"
-          copy "%CONDA%\envs\mdanse\Library\bin\netcdf.dll" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
-          copy "%CONDA%\envs\mdanse\Library\lib\netcdf.lib" "%CONDA%\envs\mdanse\Lib\site-packages\Scientific"
-          copy "%CONDA%\envs\mdanse\Library\include\netcdf.h" "%CONDA%\envs\mdanse\Include\Scientific"
-        shell: cmd /C CALL {0}
-
-      - name: Install MMTK
-        run: |
-          cd /D %GITHUB_WORKSPACE%
-          git clone https://code.ill.fr/scientific-software/mmtk.git
-          copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\mmtk-setup.py %GITHUB_WORKSPACE%\mmtk
-          cd mmtk
-          %CONDA%\envs\mdanse\python.exe mmtk-setup.py build 
-          %CONDA%\envs\mdanse\python.exe setup.py install
+          python3 -m pip install numpy matplotlib Cython pyyaml h5py netCDF4
         shell: cmd /C CALL {0}
 
       - name: Install MDANSE
         run: |
-          set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";%PATH%
           cd %GITHUB_WORKSPACE%
-          copy /y "%GITHUB_WORKSPACE%\BuildServer\setup.py" %GITHUB_WORKSPACE%
-          %CONDA%\envs\mdanse\python.exe setup.py install
-        shell: cmd /C CALL {0}
-
-      - name: Run dependencies tests
-        run: |
-          cd %GITHUB_WORKSPACE%\Tests\DependenciesTests
-          %CONDA%\envs\mdanse\python.exe AllTests.py
-        shell: cmd /C CALL {0}
+          python3 setup.py install
+        shell: cmd
 
       - name: Run unit tests
         run: |
           cd %GITHUB_WORKSPACE%\Tests\UnitTests\
-          %CONDA%\envs\mdanse\python.exe AllTests.py
+          python3 AllTests.py
         shell: cmd /C CALL {0}
 
       - name: Run functional tests
         run: |
           cd %GITHUB_WORKSPACE%\Tests\FunctionalTests\Jobs
-          %CONDA%\envs\mdanse\python.exe BuildJobTests.py
-          %CONDA%\envs\mdanse\python.exe AllTests.py
+          python3 BuildJobTests.py
+          python3 AllTests.py
         shell: cmd /C CALL {0}
 
       - name: Tar artifacts
@@ -484,44 +334,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Restore VS2008 from cache
-        id: vs2008-cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            C:\Program Files (x86)\Microsoft Visual Studio 9.0
-            C:\Program Files\Microsoft SDKs\Windows\v6.0A
-          key: vs2008
-
-      - name: Install VS2008 if not cached
-        if: steps.vs2008-cache.outputs.cache-hit == 'false'
-        run: |
-          cd $env:HOME
-          Invoke-WebRequest http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso -UseBasicParsing -Outfile $env:HOME\vs2008.iso
-          Mount-DiskImage -ImagePath $env:HOME\vs2008.iso
-          Start-Process E:\Setup\setup.exe -ArgumentList "/q /full /norestart" -Wait
-
-      - name: Restore cached VC++ For Python2.7
-        id: vcpython-cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ github.workspace }}\vcpython.msi
-          key: vcpython
-
-      - name: Download VC++ For Python2.7 if not cached
-        if: steps.vcpython-cache.outputs.cache-hit != 'true'
-        run: |
-          Invoke-WebRequest https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi -UseBasicParsing -Outfile $env:GITHUB_WORKSPACE\vcpython.msi
-
-      - name: Install VC++ For Python2.7
-        run: Start-Process $env:GITHUB_WORKSPACE\vcpython.msi -ArgumentList "/quiet /passive /norestart" -Wait
-
-      - name: Initialise conda environment
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: 2.7.18
-          activate-environment: mdanse
-
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
@@ -536,13 +348,12 @@ jobs:
 
       - name: Install packages required for documentation and psutil
         run: |
-          %CONDA%\envs\mdanse\python.exe -m pip install docutils==0.17.1 sphinx==1.6.7 stdeb psutil
+          python3 -m pip install docutils==0.17.1 sphinx==1.6.7 stdeb psutil
         shell: cmd /C CALL {0}
 
       - name: Install GUI dependencies
         run: |
-          cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
-          %CONDA%\envs\mdanse\python.exe -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
+          python3 -m pip install wxpython vtk
         shell: cmd /C CALL {0}
 
       - name: Deploy
