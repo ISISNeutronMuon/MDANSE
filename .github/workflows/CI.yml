@@ -167,7 +167,7 @@ jobs:
 
       - name: Install dependecies with pip
         run: |
-          python2 -m pip install numpy matplotlib Cython pyyaml h5py psutil
+          python3 -m pip install numpy matplotlib Cython pyyaml h5py psutil
 
       - name: Install NetCDF
         run: |
