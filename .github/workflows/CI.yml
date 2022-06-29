@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python3 -m pip install numpy matplotlib Cython netCDF4 sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
+          python3 -m pip install numpy matplotlib Cython netCDF4 pyyaml h5py psutil
 
       - name: Install MDANSE
         run: |
@@ -110,7 +110,7 @@ jobs:
 
       - name: Install wx and vtk
         run: |
-          python3 -m pip install wxpython vtk
+          python3 -m pip install wxpython vtk sphinx
 
       - run: sudo apt-get install dos2unix
 
@@ -167,7 +167,7 @@ jobs:
 
       - name: Install dependecies with pip
         run: |
-          python2 -m pip install numpy matplotlib Cython sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil netCDF4
+          python2 -m pip install numpy matplotlib Cython pyyaml h5py psutil
 
       - name: Install NetCDF
         run: |
@@ -234,7 +234,7 @@ jobs:
 
       - name: Install vtk
         run: |
-          python3 -m pip install py2app wxpython vtk
+          python3 -m pip install py2app wxpython vtk sphinx
 
       - name: Deploy MDANSE
         run: |
@@ -297,8 +297,7 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' ) ||
-          contains( github.ref, '93' )
+          contains( github.ref, 'web' )
         run: |
           cd /D %CONDA%\envs
           tar -czf mdanse.tar.gz mdanse
@@ -312,8 +311,7 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' ) ||
-           contains( github.ref, '93' )
+          contains( github.ref, 'web' )
         uses: actions/upload-artifact@v2
         with:
           name: windows_artifacts
