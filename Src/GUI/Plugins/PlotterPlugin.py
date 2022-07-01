@@ -194,7 +194,8 @@ class DataPanel(wx.Panel):
         sb_sizer2.Fit(qviewPanel)
         qviewPanel.Layout()
         
-        self._mgr.AddPane(qviewPanel,wxaui.AuiPaneInfo().Dock().Bottom().Floatable(False).CloseButton(False).Caption("Quick View").MinSize((300,300)))
+        self._mgr.AddPane(qviewPanel, wxaui.AuiPaneInfo().Dock().Bottom().Floatable(False).CloseButton(False)
+                          .Caption("Quick View").MinSize((150,150)))
         self._mgr.AddPane(self.setup,wxaui.AuiPaneInfo().Dock().Center().Floatable(False).CloseButton(False).Caption("Data"))
         
         self._mgr.Update()
