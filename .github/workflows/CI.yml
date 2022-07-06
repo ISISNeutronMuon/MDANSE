@@ -251,15 +251,13 @@ jobs:
       - name: Tar python
         run: |
           cd $CONDA/envs
-          tar -czf python.tar.gz mdanse 
-          echo $CONDA
-          echo "{CONDA_PATH}={$CONDA}" >> $GITHUB_ENV
+          tar -czf python.tar.gz mdanse
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: ubuntu-22.04_artifacts
-          path: ${{ env.CONDA_PATH }}/envs/python.tar.gz
+          path: /usr/share/miniconda/envs/python.tar.gz
           retention-days: 1
 
   deploy_ubuntu22:
@@ -276,13 +274,11 @@ jobs:
           python-version: 2.7.18
           activate-environment: mdanse
 
-      - run: echo "{CONDA_PATH}={$CONDA}" >> $GITHUB_ENV
-
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
           name: ubuntu-22.04_artifacts
-          path: ${{ env.CONDA_PATH }}/envs
+          path: /usr/share/miniconda/envs
 
       - name: Untar python
         run: |
