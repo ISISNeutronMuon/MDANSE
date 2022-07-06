@@ -205,7 +205,7 @@ jobs:
           activate-environment: mdanse
 
       - name: Install python netCDF4 package
-        run: conda install netCDF4
+        run: conda install netCDF4 -n mdanse
 
       - name: Install python packages
         run: |
@@ -231,7 +231,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           $CONDA/envs/mdanse/bin/python setup.py install
 
-      - run: $CONDA/envs/mdanse/bin/python -c "from MDANSE import REGISTRY; print REGISTRY['configurator']['netcdf_input_file']"
+      - run: $CONDA/envs/mdanse/bin/python -c "from MDANSE.Framework.Configurators import NetCDFInputFileConfigurator"
 
       - name: Run unit tests
         run: |
