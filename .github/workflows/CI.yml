@@ -282,7 +282,7 @@ jobs:
 
       - name: Untar python
         run: |
-          cd $CONDA\envs
+          cd $CONDA/envs
           tar -xzf python.tar.gz
 
       - name: Install netcdf
