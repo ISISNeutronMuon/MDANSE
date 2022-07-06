@@ -231,6 +231,8 @@ jobs:
           cd $GITHUB_WORKSPACE
           $CONDA/envs/mdanse/bin/python setup.py install
 
+      - run: $CONDA/envs/mdanse/bin/python -c "from MDANSE import REGISTRY; print REGISTRY['configurator']['configurator']"
+
       - name: Run unit tests
         run: |
           cd $GITHUB_WORKSPACE/Tests/UnitTests
