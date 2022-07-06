@@ -195,9 +195,12 @@ class DataPanel(wx.Panel):
         qviewPanel.Layout()
         
         self._mgr.AddPane(qviewPanel, wxaui.AuiPaneInfo().Dock().Bottom().Floatable(False).CloseButton(False)
-                          .Caption("Quick View").MinSize((150,150)))
-        self._mgr.AddPane(self.setup,wxaui.AuiPaneInfo().Dock().Center().Floatable(False).CloseButton(False).Caption("Data"))
+                          .Caption("Quick View").MinSize((300, 300)).BestSize((300, 300)))
+        self._mgr.AddPane(self.setup,wxaui.AuiPaneInfo().Dock().Center().Floatable(False).CloseButton(False)
+                          .Caption("Data"))
         
+        self._mgr.Update()
+        self._mgr.GetPane(qviewPanel).MinSize((100, 100))
         self._mgr.Update()
 
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_variables,  self.datalist) 
