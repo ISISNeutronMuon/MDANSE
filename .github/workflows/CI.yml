@@ -276,11 +276,13 @@ jobs:
           python-version: 2.7.18
           activate-environment: mdanse
 
+      - run: echo "{CONDA_PATH}={$CONDA}" >> $GITHUB_ENV
+
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
           name: ubuntu-22.04_artifacts
-          path: ${{ CONDA }}\envs
+          path: ${{ env.CONDA_PATH }}/envs
 
       - name: Untar python
         run: |
