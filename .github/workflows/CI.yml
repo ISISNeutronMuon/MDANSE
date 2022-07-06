@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-18.04', 'ubuntu-20.04', 'ubuntu-22.04']
+        os: ['ubuntu-18.04', 'ubuntu-20.04']
 
     steps:
       - uses: actions/checkout@v2
@@ -185,6 +185,59 @@ jobs:
           name: ubuntu-21.04_installer
           path: ${{ github.workspace }}/*21*.deb
           retention-days: 90
+
+  ci_ubuntu22:
+    runs-on: 'ubuntu-22.04'
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install netcdf-bin libnetcdf-dev python-dev libgtk2.0-0 libgtk2.0-dev
+
+      - name: Create conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 2.7.18
+          activate-environment: mdanse
+
+      - name: Install python netCDF4 package
+        run: conda install netCDF4
+
+      - name: Install python packages
+        run: |
+          $CONDA/envs/mdanse/bin/python -m pip install numpy matplotlib Cython Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
+
+      - name: Install ScientificPython
+        run: |
+          cd $HOME
+          git clone https://code.ill.fr/scientific-software/scientific-python.git
+          cd scientific-python/
+          sudo $CONDA/envs/mdanse/bin/python setup.py install
+
+      - name: Install MMTK
+        run: |
+          cd $HOME
+          git clone https://code.ill.fr/scientific-software/mmtk.git
+          cd mmtk
+          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/setup.py ~/mmtk
+          sudo $CONDA/envs/mdanse/bin/python setup.py install
+
+      - name: Install MDANSE
+        run: |
+          cd $GITHUB_WORKSPACE
+          $CONDA/envs/mdanse/bin/python setup.py install
+
+      - name: Run tests
+        run: |
+          export PATH=$PATH:/usr/lib/x86_64-linux-gnu
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu
+          source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
+          $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
+
 
 
 
