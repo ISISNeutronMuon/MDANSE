@@ -299,6 +299,7 @@ jobs:
 
       - name: Deploy
         run: |
+          sed -i 's|PYTHONEXE=$HOME/python|PYTHONEXE=$CONDA/envs/mdanse|' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
