@@ -448,7 +448,7 @@ jobs:
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
           contains( github.ref, 'web' ) ||
-          contains( github.ref, '93' )
+          contains( github.ref, '131' )
         run: |
           cd /D %CONDA%\envs
           tar -czf mdanse.tar.gz mdanse
@@ -463,7 +463,7 @@ jobs:
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
           contains( github.ref, 'web' ) ||
-           contains( github.ref, '93' )
+          contains( github.ref, '131' )
         uses: actions/upload-artifact@v2
         with:
           name: windows_artifacts
@@ -480,7 +480,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '131' )
     steps:
       - uses: actions/checkout@v2
 
