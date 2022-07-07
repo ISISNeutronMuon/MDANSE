@@ -1,3 +1,7 @@
+version 1.5.1
+--------------
+* ADDED issue #129 Installers for Ubuntu 22.x are now automatically generated and available for download
+
 version 1.5.0
 --------------
 * ADDED issue #93 HDF5 format can now be used as output format of analyses as well as input for plotters
