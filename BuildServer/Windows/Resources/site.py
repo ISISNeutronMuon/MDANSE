@@ -75,6 +75,8 @@ ENABLE_USER_SITE = None
 USER_SITE = None
 USER_BASE = None
 
+# Edit the PATH environment variable to include the Library\bin folder. This is required for numpy to work
+os.environ['PATH'] = os.path.join(sys.prefix, "Library", "bin") + os.pathsep + os.environ['PATH']
 
 # Replace c:\Python27 by actual prefix
 temp_path=[]
