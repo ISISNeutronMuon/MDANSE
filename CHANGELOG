@@ -1,3 +1,7 @@
+version 1.5.1
+--------------
+* FIXED issue 131 Importing MDANSE and other installed packages no longer raises exceptions
+
 version 1.5.0
 --------------
 * ADDED issue #93 HDF5 format can now be used as output format of analyses as well as input for plotters
