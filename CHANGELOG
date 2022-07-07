@@ -1,3 +1,7 @@
+version 1.5.1
+--------------
+* CHANGED issue #127 The minimum size of Quick View in 2D/3D Plotter is now much smaller, allowing for resizing downwards
+
 version 1.5.0
 --------------
 * ADDED issue #93 HDF5 format can now be used as output format of analyses as well as input for plotters
