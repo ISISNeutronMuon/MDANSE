@@ -249,11 +249,27 @@ jobs:
           $CONDA/envs/mdanse/bin/python AllTests.py
 
       - name: Tar python
+        if: |
+          contains( github.ref, 'main' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' )
         run: |
           cd $CONDA/envs
           tar -czf python.tar.gz mdanse
 
       - name: Upload artifacts
+        if: |
+          contains( github.ref, 'main' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' )
         uses: actions/upload-artifact@v2
         with:
           name: ubuntu-22.04_artifacts
@@ -265,6 +281,14 @@ jobs:
     runs-on: 'ubuntu-22.04'
     strategy:
       fail-fast: false
+    if: |
+      contains( github.ref, 'main' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
