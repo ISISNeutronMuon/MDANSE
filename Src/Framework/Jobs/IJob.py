@@ -187,8 +187,9 @@ class IJob(Configurable):
         f.write('################################################################\n')
         f.write('\n')
     
-        f.write('%s = REGISTRY[%r][%r]()\n' % (cls._type,'job',cls._type))
-        f.write('%s.run(parameters,status=True)' % (cls._type))
+        f.write('if __name__ == "__main__":\n')
+        f.write('    %s = REGISTRY[%r][%r]()\n' % (cls._type,'job',cls._type))
+        f.write('    %s.run(parameters,status=True)' % (cls._type))
          
         f.close()
         
