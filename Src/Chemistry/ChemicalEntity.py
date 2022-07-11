@@ -11,8 +11,10 @@ from MDANSE.Mathematics.Geometry import superposition_fit
 from MDANSE.Mathematics.LinearAlgebra import delta, Tensor, Vector
 from MDANSE.Mathematics.Transformation import Rotation, Transformation, Translation
 
+
 class UnknownAtomError(Exception):
     pass
+
 
 class InvalidMoleculeError(Exception):
 
@@ -23,6 +25,7 @@ class InvalidMoleculeError(Exception):
     def __str__(self):
         return self._message
 
+
 class UnknownMoleculeError(Exception):
 
     def __init__(self, code):
@@ -32,11 +35,14 @@ class UnknownMoleculeError(Exception):
     def __str__(self):
         return self._message
 
+
 class InconsistentAtomNamesError(Exception):
     pass
 
+
 class InvalidResidueError(Exception):
     pass
+
 
 class UnknownResidueError(Exception):
 
@@ -47,19 +53,25 @@ class UnknownResidueError(Exception):
     def __str__(self):
         return self._message
 
+
 class InvalidVariantError(Exception):
     pass
+
 
 class InvalidChemicalEntityError(Exception):
     pass
 
+
 class InconsistentChemicalSystemError(Exception):
     pass
+
 
 class ChemicalEntityError(Exception):
     pass
 
+
 class _ChemicalEntity(metaclass=abc.ABCMeta):
+    """Abstract base class for other chemical entities."""
 
     def __init__(self):
 
@@ -276,24 +288,26 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         else:
             return self._parent.top_level_chemical_entity()
 
+
 class Atom(_ChemicalEntity):
+    """A representation of atom in a trajectory."""
 
     def __init__(self, **kwargs):
 
         super(Atom,self).__init__()
 
-        self._symbol = kwargs.get('symbol','H')
+        self._symbol = kwargs.get('symbol', 'H')
 
         if self._symbol not in ATOMS_DATABASE:
             raise UnknownAtomError('The atom {} is unknown'.format(self.symbol))
 
-        self._name = kwargs.pop('name',self.symbol)
+        self._name = kwargs.pop('name', self.symbol)
 
-        self._bonds = kwargs.pop('bonds',[])
+        self._bonds = kwargs.pop('bonds', [])
 
-        self._groups = kwargs.pop('groups',[])
+        self._groups = kwargs.pop('groups', [])
 
-        self._ghost = kwargs.pop('ghost',False)
+        self._ghost = kwargs.pop('ghost', False)
 
         self._index = None
 
@@ -302,20 +316,26 @@ class Atom(_ChemicalEntity):
         for k,v in kwargs.items():
             setattr(self,k,v)
 
-    def copy(self):
+    def copy(self) -> 'Atom':
+        """
+        Creates a copy of the current instance of this class.
+
+        :return: A copy of the current instance.
+        :rtype: MDANSE.Chemistry.ChemicalEntity.Atom
+        """
 
         a = Atom(symbol=self._symbol)
 
         for k, v in self.__dict__.items():
-            setattr(a,k,v)
+            setattr(a, k, v)
 
         a._bonds = [bat.copy() for bat in self._bonds]
 
         return a
 
-    def __getitem__(self,item):
+    def __getitem__(self, item):
 
-        return getattr(self,item)
+        return getattr(self, item)
 
     def __getstate__(self):
         return self.__dict__
@@ -328,80 +348,86 @@ class Atom(_ChemicalEntity):
         
         return self.full_name()
 
-    def atom_list(self):
+    def __repr__(self):
+        contents = ', '.join([f'{key.replace("_", "")}={repr(value) if key != "bonds" else value}' for key, value in self.__dict__.items()])
+        return f'MDANSE.Chemistry.ChemicalEntity.Atom({contents})'
+
+    def atom_list(self) -> list:
         return [self] if not self.ghost else []
 
-    def total_number_of_atoms(self):
+    @staticmethod
+    def total_number_of_atoms() -> int:
         return 1
 
-    def number_of_atoms(self):
+    def number_of_atoms(self) -> int:
         return int(self.ghost)
 
     @property
-    def bonds(self):
-
+    def bonds(self) -> list:
+        """A list of atoms to which this atom is chemically bonded."""
         return self._bonds
 
     @bonds.setter
-    def ghost(self, bonds):
+    def bonds(self, bonds: list) -> None:
 
         self._bonds = bonds
 
     @property
-    def ghost(self):
+    def ghost(self) -> bool:
 
         return self._ghost
 
     @ghost.setter
-    def ghost(self, ghost):
+    def ghost(self, ghost: bool) -> None:
 
         self._ghost = ghost
 
     @property
-    def index(self):
+    def index(self) -> int:
+        """The index of the atom in the trajectory. Once set, it cannot be changed anymore."""
         return self._index
 
     @index.setter
-    def index(self, index):
+    def index(self, index: int) -> None:
         if self._index is not None:
             return
         self._index = index
 
     @property
-    def name(self):
-
+    def name(self) -> str:
+        """The full name of the atom, e.g. Hydrogen."""
         return self._name
 
     @name.setter
-    def name(self, name):
+    def name(self, name: str) -> None:
 
         self._name = name
 
     @property
-    def bonds(self):
-        return self._bonds
-
-    @property
-    def symbol(self):
-
+    def symbol(self) -> str:
+        """The chemical symbol of the atom. Must be in the atoms database."""
         return self._symbol
 
     @symbol.setter
-    def symbol(self, symbol):
+    def symbol(self, symbol: str) -> None:
+        if symbol not in ATOMS_DATABASE:
+            raise UnknownAtomError('The atom {} is unknown'.format(symbol))
 
         self._symbol = symbol
 
-    def serialize(self, h5_file, h5_contents):
+    def serialize(self, h5_contents: dict) -> tuple[str, int]:
 
-        atom_str = 'H5Atom(self._h5_file,h5_contents,symbol="{}", name="{}", ghost={})'.format(self.symbol,self.name,self.ghost)
+        atom_str = 'H5Atom(self._h5_file,h5_contents,symbol="{}", name="{}", ghost={})'.format(self.symbol, self.name,
+                                                                                               self.ghost)
 
         h5_contents.setdefault('atoms',[]).append(atom_str)
 
-        return ('atoms',len(h5_contents['atoms'])-1)
+        return 'atoms', len(h5_contents['atoms'])-1
+
 
 class AtomGroup(_ChemicalEntity):
 
-    def __init__(self, atoms):
+    def __init__(self, atoms: list):
 
         super(AtomGroup,self).__init__()
 
@@ -1300,7 +1326,7 @@ class ChemicalSystem(_ChemicalEntity):
         from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
         if self._atoms is None:
-            self._atoms = sorted_atoms(self._atom_list())
+            self._atoms = sorted_atoms(self.atom_list())
 
         return self._atoms
             
