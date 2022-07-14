@@ -12,8 +12,9 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
+import collections
 import pickle
+from typing import Union
 import unittest
 
 import MDANSE.Chemistry.ChemicalEntity as ce
@@ -376,6 +377,217 @@ class TestMolecule(unittest.TestCase):
                                         'H5Atom(self._h5_file,h5_contents,symbol="H", name="HW2", ghost=False)',
                                         'H5Atom(self._h5_file,h5_contents,symbol="H", name="HW1", ghost=False)'],
                              'molecules': ['H5Molecule(self._h5_file,h5_contents,[2, 3, 4],code="WAT",name="water")']},
+                             dictionary)
+
+
+class TestResidue(unittest.TestCase):
+    def test_valid_residue_initialisation_without_variant(self):
+        residue = ce.Residue('GLY', 'glycine', None)
+
+        self.compare_base_residues(residue, True)
+
+    def compare_base_residues(self, residue: ce.Residue, compare_atoms: bool):
+        self.assertEqual('glycine', residue.name)
+        self.assertEqual(None, residue.parent)
+        self.assertEqual('GLY', residue.code)
+        self.assertEqual(None, residue._variant)
+        self.assertEqual(None, residue._selected_variant)
+        if compare_atoms:
+            self.assertEqual(collections.OrderedDict(), residue._atoms)
+
+    def test_invalid_residue_initialisation(self):
+        with self.assertRaises(ce.UnknownResidueError):
+            ce.Residue('00000', '00000')
+
+    def test_valid_residue_initialisation_with_nonexistent_variant(self):
+        with self.assertRaises(ce.InvalidVariantError):
+            ce.Residue('GLY', 'glycine', '00000')
+
+    def test_valid_residue_initialisation_with_invalid_variant(self):
+        with self.assertRaises(ce.InvalidVariantError):
+            ce.Residue('GLY', 'glycine', 'GLY')
+
+    def test_set_atoms_valid(self):
+        residue = ce.Residue('GLY', 'glycine', None)
+        residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
+
+        self.assertEqual(7, len(residue._atoms))
+        self.compare_atoms(residue._atoms, residue)
+
+    def compare_atoms(self, atom_list: Union[list, dict, ce.Residue], parent: ce.Residue):
+        try:
+            atom = atom_list['H']
+        except TypeError:
+            atom = atom_list[0]
+        self.assertEqual('H', atom.symbol)
+        self.assertEqual('H', atom.name)
+        self.assertEqual(1, len(atom.bonds))
+        self.assertEqual(parent._atoms['N'], atom.bonds[0])
+        self.assertEqual(['backbone', 'peptide'], atom._groups)
+        self.assertEqual(False, atom.ghost)
+        self.assertEqual(None, atom.index)
+        self.assertEqual(parent, atom.parent)
+
+        try:
+            atom = atom_list['HA3']
+        except TypeError:
+            atom = atom_list[1]
+        self.assertEqual('H', atom.symbol)
+        self.assertEqual('HA3', atom.name)
+        self.assertEqual(1, len(atom.bonds))
+        self.assertEqual(parent._atoms['CA'], atom.bonds[0])
+        self.assertEqual(['sidechain'], atom._groups)
+        self.assertEqual(False, atom.ghost)
+        self.assertEqual(None, atom.index)
+        self.assertEqual(parent, atom.parent)
+
+        try:
+            atom = atom_list['O']
+        except TypeError:
+            atom = atom_list[2]
+        self.assertEqual('O', atom.symbol)
+        self.assertEqual('O', atom.name)
+        self.assertEqual(1, len(atom.bonds))
+        self.assertEqual(parent._atoms['C'], atom.bonds[0])
+        self.assertEqual(['backbone', 'peptide'], atom._groups)
+        self.assertEqual(False, atom.ghost)
+        self.assertEqual(None, atom.index)
+        self.assertEqual(parent, atom.parent)
+
+        try:
+            atom = atom_list['N']
+        except TypeError:
+            atom = atom_list[3]
+        self.assertEqual('N', atom.symbol)
+        self.assertEqual('N', atom.name)
+        self.assertEqual(3, len(atom.bonds))
+        self.assertEqual(parent._atoms['CA'], atom.bonds[0])
+        self.assertEqual(parent._atoms['H'], atom.bonds[1])
+        self.assertEqual('-R', atom.bonds[2])
+        self.assertEqual(['backbone', 'peptide'], atom._groups)
+        self.assertEqual(False, atom.ghost)
+        self.assertEqual(None, atom.index)
+        self.assertEqual(parent, atom.parent)
+
+        try:
+            atom = atom_list['CA']
+        except TypeError:
+            atom = atom_list[4]
+        self.assertEqual('C', atom.symbol)
+        self.assertEqual('CA', atom.name)
+        self.assertEqual(4, len(atom.bonds))
+        self.assertEqual(parent._atoms['C'], atom.bonds[0])
+        self.assertEqual(parent._atoms['HA2'], atom.bonds[1])
+        self.assertEqual(parent._atoms['HA3'], atom.bonds[2])
+        self.assertEqual(parent._atoms['N'], atom.bonds[3])
+        self.assertEqual(['backbone'], atom._groups)
+        self.assertEqual(False, atom.ghost)
+        self.assertEqual(None, atom.index)
+        self.assertEqual(parent, atom.parent)
+
+        try:
+            atom = atom_list['HA2']
+        except TypeError:
+            atom = atom_list[5]
+        self.assertEqual('H', atom.symbol)
+        self.assertEqual('HA2', atom.name)
+        self.assertEqual(1, len(atom.bonds))
+        self.assertEqual(parent._atoms['CA'], atom.bonds[0])
+        self.assertEqual(['backbone'], atom._groups)
+        self.assertEqual(False, atom.ghost)
+        self.assertEqual(None, atom.index)
+        self.assertEqual(parent, atom.parent)
+
+        try:
+            atom = atom_list['C']
+        except TypeError:
+            atom = atom_list[6]
+        self.assertEqual('C', atom.symbol)
+        self.assertEqual('C', atom.name)
+        self.assertEqual(3, len(atom.bonds))
+        self.assertEqual(parent._atoms['CA'], atom.bonds[0])
+        self.assertEqual(parent._atoms['O'], atom.bonds[1])
+        self.assertEqual('+R', atom.bonds[2])
+        self.assertEqual(['backbone', 'peptide'], atom._groups)
+        self.assertEqual(False, atom.ghost)
+        self.assertEqual(None, atom.index)
+        self.assertEqual(parent, atom.parent)
+
+    def test_set_atoms_invalid(self):
+        residue = ce.Residue('GLY', 'glycine', None)
+        with self.assertRaises(ce.InconsistentAtomNamesError):
+            residue.set_atoms([])
+
+    def test_pickling(self):
+        residue = ce.Residue('GLY', 'glycine', None)
+        residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
+
+        pickled = pickle.dumps(residue)
+        unpickled = pickle.loads(pickled)
+
+        self.compare_base_residues(unpickled, False)
+        self.compare_atoms(unpickled._atoms, unpickled)
+
+    def test_dunder_getitem(self):
+        residue = ce.Residue('GLY', 'glycine', None)
+        residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
+        self.compare_atoms(residue, residue)
+
+    def test_atom_list(self):
+        residue = ce.Residue('GLY', 'glycine', None)
+        residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
+        self.compare_atoms(residue.atom_list(), residue)
+
+    def test_number_of_atoms(self):
+        residue = ce.Residue('GLY', 'glycine', None)
+        residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
+        self.assertEqual(7, residue.number_of_atoms())
+        self.assertEqual(7, residue.total_number_of_atoms())
+
+    def test_copy(self):
+        residue = ce.Residue('GLY', 'glycine', None)
+        residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
+        copy = residue.copy()
+
+        self.compare_atoms(copy, copy)
+
+    def test_serialize_empty_dict(self):
+        residue = ce.Residue('GLY', 'glycine', None)
+        residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
+        dictionary = {}
+        result = residue.serialize(dictionary)
+
+        self.maxDiff = None
+        self.assertEqual(('residues', 0), result)
+        self.assertDictEqual({'residues': ['H5Residue(self._h5_file,h5_contents,[0, 1, 2, 3, 4, 5, 6],code="GLY",'
+                                           'name="glycine",variant=None)'],
+                              'atoms': ['H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA3", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="O", name="O", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="N", name="N", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="CA", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA2", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="C", ghost=False)']},
+                             dictionary)
+
+    def test_serialize_nonempty_dict(self):
+        residue = ce.Residue('GLY', 'glycine', None)
+        residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
+        dictionary = {'atoms': ['', '', '']}
+        result = residue.serialize(dictionary)
+
+        self.maxDiff = None
+        self.assertEqual(('residues', 0), result)
+        self.assertDictEqual({'residues': ['H5Residue(self._h5_file,h5_contents,[3, 4, 5, 6, 7, 8, 9],code="GLY",'
+                                           'name="glycine",variant=None)'],
+                              'atoms': ['', '', '',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA3", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="O", name="O", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="N", name="N", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="CA", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA2", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="C", ghost=False)']},
                              dictionary)
 
 

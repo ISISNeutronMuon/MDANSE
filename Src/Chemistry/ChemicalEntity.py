@@ -7,6 +7,7 @@ import numpy as np
 import h5py
 
 from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DATABASE, RESIDUES_DATABASE
+from MDANSE.Chemistry.Databases import ResiduesDatabaseError
 from MDANSE.Mathematics.Geometry import superposition_fit
 from MDANSE.Mathematics.LinearAlgebra import delta, Tensor, Vector
 from MDANSE.Mathematics.Transformation import Rotation, Transformation, Translation
@@ -651,6 +652,12 @@ class Molecule(_ChemicalEntity):
         return len(self._atoms)
 
     def reorder_atoms(self, atoms: list[str]) -> None:
+        """
+        Change the order in which the atoms in this molecule are stored.
+
+        :param atoms: A list of atoms. The atoms in the Molecule will be reordered to be in the same order as provided.
+        :type atoms: list of strings
+        """
 
         if set(atoms) != set(self._atoms.keys()):
             raise InconsistentAtomNamesError('The set of atoms to reorder is inconsistent with molecular contents')
@@ -693,10 +700,22 @@ def is_molecule(name: str) -> bool:
 
 
 class Residue(_ChemicalEntity):
+    """A group of atoms that make up an amino acid."""
     
-    def __init__(self, code, name, variant=None):
+    def __init__(self, code: str, name: str, variant: str = None):
+        """
 
-        super(Residue,self).__init__()
+        :param code: A code corresponding to a residue in the residue database.
+        :type code: str
+
+        :param name: A name for the residue.
+        :type name: str
+
+        :param variant:
+        :type variant: str
+        """
+
+        super(Residue, self).__init__()
 
         for resname, resinfo in RESIDUES_DATABASE.items():
 
@@ -714,7 +733,7 @@ class Residue(_ChemicalEntity):
         if self._variant is not None:
             try:
                 self._selected_variant = RESIDUES_DATABASE[self._variant]
-            except KeyError:
+            except (KeyError, ResiduesDatabaseError):
                 raise InvalidVariantError('The variant {} is unknown'.format(self._variant))
             else:
                 if not self._selected_variant['is_n_terminus'] and not self._selected_variant['is_c_terminus']:
@@ -724,7 +743,7 @@ class Residue(_ChemicalEntity):
 
         self._atoms = collections.OrderedDict()
 
-    def __getitem__(self,item):
+    def __getitem__(self, item: str) -> Atom:
         return self._atoms[item]
 
     def __getstate__(self):
@@ -733,7 +752,16 @@ class Residue(_ChemicalEntity):
     def __setstate__(self, state):
         self.__dict__ = state
 
-    def set_atoms(self, atoms):
+    def set_atoms(self, atoms: list[str]) -> None:
+        """
+        Populates the Residue with the provided atoms using the data from RESIDUES_DATABASE. The input must correspond
+        to the data in RESIDUES_DATABSE for this residue.
+
+        :param atoms: A list of atoms to populate the residue with
+        :type atom: list of strings
+
+        :return: None
+        """
 
         replaced_atoms = set()
         if self._selected_variant is not None:
@@ -768,21 +796,24 @@ class Residue(_ChemicalEntity):
                 except KeyError:
                     continue
 
-    def atom_list(self):
+    def atom_list(self) -> list[Atom]:
+        """List of atoms in the Residue."""
         return list([at for at in self._atoms.values() if not at.ghost])
 
-    def number_of_atoms(self):
+    def number_of_atoms(self) -> int:
+        """The number of non-ghost atoms in the residue."""
         return len([at for at in self._atoms.values() if not at.ghost])
 
-    def total_number_of_atoms(self):
+    def total_number_of_atoms(self) -> int:
+        """The total number of atoms in the molecule, including ghosts."""
         return len(self._atoms)
 
     @property
-    def code(self):
+    def code(self) -> str:
         return self._code
 
-    def copy(self):
-
+    def copy(self) -> 'Residue':
+        """Copies the instance of AtomCluster into a new, identical instance."""
         r  = Residue(self._code, self._name, self._variant)
         atoms = [at for at in self._atoms]
         r.set_atoms(atoms)
@@ -793,10 +824,10 @@ class Residue(_ChemicalEntity):
 
         return r
 
-    def serialize(self,h5_file, h5_contents):
+    def serialize(self, h5_contents: dict) -> tuple[str, int]:
 
         if 'atoms' in h5_contents:
-            at_indexes = list(range(len(h5_contents['atoms']),len(h5_contents['atoms'])+len(self._atoms)))
+            at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms'])+len(self._atoms)))
         else:
             at_indexes = list(range(len(self._atoms)))
 
@@ -805,9 +836,10 @@ class Residue(_ChemicalEntity):
         h5_contents.setdefault('residues',[]).append(res_str)
         
         for at in self._atoms.values():
-            at.serialize(h5_file,h5_contents)
+            at.serialize(h5_contents)
 
-        return ('residues',len(h5_contents['residues'])-1)
+        return 'residues', len(h5_contents['residues'])-1
+
 
 class Nucleotide(_ChemicalEntity):
     
