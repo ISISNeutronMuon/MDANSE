@@ -349,10 +349,21 @@ class Atom(_ChemicalEntity):
         return self.full_name()
 
     def __repr__(self):
-        contents = ', '.join([f'{key.replace("_", "")}={repr(value) if key != "bonds" else value}' for key, value in self.__dict__.items()])
-        return f'MDANSE.Chemistry.ChemicalEntity.Atom({contents})'
+        contents = ''
+        for key, value in self.__dict__.items():
+            if key == "_bonds":
+                bonds = ', '.join([f'Atom({atom.name})' for atom in self.bonds])
+                contents += f'bonds=[{bonds}]'
+            elif isinstance(value, _ChemicalEntity):
+                class_name = str(type(value)).replace('<class \'', '').replace('\'>', '')
+                contents += f'{key.replace("_", "")}={class_name}({value.name})'
+            else:
+                contents += f'{key.replace("_", "")}={repr(value)}'
+            contents += ', '
 
-    def atom_list(self) -> list:
+        return f'MDANSE.Chemistry.ChemicalEntity.Atom({contents[:-2]})'
+
+    def atom_list(self) -> list['Atom']:
         return [self] if not self.ghost else []
 
     @staticmethod
@@ -363,7 +374,7 @@ class Atom(_ChemicalEntity):
         return int(self.ghost)
 
     @property
-    def bonds(self) -> list:
+    def bonds(self) -> list['Atom']:
         """A list of atoms to which this atom is chemically bonded."""
         return self._bonds
 
@@ -426,6 +437,7 @@ class Atom(_ChemicalEntity):
 
 
 class AtomGroup(_ChemicalEntity):
+    """A selection of atoms that belong to the same chemical system."""
 
     def __init__(self, atoms: list):
 
@@ -458,67 +470,78 @@ class AtomGroup(_ChemicalEntity):
 
         return self._chemical_system
 
-    def serialize(self):
+    def serialize(self, h5_file):
         pass
 
+
 class AtomCluster(_ChemicalEntity):
+    """A cluster of atoms."""
 
-    def __init__(self, name, atoms, parentless=False):
+    def __init__(self, name: str, atoms: list[Atom], parentless=False):
 
-        super(AtomCluster,self).__init__()
+        super(AtomCluster, self).__init__()
 
         self._name = name
 
         self._parentless = parentless
 
-        self._atoms = []
+        self._atoms = collections.OrderedDict()
         for at in atoms:
             if not parentless:
                 at._parent = self
-            self._atoms.append(at)
+
+            name = at.name
+            i = 1
+            while name in self._atoms.keys():
+                name = ''.join([at.name, i])
+                i += 1
+            self._atoms[name] = at
 
     def __getstate__(self):
         return self.__dict__
 
-    def __setstate__(self,state):
+    def __setstate__(self, state):
         self.__dict__ = state
 
-    def __getitem__(self,item):
+    def __getitem__(self, item: str) -> Atom:
 
         return self._atoms[item]
 
-    def atom_list(self):
-        return list([at for at in self._atoms if not at.ghost])
+    def atom_list(self) -> list[Atom]:
+        """A list of atoms in the cluster which are not ghosts."""
+        return list([at for at in self._atoms.values() if not at.ghost])
 
-    def copy(self):
-
-        atoms = [atom.copy() for atom in self._atoms]
+    def copy(self) -> 'AtomCluster':
+        """Copies the instance of AtomCluster into a new, identical instance."""
+        atoms = [atom.copy() for atom in self._atoms.values()]
 
         ac = AtomCluster(self._name,atoms,self._parentless)
 
-        for at in ac._atoms:
+        for at in ac._atoms:  # TODO: Are you actually sure that we want to ignore parentless here?
             at._parent = ac
 
         return ac
 
-    def number_of_atoms(self):
-        return len([at for at in self._atoms if not at.ghost])
+    def number_of_atoms(self) -> int:
+        """The number of non-ghost atoms in the cluster."""
+        return len([at for at in self._atoms.values() if not at.ghost])
 
-    def total_number_of_atoms(self):
+    def total_number_of_atoms(self) -> int:
+        """The total number of atoms in the cluster, including ghosts."""
         return len(self._atoms)
 
-    def reorder_atoms(self, atoms):
+    def reorder_atoms(self, atoms: list[Atom]) -> None:
 
-        if set(atoms) != set([at.name for at in self._atoms]):
+        if set(atoms) != set([at.name for at in self._atoms.values()]):
             raise InconsistentAtomNamesError('The set of atoms to reorder is inconsistent with molecular contents')
 
-        reordered_atoms = []
+        reordered_atoms = collections.OrderedDict()
         for at in atoms:
             reordered_atoms[at] = self._atoms[at]
         
         self._atoms = reordered_atoms
 
-    def serialize(self,h5_file, h5_contents):
+    def serialize(self, h5_contents: dict) -> tuple[str, int]:
 
         if 'atoms' in h5_contents:
             at_indexes = list(range(len(h5_contents['atoms']),len(h5_contents['atoms'])+len(self._atoms)))
@@ -530,15 +553,17 @@ class AtomCluster(_ChemicalEntity):
         h5_contents.setdefault('atom_clusters',[]).append(ac_str)
         
         for at in self._atoms:
-            at.serialize(h5_file,h5_contents)
+            at.serialize(h5_contents)
 
         return ('atom_clusters',len(h5_contents['atom_clusters'])-1)
 
-class Molecule(_ChemicalEntity):
-    
-    def __init__(self, code, name):
 
-        super(Molecule,self).__init__()
+class Molecule(_ChemicalEntity):
+    """A group of atoms that form a molecule."""
+    
+    def __init__(self, code: str, name: str):
+
+        super(Molecule, self).__init__()
 
         self._atoms = collections.OrderedDict()
 
@@ -548,7 +573,7 @@ class Molecule(_ChemicalEntity):
 
         self._build(code)
 
-    def _build(self, code):
+    def _build(self, code: str) -> None:
 
         for molname, molinfo in MOLECULES_DATABASE.items():
             if code == molname or code in molinfo['alternatives']:
@@ -563,7 +588,7 @@ class Molecule(_ChemicalEntity):
         else:
             raise UnknownMoleculeError(code)
 
-    def __getitem__(self,item):
+    def __getitem__(self, item: str) -> Atom:
         return self._atoms[item]
 
     def __getstate__(self):
@@ -572,7 +597,19 @@ class Molecule(_ChemicalEntity):
     def __setstate__(self, state):
         self.__dict__ = state
 
-    def _set_bonds(self):
+    def __repr__(self):
+        contents = ''
+        for key, value in self.__dict__.items():
+            if isinstance(value, _ChemicalEntity) and not isinstance(value, Atom):
+                class_name = str(type(value)).replace('<class \'', '').replace('\'>', '')
+                contents += f'{key.replace("_", "")}={class_name}({value.name})'
+            else:
+                contents += f'{key.replace("_", "")}={repr(value)}'
+            contents += ', '
+
+        return f'MDANSE.MolecularDynamics.ChemicalEntity.Molecule({contents[:-2]})'
+
+    def _set_bonds(self) -> None:
 
         for atom in self._atoms.values():
             for i in range(len(atom.bonds)):
@@ -581,14 +618,17 @@ class Molecule(_ChemicalEntity):
                 except KeyError:
                     continue
 
-    def atom_list(self):
+    def atom_list(self) -> list[Atom]:
+        """The list of non-ghost atoms in the molecule."""
         return list([at for at in self._atoms.values() if not at.ghost])
 
     @property
-    def code(self):
+    def code(self) -> str:
+        """The code corresponding to the name of the molecule, e.g. WAT for water."""
         return self._code
 
-    def copy(self):
+    def copy(self) -> 'Molecule':
+        """Copies the instance of AtomCluster into a new, identical instance."""
 
         m = Molecule(self._code, self._name)
 
@@ -598,17 +638,19 @@ class Molecule(_ChemicalEntity):
 
         for atname, at in m._atoms.items():
             at._parent = m
-            at._index = self._atoms[atname]._index
+            at._index = self._atoms[atname].index
 
         return m
 
-    def number_of_atoms(self):
+    def number_of_atoms(self) -> int:
+        """The number of non-ghost atoms in the molecule."""
         return len([at for at in self._atoms.values() if not at.ghost])
 
-    def total_number_of_atoms(self):
+    def total_number_of_atoms(self) -> int:
+        """The total number of atoms in the molecule, including ghosts."""
         return len(self._atoms)
 
-    def reorder_atoms(self, atoms):
+    def reorder_atoms(self, atoms: list[str]) -> None:
 
         if set(atoms) != set(self._atoms.keys()):
             raise InconsistentAtomNamesError('The set of atoms to reorder is inconsistent with molecular contents')
@@ -619,25 +661,36 @@ class Molecule(_ChemicalEntity):
         
         self._atoms = reordered_atoms
 
-    def serialize(self,h5_file, h5_contents):
+    def serialize(self, h5_contents: dict) -> tuple[str, int]:
 
         if 'atoms' in h5_contents:
-            at_indexes = list(range(len(h5_contents['atoms']),len(h5_contents['atoms'])+len(self._atoms)))
+            at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms'])+len(self._atoms)))
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        mol_str = 'H5Molecule(self._h5_file,h5_contents,{},code="{}",name="{}")'.format(at_indexes,self._code,self._name)
+        mol_str = 'H5Molecule(self._h5_file,h5_contents,{},code="{}",name="{}")'.format(at_indexes, self._code,
+                                                                                        self._name)
 
-        h5_contents.setdefault('molecules',[]).append(mol_str)
+        h5_contents.setdefault('molecules', []).append(mol_str)
         
         for at in self._atoms.values():
-            at.serialize(h5_file,h5_contents)
+            at.serialize(h5_contents)
 
-        return ('molecules',len(h5_contents['molecules'])-1)
+        return 'molecules', len(h5_contents['molecules'])-1
 
-def is_molecule(name):
 
+def is_molecule(name: str) -> bool:
+    """
+    Checks if a given molecule is in the molecules database.
+
+    :param name: A code or an alternative code (e.g. 'WAT' for water) corresponding to a molecule
+    :type name: str
+
+    :return: Whether the provided molecule is in MOLECULES_DATABASE
+    :rtype: bool
+    """
     return name in MOLECULES_DATABASE
+
 
 class Residue(_ChemicalEntity):
     
