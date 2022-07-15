@@ -7,7 +7,7 @@ import numpy as np
 import h5py
 
 from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DATABASE, RESIDUES_DATABASE
-from MDANSE.Chemistry.Databases import ResiduesDatabaseError
+from MDANSE.Chemistry.Databases import ResiduesDatabaseError, NucleotidesDatabaseError
 from MDANSE.Mathematics.Geometry import superposition_fit
 from MDANSE.Mathematics.LinearAlgebra import delta, Tensor, Vector
 from MDANSE.Mathematics.Transformation import Rotation, Transformation, Translation
@@ -353,7 +353,7 @@ class Atom(_ChemicalEntity):
         contents = ''
         for key, value in self.__dict__.items():
             if key == "_bonds":
-                bonds = ', '.join([f'Atom({atom.name})' for atom in self.bonds])
+                bonds = ', '.join([f'Atom({atom.name if hasattr(atom, "name") else atom})' for atom in self.bonds])
                 contents += f'bonds=[{bonds}]'
             elif isinstance(value, _ChemicalEntity):
                 class_name = str(type(value)).replace('<class \'', '').replace('\'>', '')
@@ -842,10 +842,20 @@ class Residue(_ChemicalEntity):
 
 
 class Nucleotide(_ChemicalEntity):
+    """A group of atoms that make up a nucleotide."""
     
-    def __init__(self, code, name, variant=None):
+    def __init__(self, code: str, name: str, variant: str = None):
+        """
+        :param code: A code corresponding to a nucleotide in the nucleotide database.
+        :type code: str
 
-        super(Nucleotide,self).__init__()
+        :param name: A name for the residue.
+        :type name: str
+
+        :param variant:
+        :type variant: str
+        """
+        super(Nucleotide, self).__init__()
 
         for resname, resinfo in NUCLEOTIDES_DATABASE.items():
 
@@ -864,7 +874,7 @@ class Nucleotide(_ChemicalEntity):
         if self._variant is not None:
             try:
                 self._selected_variant = NUCLEOTIDES_DATABASE[self._variant]
-            except KeyError:
+            except (KeyError, NucleotidesDatabaseError):
                 raise InvalidVariantError('The variant {} is unknown'.format(self._variant))
             else:
                 if not self._selected_variant['is_5ter_terminus'] and not self._selected_variant['is_3ter_terminus']:
@@ -874,7 +884,7 @@ class Nucleotide(_ChemicalEntity):
 
         self._atoms = collections.OrderedDict()
 
-    def __getitem__(self,item):
+    def __getitem__(self, item: str) -> Atom:
         return self._atoms[item]
 
     def __getstate__(self):
@@ -883,20 +893,40 @@ class Nucleotide(_ChemicalEntity):
     def __setstate__(self, state):
         self.__dict__ = state
 
-    def copy(self):
+    def __repr__(self):
+        contents = ''
+        for key, value in self.__dict__.items():
+            if isinstance(value, _ChemicalEntity) and not isinstance(value, Atom):
+                class_name = str(type(value)).replace('<class \'', '').replace('\'>', '')
+                contents += f'{key.replace("_", "")}={class_name}(name={value.name})'
+            else:
+                contents += f'{key.replace("_", "")}={repr(value)}'
+            contents += ', '
 
+        return f'MDANSE.MolecularDynamics.ChemicalEntity.Nucleotide({contents[:-2]})'
+
+    def copy(self) -> 'Nucleotide':
+        """Copies the instance of AtomCluster into a new, identical instance."""
         n  = Nucleotide(self._code, self._name, self._variant)
         atoms = [at for at in self._atoms]
         n.set_atoms(atoms)
 
         for atname, at in n._atoms.items():
             at._parent = n
-            at._index = self._atoms[atname]._index
+            at._index = self._atoms[atname].index
 
         return n
 
-    def set_atoms(self, atoms):
+    def set_atoms(self, atoms: list[str]) -> None:
+        """
+        Populates the Nucleotide with the provided atoms using the data from NUCLEOTIDES_DATABASE. The input must
+        correspond to the data in NUCLEOTIDES_DATABASE for this nucleotide.
 
+        :param atoms: A list of atoms to populate the nucleotide with
+        :type atom: list of strings
+
+        :return: None
+        """
         replaced_atoms = set()
         if self._selected_variant is not None:
             for v in self._selected_variant['atoms'].values():
@@ -908,7 +938,10 @@ class Nucleotide(_ChemicalEntity):
             res_atoms.update(self._selected_variant['atoms'])
 
         if res_atoms != set(atoms):
-            raise InconsistentAtomNamesError('The set of atoms to reorder is inconsistent with residue contents')
+            difference = res_atoms.difference(set(atoms)) if len(res_atoms) > len(atoms) else \
+                set(atoms).difference(res_atoms)
+            raise InconsistentAtomNamesError('The set of atoms to reorder is inconsistent with residue contents.\n'
+                                             f'Expected: {res_atoms}\nActual: {set(atoms)}\nDifference: {difference}')
 
         d = copy.deepcopy(NUCLEOTIDES_DATABASE[self._resname]['atoms'])
         if self._selected_variant is not None:
@@ -921,7 +954,7 @@ class Nucleotide(_ChemicalEntity):
         
         for at, atom in self._atoms.items():
 
-            for i in range(len(atom.bonds)-1,-1,-1):
+            for i in range(len(atom.bonds)-1, -1, -1):
                 if atom.bonds[i] in replaced_atoms:
                     del atom.bonds[i]
                     continue
@@ -931,34 +964,41 @@ class Nucleotide(_ChemicalEntity):
                     except KeyError:
                         continue
 
-    def atom_list(self):
+    def atom_list(self) -> list[Atom]:
+        """List of all non-ghost atoms in the Nucleotide."""
         return list([at for at in self._atoms.values() if not at.ghost])
 
-    def number_of_atoms(self):
+    def number_of_atoms(self) -> int:
+        """The number of non-ghost atoms in the residue."""
         return len([at for at in self._atoms.values() if not at.ghost])
 
     def total_number_of_atoms(self):
+        """The total number of atoms in the molecule, including ghosts."""
         return len(self._atoms)
 
     @property
     def code(self):
         return self._code
 
-    def serialize(self, h5_file, h5_contents):
+    def serialize(self, h5_contents: dict) -> tuple[str, int]:
 
         if 'atoms' in h5_contents:
             at_indexes = list(range(len(h5_contents['atoms']),len(h5_contents['atoms'])+len(self._atoms)))
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        res_str = 'H5Nucleotide(self._h5_file,h5_contents,{},code="{}",name="{}",variant={})'.format(at_indexes,self._code,self._name,repr(self._variant))
+        res_str = 'H5Nucleotide(self._h5_file,h5_contents,{},code="{}",name="{}",variant={})'.format(at_indexes,
+                                                                                                     self._code,
+                                                                                                     self._name,
+                                                                                                     repr(self._variant))
 
         h5_contents.setdefault('nucleotides',[]).append(res_str)
         
         for at in self._atoms.values():
-            at.serialize(h5_file,h5_contents)
+            at.serialize(h5_contents)
 
-        return ('nucleotides',len(h5_contents['nucleotides'])-1)
+        return 'nucleotides', len(h5_contents['nucleotides'])-1
+
 
 class NucleotideChain(_ChemicalEntity):
 

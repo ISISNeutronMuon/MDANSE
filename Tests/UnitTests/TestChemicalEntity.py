@@ -17,6 +17,7 @@ import pickle
 from typing import Union
 import unittest
 
+from MDANSE.Chemistry import RESIDUES_DATABASE, NUCLEOTIDES_DATABASE
 import MDANSE.Chemistry.ChemicalEntity as ce
 
 
@@ -395,6 +396,16 @@ class TestResidue(unittest.TestCase):
         if compare_atoms:
             self.assertEqual(collections.OrderedDict(), residue._atoms)
 
+    def test_valid_residue_initialisation_with_valid_variant(self):
+        residue = ce.Residue('GLY', 'glycine', 'CT1')
+
+        self.assertEqual('glycine', residue.name)
+        self.assertEqual(None, residue.parent)
+        self.assertEqual('GLY', residue.code)
+        self.assertEqual('CT1', residue._variant)
+        self.assertDictEqual(RESIDUES_DATABASE['CT1'], residue._selected_variant)
+        self.assertEqual(collections.OrderedDict(), residue._atoms)
+
     def test_invalid_residue_initialisation(self):
         with self.assertRaises(ce.UnknownResidueError):
             ce.Residue('00000', '00000')
@@ -588,6 +599,161 @@ class TestResidue(unittest.TestCase):
                                         'H5Atom(self._h5_file,h5_contents,symbol="C", name="CA", ghost=False)',
                                         'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA2", ghost=False)',
                                         'H5Atom(self._h5_file,h5_contents,symbol="C", name="C", ghost=False)']},
+                             dictionary)
+
+
+class TestNucleotide(unittest.TestCase):
+    def test_valid_residue_initialisation_without_variant(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', None)
+
+        self.compare_base_residues(nucleotide, True)
+
+    def compare_base_residues(self, nucleotide: ce.Nucleotide, compare_atoms: bool):
+        self.assertEqual('5T1', nucleotide.name)
+        self.assertEqual(None, nucleotide.parent)
+        self.assertEqual('5T1', nucleotide.code)
+        self.assertEqual(None, nucleotide._variant)
+        self.assertEqual(None, nucleotide._selected_variant)
+        if compare_atoms:
+            self.assertEqual(collections.OrderedDict(), nucleotide._atoms)
+
+    def test_valid_residue_initialisation_with_valid_variant(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', '3T1')
+
+        self.assertEqual('5T1', nucleotide.name)
+        self.assertEqual(None, nucleotide.parent)
+        self.assertEqual('5T1', nucleotide.code)
+        self.assertEqual('3T1', nucleotide._variant)
+        self.assertDictEqual(NUCLEOTIDES_DATABASE['3T1'], nucleotide._selected_variant)
+        self.assertEqual(collections.OrderedDict(), nucleotide._atoms)
+
+    def test_invalid_residue_initialisation(self):
+        with self.assertRaises(ce.UnknownResidueError):
+            ce.Nucleotide('00000', '00000')
+
+    def test_valid_residue_initialisation_with_nonexistent_variant(self):
+        with self.assertRaises(ce.InvalidVariantError):
+            ce.Nucleotide('5T1', '5T1', '00000')
+
+    def test_valid_residue_initialisation_with_invalid_variant(self):
+        with self.assertRaises(ce.InvalidVariantError):
+            ce.Nucleotide('5T1', '5T1', 'A')
+
+    def test_set_atoms_none(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', None)
+        nucleotide.set_atoms(['HO5\''])
+
+        self.compare_atoms_in_5t1(nucleotide._atoms, nucleotide)
+
+    def compare_atoms_in_5t1(self, atom_list: Union[dict, ce.Nucleotide, list], nucleotide: ce.Nucleotide):
+        try:
+            atom = atom_list['HO5\'']
+        except TypeError:
+            atom = atom_list[0]
+        self.assertEqual('H', atom.symbol)
+        self.assertEqual('HO5\'', atom.name)
+        self.assertEqual(1, len(atom.bonds))
+        self.assertEqual('O5\'', atom.bonds[0])
+        self.assertEqual([], atom._groups)
+        self.assertEqual(False, atom.ghost)
+        self.assertEqual(None, atom.index)
+        self.assertEqual(nucleotide, atom.parent)
+
+    def test_set_atoms_variant(self):
+        nucleotide = ce.Nucleotide('A', 'adenine', '5T1')
+        names = ['C3\'', 'C1\'', 'C5\'', 'H2\'', 'H5\'', 'H3\'', 'O4\'', 'C8', 'C2', 'H1\'', 'C6', 'C5', 'C4', 'H5\'\'',
+                 'HO2\'', 'N9', 'C4\'', 'C2\'', 'O2\'', 'N1', 'N3', 'N6', 'N7','H4\'', 'H8', 'H2', 'O5\'', 'H61', 'H62',
+                 'O3\'', 'HO5\'']
+        nucleotide.set_atoms(names)
+
+        symbols = ['C', 'C', 'C', 'H', 'H', 'H', 'O', 'C', 'C', 'H', 'C', 'C', 'C', 'H', 'H', 'N', 'C', 'C', 'O', 'N',
+                   'N', 'N', 'N', 'H', 'H', 'H', 'O', 'H', 'H', 'O', 'H']
+        bond_atoms = [['C2\'', 'C4\'', 'H3\'', 'O3\''], ['C2\'', 'H1\'', 'N9', 'O4\''], ['C4\'', 'H5\'', 'H5\'\'', 'O5\''],
+                      ['C2\''], ['C5\''], ['C3\''], ['C1\'', 'C3\''], ['H8', 'N7', 'N9'], ['N1', 'N3', 'H2'], ['C1\''],
+                      ['C5', 'N1', 'N6'], ['C4', 'C6', 'N7'], ['C5', 'N3', 'N9'], ['C5\''], ['O2\''],
+                      ['C1\'', 'C4', 'C8'], ['C3\'', 'C5\'', 'H4\'', 'O4\''], ['C1\'', 'C3\'', 'H2\'', 'O2\''],
+                      ['C2\'', 'HO2\''], ['C2', 'C6'], ['C2', 'C4'], ['C6', 'H61', 'H62'], ['C5', 'C8'], ['C4\''],
+                      ['C8'], ['C2'], ['C5\''], ['N6'], ['N6'], ['C3\'', '+R'], ['O5\'']]
+        groups = [['sugar']] * 7 + [['base'], ['base'], ['sugar']] + [['base']] * 3 + [['sugar'], ['sugar'], ['base']] \
+                 + [['sugar']] * 3 + [['base']] * 4 + [['sugar'], ['base'], ['base'], ['phosphate'], ['base'], ['base'],
+                                                       ['phosphate']]
+
+        for atom, symbol, name, bonds, group in zip(nucleotide._atoms.values(), symbols, names, bond_atoms, groups):
+            self.assertEqual(symbol, atom.symbol)
+            self.assertEqual(name, atom.name)
+            self.assertEqual(len(bonds), len(atom.bonds))
+            for i, bond in enumerate(bonds):
+                if bond[0] != '+':
+                    self.assertEqual(nucleotide._atoms[bond], atom.bonds[i])
+                else:
+                    self.assertEqual(bond, atom.bonds[i])
+            self.assertEqual(group, atom._groups)
+            self.assertEqual(False, atom.ghost)
+            self.assertEqual(None, atom.index)
+            self.assertEqual(nucleotide, atom.parent)
+
+    def test_set_atoms_invalid_input(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', None)
+        with self.assertRaises(ce.InconsistentAtomNamesError):
+            nucleotide.set_atoms(['HO5'])
+
+    def test_dunder_getitem(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', None)
+        nucleotide.set_atoms(['HO5\''])
+        self.compare_atoms_in_5t1(nucleotide, nucleotide)
+
+    def test_pickling(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', None)
+        nucleotide.set_atoms(['HO5\''])
+
+        pickled = pickle.dumps(nucleotide)
+        unpickled = pickle.loads(pickled)
+
+        self.compare_base_residues(unpickled, False)
+        self.compare_atoms_in_5t1(unpickled._atoms, unpickled)
+
+    def test_copy(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', None)
+        nucleotide.set_atoms(['HO5\''])
+        copy = nucleotide.copy()
+
+        self.compare_base_residues(copy, False)
+        self.compare_atoms_in_5t1(copy._atoms, copy)
+
+    def test_atom_list(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', None)
+        nucleotide.set_atoms(['HO5\''])
+        self.compare_atoms_in_5t1(nucleotide.atom_list(), nucleotide)
+
+    def test_number_of_atoms(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', None)
+        nucleotide.set_atoms(['HO5\''])
+        self.assertEqual(1, nucleotide.number_of_atoms())
+        self.assertEqual(1, nucleotide.total_number_of_atoms())
+
+    def test_serialize_empty_dict(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', None)
+        nucleotide.set_atoms(['HO5\''])
+        dictionary = {}
+        result = nucleotide.serialize(dictionary)
+
+        self.assertEqual(('nucleotides', 0), result)
+        self.assertDictEqual({'nucleotides': ['H5Nucleotide(self._h5_file,h5_contents,[0],code="5T1",name="5T1",'
+                                              'variant=None)'],
+                              'atoms': ['H5Atom(self._h5_file,h5_contents,symbol="H", name="HO5\'", ghost=False)']},
+                             dictionary)
+
+    def test_serialize_nonempty_dict(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', None)
+        nucleotide.set_atoms(['HO5\''])
+        dictionary = {'atoms': ['', '', '']}
+        result = nucleotide.serialize(dictionary)
+
+        self.assertEqual(('nucleotides', 0), result)
+        self.assertDictEqual({'nucleotides': ['H5Nucleotide(self._h5_file,h5_contents,[3],code="5T1",name="5T1",'
+                                              'variant=None)'],
+                              'atoms': ['', '', '',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HO5\'", ghost=False)']},
                              dictionary)
 
 
