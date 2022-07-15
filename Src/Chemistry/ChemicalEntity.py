@@ -59,6 +59,10 @@ class InvalidVariantError(Exception):
     pass
 
 
+class InvalidNucleotideChainError(Exception):
+    pass
+
+
 class InvalidChemicalEntityError(Exception):
     pass
 
@@ -996,6 +1000,10 @@ class Nucleotide(_ChemicalEntity):
     def code(self):
         return self._code
 
+    @property
+    def variant(self):
+        return self._variant
+
     def serialize(self, h5_contents: dict) -> tuple[str, int]:
 
         if 'atoms' in h5_contents:
@@ -1017,16 +1025,22 @@ class Nucleotide(_ChemicalEntity):
 
 
 class NucleotideChain(_ChemicalEntity):
+    """A group of Nucleotide objects connected by bonds in a chain."""
 
-    def __init__(self, name):
+    def __init__(self, name: str):
+        """
 
-        super(NucleotideChain,self).__init__()
+        :param name: A name for the chain.
+        :type name: str
+        """
+
+        super(NucleotideChain, self).__init__()
 
         self._name = name
 
         self._nucleotides = []
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int):
         return self._nucleotides[item]
 
     def __getstate__(self):
@@ -1038,30 +1052,93 @@ class NucleotideChain(_ChemicalEntity):
     def __str__(self):
         return 'NucleotideChain of {} nucleotides'.format(len(self._nucleotides))
 
+    def __repr__(self):
+        contents = ''
+        for key, value in self.__dict__.items():
+            key = key[1:] if key[0] == "_" else key
+            if isinstance(value, _ChemicalEntity) and not isinstance(value, Nucleotide):
+                class_name = str(type(value)).replace('<class \'', '').replace('\'>', '')
+                contents += f'{key}={class_name}(name={value.name})'
+            else:
+                contents += f'{key}={repr(value)}'
+            contents += ', '
+
+        return f'MDANSE.MolecularDynamics.ChemicalEntity.NucleotideChain({contents[:-2]})'
+
     def _connect_nucleotides(self):
-                
-        ratoms_in_first_residue = [at for at in self._nucleotides[0].atom_list() if getattr(at,'o5prime_connected',False)]
-        n_atom_in_first_residue = self._nucleotides[0]["O5'"]
+
+        ratoms_in_first_residue = [at for at in self._nucleotides[0].atom_list() if
+                                   getattr(at, 'o5prime_connected', False)]
+        if len(ratoms_in_first_residue) == 0:
+            raise InvalidNucleotideChainError('The first nucleotide in the chain must contain an atom that is connected'
+                                              'to the 5\' terminal oxygen (O5\'). This is signified by an atom having'
+                                              'the "o5prime_connected" property set to True, and happens automatically'
+                                              'if the nucleotide was created with variant="5T1", and the set_atoms()'
+                                              ' method was called with the correct atoms.\nThe provided first '
+                                              f'nucleotide is {self._nucleotides[0].name}, its variant is '
+                                              f'{self._nucleotides[0].variant} and it contains the following atoms: '
+                                              f'{[at.name for at in self._nucleotides[0].atom_list()]}. The full info'
+                                              f' on the first nucleotide is {repr(self._nucleotides[0])}.')
+
+        try:
+            n_atom_in_first_residue = self._nucleotides[0]["O5'"]
+        except KeyError:
+            raise InvalidNucleotideChainError('The first nucleotide in the chain must contain 5\' terminal oxygen atom'
+                                              ' (O5\'). The first nucleotide that was provided is '
+                                              f'{self._nucleotides[0].name} and contains only the following atoms: '
+                                              f'{[at.name for at in self._nucleotides[0].atom_list()]}.\nThe full info'
+                                              f' on the first nucleotide is {repr(self._nucleotides[0])}.')
         n_atom_in_first_residue.bonds.extend(ratoms_in_first_residue)
 
-        ratoms_in_last_residue = [at for at in self._nucleotides[-1].atom_list() if getattr(at,'o3prime_connected',False)]
-        c_atom_in_last_residue = self._nucleotides[-1]["O3'"]
+        ratoms_in_last_residue = [at for at in self._nucleotides[-1].atom_list() if
+                                  getattr(at, 'o3prime_connected', False)]
+        if len(ratoms_in_last_residue) == 0:
+            raise InvalidNucleotideChainError('The last nucleotide in the chain must contain an atom that is connected'
+                                              'to the 3\' terminal oxygen (O3\'). This is signified by an atom having'
+                                              'the "o3prime_connected" property set to True, and happens automatically'
+                                              'if the nucleotide was created with variant="3T1", and the set_atoms()'
+                                              ' method was called with the correct atoms.\nThe provided first '
+                                              f'nucleotide is {self._nucleotides[-1].name}, its variant is '
+                                              f'{self._nucleotides[0].variant} and it contains the following atoms: '
+                                              f'{[at.name for at in self._nucleotides[-1].atom_list()]}. The full info'
+                                              f' on the first nucleotide is {repr(self._nucleotides[-1])}.')
+        try:
+            c_atom_in_last_residue = self._nucleotides[-1]["O3'"]
+        except KeyError:
+            raise InvalidNucleotideChainError('The last nucleotide in the chain must contain 3\' terminal oxygen atom'
+                                              ' (O3\'). The first nucleotide that was provided is '
+                                              f'{self._nucleotides[0].name} and contains only the following atoms: '
+                                              f'{[at.name for at in self._nucleotides[0].atom_list()]}.\nThe full info'
+                                              f' on the first nucleotide is {repr(self._nucleotides[0])}.')
         idx = c_atom_in_last_residue.bonds.index('+R')
         del c_atom_in_last_residue.bonds[idx]
         c_atom_in_last_residue.bonds.extend(ratoms_in_last_residue)
 
-        for i in range(len(self._nucleotides)-1):
-            current_residue = self._nucleotides[i]
+        for i, current_residue in enumerate(self._nucleotides[:-1]):
             next_residue = self._nucleotides[i+1]
 
-            ratoms_in_current_residue = [at for at in current_residue.atom_list() if '+R' in at.bonds][0]
-            ratoms_in_next_residue = [at for at in next_residue.atom_list() if '-R' in at.bonds][0]
+            for atom in current_residue.atom_list():
+                if '+R' in atom.bonds:
+                    current_idx = atom.bonds.index('+R')
+                    current_atom = atom
+                    break
+            else:
+                raise InvalidResidueError(f'The provided nucleotide with index {i}, {current_residue.name}, is invalid '
+                                          f'because it does not contain an atom bonded to "R+", i.e. another nucleo'
+                                          f'tide.\nThe full info on this nucleotide is {repr(current_residue)}')
 
-            idx = ratoms_in_current_residue.bonds.index('+R')
-            ratoms_in_current_residue.bonds[idx] = ratoms_in_next_residue
+            for atom in next_residue.atom_list():
+                if '-R' in atom.bonds:
+                    next_idx = atom.bonds.index('-R')
+                    next_atom = atom
+                    break
+            else:
+                raise InvalidResidueError(f'The provided nucleotide with index {i+1}, {next_residue.name}, is invalid '
+                                          f'because it does not contain an atom bonded to "R+", i.e. another nucleo'
+                                          f'tide.\nThe full info on this nucleotide is {repr(next_residue)}')
 
-            idx = ratoms_in_next_residue.bonds.index('-R')
-            ratoms_in_next_residue.bonds[idx] = ratoms_in_current_residue
+            current_atom.bonds[current_idx] = next_atom
+            next_atom.bonds[next_idx] = current_atom
 
     def atom_list(self):
 
@@ -1128,8 +1205,18 @@ class NucleotideChain(_ChemicalEntity):
 
         return ('nucleotide_chains',len(h5_contents['nucleotide_chains'])-1)
 
-    def set_nucleotides(self, nucleotides):
+    def set_nucleotides(self, nucleotides: list[Nucleotide]) -> None:
+        """
+        Sets the provided Nucleotide objects as the nucleotides making up this chain, and creates bonds between them.
+        They are connected in the order that they are passed in to this method, so the first nucleotide must the 5'
+        terminus and the last one must be the 3' terminus.
 
+        :param nucleotides: A list of nucleotides that will make up this chain.
+        :type nucleotides: list
+
+        :return: None
+        """
+        self._nucleotides = []
         for nucleotide in nucleotides:
             nucleotide.parent = self
             self._nucleotides.append(nucleotide)
@@ -1143,6 +1230,7 @@ class NucleotideChain(_ChemicalEntity):
             if 'sugar' in at.groups:
                 atoms.append(at)
         return atoms
+
 
 class PeptideChain(_ChemicalEntity):
 

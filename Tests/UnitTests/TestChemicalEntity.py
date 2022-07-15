@@ -817,6 +817,114 @@ class TestNucleotide(unittest.TestCase):
                              dictionary)
 
 
+class TestNucleotideChain(unittest.TestCase):
+    def setUp(self):
+        self.chain = ce.NucleotideChain('name')
+
+    def test_instantiation(self):
+        self.assertEqual('name', self.chain.name)
+        self.assertEqual(None, self.chain.parent)
+        self.assertEqual([], self.chain._nucleotides)
+
+    def test_set_nucleotides(self):
+        n1, n2 = self.prepare_nucleotides()
+
+        self.chain.set_nucleotides([n1, n2])
+
+        self.assertEqual(self.chain, n1.parent)
+        self.assertEqual(self.chain, n2.parent)
+
+        self.assertEqual([n1, n2], self.chain._nucleotides)
+        self.assertEqual(n2['P'], n1['O3\''].bonds[1])
+        self.assertEqual(n1['O3\''], n2['P'].bonds[3])
+
+    @staticmethod
+    def prepare_nucleotides():
+        names5 = ['C3\'', 'C1\'', 'C5\'', 'H2\'', 'H5\'', 'H3\'', 'O4\'', 'C8', 'C2', 'H1\'', 'C6', 'C5', 'C4',
+                  'H5\'\'', 'HO2\'', 'N9', 'C4\'', 'C2\'', 'O2\'', 'N1', 'N3', 'N6', 'N7', 'H4\'', 'H8', 'H2', 'O5\'',
+                  'H61', 'H62', 'O3\'', 'HO5\'']
+        n1 = ce.Nucleotide('A', 'adenine', '5T1')
+        n1.set_atoms(names5)
+
+        names3 = ['C3\'', 'C1\'', 'C5\'', 'H2\'', 'H5\'', 'H3\'', 'O4\'', 'C8', 'C2', 'H1\'', 'C6', 'C5', 'C4',
+                  'H5\'\'', 'HO2\'', 'N9', 'C4\'', 'C2\'', 'O2\'', 'N1', 'N3', 'N6', 'N7', 'H4\'', 'H8', 'H2', 'O5\'',
+                  'H61', 'H62', 'O3\'', 'HO3\'', 'OP1', 'OP2', 'P']
+        n2 = ce.Nucleotide('A', 'adenine', '3T1')
+        n2.set_atoms(names3)
+
+        return n1, n2
+
+    def test_set_nucleotides_no_ho5prime(self):
+        n1, n2 = self.prepare_nucleotides()
+
+        with self.assertRaises(ce.InvalidNucleotideChainError):
+            self.chain.set_nucleotides([n2, n1])
+
+    def test_set_nucleotides_first_no_o5prime(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', None)
+        nucleotide.set_atoms(['HO5\''])
+
+        with self.assertRaises(ce.InvalidNucleotideChainError):
+            self.chain.set_nucleotides([nucleotide, nucleotide])
+
+    def test_set_nucleotides_last_no_ho3prime(self):
+        names5 = ['C3\'', 'C1\'', 'C5\'', 'H2\'', 'H5\'', 'H3\'', 'O4\'', 'C8', 'C2', 'H1\'', 'C6', 'C5', 'C4',
+                  'H5\'\'', 'HO2\'', 'N9', 'C4\'', 'C2\'', 'O2\'', 'N1', 'N3', 'N6', 'N7', 'H4\'', 'H8', 'H2', 'O5\'',
+                  'H61', 'H62', 'O3\'', 'HO5\'']
+        n1 = ce.Nucleotide('A', 'adenine', '5T1')
+        n1.set_atoms(names5)
+        n2 = ce.Nucleotide('5T1', '5T1', None)
+
+        with self.assertRaises(ce.InvalidNucleotideChainError):
+            self.chain.set_nucleotides([n1, n2])
+
+    def test_set_nucleotides_last_no_o3prime(self):
+        names5 = ['C3\'', 'C1\'', 'C5\'', 'H2\'', 'H5\'', 'H3\'', 'O4\'', 'C8', 'C2', 'H1\'', 'C6', 'C5', 'C4',
+                  'H5\'\'', 'HO2\'', 'N9', 'C4\'', 'C2\'', 'O2\'', 'N1', 'N3', 'N6', 'N7', 'H4\'', 'H8', 'H2', 'O5\'',
+                  'H61', 'H62', 'O3\'', 'HO5\'']
+        n1 = ce.Nucleotide('A', 'adenine', '5T1')
+        n1.set_atoms(names5)
+        n2 = ce.Nucleotide('3T1', '3T1', None)
+        n2.set_atoms(['HO3\''])
+
+        with self.assertRaises(ce.InvalidNucleotideChainError):
+            self.chain.set_nucleotides([n1, n2])
+
+    def test_dunder_getitem(self):
+        n1, n2 = self.prepare_nucleotides()
+        self.chain.set_nucleotides([n1, n2])
+
+        self.assertEqual(n1, self.chain[0])
+        self.assertEqual(n2, self.chain[1])
+
+    def test_pickling(self):
+        n1, n2 = self.prepare_nucleotides()
+        self.chain.set_nucleotides([n1, n2])
+
+        pickled = pickle.dumps(self.chain)
+        unpickled = pickle.loads(pickled)
+
+        self.assertEqual('name', unpickled.name)
+        self.assertEqual(None, unpickled.parent)
+
+        self.assertEqual(2, len(unpickled._nucleotides))
+        self.assertEqual(unpickled[1]['P'], unpickled[0]['O3\''].bonds[1])
+        self.assertEqual(unpickled[0]['O3\''], unpickled[1]['P'].bonds[3])
+
+    def test_dunder_str(self):
+        n1, n2 = self.prepare_nucleotides()
+        self.chain.set_nucleotides([n1, n2])
+
+        self.assertEqual('NucleotideChain of 2 nucleotides', str(self.chain))
+
+    def test_dunder_repr(self):
+        n1, n2 = self.prepare_nucleotides()
+        self.chain.set_nucleotides([n1, n2])
+        print(repr(self.chain))
+        self.maxDiff = None
+        self.assertEqual('', repr(self.chain))
+
+
 # class TestAtomGroup(unittest.TestCase):
 #     def test_valid_instantiation(self):
 #         group = ce.AtomGroup()
