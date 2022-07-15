@@ -352,14 +352,15 @@ class Atom(_ChemicalEntity):
     def __repr__(self):
         contents = ''
         for key, value in self.__dict__.items():
-            if key == "_bonds":
+            key = key[1:] if key[0] == "_" else key
+            if key == "bonds":
                 bonds = ', '.join([f'Atom({atom.name if hasattr(atom, "name") else atom})' for atom in self.bonds])
                 contents += f'bonds=[{bonds}]'
             elif isinstance(value, _ChemicalEntity):
                 class_name = str(type(value)).replace('<class \'', '').replace('\'>', '')
-                contents += f'{key.replace("_", "")}={class_name}({value.name})'
+                contents += f'{key}={class_name}({value.name})'
             else:
-                contents += f'{key.replace("_", "")}={repr(value)}'
+                contents += f'{key}={repr(value)}'
             contents += ', '
 
         return f'MDANSE.Chemistry.ChemicalEntity.Atom({contents[:-2]})'
@@ -601,11 +602,12 @@ class Molecule(_ChemicalEntity):
     def __repr__(self):
         contents = ''
         for key, value in self.__dict__.items():
+            key = key[1:] if key[0] == "_" else key
             if isinstance(value, _ChemicalEntity) and not isinstance(value, Atom):
                 class_name = str(type(value)).replace('<class \'', '').replace('\'>', '')
-                contents += f'{key.replace("_", "")}={class_name}({value.name})'
+                contents += f'{key}={class_name}({value.name})'
             else:
-                contents += f'{key.replace("_", "")}={repr(value)}'
+                contents += f'{key}={repr(value)}'
             contents += ', '
 
         return f'MDANSE.MolecularDynamics.ChemicalEntity.Molecule({contents[:-2]})'
@@ -752,6 +754,19 @@ class Residue(_ChemicalEntity):
     def __setstate__(self, state):
         self.__dict__ = state
 
+    def __repr__(self):
+        contents = ''
+        for key, value in self.__dict__.items():
+            key = key[1:] if key[0] == "_" else key
+            if isinstance(value, _ChemicalEntity) and not isinstance(value, Atom):
+                class_name = str(type(value)).replace('<class \'', '').replace('\'>', '')
+                contents += f'{key}={class_name}({value.name})'
+            else:
+                contents += f'{key}={repr(value)}'
+            contents += ', '
+
+        return f'MDANSE.MolecularDynamics.ChemicalEntity.Residue({contents[:-2]})'
+
     def set_atoms(self, atoms: list[str]) -> None:
         """
         Populates the Residue with the provided atoms using the data from RESIDUES_DATABASE. The input must correspond
@@ -896,11 +911,12 @@ class Nucleotide(_ChemicalEntity):
     def __repr__(self):
         contents = ''
         for key, value in self.__dict__.items():
+            key = key[1:] if key[0] == "_" else key
             if isinstance(value, _ChemicalEntity) and not isinstance(value, Atom):
                 class_name = str(type(value)).replace('<class \'', '').replace('\'>', '')
-                contents += f'{key.replace("_", "")}={class_name}(name={value.name})'
+                contents += f'{key}={class_name}(name={value.name})'
             else:
-                contents += f'{key.replace("_", "")}={repr(value)}'
+                contents += f'{key}={repr(value)}'
             contents += ', '
 
         return f'MDANSE.MolecularDynamics.ChemicalEntity.Nucleotide({contents[:-2]})'

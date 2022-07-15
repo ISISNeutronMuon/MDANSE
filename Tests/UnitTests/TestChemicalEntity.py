@@ -529,6 +529,31 @@ class TestResidue(unittest.TestCase):
         with self.assertRaises(ce.InconsistentAtomNamesError):
             residue.set_atoms([])
 
+    def test_set_atoms_variant(self):
+        residue = ce.Residue('GLY', 'glycine', 'CT1')
+        residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C', 'OXT'])
+        selected_variant = RESIDUES_DATABASE['CT1']
+        selected_variant['atoms']['OXT']['bonds'] = [residue._atoms['C']]
+
+        self.maxDiff = None
+        self.assertEqual('glycine', residue.name)
+        self.assertEqual(None, residue.parent)
+        self.assertEqual('GLY', residue.code)
+        self.assertEqual('CT1', residue._variant)
+        self.assertDictEqual(selected_variant, residue._selected_variant)
+
+        self.compare_atoms(residue._atoms, residue)
+
+        atom = residue._atoms['OXT']
+        self.assertEqual('O', atom.symbol)
+        self.assertEqual('OXT', atom.name)
+        self.assertEqual(1, len(atom.bonds))
+        self.assertEqual(residue._atoms['C'], atom.bonds[0])
+        self.assertEqual(['backbone'], atom._groups)
+        self.assertEqual(False, atom.ghost)
+        self.assertEqual(None, atom.index)
+        self.assertEqual(residue, atom.parent)
+
     def test_pickling(self):
         residue = ce.Residue('GLY', 'glycine', None)
         residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
@@ -543,6 +568,30 @@ class TestResidue(unittest.TestCase):
         residue = ce.Residue('GLY', 'glycine', None)
         residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
         self.compare_atoms(residue, residue)
+
+    def test_dunder_repr(self):
+        residue = ce.Residue('GLY', 'glycine', None)
+        residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
+        self.assertEqual("MDANSE.MolecularDynamics.ChemicalEntity.Residue(parent=None, name='glycine', code='GLY', "
+                         "variant=None, selected_variant=None, atoms=OrderedDict([('H', MDANSE.Chemistry.ChemicalEntity"
+                         ".Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name='H', symbol='H', bonds="
+                         "[Atom(N)], groups=['backbone', 'peptide'], ghost=False, index=None, alternatives=['HN'])), "
+                         "('HA3', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue"
+                         "(glycine), name='HA3', symbol='H', bonds=[Atom(CA)], groups=['sidechain'], ghost=False, "
+                         "index=None, alternatives=['HA1'])), ('O', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE"
+                         ".Chemistry.ChemicalEntity.Residue(glycine), name='O', symbol='O', bonds=[Atom(C)], groups="
+                         "['backbone', 'peptide'], ghost=False, index=None, alternatives=['OT1'])), ('N', MDANSE."
+                         "Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name="
+                         "'N', symbol='N', bonds=[Atom(CA), Atom(H), Atom(-R)], groups=['backbone', 'peptide'], ghost="
+                         "False, index=None, alternatives=[])), ('CA', MDANSE.Chemistry.ChemicalEntity.Atom(parent="
+                         "MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name='CA', symbol='C', bonds=[Atom(C), "
+                         "Atom(HA2), Atom(HA3), Atom(N)], groups=['backbone'], ghost=False, index=None, alternatives="
+                         "[])), ('HA2', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity."
+                         "Residue(glycine), name='HA2', symbol='H', bonds=[Atom(CA)], groups=['backbone'], ghost=False,"
+                         " index=None, alternatives=['HA'])), ('C', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE"
+                         ".Chemistry.ChemicalEntity.Residue(glycine), name='C', symbol='C', bonds=[Atom(CA), Atom(O), "
+                         "Atom(+R)], groups=['backbone', 'peptide'], ghost=False, index=None, alternatives=[]))]))",
+                         repr(residue))
 
     def test_atom_list(self):
         residue = ce.Residue('GLY', 'glycine', None)
@@ -711,6 +760,17 @@ class TestNucleotide(unittest.TestCase):
 
         self.compare_base_residues(unpickled, False)
         self.compare_atoms_in_5t1(unpickled._atoms, unpickled)
+
+    def test_dunder_repr(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', None)
+        nucleotide.set_atoms(['HO5\''])
+
+        self.assertEqual('MDANSE.MolecularDynamics.ChemicalEntity.Nucleotide(parent=None, name=\'5T1\', resname=\'5T1\''
+                         ', code=\'5T1\', variant=None, selected_variant=None, atoms=OrderedDict([("HO5\'", MDANSE.'
+                         'Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Nucleotide(5T1), name='
+                         '"HO5\'", symbol=\'H\', bonds=[Atom(O5\')], groups=[], ghost=False, index=None, replaces='
+                         '[\'OP1\', \'OP2\', \'P\'], o5prime_connected=True, alternatives=[]))]))',
+                         repr(nucleotide))
 
     def test_copy(self):
         nucleotide = ce.Nucleotide('5T1', '5T1', None)
