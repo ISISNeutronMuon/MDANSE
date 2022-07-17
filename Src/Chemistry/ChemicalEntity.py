@@ -400,6 +400,11 @@ class Atom(_ChemicalEntity):
         self._ghost = ghost
 
     @property
+    def groups(self) -> list[str]:
+        """A list of groups to which this atom belongs."""
+        return self._groups
+
+    @property
     def index(self) -> int:
         """The index of the atom in the trajectory. Once set, it cannot be changed anymore."""
         return self._index
@@ -635,7 +640,7 @@ class Molecule(_ChemicalEntity):
         return self._code
 
     def copy(self) -> 'Molecule':
-        """Copies the instance of AtomCluster into a new, identical instance."""
+        """Copies the instance of Molecule into a new, identical instance."""
 
         m = Molecule(self._code, self._name)
 
@@ -832,7 +837,7 @@ class Residue(_ChemicalEntity):
         return self._code
 
     def copy(self) -> 'Residue':
-        """Copies the instance of AtomCluster into a new, identical instance."""
+        """Copies the instance of Residue into a new, identical instance."""
         r  = Residue(self._code, self._name, self._variant)
         atoms = [at for at in self._atoms]
         r.set_atoms(atoms)
@@ -926,7 +931,7 @@ class Nucleotide(_ChemicalEntity):
         return f'MDANSE.MolecularDynamics.ChemicalEntity.Nucleotide({contents[:-2]})'
 
     def copy(self) -> 'Nucleotide':
-        """Copies the instance of AtomCluster into a new, identical instance."""
+        """Copies the instance of Nucleotide into a new, identical instance."""
         n  = Nucleotide(self._code, self._name, self._variant)
         atoms = [at for at in self._atoms]
         n.set_atoms(atoms)
@@ -1140,24 +1145,25 @@ class NucleotideChain(_ChemicalEntity):
             current_atom.bonds[current_idx] = next_atom
             next_atom.bonds[next_idx] = current_atom
 
-    def atom_list(self):
-
+    def atom_list(self) -> list[Atom]:
+        """List of all non-ghost atoms in all the nucleotides in the chain."""
         atoms = []
         for res in self._nucleotides:
             atoms.extend(res.atom_list())
         return atoms
 
     @property
-    def bases(self):
+    def bases(self) -> list[Atom]:
+        """A list of atoms that are part of a nucleotide base."""
         atoms = []
         for at in self.atom_list():
             if 'base' in at.groups:
                 atoms.append(at)
         return atoms
 
-    def copy(self):
-
-        nc = NucleotideChain(self._code, self._name)
+    def copy(self) -> 'NucleotideChain':
+        """Copies the instance of NucleotideChain into a new, identical instance."""
+        nc = NucleotideChain(self._name)
 
         nucleotides = [nucl.copy() for nucl in self._nucleotides]
 
@@ -1166,30 +1172,30 @@ class NucleotideChain(_ChemicalEntity):
         for nucl in nc._nucleotides:
             nucl._parent = nc
 
-        nc._connect_residues()
+        nc._connect_nucleotides()
 
         return nc
 
     @property
-    def residues(self):
-
+    def residues(self) -> list[Nucleotide]:
+        """List of nucleotides in the chain."""
         return self._nucleotides
 
-    def number_of_atoms(self):
-
+    def number_of_atoms(self) -> int:
+        """Number of non-ghost atoms in the nucleotide chain."""
         number_of_atoms = 0
         for nucleotide in self._nucleotides:
             number_of_atoms += nucleotide.number_of_atoms()
         return number_of_atoms
 
-    def total_number_of_atoms(self):
-
+    def total_number_of_atoms(self) -> int:
+        """Total number of atoms in the nucleotide chain, including ghost atoms."""
         number_of_atoms = 0
         for nucleotide in self._nucleotides:
             number_of_atoms += nucleotide.total_number_of_atoms()
         return number_of_atoms
 
-    def serialize(self,h5_file, h5_contents):
+    def serialize(self, h5_contents: dict) -> tuple[str, int]:
         
         if 'nucleotides' in h5_contents:
             res_indexes = list(range(len(h5_contents['nucleotides']),len(h5_contents['nucleotides'])+len(self._nucleotides)))
@@ -1199,11 +1205,11 @@ class NucleotideChain(_ChemicalEntity):
         pc_str = 'H5NucleotideChain(self._h5_file,h5_contents,"{}",{})'.format(self._name,res_indexes)
         
         for nucl in self._nucleotides:
-            nucl.serialize(h5_file,h5_contents)
+            nucl.serialize(h5_contents)
 
         h5_contents.setdefault('nucleotide_chains',[]).append(pc_str)
 
-        return ('nucleotide_chains',len(h5_contents['nucleotide_chains'])-1)
+        return 'nucleotide_chains', len(h5_contents['nucleotide_chains'])-1
 
     def set_nucleotides(self, nucleotides: list[Nucleotide]) -> None:
         """
@@ -1224,7 +1230,8 @@ class NucleotideChain(_ChemicalEntity):
         self._connect_nucleotides()
 
     @property
-    def sugars(self):
+    def sugars(self) -> list[Atom]:
+        """A list of atoms in the nucleotide chain that are a part of the sugar part of a nucleotide."""
         atoms = []
         for at in self.atom_list():
             if 'sugar' in at.groups:

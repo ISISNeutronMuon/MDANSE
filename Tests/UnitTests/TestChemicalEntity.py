@@ -920,9 +920,95 @@ class TestNucleotideChain(unittest.TestCase):
     def test_dunder_repr(self):
         n1, n2 = self.prepare_nucleotides()
         self.chain.set_nucleotides([n1, n2])
-        print(repr(self.chain))
+
         self.maxDiff = None
-        self.assertEqual('', repr(self.chain))
+        self.assertEqual("MDANSE.MolecularDynamics.ChemicalEntity.NucleotideChain(parent=None, name='name', "
+                         "nucleotides=[MDANSE.MolecularDynamics.ChemicalEntity.Nucleotide(parent=MDANSE.Chemistry."
+                         "ChemicalEntity.NucleotideChain(name=name), name='adenine', resname='A', code='A', "
+                         "variant='5T1', selected_variant={'is_3ter_terminus': False, 'atoms':",
+                         repr(self.chain)[:320])
+
+    def test_bases(self):
+        n1, n2 = self.prepare_nucleotides()
+        self.chain.set_nucleotides([n1, n2])
+
+        self.assertEqual([n1['C8'], n1['C2'], n1['C6'], n1['C5'], n1['C4'], n1['N9'], n1['N1'], n1['N3'], n1['N6'],
+                          n1['N7'], n1['H8'], n1['H2'], n1['H61'], n1['H62'], n2['C8'], n2['C2'], n2['C6'], n2['C5'],
+                          n2['C4'], n2['N9'], n2['N1'], n2['N3'], n2['N6'], n2['N7'], n2['H8'], n2['H2'], n2['H61'],
+                          n2['H62']], self.chain.bases)
+
+    def test_copy(self):
+        n1, n2 = self.prepare_nucleotides()
+        self.chain.set_nucleotides([n1, n2])
+        copy = self.chain.copy()
+
+        self.assertEqual(repr(self.chain), repr(copy))
+
+    def test_residues(self):
+        n1, n2 = self.prepare_nucleotides()
+        self.chain.set_nucleotides([n1, n2])
+
+        self.assertEqual([n1, n2], self.chain.residues)
+
+    def test_number_of_atoms(self):
+        n1, n2 = self.prepare_nucleotides()
+        self.chain.set_nucleotides([n1, n2])
+
+        self.assertEqual(65, self.chain.number_of_atoms())
+        self.assertEqual(65, self.chain.total_number_of_atoms())
+
+    def test_serialize_empty_dict(self):
+        n1, n2 = self.prepare_nucleotides()
+        self.chain.set_nucleotides([n1, n2])
+        dictionary = {}
+        result = self.chain.serialize(dictionary)
+
+        self.maxDiff = None
+        self.assertEqual(('nucleotide_chains', 0), result)
+        self.assertDictEqual({'nucleotides': ['H5Nucleotide(self._h5_file,h5_contents,[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, '
+                                              '10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, '
+                                              '28, 29, 30],code="A",name="adenine",variant=\'5T1\')',
+                                              'H5Nucleotide(self._h5_file,h5_contents,[31, 32, 33, 34, 35, 36, 37, 38, '
+                                              '39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, '
+                                              '57, 58, 59, 60, 61, 62, 63, 64],code="A",name="adenine",'
+                                              'variant=\'3T1\')'],
+                              'atoms': [f'H5Atom(self._h5_file,h5_contents,symbol="{i}", name="{j}", ghost=False)'
+                                        for i, j in zip(['C', 'C', 'C', 'H', 'H', 'H', 'O', 'C', 'C', 'H', 'C', 'C',
+                                                         'C', 'H', 'H', 'N', 'C', 'C', 'O', 'N', 'N', 'N', 'N', 'H',
+                                                         'H', 'H', 'O', 'H', 'H', 'O', 'H', 'C', 'C', 'C', 'H', 'H',
+                                                         'H', 'O', 'C', 'C', 'H', 'C', 'C', 'C', 'H', 'H', 'N', 'C',
+                                                         'C', 'O', 'N', 'N', 'N', 'N', 'H', 'H', 'H', 'O', 'H', 'H',
+                                                         'O', 'H', 'O', 'O', 'P'],
+                                                        ['C3\'', 'C1\'', 'C5\'', 'H2\'', 'H5\'', 'H3\'', 'O4\'', 'C8',
+                                                         'C2', 'H1\'', 'C6', 'C5', 'C4', 'H5\'\'', 'HO2\'', 'N9',
+                                                         'C4\'', 'C2\'', 'O2\'', 'N1', 'N3', 'N6', 'N7', 'H4\'', 'H8',
+                                                         'H2', 'O5\'', 'H61', 'H62', 'O3\'', 'HO5\'', 'C3\'', 'C1\'',
+                                                         'C5\'', 'H2\'', 'H5\'', 'H3\'', 'O4\'', 'C8', 'C2', 'H1\'',
+                                                         'C6', 'C5', 'C4', 'H5\'\'', 'HO2\'', 'N9', 'C4\'', 'C2\'',
+                                                         'O2\'', 'N1', 'N3', 'N6', 'N7', 'H4\'', 'H8', 'H2', 'O5\'',
+                                                         'H61', 'H62', 'O3\'', 'HO3\'', 'OP1', 'OP2', 'P'])],
+                              'nucleotide_chains': ['H5NucleotideChain(self._h5_file,h5_contents,"name",[0, 1])']},
+                             dictionary)
+
+    def test_serialize_nonempty_dict(self):
+        n1, n2 = self.prepare_nucleotides()
+        self.chain.set_nucleotides([n1, n2])
+        dictionary = {'nucleotides': ['', '', ''], 'nucleotide_chains': ['']}
+        result = self.chain.serialize(dictionary)
+
+        self.assertEqual(('nucleotide_chains', 1), result)
+        self.assertEqual(['', 'H5NucleotideChain(self._h5_file,h5_contents,"name",[3, 4])'],
+                         dictionary['nucleotide_chains'])
+
+    def test_sugars(self):
+        n1, n2 = self.prepare_nucleotides()
+        self.chain.set_nucleotides([n1, n2])
+
+        self.assertEqual([n1["C3'"], n1["C1'"], n1["C5'"], n1["H2'"], n1["H5'"], n1["H3'"], n1["O4'"], n1["H1'"],
+                          n1["H5''"], n1["HO2'"], n1["C4'"], n1["C2'"], n1["O2'"], n1["H4'"], n2["C3'"], n2["C1'"],
+                          n2["C5'"], n2["H2'"], n2["H5'"], n2["H3'"], n2["O4'"], n2["H1'"], n2["H5''"], n2["HO2'"],
+                          n2["C4'"], n2["C2'"], n2["O2'"], n2["H4'"]],
+                         self.chain.sugars)
 
 
 # class TestAtomGroup(unittest.TestCase):
