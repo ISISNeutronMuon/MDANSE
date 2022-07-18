@@ -20,7 +20,6 @@ class UnknownAtomError(Exception):
 class InvalidMoleculeError(Exception):
 
     def __init__(self, code):
-
         self._message = 'The atom {} is unknown'.format(code)
 
     def __str__(self):
@@ -30,7 +29,6 @@ class InvalidMoleculeError(Exception):
 class UnknownMoleculeError(Exception):
 
     def __init__(self, code):
-
         self._message = 'The molecule {} is unknown'.format(code)
 
     def __str__(self):
@@ -48,7 +46,6 @@ class InvalidResidueError(Exception):
 class UnknownResidueError(Exception):
 
     def __init__(self, code):
-
         self._message = 'The residue {} is unknown'.format(code)
 
     def __str__(self):
@@ -60,6 +57,10 @@ class InvalidVariantError(Exception):
 
 
 class InvalidNucleotideChainError(Exception):
+    pass
+
+
+class InvalidPeptideChainError(Exception):
     pass
 
 
@@ -83,11 +84,11 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         self._parent = None
 
         self._name = ''
-    
+
     def __getstate__(self):
         return self.__dict__
 
-    def __setstate__(self,state):
+    def __setstate__(self, state):
         self.__dict__ = state
 
     @abc.abstractmethod
@@ -103,9 +104,9 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         full_name = self.name
         parent = self._parent
         while parent is not None:
-            full_name = '{}.{}'.format(parent.name,full_name)
+            full_name = '{}.{}'.format(parent.name, full_name)
             parent = parent.parent
-            
+
         return full_name
 
     @abc.abstractmethod
@@ -117,7 +118,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         return self._parent
 
     @parent.setter
-    def parent(self,parent):
+    def parent(self, parent):
         self._parent = parent
 
     @property
@@ -125,7 +126,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         return self._name
 
     @name.setter
-    def name(self,name):
+    def name(self, name):
         self._name = name
 
     @abc.abstractmethod
@@ -136,7 +137,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 
         selected_atoms = []
         for at in self.atom_list():
-            if not hasattr(at,'groups'):
+            if not hasattr(at, 'groups'):
                 continue
 
             if name in at.groups:
@@ -148,11 +149,11 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 
         coords = configuration['coordinates']
 
-        com = np.zeros((3,),dtype=np.float)
+        com = np.zeros((3,), dtype=np.float)
         sum_masses = 0.0
         for at in self.atom_list():
             m = ATOMS_DATABASE[at.symbol]['atomic_weight']
-            com += m*coords[at.index,:]
+            com += m * coords[at.index, :]
             sum_masses += m
 
         com /= sum_masses
@@ -177,7 +178,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 
         return masses
 
-    def find_transformation_as_quaternion(self, conf1, conf2 = None):
+    def find_transformation_as_quaternion(self, conf1, conf2=None):
 
         chemical_system = self.root_chemical_system()
         if chemical_system.configuration.is_periodic:
@@ -198,10 +199,10 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         return superposition_fit([
             (
                 weights[a.index],
-                Vector(*conf1['coordinates'][a.index,:]),
-                Vector(*conf2['coordinates'][a.index,:])) for a in self.atom_list()])
+                Vector(*conf1['coordinates'][a.index, :]),
+                Vector(*conf2['coordinates'][a.index, :])) for a in self.atom_list()])
 
-    def find_transformation(self, conf1, conf2 = None):
+    def find_transformation(self, conf1, conf2=None):
         """
         :param conf1: a configuration object
         :type conf1: :class:`~MDANSE.MolecularDynamics.Configuration.Configuration`
@@ -226,19 +227,19 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         :returns: the center of mass and the moment of inertia tensor
                   in the given configuration
         """
-        
+
         m = 0.0
-        mr = Vector(0.0,0.0,0.0)
-        t = Tensor(3*[3*[0.0]])
+        mr = Vector(0.0, 0.0, 0.0)
+        t = Tensor(3 * [3 * [0.0]])
         for atom in self.atom_list():
             ma = ATOMS_DATABASE[atom.symbol]['atomic_weight']
-            r = Vector(configuration['coordinates'][atom.index,:])
+            r = Vector(configuration['coordinates'][atom.index, :])
             m += ma
-            mr += ma*r
-            t += ma*r.dyadic_product(r)
-        cm = mr/m
-        t -= m*cm.dyadic_product(cm)
-        t = t.trace()*delta - t
+            mr += ma * r
+            t += ma * r.dyadic_product(r)
+        cm = mr / m
+        t -= m * cm.dyadic_product(cm)
+        t = t.trace() * delta - t
         return cm, t
 
     def normalizing_transformation(self, configuration, repr=None):
@@ -277,18 +278,18 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
             elif repr == 'IIIl':
                 seq[0:2] = np.array([seq[1], seq[0]])
             diag = np.take(diag, seq)
-        return Rotation(diag)*Translation(-cm)
+        return Rotation(diag) * Translation(-cm)
 
     def root_chemical_system(self):
 
-        if isinstance(self,ChemicalSystem):
+        if isinstance(self, ChemicalSystem):
             return self
         else:
             return self._parent.root_chemical_system()
 
     def top_level_chemical_entity(self):
 
-        if isinstance(self._parent,ChemicalSystem):
+        if isinstance(self._parent, ChemicalSystem):
             return self
         else:
             return self._parent.top_level_chemical_entity()
@@ -299,7 +300,7 @@ class Atom(_ChemicalEntity):
 
     def __init__(self, **kwargs):
 
-        super(Atom,self).__init__()
+        super(Atom, self).__init__()
 
         self._symbol = kwargs.get('symbol', 'H')
 
@@ -318,8 +319,8 @@ class Atom(_ChemicalEntity):
 
         self._parent = None
 
-        for k,v in kwargs.items():
-            setattr(self,k,v)
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     def copy(self) -> 'Atom':
         """
@@ -345,12 +346,12 @@ class Atom(_ChemicalEntity):
     def __getstate__(self):
         return self.__dict__
 
-    def __setstate__(self,state):
+    def __setstate__(self, state):
 
         self.__dict__ = state
 
     def __str__(self):
-        
+
         return self.full_name()
 
     def __repr__(self):
@@ -442,17 +443,16 @@ class Atom(_ChemicalEntity):
         atom_str = 'H5Atom(self._h5_file,h5_contents,symbol="{}", name="{}", ghost={})'.format(self.symbol, self.name,
                                                                                                self.ghost)
 
-        h5_contents.setdefault('atoms',[]).append(atom_str)
+        h5_contents.setdefault('atoms', []).append(atom_str)
 
-        return 'atoms', len(h5_contents['atoms'])-1
+        return 'atoms', len(h5_contents['atoms']) - 1
 
 
 class AtomGroup(_ChemicalEntity):
     """A selection of atoms that belong to the same chemical system."""
 
     def __init__(self, atoms: list):
-
-        super(AtomGroup,self).__init__()
+        super(AtomGroup, self).__init__()
 
         s = set([at.root_chemical_system() for at in atoms])
         if len(s) != 1:
@@ -465,7 +465,7 @@ class AtomGroup(_ChemicalEntity):
     def __getstate__(self):
         return self.__dict__
 
-    def __setstate__(self,state):
+    def __setstate__(self, state):
         self.__dict = state
 
     def atom_list(self):
@@ -478,7 +478,6 @@ class AtomGroup(_ChemicalEntity):
         return len([at for at in self._atoms if not at.ghost])
 
     def root_chemical_system(self):
-
         return self._chemical_system
 
     def serialize(self, h5_file):
@@ -526,7 +525,7 @@ class AtomCluster(_ChemicalEntity):
         """Copies the instance of AtomCluster into a new, identical instance."""
         atoms = [atom.copy() for atom in self._atoms.values()]
 
-        ac = AtomCluster(self._name,atoms,self._parentless)
+        ac = AtomCluster(self._name, atoms, self._parentless)
 
         for at in ac._atoms:  # TODO: Are you actually sure that we want to ignore parentless here?
             at._parent = ac
@@ -549,29 +548,29 @@ class AtomCluster(_ChemicalEntity):
         reordered_atoms = collections.OrderedDict()
         for at in atoms:
             reordered_atoms[at] = self._atoms[at]
-        
+
         self._atoms = reordered_atoms
 
     def serialize(self, h5_contents: dict) -> tuple[str, int]:
 
         if 'atoms' in h5_contents:
-            at_indexes = list(range(len(h5_contents['atoms']),len(h5_contents['atoms'])+len(self._atoms)))
+            at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms']) + len(self._atoms)))
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        ac_str = 'H5AtomCluster(self._h5_file,h5_contents,{},name="{}")'.format(at_indexes,self._name)
+        ac_str = 'H5AtomCluster(self._h5_file,h5_contents,{},name="{}")'.format(at_indexes, self._name)
 
-        h5_contents.setdefault('atom_clusters',[]).append(ac_str)
-        
+        h5_contents.setdefault('atom_clusters', []).append(ac_str)
+
         for at in self._atoms:
             at.serialize(h5_contents)
 
-        return ('atom_clusters',len(h5_contents['atom_clusters'])-1)
+        return ('atom_clusters', len(h5_contents['atom_clusters']) - 1)
 
 
 class Molecule(_ChemicalEntity):
     """A group of atoms that form a molecule."""
-    
+
     def __init__(self, code: str, name: str):
 
         super(Molecule, self).__init__()
@@ -590,7 +589,7 @@ class Molecule(_ChemicalEntity):
             if code == molname or code in molinfo['alternatives']:
                 for at, atinfo in molinfo['atoms'].items():
                     info = copy.deepcopy(atinfo)
-                    atom = Atom(name=at,**info)
+                    atom = Atom(name=at, **info)
                     atom.parent = self
                     self._atoms[at] = atom
 
@@ -645,7 +644,7 @@ class Molecule(_ChemicalEntity):
         m = Molecule(self._code, self._name)
 
         atom_names = [at for at in self._atoms]
-        
+
         m.reorder_atoms(atom_names)
 
         for atname, at in m._atoms.items():
@@ -676,13 +675,13 @@ class Molecule(_ChemicalEntity):
         reordered_atoms = collections.OrderedDict()
         for at in atoms:
             reordered_atoms[at] = self._atoms[at]
-        
+
         self._atoms = reordered_atoms
 
     def serialize(self, h5_contents: dict) -> tuple[str, int]:
 
         if 'atoms' in h5_contents:
-            at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms'])+len(self._atoms)))
+            at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms']) + len(self._atoms)))
         else:
             at_indexes = list(range(len(self._atoms)))
 
@@ -690,11 +689,11 @@ class Molecule(_ChemicalEntity):
                                                                                         self._name)
 
         h5_contents.setdefault('molecules', []).append(mol_str)
-        
+
         for at in self._atoms.values():
             at.serialize(h5_contents)
 
-        return 'molecules', len(h5_contents['molecules'])-1
+        return 'molecules', len(h5_contents['molecules']) - 1
 
 
 def is_molecule(name: str) -> bool:
@@ -712,7 +711,7 @@ def is_molecule(name: str) -> bool:
 
 class Residue(_ChemicalEntity):
     """A group of atoms that make up an amino acid."""
-    
+
     def __init__(self, code: str, name: str, variant: str = None):
         """
 
@@ -796,7 +795,7 @@ class Residue(_ChemicalEntity):
         res_atoms.difference_update(replaced_atoms)
         if self._selected_variant is not None:
             res_atoms.update(self._selected_variant['atoms'])
-        
+
         if res_atoms != set(atoms):
             raise InconsistentAtomNamesError('The set of atoms to reorder is inconsistent with residue contents')
 
@@ -806,12 +805,12 @@ class Residue(_ChemicalEntity):
 
         self._atoms.clear()
         for at in atoms:
-            self._atoms[at] = Atom(name=at,**d[at])
+            self._atoms[at] = Atom(name=at, **d[at])
             self._atoms[at].parent = self
-        
+
         for at, atom in self._atoms.items():
 
-            for i in range(len(atom.bonds)-1,-1,-1):
+            for i in range(len(atom.bonds) - 1, -1, -1):
                 if atom.bonds[i] in replaced_atoms:
                     del atom.bonds[i]
 
@@ -838,7 +837,7 @@ class Residue(_ChemicalEntity):
 
     def copy(self) -> 'Residue':
         """Copies the instance of Residue into a new, identical instance."""
-        r  = Residue(self._code, self._name, self._variant)
+        r = Residue(self._code, self._name, self._variant)
         atoms = [at for at in self._atoms]
         r.set_atoms(atoms)
 
@@ -848,26 +847,33 @@ class Residue(_ChemicalEntity):
 
         return r
 
+    @property
+    def variant(self):
+        return self._variant
+
     def serialize(self, h5_contents: dict) -> tuple[str, int]:
 
         if 'atoms' in h5_contents:
-            at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms'])+len(self._atoms)))
+            at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms']) + len(self._atoms)))
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        res_str = 'H5Residue(self._h5_file,h5_contents,{},code="{}",name="{}",variant={})'.format(at_indexes,self._code,self._name,repr(self._variant))
+        res_str = 'H5Residue(self._h5_file,h5_contents,{},code="{}",name="{}",variant={})'.format(at_indexes,
+                                                                                                  self._code,
+                                                                                                  self._name,
+                                                                                                  repr(self._variant))
 
-        h5_contents.setdefault('residues',[]).append(res_str)
-        
+        h5_contents.setdefault('residues', []).append(res_str)
+
         for at in self._atoms.values():
             at.serialize(h5_contents)
 
-        return 'residues', len(h5_contents['residues'])-1
+        return 'residues', len(h5_contents['residues']) - 1
 
 
 class Nucleotide(_ChemicalEntity):
     """A group of atoms that make up a nucleotide."""
-    
+
     def __init__(self, code: str, name: str, variant: str = None):
         """
         :param code: A code corresponding to a nucleotide in the nucleotide database.
@@ -932,7 +938,7 @@ class Nucleotide(_ChemicalEntity):
 
     def copy(self) -> 'Nucleotide':
         """Copies the instance of Nucleotide into a new, identical instance."""
-        n  = Nucleotide(self._code, self._name, self._variant)
+        n = Nucleotide(self._code, self._name, self._variant)
         atoms = [at for at in self._atoms]
         n.set_atoms(atoms)
 
@@ -974,12 +980,12 @@ class Nucleotide(_ChemicalEntity):
 
         self._atoms.clear()
         for at in atoms:
-            self._atoms[at] = Atom(name=at,**d[at])
+            self._atoms[at] = Atom(name=at, **d[at])
             self._atoms[at].parent = self
-        
+
         for at, atom in self._atoms.items():
 
-            for i in range(len(atom.bonds)-1, -1, -1):
+            for i in range(len(atom.bonds) - 1, -1, -1):
                 if atom.bonds[i] in replaced_atoms:
                     del atom.bonds[i]
                     continue
@@ -1012,21 +1018,22 @@ class Nucleotide(_ChemicalEntity):
     def serialize(self, h5_contents: dict) -> tuple[str, int]:
 
         if 'atoms' in h5_contents:
-            at_indexes = list(range(len(h5_contents['atoms']),len(h5_contents['atoms'])+len(self._atoms)))
+            at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms']) + len(self._atoms)))
         else:
             at_indexes = list(range(len(self._atoms)))
 
         res_str = 'H5Nucleotide(self._h5_file,h5_contents,{},code="{}",name="{}",variant={})'.format(at_indexes,
                                                                                                      self._code,
                                                                                                      self._name,
-                                                                                                     repr(self._variant))
+                                                                                                     repr(
+                                                                                                         self._variant))
 
-        h5_contents.setdefault('nucleotides',[]).append(res_str)
-        
+        h5_contents.setdefault('nucleotides', []).append(res_str)
+
         for at in self._atoms.values():
             at.serialize(h5_contents)
 
-        return 'nucleotides', len(h5_contents['nucleotides'])-1
+        return 'nucleotides', len(h5_contents['nucleotides']) - 1
 
 
 class NucleotideChain(_ChemicalEntity):
@@ -1076,7 +1083,7 @@ class NucleotideChain(_ChemicalEntity):
                                    getattr(at, 'o5prime_connected', False)]
         if len(ratoms_in_first_residue) == 0:
             raise InvalidNucleotideChainError('The first nucleotide in the chain must contain an atom that is connected'
-                                              'to the 5\' terminal oxygen (O5\'). This is signified by an atom having'
+                                              ' to the 5\' terminal oxygen (O5\'). This is signified by an atom having'
                                               'the "o5prime_connected" property set to True, and happens automatically'
                                               'if the nucleotide was created with variant="5T1", and the set_atoms()'
                                               ' method was called with the correct atoms.\nThe provided first '
@@ -1099,7 +1106,7 @@ class NucleotideChain(_ChemicalEntity):
                                   getattr(at, 'o3prime_connected', False)]
         if len(ratoms_in_last_residue) == 0:
             raise InvalidNucleotideChainError('The last nucleotide in the chain must contain an atom that is connected'
-                                              'to the 3\' terminal oxygen (O3\'). This is signified by an atom having'
+                                              ' to the 3\' terminal oxygen (O3\'). This is signified by an atom having'
                                               'the "o3prime_connected" property set to True, and happens automatically'
                                               'if the nucleotide was created with variant="3T1", and the set_atoms()'
                                               ' method was called with the correct atoms.\nThe provided first '
@@ -1120,7 +1127,7 @@ class NucleotideChain(_ChemicalEntity):
         c_atom_in_last_residue.bonds.extend(ratoms_in_last_residue)
 
         for i, current_residue in enumerate(self._nucleotides[:-1]):
-            next_residue = self._nucleotides[i+1]
+            next_residue = self._nucleotides[i + 1]
 
             for atom in current_residue.atom_list():
                 if '+R' in atom.bonds:
@@ -1138,9 +1145,10 @@ class NucleotideChain(_ChemicalEntity):
                     next_atom = atom
                     break
             else:
-                raise InvalidResidueError(f'The provided nucleotide with index {i+1}, {next_residue.name}, is invalid '
-                                          f'because it does not contain an atom bonded to "R+", i.e. another nucleo'
-                                          f'tide.\nThe full info on this nucleotide is {repr(next_residue)}')
+                raise InvalidResidueError(
+                    f'The provided nucleotide with index {i + 1}, {next_residue.name}, is invalid '
+                    f'because it does not contain an atom bonded to "R+", i.e. another nucleo'
+                    f'tide.\nThe full info on this nucleotide is {repr(next_residue)}')
 
             current_atom.bonds[current_idx] = next_atom
             next_atom.bonds[next_idx] = current_atom
@@ -1196,20 +1204,21 @@ class NucleotideChain(_ChemicalEntity):
         return number_of_atoms
 
     def serialize(self, h5_contents: dict) -> tuple[str, int]:
-        
+
         if 'nucleotides' in h5_contents:
-            res_indexes = list(range(len(h5_contents['nucleotides']),len(h5_contents['nucleotides'])+len(self._nucleotides)))
+            res_indexes = list(
+                range(len(h5_contents['nucleotides']), len(h5_contents['nucleotides']) + len(self._nucleotides)))
         else:
             res_indexes = list(range(len(self._nucleotides)))
 
-        pc_str = 'H5NucleotideChain(self._h5_file,h5_contents,"{}",{})'.format(self._name,res_indexes)
-        
+        pc_str = 'H5NucleotideChain(self._h5_file,h5_contents,"{}",{})'.format(self._name, res_indexes)
+
         for nucl in self._nucleotides:
             nucl.serialize(h5_contents)
 
-        h5_contents.setdefault('nucleotide_chains',[]).append(pc_str)
+        h5_contents.setdefault('nucleotide_chains', []).append(pc_str)
 
-        return 'nucleotide_chains', len(h5_contents['nucleotide_chains'])-1
+        return 'nucleotide_chains', len(h5_contents['nucleotide_chains']) - 1
 
     def set_nucleotides(self, nucleotides: list[Nucleotide]) -> None:
         """
@@ -1240,43 +1249,99 @@ class NucleotideChain(_ChemicalEntity):
 
 
 class PeptideChain(_ChemicalEntity):
+    """A peptide chain composed of bonded amino acid residues."""
 
-    def __init__(self, name):
+    def __init__(self, name: str):
+        """
+        The PeptideChain is instantiated empty. To set its component Residues, the set_residues() method must be called.
 
-        super(PeptideChain,self).__init__()
+        :param name: The name of this PeptideChain
+        :type name: str
+        """
+
+        super(PeptideChain, self).__init__()
 
         self._name = name
 
         self._residues = []
 
-    def _connect_residues(self):
-                
-        ratoms_in_first_residue = [at for at in self._residues[0].atom_list() if getattr(at,'nter_connected',False)]
-        n_atom_in_first_residue = self._residues[0]['N']
+    def _connect_residues(self) -> None:
+        # Process the first atom
+        ratoms_in_first_residue = [at for at in self._residues[0].atom_list() if getattr(at, 'nter_connected', False)]
+        if not ratoms_in_first_residue:
+            raise InvalidPeptideChainError('The first residue in the chain must contain an atom that is connected to '
+                                           'the terminal nitrogen. This is signified by an atom having the '
+                                           '"nter_connected" property set to True, and happens automatically if the '
+                                           'residue was created with variant="NT1", and the set_atoms() method was '
+                                           'called with the correct atoms.\nThe provided first residue is '
+                                           f'{self._residues[0].name}, its variant is {self._residues[0].variant} and '
+                                           f'it contains the following atoms: '
+                                           f'{[at.name for at in self._residues[0].atom_list()]}. The full info on the '
+                                           f'first residue is {repr(self._residues[0])}.')
+        try:
+            n_atom_in_first_residue = self._residues[0]['N']
+        except KeyError:
+            raise InvalidPeptideChainError('The first residue in the chain must contain the terminal nitrogen atom. '
+                                           f'However, the first residue that was provided is {self._residues[0].name} '
+                                           f'and contains only the following atoms: '
+                                           f'{[at.name for at in self._residues[0].atom_list()]}.\nThe full info'
+                                           f' on the first nucleotide is {repr(self._residues[0])}.')
         idx = n_atom_in_first_residue.bonds.index('-R')
         del n_atom_in_first_residue.bonds[idx]
         n_atom_in_first_residue.bonds.extend(ratoms_in_first_residue)
 
-        ratoms_in_last_residue = [at for at in self._residues[-1].atom_list() if getattr(at,'cter_connected',False)]
-        c_atom_in_last_residue = self._residues[-1]['C']
+        # Process the last atom
+        ratoms_in_last_residue = [at for at in self._residues[-1].atom_list() if getattr(at, 'cter_connected', False)]
+        if not ratoms_in_last_residue:
+            raise InvalidPeptideChainError('The last residue in the chain must contain an atom that is connected to '
+                                           'the terminal carbon. This is signified by an atom having the '
+                                           '"cter_connected" property set to True, and happens automatically if the '
+                                           'residue was created with variant="CT1", and the set_atoms() method was '
+                                           'called with the correct atoms.\nThe provided last residue is '
+                                           f'{self._residues[-1].name}, its variant is {self._residues[-1].variant} and'
+                                           f' it contains the following atoms: '
+                                           f'{[at.name for at in self._residues[-1].atom_list()]}. The full info on the'
+                                           f' last residue is {repr(self._residues[-1])}.')
+        try:
+            c_atom_in_last_residue = self._residues[-1]['C']
+        except KeyError:
+            raise InvalidPeptideChainError('The last residue in the chain must contain the terminal carbon atom. '
+                                           f'However, the last residue that was provided is {self._residues[-1].name} '
+                                           f'and contains only the following atoms: '
+                                           f'{[at.name for at in self._residues[-1].atom_list()]}.\nThe full info'
+                                           f' on the last nucleotide is {repr(self._residues[-1])}.')
         idx = c_atom_in_last_residue.bonds.index('+R')
         del c_atom_in_last_residue.bonds[idx]
         c_atom_in_last_residue.bonds.extend(ratoms_in_last_residue)
 
-        for i in range(len(self._residues)-1):
-            current_residue = self._residues[i]
-            next_residue = self._residues[i+1]
+        # Create bonds
+        for i, current_residue in enumerate(self._residues[:-1]):
+            next_residue = self._residues[i + 1]
 
-            ratoms_in_current_residue = [at for at in current_residue.atom_list() if '+R' in at.bonds][0]
-            ratoms_in_next_residue = [at for at in next_residue.atom_list() if '-R' in at.bonds][0]
+            for atom in current_residue.atom_list():
+                if '+R' in atom.bonds:
+                    current_atom = atom
+                    current_index = atom.bonds.index('+R')
+                    break
+            else:
+                raise InvalidResidueError(f'The provided residue with index {i}, {current_residue.name}, is invalid '
+                                          f'because it does not contain an atom bonded to "R+", i.e. another residue.'
+                                          f'\nThe full info on this residue is {repr(current_residue)}')
 
-            idx = ratoms_in_current_residue.bonds.index('+R')
-            ratoms_in_current_residue.bonds[idx] = ratoms_in_next_residue
+            for atom in next_residue.atom_list():
+                if '-R' in atom.bonds:
+                    next_atom = atom
+                    next_index = atom.bonds.index('-R')
+                    break
+            else:
+                raise InvalidResidueError(f'The provided residue with index {i+1}, {next_residue.name}, is invalid '
+                                          f'because it does not contain an atom bonded to "R+", i.e. another residue.'
+                                          f'\nThe full info on this residue is {repr(next_residue)}')
 
-            idx = ratoms_in_next_residue.bonds.index('-R')
-            ratoms_in_next_residue.bonds[idx] = ratoms_in_current_residue
+            current_atom.bonds[current_index] = next_atom
+            next_atom.bonds[next_index] = current_atom
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int):
         return self._residues[item]
 
     def __getstate__(self):
@@ -1288,23 +1353,36 @@ class PeptideChain(_ChemicalEntity):
     def __str__(self):
         return 'PeptideChain of {} residues'.format(len(self._residues))
 
-    def atom_list(self):
+    def __repr__(self):
+        contents = ''
+        for key, value in self.__dict__.items():
+            key = key[1:] if key[0] == "_" else key
+            if isinstance(value, _ChemicalEntity) and not isinstance(value, Residue):
+                class_name = str(type(value)).replace('<class \'', '').replace('\'>', '')
+                contents += f'{key}={class_name}(name={value.name})'
+            else:
+                contents += f'{key}={repr(value)}'
+            contents += ', '
 
+        return f'MDANSE.MolecularDynamics.ChemicalEntity.PeptideChain({contents[:-2]})'
+
+    def atom_list(self) -> list[Atom]:
+        """A list of all non-ghost atoms in the PeptideChain."""
         atoms = []
         for res in self._residues:
             atoms.extend(res.atom_list())
         return atoms
 
-    def backbone(self):
-
+    def backbone(self) -> list[Atom]:
+        """A list of all atoms in the PeptideChain that are a part of the backbone."""
         atoms = []
         for at in self.atom_list():
             if 'backbone' in at.groups:
                 atoms.append(at)
         return atoms
 
-    def copy(self):
-
+    def copy(self) -> 'PeptideChain':
+        """Copies the instance of NucleotideChain into a new, identical instance."""
         pc = PeptideChain(self._name)
 
         residues = [res.copy() for res in self._residues]
@@ -1318,26 +1396,28 @@ class PeptideChain(_ChemicalEntity):
 
         return pc
 
-    def number_of_atoms(self):
-
+    def number_of_atoms(self) -> int:
+        """The number of non-ghost in the PeptideChain."""
         number_of_atoms = 0
         for residue in self._residues:
             number_of_atoms += residue.number_of_atoms()
         return number_of_atoms
 
-    def total_number_of_atoms(self):
-
+    def total_number_of_atoms(self) -> int:
+        """The total number of atoms in the PeptideChain, including ghosts."""
         number_of_atoms = 0
         for residue in self._residues:
             number_of_atoms += residue.total_number_of_atoms()
         return number_of_atoms
 
     @property
-    def peptide_chains(self):
+    def peptide_chains(self) -> list['PeptideChain']:
+        """The list of PeptideChains in this PeptideChain"""
         return [self]
 
     @property
-    def peptides(self):
+    def peptides(self) -> list[Atom]:
+        """The list of atoms in the PeptideChain that are a part of a peptide."""
         atoms = []
         for at in self.atom_list():
             if 'peptide' in at.groups:
@@ -1345,28 +1425,36 @@ class PeptideChain(_ChemicalEntity):
         return atoms
 
     @property
-    def residues(self):
-
+    def residues(self) -> list[Residue]:
+        """The list of amino acid Residues that make up this PeptideChain."""
         return self._residues
 
-    def serialize(self,h5_file, h5_contents):
-        
+    def serialize(self, h5_contents: dict) -> tuple[str, int]:
+
         if 'residues' in h5_contents:
-            res_indexes = list(range(len(h5_contents['residues']),len(h5_contents['residues'])+len(self._residues)))
+            res_indexes = list(range(len(h5_contents['residues']), len(h5_contents['residues']) + len(self._residues)))
         else:
             res_indexes = list(range(len(self._residues)))
 
-        pc_str = 'H5PeptideChain(self._h5_file,h5_contents,"{}",{})'.format(self._name,res_indexes)
-        
+        pc_str = 'H5PeptideChain(self._h5_file,h5_contents,"{}",{})'.format(self._name, res_indexes)
+
         for res in self._residues:
-            res.serialize(h5_file,h5_contents)
+            res.serialize(h5_contents)
 
-        h5_contents.setdefault('peptide_chains',[]).append(pc_str)
+        h5_contents.setdefault('peptide_chains', []).append(pc_str)
 
-        return ('peptide_chains',len(h5_contents['peptide_chains'])-1)
+        return 'peptide_chains', len(h5_contents['peptide_chains']) - 1
 
-    def set_residues(self, residues):
+    def set_residues(self, residues: list[Residue]) -> None:
+        """
+        Populates the PeptideChain with amino acid Residues.
 
+        :param residues: List of residues that the PeptideChain consists of.
+        :type residues: list
+
+        :return: None
+        """
+        self._residues = []
         for residue in residues:
             residue.parent = self
             self._residues.append(residue)
@@ -1380,6 +1468,7 @@ class PeptideChain(_ChemicalEntity):
             if 'sidechain' in at.groups:
                 atoms.append(at)
         return atoms
+
 
 class Protein(_ChemicalEntity):
 
@@ -1465,20 +1554,21 @@ class Protein(_ChemicalEntity):
 
         return residues
 
-    def serialize(self,h5_file, h5_contents):
+    def serialize(self, h5_file, h5_contents):
         if 'peptide_chains' in h5_contents:
-            pc_indexes = list(range(len(h5_contents['pepide_chains']),len(h5_contents['pepide_chains'])+len(self._peptide_chains)))
+            pc_indexes = list(
+                range(len(h5_contents['pepide_chains']), len(h5_contents['pepide_chains']) + len(self._peptide_chains)))
         else:
             pc_indexes = list(range(len(self._peptide_chains)))
 
-        prot_str = 'H5Protein(self._h5_file,h5_contents,"{}",{})'.format(self._name,pc_indexes)
+        prot_str = 'H5Protein(self._h5_file,h5_contents,"{}",{})'.format(self._name, pc_indexes)
 
-        h5_contents.setdefault('proteins',[]).append(prot_str)
+        h5_contents.setdefault('proteins', []).append(prot_str)
 
         for pc in self._peptide_chains:
-            pc.serialize(h5_file,h5_contents)
+            pc.serialize(h5_file, h5_contents)
 
-        return ('proteins',len(h5_contents['proteins'])-1)
+        return ('proteins', len(h5_contents['proteins']) - 1)
 
     @property
     def sidechains(self):
@@ -1488,8 +1578,8 @@ class Protein(_ChemicalEntity):
                 atoms.append(at)
         return atoms
 
-def translate_atom_names(database, molname, atoms):
 
+def translate_atom_names(database, molname, atoms):
     if not molname in database:
         raise UnknownMoleculeError('The molecule {} is unknown'.format(molname))
 
@@ -1504,11 +1594,12 @@ def translate_atom_names(database, molname, atoms):
 
     return renamed_atoms
 
+
 class ChemicalSystem(_ChemicalEntity):
 
     def __init__(self, name=''):
 
-        super(ChemicalSystem,self).__init__()
+        super(ChemicalSystem, self).__init__()
 
         self._chemical_entities = []
 
@@ -1530,7 +1621,7 @@ class ChemicalSystem(_ChemicalEntity):
 
     def add_chemical_entity(self, chemical_entity):
 
-        if not isinstance(chemical_entity,_ChemicalEntity):
+        if not isinstance(chemical_entity, _ChemicalEntity):
             raise InvalidChemicalEntityError('Invalid type')
 
         for at in chemical_entity.atom_list():
@@ -1565,7 +1656,7 @@ class ChemicalSystem(_ChemicalEntity):
             self._atoms = sorted_atoms(self.atom_list())
 
         return self._atoms
-            
+
     @property
     def chemical_entities(self):
         return self._chemical_entities
@@ -1598,18 +1689,18 @@ class ChemicalSystem(_ChemicalEntity):
             ce._parent = cs
 
         if self._configuration is not None:
-            
             conf = self._configuration.clone(cs)
 
             cs._configuration = conf
 
         return cs
-        
+
     def load(self, h5_filename):
 
-        from MDANSE.Chemistry.H5ChemicalEntity import H5Atom, H5AtomCluster, H5Molecule, H5Nucleotide, H5NucleotideChain, H5Residue, H5PeptideChain, H5Protein
+        from MDANSE.Chemistry.H5ChemicalEntity import H5Atom, H5AtomCluster, H5Molecule, H5Nucleotide, \
+            H5NucleotideChain, H5Residue, H5PeptideChain, H5Protein
 
-        self._h5_file = h5py.File(h5_filename,'r',libver='latest')
+        self._h5_file = h5py.File(h5_filename, 'r', libver='latest')
         grp = self._h5_file['/chemical_system']
         self._chemical_entities = []
 
@@ -1619,7 +1710,7 @@ class ChemicalSystem(_ChemicalEntity):
 
         h5_contents = {}
         for k in grp.keys():
-            if k =='contents':
+            if k == 'contents':
                 continue
             h5_contents[k] = grp[k][:]
 
@@ -1628,7 +1719,7 @@ class ChemicalSystem(_ChemicalEntity):
             h5_chemical_entity_instance = eval(h5_contents[entity_type.decode('utf-8')][entity_index])
             ce = h5_chemical_entity_instance.build()
             self.add_chemical_entity(ce)
-        
+
         self._h5_file.close()
 
         self._h5_file = None
@@ -1654,9 +1745,8 @@ class ChemicalSystem(_ChemicalEntity):
         contents = []
         for ce in self._chemical_entities:
             entity_type, entity_index = ce.serialize(h5_file, h5_contents)
-            contents.append((entity_type,str(entity_index)))
+            contents.append((entity_type, str(entity_index)))
 
-        for k,v in h5_contents.items():
-            grp.create_dataset(k,data=v,dtype=string_dt)
+        for k, v in h5_contents.items():
+            grp.create_dataset(k, data=v, dtype=string_dt)
         grp.create_dataset('contents', data=contents, dtype=string_dt)
-

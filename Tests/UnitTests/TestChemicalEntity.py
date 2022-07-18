@@ -831,8 +831,9 @@ class TestNucleotideChain(unittest.TestCase):
 
         self.chain.set_nucleotides([n1, n2])
 
-        self.assertEqual(self.chain, n1.parent)
-        self.assertEqual(self.chain, n2.parent)
+        self.assertEqual(2, len(self.chain._nucleotides))
+        self.assertEqual(self.chain, self.chain._nucleotides[0].parent)
+        self.assertEqual(self.chain, self.chain._nucleotides[1].parent)
 
         self.assertEqual([n1, n2], self.chain._nucleotides)
         self.assertEqual(n2['P'], n1['O3\''].bonds[1])
@@ -854,18 +855,22 @@ class TestNucleotideChain(unittest.TestCase):
 
         return n1, n2
 
-    def test_set_nucleotides_no_ho5prime(self):
+    def test_set_nucleotides_no_atoms_on_5prime_oxygen(self):
         n1, n2 = self.prepare_nucleotides()
 
-        with self.assertRaises(ce.InvalidNucleotideChainError):
+        with self.assertRaises(ce.InvalidNucleotideChainError) as e:
             self.chain.set_nucleotides([n2, n1])
+        self.assertEqual('The first nucleotide in the chain must contain an atom that is connected to the 5\' terminal'
+                         ' oxygen (O5\').', str(e.exception)[:105])
 
-    def test_set_nucleotides_first_no_o5prime(self):
+    def test_set_nucleotides_first_no_5prime_oxygen(self):
         nucleotide = ce.Nucleotide('5T1', '5T1', None)
         nucleotide.set_atoms(['HO5\''])
 
-        with self.assertRaises(ce.InvalidNucleotideChainError):
+        with self.assertRaises(ce.InvalidNucleotideChainError) as e:
             self.chain.set_nucleotides([nucleotide, nucleotide])
+        self.assertEqual('The first nucleotide in the chain must contain 5\' terminal oxygen atom (O5\').',
+                         str(e.exception)[:77])
 
     def test_set_nucleotides_last_no_ho3prime(self):
         names5 = ['C3\'', 'C1\'', 'C5\'', 'H2\'', 'H5\'', 'H3\'', 'O4\'', 'C8', 'C2', 'H1\'', 'C6', 'C5', 'C4',
@@ -875,8 +880,10 @@ class TestNucleotideChain(unittest.TestCase):
         n1.set_atoms(names5)
         n2 = ce.Nucleotide('5T1', '5T1', None)
 
-        with self.assertRaises(ce.InvalidNucleotideChainError):
+        with self.assertRaises(ce.InvalidNucleotideChainError) as e:
             self.chain.set_nucleotides([n1, n2])
+        self.assertEqual('The last nucleotide in the chain must contain an atom that is connected to the 3\' terminal'
+                         ' oxygen (O3\').', str(e.exception)[:104])
 
     def test_set_nucleotides_last_no_o3prime(self):
         names5 = ['C3\'', 'C1\'', 'C5\'', 'H2\'', 'H5\'', 'H3\'', 'O4\'', 'C8', 'C2', 'H1\'', 'C6', 'C5', 'C4',
@@ -887,8 +894,10 @@ class TestNucleotideChain(unittest.TestCase):
         n2 = ce.Nucleotide('3T1', '3T1', None)
         n2.set_atoms(['HO3\''])
 
-        with self.assertRaises(ce.InvalidNucleotideChainError):
+        with self.assertRaises(ce.InvalidNucleotideChainError) as e:
             self.chain.set_nucleotides([n1, n2])
+        self.assertEqual('The last nucleotide in the chain must contain 3\' terminal oxygen atom (O3\').',
+                         str(e.exception)[:76])
 
     def test_dunder_getitem(self):
         n1, n2 = self.prepare_nucleotides()
@@ -1009,6 +1018,194 @@ class TestNucleotideChain(unittest.TestCase):
                           n2["C5'"], n2["H2'"], n2["H5'"], n2["H3'"], n2["O4'"], n2["H1'"], n2["H5''"], n2["HO2'"],
                           n2["C4'"], n2["C2'"], n2["O2'"], n2["H4'"]],
                          self.chain.sugars)
+
+
+class TestPeptideChain(unittest.TestCase):
+    def setUp(self):
+        self.chain = ce.PeptideChain('name')
+
+    def test_instantiation(self):
+        self.assertEqual('name', self.chain.name)
+        self.assertEqual(None, self.chain.parent)
+        self.assertEqual([], self.chain._residues)
+
+    def test_set_residues_valid(self):
+        self.populate_chain()
+
+        self.assertEqual(2, len(self.chain._residues))
+        self.assertEqual(self.chain, self.chain._residues[0].parent)
+        self.assertEqual(self.chain, self.chain._residues[1].parent)
+
+        self.assertEqual(self.chain._residues[1]['N'], self.chain._residues[0]['C'].bonds[2])
+        self.assertEqual(self.chain._residues[0]['C'], self.chain._residues[1]['N'].bonds[2])
+
+    def populate_chain(self):
+        r1 = ce.Residue('GLY', 'glycine1', 'NT1')
+        r1.set_atoms(['HA3', 'O', 'N', 'CA', 'HA2', 'C', 'HT1', 'HT2', 'HT3'])
+
+        r2 = ce.Residue('GLY', 'glycine2', 'CT1')
+        r2.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C', 'OXT'])
+        self.chain.set_residues([r1, r2])
+
+        return r1, r2
+
+    def test_set_residues_no_atoms_connected_to_terminal_nitrogen(self):
+        r1 = ce.Residue('GLY', 'glycine1', None)
+        r1.set_atoms(['HA3', 'O', 'N', 'CA', 'HA2', 'C', 'H'])
+
+        r2 = ce.Residue('GLY', 'glycine2', 'CT1')
+        r2.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C', 'OXT'])
+
+        with self.assertRaises(ce.InvalidPeptideChainError) as e:
+            self.chain.set_residues([r1, r2])
+
+        self.assertEqual('The first residue in the chain must contain an atom that is connected to the terminal '
+                         'nitrogen.', str(e.exception)[:95])
+
+    def test_set_residues_no_terminal_nitrogen(self):
+        r = ce.Residue('NT1', 'NT1', None)
+        r.set_atoms(['HT1', 'HT2', 'HT3'])
+
+        with self.assertRaises(ce.InvalidPeptideChainError) as e:
+            self.chain.set_residues([r, r])
+
+        self.assertEqual('The first residue in the chain must contain the terminal nitrogen atom. ',
+                         str(e.exception)[:72])
+
+    def test_set_residues_no_atoms_connected_to_terminal_carbon(self):
+        r1 = ce.Residue('GLY', 'glycine1', 'NT1')
+        r1.set_atoms(['HA3', 'O', 'N', 'CA', 'HA2', 'C', 'HT1', 'HT2', 'HT3'])
+
+        with self.assertRaises(ce.InvalidPeptideChainError) as e:
+            self.chain.set_residues([r1, r1])
+
+        self.assertEqual('The last residue in the chain must contain an atom that is connected to the terminal carbon.',
+                         str(e.exception)[:92])
+
+    def test_set_residues_no_terminal_carbon(self):
+        r1 = ce.Residue('GLY', 'glycine1', 'NT1')
+        r1.set_atoms(['HA3', 'O', 'N', 'CA', 'HA2', 'C', 'HT1', 'HT2', 'HT3'])
+
+        r2 = ce.Residue('CT1', 'CT1', 'CT1')
+        r2.set_atoms(['OXT'])
+
+        with self.assertRaises(ce.InvalidPeptideChainError) as e:
+            self.chain.set_residues([r1, r2])
+
+        self.assertEqual('The last residue in the chain must contain the terminal carbon atom. ',
+                         str(e.exception)[:69])
+
+    def test_dunder_getitem(self):
+        r1, r2 = self.populate_chain()
+
+        self.assertEqual(r1, self.chain[0])
+        self.assertEqual(r2, self.chain[1])
+
+    def test_pickling(self):
+        self.populate_chain()
+
+        pickled = pickle.dumps(self.chain)
+        unpickled = pickle.loads(pickled)
+
+        self.assertEqual('name', unpickled.name)
+        self.assertEqual(None, unpickled.parent)
+        self.assertEqual(2, len(unpickled._residues))
+
+    def test_dunder_str(self):
+        self.populate_chain()
+        self.assertEqual('PeptideChain of 2 residues', str(self.chain))
+
+    def test_dunder_repr(self):
+        self.populate_chain()
+
+        self.maxDiff = None
+        self.assertEqual("MDANSE.MolecularDynamics.ChemicalEntity.PeptideChain(parent=None, name='name', "
+                         "residues=[MDANSE.MolecularDynamics.ChemicalEntity.Residue(parent=MDANSE.Chemistry."
+                         "ChemicalEntity.PeptideChain(name), name='glycine1', code='GLY', variant='NT1', "
+                         "selected_variant={'is_n_terminus': True, ", repr(self.chain)[:281])
+
+    def test_atom_list(self):
+        r1, r2 = self.populate_chain()
+
+        self.assertEqual([r1['HA3'], r1['O'], r1['N'], r1['CA'], r1['HA2'], r1['C'], r1['HT1'], r1['HT2'], r1['HT3'],
+                          r2['H'], r2['HA3'], r2['O'], r2['N'], r2['CA'], r2['HA2'], r2['C'], r2['OXT']],
+                         self.chain.atom_list())
+
+    def test_backbone(self):
+        r1, r2 = self.populate_chain()
+
+        self.assertEqual([r1['O'], r1['N'], r1['CA'], r1['HA2'], r1['C'], r1['HT1'], r1['HT2'], r1['HT3'],
+                          r2['H'], r2['O'], r2['N'], r2['CA'], r2['HA2'], r2['C'], r2['OXT']],
+                         self.chain.backbone())
+
+    def test_copy(self):
+        self.populate_chain()
+        copy = self.chain.copy()
+
+        self.maxDiff = None
+        self.assertEqual(repr(self.chain), repr(copy))
+
+    def test_number_of_atoms(self):
+        self.populate_chain()
+        self.assertEqual(17, self.chain.number_of_atoms())
+        self.assertEqual(17, self.chain.total_number_of_atoms())
+
+    def test_peptide_chains(self):
+        self.populate_chain()
+        self.assertEqual([self.chain], self.chain.peptide_chains)
+
+    def test_peptides(self):
+        r1, r2 = self.populate_chain()
+        self.assertEqual([r1['O'], r1['N'], r1['C'], r2['H'], r2['O'], r2['N'], r2['C']],
+                         self.chain.peptides)
+
+    def test_residues(self):
+        r1, r2 = self.populate_chain()
+        self.assertEqual([r1, r2], self.chain.residues)
+
+    def test_serialize_empty_dict(self):
+        self.populate_chain()
+        dictionary = {}
+        result = self.chain.serialize(dictionary)
+
+        self.maxDiff = None
+        self.assertEqual(('peptide_chains', 0), result)
+        self.assertDictEqual({'residues': ['H5Residue(self._h5_file,h5_contents,[0, 1, 2, 3, 4, 5, 6, 7, 8],code="GLY",'
+                                           'name="glycine1",variant=\'NT1\')',
+                                           'H5Residue(self._h5_file,h5_contents,[9, 10, 11, 12, 13, 14, 15, 16],'
+                                           'code="GLY",name="glycine2",variant=\'CT1\')'],
+                              'atoms': ['H5Atom(self._h5_file,h5_contents,symbol="H", name="HA3", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="O", name="O", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="N", name="N", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="CA", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA2", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="C", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HT1", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HT2", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HT3", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA3", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="O", name="O", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="N", name="N", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="CA", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA2", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="C", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="O", name="OXT", ghost=False)'],
+                              'peptide_chains': ['H5PeptideChain(self._h5_file,h5_contents,"name",[0, 1])']},
+                             dictionary)
+
+    def test_serialize_nonempty_dict(self):
+        self.populate_chain()
+        dictionary = {'residues': ['', '', ''], 'peptide_chains': ['', '', '']}
+        result = self.chain.serialize(dictionary)
+
+        self.assertEqual(('peptide_chains', 3), result)
+        self.assertEqual(['', '', '', 'H5PeptideChain(self._h5_file,h5_contents,"name",[3, 4])'],
+                         dictionary['peptide_chains'])
+
+    def test_sidechains(self):
+        r1, r2 = self.populate_chain()
+        self.assertEqual([r1['HA3'], r2['HA3']], self.chain.sidechains)
 
 
 # class TestAtomGroup(unittest.TestCase):
