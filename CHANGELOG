@@ -1,5 +1,6 @@
 version 1.5.1
 --------------
+* FIXED issue #126 The error messages are now helpful when incorrect input is provided in fields like DL_POLY's 'aliases' that take Python object-like input
 * CHANGED issue #127 The minimum size of Quick View in 2D/3D Plotter is now much smaller, allowing for resizing downwards
 
 version 1.5.0
