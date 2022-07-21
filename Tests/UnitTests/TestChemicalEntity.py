@@ -1338,3 +1338,123 @@ class TestTranslateAtomNames(unittest.TestCase):
     def test_invalid_atom(self):
         with self.assertRaises(ce.UnknownAtomError):
             ce.translate_atom_names(MOLECULES_DATABASE, 'WAT', [''])
+
+
+class TestChemicalSystem(unittest.TestCase):
+    def setUp(self):
+        self.system = ce.ChemicalSystem('name')
+
+    def test_instantiation(self):
+        self.assertEqual('name', self.system.name)
+        self.assertEqual(None, self.system.parent)
+        self.assertEqual([], self.system.chemical_entities)
+        self.assertEqual(None, self.system._configuration)
+        self.assertEqual(0, self.system._number_of_atoms)
+        self.assertEqual(0, self.system._total_number_of_atoms)
+        self.assertEqual(None, self.system._atoms)
+
+    def test_add_chemical_entity_valid(self):
+        cluster = ce.AtomCluster('name', [ce.Atom(ghost=False), ce.Atom(ghost=True)])
+        self.system.add_chemical_entity(cluster)
+
+        self.assertEqual(1, self.system._number_of_atoms)
+        self.assertEqual(2, self.system._total_number_of_atoms)
+        self.assertEqual(self.system, cluster.parent)
+        self.assertEqual([cluster], self.system.chemical_entities)
+        self.assertEqual(None, self.system._configuration)
+        self.assertEqual(None, self.system._atoms)
+
+    def test_add_chemical_entity_invalid_input(self):
+        with self.assertRaises(ce.InvalidChemicalEntityError):
+            self.system.add_chemical_entity([])
+
+    def test_pickling(self):
+        molecule = ce.Molecule('WAT', 'name')
+        self.system.add_chemical_entity(molecule)
+
+        pickled = pickle.dumps(self.system)
+        unpickled = pickle.loads(pickled)
+
+        self.assertEqual('name', unpickled.name)
+        self.assertEqual(None, unpickled.parent)
+        self.assertEqual(3, unpickled._number_of_atoms)
+        self.assertEqual(3, unpickled._total_number_of_atoms)
+        self.assertEqual(repr(molecule), repr(unpickled.chemical_entities[0]))
+        self.assertEqual(None, unpickled._configuration)
+        self.assertEqual(None, unpickled._atoms)
+
+    def test_atom_list(self):
+        atom1 = ce.Atom(ghost=False)
+        atom2 = ce.Atom(ghost=False)
+        cluster = ce.AtomCluster('name', [atom1, atom2])
+        self.system.add_chemical_entity(cluster)
+
+        self.assertEqual([atom1, atom2], self.system.atom_list())
+
+    def test_atoms(self):
+        atom1 = ce.Atom(ghost=False)
+        atom2 = ce.Atom(ghost=False)
+        cluster = ce.AtomCluster('name', [atom1, atom2])
+        self.system.add_chemical_entity(cluster)
+
+        atom1._index = 1
+        atom2._index = 0
+
+        self.maxDiff = None
+        self.assertEqual([atom2, atom1], self.system.atoms)
+
+    def test_configuration_setter_valid(self):
+        config = DummyConfiguration(self.system)
+        self.system.configuration = config
+
+        self.assertEqual(config, self.system.configuration)
+
+    def test_configuration_setter_invalid(self):
+        other_system = ce.ChemicalSystem('name')
+        config = DummyConfiguration(self.system)
+
+        with self.assertRaises(ce.InconsistentChemicalSystemError):
+            other_system.configuration = config
+
+    def test_copy(self):
+        molecule = ce.Molecule('WAT', 'name')
+        self.system.add_chemical_entity(molecule)
+        copy = self.system.copy()
+
+        self.assertEqual('name', copy.name)
+        self.assertEqual(None, copy.parent)
+        self.assertEqual(repr(molecule), repr(copy.chemical_entities[0]))
+        self.assertEqual(None, copy._configuration)
+        self.assertEqual(3, copy._number_of_atoms)
+        self.assertEqual(3, copy._total_number_of_atoms)
+        self.assertEqual(None, copy._atoms)
+
+    def test_load_valid(self):
+        file = StubHDFFile()
+        file['/chemical_system'] = StubHDFFile()
+        file['/chemical_system'].attrs['name'] = 'new'
+
+        file['/chemical_system/contents'] = [('atoms'.encode(encoding = 'UTF-8',errors = 'strict'), 0)]
+        file['/chemical_system']['atoms'] = ['H5Atom(self._h5_file,h5_contents,symbol="H", name="H1", ghost=False)']
+        self.system.load(file)
+
+        self.assertEqual(None, self.system._h5_file)
+        self.assertEqual('new', self.system.name)
+        self.assertEqual(None, self.system.parent)
+        self.assertEqual(repr(ce.Atom(name="H1", parent=self.system, index=0)), repr(self.system.chemical_entities[0]))
+        self.assertEqual(None, self.system._configuration)
+        self.assertEqual(1, self.system._number_of_atoms)
+        self.assertEqual(1, self.system._total_number_of_atoms)
+        self.assertEqual(None, self.system._atoms)
+
+
+class DummyConfiguration:
+    def __init__(self, system: ce.ChemicalSystem):
+        self.chemical_system = system
+
+
+class StubHDFFile(dict):
+    attrs = {}
+
+    def close(self):
+        pass

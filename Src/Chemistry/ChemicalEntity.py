@@ -13,6 +13,7 @@ from MDANSE.Chemistry.Databases import ResiduesDatabaseError, NucleotidesDatabas
 from MDANSE.Mathematics.Geometry import superposition_fit
 from MDANSE.Mathematics.LinearAlgebra import delta, Tensor, Vector
 from MDANSE.Mathematics.Transformation import Rotation, Transformation, Translation
+from MDANSE.MolecularDynamics.Configuration import _Configuration
 
 
 class UnknownAtomError(Exception):
@@ -296,6 +297,10 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         else:
             return self._parent.top_level_chemical_entity()
 
+    @abc.abstractmethod
+    def total_number_of_atoms(self):
+        pass
+
 
 class Atom(_ChemicalEntity):
     """A representation of atom in a trajectory."""
@@ -497,17 +502,11 @@ class AtomCluster(_ChemicalEntity):
 
         self._parentless = parentless
 
-        self._atoms = collections.OrderedDict()
+        self._atoms = []
         for at in atoms:
             if not parentless:
                 at._parent = self
-
-            name = at.name
-            i = 1
-            while name in self._atoms.keys():
-                name = ''.join([at.name, i])
-                i += 1
-            self._atoms[name] = at
+            self._atoms.append(at)
 
     def __getstate__(self):
         return self.__dict__
@@ -521,7 +520,7 @@ class AtomCluster(_ChemicalEntity):
 
     def atom_list(self) -> list[Atom]:
         """A list of atoms in the cluster which are not ghosts."""
-        return list([at for at in self._atoms.values() if not at.ghost])
+        return list([at for at in self._atoms if not at.ghost])
 
     def copy(self) -> 'AtomCluster':
         """Copies the instance of AtomCluster into a new, identical instance."""
@@ -1500,7 +1499,7 @@ class Protein(_ChemicalEntity):
         return self._peptide_chains[item]
 
     def atom_list(self) -> list[Atom]:
-        """List of all atoms in the Protein."""
+        """List of all non-ghost atoms in the Protein."""
         atom_list = []
         for c in self._peptide_chains:
             atom_list.extend(c.atom_list())
@@ -1639,9 +1638,14 @@ def translate_atom_names(database: Union[MoleculesDatabase, ResiduesDatabase, Nu
 
 
 class ChemicalSystem(_ChemicalEntity):
+    """A collection of all chemical compounds in a trajectory."""
 
-    def __init__(self, name=''):
+    def __init__(self, name: str = ''):
+        """
 
+        :param name: The name of the ChemicalSystem
+        :type name: str
+        """
         super(ChemicalSystem, self).__init__()
 
         self._chemical_entities = []
@@ -1662,17 +1666,23 @@ class ChemicalSystem(_ChemicalEntity):
     def __setstate__(self, state):
         self.__dict__ = state
 
-    def add_chemical_entity(self, chemical_entity):
+    def add_chemical_entity(self, chemical_entity: _ChemicalEntity) -> None:
+        """
+        Adds the provided ChemicalEntity to the ChemicalSystem.
 
+        :param chemical_entity: The ChemicalEntity to be added.
+        :type chemical_entity: Any subclass of _ChemicalEntity
+
+        :return: None
+        """
         if not isinstance(chemical_entity, _ChemicalEntity):
             raise InvalidChemicalEntityError('Invalid type')
 
         for at in chemical_entity.atom_list():
-            if not at.ghost:
-                at.index = self._number_of_atoms
-                self._number_of_atoms += 1
+            at.index = self._number_of_atoms
+            self._number_of_atoms += 1
 
-            self._total_number_of_atoms += 1
+        self._total_number_of_atoms += chemical_entity.total_number_of_atoms()
 
         chemical_entity.parent = self
 
@@ -1682,8 +1692,8 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._atoms = None
 
-    def atom_list(self):
-
+    def atom_list(self) -> list[Atom]:
+        """List of all non-ghost atoms in the ChemicalSystem."""
         atom_list = []
         for ce in self._chemical_entities:
             atom_list.extend(ce.atom_list())
@@ -1691,8 +1701,8 @@ class ChemicalSystem(_ChemicalEntity):
         return atom_list
 
     @property
-    def atoms(self):
-
+    def atoms(self) -> list[Atom]:
+        """A list of all non-ghost atoms in the ChemicalSystem, sorted by their index."""
         from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
         if self._atoms is None:
@@ -1701,23 +1711,35 @@ class ChemicalSystem(_ChemicalEntity):
         return self._atoms
 
     @property
-    def chemical_entities(self):
+    def chemical_entities(self) -> list[_ChemicalEntity]:
+        """
+        A list of all chemical entities in this ChemicalSystem. Only the entities registered in the ChemicalSystem will
+        be returned; their children will not. I.e., if a Molecule object is added to this ChemicalSystem via the
+        add_chemical_entity() method, this property will only return the Molecule object, not its consituent Atom
+        objects.
+        """
         return self._chemical_entities
 
     @property
-    def configuration(self):
+    def configuration(self) -> _Configuration:
+        """The Configuration that this ChemicalSystem is associated with."""
         return self._configuration
 
     @configuration.setter
-    def configuration(self, configuration):
+    def configuration(self, configuration: _Configuration):
 
         if configuration.chemical_system != self:
             raise InconsistentChemicalSystemError('Mismatch between chemical systems')
 
         self._configuration = configuration
 
-    def copy(self):
+    def copy(self) -> 'ChemicalSystem':
+        """
+        Copies the instance of ChemicalSystem into a new, identical instance.
 
+        :return: Copy of the ChemicalSystem instance
+        :rtype: MDANSE.Chemistry.ChemicalEntity.ChemicalSystem
+        """
         cs = ChemicalSystem(self._name)
 
         cs._parent = self._parent
@@ -1738,12 +1760,25 @@ class ChemicalSystem(_ChemicalEntity):
 
         return cs
 
-    def load(self, h5_filename):
+    def load(self, h5_filename: Union[str, h5py.File]) -> None:
+        """
+        Loads a ChemicalSystem from an HDF5 file. The HDF5 file must be organised in such a way that it can parsed by
+        MDANSE.
+
+        :param h5_filename: The HDF5 file that contains the information about the chemical system. This is usually the
+            trajectory file.
+        :type h5_filename: str or h5py.File
+
+        :return: None
+        """
 
         from MDANSE.Chemistry.H5ChemicalEntity import H5Atom, H5AtomCluster, H5Molecule, H5Nucleotide, \
             H5NucleotideChain, H5Residue, H5PeptideChain, H5Protein
 
-        self._h5_file = h5py.File(h5_filename, 'r', libver='latest')
+        try:
+            self._h5_file = h5py.File(h5_filename, 'r', libver='latest')
+        except TypeError:
+            self._h5_file = h5_filename
         grp = self._h5_file['/chemical_system']
         self._chemical_entities = []
 
@@ -1752,10 +1787,10 @@ class ChemicalSystem(_ChemicalEntity):
         self._name = grp.attrs['name']
 
         h5_contents = {}
-        for k in grp.keys():
-            if k == 'contents':
+        for entity_type, v in grp.items():
+            if entity_type == 'contents':
                 continue
-            h5_contents[k] = grp[k][:]
+            h5_contents[entity_type] = v[:]
 
         for entity_type, entity_index in skeleton:
             entity_index = int(entity_index)
@@ -1787,7 +1822,7 @@ class ChemicalSystem(_ChemicalEntity):
 
         contents = []
         for ce in self._chemical_entities:
-            entity_type, entity_index = ce.serialize(h5_file, h5_contents)
+            entity_type, entity_index = ce.serialize(h5_contents)
             contents.append((entity_type, str(entity_index)))
 
         for k, v in h5_contents.items():
