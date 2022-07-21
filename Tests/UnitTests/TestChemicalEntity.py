@@ -17,7 +17,7 @@ import pickle
 from typing import Union
 import unittest
 
-from MDANSE.Chemistry import RESIDUES_DATABASE, NUCLEOTIDES_DATABASE
+from MDANSE.Chemistry import MOLECULES_DATABASE, RESIDUES_DATABASE, NUCLEOTIDES_DATABASE
 import MDANSE.Chemistry.ChemicalEntity as ce
 
 
@@ -1316,3 +1316,25 @@ class TestProtein(unittest.TestCase):
     def test_sidechains(self):
         chain = self.populate_protein()
         self.assertEqual([chain[0]['HA3'], chain[1]['HA3']], self.protein.sidechains)
+
+
+class TestTranslateAtomNames(unittest.TestCase):
+    def test_valid(self):
+        result = ce.translate_atom_names(MOLECULES_DATABASE, 'WAT', ['O', 'HW2', 'H1'])
+        self.assertEqual(['OW', 'HW2', 'HW1'], result)
+
+    def test_subset_of_all_atoms(self):
+        result = ce.translate_atom_names(MOLECULES_DATABASE, 'WAT', ['O', 'HW2'])
+        self.assertEqual(['OW', 'HW2'], result)
+
+    def test_multiple_of_one_atom(self):
+        result = ce.translate_atom_names(MOLECULES_DATABASE, 'WAT', ['O', 'HW2', 'HW2', 'HW2', 'HW2'])
+        self.assertEqual(['OW', 'HW2', 'HW2', 'HW2', 'HW2'], result)
+
+    def test_invalid_molname(self):
+        with self.assertRaises(ce.UnknownMoleculeError):
+            ce.translate_atom_names(MOLECULES_DATABASE, '00000', ['OW', 'HW1', 'HW2'])
+
+    def test_invalid_atom(self):
+        with self.assertRaises(ce.UnknownAtomError):
+            ce.translate_atom_names(MOLECULES_DATABASE, 'WAT', [''])

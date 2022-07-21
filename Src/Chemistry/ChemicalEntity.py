@@ -1,12 +1,14 @@
 import abc
 import collections
 import copy
+from typing import Union
 
 import numpy as np
 
 import h5py
 
-from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DATABASE, RESIDUES_DATABASE
+from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DATABASE, RESIDUES_DATABASE, \
+    MoleculesDatabase, NucleotidesDatabase, ResiduesDatabase
 from MDANSE.Chemistry.Databases import ResiduesDatabaseError, NucleotidesDatabaseError
 from MDANSE.Mathematics.Geometry import superposition_fit
 from MDANSE.Mathematics.LinearAlgebra import delta, Tensor, Vector
@@ -1602,7 +1604,25 @@ class Protein(_ChemicalEntity):
         return atoms
 
 
-def translate_atom_names(database, molname, atoms):
+def translate_atom_names(database: Union[MoleculesDatabase, ResiduesDatabase, NucleotidesDatabase],
+                         molname: str, atoms: list[str]) -> list[str]:
+    """
+    Changes the names of all atoms in a given compound to the default names used in MDANSE. The names provided to this
+    function must be registered in the database provided in the database parameter, either as the default name or in the
+    'alternatives'.
+
+    :param database: Database of compounds in which the compound and its constituent atoms are registered.
+    :type database: one of MOLECULES_DATABASE, RESIDUES_DATABASE, or NUCLEOTIDES_DATABASE
+
+    :param molname: The name of the chemical compound registered in the provided database whose atoms are to be renamed.
+    :type molname: str
+
+    :param atoms: A list of atom names to be renamed. All of them must be part of the molname chemical compound.
+    :type atoms: list
+
+    :return: The list of renamed atoms.
+    :rtype: list
+    """
     if not molname in database:
         raise UnknownMoleculeError('The molecule {} is unknown'.format(molname))
 
