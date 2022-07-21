@@ -1208,6 +1208,111 @@ class TestPeptideChain(unittest.TestCase):
         self.assertEqual([r1['HA3'], r2['HA3']], self.chain.sidechains)
 
 
-# class TestAtomGroup(unittest.TestCase):
-#     def test_valid_instantiation(self):
-#         group = ce.AtomGroup()
+class TestProtein(unittest.TestCase):
+    def setUp(self):
+        self.protein = ce.Protein('name')
+
+    def test_instantiation(self):
+        self.assertEqual('name', self.protein.name)
+        self.assertEqual(None, self.protein.parent)
+        self.assertEqual([], self.protein._peptide_chains)
+
+    def test_set_peptide_chains(self):
+        chain = self.populate_protein()
+
+        self.assertEqual([chain], self.protein._peptide_chains)
+        self.assertEqual(self.protein, self.protein._peptide_chains[0].parent)
+
+    def populate_protein(self):
+        r1 = ce.Residue('GLY', 'glycine1', 'NT1')
+        r1.set_atoms(['HA3', 'O', 'N', 'CA', 'HA2', 'C', 'HT1', 'HT2', 'HT3'])
+
+        r2 = ce.Residue('GLY', 'glycine2', 'CT1')
+        r2.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C', 'OXT'])
+
+        chain = ce.PeptideChain('name')
+        chain.set_residues([r1, r2])
+        self.protein.set_peptide_chains([chain])
+
+        return chain
+
+    def test_pickling(self):
+        chain = self.populate_protein()
+
+        pickled = pickle.dumps(self.protein)
+        unpickled = pickle.loads(pickled)
+
+        self.maxDiff = None
+        self.assertEqual('name', unpickled.name)
+        self.assertEqual(None, unpickled.parent)
+        self.assertEqual(1, len(unpickled._peptide_chains))
+        self.assertEqual(repr(chain), repr(unpickled._peptide_chains[0]))
+
+    def test_dunder_getitem(self):
+        chain = self.populate_protein()
+        self.assertEqual(chain, self.protein[0])
+
+    def test_atom_list(self):
+        chain = self.populate_protein()
+
+        self.assertEqual([chain[0]['HA3'], chain[0]['O'], chain[0]['N'], chain[0]['CA'], chain[0]['HA2'], chain[0]['C'],
+                          chain[0]['HT1'], chain[0]['HT2'], chain[0]['HT3'], chain[1]['H'], chain[1]['HA3'],
+                          chain[1]['O'], chain[1]['N'], chain[1]['CA'], chain[1]['HA2'], chain[1]['C'],
+                          chain[1]['OXT']], self.protein.atom_list())
+
+    def test_backbone(self):
+        chain = self.populate_protein()
+        self.assertEqual([chain[0]['O'], chain[0]['N'], chain[0]['CA'], chain[0]['HA2'], chain[0]['C'], chain[0]['HT1'],
+                          chain[0]['HT2'], chain[0]['HT3'], chain[1]['H'], chain[1]['O'], chain[1]['N'], chain[1]['CA'],
+                          chain[1]['HA2'], chain[1]['C'], chain[1]['OXT']], self.protein.backbone())
+
+    def test_copy(self):
+        chain = self.populate_protein()
+        copy = self.protein.copy()
+
+        self.maxDiff = None
+        self.assertEqual('name', copy.name)
+        self.assertEqual(None, copy.parent)
+        self.assertEqual(1, len(copy._peptide_chains))
+        self.assertEqual(repr(chain), repr(copy._peptide_chains[0]))
+
+    def test_number_of_atoms(self):
+        self.populate_protein()
+
+        self.assertEqual(17, self.protein.number_of_atoms())
+        self.assertEqual(17, self.protein.total_number_of_atoms())
+
+    def test_peptide_chains(self):
+        chain = self.populate_protein()
+        self.assertEqual([chain], self.protein.peptide_chains)
+
+    def test_peptides(self):
+        chain = self.populate_protein()
+        self.assertEqual([chain[0]['O'], chain[0]['N'], chain[0]['C'], chain[1]['H'], chain[1]['O'], chain[1]['N'],
+                          chain[1]['C']], self.protein.peptides)
+
+    def test_residues(self):
+        chain = self.populate_protein()
+        self.assertEqual(chain.residues, self.protein.residues)
+
+    def test_serialize_empty_dict(self):
+        self.populate_protein()
+        dictionary = {}
+
+        result = self.protein.serialize(dictionary)
+
+        self.assertEqual(('proteins', 0), result)
+        self.assertEqual(['H5Protein(self._h5_file,h5_contents,"name",[0])'], dictionary['proteins'])
+        self.assertEqual(['H5PeptideChain(self._h5_file,h5_contents,"name",[0, 1])'], dictionary['peptide_chains'])
+
+    def test_serialize_nonempty_dict(self):
+        self.populate_protein()
+        dictionary = {'proteins': ['', '', ''], 'peptide_chains': ['', '', '']}
+        result = self.protein.serialize(dictionary)
+
+        self.assertEqual(('proteins', 3), result)
+        self.assertEqual(['', '', '', 'H5Protein(self._h5_file,h5_contents,"name",[3])'], dictionary['proteins'])
+
+    def test_sidechains(self):
+        chain = self.populate_protein()
+        self.assertEqual([chain[0]['HA3'], chain[1]['HA3']], self.protein.sidechains)

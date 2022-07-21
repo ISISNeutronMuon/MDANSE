@@ -438,7 +438,7 @@ class Atom(_ChemicalEntity):
 
         self._symbol = symbol
 
-    def serialize(self, h5_contents: dict) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
 
         atom_str = 'H5Atom(self._h5_file,h5_contents,symbol="{}", name="{}", ghost={})'.format(self.symbol, self.name,
                                                                                                self.ghost)
@@ -551,7 +551,7 @@ class AtomCluster(_ChemicalEntity):
 
         self._atoms = reordered_atoms
 
-    def serialize(self, h5_contents: dict) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
 
         if 'atoms' in h5_contents:
             at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms']) + len(self._atoms)))
@@ -678,7 +678,7 @@ class Molecule(_ChemicalEntity):
 
         self._atoms = reordered_atoms
 
-    def serialize(self, h5_contents: dict) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
 
         if 'atoms' in h5_contents:
             at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms']) + len(self._atoms)))
@@ -851,7 +851,7 @@ class Residue(_ChemicalEntity):
     def variant(self):
         return self._variant
 
-    def serialize(self, h5_contents: dict) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
 
         if 'atoms' in h5_contents:
             at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms']) + len(self._atoms)))
@@ -1015,7 +1015,7 @@ class Nucleotide(_ChemicalEntity):
     def variant(self):
         return self._variant
 
-    def serialize(self, h5_contents: dict) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
 
         if 'atoms' in h5_contents:
             at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms']) + len(self._atoms)))
@@ -1203,7 +1203,7 @@ class NucleotideChain(_ChemicalEntity):
             number_of_atoms += nucleotide.total_number_of_atoms()
         return number_of_atoms
 
-    def serialize(self, h5_contents: dict) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
 
         if 'nucleotides' in h5_contents:
             res_indexes = list(
@@ -1429,7 +1429,7 @@ class PeptideChain(_ChemicalEntity):
         """The list of amino acid Residues that make up this PeptideChain."""
         return self._residues
 
-    def serialize(self, h5_contents: dict) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
 
         if 'residues' in h5_contents:
             res_indexes = list(range(len(h5_contents['residues']), len(h5_contents['residues']) + len(self._residues)))
@@ -1462,7 +1462,8 @@ class PeptideChain(_ChemicalEntity):
         self._connect_residues()
 
     @property
-    def sidechains(self):
+    def sidechains(self) -> list[Atom]:
+        """A list of atoms in the PeptideChain that are part of an amino acid side-chain."""
         atoms = []
         for at in self.atom_list():
             if 'sidechain' in at.groups:
@@ -1471,8 +1472,17 @@ class PeptideChain(_ChemicalEntity):
 
 
 class Protein(_ChemicalEntity):
+    """A Protein consisting of one or more peptide chains."""
 
-    def __init__(self, name=''):
+    def __init__(self, name: str = ''):
+        """
+        The Peptide class is instantiated empty; for it to contain peptide chains, the set_peptide_chains() method must
+        be called first.
+
+        :param name: The name of the protein
+        :type name: str
+        """
+        super().__init__()
 
         self._name = name
 
@@ -1484,24 +1494,27 @@ class Protein(_ChemicalEntity):
     def __setstate__(self, state):
         self.__dict__ = state
 
-    def atom_list(self):
+    def __getitem__(self, item: int) -> PeptideChain:
+        return self._peptide_chains[item]
 
+    def atom_list(self) -> list[Atom]:
+        """List of all atoms in the Protein."""
         atom_list = []
         for c in self._peptide_chains:
             atom_list.extend(c.atom_list())
 
         return atom_list
 
-    def backbone(self):
-
+    def backbone(self) -> list[Atom]:
+        """A list of all atoms in the Protein that are a part of the backbone."""
         atoms = []
         for at in self.atom_list():
             if 'backbone' in at.groups:
                 atoms.append(at)
         return atoms
 
-    def copy(self):
-
+    def copy(self) -> 'Protein':
+        """Copies the instance of Protein into a new, identical instance."""
         p = Protein(self._name)
 
         peptide_chains = [pc.copy() for pc in self._peptide_chains]
@@ -1513,32 +1526,41 @@ class Protein(_ChemicalEntity):
 
         return p
 
-    def number_of_atoms(self):
-
+    def number_of_atoms(self) -> int:
+        """The number of non-ghost atoms in the Protein."""
         number_of_atoms = 0
         for peptide_chain in self._peptide_chains:
             number_of_atoms += peptide_chain.number_of_atoms()
         return number_of_atoms
 
-    def total_number_of_atoms(self):
-
+    def total_number_of_atoms(self) -> int:
+        """The total number of atoms in the protein, including ghosts."""
         number_of_atoms = 0
         for peptide_chain in self._peptide_chains:
             number_of_atoms += peptide_chain.total_number_of_atoms()
         return number_of_atoms
 
-    def set_peptide_chains(self, peptide_chains):
+    def set_peptide_chains(self, peptide_chains: list[PeptideChain]) -> None:
+        """
+        Sets the provided peptide chains as the ones that make up this Protein.
 
+        :param peptide_chains: A list of peptide chains that make up this Protein
+        :type peptide_chains: list
+
+        :return: None
+        """
         self._peptide_chains = peptide_chains
         for pc in self._peptide_chains:
             pc.parent = self
 
     @property
-    def peptide_chains(self):
+    def peptide_chains(self) -> list[PeptideChain]:
+        """A list of peptide chains that make up this Protein."""
         return self._peptide_chains
 
     @property
-    def peptides(self):
+    def peptides(self) -> list[Atom]:
+        """A list of all atoms in the Protein that are a part of a peptide."""
         atoms = []
         for at in self.atom_list():
             if 'peptide' in at.groups:
@@ -1546,18 +1568,18 @@ class Protein(_ChemicalEntity):
         return atoms
 
     @property
-    def residues(self):
-
+    def residues(self) -> list[Residue]:
+        """A list of all amino acid Residues in the Protein."""
         residues = []
         for pc in self._peptide_chains:
             residues.extend(pc.residues)
 
         return residues
 
-    def serialize(self, h5_file, h5_contents):
+    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
         if 'peptide_chains' in h5_contents:
-            pc_indexes = list(
-                range(len(h5_contents['pepide_chains']), len(h5_contents['pepide_chains']) + len(self._peptide_chains)))
+            pc_indexes = list(range(len(h5_contents['peptide_chains']),
+                                    len(h5_contents['peptide_chains']) + len(self._peptide_chains)))
         else:
             pc_indexes = list(range(len(self._peptide_chains)))
 
@@ -1566,12 +1588,13 @@ class Protein(_ChemicalEntity):
         h5_contents.setdefault('proteins', []).append(prot_str)
 
         for pc in self._peptide_chains:
-            pc.serialize(h5_file, h5_contents)
+            pc.serialize(h5_contents)
 
-        return ('proteins', len(h5_contents['proteins']) - 1)
+        return 'proteins', len(h5_contents['proteins']) - 1
 
     @property
-    def sidechains(self):
+    def sidechains(self) -> list[Atom]:
+        """A list of all atoms in the Protein that are a part of a sidechain."""
         atoms = []
         for at in self.atom_list():
             if 'sidechain' in at.groups:
