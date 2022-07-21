@@ -1,6 +1,7 @@
 version 1.5.1
 --------------
-* FIXED issue 131 Importing MDANSE and other installed packages no longer raises exceptions
+* FIXED issue #131 Importing MDANSE and other installed packages no longer raises exceptions
+* FIXED issue #126 The error messages are now helpful when incorrect input is provided in fields like DL_POLY's 'aliases' that take Python object-like input
 
 version 1.5.0
 --------------
