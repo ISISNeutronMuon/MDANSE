@@ -450,7 +450,16 @@ class Atom(_ChemicalEntity):
         self._symbol = symbol
 
     def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+        """
+        Serializes the Atom object into a string in preparation of the object being stored on disk.
 
+        :param h5_contents: A dictionary that stores all serialized information for the whole ChemicalSystem.
+        :type h5_contents: dict
+
+        :return: A tuple containing the string 'atoms' and the index of the serialization data of this Atom in the
+            provided dictionary.
+        :rtype: tuple
+        """
         atom_str = 'H5Atom(self._h5_file,h5_contents,symbol="{}", name="{}", ghost={})'.format(self.symbol, self.name,
                                                                                                self.ghost)
 
@@ -557,7 +566,17 @@ class AtomCluster(_ChemicalEntity):
         self._atoms = reordered_atoms
 
     def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+        """
+        Serializes the AtomCluster object and its contents into strings in preparation of the object being stored on
+        disk.
 
+        :param h5_contents: A dictionary that stores all serialized information for the whole ChemicalSystem.
+        :type h5_contents: dict
+
+        :return: A tuple containing the string 'atom_clusters' and the index of the serialization data of this
+            AtomCluster in the provided dictionary.
+        :rtype: tuple
+        """
         if 'atoms' in h5_contents:
             at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms']) + len(self._atoms)))
         else:
@@ -684,7 +703,17 @@ class Molecule(_ChemicalEntity):
         self._atoms = reordered_atoms
 
     def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+        """
+        Serializes the Molecule object and its contents into strings in preparation of the object being stored on
+        disk.
 
+        :param h5_contents: A dictionary that stores all serialized information for the whole ChemicalSystem.
+        :type h5_contents: dict
+
+        :return: A tuple containing the string 'molecules' and the index of the serialization data of this Molecule
+            in the provided dictionary.
+        :rtype: tuple
+        """
         if 'atoms' in h5_contents:
             at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms']) + len(self._atoms)))
         else:
@@ -857,7 +886,17 @@ class Residue(_ChemicalEntity):
         return self._variant
 
     def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+        """
+        Serializes the Residue object and its contents into strings in preparation of the object being stored on
+        disk.
 
+        :param h5_contents: A dictionary that stores all serialized information for the whole ChemicalSystem.
+        :type h5_contents: dict
+
+        :return: A tuple containing the string 'residues' and the index of the serialization data of this Residue
+            in the provided dictionary.
+        :rtype: tuple
+        """
         if 'atoms' in h5_contents:
             at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms']) + len(self._atoms)))
         else:
@@ -1021,7 +1060,17 @@ class Nucleotide(_ChemicalEntity):
         return self._variant
 
     def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+        """
+        Serializes the Nucleotide object and its contents into strings in preparation of the object being stored on
+        disk.
 
+        :param h5_contents: A dictionary that stores all serialized information for the whole ChemicalSystem.
+        :type h5_contents: dict
+
+        :return: A tuple containing the string 'nucleotides' and the index of the serialization data of this Nucleotide
+            in the provided dictionary.
+        :rtype: tuple
+        """
         if 'atoms' in h5_contents:
             at_indexes = list(range(len(h5_contents['atoms']), len(h5_contents['atoms']) + len(self._atoms)))
         else:
@@ -1209,7 +1258,17 @@ class NucleotideChain(_ChemicalEntity):
         return number_of_atoms
 
     def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+        """
+        Serializes the NucleotideChain object and its contents into strings in preparation of the object being stored on
+        disk.
 
+        :param h5_contents: A dictionary that stores all serialized information for the whole ChemicalSystem.
+        :type h5_contents: dict
+
+        :return: A tuple containing the string 'nucleotide_chains' and the index of the serialization data of this
+            NucleotideChain in the provided dictionary.
+        :rtype: tuple
+        """
         if 'nucleotides' in h5_contents:
             res_indexes = list(
                 range(len(h5_contents['nucleotides']), len(h5_contents['nucleotides']) + len(self._nucleotides)))
@@ -1435,7 +1494,17 @@ class PeptideChain(_ChemicalEntity):
         return self._residues
 
     def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+        """
+        Serializes the PeptideChain object and its contents into strings in preparation of the object being stored on
+        disk.
 
+        :param h5_contents: A dictionary that stores all serialized information for the whole ChemicalSystem.
+        :type h5_contents: dict
+
+        :return: A tuple containing the string 'peptide_chains' and the index of the serialization data of this
+            PeptideChain in the provided dictionary.
+        :rtype: tuple
+        """
         if 'residues' in h5_contents:
             res_indexes = list(range(len(h5_contents['residues']), len(h5_contents['residues']) + len(self._residues)))
         else:
@@ -1582,6 +1651,16 @@ class Protein(_ChemicalEntity):
         return residues
 
     def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+        """
+        Serializes the Protein object and its contents into strings in preparation of the object being stored on disk.
+
+        :param h5_contents: A dictionary that stores all serialized information for the whole ChemicalSystem.
+        :type h5_contents: dict
+
+        :return: A tuple containing the string 'proteins' and the index of the serialization data of this Protein in the
+            provided dictionary.
+        :rtype: tuple
+        """
         if 'peptide_chains' in h5_contents:
             pc_indexes = list(range(len(h5_contents['peptide_chains']),
                                     len(h5_contents['peptide_chains']) + len(self._peptide_chains)))
