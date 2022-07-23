@@ -79,6 +79,10 @@ class ChemicalEntityError(Exception):
     pass
 
 
+class CorruptedFileError(Exception):
+    pass
+
+
 class _ChemicalEntity(metaclass=abc.ABCMeta):
     """Abstract base class for other chemical entities."""
 
@@ -1776,13 +1780,13 @@ class ChemicalSystem(_ChemicalEntity):
             H5NucleotideChain, H5Residue, H5PeptideChain, H5Protein
 
         try:
-            self._h5_file = h5py.File(h5_filename, 'r', libver='latest')
+            h5_file = h5py.File(h5_filename, 'r', libver='latest')
         except TypeError:
-            self._h5_file = h5_filename
-        grp = self._h5_file['/chemical_system']
+            h5_file = h5_filename
+        grp = h5_file['/chemical_system']
         self._chemical_entities = []
 
-        skeleton = self._h5_file['/chemical_system/contents'][:]
+        skeleton = h5_file['/chemical_system/contents'][:]
 
         self._name = grp.attrs['name']
 
@@ -1794,24 +1798,47 @@ class ChemicalSystem(_ChemicalEntity):
 
         for entity_type, entity_index in skeleton:
             entity_index = int(entity_index)
-            h5_chemical_entity_instance = eval(h5_contents[entity_type.decode('utf-8')][entity_index])
+            code = h5_contents[entity_type.decode('utf-8')][entity_index].replace('self._', '')
+            try:
+                h5_chemical_entity_instance = eval(code, {'__builtins__': {}},
+                                                   {'H5Atom': H5Atom, 'H5AtomCluster': H5AtomCluster,
+                                                    'H5Molecule': H5Molecule, 'H5Nucleotide': H5Nucleotide,
+                                                    'H5NucleotideChain': H5NucleotideChain, 'H5Residue': H5Residue,
+                                                    'H5PeptideChain': H5PeptideChain, 'H5Protein': H5Protein,
+                                                    'h5_contents': h5_contents, 'h5_file': h5_file})
+            except (NameError, TypeError):
+                h5_file.close()
+                raise CorruptedFileError('The provided HDF5 file could not be parsed because the chemical entity of '
+                                         f'type "{entity_type}" with index {entity_index} (located in the HDF5 file at '
+                                         f'/chemical_system/{entity_type}) contains invalid data. A string containing '
+                                         'the constructor for a sublcass of MDANSE.Chemistry.H5ChemicalEntity.'
+                                         f'_H5ChemicalEntity is expected, but instead the following value is present:'
+                                         f'{repr(code)}')
             ce = h5_chemical_entity_instance.build()
             self.add_chemical_entity(ce)
 
-        self._h5_file.close()
+        h5_file.close()
 
         self._h5_file = None
 
-    def number_of_atoms(self):
-
+    def number_of_atoms(self) -> int:
+        """The number of non-ghost atoms in the ChemicalSystem."""
         return self._number_of_atoms
 
-    def total_number_of_atoms(self):
-
+    def total_number_of_atoms(self) -> int:
+        """The number of all atoms in the ChemicalSystem, including ghost ones."""
         return self._total_number_of_atoms
 
-    def serialize(self, h5_file):
+    def serialize(self, h5_file: h5py.File) -> None:
+        """
+        Serializes the contents of the ChemicalSystem object and stores all the data necessary to reconstruct it into
+        the provided HDF5 file.
 
+        :param h5_file: The file into which the ChemicalSystem is saved
+        :type h5_file: h5py.File
+
+        :return: None
+        """
         string_dt = h5py.special_dtype(vlen=str)
 
         grp = h5_file.create_group('/chemical_system')

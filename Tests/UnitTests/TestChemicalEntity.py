@@ -1447,6 +1447,32 @@ class TestChemicalSystem(unittest.TestCase):
         self.assertEqual(1, self.system._total_number_of_atoms)
         self.assertEqual(None, self.system._atoms)
 
+    def test_load_corrupt_file_unexpected_eval_input(self):
+        file = StubHDFFile()
+        file['/chemical_system'] = StubHDFFile()
+        file['/chemical_system'].attrs['name'] = 'new'
+
+        file['/chemical_system/contents'] = [('atoms'.encode(encoding='UTF-8', errors='strict'), 0)]
+        file['/chemical_system']['atoms'] = ['Atom(symbol="H", name="H1", ghost=False)']
+
+        with self.assertRaises(ce.CorruptedFileError):
+            self.system.load(file)
+
+    def test_serialize(self):
+        molecule = ce.Molecule('WAT', 'water')
+        self.system.add_chemical_entity(molecule)
+        file = StubHDFFile()
+        self.system.serialize(file)
+
+        self.assertEqual('name', file['/chemical_system'].attrs['name'])
+        self.assertEqual(['H5Molecule(self._h5_file,h5_contents,[0, 1, 2],code="WAT",name="water")'],
+                         file['/chemical_system']['molecules'])
+        self.assertEqual(['H5Atom(self._h5_file,h5_contents,symbol="O", name="OW", ghost=False)',
+                          'H5Atom(self._h5_file,h5_contents,symbol="H", name="HW2", ghost=False)',
+                          'H5Atom(self._h5_file,h5_contents,symbol="H", name="HW1", ghost=False)'],
+                         file['/chemical_system']['atoms'])
+        self.assertEqual([('molecules', '0')], file['/chemical_system']['contents'])
+
 
 class DummyConfiguration:
     def __init__(self, system: ce.ChemicalSystem):
@@ -1458,3 +1484,10 @@ class StubHDFFile(dict):
 
     def close(self):
         pass
+
+    def create_group(self, value: str):
+        self[value] = StubHDFFile()
+        return self[value]
+
+    def create_dataset(self, name: str, data, dtype):
+        self[name] = data
