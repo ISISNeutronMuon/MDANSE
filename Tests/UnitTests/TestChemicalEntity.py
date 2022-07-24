@@ -26,89 +26,81 @@ class TestAtom(unittest.TestCase):
     def test_empty_instantiation(self):
         atom = ce.Atom()
 
-        self.assertEqual(atom.symbol, 'H')
-        self.assertEqual(atom.name, 'H')
-        self.assertEqual(atom.bonds, [])
-        self.assertEqual(atom._groups, [])
-        self.assertEqual(atom.ghost, False)
-        self.assertEqual(atom.index, None)
-        self.assertEqual(atom.parent, None)
+        self.assertEqual('H', atom.symbol)
+        self.assertEqual('H', atom.name)
+        self.assertEqual([], atom.bonds)
+        self.assertEqual([], atom._groups)
+        self.assertEqual(False, atom.ghost)
+        self.assertEqual(None, atom.index)
+        self.assertEqual(None, atom.parent)
 
-    def test_correct_instantiation(self):
-        # user getitem
-        atom = ce.Atom(symbol='C', name='carbon12')
+    def test_instantiation_overwriting_default_values(self):
+        bond = ce.Atom()
+        atom = ce.Atom(symbol='C', name='carbon12', bonds=[bond], groups=['backbone'], ghost=True,
+                       index=0, parent=bond, mass=12, random='12345')
 
-    def test_undefined_element(self):
+        self.assertEqual('C', atom.symbol)
+        self.assertEqual('carbon12', atom.name)
+        self.assertEqual([bond], atom.bonds)
+        self.assertEqual(['backbone'], atom._groups)
+        self.assertEqual(True, atom.ghost)
+        self.assertEqual(0, atom.index)
+        self.assertEqual(bond, atom.parent)
+        self.assertEqual(12, atom.mass)
+        self.assertEqual('12345', atom.random)
+
+    def test_instantiation_undefined_element(self):
         with self.assertRaises(ce.UnknownAtomError):
             ce.Atom(symbol='CC')
 
     def test_copy(self):
         atom = ce.Atom()
         copy = atom.copy()
-
-        self.assertEqual(atom.symbol, copy.symbol)
-        self.assertEqual(atom.name, copy.name)
-        self.assertEqual(atom.bonds, copy.bonds)
-        self.assertEqual(atom._groups, copy._groups)
-        self.assertEqual(atom.ghost, copy.ghost)
-        self.assertEqual(atom.index, copy.index)
-        self.assertEqual(atom.parent, copy.parent)
+        self.assertEqual(repr(atom), repr(copy))
 
     def test_pickling(self):
         atom = ce.Atom()
         pickled = pickle.dumps(atom)
         unpickled = pickle.loads(pickled)
-
-        self.assertEqual(atom.symbol, unpickled.symbol)
-        self.assertEqual(atom.name, unpickled.name)
-        self.assertEqual(atom.bonds, unpickled.bonds)
-        self.assertEqual(atom._groups, unpickled._groups)
-        self.assertEqual(atom.ghost, unpickled.ghost)
-        self.assertEqual(atom.index, unpickled.index)
-        self.assertEqual(atom.parent, unpickled.parent)
+        self.assertEqual(repr(atom), repr(unpickled))
 
     def test_dunder_str(self):
         atom = ce.Atom(name='Hydrogen')
-        self.assertEqual(str(atom), 'Hydrogen')
+        self.assertEqual('Hydrogen', str(atom))
 
     def test_dunder_repr(self):
         atom = ce.Atom(name='Hydrogen', bonds=[ce.Atom(name='H5')])
-        self.assertEqual(repr(atom), "MDANSE.Chemistry.ChemicalEntity.Atom(parent=None, name='Hydrogen', "
-                                     "symbol='H', bonds=[Atom(H5)], groups=[], ghost=False, index=None)")
+        self.assertEqual("MDANSE.Chemistry.ChemicalEntity.Atom(parent=None, name='Hydrogen', symbol='H', "
+                         "bonds=[Atom(H5)], groups=[], ghost=False, index=None)", repr(atom))
 
     def test_atom_list_ghost_true(self):
         atom = ce.Atom(ghost=True)
         atom_list = atom.atom_list()
-        self.assertEqual(atom_list, [])
+        self.assertEqual([], atom_list)
 
     def test_atom_list_ghost_false(self):
         atom = ce.Atom(ghost=False)
         atom_list = atom.atom_list()
-        self.assertEqual(atom_list, [atom])
+        self.assertEqual([atom], atom_list)
 
     def test_total_number_of_atoms(self):
-        atom = ce.Atom()
-        n = atom.total_number_of_atoms()
-        self.assertEqual(n, 1)
+        atom = ce.Atom(ghost=False)
+        ghost = ce.Atom(ghost=True)
+        self.assertEqual(1, atom.total_number_of_atoms())
+        self.assertEqual(1, ghost.total_number_of_atoms())
 
     def test_number_of_atoms(self):
         atom = ce.Atom(ghost=False)
         ghost = ce.Atom(ghost=True)
 
-        self.assertEqual(atom.number_of_atoms(), 0)
-        self.assertEqual(ghost.number_of_atoms(), 1)
+        self.assertEqual(0, atom.number_of_atoms())
+        self.assertEqual(1, ghost.number_of_atoms())
 
     def test_bonds_setter(self):
         atom = ce.Atom()
-        atom.bonds = [ce.Atom(symbol='C')]
-        self.assertEqual(len(atom.bonds), 1)
-        self.assertEqual(atom.bonds[0].symbol, 'C')
-        self.assertEqual(atom.bonds[0].name, 'C')
-        self.assertEqual(atom.bonds[0].bonds, [])
-        self.assertEqual(atom.bonds[0]._groups, [])
-        self.assertEqual(atom.bonds[0].ghost, False)
-        self.assertEqual(atom.bonds[0].index, None)
-        self.assertEqual(atom.bonds[0].parent, None)
+        bond = ce.Atom(symbol='C')
+        atom.bonds = [bond]
+        self.assertEqual([bond], atom.bonds)
 
     def test_ghost_setter(self):
         atom = ce.Atom(ghost=False)
@@ -118,23 +110,23 @@ class TestAtom(unittest.TestCase):
     def test_index_setter_index_not_set(self):
         atom = ce.Atom()
         atom.index = 0
-        self.assertEqual(atom.index, 0)
+        self.assertEqual(0, atom.index)
 
     def test_index_setter_index_set(self):
         atom = ce.Atom(index=0)
         atom.index = 1
-        self.assertEqual(atom.index, 0)
+        self.assertEqual(0, atom.index)
 
     def test_name_setter(self):
-        atom = ce.Atom()
+        atom = ce.Atom(name='name')
         atom.name = 'Hydrogen'
-        self.assertEqual(atom.name, 'Hydrogen')
+        self.assertEqual('Hydrogen', atom.name)
 
     def test_symbol_setter(self):
-        atom = ce.Atom()
+        atom = ce.Atom(symbol='H')
         atom.symbol = 'C'
 
-        self.assertEqual(atom.symbol, 'C')
+        self.assertEqual('C', atom.symbol)
         with self.assertRaises(ce.UnknownAtomError):
             atom.symbol = 'CC'
 
@@ -145,6 +137,72 @@ class TestAtom(unittest.TestCase):
 
         self.assertEqual(result, ('atoms', 0))
         self.assertEqual(dictionary, {'atoms': ['H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)']})
+
+
+class TestAtomGroup(unittest.TestCase):
+    def setUp(self):
+        self.atom1 = ce.Atom(name='H1')
+        self.atom2 = ce.Atom(name='H2')
+
+        self.system = ce.ChemicalSystem('name')
+        self.system.add_chemical_entity(self.atom1)
+        self.system.add_chemical_entity(self.atom2)
+
+        self.group = ce.AtomGroup([self.atom1, self.atom2])
+
+    def test_instantiation_valid(self):
+        self.assertEqual('', self.group.name)
+        self.assertEqual(None, self.group.parent)
+        self.assertEqual([self.atom1, self.atom2], self.group._atoms)
+        self.assertEqual(self.system, self.group._chemical_system)
+
+    def test_instantiation_invalid(self):
+        system2 = ce.ChemicalSystem('name')
+        system2.add_chemical_entity(self.atom2)
+
+        with self.assertRaises(ce.ChemicalEntityError):
+            ce.AtomGroup([self.atom1, self.atom2])
+
+    def test_pickling(self):
+        pickled = pickle.dumps(self.group)
+        unpickled = pickle.loads(pickled)
+
+        self.assertEqual('', unpickled.name)
+        self.assertEqual(None, unpickled.parent)
+        self.assertEqual(2, len(unpickled._atoms))
+        self.assertEqual(repr(self.atom1), repr(unpickled._atoms[0]))
+        self.assertEqual(repr(self.atom2), repr(unpickled._atoms[1]))
+        self.assertEqual(repr(self.system), repr(unpickled._chemical_system))
+
+    def test_duner_repr(self):
+        self.assertEqual("MDANSE.MolecularDynamics.ChemicalEntity.AtomGroup(parent=None, name='', atoms=[MDANSE."
+                         "Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.ChemicalSystem(name), "
+                         "name='H1', symbol='H', bonds=[], groups=[], ghost=False, index=0), MDANSE.Chemistry."
+                         "ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.ChemicalSystem(name), name='H2', "
+                         "symbol='H', bonds=[], groups=[], ghost=False, index=1)], chemical_system=MDANSE.Chemistry."
+                         "ChemicalEntity.ChemicalSystem(name))", repr(self.group))
+
+    def test_atom_list(self):
+        self.atom2._ghost = True
+        self.assertEqual([self.atom1], self.group.atom_list())
+
+    def test_copy(self):
+        self.assertEqual(None, self.group.copy())
+
+    def test_number_of_atoms(self):
+        self.atom2._ghost = True
+        self.assertEqual(1, self.group.number_of_atoms())
+        self.assertEqual(2, self.group.total_number_of_atoms())
+
+    def test_root_chemical_system(self):
+        self.assertEqual(repr(self.system), repr(self.group.root_chemical_system()))
+
+    def test_serialize(self):
+        dictionary = {}
+        result = self.group.serialize(dictionary)
+
+        self.assertEqual(None, result)
+        self.assertDictEqual({}, dictionary)
 
 
 @unittest.skip
@@ -1252,6 +1310,12 @@ class TestProtein(unittest.TestCase):
         chain = self.populate_protein()
         self.assertEqual(chain, self.protein[0])
 
+    def test_dunder_repr(self):
+        self.populate_protein()
+        self.assertEqual("MDANSE.MolecularDynamics.ChemicalEntity.Protein(parent=None, name='name', peptide_chains="
+                         "[MDANSE.MolecularDynamics.ChemicalEntity.PeptideChain(parent=MDANSE.Chemistry.ChemicalEntity."
+                         "Protein(name=name), name='name'", repr(self.protein)[:213])
+
     def test_atom_list(self):
         chain = self.populate_protein()
 
@@ -1382,6 +1446,24 @@ class TestChemicalSystem(unittest.TestCase):
         self.assertEqual(repr(molecule), repr(unpickled.chemical_entities[0]))
         self.assertEqual(None, unpickled._configuration)
         self.assertEqual(None, unpickled._atoms)
+
+    def test_dunder_repr(self):
+        molecule = ce.Molecule('WAT', 'name')
+        self.system.add_chemical_entity(molecule)
+
+        self.maxDiff = None
+        self.assertEqual("MDANSE.MolecularDynamics.ChemicalEntity.ChemicalSystem(parent=None, name='name', "
+                         "chemical_entities=[MDANSE.MolecularDynamics.ChemicalEntity.Molecule(parent=MDANSE.Chemistry."
+                         "ChemicalEntity.ChemicalSystem(name), name='name', atoms=OrderedDict([('OW', MDANSE.Chemistry."
+                         "ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(name), name='OW', "
+                         "symbol='O', bonds=[Atom(HW1), Atom(HW2)], groups=[], ghost=False, index=0, alternatives="
+                         "['O', 'OH2'])), ('HW2', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry."
+                         "ChemicalEntity.Molecule(name), name='HW2', symbol='H', bonds=[Atom(OW)], groups=[], "
+                         "ghost=False, index=1, alternatives=['H2'])), ('HW1', MDANSE.Chemistry.ChemicalEntity."
+                         "Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(name), name='HW1', symbol='H', bonds="
+                         "[Atom(OW)], groups=[], ghost=False, index=2, alternatives=['H1']))]), code='WAT')], "
+                         "configuration=None, number_of_atoms=3, total_number_of_atoms=3, atoms=None)",
+                         repr(self.system))
 
     def test_atom_list(self):
         atom1 = ce.Atom(ghost=False)

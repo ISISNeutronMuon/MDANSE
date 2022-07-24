@@ -397,7 +397,7 @@ class Atom(_ChemicalEntity):
         return self._bonds
 
     @bonds.setter
-    def bonds(self, bonds: list) -> None:
+    def bonds(self, bonds: list['Atom']) -> None:
 
         self._bonds = bonds
 
@@ -469,9 +469,18 @@ class Atom(_ChemicalEntity):
 
 
 class AtomGroup(_ChemicalEntity):
-    """A selection of atoms that belong to the same chemical system."""
+    """
+    An arbitrary selection of atoms that belong to the same chemical system. Unlike in Molecule and AtomCluster, the
+    atoms in an AtomGroup do not have to be related in any way other than that they have to exist in the same system.
+    Further, AtomGroup does not have the serialize() method defined, and so it will not be saved on disk.
+    """
 
-    def __init__(self, atoms: list):
+    def __init__(self, atoms: list[Atom]):
+        """
+
+        :param atoms: The list of atoms that form this AtomGroup
+        :type atoms: list
+        """
         super(AtomGroup, self).__init__()
 
         s = set([at.root_chemical_system() for at in atoms])
@@ -486,21 +495,46 @@ class AtomGroup(_ChemicalEntity):
         return self.__dict__
 
     def __setstate__(self, state):
-        self.__dict = state
+        self.__dict__ = state
 
-    def atom_list(self):
+    def __repr__(self):
+        contents = ''
+        for key, value in self.__dict__.items():
+            key = key[1:] if key[0] == "_" else key
+            if isinstance(value, _ChemicalEntity) and not isinstance(value, Atom):
+                class_name = str(type(value)).replace('<class \'', '').replace('\'>', '')
+                contents += f'{key}={class_name}({value.name})'
+            else:
+                contents += f'{key}={repr(value)}'
+            contents += ', '
+
+        return f'MDANSE.MolecularDynamics.ChemicalEntity.AtomGroup({contents[:-2]})'
+
+    def atom_list(self) -> list[Atom]:
+        """The list of all non-ghost atoms in the AtomGroup."""
         return list([at for at in self._atoms if not at.ghost])
 
-    def copy(self):
+    def copy(self) -> None:
+        """The copy method is not defined for the AtomGroup class; instances of it cannot be copied."""
         pass
 
-    def number_of_atoms(self):
+    def number_of_atoms(self) -> int:
+        """The number of all non-ghost atoms in the AtomGroup."""
         return len([at for at in self._atoms if not at.ghost])
 
-    def root_chemical_system(self):
+    def total_number_of_atoms(self) -> int:
+        """The total number of atoms in the AtomGroup, including ghosts."""
+        return len(self._atoms)
+
+    def root_chemical_system(self) -> 'ChemicalSystem':
+        """
+        :return: The chemical system whose part all the atoms in this AtomGroup are.
+        :rtype: MDANSE.Chemistry.ChemicalEntity.ChemicalSystem
+        """
         return self._chemical_system
 
-    def serialize(self, h5_file):
+    def serialize(self, h5_contents: dict) -> None:
+        """The serialize method is not defined for the AtomGroup class; it cannot be saved to disk."""
         pass
 
 
@@ -862,7 +896,7 @@ class Residue(_ChemicalEntity):
         return len([at for at in self._atoms.values() if not at.ghost])
 
     def total_number_of_atoms(self) -> int:
-        """The total number of atoms in the molecule, including ghosts."""
+        """The total number of atoms in the residue, including ghosts."""
         return len(self._atoms)
 
     @property
@@ -1571,6 +1605,19 @@ class Protein(_ChemicalEntity):
     def __getitem__(self, item: int) -> PeptideChain:
         return self._peptide_chains[item]
 
+    def __repr__(self):
+        contents = ''
+        for key, value in self.__dict__.items():
+            key = key[1:] if key[0] == "_" else key
+            if isinstance(value, ChemicalSystem):
+                class_name = str(type(value)).replace('<class \'', '').replace('\'>', '')
+                contents += f'{key}={class_name}(name={value.name})'
+            else:
+                contents += f'{key}={repr(value)}'
+            contents += ', '
+
+        return f'MDANSE.MolecularDynamics.ChemicalEntity.Protein({contents[:-2]})'
+
     def atom_list(self) -> list[Atom]:
         """List of all non-ghost atoms in the Protein."""
         atom_list = []
@@ -1748,6 +1795,12 @@ class ChemicalSystem(_ChemicalEntity):
 
     def __setstate__(self, state):
         self.__dict__ = state
+
+    def __repr__(self):
+        contents = ', '.join([f'{key[1:] if key[0] == "_" else key}={repr(value)}'
+                              for key, value in self.__dict__.items()])
+
+        return f'MDANSE.MolecularDynamics.ChemicalEntity.ChemicalSystem({contents})'
 
     def add_chemical_entity(self, chemical_entity: _ChemicalEntity) -> None:
         """
