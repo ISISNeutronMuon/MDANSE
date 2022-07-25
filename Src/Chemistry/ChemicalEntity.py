@@ -510,6 +510,9 @@ class AtomGroup(_ChemicalEntity):
 
         return f'MDANSE.MolecularDynamics.ChemicalEntity.AtomGroup({contents[:-2]})'
 
+    def __str__(self):
+        return f'AtomGroup consisting of {self.total_number_of_atoms()} atoms'
+
     def atom_list(self) -> list[Atom]:
         """The list of all non-ghost atoms in the AtomGroup."""
         return list([at for at in self._atoms if not at.ghost])
@@ -576,6 +579,9 @@ class AtomCluster(_ChemicalEntity):
             contents += ', '
 
         return f'MDANSE.MolecularDynamics.ChemicalEntity.AtomCluster({contents[:-2]})'
+
+    def __str__(self):
+        return f'AtomCluster consisting of {self.total_number_of_atoms()} atoms'
 
     def atom_list(self) -> list[Atom]:
         """A list of atoms in the cluster which are not ghosts."""
@@ -696,6 +702,9 @@ class Molecule(_ChemicalEntity):
             contents += ', '
 
         return f'MDANSE.MolecularDynamics.ChemicalEntity.Molecule({contents[:-2]})'
+
+    def __str__(self):
+        return f'Molecule of {self.name} (database code "{self.code}")'
 
     def _set_bonds(self) -> None:
 
@@ -861,6 +870,9 @@ class Residue(_ChemicalEntity):
             contents += ', '
 
         return f'MDANSE.MolecularDynamics.ChemicalEntity.Residue({contents[:-2]})'
+
+    def __str__(self):
+        return f'Amino acid Residue {self.name} (database code "{self.code}")'
 
     def set_atoms(self, atoms: list[str]) -> None:
         """
@@ -1032,6 +1044,9 @@ class Nucleotide(_ChemicalEntity):
             contents += ', '
 
         return f'MDANSE.MolecularDynamics.ChemicalEntity.Nucleotide({contents[:-2]})'
+
+    def __str__(self):
+        return f'Nucleotide {self.name} (database code "{self.code}")'
 
     def copy(self) -> 'Nucleotide':
         """Copies the instance of Nucleotide into a new, identical instance."""
@@ -1637,6 +1652,9 @@ class Protein(_ChemicalEntity):
 
         return f'MDANSE.MolecularDynamics.ChemicalEntity.Protein({contents[:-2]})'
 
+    def __str__(self):
+        return f'Protein {self.name} consisting of {len(self.peptide_chains)} peptide chains'
+
     def atom_list(self) -> list[Atom]:
         """List of all non-ghost atoms in the Protein."""
         atom_list = []
@@ -1820,6 +1838,9 @@ class ChemicalSystem(_ChemicalEntity):
                               for key, value in self.__dict__.items()])
 
         return f'MDANSE.MolecularDynamics.ChemicalEntity.ChemicalSystem({contents})'
+
+    def __str__(self):
+        return f'ChemicalSystem {self.name} consisting of {len(self._chemical_entities)} chemical entities'
 
     def add_chemical_entity(self, chemical_entity: _ChemicalEntity) -> None:
         """

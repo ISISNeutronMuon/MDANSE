@@ -182,6 +182,9 @@ class TestAtomGroup(unittest.TestCase):
                          "symbol='H', bonds=[], groups=[], ghost=False, index=1)], chemical_system=MDANSE.Chemistry."
                          "ChemicalEntity.ChemicalSystem(name))", repr(self.group))
 
+    def test_dunder_str(self):
+        self.assertEqual('AtomGroup consisting of 2 atoms', str(self.group))
+
     def test_atom_list(self):
         self.atom2._ghost = True
         self.assertEqual([self.atom1], self.group.atom_list())
@@ -259,6 +262,10 @@ class TestAtomCluster(unittest.TestCase):
                          "symbol='H', bonds=[], groups=[], ghost=False, index=None), MDANSE.Chemistry.ChemicalEntity."
                          "Atom(parent=None, name='H', symbol='H', bonds=[], groups=[], ghost=False, index=None)])",
                          repr(cluster))
+
+    def test_dunder_str(self):
+        cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()], parentless=True)
+        self.assertEqual('AtomCluster consisting of 2 atoms', str(cluster))
 
     def test_atom_list(self):
         atom = ce.Atom()
@@ -402,6 +409,9 @@ class TestMolecule(unittest.TestCase):
                          "('HW1', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity."
                          "Molecule(water), name='HW1', symbol='H', bonds=[Atom(OW)], groups=[], ghost=False, index=None"
                          ", alternatives=['H1']))]), code='WAT')", repr(self.molecule))
+
+    def test_dunder_str(self):
+        self.assertEqual('Molecule of water (database code "WAT")', str(self.molecule))
 
     def test_atom_list(self):
         self.assertEqual(3, len(self.molecule.atom_list()))
@@ -663,6 +673,11 @@ class TestResidue(unittest.TestCase):
                          "Atom(+R)], groups=['backbone', 'peptide'], ghost=False, index=None, alternatives=[]))]))",
                          repr(residue))
 
+    def test_dunder_str(self):
+        residue = ce.Residue('GLY', 'glycine', None)
+        residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
+        self.assertEqual('Amino acid Residue glycine (database code "GLY")', str(residue))
+
     def test_atom_list(self):
         residue = ce.Residue('GLY', 'glycine', None)
         residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
@@ -841,6 +856,11 @@ class TestNucleotide(unittest.TestCase):
                          '"HO5\'", symbol=\'H\', bonds=[Atom(O5\')], groups=[], ghost=False, index=None, replaces='
                          '[\'OP1\', \'OP2\', \'P\'], o5prime_connected=True, alternatives=[]))]))',
                          repr(nucleotide))
+
+    def test_dunder_str(self):
+        nucleotide = ce.Nucleotide('5T1', '5T1', None)
+        nucleotide.set_atoms(['HO5\''])
+        self.assertEqual('Nucleotide 5T1 (database code "5T1")', str(nucleotide))
 
     def test_copy(self):
         nucleotide = ce.Nucleotide('5T1', '5T1', None)
@@ -1328,6 +1348,10 @@ class TestProtein(unittest.TestCase):
                          "[MDANSE.MolecularDynamics.ChemicalEntity.PeptideChain(parent=MDANSE.Chemistry.ChemicalEntity."
                          "Protein(name=name), name='name'", repr(self.protein)[:213])
 
+    def test_dunder_str(self):
+        self.populate_protein()
+        self.assertEqual('Protein name consisting of 1 peptide chains', str(self.protein))
+
     def test_atom_list(self):
         chain = self.populate_protein()
 
@@ -1476,6 +1500,13 @@ class TestChemicalSystem(unittest.TestCase):
                          "[Atom(OW)], groups=[], ghost=False, index=2, alternatives=['H1']))]), code='WAT')], "
                          "configuration=None, number_of_atoms=3, total_number_of_atoms=3, atoms=None)",
                          repr(self.system))
+
+    def test_dunder_str(self):
+        atom1 = ce.Atom(ghost=False)
+        atom2 = ce.Atom(ghost=False)
+        cluster = ce.AtomCluster('name', [atom1, atom2])
+        self.system.add_chemical_entity(cluster)
+        self.assertEqual('ChemicalSystem name consisting of 1 chemical entities', str(self.system))
 
     def test_atom_list(self):
         atom1 = ce.Atom(ghost=False)
