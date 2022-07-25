@@ -27,13 +27,13 @@ set cmd="sed -n "s/__version__.*=.*\"\(.*\)\"/\1/p" Src/__pkginfo__.py"
 for /F %%i in (' %cmd% ') do set MDANSE_VERSION=%%i
 
 rem Check if branch is main, tag as draft otherwise
-if "%MDANSE_GIT_BRANCH_NAME%" == "refs/heads/main" (
+if %MDANSE_GIT_BRANCH_NAME% == refs/heads/main (
     set VERSION_NAME=%MDANSE_VERSION%
     sed "s/.*__beta__.*/__beta__ = None/" Src\\__pkginfo__.py >> Src\\__pkginfo__.pybak
     move Src\\__pkginfo__.pybak Src\\__pkginfo__.py
 ) else (
     rem Check if branch is release*
-    if "%MDANSE_GIT_BRANCH_NAME" == "refs/heads/release-next" (
+    if %MDANSE_GIT_BRANCH_NAME == refs/heads/release-next (
         set VERSION_NAME=%MDANSE_VERSION%-rc-%MDANSE_GIT_CURRENT_COMMIT%
         sed "s/.*__beta__.*/__beta__ = \"rc\"/" Src\\__pkginfo__.py >> Src\\__pkginfo__.pybak
         move Src\\__pkginfo__.pybak Src\\__pkginfo__.py
