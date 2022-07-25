@@ -20,6 +20,8 @@ import wx
 from MDANSE import REGISTRY
 
 from MDANSE.GUI.Widgets.IWidget import IWidget
+from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
+
 
 class PythonObjectWidget(IWidget):
     
@@ -37,6 +39,11 @@ class PythonObjectWidget(IWidget):
                 
         val = self._string.GetValue()
 
-        return ast.literal_eval(val)
+        try:
+            return ast.literal_eval(val)
+        except SyntaxError as e:
+            raise ConfiguratorError('The inputted python code could not be parsed due to the following error:\n\n'
+                                    'SyntaxError: %s' % e, self)
+
 
 REGISTRY["python_object"] = PythonObjectWidget
