@@ -205,7 +205,6 @@ class TestAtomGroup(unittest.TestCase):
         self.assertDictEqual({}, dictionary)
 
 
-@unittest.skip
 class TestAtomCluster(unittest.TestCase):
     def test_valid_instantiation_parentful(self):
         cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()])
@@ -213,8 +212,7 @@ class TestAtomCluster(unittest.TestCase):
         self.assertEqual(None, cluster.parent)
         self.assertEqual('Cluster1', cluster.name)
         self.assertEqual(False, cluster._parentless)
-        self.assertEqual('H', cluster)
-        for atom in cluster._atoms.values():
+        for atom in cluster._atoms:
             self.assertEqual('H', atom.symbol)
             self.assertEqual('H', atom.name)
             self.assertEqual([], atom.bonds)
@@ -247,66 +245,80 @@ class TestAtomCluster(unittest.TestCase):
         self.assertEqual(cluster.parent, unpickled.parent)
         self.assertEqual(cluster.name, unpickled.name)
         self.assertEqual(cluster._parentless, unpickled._parentless)
-        for atom, unpickled_atom in zip(cluster._atoms, unpickled._atoms):
-            self.assertEqual(atom.symbol, unpickled_atom.symbol)
-            self.assertEqual(atom.name, unpickled_atom.name)
-            self.assertEqual(atom.bonds, unpickled_atom.bonds)
-            self.assertEqual(atom._groups, unpickled_atom._groups)
-            self.assertEqual(atom.ghost, unpickled_atom.ghost)
-            self.assertEqual(atom.index, unpickled_atom.index)
-            self.assertEqual(atom.parent, unpickled_atom.parent)
+        self.assertEqual(repr(cluster._atoms), repr(unpickled._atoms))
+
+    def test_dunder_getitem(self):
+        atom = ce.Atom()
+        cluster = ce.AtomCluster('Cluster1', [atom, ce.Atom()], parentless=True)
+        self.assertEqual(atom, cluster[0])
+
+    def test_dunder_repr(self):
+        cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()], parentless=True)
+        self.assertEqual("MDANSE.MolecularDynamics.ChemicalEntity.AtomCluster(parent=None, name='Cluster1', "
+                         "parentless=True, atoms=[MDANSE.Chemistry.ChemicalEntity.Atom(parent=None, name='H', "
+                         "symbol='H', bonds=[], groups=[], ghost=False, index=None), MDANSE.Chemistry.ChemicalEntity."
+                         "Atom(parent=None, name='H', symbol='H', bonds=[], groups=[], ghost=False, index=None)])",
+                         repr(cluster))
 
     def test_atom_list(self):
-        cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom(ghost=True)], parentless=True)
+        atom = ce.Atom()
+        ghost = ce.Atom(ghost=True)
+        cluster = ce.AtomCluster('Cluster1', [atom, ghost], parentless=True)
+        self.assertEqual([atom], cluster.atom_list())
 
-        self.assertEqual(1, len(cluster.atom_list()))
-        for atom in cluster.atom_list():
-            self.assertEqual(atom.symbol, 'H')
-            self.assertEqual(atom.name, 'H')
-            self.assertEqual(atom.bonds, [])
-            self.assertEqual(atom._groups, [])
-            self.assertEqual(atom.ghost, False)
-            self.assertEqual(atom.index, None)
-            self.assertEqual(atom.parent, None)
+    def test_copy_parentful(self):
+        cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()], parentless=False)
+        copy = cluster.copy()
+        self.assertEqual(repr(cluster), repr(copy))
 
-    def test_copy(self):
+    def test_copy_parentless(self):
         cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()], parentless=True)
         copy = cluster.copy()
-
-        self.assertEqual(cluster.parent, copy.parent)
-        self.assertEqual(cluster.name, copy.name)
-        self.assertEqual(cluster._parentless, copy._parentless)
-        for atom, copied_atom in zip(cluster._atoms, copy._atoms):
-            self.assertEqual(atom.symbol, copied_atom.symbol)
-            self.assertEqual(atom.name, copied_atom.name)
-            self.assertEqual(atom.bonds, copied_atom.bonds)
-            self.assertEqual(atom._groups, copied_atom._groups)
-            self.assertEqual(atom.ghost, copied_atom.ghost)
-            self.assertEqual(atom.index, copied_atom.index)
-            # self.assertEqual(atom.parent, copied_atom.parent)
+        self.assertEqual(repr(cluster), repr(copy))
 
     def test_number_of_atoms(self):
-        cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()], parentless=True)
-        ghost_cluster = ce.AtomCluster('Cluster1', [ce.Atom(ghost=True), ce.Atom(ghost=True)], parentless=True)
-
-        self.assertEqual(2, cluster.number_of_atoms())
-        self.assertEqual(0, ghost_cluster.number_of_atoms())
-
-    def test_total_number_of_atoms(self):
-        cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()], parentless=True)
-        ghost_cluster = ce.AtomCluster('Cluster1', [ce.Atom(ghost=True), ce.Atom(ghost=True)], parentless=True)
-
+        cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom(ghost=True)], parentless=True)
+        self.assertEqual(1, cluster.number_of_atoms())
         self.assertEqual(2, cluster.total_number_of_atoms())
-        self.assertEqual(2, ghost_cluster.total_number_of_atoms())
 
     def test_reorder_atoms_exception(self):
         cluster = ce.AtomCluster('Cluster1', [ce.Atom(symbol='H'), ce.Atom(symbol='C')], parentless=True)
         with self.assertRaises(ce.InconsistentAtomNamesError):
             cluster.reorder_atoms(['H', 'H'])
+        with self.assertRaises(ce.InconsistentAtomNamesError):
+            cluster.reorder_atoms(['C', 'H', 'H'])
 
     def test_reorder_atoms_valid(self):
-        cluster = ce.AtomCluster('Cluster1', [ce.Atom(symbol='H'), ce.Atom(symbol='C')], parentless=True)
+        h = ce.Atom(symbol='H')
+        c = ce.Atom(symbol='C')
+        cluster = ce.AtomCluster('Cluster1', [h, c], parentless=True)
         cluster.reorder_atoms(['C', 'H'])
+
+        self.assertEqual([c, h], cluster._atoms)
+
+    def test_serialize_empty_dict(self):
+        cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()], parentless=True)
+        dictionary = {}
+        result = cluster.serialize(dictionary)
+
+        self.assertEqual(('atom_clusters', 0), result)
+        self.assertDictEqual({'atom_clusters': ['H5AtomCluster(self._h5_file,h5_contents,[0, 1],name="Cluster1")'],
+                              'atoms': ['H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)']},
+                             dictionary)
+
+    def test_serialize_nonempty_dict(self):
+        cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()], parentless=True)
+        dictionary = {'atom_clusters': ['', '', ''], 'atoms': ['', '', '']}
+        result = cluster.serialize(dictionary)
+
+        self.assertEqual(('atom_clusters', 3), result)
+        self.assertDictEqual({'atom_clusters': ['', '', '',
+                                                'H5AtomCluster(self._h5_file,h5_contents,[3, 4],name="Cluster1")'],
+                              'atoms': ['', '', '',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)',
+                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)']},
+                             dictionary)
 
 
 class TestMolecule(unittest.TestCase):

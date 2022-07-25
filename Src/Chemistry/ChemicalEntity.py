@@ -541,7 +541,7 @@ class AtomGroup(_ChemicalEntity):
 class AtomCluster(_ChemicalEntity):
     """A cluster of atoms."""
 
-    def __init__(self, name: str, atoms: list[Atom], parentless=False):
+    def __init__(self, name: str, atoms: list[Atom], parentless: bool = False):
 
         super(AtomCluster, self).__init__()
 
@@ -561,9 +561,21 @@ class AtomCluster(_ChemicalEntity):
     def __setstate__(self, state):
         self.__dict__ = state
 
-    def __getitem__(self, item: str) -> Atom:
-
+    def __getitem__(self, item: int) -> Atom:
         return self._atoms[item]
+
+    def __repr__(self):
+        contents = ''
+        for key, value in self.__dict__.items():
+            key = key[1:] if key[0] == "_" else key
+            if isinstance(value, _ChemicalEntity) and not isinstance(value, Atom):
+                class_name = str(type(value)).replace('<class \'', '').replace('\'>', '')
+                contents += f'{key}={class_name}({value.name})'
+            else:
+                contents += f'{key}={repr(value)}'
+            contents += ', '
+
+        return f'MDANSE.MolecularDynamics.ChemicalEntity.AtomCluster({contents[:-2]})'
 
     def atom_list(self) -> list[Atom]:
         """A list of atoms in the cluster which are not ghosts."""
@@ -571,31 +583,38 @@ class AtomCluster(_ChemicalEntity):
 
     def copy(self) -> 'AtomCluster':
         """Copies the instance of AtomCluster into a new, identical instance."""
-        atoms = [atom.copy() for atom in self._atoms.values()]
+        atoms = [atom.copy() for atom in self._atoms]
 
         ac = AtomCluster(self._name, atoms, self._parentless)
 
-        for at in ac._atoms:  # TODO: Are you actually sure that we want to ignore parentless here?
-            at._parent = ac
+        if not self._parentless:
+            for at in ac._atoms:
+                at._parent = ac
 
         return ac
 
     def number_of_atoms(self) -> int:
         """The number of non-ghost atoms in the cluster."""
-        return len([at for at in self._atoms.values() if not at.ghost])
+        return len([at for at in self._atoms if not at.ghost])
 
     def total_number_of_atoms(self) -> int:
         """The total number of atoms in the cluster, including ghosts."""
         return len(self._atoms)
 
-    def reorder_atoms(self, atoms: list[Atom]) -> None:
+    def reorder_atoms(self, atoms: list[str]) -> None:
 
-        if set(atoms) != set([at.name for at in self._atoms.values()]):
-            raise InconsistentAtomNamesError('The set of atoms to reorder is inconsistent with molecular contents')
+        if set(atoms) != set([at.name for at in self._atoms]) or len(atoms) != len(self._atoms):
+            raise InconsistentAtomNamesError('The set of atoms to reorder is inconsistent with molecular contents: '
+                                             f'the provided atoms ({atoms}) are different from the atoms in the '
+                                             f'AtomCluster ({[at.name for at in self._atoms]})')
 
-        reordered_atoms = collections.OrderedDict()
+        reordered_atoms = []
         for at in atoms:
-            reordered_atoms[at] = self._atoms[at]
+            for i, registered_atom in enumerate(self._atoms):
+                if at == registered_atom.name:
+                    reordered_atoms.append(registered_atom)
+                    self._atoms.pop(i)
+                    break
 
         self._atoms = reordered_atoms
 
@@ -623,7 +642,7 @@ class AtomCluster(_ChemicalEntity):
         for at in self._atoms:
             at.serialize(h5_contents)
 
-        return ('atom_clusters', len(h5_contents['atom_clusters']) - 1)
+        return 'atom_clusters', len(h5_contents['atom_clusters']) - 1
 
 
 class Molecule(_ChemicalEntity):
