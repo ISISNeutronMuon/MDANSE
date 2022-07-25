@@ -135,8 +135,8 @@ class TestAtom(unittest.TestCase):
         dictionary = {}
         result = atom.serialize(dictionary)
 
-        self.assertEqual(result, ('atoms', 0))
-        self.assertEqual(dictionary, {'atoms': ['H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)']})
+        self.assertEqual(('atoms', 0), result)
+        self.assertEqual({'atoms': ['H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)']}, dictionary)
 
 
 class TestAtomGroup(unittest.TestCase):
@@ -210,34 +210,26 @@ class TestAtomGroup(unittest.TestCase):
 
 class TestAtomCluster(unittest.TestCase):
     def test_valid_instantiation_parentful(self):
-        cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()])
+        atom1 = ce.Atom()
+        atom2 = ce.Atom()
+        cluster = ce.AtomCluster('Cluster1', [atom1, atom2])
 
         self.assertEqual(None, cluster.parent)
         self.assertEqual('Cluster1', cluster.name)
         self.assertEqual(False, cluster._parentless)
-        for atom in cluster._atoms:
-            self.assertEqual('H', atom.symbol)
-            self.assertEqual('H', atom.name)
-            self.assertEqual([], atom.bonds)
-            self.assertEqual([], atom._groups)
-            self.assertEqual(False, atom.ghost)
-            self.assertEqual(None, atom.index)
-            self.assertEqual(cluster, atom.parent)
+        self.assertEqual([atom1, atom2], cluster._atoms)
+        self.assertEqual(cluster, cluster._atoms[0].parent)
 
     def test_valid_instantiation_parentless(self):
-        cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()], parentless=True)
+        atom1 = ce.Atom()
+        atom2 = ce.Atom()
+        cluster = ce.AtomCluster('Cluster1', [atom1, atom2], parentless=True)
 
-        self.assertEqual(cluster.parent, None)
-        self.assertEqual(cluster.name, 'Cluster1')
-        self.assertEqual(cluster._parentless, True)
-        for atom in cluster._atoms:
-            self.assertEqual(atom.symbol, 'H')
-            self.assertEqual(atom.name, 'H')
-            self.assertEqual(atom.bonds, [])
-            self.assertEqual(atom._groups, [])
-            self.assertEqual(atom.ghost, False)
-            self.assertEqual(atom.index, None)
-            self.assertEqual(atom.parent, None)
+        self.assertEqual(None, cluster.parent)
+        self.assertEqual('Cluster1', cluster.name)
+        self.assertEqual(True, cluster._parentless)
+        self.assertEqual([atom1, atom2], cluster._atoms)
+        self.assertEqual(None, cluster._atoms[0].parent)
 
     def test_pickling(self):
         cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()], parentless=True)
