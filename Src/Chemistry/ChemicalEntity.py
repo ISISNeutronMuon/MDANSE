@@ -310,6 +310,15 @@ class Atom(_ChemicalEntity):
     """A representation of atom in a trajectory."""
 
     def __init__(self, **kwargs):
+        """
+        :param kwargs: Keyword arguments used to instantiate the Atom class. Any key-value pair provided is saved as an
+            attribute of the Atom instance, but the following are expected:
+            symbol: (str) The chemical symbol of the Atom. It has to be registered in the ATOMS_DATABASE.
+            name: (str) The name of the Atom.
+            bonds: (list) List of Atom objects that this Atom is chemically bonded to.
+            groups: (list) List of groups that this Atom is a part of, e.g. sidechain.
+            ghost: (bool)
+        """
 
         super(Atom, self).__init__()
 
@@ -384,8 +393,7 @@ class Atom(_ChemicalEntity):
     def atom_list(self) -> list['Atom']:
         return [self] if not self.ghost else []
 
-    @staticmethod
-    def total_number_of_atoms() -> int:
+    def total_number_of_atoms(self) -> int:
         return 1
 
     def number_of_atoms(self) -> int:
@@ -413,7 +421,7 @@ class Atom(_ChemicalEntity):
 
     @property
     def groups(self) -> list[str]:
-        """A list of groups to which this atom belongs."""
+        """A list of groups to which this atom belongs, e.g. sidechain."""
         return self._groups
 
     @property
@@ -439,7 +447,7 @@ class Atom(_ChemicalEntity):
 
     @property
     def symbol(self) -> str:
-        """The chemical symbol of the atom. Must be in the atoms database."""
+        """The chemical symbol of the atom. The symbol must be registered in ATOMS_DATABASE."""
         return self._symbol
 
     @symbol.setter
@@ -545,7 +553,17 @@ class AtomCluster(_ChemicalEntity):
     """A cluster of atoms."""
 
     def __init__(self, name: str, atoms: list[Atom], parentless: bool = False):
+        """
+        :param name: The name of the AtomCluster.
+        :type name: str
 
+        :param atoms: List of atoms that this AtomCluster consists of.
+        :type atoms: list
+
+        :param parentless: Determines whether the AtomCluster is the parent of its constituent Atoms. It is if
+            parentless is False.
+        :type parentless: bool
+        """
         super(AtomCluster, self).__init__()
 
         self._name = name
@@ -584,11 +602,15 @@ class AtomCluster(_ChemicalEntity):
         return f'AtomCluster consisting of {self.total_number_of_atoms()} atoms'
 
     def atom_list(self) -> list[Atom]:
-        """A list of atoms in the cluster which are not ghosts."""
+        """A list of all non-ghost atoms in the AtomCluster."""
         return list([at for at in self._atoms if not at.ghost])
 
     def copy(self) -> 'AtomCluster':
-        """Copies the instance of AtomCluster into a new, identical instance."""
+        """
+        Copies the instance of AtomCluster into a new, identical instance.
+        :return: An identical copy of the AtomCluster instance.
+        :rtype: MDANSE.Chemistry.ChemicalEntity.AtomCluster
+        """
         atoms = [atom.copy() for atom in self._atoms]
 
         ac = AtomCluster(self._name, atoms, self._parentless)
@@ -608,7 +630,12 @@ class AtomCluster(_ChemicalEntity):
         return len(self._atoms)
 
     def reorder_atoms(self, atoms: list[str]) -> None:
+        """
+        Change the order in which the atoms in this cluster are stored.
 
+        :param atoms: A list of atoms. The atoms in the AtomCluster will be reordered to be in the same order as provided.
+        :type atoms: list of strings
+        """
         if set(atoms) != set([at.name for at in self._atoms]) or len(atoms) != len(self._atoms):
             raise InconsistentAtomNamesError('The set of atoms to reorder is inconsistent with molecular contents: '
                                              f'the provided atoms ({atoms}) are different from the atoms in the '
