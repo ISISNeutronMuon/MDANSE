@@ -1,10 +1,13 @@
+
 # MDANSE 
+
 
 ## Molecular Dynamics Analysis for Neutron Scattering Experiments
 
 MDANSE is a python application designed for computing neutron observables from molecular dynamics (MD) trajectories that can 
 be directly compared with neutron scattering experiments, particularly inelastic and quasi-elastic neutron scattering 
 spectroscopies.
+
 
 To do this, it interfaces with a variety of MD simulation software such as CASTEP, VASP, DMOL, Gromacs, DLPOY, CHARMM, LAMMPS, PBD, DFTB etc., 
 and provides both a graphical user interface (GUI) and a command line interface. 
@@ -127,6 +130,7 @@ information.
 To join the project contact:
 
 >Dr. Sanghamitra Mukhopadhyay (sanghamitra.mukhopadhyay@stfc.ac.uk) \
+
 ISIS Neutron and Muon Source \
 Rutherford Appleton Laboratory \
 Didcot, UK

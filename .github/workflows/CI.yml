@@ -187,6 +187,7 @@ jobs:
           retention-days: 90
 
 
+
   ci_ubuntu22:
     runs-on: 'ubuntu-22.04'
     strategy:
@@ -334,6 +335,7 @@ jobs:
           name: ubuntu-22.04_installer
           path: ${{ github.workspace }}/*.deb
           retention-days: 90
+
 
 
 
@@ -597,6 +599,7 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
+
           contains( github.ref, 'web' )
         run: |
           cd /D %CONDA%\envs
@@ -611,7 +614,9 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
+
           contains( github.ref, 'web' )
+
         uses: actions/upload-artifact@v2
         with:
           name: windows_artifacts
