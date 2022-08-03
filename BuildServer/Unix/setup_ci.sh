@@ -47,14 +47,18 @@ PKG_INFO=$GITHUB_WORKSPACE/Src/__pkginfo__.py
 # Get MDANSE version
 MDANSE_VERSION=`sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' ${PKG_INFO}`
 
-# Check if branch is master
-if [[ $GITHUB_REF == "master" ]]
+
+# Check if branch is main
+if [[ $GITHUB_REF == "refs/heads/main" ]]
+
 then
     VERSION_NAME=${MDANSE_VERSION}
     "${SED_I_COMMAND[@]}" "s/.*__beta__.*/__beta__ = None/" ${PKG_INFO}
 else
     # Check if branch is release*
-	if [[ ${GITHUB_REF::7} == "release" ]]
+
+	if [[ $GITHUB_REF == "refs/heads/release-next" ]]
+
 	then
 	    VERSION_NAME=${MDANSE_VERSION}-rc-${CI_COMMIT_ID}
 	    "${SED_I_COMMAND[@]}" "s/.*__beta__.*/__beta__ = \"rc\"/" ${PKG_INFO}

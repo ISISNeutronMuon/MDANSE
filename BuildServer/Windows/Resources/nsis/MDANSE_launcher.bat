@@ -7,6 +7,8 @@ set PYTHONPATH=
 
 set dirname=%~dp0
 
-set PATH=%dirname%\Library;%dirname%\Library\bin;%dirname%\Library\include;%dirname%\Library\lib;%dirname%DLLs;%dirname%Include;%dirname%libs;%PATH%
+
+set PATH=%dirname%;%PATH%
+
 
 start /B /D "%dirname%" pythonw.exe Scripts\mdanse_gui

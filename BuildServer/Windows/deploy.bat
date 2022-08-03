@@ -46,7 +46,9 @@ rem copy CHANGELOG to CHANGELOG.txt (compulsory to be opened by nsis through an 
 copy "%GITHUB_WORKSPACE%\CHANGELOG" "%GITHUB_WORKSPACE%\BuildServer\Windows\Resources\nsis\CHANGELOG.txt"
 
 rem Copy site.py 
-copy "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\Resources\\site.py" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\"
+
+copy /y "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\Resources\\mdanse.pth" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\site-packages\\"
+
 
 rem create the MDANSE installer
 echo "Creating nsis installer for target %MDANSE_TEMPORARY_INSTALLATION_DIR%..."
