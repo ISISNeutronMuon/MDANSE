@@ -309,7 +309,8 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 class Atom(_ChemicalEntity):
     """A representation of atom in a trajectory."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, symbol: str = 'H', name: str = None, bonds: list['Atom'] = None, groups: list[str] = None,
+                 ghost: bool = False, **kwargs):
         """
         :param kwargs: Keyword arguments used to instantiate the Atom class. Any key-value pair provided is saved as an
             attribute of the Atom instance, but the following are expected:
@@ -322,18 +323,18 @@ class Atom(_ChemicalEntity):
 
         super(Atom, self).__init__()
 
-        self._symbol = kwargs.get('symbol', 'H')
+        self._symbol = symbol
 
         if self._symbol not in ATOMS_DATABASE:
             raise UnknownAtomError('The atom {} is unknown'.format(self.symbol))
 
-        self._name = kwargs.pop('name', self.symbol)
+        self._name = name if name else symbol
 
-        self._bonds = kwargs.pop('bonds', [])
+        self._bonds = bonds if bonds else []
 
-        self._groups = kwargs.pop('groups', [])
+        self._groups = groups if groups else []
 
-        self._ghost = kwargs.pop('ghost', False)
+        self._ghost = ghost
 
         self._index = None
 
