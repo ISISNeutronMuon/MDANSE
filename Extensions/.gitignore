@@ -1,6 +1,12 @@
+/atomic_trajectory.c
+/atoms_in_shell.c
+/change_coordinates.c
+/com_trajectory.c
+/contiguous_coordinates.c
 /mic_fast_calc.cpp
 /distance_histogram.c
 /fast_calculation.c
+/fold_coordinates.c
 /mt_fast_calc.c
 /qhull.c
 /sas_fast_calc.c
