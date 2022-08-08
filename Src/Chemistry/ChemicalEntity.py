@@ -98,6 +98,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
     def __setstate__(self, state):
         self.__dict__ = state
 
+    @property
     @abc.abstractmethod
     def atom_list(self):
         pass
@@ -106,6 +107,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
     def copy(self):
         pass
 
+    @property
     def full_name(self):
 
         full_name = self.name
@@ -116,6 +118,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 
         return full_name
 
+    @property
     @abc.abstractmethod
     def number_of_atoms(self):
         pass
@@ -143,7 +146,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
     def group(self, name):
 
         selected_atoms = []
-        for at in self.atom_list():
+        for at in self.atom_list:
             if not hasattr(at, 'groups'):
                 continue
 
@@ -158,7 +161,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 
         com = np.zeros((3,), dtype=np.float)
         sum_masses = 0.0
-        for at in self.atom_list():
+        for at in self.atom_list:
             m = ATOMS_DATABASE[at.symbol]['atomic_weight']
             com += m * coords[at.index, :]
             sum_masses += m
@@ -167,19 +170,21 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 
         return com
 
+    @property
     def mass(self):
 
         sum_masses = 0.0
-        for at in self.atom_list():
+        for at in self.atom_list:
             m = ATOMS_DATABASE[at.symbol]['atomic_weight']
             sum_masses += m
 
         return sum_masses
 
+    @property
     def masses(self):
 
         masses = []
-        for at in self.atom_list():
+        for at in self.atom_list:
             m = ATOMS_DATABASE[at.symbol]['atomic_weight']
             masses.append(m)
 
@@ -207,7 +212,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
             (
                 weights[a.index],
                 Vector(*conf1['coordinates'][a.index, :]),
-                Vector(*conf2['coordinates'][a.index, :])) for a in self.atom_list()])
+                Vector(*conf2['coordinates'][a.index, :])) for a in self.atom_list])
 
     def find_transformation(self, conf1, conf2=None):
         """
@@ -229,8 +234,8 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 
     def center_and_moment_of_inertia(self, configuration):
         """
-        :param conf: a configuration object, or None for the current configuration
-        :type conf: :class:`~MDANSE.MolecularDynamics.Configuration.Configuration`
+        :param configuration: a configuration object, or None for the current configuration
+        :type configuration: :class:`~MDANSE.MolecularDynamics.Configuration.Configuration`
         :returns: the center of mass and the moment of inertia tensor
                   in the given configuration
         """
@@ -238,7 +243,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         m = 0.0
         mr = Vector(0.0, 0.0, 0.0)
         t = Tensor(3 * [3 * [0.0]])
-        for atom in self.atom_list():
+        for atom in self.atom_list:
             ma = ATOMS_DATABASE[atom.symbol]['atomic_weight']
             r = Vector(configuration['coordinates'][atom.index, :])
             m += ma
@@ -287,20 +292,23 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
             diag = np.take(diag, seq)
         return Rotation(diag) * Translation(-cm)
 
+    @property
     def root_chemical_system(self):
 
         if isinstance(self, ChemicalSystem):
             return self
         else:
-            return self._parent.root_chemical_system()
+            return self._parent.root_chemical_system
 
+    @property
     def top_level_chemical_entity(self):
 
         if isinstance(self._parent, ChemicalSystem):
             return self
         else:
-            return self._parent.top_level_chemical_entity()
+            return self._parent.top_level_chemical_entity
 
+    @property
     @abc.abstractmethod
     def total_number_of_atoms(self):
         pass
@@ -312,13 +320,22 @@ class Atom(_ChemicalEntity):
     def __init__(self, symbol: str = 'H', name: str = None, bonds: list['Atom'] = None, groups: list[str] = None,
                  ghost: bool = False, **kwargs):
         """
-        :param kwargs: Keyword arguments used to instantiate the Atom class. Any key-value pair provided is saved as an
-            attribute of the Atom instance, but the following are expected:
-            symbol: (str) The chemical symbol of the Atom. It has to be registered in the ATOMS_DATABASE.
-            name: (str) The name of the Atom.
-            bonds: (list) List of Atom objects that this Atom is chemically bonded to.
-            groups: (list) List of groups that this Atom is a part of, e.g. sidechain.
-            ghost: (bool)
+        :param symbol: The chemical symbol of the Atom. It has to be registered in the ATOMS_DATABASE.
+        :type symbol: str
+
+        :param name: The name of the Atom. If this is not provided, the symbol is used as the name as well
+        :type nameL str
+
+        :param bonds: List of Atom objects that this Atom is chemically bonded to.
+        :type bonds: list
+
+        :param groups: List of groups that this Atom is a part of, e.g. sidechain.
+        :type groups: list
+
+        :param ghost:
+        :type ghost: bool
+
+        :param kwargs: Any additional parameters that should be set during instantiation.
         """
 
         super(Atom, self).__init__()
@@ -341,7 +358,11 @@ class Atom(_ChemicalEntity):
         self._parent = None
 
         for k, v in kwargs.items():
-            setattr(self, k, v)
+            try:
+                setattr(self, k, v)
+            except AttributeError:
+                raise AttributeError(f'Could not set attribute {k} to value {v}, probably because this is a protected '
+                                     f'attribute of this class.')
 
     def copy(self) -> 'Atom':
         """
@@ -373,7 +394,7 @@ class Atom(_ChemicalEntity):
 
     def __str__(self):
 
-        return self.full_name()
+        return self.full_name
 
     def __repr__(self):
         contents = ''
@@ -391,12 +412,15 @@ class Atom(_ChemicalEntity):
 
         return f'MDANSE.Chemistry.ChemicalEntity.Atom({contents[:-2]})'
 
+    @property
     def atom_list(self) -> list['Atom']:
         return [self] if not self.ghost else []
 
+    @property
     def total_number_of_atoms(self) -> int:
         return 1
 
+    @property
     def number_of_atoms(self) -> int:
         return int(self.ghost)
 
@@ -492,7 +516,7 @@ class AtomGroup(_ChemicalEntity):
         """
         super(AtomGroup, self).__init__()
 
-        s = set([at.root_chemical_system() for at in atoms])
+        s = set([at.root_chemical_system for at in atoms])
         if len(s) != 1:
             raise ChemicalEntityError('The atoms comes from different chemical systems')
 
@@ -520,8 +544,9 @@ class AtomGroup(_ChemicalEntity):
         return f'MDANSE.MolecularDynamics.ChemicalEntity.AtomGroup({contents[:-2]})'
 
     def __str__(self):
-        return f'AtomGroup consisting of {self.total_number_of_atoms()} atoms'
+        return f'AtomGroup consisting of {self.total_number_of_atoms} atoms'
 
+    @property
     def atom_list(self) -> list[Atom]:
         """The list of all non-ghost atoms in the AtomGroup."""
         return list([at for at in self._atoms if not at.ghost])
@@ -530,14 +555,17 @@ class AtomGroup(_ChemicalEntity):
         """The copy method is not defined for the AtomGroup class; instances of it cannot be copied."""
         pass
 
+    @property
     def number_of_atoms(self) -> int:
         """The number of all non-ghost atoms in the AtomGroup."""
         return len([at for at in self._atoms if not at.ghost])
 
+    @property
     def total_number_of_atoms(self) -> int:
         """The total number of atoms in the AtomGroup, including ghosts."""
         return len(self._atoms)
 
+    @property
     def root_chemical_system(self) -> 'ChemicalSystem':
         """
         :return: The chemical system whose part all the atoms in this AtomGroup are.
@@ -600,8 +628,9 @@ class AtomCluster(_ChemicalEntity):
         return f'MDANSE.MolecularDynamics.ChemicalEntity.AtomCluster({contents[:-2]})'
 
     def __str__(self):
-        return f'AtomCluster consisting of {self.total_number_of_atoms()} atoms'
+        return f'AtomCluster consisting of {self.total_number_of_atoms} atoms'
 
+    @property
     def atom_list(self) -> list[Atom]:
         """A list of all non-ghost atoms in the AtomCluster."""
         return list([at for at in self._atoms if not at.ghost])
@@ -622,10 +651,12 @@ class AtomCluster(_ChemicalEntity):
 
         return ac
 
+    @property
     def number_of_atoms(self) -> int:
         """The number of non-ghost atoms in the cluster."""
         return len([at for at in self._atoms if not at.ghost])
 
+    @property
     def total_number_of_atoms(self) -> int:
         """The total number of atoms in the cluster, including ghosts."""
         return len(self._atoms)
@@ -743,6 +774,7 @@ class Molecule(_ChemicalEntity):
                 except KeyError:
                     continue
 
+    @property
     def atom_list(self) -> list[Atom]:
         """The list of non-ghost atoms in the molecule."""
         return list([at for at in self._atoms.values() if not at.ghost])
@@ -767,10 +799,12 @@ class Molecule(_ChemicalEntity):
 
         return m
 
+    @property
     def number_of_atoms(self) -> int:
         """The number of non-ghost atoms in the molecule."""
         return len([at for at in self._atoms.values() if not at.ghost])
 
+    @property
     def total_number_of_atoms(self) -> int:
         """The total number of atoms in the molecule, including ghosts."""
         return len(self._atoms)
@@ -908,7 +942,7 @@ class Residue(_ChemicalEntity):
         to the data in RESIDUES_DATABSE for this residue.
 
         :param atoms: A list of atoms to populate the residue with
-        :type atom: list of strings
+        :type atoms: list of strings
 
         :return: None
         """
@@ -946,14 +980,17 @@ class Residue(_ChemicalEntity):
                 except KeyError:
                     continue
 
+    @property
     def atom_list(self) -> list[Atom]:
         """List of atoms in the Residue."""
         return list([at for at in self._atoms.values() if not at.ghost])
 
+    @property
     def number_of_atoms(self) -> int:
         """The number of non-ghost atoms in the residue."""
         return len([at for at in self._atoms.values() if not at.ghost])
 
+    @property
     def total_number_of_atoms(self) -> int:
         """The total number of atoms in the residue, including ghosts."""
         return len(self._atoms)
@@ -1094,7 +1131,7 @@ class Nucleotide(_ChemicalEntity):
         correspond to the data in NUCLEOTIDES_DATABASE for this nucleotide.
 
         :param atoms: A list of atoms to populate the nucleotide with
-        :type atom: list of strings
+        :type atoms: list of strings
 
         :return: None
         """
@@ -1135,14 +1172,17 @@ class Nucleotide(_ChemicalEntity):
                     except KeyError:
                         continue
 
+    @property
     def atom_list(self) -> list[Atom]:
         """List of all non-ghost atoms in the Nucleotide."""
         return list([at for at in self._atoms.values() if not at.ghost])
 
+    @property
     def number_of_atoms(self) -> int:
         """The number of non-ghost atoms in the residue."""
         return len([at for at in self._atoms.values() if not at.ghost])
 
+    @property
     def total_number_of_atoms(self):
         """The total number of atoms in the molecule, including ghosts."""
         return len(self._atoms)
@@ -1229,7 +1269,7 @@ class NucleotideChain(_ChemicalEntity):
 
     def _connect_nucleotides(self):
 
-        ratoms_in_first_residue = [at for at in self._nucleotides[0].atom_list() if
+        ratoms_in_first_residue = [at for at in self._nucleotides[0].atom_list if
                                    getattr(at, 'o5prime_connected', False)]
         if len(ratoms_in_first_residue) == 0:
             raise InvalidNucleotideChainError('The first nucleotide in the chain must contain an atom that is connected'
@@ -1239,7 +1279,7 @@ class NucleotideChain(_ChemicalEntity):
                                               ' method was called with the correct atoms.\nThe provided first '
                                               f'nucleotide is {self._nucleotides[0].name}, its variant is '
                                               f'{self._nucleotides[0].variant} and it contains the following atoms: '
-                                              f'{[at.name for at in self._nucleotides[0].atom_list()]}. The full info'
+                                              f'{[at.name for at in self._nucleotides[0].atom_list]}. The full info'
                                               f' on the first nucleotide is {repr(self._nucleotides[0])}.')
 
         try:
@@ -1248,11 +1288,11 @@ class NucleotideChain(_ChemicalEntity):
             raise InvalidNucleotideChainError('The first nucleotide in the chain must contain 5\' terminal oxygen atom'
                                               ' (O5\'). The first nucleotide that was provided is '
                                               f'{self._nucleotides[0].name} and contains only the following atoms: '
-                                              f'{[at.name for at in self._nucleotides[0].atom_list()]}.\nThe full info'
+                                              f'{[at.name for at in self._nucleotides[0].atom_list]}.\nThe full info'
                                               f' on the first nucleotide is {repr(self._nucleotides[0])}.')
         n_atom_in_first_residue.bonds.extend(ratoms_in_first_residue)
 
-        ratoms_in_last_residue = [at for at in self._nucleotides[-1].atom_list() if
+        ratoms_in_last_residue = [at for at in self._nucleotides[-1].atom_list if
                                   getattr(at, 'o3prime_connected', False)]
         if len(ratoms_in_last_residue) == 0:
             raise InvalidNucleotideChainError('The last nucleotide in the chain must contain an atom that is connected'
@@ -1262,7 +1302,7 @@ class NucleotideChain(_ChemicalEntity):
                                               ' method was called with the correct atoms.\nThe provided first '
                                               f'nucleotide is {self._nucleotides[-1].name}, its variant is '
                                               f'{self._nucleotides[0].variant} and it contains the following atoms: '
-                                              f'{[at.name for at in self._nucleotides[-1].atom_list()]}. The full info'
+                                              f'{[at.name for at in self._nucleotides[-1].atom_list]}. The full info'
                                               f' on the first nucleotide is {repr(self._nucleotides[-1])}.')
         try:
             c_atom_in_last_residue = self._nucleotides[-1]["O3'"]
@@ -1270,7 +1310,7 @@ class NucleotideChain(_ChemicalEntity):
             raise InvalidNucleotideChainError('The last nucleotide in the chain must contain 3\' terminal oxygen atom'
                                               ' (O3\'). The first nucleotide that was provided is '
                                               f'{self._nucleotides[0].name} and contains only the following atoms: '
-                                              f'{[at.name for at in self._nucleotides[0].atom_list()]}.\nThe full info'
+                                              f'{[at.name for at in self._nucleotides[0].atom_list]}.\nThe full info'
                                               f' on the first nucleotide is {repr(self._nucleotides[0])}.')
         idx = c_atom_in_last_residue.bonds.index('+R')
         del c_atom_in_last_residue.bonds[idx]
@@ -1279,7 +1319,7 @@ class NucleotideChain(_ChemicalEntity):
         for i, current_residue in enumerate(self._nucleotides[:-1]):
             next_residue = self._nucleotides[i + 1]
 
-            for atom in current_residue.atom_list():
+            for atom in current_residue.atom_list:
                 if '+R' in atom.bonds:
                     current_idx = atom.bonds.index('+R')
                     current_atom = atom
@@ -1289,7 +1329,7 @@ class NucleotideChain(_ChemicalEntity):
                                           f'because it does not contain an atom bonded to "R+", i.e. another nucleo'
                                           f'tide.\nThe full info on this nucleotide is {repr(current_residue)}')
 
-            for atom in next_residue.atom_list():
+            for atom in next_residue.atom_list:
                 if '-R' in atom.bonds:
                     next_idx = atom.bonds.index('-R')
                     next_atom = atom
@@ -1303,18 +1343,19 @@ class NucleotideChain(_ChemicalEntity):
             current_atom.bonds[current_idx] = next_atom
             next_atom.bonds[next_idx] = current_atom
 
+    @property
     def atom_list(self) -> list[Atom]:
         """List of all non-ghost atoms in all the nucleotides in the chain."""
         atoms = []
         for res in self._nucleotides:
-            atoms.extend(res.atom_list())
+            atoms.extend(res.atom_list)
         return atoms
 
     @property
     def bases(self) -> list[Atom]:
         """A list of atoms that are part of a nucleotide base."""
         atoms = []
-        for at in self.atom_list():
+        for at in self.atom_list:
             if 'base' in at.groups:
                 atoms.append(at)
         return atoms
@@ -1339,18 +1380,20 @@ class NucleotideChain(_ChemicalEntity):
         """List of nucleotides in the chain."""
         return self._nucleotides
 
+    @property
     def number_of_atoms(self) -> int:
         """Number of non-ghost atoms in the nucleotide chain."""
         number_of_atoms = 0
         for nucleotide in self._nucleotides:
-            number_of_atoms += nucleotide.number_of_atoms()
+            number_of_atoms += nucleotide.number_of_atoms
         return number_of_atoms
 
+    @property
     def total_number_of_atoms(self) -> int:
         """Total number of atoms in the nucleotide chain, including ghost atoms."""
         number_of_atoms = 0
         for nucleotide in self._nucleotides:
-            number_of_atoms += nucleotide.total_number_of_atoms()
+            number_of_atoms += nucleotide.total_number_of_atoms
         return number_of_atoms
 
     def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
@@ -1402,7 +1445,7 @@ class NucleotideChain(_ChemicalEntity):
     def sugars(self) -> list[Atom]:
         """A list of atoms in the nucleotide chain that are a part of the sugar part of a nucleotide."""
         atoms = []
-        for at in self.atom_list():
+        for at in self.atom_list:
             if 'sugar' in at.groups:
                 atoms.append(at)
         return atoms
@@ -1427,7 +1470,7 @@ class PeptideChain(_ChemicalEntity):
 
     def _connect_residues(self) -> None:
         # Process the first atom
-        ratoms_in_first_residue = [at for at in self._residues[0].atom_list() if getattr(at, 'nter_connected', False)]
+        ratoms_in_first_residue = [at for at in self._residues[0].atom_list if getattr(at, 'nter_connected', False)]
         if not ratoms_in_first_residue:
             raise InvalidPeptideChainError('The first residue in the chain must contain an atom that is connected to '
                                            'the terminal nitrogen. This is signified by an atom having the '
@@ -1436,7 +1479,7 @@ class PeptideChain(_ChemicalEntity):
                                            'called with the correct atoms.\nThe provided first residue is '
                                            f'{self._residues[0].name}, its variant is {self._residues[0].variant} and '
                                            f'it contains the following atoms: '
-                                           f'{[at.name for at in self._residues[0].atom_list()]}. The full info on the '
+                                           f'{[at.name for at in self._residues[0].atom_list]}. The full info on the '
                                            f'first residue is {repr(self._residues[0])}.')
         try:
             n_atom_in_first_residue = self._residues[0]['N']
@@ -1444,14 +1487,14 @@ class PeptideChain(_ChemicalEntity):
             raise InvalidPeptideChainError('The first residue in the chain must contain the terminal nitrogen atom. '
                                            f'However, the first residue that was provided is {self._residues[0].name} '
                                            f'and contains only the following atoms: '
-                                           f'{[at.name for at in self._residues[0].atom_list()]}.\nThe full info'
+                                           f'{[at.name for at in self._residues[0].atom_list]}.\nThe full info'
                                            f' on the first nucleotide is {repr(self._residues[0])}.')
         idx = n_atom_in_first_residue.bonds.index('-R')
         del n_atom_in_first_residue.bonds[idx]
         n_atom_in_first_residue.bonds.extend(ratoms_in_first_residue)
 
         # Process the last atom
-        ratoms_in_last_residue = [at for at in self._residues[-1].atom_list() if getattr(at, 'cter_connected', False)]
+        ratoms_in_last_residue = [at for at in self._residues[-1].atom_list if getattr(at, 'cter_connected', False)]
         if not ratoms_in_last_residue:
             raise InvalidPeptideChainError('The last residue in the chain must contain an atom that is connected to '
                                            'the terminal carbon. This is signified by an atom having the '
@@ -1460,7 +1503,7 @@ class PeptideChain(_ChemicalEntity):
                                            'called with the correct atoms.\nThe provided last residue is '
                                            f'{self._residues[-1].name}, its variant is {self._residues[-1].variant} and'
                                            f' it contains the following atoms: '
-                                           f'{[at.name for at in self._residues[-1].atom_list()]}. The full info on the'
+                                           f'{[at.name for at in self._residues[-1].atom_list]}. The full info on the'
                                            f' last residue is {repr(self._residues[-1])}.')
         try:
             c_atom_in_last_residue = self._residues[-1]['C']
@@ -1468,7 +1511,7 @@ class PeptideChain(_ChemicalEntity):
             raise InvalidPeptideChainError('The last residue in the chain must contain the terminal carbon atom. '
                                            f'However, the last residue that was provided is {self._residues[-1].name} '
                                            f'and contains only the following atoms: '
-                                           f'{[at.name for at in self._residues[-1].atom_list()]}.\nThe full info'
+                                           f'{[at.name for at in self._residues[-1].atom_list]}.\nThe full info'
                                            f' on the last nucleotide is {repr(self._residues[-1])}.')
         idx = c_atom_in_last_residue.bonds.index('+R')
         del c_atom_in_last_residue.bonds[idx]
@@ -1478,7 +1521,7 @@ class PeptideChain(_ChemicalEntity):
         for i, current_residue in enumerate(self._residues[:-1]):
             next_residue = self._residues[i + 1]
 
-            for atom in current_residue.atom_list():
+            for atom in current_residue.atom_list:
                 if '+R' in atom.bonds:
                     current_atom = atom
                     current_index = atom.bonds.index('+R')
@@ -1488,7 +1531,7 @@ class PeptideChain(_ChemicalEntity):
                                           f'because it does not contain an atom bonded to "R+", i.e. another residue.'
                                           f'\nThe full info on this residue is {repr(current_residue)}')
 
-            for atom in next_residue.atom_list():
+            for atom in next_residue.atom_list:
                 if '-R' in atom.bonds:
                     next_atom = atom
                     next_index = atom.bonds.index('-R')
@@ -1526,17 +1569,19 @@ class PeptideChain(_ChemicalEntity):
 
         return f'MDANSE.MolecularDynamics.ChemicalEntity.PeptideChain({contents[:-2]})'
 
+    @property
     def atom_list(self) -> list[Atom]:
         """A list of all non-ghost atoms in the PeptideChain."""
         atoms = []
         for res in self._residues:
-            atoms.extend(res.atom_list())
+            atoms.extend(res.atom_list)
         return atoms
 
+    @property
     def backbone(self) -> list[Atom]:
         """A list of all atoms in the PeptideChain that are a part of the backbone."""
         atoms = []
-        for at in self.atom_list():
+        for at in self.atom_list:
             if 'backbone' in at.groups:
                 atoms.append(at)
         return atoms
@@ -1556,18 +1601,20 @@ class PeptideChain(_ChemicalEntity):
 
         return pc
 
+    @property
     def number_of_atoms(self) -> int:
         """The number of non-ghost in the PeptideChain."""
         number_of_atoms = 0
         for residue in self._residues:
-            number_of_atoms += residue.number_of_atoms()
+            number_of_atoms += residue.number_of_atoms
         return number_of_atoms
 
+    @property
     def total_number_of_atoms(self) -> int:
         """The total number of atoms in the PeptideChain, including ghosts."""
         number_of_atoms = 0
         for residue in self._residues:
-            number_of_atoms += residue.total_number_of_atoms()
+            number_of_atoms += residue.total_number_of_atoms
         return number_of_atoms
 
     @property
@@ -1579,7 +1626,7 @@ class PeptideChain(_ChemicalEntity):
     def peptides(self) -> list[Atom]:
         """The list of atoms in the PeptideChain that are a part of a peptide."""
         atoms = []
-        for at in self.atom_list():
+        for at in self.atom_list:
             if 'peptide' in at.groups:
                 atoms.append(at)
         return atoms
@@ -1635,7 +1682,7 @@ class PeptideChain(_ChemicalEntity):
     def sidechains(self) -> list[Atom]:
         """A list of atoms in the PeptideChain that are part of an amino acid side-chain."""
         atoms = []
-        for at in self.atom_list():
+        for at in self.atom_list:
             if 'sidechain' in at.groups:
                 atoms.append(at)
         return atoms
@@ -1683,18 +1730,20 @@ class Protein(_ChemicalEntity):
     def __str__(self):
         return f'Protein {self.name} consisting of {len(self.peptide_chains)} peptide chains'
 
+    @property
     def atom_list(self) -> list[Atom]:
         """List of all non-ghost atoms in the Protein."""
         atom_list = []
         for c in self._peptide_chains:
-            atom_list.extend(c.atom_list())
+            atom_list.extend(c.atom_list)
 
         return atom_list
 
+    @property
     def backbone(self) -> list[Atom]:
         """A list of all atoms in the Protein that are a part of the backbone."""
         atoms = []
-        for at in self.atom_list():
+        for at in self.atom_list:
             if 'backbone' in at.groups:
                 atoms.append(at)
         return atoms
@@ -1712,18 +1761,20 @@ class Protein(_ChemicalEntity):
 
         return p
 
+    @property
     def number_of_atoms(self) -> int:
         """The number of non-ghost atoms in the Protein."""
         number_of_atoms = 0
         for peptide_chain in self._peptide_chains:
-            number_of_atoms += peptide_chain.number_of_atoms()
+            number_of_atoms += peptide_chain.number_of_atoms
         return number_of_atoms
 
+    @property
     def total_number_of_atoms(self) -> int:
         """The total number of atoms in the protein, including ghosts."""
         number_of_atoms = 0
         for peptide_chain in self._peptide_chains:
-            number_of_atoms += peptide_chain.total_number_of_atoms()
+            number_of_atoms += peptide_chain.total_number_of_atoms
         return number_of_atoms
 
     def set_peptide_chains(self, peptide_chains: list[PeptideChain]) -> None:
@@ -1748,7 +1799,7 @@ class Protein(_ChemicalEntity):
     def peptides(self) -> list[Atom]:
         """A list of all atoms in the Protein that are a part of a peptide."""
         atoms = []
-        for at in self.atom_list():
+        for at in self.atom_list:
             if 'peptide' in at.groups:
                 atoms.append(at)
         return atoms
@@ -1792,7 +1843,7 @@ class Protein(_ChemicalEntity):
     def sidechains(self) -> list[Atom]:
         """A list of all atoms in the Protein that are a part of a sidechain."""
         atoms = []
-        for at in self.atom_list():
+        for at in self.atom_list:
             if 'sidechain' in at.groups:
                 atoms.append(at)
         return atoms
@@ -1882,11 +1933,11 @@ class ChemicalSystem(_ChemicalEntity):
         if not isinstance(chemical_entity, _ChemicalEntity):
             raise InvalidChemicalEntityError('Invalid type')
 
-        for at in chemical_entity.atom_list():
+        for at in chemical_entity.atom_list:
             at.index = self._number_of_atoms
             self._number_of_atoms += 1
 
-        self._total_number_of_atoms += chemical_entity.total_number_of_atoms()
+        self._total_number_of_atoms += chemical_entity.total_number_of_atoms
 
         chemical_entity.parent = self
 
@@ -1896,11 +1947,12 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._atoms = None
 
+    @property
     def atom_list(self) -> list[Atom]:
         """List of all non-ghost atoms in the ChemicalSystem."""
         atom_list = []
         for ce in self._chemical_entities:
-            atom_list.extend(ce.atom_list())
+            atom_list.extend(ce.atom_list)
 
         return atom_list
 
@@ -1910,7 +1962,7 @@ class ChemicalSystem(_ChemicalEntity):
         from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
         if self._atoms is None:
-            self._atoms = sorted_atoms(self.atom_list())
+            self._atoms = sorted_atoms(self.atom_list)
 
         return self._atoms
 
@@ -2021,10 +2073,12 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._h5_file = None
 
+    @property
     def number_of_atoms(self) -> int:
         """The number of non-ghost atoms in the ChemicalSystem."""
         return self._number_of_atoms
 
+    @property
     def total_number_of_atoms(self) -> int:
         """The number of all atoms in the ChemicalSystem, including ghost ones."""
         return self._total_number_of_atoms

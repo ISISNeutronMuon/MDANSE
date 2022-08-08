@@ -37,7 +37,7 @@ class TestAtom(unittest.TestCase):
     def test_instantiation_overwriting_default_values(self):
         bond = ce.Atom()
         atom = ce.Atom(symbol='C', name='carbon12', bonds=[bond], groups=['backbone'], ghost=True,
-                       index=0, parent=bond, mass=12, random='12345')
+                       index=0, parent=bond, atomic_mass=12, random='12345')
 
         self.assertEqual('C', atom.symbol)
         self.assertEqual('carbon12', atom.name)
@@ -46,7 +46,7 @@ class TestAtom(unittest.TestCase):
         self.assertEqual(True, atom.ghost)
         self.assertEqual(0, atom.index)
         self.assertEqual(bond, atom.parent)
-        self.assertEqual(12, atom.mass)
+        self.assertEqual(12, atom.atomic_mass)
         self.assertEqual('12345', atom.random)
 
     def test_instantiation_undefined_element(self):
@@ -75,26 +75,26 @@ class TestAtom(unittest.TestCase):
 
     def test_atom_list_ghost_true(self):
         atom = ce.Atom(ghost=True)
-        atom_list = atom.atom_list()
+        atom_list = atom.atom_list
         self.assertEqual([], atom_list)
 
     def test_atom_list_ghost_false(self):
         atom = ce.Atom(ghost=False)
-        atom_list = atom.atom_list()
+        atom_list = atom.atom_list
         self.assertEqual([atom], atom_list)
 
     def test_total_number_of_atoms(self):
         atom = ce.Atom(ghost=False)
         ghost = ce.Atom(ghost=True)
-        self.assertEqual(1, atom.total_number_of_atoms())
-        self.assertEqual(1, ghost.total_number_of_atoms())
+        self.assertEqual(1, atom.total_number_of_atoms)
+        self.assertEqual(1, ghost.total_number_of_atoms)
 
     def test_number_of_atoms(self):
         atom = ce.Atom(ghost=False)
         ghost = ce.Atom(ghost=True)
 
-        self.assertEqual(0, atom.number_of_atoms())
-        self.assertEqual(1, ghost.number_of_atoms())
+        self.assertEqual(0, atom.number_of_atoms)
+        self.assertEqual(1, ghost.number_of_atoms)
 
     def test_bonds_setter(self):
         atom = ce.Atom()
@@ -187,18 +187,18 @@ class TestAtomGroup(unittest.TestCase):
 
     def test_atom_list(self):
         self.atom2._ghost = True
-        self.assertEqual([self.atom1], self.group.atom_list())
+        self.assertEqual([self.atom1], self.group.atom_list)
 
     def test_copy(self):
         self.assertEqual(None, self.group.copy())
 
     def test_number_of_atoms(self):
         self.atom2._ghost = True
-        self.assertEqual(1, self.group.number_of_atoms())
-        self.assertEqual(2, self.group.total_number_of_atoms())
+        self.assertEqual(1, self.group.number_of_atoms)
+        self.assertEqual(2, self.group.total_number_of_atoms)
 
     def test_root_chemical_system(self):
-        self.assertEqual(repr(self.system), repr(self.group.root_chemical_system()))
+        self.assertEqual(repr(self.system), repr(self.group.root_chemical_system))
 
     def test_serialize(self):
         dictionary = {}
@@ -263,7 +263,7 @@ class TestAtomCluster(unittest.TestCase):
         atom = ce.Atom()
         ghost = ce.Atom(ghost=True)
         cluster = ce.AtomCluster('Cluster1', [atom, ghost], parentless=True)
-        self.assertEqual([atom], cluster.atom_list())
+        self.assertEqual([atom], cluster.atom_list)
 
     def test_copy_parentful(self):
         cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()], parentless=False)
@@ -277,8 +277,8 @@ class TestAtomCluster(unittest.TestCase):
 
     def test_number_of_atoms(self):
         cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom(ghost=True)], parentless=True)
-        self.assertEqual(1, cluster.number_of_atoms())
-        self.assertEqual(2, cluster.total_number_of_atoms())
+        self.assertEqual(1, cluster.number_of_atoms)
+        self.assertEqual(2, cluster.total_number_of_atoms)
 
     def test_reorder_atoms_exception(self):
         cluster = ce.AtomCluster('Cluster1', [ce.Atom(symbol='H'), ce.Atom(symbol='C')], parentless=True)
@@ -406,18 +406,18 @@ class TestMolecule(unittest.TestCase):
         self.assertEqual('Molecule of water (database code "WAT")', str(self.molecule))
 
     def test_atom_list(self):
-        self.assertEqual(3, len(self.molecule.atom_list()))
-        self.compare_atoms(self.molecule.atom_list(), self.molecule)
+        self.assertEqual(3, len(self.molecule.atom_list))
+        self.compare_atoms(self.molecule.atom_list, self.molecule)
 
     def test_copy(self):
         copy = self.molecule.copy()
         self.compare_two_molecules(copy)
 
     def test_number_of_atoms(self):
-        self.assertEqual(3, self.molecule.number_of_atoms())
+        self.assertEqual(3, self.molecule.number_of_atoms)
 
     def test_total_number_of_atoms(self):
-        self.assertEqual(3, self.molecule.total_number_of_atoms())
+        self.assertEqual(3, self.molecule.total_number_of_atoms)
 
     def test_reorder_atoms_invalid_input(self):
         with self.assertRaises(ce.InconsistentAtomNamesError):
@@ -425,9 +425,9 @@ class TestMolecule(unittest.TestCase):
 
     def test_reorder_atoms_valid_input(self):
         self.molecule.reorder_atoms(['HW1', 'HW2', 'OW'])
-        self.assertEqual('HW1', self.molecule.atom_list()[0].name)
-        self.assertEqual('HW2', self.molecule.atom_list()[1].name)
-        self.assertEqual('OW', self.molecule.atom_list()[2].name)
+        self.assertEqual('HW1', self.molecule.atom_list[0].name)
+        self.assertEqual('HW2', self.molecule.atom_list[1].name)
+        self.assertEqual('OW', self.molecule.atom_list[2].name)
 
     def test_serialize_from_empty_dict(self):
         dictionary = {}
@@ -673,13 +673,13 @@ class TestResidue(unittest.TestCase):
     def test_atom_list(self):
         residue = ce.Residue('GLY', 'glycine', None)
         residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
-        self.compare_atoms(residue.atom_list(), residue)
+        self.compare_atoms(residue.atom_list, residue)
 
     def test_number_of_atoms(self):
         residue = ce.Residue('GLY', 'glycine', None)
         residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
-        self.assertEqual(7, residue.number_of_atoms())
-        self.assertEqual(7, residue.total_number_of_atoms())
+        self.assertEqual(7, residue.number_of_atoms)
+        self.assertEqual(7, residue.total_number_of_atoms)
 
     def test_copy(self):
         residue = ce.Residue('GLY', 'glycine', None)
@@ -865,13 +865,13 @@ class TestNucleotide(unittest.TestCase):
     def test_atom_list(self):
         nucleotide = ce.Nucleotide('5T1', '5T1', None)
         nucleotide.set_atoms(['HO5\''])
-        self.compare_atoms_in_5t1(nucleotide.atom_list(), nucleotide)
+        self.compare_atoms_in_5t1(nucleotide.atom_list, nucleotide)
 
     def test_number_of_atoms(self):
         nucleotide = ce.Nucleotide('5T1', '5T1', None)
         nucleotide.set_atoms(['HO5\''])
-        self.assertEqual(1, nucleotide.number_of_atoms())
-        self.assertEqual(1, nucleotide.total_number_of_atoms())
+        self.assertEqual(1, nucleotide.number_of_atoms)
+        self.assertEqual(1, nucleotide.total_number_of_atoms)
 
     def test_serialize_empty_dict(self):
         nucleotide = ce.Nucleotide('5T1', '5T1', None)
@@ -1045,8 +1045,8 @@ class TestNucleotideChain(unittest.TestCase):
         n1, n2 = self.prepare_nucleotides()
         self.chain.set_nucleotides([n1, n2])
 
-        self.assertEqual(65, self.chain.number_of_atoms())
-        self.assertEqual(65, self.chain.total_number_of_atoms())
+        self.assertEqual(65, self.chain.number_of_atoms)
+        self.assertEqual(65, self.chain.total_number_of_atoms)
 
     def test_serialize_empty_dict(self):
         n1, n2 = self.prepare_nucleotides()
@@ -1211,14 +1211,14 @@ class TestPeptideChain(unittest.TestCase):
 
         self.assertEqual([r1['HA3'], r1['O'], r1['N'], r1['CA'], r1['HA2'], r1['C'], r1['HT1'], r1['HT2'], r1['HT3'],
                           r2['H'], r2['HA3'], r2['O'], r2['N'], r2['CA'], r2['HA2'], r2['C'], r2['OXT']],
-                         self.chain.atom_list())
+                         self.chain.atom_list)
 
     def test_backbone(self):
         r1, r2 = self.populate_chain()
 
         self.assertEqual([r1['O'], r1['N'], r1['CA'], r1['HA2'], r1['C'], r1['HT1'], r1['HT2'], r1['HT3'],
                           r2['H'], r2['O'], r2['N'], r2['CA'], r2['HA2'], r2['C'], r2['OXT']],
-                         self.chain.backbone())
+                         self.chain.backbone)
 
     def test_copy(self):
         self.populate_chain()
@@ -1229,8 +1229,8 @@ class TestPeptideChain(unittest.TestCase):
 
     def test_number_of_atoms(self):
         self.populate_chain()
-        self.assertEqual(17, self.chain.number_of_atoms())
-        self.assertEqual(17, self.chain.total_number_of_atoms())
+        self.assertEqual(17, self.chain.number_of_atoms)
+        self.assertEqual(17, self.chain.total_number_of_atoms)
 
     def test_peptide_chains(self):
         self.populate_chain()
@@ -1350,13 +1350,13 @@ class TestProtein(unittest.TestCase):
         self.assertEqual([chain[0]['HA3'], chain[0]['O'], chain[0]['N'], chain[0]['CA'], chain[0]['HA2'], chain[0]['C'],
                           chain[0]['HT1'], chain[0]['HT2'], chain[0]['HT3'], chain[1]['H'], chain[1]['HA3'],
                           chain[1]['O'], chain[1]['N'], chain[1]['CA'], chain[1]['HA2'], chain[1]['C'],
-                          chain[1]['OXT']], self.protein.atom_list())
+                          chain[1]['OXT']], self.protein.atom_list)
 
     def test_backbone(self):
         chain = self.populate_protein()
         self.assertEqual([chain[0]['O'], chain[0]['N'], chain[0]['CA'], chain[0]['HA2'], chain[0]['C'], chain[0]['HT1'],
                           chain[0]['HT2'], chain[0]['HT3'], chain[1]['H'], chain[1]['O'], chain[1]['N'], chain[1]['CA'],
-                          chain[1]['HA2'], chain[1]['C'], chain[1]['OXT']], self.protein.backbone())
+                          chain[1]['HA2'], chain[1]['C'], chain[1]['OXT']], self.protein.backbone)
 
     def test_copy(self):
         chain = self.populate_protein()
@@ -1371,8 +1371,8 @@ class TestProtein(unittest.TestCase):
     def test_number_of_atoms(self):
         self.populate_protein()
 
-        self.assertEqual(17, self.protein.number_of_atoms())
-        self.assertEqual(17, self.protein.total_number_of_atoms())
+        self.assertEqual(17, self.protein.number_of_atoms)
+        self.assertEqual(17, self.protein.total_number_of_atoms)
 
     def test_peptide_chains(self):
         chain = self.populate_protein()
@@ -1506,7 +1506,7 @@ class TestChemicalSystem(unittest.TestCase):
         cluster = ce.AtomCluster('name', [atom1, atom2])
         self.system.add_chemical_entity(cluster)
 
-        self.assertEqual([atom1, atom2], self.system.atom_list())
+        self.assertEqual([atom1, atom2], self.system.atom_list)
 
     def test_atoms(self):
         atom1 = ce.Atom(ghost=False)
