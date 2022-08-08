@@ -136,7 +136,7 @@ class TestAtom(unittest.TestCase):
         result = atom.serialize(dictionary)
 
         self.assertEqual(('atoms', 0), result)
-        self.assertEqual({'atoms': ['H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)']}, dictionary)
+        self.assertEqual({'atoms': [[repr('H'), repr('H'), 'False']]}, dictionary)
 
 
 class TestAtomGroup(unittest.TestCase):
@@ -301,22 +301,18 @@ class TestAtomCluster(unittest.TestCase):
         result = cluster.serialize(dictionary)
 
         self.assertEqual(('atom_clusters', 0), result)
-        self.assertDictEqual({'atom_clusters': ['H5AtomCluster(self._h5_file,h5_contents,[0, 1],name="Cluster1")'],
-                              'atoms': ['H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)']},
+        self.assertDictEqual({'atom_clusters': [['[0, 1]', repr('Cluster1')]],
+                              'atoms': [[repr('H'), repr('H'), 'False'], [repr('H'), repr('H'), 'False']]},
                              dictionary)
 
     def test_serialize_nonempty_dict(self):
         cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()], parentless=True)
-        dictionary = {'atom_clusters': ['', '', ''], 'atoms': ['', '', '']}
+        dictionary = {'atom_clusters': [[], [], []], 'atoms': [[], [], []]}
         result = cluster.serialize(dictionary)
 
         self.assertEqual(('atom_clusters', 3), result)
-        self.assertDictEqual({'atom_clusters': ['', '', '',
-                                                'H5AtomCluster(self._h5_file,h5_contents,[3, 4],name="Cluster1")'],
-                              'atoms': ['', '', '',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)']},
+        self.assertDictEqual({'atom_clusters': [[], [], [], ['[3, 4]', repr('Cluster1')]],
+                              'atoms': [[], [], [], [repr('H'), repr('H'), 'False'], [repr('H'), repr('H'), 'False']]},
                              dictionary)
 
 
@@ -434,22 +430,19 @@ class TestMolecule(unittest.TestCase):
         result = self.molecule.serialize(dictionary)
 
         self.assertEqual(('molecules', 0), result)
-        self.assertDictEqual({'molecules': ['H5Molecule(self._h5_file,h5_contents,[0, 1, 2],code="WAT",name="water")'],
-                              'atoms': ['H5Atom(self._h5_file,h5_contents,symbol="O", name="OW", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HW2", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HW1", ghost=False)']},
+        self.assertDictEqual({'molecules': [['[0, 1, 2]', repr('WAT'), repr('water')]],
+                              'atoms': [[repr('O'), repr('OW'), 'False'], [repr('H'), repr('HW2'), 'False'],
+                                        [repr('H'), repr('HW1'), 'False']]},
                              dictionary)
 
     def test_serialize_from_nonempty_dict(self):
-        dictionary = {'atoms': ['', '']}
+        dictionary = {'atoms': [[], []], 'molecules': [[], []]}
         result = self.molecule.serialize(dictionary)
 
-        self.assertEqual(('molecules', 0), result)
-        self.assertDictEqual({'atoms': ['', '',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="O", name="OW", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HW2", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HW1", ghost=False)'],
-                             'molecules': ['H5Molecule(self._h5_file,h5_contents,[2, 3, 4],code="WAT",name="water")']},
+        self.assertEqual(('molecules', 2), result)
+        self.assertDictEqual({'atoms': [[], [], [repr('O'), repr('OW'), 'False'], [repr('H'), repr('HW2'), 'False'],
+                                        [repr('H'), repr('HW1'), 'False']],
+                             'molecules': [[], [], ['[2, 3, 4]', repr('WAT'), repr('water')]]},
                              dictionary)
 
 
@@ -696,35 +689,26 @@ class TestResidue(unittest.TestCase):
 
         self.maxDiff = None
         self.assertEqual(('residues', 0), result)
-        self.assertDictEqual({'residues': ['H5Residue(self._h5_file,h5_contents,[0, 1, 2, 3, 4, 5, 6],code="GLY",'
-                                           'name="glycine",variant=None)'],
-                              'atoms': ['H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA3", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="O", name="O", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="N", name="N", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="CA", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA2", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="C", ghost=False)']},
+        self.assertDictEqual({'residues': [['[0, 1, 2, 3, 4, 5, 6]', repr('GLY'), repr('glycine'), 'None']],
+                              'atoms': [[repr('H'), repr('H'), 'False'], [repr('H'), repr('HA3'), 'False'],
+                                        [repr('O'), repr('O'), 'False'], [repr('N'), repr('N'), 'False'],
+                                        [repr('C'), repr('CA'), 'False'], [repr('H'), repr('HA2'), 'False'],
+                                        [repr('C'), repr('C'), 'False']]},
                              dictionary)
 
     def test_serialize_nonempty_dict(self):
         residue = ce.Residue('GLY', 'glycine', None)
         residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
-        dictionary = {'atoms': ['', '', '']}
+        dictionary = {'atoms': [[], [], []], 'residues': [[], [], []]}
         result = residue.serialize(dictionary)
 
         self.maxDiff = None
-        self.assertEqual(('residues', 0), result)
-        self.assertDictEqual({'residues': ['H5Residue(self._h5_file,h5_contents,[3, 4, 5, 6, 7, 8, 9],code="GLY",'
-                                           'name="glycine",variant=None)'],
-                              'atoms': ['', '', '',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA3", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="O", name="O", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="N", name="N", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="CA", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA2", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="C", ghost=False)']},
+        self.assertEqual(('residues', 3), result)
+        self.assertDictEqual({'residues': [[], [], [], ['[3, 4, 5, 6, 7, 8, 9]', repr('GLY'), repr('glycine'), 'None']],
+                              'atoms': [[], [], [], [repr('H'), repr('H'), 'False'], [repr('H'), repr('HA3'), 'False'],
+                                        [repr('O'), repr('O'), 'False'], [repr('N'), repr('N'), 'False'],
+                                        [repr('C'), repr('CA'), 'False'], [repr('H'), repr('HA2'), 'False'],
+                                        [repr('C'), repr('C'), 'False']]},
                              dictionary)
 
 
@@ -880,22 +864,19 @@ class TestNucleotide(unittest.TestCase):
         result = nucleotide.serialize(dictionary)
 
         self.assertEqual(('nucleotides', 0), result)
-        self.assertDictEqual({'nucleotides': ['H5Nucleotide(self._h5_file,h5_contents,[0],code="5T1",name="5T1",'
-                                              'variant=None)'],
-                              'atoms': ['H5Atom(self._h5_file,h5_contents,symbol="H", name="HO5\'", ghost=False)']},
+        self.assertDictEqual({'nucleotides': [['[0]', repr('5T1'), repr('5T1'), 'None']],
+                              'atoms': [[repr('H'), repr('HO5\''), 'False']]},
                              dictionary)
 
     def test_serialize_nonempty_dict(self):
         nucleotide = ce.Nucleotide('5T1', '5T1', None)
         nucleotide.set_atoms(['HO5\''])
-        dictionary = {'atoms': ['', '', '']}
+        dictionary = {'atoms': [[], [], []], 'nucleotides': [[], [], []]}
         result = nucleotide.serialize(dictionary)
 
-        self.assertEqual(('nucleotides', 0), result)
-        self.assertDictEqual({'nucleotides': ['H5Nucleotide(self._h5_file,h5_contents,[3],code="5T1",name="5T1",'
-                                              'variant=None)'],
-                              'atoms': ['', '', '',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HO5\'", ghost=False)']},
+        self.assertEqual(('nucleotides', 3), result)
+        self.assertDictEqual({'nucleotides': [[], [], [], ['[3]', repr('5T1'), repr('5T1'), 'None']],
+                              'atoms': [[], [], [], [repr('H'), repr('HO5\''), 'False']]},
                              dictionary)
 
 
@@ -1056,40 +1037,28 @@ class TestNucleotideChain(unittest.TestCase):
 
         self.maxDiff = None
         self.assertEqual(('nucleotide_chains', 0), result)
-        self.assertDictEqual({'nucleotides': ['H5Nucleotide(self._h5_file,h5_contents,[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, '
-                                              '10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, '
-                                              '28, 29, 30],code="A",name="adenine",variant=\'5T1\')',
-                                              'H5Nucleotide(self._h5_file,h5_contents,[31, 32, 33, 34, 35, 36, 37, 38, '
-                                              '39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, '
-                                              '57, 58, 59, 60, 61, 62, 63, 64],code="A",name="adenine",'
-                                              'variant=\'3T1\')'],
-                              'atoms': [f'H5Atom(self._h5_file,h5_contents,symbol="{i}", name="{j}", ghost=False)'
-                                        for i, j in zip(['C', 'C', 'C', 'H', 'H', 'H', 'O', 'C', 'C', 'H', 'C', 'C',
-                                                         'C', 'H', 'H', 'N', 'C', 'C', 'O', 'N', 'N', 'N', 'N', 'H',
-                                                         'H', 'H', 'O', 'H', 'H', 'O', 'H', 'C', 'C', 'C', 'H', 'H',
-                                                         'H', 'O', 'C', 'C', 'H', 'C', 'C', 'C', 'H', 'H', 'N', 'C',
-                                                         'C', 'O', 'N', 'N', 'N', 'N', 'H', 'H', 'H', 'O', 'H', 'H',
-                                                         'O', 'H', 'O', 'O', 'P'],
-                                                        ['C3\'', 'C1\'', 'C5\'', 'H2\'', 'H5\'', 'H3\'', 'O4\'', 'C8',
-                                                         'C2', 'H1\'', 'C6', 'C5', 'C4', 'H5\'\'', 'HO2\'', 'N9',
-                                                         'C4\'', 'C2\'', 'O2\'', 'N1', 'N3', 'N6', 'N7', 'H4\'', 'H8',
-                                                         'H2', 'O5\'', 'H61', 'H62', 'O3\'', 'HO5\'', 'C3\'', 'C1\'',
-                                                         'C5\'', 'H2\'', 'H5\'', 'H3\'', 'O4\'', 'C8', 'C2', 'H1\'',
-                                                         'C6', 'C5', 'C4', 'H5\'\'', 'HO2\'', 'N9', 'C4\'', 'C2\'',
-                                                         'O2\'', 'N1', 'N3', 'N6', 'N7', 'H4\'', 'H8', 'H2', 'O5\'',
-                                                         'H61', 'H62', 'O3\'', 'HO3\'', 'OP1', 'OP2', 'P'])],
-                              'nucleotide_chains': ['H5NucleotideChain(self._h5_file,h5_contents,"name",[0, 1])']},
-                             dictionary)
+        self.assertEqual(['nucleotides', 'atoms', 'nucleotide_chains'], list(dictionary.keys()))
+        self.assertEqual([[repr('name'), '[0, 1]']], dictionary['nucleotide_chains'])
+        self.assertEqual([['[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, '
+                           '25, 26, 27, 28, 29, 30]', repr('A'), repr('adenine'), repr('5T1')],
+                          ['[31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, '
+                           '53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64]', repr('A'), repr('adenine'), repr('3T1')]],
+                         dictionary['nucleotides'])
 
     def test_serialize_nonempty_dict(self):
         n1, n2 = self.prepare_nucleotides()
         self.chain.set_nucleotides([n1, n2])
-        dictionary = {'nucleotides': ['', '', ''], 'nucleotide_chains': ['']}
+        dictionary = {'nucleotides': [[], [], []], 'nucleotide_chains': [[]]}
         result = self.chain.serialize(dictionary)
 
         self.assertEqual(('nucleotide_chains', 1), result)
-        self.assertEqual(['', 'H5NucleotideChain(self._h5_file,h5_contents,"name",[3, 4])'],
-                         dictionary['nucleotide_chains'])
+        self.assertEqual(['nucleotides', 'nucleotide_chains', 'atoms'], list(dictionary.keys()))
+        self.assertEqual([[], [repr('name'), '[3, 4]']], dictionary['nucleotide_chains'])
+        self.assertEqual([[], [], [], ['[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, '
+                                       '22, 23, 24, 25, 26, 27, 28, 29, 30]', repr('A'), repr('adenine'), repr('5T1')],
+                          ['[31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, '
+                           '53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64]', repr('A'), repr('adenine'), repr('3T1')]],
+                         dictionary['nucleotides'])
 
     def test_sugars(self):
         n1, n2 = self.prepare_nucleotides()
@@ -1252,38 +1221,23 @@ class TestPeptideChain(unittest.TestCase):
 
         self.maxDiff = None
         self.assertEqual(('peptide_chains', 0), result)
-        self.assertDictEqual({'residues': ['H5Residue(self._h5_file,h5_contents,[0, 1, 2, 3, 4, 5, 6, 7, 8],code="GLY",'
-                                           'name="glycine1",variant=\'NT1\')',
-                                           'H5Residue(self._h5_file,h5_contents,[9, 10, 11, 12, 13, 14, 15, 16],'
-                                           'code="GLY",name="glycine2",variant=\'CT1\')'],
-                              'atoms': ['H5Atom(self._h5_file,h5_contents,symbol="H", name="HA3", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="O", name="O", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="N", name="N", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="CA", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA2", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="C", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HT1", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HT2", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HT3", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="H", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA3", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="O", name="O", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="N", name="N", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="CA", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="H", name="HA2", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="C", name="C", ghost=False)',
-                                        'H5Atom(self._h5_file,h5_contents,symbol="O", name="OXT", ghost=False)'],
-                              'peptide_chains': ['H5PeptideChain(self._h5_file,h5_contents,"name",[0, 1])']},
-                             dictionary)
+        self.assertEqual(['residues', 'atoms', 'peptide_chains'], list(dictionary.keys()))
+        self.assertEqual([[repr('name'), '[0, 1]']], dictionary['peptide_chains'])
+        self.assertEqual([['[0, 1, 2, 3, 4, 5, 6, 7, 8]', repr('GLY'), repr('glycine1'), repr('NT1')],
+                          ['[9, 10, 11, 12, 13, 14, 15, 16]', repr('GLY'), repr('glycine2'), repr('CT1')]],
+                         dictionary['residues'])
 
     def test_serialize_nonempty_dict(self):
         self.populate_chain()
-        dictionary = {'residues': ['', '', ''], 'peptide_chains': ['', '', '']}
+        dictionary = {'residues': [[], [], []], 'peptide_chains': [[], [], []]}
         result = self.chain.serialize(dictionary)
 
         self.assertEqual(('peptide_chains', 3), result)
-        self.assertEqual(['', '', '', 'H5PeptideChain(self._h5_file,h5_contents,"name",[3, 4])'],
-                         dictionary['peptide_chains'])
+        self.assertEqual(['residues', 'peptide_chains', 'atoms'], list(dictionary.keys()))
+        self.assertEqual([[], [], [], [repr('name'), '[3, 4]']], dictionary['peptide_chains'])
+        self.assertEqual([[], [], [], ['[0, 1, 2, 3, 4, 5, 6, 7, 8]', repr('GLY'), repr('glycine1'), repr('NT1')],
+                          ['[9, 10, 11, 12, 13, 14, 15, 16]', repr('GLY'), repr('glycine2'), repr('CT1')]],
+                         dictionary['residues'])
 
     def test_sidechains(self):
         r1, r2 = self.populate_chain()
@@ -1390,20 +1344,22 @@ class TestProtein(unittest.TestCase):
     def test_serialize_empty_dict(self):
         self.populate_protein()
         dictionary = {}
-
         result = self.protein.serialize(dictionary)
 
         self.assertEqual(('proteins', 0), result)
-        self.assertEqual(['H5Protein(self._h5_file,h5_contents,"name",[0])'], dictionary['proteins'])
-        self.assertEqual(['H5PeptideChain(self._h5_file,h5_contents,"name",[0, 1])'], dictionary['peptide_chains'])
+        self.assertEqual(['proteins', 'residues', 'atoms', 'peptide_chains'], list(dictionary.keys()))
+        self.assertEqual([[repr('name'), '[0]']], dictionary['proteins'])
+        self.assertEqual([[repr('name'), '[0, 1]']], dictionary['peptide_chains'])
 
     def test_serialize_nonempty_dict(self):
         self.populate_protein()
-        dictionary = {'proteins': ['', '', ''], 'peptide_chains': ['', '', '']}
+        dictionary = {'proteins': [[], [], []], 'peptide_chains': [[], [], []]}
         result = self.protein.serialize(dictionary)
 
         self.assertEqual(('proteins', 3), result)
-        self.assertEqual(['', '', '', 'H5Protein(self._h5_file,h5_contents,"name",[3])'], dictionary['proteins'])
+        self.assertEqual(['proteins', 'peptide_chains', 'residues', 'atoms'], list(dictionary.keys()))
+        self.assertEqual([[], [], [], [repr('name'), '[3]']], dictionary['proteins'])
+        self.assertEqual([[], [], [], [repr('name'), '[0, 1]']], dictionary['peptide_chains'])
 
     def test_sidechains(self):
         chain = self.populate_protein()
@@ -1552,7 +1508,7 @@ class TestChemicalSystem(unittest.TestCase):
         file['/chemical_system'].attrs['name'] = 'new'
 
         file['/chemical_system/contents'] = [('atoms'.encode(encoding = 'UTF-8',errors = 'strict'), 0)]
-        file['/chemical_system']['atoms'] = ['H5Atom(self._h5_file,h5_contents,symbol="H", name="H1", ghost=False)']
+        file['/chemical_system']['atoms'] = [[repr('H'), repr('H1'), 'False']]
         self.system.load(file)
 
         self.assertEqual(None, self.system._h5_file)
@@ -1564,13 +1520,46 @@ class TestChemicalSystem(unittest.TestCase):
         self.assertEqual(1, self.system._total_number_of_atoms)
         self.assertEqual(None, self.system._atoms)
 
-    def test_load_corrupt_file_unexpected_eval_input(self):
+    def test_load_corrupt_file_skeleton_invalid_entity_type(self):
+        file = StubHDFFile()
+        file['/chemical_system'] = StubHDFFile()
+        file['/chemical_system'].attrs['name'] = 'new'
+
+        file['/chemical_system/contents'] = [('INVALID'.encode(encoding='UTF-8', errors='strict'), 0)]
+        file['/chemical_system']['atoms'] = [['H', 'H1', 'False']]
+
+        with self.assertRaises(ce.CorruptedFileError):
+            self.system.load(file)
+
+    def test_load_corrupt_file_skeleton_entity_not_in_system(self):
         file = StubHDFFile()
         file['/chemical_system'] = StubHDFFile()
         file['/chemical_system'].attrs['name'] = 'new'
 
         file['/chemical_system/contents'] = [('atoms'.encode(encoding='UTF-8', errors='strict'), 0)]
-        file['/chemical_system']['atoms'] = ['Atom(symbol="H", name="H1", ghost=False)']
+        file['/chemical_system']['INVALID'] = [['H', 'H1', 'False']]
+
+        with self.assertRaises(ce.CorruptedFileError):
+            self.system.load(file)
+
+    def test_load_corrupt_file_skeleton_index_out_of_range(self):
+        file = StubHDFFile()
+        file['/chemical_system'] = StubHDFFile()
+        file['/chemical_system'].attrs['name'] = 'new'
+
+        file['/chemical_system/contents'] = [('atoms'.encode(encoding='UTF-8', errors='strict'), 1)]
+        file['/chemical_system']['atoms'] = [['H', 'H1', 'False']]
+
+        with self.assertRaises(ce.CorruptedFileError):
+            self.system.load(file)
+
+    def test_load_corrupt_file_ast_error(self):
+        file = StubHDFFile()
+        file['/chemical_system'] = StubHDFFile()
+        file['/chemical_system'].attrs['name'] = 'new'
+
+        file['/chemical_system/contents'] = [('atoms'.encode(encoding='UTF-8', errors='strict'), 0)]
+        file['/chemical_system']['atoms'] = [['"', 'H1', 'False']]
 
         with self.assertRaises(ce.CorruptedFileError):
             self.system.load(file)
@@ -1582,12 +1571,10 @@ class TestChemicalSystem(unittest.TestCase):
         self.system.serialize(file)
 
         self.assertEqual('name', file['/chemical_system'].attrs['name'])
-        self.assertEqual(['H5Molecule(self._h5_file,h5_contents,[0, 1, 2],code="WAT",name="water")'],
+        self.assertEqual([['[0, 1, 2]', repr('WAT'), repr('water')]],
                          file['/chemical_system']['molecules'])
-        self.assertEqual(['H5Atom(self._h5_file,h5_contents,symbol="O", name="OW", ghost=False)',
-                          'H5Atom(self._h5_file,h5_contents,symbol="H", name="HW2", ghost=False)',
-                          'H5Atom(self._h5_file,h5_contents,symbol="H", name="HW1", ghost=False)'],
-                         file['/chemical_system']['atoms'])
+        self.assertEqual([[repr('O'), repr('OW'), 'False'], [repr('H'), repr('HW2'), 'False'],
+                          [repr('H'), repr('HW1'), 'False']], file['/chemical_system']['atoms'])
         self.assertEqual([('molecules', '0')], file['/chemical_system']['contents'])
 
 

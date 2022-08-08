@@ -1,4 +1,5 @@
 import abc
+from ast import literal_eval
 import collections
 import copy
 from typing import Union
@@ -482,7 +483,7 @@ class Atom(_ChemicalEntity):
 
         self._symbol = symbol
 
-    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
         Serializes the Atom object into a string in preparation of the object being stored on disk.
 
@@ -493,10 +494,7 @@ class Atom(_ChemicalEntity):
             provided dictionary.
         :rtype: tuple
         """
-        atom_str = 'H5Atom(self._h5_file,h5_contents,symbol="{}", name="{}", ghost={})'.format(self.symbol, self.name,
-                                                                                               self.ghost)
-
-        h5_contents.setdefault('atoms', []).append(atom_str)
+        h5_contents.setdefault('atoms', []).append([repr(self.symbol), repr(self.name), str(self.ghost)])
 
         return 'atoms', len(h5_contents['atoms']) - 1
 
@@ -671,7 +669,7 @@ class AtomCluster(_ChemicalEntity):
 
         self._atoms = reordered_atoms
 
-    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
         Serializes the AtomCluster object and its contents into strings in preparation of the object being stored on
         disk.
@@ -688,9 +686,7 @@ class AtomCluster(_ChemicalEntity):
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        ac_str = 'H5AtomCluster(self._h5_file,h5_contents,{},name="{}")'.format(at_indexes, self._name)
-
-        h5_contents.setdefault('atom_clusters', []).append(ac_str)
+        h5_contents.setdefault('atom_clusters', []).append([str(at_indexes), repr(self._name)])
 
         for at in self._atoms:
             at.serialize(h5_contents)
@@ -808,7 +804,7 @@ class Molecule(_ChemicalEntity):
 
         self._atoms = reordered_atoms
 
-    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
         Serializes the Molecule object and its contents into strings in preparation of the object being stored on
         disk.
@@ -825,10 +821,7 @@ class Molecule(_ChemicalEntity):
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        mol_str = 'H5Molecule(self._h5_file,h5_contents,{},code="{}",name="{}")'.format(at_indexes, self._code,
-                                                                                        self._name)
-
-        h5_contents.setdefault('molecules', []).append(mol_str)
+        h5_contents.setdefault('molecules', []).append([str(at_indexes), repr(self._code), repr(self._name)])
 
         for at in self._atoms.values():
             at.serialize(h5_contents)
@@ -991,7 +984,7 @@ class Residue(_ChemicalEntity):
     def variant(self):
         return self._variant
 
-    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
         Serializes the Residue object and its contents into strings in preparation of the object being stored on
         disk.
@@ -1008,12 +1001,8 @@ class Residue(_ChemicalEntity):
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        res_str = 'H5Residue(self._h5_file,h5_contents,{},code="{}",name="{}",variant={})'.format(at_indexes,
-                                                                                                  self._code,
-                                                                                                  self._name,
-                                                                                                  repr(self._variant))
-
-        h5_contents.setdefault('residues', []).append(res_str)
+        h5_contents.setdefault('residues', []).append([str(at_indexes), repr(self._code), repr(self._name),
+                                                       repr(self._variant)])
 
         for at in self._atoms.values():
             at.serialize(h5_contents)
@@ -1165,7 +1154,7 @@ class Nucleotide(_ChemicalEntity):
     def variant(self):
         return self._variant
 
-    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
         Serializes the Nucleotide object and its contents into strings in preparation of the object being stored on
         disk.
@@ -1182,13 +1171,8 @@ class Nucleotide(_ChemicalEntity):
         else:
             at_indexes = list(range(len(self._atoms)))
 
-        res_str = 'H5Nucleotide(self._h5_file,h5_contents,{},code="{}",name="{}",variant={})'.format(at_indexes,
-                                                                                                     self._code,
-                                                                                                     self._name,
-                                                                                                     repr(
-                                                                                                         self._variant))
-
-        h5_contents.setdefault('nucleotides', []).append(res_str)
+        h5_contents.setdefault('nucleotides', []).append([str(at_indexes), repr(self._code), repr(self._name),
+                                                          repr(self._variant)])
 
         for at in self._atoms.values():
             at.serialize(h5_contents)
@@ -1360,7 +1344,7 @@ class NucleotideChain(_ChemicalEntity):
             number_of_atoms += nucleotide.total_number_of_atoms
         return number_of_atoms
 
-    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
         Serializes the NucleotideChain object and its contents into strings in preparation of the object being stored on
         disk.
@@ -1378,12 +1362,10 @@ class NucleotideChain(_ChemicalEntity):
         else:
             res_indexes = list(range(len(self._nucleotides)))
 
-        pc_str = 'H5NucleotideChain(self._h5_file,h5_contents,"{}",{})'.format(self._name, res_indexes)
-
         for nucl in self._nucleotides:
             nucl.serialize(h5_contents)
 
-        h5_contents.setdefault('nucleotide_chains', []).append(pc_str)
+        h5_contents.setdefault('nucleotide_chains', []).append([repr(self._name), str(res_indexes)])
 
         return 'nucleotide_chains', len(h5_contents['nucleotide_chains']) - 1
 
@@ -1594,7 +1576,7 @@ class PeptideChain(_ChemicalEntity):
         """The list of amino acid Residues that make up this PeptideChain."""
         return self._residues
 
-    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
         Serializes the PeptideChain object and its contents into strings in preparation of the object being stored on
         disk.
@@ -1611,12 +1593,10 @@ class PeptideChain(_ChemicalEntity):
         else:
             res_indexes = list(range(len(self._residues)))
 
-        pc_str = 'H5PeptideChain(self._h5_file,h5_contents,"{}",{})'.format(self._name, res_indexes)
-
         for res in self._residues:
             res.serialize(h5_contents)
 
-        h5_contents.setdefault('peptide_chains', []).append(pc_str)
+        h5_contents.setdefault('peptide_chains', []).append([repr(self._name), str(res_indexes)])
 
         return 'peptide_chains', len(h5_contents['peptide_chains']) - 1
 
@@ -1765,7 +1745,7 @@ class Protein(_ChemicalEntity):
 
         return residues
 
-    def serialize(self, h5_contents: dict[str, list[str]]) -> tuple[str, int]:
+    def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
         Serializes the Protein object and its contents into strings in preparation of the object being stored on disk.
 
@@ -1782,9 +1762,7 @@ class Protein(_ChemicalEntity):
         else:
             pc_indexes = list(range(len(self._peptide_chains)))
 
-        prot_str = 'H5Protein(self._h5_file,h5_contents,"{}",{})'.format(self._name, pc_indexes)
-
-        h5_contents.setdefault('proteins', []).append(prot_str)
+        h5_contents.setdefault('proteins', []).append([repr(self._name), str(pc_indexes)])
 
         for pc in self._peptide_chains:
             pc.serialize(h5_contents)
@@ -1976,11 +1954,17 @@ class ChemicalSystem(_ChemicalEntity):
 
         from MDANSE.Chemistry.H5ChemicalEntity import H5Atom, H5AtomCluster, H5Molecule, H5Nucleotide, \
             H5NucleotideChain, H5Residue, H5PeptideChain, H5Protein
+        h5_classes = {'atoms': H5Atom, 'atom_clusters': H5AtomCluster, 'molecules': H5Molecule,
+                      'nucleotides': H5Nucleotide, 'nucleotide_chain': H5NucleotideChain, 'residue': H5Residue,
+                      'peptide_chains': H5PeptideChain, 'proteins': H5Protein}
 
         try:
             h5_file = h5py.File(h5_filename, 'r', libver='latest')
+            close_file = True
         except TypeError:
             h5_file = h5_filename
+            close_file = False
+
         grp = h5_file['/chemical_system']
         self._chemical_entities = []
 
@@ -1994,28 +1978,46 @@ class ChemicalSystem(_ChemicalEntity):
                 continue
             h5_contents[entity_type] = v[:]
 
-        for entity_type, entity_index in skeleton:
+        for i, (entity_type, entity_index) in enumerate(skeleton):
             entity_index = int(entity_index)
-            code = h5_contents[entity_type.decode('utf-8')][entity_index].replace('self._', '')
+            entity_type = entity_type.decode('utf-8')
+
             try:
-                h5_chemical_entity_instance = eval(code, {'__builtins__': {}},
-                                                   {'H5Atom': H5Atom, 'H5AtomCluster': H5AtomCluster,
-                                                    'H5Molecule': H5Molecule, 'H5Nucleotide': H5Nucleotide,
-                                                    'H5NucleotideChain': H5NucleotideChain, 'H5Residue': H5Residue,
-                                                    'H5PeptideChain': H5PeptideChain, 'H5Protein': H5Protein,
-                                                    'h5_contents': h5_contents, 'h5_file': h5_file})
-            except (NameError, TypeError):
+                entity_class = h5_classes[entity_type]
+            except KeyError:
                 h5_file.close()
-                raise CorruptedFileError('The provided HDF5 file could not be parsed because the chemical entity of '
-                                         f'type "{entity_type}" with index {entity_index} (located in the HDF5 file at '
-                                         f'/chemical_system/{entity_type}) contains invalid data. A string containing '
-                                         'the constructor for a sublcass of MDANSE.Chemistry.H5ChemicalEntity.'
-                                         f'_H5ChemicalEntity is expected, but instead the following value is present:'
-                                         f'{repr(code)}')
+                raise CorruptedFileError(f'Could not create a chemical entity of type {entity_type}. The entity listed'
+                                         f' in the chemical system contents (located at /chemical_system/contents in '
+                                         f'the HDF5 file) at index {i} is not recognised as valid entity; {entity_type}'
+                                         f' should be one of: atoms, atom_clusters, molecules, nucleotides, nucleotide'
+                                         f'_chains, residues, residue_chains, or proteins.')
+            try:
+                arguments = [literal_eval(arg) for arg in h5_contents[entity_type][entity_index]]
+            except KeyError:
+                raise CorruptedFileError(f'Could not find chemical entity {entity_type}, listed in chemical system '
+                                         f'contents (/chemical_system/contents) at index {i}, in the chemical system '
+                                         f'itself (/chemical_system). The chemical_system group in the HDF5 file '
+                                         f'contains only the following datasets: {h5_contents.keys()}.')
+            except IndexError:
+                raise CorruptedFileError(f'The chemical entity {entity_type}, listed in chemical system contents '
+                                         f'(/chemical_system/contents) at index {i}, could not be found in the '
+                                         f'{entity_type} dataset (/chemical_system/{entity_type}) because the '
+                                         f'index registered in contents, {entity_index}, is out of range of the dataset'
+                                         f', which contains only {len(h5_contents[entity_type])} elements.')
+            except (ValueError, SyntaxError, RuntimeError) as e:
+                raise CorruptedFileError(f'The data used for reconstructing the chemical system could not be parsed '
+                                         f'from the HDF5 file. The data located at /checmical_system/{entity_type}['
+                                         f'{entity_index}] is corrupted.\nThe provided data is: '
+                                         f'{h5_contents[entity_type][entity_index]}\nThe original error is: {e}')
+            finally:
+                h5_file.close()
+
+            h5_chemical_entity_instance = entity_class(h5_file, h5_contents, *arguments)
             ce = h5_chemical_entity_instance.build()
             self.add_chemical_entity(ce)
 
-        h5_file.close()
+        if close_file:
+            h5_file.close()
 
         self._h5_file = None
 
