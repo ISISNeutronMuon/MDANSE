@@ -524,12 +524,6 @@ class AtomGroup(_ChemicalEntity):
 
         self._chemical_system = list(s)[0]
 
-    def __getstate__(self):
-        return self.__dict__
-
-    def __setstate__(self, state):
-        self.__dict__ = state
-
     def __repr__(self):
         contents = ''
         for key, value in self.__dict__.items():
@@ -604,12 +598,6 @@ class AtomCluster(_ChemicalEntity):
             if not parentless:
                 at._parent = self
             self._atoms.append(at)
-
-    def __getstate__(self):
-        return self.__dict__
-
-    def __setstate__(self, state):
-        self.__dict__ = state
 
     def __getitem__(self, item: int) -> Atom:
         return self._atoms[item]
@@ -742,12 +730,6 @@ class Molecule(_ChemicalEntity):
 
     def __getitem__(self, item: str) -> Atom:
         return self._atoms[item]
-
-    def __getstate__(self):
-        return self.__dict__
-
-    def __setstate__(self, state):
-        self.__dict__ = state
 
     def __repr__(self):
         contents = ''
@@ -913,12 +895,6 @@ class Residue(_ChemicalEntity):
 
     def __getitem__(self, item: str) -> Atom:
         return self._atoms[item]
-
-    def __getstate__(self):
-        return self.__dict__
-
-    def __setstate__(self, state):
-        self.__dict__ = state
 
     def __repr__(self):
         contents = ''
@@ -1091,12 +1067,6 @@ class Nucleotide(_ChemicalEntity):
     def __getitem__(self, item: str) -> Atom:
         return self._atoms[item]
 
-    def __getstate__(self):
-        return self.__dict__
-
-    def __setstate__(self, state):
-        self.__dict__ = state
-
     def __repr__(self):
         contents = ''
         for key, value in self.__dict__.items():
@@ -1244,12 +1214,6 @@ class NucleotideChain(_ChemicalEntity):
 
     def __getitem__(self, item: int):
         return self._nucleotides[item]
-
-    def __getstate__(self):
-        return self.__dict__
-
-    def __setstate__(self, state):
-        self.__dict__ = state
 
     def __str__(self):
         return 'NucleotideChain of {} nucleotides'.format(len(self._nucleotides))
@@ -1547,12 +1511,6 @@ class PeptideChain(_ChemicalEntity):
     def __getitem__(self, item: int):
         return self._residues[item]
 
-    def __getstate__(self):
-        return self.__dict__
-
-    def __setstate__(self, state):
-        self.__dict__ = state
-
     def __str__(self):
         return 'PeptideChain of {} residues'.format(len(self._residues))
 
@@ -1704,12 +1662,6 @@ class Protein(_ChemicalEntity):
         self._name = name
 
         self._peptide_chains = []
-
-    def __getstate__(self):
-        return self.__dict__
-
-    def __setstate__(self, state):
-        self.__dict__ = state
 
     def __getitem__(self, item: int) -> PeptideChain:
         return self._peptide_chains[item]
@@ -1905,12 +1857,6 @@ class ChemicalSystem(_ChemicalEntity):
         self._name = name
 
         self._atoms = None
-
-    def __getstate__(self):
-        return self.__dict__
-
-    def __setstate__(self, state):
-        self.__dict__ = state
 
     def __repr__(self):
         contents = ', '.join([f'{key[1:] if key[0] == "_" else key}={repr(value)}'
