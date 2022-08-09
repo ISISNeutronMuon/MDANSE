@@ -5,10 +5,13 @@ import numpy as np
 
 from MDANSE.Extensions import atoms_in_shell, contiguous_coordinates
 
+
 class ConfigurationError(Exception):
     pass
 
+
 class _Configuration(metaclass=abc.ABCMeta):
+    is_periodic: bool
 
     def __init__(self, chemical_system,coordinates,**variables):
         """Constructor.

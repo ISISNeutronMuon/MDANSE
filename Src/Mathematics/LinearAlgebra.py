@@ -3,6 +3,7 @@ import numpy as np
 def cmp(a, b):
     return (a > b) - (a < b) 
 
+
 class Vector:
 
     """Vector in 3D space
@@ -54,8 +55,7 @@ class Vector:
     __deepcopy__ = __copy__
 
     def __repr__(self):
-        return 'Vector(%s,%s,%s)' % (repr(self.array[0]),\
-                                     repr(self.array[1]),repr(self.array[2]))
+        return 'Vector(%s,%s,%s)' % (repr(self.array[0]), repr(self.array[1]), repr(self.array[2]))
 
     def __str__(self):
         return repr(list(self.array))
@@ -118,6 +118,12 @@ class Vector:
 
     def __getitem__(self, index):
         return self.array[index]
+
+    def __eq__(self, other):
+        if isinstance(other, Vector):
+            return np.all(self.array == other.array)
+        else:
+            return False
 
     def x(self):
         """
@@ -276,6 +282,12 @@ class Quaternion:
     def __repr__(self):
         return 'Quaternion(' + str(list(self.array)) + ')'
 
+    def __eq__(self, other):
+        if isinstance(other, Quaternion):
+            return np.all(self.array == other.array)
+        else:
+            return False
+
     def dot(self, other):
         return np.add.reduce(self.array*other.array)
 
@@ -332,7 +344,7 @@ class Quaternion:
         @rtype: L{Scientific.Geometry.Transformation.Rotation}
         @raises ValueError: if the quaternion is not normalized
         """
-        from Transformation import Rotation
+        from MDANSE.Mathematics.Transformation import Rotation
         if np.fabs(self.norm()-1.) > 1.e-5:
             raise ValueError('Quaternion not normalized')
         d = np.dot(np.dot(self._rot, self.array), self.array)
@@ -462,6 +474,12 @@ class Tensor:
             return Tensor(elements)
         else:
             return elements
+
+    def __eq__(self, other):
+        if isinstance(other, Tensor):
+            return np.all(self.array == other.array)
+        else:
+            return False
 
     def asVector(self):
         """

@@ -5,6 +5,7 @@ import copy
 from typing import Union
 
 import numpy as np
+from numpy.typing import NDArray
 
 import h5py
 
@@ -12,8 +13,8 @@ from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DAT
     MoleculesDatabase, NucleotidesDatabase, ResiduesDatabase
 from MDANSE.Chemistry.Databases import ResiduesDatabaseError, NucleotidesDatabaseError
 from MDANSE.Mathematics.Geometry import superposition_fit
-from MDANSE.Mathematics.LinearAlgebra import delta, Tensor, Vector
-from MDANSE.Mathematics.Transformation import Rotation, Transformation, Translation
+from MDANSE.Mathematics.LinearAlgebra import delta, Quaternion, Tensor, Vector
+from MDANSE.Mathematics.Transformation import Rotation, RotationTranslation, Translation
 from MDANSE.MolecularDynamics.Configuration import _Configuration
 
 
@@ -109,8 +110,8 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         pass
 
     @property
-    def full_name(self):
-
+    def full_name(self) -> str:
+        """The full name of this chemical entity, which includes the names of all parent chemical entities."""
         full_name = self.name
         parent = self._parent
         while parent is not None:
@@ -144,8 +145,16 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
     def serialize(self, h5_file):
         pass
 
-    def group(self, name):
+    def group(self, name: str) -> list['Atom']:
+        """
+        Finds all atoms in this chemical entity that are a part of the provided group.
 
+        :param name: The name of the group whose atoms are being searched for.
+        :type name: str
+
+        :return: List of atoms that are a part of the provided group.
+        :rtype: list
+        """
         selected_atoms = []
         for at in self.atom_list:
             if not hasattr(at, 'groups'):
@@ -156,8 +165,16 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 
         return selected_atoms
 
-    def center_of_mass(self, configuration):
+    def center_of_mass(self, configuration: _Configuration) -> NDArray[float]:
+        """
+        Determines the coordinates of the centre of mass of this chemical entity.
 
+        :param configuration: The configuration corresponding to the chemical system whose part this chemical enitity is
+        :type configuration: any subclass of MDANSE.MolecularDynamics.Configuration._Configuration
+
+        :return: The coordinates of the centre of mass of this chemical entity.
+        :rtype: numpy.ndarray
+        """
         coords = configuration['coordinates']
 
         com = np.zeros((3,), dtype=np.float)
@@ -171,74 +188,115 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 
         return com
 
-    @property
-    def mass(self):
-
-        sum_masses = 0.0
-        for at in self.atom_list:
-            m = ATOMS_DATABASE[at.symbol]['atomic_weight']
-            sum_masses += m
-
-        return sum_masses
+    def centre_of_mass(self, configuration: _Configuration) -> NDArray[float]:
+        """Wrapper around the :py:meth: `center_of_mass()` method."""
+        return self.center_of_mass(configuration)
 
     @property
-    def masses(self):
+    def mass(self) -> float:
+        """The mass of this chemical entity. This is the sum of all non-ghost atoms in this chemical entity."""
+        return sum(self.masses)
 
-        masses = []
-        for at in self.atom_list:
-            m = ATOMS_DATABASE[at.symbol]['atomic_weight']
-            masses.append(m)
+    @property
+    def masses(self) -> list[float]:
+        """A list of masses of all non-ghost atoms within this chemical entity."""
+        return [ATOMS_DATABASE[at.symbol]['atomic_weight'] for at in self.atom_list]
 
-        return masses
+    def find_transformation_as_quaternion(self, conf1: _Configuration, conf2: Union[_Configuration, None] = None) \
+            -> tuple[Quaternion, Vector, Vector, float]:
+        """
+        Finds a linear transformation that, when applied to this chemical entity with its coordinates defined in
+        configuration conf1, minimizes the RMS distance to the conformation in conf2. Alternatively, if conf2 is None,
+        a linear transformation from the current configuration of the ChemicalSystem to conf1 is returned.
 
-    def find_transformation_as_quaternion(self, conf1, conf2=None):
+        Unlike :py:method: `find_transformation()`, this method returns a Quaternion corresponding to the rotation.
+        Under the hood, this method calls :func: `MDANSE.Mathematics.Geometry.superposition_fit()`.
 
-        chemical_system = self.root_chemical_system()
+        :param conf1: the configuration which is considered the initial configuration for the transformation if conf2 is
+                      set, and the final configuration if it is not
+        :type conf1: :class: `~MDANSE.MolecularDynamics.Configuration.Configuration`
+
+        :param conf2: the configuration which is considered the target configuration of the transformation, or None
+        :type conf2: :class: `~MDANSE.MolecularDynamics.Configuration.Configuration` or NoneType
+
+        :return: The quaternion corresponding to the rotation, vectors of the centres of mass of both configurations and
+            the minimum root-mean-square distance between the configurations.
+        :rtype: tuple of (:class: `MDANSE.Mathematics.LinearAlgebra.Quaternion`,
+                          :class: `MDANSE.Mathematics.LinearAlgebra.Vector`,
+                          :class: `MDANSE.Mathematics.LinearAlgebra.Vector`,
+                          float)
+        """
+        chemical_system = self.root_chemical_system
+        if chemical_system is None:
+            raise ChemicalEntityError('Only chemical entities which are a part of a ChemicalSystem can be transformed.'
+                                      f' The provided chemical entity, "{str(self)}", has its top level parent '
+                                      f'{str(self.top_level_chemical_entity)} which is not a part of any ChemicalSystem'
+                                      f'.\nFull chemical entity information: {repr(self)}')
+
         if chemical_system.configuration.is_periodic:
-            raise ValueError("superposition in periodic configurations is not defined")
+            raise ValueError("superposition in periodic configurations is not defined, therefore the configuration of "
+                             "the root chemical system of this chemical entity must not be periodic.")
 
         if conf1.chemical_system != chemical_system:
-            raise ValueError("conformations comes from different chemical systems")
+            raise ValueError('conformations come from different chemical systems: the root chemical system of this '
+                             f'chemical entity is "{chemical_system.name}" but the chemical system registered with the '
+                             f'provided configuration (conf1) is "{conf1.chemical_system.name}".\nRoot chemical system:'
+                             f' {repr(chemical_system)}\nConfiguration chemical system: {repr(conf1.chemical_system)}')
 
         if conf2 is None:
             conf2 = conf1
             conf1 = chemical_system.configuration
         else:
             if conf2.chemical_system != chemical_system:
-                raise ValueError("conformations comes from different chemical systems")
+                raise ValueError('conformations come from different chemical systems: the root chemical system of this'
+                                 f' chemical entity is "{chemical_system.name}" but the chemical system registered with'
+                                 f' the provided configuration (conf2) is "{conf2.chemical_system.name}".\nRoot '
+                                 f'chemical system: {repr(chemical_system)}\nConfiguration chemical system: '
+                                 f'{repr(conf2.chemical_system)}')
 
-        weights = chemical_system.masses()
+        weights = chemical_system.masses
 
-        return superposition_fit([
-            (
-                weights[a.index],
-                Vector(*conf1['coordinates'][a.index, :]),
-                Vector(*conf2['coordinates'][a.index, :])) for a in self.atom_list])
+        return superposition_fit([(weights[a.index],
+                                   Vector(*conf1['coordinates'][a.index, :]),
+                                   Vector(*conf2['coordinates'][a.index, :])) for a in self.atom_list])
 
-    def find_transformation(self, conf1, conf2=None):
+    def find_transformation(self, conf1: _Configuration, conf2: _Configuration = None) \
+            -> tuple[RotationTranslation, float]:
         """
-        :param conf1: a configuration object
+        Finds a linear transformation that, when applied to this chemical entity with its coordinates defined in
+        configuration conf1, minimizes the RMS distance to the conformation in conf2. Alternatively, if conf2 is None,
+        a linear transformation from the current configuration of the ChemicalSystem to conf1 is returned.
+
+        It uses the :method: `find_transformation_as_quaternion()` to do this, and then transforms its results to return
+        an :class: `MDANSE.Mathematics.Transformation.RotationTranslation` object.
+
+        :param conf1: the configuration in which this chemical entity is
         :type conf1: :class:`~MDANSE.MolecularDynamics.Configuration.Configuration`
-        :param conf2: a configuration object, or None for the current configuration
-        :type conf2: :class:`~MDANSE.MolecularDynamics.Configuration.Configuration` or NoneType
-        :returns: the linear transformation that, when applied to
-                  the object in configuration conf1, minimizes the
-                  RMS distance to the conformation in conf2, and the
-                  minimal RMS distance.
-                  If conf2 is None, returns the transformation from the
-                  current configuration to conf1 and the associated
-                  RMS distance.
-        """
+        `
+        :param conf1: the configuration which is considered the initial configuration for the transformation if conf2 is
+                      set, and the final configuration if it is not
+        :type conf1: :class: `~MDANSE.MolecularDynamics.Configuration.Configuration`
 
+        :param conf2: the configuration which is considered the target configuration of the transformation, or None
+        :type conf2: :class: `~MDANSE.MolecularDynamics.Configuration.Configuration` or NoneType
+
+        :returns: the linear transformation corresponding to the transformation from conf1 to conf2, or from current
+                  configuration to conf1, and the minimum root-mean-square distance
+        :rtype: tuple of (:class: `MDANSE.Mathematics.Transformation.RotationTranslation`, float)
+        """
         q, cm1, cm2, rms = self.find_transformation_as_quaternion(conf1, conf2)
         return Translation(cm2) * q.asRotation() * Translation(-cm1), rms
 
-    def center_and_moment_of_inertia(self, configuration):
+    def center_and_moment_of_inertia(self, configuration: _Configuration) -> tuple[Vector, Tensor]:
         """
-        :param configuration: a configuration object, or None for the current configuration
+        Calculates the centre of masses and the inertia tensor of this chemical entity.
+
+        :param configuration: a configuration that contains coordinates of this chemical entity
         :type configuration: :class:`~MDANSE.MolecularDynamics.Configuration.Configuration`
-        :returns: the center of mass and the moment of inertia tensor
-                  in the given configuration
+
+        :returns: the center of mass and the moment of inertia tensor in the given configuration
+        :rtype: tuple of (:class: `MDANSE.Mathematics.LinearAlgebra.Vector`,
+        :class: `MDANSE.Mathematics.LinearAlgebra.Tensor`)
         """
 
         m = 0.0
@@ -255,22 +313,30 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         t = t.trace() * delta - t
         return cm, t
 
-    def normalizing_transformation(self, configuration, repr=None):
-        """
-        Calculate a linear transformation that shifts the center of mass
-        of the object to the coordinate origin and makes its
-        principal axes of inertia parallel to the three coordinate
-        axes.
+    def centre_and_moment_of_inertia(self, configuration: _Configuration) -> tuple[Vector, Tensor]:
+        """Wrapper around :meth: `center_and_moment_of_inertia()`."""
+        return self.center_and_moment_of_inertia(configuration)
 
-        :param repr: the specific representation for axis alignment:
+    def normalizing_transformation(self, configuration: _Configuration, representation: str = None) \
+            -> RotationTranslation:
+        """
+        Calculate a linear transformation that shifts the center of mass  of the object to the coordinate origin and
+        makes its principal axes of inertia parallel to the three coordinate axes.
+
+        :param configuration: a configuration that contains coordinates of this chemical entity
+        :type configuration: :class:`~MDANSE.MolecularDynamics.Configuration.Configuration`
+
+        :param representation: the specific representation for axis alignment:
           Ir    : x y z <--> b c a
           IIr   : x y z <--> c a b
           IIIr  : x y z <--> a b c
           Il    : x y z <--> c b a
           IIl   : x y z <--> a c b
           IIIl  : x y z <--> b a c
+        :type representation: str
+
         :returns: the normalizing transformation
-        :rtype: Scientific.Geometry.Transformation.RigidBodyTransformation
+        :rtype: :class: `MDANSE.Mathematics.Transformation.RotationTranslation`
         """
 
         cm, inertia = self.center_and_moment_of_inertia(configuration)
@@ -278,36 +344,56 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         diag = np.transpose(diag)
         if np.linalg.det(diag) < 0:
             diag[0] = -diag[0]
-        if repr != None:
+
+        if representation is not None:
             seq = np.argsort(ev)
-            if repr == 'Ir':
+            if representation == 'Ir':
                 seq = np.array([seq[1], seq[2], seq[0]])
-            elif repr == 'IIr':
+            elif representation == 'IIr':
                 seq = np.array([seq[2], seq[0], seq[1]])
-            elif repr == 'Il':
+            elif representation == 'IIIr':
+                pass
+            elif representation == 'Il':
                 seq = seq[2::-1]
-            elif repr == 'IIl':
+            elif representation == 'IIl':
                 seq[1:3] = np.array([seq[2], seq[1]])
-            elif repr == 'IIIl':
+            elif representation == 'IIIl':
                 seq[0:2] = np.array([seq[1], seq[0]])
+            else:
+                raise ValueError(f'invalid input for parameter repr: a value of {repr(representation)} was provided, '
+                                 'but only the following values are accepted: "Ir", "IIr", "IIIr", "Il", "IIl", "IIIl"')
             diag = np.take(diag, seq)
+
         return Rotation(diag) * Translation(-cm)
 
     @property
-    def root_chemical_system(self):
-
+    def root_chemical_system(self) -> Union['ChemicalSystem', None]:
+        """
+        The :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem` of which part this chemical entity is, or None if
+        it is not a part of one.
+        """
         if isinstance(self, ChemicalSystem):
             return self
         else:
-            return self._parent.root_chemical_system
+            try:
+                return self._parent.root_chemical_system
+            except AttributeError:
+                return None
 
     @property
-    def top_level_chemical_entity(self):
-
+    def top_level_chemical_entity(self) -> '_ChemicalEntity':
+        """
+        The ultimate non-system parent of this chemical entity, i.e. the parent of a parent etc. until an entity that
+        is directly a child of a :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`, wherein the child is returned.
+        If this chemical entity is not a part of a ChemicalSystem, the entity whose parent is None is returned.
+        """
         if isinstance(self._parent, ChemicalSystem):
             return self
         else:
-            return self._parent.top_level_chemical_entity
+            try:
+                return self._parent.top_level_chemical_entity
+            except AttributeError:
+                return self
 
     @property
     @abc.abstractmethod

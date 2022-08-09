@@ -17,8 +17,12 @@ import pickle
 from typing import Union
 import unittest
 
+import numpy as np
+
 from MDANSE.Chemistry import MOLECULES_DATABASE, RESIDUES_DATABASE, NUCLEOTIDES_DATABASE
 import MDANSE.Chemistry.ChemicalEntity as ce
+from MDANSE.Mathematics.LinearAlgebra import Quaternion, Vector, Tensor
+from MDANSE.Mathematics.Transformation import RotationTranslation
 
 
 class TestAtom(unittest.TestCase):
@@ -1595,3 +1599,175 @@ class StubHDFFile(dict):
 
     def create_dataset(self, name: str, data, dtype):
         self[name] = data
+
+
+class TestChemicalEntity(unittest.TestCase):
+    def setUp(self):
+        self.r1 = ce.Residue('GLY', 'glycine1', 'NT1')
+        self.r1.set_atoms(['HA3', 'O', 'N', 'CA', 'HA2', 'C', 'HT1', 'HT2', 'HT3'])
+
+        self.r2 = ce.Residue('GLY', 'glycine2', 'CT1')
+        self.r2.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C', 'OXT'])
+
+        self.chain = ce.PeptideChain('chain')
+        self.chain.set_residues([self.r1, self.r2])
+
+        self.protein = ce.Protein('protein')
+        self.protein.set_peptide_chains([self.chain])
+
+    def test_full_name(self):
+        self.assertEqual('protein.chain.glycine1.N', self.r1['N'].full_name)
+        self.assertEqual('protein.chain.glycine2', self.r2.full_name)
+
+    def test_group(self):
+        self.assertEqual([self.r1['HA3'], self.r2['HA3']], self.protein.group('sidechain'))
+
+    def test_center_of_mass(self):
+        system = ce.ChemicalSystem('name')
+        system.add_chemical_entity(self.protein)
+        group = ce.AtomGroup([self.r1['HT3'], self.r1['HA2'], self.r2['O']])
+
+        configuration = {'coordinates': np.ones((50, 3))}
+        self.assertTrue(np.allclose(np.array([1, 1, 1]), self.protein.center_of_mass(configuration)))
+        self.assertTrue(np.allclose(np.array([1, 1, 1]), self.protein.centre_of_mass(configuration)))
+        self.assertTrue(np.allclose(np.array([1, 1, 1]), group.center_of_mass(configuration)))
+
+    def test_mass(self):
+        self.assertAlmostEqual(132.1176, self.protein.mass)
+        self.assertAlmostEqual(1.0079, self.r1['HA3'].mass)
+
+    def test_masses(self):
+        for i, j in zip([1.0079, 15.9994, 14.0067, 12.0107, 1.0079, 12.0107, 1.0079, 1.0079, 1.0079, 1.0079, 1.0079,
+                         15.9994, 14.0067, 12.0107, 1.0079, 12.0107, 15.9994], self.protein.masses):
+            self.assertAlmostEqual(i, j)
+
+        for i, j in zip([1.0079], self.r1['HA3'].masses):
+            self.assertAlmostEqual(i, j)
+
+    def test_find_transformation_as_quaternion_valid(self):
+        system = ce.ChemicalSystem('name')
+        system.add_chemical_entity(self.protein)
+        conf = StubConfiguration(False, system, coordinates=np.ones((17, 3)))
+        system.configuration = conf
+
+        self.assertTupleEqual((Quaternion([1.0, 0.0, 0.0, 0.0]), Vector(1.0,1.0,1.0), Vector(1.0,1.0,1.0), 0.0),
+                              self.protein.find_transformation_as_quaternion(conf))
+
+    def test_find_transformation_as_quaternion_entity_not_part_of_system(self):
+        conf = StubConfiguration(False, None, coordinates=np.ones((17, 3)))
+        with self.assertRaises(ce.ChemicalEntityError):
+            self.protein.find_transformation_as_quaternion(conf)
+
+    def test_find_transformation_as_quaternion_periodic_configuration(self):
+        system = ce.ChemicalSystem('name')
+        system.add_chemical_entity(self.protein)
+        conf = StubConfiguration(True, system)
+        system.configuration = conf
+
+        with self.assertRaises(ValueError) as e:
+            self.protein.find_transformation_as_quaternion(conf)
+        self.assertEqual("superposition in periodic configurations is not defined, therefore the configuration of the "
+                         "root chemical system of this chemical entity must not be periodic.", str(e.exception))
+
+    def test_find_transformation_as_quaternion_conf1_incompatible(self):
+        system = ce.ChemicalSystem('name')
+        system.add_chemical_entity(self.protein)
+        conf = StubConfiguration(False, system)
+        system.configuration = conf
+
+        conf.chemical_system = ce.ChemicalSystem('different system')
+        with self.assertRaises(ValueError) as e:
+            self.protein.find_transformation_as_quaternion(conf)
+        self.assertEqual('conformations come from different chemical systems: the root chemical system of this '
+                         'chemical entity is "name" but the chemical system registered with the provided configuration '
+                         '(conf1) is "different system".', str(e.exception)[:208])
+
+    def test_find_transformation_as_quaternion_conf2_incompatible(self):
+        system = ce.ChemicalSystem('name')
+        system.add_chemical_entity(self.protein)
+        conf = StubConfiguration(False, system)
+        system.configuration = conf
+
+        with self.assertRaises(ValueError) as e:
+            self.protein.find_transformation_as_quaternion(conf, StubConfiguration(False, ce.ChemicalSystem('diff')))
+        self.assertEqual('conformations come from different chemical systems: the root chemical system of this '
+                         'chemical entity is "name" but the chemical system registered with the provided configuration '
+                         '(conf2) is "diff".', str(e.exception)[:196])
+
+    def test_find_transformation(self):
+        system = ce.ChemicalSystem('name')
+        system.add_chemical_entity(self.protein)
+        conf = StubConfiguration(False, system, coordinates=np.ones((17, 3)))
+        system.configuration = conf
+
+        transformation, rms = self.protein.find_transformation(conf)
+        self.assertTrue(isinstance(transformation, RotationTranslation))
+        self.assertEqual(Tensor([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]], False), transformation.tensor)
+        self.assertEqual(Vector([0.0, 0.0, 0.0]), transformation.vector)
+        self.assertEqual(0, rms)
+
+    def test_center_and_moment_of_inertia(self):
+        system = ce.ChemicalSystem('name')
+        system.add_chemical_entity(self.protein)
+        group = ce.AtomGroup([self.r1['HT3'], self.r1['HA2'], self.r2['O']])
+
+        configuration = {'coordinates': np.ones((50, 3))}
+        self.assertEqual((Vector(1.0,1.0,1.0), Tensor([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])),
+                         self.protein.center_and_moment_of_inertia(configuration))
+        self.assertEqual((Vector(1.0, 1.0, 1.0), Tensor([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])),
+                         self.protein.centre_and_moment_of_inertia(configuration))
+        self.assertEqual((Vector(1.0, 1.0, 1.0), Tensor([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])),
+                         group.center_and_moment_of_inertia(configuration))
+
+    def test_normalizing_transformation_valid(self):
+        system = ce.ChemicalSystem('name')
+        system.add_chemical_entity(self.protein)
+        configuration = {'coordinates': np.ones((50, 3))}
+
+        no_representation = self.protein.normalizing_transformation(configuration, None)
+        ir = self.protein.normalizing_transformation(configuration, 'Ir')
+        iir = self.protein.normalizing_transformation(configuration, 'IIr')
+        iiir = self.protein.normalizing_transformation(configuration, 'IIIr')
+        il = self.protein.normalizing_transformation(configuration, 'Il')
+        iil = self.protein.normalizing_transformation(configuration, 'IIl')
+        iiil = self.protein.normalizing_transformation(configuration, 'IIIl')
+
+        tensors = [[[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]], [0., 0., 1.], [0, 1, 0], [1, 0, 0], [0, 0, 1], [1, 0, 0],
+                   [0, 1, 0]]
+        vectors = [Vector([-1.0, -1.0, -1.0]), Tensor(-1), Tensor(-1), Tensor(-1), Tensor(-1), Tensor(-1), Tensor(-1)]
+        self.assertTrue(isinstance(no_representation, RotationTranslation))
+        for expected_tensor, expected_vector, result in zip(tensors, vectors,
+                                                            [no_representation, ir, iir, iiir, il, iil, iiil]):
+            self.assertEqual(Tensor(expected_tensor), result.tensor)
+            self.assertEqual(expected_vector, result.vector)
+
+    def test_normalizing_transformation_invalid_representation(self):
+        system = ce.ChemicalSystem('name')
+        system.add_chemical_entity(self.protein)
+        configuration = {'coordinates': np.ones((50, 3))}
+        with self.assertRaises(ValueError):
+            self.protein.normalizing_transformation(configuration, 'INVALID INPUT')
+
+    def test_root_chemical_system(self):
+        system = ce.ChemicalSystem('name')
+        system.add_chemical_entity(self.protein)
+        atom = ce.Atom()
+
+        self.assertEqual(system, self.protein.root_chemical_system)
+        self.assertEqual(system, self.r1['O'].root_chemical_system)
+        self.assertEqual(None, atom.root_chemical_system)
+
+    def test_top_level_chemical_entity(self):
+        system = ce.ChemicalSystem('name')
+        system.add_chemical_entity(self.protein)
+        atom = ce.Atom()
+        self.assertEqual(self.protein, self.protein.top_level_chemical_entity)
+        self.assertEqual(self.protein, self.r1['O'].top_level_chemical_entity)
+        self.assertEqual(atom, atom.top_level_chemical_entity)
+
+
+class StubConfiguration(dict):
+    def __init__(self,  is_periodic: bool, chemical_system, **kwargs):
+        self.is_periodic = is_periodic
+        self.chemical_system = chemical_system
+        super().__init__(**kwargs)
