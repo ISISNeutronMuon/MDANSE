@@ -104,7 +104,7 @@ def generate_sphere_points(n):
 
 def random_points_on_sphere(radius=1.0, nPoints=100):
 
-    points = numpy.zeros((3,nPoints),dtype=numpy.float)
+    points = numpy.zeros((3,nPoints),dtype=numpy.float64)
     
     theta = 2.0*numpy.pi*numpy.random.uniform(nPoints)
     u = numpy.random.uniform(-1.0,1.0,nPoints)
@@ -195,14 +195,14 @@ def superposition_fit(confs):
               and the RMS distance after the optimal superposition
     """
     w_sum = 0.
-    wr_sum = numpy.zeros((3,), numpy.float)
+    wr_sum = numpy.zeros((3,), numpy.float64)
     for w, r_ref, r in confs:
         w_sum += w
         wr_sum += w*r_ref.array
     ref_cms = wr_sum/w_sum
-    pos = numpy.zeros((3,), numpy.float)
+    pos = numpy.zeros((3,), numpy.float64)
     possq = 0.
-    cross = numpy.zeros((3, 3), numpy.float)
+    cross = numpy.zeros((3, 3), numpy.float64)
     for w, r_ref, r in confs:
         w = w/w_sum
         r_ref = r_ref.array-ref_cms
@@ -211,7 +211,7 @@ def superposition_fit(confs):
         possq = possq + w*numpy.add.reduce(r*r) \
                       + w*numpy.add.reduce(r_ref*r_ref)
         cross = cross + w*r[:, numpy.newaxis]*r_ref[numpy.newaxis, :]
-    k = numpy.zeros((4, 4), numpy.float)
+    k = numpy.zeros((4, 4), numpy.float64)
     k[0, 0] = -cross[0, 0]-cross[1, 1]-cross[2, 2]
     k[0, 1] = cross[1, 2]-cross[2, 1]
     k[0, 2] = cross[2, 0]-cross[0, 2]

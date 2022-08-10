@@ -177,7 +177,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         """
         coords = configuration['coordinates']
 
-        com = np.zeros((3,), dtype=np.float)
+        com = np.zeros((3,), dtype=np.float64)
         sum_masses = 0.0
         for at in self.atom_list:
             m = ATOMS_DATABASE[at.symbol]['atomic_weight']
