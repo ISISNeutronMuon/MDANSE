@@ -14,7 +14,7 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
-from MDANSE.Chemistry.ChemicalEntity import NucleotideChain, PeptideChain, Protein
+from MDANSE.Chemistry.ChemicalEntity import NucleotideChain, PeptideChain, Protein, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class Macromolecule(ISelector):
@@ -23,7 +23,7 @@ class Macromolecule(ISelector):
     
     lookup = {NucleotideChain:"nucleotide_chain",PeptideChain:"peptide_chain",Protein:"protein"}
 
-    def __init__(self, chemicalSystem):
+    def __init__(self, chemicalSystem: ChemicalSystem):
 
         ISelector.__init__(self,chemicalSystem)
                 
@@ -41,7 +41,7 @@ class Macromolecule(ISelector):
         if '*' in macromolecules:
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, (NucleotideChain,PeptideChain,Protein)):
-                    sel.update([at for at in ce.atom_list()])
+                    sel.update([at for at in ce.atom_list])
         
         else:
             for ce in self._chemicalSystem.chemical_entities:

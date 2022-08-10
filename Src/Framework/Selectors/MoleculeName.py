@@ -14,13 +14,14 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class MoleculeName(ISelector):
 
     section = "molecules"
 
-    def __init__(self, chemicalSystem):
+    def __init__(self, chemicalSystem: ChemicalSystem):
 
         ISelector.__init__(self,chemicalSystem)
         
@@ -36,13 +37,13 @@ class MoleculeName(ISelector):
         sel = set()
         
         if '*' in names:
-            sel.update([at for at in self._chemicalSystem.atom_list()])
+            sel.update([at for at in self._chemicalSystem.atom_list])
 
         else:
             vals = set(names)
             for ce in self._chemicalSystem.chemical_entities:
                 if ce.name.strip() in vals:
-                    sel.update([at for at in ce.atom_list()])
+                    sel.update([at for at in ce.atom_list])
                 
         return sel
     

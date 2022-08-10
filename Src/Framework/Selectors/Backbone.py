@@ -14,14 +14,14 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
-from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
+from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 class Backbone(ISelector):
 
     section = "proteins"
 
-    def __init__(self, chemicalSystem):
+    def __init__(self, chemicalSystem: ChemicalSystem):
         
         ISelector.__init__(self,chemicalSystem)
                 
@@ -40,12 +40,12 @@ class Backbone(ISelector):
         if '*' in names:
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, (PeptideChain, Protein)):
-                    sel.update([at for at in ce.backbone()])
+                    sel.update([at for at in ce.backbone])
         else:            
             vals = set(names)
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, (PeptideChain, Protein)) and ce.name in vals:
-                    sel.update([at for at in ce.backbone()])
+                    sel.update([at for at in ce.backbone])
             
         return sel
 

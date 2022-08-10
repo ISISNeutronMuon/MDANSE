@@ -14,14 +14,14 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
-from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
+from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
         
 class ResidueType(ISelector):
 
     section = "proteins"
 
-    def __init__(self, chemicalSystem):
+    def __init__(self, chemicalSystem: ChemicalSystem):
 
         ISelector.__init__(self,chemicalSystem)
                                 
@@ -42,7 +42,7 @@ class ResidueType(ISelector):
         if '*' in types:
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, (PeptideChain,Protein)):
-                    sel.update([at for at in ce.atom_list()])
+                    sel.update([at for at in ce.atom_list])
         
         else:                
             vals = set([v.strip() for v in types])
@@ -52,7 +52,7 @@ class ResidueType(ISelector):
                     for r in ce.residues:
                         resType = r.code.strip()
                         if resType in vals:
-                            sel.update([at for at in r.atom_list()])
+                            sel.update([at for at in r.atom_list])
                 
         return sel
     

@@ -25,7 +25,7 @@ class PythonScript(ISelector):
         sel = set()
 
         if '*' in scripts:
-            sel.update([at for at in self._chemicalSystem.atom_list()])
+            sel.update([at for at in self._chemicalSystem.atom_list])
                                 
         for s in scripts:
             namespace = {"chemicalSystem" : self._chemicalSystem}

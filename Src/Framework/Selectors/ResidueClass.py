@@ -14,7 +14,7 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
-from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
+from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 # Dictionnary associating tuples of residue names (values) to their corresponding chemical family (key). 
@@ -31,7 +31,7 @@ class ResidueClass(ISelector):
 
     section = "proteins"
 
-    def __init__(self, chemicalSystem):
+    def __init__(self, chemicalSystem: ChemicalSystem):
 
         ISelector.__init__(self,chemicalSystem)
                         
@@ -49,7 +49,7 @@ class ResidueClass(ISelector):
         if '*' in classes:
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, (PeptideChain,Protein)):
-                    sel.update([at for at in ce.atom_list()])
+                    sel.update([at for at in ce.atom_list])
         
         else:        
             vals = set(classes)
@@ -65,7 +65,7 @@ class ResidueClass(ISelector):
                     for r in res:
                         resName = r.code.strip()
                         if resName in selRes:
-                            sel.update([at for at in r.atom_list()])
+                            sel.update([at for at in r.atom_list])
                                                    
         return sel
     

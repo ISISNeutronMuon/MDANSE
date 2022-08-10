@@ -61,10 +61,10 @@ class TestAtomsSelector(unittest.TestCase):
         """
         super(TestAtomsSelector, cls).setUpClass()
 
-        reader = PDBReader('./Data/PDB/2vb1.pdb')
+        reader = PDBReader('../../Data/PDB/2vb1.pdb')
         cls._proteinChemicalSystem = reader.build_chemical_system()
 
-        reader = PDBReader('./Data/PDB/1gip.pdb')
+        reader = PDBReader('../../Data/PDB/1gip.pdb')
         cls._nucleicAcidChemicalSystem = reader.build_chemical_system()
 
     def test_all(self):

@@ -18,7 +18,7 @@ import numpy as np
 
 from MDANSE.Core.Error import Error
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, AtomGroup
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, AtomGroup, ChemicalSystem, _ChemicalEntity
 from MDANSE.Extensions import fast_calculation
 
 class MolecularDynamicsError(Error):
@@ -27,7 +27,8 @@ class MolecularDynamicsError(Error):
 class UniverseAdapterError(Error):
     pass
 
-def atomindex_to_moleculeindex(chemicalSystem):
+
+def atomindex_to_moleculeindex(chemicalSystem: ChemicalSystem):
     """Returns a lookup between the index of the atoms of a chemical system and the index 
     of their corresponding chemical entity.
 
@@ -40,12 +41,13 @@ def atomindex_to_moleculeindex(chemicalSystem):
     
     lut = {}
     for i,ce in enumerate(chemicalSystem.chemical_entities):
-        for at in ce.atom_list():
+        for at in ce.atom_list:
             lut[at.index] = i
                 
     return lut
-    
-def brute_formula(chemicalEntity, sep='_'):
+
+
+def brute_formula(chemicalEntity: _ChemicalEntity, sep='_'):
     """Define the brute formula of a given chemical entity.
 
     Args:
@@ -58,12 +60,13 @@ def brute_formula(chemicalEntity, sep='_'):
     
     contents = {}
     
-    for at in chemicalEntity.atom_list():
+    for at in chemicalEntity.atom_list:
         contents[at.symbol] = str(int(contents.get(at.symbol,0)) + 1)
     
     return sep.join([''.join(v) for v in sorted(contents.items())])
 
-def build_connectivity(chemicalSystem ,tolerance=0.05):
+
+def build_connectivity(chemicalSystem: ChemicalSystem ,tolerance=0.05):
     """Build the connectivity of the AtomCluster of a given chemical system.
 
     Args:
@@ -83,14 +86,14 @@ def build_connectivity(chemicalSystem ,tolerance=0.05):
             singleAtomsObjects.append(ce)
         else:
             if ce.number_of_atoms() == 1:
-                singleAtomsObjects.extend(ce.atom_list())
+                singleAtomsObjects.extend(ce.atom_list)
 
     if singleAtomsObjects:
         scannedObjects.append(AtomCluster('',singleAtomsObjects, parentless=True))
 
     for ce in scannedObjects:
 
-        atoms = sorted(ce.atom_list(), key = operator.attrgetter('index'))
+        atoms = sorted(ce.atom_list, key = operator.attrgetter('index'))
 
         nAtoms = len(atoms)
         indexes = [at.index for at in atoms]
@@ -105,7 +108,8 @@ def build_connectivity(chemicalSystem ,tolerance=0.05):
             atoms[idx1].bonds.append(atoms[idx2])                  
             atoms[idx2].bonds.append(atoms[idx1])
 
-def find_atoms_in_molecule(chemicalSystem, ceName, atomNames, indexes=False):
+
+def find_atoms_in_molecule(chemicalSystem: ChemicalSystem, ceName, atomNames, indexes=False):
     """Find the atoms of a chemical system whose chemical entity match a given value 
     and atom names are within a given list.
 
@@ -128,7 +132,7 @@ def find_atoms_in_molecule(chemicalSystem, ceName, atomNames, indexes=False):
                     
     match = []
     for ce in chemicalEntities:
-        atoms = ce.atom_list()
+        atoms = ce.atom_list
         names = [at.name for at in atoms]
         l = [atoms[names.index(at_name)] for at_name in atomNames]
 
@@ -139,7 +143,8 @@ def find_atoms_in_molecule(chemicalSystem, ceName, atomNames, indexes=False):
         
     return match
 
-def get_chemical_objects_dict(chemical_system):
+
+def get_chemical_objects_dict(chemical_system: ChemicalSystem):
     """Return a dict of the chemical entities found in a chemical system.
 
     Args:
@@ -155,8 +160,9 @@ def get_chemical_objects_dict(chemical_system):
         d.setdefault(ce.name, []).append(ce)
         
     return d
-                                                                            
-def group_atoms(chemicalSystem,groups):
+
+
+def group_atoms(chemicalSystem: ChemicalSystem,groups):
     """Group the atoms of a chemical system.
 
     Args:
@@ -167,13 +173,14 @@ def group_atoms(chemicalSystem,groups):
         list: the list of AtomGroup
     """
     
-    atoms = sorted(chemicalSystem.atom_list(), key=operator.attrgetter('index'))
+    atoms = sorted(chemicalSystem.atom_list, key=operator.attrgetter('index'))
                                         
     groups = [AtomGroup([atoms[index] for index in gr]) for gr in groups]
 
     return groups
 
-def resolve_undefined_molecules_name(chemicalSystem):
+
+def resolve_undefined_molecules_name(chemicalSystem: ChemicalSystem):
     """Resolve the name of the chemical entities with no names by using their
     brute formula.
 
@@ -185,7 +192,8 @@ def resolve_undefined_molecules_name(chemicalSystem):
         if not ce.name.strip():
             ce.name = brute_formula(ce,sep="")
 
-def sorted_atoms(atoms,attribute=None):
+
+def sorted_atoms(atoms: list[Atom], attribute=None):
     """Sort a list of atoms according.
 
     Args:

@@ -14,23 +14,24 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
         
 class Sulphate(ISelector):
 
     section = "chemical groups"
 
-    def __init__(self, chemicalSystem):
+    def __init__(self, chemicalSystem: ChemicalSystem):
         
         ISelector.__init__(self,chemicalSystem)
 
         for ce in self._chemicalSystem.chemical_entities:
                                         
-            sulfur = [at for at in ce.atom_list() if at.element.strip().lower() in ['sulphur', 'sulfur']]
+            sulfur = [at for at in ce.atom_list if at.element.strip().lower() in ['sulphur', 'sulfur']]
             
             for sulf in sulfur:
                 neighbours = sulf.bonds
-                oxygens = [neigh.full_name().strip() for neigh in neighbours if neigh.element.strip().lower() == 'oxygen']
+                oxygens = [neigh.full_name.strip() for neigh in neighbours if neigh.element.strip().lower() == 'oxygen']
                 if len(oxygens) == 4:
                     self._choices.extend([sulf] + sorted(oxygens))
 
@@ -46,7 +47,7 @@ class Sulphate(ISelector):
             names = self._choices[1:]
         
         vals = set([v for v in names])
-        sel.update([at for at in self._chemicalSystem.atom_list() if at.full_name().strip() in vals])
+        sel.update([at for at in self._chemicalSystem.atom_list if at.full_name.strip() in vals])
                 
         return sel
     

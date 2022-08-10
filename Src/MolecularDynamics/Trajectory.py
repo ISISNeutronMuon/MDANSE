@@ -19,7 +19,7 @@ import numpy as np
 import h5py
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
+from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem, _ChemicalEntity
 from MDANSE.Extensions import atomic_trajectory, com_trajectory, fold_coordinates
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration, RealConfiguration
 from MDANSE.MolecularDynamics.TrajectoryUtils import build_connectivity, resolve_undefined_molecules_name, sorted_atoms
@@ -380,7 +380,7 @@ class TrajectoryWriterError(Exception):
 
 class TrajectoryWriter:
 
-    def __init__(self, h5_filename, chemical_system, n_steps, selected_atoms=None):
+    def __init__(self, h5_filename, chemical_system: ChemicalSystem, n_steps, selected_atoms=None):
         """Constructor.
 
         :param h5_filename: the trajectory filename
@@ -400,16 +400,16 @@ class TrajectoryWriter:
         self._chemical_system = chemical_system.copy()
 
         if selected_atoms is None:
-            self._selected_atoms = self._chemical_system.atom_list()
+            self._selected_atoms = self._chemical_system.atom_list
         else:
             for at in selected_atoms:
-                if at.root_chemical_system() != chemical_system:
+                if at.root_chemical_system != chemical_system:
                     raise TrajectoryWriterError('One or more atoms of the selection comes from a different chemical system')
             self._selected_atoms = sorted_atoms(selected_atoms)
             
         self._selected_atoms = [at.index for at in self._selected_atoms]
 
-        all_atoms = self._chemical_system.atom_list()
+        all_atoms = self._chemical_system.atom_list
         for idx in self._selected_atoms:
             all_atoms[idx] = False
 
@@ -458,7 +458,7 @@ class TrajectoryWriter:
         if units is None:
             units = {}
 
-        n_atoms = self._chemical_system.total_number_of_atoms()
+        n_atoms = self._chemical_system.total_number_of_atoms
 
         # Write the configuration variables
         configuration_grp = self._h5_file['/configuration']
@@ -511,7 +511,7 @@ class RigidBodyTrajectoryGenerator:
        and a quaternion for the orientation)
     """
     
-    def __init__(self, trajectory, chemical_entity, reference, first=0, last=None, step=1):
+    def __init__(self, trajectory, chemical_entity: _ChemicalEntity, reference, first=0, last=None, step=1):
         """Constructor.
 
         :param trajectory: the input trajectory
@@ -533,7 +533,7 @@ class RigidBodyTrajectoryGenerator:
         if last is None:
             last = len(self._trajectory)
 
-        atoms = chemical_entity.atom_list()
+        atoms = chemical_entity.atom_list
 
         masses = [ATOMS_DATABASE[at.symbol]['atomic_weight'] for at in atoms]
 
