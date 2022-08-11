@@ -350,7 +350,13 @@ class AtomsDatabase(metaclass=Singleton):
         return info
 
     def items(self) -> ItemsView[str, Union[str, int, float, list]]:
+        """
+        Returns the iterator over the data dictionary, thus allowing to iterate over the atoms and their properties
+        simultaneously.
 
+        :return: Iterator over the data dictionary
+        :rtype: ItemsView
+        """
         return self._data.items()
 
     def match_numeric_property(self, pname: str, value: Union[int, float], tolerance:float = 0.0) -> list[str]:
@@ -437,7 +443,7 @@ class AtomsDatabase(metaclass=Singleton):
 
 class MoleculesDatabaseError(Error):
     """
-    This class handles the exceptions related to ElementsDatabase
+    This class handles the exceptions related to MoleculesDatabase
     """
     pass
 
@@ -460,12 +466,12 @@ class MoleculesDatabase(object, metaclass=Singleton):
         # Load the user database. If any problem occurs while loading it, loads the default one
         self._load()
 
-    def __contains__(self, molecule):
+    def __contains__(self, molecule: str) -> bool:
         """
         Return True if the database contains a given molecule.
 
         :param molecule: the name of the element to search in the database
-        :type ename: str
+        :type molecule: str
 
         :return: True if the database contains a given element
         :rtype: bool
@@ -477,14 +483,13 @@ class MoleculesDatabase(object, metaclass=Singleton):
 
         return False
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str):
         """
         Return an entry of the database.
 
-        If the item is a basestring, then the return value will be the list of properties
-        related to element of the databse base that matches this item. If the item is a
-        2-tuple then the return value will the property of the databse whose element and property match
-        respectively the first and second elements of the tuple.
+        If the item is a basestring, then the return value will be the list of properties related to element of the
+        database that matches this item. If the item is a 2-tuple then the return value will the property of the
+        database whose element and property match respectively the first and second elements of the tuple.
 
         :param item: the item to get from the database
         :type item: str or tuple
@@ -504,35 +509,37 @@ class MoleculesDatabase(object, metaclass=Singleton):
         for v in self._data.values():
             yield copy.deepcopy(v)
 
-    def _load(self):
+    def _load(self, user_database: str = None, default_database: str = None) -> None:
         """
-        Load the elements database
+        Load the molecule database. This method should never be called elsewhere than __init__ or unit testing.
 
-        :param filename: the path of the elements database to be loaded
-        :type filename: str
+        :param user_database: The path to the user-defined database. The default path is used by default.
+        :type user_database: str or None
+
+        :param default_database: The path to the default MDANSE atom database. The default path is used by default.
+        :type default_database: str or None
         """
+        if user_database is None:
+            user_database = MoleculesDatabase._USER_DATABASE
+        if default_database is None:
+            default_database = MoleculesDatabase._DEFAULT_DATABASE
 
-        if os.path.exists(MoleculesDatabase._USER_DATABASE):
-            database_path = MoleculesDatabase._USER_DATABASE
+        if os.path.exists(user_database):
+            database_path = user_database
         else:
-            database_path = MoleculesDatabase._DEFAULT_DATABASE
+            database_path = default_database
 
-        f = open(database_path, "r")
-
-        # Try to open the input file
-        try:
+        with open(database_path, "r") as f:
             self._data = json.load(f)
-        except:
-            raise MoleculesDatabaseError('An error occured while parsing the molecules database')
-        finally:
-            f.close()
 
-    def add_molecule(self, molecule):
+    def add_molecule(self, molecule: str) -> None:
         """
-        Add a new molecule in the elements database.
+        Add a new molecule in the molecule database.The data for this atom will be empty (not completely, its entry
+        will consist of an empty list 'alternatives' and empty dict 'atoms') and will not be saved until the
+        :meth: `save()` method is called. If the atom already exists, an exception is raised.
 
-        :param ename: the name of the element to add
-        :type ename: str
+        :param molecule: the name of the molecule to add
+        :type molecule: str
         """
 
         if molecule in self._data:
@@ -540,42 +547,49 @@ class MoleculesDatabase(object, metaclass=Singleton):
 
         self._data[molecule] = {'alternatives': [], 'atoms': {}}
 
-    def items(self):
+    def items(self) -> ItemsView[str, dict[str, Union[list[str], dict[str, dict[str, Union[str, list[str]]]]]]]:
+        """
+        Returns an interator over the data dictionary, allowing to iterate over molecule names and their data
+        simultaneously.
 
+        :return: An iterator over the data dictionary
+        :rtype: ItemsView
+        """
         return self._data.items()
 
     @property
-    def molecules(self):
+    def molecules(self) -> list[str]:
         """
-        Returns the name of the elements of the database.
+        Returns the name of the molecule of the database.
 
-        :return: the name of the elements stored in the database
+        :return: the name of the molecule stored in the database
         :rtype: list
         """
 
         return list(self._data.keys())
 
     @property
-    def n_molecules(self):
+    def n_molecules(self) -> int:
         """
-        Return the number of elements stored in the elements database.
+        Return the number of molecules stored in the molecule database.
 
-        :return: the number of elements stored in the elements database
+        :return: the number of molecules stored in the molecule database
         :rtype: int
         """
 
         return len(self._data)
 
-    def _reset(self):
+    def _reset(self) -> None:
         """
         Reset the molecules database
         """
 
         self._data.clear()
 
-    def save(self):
+    def save(self) -> None:
         """
-        Save a copy of the elements database to MDANSE application directory.
+        Save a copy of the molecule database to MDANSE application directory. This database will then be used in the
+        future. If the user database already exists, calling this function will overwrite it.
         """
 
         with open(MoleculesDatabase._USER_DATABASE, 'w') as fout:

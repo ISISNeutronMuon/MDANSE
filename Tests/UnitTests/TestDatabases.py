@@ -50,9 +50,10 @@ import os
 import unittest
 from unittest.mock import patch, mock_open, ANY
 
-from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, RESIDUES_DATABASE, NUCLEOTIDES_DATABASE
 import MDANSE.Chemistry.Databases as Databases
-from MDANSE.Chemistry.Databases import AtomsDatabaseError
+from MDANSE.Chemistry.Databases import AtomsDatabaseError, MoleculesDatabaseError, ResiduesDatabaseError, \
+    NucleotidesDatabaseError
 
 
 class TestAtomsDatabase(unittest.TestCase):
@@ -251,6 +252,83 @@ class TestAtomsDatabase(unittest.TestCase):
             ATOMS_DATABASE.save()
             op.assert_called_with(ATOMS_DATABASE._USER_DATABASE, 'w')
             dump.assert_called_with({'properties': self.properties, 'atoms': self.data}, ANY)
+
+
+class TestMoleculesDatabase(unittest.TestCase):
+    def setUp(self):
+        self.data = {"WAT": {"alternatives": ["H2O", "water", "TIP3"],
+                             "atoms": {"OW": {"symbol": "O", "alternatives": ["O", "OH2"], "groups": [],
+                                              "bonds": ["HW1", "HW2"]},
+                                       "HW2": {"symbol": "H", "alternatives": ["H2"], "groups": [], "bonds": ["OW"]}}}}
+        self.overwrite_database()
+
+    @classmethod
+    def tearDownClass(cls):
+        MOLECULES_DATABASE._load()
+
+    def overwrite_database(self):
+        MOLECULES_DATABASE._data = self.data
+
+    def test__load_default_database(self):
+        with patch('builtins.open', new_callable=mock_open, read_data=json.dumps(self.data)) as m:
+            MOLECULES_DATABASE._load('INVALID.json', 'molecules.json')
+            m.assert_called_with('molecules.json', 'r')
+            self.assertDictEqual(self.data, MOLECULES_DATABASE._data)
+
+    def test__load_user_database(self):
+        with patch('builtins.open', new_callable=mock_open, read_data=json.dumps(self.data)) as m, \
+                patch('os.path.exists', spec=True):
+            MOLECULES_DATABASE._load('user.json', 'default.json')
+            m.assert_called_with('user.json', 'r')
+            self.assertDictEqual(self.data, MOLECULES_DATABASE._data)
+
+    def test___contains__(self):
+        self.assertFalse("fhsdjfsd" in MOLECULES_DATABASE)
+        self.assertTrue("WAT" in MOLECULES_DATABASE)
+        self.assertTrue('H2O' in MOLECULES_DATABASE)
+
+    def test___getitem__(self):
+        self.assertDictEqual(self.data['WAT'], MOLECULES_DATABASE['WAT'])
+        with self.assertRaises(MoleculesDatabaseError):
+            a = MOLECULES_DATABASE['INVALID']
+        # TODO: Look into the not implemented description of __getitem__
+
+    def test___iter__(self):
+        generator = iter(MOLECULES_DATABASE)
+        self.assertDictEqual(self.data['WAT'], next(generator))
+
+    def test_add_molecule_existing_molecule(self):
+        with self.assertRaises(MoleculesDatabaseError):
+            MOLECULES_DATABASE.add_molecule("WAT")
+
+    def test_add_molecule_valid(self):
+        with patch('json.dump') as m, patch('MDANSE.Chemistry.Databases.MoleculesDatabase.save') as n:
+            MOLECULES_DATABASE.add_molecule("new_molecule")
+            self.assertDictEqual({'alternatives': [], 'atoms': {}}, MOLECULES_DATABASE['new_molecule'])
+            assert not m.called
+            assert not n.called
+
+    def test_items(self):
+        for (expected_atom, expected_data), (atom, data) in zip(self.data.items(), MOLECULES_DATABASE.items()):
+            self.assertEqual(expected_atom, atom)
+            self.assertDictEqual(expected_data, data)
+
+    def test_molecules(self):
+        self.assertEqual(['WAT'], MOLECULES_DATABASE.molecules)
+
+    def test_n_molecules(self):
+        self.assertEqual(1, MOLECULES_DATABASE.n_molecules)
+
+    def test__reset(self):
+        MOLECULES_DATABASE._reset()
+        self.assertDictEqual({}, MOLECULES_DATABASE._data)
+
+    def test_save(self):
+        with patch('builtins.open', new_callable=mock_open) as op, patch('json.dump') as dump:
+            MOLECULES_DATABASE.save()
+            op.assert_called_with(MOLECULES_DATABASE._USER_DATABASE, 'w')
+            dump.assert_called_with(self.data, ANY)
+
 
 
 def suite():
