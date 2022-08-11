@@ -621,12 +621,12 @@ class NucleotidesDatabase(object, metaclass=Singleton):
         # Load the user database. If any problem occurs while loading it, loads the default one
         self._load()
 
-    def __contains__(self, nucleotide):
+    def __contains__(self, nucleotide: str) -> bool:
         """
-        Return True if the database contains a given molecule.
+        Return True if the database contains the provided nucleotide.
 
-        :param molecule: the name of the element to search in the database
-        :type ename: str
+        :param nucleotide: the name (default or alternative) of the nucleotide to search in the database
+        :type nucleotide: str
 
         :return: True if the database contains a given element
         :rtype: bool
@@ -634,14 +634,13 @@ class NucleotidesDatabase(object, metaclass=Singleton):
 
         return nucleotide in self._residue_map
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> dict[str, Union[bool, list[str], dict[str, Union[bool, list[str], str]]]]:
         """
         Return an entry of the database.
 
-        If the item is a basestring, then the return value will be the list of properties
-        related to element of the databse base that matches this item. If the item is a
-        2-tuple then the return value will the property of the databse whose element and property match
-        respectively the first and second elements of the tuple.
+        If the item is a basestring, then the return value will be the list of properties related to element of the
+        database that matches this item. If the item is a 2-tuple then the return value will the property of the
+        database whose element and property match respectively the first and second elements of the tuple.
 
         :param item: the item to get from the database
         :type item: str or tuple
@@ -660,28 +659,28 @@ class NucleotidesDatabase(object, metaclass=Singleton):
         for v in self._data.values():
             yield copy.deepcopy(v)
 
-    def _load(self):
+    def _load(self, user_database: str = None, default_database: str = None) -> None:
         """
-        Load the elements database
+        Load the molecule database. This method should never be called elsewhere than __init__ or unit testing.
 
-        :param filename: the path of the elements database to be loaded
-        :type filename: str
+        :param user_database: The path to the user-defined database. The default path is used by default.
+        :type user_database: str or None
+
+        :param default_database: The path to the default MDANSE nucleotide database. The default path is used by default.
+        :type default_database: str or None
         """
+        if user_database is None:
+            user_database = NucleotidesDatabase._USER_DATABASE
+        if default_database is None:
+            default_database = NucleotidesDatabase._DEFAULT_DATABASE
 
-        if os.path.exists(NucleotidesDatabase._USER_DATABASE):
-            database_path = NucleotidesDatabase._USER_DATABASE
+        if os.path.exists(user_database):
+            database_path = user_database
         else:
-            database_path = NucleotidesDatabase._DEFAULT_DATABASE
+            database_path = default_database
 
-        f = open(database_path, 'r')
-
-        # Try to open the input file
-        try:
+        with open(database_path, "r") as f:
             self._data = json.load(f)
-        except:
-            raise NucleotidesDatabaseError('An error occured while parsing the molecules database')
-        finally:
-            f.close()
 
         self._residue_map = {}
 
@@ -690,15 +689,21 @@ class NucleotidesDatabase(object, metaclass=Singleton):
             for alt in v['alternatives']:
                 self._residue_map[alt] = k
 
-    def add_nucleotide(self, nucleotide, is_5ter_terminus=False, is_3ter_terminus=False):
+    def add_nucleotide(self, nucleotide: str, is_5ter_terminus: bool = False, is_3ter_terminus: bool = False) -> None:
         """
-        Add a new molecule in the elements database.
+        Add a new nucleotide in the nucleotide database.
 
-        :param ename: the name of the element to add
-        :type ename: str
+        :param nucleotide: the name of the nucleotide to add
+        :type nucleotide: str
+
+        :param is_5ter_terminus: boolean value representing whether this nucleotide acts as a 5' terminus
+        :type is_5ter_terminus: bool
+
+        :param is_3ter_terminus: boolean value representing whether this nucleotide acts as a 3' terminus
+        :type is_3ter_terminus: bool
         """
 
-        if nucleotide in self._data:
+        if nucleotide in self._residue_map:
             raise NucleotidesDatabaseError('The nucleotide {} is already stored in the database'.format(nucleotide))
 
         self._data[nucleotide] = {
@@ -707,42 +712,51 @@ class NucleotidesDatabase(object, metaclass=Singleton):
             'is_5ter_terminus': is_5ter_terminus,
             'is_3ter_terminus': is_3ter_terminus}
 
-    def items(self):
+        self._residue_map[nucleotide] = nucleotide
 
+    def items(self) -> ItemsView[str, dict[str, Union[bool, list[str], dict[str, Union[bool, list[str], str]]]]]:
+        """
+        Returns the iterator over the items of the data dictionary, allowing for iterating over nucleotides and their
+        data simultaneously.
+
+        :return: an iteratore over the items of the data dictionary
+        :rtype: ItemsView
+        """
         return self._data.items()
 
     @property
-    def nucleotides(self):
+    def nucleotides(self) -> list[str]:
         """
         Returns the name of the nucleotides of the database.
 
-        :return: the name of the elements stored in the database
+        :return: the name of the nucleotides stored in the database
         :rtype: list
         """
 
         return list(self._data.keys())
 
     @property
-    def n_nucleotides(self):
+    def n_nucleotides(self) -> int:
         """
-        Return the number of nucleotides stored in the elements database.
+        Return the number of nucleotides stored in the nucleotides database.
 
-        :return: the number of elements stored in the elements database
+        :return: the number of nucleotides stored in the nucleotides database
         :rtype: int
         """
 
         return len(self._data)
 
-    def _reset(self):
+    def _reset(self) -> None:
         """
-        Reset the molecules database
+        Resets the nucleotide database
         """
 
         self._data.clear()
 
-    def save(self):
+    def save(self) -> None:
         """
-        Save a copy of the elements database to MDANSE application directory.
+        Save a copy of the nucleotide database to MDANSE application directory. This database will then be used in the
+        future. If the user database already exists, calling this function will overwrite it.
         """
 
         with open(NucleotidesDatabase._USER_DATABASE, 'w') as fout:
