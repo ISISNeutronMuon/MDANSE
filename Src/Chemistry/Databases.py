@@ -15,7 +15,6 @@
 
 import copy
 import os
-import numbers
 from typing import Union, ItemsView
 
 import json
@@ -25,6 +24,101 @@ from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
 
 
+class _Database(metaclass=Singleton):
+    """
+    Base class for all the databases.
+    """
+    _DEFAULT_DATABASE: str
+    _USER_DATABASE: str
+
+    def __init__(self):
+        """
+        Constructor
+        """
+
+        self._data = {}
+
+        self._reset()
+
+        # Load the user database. If any problem occurs while loading it, loads the default one
+        self._load()
+
+    def __contains__(self, name: str) -> bool:
+        """
+        Return True if the database contains the particle name.
+
+        :param name: the name (default or alternative) of the nucleotide to search in the database
+        :type name: str
+
+        :return: True if the database contains a given element
+        :rtype: bool
+        """
+        return name in self._residue_map
+
+    def __iter__(self):
+        """
+        Return a generator over the particles stored in the database.
+        """
+
+        for v in self._data.values():
+            yield copy.deepcopy(v)
+
+    def _load(self, user_database: str = None, default_database: str = None) -> None:
+        """
+        Load the database. This method should never be called elsewhere than __init__ or unit testing.
+
+        :param user_database: The path to the user-defined database. The default path is used by default.
+        :type user_database: str or None
+
+        :param default_database: The path to the default MDANSE atom database. The default path is used by default.
+        :type default_database: str or None
+        """
+        if user_database is None:
+            user_database = self._USER_DATABASE
+        if default_database is None:
+            default_database = self._DEFAULT_DATABASE
+
+        if os.path.exists(user_database):
+            database_path = user_database
+        else:
+            database_path = default_database
+
+        with open(database_path, "r") as f:
+            self._data = json.load(f)
+
+    def _build_residue_map(self) -> None:
+        """Creates a dict mapping alternative names to the official name."""
+        self._residue_map = {}
+        for k, v in self._data.items():
+            self._residue_map[k] = k
+            for alt in v['alternatives']:
+                self._residue_map[alt] = k
+
+    def items(self) -> ItemsView[str, dict]:
+        """
+        Returns the iterator over the items of the data dict, allowing for iteration over particle names and their data
+        simultaneously.
+
+        :return: an iterator over the items of the data dict
+        :rtype: ItemsView
+        """
+        return self._data.items()
+
+    def _reset(self) -> None:
+        """
+        Resets the database, removing all data.
+        """
+        self._data.clear()
+
+    def save(self) -> None:
+        """
+        Save a copy of the database to MDANSE application directory. This database will then be used in the
+        future. If the user database already exists, calling this function will overwrite it.
+        """
+        with open(self._USER_DATABASE, 'w') as f:
+            json.dump(self._data, f)
+
+
 class AtomsDatabaseError(Error):
     """
     This class handles the exceptions related to AtomsDatabase
@@ -32,7 +126,7 @@ class AtomsDatabaseError(Error):
     pass
 
 
-class AtomsDatabase(metaclass=Singleton):
+class AtomsDatabase(_Database):
     """
     This class implements the atoms database of MDANSE.
 
@@ -81,15 +175,9 @@ class AtomsDatabase(metaclass=Singleton):
         """
         Constructor
         """
-
-        self._data = {}
-
         self._properties = {}
 
-        self._reset()
-
-        # Load the user database. If any problem occurs while loading it, loads the default one
-        self._load()
+        super().__init__()
 
     def __contains__(self, element: str) -> bool:
         """
@@ -118,14 +206,6 @@ class AtomsDatabase(metaclass=Singleton):
         except KeyError:
             raise AtomsDatabaseError("The element {} is not registered in the database.".format(item))
 
-    def __iter__(self):
-        """
-        Return a generator over the atoms stored in the database.
-        """
-
-        for v in self._data.values():
-            yield copy.deepcopy(v)
-
     def _load(self, user_database: str = None, default_database: str = None) -> None:
         """
         Load the elements database. This method should never be called elsewhere than __init__ or unit testing.
@@ -136,20 +216,10 @@ class AtomsDatabase(metaclass=Singleton):
         :param default_database: The path to the default MDANSE atom database. The default path is used by default.
         :type default_database: str or None
         """
-        if user_database is None:
-            user_database = AtomsDatabase._USER_DATABASE
-        if default_database is None:
-            default_database = AtomsDatabase._DEFAULT_DATABASE
+        super()._load(user_database, default_database)
 
-        if os.path.exists(user_database):
-            database_path = user_database
-        else:
-            database_path = default_database
-
-        with open(database_path, "r") as f:
-            db = json.load(f)
-            self._properties = db['properties']
-            self._data = db['atoms']
+        self._properties = self._data['properties']
+        self._data = self._data['atoms']
 
     def add_atom(self, atom: str) -> None:
         """
@@ -167,7 +237,7 @@ class AtomsDatabase(metaclass=Singleton):
 
     def add_property(self, pname: str, ptype: str) -> None:
         """
-        Add a new property to the elements database.
+        Add a new property to the atoms database.
 
         When added, the property will be set with a default value to all the elements of the database.
 
@@ -349,16 +419,6 @@ class AtomsDatabase(metaclass=Singleton):
 
         return info
 
-    def items(self) -> ItemsView[str, Union[str, int, float, list]]:
-        """
-        Returns the iterator over the data dictionary, thus allowing to iterate over the atoms and their properties
-        simultaneously.
-
-        :return: Iterator over the data dictionary
-        :rtype: ItemsView
-        """
-        return self._data.items()
-
     def match_numeric_property(self, pname: str, value: Union[int, float], tolerance:float = 0.0) -> list[str]:
         """
         Return the names of the atoms that match a given numeric property within a given tolerance
@@ -448,40 +508,11 @@ class MoleculesDatabaseError(Error):
     pass
 
 
-class MoleculesDatabase(object, metaclass=Singleton):
+class MoleculesDatabase(_Database):
     _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__), 'molecules.json')
 
     # The user path
     _USER_DATABASE = os.path.join(PLATFORM.application_directory(), 'molecules.json')
-
-    def __init__(self):
-        """
-        Constructor
-        """
-
-        self._data = {}
-
-        self._reset()
-
-        # Load the user database. If any problem occurs while loading it, loads the default one
-        self._load()
-
-    def __contains__(self, molecule: str) -> bool:
-        """
-        Return True if the database contains a given molecule.
-
-        :param molecule: the name of the element to search in the database
-        :type molecule: str
-
-        :return: True if the database contains a given element
-        :rtype: bool
-        """
-
-        for k, v in self._data.items():
-            if molecule == k or molecule in v['alternatives']:
-                return True
-
-        return False
 
     def __getitem__(self, item: str):
         """
@@ -495,19 +526,10 @@ class MoleculesDatabase(object, metaclass=Singleton):
         :type item: str or tuple
         """
 
-        for k, v in self._data.items():
-            if item == k or item in v['alternatives']:
-                return copy.deepcopy(self._data[k])
+        if item in self._residue_map:
+            return copy.deepcopy(self._data[self._residue_map[item]])
         else:
             raise MoleculesDatabaseError("The molecule {} is not registered in the database.".format(item))
-
-    def __iter__(self):
-        """
-        Return a generator over the molecules stored in the database.
-        """
-
-        for v in self._data.values():
-            yield copy.deepcopy(v)
 
     def _load(self, user_database: str = None, default_database: str = None) -> None:
         """
@@ -519,18 +541,8 @@ class MoleculesDatabase(object, metaclass=Singleton):
         :param default_database: The path to the default MDANSE atom database. The default path is used by default.
         :type default_database: str or None
         """
-        if user_database is None:
-            user_database = MoleculesDatabase._USER_DATABASE
-        if default_database is None:
-            default_database = MoleculesDatabase._DEFAULT_DATABASE
-
-        if os.path.exists(user_database):
-            database_path = user_database
-        else:
-            database_path = default_database
-
-        with open(database_path, "r") as f:
-            self._data = json.load(f)
+        super()._load(user_database, default_database)
+        self._build_residue_map()
 
     def add_molecule(self, molecule: str) -> None:
         """
@@ -546,16 +558,7 @@ class MoleculesDatabase(object, metaclass=Singleton):
             raise MoleculesDatabaseError('The element {} is already stored in the database'.format(molecule))
 
         self._data[molecule] = {'alternatives': [], 'atoms': {}}
-
-    def items(self) -> ItemsView[str, dict[str, Union[list[str], dict[str, dict[str, Union[str, list[str]]]]]]]:
-        """
-        Returns an interator over the data dictionary, allowing to iterate over molecule names and their data
-        simultaneously.
-
-        :return: An iterator over the data dictionary
-        :rtype: ItemsView
-        """
-        return self._data.items()
+        self._residue_map[molecule] = molecule
 
     @property
     def molecules(self) -> list[str]:
@@ -579,22 +582,6 @@ class MoleculesDatabase(object, metaclass=Singleton):
 
         return len(self._data)
 
-    def _reset(self) -> None:
-        """
-        Reset the molecules database
-        """
-
-        self._data.clear()
-
-    def save(self) -> None:
-        """
-        Save a copy of the molecule database to MDANSE application directory. This database will then be used in the
-        future. If the user database already exists, calling this function will overwrite it.
-        """
-
-        with open(MoleculesDatabase._USER_DATABASE, 'w') as fout:
-            json.dump(self._data, fout)
-
 
 class NucleotidesDatabaseError(Error):
     """
@@ -603,36 +590,11 @@ class NucleotidesDatabaseError(Error):
     pass
 
 
-class NucleotidesDatabase(object, metaclass=Singleton):
+class NucleotidesDatabase(_Database):
     _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__), 'nucleotides.json')
 
     # The user path
     _USER_DATABASE = os.path.join(PLATFORM.application_directory(), 'nucleotides.json')
-
-    def __init__(self):
-        """
-        Constructor
-        """
-
-        self._data = {}
-
-        self._reset()
-
-        # Load the user database. If any problem occurs while loading it, loads the default one
-        self._load()
-
-    def __contains__(self, nucleotide: str) -> bool:
-        """
-        Return True if the database contains the provided nucleotide.
-
-        :param nucleotide: the name (default or alternative) of the nucleotide to search in the database
-        :type nucleotide: str
-
-        :return: True if the database contains a given element
-        :rtype: bool
-        """
-
-        return nucleotide in self._residue_map
 
     def __getitem__(self, item: str) -> dict[str, Union[bool, list[str], dict[str, Union[bool, list[str], str]]]]:
         """
@@ -651,14 +613,6 @@ class NucleotidesDatabase(object, metaclass=Singleton):
         else:
             raise NucleotidesDatabaseError("The nucleotide {} is not registered in the database.".format(item))
 
-    def __iter__(self):
-        """
-        Return a generator over the nucleotides stored in the database.
-        """
-
-        for v in self._data.values():
-            yield copy.deepcopy(v)
-
     def _load(self, user_database: str = None, default_database: str = None) -> None:
         """
         Load the molecule database. This method should never be called elsewhere than __init__ or unit testing.
@@ -669,25 +623,8 @@ class NucleotidesDatabase(object, metaclass=Singleton):
         :param default_database: The path to the default MDANSE nucleotide database. The default path is used by default.
         :type default_database: str or None
         """
-        if user_database is None:
-            user_database = NucleotidesDatabase._USER_DATABASE
-        if default_database is None:
-            default_database = NucleotidesDatabase._DEFAULT_DATABASE
-
-        if os.path.exists(user_database):
-            database_path = user_database
-        else:
-            database_path = default_database
-
-        with open(database_path, "r") as f:
-            self._data = json.load(f)
-
-        self._residue_map = {}
-
-        for k, v in self._data.items():
-            self._residue_map[k] = k
-            for alt in v['alternatives']:
-                self._residue_map[alt] = k
+        super()._load(user_database, default_database)
+        self._build_residue_map()
 
     def add_nucleotide(self, nucleotide: str, is_5ter_terminus: bool = False, is_3ter_terminus: bool = False) -> None:
         """
@@ -716,16 +653,6 @@ class NucleotidesDatabase(object, metaclass=Singleton):
 
         self._residue_map[nucleotide] = nucleotide
 
-    def items(self) -> ItemsView[str, dict[str, Union[bool, list[str], dict[str, Union[bool, list[str], str]]]]]:
-        """
-        Returns the iterator over the items of the data dictionary, allowing for iterating over nucleotides and their
-        data simultaneously.
-
-        :return: an iteratore over the items of the data dictionary
-        :rtype: ItemsView
-        """
-        return self._data.items()
-
     @property
     def nucleotides(self) -> list[str]:
         """
@@ -748,22 +675,6 @@ class NucleotidesDatabase(object, metaclass=Singleton):
 
         return len(self._data)
 
-    def _reset(self) -> None:
-        """
-        Resets the nucleotide database
-        """
-
-        self._data.clear()
-
-    def save(self) -> None:
-        """
-        Save a copy of the nucleotide database to MDANSE application directory. This database will then be used in the
-        future. If the user database already exists, calling this function will overwrite it.
-        """
-
-        with open(NucleotidesDatabase._USER_DATABASE, 'w') as fout:
-            json.dump(self._data, fout)
-
 
 class ResiduesDatabaseError(Error):
     """
@@ -772,36 +683,11 @@ class ResiduesDatabaseError(Error):
     pass
 
 
-class ResiduesDatabase(object, metaclass=Singleton):
+class ResiduesDatabase(_Database):
     _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__), 'residues.json')
 
     # The user path
     _USER_DATABASE = os.path.join(PLATFORM.application_directory(), 'residues.json')
-
-    def __init__(self):
-        """
-        Constructor
-        """
-
-        self._data = {}
-
-        self._reset()
-
-        # Load the user database. If any problem occurs while loading it, loads the default one
-        self._load()
-
-    def __contains__(self, residue: str) -> bool:
-        """
-        Return True if the database contains a given residue.
-
-        :param molecule: the name of the residue to search in the database
-        :type ename: str
-
-        :return: True if the database contains a given residue
-        :rtype: bool
-        """
-
-        return residue in self._residue_map
 
     def __getitem__(self, item: str) -> dict[str, Union[bool, list[str], dict[str, dict[str, Union[str, list[str]]]]]]:
         """
@@ -821,14 +707,6 @@ class ResiduesDatabase(object, metaclass=Singleton):
         else:
             raise ResiduesDatabaseError("The residue {} is not registered in the database.".format(item))
 
-    def __iter__(self):
-        """
-        Return a generator over the molecules stored in the database.
-        """
-
-        for v in self._data.values():
-            yield copy.deepcopy(v)
-
     def _load(self, user_database: str = None, default_database: str = None) -> None:
         """
         Load the molecule database. This method should never be called elsewhere than __init__ or unit testing.
@@ -839,25 +717,8 @@ class ResiduesDatabase(object, metaclass=Singleton):
         :param default_database: The path to the default MDANSE nucleotide database. The default path is used by default.
         :type default_database: str or None
         """
-        if user_database is None:
-            user_database = ResiduesDatabase._USER_DATABASE
-        if default_database is None:
-            default_database = ResiduesDatabase._DEFAULT_DATABASE
-
-        if os.path.exists(user_database):
-            database_path = user_database
-        else:
-            database_path = default_database
-
-        with open(database_path, "r") as f:
-            self._data = json.load(f)
-
-        self._residue_map = {}
-
-        for k, v in self._data.items():
-            self._residue_map[k] = k
-            for alt in v['alternatives']:
-                self._residue_map[alt] = k
+        super()._load(user_database, default_database)
+        self._build_residue_map()
 
     def add_residue(self, residue: str, is_c_terminus: bool = False, is_n_terminus: bool = False) -> None:
         """
@@ -889,16 +750,6 @@ class ResiduesDatabase(object, metaclass=Singleton):
 
         self._residue_map[residue] = residue
 
-    def items(self) -> ItemsView[str, dict[str, Union[bool, list[str], dict[str, dict[str, Union[str, list[str]]]]]]]:
-        """
-        Returns the iterator over the items of the data dict, allowing for iteration over residue names and their data
-        simultaneously.
-
-        :return: an iterator over the items of the data dict
-        :rtype: ItemsView
-        """
-        return self._data.items()
-
     @property
     def residues(self) -> list[str]:
         """
@@ -920,22 +771,6 @@ class ResiduesDatabase(object, metaclass=Singleton):
         """
 
         return len(self._data)
-
-    def _reset(self) -> None:
-        """
-        Reset the residues database
-        """
-
-        self._data.clear()
-
-    def save(self) -> None:
-        """
-        Saves a copy of the residues database to MDANSE application directory. This database will then be used in the
-        future. If the user database already exists, calling this function will overwrite it.
-        """
-
-        with open(ResiduesDatabase._USER_DATABASE, 'w') as fout:
-            json.dump(self._data, fout)
 
 
 if __name__ == '__main__':
