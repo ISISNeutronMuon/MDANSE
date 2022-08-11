@@ -408,6 +408,88 @@ class TestNucleotidesDatabase(unittest.TestCase):
             dump.assert_called_with(self.data, ANY)
 
 
+class TestResiduesDatabase(unittest.TestCase):
+    def setUp(self):
+        self.data = {"GLY": {"is_n_terminus": False,
+                             "atoms": {"C": {"symbol": "C", "alternatives": [], "groups": ["backbone", "peptide"],
+                                             "bonds": ["CA", "O", "+R"]},
+                                       "H": {"symbol": "H", "alternatives": ["HN"], "groups": ["backbone", "peptide"],
+                                             "bonds": ["N"]},
+                                       "CA": {"symbol": "C", "alternatives": [], "groups": ["backbone"],
+                                              "bonds": ["C", "HA2", "HA3", "N"]}},
+                     "alternatives": ['glycine', 'G'], "is_c_terminus": False}}
+        RESIDUES_DATABASE._data = self.data
+        RESIDUES_DATABASE._residue_map = {'GLY': 'GLY', 'glycine': 'GLY', 'G': 'GLY'}
+
+    @classmethod
+    def tearDownClass(cls):
+        RESIDUES_DATABASE._load()
+
+    def test__load_default_database(self):
+        with patch('builtins.open', new_callable=mock_open, read_data=json.dumps(self.data)) as m:
+            RESIDUES_DATABASE._load('INVALID.json', 'residues.json')
+            m.assert_called_with('residues.json', 'r')
+            self.assertDictEqual(self.data, RESIDUES_DATABASE._data)
+            self.assertDictEqual({'GLY': 'GLY', 'glycine': 'GLY', 'G': 'GLY'}, RESIDUES_DATABASE._residue_map)
+
+    def test__load_user_database(self):
+        with patch('builtins.open', new_callable=mock_open, read_data=json.dumps(self.data)) as m, \
+                patch('os.path.exists', spec=True):
+            RESIDUES_DATABASE._load('user.json', 'default.json')
+            m.assert_called_with('user.json', 'r')
+            self.assertDictEqual(self.data, RESIDUES_DATABASE._data)
+            self.assertDictEqual({'GLY': 'GLY', 'glycine': 'GLY', 'G': 'GLY'}, RESIDUES_DATABASE._residue_map)
+
+    def test___contains__(self):
+        self.assertFalse("fhsdjfsd" in RESIDUES_DATABASE)
+        self.assertTrue("GLY" in RESIDUES_DATABASE)
+        self.assertTrue('G' in RESIDUES_DATABASE)
+
+    def test___getitem__(self):
+        self.assertDictEqual(self.data['GLY'], RESIDUES_DATABASE['GLY'])
+        self.assertDictEqual(self.data['GLY'], RESIDUES_DATABASE['G'])
+        with self.assertRaises(ResiduesDatabaseError):
+            a = RESIDUES_DATABASE['INVALID']
+        # TODO: Look into the not implemented description of __getitem__
+
+    def test___iter__(self):
+        generator = iter(RESIDUES_DATABASE)
+        self.assertDictEqual(self.data['GLY'], next(generator))
+
+    def test_add_residue_existing_nucleotide(self):
+        with self.assertRaises(ResiduesDatabaseError):
+            RESIDUES_DATABASE.add_residue("G")
+
+    def test_add_residue_valid(self):
+        with patch('json.dump') as m, patch('MDANSE.Chemistry.Databases.ResiduesDatabase.save') as n:
+            RESIDUES_DATABASE.add_residue("new_residues", True, True)
+            self.assertDictEqual({'alternatives': [], 'atoms': {}, 'is_c_terminus': True, 'is_n_terminus': True},
+                                 RESIDUES_DATABASE['new_residues'])
+            assert not m.called
+            assert not n.called
+
+    def test_items(self):
+        for (expected_atom, expected_data), (atom, data) in zip(self.data.items(), RESIDUES_DATABASE.items()):
+            self.assertEqual(expected_atom, atom)
+            self.assertDictEqual(expected_data, data)
+
+    def test_residues(self):
+        self.assertEqual(['GLY'], RESIDUES_DATABASE.residues)
+
+    def test_n_residues(self):
+        self.assertEqual(1, RESIDUES_DATABASE.n_residues)
+
+    def test__reset(self):
+        RESIDUES_DATABASE._reset()
+        self.assertDictEqual({}, RESIDUES_DATABASE._data)
+
+    def test_save(self):
+        with patch('builtins.open', new_callable=mock_open) as op, patch('json.dump') as dump:
+            RESIDUES_DATABASE.save()
+            op.assert_called_with(RESIDUES_DATABASE._USER_DATABASE, 'w')
+            dump.assert_called_with(self.data, ANY)
+
+
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()

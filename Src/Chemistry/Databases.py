@@ -534,7 +534,7 @@ class MoleculesDatabase(object, metaclass=Singleton):
 
     def add_molecule(self, molecule: str) -> None:
         """
-        Add a new molecule in the molecule database.The data for this atom will be empty (not completely, its entry
+        Add a new molecule in the molecule database. The data for this molecule will be empty (not completely, its entry
         will consist of an empty list 'alternatives' and empty dict 'atoms') and will not be saved until the
         :meth: `save()` method is called. If the atom already exists, an exception is raised.
 
@@ -691,7 +691,9 @@ class NucleotidesDatabase(object, metaclass=Singleton):
 
     def add_nucleotide(self, nucleotide: str, is_5ter_terminus: bool = False, is_3ter_terminus: bool = False) -> None:
         """
-        Add a new nucleotide in the nucleotide database.
+        Add a new nucleotide in the nucleotide database. The data for this nucleotide will be empty (not completely,
+        its entry will consist of an empty list 'alternatives' and empty dict 'atoms') and will not be saved until the
+        :meth: `save()` method is called. If the atom already exists, an exception is raised.
 
         :param nucleotide: the name of the nucleotide to add
         :type nucleotide: str
@@ -788,20 +790,20 @@ class ResiduesDatabase(object, metaclass=Singleton):
         # Load the user database. If any problem occurs while loading it, loads the default one
         self._load()
 
-    def __contains__(self, residue):
+    def __contains__(self, residue: str) -> bool:
         """
-        Return True if the database contains a given molecule.
+        Return True if the database contains a given residue.
 
-        :param molecule: the name of the element to search in the database
+        :param molecule: the name of the residue to search in the database
         :type ename: str
 
-        :return: True if the database contains a given element
+        :return: True if the database contains a given residue
         :rtype: bool
         """
 
         return residue in self._residue_map
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> dict[str, Union[bool, list[str], dict[str, dict[str, Union[str, list[str]]]]]]:
         """
         Return an entry of the database.
 
@@ -827,28 +829,28 @@ class ResiduesDatabase(object, metaclass=Singleton):
         for v in self._data.values():
             yield copy.deepcopy(v)
 
-    def _load(self):
+    def _load(self, user_database: str = None, default_database: str = None) -> None:
         """
-        Load the elements database
+        Load the molecule database. This method should never be called elsewhere than __init__ or unit testing.
 
-        :param filename: the path of the elements database to be loaded
-        :type filename: str
+        :param user_database: The path to the user-defined database. The default path is used by default.
+        :type user_database: str or None
+
+        :param default_database: The path to the default MDANSE nucleotide database. The default path is used by default.
+        :type default_database: str or None
         """
+        if user_database is None:
+            user_database = ResiduesDatabase._USER_DATABASE
+        if default_database is None:
+            default_database = ResiduesDatabase._DEFAULT_DATABASE
 
-        if os.path.exists(ResiduesDatabase._USER_DATABASE):
-            database_path = ResiduesDatabase._USER_DATABASE
+        if os.path.exists(user_database):
+            database_path = user_database
         else:
-            database_path = ResiduesDatabase._DEFAULT_DATABASE
+            database_path = default_database
 
-        f = open(database_path, 'r')
-
-        # Try to open the input file
-        try:
+        with open(database_path, "r") as f:
             self._data = json.load(f)
-        except:
-            raise ResiduesDatabaseError('An error occured while parsing the molecules database')
-        finally:
-            f.close()
 
         self._residue_map = {}
 
@@ -857,15 +859,26 @@ class ResiduesDatabase(object, metaclass=Singleton):
             for alt in v['alternatives']:
                 self._residue_map[alt] = k
 
-    def add_residue(self, residue, is_c_terminus=False, is_n_terminus=False):
+    def add_residue(self, residue: str, is_c_terminus: bool = False, is_n_terminus: bool = False) -> None:
         """
-        Add a new molecule in the elements database.
+        Add a new molecule to the residue database. The data for this residue will be empty (not completely, its entry
+        will consist of an empty list 'alternatives', an empty dict 'atoms', and two booleans determined by the
+        arguments) and will not be saved until the :meth: `save()` method is called. If the atom already exists, an
+        exception is raised.
 
-        :param ename: the name of the element to add
-        :type ename: str
+        :param residue: the name of the element to add
+        :type residue: str
+
+        :param is_c_terminus: boolean representation of whether this residue is the C-terminus of proteins. False by
+               default.
+        :type is_c_terminus: bool
+
+        :param is_n_terminus: boolean representation of whether this residue is the N-terminus of proteins. False by
+               default.
+        :type is_n_terminus: bool
         """
 
-        if residue in self._data:
+        if residue in self._residue_map:
             raise ResiduesDatabaseError('The element {} is already stored in the database'.format(residue))
 
         self._data[residue] = {
@@ -874,42 +887,51 @@ class ResiduesDatabase(object, metaclass=Singleton):
             'is_n_terminus': is_n_terminus,
             'is_c_terminus': is_c_terminus}
 
-    def items(self):
+        self._residue_map[residue] = residue
 
+    def items(self) -> ItemsView[str, dict[str, Union[bool, list[str], dict[str, dict[str, Union[str, list[str]]]]]]]:
+        """
+        Returns the iterator over the items of the data dict, allowing for iteration over residue names and their data
+        simultaneously.
+
+        :return: an iterator over the items of the data dict
+        :rtype: ItemsView
+        """
         return self._data.items()
 
     @property
-    def residues(self):
+    def residues(self) -> list[str]:
         """
-        Returns the name of the elements of the database.
+        Returns the names of all residues in the database.
 
-        :return: the name of the elements stored in the database
+        :return: the names of all residues in the database.
         :rtype: list
         """
 
         return list(self._data.keys())
 
     @property
-    def n_residues(self):
+    def n_residues(self) -> int:
         """
-        Return the number of elements stored in the elements database.
+        Return the number of residues stored in the residues database.
 
-        :return: the number of elements stored in the elements database
+        :return: the number of residues stored in the residues database
         :rtype: int
         """
 
         return len(self._data)
 
-    def _reset(self):
+    def _reset(self) -> None:
         """
-        Reset the molecules database
+        Reset the residues database
         """
 
         self._data.clear()
 
-    def save(self):
+    def save(self) -> None:
         """
-        Save a copy of the elements database to MDANSE application directory.
+        Saves a copy of the residues database to MDANSE application directory. This database will then be used in the
+        future. If the user database already exists, calling this function will overwrite it.
         """
 
         with open(ResiduesDatabase._USER_DATABASE, 'w') as fout:
