@@ -169,6 +169,18 @@ class TestAtomsDatabase(unittest.TestCase):
         with self.assertRaises(AtomsDatabaseError):
             ATOMS_DATABASE.get_value('H', 'INVALID')
 
+    def test_get_value_for_multiple_atoms_valid(self):
+        self.assertEqual([0, 0, 2, 0, 0, 0, 0],
+                         ATOMS_DATABASE.get_values_for_multiple_atoms(['H', 'H', 'H2', 'O', 'O', 'O', 'H'], 'nucleon'))
+
+    def test_get_value_for_multiple_atoms_unknown_atom(self):
+        with self.assertRaises(AtomsDatabaseError):
+            ATOMS_DATABASE.get_values_for_multiple_atoms(['H', 'O', 'O', 'INVALID'], 'nucleon')
+
+    def test_get_value_for_multiple_atoms_unknown_property(self):
+        with self.assertRaises(AtomsDatabaseError):
+            ATOMS_DATABASE.get_values_for_multiple_atoms(['H', 'H', 'H'], 'INVALID')
+
     def test_set_value_valid(self):
         ATOMS_DATABASE.set_value('H', 'symbol', 'C')
         self.assertEqual('C', ATOMS_DATABASE['H']['symbol'])

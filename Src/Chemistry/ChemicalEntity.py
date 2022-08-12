@@ -128,19 +128,13 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         return selected_atoms
 
     def center_of_mass(self, configuration):
+        atom_data = np.array([[at.symbol, str(at.index)] for at in self.atom_list()])
+        sort = np.argsort(atom_data[:, 1])
+        symbols = atom_data[sort, 0]
+        indices = atom_data[sort, 1]
+        masses = np.array(ATOMS_DATABASE.get_multiple_values(symbols, 'atomic_weight'))
 
-        coords = configuration['coordinates']
-
-        com = np.zeros((3,),dtype=np.float)
-        sum_masses = 0.0
-        for at in self.atom_list():
-            m = ATOMS_DATABASE[at.symbol]['atomic_weight']
-            com += m*coords[at.index,:]
-            sum_masses += m
-
-        com /= sum_masses
-
-        return com
+        return np.sum(masses[:, None] * configuration['coordinates'][indices.astype(int), :], axis=0) / np.sum(masses)
 
     def mass(self):
 

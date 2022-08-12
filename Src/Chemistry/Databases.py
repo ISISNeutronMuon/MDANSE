@@ -343,6 +343,24 @@ class AtomsDatabase(_Database):
 
         return self._data[atom].get(pname, ptype())
 
+    def get_values_for_multiple_atoms(self, atoms: list[str], prop: str) -> list[Union[str, int, float, list]]:
+        """
+        Retrieves the values of a given property for multiple atoms efficiently.
+        :param atoms:
+        :param prop:
+        :return:
+        """
+        unique_atoms = set(atoms)
+
+        if not all(atom in self._data for atom in atoms):
+            raise AtomsDatabaseError('One or more of the provided atoms {} are unknown'.format(atoms))
+
+        if prop not in self._properties:
+            raise AtomsDatabaseError("The property {} is not registered in the database".format(prop))
+
+        values = {name: self._data[name][prop] for name in unique_atoms}
+        return [values[atom] for atom in atoms]
+
     def set_value(self, atom: str, pname: str, value: Union[str, int, float, list]) -> None:
         """
         Set the given property of the given atom to the given value.
