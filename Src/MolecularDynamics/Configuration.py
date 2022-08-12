@@ -1,74 +1,97 @@
+from __future__ import annotations
 import abc
 import copy
+from typing import Union, TYPE_CHECKING
 
 import numpy as np
+from numpy.typing import ArrayLike
 
+if TYPE_CHECKING:
+    from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
+    from MDANSE.Mathematics.Transformation import RigidBodyTransformation
+    from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.Extensions import atoms_in_shell, contiguous_coordinates
+
 
 class ConfigurationError(Exception):
     pass
 
+
 class _Configuration(metaclass=abc.ABCMeta):
 
-    def __init__(self, chemical_system,coordinates,**variables):
-        """Constructor.
+    def __init__(self, chemical_system: ChemicalSystem, coords: ArrayLike, **variables):
+        """
+        Constructor.
 
-        Args:
-            chemical_system (MDANSE.Chemistry.ChemicalEntity.ChemicalSystem): the chemical system
-            coordinates (ndarray): the coordinates
+        :param chemical_system: The chemical system described by this configuration.
+        :type chemical_system: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`
+
+        :param coords: the coordinates of all the particles in the chemical system
+        :type coords: numpy.ndarray
+
+        :param variables: keyword arguments for any other variables that should be saved to this configuration
         """
 
         self._chemical_system = chemical_system
 
         self._variables = {}
 
-        coordinates = np.array(coordinates)
-        if coordinates.shape != (self._chemical_system.number_of_atoms(),3):
+        coords = np.array(coords)
+        if coords.shape != (self._chemical_system.number_of_atoms(), 3):
             raise ValueError('Invalid coordinates dimensions')
 
-        self['coordinates'] = coordinates
+        self['coordinates'] = coords
 
-        for k,v in variables.items():
+        for k, v in variables.items():
             self[k] = v
 
-    def __contains__(self,item):
-        """Return True if |item| belong to the configuration.
+    def __contains__(self, item: str) -> bool:
+        """
+        Returns True if the provided variable belongs to the configuration.
 
-        Args:
-            item (str): the item
+        :param item: the variable to be confirmed
+        :type item: str
 
-        Returns:
-            bool: True if the configuration has the given item
+        :return: True if the configuration has the given item, otherwise False
+        :rtype: bool
         """
         return item in self._variables
 
-    def __getitem__(self,item):
-        """Returns the configuration value for a given item.
+    def __getitem__(self, item: str) -> np.ndarray:
+        """
+        Returns the configuration value for a given item.
 
-        Args:
-            item (str): the item
+        :param item: the variable whose value is to be retrieved
+        :type item: str
+
+        :return: the value of the variable
         """
         return self._variables[item]
 
-    def __setitem__(self,name,value):
-        """Set a configuration item.
+    def __setitem__(self, name: str, value: ArrayLike) -> None:
+        """
+        Sets the provided variable to the provided value, but only if the value has the shape of
+        (number of atoms in the chemical system, 3).
 
-        Args:
-            name (str): the item
-            value (ndarray): the value
+        :param name: the variable to be set
+        :type name: str
+
+        :param value: the value of the variable to be set
+        :type value: numpy.ndarray
         """
 
         item = np.array(value)
-        if item.shape != (self._chemical_system.number_of_atoms(),3):
+        if item.shape != (self._chemical_system.number_of_atoms(), 3):
             raise ValueError('Invalid item dimensions')
 
         self._variables[name] = value
 
-    def apply_transformation(self,transfo):
-        """Apply a linear transformation to the configuration.
+    def apply_transformation(self, transfo: RigidBodyTransformation) -> None:
+        """
+        Applies a linear transformation to the configuration.
 
-        Args:
-            transfo (MDANSE.Mathematics.Transformation.Transformation): the transformation
+        :param transfo: the transformation to be applied
+        :type transfo: :class: `MDANSE.Mathematics.Transformation.RigidBodyTransformation`
         """
         conf = self['coordinates']
         rot = transfo.rotation().tensor.array
@@ -81,35 +104,39 @@ class _Configuration(metaclass=abc.ABCMeta):
             velocities[:] = np.dot(velocities, np.transpose(rot))
 
     @property
-    def chemical_system(self):
-        """Returns the chemical system stored in this configuration.
+    def chemical_system(self) -> ChemicalSystem:
+        """
+        Returns the chemical system stored in this configuration.
 
-        Args:
-            chemical_system (MDANSE.Chemistry.ChemicalEntity.ChemicalSystem): the chemical system
+        :return: the chemical system that this configuration describes
+        :rtype: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`
         """
         return self._chemical_system
 
     @abc.abstractmethod
-    def clone(self,chemical_system):
-        """Clone this configuration.
+    def clone(self, chemical_system: ChemicalSystem):
+        """
+        Clones this configuration.
 
-        Args:
-            chemical_system (MDANSE.Chemistry.ChemicalEntity.ChemicalSystem): the chemical system
+        :param chemical_system: the chemical system that this configuration describes
+        :type chemical_system: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`
         """
         pass
 
     @property
-    def coordinates(self):
-        """Returns the coordinates.
+    def coordinates(self) -> np.ndarray:
+        """
+        Returns the coordinates.
 
-        Returns:
-            ndarray: the coordinates
+        :return: the coordinates stored in this configuration
+        :rtype: numpy.ndarray
         """
         return self._variables['coordinates']
 
     @abc.abstractmethod
     def to_real_coordinates(self):
-        """Return the coordinates of this configuration converted to real coordinates.
+        """
+        Return the coordinates of this configuration converted to real coordinates.
 
         Returns:
             ndarray: the real coordinates
@@ -117,36 +144,47 @@ class _Configuration(metaclass=abc.ABCMeta):
         pass
 
     @property
-    def variables(self):
-        """Returns the configuration variable dictionary.
+    def variables(self) -> dict[str, np.ndarray]:
+        """
+        Returns the configuration variable dictionary.
 
-        Returns:
-            dict: the confguration variables
+        :return: all the variables stored in this configuration
+        :rtype: dict
         """
         return self._variables
 
+
 class _PeriodicConfiguration(_Configuration):
 
-    def __init__(self, chemical_system, coordinates, unit_cell, **variables):
-        """Constructor.
+    def __init__(self, chemical_system: ChemicalSystem, coords: ArrayLike, unit_cell: UnitCell, **variables):
+        """
+        Constructor.
 
-        Args:
-            chemical_system (MDANSE.Chemistry.ChemicalEntity.ChemicalSystem): the chemical system
-            coordinates (ndarray): the coordinates
-            unit_cell (MDANSE.MolecularDynamics.UnitCell.UnitCell): the unit cell
+        :param chemical_system: The chemical system described by this configuration.
+        :type chemical_system: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`
+
+        :param coords: the coordinates of all the particles in the chemical system
+        :type coords: numpy.ndarray
+
+        :param unit_cell: the unit cell of the system in this configuration
+        :type unit_cell: :class: `MDANSE.MolecularDynamics.UnitCell.UnitCell`
+
+        :param variables: keyword arguments for any other variables that should be saved to this configuration
         """
 
-        super(_PeriodicConfiguration,self).__init__(chemical_system,coordinates,**variables)
+        super(_PeriodicConfiguration, self).__init__(chemical_system, coords, **variables)
 
-        if unit_cell.direct.shape != (3,3):
+        if unit_cell.direct.shape != (3, 3):
             raise ValueError('Invalid unit cell dimensions')
         self._unit_cell = unit_cell
 
-    def clone(self,chemical_system):
-        """Clone this configuration.
+    def clone(self, chemical_system: ChemicalSystem):
+        """
+        Creates a deep copy of this configuration, using the provided chemical system.
 
-        Args:
-            chemical_system (MDANSE.Chemistry.ChemicalEntity.ChemicalSystem): the chemical system
+        :param chemical_system: the chemical system that is to be used for copying. It must have the same number of
+                                atoms as the chemical system that this configuration describes
+        :type chemical_system: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem):
         """
 
         if chemical_system.total_number_of_atoms() != self.chemical_system.total_number_of_atoms():
@@ -158,8 +196,8 @@ class _PeriodicConfiguration(_Configuration):
 
         coords = variables.pop('coordinates')
 
-        return self.__class__(chemical_system,coords,unit_cell,**variables)
-        
+        return self.__class__(chemical_system, coords, unit_cell, **variables)
+
     @abc.abstractmethod
     def fold_coordinates(self):
         """Fold the coordinates into simulation box.
@@ -176,39 +214,42 @@ class _PeriodicConfiguration(_Configuration):
         pass
 
     @property
-    def unit_cell(self):
-        """Return the nit cell stored in this configuration.
+    def unit_cell(self) -> UnitCell:
+        """
+        Return the nit cell stored in this configuration.
 
-        Returns:
-            MDANSE.MolecularDynamics.UnitCell.UnitCell: the unit cell
+        :return: the unit cell associated with this chemical system
+        :rtype: :class: `MDANSE.MolecularDynamics.UnitCell.UnitCell
         """
         return self._unit_cell
 
     @unit_cell.setter
-    def unit_cell(self,unit_cell):
-        """Ses the unit cell.
-
-        Args:
-            unit_cell (MDANSE.MolecularDynamics.UnitCell.UnitCell): the unit cell
+    def unit_cell(self, unit_cell: UnitCell) -> None:
         """
+        Sets the unit cell.
+
+        :param unit_cell: the new unit cell
+        :type unit_cell: :class: `MDANSE.MolecularDynamics.UnitCell.UnitCell`
+        """
+        if unit_cell.direct.shape != (3, 3):
+            raise ValueError('Invalid unit cell dimensions')
         self._unit_cell = unit_cell
 
-class PeriodicBoxConfiguration(_PeriodicConfiguration):
 
+class PeriodicBoxConfiguration(_PeriodicConfiguration):
     is_periodic = True
 
-    def fold_coordinates(self):
-        """Fold the coordinates into simulation box.
-        """
+    def fold_coordinates(self) -> None:
+        """Folds the coordinates into simulation box."""
 
         from MDANSE.Extensions import fold_coordinates
 
         coords = self._variables['coordinates']
-        coords = coords[np.newaxis,:,:]
+        coords = coords[np.newaxis, :, :]
         unit_cell = self._unit_cell.transposed_direct
         inverse_unit_cell = self._unit_cell.transposed_inverse
-        unit_cells = unit_cell[np.newaxis,:,:]
-        inverse_unit_cells = inverse_unit_cell[np.newaxis,:,:]
+        unit_cells = unit_cell[np.newaxis, :, :]
+        inverse_unit_cells = inverse_unit_cell[np.newaxis, :, :]
         coords = fold_coordinates.fold_coordinates(
             coords,
             unit_cells,
@@ -232,7 +273,7 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
         Returns:
             ndarray: the real coordinates
         """
-        return np.matmul(self._variables['coordinates'],self._unit_cell.direct)
+        return np.matmul(self._variables['coordinates'], self._unit_cell.direct)
 
     def to_real_configuration(self):
         """Return this configuration converted to real coordinates.
@@ -246,7 +287,7 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
         variables = copy.deepcopy(self._variables)
         variables.pop('coordinates')
 
-        real_conf = PeriodicRealConfiguration(self._chemical_system,coords,self._unit_cell,**variables)
+        real_conf = PeriodicRealConfiguration(self._chemical_system, coords, self._unit_cell, **variables)
 
         return real_conf
 
@@ -263,7 +304,7 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
                                                     ref,
                                                     mini,
                                                     maxi)
-        
+
         atom_list = self._chemical_system.atom_list()
 
         selected_atoms = [atom_list[idx] for idx in indexes]
@@ -290,7 +331,7 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
         conf._variables['coordinates'] = contiguous_coords
         return conf
 
-    def contiguous_offsets(self,chemical_entities=None):
+    def contiguous_offsets(self, chemical_entities=None):
         """Returns the contiguity offsets for a list of chemical entities.
 
         Args:
@@ -310,7 +351,7 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
         indexes = []
         for ce in chemical_entities:
             indexes.append([at.index for at in ce.atom_list()])
-        
+
         offsets = contiguous_coordinates.contiguous_offsets_box(
             self._variables['coordinates'],
             self._unit_cell.transposed_direct,
@@ -319,8 +360,8 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
 
         return offsets
 
-class PeriodicRealConfiguration(_PeriodicConfiguration):
 
+class PeriodicRealConfiguration(_PeriodicConfiguration):
     is_periodic = True
 
     def fold_coordinates(self):
@@ -330,11 +371,11 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         from MDANSE.Extensions import fold_coordinates
 
         coords = self._variables['coordinates']
-        coords = coords[np.newaxis,:,:]
+        coords = coords[np.newaxis, :, :]
         unit_cell = self._unit_cell.transposed_direct
         inverse_unit_cell = self._unit_cell.transposed_inverse
-        unit_cells = unit_cell[np.newaxis,:,:]
-        inverse_unit_cells = inverse_unit_cell[np.newaxis,:,:]
+        unit_cells = unit_cell[np.newaxis, :, :]
+        inverse_unit_cells = inverse_unit_cell[np.newaxis, :, :]
         coords = fold_coordinates.fold_coordinates(
             coords,
             unit_cells,
@@ -351,7 +392,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
             ndarray: the box coordinates
         """
 
-        return np.matmul(self._variables['coordinates'],self._unit_cell.inverse)
+        return np.matmul(self._variables['coordinates'], self._unit_cell.inverse)
 
     def to_box_configuration(self):
         """Return this configuration converted to box coordinates.
@@ -365,7 +406,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         variables = copy.deepcopy(self._variables)
         variables.pop('coordinates')
 
-        box_conf = PeriodicBoxConfiguration(self._chemical_system,coords,self._unit_cell,**variables)
+        box_conf = PeriodicBoxConfiguration(self._chemical_system, coords, self._unit_cell, **variables)
 
         return box_conf
 
@@ -458,7 +499,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         indexes = []
         for ce in chemical_entities:
             indexes.append([at.index for at in ce.atom_list()])
-        
+
         offsets = contiguous_coordinates.contiguous_offsets_real(
             self._variables['coordinates'],
             self._unit_cell.transposed_direct,
@@ -467,8 +508,8 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 
         return offsets
 
-class RealConfiguration(_Configuration):
 
+class RealConfiguration(_Configuration):
     is_periodic = False
 
     def clone(self, chemical_system):
@@ -485,7 +526,7 @@ class RealConfiguration(_Configuration):
 
         coords = variables.pop('coordinates')
 
-        return self.__class__(chemical_system,coords,**variables)        
+        return self.__class__(chemical_system, coords, **variables)
 
     def fold_coordinates(self):
         """Fold the coordinates into simulation box.
@@ -554,9 +595,10 @@ class RealConfiguration(_Configuration):
                 if ce.root_chemical_system() is not self._chemical_system:
                     raise ConfigurationError('One or more chemical entities comes from another chemical system')
 
-        offsets = np.zeros((self._chemical_system.number_of_atoms(),3))
+        offsets = np.zeros((self._chemical_system.number_of_atoms(), 3))
 
         return offsets
+
 
 if __name__ == "__main__":
 
@@ -568,20 +610,13 @@ if __name__ == "__main__":
     cs = ChemicalSystem()
     for i in range(n_atoms):
         cs.add_chemical_entity(Atom(symbol='H'))
-        
-    coordinates = np.empty((n_atoms,3),dtype=float)
-    coordinates[0,:] = [1,1,1]
-    coordinates[1,:] = [3,3,3]
 
-    uc = np.array([[10.0,0.0,0.0],[0.0,10.0,0.0],[0.0,0.0,10.0]])
+    coordinates = np.empty((n_atoms, 3), dtype=float)
+    coordinates[0, :] = [1, 1, 1]
+    coordinates[1, :] = [3, 3, 3]
+
+    uc = np.array([[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]])
 
     conf = RealConfiguration(cs, coordinates)
 
-    print(conf.atomsInShell(0,0,5))
-
-
-
-
-
-
-
+    print(conf.atomsInShell(0, 0, 5))

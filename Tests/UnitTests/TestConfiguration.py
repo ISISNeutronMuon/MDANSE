@@ -50,8 +50,68 @@ import unittest
 import numpy as np
 
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
-from MDANSE.MolecularDynamics.Configuration import BoxConfiguration, RealConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration, RealConfiguration
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
+
+class TestPeriodicConfiguration(unittest.TestCase):
+    """Uses PeriodicBoxConfiguration to test the methods of its abstract base class, _PeriodicConfiguration."""
+    def setUp(self):
+        self.chem_system = ChemicalSystem()
+        self._nAtoms = 4
+
+        atoms = []
+        for i in range(self._nAtoms):
+            atoms.append(Atom(symbol='H'))
+        ac = AtomCluster('', atoms)
+
+        self.chem_system.add_chemical_entity(ac)
+
+    def test_instantiation_valid(self):
+        coords = np.random.uniform(0,1,(self._nAtoms,3))
+        unit_cell = UnitCell(np.random.uniform(0,1,(3,3)))
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+
+        self.assertEqual(self.chem_system, conf.chemical_system)
+        self.assertTrue(np.allclose(coords, conf['coordinates']))
+        self.assertEqual(unit_cell, conf.unit_cell)
+
+    def test_instantiation_invalid_unit_cell(self):
+        coords = np.random.uniform(0, 1, (self._nAtoms, 3))
+        unit_cell = UnitCell(np.random.uniform(0, 1, (4, 4)))
+        with self.assertRaises(ValueError):
+            PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+
+    def test_clone_valid(self):
+        coords = np.random.uniform(0, 1, (self._nAtoms, 3))
+        unit_cell = UnitCell(np.random.uniform(0, 1, (3, 3)))
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+        clone = conf.clone(self.chem_system)
+
+        self.assertEqual(self.chem_system, clone.chemical_system)
+        self.assertTrue(np.allclose(coords, clone['coordinates']))
+        self.assertEqual(unit_cell, clone.unit_cell)
+
+    def test_unit_cell_setter_valid(self):
+        coords = np.random.uniform(0, 1, (self._nAtoms, 3))
+        unit_cell = UnitCell(np.random.uniform(0, 1, (3, 3)))
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+
+        unit_cell_new = UnitCell(np.random.uniform(0, 2, (3, 3)))
+        conf.unit_cell = unit_cell_new
+        self.assertEqual(unit_cell_new, conf.unit_cell)
+
+    def test_unit_cell_setter_invalid_shape(self):
+        coords = np.random.uniform(0, 1, (self._nAtoms, 3))
+        unit_cell = UnitCell(np.random.uniform(0, 1, (3, 3)))
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+
+        unit_cell_new = UnitCell(np.random.uniform(0, 2, (4, 4)))
+        with self.assertRaises(ValueError):
+            conf.unit_cell = unit_cell_new
+
+
+@unittest.skip
 class TestConfiguration(unittest.TestCase):
     '''
     Unittest for the geometry-related functions

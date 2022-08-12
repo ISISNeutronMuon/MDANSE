@@ -12,9 +12,15 @@ class UnitCell:
         :type unit_cell: 3x3 numpy array
         """
 
-        self._unit_cell = unit_cell.astype(np.float64)
+        self._unit_cell = np.array(unit_cell).astype(np.float64)
 
         self._inverse_unit_cell = np.linalg.inv(self._unit_cell)
+
+    def __eq__(self, other):
+        if isinstance(other, UnitCell):
+            return np.allclose(self._unit_cell, other._unit_cell)
+        else:
+            return False
 
     @property
     def a_vector(self):
