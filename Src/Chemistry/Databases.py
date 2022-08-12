@@ -120,9 +120,7 @@ class _Database(metaclass=Singleton):
 
 
 class AtomsDatabaseError(Error):
-    """
-    This class handles the exceptions related to AtomsDatabase
-    """
+    """This class handles the exceptions related to AtomsDatabase"""
     pass
 
 
@@ -183,8 +181,8 @@ class AtomsDatabase(_Database):
         """
         Return True if the database contains a given element.
 
-        :param ename: the name of the element to search in the database
-        :type ename: str
+        :param element: the name of the element to search in the database
+        :type element: str
 
         :return: True if the database contains a given element
         :rtype: bool
@@ -208,7 +206,7 @@ class AtomsDatabase(_Database):
 
     def _load(self, user_database: str = None, default_database: str = None) -> None:
         """
-        Load the elements database. This method should never be called elsewhere than __init__ or unit testing.
+        Load the atom database. This method should never be called elsewhere than __init__ or unit testing.
 
         :param user_database: The path to the user-defined database. The default path is used by default.
         :type user_database: str or None
@@ -345,10 +343,17 @@ class AtomsDatabase(_Database):
 
     def get_values_for_multiple_atoms(self, atoms: list[str], prop: str) -> list[Union[str, int, float, list]]:
         """
-        Retrieves the values of a given property for multiple atoms efficiently.
-        :param atoms:
-        :param prop:
-        :return:
+        Retrieves the values of a given property for multiple atoms efficiently. The atoms may (and, for maximum
+        efficiency, should) repeat.
+
+        :param atoms: list of atom names for which the value of the given property is to be retrieved
+        :type atoms: list
+
+        :param prop: the property whose value is to be retrieved
+        :type prop: str
+
+        :return: list of values of the given property for the provided atoms
+        :rtype: list
         """
         unique_atoms = set(atoms)
 
@@ -416,7 +421,7 @@ class AtomsDatabase(_Database):
         """
         Return a formatted string that contains all the information about a given atom.
 
-        :param atom: the name of the atom for which the property is required
+        :param atom: the name of the atom whose information is to be returned
         :type atom: str
 
         :return: the information about a selected atom
@@ -443,8 +448,10 @@ class AtomsDatabase(_Database):
 
         :param pname: the name of the property to match
         :type pname: str
+
         :param value: the matching value
         :type value: one of int, float
+
         :param tolerance: the matching tolerance
         :type tolerance: float
 
@@ -501,7 +508,7 @@ class AtomsDatabase(_Database):
 
     def _reset(self) -> None:
         """
-        Reset the elements database
+        Reset the atom database
         """
 
         self._data.clear()
@@ -510,7 +517,8 @@ class AtomsDatabase(_Database):
 
     def save(self) -> None:
         """
-        Save a copy of the elements database to MDANSE application directory.
+        Save a copy of the atom database to MDANSE application directory. This database will then be used in the
+        future. If the user database already exists, calling this function will overwrite it.
         """
 
         d = {'properties': self._properties, 'atoms': self._data}
@@ -520,9 +528,7 @@ class AtomsDatabase(_Database):
 
 
 class MoleculesDatabaseError(Error):
-    """
-    This class handles the exceptions related to MoleculesDatabase
-    """
+    """This class handles the exceptions related to MoleculesDatabase"""
     pass
 
 
@@ -556,7 +562,7 @@ class MoleculesDatabase(_Database):
         :param user_database: The path to the user-defined database. The default path is used by default.
         :type user_database: str or None
 
-        :param default_database: The path to the default MDANSE atom database. The default path is used by default.
+        :param default_database: The path to the default MDANSE molecule database. The default path is used by default.
         :type default_database: str or None
         """
         super()._load(user_database, default_database)
@@ -581,7 +587,7 @@ class MoleculesDatabase(_Database):
     @property
     def molecules(self) -> list[str]:
         """
-        Returns the name of the molecule of the database.
+        Returns the names of all molecules in the database.
 
         :return: the name of the molecule stored in the database
         :rtype: list
@@ -602,9 +608,7 @@ class MoleculesDatabase(_Database):
 
 
 class NucleotidesDatabaseError(Error):
-    """
-    This class handles the exceptions related to ElementsDatabase
-    """
+    """This class handles the exceptions related to NucleotidesDatabase"""
     pass
 
 
@@ -633,7 +637,7 @@ class NucleotidesDatabase(_Database):
 
     def _load(self, user_database: str = None, default_database: str = None) -> None:
         """
-        Load the molecule database. This method should never be called elsewhere than __init__ or unit testing.
+        Load the nucleotide database. This method should never be called elsewhere than __init__ or unit testing.
 
         :param user_database: The path to the user-defined database. The default path is used by default.
         :type user_database: str or None
@@ -647,8 +651,9 @@ class NucleotidesDatabase(_Database):
     def add_nucleotide(self, nucleotide: str, is_5ter_terminus: bool = False, is_3ter_terminus: bool = False) -> None:
         """
         Add a new nucleotide in the nucleotide database. The data for this nucleotide will be empty (not completely,
-        its entry will consist of an empty list 'alternatives' and empty dict 'atoms') and will not be saved until the
-        :meth: `save()` method is called. If the atom already exists, an exception is raised.
+        its entry will consist of an empty list 'alternatives', an empty dict 'atoms', and two boolean values determined
+        by the parameters) and will not be saved until the :meth: `save()` method is called. If the atom already exists,
+        an exception is raised.
 
         :param nucleotide: the name of the nucleotide to add
         :type nucleotide: str
@@ -674,7 +679,7 @@ class NucleotidesDatabase(_Database):
     @property
     def nucleotides(self) -> list[str]:
         """
-        Returns the name of the nucleotides of the database.
+        Returns the names of all nucleotides in the database.
 
         :return: the name of the nucleotides stored in the database
         :rtype: list
@@ -695,9 +700,7 @@ class NucleotidesDatabase(_Database):
 
 
 class ResiduesDatabaseError(Error):
-    """
-    This class handles the exceptions related to ElementsDatabase
-    """
+    """This class handles the exceptions related to ResiduesDatabase"""
     pass
 
 
@@ -712,8 +715,8 @@ class ResiduesDatabase(_Database):
         Return an entry of the database.
 
         If the item is a basestring, then the return value will be the list of properties
-        related to element of the databse base that matches this item. If the item is a
-        2-tuple then the return value will the property of the databse whose element and property match
+        related to element of the database base that matches this item. If the item is a
+        2-tuple then the return value will the property of the database whose element and property match
         respectively the first and second elements of the tuple.
 
         :param item: the item to get from the database
@@ -727,12 +730,12 @@ class ResiduesDatabase(_Database):
 
     def _load(self, user_database: str = None, default_database: str = None) -> None:
         """
-        Load the molecule database. This method should never be called elsewhere than __init__ or unit testing.
+        Load the residue database. This method should never be called elsewhere than __init__ or unit testing.
 
         :param user_database: The path to the user-defined database. The default path is used by default.
         :type user_database: str or None
 
-        :param default_database: The path to the default MDANSE nucleotide database. The default path is used by default.
+        :param default_database: The path to the default MDANSE residue database. The default path is used by default.
         :type default_database: str or None
         """
         super()._load(user_database, default_database)
@@ -740,20 +743,20 @@ class ResiduesDatabase(_Database):
 
     def add_residue(self, residue: str, is_c_terminus: bool = False, is_n_terminus: bool = False) -> None:
         """
-        Add a new molecule to the residue database. The data for this residue will be empty (not completely, its entry
+        Add a new residue to the residue database. The data for this residue will be empty (not completely, its entry
         will consist of an empty list 'alternatives', an empty dict 'atoms', and two booleans determined by the
-        arguments) and will not be saved until the :meth: `save()` method is called. If the atom already exists, an
+        arguments) and will not be saved until the :meth: `save()` method is called. If the residue already exists, an
         exception is raised.
 
-        :param residue: the name of the element to add
+        :param residue: the name of the residue to add
         :type residue: str
 
         :param is_c_terminus: boolean representation of whether this residue is the C-terminus of proteins. False by
-               default.
+                              default.
         :type is_c_terminus: bool
 
         :param is_n_terminus: boolean representation of whether this residue is the N-terminus of proteins. False by
-               default.
+                              default.
         :type is_n_terminus: bool
         """
 
