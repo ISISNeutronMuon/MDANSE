@@ -1,21 +1,24 @@
+from __future__ import annotations
+
 import abc
 from ast import literal_eval
 import collections
 import copy
-from typing import Union
+from typing import Union, TYPE_CHECKING
 
+import h5py
 import numpy as np
 from numpy.typing import NDArray
 
-import h5py
-
-from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DATABASE, RESIDUES_DATABASE, \
-    MoleculesDatabase, NucleotidesDatabase, ResiduesDatabase
+from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DATABASE, RESIDUES_DATABASE
 from MDANSE.Chemistry.Databases import ResiduesDatabaseError, NucleotidesDatabaseError
 from MDANSE.Mathematics.Geometry import superposition_fit
 from MDANSE.Mathematics.LinearAlgebra import delta, Quaternion, Tensor, Vector
 from MDANSE.Mathematics.Transformation import Rotation, RotationTranslation, Translation
-from MDANSE.MolecularDynamics.Configuration import _Configuration
+
+if TYPE_CHECKING:
+    from MDANSE.Chemistry.Databases import MoleculesDatabase, NucleotidesDatabase, ResiduesDatabase
+    from MDANSE.MolecularDynamics.Configuration import _Configuration
 
 
 class UnknownAtomError(Exception):
