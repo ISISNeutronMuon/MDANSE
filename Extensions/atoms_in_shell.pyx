@@ -130,8 +130,6 @@ def atoms_in_shell_box(ndarray[np.float64_t, ndim=2]  config not None,
 
     cdef int i
 
-    cdef ndarray[np.float64_t, ndim=2] scaleconfig = np.empty((config.shape[0],3),dtype=np.float)
-
     cdef double mini2 = mini**2
     cdef double maxi2 = maxi**2
 
@@ -150,9 +148,9 @@ def atoms_in_shell_box(ndarray[np.float64_t, ndim=2]  config not None,
         sdy = config[i,1] - refy
         sdz = config[i,2] - refz
 
-        sdx -= round(sdx)
-        sdy -= round(sdy)
-        sdz -= round(sdz)
+        sdx = round(sdx)
+        sdy = round(sdy)
+        sdz = round(sdz)
             
         r2 = sdx*sdx + sdy*sdy + sdz*sdz
 

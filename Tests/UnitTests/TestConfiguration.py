@@ -13,32 +13,6 @@
 #
 # **************************************************************************
 
-#MDANSE : Molecular Dynamics Analysis for Neutron Scattering Experiments
-#------------------------------------------------------------------------------------------
-#Copyright (C)
-#2015- Eric C. Pellegrini Institut Laue-Langevin
-#BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
-#France
-#pellegrini[at]ill.fr
-#goret[at]ill.fr
-#aoun[at]ill.fr
-#
-#This library is free software; you can redistribute it and/or
-#modify it under the terms of the GNU Lesser General Public
-#License as published by the Free Software Foundation; either
-#version 2.1 of the License, or (at your option) any later version.
-#
-#This library is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#Lesser General Public License for more details.
-#
-#You should have received a copy of the GNU Lesser General Public
-#License along with this library; if not, write to the Free Software
-#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
 ''' 
 Created on May 29, 2015
 
@@ -50,7 +24,8 @@ import unittest
 import numpy as np
 
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
-from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration, RealConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration, PeriodicRealConfiguration, \
+    RealConfiguration, ConfigurationError
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
@@ -82,11 +57,21 @@ class TestPeriodicConfiguration(unittest.TestCase):
         with self.assertRaises(ValueError):
             PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
 
-    def test_clone_valid(self):
+    def test_clone_valid_chemical_system(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
         unit_cell = UnitCell(np.random.uniform(0, 1, (3, 3)))
         conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
         clone = conf.clone(self.chem_system)
+
+        self.assertEqual(self.chem_system, clone.chemical_system)
+        self.assertTrue(np.allclose(coords, clone['coordinates']))
+        self.assertEqual(unit_cell, clone.unit_cell)
+
+    def test_clone_valid_none(self):
+        coords = np.random.uniform(0, 1, (self._nAtoms, 3))
+        unit_cell = UnitCell(np.random.uniform(0, 1, (3, 3)))
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+        clone = conf.clone()
 
         self.assertEqual(self.chem_system, clone.chemical_system)
         self.assertTrue(np.allclose(coords, clone['coordinates']))
@@ -109,6 +94,112 @@ class TestPeriodicConfiguration(unittest.TestCase):
         unit_cell_new = UnitCell(np.random.uniform(0, 2, (4, 4)))
         with self.assertRaises(ValueError):
             conf.unit_cell = unit_cell_new
+
+
+class TestPeriodicBoxConfiguaration(unittest.TestCase):
+    def setUp(self):
+        self.chem_system = ChemicalSystem()
+        self._nAtoms = 4
+
+        atoms = []
+        for i in range(self._nAtoms):
+            atoms.append(Atom(symbol='H'))
+        ac = AtomCluster('', atoms)
+
+        self.chem_system.add_chemical_entity(ac)
+
+    def test_fold_coordinates(self):
+        coords = np.array([
+            [-1.65955991,  4.40648987, -9.9977125 ],
+            [-3.95334855, -7.06488218, -8.1532281 ],
+            [-6.27479577, -3.08878546, -2.06465052],
+            [ 0.77633468, -1.61610971,  3.70439001]])
+        unit_cell = UnitCell(np.array([[1.0,2.0,1.0],[2.0,-1.0,1.0],[3.0,1.0,1.0]]))
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+
+        self.assertTrue(np.allclose(conf['coordinates'], [[-1.65955991,  4.40648987, -9.9977125 ],
+            [-3.95334855, -7.06488218, -8.1532281 ],
+            [-6.27479577, -3.08878546, -2.06465052],
+            [ 0.77633468, -1.61610971,  3.70439001]], rtol=1.0e-6),
+                        f'actual = {conf["coordinates"]}')
+
+    def test_to_box_coordinates(self):
+        unit_cell = UnitCell(np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]]))
+        coords = np.array(([1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]))
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+
+        self.assertTrue(np.allclose(coords, conf.to_box_coordinates()), f'\nactual = {conf.to_box_coordinates()}')
+
+    def test_to_real_coordinates(self):
+        unit_cell = UnitCell(np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]]))
+        coords = np.array(([1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]))
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+
+        self.assertTrue(np.allclose([[14.0,3.0,6.0], [32.0,9.0,15.0], [50.0,15.0,24.0], [68.0,21.0,33.0]],
+                                    conf.to_real_coordinates()), f'\nactual = {conf.to_real_coordinates()}')
+
+    def test_to_real_configuration(self):
+        unit_cell = UnitCell(np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]]))
+        coords = np.array(([1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]))
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+        real = conf.to_real_configuration()
+
+        self.assertTrue(isinstance(real, PeriodicRealConfiguration))
+        self.assertEqual(repr(self.chem_system), repr(real._chemical_system))
+        self.assertEqual(['coordinates'], list(real._variables.keys()))
+        self.assertTrue(np.allclose([[14.0,3.0,6.0], [32.0,9.0,15.0], [50.0,15.0,24.0], [68.0,21.0,33.0]],
+                                    real['coordinates']), f'\nactual = {real["coordinates"]}')
+        self.assertEqual(unit_cell, real._unit_cell)
+
+    def test_atoms_in_shell(self):
+        unit_cell = UnitCell(np.array([[10, 0, 0], [0, 10, 0], [0, 0, 10]]))
+        coords = np.array(([1, 1, 1], [2, 1, 1], [5, 1, 1], [9, 1, 1]))
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+        atoms = conf.atoms_in_shell(0, 0.0, 5)
+
+        self.assertEqual([1, 2], [at.index for at in atoms])
+
+    def test_contiguous_configuration(self):
+        unit_cell = UnitCell(np.array([[2, 1, 0], [-3, 2, 0], [2, 1, -4]]))
+        coords = [[0.1, 0.1, 0.1], [0.3, 0.2, 0.4], [-1.3, -1.1, -1.3], [1.9, 1.5, 1.9]]
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+        contiguous_conf = conf.contiguous_configuration()
+
+        self.assertTrue(isinstance(contiguous_conf, PeriodicBoxConfiguration))
+        self.assertEqual(repr(self.chem_system), repr(contiguous_conf._chemical_system))
+        self.assertEqual(['coordinates'], list(contiguous_conf._variables.keys()))
+        self.assertTrue(np.allclose([[0.1, 0.1, 0.1], [0.8, 1.1, -1.6], [-0.9, -0.8, 1.2], [-1.9, 0.8, 0.4]],
+                                    contiguous_conf['coordinates']), f'\nactual = {contiguous_conf["coordinates"]}')
+
+    def test_contiguous_offsets_valid_no_input(self):
+        self.chem_system.add_chemical_entity(AtomCluster('2', [Atom(), Atom()]))
+
+        unit_cell = UnitCell(np.array([[2, 1, 0], [-3, 2, 0], [2, 1, -4]]))
+        coords = [[0.1, 0.1, 0.1], [0.3, 0.2, 0.4], [-1.3, -1.1, -1.3], [1.9, 1.5, 1.9], [1, 1.5, 1], [0.1, 1.5, 1.1]]
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+        offsets = conf.contiguous_offsets()
+
+        self.assertTrue(np.allclose([[0, 0, 0], [0.8, 1.1, -1.6], [-0.9, -0.8, 1.2], [-1.9, 0.8, 0.4], [0, 0, 0],
+                                     [1.9, 1.5, 1.9]], offsets), f'\nactual = {offsets}')
+
+    def test_contiguous_offsets_valid_specified_list(self):
+        self.chem_system.add_chemical_entity(AtomCluster('2', [Atom(), Atom()]))
+
+        unit_cell = UnitCell(np.array([[2, 1, 0], [-3, 2, 0], [2, 1, -4]]))
+        coords = [[0.1, 0.1, 0.1], [0.3, 0.2, 0.4], [-1.3, -1.1, -1.3], [1.9, 1.5, 1.9], [1, 1.5, 1], [0.1, 1.5, 1.1]]
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+        offsets = conf.contiguous_offsets(self.chem_system.chemical_entities[0])
+
+        self.assertTrue(np.allclose([[0, 0, 0], [0.8, 1.1, -1.6], [-0.9, -0.8, 1.2], [-1.9, 0.8, 0.4]], offsets),
+                        f'\nactual = {offsets}')
+
+    def test_contiguous_offsets_invalid(self):
+        unit_cell = UnitCell(np.array([[2, 1, 0], [-3, 2, 0], [2, 1, -4]]))
+        coords = [[0.1, 0.1, 0.1], [0.3, 0.2, 0.4], [-1.3, -1.1, -1.3], [1.9, 1.5, 1.9]]
+        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+
+        with self.assertRaises(ConfigurationError):
+            conf.contiguous_offsets([Atom(parent=ChemicalSystem())])
 
 
 @unittest.skip
@@ -281,6 +372,7 @@ def suite():
     s = unittest.TestSuite()
     s.addTest(loader.loadTestsFromTestCase(TestConfiguration))
     return s
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

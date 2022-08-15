@@ -27,7 +27,7 @@ class WithinShell(ISelector):
         sel = set()
 
         if self._chemicalSystem.configuration is not None:
-            sel.update(self._chemicalSystem.configuration.atomsInShell(ref,mini,maxi))
+            sel.update(self._chemicalSystem.configuration.atoms_in_shell(ref, mini, maxi))
         
         return sel
     
