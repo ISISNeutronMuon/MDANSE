@@ -562,15 +562,22 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 class RealConfiguration(_Configuration):
     is_periodic = False
 
-    def clone(self, chemical_system):
-        """Clone this configuration.
-
-        Args:
-            chemical_system (MDANSE.Chemistry.ChemicalEntity.ChemicalSystem): the chemical system
+    def clone(self, chemical_system: Union[None, ChemicalSystem] = None) -> RealConfiguration:
         """
+        Creates a deep copy of this configuration, using the provided chemical system.
 
-        if chemical_system.total_number_of_atoms() != self.chemical_system.total_number_of_atoms():
-            raise ConfigurationError('Mismatch between the chemical systems')
+        :param chemical_system: the chemical system that is to be used for copying. It must have the same number of
+                                atoms as the chemical system that this configuration describes
+        :type chemical_system: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`
+
+        :return: the cloned configuration
+        :rtype: :class: `MDANSE.MolecularDynamics.Configuration.RealConfiguration`
+        """
+        if chemical_system is None:
+            chemical_system = self._chemical_system
+        else:
+            if chemical_system.total_number_of_atoms() != self.chemical_system.total_number_of_atoms():
+                raise ConfigurationError('Mismatch between the chemical systems')
 
         variables = copy.deepcopy(self.variables)
 
@@ -578,33 +585,42 @@ class RealConfiguration(_Configuration):
 
         return self.__class__(chemical_system, coords, **variables)
 
-    def fold_coordinates(self):
-        """Fold the coordinates into simulation box.
-        """
+    def fold_coordinates(self) -> None:
+        """Does nothing since coordinates can only be folded if the configuration has a unit cell."""
         return
 
-    def to_real_coordinates(self):
-        """Return the coordinates of this configuration converted to real coordinates.
+    def to_real_coordinates(self) -> np.ndarray:
+        """
+        Return the coordinates of this configuration converted to real coordinates.
 
-        Returns:
-            ndarray: the real coordinates
+        :return: the real coordinates
+        :rtype: numpy.ndarray
         """
         return self._variables['coordinates']
 
-    def atomsInShell(self, ref, mini=0.0, maxi=10.0):
-        """Returns the atoms found in a shell around a reference atom.
+    def atoms_in_shell(self, ref: int, mini: float = 0.0, maxi: float = 10.0) -> list[Atom]:
+        """
+        Returns all atoms found in a shell around a reference atom. The shell is a (hollow) sphere around the reference
+        atom defined by parameters mini and maxi. All atoms within the sphere with radius maxi but not within that of
+        radius mini are returned. Atoms that are exactly mini or maxi distance away from the reference atom ARE counted
+        For more details, see :func: `MDANSE.Extensions.atoms_in_shell.atoms_in_shell_nopbc`, which is called under the
+        hood.
 
-        Args:
-            ref (int): the index of the reference atom
-            mini (float): the inner radius of the shell
-            maxi (float): the outer radius of the shell
+        :param ref: the index of the reference atom
+        :type ref: int
+
+        :param mini: the inner radius of the shell
+        :type mini: float
+
+        :param maxi: the outer radius of the shell
+        :type maxi: float
+
+        :return: list of atoms within the defined shell
+        :rtype: list
         """
 
-        indexes = atoms_in_shell.atoms_in_shell_nopbc(
-            self._variables['coordinates'],
-            ref,
-            mini,
-            maxi)
+        indexes = atoms_in_shell.atoms_in_shell_nopbc(self._variables['coordinates'].astype(np.float64),
+                                                      ref, mini, maxi)
 
         atom_list = self._chemical_system.atom_list()
 
@@ -612,30 +628,34 @@ class RealConfiguration(_Configuration):
 
         return selected_atoms
 
-    def contiguous_configuration(self):
-        """Return a configuration with chemical entities made contiguous.
+    def contiguous_configuration(self) -> RealConfiguration:
+        """
+        Return a configuration with chemical entities made contiguous, which is always itself.
 
-        Returns:
-            MDANSE.MolecularDynamics.Configuration.PeriodicBoxConfiguration: the contiguous configuration
+        :return: itself
+        :rtype: :class: `MDANSE.MolecularDynamics.Configuration.RealConfiguration`
         """
         return self
 
-    def continuous_configuration(self):
-        """Return a configuration with chemical entities made continuous.
+    def continuous_configuration(self) -> RealConfiguration:
+        """
+        Return a configuration with chemical entities made continuous, which is always itself.
 
-        Returns:
-            MDANSE.MolecularDynamics.Configuration.PeriodicBoxConfiguration: the continuous configuration
+        :return: itself
+        :rtype: :class: `MDANSE.MolecularDynamics.Configuration.RealConfiguration`
         """
         return self
 
-    def contiguous_offsets(self, chemical_entities=None):
-        """Returns the contiguity offsets for a list of chemical entities.
+    def contiguous_offsets(self, chemical_entities: Union[None, list[_ChemicalEntity]] = None) -> np.ndarray:
+        """
+        Returns the contiguity offsets for a list of chemical entities, which are always zero for every atom.
 
-        Args:
-            chemical_entities (list): the list of chemical entities
+        :param chemical_entities: the list of chemical entities whose offsets are to be calculated or None for all
+                                  entities in the chemical system
+        :type chemical_entities: list
 
-        Returns:
-            ndarray: the offsets
+        :return: the offsets
+        :rtype: numpy.ndarray
         """
 
         if chemical_entities is None:
@@ -645,7 +665,9 @@ class RealConfiguration(_Configuration):
                 if ce.root_chemical_system() is not self._chemical_system:
                     raise ConfigurationError('One or more chemical entities comes from another chemical system')
 
-        offsets = np.zeros((self._chemical_system.number_of_atoms(), 3))
+        number_of_particles = sum([ce.total_number_of_atoms() for ce in chemical_entities])
+
+        offsets = np.zeros((number_of_particles, 3))
 
         return offsets
 

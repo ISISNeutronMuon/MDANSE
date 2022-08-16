@@ -318,14 +318,9 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
             conf.contiguous_offsets([Atom(parent=ChemicalSystem())])
 
 
-@unittest.skip
-class TestConfiguration(unittest.TestCase):
-    '''
-    Unittest for the geometry-related functions
-    '''
-
+class TestRealConfiguration(unittest.TestCase):
     def setUp(self):
-        self._chemicalSystem = ChemicalSystem()
+        self.chem_system = ChemicalSystem()
         self._nAtoms = 4
 
         atoms = []
@@ -333,149 +328,98 @@ class TestConfiguration(unittest.TestCase):
             atoms.append(Atom(symbol='H'))
         ac = AtomCluster('', atoms)
 
-        self._chemicalSystem.add_chemical_entity(ac)
+        self.chem_system.add_chemical_entity(ac)
 
-    def test_assertion(self):
-        coordinates = np.random.uniform(0, 1, (2, 3))
-        with self.assertRaises(ValueError):
-            _ = RealConfiguration(self._chemicalSystem, coordinates)
-
-        coordinates = np.random.uniform(0, 1, (2, 3))
-        with self.assertRaises(ValueError):
-            _ = BoxConfiguration(self._chemicalSystem, coordinates)
-
-    def test_real_configuration(self):
+    def test_clone_valid_no_input(self):
         coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self._chemicalSystem, coordinates)
-        self.assertTrue(np.allclose(conf.to_real_coordinates(), coordinates, rtol=1.0e-6))
+        conf = RealConfiguration(self.chem_system, coordinates)
+        clone = conf.clone()
 
-    def test_to_box_coordinates(self):
+        self.assertTrue(isinstance(clone, RealConfiguration))
+        self.assertEqual(['coordinates'], list(clone._variables.keys()))
+        self.assertTrue(np.allclose(coordinates, clone['coordinates']), f'\nactual = {clone["coordinates"]}')
+
+    def test_clone_valid_chemical_system_provided(self):
         coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self._chemicalSystem, coordinates)
-        self.assertTrue(np.allclose(conf.to_box_coordinates(), coordinates, rtol=1.0e-6))
+        conf = RealConfiguration(self.chem_system, coordinates)
+        clone = conf.clone(self.chem_system)
 
-        unitCell = np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]], dtype=np.float)
-        coordinates = np.array(([1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]), dtype=np.float)
-        conf = RealConfiguration(self._chemicalSystem, coordinates, unitCell)
+        self.assertTrue(isinstance(clone, RealConfiguration))
+        self.assertEqual(['coordinates'], list(clone._variables.keys()))
+        self.assertTrue(np.allclose(coordinates, clone['coordinates']), f'\nactual = {clone["coordinates"]}')
 
-        boxCoordinates = conf.to_box_coordinates()
-        self.assertTrue(np.allclose(boxCoordinates, [[3.0, 2.0, -2.0],
-                                                     [5.4, 3.2, -2.6],
-                                                     [7.8, 4.4, -3.2],
-                                                     [10.2, 5.6, -3.8]], rtol=1.0e-6))
+    def test_clone_invalid_system(self):
+        coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
+        conf = RealConfiguration(self.chem_system, coordinates)
+
+        cs = ChemicalSystem()
+        with self.assertRaises(ConfigurationError):
+            conf.clone(cs)
 
     def test_fold_coordinates(self):
-        unitCell = np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]], dtype=np.float)
-        coordinates = np.array(([1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]), dtype=np.float)
-        conf = RealConfiguration(self._chemicalSystem, coordinates, unitCell)
+        coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
+        conf = RealConfiguration(self.chem_system, coordinates)
         conf.fold_coordinates()
 
-        self.assertTrue(np.allclose(conf.variables['coordinates'], [[0.0, 0.0, 0.0],
-                                                                    [2.0, 1.0, 1.0],
-                                                                    [0.0, -1.0, 0.0],
-                                                                    [0.0, 1.0, 0.0]], rtol=1.0e-6))
-
-    def test_box_configuration(self):
-        coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = BoxConfiguration(self._chemicalSystem, coordinates)
-        self.assertTrue(np.allclose(conf.to_box_coordinates(), coordinates, rtol=1.0e-6))
+        self.assertTrue(np.allclose(coordinates, conf['coordinates']), f'\nactual = {conf["coordinates"]}')
 
     def test_to_real_coordinates(self):
-        unitCell = np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]], dtype=np.float)
-        coordinates = np.array(([1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]), dtype=np.float)
-        conf = BoxConfiguration(self._chemicalSystem, coordinates, unitCell)
+        coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
+        conf = RealConfiguration(self.chem_system, coordinates)
+        real = conf.to_real_coordinates()
 
-        realCoordinates = conf.to_real_coordinates()
-        self.assertTrue(np.allclose(realCoordinates, [[14.0, 3.0, 6.0],
-                                                      [32.0, 9.0, 15.0],
-                                                      [50.0, 15.0, 24.0],
-                                                      [68.0, 21.0, 33.0]], rtol=1.0e-6))
+        self.assertTrue(np.allclose(coordinates, real), f'\nactual = {real}')
 
-    def test_fold_coordinates_real_pbc(self):
-        unit_cell = np.array([[2, 1, 0], [-3, 2, 0], [2, 1, -4]], dtype=np.float)
-        coords = np.array([
-            [-1.65955991, 4.40648987, -9.9977125],
-            [-3.95334855, -7.06488218, -8.1532281],
-            [-6.27479577, -3.08878546, -2.06465052],
-            [0.77633468, -1.61610971, 3.70439001]])
+    def test_atoms_in_shell(self):
+        coords = np.array([[1, 1, 1], [2, 1, 1], [5, 1, 1], [9, 1, 1]])
+        conf = RealConfiguration(self.chem_system, coords)
+        atoms = conf.atoms_in_shell(0, 0, 5)
 
-        conf = RealConfiguration(self._chemicalSystem, coords, unit_cell)
-        conf.fold_coordinates()
+        self.assertEqual([1, 2], [at.index for at in atoms])
 
-        real_coordinates = conf['coordinates']
+    def test_contiguous_configuration(self):
+        coords = np.random.uniform(0, 1, (self._nAtoms, 3))
+        conf = RealConfiguration(self.chem_system, coords)
 
-        self.assertTrue(np.allclose(real_coordinates, [[-0.65955991, 1.40648987, -1.9977125],
-                                                       [1.04665145, -1.06488218, -0.1532281],
-                                                       [-0.27479577, -0.08878546, 1.93534948],
-                                                       [-0.22366532, 1.38389029, -0.29560999]], rtol=1.0e-6))
+        self.assertEqual(conf, conf.contiguous_configuration())
 
-    def test_fold_coordinates_real_nopbc(self):
-        coords = np.array([
-            [-1.65955991, 4.40648987, -9.9977125],
-            [-3.95334855, -7.06488218, -8.1532281],
-            [-6.27479577, -3.08878546, -2.06465052],
-            [0.77633468, -1.61610971, 3.70439001]])
+    def test_continuous_configuration(self):
+        coords = np.random.uniform(0, 1, (self._nAtoms, 3))
+        conf = RealConfiguration(self.chem_system, coords)
 
-        conf = RealConfiguration(self._chemicalSystem, coords)
-        conf.fold_coordinates()
+        self.assertEqual(conf, conf.continuous_configuration())
 
-        real_coordinates = conf['coordinates']
+    def test_contiguous_offsets_valid_none(self):
+        self.chem_system.add_chemical_entity(AtomCluster('', [Atom(), Atom()]))
+        coords = np.random.uniform(0, 1, (self._nAtoms+2, 3))
+        conf = RealConfiguration(self.chem_system, coords)
 
-        self.assertTrue(np.allclose(real_coordinates, coords, rtol=1.0e-6))
+        offsets = conf.contiguous_offsets()
+        self.assertTrue(np.allclose(np.zeros((6, 3)), offsets), f'\nactual = {offsets}')
 
-    def test_fold_coordinates_box_pbc(self):
-        unit_cell = np.array([[2, 1, 0], [-3, 2, 0], [2, 1, -4]], dtype=np.float)
-        coords = np.array([
-            [0.6, 0.8, -0.7],
-            [0.3, -0.1, 1.2],
-            [0.4, 0.2, -0.9],
-            [-0.2, 0.4, 0.6]])
+    def test_contiguous_offsets_valid_system_input(self):
+        self.chem_system.add_chemical_entity(AtomCluster('', [Atom(), Atom()]))
+        coords = np.random.uniform(0, 1, (self._nAtoms + 2, 3))
+        conf = RealConfiguration(self.chem_system, coords)
 
-        conf = BoxConfiguration(self._chemicalSystem, coords, unit_cell)
-        conf.fold_coordinates()
+        offsets = conf.contiguous_offsets(self.chem_system.chemical_entities[0])
+        self.assertTrue(np.allclose(np.zeros((4, 3)), offsets), f'\nactual = {offsets}')
 
-        real_coordinates = conf['coordinates']
+    def test_contiguous_offsets_invalid_system(self):
+        coords = np.random.uniform(0, 1, (self._nAtoms, 3))
+        conf = RealConfiguration(self.chem_system, coords)
 
-        self.assertTrue(np.allclose(real_coordinates, [[-0.4, -0.2, 0.3],
-                                                       [0.3, -0.1, 0.2],
-                                                       [0.4, 0.2, 0.1],
-                                                       [-0.2, 0.4, -0.4]], rtol=1.0e-6))
-
-    def test_fold_coordinates_box_nopbc(self):
-        coords = np.array([
-            [0.6, 0.8, -0.7],
-            [0.3, -0.1, 1.2],
-            [0.4, 0.2, -0.9],
-            [-0.2, 0.4, 0.6]])
-
-        conf = BoxConfiguration(self._chemicalSystem, coords)
-        conf.fold_coordinates()
-
-        real_coordinates = conf['coordinates']
-
-        self.assertTrue(np.allclose(real_coordinates, coords, rtol=1.0e-6))
-
-    def test_contiguous_configuration_real_pbc(self):
-        unit_cell = np.array([[2, 1, 0], [-3, 2, 0], [2, 1, -4]], dtype=np.float)
-
-        box_coords = [[0.1, 0.1, 0.1], [0.3, 0.2, 0.4], [-1.3, -1.1, -1.3], [1.9, 1.5, 1.9]]
-        box_conf = BoxConfiguration(self._chemicalSystem, box_coords, unit_cell)
-        real_coords = box_conf.to_real_coordinates()
-        real_conf = RealConfiguration(self._chemicalSystem, real_coords, unit_cell)
-
-        contiguous_conf = real_conf.contiguous_configuration()
-        real_coordinates = contiguous_conf['coordinates']
-
-        self.assertTrue(np.allclose(real_coordinates, [[0.1, 0.4, -0.4],
-                                                       [0.8, 1.1, -1.6],
-                                                       [-0.9, -0.8, 1.2],
-                                                       [-1.9, 0.8, 0.4]], rtol=1.0e-6))
+        with self.assertRaises(ConfigurationError):
+            conf.contiguous_offsets([Atom(parent=ChemicalSystem())])
 
 
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(TestConfiguration))
+    s.addTest(loader.loadTestsFromTestCase(TestPeriodicConfiguration))
+    s.addTest(loader.loadTestsFromTestCase(TestPeriodicBoxConfiguration))
+    s.addTest(loader.loadTestsFromTestCase(TestPeriodicRealConfiguration))
+    s.addTest(loader.loadTestsFromTestCase(TestRealConfiguration))
     return s
 
 
