@@ -13,11 +13,11 @@
 #
 # **************************************************************************
 
-''' 
+"""
 Created on May 29, 2015
 
 @author: Eric C. Pellegrini
-'''
+"""
 
 import unittest
 
@@ -36,6 +36,7 @@ class TestConfiguration(unittest.TestCase):
     Uses :class: `MDNASE.MolecularDynamics.Configuration.RealConfiguration` to test methods of the abstract base
     class :class: `MDANSE.MolecularDynamics.Configuration._Configuration`.
     """
+
     def setUp(self):
         self.chem_system = ChemicalSystem()
         self._nAtoms = 4
@@ -91,7 +92,7 @@ class TestConfiguration(unittest.TestCase):
         conf = RealConfiguration(self.chem_system, coords)
 
         with self.assertRaises(ValueError):
-            conf['velocities'] = np.random.uniform(0, 1, (self._nAtoms+1, 3))
+            conf['velocities'] = np.random.uniform(0, 1, (self._nAtoms + 1, 3))
         with self.assertRaises(ValueError):
             conf['velocities'] = np.random.uniform(0, 1, (self._nAtoms, 4))
 
@@ -111,7 +112,6 @@ class TestConfiguration(unittest.TestCase):
         self.assertTrue(np.allclose(vels, conf['velocities']), f'\nactual = {conf["velocities"]}')
         self.assertTrue(np.allclose(forces, conf['forces']), f'\nactual = {conf["forces"]}')
 
-    @unittest.skip
     def test_apply_transformation_rotation(self):
         coords = np.array([[1, 1, 1], [2, 1, 1], [5, 1, 1], [9, 1, 1]])
         vels = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 1]])
@@ -251,7 +251,6 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
                                     real['coordinates']), f'\nactual = {real["coordinates"]}')
         self.assertEqual(unit_cell, real._unit_cell)
 
-    @unittest.skip
     def test_atoms_in_shell(self):
         unit_cell = UnitCell(np.array([[10, 0, 0], [0, 10, 0], [0, 0, 10]]))
         coords = np.array(([1, 1, 1], [2, 1, 1], [5, 1, 1], [9, 1, 1]))
@@ -272,7 +271,6 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
         self.assertTrue(np.allclose([[0.1, 0.1, 0.1], [0.8, 1.1, -1.6], [-0.9, -0.8, 1.2], [-1.9, 0.8, 0.4]],
                                     contiguous_conf['coordinates']), f'\nactual = {contiguous_conf["coordinates"]}')
 
-    @unittest.skip
     def test_contiguous_offsets_valid_no_input(self):
         self.chem_system.add_chemical_entity(AtomCluster('2', [Atom(), Atom()]))
 
@@ -284,7 +282,6 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
         self.assertTrue(np.allclose([[0, 0, 0], [0.8, 1.1, -1.6], [-0.9, -0.8, 1.2], [-1.9, 0.8, 0.4], [0, 0, 0],
                                      [1.9, 1.5, 1.9]], offsets), f'\nactual = {offsets}')
 
-    @unittest.skip
     def test_contiguous_offsets_valid_specified_list(self):
         self.chem_system.add_chemical_entity(AtomCluster('2', [Atom(), Atom()]))
 
@@ -362,7 +359,6 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         real = conf.to_real_coordinates()
         self.assertTrue(np.allclose(coords, real), f'\nactual = {real}')
 
-    @unittest.skip
     def test_atoms_in_shell(self):
         coords = np.array([[1, 1, 1], [2, 1, 1], [5, 1, 1], [9, 1, 1]])
         unit_cell = UnitCell(np.array([[10, 0, 0], [0, 10, 0], [0, 0, 10]]))
@@ -371,7 +367,6 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
 
         self.assertEqual([1, 2], [at.index for at in atoms])
 
-    @unittest.skip
     def test_contiguous_configuration(self):
         coords = np.array([[14.0, 3.0, 6.0], [32.0, 9.0, 15.0], [50.0, 15.0, 24.0], [68.0, 21.0, 33.0]])
         unit_cell = UnitCell(np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]]))
@@ -385,7 +380,6 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
                                     result['coordinates']), f'\nactual = {result["coordinates"]}')
         self.assertEqual(unit_cell, result._unit_cell)
 
-    @unittest.skip
     def test_continuous_configuration(self):
         coords = np.array([[14.0, 3.0, 6.0], [32.0, 9.0, 15.0], [50.0, 15.0, 24.0], [68.0, 21.0, 33.0]])
         unit_cell = UnitCell(np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]]))
@@ -399,27 +393,25 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
                                     result['coordinates']), f'\nactual = {result["coordinates"]}')
         self.assertEqual(unit_cell, result._unit_cell)
 
-    @unittest.skip
     def test_contiguous_offsets_valid_no_input(self):
         coords = np.array([[14.0, 3.0, 6.0], [32.0, 9.0, 15.0], [50.0, 15.0, 24.0], [68.0, 21.0, 33.0]])
         unit_cell = UnitCell(np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]]))
         conf = PeriodicRealConfiguration(self.chem_system, coords, unit_cell)
 
         offsets = conf.contiguous_offsets()
-        self.assertTrue(np.allclose([[ 0.,  0.,  0.], [-3., -3., -3.], [-6., -6., -6.], [-9., -9., -9.]], offsets),
+        self.assertTrue(np.allclose([[0., 0., 0.], [-3., -3., -3.], [-6., -6., -6.], [-9., -9., -9.]], offsets),
                         f'\nactual = {offsets}')
 
-    @unittest.skip
     def test_contiguous_offsets_valid_specified_list(self):
         self.chem_system.add_chemical_entity(AtomCluster('2', [Atom(), Atom()]))
 
         coords = np.array([[14.0, 3.0, 6.0], [32.0, 9.0, 15.0], [50.0, 15.0, 24.0], [68.0, 21.0, 33.0],
-                          [15.0, 15.0, 15.0], [10.0, 10.0, 10.0]])
+                           [15.0, 15.0, 15.0], [10.0, 10.0, 10.0]])
         unit_cell = UnitCell(np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]]))
         conf = PeriodicRealConfiguration(self.chem_system, coords, unit_cell)
 
         offsets = conf.contiguous_offsets(self.chem_system.chemical_entities[0])
-        self.assertTrue(np.allclose([[ 0.,  0.,  0.], [-3., -3., -3.], [-6., -6., -6.], [-9., -9., -9.]],
+        self.assertTrue(np.allclose([[0., 0., 0.], [-3., -3., -3.], [-6., -6., -6.], [-9., -9., -9.]],
                                     offsets), f'\nactual = {offsets}')
 
     def test_contiguous_offsets_invalid(self):
@@ -504,7 +496,7 @@ class TestRealConfiguration(unittest.TestCase):
 
     def test_contiguous_offsets_valid_none(self):
         self.chem_system.add_chemical_entity(AtomCluster('', [Atom(), Atom()]))
-        coords = np.random.uniform(0, 1, (self._nAtoms+2, 3))
+        coords = np.random.uniform(0, 1, (self._nAtoms + 2, 3))
         conf = RealConfiguration(self.chem_system, coords)
 
         offsets = conf.contiguous_offsets()
@@ -529,6 +521,7 @@ class TestRealConfiguration(unittest.TestCase):
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(TestConfiguration))
     s.addTest(loader.loadTestsFromTestCase(TestPeriodicConfiguration))
     s.addTest(loader.loadTestsFromTestCase(TestPeriodicBoxConfiguration))
     s.addTest(loader.loadTestsFromTestCase(TestPeriodicRealConfiguration))
