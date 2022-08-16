@@ -175,7 +175,7 @@ class Rotation(RigidBodyTransformation):
         elif len(args) == 2:
             axis, angle = args
             axis = axis.normal()
-            projector = axis.dyadicProduct(axis)
+            projector = axis.dyadic_product(axis)
             self.tensor = projector - \
                           float(np.sin(angle))*(epsilon*axis) + \
                           float(np.cos(angle))*(delta-projector)

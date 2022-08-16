@@ -36,11 +36,7 @@ class _Configuration(metaclass=abc.ABCMeta):
 
         self._variables = {}
 
-        coords = np.array(coords)
-        if coords.shape != (self._chemical_system.number_of_atoms(), 3):
-            raise ValueError('Invalid coordinates dimensions')
-
-        self['coordinates'] = coords
+        self['coordinates'] = np.array(coords)
 
         for k, v in variables.items():
             self[k] = v
@@ -96,7 +92,10 @@ class _Configuration(metaclass=abc.ABCMeta):
         conf = self['coordinates']
         rot = transfo.rotation().tensor.array
         conf[:] = np.dot(conf, np.transpose(rot))
-        np.add(conf, transfo.translation().vector.array[np.newaxis, :], conf)
+
+        # The casting here must be set to 'unsafe' to allow for conversion from int to float; the vector array may be
+        # of float dtype while conf, after the dot product, can be int.
+        np.add(conf, transfo.translation().vector.array[np.newaxis, :], conf, casting='unsafe')
 
         if 'velocities' in self._variables:
             velocities = self._variables['velocities']
