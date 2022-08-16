@@ -38,28 +38,28 @@ def atoms_in_shell_real(ndarray[np.float64_t, ndim=2]  config not None,
 
     cdef int i
 
-    cdef ndarray[np.float64_t, ndim=2] scaleconfig = np.empty((config.shape[0],3),dtype=np.float)
+    cdef ndarray[np.float64_t, ndim=2] scaleconfig = np.empty((config.shape[0], 3), dtype=np.float64)
 
     cdef double mini2 = mini**2
     cdef double maxi2 = maxi**2
 
-    refx = config[refIndex,0]
-    refy = config[refIndex,1]
-    refz = config[refIndex,2]
+    refx = config[refIndex, 0]
+    refy = config[refIndex, 1]
+    refz = config[refIndex, 2]
 
     for 0 <= i < config.shape[0]:
 
-        x = config[i,0]
-        y = config[i,1]
-        z = config[i,2]
+        x = config[i, 0]
+        y = config[i, 1]
+        z = config[i, 2]
 
-        scaleconfig[i,0] = x*rcell[0,0] + y*rcell[0,1] + z*rcell[0,2]
-        scaleconfig[i,1] = x*rcell[1,0] + y*rcell[1,1] + z*rcell[1,2]
-        scaleconfig[i,2] = x*rcell[2,0] + y*rcell[2,1] + z*rcell[2,2]
+        scaleconfig[i, 0] = x*rcell[0, 0] + y*rcell[0, 1] + z*rcell[0, 2]
+        scaleconfig[i, 1] = x*rcell[1, 0] + y*rcell[1, 1] + z*rcell[1, 2]
+        scaleconfig[i, 2] = x*rcell[2, 0] + y*rcell[2, 1] + z*rcell[2, 2]
 
-    refsx = scaleconfig[refIndex,0]
-    refsy = scaleconfig[refIndex,1]
-    refsz = scaleconfig[refIndex,2]
+    refsx = scaleconfig[refIndex, 0]
+    refsy = scaleconfig[refIndex, 1]
+    refsz = scaleconfig[refIndex, 2]
 
     indexes = []
 
@@ -68,17 +68,17 @@ def atoms_in_shell_real(ndarray[np.float64_t, ndim=2]  config not None,
         if i == refIndex:
             continue
 
-        sdx = scaleconfig[i,0] - refsx
-        sdy = scaleconfig[i,1] - refsy
-        sdz = scaleconfig[i,2] - refsz
+        sdx = scaleconfig[i, 0] - refsx
+        sdy = scaleconfig[i, 1] - refsy
+        sdz = scaleconfig[i, 2] - refsz
 
         sdx -= round(sdx)
         sdy -= round(sdy)
         sdz -= round(sdz)
             
-        rx = sdx*cell[0,0] + sdy*cell[0,1] + sdz*cell[0,2]
-        ry = sdx*cell[1,0] + sdy*cell[1,1] + sdz*cell[1,2]
-        rz = sdx*cell[2,0] + sdy*cell[2,1] + sdz*cell[2,2]
+        rx = sdx*cell[0, 0] + sdy*cell[0, 1] + sdz*cell[0, 2]
+        ry = sdx*cell[1, 0] + sdy*cell[1, 1] + sdz*cell[1, 2]
+        rz = sdx*cell[2, 0] + sdy*cell[2, 1] + sdz*cell[2, 2]
 
         r2 = rx*rx + ry*ry + rz*rz
 
@@ -148,9 +148,9 @@ def atoms_in_shell_box(ndarray[np.float64_t, ndim=2]  config not None,
         sdy = config[i,1] - refy
         sdz = config[i,2] - refz
 
-        sdx = round(sdx)
-        sdy = round(sdy)
-        sdz = round(sdz)
+        sdx -= round(sdx)
+        sdy -= round(sdy)
+        sdz -= round(sdz)
             
         r2 = sdx*sdx + sdy*sdy + sdz*sdz
 

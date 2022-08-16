@@ -38,7 +38,7 @@ def fold_coordinates(
 
     cdef int i
 
-    cdef ndarray[np.float64_t, ndim=3] folded_coords = np.empty((coords.shape[0],coords.shape[1],3),dtype=np.float)
+    cdef ndarray[np.float64_t, ndim=3] folded_coords = np.empty((coords.shape[0],coords.shape[1],3),dtype=np.float64)
 
     cdef ndarray[np.float64_t, ndim=3] box_coords
 
@@ -48,7 +48,7 @@ def fold_coordinates(
 
     if not box_coordinates:
 
-        box_coords = np.empty((coords.shape[0],coords.shape[1],3),dtype=np.float)
+        box_coords = np.empty((coords.shape[0],coords.shape[1],3),dtype=np.float64)
 
         for 0 <= i < box_coords.shape[0]:
 
