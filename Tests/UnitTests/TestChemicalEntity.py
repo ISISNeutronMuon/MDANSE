@@ -1771,3 +1771,17 @@ class StubConfiguration(dict):
         self.is_periodic = is_periodic
         self.chemical_system = chemical_system
         super().__init__(**kwargs)
+
+
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    for test_case in [TestChemicalEntity, TestAtom, TestAtomCluster, TestAtomGroup, TestMolecule, TestResidue,
+                      TestNucleotide, TestNucleotideChain, TestPeptideChain, TestProtein, TestTranslateAtomNames,
+                      TestChemicalSystem]:
+        s.addTest(loader.loadTestsFromTestCase(test_case))
+    return s
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
