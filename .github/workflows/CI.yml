@@ -155,7 +155,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['macos-10.15', 'macos-11']
+        os: ['macos-11', 'macos-12']
 
     steps:
       - uses: actions/checkout@v2
@@ -165,7 +165,7 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dependecies with pip
+      - name: Install dependencies with pip
         run: |
           python3 -m pip install numpy matplotlib Cython pyyaml h5py psutil vtk
 
@@ -190,14 +190,14 @@ jobs:
           python3 AllTests.py
 
       - name: Tar python
-        if: ${{ (matrix.os == 'macos-10.15') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
+        if: ${{ (matrix.os == 'macos-11') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
 
       - name: Upload artifacts
-        if: ${{ (matrix.os == 'macos-10.15') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
+        if: ${{ (matrix.os == 'macos-11') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -207,7 +207,7 @@ jobs:
 
   deploy_osx:
     needs: ci_osx
-    runs-on: macos-10.15
+    runs-on: macos-11
     if: |
       contains( github.ref, 'main' ) ||
       contains( github.ref, 'develop' ) ||
@@ -222,7 +222,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: macos-10.15_artifacts
+          name: macos-11_artifacts
           path: ~/
 
       - run: brew install netcdf
