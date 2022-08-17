@@ -349,6 +349,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - run: echo $RUNNER_NAME
+
       - name: Install python
         uses: actions/setup-python@v2
         with:
@@ -446,7 +448,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: ${{ matrix.os }}_artifacts
+          name: macos-11_artifacts
           path: ~/
 
       - run: brew install netcdf
