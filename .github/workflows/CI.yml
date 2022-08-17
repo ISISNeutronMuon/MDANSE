@@ -349,8 +349,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - run: echo $RUNNER_NAME
-
       - name: Install python
         uses: actions/setup-python@v2
         with:
@@ -413,6 +411,14 @@ jobs:
           cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
           python2 BuildJobTests.py
           python2 AllTests.py
+
+      - run: |
+          cd /usr/lib/
+          ls
+
+      - run: |
+          cd /usr/local/lib
+          ls
 
       - name: Tar python
         if: ${{ (matrix.os == 'macos-11') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, '136' ) ) }}
