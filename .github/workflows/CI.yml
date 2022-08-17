@@ -446,7 +446,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: macos-10.15_artifacts
+          name: ${{ matrix.os }}_artifacts
           path: ~/
 
       - run: brew install netcdf
