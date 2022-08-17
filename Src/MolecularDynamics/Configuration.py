@@ -78,7 +78,8 @@ class _Configuration(metaclass=abc.ABCMeta):
 
         item = np.array(value)
         if item.shape != (self._chemical_system.number_of_atoms(), 3):
-            raise ValueError('Invalid item dimensions')
+            raise ValueError(f'Invalid item dimensions; a shape of {(self._chemical_system.number_of_atoms(), 3)} was '
+                             f'expected but data with shape of {item.shape} was provided.')
 
         self._variables[name] = value
 
@@ -189,7 +190,11 @@ class _PeriodicConfiguration(_Configuration):
             chemical_system = self._chemical_system
         else:
             if chemical_system.total_number_of_atoms() != self.chemical_system.total_number_of_atoms():
-                raise ConfigurationError('Mismatch between the chemical systems')
+                raise ConfigurationError('Mismatch between the chemical systems; the provided chemical system, '
+                                         f'{chemical_system.name}, has {chemical_system.total_number_of_atoms()} atoms '
+                                         f'which does not match the chemical system of this configuration, '
+                                         f'{self.chemical_system.name} which has '
+                                         f'{self.chemical_system.total_number_of_atoms()} atoms.')
 
         unit_cell = copy.deepcopy(self._unit_cell)
 
@@ -661,8 +666,15 @@ class RealConfiguration(_Configuration):
             chemical_entities = self._chemical_system.chemical_entities
         else:
             for ce in chemical_entities:
-                if ce.root_chemical_system() is not self._chemical_system:
-                    raise ConfigurationError('One or more chemical entities comes from another chemical system')
+                root = ce.root_chemical_system()
+                if root is not self._chemical_system:
+                    raise ConfigurationError('All the entities provided in the chemical_entities parameter must belong '
+                                             'to the chemical system registered with this configuration, which is '
+                                             f'{self._chemical_system.name}. However, the entity at index {i}, '
+                                             f'{str(ce)}, is in chemical system '
+                                             f'{root.name if root is not None else None}.\nExpected chemical system: '
+                                             f'{repr(self._chemical_system)}\nActual chemical system: {repr(root)}\n'
+                                             f'Faulty chemical entity: {repr(ce)}')
 
         number_of_particles = sum([ce.total_number_of_atoms() for ce in chemical_entities])
 
@@ -690,4 +702,4 @@ if __name__ == "__main__":
 
     conf = RealConfiguration(cs, coordinates)
 
-    print(conf.atomsInShell(0, 0, 5))
+    print(conf.atoms_in_shell(0, 0, 5))
