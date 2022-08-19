@@ -79,6 +79,7 @@ sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
 
 # It is necessary to interlink the following dylibs for them to work properly
 echo "Change dylib links"
+sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib  @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/MacOS/python
 # libpython
 sudo install_name_tool -id @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
 sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
