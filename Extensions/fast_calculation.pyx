@@ -17,14 +17,17 @@ import cython
 import numpy as np
 cimport numpy as np 
 
+
 cdef extern from "math.h":
 
     double floor(double x)
     double ceil(double x)
     double sqrt(double x)
 
+
 cdef inline double round(double r):
     return floor(r + 0.5) if (r > 0.0) else ceil(r - 0.5)
+
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
@@ -32,13 +35,12 @@ cdef inline double round(double r):
 def cpt_cluster_connectivity_nopbc(
     np.ndarray[np.float64_t, ndim=2] coords,
     np.ndarray[np.float64_t, ndim=1] covRadii,
-    np.float32_t tolerance,
-    bonds):
+    np.float32_t tolerance):
 
     '''
     Compute the connectivity of an atom cluster.
     '''
-    
+    bonds = []
     cdef int i, j, nbat
     cdef float radius, distance
     
@@ -52,6 +54,7 @@ def cpt_cluster_connectivity_nopbc(
             if distance <= (radius*radius):
                 bonds.append([i,j])
     return bonds
+
 
 @cython.cdivision(True)
 @cython.boundscheck(False)

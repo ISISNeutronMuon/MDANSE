@@ -13,180 +13,247 @@
 # **************************************************************************
 
 import operator
+from typing import Union
 
 import numpy as np
 
 from MDANSE.Core.Error import Error
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, AtomGroup
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, AtomGroup, ChemicalSystem, _ChemicalEntity
 from MDANSE.Extensions import fast_calculation
+
 
 class MolecularDynamicsError(Error):
     pass
 
+
 class UniverseAdapterError(Error):
     pass
 
-def atomindex_to_moleculeindex(chemicalSystem):
-    """Returns a lookup between the index of the atoms of a chemical system and the index 
-    of their corresponding chemical entity.
 
-    Args:
-        chemicalSystem (MDANSE.Chemistry.ChemicalEntitiy.ChemicalSystem): the chemical system
-
-    Returns:
-        dict: the lookup table        
+def atom_index_to_molecule_index(chemical_system: ChemicalSystem) -> dict[int, int]:
     """
-    
+    Maps the indices of all atoms in a chemical system to the indices of their root parent chemical entities and returns
+    the lookup table. This can then be used to retrieve the root parent chemical entity of an atom through the
+    chemical_entities property of ChemicalSystem.
+
+    :param chemical_system: the chemical system whose lookup table is to be generated
+    :type chemical_system: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`
+
+    :return: a lookup table mapping atom indices to the indices of their root chemical entity
+    :rtype: dict
+    """
+
     lut = {}
-    for i,ce in enumerate(chemicalSystem.chemical_entities):
+    for i, ce in enumerate(chemical_system.chemical_entities):
         for at in ce.atom_list():
             lut[at.index] = i
-                
+
     return lut
-    
-def brute_formula(chemicalEntity, sep='_'):
-    """Define the brute formula of a given chemical entity.
 
-    Args:
-        chemicalEntity (MDANSE.Chemistry.ChemicalEntity.ChemicalEntity): the chemical entity
-        sep (str): the separator
 
-    Returns:
-        the brute formula
+def brute_formula(chemical_entity: _ChemicalEntity, sep: str = '_', ignore_ones: bool = False) -> str:
     """
-    
+    Determine the molecular formula of a given chemical entity.
+
+    :param chemical_entity: the chemical entity whose formula is to be deternimed
+    :type chemical_entity: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalEntity`
+
+    :param sep: the separator used between elements, i.e. with the default separator a water molecule will return H2_O1
+    :type sep: str
+
+    :param ignore_ones: determines whether number 1 should be printed, i.e. whether water should be H2_O1 or H2_O
+    :type ignore_ones: bool
+
+    :return: the molecular formula
+    :rtype: str
+    """
+
     contents = {}
-    
-    for at in chemicalEntity.atom_list():
-        contents[at.symbol] = str(int(contents.get(at.symbol,0)) + 1)
-    
-    return sep.join([''.join(v) for v in sorted(contents.items())])
 
-def build_connectivity(chemicalSystem ,tolerance=0.05):
-    """Build the connectivity of the AtomCluster of a given chemical system.
+    for at in chemical_entity.atom_list():
+        contents[at.symbol] = str(int(contents.get(at.symbol, 0)) + 1)
 
-    Args:
-        chemicalSystem (MDANSE.Chemistry.ChemicalEntitiy.ChemicalSystem): the chemical system
-        tolerance (float): the tolerance used for defining whether two atoms are bonded
+    formula = sep.join([''.join(v) for v in sorted(contents.items())])
+
+    if ignore_ones:
+        return formula.replace('1', '')
+    else:
+        return formula
+
+
+def build_connectivity(chemical_system: ChemicalSystem, tolerance: float = 0.05) -> None:
+    """
+    Creates bonds between atoms within each atom cluster as well as between loose atoms. Bonds are created only between
+    atoms whose covalent radii overlap, i.e. for whose the sum of their covalent radii plus the tolerance is smaller
+    than their distance. Bonds are created only between atoms within a
+    :class: `MDANSE.Chemistry.ChemicalEntity.AtomCluster` or between loose atoms (atoms that are not part of another
+    chemical entity or which are the only atom in their chemical entity). No bonds are created between atoms of other
+    chemical entities (unless it's the only atom in it), and no bonds are created between atoms in different atom
+    clusters or between atoms in an entity and loose atoms, regardless of their positions.
+
+    Please note that the coordinates of atoms are taken from the configuration registered in the provided chemical
+    system.
+
+    :param chemical_system: the chemical system in which bonds are to be created
+    :type chemical_system: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`
+
+    :param tolerance: the tolerance used for defining whether two atoms are bonded in nm
+    :type tolerance: float
+
+    :return: None
     """
 
-    bonds = []
-    
-    conf = chemicalSystem.configuration
+    conf = chemical_system.configuration
 
-    scannedObjects = [ce for ce in chemicalSystem.chemical_entities if isinstance(ce,AtomCluster)]
-                
-    singleAtomsObjects = []
-    for ce in chemicalSystem.chemical_entities:
-        if isinstance(ce,Atom):
-            singleAtomsObjects.append(ce)
+    atom_clusters = []
+    single_atoms_objects = []
+
+    # Find all atom clusters, loose atoms, and one-atom objects
+    for ce in chemical_system.chemical_entities:
+        if isinstance(ce, Atom):
+            single_atoms_objects.append(ce)
+        elif isinstance(ce, AtomCluster):
+            atom_clusters.append(ce)
         else:
             if ce.number_of_atoms() == 1:
-                singleAtomsObjects.extend(ce.atom_list())
+                single_atoms_objects.extend(ce.atom_list())
 
-    if singleAtomsObjects:
-        scannedObjects.append(AtomCluster('',singleAtomsObjects, parentless=True))
+    if single_atoms_objects:
+        atom_clusters.append(AtomCluster('', single_atoms_objects, parentless=True))
 
-    for ce in scannedObjects:
+    for ce in atom_clusters:
 
-        atoms = sorted(ce.atom_list(), key = operator.attrgetter('index'))
+        atoms = sorted(ce.atom_list(), key=operator.attrgetter('index'))
 
-        nAtoms = len(atoms)
+        n_atoms = len(atoms)
         indexes = [at.index for at in atoms]
-        coords = conf.variables['coordinates'][indexes,:]
-        covRadii = np.zeros((nAtoms,), dtype=np.float64)
-        for i,at in enumerate(atoms):
-            covRadii[i] = ATOMS_DATABASE[at.symbol.capitalize()]['covalent_radius']
-        
-        fast_calculation.cpt_cluster_connectivity_nopbc(coords,covRadii,tolerance,bonds)
-                  
-        for idx1,idx2 in bonds:
-            atoms[idx1].bonds.append(atoms[idx2])                  
+        coords = conf.variables['coordinates'][indexes, :]
+        cov_radii = np.zeros((n_atoms,), dtype=np.float64)
+        for i, at in enumerate(atoms):
+            cov_radii[i] = ATOMS_DATABASE[at.symbol.capitalize()]['covalent_radius']
+
+        bonds = fast_calculation.cpt_cluster_connectivity_nopbc(coords, cov_radii, tolerance)
+
+        for idx1, idx2 in bonds:
+            atoms[idx1].bonds.append(atoms[idx2])
             atoms[idx2].bonds.append(atoms[idx1])
 
-def find_atoms_in_molecule(chemicalSystem, ceName, atomNames, indexes=False):
-    """Find the atoms of a chemical system whose chemical entity match a given value 
-    and atom names are within a given list.
 
-    Args:
-        chemicalSystem (MDANSE.Chemistry.ChemicalEntitiy.ChemicalSystem): the chemical system
-        ceName (str): the name of the chemical entity to match
-        atomNames (list): the list of atom names to search
-        indexes (bool): if True the indexes of the atoms will be returned otherwise the Atom instances will be returned
+def find_atoms_in_molecule(chemical_system: ChemicalSystem, entity_name: str, atom_names: list[str],
+                           indexes: bool = False) -> list[list[Union[Atom, int]]]:
+    """
+    Finds all chemical entities of the provided name within the chemical system, and then retrieves all atoms from each
+    of the found entities whose name matches one of the provided atom names. However, please note that only the chemical
+    entities directly registered in the chemical system are searched, i.e. the chemical_entities property of
+    :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`. Therefore, for example, if a chemical system consists of a
+    Protein with name 'protein' which consists of 2 NucleotideChains 'chain1' and 'chain2', and this function is called
+    with the entity_name parameter set to 'chain1', an empty list will be returned.
 
-    Returns:
-        list: the list of indexes or atom instances found
+    :param chemical_system: the chemical system to be searched
+    :type chemical_system: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`
+
+    :param entity_name: the name of the chemical entity to match
+    :type entity_name: str
+
+    :param atom_names: the list of atom names to search
+    :type atom_names: list
+
+    :param indexes: if True the indexes of the atoms will be returned otherwise the Atom instances will be returned
+    :type indexes: bool
+
+    :return: the list of indexes or atom instances found
+    :rtype: list
     """
 
-    # Loop over the chemical entities of the chemical entity and keep only those
-    # whose name match |ce_name|
-    chemicalEntities = []
-    for ce in chemicalSystem.chemical_entities:
-        if ce.name == ceName:
-            chemicalEntities.append(ce)
-                    
+    # Loop over the chemical entities of the chemical entity and keep only those whose name match |ce_name|
+    chemical_entities = []
+    for ce in chemical_system.chemical_entities:
+        if ce.name == entity_name:
+            chemical_entities.append(ce)
+
     match = []
-    for ce in chemicalEntities:
+    for ce in chemical_entities:
         atoms = ce.atom_list()
         names = [at.name for at in atoms]
-        l = [atoms[names.index(at_name)] for at_name in atomNames]
+        try:
+            match.append([atoms[names.index(at_name)] for at_name in atom_names])
+        except ValueError:
+            match.append([])
 
-        match.append(l)
-        
     if indexes is True:
-        match = [[at.index for at in atList] for atList in match]
-        
+        match = [[at.index for at in at_list] for at_list in match]
+
     return match
 
-def get_chemical_objects_dict(chemical_system):
-    """Return a dict of the chemical entities found in a chemical system.
 
-    Args:
-        chemicalSystem (MDANSE.Chemistry.ChemicalEntitiy.ChemicalSystem): the chemical system
-
-    Returns:
-        dict: a dict whose key and value are respectively the name and the instance of the
-    chemical entities defined in the chemical system
+def get_chemical_objects_dict(chemical_system: ChemicalSystem) -> dict[str, list[_ChemicalEntity]]:
     """
-    
+    Maps all chemical entities in a chemical system to their names, and returns this as a dict. Please note that only
+    the top level chemical entities (those directly registered in chemical system) are mapped; children entities are not
+    mapped. Therefore, if a chemical system containing a protein called 'protein' which itself consists of nucleotide
+    chains 'chain1' and 'chain2' is passed in to this function, the following dict would be returned {'protein': [
+    Protein]}.
+
+    :param chemical_system: the chemical system whose entities are to be retrieved
+    :type chemical_system: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`
+
+    :return: a dict mapping the names of the entities in a chemical system to a list of entities with that name
+    :rtype: dict
+    """
+
     d = {}
     for ce in chemical_system.chemical_entities:
         d.setdefault(ce.name, []).append(ce)
-        
+
     return d
-                                                                            
-def group_atoms(chemicalSystem,groups):
-    """Group the atoms of a chemical system.
 
-    Args:
-        chemicalSystem (MDANSE.Chemistry.ChemicalEntitiy.ChemicalSystem): the chemical system
-        groups (list): the nested list of indexes, each sublist defining a group
 
-    Returns:
-        list: the list of AtomGroup
+def group_atoms(chemical_system: ChemicalSystem, groups: list[list[int]]) -> list[AtomGroup]:
     """
-    
-    atoms = sorted(chemicalSystem.atom_list(), key=operator.attrgetter('index'))
-                                        
-    groups = [AtomGroup([atoms[index] for index in gr]) for gr in groups]
+    Groups select atoms into :class: `MDANSE.Chemistry.ChemicalEntity.AtomGroup` objects according to the instructions
+    in the 'groups' argument. Please note, however, that the groups are created strictly according to this parameter,
+    meaning that not all atoms are necessarily placed into a group and that some atoms may be placed into multiple
+    groups, depending on the instructions. The only exception to this is if one of the lists in the 'groups' parameters
+    is empty, in which case no group is created for that list, the instruction silently ignored.
+
+    :param chemical_system: the chemical system whose atoms are to be grouped
+    :type chemical_system: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`
+
+    :param groups: the nested list of indexes, each sublist defining a group
+    :type groups: list
+
+    :return: list of atom groups as specified
+    :rtype: list
+    """
+    atoms = chemical_system.atom_list()
+
+    groups = [AtomGroup([atoms[index] for index in gr]) for gr in groups if gr]
 
     return groups
 
-def resolve_undefined_molecules_name(chemicalSystem):
-    """Resolve the name of the chemical entities with no names by using their
-    brute formula.
 
-    Args:
-        chemicalSystem (MDANSE.Chemistry.ChemicalEntitiy.ChemicalSystem): the chemical system
+def resolve_undefined_molecules_name(chemical_system: ChemicalSystem) -> None:
     """
-    
-    for ce in chemicalSystem.chemical_entities:
-        if not ce.name.strip():
-            ce.name = brute_formula(ce,sep="")
+    Changes the names of all top-level chemical entities (those directly registered with a chemical system) that have no
+    name to their molecular formulae. To be considered to have no name, the molecule's name must be an empty string or a
+    string that consists of only spaces. The molecular formula is determined through
+    :func: `MDANSE.MolecularDynamics.TrajectoryUtils.resolve_undefined_molecules_name`.
 
-def sorted_atoms(atoms,attribute=None):
-    """Sort a list of atoms according.
+    :param chemical_system: the chemical system
+    :type chemical_system: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`
+
+    :return: None
+    """
+    # Is it okay to not do this for children?
+    for ce in chemical_system.chemical_entities:
+        if not ce.name.strip():
+            ce.name = brute_formula(ce, sep="")
+
+
+def sorted_atoms(atoms, attribute=None):
+    """
+    Sort a list of atoms according to their index.
 
     Args:
         atoms (list): the atom list
@@ -197,9 +264,8 @@ def sorted_atoms(atoms,attribute=None):
     """
 
     atoms = sorted(atoms, key=operator.attrgetter('index'))
-    
+
     if attribute is None:
         return atoms
     else:
-        return [getattr(at,attribute) for at in atoms]
-    
+        return [getattr(at, attribute) for at in atoms]
