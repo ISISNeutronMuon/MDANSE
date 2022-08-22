@@ -99,8 +99,6 @@ sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dyli
 # libnetcdf
 sudo install_name_tool -change @rpath/libnetcdf.13.dylib @executable_path/../Frameworks/libnetcdf.13.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/netCDF4/_netCDF4.so
 sudo install_name_tool -change @rpath/libhdf5.103.dylib @executable_path/../Frameworks/libhdf5.103.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/netCDF4/_netCDF4.so
-sudo install_name_tool -change @rpath/libnetcdf.13.dylib @executable_path/../Frameworks/libnetcdf.13.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/netCDF4/_netCDF4.so
-sudo install_name_tool -change @rpath/libhdf5.103.dylib @executable_path/../Frameworks/libhdf5.103.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/netCDF4/_netCDF4.so
 
 echo "Copy site.py"
 sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
