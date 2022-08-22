@@ -43,6 +43,7 @@ echo "Uninstall sphinx and its dependencies"
 sudo ${PYTHONEXE} -m pip uninstall -y sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3
 
 echo "Building mdanse app"
+sudo "${SED_I_COMMAND[@]}" "s|#!/usr/bin/env python|/Applications/MDANSE.app/Contents/MacOS/python" "${GITHUB_WORKSPACE}/Scripts/mdanse_gui"
 cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS" || exit
 sudo ${PYTHONEXE} build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR"
 status=$?
@@ -113,6 +114,9 @@ chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 echo "Comment out in __boot__.py"
 sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
+
+# Correct python path in Info.plist
+sudo "${SED_I_COMMAND[@]}" "s|/Users/runner/Contents/Resources/bin/python|/@executable_path/python|" ${MDANSE_APP_DIR}/Contents/Info.plist
 
 # Create a bash script that will run the bundled python with $PYTHONHOME set
 echo "#!/bin/bash" > ~/python2
