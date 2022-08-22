@@ -5,6 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -189,6 +190,7 @@ jobs:
 
   ci_ubuntu22:
     runs-on: 'ubuntu-22.04'
+    if: false
     strategy:
       fail-fast: false
     steps:
@@ -490,6 +492,7 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
+    if: false
     steps:
       - uses: actions/checkout@v2
 

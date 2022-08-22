@@ -43,7 +43,7 @@ echo "Uninstall sphinx and its dependencies"
 sudo ${PYTHONEXE} -m pip uninstall -y sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3
 
 echo "Building mdanse app"
-sudo "${SED_I_COMMAND[@]}" "s|#!/usr/bin/env python|/Applications/MDANSE.app/Contents/MacOS/python" "${GITHUB_WORKSPACE}/Scripts/mdanse_gui"
+sudo "${SED_I_COMMAND[@]}" "s|#!/usr/bin/env python|/Applications/MDANSE.app/Contents/MacOS/python|" "${GITHUB_WORKSPACE}/Scripts/mdanse_gui"
 cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS" || exit
 sudo ${PYTHONEXE} build.py py2app --argv-inject "$GITHUB_WORKSPACE" --argv-inject "$VERSION_NAME" --argv-inject "$CI_TEMP_BUILD_DIR" --argv-inject "$CI_TEMP_DIR"
 status=$?
