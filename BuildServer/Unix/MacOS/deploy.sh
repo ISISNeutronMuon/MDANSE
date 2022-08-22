@@ -99,6 +99,8 @@ sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dyli
 # libnetcdf
 sudo install_name_tool -change @rpath/libnetcdf.13.dylib @executable_path/../Frameworks/libnetcdf.13.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/netCDF4/_netCDF4.so
 sudo install_name_tool -change @rpath/libhdf5.103.dylib @executable_path/../Frameworks/libhdf5.103.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/netCDF4/_netCDF4.so
+sudo install_name_tool -change @rpath/libnetcdf.13.dylib @executable_path/../Frameworks/libnetcdf.13.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/netCDF4/_netCDF4.so
+sudo install_name_tool -change @rpath/libhdf5.103.dylib @executable_path/../Frameworks/libhdf5.103.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/netCDF4/_netCDF4.so
 
 echo "Copy site.py"
 sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
@@ -113,9 +115,6 @@ chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 echo "Comment out in __boot__.py"
 sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
-
-# Correct python path in Info.plist
-sudo "${SED_I_COMMAND[@]}" "s|/Users/runner/Contents/Resources/bin/python|/@executable_path/python|" ${MDANSE_APP_DIR}/Contents/Info.plist
 
 # Create a bash script that will run the bundled python with $PYTHONHOME set
 echo "#!/bin/bash" > ~/python2
