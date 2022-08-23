@@ -381,8 +381,6 @@ jobs:
           sudo python2 setup.py install --netcdf_prefix=$RUNNER_TOOL_CACHE/Python/2.7.18/x64
           sudo install_name_tool -add_rpath $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/Scientific/_netcdf.so
 
-      - run: python2 -c "from Scientific.IO import NetCDF"
-
       - name: Install MMTK
         run: |
           cd $HOME
@@ -431,7 +429,7 @@ jobs:
 
   deploy_osx:
     needs: ci_osx
-    runs-on: macos-11
+    runs-on: macos-12
     if: |
       contains( github.ref, 'main' ) ||
       contains( github.ref, 'develop' ) ||
@@ -525,6 +523,8 @@ jobs:
       - name: Install MDANSE
         run: |
           cd $GITHUB_WORKSPACE
+          $CONDA/envs/mdanse/bin/python setup.py build
+          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/setup.py ./
           $CONDA/envs/mdanse/bin/python setup.py install
 
       - name: Run dependency tests
