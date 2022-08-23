@@ -343,7 +343,6 @@ jobs:
   # OSX
   ci_osx:
     runs-on: ${{ matrix.os }}
-    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -602,18 +601,13 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: ubuntu-22.04_artifacts
+          name: macos12_artifacts
           path: /usr/share/miniconda/envs
 
       - name: Untar python
         run: |
           cd $CONDA/envs
           tar -xzf python.tar.gz
-
-      - name: Install netcdf
-        run: |
-          sudo apt-get update
-          sudo apt-get install netcdf-bin libnetcdf-dev
 
       - name: Install wxPython and VTK python packages
         run: |
@@ -628,6 +622,8 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
+        env:
+          MACOSX_DEPLOYMENT_TARGET: 10.9
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
