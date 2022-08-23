@@ -394,14 +394,14 @@ jobs:
           sudo cp -fv $GITHUB_WORKSPACE/BuildServer/setup.py $GITHUB_WORKSPACE
           python2 setup.py install
 
-      - name: Run unit tests
-        run: |
-          cd $GITHUB_WORKSPACE/Tests/UnitTests
-          python2 AllTests.py
-
       - name: Run dependency tests
         run: |
           cd $GITHUB_WORKSPACE/Tests/DependenciesTests
+          python2 AllTests.py
+
+      - name: Run unit tests
+        run: |
+          cd $GITHUB_WORKSPACE/Tests/UnitTests
           python2 AllTests.py
 
       - name: Run functional tests
