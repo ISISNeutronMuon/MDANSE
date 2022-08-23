@@ -372,11 +372,6 @@ jobs:
           sudo cp -rfv ~/tempenv/lib/libdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -rfv ~/tempenv/lib/libjpeg* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
 
-      - name: Install NetCDF
-        run: |
-          brew install netcdf
-          sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
-
       - name: Install ScientificPython
         run: |
           cd $HOME
