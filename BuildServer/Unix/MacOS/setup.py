@@ -271,7 +271,7 @@ EXTENSIONS = [Extension('MDANSE.Extensions.distance_histogram',
                         include_dirs=INCLUDE_DIR,
                         sources = [os.path.join("Extensions",'mic_fast_calc.pyx')],
                         language="c++",
-                        extra_compile_args=['-mmacosx-version-min=10.14']),
+                        extra_compile_args=['-stdlib=libc++']),
               Extension('MDANSE.Extensions.qhull',
                         include_dirs  = QHULL_INCLUDE_DIR,
                         sources =  glob.glob(os.path.join(QHULL_DIR, 'src','*.c')) +
