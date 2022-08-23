@@ -356,16 +356,17 @@ jobs:
         with:
           python-version: '2.7.18'
 
-      - name: Install dependecies with pip
+      - name: Install dependencies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app==0.26.1 pyyaml h5py psutil
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app==0.26.1 pyyaml psutil
 
       - name: Install netCDF4 python package
         run: |
           sudo conda create -p ~/tempenv python=2.7
-          sudo conda install -p ~/tempenv netcdf4
+          sudo conda install -p ~/tempenv netcdf4 h5py
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/cftime $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/netCDF4 $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
+          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/h5py $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages
           sudo cp -rfv ~/tempenv/lib/libhdf5* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -rfv ~/tempenv/lib/libnetcdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -rfv ~/tempenv/lib/libmfhdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
