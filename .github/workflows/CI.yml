@@ -343,6 +343,7 @@ jobs:
   # OSX
   ci_osx:
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -524,7 +525,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           $CONDA/envs/mdanse/bin/python setup.py build
-          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/setup.py ./
+          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/setup.py ./
           $CONDA/envs/mdanse/bin/python setup.py install
 
       - name: Run dependency tests
