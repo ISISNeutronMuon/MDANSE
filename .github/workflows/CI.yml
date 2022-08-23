@@ -524,8 +524,8 @@ jobs:
       - name: Install MDANSE
         run: |
           cd $GITHUB_WORKSPACE
-          $CONDA/envs/mdanse/bin/python setup.py build
           sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/setup.py ./
+          $CONDA/envs/mdanse/bin/python setup.py build
           $CONDA/envs/mdanse/bin/python setup.py install
 
       - name: Run dependency tests
