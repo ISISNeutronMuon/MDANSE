@@ -380,6 +380,8 @@ jobs:
           cd scientific-python
           sudo python2 setup.py install --netcdf_prefix=$RUNNER_TOOL_CACHE/Python/2.7.18/x64
 
+      - run: python2 -c "from Scientific.IO import NetCDF"
+
       - name: Install MMTK
         run: |
           cd $HOME
