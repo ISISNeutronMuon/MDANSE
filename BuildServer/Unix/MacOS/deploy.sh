@@ -42,21 +42,14 @@ echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
 #Install py2app
-cd $HOME
-git clone https://github.com/ronaldoussoren/py2app.git
-cd py2app
-git switch v0.28-branch
-sudo "${SED_I_COMMAND[@]}" "s|re.compile(rb|re.compile(br|" "./py2app/bootstrap/boot_app.py"
-sudo ${PYTHONEXE} -m pip install modulegraph altgraph macholib
-sudo ${PYTHONEXE} setup.py install
-#sudo "${SED_I_COMMAND[@]}" "s|NamedTemporaryFile(sufix|NamedTemporaryFile(suffix|" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/util.py"
+sudo ${PYTHONEXE} -m pip install py2app==0.27
+#sudo "${SED_I_COMMAND[@]}" "s|re.compile(rb|re.compile(br|" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/bootstrap/boot_app.py"
+sudo "${SED_I_COMMAND[@]}" "s|NamedTemporaryFile(sufix|NamedTemporaryFile(suffix|" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/util.py"
 
 # Replace buggy py2app files
 echo "Replacing buggy python2 files"
-#sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/recipes"
-#sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/recipes"
-cd $PYTHON_FOLDER/lib/python2.7/site-packages
-ls
+sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/recipes"
+sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/recipes"
 
 echo "Uninstall sphinx and its dependencies"
 sudo ${PYTHONEXE} -m pip uninstall -y sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3
@@ -138,6 +131,9 @@ echo '$SCRIPT_DIR/python "${@:1}"'
 } >> ~/python2
 sudo cp -v ~/python2 "${MDANSE_APP_DIR}/Contents/MacOS"
 sudo chmod 755 "${MDANSE_APP_DIR}/Contents/MacOS/python2"
+
+sudo "${SED_I_COMMAND[@]}" "s|/Users/runner/Contents/Resources/bin/python|/Applications/MDANSE.app/Contents/MacOS/python" ${MDANSE_APP_DIR}/Contents/Info.plist
+sudo cp -fv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/__boot__.py ${MDANSE_APP_DIR}/Contents/Resources
 
 #############################
 # Cleanup
