@@ -17,7 +17,7 @@ do
 done
 
 echo -e "${BLUE}" "Changing site-packages/wx so files""${NORMAL}"
-cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/wx || exit
+cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/wx-3.0-osx_cocoa/wx || exit
 files=(*.so)
 echo ${files[*]}
 for f in ${files[*]}

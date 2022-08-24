@@ -132,9 +132,6 @@ echo '$SCRIPT_DIR/python "${@:1}"'
 sudo cp -v ~/python2 "${MDANSE_APP_DIR}/Contents/MacOS"
 sudo chmod 755 "${MDANSE_APP_DIR}/Contents/MacOS/python2"
 
-sudo "${SED_I_COMMAND[@]}" "s|/Users/runner/Contents/Resources/bin/python|/Applications/MDANSE.app/Contents/MacOS/python" ${MDANSE_APP_DIR}/Contents/Info.plist
-sudo cp -fv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/__boot__.py ${MDANSE_APP_DIR}/Contents/Resources
-
 #############################
 # Cleanup
 #############################
