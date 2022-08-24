@@ -624,7 +624,7 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
         env:
           MACOSX_DEPLOYMENT_TARGET: 10.9
-          PYTHONEXE: /usr/local/miniconda/envs/mdanse/bin/python
+          PYTHON_FOLDER: /usr/local/miniconda/envs/mdanse
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
