@@ -343,6 +343,7 @@ jobs:
   # OSX
   ci_osx:
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -489,7 +490,6 @@ jobs:
 
   ci_macos:
     runs-on: 'macos-12'
-    if: false
     strategy:
       fail-fast: false
     steps:
@@ -616,8 +616,6 @@ jobs:
         run: |
           sudo conda install -n mdanse -c daf wxpython
           sudo conda install -n mdanse -c ccordoba12 vtk
-
-      - run: sudo apt-get install dos2unix
 
       - name: Deploy
         run: |
