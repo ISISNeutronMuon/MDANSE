@@ -42,9 +42,14 @@ echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
 #Install py2app
-sudo ${PYTHONEXE} -m pip install py2app==0.27
-#sudo "${SED_I_COMMAND[@]}" "s|re.compile(rb|re.compile(br|" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/bootstrap/boot_app.py"
-sudo "${SED_I_COMMAND[@]}" "s|NamedTemporaryFile(sufix|NamedTemporaryFile(suffix|" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/util.py"
+cd $HOME
+git clone https://github.com/ronaldoussoren/py2app.git
+cd py2app
+git switch v0.28-branch
+sudo "${SED_I_COMMAND[@]}" "s|re.compile(rb|re.compile(br|" "./py2app/bootstrap/boot_app.py"
+sudo ${PYTHONEXE} -m pip install modulegraph altgraph macholib
+sudo ${PYTHONEXE} setup.py install
+#sudo "${SED_I_COMMAND[@]}" "s|NamedTemporaryFile(sufix|NamedTemporaryFile(suffix|" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/util.py"
 
 # Replace buggy py2app files
 echo "Replacing buggy python2 files"
