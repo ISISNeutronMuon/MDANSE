@@ -5,7 +5,7 @@
 #############################
 # Debug option for py2app, if needed
 export DISTUTILS_DEBUG=0
-export PYTHONEXE=$HOME/Contents/Resources/bin/python
+#export PYTHONEXE=$HOME/Contents/Resources/bin/python
 #############################
 # PREPARATION
 #############################

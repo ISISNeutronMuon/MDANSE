@@ -412,14 +412,14 @@ jobs:
           python2 AllTests.py
 
       - name: Tar python
-        if: ${{ (matrix.os == 'macos-11') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, '136' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, '136' ) ) }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
 
       - name: Upload artifacts
-        if: ${{ (matrix.os == 'macos-11') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, '136' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, '136' ) ) }}
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -474,6 +474,8 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
           sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/README.txt $GITHUB_WORKSPACE
+        env:
+          PYTHONEXE: ~/Contents/Resources/bin/python
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
@@ -572,7 +574,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: macos12_artifacts
-          path: /usr/share/miniconda/envs/python.tar.gz
+          path: /usr/local/miniconda/envs/python.tar.gz
           retention-days: 1
 
   deploy_macos:
@@ -602,7 +604,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: macos12_artifacts
-          path: /usr/share/miniconda/envs
+          path: /usr/local/miniconda/envs
 
       - name: Untar python
         run: |
@@ -624,6 +626,7 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
         env:
           MACOSX_DEPLOYMENT_TARGET: 10.9
+          PYTHONEXE: /usr/local/miniconda/envs/mdanse/bin/python
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
