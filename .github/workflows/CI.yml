@@ -396,16 +396,19 @@ jobs:
           python2 setup.py install
 
       - name: Run dependency tests
+        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/DependenciesTests
           python2 AllTests.py
 
       - name: Run unit tests
+        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/UnitTests
           python2 AllTests.py
 
       - name: Run functional tests
+        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
           python2 BuildJobTests.py
@@ -532,16 +535,19 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: 10.9
 
       - name: Run dependency tests
+        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/DependenciesTests
           $CONDA/envs/mdanse/bin/python AllTests.py
 
       - name: Run unit tests
+        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/UnitTests
           $CONDA/envs/mdanse/bin/python AllTests.py
 
       - name: Run functional tests
+        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
           $CONDA/envs/mdanse/bin/python BuildJobTests.py
