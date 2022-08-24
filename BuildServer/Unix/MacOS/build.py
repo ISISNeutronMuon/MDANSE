@@ -49,7 +49,8 @@ if sys.platform.startswith('darwin'):
         'dist_dir': temp_dir,
         'graph': False,
         'xref': False,
-        'packages' : ["MDANSE","MMTK","Scientific","matplotlib", "netCDF4"]
+        'packages' : ["MDANSE","MMTK","Scientific","matplotlib", "netCDF4"],
+        'emulate_shell_environment': True
     }
 
     setup(

@@ -489,6 +489,7 @@ jobs:
 
   ci_macos:
     runs-on: 'macos-12'
+    if: false
     strategy:
       fail-fast: false
     steps:
