@@ -38,6 +38,7 @@ mkdir -p ${MDANSE_APP_DIR}/Contents/Frameworks
 echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
+sudo ${PYTHONEXE} -m pip install py2app
 # Replace buggy py2app files
 echo "Replacing buggy python2 files"
 sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/recipes"
@@ -77,8 +78,6 @@ sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
 
 echo "Copy dependency dylibs"
 sudo mv -v ${MDANSE_APP_DIR}/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
-#sudo cp -v /usr/lib/libz.* ${MDANSE_APP_DIR}/Contents/Frameworks
-#sudo cp -v /usr/lib/libc++* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
 
 # It is necessary to interlink the following dylibs for them to work properly
@@ -91,12 +90,6 @@ sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/l
 # libintl
 sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
 sudo install_name_tool -change /usr/lib/libiconv.2.dylib @executable_path/../Frameworks/libiconv.2.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
-# libc++
-#sudo install_name_tool -change /usr/lib/libc++.1.dylib @executable_path/../Frameworks/libc++.1.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++.1.dylib
-#sudo install_name_tool -change /usr/lib/libc++abi.dylib @executable_path/../Frameworks/libc++abi.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++.1.dylib
-#sudo install_name_tool -change /usr/lib/libc++abi.dylib @executable_path/../Frameworks/libc++abi.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++abi.dylib
-# libz
-#sudo install_name_tool -change /usr/lib/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libz.1.dylib
 # hashlib
 sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libssl.1.1.dylib @executable_path/../Frameworks/libssl.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
 sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib @executable_path/../Frameworks/libcrypto.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so

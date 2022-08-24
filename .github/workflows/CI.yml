@@ -343,7 +343,6 @@ jobs:
   # OSX
   ci_osx:
     runs-on: ${{ matrix.os }}
-    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -359,7 +358,7 @@ jobs:
 
       - name: Install dependencies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app==0.26.1 pyyaml h5py psutil
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
 
       - name: Install netCDF4 python package
         run: |
@@ -476,7 +475,7 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
           sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/README.txt $GITHUB_WORKSPACE
         env:
-          PYTHONEXE: ~/Contents/Resources/bin/python
+          PYTHON_FOLDER: ~/Contents/Resources
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
