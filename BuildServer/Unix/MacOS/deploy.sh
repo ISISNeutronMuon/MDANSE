@@ -6,7 +6,7 @@
 # Debug option for py2app, if needed
 export DISTUTILS_DEBUG=0
 #export PYTHON_FOLDER=$HOME/Contents/Resources
-export PYTHONEXE="$PYTHON_FOLDER/bin/python"
+export PYTHONEXE=$PYTHON_FOLDER/bin/python
 #############################
 # PREPARATION
 #############################
@@ -39,7 +39,7 @@ echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
 #Install py2app
-sudo ${PYTHONEXE} -m pip install py2app
+sudo ${PYTHONEXE} -m pip install py2app==0.28.1
 sudo "${SED_I_COMMAND[@]}" "s|re.compile(rb|re.compile(br|" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/bootstrap/boot_app.py"
 
 # Replace buggy py2app files
