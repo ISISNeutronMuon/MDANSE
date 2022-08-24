@@ -17,8 +17,10 @@ export MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
 export PYTHONPATH=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages:${PYTHONPATH}
 
 # Build API
-#sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python2.7
-#sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python
+if [ $CHANGE -ne 0 ]; then
+  sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python2.7
+  sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python
+fi
 export MACOSX_DEPLOYMENT_TARGET=10.9
 sudo ${PYTHONEXE} setup.py build_api build_help install
 
@@ -39,8 +41,8 @@ echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
 #Install py2app
-sudo ${PYTHONEXE} -m pip install py2app==0.28
-sudo "${SED_I_COMMAND[@]}" "s|re.compile(rb|re.compile(br|" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/bootstrap/boot_app.py"
+sudo ${PYTHONEXE} -m pip install py2app==0.27
+#sudo "${SED_I_COMMAND[@]}" "s|re.compile(rb|re.compile(br|" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/bootstrap/boot_app.py"
 
 # Replace buggy py2app files
 echo "Replacing buggy python2 files"
