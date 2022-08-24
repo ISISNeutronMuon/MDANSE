@@ -558,9 +558,6 @@ jobs:
       - name: Install wxPython and VTK python packages
         run: |
           sudo conda install -n mdanse -c david_baddeley wxpython
-          cd $CONDA/envs/mdanse/lib/python2.7/site-packages/
-          ls
-          exit 1
           sudo conda install -n mdanse -c free vtk
 
       - name: Deploy
