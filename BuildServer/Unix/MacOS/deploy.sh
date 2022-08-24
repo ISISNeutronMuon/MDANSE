@@ -81,7 +81,7 @@ echo -e "${BLUE}""Copying python""${NORMAL}"
 sudo mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
 
 echo "Copy lib"
-sudo cp -r $PYTHON_FOLDER/lib ${MDANSE_APP_DIR}/Contents/Resources
+sudo cp -rv $PYTHON_FOLDER/lib ${MDANSE_APP_DIR}/Contents/Resources
 
 echo "Copy dependency dylibs"
 sudo mv -v ${MDANSE_APP_DIR}/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks

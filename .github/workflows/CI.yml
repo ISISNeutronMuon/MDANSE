@@ -343,6 +343,7 @@ jobs:
   # OSX
   ci_osx:
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -557,6 +558,9 @@ jobs:
       - name: Install wxPython and VTK python packages
         run: |
           sudo conda install -n mdanse -c david_baddeley wxpython
+          cd $CONDA/envs/mdanse/lib/python2.7/site-packages/
+          ls
+          exit 1
           sudo conda install -n mdanse -c free vtk
 
       - name: Deploy
