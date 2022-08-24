@@ -20,10 +20,7 @@ export PYTHONPATH=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages:${PYTHONPAT
 #sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python2.7
 #sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python
 export MACOSX_DEPLOYMENT_TARGET=10.9
-
-cd $PYTHON_FOLDER || exit
-sudo ./bin/python setup.py build_api build_help install
-cd ${GITHUB_WORKSPACE} || exit
+sudo ${PYTHONEXE} setup.py build_api build_help install
 
 status=$?
 if [ $status -ne 0 ]; then
@@ -42,8 +39,7 @@ echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
 #Install py2app
-cd $PYTHON_FOLDER || exit
-sudo ./bin/python -m pip install py2app==0.28
+sudo ${PYTHONEXE} -m pip install py2app==0.28
 sudo "${SED_I_COMMAND[@]}" "s|re.compile(rb|re.compile(br|" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/bootstrap/boot_app.py"
 
 # Replace buggy py2app files
@@ -52,8 +48,7 @@ sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$PYTHON_FO
 sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/recipes"
 
 echo "Uninstall sphinx and its dependencies"
-sudo ./bin/python -m pip uninstall -y sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3
-cd ${GITHUB_WORKSPACE} || exit
+sudo ${PYTHONEXE} -m pip uninstall -y sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3
 
 echo "Building mdanse app"
 cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS" || exit

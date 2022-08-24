@@ -478,7 +478,7 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
           sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/README.txt $GITHUB_WORKSPACE
         env:
-          PYTHON_FOLDER: ~/Contents/Resources
+          PYTHON_FOLDER: /Users/runner/Contents/Resources
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
