@@ -39,8 +39,7 @@ echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
 #Install py2app
-sudo ${PYTHONEXE} -m pip install py2app==0.27
-sudo "${SED_I_COMMAND[@]}" "s|NamedTemporaryFile(sufix|NamedTemporaryFile(suffix|" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/util.py"
+sudo ${PYTHONEXE} -m pip install py2app==0.26.1
 
 # Replace buggy py2app files
 echo "Replacing buggy python2 files"
