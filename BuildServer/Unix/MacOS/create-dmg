@@ -216,8 +216,7 @@ fi
 
 # unmount
 echo "Unmounting disk image..."
-sudo unmount -f "${DEV_NAME}"
-sudo hdiutil detach -force -debug "${DEV_NAME}"
+sudo hdiutil detach "${DEV_NAME}"
 
 # compress image
 echo "Compressing disk image..."
