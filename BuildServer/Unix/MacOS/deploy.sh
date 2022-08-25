@@ -5,7 +5,7 @@
 #############################
 # Debug option for py2app, if needed
 export DISTUTILS_DEBUG=0
-#export PYTHON_FOLDER=$HOME/Contents/Resources
+export PYTHON_FOLDER=$HOME/Contents/Resources
 export PYTHONEXE=$PYTHON_FOLDER/bin/python
 #############################
 # PREPARATION
@@ -17,13 +17,10 @@ export MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
 export PYTHONPATH=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages:${PYTHONPATH}
 
 # Build API
-if [ $CHANGE -ne 0 ]; then
-  sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python2.7
-  sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python
-  sudo ${PYTHONEXE} setup.py build
-fi
+sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python2.7
+sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python
 export MACOSX_DEPLOYMENT_TARGET=10.9
-sudo ${PYTHONEXE} setup.py build_api build_help install
+sudo ${PYTHONEXE} setup.py build build_api build_help install
 
 status=$?
 if [ $status -ne 0 ]; then
@@ -43,7 +40,6 @@ MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
 #Install py2app
 sudo ${PYTHONEXE} -m pip install py2app==0.27
-#sudo "${SED_I_COMMAND[@]}" "s|re.compile(rb|re.compile(br|" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/bootstrap/boot_app.py"
 sudo "${SED_I_COMMAND[@]}" "s|NamedTemporaryFile(sufix|NamedTemporaryFile(suffix|" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/util.py"
 
 # Replace buggy py2app files
@@ -116,9 +112,10 @@ chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 
 # Comment out the 'add_system_python_extras' call that add some System path to the sys.path and
 # '_boot_multiprocessing' which is bugged since python 2 doesn't have the functions it uses
-echo "Comment out in __boot__.py"
-sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
-sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
+echo "Replace __boot__.py"
+sudo cp -fv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/__boot__.py ${MDANSE_APP_DIR}/Contents/Resources
+echo "./python2 ../Resources/mdanse_gui" > ${MDANSE_APP_DIR}/Contents/MacOS/launch_mdanse
+sudo chmod 755 ${MDANSE_APP_DIR}/Contents/MacOS/launch_mdanse
 
 # Create a bash script that will run the bundled python with $PYTHONHOME set
 echo "#!/bin/bash" > ~/python2

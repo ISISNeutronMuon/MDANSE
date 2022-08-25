@@ -343,7 +343,6 @@ jobs:
   # OSX
   ci_osx:
     runs-on: ${{ matrix.os }}
-    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -478,9 +477,6 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
           sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/Resources/README.txt $GITHUB_WORKSPACE
-        env:
-          PYTHON_FOLDER: /Users/runner/Contents/Resources
-          CHANGE: 1
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
@@ -491,94 +487,6 @@ jobs:
             ${{ github.workspace }}/README.txt
           retention-days: 90
 
-
-  ci_macos:
-    runs-on: 'macos-12'
-    strategy:
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Create conda environment
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: 2.7.18
-          activate-environment: mdanse
-
-      - name: Install python netCDF4 package
-        run: conda install netCDF4 -n mdanse
-
-      - name: Install python packages
-        run: |
-          $CONDA/envs/mdanse/bin/python -m pip install numpy matplotlib Cython Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
-
-      - name: Install ScientificPython
-        run: |
-          cd $HOME
-          git clone https://code.ill.fr/scientific-software/scientific-python.git
-          cd scientific-python/
-          sudo $CONDA/envs/mdanse/bin/python setup.py install  --netcdf_prefix=$CONDA/envs/mdanse
-
-      - name: Install MMTK
-        run: |
-          cd $HOME
-          git clone https://code.ill.fr/scientific-software/mmtk.git
-          cd mmtk
-          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/setup.py ~/mmtk
-          sudo $CONDA/envs/mdanse/bin/python setup.py install
-
-      - name: Install MDANSE
-        run: |
-          cd $GITHUB_WORKSPACE
-          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/setup.py ./
-          $CONDA/envs/mdanse/bin/python setup.py build
-          $CONDA/envs/mdanse/bin/python setup.py install
-        env:
-          MACOSX_DEPLOYMENT_TARGET: 10.9
-
-      - name: Run dependency tests
-        if: false
-        run: |
-          cd $GITHUB_WORKSPACE/Tests/DependenciesTests
-          $CONDA/envs/mdanse/bin/python AllTests.py
-
-      - name: Run unit tests
-        if: false
-        run: |
-          cd $GITHUB_WORKSPACE/Tests/UnitTests
-          $CONDA/envs/mdanse/bin/python AllTests.py
-
-      - name: Run functional tests
-        if: false
-        run: |
-          cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
-          $CONDA/envs/mdanse/bin/python BuildJobTests.py
-          $CONDA/envs/mdanse/bin/python AllTests.py
-
-      - name: Install wxPython and VTK python packages
-        run: |
-          sudo conda install -n mdanse -c david_baddeley wxpython
-          sudo conda install -n mdanse -c free vtk
-
-      - name: Deploy
-        run: |
-          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/setup.py $GITHUB_WORKSPACE
-          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
-          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
-          source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
-        env:
-          MACOSX_DEPLOYMENT_TARGET: 10.9
-          PYTHON_FOLDER: /usr/local/miniconda/envs/mdanse
-          CHANGE: 0
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: MacOS12_installer
-          path: |
-            ${{ github.workspace }}/*.dmg
-            ${{ github.workspace }}/README.txt
-          retention-days: 90
 
 
 
