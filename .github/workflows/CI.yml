@@ -371,15 +371,18 @@ jobs:
           sudo cp -rfv ~/tempenv/lib/libmfhdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -rfv ~/tempenv/lib/libdf* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
           sudo cp -rfv ~/tempenv/lib/libjpeg* $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib
-          sudo cp -rfv ~/tempenv/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
+
+      - name: Install NetCDF
+        run: |
+          brew install netcdf
+          sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
 
       - name: Install ScientificPython
         run: |
           cd $HOME
           git clone https://code.ill.fr/scientific-software/scientific-python.git
           cd scientific-python
-          sudo python2 setup.py install --netcdf_prefix=$RUNNER_TOOL_CACHE/Python/2.7.18/x64
-          sudo install_name_tool -add_rpath $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib $RUNNER_TOOL_CACHE/Python/2.7.18/x64/lib/python2.7/site-packages/Scientific/_netcdf.so
+          sudo python2 setup.py install
 
       - name: Install MMTK
         run: |
