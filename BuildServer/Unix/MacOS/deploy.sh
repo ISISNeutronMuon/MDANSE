@@ -113,7 +113,7 @@ chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 # '_boot_multiprocessing' which is bugged since python 2 doesn't have the functions it uses
 echo "Replace __boot__.py"
 sudo cp -fv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/__boot__.py ${MDANSE_APP_DIR}/Contents/Resources
-echo "./python2 ../Resources/mdanse_gui" > ${MDANSE_APP_DIR}/Contents/MacOS/launch_mdanse
+echo "./python2 ../Resources/mdanse_gui"  | sudo tee  ${MDANSE_APP_DIR}/Contents/MacOS/launch_mdanse
 sudo chmod 755 ${MDANSE_APP_DIR}/Contents/MacOS/launch_mdanse
 
 # Create a bash script that will run the bundled python with $PYTHONHOME set
