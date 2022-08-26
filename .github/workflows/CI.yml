@@ -464,7 +464,7 @@ jobs:
       - name: Install vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c free vtk
+          sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk ~/Contents/Resources/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* ~/Contents/Resources/lib
 
