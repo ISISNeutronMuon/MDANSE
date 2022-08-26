@@ -346,10 +346,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['macos-11', 'macos-12']
+        os: ['macos-12']
 
     steps:
       - uses: actions/checkout@v2
+
+      - run: |
+          cd ~
+          brew install wget
+          sudo wget https://github.com/Kitware/VTK/archive/refs/tags/v6.3.0.zip
+          ls
 
       - name: Install python
         uses: actions/setup-python@v2
@@ -464,8 +470,9 @@ jobs:
       - name: Install vtk
         run: |
           cd ~
-          sudo curl https://github.com/Kitware/VTK/archive/refs/tags/v6.3.0.zip -o vtk
-          cd vtk
+          brew install wget
+          sudo wget https://github.com/Kitware/VTK/archive/refs/tags/v6.3.0.zip
+          tar -xzf ~/VTK-6.3.0.zip -C ~/vtk
           sudo mkdir $HOME/Contents/Resources/vtk
           cd $HOME/Contents/Resources/vtk
           cmake ~/vtk
