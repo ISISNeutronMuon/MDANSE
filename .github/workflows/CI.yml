@@ -484,6 +484,7 @@ jobs:
 
       - name: Install wx
         run: |
+          sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
           sudo cp -rv $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/* ~/Contents/Resources/lib/python2.7/site-packages
           sudo cp -v $HOME/tempenv/lib/libwx*  ~/Contents/Resources/lib
