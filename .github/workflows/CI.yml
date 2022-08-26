@@ -464,13 +464,13 @@ jobs:
       - name: Install vtk
         run: |
           cd ~
-          git clone https://github.com/Kitware/VTK.git
+          sudo curl https://github.com/Kitware/VTK/archive/refs/tags/v6.3.0.zip -o vtk
           cd vtk
-          git checkout tags/v6.3.0
           sudo mkdir $HOME/Contents/Resources/vtk
           cd $HOME/Contents/Resources/vtk
           cmake ~/vtk
           sudo make -j2 install
+          ls
         env:
           BUILD_TESTING: OFF
           CMAKE_INSTALL_PREFIX: ~/Contents/Resources
