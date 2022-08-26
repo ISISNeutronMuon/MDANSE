@@ -22,7 +22,11 @@ if sys.platform.startswith('darwin'):
         u'CFBundleShortVersionString': version,
         u'CFBundleVersion': version,
         u'CFBundleIdentifier': u'eu.ill.MDANSE-'+version,
-        u'LSApplicationCategoryType': u'public.app-category.science'
+        u'LSApplicationCategoryType': u'public.app-category.science',
+        u'LSEnvironment': {u'PYTHONHOME': u'/Applications/MDANSE.app/Contents:'
+                                          u'/Applications/MDANSE.app/Contents/Resources',
+                           u'PYTHONPATH': u'/Applications/MDANSE.app/Contents/Resources/lib/python2.7:'
+                                          u'/Applications/MDANSE.app/Contents/Resources/lib/python2.7/site-packages'}
     }
 
     try:
@@ -45,7 +49,8 @@ if sys.platform.startswith('darwin'):
         'dist_dir': temp_dir,
         'graph': False,
         'xref': False,
-        'packages' : ["MDANSE","MMTK","Scientific","matplotlib"]
+        'packages' : ["MDANSE","MMTK","Scientific","matplotlib", "netCDF4"],
+        'emulate_shell_environment': True
     }
 
     setup(

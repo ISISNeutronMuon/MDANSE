@@ -5,7 +5,8 @@
 #############################
 # Debug option for py2app, if needed
 export DISTUTILS_DEBUG=0
-export PYTHONEXE=$HOME/Contents/Resources/bin/python
+export PYTHON_FOLDER=$HOME/Contents/Resources
+export PYTHONEXE=$PYTHON_FOLDER/bin/python
 #############################
 # PREPARATION
 #############################
@@ -16,6 +17,9 @@ export MDANSE_APP_DIR=${CI_TEMP_DIR}/dist/MDANSE.app
 export PYTHONPATH=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages:${PYTHONPATH}
 
 # Build API
+sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python2.7
+sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python
+export MACOSX_DEPLOYMENT_TARGET=10.9
 sudo ${PYTHONEXE} setup.py build build_api build_help install
 
 status=$?
@@ -34,10 +38,13 @@ mkdir -p ${MDANSE_APP_DIR}/Contents/Frameworks
 echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
+#Install py2app
+sudo ${PYTHONEXE} -m pip install py2app==0.26.1
+
 # Replace buggy py2app files
 echo "Replacing buggy python2 files"
-sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
-sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$HOME/Contents/Resources/lib/python2.7/site-packages/py2app/recipes"
+sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/recipes"
+sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/recipes"
 
 echo "Uninstall sphinx and its dependencies"
 sudo ${PYTHONEXE} -m pip uninstall -y sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3
@@ -69,16 +76,15 @@ echo -e "${BLUE}""Copying python""${NORMAL}"
 sudo mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
 
 echo "Copy lib"
-sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
+sudo cp -rv $PYTHON_FOLDER/lib ${MDANSE_APP_DIR}/Contents/Resources
 
 echo "Copy dependency dylibs"
 sudo mv -v ${MDANSE_APP_DIR}/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
-sudo cp -v /usr/lib/libz.* ${MDANSE_APP_DIR}/Contents/Frameworks
-sudo cp -v /usr/lib/libc++* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
 
 # It is necessary to interlink the following dylibs for them to work properly
 echo "Change dylib links"
+sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/MacOS/python
 # libpython
 sudo install_name_tool -id @executable_path/../Frameworks/libpython2.7.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
 sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libpython2.7.dylib
@@ -86,29 +92,29 @@ sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/l
 # libintl
 sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
 sudo install_name_tool -change /usr/lib/libiconv.2.dylib @executable_path/../Frameworks/libiconv.2.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
-# libc++
-sudo install_name_tool -change /usr/lib/libc++.1.dylib @executable_path/../Frameworks/libc++.1.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++.1.dylib
-sudo install_name_tool -change /usr/lib/libc++abi.dylib @executable_path/../Frameworks/libc++abi.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++.1.dylib
-sudo install_name_tool -change /usr/lib/libc++abi.dylib @executable_path/../Frameworks/libc++abi.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++abi.dylib
-# libz
-sudo install_name_tool -change /usr/lib/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libz.1.dylib
 # hashlib
 sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libssl.1.1.dylib @executable_path/../Frameworks/libssl.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
 sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib @executable_path/../Frameworks/libcrypto.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
+# libnetcdf
+sudo install_name_tool -change @rpath/libnetcdf.13.dylib @executable_path/../Frameworks/libnetcdf.13.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/netCDF4/_netCDF4.so
+sudo install_name_tool -change @rpath/libhdf5.103.dylib @executable_path/../Frameworks/libhdf5.103.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/netCDF4/_netCDF4.so
+sudo install_name_tool -change @rpath/libnetcdf.13.dylib @executable_path/../Frameworks/libnetcdf.13.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/netCDF4/_netCDF4.so
+sudo install_name_tool -change @rpath/libhdf5.103.dylib @executable_path/../Frameworks/libhdf5.103.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/netCDF4/_netCDF4.so
 
 echo "Copy site.py"
 sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
 sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/.
 
-echo -e "${BLUE}""Changing wx and vtk dyilib links""${NORMAL}"
+echo -e "${BLUE}""Changing wx and vtk dylib links""${NORMAL}"
 chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
 
 # Comment out the 'add_system_python_extras' call that add some System path to the sys.path and
 # '_boot_multiprocessing' which is bugged since python 2 doesn't have the functions it uses
-echo "Comment out in __boot__.py"
-sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
-sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
+echo "Replace __boot__.py"
+sudo cp -fv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/__boot__.py ${MDANSE_APP_DIR}/Contents/Resources
+echo "./python2 ../Resources/mdanse_gui"  | sudo tee  ${MDANSE_APP_DIR}/Contents/MacOS/launch_mdanse
+sudo chmod 755 ${MDANSE_APP_DIR}/Contents/MacOS/launch_mdanse
 
 # Create a bash script that will run the bundled python with $PYTHONHOME set
 echo "#!/bin/bash" > ~/python2
@@ -117,7 +123,7 @@ echo 'SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null &&
 echo 'PARENT_DIR="$(dirname "$SCRIPT_DIR")"'
 echo 'export PYTHONHOME=$PARENT_DIR:$PARENT_DIR/Resources'
 echo 'export PYTHONPATH=$PARENT_DIR/Resources/lib/python2.7:$PARENT_DIR/Resources:$PARENT_DIR/Resources/lib/python2.7/site-packages'
-echo '$SCRIPT_DIR/python "${@:2}"'
+echo '$SCRIPT_DIR/python "${@:1}"'
 } >> ~/python2
 sudo cp -v ~/python2 "${MDANSE_APP_DIR}/Contents/MacOS"
 sudo chmod 755 "${MDANSE_APP_DIR}/Contents/MacOS/python2"

@@ -5,6 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -189,6 +190,7 @@ jobs:
 
   ci_ubuntu22:
     runs-on: 'ubuntu-22.04'
+    if: false
     strategy:
       fail-fast: false
     steps:
@@ -344,7 +346,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['macos-10.15', 'macos-11']
+        os: ['macos-11', 'macos-12']
 
     steps:
       - uses: actions/checkout@v2
@@ -354,9 +356,9 @@ jobs:
         with:
           python-version: '2.7.18'
 
-      - name: Install dependecies with pip
+      - name: Install dependencies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app==0.26.1 pyyaml h5py psutil
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
 
       - name: Install netCDF4 python package
         run: |
@@ -396,41 +398,44 @@ jobs:
           sudo cp -fv $GITHUB_WORKSPACE/BuildServer/setup.py $GITHUB_WORKSPACE
           python2 setup.py install
 
-      - name: Run unit tests
-        run: |
-          cd $GITHUB_WORKSPACE/Tests/UnitTests
-          python2 AllTests.py
-
       - name: Run dependency tests
+        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/DependenciesTests
           python2 AllTests.py
 
+      - name: Run unit tests
+        if: false
+        run: |
+          cd $GITHUB_WORKSPACE/Tests/UnitTests
+          python2 AllTests.py
+
       - name: Run functional tests
+        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
           python2 BuildJobTests.py
           python2 AllTests.py
 
       - name: Tar python
-        if: ${{ (matrix.os == 'macos-10.15') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, '136' ) ) }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
 
       - name: Upload artifacts
-        if: ${{ (matrix.os == 'macos-10.15') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, '136' ) ) }}
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.os }}_artifacts
+          name: MacOS_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
 
 
   deploy_osx:
     needs: ci_osx
-    runs-on: macos-10.15
+    runs-on: macos-12
     if: |
       contains( github.ref, 'main' ) ||
       contains( github.ref, 'develop' ) ||
@@ -438,14 +443,15 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) || 
+      contains( github.ref, '136' )
     steps:
       - uses: actions/checkout@v2
 
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: macos-10.15_artifacts
+          name: MacOS_artifacts
           path: ~/
 
       - run: brew install netcdf
@@ -458,7 +464,7 @@ jobs:
       - name: Install vtk
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c free vtk
+          sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
           sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk ~/Contents/Resources/lib/python2.7/site-packages
           sudo cp $HOME/tempenv/lib/libvtk* ~/Contents/Resources/lib
 
@@ -486,9 +492,11 @@ jobs:
 
 
 
+
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
+    if: false
     steps:
       - uses: actions/checkout@v2
 
