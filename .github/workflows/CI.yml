@@ -469,7 +469,7 @@ jobs:
           unzip ~/v6.3.0.zip
           sudo mkdir $HOME/Contents/Resources/vtk
           cd $HOME/Contents/Resources/vtk
-          cmake ~/v6.3.0
+          cmake ~/VTK-6.3.0
           sudo make -j2 install
           ls
         env:
