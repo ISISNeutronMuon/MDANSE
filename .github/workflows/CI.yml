@@ -463,10 +463,23 @@ jobs:
 
       - name: Install vtk
         run: |
-          sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk ~/Contents/Resources/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libvtk* ~/Contents/Resources/lib
+          cd ~
+          git clone https://github.com/Kitware/VTK.git
+          cd vtk
+          git checkout tags/v6.3.0
+          sudo mkdir $HOME/Contents/Resources/vtk
+          cd $HOME/Contents/Resources/vtk
+          cmake ~/vtk
+          sudo make -j2 install
+        env:
+          BUILD_TESTING: OFF
+          CMAKE_INSTALL_PREFIX: ~/Contents/Resources
+          VTK_WRAP_PYTHON: ON
+          PYTHON_EXECUTABLE: ~/Contents/Resources/bin/python
+          PYTHON_INCLUDE_DIR: ~/Contents/Resources/include/python2.7
+          PYTHON_LIBRARY: ~/Contents/Resources/lib/libpython2.7.dylib
+          VTK_INSTALL_PYTHON_MODULE_DIR: ~/Contents/Resources/lib/python2.7/site-packages
+          BUILD_SHARED_LIBS: ON
 
       - name: Install wx
         run: |

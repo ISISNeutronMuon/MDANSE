@@ -7,6 +7,7 @@
 export DISTUTILS_DEBUG=0
 export PYTHON_FOLDER=$HOME/Contents/Resources
 export PYTHONEXE=$PYTHON_FOLDER/bin/python
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 #############################
 # PREPARATION
 #############################
