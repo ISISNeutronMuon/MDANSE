@@ -351,12 +351,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - run: |
-          cd ~
-          brew install wget
-          sudo wget https://github.com/Kitware/VTK/archive/refs/tags/v6.3.0.zip
-          ls
-
       - name: Install python
         uses: actions/setup-python@v2
         with:
@@ -472,10 +466,10 @@ jobs:
           cd ~
           brew install wget
           sudo wget https://github.com/Kitware/VTK/archive/refs/tags/v6.3.0.zip
-          tar -xzf ~/VTK-6.3.0.zip -C ~/vtk
+          unzip ~/v6.3.0.zip
           sudo mkdir $HOME/Contents/Resources/vtk
           cd $HOME/Contents/Resources/vtk
-          cmake ~/vtk
+          cmake ~/v6.3.0
           sudo make -j2 install
           ls
         env:
