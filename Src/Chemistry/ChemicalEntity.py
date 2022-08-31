@@ -7,7 +7,7 @@ import numpy as np
 import h5py
 
 from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DATABASE, RESIDUES_DATABASE
-from MDANSE.Mathematics.Geometry import superposition_fit
+from MDANSE.Mathematics.Geometry import superposition_fit, center_of_mass
 from MDANSE.Mathematics.LinearAlgebra import delta, Tensor, Vector
 from MDANSE.Mathematics.Transformation import Rotation, Transformation, Translation
 
@@ -128,13 +128,19 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         return selected_atoms
 
     def center_of_mass(self, configuration):
+        # Retrieve atom symbols and indices as a numpy array
         atom_data = np.array([[at.symbol, str(at.index)] for at in self.atom_list()])
+
+        # Sort indices and reorder both symbols and indices using this order
         sort = np.argsort(atom_data[:, 1])
         symbols = atom_data[sort, 0]
         indices = atom_data[sort, 1]
-        masses = np.array(ATOMS_DATABASE.get_multiple_values(symbols, 'atomic_weight'))
 
-        return np.sum(masses[:, None] * configuration['coordinates'][indices.astype(int), :], axis=0) / np.sum(masses)
+        # Retrieve atom masses and coordinates, ensuring that they are ordered correctly
+        masses = np.array(ATOMS_DATABASE.get_multiple_values(symbols, 'atomic_weight'))
+        coords = configuration['coordinates'][indices.astype(int), :]
+
+        return center_of_mass(coords, masses)
 
     def mass(self):
 
