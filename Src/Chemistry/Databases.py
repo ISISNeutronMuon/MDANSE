@@ -542,10 +542,6 @@ class MoleculesDatabase(_Database):
         """
         Return an entry of the database.
 
-        If the item is a basestring, then the return value will be the list of properties related to element of the
-        database that matches this item. If the item is a 2-tuple then the return value will the property of the
-        database whose element and property match respectively the first and second elements of the tuple.
-
         :param item: the item to get from the database
         :type item: str or tuple
         """
@@ -621,10 +617,6 @@ class NucleotidesDatabase(_Database):
     def __getitem__(self, item: str) -> dict[str, Union[bool, list[str], dict[str, Union[bool, list[str], str]]]]:
         """
         Return an entry of the database.
-
-        If the item is a basestring, then the return value will be the list of properties related to element of the
-        database that matches this item. If the item is a 2-tuple then the return value will the property of the
-        database whose element and property match respectively the first and second elements of the tuple.
 
         :param item: the item to get from the database
         :type item: str or tuple
@@ -713,11 +705,6 @@ class ResiduesDatabase(_Database):
     def __getitem__(self, item: str) -> dict[str, Union[bool, list[str], dict[str, dict[str, Union[str, list[str]]]]]]:
         """
         Return an entry of the database.
-
-        If the item is a basestring, then the return value will be the list of properties
-        related to element of the database base that matches this item. If the item is a
-        2-tuple then the return value will the property of the database whose element and property match
-        respectively the first and second elements of the tuple.
 
         :param item: the item to get from the database
         :type item: str or tuple
