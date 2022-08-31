@@ -467,7 +467,7 @@ jobs:
           sudo wget https://github.com/Kitware/VTK/archive/refs/tags/v6.3.0.zip
           unzip ~/v6.3.0.zip
           sudo mkdir $HOME/Contents/Resources/vtk
-          cd $HOME/Contents/Resources/vtk
+          cd $HOME/VTK-6.3.0
           
           sudo cmake -DBUILD_TESTING:BOOL=OFF
           sudo cmake -DCMAKE_INSTALL_PREFIX:PATH=~/Contents/Resources
