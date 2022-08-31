@@ -472,14 +472,15 @@ jobs:
           sudo cmake -DBUILD_TESTING:BOOL=OFF
           sudo cmake -DCMAKE_INSTALL_PREFIX:PATH=~/Contents/Resources
           sudo cmake -DVTK_WRAP_PYTHON:BOOL=ON
-          sudo cmake -DPYTHON_EXECUTABLE:PATH=~/Contents/Resources/bin/python
+          sudo cmake -DVTK_PYTHON_VERSION:STRING=2.7
+          sudo cmake -DPYTHON_EXECUTABLE:FILEPATH=~/Contents/Resources/bin/python
           sudo cmake -DPYTHON_INCLUDE_DIR:PATH=~/Contents/Resources/include/python2.7
-          sudo cmake -DPYTHON_LIBRARY:PATH=~/Contents/Resources/lib/libpython2.7.dylib
+          sudo cmake -DPYTHON_LIBRARY:FILEPATH=~/Contents/Resources/lib/libpython2.7.dylib
           sudo cmake -DVTK_INSTALL_PYTHON_MODULE_DIR:PATH=~/Contents/Resources/lib/python2.7/site-packages
           sudo cmake -DBUILD_SHARED_LIBS:BOOL=ON
           
           sudo cmake ~/VTK-6.3.0
-          sudo make -j2 install
+          sudo make install
           ls
         env:
           BUILD_TESTING: OFF
