@@ -469,7 +469,7 @@ jobs:
           cd ~
           sudo wget https://github.com/Kitware/VTK/archive/refs/tags/v9.1.0.zip
           unzip ~/v9.1.0.zip
-          sudo mkdir $HOME/Contents/Resources/vtk
+          sudo mkdir $HOME/build
           cd $HOME/VTK-9.1.0
           
           sudo cmake -DBUILD_TESTING:BOOL=OFF
@@ -482,6 +482,7 @@ jobs:
           sudo cmake -DVTK_INSTALL_PYTHON_MODULE_DIR:PATH=~/Contents/Resources/lib/python2.7/site-packages
           sudo cmake -DBUILD_SHARED_LIBS:BOOL=ON
           
+          cd ~/build
           sudo cmake ~/VTK-9.1.0
           sudo make install
           ls
@@ -494,6 +495,7 @@ jobs:
           PYTHON_LIBRARY: ~/Contents/Resources/lib/libpython2.7.dylib
           VTK_INSTALL_PYTHON_MODULE_DIR: ~/Contents/Resources/lib/python2.7/site-packages
           BUILD_SHARED_LIBS: ON
+          VTK_SOURCE_DIR: ~/VTK-9.1.0
 
       - name: Install wx
         run: |
