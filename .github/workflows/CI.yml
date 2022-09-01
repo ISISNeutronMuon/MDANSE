@@ -467,10 +467,10 @@ jobs:
       - name: Install vtk
         run: |
           cd ~
-          sudo wget https://github.com/Kitware/VTK/archive/refs/tags/v6.3.0.zip
-          unzip ~/v6.3.0.zip
+          sudo wget https://github.com/Kitware/VTK/archive/refs/tags/v9.1.0.zip
+          unzip ~/v9.1.0.zip
           sudo mkdir $HOME/Contents/Resources/vtk
-          cd $HOME/VTK-6.3.0
+          cd $HOME/VTK-9.1.0
           
           sudo cmake -DBUILD_TESTING:BOOL=OFF
           sudo cmake -DCMAKE_INSTALL_PREFIX:PATH=~/Contents/Resources
@@ -482,7 +482,7 @@ jobs:
           sudo cmake -DVTK_INSTALL_PYTHON_MODULE_DIR:PATH=~/Contents/Resources/lib/python2.7/site-packages
           sudo cmake -DBUILD_SHARED_LIBS:BOOL=ON
           
-          sudo cmake ~/VTK-6.3.0
+          sudo cmake ~/VTK-9.1.0
           sudo make install
           ls
         env:
