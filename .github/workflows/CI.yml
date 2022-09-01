@@ -472,17 +472,7 @@ jobs:
           sudo mkdir $HOME/VTK-9.1.0/build
           cd ~/VTK-9.1.0/build
           
-          sudo cmake .. -DBUILD_TESTING:BOOL=OFF
-          sudo cmake .. -DCMAKE_INSTALL_PREFIX:PATH=~/Contents/Resources
-          sudo cmake .. -DVTK_WRAP_PYTHON:BOOL=ON
-          sudo cmake .. -DVTK_PYTHON_VERSION:STRING=2.7
-          sudo cmake .. -DPYTHON_EXECUTABLE:FILEPATH=~/Contents/Resources/bin/python
-          sudo cmake .. -DPYTHON_INCLUDE_DIR:PATH=~/Contents/Resources/include/python2.7
-          sudo cmake .. -DPYTHON_LIBRARY:FILEPATH=~/Contents/Resources/lib/libpython2.7.dylib
-          sudo cmake .. -DVTK_INSTALL_PYTHON_MODULE_DIR:PATH=~/Contents/Resources/lib/python2.7/site-packages
-          sudo cmake .. -DBUILD_SHARED_LIBS:BOOL=ON
-          
-          sudo cmake ~/VTK-9.1.0
+          sudo cmake .. -DBUILD_TESTING:BOOL=OFF  -DCMAKE_INSTALL_PREFIX:PATH=~/Contents/Resources  -DVTK_WRAP_PYTHON:BOOL=ON -DVTK_PYTHON_VERSION:STRING=2.7 -DPYTHON_EXECUTABLE:FILEPATH=~/Contents/Resources/bin/python -DPYTHON_INCLUDE_DIR:PATH=~/Contents/Resources/include/python2.7 -DPYTHON_LIBRARY:FILEPATH=~/Contents/Resources/lib/libpython2.7.dylib -DVTK_INSTALL_PYTHON_MODULE_DIR:PATH=~/Contents/Resources/lib/python2.7/site-packages -DBUILD_SHARED_LIBS:BOOL=ON
           sudo make install
         env:
           BUILD_TESTING: OFF
