@@ -469,8 +469,8 @@ jobs:
           cd ~
           sudo wget https://github.com/Kitware/VTK/archive/refs/tags/v9.1.0.zip
           unzip ~/v9.1.0.zip
-          sudo mkdir $HOME/v9.1.0/build
-          cd ~/v9.1.0/build
+          sudo mkdir $HOME/VTK-9.1.0/build
+          cd ~/VTK-9.1.0/build
           
           sudo cmake .. -DBUILD_TESTING:BOOL=OFF
           sudo cmake .. -DCMAKE_INSTALL_PREFIX:PATH=~/Contents/Resources
