@@ -137,7 +137,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         indices = atom_data[sort, 1]
 
         # Retrieve atom masses and coordinates, ensuring that they are ordered correctly
-        masses = np.array(ATOMS_DATABASE.get_multiple_values(symbols, 'atomic_weight'))
+        masses = np.array(ATOMS_DATABASE.get_values_for_multiple_atoms(symbols, 'atomic_weight'))
         coords = configuration['coordinates'][indices.astype(int), :]
 
         return center_of_mass(coords, masses)
