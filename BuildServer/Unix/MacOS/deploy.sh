@@ -109,6 +109,8 @@ sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Con
 echo -e "${BLUE}""Changing wx and vtk dylib links""${NORMAL}"
 chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
+sudo ${PYTHONEXE} ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/relink-vtk.py
+cd $GITHUB_WORKSPACE || exit
 
 # Comment out the 'add_system_python_extras' call that add some System path to the sys.path and
 # '_boot_multiprocessing' which is bugged since python 2 doesn't have the functions it uses
