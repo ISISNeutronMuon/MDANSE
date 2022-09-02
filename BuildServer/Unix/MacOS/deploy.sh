@@ -148,6 +148,10 @@ sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/zmq
 sudo rm -rf $HOME/Contents
 #Remove py2app
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/py2app
+# Delete duplicates
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/MDANSE
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/MMTK
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/Scientific
 
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/conf_
 #############################
