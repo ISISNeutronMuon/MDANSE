@@ -485,14 +485,6 @@ jobs:
           BUILD_SHARED_LIBS: ON
           VTK_SOURCE_DIR: ~/VTK-9.1.0
 
-      - run: |
-          cd ~/Contents/Resources/lib/python2.7/site-packages
-          ls
-
-      - run: |
-          cd ~/Contents/Resources/lib/python2.7/lib-dynload
-          ls
-
       - name: Install wx
         run: |
           sudo conda create -p $HOME/tempenv python=2.7
