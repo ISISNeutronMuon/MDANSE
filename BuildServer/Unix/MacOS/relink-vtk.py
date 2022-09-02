@@ -60,7 +60,7 @@ def replace_libline(fname, line, to_remove=None, to_insert='@executable_path/../
 
 
 if __name__ == '__main__':
-    os.chdir(r'/Users/runner/work/MDANSE/MDANSE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/vtk')
+    os.chdir(r'/Users/runner/work/MDANSE/MDANSE/temp/dist/MDANSE.app/Contents/Resources/lib/python2.7/site-packages/vtkmodules')
     flist = get_file_list('.so') # in site-packages vtk
     os.chdir(r'/Users/runner/work/MDANSE/MDANSE/temp/dist/MDANSE.app/Contents/Framework')
     flist.extend(get_file_list('libvtk')) # in Framework
