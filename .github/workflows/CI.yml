@@ -468,12 +468,17 @@ jobs:
           cd ~
           wget https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.0/wxWidgets-3.2.0.tar.bz2
           sudo tar -xf wxWidgets-3.2.0.tar.bz2
+          mkdir ~/wxWidgets-3.2.0/bld
+          cd ~/wxWidgets-3.2.0/bld
+          ../configure --prefix=$HOME/Contents/Resources --exec_prefix=$HOME/Contents/Resources --build=Release --with-osx --with-opengl --enable-sound --enable-graphics_ctx --enable-mediactrl --enable-display --enable-geometry --enable-uiactionsim --enable-monolithic
+          sudo make install 
+          
           cd ~
           wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
           sudo tar -xf wxPython-src-3.0.2.0.tar.bz2
           cp -rvf ~/wxPython-src-3.0.2.0/wxPython ~/wxWidgets-3.2.0.tar.bz2
           cd ~/wxWidgets-3.2.0.tar.bz2/wxPython
-          sudo ~/Contents/Resources/bin/python build-wxpython.py --build_dir=../bld --osx_cocoa=True --install=True --installdir=$HOME/Contents/Resources/lib
+          sudo ~/Contents/Resources/bin/python build-wxpython.py --build_dir=../bld2 --osx_cocoa=True --no_wxbuild=True
 
       - name: Install vtk
         run: |
