@@ -463,6 +463,13 @@ jobs:
           sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python2.7
           sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python
 
+      - name: Install wx
+        run: |
+          cd ~
+          wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
+          sudo tar -xf wxPython-src-3.0.2.0.tar.bz2
+          cd ~/wxPython-src-3.0.2.0/wxPython/
+          sudo ~/Contents/Resources/bin/python ./build-wxpython.py --build_dir=../bld
 
       - name: Install vtk
         run: |
@@ -472,7 +479,7 @@ jobs:
           sudo mkdir $HOME/VTK-9.1.0/build
           cd ~/VTK-9.1.0/build
           
-          sudo cmake .. -DBUILD_TESTING:BOOL=OFF  -DCMAKE_INSTALL_PREFIX:PATH=~/Contents/Resources  -DVTK_WRAP_PYTHON:BOOL=ON -DVTK_PYTHON_VERSION:STRING=2 -DPYTHON_EXECUTABLE:FILEPATH=~/Contents/Resources/bin/python -DPYTHON_INCLUDE_DIR:PATH=~/Contents/Resources/include/python2.7 -DPYTHON_LIBRARY:FILEPATH=~/Contents/Resources/lib/libpython2.7.dylib -DVTK_INSTALL_PYTHON_MODULE_DIR:PATH=~/Contents/Resources/lib/python2.7/site-packages -DBUILD_SHARED_LIBS:BOOL=ON
+          sudo cmake .. -DBUILD_TESTING:BOOL=OFF -DCMAKE_BUILD_TYPE:STRING=Release  -DCMAKE_INSTALL_PREFIX:PATH=~/Contents/Resources  -DVTK_WRAP_PYTHON:BOOL=ON -DVTK_PYTHON_VERSION:STRING=2 -DPYTHON_EXECUTABLE:FILEPATH=~/Contents/Resources/bin/python -DPYTHON_INCLUDE_DIR:PATH=~/Contents/Resources/include/python2.7 -DPYTHON_LIBRARY:FILEPATH=~/Contents/Resources/lib/libpython2.7.dylib -DVTK_INSTALL_PYTHON_MODULE_DIR:PATH=~/Contents/Resources/lib/python2.7/site-packages -DBUILD_SHARED_LIBS:BOOL=ON
           sudo make -j 2 install
         env:
           BUILD_TESTING: OFF
@@ -484,13 +491,6 @@ jobs:
           VTK_INSTALL_PYTHON_MODULE_DIR: ~/Contents/Resources/lib/python2.7/site-packages
           BUILD_SHARED_LIBS: ON
           VTK_SOURCE_DIR: ~/VTK-9.1.0
-
-      - name: Install wx
-        run: |
-          sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
-          sudo cp -rv $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/* ~/Contents/Resources/lib/python2.7/site-packages
-          sudo cp -v $HOME/tempenv/lib/libwx*  ~/Contents/Resources/lib
 
       - name: Deploy MDANSE
         run: |
