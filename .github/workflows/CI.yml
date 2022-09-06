@@ -477,7 +477,7 @@ jobs:
           wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
           sudo tar -xf wxPython-src-3.0.2.0.tar.bz2
           cd ~/wxPython-src-3.0.2.0/wxPython
-          sudo ~/Contents/Resources/bin/python ./build-wxpython.py --build_dir=../bld --osx_cocoa=True --no_wxbuild=True --osx_carbon=False --installdir=$HOME/Contents/Resources
+          sudo ~/Contents/Resources/bin/python ./build-wxpython.py --build_dir=../bld --osx_cocoa --no_wxbuild --installdir=$HOME/Contents/Resources
 
       - name: Install vtk
         run: |
