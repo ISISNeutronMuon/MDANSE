@@ -466,10 +466,14 @@ jobs:
       - name: Install wx
         run: |
           cd ~
+          wget https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.0/wxWidgets-3.2.0.tar.bz2
+          sudo tar -xf wxWidgets-3.2.0.tar.bz2
+          cd ~
           wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
           sudo tar -xf wxPython-src-3.0.2.0.tar.bz2
-          cd ~/wxPython-src-3.0.2.0/wxPython/
-          sudo ~/Contents/Resources/bin/python ./build-wxpython.py --build_dir=../bld
+          cp -rvf ~/wxPython-src-3.0.2.0/wxPython ~/wxWidgets-3.2.0.tar.bz2
+          cd ~/wxWidgets-3.2.0.tar.bz2/wxPython
+          sudo ~/Contents/Resources/bin/python build-wxpython.py --build_dir=../bld --osx_cocoa=True --install=True --installdir=$HOME/Contents/Resources/lib
 
       - name: Install vtk
         run: |
