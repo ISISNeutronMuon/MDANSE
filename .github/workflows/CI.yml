@@ -502,7 +502,6 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
-    if: false
     steps:
       - uses: actions/checkout@v2
 
