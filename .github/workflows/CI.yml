@@ -158,7 +158,6 @@ jobs:
 
       - name: Deploy
         run: |
-          sudo ~/python/bin/python -m pip install sphinx==1.6.7 stdeb docutils==0.17.1 graphviz
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
