@@ -13,7 +13,7 @@ rem see http://p-nand-q.com/python/building-python-27-with-vs2010.html for more 
 set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
 
 rem Prepare the environment for building MDANSE
-set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";%PATH%
+set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";"%CONDA%\envs\mdanse\Library\bin\graphviz";%PATH%
 copy /y "%GITHUB_WORKSPACE%\BuildServer\setup.py" %GITHUB_WORKSPACE%
 
 "%PYTHON_EXE%" setup.py build build_api build_help install

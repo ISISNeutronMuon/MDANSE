@@ -5,7 +5,6 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -33,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro stdeb pyyaml h5py psutil
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
 
       - name: Install netCDF4 python package
@@ -83,7 +82,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '152' )
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 python
@@ -97,7 +97,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '152' )
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -119,7 +120,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '152' )
     steps:
       - uses: actions/checkout@v2
 
@@ -152,10 +154,11 @@ jobs:
           sudo cp -r ~/tempenv/lib/python2.7/site-packages/vtk ~/python/lib/python2.7/site-packages
           sudo cp ~/tempenv/lib/libvtk* ~/python/lib
 
-      - run: sudo apt-get install dos2unix
+      - run: sudo apt-get install dos2unix graphviz
 
       - name: Deploy
         run: |
+          sudo ~/python/bin/python -m pip install sphinx==1.6.7 stdeb docutils==0.17.1 graphviz
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
@@ -212,7 +215,7 @@ jobs:
 
       - name: Install python packages
         run: |
-          $CONDA/envs/mdanse/bin/python -m pip install numpy matplotlib Cython Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
+          $CONDA/envs/mdanse/bin/python -m pip install numpy matplotlib Cython Pyro stdeb pyyaml h5py psutil
 
       - name: Install ScientificPython
         run: |
@@ -258,7 +261,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '152' )
         run: |
           cd $CONDA/envs
           tar -czf python.tar.gz mdanse
@@ -271,7 +275,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '152' )
         uses: actions/upload-artifact@v2
         with:
           name: ubuntu-22.04_artifacts
@@ -290,7 +295,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '152' )
     steps:
       - uses: actions/checkout@v2
 
@@ -321,10 +327,11 @@ jobs:
           sudo conda install -n mdanse -c daf wxpython
           sudo conda install -n mdanse -c ccordoba12 vtk
 
-      - run: sudo apt-get install dos2unix
+      - run: sudo apt-get install dos2unix graphviz
 
       - name: Deploy
         run: |
+          sudo $CONDA/envs/mdanse/bin/python -m pip install sphinx==1.6.7 docutils==0.17.1 graphviz
           sed -i 's|PYTHONEXE=$HOME/python|PYTHONEXE=$CONDA/envs/mdanse|' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
@@ -358,7 +365,7 @@ jobs:
 
       - name: Install dependencies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro stdeb pyyaml h5py psutil
 
       - name: Install netCDF4 python package
         run: |
@@ -418,14 +425,14 @@ jobs:
           python2 AllTests.py
 
       - name: Tar python
-        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, '136' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, '136' ) || contains( github.ref, '152' ) ) }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
 
       - name: Upload artifacts
-        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, '136' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, '136' ) || contains( github.ref, '152' ) ) }}
         uses: actions/upload-artifact@v2
         with:
           name: MacOS_artifacts
@@ -444,7 +451,7 @@ jobs:
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
       contains( github.ref, 'web' ) || 
-      contains( github.ref, '136' )
+      contains( github.ref, '152' )
     steps:
       - uses: actions/checkout@v2
 
@@ -454,7 +461,7 @@ jobs:
           name: MacOS_artifacts
           path: ~/
 
-      - run: brew install netcdf
+      - run: brew install netcdf graphviz
 
       - name: Untar python
         run: |
@@ -476,6 +483,7 @@ jobs:
 
       - name: Deploy MDANSE
         run: |
+          sudo  ~/Contents/Resources/bin/python -m pip install sphinx==1.6.7 docutils==0.17.1 graphviz
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/MacOS/deploy.sh
@@ -605,7 +613,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '152' )
         run: |
           cd /D %CONDA%\envs
           tar -czf mdanse.tar.gz mdanse
@@ -619,7 +628,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '152' )
         uses: actions/upload-artifact@v2
         with:
           name: windows_artifacts
@@ -636,7 +646,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '152' )
     steps:
       - uses: actions/checkout@v2
 
@@ -693,6 +704,7 @@ jobs:
       - name: Install packages required for documentation and psutil
         run: |
           %CONDA%\envs\mdanse\python.exe -m pip install docutils==0.17.1 sphinx==1.6.7 stdeb psutil
+          conda install graphviz
         shell: cmd /C CALL {0}
 
       - name: Install GUI dependencies
