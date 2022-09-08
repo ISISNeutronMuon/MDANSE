@@ -715,7 +715,7 @@ jobs:
 
       - name: Alter conf_api.py for correct sphinx build
         run: |
-          cd %GITHUB_WORKSPACE%\Doc\
+          Set-Location $Env:GITHUB_WORKSPACE\Doc\
           (gc conf_api.py) -replace '#graphviz_dot', 'graphviz_dot' | Out-File -encoding UTF8 conf_api.py
 
       - name: Deploy
