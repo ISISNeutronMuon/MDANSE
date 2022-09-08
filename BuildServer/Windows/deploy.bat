@@ -14,7 +14,9 @@ set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\To
 
 rem Prepare the environment for building MDANSE
 set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";"%CONDA%\envs\mdanse\Library\bin\graphviz";"%CONDA%\envs\mdanse\Library\bin";%PATH%
-echo %PATH%
+cd /d %CONDA%\envs\mdanse\Library\bin\graphviz
+dir /s
+cd %MDANSE_SOURCE_DIR%
 copy /y "%GITHUB_WORKSPACE%\BuildServer\setup.py" %GITHUB_WORKSPACE%
 
 "%PYTHON_EXE%" setup.py build build_api build_help install
