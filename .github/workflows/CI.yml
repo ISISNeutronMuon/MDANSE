@@ -107,6 +107,7 @@ jobs:
 
 
   deploy_ubuntu:
+    needs: ci_ubuntu
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
