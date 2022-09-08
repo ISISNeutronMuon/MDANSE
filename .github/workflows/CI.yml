@@ -324,7 +324,7 @@ jobs:
 
       - run: sudo apt-get install dos2unix
 
-      - run: conda remove ncurses
+      - run: conda remove ncurses --force
 
       - name: Deploy
         run: |
