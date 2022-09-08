@@ -154,6 +154,12 @@ jobs:
           sudo cp -r ~/tempenv/lib/python2.7/site-packages/vtk ~/python/lib/python2.7/site-packages
           sudo cp ~/tempenv/lib/libvtk* ~/python/lib
 
+      - name: Install libgtk on ubuntu 20 so that sphinx can document GUI modules
+        if: ${{ (matrix.os == 'ubuntu-20.04') }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install libgtk2.0-0 libgtk2.0-dev
+
       - run: sudo apt-get install dos2unix graphviz
 
       - name: Deploy
@@ -326,7 +332,7 @@ jobs:
           sudo conda install -n mdanse -c daf wxpython
           sudo conda install -n mdanse -c ccordoba12 vtk
 
-      - run: sudo apt-get install dos2unix graphviz
+      - run: sudo apt-get install dos2unix graphviz libgtk2.0-0 libgtk2.0-dev
 
       - name: Deploy
         run: |

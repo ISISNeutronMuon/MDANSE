@@ -13,7 +13,8 @@ rem see http://p-nand-q.com/python/building-python-27-with-vs2010.html for more 
 set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
 
 rem Prepare the environment for building MDANSE
-set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";"%CONDA%\envs\mdanse\Library\bin\graphviz";%PATH%
+set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";"%CONDA%\envs\mdanse\Library\bin\graphviz";"%CONDA%\envs\mdanse\Library\bin";%PATH%
+echo %PATH%
 copy /y "%GITHUB_WORKSPACE%\BuildServer\setup.py" %GITHUB_WORKSPACE%
 
 "%PYTHON_EXE%" setup.py build build_api build_help install
@@ -31,6 +32,7 @@ rmdir /s /q PyQT4
 rmdir /s /q PyQT4-4.11.4.dist-info
 rmdir /s /q matplotlib\mpl-data\sample_data
 "%PYTHON_EXE%" -m pip uninstall sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3 -y
+conda remove graphviz
 cd %MDANSE_TEMPORARY_INSTALLATION_DIR%\Library
 rmdir /s /q cmake
 del /f /q USING*
