@@ -256,7 +256,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '151' )
         run: |
           cd $CONDA/envs
           tar -czf python.tar.gz mdanse
@@ -269,7 +270,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '151' )
         uses: actions/upload-artifact@v2
         with:
           name: ubuntu-22.04_artifacts
@@ -288,7 +290,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '151' )
     steps:
       - uses: actions/checkout@v2
 
@@ -321,10 +324,11 @@ jobs:
 
       - run: sudo apt-get install dos2unix
 
+      - run: conda remove ncurses
+
       - name: Deploy
         run: |
           sed -i 's|PYTHONEXE=$HOME/python|PYTHONEXE=$CONDA/envs/mdanse|' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
-          sudo rm -v $CONDA/envs/mdanse/lib/libtinfo.*
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
