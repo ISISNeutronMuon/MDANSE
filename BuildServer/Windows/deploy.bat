@@ -14,7 +14,6 @@ set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\To
 
 rem Prepare the environment for building MDANSE
 set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";%PATH%
-powershell -Command "(gc %GITHUB_WORKSPACE%\Doc\conf_api.py) -replace '#graphviz_dot', 'graphviz_dot' | Out-File -encoding UTF8 %GITHUB_WORKSPACE%\Doc\conf_api.py"
 copy /y "%GITHUB_WORKSPACE%\BuildServer\setup.py" %GITHUB_WORKSPACE%
 
 "%PYTHON_EXE%" setup.py build build_api build_help install
