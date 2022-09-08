@@ -31,12 +31,14 @@ rmdir /s /q PyQT4
 rmdir /s /q PyQT4-4.11.4.dist-info
 rmdir /s /q matplotlib\mpl-data\sample_data
 "%PYTHON_EXE%" -m pip uninstall sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3 -y
-conda remove graphviz
 cd %MDANSE_TEMPORARY_INSTALLATION_DIR%\Library
 rmdir /s /q cmake
 del /f /q USING*
 cd bin
 del /f /q *.exe
+rmdir /s /q graphviz
+cd ..\share
+rmdir /s /q graphviz
 
 cd /D "%GITHUB_WORKSPACE%\BuildServer\Windows"
 
