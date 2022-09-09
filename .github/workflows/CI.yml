@@ -256,8 +256,7 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' ) ||
-          contains( github.ref, '151' )
+          contains( github.ref, 'web' )
         run: |
           cd $CONDA/envs
           tar -czf python.tar.gz mdanse
@@ -270,8 +269,7 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' ) ||
-          contains( github.ref, '151' )
+          contains( github.ref, 'web' )
         uses: actions/upload-artifact@v2
         with:
           name: ubuntu-22.04_artifacts
@@ -290,8 +288,7 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) ||
-      contains( github.ref, '151' )
+      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
