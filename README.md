@@ -15,12 +15,12 @@ J Chem Inf Model. 57(1):1-5 (2017).
 
 ## Acknowledgements
 
-MDANSE was born at the ILL in 2012, as an extension of the [nMOLDYN program](https://github.com/khinsen/nMOLDYN3) , originally developed
-by Gerald Kneller in 1995. Subsequent versions of nMOLDYN were further developed by Gerald
-Kneller, Konrad Hinsen and Eric Pellegrini. We are grateful to all the people who have helped in some
-way or another to improve nMOLDYN and/or MDANSE along those years. Apart from the main
-developers mentioned above, we would like to acknowledge explicitly the contributions done in the
-past by Bachir Aoun, Vania Calandrini, Paolo Calligari, Gael Goret and Remi Perenon.
+MDANSE was born at the ILL in 2012, as an extension of the [nMOLDYN program](https://github.com/khinsen/nMOLDYN3), originally developed
+by Gerald Kneller in 1995. Subsequent versions of nMOLDYN were further developed by Gerald Kneller, Konrad Hinsen and Eric Pellegrini. For the latest version of nMoldyn please cite: \
+Hinsen, K., Pellegrini, E., Stachura, S. and Kneller, G.R. (2012)  J. Comput. Chem., 33: 2043-2048 [https://doi.org/10.1002/jcc.23035][https://doi.org/10.1002/jcc.23035]. 
+
+We are grateful to all the people who have helped in some way or another to improve nMOLDYN and/or MDANSE along those years. Apart from the main
+developers mentioned above, we would like to acknowledge explicitly the contributions done in the past by Bachir Aoun, Vania Calandrini, Paolo Calligari, Gael Goret and Remi Perenon.
 
 The MDANSE project is supported by Ada Lovelace Centre and ISIS Neutron and Muon Source, Science
 and Technology Facilities Council, UKRI. Past financial support from the Institut Laue-Langevin, the
@@ -145,3 +145,6 @@ To join the project contact:
 ISIS Neutron and Muon Source \
 Rutherford Appleton Laboratory \
 Didcot, UK
+
+
+[https://doi.org/10.1002/jcc.23035]: https://doi.org/10.1002/jcc.23035
