@@ -130,3 +130,21 @@ class TestTrajectoryUtils(unittest.TestCase):
         self.assertEqual('H2O1', m4.name)
         self.assertEqual('', m3.name)
         self.assertEqual('protein', p.name)
+
+    def test_sorted_atoms_normal(self):
+        atoms = [Atom() for _ in range(10)]
+        for i, atom in enumerate(atoms):
+            atom.index = i
+
+        result = sorted_atoms([atoms[1], atoms[2], atoms[5], atoms[9], atoms[0], atoms[3], atoms[8], atoms[4],
+                               atoms[7], atoms[6]])
+        self.assertEqual(atoms, result)
+
+    def test_sorted_atoms_return_names(self):
+        atoms = [Atom() for _ in range(10)]
+        for i, atom in enumerate(atoms):
+            atom.index = i
+
+        result = sorted_atoms([atoms[1], atoms[2], atoms[5], atoms[9], atoms[0], atoms[3], atoms[8], atoms[4],
+                               atoms[7], atoms[6]], 'name')
+        self.assertEqual([at.name for at in atoms], result)

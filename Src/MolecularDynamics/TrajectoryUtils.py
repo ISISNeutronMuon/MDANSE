@@ -251,16 +251,19 @@ def resolve_undefined_molecules_name(chemical_system: ChemicalSystem) -> None:
             ce.name = brute_formula(ce, sep="")
 
 
-def sorted_atoms(atoms, attribute=None):
+def sorted_atoms(atoms: list[Atom], attribute: str = None) -> list[Union[Atom, float, int, str, list]]:
     """
-    Sort a list of atoms according to their index.
+    Sort a list of atoms according to their index, and returns either the sorted list of atoms or the values of the
+    specified attribute.
 
-    Args:
-        atoms (list): the atom list
-        attribute (str): if not None, return the attribute of the atom instead of the atom instance
+    :param atoms: the atom list to be sorted
+    :type atoms: list
 
-    Returns:
-        list: the sorted atoms
+    :param attribute: if not None, return the attribute of the atom instead of the atom instance
+    :type attribute: str
+
+    :return: the sorted atoms or the value of their specified attributes
+    :rtype: list
     """
 
     atoms = sorted(atoms, key=operator.attrgetter('index'))
