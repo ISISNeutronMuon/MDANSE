@@ -147,6 +147,3 @@ To join the project contact:
 ISIS Neutron and Muon Source \
 Rutherford Appleton Laboratory \
 Didcot, UK
-
-
-[https://doi.org/10.1002/jcc.23035]: https://doi.org/10.1002/jcc.23035
