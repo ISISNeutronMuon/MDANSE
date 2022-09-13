@@ -13,21 +13,6 @@ This project is built on the development published previously: \
 G. Goret, B. Aoun, E. Pellegrini, "MDANSE: An Interactive Analysis Environment for Molecular Dynamics Simulations", 
 J Chem Inf Model. 57(1):1-5 (2017).
 
-## Acknowledgements
-
-MDANSE was born at the ILL in 2012, as an extension of the [nMOLDYN program](https://github.com/khinsen/nMOLDYN3), originally developed
-by Gerald Kneller in 1995. Subsequent versions of nMOLDYN were further developed by Gerald Kneller, Konrad Hinsen and Eric Pellegrini. For the latest version of nMoldyn please cite: \
-Hinsen, K., Pellegrini, E., Stachura, S. and Kneller, G.R. (2012)  J. Comput. Chem., 33: 2043-2048 [https://doi.org/10.1002/jcc.23035][https://doi.org/10.1002/jcc.23035]. 
-
-We are grateful to all the people who have helped in some way or another to improve nMOLDYN and/or MDANSE along those years. Apart from the main
-developers mentioned above, we would like to acknowledge explicitly the contributions done in the past by Bachir Aoun, Vania Calandrini, Paolo Calligari, Gael Goret and Remi Perenon.
-
-The MDANSE project is supported by Ada Lovelace Centre and ISIS Neutron and Muon Source, Science
-and Technology Facilities Council, UKRI. Past financial support from the Institut Laue-Langevin, the
-French Agence Nationale de la Recherche (ANR) through contracts No. ANR-2010-COSI-001-01 and
-ANR-06-CIS6-012-01, and the Horizon 2020 Framework Programme of the European Union under
-project number 654000 is also acknowledged.
-
 ## Quick start
 
 The easiest way to start using MDANSE is to download a built installer from out latest [github release](https://github.com/ISISNeutronMuon/MDANSE/releases/).
@@ -136,6 +121,23 @@ G. Goret, B. Aoun, E. Pellegrini. J Chem Inf Model. (2017) 57(1):1-5.
 
 MDANSE is licensed under GPL-3.0. See [LICENSE](https://github.com/ISISNeutronMuon/MDANSE/blob/develop/LICENSE) for more 
 information.
+
+## Acknowledgements
+
+MDANSE was born at the ILL in 2012, as an extension of the [nMOLDYN program](https://github.com/khinsen/nMOLDYN3), originally developed
+by Gerald Kneller in 1995. Subsequent versions of nMOLDYN were further developed by Gerald Kneller, Konrad Hinsen and Eric Pellegrini. For the latest version of nMoldyn please cite:
+
+>nMoldyn 3: Using task farming for a parallel spectroscopy-oriented analysis of molecular dynamics simulations.
+K. Hinsen, E. Pellegrini, S. Stachura, G.R. Kneller J. Comput. Chem. (2012) 33:2043-2048 [https://doi.org/10.1002/jcc.23035][https://doi.org/10.1002/jcc.23035]. 
+
+We are grateful to all the people who have helped in some way or another to improve nMOLDYN and/or MDANSE along those years. Apart from the main
+developers mentioned above, we would like to acknowledge explicitly the contributions done in the past by Bachir Aoun, Vania Calandrini, Paolo Calligari, Gael Goret and Remi Perenon.
+
+The MDANSE project is supported by Ada Lovelace Centre and ISIS Neutron and Muon Source, Science
+and Technology Facilities Council, UKRI. Past financial support from the Institut Laue-Langevin, the
+French Agence Nationale de la Recherche (ANR) through contracts No. ANR-2010-COSI-001-01 and
+ANR-06-CIS6-012-01, and the Horizon 2020 Framework Programme of the European Union under
+project number 654000 is also acknowledged.
 
 ## Joining the project
 
