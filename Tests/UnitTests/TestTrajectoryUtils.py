@@ -33,7 +33,7 @@ class TestTrajectoryUtils(unittest.TestCase):
         for ce in [m, ac, a, ag]:
             cs.add_chemical_entity(ce)
 
-        coords = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0],
+        coords = np.array([[1, 1.05, 1], [1, 0.98, 1], [1, 1.12, 1],
                            [1, 1, 1], [1.044, 1, 1], [0.95, 1, 1], [1.055, 1, 1],
                            [1, 1, 1.02], [1, 1, 1.06]])
         conf = RealConfiguration(cs, coords)

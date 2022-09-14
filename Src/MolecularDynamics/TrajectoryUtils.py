@@ -42,6 +42,19 @@ def atom_index_to_molecule_index(chemical_system: ChemicalSystem) -> dict[int, i
 
     :return: a lookup table mapping atom indices to the indices of their root chemical entity
     :rtype: dict
+
+    :Example:
+
+    >>> from MDANSE.Chemistry.ChemicalEntity import Molecule, ChemicalSystem
+    >>>
+    >>> # Set up a chemical system
+    >>> molecules = [Molecule('WAT', 'w1'), Molecule('WAT', 'w2')]
+    >>> cs = ChemicalSystem()
+    >>> for molecule in molecules:
+    >>>     cs.add_chemical_entity(molecule)
+    >>>
+    >>> atom_index_to_molecule_index(cs)
+    {0: 0, 1: 0, 2: 0, 3: 1, 4: 1, 5: 1}
     """
 
     lut = {}
@@ -56,7 +69,7 @@ def brute_formula(chemical_entity: _ChemicalEntity, sep: str = '_', ignore_ones:
     """
     Determine the molecular formula of a given chemical entity.
 
-    :param chemical_entity: the chemical entity whose formula is to be deternimed
+    :param chemical_entity: the chemical entity whose formula is to be determined
     :type chemical_entity: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalEntity`
 
     :param sep: the separator used between elements, i.e. with the default separator a water molecule will return H2_O1
@@ -67,6 +80,18 @@ def brute_formula(chemical_entity: _ChemicalEntity, sep: str = '_', ignore_ones:
 
     :return: the molecular formula
     :rtype: str
+
+    :Example:
+
+    >>> from MDANSE.Chemistry.ChemicalEntity import Molecule
+    >>> m = Molecule('WAT', 'water')
+    >>>
+    >>> brute_formula(m)
+    'H2_O1'
+    >>> brute_formula(m, '')
+    'H2O1'
+    >>> brute_formula(m, '', True)
+    'H2O'
     """
 
     contents = {}
@@ -102,6 +127,65 @@ def build_connectivity(chemical_system: ChemicalSystem, tolerance: float = 0.05)
     :type tolerance: float
 
     :return: None
+
+    :Example:
+
+    >>> from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, AtomGroup, Molecule, ChemicalSystem
+    >>> from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+    >>> import numpy as np
+    >>>
+    >>> cs = ChemicalSystem()
+    >>>
+    >>> # Atoms in a Molecule object will not be changed
+    >>> molecule = Molecule('WAT', 'water')
+    >>>
+    >>> # Atoms in atom clusters and loose atoms as well as the atom group as it has only one atom will be bonded
+    >>> # if appropriate. All the atoms here are H atoms whose covalent radius is 0.023 in MDANSE atom database
+    >>> atom = Atom(name='loose atom')
+    >>> cluster = AtomCluster('name', [Atom(name=f'cluster atom {i}') for i in range(4)])
+    >>> group = AtomGroup([Atom(name='group atom', parent=cs)])
+    >>>
+    >>> for entity in [molecule, atom, cluster, group]:
+    >>>     cs.add_chemical_entity(entity)
+    >>>
+    >>> # The coordinates of all the previously defined particles, in the order they were added to the chemical system
+    >>> coords = np.array([[1, 1.05, 1], [1, 0.98, 1], [1, 1.12, 1],
+                           [1, 1, 1.02],
+                           [1, 1, 1], [1.044, 1, 1], [0.95, 1, 1], [1.055, 1, 1],
+                           [1, 1, 1.06]])
+    >>> configuration = RealConfiguration(cs, coords)
+    >>> cs.configuration = configuration
+    >>>
+    >>> build_connectivity(cs, 0.005)
+    >>>
+    >>> # The bonding of atoms in molecule has not changed even though. by coordinates, some are within bonding distance
+    >>> # of some of the other atoms.
+    >>> molecule['OW'].bonds
+    [Atom(name='HW2'), Atom(name='HW1')]
+    >>> molecule['HW2'].bonds
+    [Atom(name='OW')]
+    >>> molecule['HW1'].bonds
+    [Atom(name='OW')]
+    >>>
+    >>> # The loose atom is within the bonding distance of the first atom in the cluster, but no bond is created between
+    >>> # them since bonds are created only in atoms within each cluster and between other atoms separately. A bond is,
+    >>> # however created between the loose atom and the atom in the atom group since they are within bonding distance
+    >>> # and are considered to be 'other' atoms (not withing a cluster but not within a large structure).
+    >>> atom.bonds
+    [Atom(name='group atom')]
+    >>> group._atoms[0].bonds
+    [Atom(name='loose atom')]
+    >>>
+    >>> # Atoms are bonded purely based on distance (sum of the two atoms' covalent radii + tolerance) regardless of the
+    >>> # element, so it is possible to end up in a chemically unfeasible situation such as this chain of 4 H atoms:
+    >>> cluster[0].bonds
+    [Atom(name='cluster atom 1'), Atom(name='cluster atom 2')]
+    >>> cluster[1].bonds
+    [Atom(name='cluster atom 0'), Atom(name='cluster atom 3')]
+    >>> cluster[2].bonds
+    [Atom(name='cluster atom 0')]
+    >>> cluster[3].bonds
+    [Atom(name='cluster atom 1')]
     """
 
     conf = chemical_system.configuration
@@ -164,6 +248,29 @@ def find_atoms_in_molecule(chemical_system: ChemicalSystem, entity_name: str, at
 
     :return: the list of indexes or atom instances found
     :rtype: list
+
+    :Example:
+
+    >>> from MDANSE.Chemistry.ChemicalEntity import Molecule, ChemicalSystem
+    >>>
+    >>> cs = ChemicalSystem()
+    >>>
+    >>> molecules = [Molecule('WAT', 'water'), Molecule('WAT', 'water'), Molecule('WAT', 'totally not water')]
+    >>> for molecule in molecules:
+    >>>     cs.add_chemical_entity(molecule)
+    >>>
+    >>> # Search for all hydrogen atoms in molecules called water
+    >>> find_atoms_in_molecule(cs, 'water', ['HW2', 'HW1'])
+    [[Atom(name='HW2'), Atom(name='HW1')], [Atom(name='HW2'), Atom(name='HW1')]]
+    >>> # Searching for atoms in molecules that do not exist returns an empty list
+    >>> find_atoms_in_molecule(cs, 'INVALID', ['HW1'])
+    []
+    >>> # Searching for atoms that do not exist in the molecules of the specified name returns a list of empty lists
+    >>> find_atoms_in_molecule(cs, 'water', ['INVALID'])
+    [[], []]
+    >>> # Setting the indexes parameter to True causes indices to be returned instead of atom objects
+    >>> find_atoms_in_molecule(cs, 'water', ['HW2', 'HW1'], True)
+    [[1, 2], [4, 5]]
     """
 
     # Loop over the chemical entities of the chemical entity and keep only those whose name match |ce_name|
@@ -191,15 +298,28 @@ def get_chemical_objects_dict(chemical_system: ChemicalSystem) -> dict[str, list
     """
     Maps all chemical entities in a chemical system to their names, and returns this as a dict. Please note that only
     the top level chemical entities (those directly registered in chemical system) are mapped; children entities are not
-    mapped. Therefore, if a chemical system containing a protein called 'protein' which itself consists of nucleotide
-    chains 'chain1' and 'chain2' is passed in to this function, the following dict would be returned {'protein': [
-    Protein]}.
+    mapped.
 
     :param chemical_system: the chemical system whose entities are to be retrieved
     :type chemical_system: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`
 
     :return: a dict mapping the names of the entities in a chemical system to a list of entities with that name
     :rtype: dict
+
+    :Examples:
+
+    >>> from MDANSE.Chemistry.ChemicalEntity import Molecule, ChemicalSystem
+    >>>
+    >>> compounds = [Molecule('WAT', 'water'), Molecule('WAT', 'water'), Molecule('WAT', 'dihydrogen monoxide'), Atom()]
+    >>>
+    >>> cs = ChemicalSystem()
+    >>> for compound in compounds:
+    >>>     cs.add_chemical_entity(compound)
+    >>>
+    >>> # The atoms that are part of molecules (and so not registered with the chemical system directly) are not mapped
+    >>> get_chemical_objects_dict(cs)
+    {'water': [Molecule(name='water'), Molecule(name='water')],
+     'dihydrogen monoxide': [Molecule(name='dihydrogen monoxide')], '': [Atom(name='')]}
     """
 
     d = {}
@@ -225,6 +345,27 @@ def group_atoms(chemical_system: ChemicalSystem, groups: list[list[int]]) -> lis
 
     :return: list of atom groups as specified
     :rtype: list
+
+    :Example:
+
+    >>> from MDANSE.Chemistry.ChemicalEntity import Atom, Molecule, ChemicalSystem
+    >>>
+    >>> compounds = [Atom(), Molecule('WAT', ''), Molecule('WAT', ''), Molecule('WAT', '')]
+    >>>
+    >>> cs = ChemicalSystem()
+    >>> for compound in compounds:
+    >>>     cs.add_chemical_entity(compound)
+    >>>
+    >>> # An atom group is created for each non-empty list in the provided list of lists
+    >>> groups = group_atoms(cs, [[0, 2], [], [3], [5, 7, 9]])
+    >>> groups
+    [AtomGroup(), AtomGroup(), AtomGroup()]
+    >>> groups[0].atom_list
+    [Atom(name=''), Atom(name='HW2')]
+    >>> groups[1].atom_list
+    [Atom(name='HW1')]
+    >>> groups[2].atom_list
+    [Atom(name='HW2'), Atom(name='OW'), Atom(name='HW1')]
     """
     atoms = chemical_system.atom_list()
 
@@ -244,6 +385,25 @@ def resolve_undefined_molecules_name(chemical_system: ChemicalSystem) -> None:
     :type chemical_system: :class: `MDANSE.Chemistry.ChemicalEntity.ChemicalSystem`
 
     :return: None
+
+    :Example:
+
+    >>> from MDANSE.Chemistry.ChemicalEntity import Atom, Molecule, ChemicalSystem
+    >>>
+    >>> compounds = [Molecule('WAT', ''), Molecule('WAT', ' water '), Molecule('WAT', '    '), Atom()]
+    >>>
+    >>> # Alter the name of one of the atoms in a molecule to see that it will not be changed
+    >>> compounds[0]['OW'].name = ''
+    >>>
+    >>> cs = ChemicalSystem()
+    >>> for compound in compounds:
+    >>>     cs.add_chemical_entity(compound)
+    >>>
+    >>> resolve_undefined_molecules_name(cs)
+    >>> cs.chemical_entities
+    [Molecule(name='H2O1'), Molecule(name=' water '), Molecule(name='H2O1'), Atom(name='H1')]
+    >>> compounds[0]['OW'].name
+    ''
     """
     # Is it okay to not do this for children?
     for ce in chemical_system.chemical_entities:
@@ -264,6 +424,20 @@ def sorted_atoms(atoms: list[Atom], attribute: str = None) -> list[Union[Atom, f
 
     :return: the sorted atoms or the value of their specified attributes
     :rtype: list
+
+    :Example:
+
+    >>> from MDANSE.Chemistry.ChemicalEntity import Atom
+    >>>
+    >>> atoms = [Atom() for _ in range(4)]
+    >>> for i, atom in enumerate(atoms):
+    >>>     atom.index = i
+    >>>     atom.name = f'atom{i}'
+    >>>
+    >>> sorted_atoms([atoms[0], atoms[3], atoms[2], atoms[1]])
+    [Atom(name='atom0'), Atom(name='atom3'), Atom(name='atom2'), Atom(name='atom1')]
+    >>> sorted_atoms([atoms[0], atoms[3], atoms[2], atoms[1]], 'name')
+    ['atom0', 'atom3', 'atom2', 'atom1']
     """
 
     atoms = sorted(atoms, key=operator.attrgetter('index'))
