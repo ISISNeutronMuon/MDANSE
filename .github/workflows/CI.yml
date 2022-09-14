@@ -234,6 +234,8 @@ jobs:
 
       - name: Install py2app, wxpython, and sphinx
         run: |
+          sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/3.9.13/x64/lib/libpython3.9.dylib /Users/runner/Contents/Resources/lib/libpython3.9.dylib /Users/runner/Contents/Resources/bin/python3.9
+          sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/3.9.13/x64/lib/libpython3.9.dylib /Users/runner/Contents/Resources/lib/libpython3.9.dylib /Users/runner/Contents/Resources/bin/python
           $HOME/Contents/Resources/bin/python -m pip install py2app wxpython sphinx psutil distro
 
       - name: Deploy MDANSE
@@ -302,7 +304,7 @@ jobs:
           contains( github.ref, 'web' ) ||
           contains( github.ref, 'cicd' )
         run: |
-          cd %RUNNER_TOOL_CACHE%/Python/3.9.13
+          cd /D %RUNNER_TOOL_CACHE%/Python/3.9.13
           ren x64 python
           dir
           tar -czf python.tar.gz .\python
