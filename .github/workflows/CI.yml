@@ -107,7 +107,7 @@ jobs:
 
       - name: Install wx and sphinx
         run: |
-          python3 -m pip install wxpython sphinx distro psutil
+          ~/python/bin/python -m pip install wxpython sphinx distro psutil
 
       - name: Deploy
         run: |
@@ -300,7 +300,7 @@ jobs:
           contains( github.ref, 'web' ) ||
           contains( github.ref, 'cicd' )
         run: |
-          cd $RUNNER_TOOL_CACHE/Python/3.9.13
+          cd %RUNNER_TOOL_CACHE%/Python/3.9.13
           tar -czf python.tar.gz x64
         shell: cmd
 
