@@ -2,20 +2,12 @@
 
 cd %MDANSE_SOURCE_DIR%
 
-set MDANSE_TEMPORARY_INSTALLATION_DIR="%CONDA%\envs\mdanse"
+set MDANSE_TEMPORARY_INSTALLATION_DIR="%GITHUB_WORKSPACE%\x64\"
 rem Set the path to python executable
 set PYTHON_EXE=%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe
 
-rem This is the env var used by distutils to find the MSVC framework to be used for compiling extension
-rem see https://stackoverflow.com/questions/2817869/error-unable-to-find-vcvarsall-bat for more info
-rem For the sake of code safety, this should be the same framework used to build Python itself
-rem see http://p-nand-q.com/python/building-python-27-with-vs2010.html for more info
-set VS90COMNTOOLS="C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools"
 
 rem Prepare the environment for building MDANSE
-set PATH="C:\Program Files (x86)\Microsoft Visual Studio 9.0\";"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\Bin\x86_amd64";%PATH%
-copy /y "%GITHUB_WORKSPACE%\BuildServer\setup.py" %GITHUB_WORKSPACE%
-
 "%PYTHON_EXE%" setup.py build build_api build_help install
 
 set STATUS=%ERRORLEVEL%
@@ -46,7 +38,7 @@ rem copy CHANGELOG to CHANGELOG.txt (compulsory to be opened by nsis through an 
 copy "%GITHUB_WORKSPACE%\CHANGELOG" "%GITHUB_WORKSPACE%\BuildServer\Windows\Resources\nsis\CHANGELOG.txt"
 
 rem Copy site.py 
-copy "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\Resources\\site.py" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\"
+rem copy "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\Resources\\site.py" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\"
 
 rem create the MDANSE installer
 echo "Creating nsis installer for target %MDANSE_TEMPORARY_INSTALLATION_DIR%..."
