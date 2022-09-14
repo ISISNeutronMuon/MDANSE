@@ -2,13 +2,13 @@
 
 cd %MDANSE_SOURCE_DIR%
 
-set MDANSE_TEMPORARY_INSTALLATION_DIR="%GITHUB_WORKSPACE%\x64\"
+set MDANSE_TEMPORARY_INSTALLATION_DIR="%GITHUB_WORKSPACE%\python\"
 rem Set the path to python executable
 set PYTHON_EXE=%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe
 
 
 rem Prepare the environment for building MDANSE
-"%PYTHON_EXE%" setup.py build build_api build_help install
+rem "%PYTHON_EXE%" setup.py build build_api build_help install
 
 set STATUS=%ERRORLEVEL%
 rem Exit now if unable to build

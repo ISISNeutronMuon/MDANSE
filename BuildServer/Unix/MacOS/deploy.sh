@@ -18,7 +18,7 @@ export PYTHONPATH=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages:${PYTHONPAT
 # Build API
 sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/3.9.13/x64/lib/libpython3.9.dylib /Users/runner/Contents/Resources/lib/libpython3.9.dylib /Users/runner/Contents/Resources/bin/python3.9
 sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/3.9.13/x64/lib/libpython3.9.dylib /Users/runner/Contents/Resources/lib/libpython3.9.dylib /Users/runner/Contents/Resources/bin/python
-sudo ${PYTHONEXE} setup.py build build_api build_help install
+#sudo ${PYTHONEXE} setup.py build build_api build_help install
 
 status=$?
 if [ $status -ne 0 ]; then

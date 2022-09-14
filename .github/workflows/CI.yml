@@ -107,6 +107,7 @@ jobs:
 
       - name: Install wx and sphinx
         run: |
+          ~/python/bin/python -m pip install attrdict3
           ~/python/bin/python -m pip install wxpython sphinx distro psutil
 
       - name: Deploy
@@ -301,7 +302,8 @@ jobs:
           contains( github.ref, 'cicd' )
         run: |
           cd %RUNNER_TOOL_CACHE%/Python/3.9.13
-          tar -czf python.tar.gz x64
+          ren x64 python
+          tar -czf python.tar.gz python
         shell: cmd
 
       - name: Upload artifacts
@@ -349,7 +351,7 @@ jobs:
 
       - name: Install packages required for documentation and psutil
         run: |
-          %GITHUB_WORKSPACE%\x64\python.exe -m pip install sphinx psutil distro wxpython
+          %GITHUB_WORKSPACE%\python\python.exe -m pip install sphinx psutil distro wxpython
         shell: cmd
 
       - name: Deploy
