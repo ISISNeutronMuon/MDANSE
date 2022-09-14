@@ -23,11 +23,7 @@ rmdir /s /q PyQT4
 rmdir /s /q PyQT4-4.11.4.dist-info
 rmdir /s /q matplotlib\mpl-data\sample_data
 "%PYTHON_EXE%" -m pip uninstall sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3 -y
-cd %MDANSE_TEMPORARY_INSTALLATION_DIR%\Library
-rmdir /s /q cmake
-del /f /q USING*
-cd bin
-del /f /q *.exe
+
 
 cd /D "%GITHUB_WORKSPACE%\BuildServer\Windows"
 
@@ -44,15 +40,6 @@ rem create the MDANSE installer
 echo "Creating nsis installer for target %MDANSE_TEMPORARY_INSTALLATION_DIR%..."
 makensis /V4 /ONSISlog.txt /DVERSION=%VERSION_NAME% /DARCH=%BUILD_TARGET% /DTARGET_DIR=%MDANSE_TEMPORARY_INSTALLATION_DIR% %GITHUB_WORKSPACE%\\BuildServer\\Windows\\Resources\\nsis\\MDANSE_installer.nsi
 
-set STATUS=%ERRORLEVEL%
-rem Exit now if something goes wrong
-if %STATUS% neq 0 (
-    echo "Failed when packaging MDANSE"
-    exit %STATUS%
-)
-
 move %MDANSE_TEMPORARY_INSTALLATION_DIR%\\MDANSE*.exe %MDANSE_SOURCE_DIR%\\
-rem Remove NSIS log file
-del NSISlog.txt
 
 cd %MDANSE_SOURCE_DIR%

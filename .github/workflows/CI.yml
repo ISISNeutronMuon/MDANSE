@@ -371,5 +371,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Windows_executable
-          path: ${{ github.workspace }}\*.exe
+          path: |
+            ${{ github.workspace }}\*.exe
+            ${{ github.workspace }}\python\ONSISlog.txt
           retention-days: 90
