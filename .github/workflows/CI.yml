@@ -103,12 +103,7 @@ jobs:
       - name: Install netcdf
         run: |
           sudo apt-get update
-          sudo apt-get install netcdf-bin libnetcdf-dev dos2unix graphviz
-
-      - name: Install GTK3 on Ubuntu 20
-        if: ${{ (matrix.os == 'ubuntu-20.04') }}
-        run: |
-          sudo apt-get install libgtk-3-dev
+          sudo apt-get install netcdf-bin libnetcdf-dev dos2unix graphviz libgtk-3-dev
 
       - name: Install wx and sphinx
         run: |
@@ -239,7 +234,7 @@ jobs:
 
       - name: Install py2app, wxpython, and sphinx
         run: |
-          python3 -m pip install py2app wxpython sphinx psutil distro
+          $HOME/Contents/Resources/bin/python -m pip install py2app wxpython sphinx psutil distro
 
       - name: Deploy MDANSE
         run: |
@@ -309,6 +304,7 @@ jobs:
         run: |
           cd %RUNNER_TOOL_CACHE%/Python/3.9.13
           ren x64 python
+          dir
           tar -czf python.tar.gz .\python
         shell: cmd
 
