@@ -43,7 +43,7 @@ DEBIAN_BIN_DIR=${DEBIAN_ROOT_DIR}/usr/local/bin
 mkdir -p ${DEBIAN_BIN_DIR}
 cp $GITHUB_WORKSPACE/Scripts/* ${DEBIAN_BIN_DIR}/
 dos2unix ${DEBIAN_BIN_DIR}/mdanse_*
-cp $PYTHONEXE/bin/* ${DEBIAN_BIN_DIR}/
+cp -r $PYTHONEXE/bin/* ${DEBIAN_BIN_DIR}/
 
 # Replace the shebang in mdanse scripts to point to the correct python location, and also edit them
 # so that if LD_LIBRARY_PATH is not set up by bash, it the script sets it up for itself.

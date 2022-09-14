@@ -45,7 +45,7 @@ if sys.platform.startswith('darwin'):
         'dist_dir': temp_dir,
         'graph': False,
         'xref': False,
-        'packages' : ["MDANSE","MMTK","Scientific","matplotlib"]
+        'packages' : ["MDANSE","matplotlib"]
     }
 
     setup(
