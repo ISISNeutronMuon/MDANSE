@@ -373,5 +373,5 @@ jobs:
           name: Windows_executable
           path: |
             ${{ github.workspace }}\*.exe
-            ${{ github.workspace }}\python\ONSISlog.txt
+            ${{ github.workspace }}\python\BuildServer\Windows\ONSISlog.txt
           retention-days: 90
