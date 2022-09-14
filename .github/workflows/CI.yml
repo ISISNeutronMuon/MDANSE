@@ -190,7 +190,6 @@ jobs:
 
   ci_ubuntu22:
     runs-on: 'ubuntu-22.04'
-    if: false
     strategy:
       fail-fast: false
     steps:
@@ -258,7 +257,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '158' )
         run: |
           cd $CONDA/envs
           tar -czf python.tar.gz mdanse
@@ -271,7 +271,8 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'web' ) ||
+          contains( github.ref, '158' )
         uses: actions/upload-artifact@v2
         with:
           name: ubuntu-22.04_artifacts
@@ -290,7 +291,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '158' )
     steps:
       - uses: actions/checkout@v2
 
@@ -326,6 +328,7 @@ jobs:
       - name: Deploy
         run: |
           sed -i 's|PYTHONEXE=$HOME/python|PYTHONEXE=$CONDA/envs/mdanse|' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
+          sudo rm -v $CONDA/envs/mdanse/lib/libstdc*
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
@@ -343,6 +346,7 @@ jobs:
   # OSX
   ci_osx:
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -399,19 +403,16 @@ jobs:
           python2 setup.py install
 
       - name: Run dependency tests
-        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/DependenciesTests
           python2 AllTests.py
 
       - name: Run unit tests
-        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/UnitTests
           python2 AllTests.py
 
       - name: Run functional tests
-        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
           python2 BuildJobTests.py
