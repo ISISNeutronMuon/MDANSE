@@ -362,6 +362,7 @@ jobs:
       - run: |
           cd /D %GITHUB_WORKSPACE%\python
           dir
+        shell: cmd
 
       - name: Deploy
         run: |
