@@ -261,6 +261,7 @@ jobs:
 
   # WINDOWS
   ci_windows:
+    if: false
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -379,5 +380,4 @@ jobs:
           name: Windows_executable
           path: |
             ${{ github.workspace }}\*.exe
-            ${{ github.workspace }}\python\BuildServer\Windows\*.txt
           retention-days: 90

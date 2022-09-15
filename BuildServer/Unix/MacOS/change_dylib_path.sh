@@ -26,7 +26,7 @@ do
 done
 
 echo -e "${BLUE}" "Changing lib-dynload/wx so files""${NORMAL}"
-cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python3.9/lib-dynload/wx || exit
+cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python3.9/lib-dynload/wx
 files=(*.so)
 echo ${files[*]}
 for f in ${files[*]}
