@@ -124,24 +124,28 @@ information.
 
 ## Acknowledgements
 
-MDANSE has inherited some codes from the [nMOLDYN program](https://github.com/khinsen/nMOLDYN3), originally developed
-by Gerald Kneller in 1995 and subsequently by Konrad Hinsen and Eric Pellegrini. For more information see:
+MDANSE has inherited some code from the [nMOLDYN program](https://github.com/khinsen/nMOLDYN3), originally developed
+by Gerald Kneller in 1995 and subsequently also by Konrad Hinsen, Tomasz Rog, Krzysztof Murzyn, Slawomir Stachura,
+and Eric Pellegrini. For more information see:
 
 >nMoldyn 3: Using task farming for a parallel spectroscopy-oriented analysis of molecular dynamics simulations.
 K. Hinsen, E. Pellegrini, S. Stachura, G.R. Kneller J. Comput. Chem. (2012) 33:2043-2048 [https://doi.org/10.1002/jcc.23035][https://doi.org/10.1002/jcc.23035]. 
 
-We are grateful to all the people who have helped in some way or another to improve nMOLDYN and/or MDANSE along those years. Apart from the main
-developers mentioned above, we would like to acknowledge explicitly the contributions done in the past by Bachir Aoun, Vania Calandrini, Paolo Calligari, Gael Goret and Remi Perenon.
+We are grateful to all the people who have helped in some way or another to improve nMOLDYN and/or MDANSE along those years. 
+Apart from the main developers mentioned above, we would like to acknowledge explicitly the contributions done in the past 
+by Bachir Aoun, Vania Calandrini, Paolo Calligari, Gael Goret and Remi Perenon.
 
-The MDANSE project is supported by Ada Lovelace Centre and ISIS Neutron and Muon Source, Science
-and Technology Facilities Council, UKRI. Past financial support from the Institut Laue-Langevin, the
-French Agence Nationale de la Recherche (ANR) through contracts No. ANR-2010-COSI-001-01 and
-ANR-06-CIS6-012-01, and the Horizon 2020 Framework Programme of the European Union under
-project number 654000 is also acknowledged.
+The MDANSE project is supported by Ada Lovelace Centre, ISIS Neutron and Muon Source, Science
+and Technology Facilities Council, UKRI, and the Institut Laue-Langevin (Grenoble, France). 
+Past financial support from the French Agence Nationale de la Recherche (ANR) through contracts 
+No. ANR-2010-COSI-001-01 and ANR-06-CIS6-012-01, and the Horizon 2020 Framework Programme of 
+the European Union under project number 654000 is also acknowledged.
 
 ## Joining the project
 
-To join the project contact:
+MDANSE is currently maintained and developed by software developers from ISIS and ILL, but we are fully open to new
+collaborators who would like to contribute code, documentation, tutorials or usage examples.
+If you want to join the project contact:
 
 >Dr. Sanghamitra Mukhopadhyay (sanghamitra.mukhopadhyay@stfc.ac.uk) \
 ISIS Neutron and Muon Source \
