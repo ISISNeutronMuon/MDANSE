@@ -1,0 +1,1 @@
+import os, sys; os.environ['PATH'] = os.path.join(sys.prefix, "Library", "bin") + os.pathsep + os.environ['PATH']

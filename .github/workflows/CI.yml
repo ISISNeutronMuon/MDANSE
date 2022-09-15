@@ -297,39 +297,6 @@ jobs:
           python3 AllTests.py
         shell: cmd
 
-      - name: Tar artifacts
-        if: |
-          contains( github.ref, 'main' ) ||
-          contains( github.ref, 'develop' ) ||
-          contains( github.ref, 'release-' ) ||
-          contains( github.ref, 'hotfix-' ) ||
-          contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' ) ||
-          contains( github.ref, 'cicd' )
-        run: |
-          cd /D %RUNNER_TOOL_CACHE%/Python/3.9.13
-          ren x64 python
-          dir
-          tar -czf python.tar.gz .\python
-        shell: cmd
-
-      - name: Upload artifacts
-        if: |
-          contains( github.ref, 'main' ) ||
-          contains( github.ref, 'develop' ) ||
-          contains( github.ref, 'release-' ) ||
-          contains( github.ref, 'hotfix-' ) ||
-          contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' ) ||
-          contains( github.ref, 'cicd' )
-        uses: actions/upload-artifact@v2
-        with:
-          name: windows_artifacts
-          path: ${{ runner.tool_cache }}/Python/3.9.13/python.tar.gz
-          retention-days: 1
-
   deploy_windows:
     runs-on: windows-2019
     needs: ci_windows
@@ -345,25 +312,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
+      - name: Create conda environment
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          name: windows_artifacts
-          path: ${{ github.workspace }}
+          python-version: 3.9.13
+          activate-environment: mdanse
 
-      - name: Untar python
+      - name: Install h5py and netCDF4 witch conda
         run: |
-          cd /D %GITHUB_WORKSPACE%
-          tar -xkf python.tar.gz
-          cd python
-          del python3.exe
-          mklink python3.exe python.exe
-        shell: cmd
+          conda install h5py netCDF4 graphviz
+        shell: cmd /C CALL {0}
 
-      - name: Install packages required for documentation and psutil
+      - name: Install other dependencies with pip
         run: |
-          %GITHUB_WORKSPACE%\python\python.exe -m pip install sphinx psutil distro wxpython
-        shell: cmd
+          %CONDA%\envs\mdanse\python.exe -m pip install numpy matplotlib Cython pyyaml vtk psutil wxpython sphinx distro
 
       - name: Deploy
         run: |

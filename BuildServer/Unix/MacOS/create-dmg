@@ -217,6 +217,7 @@ fi
 # unmount
 echo "Start unmounting disk image..."
 function hdiutil_detach_retry() {
+  MAXIMUM_UNMOUNTING_ATTEMPTS=15
 	# Unmount
 	unmounting_attempts=0
 	until
