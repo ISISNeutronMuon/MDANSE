@@ -92,8 +92,8 @@ sudo install_name_tool -change /usr/lib/libiconv.2.dylib @executable_path/../Fra
 # libz
 #sudo install_name_tool -change /usr/lib/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libz.1.dylib
 # hashlib
-sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libssl.1.1.dylib @executable_path/../Frameworks/libssl.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
-sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib @executable_path/../Frameworks/libcrypto.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
+#sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libssl.1.1.dylib @executable_path/../Frameworks/libssl.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
+#sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib @executable_path/../Frameworks/libcrypto.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
 
 echo "Copy site.py"
 #sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.

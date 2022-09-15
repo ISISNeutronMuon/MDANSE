@@ -352,16 +352,14 @@ jobs:
         run: |
           cd /D %GITHUB_WORKSPACE%
           tar -xkf python.tar.gz
+          cd python
+          del python3.exe
+          mklink python3.exe python.exe
         shell: cmd
 
       - name: Install packages required for documentation and psutil
         run: |
           %GITHUB_WORKSPACE%\python\python.exe -m pip install sphinx psutil distro wxpython
-        shell: cmd
-
-      - run: |
-          cd /D %GITHUB_WORKSPACE%\python
-          dir
         shell: cmd
 
       - name: Deploy
