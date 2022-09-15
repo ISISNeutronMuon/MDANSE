@@ -112,16 +112,16 @@ sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_ex
 sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
 
 # Create a bash script that will run the bundled python with $PYTHONHOME set
-echo "#!/bin/bash" > ~/python2
+echo "#!/bin/bash" > ~/python3
 {
 echo 'SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"'
 echo 'PARENT_DIR="$(dirname "$SCRIPT_DIR")"'
 echo 'export PYTHONHOME=$PARENT_DIR:$PARENT_DIR/Resources'
-echo 'export PYTHONPATH=$PARENT_DIR/Resources/lib/python2.7:$PARENT_DIR/Resources:$PARENT_DIR/Resources/lib/python2.7/site-packages'
-echo '$SCRIPT_DIR/python "${@:2}"'
-} >> ~/python2
-sudo cp -v ~/python2 "${MDANSE_APP_DIR}/Contents/MacOS"
-sudo chmod 755 "${MDANSE_APP_DIR}/Contents/MacOS/python2"
+echo 'export PYTHONPATH=$PARENT_DIR/Resources/lib/python3.9:$PARENT_DIR/Resources:$PARENT_DIR/Resources/lib/python3.9/site-packages'
+echo '$SCRIPT_DIR/python "${@:1}"'
+} >> ~/python3
+sudo cp -v ~/python3 "${MDANSE_APP_DIR}/Contents/MacOS"
+sudo chmod 755 "${MDANSE_APP_DIR}/Contents/MacOS/python3"
 
 #############################
 # Cleanup
