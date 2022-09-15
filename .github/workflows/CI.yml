@@ -261,7 +261,6 @@ jobs:
 
   # WINDOWS
   ci_windows:
-    if: false
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
