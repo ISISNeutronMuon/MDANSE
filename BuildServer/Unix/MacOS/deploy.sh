@@ -71,7 +71,7 @@ sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
 echo "Copy dependency dylibs"
 sudo mv -v ${MDANSE_APP_DIR}/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
 #sudo cp -v /usr/lib/libz.* ${MDANSE_APP_DIR}/Contents/Frameworks
-sudo cp -v /usr/lib/libc++* ${MDANSE_APP_DIR}/Contents/Frameworks
+#sudo cp -v /usr/lib/libc++* ${MDANSE_APP_DIR}/Contents/Frameworks
 sudo cp /usr/local/lib/libint*.dylib ${MDANSE_APP_DIR}/Contents/Frameworks
 
 # It is necessary to interlink the following dylibs for them to work properly

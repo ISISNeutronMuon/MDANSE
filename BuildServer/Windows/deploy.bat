@@ -2,12 +2,13 @@
 
 cd %MDANSE_SOURCE_DIR%
 
-set MDANSE_TEMPORARY_INSTALLATION_DIR="%GITHUB_WORKSPACE%\python\"
+set MDANSE_TEMPORARY_INSTALLATION_DIR=%GITHUB_WORKSPACE%\python\
 rem Set the path to python executable
 set PYTHON_EXE=%MDANSE_TEMPORARY_INSTALLATION_DIR%\python.exe
 
 
 rem Prepare the environment for building MDANSE
+set PATH=%MDANSE_TEMPORARY_INSTALLATION_DIR%;%MDANSE_TEMPORARY_INSTALLATION_DIR%\Scripts\;%PATH%
 rem "%PYTHON_EXE%" setup.py build build_api build_help install
 
 set STATUS=%ERRORLEVEL%
@@ -39,7 +40,6 @@ rem copy "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\Resources\\site.py" "%MDANSE
 rem create the MDANSE installer
 echo "Creating nsis installer for target %MDANSE_TEMPORARY_INSTALLATION_DIR%..."
 makensis /V4 /ONSISlog.txt /DVERSION=%VERSION_NAME% /DARCH=%BUILD_TARGET% /DTARGET_DIR=%MDANSE_TEMPORARY_INSTALLATION_DIR% %GITHUB_WORKSPACE%\\BuildServer\\Windows\\Resources\\nsis\\MDANSE_installer.nsi
-echo "Installer created"
 
 move %MDANSE_TEMPORARY_INSTALLATION_DIR%\\MDANSE*.exe %MDANSE_SOURCE_DIR%\\
 
