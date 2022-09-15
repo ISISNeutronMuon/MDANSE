@@ -4,6 +4,7 @@ on: [push, workflow_dispatch]
 
 jobs:
   ci_ubuntu:
+    if: false
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
