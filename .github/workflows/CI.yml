@@ -325,6 +325,7 @@ jobs:
       - name: Install other dependencies with pip
         run: |
           %CONDA%\envs\mdanse\python.exe -m pip install numpy matplotlib Cython pyyaml vtk psutil wxpython sphinx distro
+        shell: cmd /C CALL {0}
 
       - name: Deploy
         run: |
@@ -333,7 +334,7 @@ jobs:
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\deploy.bat"
-        shell: cmd
+        shell: cmd /C CALL {0}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
