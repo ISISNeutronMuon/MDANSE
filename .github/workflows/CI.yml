@@ -65,15 +65,29 @@ jobs:
         with:
           python-version: '3.9.13'
 
+      - run: |
+          cd $RUNNER_TOOL_CACHE/Python/3.9.13/x64
+          ls
+
       - name: Install netcdf
         run: |
           sudo apt-get update
           sudo apt-get install netcdf-bin libnetcdf-dev dos2unix graphviz libgtk-3-dev
 
-      - name: Install wx and sphinx
+      - name: Install packages with pip
         run: |
-          python3 -m pip install numpy matplotlib Cython netCDF4 pyyaml h5py vtk attrdict3
-          python3 -m pip install wxpython==4.1.1 sphinx distro psutil
+          python3 -m pip install numpy matplotlib Cython netCDF4 pyyaml h5py vtk attrdict3 sphinx distro psutil
+
+      - name: Install wxpython with conda
+        run: |
+          sudo conda create -p ~/tempenv python=3.9.13
+          sudo conda install -p ~/tempenv wxpython
+          cd ~/tempenv/lib/python2.7/site-packages/
+          ls
+          sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib/python3.9/site-packages
+          sudo cp -rfv ~/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib
+          sudo cp -rfv ~/tempenv/include/wx $RUNNER_TOOL_CACHE/Python/3.9.13/x64/include
+          sudo cp -v ~/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib
 
       - name: Deploy
         run: |
@@ -201,8 +215,6 @@ jobs:
           sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/3.9.13/x64/lib/libpython3.9.dylib /Users/runner/Contents/Resources/lib/libpython3.9.dylib /Users/runner/Contents/Resources/bin/python3.9
           sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/3.9.13/x64/lib/libpython3.9.dylib /Users/runner/Contents/Resources/lib/libpython3.9.dylib /Users/runner/Contents/Resources/bin/python
           $HOME/Contents/Resources/bin/python -m pip install py2app==0.26.1 wxpython sphinx psutil distro
-          cd $HOME/Contents/Resources/lib/
-          ls
 
       - name: Deploy MDANSE
         run: |
