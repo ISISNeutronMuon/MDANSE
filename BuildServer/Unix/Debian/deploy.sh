@@ -5,7 +5,7 @@
 #############################
 # Debug option for py2app, if needed
 export DISTUTILS_DEBUG=0
-export PYTHONEXE=$HOME/python
+export PYTHONEXE=$RUNNER_TOOL_CACHE/Python/3.9.13/x64
 #############################
 # PREPARATION
 #############################
@@ -65,6 +65,7 @@ cd $GITHUB_WORKSPACE || exit
 
 # Build API
 # sudo $PYTHONEXE/bin/python setup.py build build_api build_help install
+sudo $PYTHONEXE/bin/python setup.py install
 
 status=$?
 if [ $status -ne 0 ]; then

@@ -40,37 +40,6 @@ jobs:
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
 
-      - name: Tar artifacts
-        if: |
-          contains( github.ref, 'main' ) ||
-          contains( github.ref, 'develop' ) ||
-          contains( github.ref, 'release-' ) ||
-          contains( github.ref, 'hotfix-' ) ||
-          contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' ) ||
-          contains( github.ref, 'cicd' )
-        run: |
-          cd $RUNNER_TOOL_CACHE/Python/3.9.13
-          mv x64 python
-          tar -czf python.tar.gz python
-
-      - name: Upload artifacts
-        if: |
-          contains( github.ref, 'main' ) ||
-          contains( github.ref, 'develop' ) ||
-          contains( github.ref, 'release-' ) ||
-          contains( github.ref, 'hotfix-' ) ||
-          contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' ) ||
-          contains( github.ref, 'cicd' )
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.os }}_artifacts
-          path: ${{ runner.tool_cache }}/Python/3.9.13/python.tar.gz
-          retention-days: 1
-
 
   deploy_ubuntu:
     needs: ci_ubuntu
@@ -91,14 +60,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
+      - name: Install python
+        uses: actions/setup-python@v2
         with:
-          name: ${{ matrix.os }}_artifacts
-          path: ~/
-
-      - name: Untar artifacts
-        run: tar -xzf ~/python.tar.gz -C $HOME
+          python-version: '3.9.13'
 
       - name: Install netcdf
         run: |
@@ -107,9 +72,8 @@ jobs:
 
       - name: Install wx and sphinx
         run: |
-          export LD_LIBRARY_PATH=~/python/lib:$LD_LIBRARY_PATH
-          ~/python/bin/python -m pip install attrdict3
-          ~/python/bin/python -m pip install wxpython==4.1.1 sphinx distro psutil
+          python3 -m pip install numpy matplotlib Cython netCDF4 pyyaml h5py vtk attrdict3
+          python3 -m pip install wxpython==4.1.1 sphinx distro psutil
 
       - name: Deploy
         run: |
