@@ -4,7 +4,6 @@ on: [push, workflow_dispatch]
 
 jobs:
   ci_ubuntu:
-    if: false
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -110,7 +109,7 @@ jobs:
         run: |
           export LD_LIBRARY_PATH=~/python/lib:$LD_LIBRARY_PATH
           ~/python/bin/python -m pip install attrdict3
-          ~/python/bin/python -m pip install wxpython sphinx distro psutil
+          ~/python/bin/python -m pip install wxpython==4.1.1 sphinx distro psutil
 
       - name: Deploy
         run: |

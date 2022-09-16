@@ -4,6 +4,8 @@
 
 set -e;
 
+MAXIMUM_UNMOUNTING_ATTEMPTS=15
+
 function pure_version() {
   echo '1.0.0.2'
 }
@@ -217,7 +219,6 @@ fi
 # unmount
 echo "Start unmounting disk image..."
 function hdiutil_detach_retry() {
-  MAXIMUM_UNMOUNTING_ATTEMPTS=15
 	# Unmount
 	unmounting_attempts=0
 	until
@@ -226,7 +227,7 @@ function hdiutil_detach_retry() {
 		sudo hdiutil detach "$1"
 		exit_code=$?
 		(( exit_code ==  0 )) && break            # nothing goes wrong
-		(( exit_code != 16 )) && exit $exit_code  # exit with the original exit code
+		#(( exit_code != 16 )) && exit $exit_code  # exit with the original exit code
 		# The above statement returns 1 if test failed (exit_code == 16).
 		#   It can make the code in the {do... done} block to be executed
 	do
