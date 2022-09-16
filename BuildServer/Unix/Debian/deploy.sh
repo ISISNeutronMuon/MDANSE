@@ -65,7 +65,7 @@ cd $GITHUB_WORKSPACE || exit
 
 # Build API
 # sudo $PYTHONEXE/bin/python setup.py build build_api build_help install
-sudo $PYTHONEXE/bin/python setup.py install
+sudo $PYTHONEXE/bin/python setup.py build install
 
 status=$?
 if [ $status -ne 0 ]; then
