@@ -85,15 +85,6 @@ sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/3.9.13/x64/l
 # libintl
 sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
 sudo install_name_tool -change /usr/lib/libiconv.2.dylib @executable_path/../Frameworks/libiconv.2.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libintl.8.dylib
-# libc++
-#sudo install_name_tool -change /usr/lib/libc++.1.dylib @executable_path/../Frameworks/libc++.1.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++.1.dylib
-#sudo install_name_tool -change /usr/lib/libc++abi.dylib @executable_path/../Frameworks/libc++abi.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++.1.dylib
-#sudo install_name_tool -change /usr/lib/libc++abi.dylib @executable_path/../Frameworks/libc++abi.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libc++abi.dylib
-# libz
-#sudo install_name_tool -change /usr/lib/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib ${MDANSE_APP_DIR}/Contents/Frameworks/libz.1.dylib
-# hashlib
-#sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libssl.1.1.dylib @executable_path/../Frameworks/libssl.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
-#sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib @executable_path/../Frameworks/libcrypto.1.1.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/_hashlib.so
 
 echo "Copy site.py"
 #sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
@@ -105,11 +96,11 @@ chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 sudo ${PYTHONEXE} ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/relink-vtk.py
 cd $GITHUB_WORKSPACE || exit
 
-# Comment out the 'add_system_python_extras' call that add some System path to the sys.path and
-# '_boot_multiprocessing' which is bugged since python 2 doesn't have the functions it uses
-echo "Comment out in __boot__.py"
-sudo "${SED_I_COMMAND[@]}" "s/^add_system_python_extras()$/#add_system_python_extras()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
-sudo "${SED_I_COMMAND[@]}" "s/^_boot_multiprocessing()$/#_boot_multiprocessing()/" ${MDANSE_APP_DIR}/Contents/Resources/__boot__.py
+# Replace __boot__.py with a custom script that simply launches mdanse_gui script in a new shell
+echo "Replace __boot__.py"
+sudo cp -fv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/__boot__.py ${MDANSE_APP_DIR}/Contents/Resources
+echo "./python3 ../Resources/mdanse_gui"  | sudo tee  ${MDANSE_APP_DIR}/Contents/MacOS/launch_mdanse
+sudo chmod 755 ${MDANSE_APP_DIR}/Contents/MacOS/launch_mdanse
 
 # Create a bash script that will run the bundled python with $PYTHONHOME set
 echo "#!/bin/bash" > ~/python3
