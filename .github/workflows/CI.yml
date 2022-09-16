@@ -297,7 +297,7 @@ jobs:
         shell: cmd
 
   deploy_windows:
-    runs-on: windows-2019
+    runs-on: windows-latest
     needs: ci_windows
     if: |
       contains( github.ref, 'main' ) ||
