@@ -60,7 +60,7 @@ do
   sudo sed -i '7i \ \ \ \ else: os.environ["LD_LIBRARY_PATH"] = "/usr/local/lib"' $f
   sudo sed -i '8i \ \ \ \ os.execve(os.path.realpath(__file__), argv, os.environ)' $f
 
-  sudo sed -i "s|python3.9|python3.$PYTHON_MINOR_VER" $f
+  sudo sed -i "s|python3.9|python3.$PYTHON_MINOR_VER|" $f
 done
 
 cd $GITHUB_WORKSPACE || exit
