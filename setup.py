@@ -6,10 +6,11 @@ import sys
 
 import numpy
 
+from setuptools import setup, Extension
 from Cython.Distutils import build_ext as cython_build_ext
 
 from distutils.command.build import build
-from distutils.core import setup, Extension
+#from distutils.core import setup, Extension
 from distutils.sysconfig import get_config_vars
 from distutils.util import convert_path
 
@@ -313,7 +314,7 @@ if sphinx:
 #################################
 # The setup section
 #################################
-print(EXTENSIONS, type(EXTENSIONS[0]))
+
 setup (name             = "MDANSE",
        version          = PACKAGE_INFO["__version__"],
        description      = PACKAGE_INFO["__description__"],
