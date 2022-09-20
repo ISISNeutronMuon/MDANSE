@@ -56,7 +56,7 @@ do
   sudo sed -i '3i if not "/usr/local/lib" in os.environ.get("LD_LIBRARY_PATH", ""):' $f
   sudo sed -i '4i \ \ \ \ from sys import argv' $f
   sudo sed -i '5i \ \ \ \ if os.environ.get("LD_LIBRARY_PATH"):' $f
-  sudo sed -i '6i \ \ \ \ \ \ \ \ os.environ["LD_LIBRARY_PATH"] = ":".join(["/usr/local/lib", os.environ["LD_LIBRARY_PATH"]])' $f
+  sudo sed -i '6i \ \ \ \ \ \ \ \ os.environ["LD_LIBRARY_PATH"] = ":".join(["/usr/local/lib", "/usr/local/lib/python3.9/site-packages/wx", os.environ["LD_LIBRARY_PATH"]])' $f
   sudo sed -i '7i \ \ \ \ else: os.environ["LD_LIBRARY_PATH"] = "/usr/local/lib"' $f
   sudo sed -i '8i \ \ \ \ os.execve(os.path.realpath(__file__), argv, os.environ)' $f
 done
