@@ -80,8 +80,8 @@ jobs:
 
       - name: Install wxpython with conda
         run: |
-          sudo conda create -p ~/tempenv wxpython
-          cd ~/tempenv/lib/python2.7/site-packages/
+          sudo conda create -p ~/tempenv python>=3.9 wxpython
+          cd ~/tempenv/lib/python3.9/site-packages/
           ls
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib/python3.9/site-packages
           sudo cp -rfv ~/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib
