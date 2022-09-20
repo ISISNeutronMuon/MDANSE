@@ -82,14 +82,12 @@ jobs:
         run: |
           sudo conda create -p ~/tempenv -c conda-forge python=3.9.13 wxpython
           sudo cp -rfv ~/tempenv/lib/python3.9/site-packages/wx $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib/python3.9/site-packages
-          echo "Copying egginfo"
           sudo cp -rfv ~/tempenv/lib/python3.9/site-packages/wxPython* $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib/python3.9/site-packages
-          echo "Copying lib/wx"
           sudo cp -rfv ~/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib
-          echo "Copying include/wx"
           sudo cp -rfv ~/tempenv/include/wx-3.1 $RUNNER_TOOL_CACHE/Python/3.9.13/x64/include
-          echo "Copying libwx"
           sudo cp -v ~/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib
+          
+          sudo cp -v ~/tempenv/lib/libiconv* $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib
 
       - name: Deploy
         run: |

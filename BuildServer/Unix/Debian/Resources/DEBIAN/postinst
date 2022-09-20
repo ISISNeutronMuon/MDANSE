@@ -3,3 +3,5 @@
 sudo sed -i '$ a export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH' ~/.bashrc
 sudo sed -i '$ a export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH' ~/.profile
 echo 'export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH' > /etc/profile.d/mdanse.sh
+
+sudo ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/local/lib/libjpeg.so.9
