@@ -87,7 +87,7 @@ jobs:
           echo "Copying lib/wx"
           sudo cp -rfv ~/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib
           echo "Copying include/wx"
-          sudo cp -fv ~/tempenv/include/wx* $RUNNER_TOOL_CACHE/Python/3.9.13/x64/include
+          sudo cp -rfv ~/tempenv/include/wx-3.1 $RUNNER_TOOL_CACHE/Python/3.9.13/x64/include
           echo "Copying libwx"
           sudo cp -v ~/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib
 
