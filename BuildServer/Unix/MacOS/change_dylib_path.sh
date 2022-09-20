@@ -51,18 +51,18 @@ do
   sudo install_name_tool -change /usr/lib/$f @executable_path/../Frameworks/$f $f
 done
 
-#echo -e "${BLUE}" "Changing lib-dynload/vtk so files""${NORMAL}"
-#cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/vtk || exit
-#files=(vtk*.so)
-#echo ${files[*]}
-#for f in ${files[*]}
-#do
-#  sudo install_name_tool -add_rpath @executable_path/../Frameworks $f
-#  sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib $f
-#done
+echo -e "${BLUE}" "Changing lib-dynload/vtk so files""${NORMAL}"
+cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/vtk || exit
+files=(vtk*.so)
+echo ${files[*]}
+for f in ${files[*]}
+do
+  sudo install_name_tool -add_rpath @executable_path/../Frameworks $f
+  sudo install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.8.dylib $f
+done
 
 echo -e "${BLUE}" "Changing site-packages/vtk so files""${NORMAL}"
-cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/vtkmodules || exit
+cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/vtk || exit
 files=(vtk*.so)
 echo ${files[*]}
 for f in ${files[*]}

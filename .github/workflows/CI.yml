@@ -5,7 +5,6 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -190,7 +189,6 @@ jobs:
 
   ci_ubuntu22:
     runs-on: 'ubuntu-22.04'
-    if: false
     strategy:
       fail-fast: false
     steps:
@@ -346,7 +344,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['macos-12']
+        os: ['macos-11', 'macos-12']
 
     steps:
       - uses: actions/checkout@v2
@@ -399,19 +397,16 @@ jobs:
           python2 setup.py install
 
       - name: Run dependency tests
-        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/DependenciesTests
           python2 AllTests.py
 
       - name: Run unit tests
-        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/UnitTests
           python2 AllTests.py
 
       - name: Run functional tests
-        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
           python2 BuildJobTests.py
@@ -465,41 +460,16 @@ jobs:
 
       - name: Install wx
         run: |
-          cd ~
-          wget https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.0/wxWidgets-3.2.0.tar.bz2
-          sudo tar -xf wxWidgets-3.2.0.tar.bz2
-          sudo mkdir ~/wxWidgets-3.2.0/bld
-          cd ~/wxWidgets-3.2.0/bld
-          sudo ../configure --prefix=$HOME/Contents/Resources --exec_prefix=$HOME/Contents/Resources --with-osx --with-opengl --enable-sound --enable-graphics_ctx --enable-mediactrl --enable-display --enable-geometry --enable-uiactionsim --enable-monolithic
-          sudo make install
-          
-          cd ~
-          wget https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2
-          sudo tar -xf wxPython-src-3.0.2.0.tar.bz2
-          cd ~/wxPython-src-3.0.2.0/wxPython
-          sudo sed -i "" 's|WX_CONFIG = None|WX_CONFIG = "/Users/runner/Contents/Resources/wx-config"|' ./config.py
-          sudo ~/Contents/Resources/bin/python ./build-wxpython.py --build_dir=$HOME/Contents/Resources --osx_cocoa --no_wxbuild --installdir=$HOME/Contents/Resources
+          sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
+          sudo cp -rv $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/* ~/Contents/Resources/lib/python2.7/site-packages
+          sudo cp -v $HOME/tempenv/lib/libwx*  ~/Contents/Resources/lib
 
       - name: Install vtk
         run: |
-          cd ~
-          sudo wget https://github.com/Kitware/VTK/archive/refs/tags/v9.1.0.zip
-          unzip ~/v9.1.0.zip
-          sudo mkdir $HOME/VTK-9.1.0/build
-          cd ~/VTK-9.1.0/build
-          
-          sudo cmake .. -DBUILD_TESTING:BOOL=OFF -DCMAKE_BUILD_TYPE:STRING=Release  -DCMAKE_INSTALL_PREFIX:PATH=~/Contents/Resources  -DVTK_WRAP_PYTHON:BOOL=ON -DVTK_PYTHON_VERSION:STRING=2 -DPYTHON_EXECUTABLE:FILEPATH=~/Contents/Resources/bin/python -DPYTHON_INCLUDE_DIR:PATH=~/Contents/Resources/include/python2.7 -DPYTHON_LIBRARY:FILEPATH=~/Contents/Resources/lib/libpython2.7.dylib -DVTK_INSTALL_PYTHON_MODULE_DIR:PATH=~/Contents/Resources/lib/python2.7/site-packages -DBUILD_SHARED_LIBS:BOOL=ON
-          sudo make -j 2 install
-        env:
-          BUILD_TESTING: OFF
-          CMAKE_INSTALL_PREFIX: ~/Contents/Resources
-          VTK_WRAP_PYTHON: ON
-          PYTHON_EXECUTABLE: ~/Contents/Resources/bin/python
-          PYTHON_INCLUDE_DIR: ~/Contents/Resources/include/python2.7
-          PYTHON_LIBRARY: ~/Contents/Resources/lib/libpython2.7.dylib
-          VTK_INSTALL_PYTHON_MODULE_DIR: ~/Contents/Resources/lib/python2.7/site-packages
-          BUILD_SHARED_LIBS: ON
-          VTK_SOURCE_DIR: ~/VTK-9.1.0
+          sudo conda create -p $HOME/tempenv python=2.7
+          sudo conda install -p $HOME/tempenv -c free vtk
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk ~/Contents/Resources/lib/python2.7/site-packages
+          sudo cp $HOME/tempenv/lib/libvtk* ~/Contents/Resources/lib
 
       - name: Deploy MDANSE
         run: |
@@ -523,7 +493,6 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
-    if: false
     steps:
       - uses: actions/checkout@v2
 
