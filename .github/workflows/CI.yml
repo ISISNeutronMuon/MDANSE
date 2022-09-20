@@ -86,8 +86,8 @@ jobs:
           sudo cp -rfv ~/tempenv/include/wx-3.1 $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/include
           sudo cp -v ~/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib
           
-          sudo cp -v ~/tempenv/lib/libiconv* $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib
-          sudo cp -v ~/tempenv/lib/libjpeg* $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib/python3.9/site-packages/wx
+          sudo cp -v ~/tempenv/lib/libiconv* $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib/python3.$PYTHON_MINOR_VER/site-packages/wx
+          sudo cp -v ~/tempenv/lib/libjpeg* $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib/python3.$PYTHON_MINOR_VER/site-packages/wx
 
       - name: Deploy
         run: |
