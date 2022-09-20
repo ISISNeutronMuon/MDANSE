@@ -313,7 +313,7 @@ if sphinx:
 #################################
 # The setup section
 #################################
-
+print(EXTENSIONS, type(EXTENSIONS[0]))
 setup (name             = "MDANSE",
        version          = PACKAGE_INFO["__version__"],
        description      = PACKAGE_INFO["__description__"],
