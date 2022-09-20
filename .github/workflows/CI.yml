@@ -104,11 +104,14 @@ jobs:
 
       - name: Edit postinst
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
-        run: sed -i '$ a ln -s /usr/lib/x86_64-linux-gnu/libnetcdf.so.18 /usr/local/lib/libnetcdf.so.15' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/Resources/DEBIAN/postinst
+        run: |
+          sed -i '$ a ln -s /usr/lib/x86_64-linux-gnu/libnetcdf.so.18 /usr/local/lib/libnetcdf.so.15' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/Resources/DEBIAN/postinst
 
       - name: Deploy for ubuntu 21
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
         run: |
+          find / -iname "libffi*" $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib/python3.$PYTHON_MINOR_VER/site-packages/wx
+          sudo cp -fv /usr/lib/x86_64-linux-gnu/libffi* 
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           export DISTRO=ubuntu-21.04
