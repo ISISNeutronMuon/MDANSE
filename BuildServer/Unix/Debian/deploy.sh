@@ -5,7 +5,7 @@
 #############################
 # Debug option for py2app, if needed
 export DISTUTILS_DEBUG=0
-export PYTHONEXE=$RUNNER_TOOL_CACHE/Python/3.9.13/x64
+export PYTHONEXE=$RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64
 #############################
 # PREPARATION
 #############################
@@ -59,6 +59,8 @@ do
   sudo sed -i '6i \ \ \ \ \ \ \ \ os.environ["LD_LIBRARY_PATH"] = ":".join(["/usr/local/lib", "/usr/local/lib/python3.9/site-packages/wx", os.environ["LD_LIBRARY_PATH"]])' $f
   sudo sed -i '7i \ \ \ \ else: os.environ["LD_LIBRARY_PATH"] = "/usr/local/lib"' $f
   sudo sed -i '8i \ \ \ \ os.execve(os.path.realpath(__file__), argv, os.environ)' $f
+
+  sudo sed -i "s|python3.9|python3.$PYTHON_MINOR_VER" $f
 done
 
 cd $GITHUB_WORKSPACE || exit

@@ -44,6 +44,9 @@ jobs:
   deploy_ubuntu:
     needs: ci_ubuntu
     runs-on: ${{ matrix.os }}
+    env:
+      PYTHON_MINOR_VER: 9
+      PYTHON_VER: 3.9.13
     strategy:
       fail-fast: false
       matrix:
@@ -63,7 +66,7 @@ jobs:
       - name: Install python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9.13'
+          python-version: ${{ env.PYTHON_VER }}
 
       - name: Install netcdf
         run: |
@@ -76,15 +79,15 @@ jobs:
 
       - name: Install wxpython with conda
         run: |
-          sudo conda create -p ~/tempenv -c conda-forge python=3.9.13 wxpython
-          sudo cp -rfv ~/tempenv/lib/python3.9/site-packages/wx $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib/python3.9/site-packages
-          sudo cp -rfv ~/tempenv/lib/python3.9/site-packages/wxPython* $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib/python3.9/site-packages
-          sudo cp -rfv ~/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib
-          sudo cp -rfv ~/tempenv/include/wx-3.1 $RUNNER_TOOL_CACHE/Python/3.9.13/x64/include
-          sudo cp -v ~/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib
+          sudo conda create -p ~/tempenv -c conda-forge python=$PYTHON_VER wxpython
+          sudo cp -rfv ~/tempenv/lib/python3.$PYTHON_MINOR_VER/site-packages/wx $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib/python3.9/site-packages
+          sudo cp -rfv ~/tempenv/lib/python3.$PYTHON_MINOR_VER/site-packages/wxPython* $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib/python3.9/site-packages
+          sudo cp -rfv ~/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib
+          sudo cp -rfv ~/tempenv/include/wx-3.1 $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/include
+          sudo cp -v ~/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib
           
-          sudo cp -v ~/tempenv/lib/libiconv* $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib
-          sudo cp -v ~/tempenv/lib/libjpeg* $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib/python3.9/site-packages/wx
+          sudo cp -v ~/tempenv/lib/libiconv* $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib
+          sudo cp -v ~/tempenv/lib/libjpeg* $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib/python3.9/site-packages/wx
 
       - name: Deploy
         run: |
