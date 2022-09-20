@@ -117,6 +117,8 @@ def build_connectivity(chemical_system: ChemicalSystem, tolerance: float = 0.05)
     chemical entities (unless it's the only atom in it), and no bonds are created between atoms in different atom
     clusters or between atoms in an entity and loose atoms, regardless of their positions.
 
+    NOTE: Periodic boundary conditions are ignored in this function; bonds are not created across PBC, only within.
+
     Please note that the coordinates of atoms are taken from the configuration registered in the provided chemical
     system.
 
