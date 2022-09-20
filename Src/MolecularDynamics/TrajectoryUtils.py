@@ -212,7 +212,7 @@ def build_connectivity(chemical_system: ChemicalSystem, tolerance: float = 0.05)
 
         n_atoms = len(atoms)
         indexes = [at.index for at in atoms]
-        coords = conf.variables['coordinates'][indexes, :]
+        coords = conf.to_real_coordinates()[indexes, :]
         cov_radii = np.zeros((n_atoms,), dtype=np.float64)
         for i, at in enumerate(atoms):
             cov_radii[i] = ATOMS_DATABASE[at.symbol.capitalize()]['covalent_radius']
