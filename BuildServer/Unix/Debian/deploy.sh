@@ -56,7 +56,8 @@ do
   sudo sed -i '20s|from|try: from|' $f
   sudo sed -i '21i \ \ \ \ except ImportError:' $f
   sudo sed -i '22i \ \ \ \ \ \ \ \ import os, subprocess' $f
-  sudo sed -i "23i \ \ \ \ \ \ \ \ os.environ['LD_LIBRARY_PATH'] = f'/usr/local/lib:/usr/local/lib/python3.$PYTHON_MINOR_VER/site-packages/wx:{os.environ.get(\\'LD_LIBRARY_PATH\\', \\'/usr/local\\')}'" $f
+  sudo sed -i "23i \ \ \ \ \ \ \ \ os.environ['LD_LIBRARY_PATH'] = f'/usr/local/lib:/usr/local/lib/python3.$PYTHON_MINOR_VER/site-packages/wx:{os.environ.get(NONE)}'" $f
+  sudo sed -i '23s|NONE|"LD_LIBRARY_PATH", "/usr/local"|' $f
   sudo sed -i '24i \ \ \ \ \ \ \ \ subprocess.check_call(str(os.path.abspath(__file__)), env=os.environ, shell=True)' $f
 
   sudo sed -i "s|python3.9|python3.$PYTHON_MINOR_VER|" $f
