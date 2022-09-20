@@ -4,6 +4,7 @@ on: [push, workflow_dispatch]
 
 jobs:
   ci_ubuntu:
+    if: false
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -42,7 +43,6 @@ jobs:
 
 
   deploy_ubuntu:
-    needs: ci_ubuntu
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -80,8 +80,7 @@ jobs:
 
       - name: Install wxpython with conda
         run: |
-          sudo conda create -p ~/tempenv python=3.9.13
-          sudo conda install -p ~/tempenv wxpython
+          sudo conda create -p ~/tempenv wxpython
           cd ~/tempenv/lib/python2.7/site-packages/
           ls
           sudo cp -rfv ~/tempenv/lib/python2.7/site-packages/wx $RUNNER_TOOL_CACHE/Python/3.9.13/x64/lib/python3.9/site-packages
@@ -126,6 +125,7 @@ jobs:
 
   # OSX
   ci_osx:
+    if: false
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -236,6 +236,7 @@ jobs:
 
   # WINDOWS
   ci_windows:
+    if: false
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
