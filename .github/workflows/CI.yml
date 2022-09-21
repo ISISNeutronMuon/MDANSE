@@ -110,7 +110,6 @@ jobs:
       - name: Deploy for ubuntu 21
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
         run: |
-          find / -iname "libffi*"
           sudo cp -fv /usr/lib/x86_64-linux-gnu/libffi*  $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib/python3.$PYTHON_MINOR_VER/site-packages/wx
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
