@@ -49,9 +49,9 @@ cp -r $PYTHONEXE/bin/* ${DEBIAN_BIN_DIR}/
 echo "Editing scripts"
 cd ${DEBIAN_BIN_DIR}/ || exit
 files=(mdanse*)
-echo files
 for f in ${files[*]}
 do
+  echo $f
   sudo sed -i '1s%.*%#!/usr/local/bin/python%' $f
 
   sudo sed -i '20s|from|try: from|' $f
