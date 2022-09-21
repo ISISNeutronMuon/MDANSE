@@ -106,6 +106,7 @@ jobs:
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
         run: |
           sed -i '$ a ln -s /usr/lib/x86_64-linux-gnu/libnetcdf.so.18 /usr/local/lib/libnetcdf.so.15' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/Resources/DEBIAN/postinst
+          sed -i '$ a rm /usr/local/lib/libnetcdf.so.15' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/Resources/DEBIAN/postrm
 
       - name: Deploy for ubuntu 21
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
