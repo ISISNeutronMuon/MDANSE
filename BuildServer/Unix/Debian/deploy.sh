@@ -14,7 +14,6 @@ SCRIPT_DIR=$GITHUB_WORKSPACE/BuildServer/Unix/Debian/
 
 DEBIAN_ROOT_DIR=$GITHUB_WORKSPACE/temp
 
-rm -rf ${DEBIAN_ROOT_DIR}
 mkdir -p ${DEBIAN_ROOT_DIR}
 
 #############################
@@ -47,8 +46,10 @@ cp -r $PYTHONEXE/bin/* ${DEBIAN_BIN_DIR}/
 
 # Replace the shebang in mdanse scripts to point to the correct python location, and also edit them
 # so that if LD_LIBRARY_PATH is not set up by bash, it the script sets it up for itself.
+echo "Editing scripts"
 cd ${DEBIAN_BIN_DIR}/ || exit
 files=(mdanse*)
+echo files
 for f in ${files[*]}
 do
   sudo sed -i '1s%.*%#!/usr/local/bin/python%' $f
@@ -82,6 +83,11 @@ cp -r $PYTHONEXE/include $DEBIAN_ROOT_DIR/usr/local
 # Compute the Installed-Size field for the debian package
 instSize=$(du ${DEBIAN_ROOT_DIR} -b -s | cut -f1)
 sed -i "s/Installed-Size:.*/Installed-Size: $((1+(instSize/1024)))/g" ${DEBIAN_ROOT_DIR}/DEBIAN/control
+
+cd ${DEBIAN_BIN_DIR}
+ls
+cat mdanse_gui
+cd $GITHUB_WORKSPACE || exit
 
 export TMPDIR=.
 fakeroot dpkg-deb -b ${DEBIAN_ROOT_DIR} $GITHUB_WORKSPACE/MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.deb
