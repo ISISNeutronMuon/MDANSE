@@ -34,7 +34,7 @@ class TrajectoryViewerPlugin(ComponentPlugin):
         
     label = "Trajectory Viewer"
     
-    ancestor = ["molecular_viewer"]
+    ancestor = ["mmtk_trajectory", "molecular_viewer"]
     
     _dimensions = {'x':0, 'y':1, 'z':2}
 
