@@ -328,6 +328,7 @@ jobs:
           sed -i 's|PYTHONEXE=$HOME/python|PYTHONEXE=$CONDA/envs/mdanse|' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
           sudo rm $CONDA/envs/mdanse/lib/libtinfo*
           sudo rm $CONDA/envs/mdanse/lib/libncurses*
+          sudo rm -v $CONDA/envs/mdanse/lib/libstdc*
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
@@ -401,19 +402,16 @@ jobs:
           python2 setup.py install
 
       - name: Run dependency tests
-        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/DependenciesTests
           python2 AllTests.py
 
       - name: Run unit tests
-        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/UnitTests
           python2 AllTests.py
 
       - name: Run functional tests
-        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
           python2 BuildJobTests.py
