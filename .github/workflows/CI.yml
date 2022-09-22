@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro stdeb pyyaml h5py psutil
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
 
       - name: Install netCDF4 python package
@@ -151,10 +151,11 @@ jobs:
           sudo cp -r ~/tempenv/lib/python2.7/site-packages/vtk ~/python/lib/python2.7/site-packages
           sudo cp ~/tempenv/lib/libvtk* ~/python/lib
 
-      - run: sudo apt-get install dos2unix
+      - run: sudo apt-get install dos2unix graphviz
 
       - name: Deploy
         run: |
+          sudo ~/python/bin/python -m pip install sphinx==1.6.7 stdeb docutils==0.17.1 graphviz
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
@@ -210,7 +211,7 @@ jobs:
 
       - name: Install python packages
         run: |
-          $CONDA/envs/mdanse/bin/python -m pip install numpy matplotlib Cython Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
+          $CONDA/envs/mdanse/bin/python -m pip install numpy matplotlib Cython Pyro stdeb pyyaml h5py psutil
 
       - name: Install ScientificPython
         run: |
@@ -319,12 +320,13 @@ jobs:
           sudo conda install -n mdanse -c daf wxpython
           sudo conda install -n mdanse -c ccordoba12 vtk
 
-      - run: sudo apt-get install dos2unix
+      - run: sudo apt-get install dos2unix graphviz
 
       - run: conda remove ncurses --force
 
       - name: Deploy
         run: |
+          sudo $CONDA/envs/mdanse/bin/python -m pip install sphinx==1.6.7 docutils==0.17.1 graphviz
           sed -i 's|PYTHONEXE=$HOME/python|PYTHONEXE=$CONDA/envs/mdanse|' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
           sudo rm $CONDA/envs/mdanse/lib/libtinfo*
           sudo rm $CONDA/envs/mdanse/lib/libncurses*
@@ -361,7 +363,7 @@ jobs:
 
       - name: Install dependencies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro stdeb pyyaml h5py psutil
 
       - name: Install netCDF4 python package
         run: |
@@ -418,14 +420,14 @@ jobs:
           python2 AllTests.py
 
       - name: Tar python
-        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, '136' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
 
       - name: Upload artifacts
-        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, '136' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
         uses: actions/upload-artifact@v2
         with:
           name: MacOS_artifacts
@@ -443,8 +445,7 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) || 
-      contains( github.ref, '136' )
+      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
@@ -454,7 +455,7 @@ jobs:
           name: MacOS_artifacts
           path: ~/
 
-      - run: brew install netcdf
+      - run: brew install netcdf graphviz
 
       - name: Untar python
         run: |
@@ -692,6 +693,7 @@ jobs:
       - name: Install packages required for documentation and psutil
         run: |
           %CONDA%\envs\mdanse\python.exe -m pip install docutils==0.17.1 sphinx==1.6.7 stdeb psutil
+          conda install graphviz
         shell: cmd /C CALL {0}
 
       - name: Install GUI dependencies
@@ -699,6 +701,11 @@ jobs:
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
           %CONDA%\envs\mdanse\python.exe -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd /C CALL {0}
+
+      - name: Alter conf_api.py for correct sphinx build
+        run: |
+          Set-Location $Env:GITHUB_WORKSPACE\Doc\
+          (gc conf_api.py) -replace '#graphviz_dot', 'graphviz_dot' | Out-File -encoding UTF8 conf_api.py
 
       - name: Deploy
         run: |

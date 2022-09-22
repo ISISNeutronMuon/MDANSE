@@ -1,6 +1,7 @@
 version 1.5.2
 -------------
 * FIXED issue #158 Molecular Viewer and Elevation, Iso-Surface, and Scalar-Field plotters no longer crash MDANSE on Ubuntu 22
+* FIXED issue #152 MDANSE API documentation that comes with released installers now has class inheritance diagrams displayed properly
 * FIXED issue #151 MDANSE should no longer interfere with system functionalities such as nano on Ubuntu 22
 
 version 1.5.1

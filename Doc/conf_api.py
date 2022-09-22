@@ -72,6 +72,9 @@ inheritance_graph_attrs = dict(rankdir="TB", size='""')
 
 inheritance_node_attrs = dict(color='lightblue', style='filled')
 
+# The following is uncommented only in Windows CI/CD
+#graphviz_dot = r'C:\Miniconda\envs\mdanse\Library\bin\graphviz\dot.exe'
+
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
