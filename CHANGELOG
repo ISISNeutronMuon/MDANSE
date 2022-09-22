@@ -1,3 +1,7 @@
+version 1.5.2
+--------------
+* CHANGED issue #165 The Trajectory Viewer functionality can now be opened without having to open the Molecular Viewer first
+
 version 1.5.1
 --------------
 * ADDED issue #129 Installers for Ubuntu 22.x are now automatically generated and available for download
