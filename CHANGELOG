@@ -1,3 +1,7 @@
+version 1.5.2
+-------------
+* FIXED issue #158 Molecular Viewer and Elevation, Iso-Surface, and Scalar-Field plotters no longer crash MDANSE on Ubuntu 22
+
 version 1.5.1
 --------------
 * ADDED issue #129 Installers for Ubuntu 22.x are now automatically generated and available for download
