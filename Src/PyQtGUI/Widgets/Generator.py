@@ -22,7 +22,9 @@ class WidgetGenerator:
     dockable, scrollable, etc.
     """
 
-    def wrapWidget(self, cls: QWidget =None,
+    def wrapWidget(self,
+                   *args,
+                   cls: QWidget =None,
                    parent: QWidget =None,
                    name: str = "",
                    scrollable: bool =False,
@@ -33,11 +35,11 @@ class WidgetGenerator:
         to enable docking, scrolling, etc.
 
         Keyword Arguments:
-            cls -- _description_ (default: {None})
-            parent -- _description_ (default: {None})
-            name -- _description_ (default: {""})
-            scrollable -- _description_ (default: {False})
-            dockable -- _description_ (default: {False})
+            cls -- the PyQt widget to be created (default: {None})
+            parent -- parent QObject for the widget (default: {None})
+            name -- name, if needed (default: {""})
+            scrollable -- if yes, create a QScrollArea (default: {False})
+            dockable -- if yes, create a QDockWidget (default: {False})
 
         Returns:
             base, instance
@@ -57,7 +59,7 @@ class WidgetGenerator:
             next_parent = scroller
             if base is None:
                 base = scroller
-        instance = cls(next_parent, **kwargs)
+        instance = cls(*args, parent=next_parent, **kwargs)
         if base is None:
             base = instance
         return base, instance
