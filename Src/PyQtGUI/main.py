@@ -16,7 +16,7 @@
 import sys
 
 from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import QSettings
+from PyQt6.QtCore import QSettings, QThread
 
 from MDANSE.PyQtGUI.MainWindow import Main
 from MDANSE.PyQtGUI.BackEnd import BackEnd
@@ -29,10 +29,15 @@ def startGUI(some_args):
                          parent = app)
     # the backend has no parent, because it runs in a separate QThread
     backend = BackEnd(parent=None)
+    backend_thread = QThread()
+    backend.moveToThread(backend_thread)
+    backend_thread.start()
     # Main is the main window of the GUI
     # It runs in the main thread, and has to connect to the BackEnd
     # using slots and signals.
-    root = Main(parent=app, title = "MDANSE for Python 3")
+    root = Main(parent=None, title = "MDANSE for Python 3")
+    root.destroyed.connect(backend_thread.exit)
+    root.setBackend(backend)
     root.show()
     app.exec() # once this is done, the GUI has its event loop running.
     # no more Python scripting now, we are in the event loop.

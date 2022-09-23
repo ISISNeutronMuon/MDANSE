@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/main.py
-# @brief     Starts the QApplication instance
+# @file      Src/PyQtGUI/MainWindow.py
+# @brief     Base widget for the MDANSE GUI
 #
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -18,7 +18,9 @@ from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMainWindow, \
                                                 QPushButton,  QVBoxLayout, QWidget, \
                                                 QLineEdit, QHBoxLayout, QAbstractItemView, \
-                                                QFileDialog, QLabel
+                                                QFileDialog, QLabel, \
+                                                QMenuBar
+
 
 class Main(QMainWindow):
     """The main window of the MDANSE GUI,
@@ -27,7 +29,19 @@ class Main(QMainWindow):
     Args:
         QMainWindow - the base class.
     """
+
     def __init__(self, parent = None, title = "MDANSE"):
         super().__init__(parent)
         self.setWindowTitle(title)
-        
+        self.makeBasicLayout()
+
+    def setBackend(self, backend = None):
+        """Attaches a MDANSE backend to the GUI.
+        This handle is stored so we can connect
+        all the QActions from the GUI
+        to the correct backend slots.
+        """
+        self.backend = backend
+
+    def makeBasicLayout(self):
+        self.menuBar = QMenuBar(self)
