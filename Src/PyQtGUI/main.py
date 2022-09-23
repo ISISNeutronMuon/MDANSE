@@ -16,12 +16,23 @@
 import sys
 
 from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import QSettings
 
 from MDANSE.PyQtGUI.MainWindow import Main
+from MDANSE.PyQtGUI.BackEnd import BackEnd
 
 def startGUI(some_args):
-    app = QApplication(some_args) # this is quite important, just to activate Qt
-    root = Main()
+    app = QApplication(some_args)  # this is quite important, just to activate Qt
+    # the settings object should let us save the GUI layout
+    settings = QSettings("ISIS Neutron and Muon Source",
+                         "MDANSE for Python 3",
+                         parent = app)
+    # the backend has no parent, because it runs in a separate QThread
+    backend = BackEnd(parent=None)
+    # Main is the main window of the GUI
+    # It runs in the main thread, and has to connect to the BackEnd
+    # using slots and signals.
+    root = Main(parent=app, title = "MDANSE for Python 3")
     root.show()
     app.exec() # once this is done, the GUI has its event loop running.
     # no more Python scripting now, we are in the event loop.
