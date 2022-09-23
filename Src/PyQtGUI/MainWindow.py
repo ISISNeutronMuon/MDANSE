@@ -27,6 +27,7 @@ class Main(QMainWindow):
     Args:
         QMainWindow - the base class.
     """
-    def __init__(self, title = "MDANSE"):
+    def __init__(self, parent = None, title = "MDANSE"):
+        super().__init__(parent)
         self.setWindowTitle(title)
         
