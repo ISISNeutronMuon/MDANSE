@@ -14,12 +14,12 @@
 # **************************************************************************
 
 from PyQt6.QtCore import pyqtSlot, QSize, QMetaObject, QLocale, QObject, QThread, QMutex, QSortFilterProxyModel
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QAction
 from PyQt6.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMainWindow, \
                                                 QPushButton,  QVBoxLayout, QWidget, \
                                                 QLineEdit, QHBoxLayout, QAbstractItemView, \
                                                 QFileDialog, QLabel, \
-                                                QMenuBar
+                                                QMenuBar, QWidgetAction
 
 
 class Main(QMainWindow):
@@ -45,3 +45,7 @@ class Main(QMainWindow):
 
     def makeBasicLayout(self):
         self.menuBar = QMenuBar(self)
+    
+    def attachActions(self):
+        QAction(parent=self)
+
