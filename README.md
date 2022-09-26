@@ -124,9 +124,13 @@ information.
 
 ## Acknowledgements
 
-MDANSE has inherited some code from the [nMOLDYN program](https://github.com/khinsen/nMOLDYN3), originally developed
-by Gerald Kneller in 1995 and subsequently also by Konrad Hinsen, Tomasz Rog, Krzysztof Murzyn, Slawomir Stachura,
-and Eric Pellegrini. For more information see:
+The computational core of MDANSE is based on [version 3 of the nMOLDYN program](https://github.com/khinsen/nMOLDYN3).
+nMOLDYN was originally developed by Gerald Kneller in 1995 and subsequently also by Konrad Hinsen, Tomasz Rog,
+Krzysztof Murzyn, Slawomir Stachura, and Eric Pellegrini. MDANSE includes most of the code of nMOLDYN3, and also code
+from the libraries [MMTK](https://github.com/khinsen/MMTK) and [ScientificPython](https://github.com/khinsen/ScientificPython),
+in order to reduce dependencies and thus facilitate installation.
+
+For more information see:
 
 >nMoldyn 3: Using task farming for a parallel spectroscopy-oriented analysis of molecular dynamics simulations.
 K. Hinsen, E. Pellegrini, S. Stachura, G.R. Kneller J. Comput. Chem. (2012) 33:2043-2048 [https://doi.org/10.1002/jcc.23035][https://doi.org/10.1002/jcc.23035]. 
