@@ -161,11 +161,11 @@ class CP2KConverter(Converter):
 
     settings = collections.OrderedDict()           
     settings['pos_file'] = ('input_file',{'wildcard':'XYZ files (*.xyz)|*.xyz|All files|*',
-                                                'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})
+                                                'default':os.path.join('..','..','..','Data','Trajectories','CP2K','p1-supercell-pos-ejemplo.xyz')})
     settings['vel_file'] = ('input_file',{'wildcard':'XYZ files (*.xyz)|*.xyz|All files|*',
-                                                'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})
+                                                'default':os.path.join('..','..','..','Data','Trajectories','CP2K','p1-supercell-vel-ejemplo.xyz')})
     settings['cell_file'] = ('input_file',{'wildcard':'Cell files (*.cell)|*.cell|All files|*',
-                                                'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})
+                                                'default':os.path.join('..','..','..','Data','Trajectories','CP2K','p1-supercell-1.cell')})
     settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'xdatcar_file'})
                 
     def initialize(self):
