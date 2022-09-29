@@ -231,7 +231,7 @@ class CP2KConverter(Converter):
         # The real coordinates are foled then into the simulation box (-L/2,L/2). 
         self._universe.foldCoordinatesIntoBox()
 
-        time = index*self.configuration["time_step"]["value"]*Units.fs
+        time = index*self._xyzFile["time_step"]*Units.fs
 
         velocities = ParticleVector(self._universe)
         velocities.array = self._velFile.read_step(index)*Units.Ang/Units.fs
