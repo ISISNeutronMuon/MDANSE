@@ -15,6 +15,8 @@
 
 from PyQt6.QtCore import pyqtSlot, QObject, QThread, QMutex, pyqtSignal
 
+from PyQtGUI.DataViewModel.TrajectoryHolder import TrajectoryHolder
+
 class BackEnd(QObject):
     """The main window of the MDANSE GUI,
     inherits QMainWindow.
@@ -25,4 +27,6 @@ class BackEnd(QObject):
     
     def __init__(self, parent = None):
         super().__init__(parent)
+
+        self.trajectory_holder = TrajectoryHolder(parent=self)
         

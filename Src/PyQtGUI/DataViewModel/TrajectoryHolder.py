@@ -13,10 +13,25 @@
 #
 # **************************************************************************
 
-from PyQt6.QtGui import QStandardItemModel
-from PyQt6.QtCore import QObject
+from PyQt6.QtGui import QStandardItemModel, QStandardItem
+from PyQt6.QtCore import QObject, pyqtSlot
+
+from MDANSE.Framework.InputData import InputFileData
+
+class TrajectoryItem(QStandardItem):
+
+    def __init__(self, *args, trajectory = None):
+        super().__init__(self, *args)
+        self._trajectory = trajectory
+
 
 class TrajectoryHolder(QStandardItemModel):
 
     def __init__(self, parent: QObject = None):
         super.__init__(self, parent=parent)
+
+    @pyqtSlot(object)
+    def addItem(self, new_entry: InputFileData):
+        traj = TrajectoryItem(new_entry.basename, trajectory = new_entry)
+        self.appendRow([traj])
+
