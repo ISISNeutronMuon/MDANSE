@@ -26,10 +26,11 @@ class BackEnd(QObject):
         QMainWindow - the base class.
     """
     
-    def __init__(self, parent = None):
+    def __init__(self, parent = None, python = ""):
         super().__init__(parent)
 
         self.data_holders = {}
+        self.python_interpreter = python  # we need it to call scripts
         # ^^^^^^^^^^^^^^^
         # This dictionary will hold all the objects derived from
         # the QStandardDataModel, which can be connected to GUI components.
@@ -42,7 +43,7 @@ class BackEnd(QObject):
         self.data_holders['trajectory'] = self.trajectory_holder
 
     def createJobHolder(self):
-        self.job_holder = JobHolder(parent=self)
+        self.job_holder = JobHolder(parent=self, python = self.python_interpreter)
         self.data_holders['jobs'] = self.job_holder
 
     def startJob(self):

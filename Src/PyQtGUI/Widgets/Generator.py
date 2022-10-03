@@ -51,6 +51,7 @@ class WidgetGenerator:
         base = None
         if dockable:
             docker = QDockWidget(name, parent=parent)
+            docker.setObjectName(name+"_dockWidget")
             next_parent = docker
             if base is None:
                 base = docker

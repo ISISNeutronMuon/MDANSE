@@ -16,7 +16,7 @@
 from collections import defaultdict
 
 from PyQt6.QtCore import pyqtSlot, QSize, QMetaObject, QLocale, QObject, QThread, QMutex, QSortFilterProxyModel,\
-                         Qt
+                         Qt, QTimer
 from PyQt6.QtGui import QFont, QAction
 from PyQt6.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMainWindow, \
                                                 QPushButton,  QVBoxLayout, QWidget, \
@@ -35,11 +35,26 @@ class Main(QMainWindow, FrontEnd):
         QMainWindow - the base class.
     """
 
-    def __init__(self, parent = None, title = "MDANSE"):
+    def __init__(self, parent = None, title = "MDANSE", settings = None):
         super().__init__(parent)
         self.setWindowTitle(title)
         self.wid_gen = WidgetGenerator()
         self.makeBasicLayout()
+        self.settings = settings
+        if settings is not None:
+            settings.beginGroup("MainWindow")
+            geo = settings.value("geometry")
+            if geo:
+                self.restoreGeometry(geo)
+            state = settings.value("state")
+            if state:
+                self.restoreState(state)
+            settings.endGroup()
+        self.settings_timer = QTimer()
+        self.settings_timer.timeout.connect(self.saveSettings)
+        self.settings_timer.setInterval(10000)
+        self.settings_timer.start()
+        self.destroyed.connect(self.settings_timer.stop)
 
     def makeBasicLayout(self):
         self.menuBar = QMenuBar(self)
@@ -63,4 +78,10 @@ class Main(QMainWindow, FrontEnd):
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, base)
         self._views['jobs'].append(temp)
 
+    @pyqtSlot()
+    def saveSettings(self):
+        self.settings.beginGroup("MainWindow")
+        self.settings.setValue("geometry", self.saveGeometry())
+        self.settings.setValue("state", self.saveState())
+        self.settings.endGroup()
 
