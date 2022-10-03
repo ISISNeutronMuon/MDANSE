@@ -161,11 +161,12 @@ class CP2KConverter(Converter):
 
     settings = collections.OrderedDict()           
     settings['pos_file'] = ('input_file',{'wildcard':'XYZ files (*.xyz)|*.xyz|All files|*',
-                                                'default':os.path.join('..','..','..','Data','Trajectories','CP2K','p1-supercell-pos-ejemplo.xyz')})
+                                                'default':''})
     settings['vel_file'] = ('input_file',{'wildcard':'XYZ files (*.xyz)|*.xyz|All files|*',
-                                                'default':os.path.join('..','..','..','Data','Trajectories','CP2K','p1-supercell-vel-ejemplo.xyz')})
+                                                'default':'',
+                                                'optional':True})
     settings['cell_file'] = ('input_file',{'wildcard':'Cell files (*.cell)|*.cell|All files|*',
-                                                'default':os.path.join('..','..','..','Data','Trajectories','CP2K','p1-supercell-1.cell')})
+                                                'default':''})
     settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'xdatcar_file'})
                 
     def initialize(self):
@@ -175,13 +176,13 @@ class CP2KConverter(Converter):
                 
         self._xyzFile = XYZFile(self.configuration["pos_file"]["filename"])
 
-        self._velFile = XYZFile(self.configuration["vel_file"]["filename"])
+        if self.configuration["vel_file"]:
+            self._velFile = XYZFile(self.configuration["vel_file"]["filename"])
+            if abs(self._xyzFile["time_step"] - self._velFile["time_step"]) > 1.0e-09:
+                raise CP2KConverterError("Inconsistent time step between pos and vel files")
 
-        if abs(self._xyzFile["time_step"] - self._velFile["time_step"]) > 1.0e-09:
-            raise CP2KConverterError("Inconsistent time step between pos and vel files")
-
-        if self._xyzFile["n_frames"] != self._velFile["n_frames"]:
-            raise CP2KConverterError("Inconsistent number of frames between pos and vell files")
+            if self._xyzFile["n_frames"] != self._velFile["n_frames"]:
+                raise CP2KConverterError("Inconsistent number of frames between pos and vell files")
 
         self._cellFile = CellFile(self.configuration["cell_file"]["filename"])
 
@@ -200,12 +201,13 @@ class CP2KConverter(Converter):
             for i in range(number):
                 self._universe.addObject(Atom(symbol, name="%s_%d" % (symbol,i+1)))
 
-        self._universe.initializeVelocitiesToTemperature(0.0)
-
         # A MMTK trajectory is opened for writing.
         self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
 
-        data_to_be_written = ["configuration","velocities","time"]
+        data_to_be_written = ["configuration","time"]
+        if self.configuration["vel_file"]:
+            self._universe.initializeVelocitiesToTemperature(0.0)
+            data_to_be_written.append("velocities")
 
         # A frame generator is created.
         self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
@@ -233,11 +235,14 @@ class CP2KConverter(Converter):
 
         time = index*self._xyzFile["time_step"]*Units.fs
 
-        velocities = ParticleVector(self._universe)
-        velocities.array = self._velFile.read_step(index)*Units.Ang/Units.fs
+        data = {"time": time}
+        if self.configuration["vel_file"]:
+            velocities = ParticleVector(self._universe)
+            velocities.array = self._velFile.read_step(index)*Units.Ang/Units.fs
+            data["velocities"] = velocities
 
         # A call to the snapshot generator produces the step corresponding to the current frame.
-        self._snapshot(data = {"time": time, "velocities":velocities})
+        self._snapshot(data = data)
 
         return index, None
 
@@ -259,7 +264,8 @@ class CP2KConverter(Converter):
         
         self._xyzFile.close()
 
-        self._velFile.close()
+        if self.configuration["vel_file"]:
+            self._velFile.close()
 
         self._cellFile.close()
 
