@@ -60,8 +60,14 @@ class WidgetGenerator:
             if base is None:
                 base = scroller
         instance = cls(*args, parent=next_parent, **kwargs)
+        centre = instance
         if base is None:
             base = instance
+        if scrollable:
+            scroller.setWidget(centre)
+            centre = scroller
+        if dockable:
+            docker.setWidget(centre)
         return base, instance
 
         

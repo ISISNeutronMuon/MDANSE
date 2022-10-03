@@ -13,9 +13,9 @@
 #
 # **************************************************************************
 
-from PyQt6.QtCore import pyqtSlot, QObject, QThread, QMutex, pyqtSignal
+from PyQt6.QtCore import pyqtSlot, QObject, QThread, QMutex, pyqtSignal, QProcess
 
-from PyQtGUI.DataViewModel.TrajectoryHolder import TrajectoryHolder
+from MDANSE.PyQtGUI.DataViewModel.TrajectoryHolder import TrajectoryHolder
 
 class BackEnd(QObject):
     """The main window of the MDANSE GUI,
@@ -28,5 +28,20 @@ class BackEnd(QObject):
     def __init__(self, parent = None):
         super().__init__(parent)
 
+        self.data_holders = {}
+        # ^^^^^^^^^^^^^^^
+        # This dictionary will hold all the objects derived from
+        # the QStandardDataModel, which can be connected to GUI components.
+        # The keys of the dictionary should match the keys of the 
+        # FrontEnd's self.views dictionary.
+        self.createTrajectoryHolder()
+    
+    def createTrajectoryHolder(self):
         self.trajectory_holder = TrajectoryHolder(parent=self)
+        self.data_holders['trajectory'] = self.trajectory_holder
+
+    def startJob(self):
+        pass  # whatever happens here, a QProcess will be involved at some point
+
+
         

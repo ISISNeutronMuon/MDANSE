@@ -21,14 +21,14 @@ from MDANSE.Framework.InputData import InputFileData
 class TrajectoryItem(QStandardItem):
 
     def __init__(self, *args, trajectory = None):
-        super().__init__(self, *args)
+        super().__init__(*args)
         self._trajectory = trajectory
 
 
 class TrajectoryHolder(QStandardItemModel):
 
     def __init__(self, parent: QObject = None):
-        super.__init__(self, parent=parent)
+        super().__init__(parent=parent)
 
     @pyqtSlot(object)
     def addItem(self, new_entry: InputFileData):

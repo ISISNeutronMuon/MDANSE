@@ -13,16 +13,21 @@
 #
 # **************************************************************************
 
-from PyQt6.QtCore import pyqtSlot, QSize, QMetaObject, QLocale, QObject, QThread, QMutex, QSortFilterProxyModel
+from collections import defaultdict
+
+from PyQt6.QtCore import pyqtSlot, QSize, QMetaObject, QLocale, QObject, QThread, QMutex, QSortFilterProxyModel,\
+                         Qt
 from PyQt6.QtGui import QFont, QAction
 from PyQt6.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMainWindow, \
                                                 QPushButton,  QVBoxLayout, QWidget, \
                                                 QLineEdit, QHBoxLayout, QAbstractItemView, \
                                                 QFileDialog, QLabel, \
-                                                QMenuBar, QWidgetAction
+                                                QMenuBar, QWidgetAction, QTreeView
 
+from MDANSE.PyQtGUI.Widgets.Generator import WidgetGenerator
+from MDANSE.PyQtGUI.FrontEnd import FrontEnd
 
-class Main(QMainWindow):
+class Main(QMainWindow, FrontEnd):
     """The main window of the MDANSE GUI,
     inherits QMainWindow.
 
@@ -33,19 +38,20 @@ class Main(QMainWindow):
     def __init__(self, parent = None, title = "MDANSE"):
         super().__init__(parent)
         self.setWindowTitle(title)
+        self.wid_gen = WidgetGenerator()
         self.makeBasicLayout()
-
-    def setBackend(self, backend = None):
-        """Attaches a MDANSE backend to the GUI.
-        This handle is stored so we can connect
-        all the QActions from the GUI
-        to the correct backend slots.
-        """
-        self.backend = backend
 
     def makeBasicLayout(self):
         self.menuBar = QMenuBar(self)
-    
-    def attachActions(self):
-        QAction(parent=self)
+        self.exitAct = QAction("Exit", parent = self.menuBar)
+        self.exitAct.triggered.connect(self.destroy)
+        self.menuBar.addAction(self.exitAct)
+        self.createTrajectoryViewer()
+
+    def createTrajectoryViewer(self):
+        base, temp = self.wid_gen.wrapWidget(cls = QTreeView, parent= self, dockable = True,
+                                             name="Trajectories")
+        self.traj_view = temp
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, base)
+
 
