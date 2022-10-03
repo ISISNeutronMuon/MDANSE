@@ -48,14 +48,11 @@ class XYZFile(dict):
 
         self["instance"].readline()
         self._headerSize = self["instance"].tell()
-        self["atoms"] = collections.OrderedDict()
+        self["atoms"] = []
         for i in range(self["n_atoms"]):
             line  = self["instance"].readline()
             atom = line.split()[0].strip()
-            if atom in self["atoms"]:            
-                self["atoms"][atom] += 1
-            else:
-                self["atoms"][atom] = 1
+            self["atoms"].append(atom)
 
         # The frame size define the total size of a frame (number of atoms header + time info line + coordinates block)
         self._frameSize = self["instance"].tell()
@@ -182,7 +179,7 @@ class CP2KConverter(Converter):
                 raise CP2KConverterError("Inconsistent time step between pos and vel files")
 
             if self._xyzFile["n_frames"] != self._velFile["n_frames"]:
-                raise CP2KConverterError("Inconsistent number of frames between pos and vell files")
+                raise CP2KConverterError("Inconsistent number of frames between pos and vel files")
 
         self._cellFile = CellFile(self.configuration["cell_file"]["filename"])
 
@@ -197,9 +194,8 @@ class CP2KConverter(Converter):
 
         self._universe = ParallelepipedicPeriodicUniverse()
         
-        for symbol,number in self._xyzFile["atoms"].items():
-            for i in range(number):
-                self._universe.addObject(Atom(symbol, name="%s_%d" % (symbol,i+1)))
+        for i, symbol in enumerate(self._xyzFile["atoms"]):
+            self._universe.addObject(Atom(symbol, name="%s_%d" % (symbol,i+1)))
 
         # A MMTK trajectory is opened for writing.
         self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
