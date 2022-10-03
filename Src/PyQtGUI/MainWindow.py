@@ -47,11 +47,20 @@ class Main(QMainWindow, FrontEnd):
         self.exitAct.triggered.connect(self.destroy)
         self.menuBar.addAction(self.exitAct)
         self.createTrajectoryViewer()
+        self.createJobsViewer()
 
     def createTrajectoryViewer(self):
         base, temp = self.wid_gen.wrapWidget(cls = QTreeView, parent= self, dockable = True,
                                              name="Trajectories")
         self.traj_view = temp
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, base)
+        self._views['trajectory'].append(temp)
+
+    def createJobsViewer(self):
+        base, temp = self.wid_gen.wrapWidget(cls = QTreeView, parent= self, dockable = True,
+                                             name="Jobs")
+        self.job_view = temp
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, base)
+        self._views['jobs'].append(temp)
 
 
