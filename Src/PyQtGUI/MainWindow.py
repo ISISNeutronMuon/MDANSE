@@ -21,7 +21,7 @@ from PyQt6.QtGui import QFont, QAction
 from PyQt6.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMainWindow, \
                                                 QPushButton,  QVBoxLayout, QWidget, \
                                                 QLineEdit, QHBoxLayout, QAbstractItemView, \
-                                                QFileDialog, QLabel, \
+                                                QFileDialog, QLabel, QToolBar, \
                                                 QMenuBar, QWidgetAction, QTreeView
 
 from MDANSE.PyQtGUI.Widgets.Generator import WidgetGenerator
@@ -52,17 +52,27 @@ class Main(QMainWindow, FrontEnd):
             settings.endGroup()
         self.settings_timer = QTimer()
         self.settings_timer.timeout.connect(self.saveSettings)
-        self.settings_timer.setInterval(10000)
+        self.settings_timer.setInterval(2000)
         self.settings_timer.start()
         self.destroyed.connect(self.settings_timer.stop)
 
     def makeBasicLayout(self):
+        self.createTrajectoryViewer()
+        self.createJobsViewer()
+        self.setupMenubar()
+        self.setupToolbar()
+    
+    def setupMenubar(self):
         self.menuBar = QMenuBar(self)
         self.exitAct = QAction("Exit", parent = self.menuBar)
         self.exitAct.triggered.connect(self.destroy)
         self.menuBar.addAction(self.exitAct)
-        self.createTrajectoryViewer()
-        self.createJobsViewer()
+
+    def setupToolbar(self):
+        self.toolBar = QToolBar(self)
+        self.toolBar.setMovable(True)
+        for act in self._actions:
+            self.toolBar.addAction(act)
 
     def createTrajectoryViewer(self):
         base, temp = self.wid_gen.wrapWidget(cls = QTreeView, parent= self, dockable = True,

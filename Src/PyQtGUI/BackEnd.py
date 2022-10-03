@@ -37,6 +37,7 @@ class BackEnd(QObject):
         # The keys of the dictionary should match the keys of the 
         # FrontEnd's self.views dictionary.
         self.createTrajectoryHolder()
+        self.createJobHolder()
 
     def createTrajectoryHolder(self):
         self.trajectory_holder = TrajectoryHolder(parent=self)
@@ -46,7 +47,20 @@ class BackEnd(QObject):
         self.job_holder = JobHolder(parent=self, python = self.python_interpreter)
         self.data_holders['jobs'] = self.job_holder
 
+    def getActions(self):
+        callable_slots =[
+            [self.loadFile, 'Load File'],
+            [self.startJob, 'Start a Job'],
+        ]
+        return callable_slots
+
+    @pyqtSlot()
+    def loadFile(self):
+        print("LoadFile triggered in BackEnd.")
+
+    @pyqtSlot()
     def startJob(self):
+        print("startJob triggered in BackEnd.")
         pass  # whatever happens here, a QProcess will be involved at some point
 
 
