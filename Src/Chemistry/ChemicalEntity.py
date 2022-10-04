@@ -572,6 +572,27 @@ class Atom(_ChemicalEntity):
 
         self._symbol = symbol
 
+    @classmethod
+    def build(cls, h5_contents: Union[None, dict[str, list[list[str]]]], symbol: str, name: str, ghost: bool) -> Atom:
+        """
+        Creates an instance of the Atom class. This method is meant to be used when loading a trajectory from disk and
+        so may be called when the :class: `ChemicalSystem`.load() method is called.
+
+        :param h5_contents: A parameter present solely for compatibility with other classes' build() methods. It is not
+            used.
+        :type h5_contents: None or dict
+
+        :param symbol: The chemical symbol of the Atom. It has to be registered in the ATOMS_DATABASE.
+        :type symbol: str
+
+        :param name: The name of the Atom. If this is not provided, the symbol is used as the name as well
+        :type nameL str
+
+        :param ghost:
+        :type ghost: bool
+        """
+        return cls(symbol=symbol, name=name, ghost=ghost)
+
     def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
         Serializes the Atom object into a string in preparation of the object being stored on disk.
@@ -592,7 +613,8 @@ class AtomGroup(_ChemicalEntity):
     """
     An arbitrary selection of atoms that belong to the same chemical system. Unlike in Molecule and AtomCluster, the
     atoms in an AtomGroup do not have to be related in any way other than that they have to exist in the same system.
-    Further, AtomGroup does not have the serialize() method defined, and so it will not be saved on disk.
+    Further, AtomGroup does not have the serialize() or the build() method defined, and so it will not be saved on disk
+    and cannot be loeaded from disk.
     """
 
     def __init__(self, atoms: list[Atom]):
@@ -758,6 +780,34 @@ class AtomCluster(_ChemicalEntity):
 
         self._atoms = reordered_atoms
 
+    @classmethod
+    def build(cls, h5_contents: dict[str, list[list[str]]], atom_indexes: list[int], name: str) -> AtomCluster:
+        """
+        Creates an instance of the AtomCluster class. This method is meant to be used when loading a trajectory from
+        disk and so may be called when the :class: `ChemicalSystem`.load() method is called. Please note that an
+        AtomCluster made with this method has parentless set to False.
+
+        :param h5_contents: The contents of an MDANSE HDF5 Trajectory describing a chemical system. Obtained by calling
+            the :class: `ChemicalSystem`.load() method.
+        :type h5_contents: dict
+
+        :param atom_indexes: List of indexes of atoms that compose this AtomGroup, pointing to `h5_contents['atoms']`
+        :type atom_indexes: list
+
+        :param name: The name of the AtomCluster.
+        :type name: str
+
+        :param atoms: List of atoms that this AtomCluster consists of.
+        :type atoms: list
+        """
+        contents = h5_contents['atoms']
+        atoms = []
+        for index in atom_indexes:
+            args = [literal_eval(arg) for arg in contents[index]]
+            atoms.append(Atom.build(None, *args))
+
+        return cls(name, atoms)
+
     def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
         Serializes the AtomCluster object and its contents into strings in preparation of the object being stored on
@@ -787,6 +837,13 @@ class Molecule(_ChemicalEntity):
     """A group of atoms that form a molecule."""
 
     def __init__(self, code: str, name: str):
+        """
+        :param code: A code representing a molecule in the :class: `MoleculesDatabase`
+        :type code: str
+
+        :param name: The name of this Molecule.
+        :type name: str
+        """
 
         super(Molecule, self).__init__()
 
@@ -893,6 +950,37 @@ class Molecule(_ChemicalEntity):
 
         self._atoms = reordered_atoms
 
+    @classmethod
+    def build(cls, h5_contents: dict[str, list[list[str]]], atom_indexes: list[int], code: str, name: str) -> Molecule:
+        """
+        Creates an instance of the Molecule class. This method is meant to be used when loading a trajectory from
+        disk and so may be called when the :class: `ChemicalSystem`.load() method is called.
+
+        :param h5_contents: The contents of an MDANSE HDF5 Trajectory describing a chemical system. Obtained by calling
+            the :class: `ChemicalSystem`.load() method.
+        :type h5_contents: dict
+
+        :param atom_indexes: List of indexes of atoms that compose this Molecule, pointing to `h5_contents['atoms']`
+        :type atom_indexes: list
+
+        :param code: A code representing a molecule in the :class: `MoleculesDatabase`
+        :type code: str
+
+        :param name: The name of the Molecule.
+        :type name: str
+        """
+        mol = cls(code, name)
+        contents = h5_contents['atoms']
+
+        names = [literal_eval(contents[index][1]) for index in atom_indexes]
+
+        mol.reorder_atoms(names)
+
+        for at, index in zip(mol.atom_list, atom_indexes):
+            at.ghost = literal_eval(contents[index][2])
+
+        return mol
+
     def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
         Serializes the Molecule object and its contents into strings in preparation of the object being stored on
@@ -934,7 +1022,7 @@ def is_molecule(name: str) -> bool:
 class Residue(_ChemicalEntity):
     """A group of atoms that make up an amino acid."""
 
-    def __init__(self, code: str, name: str, variant: str = None):
+    def __init__(self, code: str, name: str, variant: Union[str, None] = None):
         """
 
         :param code: A code corresponding to a residue in the residue database.
@@ -1073,6 +1161,39 @@ class Residue(_ChemicalEntity):
     def variant(self):
         return self._variant
 
+    @classmethod
+    def build(cls, h5_contents: dict[str, list[list[str]]], atom_indexes: list[int], code: str, name: str,
+              variant: Union[str, None]) -> Residue:
+        """
+        Creates an instance of the Residue class. This method is meant to be used when loading a trajectory from
+        disk and so may be called when the :class: `ChemicalSystem`.load() method is called.
+
+        :param h5_contents: The contents of an MDANSE HDF5 Trajectory describing a chemical system. Obtained by calling
+            the :class: `ChemicalSystem`.load() method.
+        :type h5_contents: dict
+
+        :param atom_indexes: List of indexes of atoms that compose this Residue, pointing to `h5_contents['atoms']`
+        :type atom_indexes: list
+
+        :param code: A code corresponding to a residue in the residue database.
+        :type code: str
+
+        :param name: A name for the residue.
+        :type name: str
+
+        :param variant:
+        :type variant: str
+
+        :return: An instance of the Residue class.
+        :rtype: Residue
+        """
+        res = cls(code, name, variant)
+
+        names = [literal_eval(h5_contents['atoms'][index][1]) for index in atom_indexes]
+        res.set_atoms(names)
+
+        return res
+
     def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
         Serializes the Residue object and its contents into strings in preparation of the object being stored on
@@ -1102,7 +1223,7 @@ class Residue(_ChemicalEntity):
 class Nucleotide(_ChemicalEntity):
     """A group of atoms that make up a nucleotide."""
 
-    def __init__(self, code: str, name: str, variant: str = None):
+    def __init__(self, code: str, name: str, variant: Union[str, None] = None):
         """
         :param code: A code corresponding to a nucleotide in the nucleotide database.
         :type code: str
@@ -1242,6 +1363,39 @@ class Nucleotide(_ChemicalEntity):
     @property
     def variant(self):
         return self._variant
+
+    @classmethod
+    def build(cls, h5_contents: dict[str, list[list[str]]], atom_indexes: list[int], code: str, name: str,
+              variant: Union[str, None]) -> Nucleotide:
+        """
+        Creates an instance of the Nucleotide class. This method is meant to be used when loading a trajectory from
+        disk and so may be called when the :class: `ChemicalSystem`.load() method is called.
+
+        :param h5_contents: The contents of an MDANSE HDF5 Trajectory describing a chemical system. Obtained by calling
+            the :class: `ChemicalSystem`.load() method.
+        :type h5_contents: dict
+
+        :param atom_indexes: List of indexes of atoms that compose this Nucleotide, pointing to `h5_contents['atoms']`
+        :type atom_indexes: list
+
+        :param code: A code corresponding to a residue in the residue database.
+        :type code: str
+
+        :param name: A name for the residue.
+        :type name: str
+
+        :param variant:
+        :type variant: str
+
+        :return: An instance of the Nucleotide class.
+        :rtype: Nucleotide
+        """
+        nucl = cls(code, name, variant)
+
+        names = [literal_eval(h5_contents['atoms'][index][1]) for index in atom_indexes]
+        nucl.set_atoms(names)
+
+        return nucl
 
     def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
@@ -1432,6 +1586,47 @@ class NucleotideChain(_ChemicalEntity):
         for nucleotide in self._nucleotides:
             number_of_atoms += nucleotide.total_number_of_atoms
         return number_of_atoms
+
+    @classmethod
+    def build(cls, h5_contents: dict[str, list[list[str]]], name: str, nucl_indexes: list[int]) -> NucleotideChain:
+        """
+        Creates an instance of the NucleotideChain class, one that contains its constituent :class: `Nucleotide`s.
+        This method is meant to be used when loading a trajectory from disk and so may be called when the
+        :class: `ChemicalSystem`.load() method is called.
+
+        :param h5_contents: The contents of an MDANSE HDF5 Trajectory describing a chemical system. Obtained by calling
+            the :class: `ChemicalSystem`.load() method.
+        :type h5_contents: dict
+
+        :param name: A name for the chain.
+        :type name: str
+
+        :param nucl_indexes: List of indexes of :class: `Nucleotide`s that compose this NucleotideChain, pointing to
+            `h5_contents['nucleotides']`
+        :type nucl_indexes: list
+
+        :return: An instance of the NucleotideChain class.
+        :rtype: NucleotideChain
+        """
+        nc = cls(name)
+
+        contents = h5_contents['nucleotides']
+        nucleotides = []
+        for index in nucl_indexes:
+            args = [literal_eval(arg) for arg in contents[index]]
+            nucl = Nucleotide.build(h5_contents, *args)
+            nucl.parent = nc
+            nucleotides.append(nucl)
+
+        try:
+            nc.set_nucleotides(nucleotides)
+        except (InvalidNucleotideChainError, InvalidResidueError) as e:
+            raise CorruptedFileError(f'Could not reconstruct NucleotideChain with name {name} from the HDF5 trajectory '
+                                     f'due to an issue with the terminal nucleotides. The NucleotideChain that could '
+                                     f'not be reconstructed is located in the trajectory at /chemical_system/'
+                                     f'nucleotide_chains at index INDEX. The original error is:\n{str(e)}')
+
+        return nc
 
     def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
@@ -1665,6 +1860,47 @@ class PeptideChain(_ChemicalEntity):
         """The list of amino acid Residues that make up this PeptideChain."""
         return self._residues
 
+    @classmethod
+    def build(cls, h5_contents: dict[str, list[list[str]]], name: str, res_indexes: list[int]) -> PeptideChain:
+        """
+        Creates an instance of the PeptideChain class, one that contains its constituent :class: `Residue`s.
+        This method is meant to be used when loading a trajectory from disk and so may be called when the
+        :class: `ChemicalSystem`.load() method is called.
+
+        :param h5_contents: The contents of an MDANSE HDF5 Trajectory describing a chemical system. Obtained by calling
+            the :class: `ChemicalSystem`.load() method.
+        :type h5_contents: dict
+
+        :param name: A name for the chain.
+        :type name: str
+
+        :param res_indexes: List of indexes of :class: `Residue`s that compose this PeptideChain, pointing to
+            `h5_contents['residues']`
+        :type res_indexes: list
+
+        :return: An instance of the PeptideChain class.
+        :rtype: PeptideChain
+        """
+        pc = cls(name)
+
+        contents = h5_contents['residues']
+        residues = []
+        for index in res_indexes:
+            args = [literal_eval(arg) for arg in contents[index]]
+            res = Residue.build(h5_contents, *args)
+            res.parent = pc
+            residues.append(res)
+
+        try:
+            pc.set_residues(residues)
+        except (InvalidPeptideChainError, InvalidResidueError) as e:
+            raise CorruptedFileError(f'Could not reconstruct PeptideChain with name {name} from the HDF5 trajectory '
+                                     f'due to an issue with the terminal residues. The PeptideChain that could '
+                                     f'not be reconstructed is located in the trajectory at /chemical_system/'
+                                     f'peptide_chains at index INDEX. The original error is:\n{str(e)}')
+
+        return pc
+
     def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
         Serializes the PeptideChain object and its contents into strings in preparation of the object being stored on
@@ -1833,6 +2069,41 @@ class Protein(_ChemicalEntity):
             residues.extend(pc.residues)
 
         return residues
+
+    @classmethod
+    def build(cls, h5_contents: dict[str, list[list[str]]], name: str, peptide_chain_indexes: list[int]) -> Protein:
+        """
+        Creates an instance of the Protein class, one that contains its constituent :class: `PeptideChain`s.
+        This method is meant to be used when loading a trajectory from disk and so may be called when the
+        :class: `ChemicalSystem`.load() method is called.
+
+        :param h5_contents: The contents of an MDANSE HDF5 Trajectory describing a chemical system. Obtained by calling
+            the :class: `ChemicalSystem`.load() method.
+        :type h5_contents: dict
+
+        :param name: A name for the chain.
+        :type name: str
+
+        :param peptide_chain_indexes: List of indexes of :class: `PeptideChain`s that compose this Protein, pointing to
+            `h5_contents['peptide_chains']`
+        :type peptide_chain_indexes: list
+
+        :return: An instance of the Protein class.
+        :rtype: Protein
+        """
+        p = cls(name)
+
+        contents = h5_contents['peptide_chains']
+        peptide_chains = []
+        for index in peptide_chain_indexes:
+            args = [literal_eval(arg) for arg in contents[index]]
+            pc = PeptideChain.build(h5_contents, *args)
+            pc.parent = p
+            peptide_chains.append(pc)
+
+        p.set_peptide_chains(peptide_chains)
+
+        return p
 
     def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
@@ -2040,12 +2311,9 @@ class ChemicalSystem(_ChemicalEntity):
 
         :return: None
         """
-
-        from MDANSE.Chemistry.H5ChemicalEntity import H5Atom, H5AtomCluster, H5Molecule, H5Nucleotide, \
-            H5NucleotideChain, H5Residue, H5PeptideChain, H5Protein
-        h5_classes = {'atoms': H5Atom, 'atom_clusters': H5AtomCluster, 'molecules': H5Molecule,
-                      'nucleotides': H5Nucleotide, 'nucleotide_chain': H5NucleotideChain, 'residue': H5Residue,
-                      'peptide_chains': H5PeptideChain, 'proteins': H5Protein}
+        h5_classes = {'atoms': Atom, 'atom_clusters': AtomCluster, 'molecules': Molecule,
+                      'nucleotides': Nucleotide, 'nucleotide_chain': NucleotideChain, 'residue': Residue,
+                      'peptide_chains': PeptideChain, 'proteins': Protein}
 
         try:
             h5_file = h5py.File(h5_filename, 'r', libver='latest')
@@ -2095,14 +2363,57 @@ class ChemicalSystem(_ChemicalEntity):
                                          f', which contains only {len(h5_contents[entity_type])} elements.')
             except (ValueError, SyntaxError, RuntimeError) as e:
                 raise CorruptedFileError(f'The data used for reconstructing the chemical system could not be parsed '
-                                         f'from the HDF5 file. The data located at /checmical_system/{entity_type}['
+                                         f'from the HDF5 file. The data located at /chemical_system/{entity_type}['
                                          f'{entity_index}] is corrupted.\nThe provided data is: '
                                          f'{h5_contents[entity_type][entity_index]}\nThe original error is: {e}')
             finally:
                 h5_file.close()
 
-            h5_chemical_entity_instance = entity_class(h5_file, h5_contents, *arguments)
-            ce = h5_chemical_entity_instance.build()
+            try:
+                ce = entity_class.build(h5_contents, *arguments)
+            except CorruptedFileError as e:
+                raise CorruptedFileError(str(e).replace('INDEX', str(entity_index)))
+            except InconsistentAtomNamesError as e:
+                raise CorruptedFileError(f'Could not reconstruct {entity_class} from the HDF5 Trajectory because its '
+                                         f'constituent atoms recorded in the trajectory are different from those '
+                                         f'expected of this entity with this code ({arguments[1]}). The entity that '
+                                         f'raised this error is located in the trajectory at /chemical_system/'
+                                         f'{entity_type} at index {entity_index} while its constituent atoms are at '
+                                         f'/chemical_system/atoms at indices {arguments[0]}.\nThe full data in the '
+                                         f'trajectory of the entity that raised the error is '
+                                         f'{h5_contents[entity_type][entity_index]}\nThe original error is {e}')
+            except IndexError as e:
+                raise CorruptedFileError(f'Could not reconstruct {entity_class} from the HDF5 Trajectory because one '
+                                         f'or more of its constituent atoms are missing from the trajectory. This '
+                                         f'entity is located in the trajectory at /chemical_system/{entity_type} at '
+                                         f'index {entity_index}. Its constituent atoms are located at /chemical_system/'
+                                         f'atoms at indices {arguments[0]}, but only {len(h5_contents["atoms"])} atoms '
+                                         f'are present in the trajectory.\nThe full data in the trajectory of the '
+                                         f'entity that raised the error is {h5_contents[entity_type][entity_index]}'
+                                         f'\nThe original error is {e}')
+            except KeyError as e:
+                raise CorruptedFileError(f'Could not reconstruct {entity_class} from the HDF5 Trajectory because one of'
+                                         f' its constituent parts could not be found in the trajectory. This entity is '
+                                         f'located in the trajectory at /chemical_system/{entity_type} at index '
+                                         f'{entity_index}.\nThe full data in the trajectory of the entity that raised '
+                                         f'the error is {h5_contents[entity_type][entity_index]}\nThe original error is'
+                                         f' {e}')
+            except TypeError as e:
+                raise CorruptedFileError(f'Could not reconstruct {entity_class} from the HDF5 Trajectory because the '
+                                         f'data associated with it does not match the expected arguments required for'
+                                         f' reconstructing this entity. This entity is located in the trajectory at '
+                                         f'/chemical_system/{entity_type} at index {entity_index} and the associated '
+                                         f'data is {arguments}.\nThe full data in the trajectory of the entity that '
+                                         f'raised the error is {h5_contents[entity_type][entity_index]}\nThe original '
+                                         f'error is {e}.')
+            except ValueError as e:
+                raise CorruptedFileError(f'Could not reconstruct {entity_class} from the HDF5 Trajectory because the '
+                                         f'data associated with it is in an incorrect format. This entity is located '
+                                         f'in the trajectory at /chemical_system/{entity_type} at index {entity_index} '
+                                         f'and the associated data is {arguments}.\nThe full data in the trajectory of '
+                                         f'the entity that raised the error is {h5_contents[entity_type][entity_index]}'
+                                         f'\nThe original error is {e}.')
+
             self.add_chemical_entity(ce)
 
         if close_file:

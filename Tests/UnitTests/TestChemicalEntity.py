@@ -134,6 +134,10 @@ class TestAtom(unittest.TestCase):
         with self.assertRaises(ce.UnknownAtomError):
             atom.symbol = 'CC'
 
+    def test_build(self):
+        atom = ce.Atom.build(None, 'H', 'H1', False)
+        self.assertEqual(repr(ce.Atom(symbol='H', name='H1', ghost=False)), repr(atom))
+
     def test_serialize(self):
         atom = ce.Atom()
         dictionary = {}
@@ -299,6 +303,13 @@ class TestAtomCluster(unittest.TestCase):
 
         self.assertEqual([c, h], cluster._atoms)
 
+    def test_build(self):
+        h5 = {'atom_clusters': [['[0, 1]', repr('Cluster1')]],
+              'atoms': [[repr('H'), repr('H'), 'False'], [repr('H'), repr('H'), 'False']]}
+        ac = ce.AtomCluster.build(h5, [0, 1], 'Cluster1')
+
+        self.assertEqual(repr(ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()])), repr(ac))
+
     def test_serialize_empty_dict(self):
         cluster = ce.AtomCluster('Cluster1', [ce.Atom(), ce.Atom()], parentless=True)
         dictionary = {}
@@ -429,6 +440,14 @@ class TestMolecule(unittest.TestCase):
         self.assertEqual('HW2', self.molecule.atom_list[1].name)
         self.assertEqual('OW', self.molecule.atom_list[2].name)
 
+    def test_build(self):
+        h5 = {'molecules': [['[0, 1, 2]', repr('WAT'), repr('water')]],
+              'atoms': [[repr('O'), repr('OW'), 'False'], [repr('H'), repr('HW2'), 'False'],
+                        [repr('H'), repr('HW1'), 'False']]}
+        m = ce.Molecule.build(h5, [0, 1, 2], 'WAT', 'water')
+
+        self.assertEqual(repr(ce.Molecule('WAT', 'water')), repr(m))
+
     def test_serialize_from_empty_dict(self):
         dictionary = {}
         result = self.molecule.serialize(dictionary)
@@ -446,7 +465,7 @@ class TestMolecule(unittest.TestCase):
         self.assertEqual(('molecules', 2), result)
         self.assertDictEqual({'atoms': [[], [], [repr('O'), repr('OW'), 'False'], [repr('H'), repr('HW2'), 'False'],
                                         [repr('H'), repr('HW1'), 'False']],
-                             'molecules': [[], [], ['[2, 3, 4]', repr('WAT'), repr('water')]]},
+                              'molecules': [[], [], ['[2, 3, 4]', repr('WAT'), repr('water')]]},
                              dictionary)
 
 
@@ -685,6 +704,19 @@ class TestResidue(unittest.TestCase):
 
         self.compare_atoms(copy, copy)
 
+    def test_build(self):
+        h5 = {'residues': [['[0, 1, 2, 3, 4, 5, 6]', repr('GLY'), repr('glycine'), 'None']],
+              'atoms': [[repr('H'), repr('H'), 'False'], [repr('H'), repr('HA3'), 'False'],
+                        [repr('O'), repr('O'), 'False'], [repr('N'), repr('N'), 'False'],
+                        [repr('C'), repr('CA'), 'False'], [repr('H'), repr('HA2'), 'False'],
+                        [repr('C'), repr('C'), 'False']]}
+        r = ce.Residue.build(h5, [0, 1, 2, 3, 4, 5, 6], 'GLY', 'glycine', None)
+
+        expected = ce.Residue('GLY', 'glycine', None)
+        expected.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
+
+        self.assertEqual(repr(expected), repr(r))
+
     def test_serialize_empty_dict(self):
         residue = ce.Residue('GLY', 'glycine', None)
         residue.set_atoms(['H', 'HA3', 'O', 'N', 'CA', 'HA2', 'C'])
@@ -776,13 +808,15 @@ class TestNucleotide(unittest.TestCase):
     def test_set_atoms_variant(self):
         nucleotide = ce.Nucleotide('A', 'adenine', '5T1')
         names = ['C3\'', 'C1\'', 'C5\'', 'H2\'', 'H5\'', 'H3\'', 'O4\'', 'C8', 'C2', 'H1\'', 'C6', 'C5', 'C4', 'H5\'\'',
-                 'HO2\'', 'N9', 'C4\'', 'C2\'', 'O2\'', 'N1', 'N3', 'N6', 'N7','H4\'', 'H8', 'H2', 'O5\'', 'H61', 'H62',
+                 'HO2\'', 'N9', 'C4\'', 'C2\'', 'O2\'', 'N1', 'N3', 'N6', 'N7', 'H4\'', 'H8', 'H2', 'O5\'', 'H61',
+                 'H62',
                  'O3\'', 'HO5\'']
         nucleotide.set_atoms(names)
 
         symbols = ['C', 'C', 'C', 'H', 'H', 'H', 'O', 'C', 'C', 'H', 'C', 'C', 'C', 'H', 'H', 'N', 'C', 'C', 'O', 'N',
                    'N', 'N', 'N', 'H', 'H', 'H', 'O', 'H', 'H', 'O', 'H']
-        bond_atoms = [['C2\'', 'C4\'', 'H3\'', 'O3\''], ['C2\'', 'H1\'', 'N9', 'O4\''], ['C4\'', 'H5\'', 'H5\'\'', 'O5\''],
+        bond_atoms = [['C2\'', 'C4\'', 'H3\'', 'O3\''], ['C2\'', 'H1\'', 'N9', 'O4\''],
+                      ['C4\'', 'H5\'', 'H5\'\'', 'O5\''],
                       ['C2\''], ['C5\''], ['C3\''], ['C1\'', 'C3\''], ['H8', 'N7', 'N9'], ['N1', 'N3', 'H2'], ['C1\''],
                       ['C5', 'N1', 'N6'], ['C4', 'C6', 'N7'], ['C5', 'N3', 'N9'], ['C5\''], ['O2\''],
                       ['C1\'', 'C4', 'C8'], ['C3\'', 'C5\'', 'H4\'', 'O4\''], ['C1\'', 'C3\'', 'H2\'', 'O2\''],
@@ -860,6 +894,16 @@ class TestNucleotide(unittest.TestCase):
         nucleotide.set_atoms(['HO5\''])
         self.assertEqual(1, nucleotide.number_of_atoms)
         self.assertEqual(1, nucleotide.total_number_of_atoms)
+
+    def test_build(self):
+        h5 = {'nucleotides': [['[0]', repr('5T1'), repr('5T1'), 'None']],
+              'atoms': [[repr('H'), repr('HO5\''), 'False']]}
+        n = ce.Nucleotide.build(h5, [0], '5T1', '5T1', None)
+
+        expected = ce.Nucleotide('5T1', '5T1', None)
+        expected.set_atoms(['HO5\''])
+
+        self.assertEqual(repr(expected), repr(n))
 
     def test_serialize_empty_dict(self):
         nucleotide = ce.Nucleotide('5T1', '5T1', None)
@@ -1032,6 +1076,46 @@ class TestNucleotideChain(unittest.TestCase):
 
         self.assertEqual(65, self.chain.number_of_atoms)
         self.assertEqual(65, self.chain.total_number_of_atoms)
+
+    def test_build(self):
+        h5 = {'nucleotides': [
+            ['[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 2'
+             '8, 29, 30]', "'A'", "'adenine'", "'5T1'"], [
+                '[31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64]',
+                "'A'", "'adenine'", "'3T1'"]],
+              'atoms': [["'C'", '"C3\'"', 'False'], ["'C'", '"C1\'"', 'False'], ["'C'", '"C5\'"', 'False'],
+                        ["'H'", '"H2\'"', 'False'], ["'H'", '"H5\'"', 'False'], ["'H'", '"H3\'"', 'False'],
+                        ["'O'", '"O4\'"', 'False'], ["'C'", "'C8'", 'False'], ["'C'", "'C2'", 'False'],
+                        ["'H'", '"H1\'"', 'False'], ["'C'", "'C6'", 'False'], ["'C'", "'C5'", 'False'],
+                        ["'C'", "'C4'", 'False'], ["'H'", '"H5\'\'"', 'False'], ["'H'", '"HO2\'"', 'False'],
+                        ["'N'", "'N9'", 'False'], ["'C'", '"C4\'"', 'False'], ["'C'", '"C2\'"', 'False'],
+                        ["'O'", '"O2\'"', 'False'], ["'N'", "'N1'", 'False'], ["'N'", "'N3'", 'False'],
+                        ["'N'", "'N6'", 'False'], ["'N'", "'N7'", 'False'], ["'H'", '"H4\'"', 'False'],
+                        ["'H'", "'H8'", 'False'], ["'H'", "'H2'"
+                            , 'False'], ["'O'", '"O5\'"', 'False'], ["'H'", "'H61'", 'False'],
+                        ["'H'", "'H62'", 'False'], ["'O'", '"O3\'"', 'False'], ["'H'", '"HO5\'"', 'False'],
+                        ["'C'", '"C3\'"', 'False'], ["'C'", '"C1\'"', 'False'], ["'C'", '"C5\'"', 'False'],
+                        ["'H'", '"H2\'"', 'False'], ["'H'", '"H5\'"', 'False'], ["'H'", '"H3\'"', 'False'],
+                        ["'O'", '"O4\'"', 'False'], ["'C'", "'C8'", 'False'], ["'C'", "'C2'", 'False'],
+                        ["'H'", '"H1\'"', 'False'], ["'C'", "'C6'", 'False'], ["'C'", "'C5'", 'False'],
+                        ["'C'", "'C4'", 'False'], ["'H'", '"H5\'\'"', 'False'], ["'H'", '"HO2\'"'
+                            , 'False'], ["'N'", "'N9'", 'False'], ["'C'", '"C4\'"', 'False'],
+                        ["'C'", '"C2\'"', 'False'], ["'O'", '"O2\'"', 'False'], ["'N'", "'N1'", 'False'],
+                        ["'N'", "'N3'", 'False'], ["'N'", "'N6'", 'False'], ["'N'", "'N7'", 'False'],
+                        ["'H'", '"H4\'"', 'False'], ["'H'", "'H8'", 'False'], ["'H'", "'H2'", 'False'],
+                        ["'O'", '"O5\'"', 'False'], ["'H'", "'H61'", 'False'], ["'H'",
+                                                                                "'H62'", 'False'],
+                        ["'O'", '"O3\'"', 'False'], ["'H'", '"HO3\'"', 'False'], ["'O'", "'OP1'", 'False'],
+                        ["'O'", "'OP2'", 'False'], ["'P'", "'P'", 'False']],
+              'nucleotide_chains': [["'name'", '[0, 1]']]}
+
+        nc = ce.NucleotideChain.build(h5, 'name', [0, 1])
+
+        n1, n2 = self.prepare_nucleotides()
+        self.chain.set_nucleotides([n1, n2])
+
+        self.maxDiff = None
+        self.assertEqual(repr(self.chain), repr(nc))
 
     def test_serialize_empty_dict(self):
         n1, n2 = self.prepare_nucleotides()
@@ -1218,6 +1302,15 @@ class TestPeptideChain(unittest.TestCase):
         r1, r2 = self.populate_chain()
         self.assertEqual([r1, r2], self.chain.residues)
 
+    def test_build(self):
+        h5 = {'residues': [['[0, 1, 2, 3, 4, 5, 6, 7, 8]', "'GLY'", "'glycine1'", "'NT1'"], ['[9, 10, 11, 12, 13, 14, 15, 16]', "'GLY'", "'glycine2'", "'CT1'"]], 'atoms': [["'H'", "'HA3'", 'False'], ["'O'", "'O'", 'False'], ["'N'", "'N'", 'False'], ["'C'", "'CA'", 'False'], ["'H'", "'HA2'", 'False'], ["'C'", "'C'", 'False'], ["'H'", "'HT1'", 'False'], ["'H'", "'HT2'", 'False'], ["'H'", "'HT3'", 'False'], ["'H'", "'H'", 'False'], ["'H'", "'HA3'", 'False'], ["'O'", "'O'", 'False'], ["'N'", "'N'", 'False'], ["'C'", "'CA'", 'False'], ["'H'", "'HA2'", 'False'], ["'C'", "'C'", 'False'], ["'O'", "'OXT'", 'False']], 'peptide_chains': [["'name'", '[0, 1]']]}
+        pc = ce.PeptideChain.build(h5, 'name', [0, 1])
+
+        self.populate_chain()
+
+        self.maxDiff = None
+        self.assertEqual(repr(self.chain), repr(pc))
+
     def test_serialize_empty_dict(self):
         self.populate_chain()
         dictionary = {}
@@ -1344,6 +1437,15 @@ class TestProtein(unittest.TestCase):
     def test_residues(self):
         chain = self.populate_protein()
         self.assertEqual(chain.residues, self.protein.residues)
+
+    def test_build(self):
+        h5 = {'proteins': [["'name'", '[0]']], 'residues': [['[0, 1, 2, 3, 4, 5, 6, 7, 8]', "'GLY'", "'glycine1'", "'NT1'"], ['[9, 10, 11, 12, 13, 14, 15, 16]', "'GLY'", "'glycine2'", "'CT1'"]], 'atoms': [["'H'", "'HA3'", 'False'], ["'O'", "'O'", 'False'], ["'N'", "'N'", 'False'], ["'C'", "'CA'", 'False'], ["'H'", "'HA2'", 'False'], ["'C'", "'C'", 'False'], ["'H'", "'HT1'", 'False'], ["'H'", "'HT2'", 'False'], ["'H'", "'HT3'", 'False'], ["'H'", "'H'", 'False'], ["'H'", "'HA3'", 'False'], ["'O'", "'O'", 'False'], ["'N'", "'N'", 'False'], ["'C'", "'CA'", 'False'], ["'H'", "'HA2'", 'False'], ["'C'", "'C'", 'False'], ["'O'", "'OXT'", 'False']], 'peptide_chains': [["'name'", '[0, 1]']]}
+        p = ce.Protein.build(h5, 'name', [0])
+
+        self.populate_protein()
+
+        self.maxDiff = 0
+        self.assertEqual(repr(self.protein), repr(p))
 
     def test_serialize_empty_dict(self):
         self.populate_protein()
@@ -1511,7 +1613,7 @@ class TestChemicalSystem(unittest.TestCase):
         file['/chemical_system'] = StubHDFFile()
         file['/chemical_system'].attrs['name'] = 'new'
 
-        file['/chemical_system/contents'] = [('atoms'.encode(encoding = 'UTF-8',errors = 'strict'), 0)]
+        file['/chemical_system/contents'] = [('atoms'.encode(encoding='UTF-8', errors='strict'), 0)]
         file['/chemical_system']['atoms'] = [[repr('H'), repr('H1'), 'False']]
         self.system.load(file)
 
@@ -1567,6 +1669,80 @@ class TestChemicalSystem(unittest.TestCase):
 
         with self.assertRaises(ce.CorruptedFileError):
             self.system.load(file)
+
+    def test_load_corrupt_file_inconsistent_atoms(self):
+        file = StubHDFFile()
+        file['/chemical_system'] = StubHDFFile()
+        file['/chemical_system'].attrs['name'] = 'new'
+
+        file['/chemical_system/contents'] = [('molecules'.encode(encoding='UTF-8', errors='strict'), 0)]
+        file['/chemical_system']['atoms'] = [[repr('H'), repr('H1'), 'False'] for _ in range(3)]
+        file['/chemical_system']['molecules'] = [['[0, 1, 2]', repr('WAT'), repr('water')]]
+
+        with self.assertRaises(ce.CorruptedFileError) as e:
+            self.system.load(file)
+        self.assertEqual('Could not reconstruct <class \'MDANSE.Chemistry.ChemicalEntity.Molecule\'> from the HDF5 '
+                         'Trajectory because its constituent atoms recorded in the trajectory are different',
+                         str(e.exception)[:168])
+
+    def test_load_corrupt_file_index_out_of_bounds(self):
+        file = StubHDFFile()
+        file['/chemical_system'] = StubHDFFile()
+        file['/chemical_system'].attrs['name'] = 'new'
+
+        file['/chemical_system/contents'] = [('molecules'.encode(encoding='UTF-8', errors='strict'), 0)]
+        file['/chemical_system']['atoms'] = [[repr('H'), repr('H1'), 'False']]
+        file['/chemical_system']['molecules'] = [['[0, 1, 2]', repr('WAT'), repr('water')]]
+
+        with self.assertRaises(ce.CorruptedFileError) as e:
+            self.system.load(file)
+        self.assertEqual('Could not reconstruct <class \'MDANSE.Chemistry.ChemicalEntity.Molecule\'> from the HDF5 '
+                         'Trajectory because one or more of its constituent atoms are missing',
+                         str(e.exception)[:154])
+
+    def test_load_corrupt_file_missing_entity(self):
+        file = StubHDFFile()
+        file['/chemical_system'] = StubHDFFile()
+        file['/chemical_system'].attrs['name'] = 'new'
+
+        file['/chemical_system/contents'] = [('molecules'.encode(encoding='UTF-8', errors='strict'), 0)]
+        file['/chemical_system']['molecules'] = [['[0, 1, 2]', repr('WAT'), repr('water')]]
+
+        with self.assertRaises(ce.CorruptedFileError) as e:
+            self.system.load(file)
+        self.assertEqual('Could not reconstruct <class \'MDANSE.Chemistry.ChemicalEntity.Molecule\'> from the HDF5 '
+                         'Trajectory because one of its constituent parts could not be found in the trajectory',
+                         str(e.exception)[:171])
+
+    def test_load_corrupt_file_incorrect_arguments(self):
+        file = StubHDFFile()
+        file['/chemical_system'] = StubHDFFile()
+        file['/chemical_system'].attrs['name'] = 'new'
+
+        file['/chemical_system/contents'] = [('proteins'.encode(encoding='UTF-8', errors='strict'), 0)]
+        file['/chemical_system']['peptide_chains'] = [[repr('name'), '[0, 1]', repr('INVALID_ARGUMENT')],]
+        file['/chemical_system']['proteins'] = [[repr('protein'), '[0, 1, 2]']]
+
+        with self.assertRaises(ce.CorruptedFileError) as e:
+            self.system.load(file)
+        self.assertEqual('Could not reconstruct <class \'MDANSE.Chemistry.ChemicalEntity.Protein\'> from the HDF5 '
+                         'Trajectory because the data associated with it does not match the expected arguments',
+                         str(e.exception)[:170])
+
+    def test_load_corrupt_file_ast_error_when_building(self):
+        file = StubHDFFile()
+        file['/chemical_system'] = StubHDFFile()
+        file['/chemical_system'].attrs['name'] = 'new'
+
+        file['/chemical_system/contents'] = [('molecules'.encode(encoding='UTF-8', errors='strict'), 0)]
+        file['/chemical_system']['atoms'] = [[repr('H'), 'H1', 'False']]
+        file['/chemical_system']['molecules'] = [['[0, 1, 2]', repr('WAT'), repr('water')]]
+
+        with self.assertRaises(ce.CorruptedFileError) as e:
+            self.system.load(file)
+        self.assertEqual('Could not reconstruct <class \'MDANSE.Chemistry.ChemicalEntity.Molecule\'> from the HDF5 '
+                         'Trajectory because the data associated with it is in an incorrect format.',
+                         str(e.exception)[:160])
 
     def test_serialize(self):
         molecule = ce.Molecule('WAT', 'water')
@@ -1650,7 +1826,7 @@ class TestChemicalEntity(unittest.TestCase):
         conf = StubConfiguration(False, system, coordinates=np.ones((17, 3)))
         system.configuration = conf
 
-        self.assertTupleEqual((Quaternion([1.0, 0.0, 0.0, 0.0]), Vector(1.0,1.0,1.0), Vector(1.0,1.0,1.0), 0.0),
+        self.assertTupleEqual((Quaternion([1.0, 0.0, 0.0, 0.0]), Vector(1.0, 1.0, 1.0), Vector(1.0, 1.0, 1.0), 0.0),
                               self.protein.find_transformation_as_quaternion(conf))
 
     def test_find_transformation_as_quaternion_entity_not_part_of_system(self):
@@ -1712,7 +1888,7 @@ class TestChemicalEntity(unittest.TestCase):
         group = ce.AtomGroup([self.r1['HT3'], self.r1['HA2'], self.r2['O']])
 
         configuration = {'coordinates': np.ones((50, 3))}
-        self.assertEqual((Vector(1.0,1.0,1.0), Tensor([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])),
+        self.assertEqual((Vector(1.0, 1.0, 1.0), Tensor([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])),
                          self.protein.center_and_moment_of_inertia(configuration))
         self.assertEqual((Vector(1.0, 1.0, 1.0), Tensor([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])),
                          self.protein.centre_and_moment_of_inertia(configuration))
@@ -1767,7 +1943,7 @@ class TestChemicalEntity(unittest.TestCase):
 
 
 class StubConfiguration(dict):
-    def __init__(self,  is_periodic: bool, chemical_system, **kwargs):
+    def __init__(self, is_periodic: bool, chemical_system, **kwargs):
         self.is_periodic = is_periodic
         self.chemical_system = chemical_system
         super().__init__(**kwargs)
