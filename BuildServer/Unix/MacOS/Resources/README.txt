@@ -27,7 +27,7 @@ https://www.macworld.co.uk/how-to/mac-app-unidentified-developer-3669596/
 How to use the bundled python
 =============================
 
-TL;DR: always use /Applications/MDANSE.app/Contents/MacOS/python2
+TL;DR: always use /Applications/MDANSE.app/Contents/MacOS/python3
 
 MDANSE comes with a bundled python that you can use to run scripts that use MDANSE. It has all the functionality
 of a normal python installation, including several preinstalled libraries, most important of which are:
@@ -48,7 +48,7 @@ with the script, please let us know. In the meantime, you can use the following 
 in a bash (terminal) to use the bundled python:
  $ PARENT_DIR=/Applications/MDANSE.app/Contents
  $ export PYTHONHOME=$PARENT_DIR:$PARENT_DIR/Resources
- $ export PYTHONPATH=$PARENT_DIR/Resources/lib/python2.7:$PARENT_DIR/Resources:$PARENT_DIR/Resources/lib/python2.7/site-packages
+ $ export PYTHONPATH=$PARENT_DIR/Resources/lib/python3.9:$PARENT_DIR/Resources:$PARENT_DIR/Resources/lib/python3.9/site-packages
 
 Once these environment variables are set, you can use the proper python, though only in the
 current bash session:

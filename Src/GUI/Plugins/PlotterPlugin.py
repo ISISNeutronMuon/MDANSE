@@ -18,8 +18,6 @@ import os
 
 import numpy
 
-import netCDF4
-
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 

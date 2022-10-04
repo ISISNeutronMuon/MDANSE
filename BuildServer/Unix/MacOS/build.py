@@ -15,14 +15,18 @@ if sys.platform.startswith('darwin'):
     except KeyError:
         version = sys.argv[5]
 
-    APP = [os.path.join(project_dir,'Scripts','mdanse_gui')]
+    APP = [os.path.join(project_dir, 'Scripts', 'mdanse_gui')]
 
     PLIST = {
         u'CFBundleName': u'MDANSE',
         u'CFBundleShortVersionString': version,
         u'CFBundleVersion': version,
-        u'CFBundleIdentifier': u'eu.ill.MDANSE-'+version,
-        u'LSApplicationCategoryType': u'public.app-category.science'
+        u'CFBundleIdentifier': u'eu.ill.MDANSE-' + version,
+        u'LSApplicationCategoryType': u'public.app-category.science',
+        u'LSEnvironment': {u'PYTHONHOME': u'/Applications/MDANSE.app/Contents:'
+                                          u'/Applications/MDANSE.app/Contents/Resources',
+                           u'PYTHONPATH': u'/Applications/MDANSE.app/Contents/Resources/lib/python3.9:'
+                                          u'/Applications/MDANSE.app/Contents/Resources/lib/python3.9/site-packages'}
     }
 
     try:
@@ -35,17 +39,18 @@ if sys.platform.startswith('darwin'):
         temp_dir = os.path.join(sys.argv[9], 'dist')
 
     OPTIONS = {
-        'argv_emulation': False,# has to be False otherwise triggers problems with wxPython which lose some events that are captured by OS
+        'argv_emulation': False,
+        # has to be False otherwise triggers problems with wxPython which lose some events that are captured by OS
         'iconfile': os.path.join(project_dir, 'Src', 'GUI', 'Icons', 'mdanse.icns'),
         'excludes': 'PyQt4',
-		'matplotlib_backends': '-',
+        'matplotlib_backends': '-',
         'optimize': '1',
         'plist': PLIST,
         'bdist_base': temp_build,
         'dist_dir': temp_dir,
         'graph': False,
         'xref': False,
-        'packages' : ["MDANSE","MMTK","Scientific","matplotlib"]
+        'packages': ["MDANSE", "matplotlib"]
     }
 
     setup(
@@ -55,4 +60,4 @@ if sys.platform.startswith('darwin'):
         setup_requires=['py2app']
     )
 else:
-    print 'No build_app implementation for your system.'
+    print('No build_app implementation for your system.')
