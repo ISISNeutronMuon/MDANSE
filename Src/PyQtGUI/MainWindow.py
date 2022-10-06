@@ -16,7 +16,7 @@
 from collections import defaultdict
 
 from PyQt6.QtCore import pyqtSlot, QSize, QMetaObject, QLocale, QObject, QThread, QMutex, QSortFilterProxyModel,\
-                         Qt, QTimer
+                         Qt, QTimer, QDir
 from PyQt6.QtGui import QFont, QAction
 from PyQt6.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMainWindow, \
                                                 QPushButton,  QVBoxLayout, QWidget, \
@@ -26,6 +26,7 @@ from PyQt6.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMa
 
 from MDANSE.PyQtGUI.Widgets.Generator import WidgetGenerator
 from MDANSE.PyQtGUI.FrontEnd import FrontEnd
+from MDANSE.PyQtGUI.Resources import Resources
 
 class Main(QMainWindow, FrontEnd):
     """The main window of the MDANSE GUI,
@@ -63,16 +64,20 @@ class Main(QMainWindow, FrontEnd):
         self.setupToolbar()
     
     def setupMenubar(self):
-        self.menuBar = QMenuBar(self)
-        self.exitAct = QAction("Exit", parent = self.menuBar)
+        self._menuBar = self.menuBar()
+        self._menuBar.setObjectName("main menubar")
+        self._menuBar.setVisible(True)
+        self.exitAct = QAction("Exit", parent = self._menuBar)
         self.exitAct.triggered.connect(self.destroy)
-        self.menuBar.addAction(self.exitAct)
+        self._menuBar.addAction(self.exitAct)
 
     def setupToolbar(self):
-        self.toolBar = QToolBar(self)
-        self.toolBar.setMovable(True)
+        self._toolBar = QToolBar(self)
+        self._toolBar.setMovable(True)
+        self._toolBar.setObjectName("main toolbar")
+        self.addToolBar(self._toolBar)
         for act in self._actions:
-            self.toolBar.addAction(act)
+            self._toolBar.addAction(act)
 
     def createTrajectoryViewer(self):
         base, temp = self.wid_gen.wrapWidget(cls = QTreeView, parent= self, dockable = True,
