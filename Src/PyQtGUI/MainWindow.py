@@ -40,6 +40,7 @@ class Main(QMainWindow, FrontEnd):
         super().__init__(parent)
         self.setWindowTitle(title)
         self.wid_gen = WidgetGenerator()
+        self.resources = Resources()
         self.makeBasicLayout()
         self.settings = settings
         if settings is not None:
@@ -76,6 +77,10 @@ class Main(QMainWindow, FrontEnd):
         self._toolBar.setMovable(True)
         self._toolBar.setObjectName("main toolbar")
         self.addToolBar(self._toolBar)
+        for key, icon in self.resources._icons.items():
+            # action = QAction(icon, str(key), self._toolBar)
+            # self._actions.append(action)
+            self._toolBar.addAction(icon, str(key))
         for act in self._actions:
             self._toolBar.addAction(act)
 
