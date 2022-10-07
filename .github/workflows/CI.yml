@@ -461,19 +461,21 @@ jobs:
         run: |
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
-
-      - name: Install vtk
-        run: |
-          sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c ccordoba12 vtk
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk ~/Contents/Resources/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libvtk* ~/Contents/Resources/lib
+          sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python2.7
+          sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python
 
       - name: Install wx
         run: |
+          sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
           sudo cp -rv $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/* ~/Contents/Resources/lib/python2.7/site-packages
           sudo cp -v $HOME/tempenv/lib/libwx*  ~/Contents/Resources/lib
+
+      - name: Install vtk
+        run: |
+          sudo conda install -p $HOME/tempenv -c free vtk
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk ~/Contents/Resources/lib/python2.7/site-packages
+          sudo cp $HOME/tempenv/lib/libvtk* ~/Contents/Resources/lib
 
       - name: Deploy MDANSE
         run: |

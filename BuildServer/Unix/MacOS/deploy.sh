@@ -7,6 +7,7 @@
 export DISTUTILS_DEBUG=0
 export PYTHON_FOLDER=$HOME/Contents/Resources
 export PYTHONEXE=$PYTHON_FOLDER/bin/python
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 #############################
 # PREPARATION
 #############################
@@ -99,8 +100,6 @@ sudo install_name_tool -change /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dyli
 # libnetcdf
 sudo install_name_tool -change @rpath/libnetcdf.13.dylib @executable_path/../Frameworks/libnetcdf.13.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/netCDF4/_netCDF4.so
 sudo install_name_tool -change @rpath/libhdf5.103.dylib @executable_path/../Frameworks/libhdf5.103.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/netCDF4/_netCDF4.so
-sudo install_name_tool -change @rpath/libnetcdf.13.dylib @executable_path/../Frameworks/libnetcdf.13.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/netCDF4/_netCDF4.so
-sudo install_name_tool -change @rpath/libhdf5.103.dylib @executable_path/../Frameworks/libhdf5.103.dylib ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/netCDF4/_netCDF4.so
 
 echo "Copy site.py"
 sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Contents/Resources/.
@@ -109,6 +108,8 @@ sudo cp ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/site.py ${MDANSE_APP_DIR}/Con
 echo -e "${BLUE}""Changing wx and vtk dylib links""${NORMAL}"
 chmod 777 ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh
 "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/change_dylib_path.sh"
+sudo ${PYTHONEXE} ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/relink-vtk.py
+cd $GITHUB_WORKSPACE || exit
 
 # Comment out the 'add_system_python_extras' call that add some System path to the sys.path and
 # '_boot_multiprocessing' which is bugged since python 2 doesn't have the functions it uses
@@ -146,6 +147,10 @@ sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/zmq
 sudo rm -rf $HOME/Contents
 #Remove py2app
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/py2app
+# Delete duplicates
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/MDANSE
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/MMTK
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/Scientific
 
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/conf_
 #############################
@@ -154,4 +159,4 @@ sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/conf_
 sleep 5
 echo "Create dmg"
 "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/create-dmg" --background "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/Resources/dmg/dmg_background.jpg" --volname "MDANSE" --window-pos 200 120 --window-size 800 400 --icon MDANSE.app 200 190 --hide-extension MDANSE.app --app-drop-link 600 185 "${MDANSE_DMG}" ${CI_TEMP_DIR}/dist
-sudo mv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/${MDANSE_DMG} ${GITHUB_WORKSPACE}
+#sudo mv ${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS/${MDANSE_DMG} ${GITHUB_WORKSPACE}
