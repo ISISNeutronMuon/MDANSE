@@ -27,6 +27,7 @@ from PyQt6.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMa
 from MDANSE.PyQtGUI.Widgets.Generator import WidgetGenerator
 from MDANSE.PyQtGUI.FrontEnd import FrontEnd
 from MDANSE.PyQtGUI.Resources import Resources
+from MDANSE.PyQtGUI.Icons import ICONS
 
 class Main(QMainWindow, FrontEnd):
     """The main window of the MDANSE GUI,
@@ -41,6 +42,7 @@ class Main(QMainWindow, FrontEnd):
         self.setWindowTitle(title)
         self.wid_gen = WidgetGenerator()
         self.resources = Resources()
+        # self.resources = ICONS
         self.makeBasicLayout()
         self.settings = settings
         if settings is not None:
@@ -73,16 +75,18 @@ class Main(QMainWindow, FrontEnd):
         self._menuBar.addAction(self.exitAct)
 
     def setupToolbar(self):
-        self._toolBar = QToolBar(self)
-        self._toolBar.setMovable(True)
+        self._toolBar = QToolBar("Main MDANSE toolbar", self)
+        # self._toolBar.setMovable(True)
         self._toolBar.setObjectName("main toolbar")
-        self.addToolBar(self._toolBar)
         for key, icon in self.resources._icons.items():
-            # action = QAction(icon, str(key), self._toolBar)
-            # self._actions.append(action)
-            self._toolBar.addAction(icon, str(key))
+            action = QAction(icon, str(key), self._toolBar)
+            action.triggered.connect(self.onMyToolBarButtonClick)
+            self._actions.append(action)
+            # self._actions.append(self._toolBar.addAction(icon, str(key)))
         for act in self._actions:
             self._toolBar.addAction(act)
+        self.addToolBar(self._toolBar)
+        print(f"Icon size is {self._toolBar.iconSize()}")
 
     def createTrajectoryViewer(self):
         base, temp = self.wid_gen.wrapWidget(cls = QTreeView, parent= self, dockable = True,
@@ -104,4 +108,7 @@ class Main(QMainWindow, FrontEnd):
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("state", self.saveState())
         self.settings.endGroup()
+
+    def onMyToolBarButtonClick(self, s):
+        print("click", s)
 
