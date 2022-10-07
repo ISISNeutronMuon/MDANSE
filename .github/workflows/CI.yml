@@ -113,14 +113,6 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
-    if: |
-      contains( github.ref, 'main' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
@@ -638,14 +630,6 @@ jobs:
     runs-on: windows-2019
     if: false
     needs: ci_windows
-    if: |
-      contains( github.ref, 'main' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
