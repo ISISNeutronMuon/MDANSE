@@ -46,8 +46,9 @@ class InputFileWidget(IWidget):
 
         filename = self._browser.GetValue()
 
-        if not filename:
-            raise ConfigurationError("No input file selected", self)
+        if not self._configurator.optional:
+            if not filename:
+                raise ConfigurationError("No input file selected", self)
 
         return filename
     

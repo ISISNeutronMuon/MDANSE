@@ -36,7 +36,7 @@ class QVectorsConfigurator(IConfigurator):
     :note: this configurator depends on 'trajectory' configurator to be configured.
     """
         
-    _default = ("spherical_lattice",{"shells":(0.1,5,0.1), "width" : 0.1, "n_vectors" : 50})
+    _default = ("spherical_lattice",{"shells":(0.1,5,0.1), "width" : 0.1, "n_vectors" : 50, "seed": 0})
 
     def configure(self, value):
         '''

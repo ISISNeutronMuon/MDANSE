@@ -21,6 +21,7 @@ export PYTHONPATH=${CI_TEMP_INSTALL_DIR}/lib/python2.7/site-packages:${PYTHONPAT
 sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python2.7
 sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python
 export MACOSX_DEPLOYMENT_TARGET=10.9
+sudo ${PYTHONEXE} -m pip install sphinx==1.6.7 stdeb docutils==0.17.1 graphviz
 sudo ${PYTHONEXE} setup.py build build_api build_help install
 
 status=$?
@@ -48,7 +49,7 @@ sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$PYTHON_FO
 sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/recipes"
 
 echo "Uninstall sphinx and its dependencies"
-sudo ${PYTHONEXE} -m pip uninstall -y sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3
+sudo ${PYTHONEXE} -m pip uninstall -y sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3 graphviz
 
 echo "Building mdanse app"
 cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS" || exit
