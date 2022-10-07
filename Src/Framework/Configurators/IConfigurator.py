@@ -108,6 +108,8 @@ class IConfigurator(dict):
         self._label = kwargs.get('label'," ".join(name.split('_')).strip())
 
         self._widget = kwargs.get('widget',self._type)
+
+        self._optional = kwargs.get('optional',False)
         
         self._configured = False
             
@@ -159,6 +161,17 @@ class IConfigurator(dict):
         '''
         
         return self._name
+
+    @property
+    def optional(self):
+        '''
+        Returns the optional state name of this configurator.
+        
+        :return: the optional state.
+        :rtype: boolean
+        '''
+
+        return self._optional
 
     @property
     def root(self):

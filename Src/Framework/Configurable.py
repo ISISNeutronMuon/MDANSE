@@ -116,7 +116,7 @@ class Configurable(object):
             for k,v in self._configuration.items():
                 # If no input parameter has been set for this item, use its default value.
                 if not parameters.has_key(k):
-                    parameters[k] = v.default
+                    raise ConfigurationError("The parameter '%s' is missing" % k)
         else:
             raise ConfigurationError("Invalid type for configuration parameters")             
                         
@@ -133,15 +133,19 @@ class Configurable(object):
                     continue
                 
                 if conf.check_dependencies(configured):
-                                                            
-                    conf.configure(parameters[name])
+
+                    if not conf.optional:
+                        conf.configure(parameters[name])
+                        self._info.append(conf.get_information())
+                    else:
+                        if parameters[name]:
+                            conf.configure(parameters[name])
+                            self._info.append(conf.get_information())
                     
                     conf.set_configured(True)
                     
                     self._configuration[name]=conf
-                    
-                    self._info.append(conf.get_information())
-                                                            
+                                                                            
                     configured.add(name)
                                         
                     progress = True
