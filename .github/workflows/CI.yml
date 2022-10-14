@@ -379,7 +379,7 @@ jobs:
 
       - name: Install NetCDF
         run: |
-          brew install netcdf
+          brew install netcdf@4.8.1
           sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
 
       - name: Install ScientificPython
