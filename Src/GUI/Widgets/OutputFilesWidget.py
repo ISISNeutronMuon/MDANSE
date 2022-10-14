@@ -13,6 +13,8 @@
 #
 # **************************************************************************
 
+import glob
+import itertools
 import os
 import os.path
 
@@ -34,7 +36,7 @@ class OutputFilesWidget(IWidget):
     @staticmethod
     def _get_unique_filename(directory,basename):
 
-        filesInDirectory = [os.path.join(directory,e) for e in os.listdir(directory) 
+        filesInDirectory = [os.path.join(directory,e) for e in itertools.chain(glob.iglob(os.path.join(directory,"*")),glob.iglob(os.path.join(directory,".*"))) 
                             if os.path.isfile(os.path.join(directory,e))]
         basenames = [os.path.splitext(f)[0] for f in filesInDirectory]
 
