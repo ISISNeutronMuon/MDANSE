@@ -47,6 +47,7 @@ sudo ${PYTHONEXE} -m pip install py2app==0.26.1
 echo "Replacing buggy python2 files"
 sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt5.py" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/recipes"
 sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/qt6.py" "$PYTHON_FOLDER/lib/python2.7/site-packages/py2app/recipes"
+sudo cp -fv "$GITHUB_WORKSPACE/BuildServer/Unix/MacOS/py2app/util.py" "$PYTHON_FOLDER/lib/python2.7/site-packages/modulegraph/util.py"
 
 echo "Uninstall sphinx and its dependencies"
 sudo ${PYTHONEXE} -m pip uninstall -y sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3 graphviz

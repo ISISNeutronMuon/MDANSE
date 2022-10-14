@@ -5,6 +5,7 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -107,18 +108,11 @@ jobs:
   deploy_ubuntu:
     needs: ci_ubuntu
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
-    if: |
-      contains( github.ref, 'main' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
@@ -190,6 +184,7 @@ jobs:
 
   ci_ubuntu22:
     runs-on: 'ubuntu-22.04'
+    if: false
     strategy:
       fail-fast: false
     steps:
@@ -280,16 +275,9 @@ jobs:
   deploy_ubuntu22:
     needs: ci_ubuntu22
     runs-on: 'ubuntu-22.04'
+    if: false
     strategy:
       fail-fast: false
-    if: |
-      contains( github.ref, 'main' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
@@ -420,14 +408,14 @@ jobs:
           python2 AllTests.py
 
       - name: Tar python
-        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, '172_' ) || contains( github.ref, 'web' ) ) }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
 
       - name: Upload artifacts
-        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, '172_' ) || contains( github.ref, 'web' ) ) }}
         uses: actions/upload-artifact@v2
         with:
           name: MacOS_artifacts
@@ -445,7 +433,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, '172_' )
     steps:
       - uses: actions/checkout@v2
 
@@ -499,6 +488,7 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
+    if: false
     steps:
       - uses: actions/checkout@v2
 
@@ -630,15 +620,8 @@ jobs:
 
   deploy_windows:
     runs-on: windows-2019
+    if: false
     needs: ci_windows
-    if: |
-      contains( github.ref, 'main' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
