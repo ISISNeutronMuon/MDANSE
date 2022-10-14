@@ -5,7 +5,6 @@ on: [push, workflow_dispatch]
 jobs:
   ci_ubuntu:
     runs-on: ${{ matrix.os }}
-    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -83,6 +82,7 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
+          contains( github.ref, '172_' ) ||
           contains( github.ref, 'web' )
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
@@ -97,6 +97,7 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
+          contains( github.ref, '172_' ) ||
           contains( github.ref, 'web' )
         uses: actions/upload-artifact@v2
         with:
@@ -108,11 +109,19 @@ jobs:
   deploy_ubuntu:
     needs: ci_ubuntu
     runs-on: ${{ matrix.os }}
-    if: false
     strategy:
       fail-fast: false
       matrix:
         os: ['ubuntu-18.04', 'ubuntu-20.04']
+    if: |
+      contains( github.ref, 'main' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, '172_' ) ||
+      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
@@ -184,7 +193,6 @@ jobs:
 
   ci_ubuntu22:
     runs-on: 'ubuntu-22.04'
-    if: false
     strategy:
       fail-fast: false
     steps:
@@ -252,6 +260,7 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
+          contains( github.ref, '172_' ) ||
           contains( github.ref, 'web' )
         run: |
           cd $CONDA/envs
@@ -265,6 +274,7 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
+          contains( github.ref, '172_' ) ||
           contains( github.ref, 'web' )
         uses: actions/upload-artifact@v2
         with:
@@ -275,9 +285,17 @@ jobs:
   deploy_ubuntu22:
     needs: ci_ubuntu22
     runs-on: 'ubuntu-22.04'
-    if: false
     strategy:
       fail-fast: false
+    if: |
+      contains( github.ref, 'main' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, '172_' ) ||
+      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
@@ -433,8 +451,8 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) ||
-      contains( github.ref, '172_' )
+      contains( github.ref, '172_' ) ||
+      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
@@ -488,7 +506,6 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-2019
-    if: false
     steps:
       - uses: actions/checkout@v2
 
@@ -558,7 +575,7 @@ jobs:
           git clone https://code.ill.fr/scientific-software/mmtk.git
           copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\mmtk-setup.py %GITHUB_WORKSPACE%\mmtk
           cd mmtk
-          %CONDA%\envs\mdanse\python.exe mmtk-setup.py build 
+          %CONDA%\envs\mdanse\python.exe mmtk-setup.py build
           %CONDA%\envs\mdanse\python.exe setup.py install
         shell: cmd /C CALL {0}
 
@@ -597,6 +614,7 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
+          contains( github.ref, '172_' ) ||
           contains( github.ref, 'web' )
         run: |
           cd /D %CONDA%\envs
@@ -611,6 +629,7 @@ jobs:
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
           contains( github.ref, 'tags' ) ||
+          contains( github.ref, '172_' ) ||
           contains( github.ref, 'web' )
         uses: actions/upload-artifact@v2
         with:
@@ -620,8 +639,16 @@ jobs:
 
   deploy_windows:
     runs-on: windows-2019
-    if: false
     needs: ci_windows
+    if: |
+      contains( github.ref, 'main' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, '172_' ) ||
+      contains( github.ref, 'web' )
     steps:
       - uses: actions/checkout@v2
 
