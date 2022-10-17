@@ -13,6 +13,8 @@
 #
 # **************************************************************************
 
+import glob
+import itertools
 import os
 import os.path
 
@@ -38,7 +40,9 @@ class SingleOutputFileWidget(IWidget):
 
         directory = os.path.dirname(filename)
 
-        filesInDirectory = [os.path.join(directory,e) for e in os.listdir(directory) if os.path.isfile(os.path.join(directory,e))]
+        filesInDirectory = [os.path.join(directory,e) for e in itertools.chain(glob.iglob(os.path.join(directory,"*")),glob.iglob(os.path.join(directory,".*"))) 
+                            if os.path.isfile(os.path.join(directory,e))]
+
 
         path = filename
         comp = 1

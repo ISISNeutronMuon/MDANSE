@@ -380,7 +380,7 @@ jobs:
       - name: Install NetCDF
         run: |
           brew install netcdf
-          sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
+          sudo cp -r /usr/local/opt/netcdf/include $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/netcdf
 
       - name: Install ScientificPython
         run: |
@@ -568,7 +568,7 @@ jobs:
           git clone https://code.ill.fr/scientific-software/mmtk.git
           copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\mmtk-setup.py %GITHUB_WORKSPACE%\mmtk
           cd mmtk
-          %CONDA%\envs\mdanse\python.exe mmtk-setup.py build 
+          %CONDA%\envs\mdanse\python.exe mmtk-setup.py build
           %CONDA%\envs\mdanse\python.exe setup.py install
         shell: cmd /C CALL {0}
 
