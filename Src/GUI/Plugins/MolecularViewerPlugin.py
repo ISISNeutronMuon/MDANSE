@@ -14,6 +14,7 @@
 # **************************************************************************
 
 import os
+import platform
 
 import numpy
 
@@ -137,8 +138,11 @@ class MolecularViewerPlugin(ComponentPlugin):
     '''
             
     label = "Molecular Viewer"
-    
-    ancestor = ["mmtk_trajectory"]
+
+    if platform.system() == "Darwin":
+        ancestor = ["this_must_be_disabled"]
+    else:
+        ancestor = ["mmtk_trajectory"]
     
     category = ("Viewer",)
                 
