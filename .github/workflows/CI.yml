@@ -540,7 +540,7 @@ jobs:
 
       - name: Install backend dependencies
         run: |
-          %CONDA%\envs\mdanse\python.exe -m pip install numpy matplotlib Cython pyyaml Pyro
+          %CONDA%\envs\mdanse\python.exe -m pip install numpy==1.16.6 matplotlib Cython pyyaml Pyro
         shell: cmd /C CALL {0}
 
       - name: Install ScientificPython
