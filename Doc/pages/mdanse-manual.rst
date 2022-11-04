@@ -114,11 +114,11 @@ privileges, ie. Windows will ask you if you really want to install the
 software, and you might need to enter your password. When that is done,
 you will see a welcome screen, followed by a license agreement.
 
-.. image:: Pictures/10000001000001F400000185DE47831036B11045.png
+.. image:: Pictures/picture2.png
    :width: 9.103cm
    :height: 7.082cm
 
-.. image:: Pictures/10000001000001F400000187FCDDC0BEF9645BDF.png
+.. image:: Pictures/picture3.png
    :width: 9.022cm
    :height: 6.967cm
 
@@ -126,7 +126,7 @@ The default installation location is in C:\\Program Files\\MDANSE, but
 it can be changed to any location. Once you select next, the
 installation will start, which may take a while.
 
-.. image:: Pictures/10000001000001F700000187CD047508F8F0F742.png
+.. image:: Pictures/picture4.png
    :width: 9.428cm
    :height: 7.408cm
 
@@ -135,7 +135,7 @@ If you want to have a desktop shortcut, don’t forget to check the box.
 The ‘View CHANGELOG’ link at the bottom will open CHANGELOG.txt file
 where you can see what has changed.
 
-.. image:: Pictures/10000001000001F4000001886023737B90BAFF44.png
+.. image:: Pictures/picture5.png
    :width: 9.571cm
    :height: 7.504cm
 
@@ -328,11 +328,11 @@ folder where you installed MDANSE (C:\\Program Files\\MDANSE by
 default). Inside you can double click on the file called MDANSE with the
 MDANSE icon:
 
-.. image:: Pictures/10000001000000730000006F64D69D1EB0E5B5D7.png
+.. image:: Pictures/picture6.png
    :width: 1.789cm
    :height: 1.727cm
 
-.. image:: Pictures/100000010000025800000014D95D6D39C9FE12CE.png
+.. image:: Pictures/picture7.png
    :width: 14.021cm
    :height: 0.467cm
 
@@ -368,7 +368,7 @@ If your distribution has an applications menu of some sort, like below,
 you should be able to find an MDANSE icon in there that can be used to
 start the GUI.
 
-.. image:: Pictures/100000010000055100000301A9B5B198B0D6FEE6.png
+.. image:: Pictures/picture8.png
    :width: 12.314cm
    :height: 6.959cm
 
@@ -395,7 +395,7 @@ Please note that all pictures come from Windows 10, so the GUI will look
 very slightly different on other platforms. However, MDANSE works
 equally well, bugs notwithstanding, on all platforms.
 
-.. image:: Pictures/100000000000035A00000225D9D9B30259888397.jpg
+.. image:: Pictures/picture9.jpg
    :width: 15.921cm
    :height: 10.186cm
 
@@ -461,7 +461,7 @@ The File menu
 
 Pressing the **File** menu button brings up the following menu:
 
-.. image:: Pictures/10000001000000C70000006E1539438FACE07774.png
+.. image:: Pictures/picture10.png
    :width: 3.759cm
    :height: 2.078cm
 
@@ -472,7 +472,7 @@ This option allows you to select an MMTK NetCDF file. Once you click the
 Load data button, a standard (platform-specific) file browser will open,
 like the one below:
 
-.. image:: Pictures/10000001000003B4000002564F3D2836EB0B6495.png
+.. image:: Pictures/picture11.png
    :width: 10.315cm
    :height: 6.509cm
 
@@ -491,7 +491,7 @@ This option allows to convert a trajectory derived with a non MMTK-based
 program to the NetCDF MMTK trajectory format. Hovering over the
 Trajectory converter brings up the following menu:
 
-.. image:: Pictures/100000010000015B0000016E3E986405A542C06F.png
+.. image:: Pictures/picture12.png
    :width: 6.909cm
    :height: 7.287cm
 
@@ -521,7 +521,7 @@ The View menu
 
 This menu contains several options to hide/show various parts of MDANSE:
 
-.. image:: Pictures/10000001000000BE0000007FCAA964E78A90519D.png
+.. image:: Pictures/picture13.png
    :width: 3.962cm
    :height: 2.649cm
 
@@ -548,7 +548,7 @@ The Help menu
 
 Pressing the Help button brings up the following menu:
 
-.. image:: Pictures/10000001000000DB00000099F6B730A10B6BD3B5.png
+.. image:: Pictures/picture22.png
    :width: 5.741cm
    :height: 4.048cm
 
@@ -574,7 +574,7 @@ perform many important actions. Below is a brief overview of all of
 them, going left to right, and after that we will take a look at the
 more complex ones.
 
-.. image:: Pictures/10000001000001FB0000002B44E7FF7987426A26.png
+.. image:: Pictures/picture23.png
    :width: 13.416cm
    :height: 1.138cm
 
@@ -615,7 +615,7 @@ Periodic table viewer
 
 Once launched, it will open this window:
 
-.. image:: Pictures/100000010000031E000001EB8316D84CE16D60A9.png
+.. image:: Pictures/picture24.png
    :width: 15.806cm
    :height: 9.733cm
 
@@ -623,14 +623,14 @@ By hovering over an element, detailed information from MDANSE elements
 database will show up at the top. By clicking on an element, a list of
 its isotopes will appear as a menu:
 
-.. image:: Pictures/100000010000007B00000072BD990BE2296AF016.png
+.. image:: Pictures/picture25.png
    :width: 3.254cm
    :height: 3.016cm
 
 When an isotope is selected, all the information that is stored in the
 database will be displayed:
 
-.. image:: Pictures/100000010000024600000333543D0D0EC0A01C7E.png
+.. image:: Pictures/picture26.png
    :width: 7.509cm
    :height: 10.566cm
 
@@ -644,7 +644,7 @@ Elements database editor
 
 Clicking on this button opens this window:
 
-.. image:: Pictures/10000001000003160000018C76F0FE861E14A12B.png
+.. image:: Pictures/picture27.png
    :width: 15.789cm
    :height: 7.895cm
 
@@ -656,7 +656,7 @@ can do that through the file menu.
 File menu
 ^^^^^^^^^
 
-.. image:: Pictures/10000001000001000000004B8B80A954F09BBF56.png
+.. image:: Pictures/picture28.png
    :width: 6.773cm
    :height: 1.984cm
 
@@ -671,7 +671,7 @@ Database menu
 
 Clicking on Database opens this menu:
 
-.. image:: Pictures/10000001000000A900000052FEACFDD7C67801BA.png
+.. image:: Pictures/picture29.png
    :width: 4.329cm
    :height: 1.99cm
 
@@ -683,7 +683,7 @@ Clicking on Database opens this menu:
 
 Upon clicking on the icon, this window will open:
 
-.. image:: Pictures/10000001000003DA000002B772D53BC965757606.png
+.. image:: Pictures/picture30.png
    :width: 12.173cm
    :height: 8.58cm
 
@@ -692,7 +692,7 @@ File menu → Load, which will open a file browser. Only NetCDF files
 (ending in .nc, .cdf, or .netcdf) and HDF5 files (extension .h5 or .hdf)
 can be loaded; other file formats will result in an error.
 
-.. image:: Pictures/1000000100000079000000510978F762503F30F6.png
+.. image:: Pictures/picture31.png
    :width: 3.201cm
    :height: 2.081cm
 
@@ -702,7 +702,7 @@ assigned to the loaded instance (i.e. a key to e.g. distinguish between
 files with the same name), the name of the file, and the full path to
 the file.
 
-.. image:: Pictures/1000000100000130000000AFA255BACE473AB186.png
+.. image:: Pictures/picture32.png
    :width: 6.645cm
    :height: 3.826cm
 
@@ -772,7 +772,7 @@ Units Editor
 
 When opened, this window will appear:
 
-.. image:: Pictures/1000000100000248000001ECCC3F9A11E0472AF2.png
+.. image:: Pictures/picture38.png
    :width: 9.693cm
    :height: 8.167cm
 
@@ -783,7 +783,7 @@ information on how units work is in the `Units <#_Units>`__ section.
 This list is interactive; any unit in it can be clicked on, which
 displays its details, like so:
 
-.. image:: Pictures/1000000100000247000001E9C7FFA85698785E9D.png
+.. image:: Pictures/picture39.png
    :width: 9.804cm
    :height: 8.142cm
 
@@ -807,7 +807,7 @@ There are four buttons in the Units Editor window:
 -  **Add unit** opens the following window, which can be used to add new
    units or edit existing ones.
 
-.. image:: Pictures/10000001000000C10000017909613E0AF9D5EED0.png
+.. image:: Pictures/picture40.png
    :width: 2.84cm
    :height: 5.547cm
 
@@ -859,7 +859,7 @@ results of analyses are distinctly separated as ‘mmtk trajectory’ and
 file name here to bring it to the Working panel. This can be done
 multiple times for each file.
 
-.. image:: Pictures/10000001000000FD000001112D4B60FF74FCFC13.png
+.. image:: Pictures/picture41.png
    :width: 6.696cm
    :height: 7.223cm
 
@@ -870,7 +870,7 @@ The selected files appear in the Working panel as tabs. The currently
 opened tab is the one that whose file is going to be used for analysis
 and other operations when using the Plugins panel.
 
-.. image:: Pictures/100000010000010C0000002EFF8582524B23620C.png
+.. image:: Pictures/picture42.png
    :width: 7.093cm
    :height: 1.217cm
 
@@ -883,11 +883,11 @@ working panel, like below. To do that, you have to drag the window so
 that its top is near the top of the working panel, where the tabs are.
 An indicator will appear when you got it right.
 
-.. image:: Pictures/100000010000039B00000223E26E6A96BBCAA5F7.png
+.. image:: Pictures/picture43.png
    :width: 13.376cm
    :height: 7.927cm
 
-.. image:: Pictures/10000001000003A4000000F537A5F4FDE03228C0.png
+.. image:: Pictures/picture44.png
    :width: 15.921cm
    :height: 4.186cm
 
@@ -898,13 +898,13 @@ This is the heart of MDANSE, where all the analyses as well as other
 important features can be found. If the selected tab in the Working
 panel is from a trajectory, the Plugins panel will look like this:
 
-.. image:: Pictures/10000001000000FA0000011803C2A7616D0C2E95.png
+.. image:: Pictures/picture45.png
    :width: 6.616cm
    :height: 7.408cm
 
 If it is from the result of an analysis, it will look like this:
 
-.. image:: Pictures/10000001000000F700000112DF7A4DFE4F638571.png
+.. image:: Pictures/picture46.png
    :width: 6.535cm
    :height: 7.251cm
 
@@ -924,7 +924,7 @@ This menu contains all data manipulations and appears as in the picture
 below when a trajectory is loaded. As indicated by the plus buttons,
 each of these options is a menu in itself.
 
-.. image:: Pictures/10000001000000F9000000B9A79707AE37EC9465.png
+.. image:: Pictures/picture47.png
    :width: 6.588cm
    :height: 4.895cm
 
@@ -1031,7 +1031,7 @@ where N\ :sub:`triplets` is the number of selected triplets.
 GUI
    
 
-.. image:: Pictures/10000001000003220000021BA346CFB73717C1BE.png
+.. image:: Pictures/picture48.png
    :width: 15.921cm
    :height: 10.7cm
 
@@ -1191,7 +1191,7 @@ performed on a water box of 768 water molecules. To get the diffusion
 coefficient out of this plot, the slope of the linear part of the plot
 should be calculated.
 
-.. image:: Pictures/10000000000001BC00000163C18A769B32940652.png
+.. image:: Pictures/picture53.png
    :width: 11.748cm
    :height: 9.393cm
 
@@ -9042,55 +9042,55 @@ Packages.” https://www.lfd.uci.edu/~gohlke/pythonlibs/#wxpython.
 [42] “Conda MacOS.”
 https://docs.conda.io/projects/conda/en/latest/user-guide/install/macos.html.
 
-.. |image1| image:: Pictures/100000010000028D000001F1F632B1C1173DE220.png
+.. |image1| image:: Pictures/picture14.png
    :width: 7.096cm
    :height: 5.426cm
-.. |image2| image:: Pictures/100000010000028D000001F583E3D2D6B25FED29.png
+.. |image2| image:: Pictures/picture15.png
    :width: 7.131cm
    :height: 5.452cm
-.. |image3| image:: Pictures/100000010000028D000001F1F632B1C1173DE220.png
+.. |image3| image:: Pictures/picture16.png
    :width: 7.096cm
    :height: 5.426cm
-.. |image4| image:: Pictures/100000010000028C000001F092B9EB9B1E48AB9D.png
+.. |image4| image:: Pictures/picture17.png
    :width: 7.193cm
    :height: 5.466cm
-.. |image5| image:: Pictures/100000010000028D000001F1F632B1C1173DE220.png
+.. |image5| image:: Pictures/picture18.png
    :width: 7.096cm
    :height: 5.426cm
-.. |image6| image:: Pictures/100000010000028C000001F40D7333B09A10BBF0.png
+.. |image6| image:: Pictures/picture19.png
    :width: 7.131cm
    :height: 5.445cm
-.. |image7| image:: Pictures/100000010000025E000001C3AC39A36717DC7EE3.png
+.. |image7| image:: Pictures/picture20.png
    :width: 6.959cm
    :height: 5.156cm
-.. |image8| image:: Pictures/100000010000025D000001C0F8379C92EEE1C895.png
+.. |image8| image:: Pictures/picture21.png
    :width: 7.011cm
    :height: 5.191cm
-.. |image9| image:: Pictures/10000001000001C9000003B286D7BAECC84888DA.png
+.. |image9| image:: Pictures/picture33.png
    :width: 7.191cm
    :height: 14.887cm
-.. |image10| image:: Pictures/10000001000002A10000027D14B28490295A59FA.png
+.. |image10| image:: Pictures/picture34.png
    :width: 7.728cm
    :height: 7.313cm
-.. |image11| image:: Pictures/100000010000029E000002771B2359A8E105AC9F.png
+.. |image11| image:: Pictures/picture35.png
    :width: 7.798cm
    :height: 7.345cm
-.. |image12| image:: Pictures/100000010000029E000002771B2359A8E105AC9F.png
+.. |image12| image:: Pictures/picture36.png
    :width: 7.798cm
    :height: 7.345cm
-.. |image13| image:: Pictures/100000010000029D0000027A5511D91E20AFD9A5.png
+.. |image13| image:: Pictures/picture37.png
    :width: 7.765cm
    :height: 7.357cm
-.. |image14| image:: Pictures/1000000100000323000002D1329469D922AFA541.png
+.. |image14| image:: Pictures/picture49.png
    :width: 15.921cm
    :height: 14.295cm
-.. |image15| image:: Pictures/100000010000031E000000F3118920C50EDE8CB0.png
+.. |image15| image:: Pictures/picture50.png
    :width: 15.921cm
    :height: 4.847cm
-.. |image16| image:: Pictures/100000010000031F00000248D8781028790CCDA5.png
+.. |image16| image:: Pictures/picture51.png
    :width: 15.921cm
    :height: 11.636cm
-.. |image17| image:: Pictures/100000010000031E00000105F69265329BBA5756.png
+.. |image17| image:: Pictures/picture52.png
    :width: 15.921cm
    :height: 5.207cm
 .. |image18| image:: Pictures/100000010000031F00000247259172131CFA3B36.png
