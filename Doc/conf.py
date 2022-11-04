@@ -41,6 +41,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # copyright = '2015-2022, Eric Pellegrini'
 author = 'Eric Pellegrini'
 release = '1.5.2'
+version = '1.5'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -86,9 +87,6 @@ copyright = u'2015, Gael Goret, Bachir Aoun and Eric C. Pellegrini'
 # built documents.
 #
 # The short X.Y version.
-version = '1.0'
-# The full version, including alpha/beta/rc tags.
-release = '1.0'
 
 html_logo = '_static/mdanse_logo.png'
 
@@ -117,3 +115,7 @@ html_theme_options = {'sidebarwidth':250}#, 'nosidebar':True}
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'MDANSE_doc'
 
+latex_documents = [
+    (master_doc, 'theory_help.tex', 'Theory background of MDANSE',
+     'MDANSE developers', 'manual'),
+]
