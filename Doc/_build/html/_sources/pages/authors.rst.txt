@@ -22,17 +22,3 @@ financial support from the Institut Laue-Langevin and the French Agence
 Nationale de la Recherche (ANR) through contracts No.
 ANR-2010-COSI-001-01 and ANR-06-CIS6-012-01 is also acknowledged.
 
-Citing MDANSE
-=============
-
-If you find MDANSE useful for your research, please cite the following
-paper in your publications:
-
-MDANSE: An Interactive Analysis Environment for Molecular Dynamics
-Simulations
-
-G. Goret, B. Aoun, and E. Pellegrini
-
-Journal of Chemical Information and Modeling 2017 57 (1), 1-5
-
-DOI: 10.1021/acs.jcim.6b00571

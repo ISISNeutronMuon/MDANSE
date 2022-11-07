@@ -22,11 +22,11 @@ privileges, ie. Windows will ask you if you really want to install the
 software, and you might need to enter your password. When that is done,
 you will see a welcome screen, followed by a license agreement.
 
-.. image:: Pictures/picture2.png
+.. image:: ./Pictures/10000001000001F400000185DE47831036B11045.png
    :width: 9.103cm
    :height: 7.082cm
 
-.. image:: Pictures/picture3.png
+.. image:: ./Pictures/10000001000001F400000187FCDDC0BEF9645BDF.png
    :width: 9.022cm
    :height: 6.967cm
 
@@ -34,7 +34,7 @@ The default installation location is in C:\\Program Files\\MDANSE, but
 it can be changed to any location. Once you select next, the
 installation will start, which may take a while.
 
-.. image:: Pictures/picture4.png
+.. image:: ./Pictures/10000001000001F700000187CD047508F8F0F742.png
    :width: 9.428cm
    :height: 7.408cm
 
@@ -43,7 +43,7 @@ If you want to have a desktop shortcut, don’t forget to check the box.
 The ‘View CHANGELOG’ link at the bottom will open CHANGELOG.txt file
 where you can see what has changed.
 
-.. image:: Pictures/picture5.png
+.. image:: ./Pictures/10000001000001F4000001886023737B90BAFF44.png
    :width: 9.571cm
    :height: 7.504cm
 

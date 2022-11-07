@@ -34,9 +34,6 @@ G. Goret, B. Aoun, E. Pellegrini, "MDANSE: An Interactive Analysis Environment f
 J Chem Inf Model. 57(1):1-5 (2017).
 
 
-User guide
-==========
-
 .. toctree::
    :maxdepth: 4
    :numbered:
@@ -52,6 +49,7 @@ User guide
    pages/cmd
    pages/trajectory
    pages/plotting
+   pages/parameters
    pages/build
    pages/references
 

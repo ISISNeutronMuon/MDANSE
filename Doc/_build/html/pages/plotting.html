@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10. Plotting Options &mdash; MDANSE 1.5.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="11. Glossary of Parameters" href="parameters.html" />
+    <link rel="prev" title="9. Trajectory Converters" href="trajectory.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> MDANSE
+            <img src="../_static/mdanse_logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">MDANSE User Manual</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="opening.html">1. MDANSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opening.html#citing-mdanse">2. Citing MDANSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">3. Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">4. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">5. Installing MDANSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="files.html">6. Input and output files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">7. Using MDANSE Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmd.html">8. Using MDANSE from command line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">9. Trajectory Converters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">10. Plotting Options</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#line-plotter">10.1. Line Plotter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#toolbar">10.1.1. Toolbar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#right-click-menu">10.1.2. Right-click menu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#general-settings">10.1.3. General settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#axes-settings">10.1.4. Axes settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lines-settings">10.1.5. Lines settings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#image-plotter">10.2. Image Plotter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#right-click-menu-1">10.2.1. Right-click menu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#settings">10.2.2. Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#elevation-plotter">10.3. Elevation Plotter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#d-slice-plotter">10.4. 2D Slice Plotter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#iso-surface-plotter">10.5. Iso Surface Plotter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scalar-field-plotter">10.6. Scalar-Field Plotter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">11. Glossary of Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build.html">12. Building MDANSE from source code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">13. References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MDANSE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><span class="section-number">10. </span>Plotting Options</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pages/plotting.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="plotting-options">
+<h1><span class="section-number">10. </span>Plotting Options<a class="headerlink" href="#plotting-options" title="Permalink to this heading"></a></h1>
+<section id="line-plotter">
+<h2><span class="section-number">10.1. </span>Line Plotter<a class="headerlink" href="#line-plotter" title="Permalink to this heading"></a></h2>
+<section id="toolbar">
+<span id="toolbar-1"></span><h3><span class="section-number">10.1.1. </span>Toolbar<a class="headerlink" href="#toolbar" title="Permalink to this heading"></a></h3>
+<p>Data plotted with the Line Plotter will have the following menu beneath
+the graph:</p>
+<a class="reference internal image-reference" href="../_images/10000001000002990000003D4AC033C3BBE338C0.png"><img alt="../_images/10000001000002990000003D4AC033C3BBE338C0.png" src="../_images/10000001000002990000003D4AC033C3BBE338C0.png" style="width: 15.921cm; height: 1.461cm;" /></a>
+<p>The top-row buttons, going from left to right, have the following
+functions:</p>
+<ul class="simple">
+<li><p><strong>Home</strong> restores the plot to the default position. Ie. if it has
+been moved, zoomed in/out, axes adjusted, etc., it will be restored
+to the position it was in when it was plotted. This position is one
+MDANSE determined to be the best fit and shows all the data.</p></li>
+</ul>
+<p><a class="reference internal" href="../_images/10000001000004E6000002A73EEAE87D5C660F5C.png"><img alt="image35" src="../_images/10000001000004E6000002A73EEAE87D5C660F5C.png" style="width: 7.655cm; height: 4.159cm;" /></a><a class="reference internal" href="../_images/10000001000004E4000002A94202A3BFD79098BA.png"><img alt="image36" src="../_images/10000001000004E4000002A94202A3BFD79098BA.png" style="width: 7.465cm; height: 4.096cm;" /></a></p>
+<ul class="simple">
+<li><p><strong>Back</strong> undoes the latest action.</p></li>
+<li><p><strong>Forward</strong> redoes the latest undone action.</p></li>
+<li><p><strong>Pan</strong> gives the ability to use mouse to move the graph. After this
+option is activated, you can drag the plot around to adjust what is
+visible inside the axes. This mode can be disabled by clicking on its
+icon again.</p></li>
+<li><p><strong>Zoom</strong> gives the ability to zoom in. Once activated, you can select
+an area inside the axes that will be zoomed in on. This mode can be
+disabled by clicking on its icon again.</p></li>
+<li><p><strong>Subplots</strong> opens the Configure subplots window, like the one below.
+It can be used to adjust various parameters of the whole graph. The
+red lines signify the original positions, while the blue bars show
+the current value. The values can be adjusted by clicking inside the
+relevant bar, and the blue bar will move to the clicked position.
+PLEASE NOTE that whatever changes you make are automatically applied
+and saved. There is no confirmation prompt when closing this window,
+and when it is reopened, the red bars will move to the new positions.
+The changes can only be reverted by using the <strong>Back</strong> or <strong>Home</strong>
+buttons.</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/10000001000002510000013F4553775FDA154299.png"><img alt="../_images/10000001000002510000013F4553775FDA154299.png" src="../_images/10000001000002510000013F4553775FDA154299.png" style="width: 13.033cm; height: 7.011cm;" /></a>
+<ul class="simple">
+<li><ul>
+<li><p><strong>left</strong> moves the left vertical ax to change the size of the
+plot.</p></li>
+</ul>
+</li>
+</ul>
+<a class="reference internal image-reference" href="../_images/10000001000005A3000003AC767D18B87ADC83B7.png"><img alt="../_images/10000001000005A3000003AC767D18B87ADC83B7.png" src="../_images/10000001000005A3000003AC767D18B87ADC83B7.png" style="width: 10.171cm; height: 6.625cm;" /></a>
+<ul class="simple">
+<li><ul>
+<li><p><strong>bottom</strong> moves the bottom horizontal ax to change the size of
+the plot.</p></li>
+</ul>
+</li>
+</ul>
+<a class="reference internal image-reference" href="../_images/10000001000005A5000003B1932A4B476DA84F50.png"><img alt="../_images/10000001000005A5000003B1932A4B476DA84F50.png" src="../_images/10000001000005A5000003B1932A4B476DA84F50.png" style="width: 10.202cm; height: 6.671cm;" /></a>
+<ul class="simple">
+<li><ul>
+<li><p><strong>right</strong> moves the right vertical ax to change the size of the
+plot.</p></li>
+</ul>
+</li>
+</ul>
+<a class="reference internal image-reference" href="../_images/10000001000005A5000003ABB1E8E9831A8AAA00.png"><img alt="../_images/10000001000005A5000003ABB1E8E9831A8AAA00.png" src="../_images/10000001000005A5000003ABB1E8E9831A8AAA00.png" style="width: 10.246cm; height: 6.659cm;" /></a>
+<ul class="simple">
+<li><ul>
+<li><p><strong>top</strong> moves the top horizontal to change the size of the plot.</p></li>
+</ul>
+</li>
+</ul>
+<a class="reference internal image-reference" href="../_images/10000001000005A7000003ADE01DFF6A52D35724.png"><img alt="../_images/10000001000005A7000003ADE01DFF6A52D35724.png" src="../_images/10000001000005A7000003ADE01DFF6A52D35724.png" style="width: 10.388cm; height: 6.754cm;" /></a>
+<ul class="simple">
+<li><ul>
+<li><p><strong>wspace</strong> changes the vertical spacing between multiple graphs
+(matplotlib subplots)</p></li>
+<li><p><strong>hspace</strong> changes the horizontal spacing between multiple graphs
+(matplotlib subplots)</p></li>
+</ul>
+</li>
+<li><p><strong>Save</strong> opens a file browser that allows you to save the graph in
+one of these formats: EPS, PGF, PDF, PNG, PS, RAW, RGBA, SVG, or
+SVGZ.</p></li>
+</ul>
+<p>Below this row of buttons is a field called Offset value, which allows
+for changing the y-axis offset.</p>
+</section>
+<section id="right-click-menu">
+<h3><span class="section-number">10.1.2. </span>Right-click menu<a class="headerlink" href="#right-click-menu" title="Permalink to this heading"></a></h3>
+<p>Another way to adjust the plot is through a menu accessible through
+right-clicking anywhere inside the tab:</p>
+<a class="reference internal image-reference" href="../_images/10000001000000B60000008C820D1B058CFA1617.png"><img alt="../_images/10000001000000B60000008C820D1B058CFA1617.png" src="../_images/10000001000000B60000008C820D1B058CFA1617.png" style="width: 4.653cm; height: 3.514cm;" /></a>
+<ul class="simple">
+<li><p><strong>Clear</strong> removes all the lines from current graph. A prompt will
+appear asking for confirmation before this happens.</p></li>
+<li><p><strong>Export data</strong> opens a file browser that can be used to save the
+data making up the graph. The exported data is in columns separated
+by spaces. The adjustments made that affect the data itself, such as
+changes in <a class="reference external" href="#_Units">units</a>, are applied. This option is useful if
+you would like to plot the data using a software of your choice
+rather than the MDANSE plotter.</p></li>
+</ul>
+</section>
+<section id="general-settings">
+<h3><span class="section-number">10.1.3. </span>General settings<a class="headerlink" href="#general-settings" title="Permalink to this heading"></a></h3>
+<p>Clicking on General settings in the above menu opens this window:</p>
+<a class="reference internal image-reference" href="../_images/100000010000021E0000013CBE1FC154D5CE9300.png"><img alt="../_images/100000010000021E0000013CBE1FC154D5CE9300.png" src="../_images/100000010000021E0000013CBE1FC154D5CE9300.png" style="width: 10.881cm; height: 6.244cm;" /></a>
+<ul class="simple">
+<li><p>Label</p>
+<ul>
+<li><p><strong>Title</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format;</em> str</p>
+<p><em>Default:</em> None</p>
+<p><em>Description:</em> sets a title for the graph. This will appear above the
+figure.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>X Axis</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> str</p>
+<p><em>Default:</em> the name of the variable plotted on the x-axis</p>
+<p><em>Description:</em> sets the x-axis label. This will appear below the bottom
+ax, to the left of the x-axis units. The <a class="reference external" href="#_Units">units</a> cannot be
+formatted here, but they can be changed in <a class="reference external" href="#_Axes_settings">Axes
+settings</a>.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>Y Axis</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> str</p>
+<p><em>Default:</em> the name of the first plotted variable</p>
+<p><em>Description:</em> sets the y-axis label. This will appear below the bottom
+ax, to the left of the y-axis units. The <a class="reference external" href="#_Units">units</a> cannot be
+formatted here, but they can be changed in <a class="reference external" href="#_Axes_settings">Axes
+settings</a>.</p>
+<ul class="simple">
+<li><p>Legend</p>
+<ul>
+<li><p><strong>Show</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> bool</p>
+<p><em>Default:</em> False</p>
+<p><em>Description:</em> if ticked, causes the legend to appear.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>Location</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> drop-down</p>
+<p><em>Default:</em> best</p>
+<p><em>Description:</em> the location where the legend will appear on the graph.
+Since MDANSE uses matplotlib for plotting, these options are all the
+ones available in matplotlib and so function like those. For more
+information, <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.legend.html">matplotlib
+documentation</a>
+might be of use.</p>
+<ul class="simple">
+<li><ul>
+<li><p>Style</p>
+<ul>
+<li><p><strong>Frame on</strong></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> bool</p>
+<p><em>Default:</em> True</p>
+<p><em>Description:</em> Adds a frame around the legend.</p>
+<ul class="simple">
+<li><ul>
+<li><ul>
+<li><p><strong>Fancy box</strong></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> bool</p>
+<p><em>Default:</em> False</p>
+<p><em>Description:</em> Slightly changes the legend frame/shadow. Only works if
+the frame is on.</p>
+<ul class="simple">
+<li><ul>
+<li><ul>
+<li><p><strong>Shadow</strong></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> bool</p>
+<p><em>Default:</em> True</p>
+<p><em>Description:</em> Adds a shadow beneath the legend.</p>
+<ul class="simple">
+<li><p>Grid</p>
+<ul>
+<li><p><strong>Style</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> drop-down</p>
+<p><em>Default:</em> None</p>
+<p><em>Description:</em> decides how the grid should look.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>Width</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 1</p>
+<p><em>Description:</em> the thickness of the lines making up the grid.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>Color</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> window</p>
+<p><em>Default:</em> red</p>
+<p><em>Description:</em> opens a window that allows for advanced colour selection.
+The colour is the colour of the lines making up the grid.</p>
+<ul class="simple">
+<li><p><strong>Apply</strong> button applies the changes to the graph without closing the
+window.</p></li>
+</ul>
+</section>
+<section id="axes-settings">
+<h3><span class="section-number">10.1.4. </span>Axes settings<a class="headerlink" href="#axes-settings" title="Permalink to this heading"></a></h3>
+<p>The Axes settings button in the right-click menu opens the following
+window:</p>
+<a class="reference internal image-reference" href="../_images/100000010000028C000000C48CF73CD09B2E10B7.png"><img alt="../_images/100000010000028C000000C48CF73CD09B2E10B7.png" src="../_images/100000010000028C000000C48CF73CD09B2E10B7.png" style="width: 13.229cm; height: 3.866cm;" /></a>
+<ul class="simple">
+<li><p>Bounds</p>
+<ul>
+<li><p><strong>X Min</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> float</p>
+<p><em>Default:</em> value corresponding to the best fit</p>
+<p><em>Description:</em> the x value at which the y ax intercepts the x ax.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>Y Min</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> float</p>
+<p><em>Default:</em> value corresponding to the best fit</p>
+<p><em>Description:</em> the y value at which the x ax intercepts the y ax.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>X Max</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> float</p>
+<p><em>Default:</em> value corresponding to the best fit</p>
+<p><em>Description:</em> the x value denominating the right end of the graph</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>Y Max</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> float</p>
+<p><em>Default:</em> value corresponding to the best fit</p>
+<p><em>Description:</em> the y value denominating the top end of the graph</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>Auto fit</strong> button restores all the above values to their
+defaults, ie. it adjusts the graph to the best fit, where all data
+is visible and least white space is left. It automatically applies
+the changes.</p></li>
+</ul>
+</li>
+<li><p>Unit and Scale</p>
+<ul>
+<li><p><strong>X</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> str; drop-down</p>
+<p><em>Default:</em> depends on physical quantity (more info in
+<a class="reference external" href="#_Units">Units</a>); linear</p>
+<p><em>Description:</em> the units that the data making up the graph is in. Both
+the plot and the axis label are adjusted once Apply is pressed.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>Y</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> str; drop-down</p>
+<p><em>Default:</em> depends on physical quantity (more info in
+<a class="reference external" href="#_Units">Units</a>); linear</p>
+<p><em>Description:</em> the units that the data making up the graph is in. Both
+the plot and the axis label are adjusted once Apply is pressed.</p>
+<ul class="simple">
+<li><p><strong>Apply</strong> button applies the changes to the graph without closing the
+window.</p></li>
+</ul>
+</section>
+<section id="lines-settings">
+<h3><span class="section-number">10.1.5. </span>Lines settings<a class="headerlink" href="#lines-settings" title="Permalink to this heading"></a></h3>
+<p>The Lines settings button in the right-click menu opens the following
+window:</p>
+<a class="reference internal image-reference" href="../_images/10000001000001D0000001044A0C62B9A6078359.png"><img alt="../_images/10000001000001D0000001044A0C62B9A6078359.png" src="../_images/10000001000001D0000001044A0C62B9A6078359.png" style="width: 12.277cm; height: 6.879cm;" /></a>
+<ul class="simple">
+<li><p>The <strong>Lines</strong> box is a list of all lines in the figure. These lines
+can be selected by clicking on them, which allows them to be
+manipulated.</p></li>
+<li><p><strong>Delete</strong> button deletes the line from the graph.</p></li>
+<li><p><strong>Legend</strong></p></li>
+</ul>
+<p><em>Format:</em> str</p>
+<p><em>Default:</em> the name of the selected line as it shows up in the Lines
+block</p>
+<p><em>Description:</em> the name of the line that appears in the legend.</p>
+<ul class="simple">
+<li><p><strong>Style</strong></p></li>
+</ul>
+<p><em>Format:</em> drop-down</p>
+<p><em>Default:</em> -</p>
+<p><em>Description:</em> determines how the line should look like.</p>
+<ul class="simple">
+<li><p><strong>Width</strong></p></li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 1</p>
+<p><em>Description:</em> the width of the line.</p>
+<ul class="simple">
+<li><p><strong>Color</strong></p></li>
+</ul>
+<p><em>Format:</em> window</p>
+<p><em>Default:</em> generated automatically by matplotlib</p>
+<p><em>Description:</em> opens a window that allows for advanced colour selection.
+Allows for changing the line colour.</p>
+<ul class="simple">
+<li><p><strong>Apply</strong> button applies the changes without closing the window.</p></li>
+</ul>
+</section>
+</section>
+<section id="image-plotter">
+<h2><span class="section-number">10.2. </span>Image Plotter<a class="headerlink" href="#image-plotter" title="Permalink to this heading"></a></h2>
+<p>At the bottom of an Image Plotter is the menu below. The functions of
+the buttons, from left to right, is below that.</p>
+<a class="reference internal image-reference" href="../_images/100000010000014A00000020C236E406689A15C0.png"><img alt="../_images/100000010000014A00000020C236E406689A15C0.png" src="../_images/100000010000014A00000020C236E406689A15C0.png" style="width: 8.731cm; height: 0.847cm;" /></a>
+<ul class="simple">
+<li><p><strong>Home</strong> restores the plot to the default position. Ie. if it has
+been moved, zoomed in/out, axes adjusted, etc., it will be restored
+to the position it was in when it was plotted. This position is one
+MDANSE determined to be the best fit and shows all the data.</p></li>
+</ul>
+<p><a class="reference internal" href="../_images/1000000100000478000002C6F32754BFA135B144.png"><img alt="image37" src="../_images/1000000100000478000002C6F32754BFA135B144.png" style="width: 6.854cm; height: 4.255cm;" /></a><a class="reference internal" href="../_images/1000000100000483000002D2D853AC6BB7CFEA02.png"><img alt="image38" src="../_images/1000000100000483000002D2D853AC6BB7CFEA02.png" style="width: 6.791cm; height: 4.246cm;" /></a></p>
+<ul class="simple">
+<li><p><strong>Back</strong> undoes the latest action.</p></li>
+<li><p><strong>Forward</strong> redoes the latest undone action.</p></li>
+<li><p><strong>Pan</strong> gives the ability to use mouse to move the graph. After this
+option is activated, you can drag the plot around to adjust what is
+visible inside the axes. This mode can be disabled by clicking on its
+icon again.</p></li>
+<li><p><strong>Zoom</strong> gives the ability to zoom in. Once activated, you can select
+an area inside the axes that will be zoomed in on. This mode can be
+disabled by clicking on its icon again.</p></li>
+<li><p><strong>Subplots</strong> opens the Configure subplots window, like the one below.
+It can be used to adjust various parameters of the whole graph. The
+red lines signify the original positions, while the blue bars show
+the current value. The values can be adjusted by clicking inside the
+relevant bar, and the blue bar will move to the clicked position.
+PLEASE NOTE that whatever changes you make are automatically applied
+and saved. There is no confirmation prompt when closing this window,
+and when it is reopened, the red bars will move to the new positions.
+The changes can only be reverted by using the <strong>Back</strong> or <strong>Home</strong>
+buttons. (The illustrations are of a line plot, but exactly the same
+happens to an Image Plot)</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/10000001000002510000013F4553775FDA154299.png"><img alt="../_images/10000001000002510000013F4553775FDA154299.png" src="../_images/10000001000002510000013F4553775FDA154299.png" style="width: 13.033cm; height: 7.011cm;" /></a>
+<ul class="simple">
+<li><ul>
+<li><p><strong>left</strong> moves the left vertical ax to change the size of the
+plot.</p></li>
+</ul>
+</li>
+</ul>
+<a class="reference internal image-reference" href="../_images/10000001000005A7000003B03735117678BCB5D2.png"><img alt="../_images/10000001000005A7000003B03735117678BCB5D2.png" src="../_images/10000001000005A7000003B03735117678BCB5D2.png" style="width: 9.432cm; height: 6.152cm;" /></a>
+<ul class="simple">
+<li><ul>
+<li><p><strong>bottom</strong> moves the bottom horizontal ax to change the size of
+the plot.</p></li>
+</ul>
+</li>
+</ul>
+<a class="reference internal image-reference" href="../_images/10000001000005AB000003B801402409C04665A2.png"><img alt="../_images/10000001000005AB000003B801402409C04665A2.png" src="../_images/10000001000005AB000003B801402409C04665A2.png" style="width: 9.44cm; height: 6.195cm;" /></a>
+<ul class="simple">
+<li><ul>
+<li><p><strong>right</strong> moves the right vertical ax to change the size of the
+plot.</p></li>
+</ul>
+</li>
+</ul>
+<a class="reference internal image-reference" href="../_images/10000001000005A7000003B1D5499F0F48FF77D1.png"><img alt="../_images/10000001000005A7000003B1D5499F0F48FF77D1.png" src="../_images/10000001000005A7000003B1D5499F0F48FF77D1.png" style="width: 9.761cm; height: 6.375cm;" /></a>
+<ul class="simple">
+<li><ul>
+<li><p><strong>top</strong> moves the top horizontal to change the size of the plot.</p></li>
+</ul>
+</li>
+</ul>
+<a class="reference internal image-reference" href="../_images/10000001000005A4000003B0CA26F7CCCE412711.png"><img alt="../_images/10000001000005A4000003B0CA26F7CCCE412711.png" src="../_images/10000001000005A4000003B0CA26F7CCCE412711.png" style="width: 9.931cm; height: 6.491cm;" /></a>
+<ul class="simple">
+<li><ul>
+<li><p><strong>wspace</strong> changes the vertical spacing between multiple graphs
+(matplotlib subplots)</p></li>
+<li><p><strong>hspace</strong> changes the horizontal spacing between multiple graphs
+(matplotlib subplots)</p></li>
+</ul>
+</li>
+<li><p><strong>Save</strong> opens a file browser that allows you to save the graph in
+one of these formats: EPS, PGF, PDF, PNG, PS, RAW, RGBA, SVG, or
+SVGZ.</p></li>
+<li><p><strong>Slicing mode</strong>, when ticked, allows you to select any point in the
+plot. This point will remain marked by a cross (see below) on the
+plot until Slicing mode is deactivated.</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/1000000100000488000002C3774AD25EFC07291A.png"><img alt="../_images/1000000100000488000002C3774AD25EFC07291A.png" src="../_images/1000000100000488000002C3774AD25EFC07291A.png" style="width: 8.978cm; height: 5.472cm;" /></a>
+<p>The selection also makes the following window to appear. There is no
+limit to how many points may be selected, and each point will appear in
+the window as different colour, corresponding to the colour of the
+cross.</p>
+<a class="reference internal image-reference" href="../_images/10000001000003C00000032DBE69F8276B9B91D5.png"><img alt="../_images/10000001000003C00000032DBE69F8276B9B91D5.png" src="../_images/10000001000003C00000032DBE69F8276B9B91D5.png" style="width: 9.253cm; height: 7.835cm;" /></a>
+<p>The upper plot shows how value changes across the x-axis at the y-value
+of the chosen point, while the bottom plot shows how the value changes
+across the y-axis at the x-value of the chosen point.</p>
+<p>The buttons in the bottom bar work the same as the corresponding buttons
+in the Image Plot. The other buttons work thusly:</p>
+<ul class="simple">
+<li><p><strong>Auto Scale</strong> adjusts the y-axis so that it contains 0.</p></li>
+<li><p><strong>Single target plot</strong> checkbox determines whether additional slices
+should be added to the same ‘Cross slicing’ window. It does not take
+effect immediately; if it is checked but the window is not closed,
+additional cross slices will be added to the plots in the opened
+window. However, if the box is checked then the window is closed, any
+cross slices made will open a new window where all the previously
+made slices are present plus the new one. In this case, the windows
+corresponding to older slices are not altered.</p></li>
+</ul>
+<p>For illustration, if the box is unchecked or the window is not closed
+after checking the box, only one ‘Cross slicing’ window will be open and
+will change thusly (left to right) as further slices are performed:</p>
+<p><a class="reference internal" href="../_images/10000001000003C2000003347082A5808C577BC7.png"><img alt="image39" src="../_images/10000001000003C2000003347082A5808C577BC7.png" style="width: 4.815cm; height: 4.105cm;" /></a><a class="reference internal" href="../_images/10000001000003C10000032F3AEF65741592C169.png"><img alt="image40" src="../_images/10000001000003C10000032F3AEF65741592C169.png" style="width: 4.904cm; height: 4.157cm;" /></a><a class="reference internal" href="../_images/10000001000003BF0000032F9CDC0562548E815A.png"><img alt="image41" src="../_images/10000001000003BF0000032F9CDC0562548E815A.png" style="width: 4.798cm; height: 4.076cm;" /></a></p>
+<p>If the first window is closed after checking the box, new windows will
+continue being created like so:</p>
+<p><a class="reference internal" href="../_images/10000001000003C200000330E638C73D8C1D67D9.png"><img alt="image42" src="../_images/10000001000003C200000330E638C73D8C1D67D9.png" style="width: 5.239cm; height: 4.443cm;" /></a> <a class="reference internal" href="../_images/100000010000072F000003336ED265D0B6E3D58A.png"><img alt="image43" src="../_images/100000010000072F000003336ED265D0B6E3D58A.png" style="width: 9.844cm; height: 4.383cm;" /></a></p>
+<section id="right-click-menu-1">
+<span id="id1"></span><h3><span class="section-number">10.2.1. </span>Right-click menu<a class="headerlink" href="#right-click-menu-1" title="Permalink to this heading"></a></h3>
+<p>By right-clicking anywhere inside the axes, the following menu will
+appear:</p>
+<a class="reference internal image-reference" href="../_images/10000001000000960000003931D40B39128A8083.png"><img alt="../_images/10000001000000960000003931D40B39128A8083.png" src="../_images/10000001000000960000003931D40B39128A8083.png" style="width: 3.969cm; height: 1.508cm;" /></a>
+<ul class="simple">
+<li><p><strong>Export data</strong> opens a file browser that can be used to save the
+data making up the graph. The exported data is in columns separated
+by spaces. The adjustments made that affect the data itself, such as
+changes in <a class="reference external" href="#_Units">units</a>, are applied. This option is useful if
+you would like to plot the data using a software of your choice
+rather than the MDANSE plotter.</p></li>
+</ul>
+</section>
+<section id="settings">
+<h3><span class="section-number">10.2.2. </span>Settings<a class="headerlink" href="#settings" title="Permalink to this heading"></a></h3>
+<p>By clicking on Setting, the following window will open:</p>
+<a class="reference internal image-reference" href="../_images/100000010000014600000113C0E6204C6248BA0D.png"><img alt="../_images/100000010000014600000113C0E6204C6248BA0D.png" src="../_images/100000010000014600000113C0E6204C6248BA0D.png" style="width: 7.274cm; height: 6.137cm;" /></a>
+<ul class="simple">
+<li><p>Label</p>
+<ul>
+<li><p><strong>Title</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format;</em> str</p>
+<p><em>Default:</em> None</p>
+<p><em>Description:</em> sets a title for the graph. This will appear above the
+figure.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>X Axis</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> str</p>
+<p><em>Default:</em> the name of the variable plotted on the x-axis</p>
+<p><em>Description:</em> sets the x-axis label. This will appear below the bottom
+ax, to the left of the x-axis units. The <a class="reference external" href="#_Units">units</a> cannot be
+formatted here, but they can be changed in <a class="reference external" href="#_Axes_settings">Axes
+settings</a>.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>Y Axis</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> str</p>
+<p><em>Default:</em> the name of the first plotted variable</p>
+<p><em>Description:</em> sets the y-axis label. This will appear below the bottom
+ax, to the left of the y-axis units. The <a class="reference external" href="#_Units">units</a> cannot be
+formatted here, but they can be changed in <a class="reference external" href="#_Axes_settings">Axes
+settings</a>.</p>
+<ul class="simple">
+<li><p>Aspect</p>
+<ul>
+<li><p><strong>Proportions</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> drop-down</p>
+<p><em>Default:</em> auto</p>
+<p>Description: changes how the scale of the x-axis and y-axis is related.
+’auto’ automatically decides how to fit the plot, while ‘equal’ makes
+both axes range between the same values.</p>
+<ul class="simple">
+<li><p><strong>interpolation order</strong></p></li>
+</ul>
+<p><em>Format:</em> drop-down</p>
+<p><em>Default:</em> Nearest</p>
+<p><em>Description:</em> the algorithm to use for image scaling. For more
+information, see matplotlib documentation
+[<a class="reference external" href="#SignetBibliographie_037">37</a>].</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>Scale</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> drop-down</p>
+<p><em>Default:</em> none</p>
+<p><em>Description:</em> changes the scale of the axes.</p>
+<ul class="simple">
+<li><p>Units</p>
+<ul>
+<li><p><strong>X</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> str</p>
+<p><em>Default:</em> depends on physical quantity (more info in
+<a class="reference external" href="#_Units">Units</a>)</p>
+<p><em>Description:</em> the units that the data making up the graph is in. Both
+the plot and the axis label are adjusted once Apply is pressed.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>Y</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> str</p>
+<p><em>Default:</em> depends on physical quantity (more info in
+<a class="reference external" href="#_Units">Units</a>)</p>
+<p><em>Description:</em> the units that the data making up the graph is in. Both
+the plot and the axis label are adjusted once Apply is pressed.</p>
+<ul class="simple">
+<li><p><strong>Apply</strong> button applies the changes without closing the window.</p></li>
+</ul>
+</section>
+</section>
+<section id="elevation-plotter">
+<h2><span class="section-number">10.3. </span>Elevation Plotter<a class="headerlink" href="#elevation-plotter" title="Permalink to this heading"></a></h2>
+<p>An elevation plot should look like this when opened:</p>
+<a class="reference internal image-reference" href="../_images/100000010000029600000246AC569286636CD2E9.png"><img alt="../_images/100000010000029600000246AC569286636CD2E9.png" src="../_images/100000010000029600000246AC569286636CD2E9.png" style="width: 11.158cm; height: 9.809cm;" /></a>
+<p>You can use the mouse to drag the plot around to change the perspective,
+a bit similar to how Pan would behave in Image Plotter when activated.
+The plot can be zoomed in or out using the scrolling wheel or touchpad.</p>
+<p>The <strong>Scaling Panel</strong> in the toolbar can be used to change the size of
+the plot, either along x-axis or y-axis, depending on which part is
+used. Please note, however, that it is possible that only a part of the
+plot is initially visible, meaning the changes on screen are only a
+side-effect of actual changes. Both the input field and the sliding bar
+achieve the same purpose.</p>
+<p>The <strong>Elevation Panel</strong> changes the contrast of the colours in the plot.
+Both the input field and the sliding bar achieve the same purpose.</p>
+<p>The <strong>Save current view</strong> button opens a file browse, allowing the
+current contents of the screen (inside the plot, ie. not toolbar) to be
+saved as a PNG file.</p>
+</section>
+<section id="d-slice-plotter">
+<h2><span class="section-number">10.4. </span>2D Slice Plotter<a class="headerlink" href="#d-slice-plotter" title="Permalink to this heading"></a></h2>
+<p>This plotter was created to help visualising the 3D trajectory
+variables, configuration, velocities, and gradients. It creates a 2D
+plot of a 3D variable. Therefore, extra setup is required before it can
+be used, and so it looks as follows in the Data panel:</p>
+<a class="reference internal image-reference" href="../_images/10000001000001880000005ADE46A25EFC1A049F.png"><img alt="../_images/10000001000001880000005ADE46A25EFC1A049F.png" src="../_images/10000001000001880000005ADE46A25EFC1A049F.png" style="width: 8.209cm; height: 1.886cm;" /></a>
+<ul class="simple">
+<li><p><strong>Dim</strong></p></li>
+</ul>
+<p><em>Format:</em> positive int</p>
+<p><em>Default:</em> 0</p>
+<p><em>Description:</em> the dimension that will appear as the colour gradient in
+the plot. The other two dimensions will be plotted on the x and y axes
+of the plot. Only values 0, 1, and 2 are accepted. Which dimension is
+which number can be determined from the ‘Axis’ column in the Data panel
+if it is populated, or the ‘Size’ column if the former is not. The
+dimensions are assigned number in the order in which they appear, so,
+e.g., if ‘Axis’ column shows ‘time,atom,dim’, then time is 0, atom is 1,
+and dim is 3.</p>
+<ul class="simple">
+<li><p><strong>Slice</strong></p></li>
+</ul>
+<p><em>Format:</em> positive int</p>
+<p><em>Default:</em> 0</p>
+<p><em>Description:</em> the part of the dimension that is plotted. Only values
+from 0 to the size of the dimension are accepted. For example, if Dim
+corresponding to the dimension of the configuration variable (i.e., the
+x, y, or z component) is selected, then the Slice field corresponds to
+those x/y/z components. Thus, if in this example, we select Slice of 1
+(i.e., the y component), then we get a 2D plot with time and the number
+of atoms on the x and y axes, and the colour gradient corresponds to the
+y-component of the position vectors (picture below).</p>
+<p>When this plotter is configured with the above options and plotted, a
+plot similar to below will be obtained.</p>
+<a class="reference internal image-reference" href="../_images/10000001000005E8000003AB85875262BA140476.png"><img alt="../_images/10000001000005E8000003AB85875262BA140476.png" src="../_images/10000001000005E8000003AB85875262BA140476.png" style="width: 15.921cm; height: 9.887cm;" /></a>
+<p>For the description of the various manipulations of this plot, please
+see <a class="reference external" href="#_Image_Plotter">Image Plotter</a>. 2D Slice Plotter uses Image
+Plotter under the hood, meaning that the various options are identical.</p>
+</section>
+<section id="iso-surface-plotter">
+<h2><span class="section-number">10.5. </span>Iso Surface Plotter<a class="headerlink" href="#iso-surface-plotter" title="Permalink to this heading"></a></h2>
+<p>When opened, this plotter might look like this:</p>
+<a class="reference internal image-reference" href="../_images/100000010000029900000248508AD1513B39D1F0.png"><img alt="../_images/100000010000029900000248508AD1513B39D1F0.png" src="../_images/100000010000029900000248508AD1513B39D1F0.png" style="width: 12.965cm; height: 11.386cm;" /></a>
+<p>You can use the mouse to drag the plot around to move the 3D picture.
+The plot can be zoomed in or out using the scrolling wheel or touchpad.</p>
+<ul class="simple">
+<li><p><strong>Rendering mode</strong></p></li>
+</ul>
+<p><em>Format:</em> drop-down</p>
+<p><em>Default:</em> line</p>
+<p><em>Description:</em> changes which geometric shapes (points, lines, surface)
+is used to display the surface.</p>
+<ul class="simple">
+<li><p><strong>Opacity level</strong></p></li>
+</ul>
+<p><em>Format:</em> float of value 0-1</p>
+<p><em>Default:</em> 1.0</p>
+<p><em>Description:</em> changes the opacity/transparency of the objects used to
+display the surface.</p>
+<ul class="simple">
+<li><p><strong>Contour Level</strong></p></li>
+</ul>
+<p><em>Format:</em> sliding bar</p>
+<p><em>Default:</em> middle</p>
+<p><em>Description:</em> changes how much space the shapes making the surface
+take. &lt;insert&gt;</p>
+<ul class="simple">
+<li><p><strong>Slice orientation</strong></p></li>
+</ul>
+<p><em>Format:</em> multiple choice</p>
+<p><em>Default:</em> None</p>
+<p><em>Description:</em> adds a coloured plane described by the shown axes that
+slices through the surface. After clicking on the plot, the plane can be
+moved along the axis not mentioned in the chosen plane’s name by using +
+and – keys.</p>
+<ul class="simple">
+<li><p><strong>Save current view</strong> button opens a file browser that allows the
+current view to be saved as a PNG file.</p></li>
+</ul>
+</section>
+<section id="scalar-field-plotter">
+<h2><span class="section-number">10.6. </span>Scalar-Field Plotter<a class="headerlink" href="#scalar-field-plotter" title="Permalink to this heading"></a></h2>
+<p>&lt;insert&gt;</p>
+<p>The units used by MDANSE are nm for length and ps for time, and their
+inverses for Q (nm<sup>1</sup>) and angular frequencies, 
+(ps<sup>1</sup>). Any input must be given using these units, and the
+output files do also employ the same units. The 2D/3D plotter includes
+the Python magnitude module, so you can modify the units when plotting
+the results using the <a class="reference external" href="#_Axes_settings">Axes settings</a> (available
+from the context menu that appears by right clicking on the plot). If
+you use the export option in the graphic after having changed the units,
+your output file will be saved with the desired units. But remember that
+the original output file (typically a netCDF4) is written using the
+original standard units.</p>
+<p>The list of prefixes to physical quantities is listed in <a class="reference external" href="#anchor-339">Table
+1</a>. The leftmost column is what can be written in front
+of the symbol of a physical quantity.</p>
+<p>Table 1: A list of prefixes that can be used to modify units.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 38%" />
+<col style="width: 31%" />
+<col style="width: 31%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Symbol</p></td>
+<td><p>Name</p></td>
+<td><p>Value</p></td>
+</tr>
+<tr class="row-even"><td><p>y</p></td>
+<td><p>yocto</p></td>
+<td><p>1e-24</p></td>
+</tr>
+<tr class="row-odd"><td><p>z</p></td>
+<td><p>zepto</p></td>
+<td><p>1e-21</p></td>
+</tr>
+<tr class="row-even"><td><p>a</p></td>
+<td><p>atto</p></td>
+<td><p>1e-18</p></td>
+</tr>
+<tr class="row-odd"><td><p>f</p></td>
+<td><p>femto</p></td>
+<td><p>1e-15</p></td>
+</tr>
+<tr class="row-even"><td><p>p</p></td>
+<td><p>pico</p></td>
+<td><p>1e-12</p></td>
+</tr>
+<tr class="row-odd"><td><p>n</p></td>
+<td><p>nano</p></td>
+<td><p>1e-9</p></td>
+</tr>
+<tr class="row-even"><td><p>u</p></td>
+<td><p>micro</p></td>
+<td><p>1e-6</p></td>
+</tr>
+<tr class="row-odd"><td><p>m</p></td>
+<td><p>mili</p></td>
+<td><p>1e-3</p></td>
+</tr>
+<tr class="row-even"><td><p>c</p></td>
+<td><p>centi</p></td>
+<td><p>1e-2</p></td>
+</tr>
+<tr class="row-odd"><td><p>d</p></td>
+<td><p>deci</p></td>
+<td><p>1e-1</p></td>
+</tr>
+<tr class="row-even"><td><p>da</p></td>
+<td><p>deca</p></td>
+<td><p>1e1</p></td>
+</tr>
+<tr class="row-odd"><td><p>h</p></td>
+<td><p>hecto</p></td>
+<td><p>1e2</p></td>
+</tr>
+<tr class="row-even"><td><p>k</p></td>
+<td><p>kilo</p></td>
+<td><p>1e3</p></td>
+</tr>
+<tr class="row-odd"><td><p>M</p></td>
+<td><p>mega</p></td>
+<td><p>1e6</p></td>
+</tr>
+<tr class="row-even"><td><p>G</p></td>
+<td><p>giga</p></td>
+<td><p>1e9</p></td>
+</tr>
+<tr class="row-odd"><td><p>T</p></td>
+<td><p>tera</p></td>
+<td><p>1e12</p></td>
+</tr>
+<tr class="row-even"><td><p>P</p></td>
+<td><p>peta</p></td>
+<td><p>1e15</p></td>
+</tr>
+<tr class="row-odd"><td><p>E</p></td>
+<td><p>exa</p></td>
+<td><p>1e18</p></td>
+</tr>
+<tr class="row-even"><td><p>Z</p></td>
+<td><p>zetta</p></td>
+<td><p>1e21</p></td>
+</tr>
+<tr class="row-odd"><td><p>Y</p></td>
+<td><p>yotta</p></td>
+<td><p>1e24</p></td>
+</tr>
+</tbody>
+</table>
+<p>All these prefixes can be used with any of the units from <a class="reference external" href="#anchor-340">Table
+2</a>. All these units can also be accessed through the
+<a class="reference external" href="#_Unites_Editor">Units Editor</a>.</p>
+<p>Table 2: A list of all units that can be used in MDANSE.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>Symbol</strong></p></td>
+<td><p><strong>Unit</strong></p></td>
+<td><p><strong>Value in SI
+units</strong></p></td>
+<td><p><strong>Physical
+quantity</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>au</p></td>
+<td><p>atomic unit</p></td>
+<td><p>0</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>m</p></td>
+<td><p>meter</p></td>
+<td><p>1 m</p></td>
+<td><p>length</p></td>
+</tr>
+<tr class="row-even"><td><p>ang</p></td>
+<td><p>Angstrom</p></td>
+<td><p>1 *
+10<sup>-10</sup>
+m</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ft</p></td>
+<td><p>foot</p></td>
+<td><p>0.3048 m</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>inch</p></td>
+<td><p>inch</p></td>
+<td><p>0.0254 m</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ly</p></td>
+<td><p>light year</p></td>
+<td><p>9.
+460,730,472,58
+*
+10<sup>15</sup>
+m</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>b</p></td>
+<td><p>Barn</p></td>
+<td><p>1 *
+10<sup>-28</sup>
+m<sup>2</sup></p></td>
+<td><p>surface</p></td>
+</tr>
+<tr class="row-odd"><td><p>l</p></td>
+<td><p>litre</p></td>
+<td><p>1 *
+10<sup>-3</sup>
+m<sup>3</sup></p></td>
+<td><p>volume</p></td>
+</tr>
+<tr class="row-even"><td><p>s</p></td>
+<td><p>second</p></td>
+<td><p>1 s</p></td>
+<td><p>time</p></td>
+</tr>
+<tr class="row-odd"><td><p>year</p></td>
+<td><p>year</p></td>
+<td><p>3
+1,556,925.9747
+s</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>day</p></td>
+<td><p>day</p></td>
+<td><p>86400 s</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>h</p></td>
+<td><p>hour</p></td>
+<td><p>3600 s</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>min</p></td>
+<td><p>minute</p></td>
+<td><p>60 s</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>kg</p></td>
+<td><p>kilogram</p></td>
+<td><p>1 kg</p></td>
+<td><p>mass</p></td>
+</tr>
+<tr class="row-even"><td><p>g</p></td>
+<td><p>gram</p></td>
+<td><p>1 *
+10<sup>-3</sup>
+kg</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>uma</p></td>
+<td><p>unified mass
+unit</p></td>
+<td><p>1.660,540,2 *
+10<sup>-27</sup>
+kg</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>mol</p></td>
+<td><p>mole</p></td>
+<td><p>1 mol</p></td>
+<td><p>amount of mass</p></td>
+</tr>
+<tr class="row-odd"><td><p>J</p></td>
+<td><p>Joule</p></td>
+<td><p>1 kg
+m<sup>2</sup>
+s<sup>-2</sup></p></td>
+<td><p>energy</p></td>
+</tr>
+<tr class="row-even"><td><p>eV</p></td>
+<td><p>electron volt</p></td>
+<td><p>1.602,176,49
+*
+10<sup>-19</sup>
+kg m<sup>2</sup>
+s<sup>-2</sup></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>cal</p></td>
+<td><p>calorie</p></td>
+<td><p>4.184 kg
+m<sup>2</sup>
+s<sup>-2</sup></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>cal_per_mole</p></td>
+<td><p>calorie per
+mole</p></td>
+<td><p>6.947,78 *
+10<sup>-24</sup>
+kg m<sup>2</sup>
+s<sup>-2</sup>
+mol<sup>-1</sup></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>J_per_mole</p></td>
+<td><p>Joule per mole</p></td>
+<td><p>1.
+660,559,273,42
+*
+10<sup>-24</sup>
+kg m<sup>2</sup>
+s<sup>-2</sup>
+mol<sup>-1</sup></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Ha</p></td>
+<td><p>Hartree</p></td>
+<td><p>4.359,743,94
+*
+10<sup>-18</sup>
+kg m<sup>2</sup>
+s<sup>-2</sup></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>K</p></td>
+<td><p>Kelvin</p></td>
+<td><p>1 K</p></td>
+<td><p>temperature</p></td>
+</tr>
+<tr class="row-even"><td><p>N</p></td>
+<td><p>Newton</p></td>
+<td><p>1 kg m
+s<sup>-2</sup></p></td>
+<td><p>force</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pa</p></td>
+<td><p>Pascal</p></td>
+<td><p>1 kg
+m<sup>-1</sup>
+s<sup>-2</sup></p></td>
+<td><p>pressure</p></td>
+</tr>
+<tr class="row-even"><td><p>W</p></td>
+<td><p>Watt</p></td>
+<td><p>1 kg
+m<sup>2</sup>
+s<sup>-3</sup></p></td>
+<td><p>power</p></td>
+</tr>
+<tr class="row-odd"><td><p>Hz</p></td>
+<td><p>Hertz</p></td>
+<td><p>1 s<sup>-1</sup></p></td>
+<td><p>frequency</p></td>
+</tr>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>Ampere</p></td>
+<td><p>1 A</p></td>
+<td><p>electric
+current</p></td>
+</tr>
+<tr class="row-odd"><td><p>C</p></td>
+<td><p>Coulomb</p></td>
+<td><p>1 A s</p></td>
+<td><p>charge</p></td>
+</tr>
+<tr class="row-even"><td><p>V</p></td>
+<td><p>Volt</p></td>
+<td><p>1 kg
+m<sup>2</sup>
+s<sup>-3</sup>
+A<sup>-1</sup></p></td>
+<td><p>voltage</p></td>
+</tr>
+<tr class="row-odd"><td><p>F</p></td>
+<td><p>Farad</p></td>
+<td><p>1 s<sup>4</sup>
+A<sup>2</sup>
+kg<sup>-1</sup>
+m<sup>-2</sup></p></td>
+<td><p>capacitance</p></td>
+</tr>
+<tr class="row-even"><td><p>ohm</p></td>
+<td><p>Ohm</p></td>
+<td><p>1 kg
+m<sup>2</sup>
+s<sup>-3</sup>
+A<sup>-2</sup></p></td>
+<td><p>resistance</p></td>
+</tr>
+<tr class="row-odd"><td><p>S</p></td>
+<td><p>Siemens</p></td>
+<td><p>1 s<sup>3</sup>
+A<sup>2</sup>
+kg<sup>-1</sup>
+m<sup>-2</sup></p></td>
+<td><p>conductance</p></td>
+</tr>
+<tr class="row-even"><td><p>Wb</p></td>
+<td><p>Weber</p></td>
+<td><p>1 kg
+m<sup>2</sup>
+s<sup>-2</sup>
+A<sup>-1</sup></p></td>
+<td><p>magnetic flux</p></td>
+</tr>
+<tr class="row-odd"><td><p>T</p></td>
+<td><p>Tesla</p></td>
+<td><p>1 kg
+s<sup>-2</sup>
+A<sup>-1</sup></p></td>
+<td><p>flux density</p></td>
+</tr>
+<tr class="row-even"><td><p>H</p></td>
+<td><p>Henry</p></td>
+<td><p>1 kg
+m<sup>2</sup>
+s<sup>-2</sup>
+A<sup>-2</sup></p></td>
+<td><p>inductance</p></td>
+</tr>
+<tr class="row-odd"><td><p>cd</p></td>
+<td><p>Candela</p></td>
+<td><p>1 cd</p></td>
+<td><p>luminous
+intensity</p></td>
+</tr>
+<tr class="row-even"><td><p>lm</p></td>
+<td><p>Lumen</p></td>
+<td><p>1 cd sr</p></td>
+<td><p>luminous flux</p></td>
+</tr>
+<tr class="row-odd"><td><p>lux</p></td>
+<td><p>lux</p></td>
+<td><p>1 cd sr
+m<sup>-2</sup></p></td>
+<td><p>illuminance</p></td>
+</tr>
+<tr class="row-even"><td><p>Bq</p></td>
+<td><p>Becquerel</p></td>
+<td><p>1 s<sup>-1</sup></p></td>
+<td><p>radioactivity</p></td>
+</tr>
+<tr class="row-odd"><td><p>Gy</p></td>
+<td><p>gray</p></td>
+<td><p>1 m<sup>2</sup>
+s<sup>-2</sup></p></td>
+<td><p>ionising
+radiation</p></td>
+</tr>
+<tr class="row-even"><td><p>kat</p></td>
+<td><p>Katal</p></td>
+<td><p>1 mol
+s<sup>-1</sup></p></td>
+<td><p>catalytic
+activity</p></td>
+</tr>
+<tr class="row-odd"><td><p>dpi</p></td>
+<td><p>inches in
+meter</p></td>
+<td><p>39.370,
+078,740,157,48
+m<sup>-1</sup></p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>gravity</p></td>
+<td><p>gravitational
+constant</p></td>
+<td><p>9.80665 m
+s<sup>-2</sup></p></td>
+<td><p>acceleration</p></td>
+</tr>
+<tr class="row-odd"><td><p>c</p></td>
+<td><p>speed of light</p></td>
+<td><p>2.997,924,58
+*
+10<sup>8</sup> m
+s<sup>-1</sup></p></td>
+<td><p>velocity</p></td>
+</tr>
+<tr class="row-even"><td><p>rad</p></td>
+<td><p>radian</p></td>
+<td><p>1 rad</p></td>
+<td><p>angle</p></td>
+</tr>
+<tr class="row-odd"><td><p>cyc</p></td>
+<td><p>cycle</p></td>
+<td><p>6.283,1
+85,307,179,586
+rad</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>sr</p></td>
+<td><p>steradian</p></td>
+<td><p>1 sr</p></td>
+<td><p>solid angle</p></td>
+</tr>
+<tr class="row-odd"><td><p>inv_nm</p></td>
+<td><p>inverse nm</p></td>
+<td><p>1 *
+10<sup>9</sup>
+m<sup>-1</sup></p></td>
+<td><p>Inverse length</p></td>
+</tr>
+<tr class="row-even"><td><p>akma_time</p></td>
+<td><p>AKMA time</p></td>
+<td><p>20.454,
+829,497,745,98
+*
+10<sup>-12</sup>
+s</p></td>
+<td><p>time</p></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="section-1"></span></section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="trajectory.html" class="btn btn-neutral float-left" title="9. Trajectory Converters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="parameters.html" class="btn btn-neutral float-right" title="11. Glossary of Parameters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015, Gael Goret, Bachir Aoun and Eric C. Pellegrini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

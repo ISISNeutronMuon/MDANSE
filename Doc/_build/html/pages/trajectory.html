@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9. Trajectory Converters &mdash; MDANSE 1.5.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="10. Plotting Options" href="plotting.html" />
+    <link rel="prev" title="8. Using MDANSE from command line" href="cmd.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> MDANSE
+            <img src="../_static/mdanse_logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">MDANSE User Manual</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="opening.html">1. MDANSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opening.html#citing-mdanse">2. Citing MDANSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">3. Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">4. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">5. Installing MDANSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="files.html">6. Input and output files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">7. Using MDANSE Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmd.html">8. Using MDANSE from command line</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">9. Trajectory Converters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#castep-converter">9.1. CASTEP converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#charmm-converter">9.2. CHARMM converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dftb-converter">9.3. DFTB converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#discover-converter">9.4. Discover converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dl-poly-converter">9.5. DL_POLY converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dmol-converter">9.6. DMol converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#forcite-converter">9.7. Forcite converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generic-converter">9.8. Generic converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gromacs-converter">9.9. Gromacs converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lammps-converter">9.10. LAMMPS converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#namd-converter">9.11. NAMD converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pdb-converter">9.12. PDB converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vasp-converter">9.13. VASP converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#xplor-converter">9.14. XPLOR converter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">10. Plotting Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">11. Glossary of Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build.html">12. Building MDANSE from source code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">13. References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MDANSE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><span class="section-number">9. </span>Trajectory Converters</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pages/trajectory.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trajectory-converters">
+<h1><span class="section-number">9. </span>Trajectory Converters<a class="headerlink" href="#trajectory-converters" title="Permalink to this heading"></a></h1>
+<p>Below is the list of converters present in MDANSE. These allow for the
+outputs of a variety of MD simulation software to be able to be used in
+MDANSE by converting the various file formats to MMTK NetCDF format that
+can be used by MDANSE. All converters convert the positions and other
+vital values such as unit cell parameters, but velocities and forces are
+converted by only select converters.</p>
+<p>Each converter requires different things to work and provides different
+options. This is detailed in the sections below. The only things that
+all converter windows have in common are the buttons (described in <a class="reference external" href="#_Trajectory_converter">main
+text</a>) and the output files field. At the
+beginning, that is just as the converter window is opened, this field
+will appear as follows:</p>
+<a class="reference internal image-reference" href="../_images/100000010000026200000041B5878AC6986B511E.png"><img alt="../_images/100000010000026200000041B5878AC6986B511E.png" src="../_images/100000010000026200000041B5878AC6986B511E.png" style="width: 15.921cm; height: 1.697cm;" /></a>
+<ul class="simple">
+<li><p><strong>Output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output.nc (where ~ is the home directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the MD file
+except velocities.</p>
+<p>However, once an input file is selected (that is, Browse button next to
+an input file field is clicked, a file is selected in the file browser,
+and OK is clicked), MDANSE tries to generate a useful file name and
+place it in the same folder as the input file. Therefore, the output
+file field will appear as follows:</p>
+<a class="reference internal image-reference" href="../_images/1000000100000300000000943C654743BE929242.png"><img alt="../_images/1000000100000300000000943C654743BE929242.png" src="../_images/1000000100000300000000943C654743BE929242.png" style="width: 15.921cm; height: 3.067cm;" /></a>
+<ul class="simple">
+<li><p><strong>Output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em>
+original_trajectory_directory_path\original_trajectory_file_name (where
+original_trajectory_directory_path is the path where the trajectory
+being converted is located, and original_trajectory_file_name is the
+name of the trajectory being converted)</p>
+<p>Also, (n) may be appended to the end of the proposed file name if a file
+with the initial name already exists, where n is the lowest number for
+which a file does not exist.</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the MD file
+except velocities.</p>
+<section id="castep-converter">
+<h2><span class="section-number">9.1. </span>CASTEP converter<a class="headerlink" href="#castep-converter" title="Permalink to this heading"></a></h2>
+<p>MDANSE can convert .md files generated by <strong>CA</strong>mbridge <strong>S</strong>erial
+<strong>T</strong>otal <strong>E</strong>nergy <strong>P</strong>ackage (CASTEP)
+[<a class="reference external" href="#SignetBibliographie_027">27</a>] of any version, and the header can
+be of any length. The converter expects velocities and forces to be
+written in the MD file. Clicking on the CASTEP button brings up this
+window:</p>
+<a class="reference internal image-reference" href="../_images/10000001000003150000015759A83DDB0249EC5C.png"><img alt="../_images/10000001000003150000015759A83DDB0249EC5C.png" src="../_images/10000001000003150000015759A83DDB0249EC5C.png" style="width: 12.638cm; height: 5.405cm;" /></a>
+<ul class="simple">
+<li><p><strong>castep file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\CASTEP\PBAnew.md</p>
+<p><em>Description:</em> the path to an MD file that contains the trajectory. The
+Browse button can be used to search for the file using the file browser.</p>
+<ul class="simple">
+<li><p><strong>Output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the MD file
+except velocities.</p>
+</section>
+<section id="charmm-converter">
+<h2><span class="section-number">9.2. </span>CHARMM converter<a class="headerlink" href="#charmm-converter" title="Permalink to this heading"></a></h2>
+<p>This converter allows the conversion from a trajectory generated with
+<strong>C</strong>hemistry at <strong>HAR</strong>vard <strong>M</strong>acromolecular <strong>M</strong>echanics
+(CHARMM) [<a class="reference external" href="#SignetBibliographie_028">28</a>]. Selecting CHARMM button
+will open the following window:</p>
+<a class="reference internal image-reference" href="../_images/10000001000003150000025696FDB61E670AE025.png"><img alt="../_images/10000001000003150000025696FDB61E670AE025.png" src="../_images/10000001000003150000025696FDB61E670AE025.png" style="width: 13.899cm; height: 10.534cm;" /></a>
+<ul class="simple">
+<li><p><strong>pdb file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\CHARMM\2vb1.pdb</p>
+<p><em>Description:</em> a PDB file of the system must be provided for the
+conversion. This file is necessary to build up the MMTK universe related
+to the MMTK trajectory. If you do not have a PDB file, you can generate
+it in many ways, such as by using ‘gmx editconf’ Gromacs command.</p>
+<p>Please note, however, that there are multiple ‘versions’ of PDB files,
+but MDANSE is quite strict regarding which ones it can read. Therefore,
+it is best to make sure the PDB complies with the specification in Ref
+[<a class="reference external" href="#SignetBibliographie_029">29</a>]. Notably, the terminal oxygens on
+the carboxylic acid end must be noted as OT1 and OT2; O1 and O2 will
+result in an obscure error.</p>
+<ul class="simple">
+<li><p><strong>dcd file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\CHARMM\2vb1.dcd</p>
+<p><em>Description:</em> the CHARMM DCD trajectory file that stores the trajectory
+frames.</p>
+<ul class="simple">
+<li><p><strong>Time step (ps)</strong></p></li>
+</ul>
+<p><em>Format:</em> strictly positive float</p>
+<p><em>Default:</em> 1.0</p>
+<p><em>Description:</em> the time step in picoseconds between two consecutive
+frames of CHARMM trajectory.</p>
+<ul class="simple">
+<li><p><strong>Fold coordinates in to box</strong></p></li>
+</ul>
+<p><em>Format:</em> bool</p>
+<p><em>Default:</em> False</p>
+<p><em>Description:</em> &lt;insert&gt;</p>
+<ul class="simple">
+<li><p><strong>output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the PDB and DCD
+files except velocities.</p>
+</section>
+<section id="dftb-converter">
+<h2><span class="section-number">9.3. </span>DFTB converter<a class="headerlink" href="#dftb-converter" title="Permalink to this heading"></a></h2>
+<p>Converts trajectories generated using software based on the
+<strong>D</strong>ensity <strong>F</strong>unctional based <strong>T</strong>ight <strong>B</strong>inding (DFTB)
+method [<a class="reference external" href="#SignetBibliographie_030">30</a>]. It should work with all the
+related software, but if you have any issues, please let us know.</p>
+<p>Selecting DFTB will open this window:</p>
+<a class="reference internal image-reference" href="../_images/10000001000003140000015850B81A8826C6B772.png"><img alt="../_images/10000001000003140000015850B81A8826C6B772.png" src="../_images/10000001000003140000015850B81A8826C6B772.png" style="width: 13.106cm; height: 5.689cm;" /></a>
+<ul class="simple">
+<li><p><strong>xtd file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em>
+..\..\..\Data\Trajectories\Forcite\nylon66_rho100_500K_v300K.xtd</p>
+<p><em>Description:</em> a XTD file of the system must be provided for the
+conversion. This file is necessary to build up the MMTK universe related
+to the MMTK trajectory.</p>
+<ul class="simple">
+<li><p><strong>trj file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em>
+..\..\..\Data\Trajectories\Forcite\nylon66_rho100_500K_v300K.trj</p>
+<p><em>Description:</em> the DFTB TRJ trajectory file that stores the trajectory
+frames.</p>
+<ul class="simple">
+<li><p><strong>output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the XTD and TRJ
+files except velocities.</p>
+</section>
+<section id="discover-converter">
+<h2><span class="section-number">9.4. </span>Discover converter<a class="headerlink" href="#discover-converter" title="Permalink to this heading"></a></h2>
+<p>This converter allows the conversion from a trajectory generated with
+Materials Studio [<a class="reference external" href="#SignetBibliographie_031">31</a>] Discover module to
+a MMTK NetCDF trajectory. It converts velocities but not forces.
+Clicking on Discover button will open this window:</p>
+<a class="reference internal image-reference" href="../_images/10000001000003150000014DDFE5CA44B547B43C.png"><img alt="../_images/10000001000003150000014DDFE5CA44B547B43C.png" src="../_images/10000001000003150000014DDFE5CA44B547B43C.png" style="width: 12.903cm; height: 5.447cm;" /></a>
+<ul class="simple">
+<li><p><strong>xtd file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\Discover\sushi.xtd</p>
+<p><em>Description:</em> a XTD file of the system must be provided for the
+conversion. This file is necessary to build up the MMTK universe related
+to the MMTK trajectory.</p>
+<ul class="simple">
+<li><p><strong>his file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\Discover\sushi.his</p>
+<p><em>Description:</em> the Discover HIS trajectory file that stores the
+trajectory frames.</p>
+<ul class="simple">
+<li><p><strong>output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the XTD and HIS
+files except velocities.</p>
+</section>
+<section id="dl-poly-converter">
+<h2><span class="section-number">9.5. </span>DL_POLY converter<a class="headerlink" href="#dl-poly-converter" title="Permalink to this heading"></a></h2>
+<p>This converter allows the conversion from a trajectory generated with DL
+POLY [<a class="reference external" href="#SignetBibliographie_032">32</a>] to a MMTK NetCDF trajectory. It
+can convert both velocities and forces. Pressing the DL-POLY button will
+open this window:</p>
+<a class="reference internal image-reference" href="../_images/1000000100000317000001CD6129CD4A142CB73E.png"><img alt="../_images/1000000100000317000001CD6129CD4A142CB73E.png" src="../_images/1000000100000317000001CD6129CD4A142CB73E.png" style="width: 13.31cm; height: 7.826cm;" /></a>
+<ul class="simple">
+<li><p><strong>field file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\DL_POLY\FIELD_cumen</p>
+<p><em>Description:</em> the DL POLY FIELD file that stores the information about
+the system. This file is necessary to build up the MMTK universe related
+to the MMTK trajectory.</p>
+<ul class="simple">
+<li><p><strong>history file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\DL_POLY\HISTORY_cumen</p>
+<p><em>Description:</em> the DL POLY HISTORY file that stores the trajectory
+frames.</p>
+<ul class="simple">
+<li><p><strong>atom aliases</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> {}</p>
+<p><em>Description:</em> MDANSE will create the MMTK universe with the atom names
+specified in the FIELD file. By default, MDANSE will interpret these
+names directly as if they were a chemical symbol. If this fails, MDANSE
+will remove the last character until it corresponds to a known chemical
+symbol. For example, an atom defined in the FIELD file as CB, will first
+be interpreted as an atom of chemical symbol CB. As it does not exist,
+MDANSE will interpret it as an atom of chemical symbol C, namely a
+carbon atom. Using this procedure, it can happen that some atom names
+can be misunderstood, or event not understood at all by MMTK. For
+example, aromatic carbons (CA) can be interpreted as calcium.</p>
+<p>The aim of the Special atoms field is precisely to avoid such problems.
+The format for the Special atoms field is</p>
+<p><em>{atom_name1:element1 &lt;sep&gt; atom_name2:element2 etc.}</em></p>
+<p>where &lt;sep&gt; can be a white space, a comma, or a semicolon. In the
+example showed in figure 4.7, the string CS:C should be entered in the
+Special atoms field. Interestingly, the Special atoms field can also be
+used to specify united atoms. The syntax is exactly the same but, in
+that case, the element name must be replaced by the MMTK united atom
+code (e.g. CH3, CH2, CH, NH, NH2, NH3, OH, SH, etc.)</p>
+<ul class="simple">
+<li><p><strong>version</strong></p></li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 2</p>
+<p><em>Description:</em> The version of DL POLY software. Different versions
+format the HISTORY file differently, so it is necessary to select the
+correct format.</p>
+<ul class="simple">
+<li><p><strong>output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the FIELD and
+HISTORY files.</p>
+</section>
+<section id="dmol-converter">
+<h2><span class="section-number">9.6. </span>DMol converter<a class="headerlink" href="#dmol-converter" title="Permalink to this heading"></a></h2>
+<p>This converter allows the conversion from a trajectory generated with
+Materials Studio [<a class="reference external" href="#SignetBibliographie_031">31</a>] DMol module to a
+MMTK NetCDF trajectory. Clicking on DMol button will open this window:</p>
+<a class="reference internal image-reference" href="../_images/100000010000031500000151C0FBAB90F30D0BF1.png"><img alt="../_images/100000010000031500000151C0FBAB90F30D0BF1.png" src="../_images/100000010000031500000151C0FBAB90F30D0BF1.png" style="width: 13.391cm; height: 5.719cm;" /></a>
+<ul class="simple">
+<li><p><strong>xtd file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\Discover\sushi.xtd</p>
+<p><em>Description:</em> an XTD file of the system must be provided for the
+conversion. This file is necessary to build up the MMTK universe related
+to the MMTK trajectory.</p>
+<ul class="simple">
+<li><p><strong>his file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\Discover\sushi.his</p>
+<p><em>Description:</em> the DMol HIS trajectory file that stores the trajectory
+frames.</p>
+<ul class="simple">
+<li><p><strong>output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the XTD and HIS
+files except velocities.</p>
+</section>
+<section id="forcite-converter">
+<h2><span class="section-number">9.7. </span>Forcite converter<a class="headerlink" href="#forcite-converter" title="Permalink to this heading"></a></h2>
+<p>This converter allows for the conversion from a trajectory generated
+with Materials Studio [<a class="reference external" href="#SignetBibliographie_031">31</a>] Forcite module
+to a MMTK NetCDF trajectory. It can convert both velocities and forces,
+if present. Clicking on DMol button will open this window:</p>
+<a class="reference internal image-reference" href="../_images/1000000100000316000001524D8DC11569DB0A6A.png"><img alt="../_images/1000000100000316000001524D8DC11569DB0A6A.png" src="../_images/1000000100000316000001524D8DC11569DB0A6A.png" style="width: 13.391cm; height: 5.72cm;" /></a>
+<ul class="simple">
+<li><p><strong>xtd file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em>
+..\..\..\Data\Trajectories\Forcite\nylon66_rho100_500K_v300K.xtd</p>
+<p><em>Description:</em> a XTD file of the system must be provided for the
+conversion. This file is necessary to build up the MMTK universe related
+to the MMTK trajectory.</p>
+<ul class="simple">
+<li><p><strong>trj file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em>
+..\..\..\Data\Trajectories\Forcite\nylon66_rho100_500K_v300K.trj</p>
+<p><em>Description:</em> the Forcite TRJ trajectory file that stores the
+trajectory frames.</p>
+<ul class="simple">
+<li><p><strong>output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the XTD and HIS
+files except velocities.</p>
+</section>
+<section id="generic-converter">
+<h2><span class="section-number">9.8. </span>Generic converter<a class="headerlink" href="#generic-converter" title="Permalink to this heading"></a></h2>
+<p>Converts a trajectory written in ASCII to an MMTK NetCDF file, including
+both velocities and forces if present. This is useful if you have a
+trajectory from a software not currently supported by MDANSE. An example
+of such ASCII file can be found by clicking on Help in the window that
+appears when Generic is selected:</p>
+<a class="reference internal image-reference" href="../_images/100000010000031500000109AFEC778397C1B933.png"><img alt="../_images/100000010000031500000109AFEC778397C1B933.png" src="../_images/100000010000031500000109AFEC778397C1B933.png" style="width: 13.573cm; height: 4.558cm;" /></a>
+<ul class="simple">
+<li><p><strong>gt file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default</em>: ..\..\..\Data\Trajectories\Generic\test.gt</p>
+<p><em>Description: path to</em> an ASCII trajectory file that will be converted
+to MMTK NetCDF format.</p>
+<ul class="simple">
+<li><p><strong>output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the XTD and HIS
+files except velocities.</p>
+</section>
+<section id="gromacs-converter">
+<h2><span class="section-number">9.9. </span>Gromacs converter<a class="headerlink" href="#gromacs-converter" title="Permalink to this heading"></a></h2>
+<p>Converts a trajectory generated by the Gromacs software
+[<a class="reference external" href="#SignetBibliographie_033">33</a>] into MMTK NetCDF format. A PDF file
+containing the data about the initial configuration must be provided,
+along with a trajectory in either an XTC, or, since version 1.6.0, a TRR
+format. The latter format supports velocity reading. Selecting Gromacs
+opens the following window:</p>
+<a class="reference internal image-reference" href="../_images/100000010000030F00000180568EF39BEE35B86C.png"><img alt="../_images/100000010000030F00000180568EF39BEE35B86C.png" src="../_images/100000010000030F00000180568EF39BEE35B86C.png" style="width: 15.921cm; height: 7.807cm;" /></a>
+<ul class="simple">
+<li><p><strong>pdb file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\Gromacs\md.pdb</p>
+<p><em>Description:</em> a PDB file of the system must be provided for the
+conversion. This file is necessary to build up the MMTK universe related
+to the MMTK trajectory. If you do not have a PDB file, you can generate
+it in many ways, such as by using ‘gmx editconf’ Gromacs command.</p>
+<p>Please note, however, that there are multiple ‘versions’ of PDB files,
+but MDANSE is quite strict regarding which ones it can read. Therefore,
+it is best to make sure the PDB complies with the specification in Ref
+[<a class="reference external" href="#SignetBibliographie_029">29</a>]. Notably, the terminal oxygens on
+the carboxylic acid end must be noted as OT1 and OT2; O1 and O2 will
+result in an obscure error.</p>
+<ul class="simple">
+<li><p><strong>xtc or trr file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\Gromacs\md.xtc</p>
+<p><em>Description:</em> the Gromacs XTC or TRR trajectory file that stores the
+trajectory frames.</p>
+<ul class="simple">
+<li><p><strong>Fold coordinates in to box</strong></p></li>
+</ul>
+<p><em>Format:</em> bool</p>
+<p><em>Default:</em> False</p>
+<p><em>Description:</em> &lt;insert&gt;</p>
+<ul class="simple">
+<li><p><strong>output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the PDB and DCD
+files except velocities.</p>
+</section>
+<section id="lammps-converter">
+<h2><span class="section-number">9.10. </span>LAMMPS converter<a class="headerlink" href="#lammps-converter" title="Permalink to this heading"></a></h2>
+<p>Converts trajectories generated by <strong>L</strong>arge-scale
+<strong>A</strong>tomic/<strong>M</strong>olecular <strong>M</strong>assively <strong>P</strong>arallel
+<strong>S</strong>imulator (LAMMPS) [<a class="reference external" href="#SignetBibliographie_034">34</a>] into MMTK
+NetCDF format. Selecting LAMMPS opens the following window:</p>
+<a class="reference internal image-reference" href="../_images/100000010000031600000256CA0AC56F060C39AD.png"><img alt="../_images/100000010000031600000256CA0AC56F060C39AD.png" src="../_images/100000010000031600000256CA0AC56F060C39AD.png" style="width: 15.162cm; height: 11.441cm;" /></a>
+<ul class="simple">
+<li><p><strong>LAMMPS configuration file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em>
+..\..\..\Data\Trajectories\LAMMPS\glycyl_L_alanine_charmm.config</p>
+<p><em>Description:</em> LAMMPS configuration file. It should contain box
+dimensions and the masses block.</p>
+<ul class="simple">
+<li><p><strong>LAMMPS trajectory file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em>
+..\..\..\Data\Trajectories\LAMMPS\glycyl_L_alanine_charmm.config</p>
+<p><em>Description</em>: a .lammps file that stores the trajectory frames.</p>
+<ul class="simple">
+<li><p><strong>mass tolerance (uma)</strong></p></li>
+</ul>
+<p><em>Format:</em> float</p>
+<p><em>Default:</em> 0.001</p>
+<p><em>Description:</em> For LAMMPS trajectories, the parameter used to identify
+the chemical elements present in the simulated system is the mass.
+MDANSE compares the values present in the “Masses” block in the LAMMPS
+configuration file with those stored in MDANSE’s own database and
+identify an element when both agree between the mass tolerance (the
+other input parameter available in the conversion interface). Naturally
+the masses appearing in the configuration file should be close to those
+in the database, but they are not necessarily the same. For example, the
+mass for hydrogen in the database is 1.0079 uma, but you could have a
+simulation done with a mass value of 1.008 or 1.01 or even just 1.</p>
+<p>A possible solution may be to change the mass tolerance given using this
+option. However, as the MDANSE database contains the masses of all the
+isotopes, if the tolerance is such that more than one isotope can be
+assigned, the converter will also fail. Therefore, the safest solution
+is to check the values of the masses in the MDANSE database and modify
+the LAMMPS configuration file to use the same masses.</p>
+<ul class="simple">
+<li><p><strong>smart mass association</strong></p></li>
+</ul>
+<p><em>Format:</em> bool</p>
+<p><em>Default:</em> True</p>
+<p><em>Description:</em> If this is set to True and there are two or more elements
+in the MDANSE database within the tolerance of the LAMMPS mass (ie. If
+there is more than one match), MDANSE will not fail with an error but
+instead match the element from the database that most closely matches
+the mass in the LAMMPS .config file.</p>
+<ul class="simple">
+<li><p><strong>Time step (fs)</strong></p></li>
+</ul>
+<p><em>Format:</em> strictly positive float</p>
+<p><em>Default:</em> 1.0</p>
+<p><em>Description:</em> the time step in <strong>femtoseconds</strong> between two consecutive
+frames of the LAMMPS trajectory.</p>
+<ul class="simple">
+<li><p><strong>Number of time steps</strong></p></li>
+</ul>
+<p><em>Format:</em> strictly positive int</p>
+<p><em>Default:</em> 0</p>
+<p><em>Description:</em> the number of steps you want to convert. If this is set
+to 0, MDANSE will convert all the frames in the trajectory.</p>
+<ul class="simple">
+<li><p><strong>output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the PDB and DCD
+files except velocities.</p>
+</section>
+<section id="namd-converter">
+<h2><span class="section-number">9.11. </span>NAMD converter<a class="headerlink" href="#namd-converter" title="Permalink to this heading"></a></h2>
+<p>Converts a trajectory generated with <strong>NA</strong>noscale <strong>M</strong>olecular
+<strong>D</strong>ynamics (NAMD) [<a class="reference external" href="#SignetBibliographie_035">35</a>] to an MMTK
+NetCDF trajectory. Selecting NAMD opens the following window:</p>
+<a class="reference internal image-reference" href="../_images/1000000100000315000001D3B4813D4CD3F2A528.png"><img alt="../_images/1000000100000315000001D3B4813D4CD3F2A528.png" src="../_images/1000000100000315000001D3B4813D4CD3F2A528.png" style="width: 15.84cm; height: 9.423cm;" /></a>
+<ul class="simple">
+<li><p><strong>pdb file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\CHARMM\2vb1.pdb</p>
+<p><em>Description:</em> a PDB file of the system must be provided for the
+conversion. This file is necessary to build up the MMTK universe related
+to the MMTK trajectory.</p>
+<p>Please note, however, that there are multiple ‘versions’ of PDB files,
+but MDANSE is quite strict regarding which ones it can read. Therefore,
+it is best to make sure the PDB complies with the specification in Ref
+[<a class="reference external" href="#SignetBibliographie_029">29</a>]. Notably, the terminal oxygens on
+the carboxylic acid end must be noted as OT1 and OT2; O1 and O2 will
+result in an obscure error.</p>
+<ul class="simple">
+<li><p><strong>dcd file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\CHARMM\2vb1.dcd</p>
+<p><em>Description:</em> the NAMD DCD trajectory file that stores the trajectory
+frames.</p>
+<ul class="simple">
+<li><p><strong>Time step (ps)</strong></p></li>
+</ul>
+<p><em>Format:</em> strictly positive float</p>
+<p><em>Default:</em> 1.0</p>
+<p><em>Description:</em> the time step in <strong>picoseconds</strong> between two consecutive
+frames of CHARMM trajectory.</p>
+<ul class="simple">
+<li><p><strong>Fold coordinates in to box</strong></p></li>
+</ul>
+<p><em>Format:</em> bool</p>
+<p><em>Default:</em> False</p>
+<p><em>Description:</em> &lt;insert&gt;</p>
+<ul class="simple">
+<li><p><strong>output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the PDB and DCD
+files except velocities.</p>
+</section>
+<section id="pdb-converter">
+<h2><span class="section-number">9.12. </span>PDB converter<a class="headerlink" href="#pdb-converter" title="Permalink to this heading"></a></h2>
+<p>MDANSE can convert standalone PDB files into MMTK NetCDF. However, of
+the variety of PDB format, MMTK is capable of parsing only some; to
+ensure that a PDB can be read, it should comply with the specification
+in Ref [<a class="reference external" href="#SignetBibliographie_029">29</a>]. To do that, select PDB, and
+the following window will open:</p>
+<a class="reference internal image-reference" href="../_images/1000000100000317000001943BEFBB02AB5D45DD.png"><img alt="../_images/1000000100000317000001943BEFBB02AB5D45DD.png" src="../_images/1000000100000317000001943BEFBB02AB5D45DD.png" style="width: 13.189cm; height: 6.796cm;" /></a>
+<ul class="simple">
+<li><p><strong>pdb file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\CHARMM\2vb1.pdb</p>
+<p><em>Description:</em> a PDB file of the system must be provided for the
+conversion. This file is necessary to build up the MMTK universe related
+to the MMTK trajectory. If you do not have a PDB file, you can generate
+it in many ways, such as by using ‘gmx editconf’ Gromacs command.</p>
+<p>Please note, however, that there are multiple ‘versions’ of PDB files,
+but MDANSE is quite strict regarding which ones it can read. Therefore,
+it is best to make sure the PDB complies with the specification in Ref
+[<a class="reference external" href="#SignetBibliographie_029">29</a>]. Notably, the terminal oxygens on
+the carboxylic acid end must be noted as OT1 and OT2; O1 and O2 will
+result in an obscure error.</p>
+<ul class="simple">
+<li><p><strong>nb frame</strong></p></li>
+</ul>
+<p><em>Format:</em> int int int</p>
+<p><em>Default:</em> 0 2 1</p>
+<p><em>Description:</em> The selection of frames that will be converted. The
+frames specified in both ‘from’ and ‘to’ are included (ie. by default
+frames 0, 1, and 2 are converted). The ‘by step of’ field specifies the
+periodicity of which frames are skipped, ie. if it is 1, every frame is
+converted, if it is 2, every other is converted, etc.</p>
+<ul class="simple">
+<li><p><strong>Time step (ps)</strong></p></li>
+</ul>
+<p><em>Format:</em> strictly positive float</p>
+<p><em>Default:</em> 1.0</p>
+<p><em>Description:</em> the time step in <strong>picoseconds</strong> between two consecutive
+frames of CHARMM trajectory.</p>
+<ul class="simple">
+<li><p><strong>output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the PDB file
+except velocities.</p>
+</section>
+<section id="vasp-converter">
+<h2><span class="section-number">9.13. </span>VASP converter<a class="headerlink" href="#vasp-converter" title="Permalink to this heading"></a></h2>
+<p>Converts a trajectory generated with <strong>V</strong>ienna <strong>A</strong>b-initio
+<strong>S</strong>imulation <strong>P</strong>ackage (<a class="reference external" href="https://www.vasp.at/">VASP</a>) to an
+MMTK NetCDF trajectory. Only trajectories created with VASP version 5 or
+higher can be converted. Selecting VASP opens the following window:</p>
+<a class="reference internal image-reference" href="../_images/100000010000031400000162FCE1F445A5063084.png"><img alt="../_images/100000010000031400000162FCE1F445A5063084.png" src="../_images/100000010000031400000162FCE1F445A5063084.png" style="width: 13.818cm; height: 6.205cm;" /></a>
+<ul class="simple">
+<li><p><strong>xdatcar file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\VASP\XDATCAR_version5</p>
+<p><em>Description:</em> an XDATCAR file storing a trajectory.</p>
+<ul class="simple">
+<li><p><strong>Time step (ps)</strong></p></li>
+</ul>
+<p><em>Format:</em> strictly positive float</p>
+<p><em>Default:</em> 1.0</p>
+<p><em>Description:</em> the time step in <strong>picoseconds</strong> between two consecutive
+frames of CHARMM trajectory.</p>
+<ul class="simple">
+<li><p><strong>output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the PDB file
+except velocities.</p>
+</section>
+<section id="xplor-converter">
+<h2><span class="section-number">9.14. </span>XPLOR converter<a class="headerlink" href="#xplor-converter" title="Permalink to this heading"></a></h2>
+<p>Converts a trajectory generated by X-PLOR into the MMTK NetCDF format.
+Selecting XPLOR opens the following window:</p>
+<a class="reference internal image-reference" href="../_images/1000000100000316000001DD1886B5FEBC0A0CA9.png"><img alt="../_images/1000000100000316000001DD1886B5FEBC0A0CA9.png" src="../_images/1000000100000316000001DD1886B5FEBC0A0CA9.png" style="width: 14.081cm; height: 8.5cm;" /></a>
+<ul class="simple">
+<li><p><strong>pdb file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\CHARMM\2vb1.pdb</p>
+<p><em>Description:</em> a PDB file of the system must be provided for the
+conversion. This file is necessary to build up the MMTK universe related
+to the MMTK trajectory.</p>
+<p>Please note, however, that there are multiple ‘versions’ of PDB files,
+but MDANSE is quite strict regarding which ones it can read. Therefore,
+it is best to make sure the PDB complies with the specification in Ref
+<em>[</em><a class="reference external" href="#SignetBibliographie_029">29</a><em>]</em>. Notably, the terminal
+oxygens on the carboxylic acid end must be noted as OT1 and OT2; O1 and
+O2 will result in an obscure error.</p>
+<ul class="simple">
+<li><p><strong>dcd file</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ..\..\..\Data\Trajectories\CHARMM\2vb1.dcd</p>
+<p><em>Description:</em> an X-PLOR DCD trajectory file that stores the trajectory
+frames.</p>
+<ul class="simple">
+<li><p><strong>Time step (ps)</strong></p></li>
+</ul>
+<p><em>Format:</em> strictly positive float</p>
+<p><em>Default:</em> 1.0</p>
+<p><em>Description:</em> the time step in <strong>picoseconds</strong> between two consecutive
+frames of CHARMM trajectory.</p>
+<ul class="simple">
+<li><p><strong>Fold coordinates in to box</strong></p></li>
+</ul>
+<p><em>Format:</em> bool</p>
+<p><em>Default:</em> False</p>
+<p><em>Description:</em> &lt;insert&gt;</p>
+<ul class="simple">
+<li><p><strong>output files</strong></p></li>
+</ul>
+<p><em>Format:</em> string</p>
+<p><em>Default:</em> ~\output_trajectory_conversion (where ~ is the home
+directory)</p>
+<p><em>Description:</em> the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the PDB and DCD
+files except velocities.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cmd.html" class="btn btn-neutral float-left" title="8. Using MDANSE from command line" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plotting.html" class="btn btn-neutral float-right" title="10. Plotting Options" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015, Gael Goret, Bachir Aoun and Eric C. Pellegrini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

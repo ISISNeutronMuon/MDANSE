@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>8. Using MDANSE from command line &mdash; MDANSE 1.5.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="9. Trajectory Converters" href="trajectory.html" />
+    <link rel="prev" title="7. Using MDANSE Graphical User Interface" href="gui.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> MDANSE
+            <img src="../_static/mdanse_logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">MDANSE User Manual</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="opening.html">1. MDANSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opening.html#citing-mdanse">2. Citing MDANSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">3. Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">4. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">5. Installing MDANSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="files.html">6. Input and output files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">7. Using MDANSE Graphical User Interface</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">8. Using MDANSE from command line</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#custom-scripts">8.1. Custom scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mdanse-scripts">8.2. MDANSE Scripts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mdanse">8.2.1. mdanse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mdanse-elements-database">8.2.2. mdanse_elements_database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mdanse-gui">8.2.3. mdanse_gui</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mdanse-job">8.2.4. mdanse_job</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mdanse-periodic-table">8.2.5. mdanse_periodic_table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mdanse-plotter">8.2.6. mdanse_plotter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mdanse-ud-editor">8.2.7. mdanse_ud_editor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mdanse-units-editor">8.2.8. mdanse_units_editor</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">9. Trajectory Converters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">10. Plotting Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">11. Glossary of Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build.html">12. Building MDANSE from source code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">13. References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MDANSE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><span class="section-number">8. </span>Using MDANSE from command line</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pages/cmd.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="using-mdanse-from-command-line">
+<h1><span class="section-number">8. </span>Using MDANSE from command line<a class="headerlink" href="#using-mdanse-from-command-line" title="Permalink to this heading"></a></h1>
+<div class="line-block">
+<div class="line">In some situations a graphical interface cannot be used for technical
+reasons (e.g., text-mode</div>
+<div class="line">connection to remote machines or Tk not available) or it is not the
+most convenient solution.</div>
+<div class="line">This occurs typically when one needs to perform a large number of
+similar calculations or when</div>
+<div class="line">the subset, deuteration or group selections that are to be used for a
+given analysis requires</div>
+<div class="line">more flexibility than the MDANSE GUI selection dialogs can offer. For
+these situations,</div>
+<div class="line">MDANSE provides a command-line interface that reads all input
+information from a single</div>
+<div class="line">input file.</div>
+</div>
+<p>Windows, has a dedicated command line which can be run using
+MDANSE_command_shell file, which sets some environment variables so
+that, in it, MDANSE python is the default python. On other platforms,
+you have to use a normal terminal and use MDANSE python by calling its
+full path, which should be (if MDANSE is in default installation
+location) /Applications/MDANSE.app/Contents/MacOS/python2 on MacOS, and
+/usr/local/bin/python on Linux systems. Please only use the
+python<strong>2</strong> file on MacOS, the other python file does not have some
+environmental variables set up.</p>
+<p>These pythons (as discussed in previous paragraph) can then be used to
+run MDANSE python scripts like any other python script:</p>
+<p>python script.py Windows</p>
+<p>path/python2 script.py MacOS</p>
+<p>path/python script.py Linux</p>
+<p>The python can also be used to install other packages, run short code
+(using the -c option), or to activate python REPL.</p>
+<p>The last way to use MDANSE from the command line is to use default
+MDANSE scripts to interface with select parts of MDANSE GUI. This is
+described in a <a class="reference external" href="#_MDANSE_Scripts">this section</a>.</p>
+<section id="custom-scripts">
+<h2><span class="section-number">8.1. </span>Custom scripts<a class="headerlink" href="#custom-scripts" title="Permalink to this heading"></a></h2>
+<p>It is possible to edit MDANSE scripts or even write new ones from
+scratch. To run an analysis using the MDANSE python library, two steps
+are necessary; first, set up the parameters that the analysis requires
+(equivalent to filling in the fields in the GUI), then running the
+analysis (equivalent to clicking the Run button). For both of these, it
+is necessary to understand how the analysis’ class works. This can be
+done by reading MDANSE documentation, either by clicking the analysis’
+Help button or by clicking the <a class="reference external" href="#open_mdanse_api">Open MDANSE API</a>
+button on the toolbar. An example script is below.</p>
+<hr class="docutils" />
+<p># Job parameters #</p>
+<hr class="docutils" />
+<p>parameters = {}</p>
+<p>parameters[‘atom_charges’] = ‘’</p>
+<p>parameters[‘atom_selection’] = None</p>
+<p>parameters[‘frames’] = (0, 2258, 1)</p>
+<p>parameters[‘output_files’] =
+(u’C:\\Users\\TACHYON\\Downloads\\output_NaF’, (u’netcdf’,))</p>
+<p>parameters[‘running_mode’] = (‘monoprocessor’,)</p>
+<p>parameters[‘trajectory’] =
+u’C:\\Users\\TACHYON\\Downloads\\NaF.nc’</p>
+<hr class="docutils" />
+<p># Setup and run the analysis #</p>
+<hr class="docutils" />
+<p># Create an instance of the class</p>
+<p>dacf = REGISTRY[‘job’][‘dacf’]()</p>
+<p># Run the analysis</p>
+<p>dacf.run(parameters,status=True)</p>
+</section>
+<section id="mdanse-scripts">
+<span id="mdanse-scripts-1"></span><h2><span class="section-number">8.2. </span>MDANSE Scripts<a class="headerlink" href="#mdanse-scripts" title="Permalink to this heading"></a></h2>
+<p>When MDANSE is installed, multiple scripts come with it, installed into
+the Scripts\ directory on Windows and bin/ directory on Unix systems.
+They can be run with python, for example</p>
+<p>python mdanse_gui</p>
+<p>or by themselves (this mode might be unavailable on Windows):</p>
+<p>mdanse_gui</p>
+<p>The following scripts come with MDANSE, each of which is described in
+the following subsections, though more information about a script can
+also be gained by calling the script with -h, e.g.,</p>
+<p>python mdanse_gui -h</p>
+<ul class="simple">
+<li><p>mdanse</p></li>
+<li><p>mdanse_elements_database</p></li>
+<li><p>mdanse_gui</p></li>
+<li><p>mdanse_job</p></li>
+<li><p>mdanse_periodic_table</p></li>
+<li><p>mdanse_plotter</p></li>
+<li><p>mdanse_ud_editor</p></li>
+<li><p>mdanse_units_editor</p></li>
+</ul>
+<section id="mdanse">
+<h3><span class="section-number">8.2.1. </span>mdanse<a class="headerlink" href="#mdanse" title="Permalink to this heading"></a></h3>
+<p>This script is used to interface with the current installation of MDANSE
+without running the GUI. It has the following options, where the
+expected arguments should be inputted after the option as
+space-separated values:</p>
+<ul class="simple">
+<li><p><strong>–version</strong></p></li>
+</ul>
+<p><em>Description:</em> displays the version of the installed MDANSE</p>
+<p><em>Expected arguments:</em> None</p>
+<ul class="simple">
+<li><p><strong>–add-mmtk-def</strong></p></li>
+</ul>
+<p><em>Description:</em> adds the provided definition to the MMTK database</p>
+<p><em>Expected arguments:</em> code, typ, filename</p>
+<p><em>code</em>: the MMTK code for the molecule to register (i.e., HOH for water)</p>
+<p><em>typ</em>: the molecular type; one of amino_acid, molecule, nucleic_acid</p>
+<p><em>filename</em>: the path to the file that stores the MMTK definition of the
+molecule being added</p>
+<ul class="simple">
+<li><p><strong>–database</strong> or <strong>-d</strong></p></li>
+</ul>
+<p><em>Description:</em> displays chemical information about the provided element</p>
+<p><em>Expected arguments:</em> ename</p>
+<p><em>ename</em>: the name of a registered element</p>
+<ul class="simple">
+<li><p><strong>–registry</strong> or <strong>-r</strong></p></li>
+</ul>
+<p><em>Description:</em> displays the contents of MDANSE classes registry</p>
+<p><em>Expected arguments:</em> None or interface</p>
+<p>None → information on all classes is displayed</p>
+<p><em>interface</em>: the name of a class → information on only the subclasses of
+the provided class is displayed</p>
+<ul class="simple">
+<li><p><strong>–traj</strong> or <strong>-t</strong></p></li>
+</ul>
+<p><em>Description:</em> displays the chemical contents of a trajectory</p>
+<p><em>Expected arguments:</em> trajName</p>
+<p><em>trajName</em>: the name of a trajectory that has been loaded into MDANSE</p>
+<ul class="simple">
+<li><p><strong>–jc</strong></p></li>
+</ul>
+<p><em>Description:</em> shows the status of the provided job</p>
+<p><em>Expected arguments:</em> filename</p>
+<p><em>filename</em>: the name (not path!) of a file representing an MDANSE job</p>
+<ul class="simple">
+<li><p><strong>–jl</strong></p></li>
+</ul>
+<p><em>Description:</em> displays the job list</p>
+<p><em>Expected arguments:</em> None</p>
+<ul class="simple">
+<li><p><strong>–jr</strong></p></li>
+</ul>
+<p><em>Description:</em> runs the provided MDANSE job(s)</p>
+<p><em>Expected arguments:</em> filename</p>
+<p><em>filename</em>: the path to an MDANSE python script</p>
+<ul class="simple">
+<li><p><strong>–js</strong></p></li>
+</ul>
+<p><em>Description:</em> saves a job script for the provided job with default
+parameters</p>
+<p><em>Expected arguments:</em> name</p>
+<p><em>name</em>: the name of a job (e.g., ccf for Current Correlation Function)</p>
+<ul class="simple">
+<li><p><strong>–jt</strong></p></li>
+</ul>
+<p><em>Description:</em> saves a new job template</p>
+<p><em>Expected arguments:</em> classname, shortname</p>
+<p><em>classname</em>: a full name for the new job (e.g., TXTConverter)</p>
+<p><em>shortname</em>: a short name for the new job (e.g., txtc)</p>
+</section>
+<section id="mdanse-elements-database">
+<h3><span class="section-number">8.2.2. </span>mdanse_elements_database<a class="headerlink" href="#mdanse-elements-database" title="Permalink to this heading"></a></h3>
+<p>This script has no options. When run, it opens the <a class="reference external" href="#_Elements_database_editor">Elements Database
+Editor</a> GUI window.</p>
+</section>
+<section id="mdanse-gui">
+<h3><span class="section-number">8.2.3. </span>mdanse_gui<a class="headerlink" href="#mdanse-gui" title="Permalink to this heading"></a></h3>
+<p>This script has no options. When run, it opens the main <a class="reference external" href="#_The_main_window">MDANSE
+GUI</a> window.</p>
+</section>
+<section id="mdanse-job">
+<h3><span class="section-number">8.2.4. </span>mdanse_job<a class="headerlink" href="#mdanse-job" title="Permalink to this heading"></a></h3>
+<p>This script is used to run a <a class="reference external" href="#_Analysis">job</a>. It opens the GUI
+window for the selected job without opening the main window. To do this,
+two positional arguments are required (meaning only the values should be
+placed after mdanse_job, no – options like for the mdanse script).
+These two arguments are as follows:</p>
+<ul class="simple">
+<li><p><strong>job</strong> – the short name of the job to be run (e.g., pdf for Pair
+Distribution Function).</p></li>
+<li><p><strong>trajectory</strong> – (only required for analyses; should be left blank
+for trajectory converters) the path to an MMTK trajectory file used
+for the job.</p></li>
+</ul>
+</section>
+<section id="mdanse-periodic-table">
+<h3><span class="section-number">8.2.5. </span>mdanse_periodic_table<a class="headerlink" href="#mdanse-periodic-table" title="Permalink to this heading"></a></h3>
+<p>This script has no options. When run, it opens the <a class="reference external" href="#_Periodic_table_viewer">Periodic
+Table</a> GUI window.</p>
+</section>
+<section id="mdanse-plotter">
+<h3><span class="section-number">8.2.6. </span>mdanse_plotter<a class="headerlink" href="#mdanse-plotter" title="Permalink to this heading"></a></h3>
+<p>This script has no options. When run, it opens the <a class="reference external" href="#_2D/3D_Plotter">2D/3D
+Plotter</a> GUI window.</p>
+</section>
+<section id="mdanse-ud-editor">
+<h3><span class="section-number">8.2.7. </span>mdanse_ud_editor<a class="headerlink" href="#mdanse-ud-editor" title="Permalink to this heading"></a></h3>
+<p>This script has no options. When run, it opens the <a class="reference external" href="#_User_definition">User Definitions
+Editor</a> GUI window.</p>
+</section>
+<section id="mdanse-units-editor">
+<h3><span class="section-number">8.2.8. </span>mdanse_units_editor<a class="headerlink" href="#mdanse-units-editor" title="Permalink to this heading"></a></h3>
+<p>This script has no options. When run, it opens the Units Editor GUI
+window.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="gui.html" class="btn btn-neutral float-left" title="7. Using MDANSE Graphical User Interface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trajectory.html" class="btn btn-neutral float-right" title="9. Trajectory Converters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015, Gael Goret, Bachir Aoun and Eric C. Pellegrini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

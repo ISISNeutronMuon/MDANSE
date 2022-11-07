@@ -19,3 +19,19 @@ Facilities Council, UKRI
 :sup:`2`\ Institut Laue-Langevin, France
 
 November 2022
+
+
+Citing MDANSE
+=============
+
+If you find MDANSE useful for your research, please cite the following
+paper in your publications:
+
+MDANSE: An Interactive Analysis Environment for Molecular Dynamics
+Simulations
+
+G. Goret, B. Aoun, and E. Pellegrini
+
+Journal of Chemical Information and Modeling 2017 57 (1), 1-5
+
+DOI: 10.1021/acs.jcim.6b00571
