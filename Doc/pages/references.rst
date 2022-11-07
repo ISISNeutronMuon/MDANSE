@@ -1,0 +1,268 @@
+
+References
+==========
+
+[1] G. Goret, B. Aoun, and E. Pellegrini, “MDANSE: An Interactive
+Analysis Environment for Molecular Dynamics Simulations,” *J. Chem. Inf.
+Model.*, vol. 57, no. 1, pp. 1–5, Jan. 2017, doi:
+10.1021/acs.jcim.6b00571.
+
+[2] “MDANSE GitHub Actions.”
+https://github.com/ISISNeutronMuon/MDANSE/actions.
+
+[3] “Open a Mac app from an unidentified developer.”
+https://support.apple.com/en-gb/guide/mac-help/mh40616/mac).
+
+[4] K. Haslam, “How to open a Mac app from an unidentified developer.”
+https://www.macworld.co.uk/how-to/mac-app-unidentified-developer-3669596/.
+
+[5] “MDANSE GitHub Issue #8.”
+https://github.com/ISISNeutronMuon/MDANSE/issues/8.
+
+[6] “University Corporation for Atmospheric Research.”
+http://www.ucar.edu/.
+
+[7] “The HDF Group.” https://www.hdfgroup.org/.
+
+[8] “MDANSE.” https://mdanse.org/.
+
+[9] “MDANSE GitHub Issues.”
+https://github.com/ISISNeutronMuon/MDANSE/issues.
+
+[10] F. J. Harris, “On the use of windows for harmonic analysis with the
+discrete Fourier transform,” *Proc. IEEE*, vol. 66, no. 1, pp. 51–83,
+1978, doi: 10.1109/PROC.1978.10837.
+
+[11] J. P. Boon and S. Yip, *Molecular Hydrodynamics*. New York:
+McGraw-Hill, 1980.
+
+[12] G. R. Kneller, “Technical Report Jül 2215,” Jülich, Germany.
+
+[13] A. G. Redfield, “On the Theory of Relaxation Processes,” *IBM J.
+Res. Dev.*, vol. 1, no. 1, pp. 19–31, 1957, doi: 10.1147/rd.11.0019.
+
+[14] G. Lipari and A. Szabo, “Model-free approach to the interpretation
+of nuclear magnetic resonance relaxation in macromolecules. 1. Theory
+and range of validity,” *J. Am. Chem. Soc.*, vol. 104, no. 17, pp.
+4546–4559, Aug. 1982, doi: 10.1021/ja00381a009.
+
+[15] G. Lipari and A. Szabo, “Model-free approach to the interpretation
+of nuclear magnetic resonance relaxation in macromolecules. 2. Analysis
+of experimental results,” *J. Am. Chem. Soc.*, vol. 104, no. 17, pp.
+4559–4570, Aug. 1982, doi: 10.1021/ja00381a010.
+
+[16] L. Van Hove, “Correlations in Space and Time and Born Approximation
+Scattering in Systems of Interacting Particles,” *Phys. Rev.*, vol. 95,
+no. 1, pp. 249–262, Jul. 1954, doi: 10.1103/PhysRev.95.249.
+
+[17] P. Schofield, “Space-Time Correlation Function Formalism for Slow
+Neutron Scattering,” *Phys. Rev. Lett.*, vol. 4, no. 5, pp. 239–240,
+Mar. 1960, doi: 10.1103/PhysRevLett.4.239.
+
+[18] G. R. Kneller, “Inelastic neutron scattering from classical
+systems,” *Mol. Phys.*, vol. 83, no. 1, pp. 63–87, Sep. 1994, doi:
+10.1080/00268979400101081.
+
+[19] J.-. P. Hansen and I. R. McDonald, “Correlations in Space and
+Time,” in *Theory of Simple Liquids*, 3rd ed., Elsevier, 2006, pp.
+195–201.
+
+[20] S. W. Lovesey, *Theory of Neutron Scattering from Condensed
+Matter*, vol. 1. Oxford: Clarendon Press, 1986.
+
+[21] G. R. Kneller, W. Doster, M. Settles, S. Cusack, and J. C. Smith,
+“Methyl group dynamics in the crystalline alanine dipeptide: A combined
+computer simulation and inelastic neutron scattering analysis,” *J.
+Chem. Phys.*, vol. 97, no. 12, pp. 8864–8879, Dec. 1992, doi:
+10.1063/1.463361.
+
+[22] A. Rahman, K. S. Singwi, and A. Sjölander, “Theory of Slow Neutron
+Scattering by Liquids. I,” *Phys. Rev.*, vol. 126, no. 3, pp. 986–996,
+May 1962, doi: 10.1103/PhysRev.126.986.
+
+[23] J.-P. Ryckaert, G. Ciccotti, and H. J. C. Berendsen, “Numerical
+integration of the cartesian equations of motion of a system with
+constraints: molecular dynamics of n-alkanes,” *J. Comput. Phys.*, vol.
+23, no. 3, pp. 327–341, 1977, doi:
+https://doi.org/10.1016/0021-9991(77)90098-5.
+
+[24] G. R. Kneller, “Superposition of Molecular Structures using
+Quaternions,” *Mol. Simul.*, vol. 7, no. 1–2, pp. 113–119, May 1991,
+doi: 10.1080/08927029108022453.
+
+[25] S. L. Altmann, *Rotations, quaternions, and double groups*. Oxford:
+Clarendon Press, 1986.
+
+[26] “Axonometric Projection.”
+https://en.wikipedia.org/wiki/Axonometric_projection#:~:text=In
+trimetric projection%2C the direction,by the angle of viewing.
+
+[27] “CASTEP.” http://www.castep.org/.
+
+[28] “CHARMM.” http://www.charmm.org/.
+
+[29] “PDB specification.”
+http://www.wwpdb.org/documentation/file-format.php.
+
+[30] “DFTB.” https://dftb.org/.
+
+[31] “Materials Studio.”
+https://www.3ds.com/products-services/biovia/products/molecular-modeling-simulation/biovia-materials-studio/.
+
+[32] “DL_POLY.” https://www.scd.stfc.ac.uk/Pages/DL_POLY.aspx.
+
+[33] “Gromacs.” https://www.gromacs.org/.
+
+[34] “LAMMPS.” https://www.lammps.org/.
+
+[35] “NAMD.” http://www.ks.uiuc.edu/Research/namd/.
+
+[36] M. Abramowitz and I. A. Stegun, *Handbook of Mathematical
+Functions*. New York: Dover, 1972.
+
+[37] “Interpolations for imshow.”
+https://matplotlib.org/stable/gallery/images_contours_and_fields/interpolation_methods.html.
+
+[38] “MDANSE GitHub.” https://github.com/ISISNeutronMuon/MDANSE.
+
+[39] “Miniconda Windows.”
+https://docs.conda.io/en/latest/miniconda.html.
+
+[40] “Microsoft Visual Studio 2008.”
+http://download.microsoft.com/download/8/1/d/81d3f35e-fa03-485b-953b-ff952e402520/VS2008ProEdition90dayTrialENUX1435622.iso.
+
+[41] C. Gohlke, “Unofficial Windows Binaries for Python Extension
+Packages.” https://www.lfd.uci.edu/~gohlke/pythonlibs/#wxpython.
+
+[42] “Conda MacOS.”
+https://docs.conda.io/projects/conda/en/latest/user-guide/install/macos.html.
+
+.. |image1| image:: ./Pictures/100000010000028D000001F1F632B1C1173DE220.png
+   :width: 7.096cm
+   :height: 5.426cm
+.. |image2| image:: ./Pictures/100000010000028D000001F583E3D2D6B25FED29.png
+   :width: 7.131cm
+   :height: 5.452cm
+.. |image3| image:: ./Pictures/100000010000028D000001F1F632B1C1173DE220.png
+   :width: 7.096cm
+   :height: 5.426cm
+.. |image4| image:: ./Pictures/100000010000028C000001F092B9EB9B1E48AB9D.png
+   :width: 7.193cm
+   :height: 5.466cm
+.. |image5| image:: ./Pictures/100000010000028D000001F1F632B1C1173DE220.png
+   :width: 7.096cm
+   :height: 5.426cm
+.. |image6| image:: ./Pictures/100000010000028C000001F40D7333B09A10BBF0.png
+   :width: 7.131cm
+   :height: 5.445cm
+.. |image7| image:: ./Pictures/100000010000025E000001C3AC39A36717DC7EE3.png
+   :width: 6.959cm
+   :height: 5.156cm
+.. |image8| image:: ./Pictures/100000010000025D000001C0F8379C92EEE1C895.png
+   :width: 7.011cm
+   :height: 5.191cm
+.. |image9| image:: ./Pictures/10000001000001C9000003B286D7BAECC84888DA.png
+   :width: 7.191cm
+   :height: 14.887cm
+.. |image10| image:: ./Pictures/10000001000002A10000027D14B28490295A59FA.png
+   :width: 7.728cm
+   :height: 7.313cm
+.. |image11| image:: ./Pictures/100000010000029E000002771B2359A8E105AC9F.png
+   :width: 7.798cm
+   :height: 7.345cm
+.. |image12| image:: ./Pictures/100000010000029E000002771B2359A8E105AC9F.png
+   :width: 7.798cm
+   :height: 7.345cm
+.. |image13| image:: ./Pictures/100000010000029D0000027A5511D91E20AFD9A5.png
+   :width: 7.765cm
+   :height: 7.357cm
+.. |image14| image:: ./Pictures/1000000100000323000002D1329469D922AFA541.png
+   :width: 15.921cm
+   :height: 14.295cm
+.. |image15| image:: ./Pictures/100000010000031E000000F3118920C50EDE8CB0.png
+   :width: 15.921cm
+   :height: 4.847cm
+.. |image16| image:: ./Pictures/100000010000031F00000248D8781028790CCDA5.png
+   :width: 15.921cm
+   :height: 11.636cm
+.. |image17| image:: ./Pictures/100000010000031E00000105F69265329BBA5756.png
+   :width: 15.921cm
+   :height: 5.207cm
+.. |image18| image:: ./Pictures/100000010000031F00000247259172131CFA3B36.png
+   :width: 15.921cm
+   :height: 11.617cm
+.. |image19| image:: ./Pictures/100000010000031F000001000B539E0E94164B2D.png
+   :width: 15.921cm
+   :height: 5.101cm
+.. |image20| image:: ./Pictures/1000000100000320000001F34B3598CBB7D90098.png
+   :width: 15.921cm
+   :height: 9.931cm
+.. |image21| image:: ./Pictures/1000000100000322000001997BE6CF552F7A05D0.png
+   :width: 15.921cm
+   :height: 8.119cm
+.. |image22| image:: ./Pictures/100000010000031F000001F4716D097EF0177F0B.png
+   :width: 15.921cm
+   :height: 9.964cm
+.. |image23| image:: ./Pictures/100000010000031F000001BDEA9E86A41E3EBCA6.png
+   :width: 15.921cm
+   :height: 8.867cm
+.. |image24| image:: ./Pictures/100000010000032200000261D8E9E9FE2C36FF14.png
+   :width: 15.921cm
+   :height: 12.09cm
+.. |image25| image:: ./Pictures/1000000100000320000000F8750817242922EC77.png
+   :width: 15.921cm
+   :height: 3.447cm
+.. |image26| image:: ./Pictures/10000001000003200000020ED42C0286B2E43D23.png
+   :width: 15.921cm
+   :height: 10.469cm
+.. |image27| image:: ./Pictures/1000000100000321000001BF1AACC92E311ED8D8.png
+   :width: 15.921cm
+   :height: 8.885cm
+.. |image28| image:: ./Pictures/100000010000031F000001FD2749283C27712371.png
+   :width: 15.921cm
+   :height: 10.142cm
+.. |image29| image:: ./Pictures/100000010000032000000193F4C1E0DB6DC04C31.png
+   :width: 15.921cm
+   :height: 8.019cm
+.. |image30| image:: ./Pictures/1000000100000321000001FE1657294434127D8F.png
+   :width: 15.921cm
+   :height: 10.137cm
+.. |image31| image:: ./Pictures/1000000100000320000001E1A38060C427362263.png
+   :width: 15.921cm
+   :height: 9.573cm
+.. |image32| image:: ./Pictures/1000000000000226000000D8F0CF60C6C4938937.png
+   :width: 13.123cm
+   :height: 5.154cm
+.. |image33| image:: ./Pictures/100000010000031F00000203A1B6C4356C211C30.png
+   :width: 15.921cm
+   :height: 10.262cm
+.. |image34| image:: ./Pictures/10000001000003220000018769B28972812F81A2.png
+   :width: 15.921cm
+   :height: 7.761cm
+.. |image35| image:: ./Pictures/10000001000004E6000002A73EEAE87D5C660F5C.png
+   :width: 7.655cm
+   :height: 4.159cm
+.. |image36| image:: ./Pictures/10000001000004E4000002A94202A3BFD79098BA.png
+   :width: 7.465cm
+   :height: 4.096cm
+.. |image37| image:: ./Pictures/1000000100000478000002C6F32754BFA135B144.png
+   :width: 6.854cm
+   :height: 4.255cm
+.. |image38| image:: ./Pictures/1000000100000483000002D2D853AC6BB7CFEA02.png
+   :width: 6.791cm
+   :height: 4.246cm
+.. |image39| image:: ./Pictures/10000001000003C2000003347082A5808C577BC7.png
+   :width: 4.815cm
+   :height: 4.105cm
+.. |image40| image:: ./Pictures/10000001000003C10000032F3AEF65741592C169.png
+   :width: 4.904cm
+   :height: 4.157cm
+.. |image41| image:: ./Pictures/10000001000003BF0000032F9CDC0562548E815A.png
+   :width: 4.798cm
+   :height: 4.076cm
+.. |image42| image:: ./Pictures/10000001000003C200000330E638C73D8C1D67D9.png
+   :width: 5.239cm
+   :height: 4.443cm
+.. |image43| image:: ./Pictures/100000010000072F000003336ED265D0B6E3D58A.png
+   :width: 9.844cm
+   :height: 4.383cm

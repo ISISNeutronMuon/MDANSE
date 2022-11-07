@@ -48,8 +48,12 @@ User guide
    pages/introduction
    pages/installation
    pages/files
-   pages/GUI/startup
-   pages/GUI/main-window
+   pages/gui
+   pages/cmd
+   pages/trajectory
+   pages/plotting
+   pages/build
+   pages/references
 
 Indices and tables
 ==================
