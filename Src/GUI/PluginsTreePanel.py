@@ -87,7 +87,8 @@ class PluginsTreePanel(wx.Panel):
             ancestors = []
             for anc in ancestor:
                 ancestors.append(anc)
-                ancestors.extend([c._type for c in REGISTRY['plugin'][anc].__subclasses__()])
+                if anc in REGISTRY['plugin'].keys():
+                    ancestors.extend([c._type for c in REGISTRY['plugin'][anc].__subclasses__()])
             
             for a in ancestors:
 
