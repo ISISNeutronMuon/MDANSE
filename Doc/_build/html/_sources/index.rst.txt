@@ -38,12 +38,18 @@ User guide
 ==========
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :numbered:
    :hidden:
-   :caption: Theory
+   :caption: MDANSE User Manual
 
-   pages/mdanse-manual
+   pages/opening
+   pages/authors
+   pages/introduction
+   pages/installation
+   pages/files
+   pages/GUI/startup
+   pages/GUI/main-window
 
 Indices and tables
 ==================

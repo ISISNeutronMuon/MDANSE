@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>6. Input and output files &mdash; MDANSE 1.5.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="5. Installing MDANSE" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> MDANSE
+            <img src="../_static/mdanse_logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">MDANSE User Manual</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="opening.html">1. MDANSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">2. Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html#citing-mdanse">3. Citing MDANSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">4. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">5. Installing MDANSE</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">6. Input and output files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#netcdf-file-format">6.1. NetCDF file format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hdf5-file-format">6.2. HDF5 file format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dat-file-format">6.3. DAT file format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mdanse-scripts">6.4. MDANSE scripts</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MDANSE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><span class="section-number">6. </span>Input and output files</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pages/files.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="input-and-output-files">
+<h1><span class="section-number">6. </span>Input and output files<a class="headerlink" href="#input-and-output-files" title="Permalink to this heading"></a></h1>
+<p>Almost, if not all, functionalities provided by MDANSE are based on
+Network Common Data Form (NetCDF) input file. However, in certain
+circumstances MDANSE can use or produce another type of files. We will
+start this section by explaining in detail the NetCDF file format
+introducing next the other file formats used by MDANSE.</p>
+<section id="netcdf-file-format">
+<h2><span class="section-number">6.1. </span>NetCDF file format<a class="headerlink" href="#netcdf-file-format" title="Permalink to this heading"></a></h2>
+<p>NetCDF is a set of software libraries and self-describing,
+machine-independent data formats that support the creation, access, and
+sharing of array-oriented scientific data. The project homepage is
+hosted by the Unidata program at the University Corporation for
+Atmospheric Research.[<a class="reference external" href="#SignetBibliographie_006">6</a>] They are also
+the chief source of NetCDF -based software, standards development,
+updates, etc. The format is an open standard.</p>
+<p>The data format is self-describing. This means that there is a header
+which describes the layout of the rest of the file, in particular the
+data arrays, as well as arbitrary file metadata in the form of
+name/value attributes. The format is platform independent, with issues
+such as endianness being addressed in the software libraries. The data
+arrays are rectangular, not ragged, and stored in a simple and regular
+fashion that allows efficient sub setting.</p>
+<p>MDANSE expects trajectories to be in NetCDF format and follow the
+conventions of Molecular Modelling ToolKit (MMTK). Trajectories that
+have not been produced with MMTK or MMTK-based programs must be
+converted to MMTK format before they can be analysed with MDANSE. This
+conversion is necessary because no other common trajectory format
+permits efficient access both to conformations at a given time and to
+one-atom trajectories for all times. In addition to providing such an
+access, the NetCDF format has several advantages that make it
+particularly suitable for archiving trajectories:</p>
+<ul class="simple">
+<li><p>compact files (binary storage)</p></li>
+<li><p>machine-independent format</p></li>
+<li><p>fully self-contained, complete information about the system is stored
+in the trajectory file.</p></li>
+</ul>
+<p>The conversion of the trajectories from different formats to the MMTK
+format can be made directly via the MDANSE <a class="reference external" href="#_Using_MDANSE_Graphical">graphical user
+interface</a>, specifically the <a class="reference external" href="#_Trajectory_converter">trajectory
+converters</a>.</p>
+<p>MMTK NetCDF files work, however, not just as input files; they are at
+the centre of MDANSE. The result of an <a class="reference external" href="#_Analysis">analysis</a> is, by
+default, written into an MMTK NetCDF file, which can then be once again
+used as an input file. The <a class="reference external" href="#_2D/3D_Plotter">2D/3D Plotter</a>, the
+inbuilt tool for graph visualisation, only works with MMTK NetCDF files.</p>
+</section>
+<section id="hdf5-file-format">
+<h2><span class="section-number">6.2. </span>HDF5 file format<a class="headerlink" href="#hdf5-file-format" title="Permalink to this heading"></a></h2>
+<p>HDF is a set of file formats designed to store and organise large
+amounts of data. The project is maintained by The HDF Group
+[<a class="reference external" href="#SignetBibliographie_007">7</a>], a non-profit corporation, who ensure
+its continued development and accessibility. The associated libraries
+and tools are available under a liberal license for general use.</p>
+<p>HDF5 is the latest version, and its use is widespread; even the version
+4 of the NetCDF format is built on top of HDF5. It is organised
+hierarchically like a file system and uses POSIX-like syntax. The data
+is stored in datasets, n-dimensional arrays, which are grouped in
+groups, file-like objects. Either can then be modified with metadata by
+adding attributes.</p>
+<p>It is a goal to replace NetCDF with HDF5 as the main storage format, and
+therefore MDANSE supports HDF5 output for <a class="reference external" href="#_Analysis">analyses</a> and
+input for <a class="reference external" href="#_2D/3D_Plotter">plotters</a>.</p>
+</section>
+<section id="dat-file-format">
+<h2><span class="section-number">6.3. </span>DAT file format<a class="headerlink" href="#dat-file-format" title="Permalink to this heading"></a></h2>
+<p>When performing an <a class="reference external" href="#_Analysis">analysis</a>, it there are two options
+for output file formats: NetCDF and ASCII. By default, only NetCDF is
+selected, creating an MMTK NetCDF file, but it is possible to change
+that to ASCII or both. If the ASCII option is selected, a tarball is
+generated. Inside are multiple files which together contain the results
+of the analysis. Firstly, there is a text file, jobinfo.txt, which
+contains the options that were selected when performing the analysis.</p>
+<p>Secondly, there is a DAT file for each variable generated by the
+analysis. Each file is named after the variable it contains, and this
+name is identical to the name that would appear in <a class="reference external" href="#_2D/3D_Plotter">2D/3D
+Plotter</a> if the equivalent NetCDF file were loaded
+in. Each file begins with a couple commented line describing the
+variable:</p>
+<ul class="simple">
+<li><p>variable name</p></li>
+<li><p>type of plot (this represents the dimensions of plot)</p></li>
+<li><p>which variable is on the x-axis if the variable in this DAT file were
+to be plotted on the y-axis</p></li>
+<li><p><a class="reference external" href="#_Units">units</a> in which the data is written</p></li>
+<li><p>the length of the trajectory (indicated as slice:[length])</p></li>
+</ul>
+<p>After that is a list of numbers representing the variable as described.</p>
+</section>
+<section id="mdanse-scripts">
+<h2><span class="section-number">6.4. </span>MDANSE scripts<a class="headerlink" href="#mdanse-scripts" title="Permalink to this heading"></a></h2>
+<p>These files are python scripts that, when run, perform a given analysis
+with all the options set the way they were when this script was created.
+It can be run like any other script, you only have to make sure you use
+the python interpreter that comes with MDANSE. For more information
+about MDANSE python, read <a class="reference external" href="#_Using_MDANSE_from">Using MDANSE from command
+line</a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="5. Installing MDANSE" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015, Gael Goret, Bachir Aoun and Eric C. Pellegrini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
