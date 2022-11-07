@@ -92,6 +92,18 @@
              
   <section id="building-mdanse-from-source-code">
 <h1><span class="section-number">12. </span>Building MDANSE from source code<a class="headerlink" href="#building-mdanse-from-source-code" title="Permalink to this heading"></a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The MDANSE branch 1.5.x is still based on Python 2.
+At the time this manual has been written, in 2022,
+this makes it extremally difficult to find all the
+necessary software dependencies.
+It is strongly recommended to install a pre-built
+package for your operating system instead of
+building MDANSE from source yourself.
+A new version of MDANSE, based on Python 3,
+is currently under development.</p>
+</div>
 <p>MDANSE is an open-source software, and so the source code is widely
 available. Currently, it is hosted by ISIS at GitHub
 [<a class="reference external" href="#SignetBibliographie_038">38</a>]. The code can be freely altered and
@@ -133,19 +145,23 @@ architecture.</p>
 </ul>
 <p>Afterwards, a virtual environment can be created and the wheels as well
 as other dependencies can be installed into it.</p>
-<p>conda create –name envname python=2.7</p>
-<p>conda activate envname</p>
-<p>conda install h5py netCDF4</p>
-<p>pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
-wxPython_common‑3.0.2.0‑py2‑none‑any.whl
-wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
-VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">conda create --name envname python=2.7</span>
+<span class="go">conda activate envname</span>
+<span class="go">conda install h5py netCDF4</span>
+<span class="go">pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro</span>
+<span class="go">wxPython_common‑3.0.2.0‑py2‑none‑any.whl</span>
+<span class="go">wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl</span>
+<span class="go">VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl</span>
+</pre></div>
+</div>
 <p>Then, ScientificPython can be installed into the virtual environment.
 This has to be done from source, using an ILL version of
 ScientificPython.</p>
-<p>git clone <a class="reference external" href="https://code.ill.fr/scientific-software/scientific-python.git">https://code.ill.fr/scientific-software/scientific-python.git</a></p>
-<p>cd scientific-python</p>
-<p>python setup.py –netcdf_prefix=dir_h –netcdf_dll=dir_dll build install</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git clone https://code.ill.fr/scientific-software/scientific-python.git</span>
+<span class="go">cd scientific-python</span>
+<span class="go">python setup.py --netcdf_prefix=dir_h --netcdf_dll=dir_dll build install</span>
+</pre></div>
+</div>
 <p>In the second line, dir_h stands for the directory where the netcdf.h
 file exists, and dir_dll for the location of netcdf.dll. The location of
 both these files is inside the environment. If Miniconda was installed
@@ -158,14 +174,16 @@ file cannot be found, then the setup.py file has to be edited. Changing
 the line 86, which should read netcdf_lib = netcdf_dll, to netcdf_lib =
 r’path’, where path is the path to said file should fix the issue.
 Alternatively, the line can be replaced with the following code:</p>
-<p>if os.path.exists(os.path.join(netcdf_dll, ‘netcdf.lib’)):</p>
-<p>netcdf_lib = netcdf_dll</p>
-<p>elif os.path.exists(os.path.join(os.path.dirname(netcdf_dll), ‘lib’,
-‘netcdf.lib’)):</p>
-<p>netcdf_lib = os.path.join(os.path.dirname(netcdf_dll), ‘lib’)</p>
-<p>else:</p>
-<p>print “netcdf.lib could not be found”</p>
-<p>raise SystemExit</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">netcdf_dll</span><span class="p">,</span> <span class="s1">&#39;netcdf.lib&#39;</span><span class="p">)):</span>
+    <span class="n">netcdf_lib</span> <span class="o">=</span> <span class="n">netcdf_dll</span>
+<span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">netcdf_dll</span><span class="p">),</span> <span class="s1">&#39;lib&#39;</span><span class="p">,</span>
+<span class="s1">&#39;netcdf.lib&#39;</span><span class="p">)):</span>
+    <span class="n">netcdf_lib</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">netcdf_dll</span><span class="p">),</span> <span class="s1">&#39;lib&#39;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span> <span class="s2">&quot;netcdf.lib could not be found&quot;</span>
+    <span class="k">raise</span> <span class="ne">SystemExit</span>
+</pre></div>
+</div>
 <p>Any other errors can be attempted to be solved by running “C:\Program
 Files (x86)\Microsoft Visual Studio 9.0\VC\bin\vcvars32.bat” on x32
 systems and “C:\Program Files (x86)\Microsoft Visual Studio
@@ -174,15 +192,19 @@ vcvarsall.bat error is encountered after that, Visual Studio 2008 might
 have to be reinstalled (not to forget to install the x64 Tools).</p>
 <p>Once ScientificPython is installed successfully, MMTK and MDANSE can be
 built and installed from source.</p>
-<p>git clone <a class="reference external" href="https://code.ill.fr/scientific-software/mmtk.git">https://code.ill.fr/scientific-software/mmtk.git</a></p>
-<p>cd mmtk</p>
-<p>python setup.py install</p>
-<p>git clone <a class="reference external" href="https://github.com/ISISNeutronMuon/MDANSE.git">https://github.com/ISISNeutronMuon/MDANSE.git</a></p>
-<p>cd MDANSE</p>
-<p>python setup.py build install</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git clone https://code.ill.fr/scientific-software/mmtk.git</span>
+<span class="go">cd mmtk</span>
+<span class="go">python setup.py install</span>
+<span class="go">git clone https://github.com/ISISNeutronMuon/MDANSE.git</span>
+<span class="go">cd MDANSE</span>
+<span class="go">python setup.py build install</span>
+</pre></div>
+</div>
 <p>After that, MDANSE can be used from command line as per usual, and the
 GUI can be started by running</p>
-<p>python path\envname\Scripts\mdanse_gui</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python path\\envname\\Scripts\\mdanse_gui</span>
+</pre></div>
+</div>
 </section>
 <section id="macos">
 <span id="macos-2"></span><h2><span class="section-number">12.2. </span>MacOS<a class="headerlink" href="#macos" title="Permalink to this heading"></a></h2>
@@ -193,31 +215,36 @@ be used but conda still has to be used to download multiple packages
 unless they are built from source. This guide uses conda fully.</p>
 <p>First, create a conda virtual environment and install dependencies
 (envname can be whatever name desirable for the environment).</p>
-<p>conda create –name envname python=2.7</p>
-<p>conda activate envname</p>
-<p>conda install h5py netCDF4</p>
-<p>pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro pyyaml</p>
-<p>sudo conda install -y -c daf wxpython</p>
-<p>sudo conda install -y -c ccordoba12 vtk</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">conda create --name envname python=2.7</span>
+<span class="go">conda activate envname</span>
+<span class="go">conda install h5py netCDF4</span>
+<span class="go">pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro pyyaml</span>
+<span class="go">sudo conda install -y -c daf wxpython</span>
+<span class="go">sudo conda install -y -c ccordoba12 vtk</span>
+</pre></div>
+</div>
 <p>Afterwards, ScientificPython, MMTK, and MDANSE can be built and
 installed from source code. Please note that the NETCDF_HEADER_FILE_PATH
 below has to be set to the location of the directory of netcdf.h.</p>
-<p>export
-NETCDF_HEADER_FILE_PATH=/Users/username/Miniconda/envs/envname/include</p>
-<p>git clone <a class="reference external" href="https://code.ill.fr/scientific-software/scientific-python.git">https://code.ill.fr/scientific-software/scientific-python.git</a></p>
-<p>cd scientific-python/</p>
-<p>python setup.py install</p>
-<p>git clone <a class="reference external" href="https://code.ill.fr/scientific-software/mmtk.git">https://code.ill.fr/scientific-software/mmtk.git</a></p>
-<p>cd mmtk</p>
-<p>spython setup.py install</p>
-<p>git clone <a class="reference external" href="https://github.com/ISISNeutronMuon/MDANSE.git">https://github.com/ISISNeutronMuon/MDANSE.git</a></p>
-<p>cd MDANSE</p>
-<p>python setup.py install</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">export NETCDF_HEADER_FILE_PATH=/Users/username/Miniconda/envs/envname/include</span>
+<span class="go">git clone https://code.ill.fr/scientific-software/scientific-python.git</span>
+<span class="go">cd scientific-python/</span>
+<span class="go">python setup.py install</span>
+<span class="go">git clone https://code.ill.fr/scientific-software/mmtk.git</span>
+<span class="go">cd mmtk</span>
+<span class="go">spython setup.py install</span>
+<span class="go">git clone https://github.com/ISISNeutronMuon/MDANSE.git</span>
+<span class="go">cd MDANSE</span>
+<span class="go">python setup.py install</span>
+</pre></div>
+</div>
 <p>If there are any permission issues, the installation will have to be
 performed with elevated privileges and full path to python, ie.
 path/envname/bin/python. Afterwards, MDANSE can be used from command
 line like normal, and the GUI can be started by running:</p>
-<p>path/envname/bin/mdanse_gui</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">path/envname/bin/mdanse_gui</span>
+</pre></div>
+</div>
 </section>
 <section id="linux">
 <span id="linux-2"></span><h2><span class="section-number">12.3. </span>Linux<a class="headerlink" href="#linux" title="Permalink to this heading"></a></h2>
@@ -238,22 +265,24 @@ be taken from our continuous integration pipeline at
 used for building MDANSE, which makes installing packages much simpler
 and should reduce the dependence on distribution somewhat. The steps to
 follow are such:</p>
-<p>conda create –name envname python=2.7</p>
-<p>conda activate envname</p>
-<p>conda install h5py netCDF4</p>
-<p>pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro pyyaml</p>
-<p>sudo conda install -y -c daf wxpython</p>
-<p>sudo conda install -y -c ccordoba12 vtk</p>
-<p>export NETCDF_HEADER_FILE_PATH=/usr/include/</p>
-<p>git clone <a class="reference external" href="https://code.ill.fr/scientific-software/scientific-python.git">https://code.ill.fr/scientific-software/scientific-python.git</a></p>
-<p>cd scientific-python/</p>
-<p>python setup.py install</p>
-<p>git clone <a class="reference external" href="https://code.ill.fr/scientific-software/mmtk.git">https://code.ill.fr/scientific-software/mmtk.git</a></p>
-<p>cd mmtk</p>
-<p>spython setup.py install</p>
-<p>git clone <a class="reference external" href="https://github.com/ISISNeutronMuon/MDANSE.git">https://github.com/ISISNeutronMuon/MDANSE.git</a></p>
-<p>cd MDANSE</p>
-<p>python setup.py install</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">conda create --name envname python=2.7</span>
+<span class="go">conda activate envname</span>
+<span class="go">conda install h5py netCDF4</span>
+<span class="go">pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro pyyaml</span>
+<span class="go">sudo conda install -y -c daf wxpython</span>
+<span class="go">sudo conda install -y -c ccordoba12 vtk</span>
+<span class="go">export NETCDF_HEADER_FILE_PATH=/usr/include/</span>
+<span class="go">git clone https://code.ill.fr/scientific-software/scientific-python.git</span>
+<span class="go">cd scientific-python/</span>
+<span class="go">python setup.py install</span>
+<span class="go">git clone https://code.ill.fr/scientific-software/mmtk.git</span>
+<span class="go">cd mmtk</span>
+<span class="go">spython setup.py install</span>
+<span class="go">git clone https://github.com/ISISNeutronMuon/MDANSE.git</span>
+<span class="go">cd MDANSE</span>
+<span class="go">python setup.py install</span>
+</pre></div>
+</div>
 </section>
 </section>
 
