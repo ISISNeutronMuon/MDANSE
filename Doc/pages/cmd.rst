@@ -2,38 +2,32 @@
 Using MDANSE from command line
 ==============================
 
-| In some situations a graphical interface cannot be used for technical
-  reasons (e.g., text-mode
-| connection to remote machines or Tk not available) or it is not the
-  most convenient solution.
-| This occurs typically when one needs to perform a large number of
-  similar calculations or when
-| the subset, deuteration or group selections that are to be used for a
-  given analysis requires
-| more flexibility than the MDANSE GUI selection dialogs can offer. For
-  these situations,
-| MDANSE provides a command-line interface that reads all input
-  information from a single
-| input file.
+In some situations a graphical interface cannot be used for technical reasons (e.g., text-mode
+connection to remote machines or Tk not available) or it is not the most convenient solution.
+This occurs typically when one needs to perform a large number of similar calculations or when
+the subset, deuteration or group selections that are to be used for a given analysis requires
+more flexibility than the MDANSE GUI selection dialogs can offer. For these situations,
+MDANSE provides a command-line interface that reads all input information from a single
+input file.
 
 Windows, has a dedicated command line which can be run using
 MDANSE_command_shell file, which sets some environment variables so
 that, in it, MDANSE python is the default python. On other platforms,
 you have to use a normal terminal and use MDANSE python by calling its
 full path, which should be (if MDANSE is in default installation
-location) /Applications/MDANSE.app/Contents/MacOS/python2 on MacOS, and
-/usr/local/bin/python on Linux systems. Please only use the
-python\ **2** file on MacOS, the other python file does not have some
+location) `/Applications/MDANSE.app/Contents/MacOS/python2` on MacOS, and
+`/usr/local/bin/python` on Linux systems. Please only use the
+**python2** file on MacOS, the other python file does not have some
 environmental variables set up.
 
 These pythons (as discussed in previous paragraph) can then be used to
 run MDANSE python scripts like any other python script:
 
-python script.py Windows
+`python script.py` -- Windows
 
-path/python2 script.py MacOS
+`path/python2 script.py` -- MacOS
 
-path/python script.py Linux
+`path/python script.py` -- Linux
 
 The python can also be used to install other packages, run short code
 (using the -c option), or to activate python REPL.
@@ -61,21 +55,17 @@ button on the toolbar. An example script is below.
 
 ################################################################
 
-parameters = {}
+.. code-block:: python
 
-parameters['atom_charges'] = ''
-
-parameters['atom_selection'] = None
-
-parameters['frames'] = (0, 2258, 1)
-
-parameters['output_files'] =
-(u'C:\\\\Users\\\\TACHYON\\\\Downloads\\\\output_NaF', (u'netcdf',))
-
-parameters['running_mode'] = ('monoprocessor',)
-
-parameters['trajectory'] =
-u'C:\\\\Users\\\\TACHYON\\\\Downloads\\\\NaF.nc'
+  parameters = {}
+  parameters['atom_charges'] = ''
+  parameters['atom_selection'] = None
+  parameters['frames'] = (0, 2258, 1)
+  parameters['output_files'] =
+  (u'C:\\\\Users\\\\TACHYON\\\\Downloads\\\\output_NaF', (u'netcdf',))
+  parameters['running_mode'] = ('monoprocessor',)
+  parameters['trajectory'] =
+  u'C:\\\\Users\\\\TACHYON\\\\Downloads\\\\NaF.nc'
 
 ################################################################
 
@@ -85,11 +75,15 @@ u'C:\\\\Users\\\\TACHYON\\\\Downloads\\\\NaF.nc'
 
 # Create an instance of the class
 
-dacf = REGISTRY['job']['dacf']()
+.. code-block:: python
+  
+  dacf = REGISTRY['job']['dacf']()
 
 # Run the analysis
 
-dacf.run(parameters,status=True)
+.. code-block:: python
+  
+  dacf.run(parameters,status=True)
 
 .. _mdanse-scripts-1:
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>6. Input and output files &mdash; MDANSE 1.5.2 documentation</title>
+  <title>7. Input and output files &mdash; MDANSE 1.5.2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="7. Using MDANSE Graphical User Interface" href="gui.html" />
-    <link rel="prev" title="5. Installing MDANSE" href="installation.html" /> 
+    <link rel="next" title="8. Using MDANSE Graphical User Interface" href="gui.html" />
+    <link rel="prev" title="6. Building MDANSE from source code" href="build.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,19 +51,19 @@
 <li class="toctree-l1"><a class="reference internal" href="authors.html">3. Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">4. Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">5. Installing MDANSE</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">6. Input and output files</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#netcdf-file-format">6.1. NetCDF file format</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#hdf5-file-format">6.2. HDF5 file format</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dat-file-format">6.3. DAT file format</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#mdanse-scripts">6.4. MDANSE scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build.html">6. Building MDANSE from source code</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">7. Input and output files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#netcdf-file-format">7.1. NetCDF file format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hdf5-file-format">7.2. HDF5 file format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dat-file-format">7.3. DAT file format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mdanse-scripts">7.4. MDANSE scripts</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="gui.html">7. Using MDANSE Graphical User Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cmd.html">8. Using MDANSE from command line</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trajectory.html">9. Trajectory Converters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">10. Plotting Options</a></li>
-<li class="toctree-l1"><a class="reference internal" href="parameters.html">11. Glossary of Parameters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="build.html">12. Building MDANSE from source code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">8. Using MDANSE Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmd.html">9. Using MDANSE from command line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">10. Trajectory Converters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">11. Plotting Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">12. Glossary of Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">13. References</a></li>
 </ul>
 
@@ -81,7 +81,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li><span class="section-number">6. </span>Input and output files</li>
+      <li><span class="section-number">7. </span>Input and output files</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/pages/files.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -92,14 +92,14 @@
            <div itemprop="articleBody">
              
   <section id="input-and-output-files">
-<h1><span class="section-number">6. </span>Input and output files<a class="headerlink" href="#input-and-output-files" title="Permalink to this heading"></a></h1>
+<h1><span class="section-number">7. </span>Input and output files<a class="headerlink" href="#input-and-output-files" title="Permalink to this heading"></a></h1>
 <p>Almost, if not all, functionalities provided by MDANSE are based on
 Network Common Data Form (NetCDF) input file. However, in certain
 circumstances MDANSE can use or produce another type of files. We will
 start this section by explaining in detail the NetCDF file format
 introducing next the other file formats used by MDANSE.</p>
 <section id="netcdf-file-format">
-<h2><span class="section-number">6.1. </span>NetCDF file format<a class="headerlink" href="#netcdf-file-format" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">7.1. </span>NetCDF file format<a class="headerlink" href="#netcdf-file-format" title="Permalink to this heading"></a></h2>
 <p>NetCDF is a set of software libraries and self-describing,
 machine-independent data formats that support the creation, access, and
 sharing of array-oriented scientific data. The project homepage is
@@ -140,7 +140,7 @@ used as an input file. The <a class="reference external" href="#_2D/3D_Plotter">
 inbuilt tool for graph visualisation, only works with MMTK NetCDF files.</p>
 </section>
 <section id="hdf5-file-format">
-<h2><span class="section-number">6.2. </span>HDF5 file format<a class="headerlink" href="#hdf5-file-format" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">7.2. </span>HDF5 file format<a class="headerlink" href="#hdf5-file-format" title="Permalink to this heading"></a></h2>
 <p>HDF is a set of file formats designed to store and organise large
 amounts of data. The project is maintained by The HDF Group
 [<a class="reference external" href="#SignetBibliographie_007">7</a>], a non-profit corporation, who ensure
@@ -157,7 +157,7 @@ therefore MDANSE supports HDF5 output for <a class="reference external" href="#_
 input for <a class="reference external" href="#_2D/3D_Plotter">plotters</a>.</p>
 </section>
 <section id="dat-file-format">
-<h2><span class="section-number">6.3. </span>DAT file format<a class="headerlink" href="#dat-file-format" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">7.3. </span>DAT file format<a class="headerlink" href="#dat-file-format" title="Permalink to this heading"></a></h2>
 <p>When performing an <a class="reference external" href="#_Analysis">analysis</a>, it there are two options
 for output file formats: NetCDF and ASCII. By default, only NetCDF is
 selected, creating an MMTK NetCDF file, but it is possible to change
@@ -182,7 +182,7 @@ to be plotted on the y-axis</p></li>
 <p>After that is a list of numbers representing the variable as described.</p>
 </section>
 <section id="mdanse-scripts">
-<h2><span class="section-number">6.4. </span>MDANSE scripts<a class="headerlink" href="#mdanse-scripts" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">7.4. </span>MDANSE scripts<a class="headerlink" href="#mdanse-scripts" title="Permalink to this heading"></a></h2>
 <p>These files are python scripts that, when run, perform a given analysis
 with all the options set the way they were when this script was created.
 It can be run like any other script, you only have to make sure you use
@@ -196,8 +196,8 @@ line</a>.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="installation.html" class="btn btn-neutral float-left" title="5. Installing MDANSE" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="gui.html" class="btn btn-neutral float-right" title="7. Using MDANSE Graphical User Interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="build.html" class="btn btn-neutral float-left" title="6. Building MDANSE from source code" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gui.html" class="btn btn-neutral float-right" title="8. Using MDANSE Graphical User Interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

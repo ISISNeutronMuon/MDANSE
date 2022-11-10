@@ -44,13 +44,13 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/authors
    pages/introduction
    pages/installation
+   pages/build
    pages/files
    pages/gui
    pages/cmd
    pages/trajectory
    pages/plotting
    pages/parameters
-   pages/build
    pages/references
 
 Indices and tables

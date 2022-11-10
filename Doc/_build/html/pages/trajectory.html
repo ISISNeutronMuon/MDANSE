@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>9. Trajectory Converters &mdash; MDANSE 1.5.2 documentation</title>
+  <title>10. Trajectory Converters &mdash; MDANSE 1.5.2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="10. Plotting Options" href="plotting.html" />
-    <link rel="prev" title="8. Using MDANSE from command line" href="cmd.html" /> 
+    <link rel="next" title="11. Plotting Options" href="plotting.html" />
+    <link rel="prev" title="9. Using MDANSE from command line" href="cmd.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,29 +51,29 @@
 <li class="toctree-l1"><a class="reference internal" href="authors.html">3. Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">4. Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">5. Installing MDANSE</a></li>
-<li class="toctree-l1"><a class="reference internal" href="files.html">6. Input and output files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gui.html">7. Using MDANSE Graphical User Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cmd.html">8. Using MDANSE from command line</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">9. Trajectory Converters</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#castep-converter">9.1. CASTEP converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#charmm-converter">9.2. CHARMM converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dftb-converter">9.3. DFTB converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#discover-converter">9.4. Discover converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dl-poly-converter">9.5. DL_POLY converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dmol-converter">9.6. DMol converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#forcite-converter">9.7. Forcite converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#generic-converter">9.8. Generic converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#gromacs-converter">9.9. Gromacs converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#lammps-converter">9.10. LAMMPS converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#namd-converter">9.11. NAMD converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pdb-converter">9.12. PDB converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#vasp-converter">9.13. VASP converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#xplor-converter">9.14. XPLOR converter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build.html">6. Building MDANSE from source code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="files.html">7. Input and output files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">8. Using MDANSE Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmd.html">9. Using MDANSE from command line</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">10. Trajectory Converters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#castep-converter">10.1. CASTEP converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#charmm-converter">10.2. CHARMM converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dftb-converter">10.3. DFTB converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#discover-converter">10.4. Discover converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dl-poly-converter">10.5. DL_POLY converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dmol-converter">10.6. DMol converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#forcite-converter">10.7. Forcite converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generic-converter">10.8. Generic converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gromacs-converter">10.9. Gromacs converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lammps-converter">10.10. LAMMPS converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#namd-converter">10.11. NAMD converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pdb-converter">10.12. PDB converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vasp-converter">10.13. VASP converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#xplor-converter">10.14. XPLOR converter</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">10. Plotting Options</a></li>
-<li class="toctree-l1"><a class="reference internal" href="parameters.html">11. Glossary of Parameters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="build.html">12. Building MDANSE from source code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">11. Plotting Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">12. Glossary of Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">13. References</a></li>
 </ul>
 
@@ -91,7 +91,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li><span class="section-number">9. </span>Trajectory Converters</li>
+      <li><span class="section-number">10. </span>Trajectory Converters</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/pages/trajectory.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -102,7 +102,7 @@
            <div itemprop="articleBody">
              
   <section id="trajectory-converters">
-<h1><span class="section-number">9. </span>Trajectory Converters<a class="headerlink" href="#trajectory-converters" title="Permalink to this heading"></a></h1>
+<h1><span class="section-number">10. </span>Trajectory Converters<a class="headerlink" href="#trajectory-converters" title="Permalink to this heading"></a></h1>
 <p>Below is the list of converters present in MDANSE. These allow for the
 outputs of a variety of MD simulation software to be able to be used in
 MDANSE by converting the various file formats to MMTK NetCDF format that
@@ -146,7 +146,7 @@ which a file does not exist.</p>
 MMTK NetCDF format, containing all the information from the MD file
 except velocities.</p>
 <section id="castep-converter">
-<h2><span class="section-number">9.1. </span>CASTEP converter<a class="headerlink" href="#castep-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.1. </span>CASTEP converter<a class="headerlink" href="#castep-converter" title="Permalink to this heading"></a></h2>
 <p>MDANSE can convert .md files generated by <strong>CA</strong>mbridge <strong>S</strong>erial
 <strong>T</strong>otal <strong>E</strong>nergy <strong>P</strong>ackage (CASTEP)
 [<a class="reference external" href="#SignetBibliographie_027">27</a>] of any version, and the header can
@@ -172,7 +172,7 @@ MMTK NetCDF format, containing all the information from the MD file
 except velocities.</p>
 </section>
 <section id="charmm-converter">
-<h2><span class="section-number">9.2. </span>CHARMM converter<a class="headerlink" href="#charmm-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.2. </span>CHARMM converter<a class="headerlink" href="#charmm-converter" title="Permalink to this heading"></a></h2>
 <p>This converter allows the conversion from a trajectory generated with
 <strong>C</strong>hemistry at <strong>HAR</strong>vard <strong>M</strong>acromolecular <strong>M</strong>echanics
 (CHARMM) [<a class="reference external" href="#SignetBibliographie_028">28</a>]. Selecting CHARMM button
@@ -224,7 +224,7 @@ MMTK NetCDF format, containing all the information from the PDB and DCD
 files except velocities.</p>
 </section>
 <section id="dftb-converter">
-<h2><span class="section-number">9.3. </span>DFTB converter<a class="headerlink" href="#dftb-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.3. </span>DFTB converter<a class="headerlink" href="#dftb-converter" title="Permalink to this heading"></a></h2>
 <p>Converts trajectories generated using software based on the
 <strong>D</strong>ensity <strong>F</strong>unctional based <strong>T</strong>ight <strong>B</strong>inding (DFTB)
 method [<a class="reference external" href="#SignetBibliographie_030">30</a>]. It should work with all the
@@ -259,7 +259,7 @@ MMTK NetCDF format, containing all the information from the XTD and TRJ
 files except velocities.</p>
 </section>
 <section id="discover-converter">
-<h2><span class="section-number">9.4. </span>Discover converter<a class="headerlink" href="#discover-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.4. </span>Discover converter<a class="headerlink" href="#discover-converter" title="Permalink to this heading"></a></h2>
 <p>This converter allows the conversion from a trajectory generated with
 Materials Studio [<a class="reference external" href="#SignetBibliographie_031">31</a>] Discover module to
 a MMTK NetCDF trajectory. It converts velocities but not forces.
@@ -291,7 +291,7 @@ MMTK NetCDF format, containing all the information from the XTD and HIS
 files except velocities.</p>
 </section>
 <section id="dl-poly-converter">
-<h2><span class="section-number">9.5. </span>DL_POLY converter<a class="headerlink" href="#dl-poly-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.5. </span>DL_POLY converter<a class="headerlink" href="#dl-poly-converter" title="Permalink to this heading"></a></h2>
 <p>This converter allows the conversion from a trajectory generated with DL
 POLY [<a class="reference external" href="#SignetBibliographie_032">32</a>] to a MMTK NetCDF trajectory. It
 can convert both velocities and forces. Pressing the DL-POLY button will
@@ -355,7 +355,7 @@ MMTK NetCDF format, containing all the information from the FIELD and
 HISTORY files.</p>
 </section>
 <section id="dmol-converter">
-<h2><span class="section-number">9.6. </span>DMol converter<a class="headerlink" href="#dmol-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.6. </span>DMol converter<a class="headerlink" href="#dmol-converter" title="Permalink to this heading"></a></h2>
 <p>This converter allows the conversion from a trajectory generated with
 Materials Studio [<a class="reference external" href="#SignetBibliographie_031">31</a>] DMol module to a
 MMTK NetCDF trajectory. Clicking on DMol button will open this window:</p>
@@ -386,7 +386,7 @@ MMTK NetCDF format, containing all the information from the XTD and HIS
 files except velocities.</p>
 </section>
 <section id="forcite-converter">
-<h2><span class="section-number">9.7. </span>Forcite converter<a class="headerlink" href="#forcite-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.7. </span>Forcite converter<a class="headerlink" href="#forcite-converter" title="Permalink to this heading"></a></h2>
 <p>This converter allows for the conversion from a trajectory generated
 with Materials Studio [<a class="reference external" href="#SignetBibliographie_031">31</a>] Forcite module
 to a MMTK NetCDF trajectory. It can convert both velocities and forces,
@@ -420,7 +420,7 @@ MMTK NetCDF format, containing all the information from the XTD and HIS
 files except velocities.</p>
 </section>
 <section id="generic-converter">
-<h2><span class="section-number">9.8. </span>Generic converter<a class="headerlink" href="#generic-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.8. </span>Generic converter<a class="headerlink" href="#generic-converter" title="Permalink to this heading"></a></h2>
 <p>Converts a trajectory written in ASCII to an MMTK NetCDF file, including
 both velocities and forces if present. This is useful if you have a
 trajectory from a software not currently supported by MDANSE. An example
@@ -445,7 +445,7 @@ MMTK NetCDF format, containing all the information from the XTD and HIS
 files except velocities.</p>
 </section>
 <section id="gromacs-converter">
-<h2><span class="section-number">9.9. </span>Gromacs converter<a class="headerlink" href="#gromacs-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.9. </span>Gromacs converter<a class="headerlink" href="#gromacs-converter" title="Permalink to this heading"></a></h2>
 <p>Converts a trajectory generated by the Gromacs software
 [<a class="reference external" href="#SignetBibliographie_033">33</a>] into MMTK NetCDF format. A PDF file
 containing the data about the initial configuration must be provided,
@@ -492,7 +492,7 @@ MMTK NetCDF format, containing all the information from the PDB and DCD
 files except velocities.</p>
 </section>
 <section id="lammps-converter">
-<h2><span class="section-number">9.10. </span>LAMMPS converter<a class="headerlink" href="#lammps-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.10. </span>LAMMPS converter<a class="headerlink" href="#lammps-converter" title="Permalink to this heading"></a></h2>
 <p>Converts trajectories generated by <strong>L</strong>arge-scale
 <strong>A</strong>tomic/<strong>M</strong>olecular <strong>M</strong>assively <strong>P</strong>arallel
 <strong>S</strong>imulator (LAMMPS) [<a class="reference external" href="#SignetBibliographie_034">34</a>] into MMTK
@@ -569,7 +569,7 @@ MMTK NetCDF format, containing all the information from the PDB and DCD
 files except velocities.</p>
 </section>
 <section id="namd-converter">
-<h2><span class="section-number">9.11. </span>NAMD converter<a class="headerlink" href="#namd-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.11. </span>NAMD converter<a class="headerlink" href="#namd-converter" title="Permalink to this heading"></a></h2>
 <p>Converts a trajectory generated with <strong>NA</strong>noscale <strong>M</strong>olecular
 <strong>D</strong>ynamics (NAMD) [<a class="reference external" href="#SignetBibliographie_035">35</a>] to an MMTK
 NetCDF trajectory. Selecting NAMD opens the following window:</p>
@@ -619,7 +619,7 @@ MMTK NetCDF format, containing all the information from the PDB and DCD
 files except velocities.</p>
 </section>
 <section id="pdb-converter">
-<h2><span class="section-number">9.12. </span>PDB converter<a class="headerlink" href="#pdb-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.12. </span>PDB converter<a class="headerlink" href="#pdb-converter" title="Permalink to this heading"></a></h2>
 <p>MDANSE can convert standalone PDB files into MMTK NetCDF. However, of
 the variety of PDB format, MMTK is capable of parsing only some; to
 ensure that a PDB can be read, it should comply with the specification
@@ -669,7 +669,7 @@ MMTK NetCDF format, containing all the information from the PDB file
 except velocities.</p>
 </section>
 <section id="vasp-converter">
-<h2><span class="section-number">9.13. </span>VASP converter<a class="headerlink" href="#vasp-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.13. </span>VASP converter<a class="headerlink" href="#vasp-converter" title="Permalink to this heading"></a></h2>
 <p>Converts a trajectory generated with <strong>V</strong>ienna <strong>A</strong>b-initio
 <strong>S</strong>imulation <strong>P</strong>ackage (<a class="reference external" href="https://www.vasp.at/">VASP</a>) to an
 MMTK NetCDF trajectory. Only trajectories created with VASP version 5 or
@@ -699,7 +699,7 @@ MMTK NetCDF format, containing all the information from the PDB file
 except velocities.</p>
 </section>
 <section id="xplor-converter">
-<h2><span class="section-number">9.14. </span>XPLOR converter<a class="headerlink" href="#xplor-converter" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">10.14. </span>XPLOR converter<a class="headerlink" href="#xplor-converter" title="Permalink to this heading"></a></h2>
 <p>Converts a trajectory generated by X-PLOR into the MMTK NetCDF format.
 Selecting XPLOR opens the following window:</p>
 <a class="reference internal image-reference" href="../_images/1000000100000316000001DD1886B5FEBC0A0CA9.png"><img alt="../_images/1000000100000316000001DD1886B5FEBC0A0CA9.png" src="../_images/1000000100000316000001DD1886B5FEBC0A0CA9.png" style="width: 14.081cm; height: 8.5cm;" /></a>
@@ -753,8 +753,8 @@ files except velocities.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="cmd.html" class="btn btn-neutral float-left" title="8. Using MDANSE from command line" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="plotting.html" class="btn btn-neutral float-right" title="10. Plotting Options" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="cmd.html" class="btn btn-neutral float-left" title="9. Using MDANSE from command line" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plotting.html" class="btn btn-neutral float-right" title="11. Plotting Options" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
