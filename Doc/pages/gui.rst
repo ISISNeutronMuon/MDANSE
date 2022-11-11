@@ -393,7 +393,7 @@ Upon clicking on the icon, this window will open:
    :height: 8.58cm
 
 To use it, a file has to be loaded first. This can be done using the
-File menu → Load, which will open a file browser. Only NetCDF files
+File menu -> Load, which will open a file browser. Only NetCDF files
 (ending in .nc, .cdf, or .netcdf) and HDF5 files (extension .h5 or .hdf)
 can be loaded; other file formats will result in an error.
 
@@ -550,7 +550,7 @@ case-sensitive, and that already existing units cannot be overwritten.
 
 Further, existing units can be deleted from the Units Editor window. To
 do this, the unit to be deleted has to be selected by clicking on it,
-and then the ‘Delete' button has to be clicked. This will show a prompt
+and then the 'Delete' button has to be clicked. This will show a prompt
 for confirmation, and once that is accepted, the unit will be removed,
 though the change has to be saved by clicking on either the OK or Cancel
 button.
@@ -559,8 +559,8 @@ Data panel
 ----------
 
 This is where files loaded into MDANSE are displayed. Trajectories and
-results of analyses are distinctly separated as ‘mmtk trajectory' and
-‘netcdf data' respectively. To proceed, you need to double-click on a
+results of analyses are distinctly separated as 'mmtk trajectory' and
+'netcdf data' respectively. To proceed, you need to double-click on a
 file name here to bring it to the Working panel. This can be done
 multiple times for each file.
 
@@ -618,7 +618,7 @@ Nevertheless, in each of the sections below, it will be stated if the
 plugin appears for trajectories, results, or both.
 
 All the options in above are just headings. To get to the actual
-plugins, click on the ‘plus' buttons next to the text to unhide the
+plugins, click on the 'plus' buttons next to the text to unhide the
 options. If there is no such button next to a text, that means that that
 is a plugin and can be launched by double-clicking on the text.
 
@@ -851,7 +851,7 @@ General AutoCorrelation Function
 
 *Description:* determines the variable for which the autocorrelation
 function is calculated. Therefore, if the selected variable is
-‘configuration', essentially position autocorrelation function is
+'configuration', essentially position autocorrelation function is
 calculated.
 
 -  `normalize <#_Normalize>`__
@@ -1797,7 +1797,7 @@ first moment is given by the average kinetic energy (in units of
 
 .. math:: \langle\omega\rangle
 
-is called the *recoil moment*. A number of ‘recipes' has been suggested
+is called the *recoil moment*. A number of 'recipes' has been suggested
 to correct classical dynamic structure factors for detailed balance and
 to describe recoil effects in an approximate way. The most popular one
 has been suggested by Schofield [`17 <#SignetBibliographie_017>`__]
@@ -1836,7 +1836,7 @@ partial g(r), corresponding to the Faber-Ziman definition:
 \ (49)
 
 The total S(Q) is computed as a weighted sum similar to the one used for
-the total g(r). In the case of the analysis ‘X-ray Static structure
+the total g(r). In the case of the analysis 'X-ray Static structure
 factor', the Q-dependence of the atomic form factors is taken into
 account in this weighted sum.
 
@@ -1916,7 +1916,7 @@ ensure that the computer has sufficient memory.
 In this mode, all velocities are interpolated once, at the beginning,
 and stored on disk. This makes it slow but with little memory
 requirement. This balance of speed and memory can be further altered by
-using the ‘number of preloaded frames' option. This mode is meant for
+using the 'number of preloaded frames' option. This mode is meant for
 when the computer has insufficient memory for the other modes and is
 advisable to be used with large trajectories. Further, since disk is
 involved, it is advisable that the computer has an SSD, and that the
@@ -1928,14 +1928,14 @@ In this mode, MDANSE selects one of the above modes to be used that
 should be best given the hardware. It does this by estimating the memory
 requirements and comparing them to the total memory of the computer.
 
--  **number of preloaded frames** (only applicable when ‘interpolation
-   mode' is set to ‘one-time disk interpolation)
+-  **number of preloaded frames** (only applicable when 'interpolation
+   mode' is set to 'one-time disk interpolation)
 
 *Format:* int
 
 *Default:* 50
 
-*Description:* this option allows for the optimisation of the ‘one-time
+*Description:* this option allows for the optimisation of the 'one-time
 disk interpolation' interpolation mode. It governs the number of frames
 for which the velocities are loaded from disk to memory at once. Thus,
 if it is set to 1, the interpolated velocities of all particles are
@@ -1948,8 +1948,8 @@ faster (though with diminishing returns) but the more memory required.
 Please note that this option can be set to a value of -1, which will
 cause all the interpolated velocities for all the particles of one
 element to be loaded into memory at once. This way, the memory usage is
-comparable to the ‘repeated interpolation' interpolation mode. Further,
-when SSD is used, the analysis can be faster than in the ‘repeated
+comparable to the 'repeated interpolation' interpolation mode. Further,
+when SSD is used, the analysis can be faster than in the 'repeated
 interpolation' mode.
 
 -  `q vectors <#_A3.4._Q_vectors>`__
@@ -2566,7 +2566,7 @@ Displacement <#_Theory_and_implementation_2>`__ section. *MDANSE*
 corrects the atomic input trajectories for jumps due to periodic
 boundary conditions. It should be noted that the computation of the
 intermediate scattering function in the Gaussian approximation is much
-‘cheaper' than the computation of the full intermediate scattering
+'cheaper' than the computation of the full intermediate scattering
 function, F\ :sub:`inc`\ (q, t), since no averaging over different
 *q*-vectors needs to be performed. It is sufficient to compute a single
 mean-square displacement per atom.
@@ -3823,7 +3823,7 @@ treated as rigid, constraints are taken into account in the framework of
 cartesian coordinates [`23 <#SignetBibliographie_023>`__]. In *MDANSE*,
 Rigid-Body Trajectory (*RBT*) can be defined from a *MD* trajectory by
 fitting rigid reference structures, defining a (sub)molecule, to the
-corresponding structure in each time frame of the trajectory. Here ‘fit'
+corresponding structure in each time frame of the trajectory. Here 'fit'
 means the optimal superposition of the structures in a least-squares
 sense. We will describe now how rigid body motions, i.e. global
 translations and rotations of molecules or subunits of complex
@@ -3834,7 +3834,7 @@ frame of the trajectory the atomic positions of a rigid reference
 structure, defined by the three cartesian components of its centroid
 (e.g. the centre of mass) and three angles, are as close as possible to
 the atomic positions of the corresponding structure in the *MD*
-configuration. Here ‘as close as possible' means as close as possible in
+configuration. Here 'as close as possible' means as close as possible in
 a least-squares sense.
 
 **Optimal superposition.** We consider a given time frame in which the
@@ -3995,7 +3995,7 @@ where Q is a normalised quaternion
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}102} \right) \\
    \end{matrix}
 
-The symbol *tr* stands for ‘trace'. We note that a normalized quaternion
+The symbol *tr* stands for 'trace'. We note that a normalized quaternion
 is represented by an *orthogonal* 4 × 4 matrix. **R′** may then be
 written as
 
@@ -4421,7 +4421,7 @@ instead be selected.
 *Description:* the spatial component of the selected variable which will
 be plotted. For example, the change in position of a specific atom along
 the x-axis over time can be plotted. The x, y, and z components of the
-‘variable' vectors are available for plotting.
+'variable' vectors are available for plotting.
 
 The menu at the bottom of the plotter is identical to the one used in
 `Line Plotter <#_Toolbar_1>`__, and so the description of its function
@@ -4455,7 +4455,7 @@ topmost toolbar, a new line is added.
 
 *Description:* Toggles the legend. When False, the legend is hidden.
 When True, the legend appears in the location matplotlib determines as
-‘best'.
+'best'.
 
 My jobs
 ~~~~~~~
@@ -4570,10 +4570,10 @@ a job in this panel, like so:
 2. **START** field shows the exact date and time when this job was
    started.
 3. **ELAPSED** field shows the time elapsed since the start of the job.
-4. **STATE** field shows the state of the job. This can be ‘running',
+4. **STATE** field shows the state of the job. This can be 'running',
    indicating that MDANSE is in the process of performing the job,
-   ‘finished', indicating that the job was completed successfully, and
-   ‘aborted', indicating that the job failed due to an error. This field
+   'finished', indicating that the job was completed successfully, and
+   'aborted', indicating that the job failed due to an error. This field
    is also a button which shows the traceback to the error that caused
    the failure when clicked. This should provide all the information to
    either correct your mistake or to inform us of a bug. When `reporting
