@@ -790,11 +790,11 @@ Scalar-Field Plotter
 <insert>
 
 Units
------
+=====
 
 The units used by MDANSE are nm for length and ps for time, and their
-inverses for Q (nm\ :sup:`1`) and angular frequencies, 
-(ps\ :sup:`1`). Any input must be given using these units, and the
+inverses for Q (nm\ :sup:`-1`) and angular frequencies, 
+(ps\ :sup:`-1`). Any input must be given using these units, and the
 output files do also employ the same units. The 2D/3D plotter includes
 the Python magnitude module, so you can modify the units when plotting
 the results using the `Axes settings <#_Axes_settings>`__ (available

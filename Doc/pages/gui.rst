@@ -785,15 +785,7 @@ approximate value for the diffusion constant
 
 .. math:: D = {\sum\limits_{\alpha}D_{\alpha}}
 
-\ (see Eqs.
-
-.. math:: 10
-
-\ `Error: Reference source not found <#anchor-73>`__ and
-
-.. math:: 11
-
-\ `Error: Reference source not found <#anchor-74>`__).
+(see Eqs. :math:`10` and :math:`11`).
 
 .. math:: \mathit{DOS}\left( {n\cdot\Delta\nu} \right)
 
@@ -957,11 +949,7 @@ velocity autocorrelation function. Writing
 
 .. math:: d_{\alpha}{(t) = {\int\limits_{0}^{t}{\mathit{d\tau}v_{\alpha}(\tau)}}}
 
-\ in Eq.
-
-.. math:: 5
-
-\ `Error: Reference source not found <#anchor-84>`__ one can show (see
+\ in Eq. :math:`5` one can show (see
 e.g. [`11 <#SignetBibliographie_011>`__]) that
 
 .. math::
@@ -971,11 +959,7 @@ e.g. [`11 <#SignetBibliographie_011>`__]) that
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}9} \right) \\
    \end{matrix}
 
-Using now the definition
-
-.. math:: 8
-
-\ `Error: Reference source not found <#anchor-85>`__ of the diffusion
+Using now the definition :math:`8` of the diffusion
 coefficient one obtains the relation
 
 .. math::
@@ -985,12 +969,7 @@ coefficient one obtains the relation
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}10} \right) \\
    \end{matrix}
 
-With Eq.
-
-.. math:: 28
-
-\ `Error: Reference source not found <#anchor-86>`__ this can also be
-written as
+With Eq. :math:`28` this can also be written as
 
 .. math::
 
@@ -1084,7 +1063,7 @@ computation of the *MSD*:
 
 .. math:: \mathit{MSD}{(m)}\leftarrow{}
 
-m running from 0 to Nt – 1
+m running from 0 to Nt - 1
 
 It should be noted that the efficiency of this algorithm is the same as
 for the *FCA* computation
@@ -1388,11 +1367,7 @@ reads
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}28} \right) \\
    \end{matrix}
 
-For non-isotropic systems, relation
-
-.. math:: 26
-
-\ `Error: Reference source not found <#anchor-98>`__ holds if the *DOS*
+For non-isotropic systems, relation :math:`26` holds if the *DOS*
 is computed from the atomic velocity autocorrelation functions
 
 .. math:: C_{\mathit{vv};\mathit{\alpha\alpha}}\left( {t;n_{q}} \right)
@@ -1628,11 +1603,7 @@ The operators
 
 .. math:: \hat{R_{\alpha}}(t)
 
-\ in Eq.
-
-.. math:: 34
-
-\ `Error: Reference source not found <#anchor-110>`__ are the position
+\ in Eq. :math:`34` are the position
 operators of the nuclei in the sample. The brackets
 
 .. math:: \langle\ldots\rangle
@@ -1729,11 +1700,7 @@ where n\ :sub:`I`, n\ :sub:`J`, N\ :sub:`species`, :math:`\omega`\ :sub:`I,coh,i
 and :math:`\omega`\ :sub:`J,coh,inc` are defined in Section ??.
 
 The corresponding dynamic structure factors are obtained by performing
-the Fourier transformation defined in Eq.
-
-.. math:: 33
-
-\ `Error: Reference source not found <#anchor-111>`__.
+the Fourier transformation defined in Eq. :math:`33`.
 
 An important quantity describing *structural* properties of liquids is
 the *static structure factor*, which is defined as
@@ -1810,17 +1777,9 @@ has been suggested by Schofield [`17 <#SignetBibliographie_017>`__]
    \end{matrix}
 
 One can easily verify that the resulting dynamic structure factor
-fulfils the relation of detailed balance. Formally, the correction
-
-.. math:: 48
-
-\ `Error: Reference source not found <#anchor-113>`__ is correct to
-first order in
-
-.. math:: \hslash
-
-. Therefore, it cannot be used for large *q*-values which correspond to
-large momentum transfers
+fulfils the relation of detailed balance. Formally, the correction :math:`48`
+is correct to first order in :math:`\hslash`. Therefore, it cannot be used
+for large *q*-values which correspond to large momentum transfers
 
 .. math:: \hslash q
 
@@ -1831,7 +1790,9 @@ so far. For more details we refer to Ref.
 MDANSE computes the partial S(Q)'s as the Fourier transform of the
 partial g(r), corresponding to the Faber-Ziman definition:
 
-.. math:: {S_{\mathit{\text{:math:`\alpha`β}}}(Q{) = {1 + \frac{4\mathit{\text{πρ}_{\mathrm{0}}}}{Q}}}{\int\limits_{0}^{\infty}{r\left\lbrack {g_{\mathit{\text{:math:`\alpha`β}}}(r{) - 1}} \right\rbrack\text{sin}(\mathit{\text{Qr}})\mathit{dr}}}}{}
+.. math::
+   
+   S_{\alpha\beta}(Q) = 1 + \frac{4\pi\rho_0}{Q}\int\limits_{0}^{\infty}{r\left\lbrack {g_\alpha\beta}(r)-1 \right\rbrack\text{sin}(Qr)dr}
 
 \ (49)
 
@@ -1973,17 +1934,9 @@ Background <#_Theory_and_background>`__ for more details about the
 theoretical background related to the dynamic coherent structure factor.
 In this analysis, *MDANSE* proceeds in two steps. First, it computes the
 partial and total intermediate coherent scattering function using
-equation
-
-.. math:: 40
-
-\ `Error: Reference source not found <#anchor-121>`__. Then, the partial
+equation :math:`40`. Then, the partial
 and total dynamic coherent structure factors are obtained by performing
-the Fourier Transformation, defined in Eq.
-
-.. math:: 33
-
-\ `Error: Reference source not found <#anchor-122>`__, respectively on
+the Fourier Transformation, defined in Eq. :math:`33`, respectively on
 the total and partial intermediate coherent scattering functions.
 
 *MDANSE* computes the coherent intermediate scattering function on a
@@ -2022,11 +1975,7 @@ The symbol
 
 .. math:: {\overline{...}}^{q}
 
-\ in Eq.
-
-.. math:: 51
-
-\ `Error: Reference source not found <#anchor-123>`__ denotes an average
+\ in Eq. :math:`51` denotes an average
 over *q*-vectors having *approximately* the same modulus
 
 .. math:: {q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q
@@ -2050,9 +1999,9 @@ written as
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}53} \right) \\
    \end{matrix}
 
-with x′, y′, z′ having values between 0 and 1. The primes indicate that
+with x', y', z' having values between 0 and 1. The primes indicate that
 the coordinates are box coordinates. A jump due to periodic boundary
-conditions causes x′, y′, z′ to jump by ∓1. The set of dual basis
+conditions causes x', y', z' to jump by :math:`\pm1`. The set of dual basis
 vectors **b**\ :sup:`1`, **b**\ :sup:`2`, **b**\ :sup:`3` is defined by
 the relation
 
@@ -2073,15 +2022,11 @@ If the q-vectors are now chosen as
    \end{matrix}
 
 where *k,l,m* are integer numbers, jumps in the particle trajectories
-produce phase changes of multiples of 2π in the Fourier transformed
+produce phase changes of multiples of :math:`2\pi` in the Fourier transformed
 particle density, i.e. leave it unchanged. One can define a grid of
 *q*-shells or a grid of *q*-vectors along a given direction or on a
 given plane, giving in addition a *tolerance* for *q*. *MDANSE* looks
-then for *q*-vectors of the form given in Eq.
-
-.. math:: 61
-
-\ `Error: Reference source not found <#anchor-124>`__ whose moduli
+then for *q*-vectors of the form given in Eq. 61 whose moduli
 deviate within the prescribed tolerance from the equidistant *q*-grid.
 From these *q*-vectors only a maximum number per grid-point (called
 generically *q*-shell also in the anisotropic case) is kept.
@@ -2209,9 +2154,9 @@ position vector in the *MD* cell can be written as
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}59} \right) \\
    \end{matrix}
 
-with x′, y′, z′ having values between 0 and 1. The primes indicate that
+with x', y', z' having values between 0 and 1. The primes indicate that
 the coordinates are box coordinates. A jump due to periodic boundary
-conditions causes x′, y′, z′ to jump by ∓1. The set of dual basis
+conditions causes x', y', z' to jump by ∓1. The set of dual basis
 vectors **b**\ :sup:`1`, **b**\ :sup:`2`, **b**\ :sup:`3` is defined by
 the relation
 
@@ -2955,7 +2900,7 @@ and n\ :sub:`J` are respectively the numbers of atoms of species *I* and
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}82} \right) \\
    \end{matrix}
 
-where ρ\ :sub:`J` is the density of atom of specie *J* and
+where :math:`\rho`\ :sub:`J` is the density of atom of specie *J* and
 
 .. math:: n_{\alpha J}(r)
 
@@ -2981,7 +2926,7 @@ and the Total Correlation Function (TCF), defined as
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}83} \right) \\
    \end{matrix}
 
-where ρ\ :sub:`0` is the average atomic density, which is defined as
+where :math:`\rho`\ :sub:`0` is the average atomic density, which is defined as
 
 .. math::
 
@@ -3863,7 +3808,7 @@ parameters*, abbreviated as vector **q** = (q\ :sub:`0`, q\ :sub:`1`,
 q\ :sub:`2`, q\ :sub:`3`). The quaternion parameters fulfil the
 normalization condition
 
-.. math:: q・{q = 1}
+.. math:: q \dot {q = 1}
 
 \ [`25 <#SignetBibliographie_025>`__]. The target function to be
 minimized is now defined as
@@ -3996,7 +3941,7 @@ where Q is a normalised quaternion
    \end{matrix}
 
 The symbol *tr* stands for 'trace'. We note that a normalized quaternion
-is represented by an *orthogonal* 4 × 4 matrix. **R′** may then be
+is represented by an *orthogonal* 4 x 4 matrix. **R'** may then be
 written as
 
 .. math::
@@ -4006,7 +3951,7 @@ written as
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}103} \right) \\
    \end{matrix}
 
-where the components x′, y′, z′, abbreviated as r′, are given by
+where the components x', y', z', abbreviated as r', are given by
 
 .. math::
 
@@ -4242,7 +4187,7 @@ performed.
 
 *Description:* <insert>
 
--  mcstas parameters – these options become visible once a McStas
+-  mcstas parameters - these options become visible once a McStas
    instrument has been chosen.
 -  `output files <#_Output_files>`__
 -  `running mode <#_Running_mode>`__

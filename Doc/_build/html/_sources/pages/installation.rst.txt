@@ -77,7 +77,9 @@ can directly use this like any other DEB package:
 2. In terminal run (make sure to use the correct path and full name of
    the DEB file):
 
-sudo apt install ./MDANSE.deb
+.. code-block:: console
+
+  sudo apt install ./MDANSE.deb
 
 Apt will install any missing dependencies, so once you approve when
 prompted and wait for installation to finish, you can start the MDANSE

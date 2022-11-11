@@ -118,8 +118,9 @@
 <li class="toctree-l1"><a class="reference internal" href="cmd.html">8. Using MDANSE from command line</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trajectory.html">9. Trajectory Converters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plotting.html">10. Plotting Options</a></li>
-<li class="toctree-l1"><a class="reference internal" href="parameters.html">11. Glossary of Parameters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">12. References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html#units">11. Units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">12. Glossary of Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">13. References</a></li>
 </ul>
 
         </div>
@@ -454,7 +455,7 @@ the changes in a new file.</p></li>
 <p>Upon clicking on the icon, this window will open:</p>
 <a class="reference internal image-reference" href="../_images/10000001000003DA000002B772D53BC965757606.png"><img alt="../_images/10000001000003DA000002B772D53BC965757606.png" src="../_images/10000001000003DA000002B772D53BC965757606.png" style="width: 12.173cm; height: 8.58cm;" /></a>
 <p>To use it, a file has to be loaded first. This can be done using the
-File menu → Load, which will open a file browser. Only NetCDF files
+File menu -&gt; Load, which will open a file browser. Only NetCDF files
 (ending in .nc, .cdf, or .netcdf) and HDF5 files (extension .h5 or .hdf)
 can be loaded; other file formats will result in an error.</p>
 <a class="reference internal image-reference" href="../_images/1000000100000079000000510978F762503F30F6.png"><img alt="../_images/1000000100000079000000510978F762503F30F6.png" src="../_images/1000000100000079000000510978F762503F30F6.png" style="width: 3.201cm; height: 2.081cm;" /></a>
@@ -484,7 +485,7 @@ are available in MDANSE:</p>
 <td><p>Dimension</p></td>
 <td><p>Description</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="#_Line_Plotter">Line</a></p></td>
+<tr class="row-even"><td><p>Line</p></td>
 <td><p>1D</p></td>
 <td><p>A simple plot depicting
 the dependence of one
@@ -493,40 +494,31 @@ consists of a single
 line. Uses normal plot()
 function from matplotlib.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="#_Image_Plotter">I
-mage</a></p></td>
+<tr class="row-odd"><td><p>Image</p></td>
 <td><p>2D</p></td>
 <td><p>Plots data as an image,
 i.e. on a 2D regular
 raster. Uses matplotlib
 imshow() function.</p></td>
 </tr>
-<tr class="row-even"><td><dl class="simple">
-<dt><a href="#id1"><span class="problematic" id="id2">`</span></a>Elevation</dt><dd><p>&lt;#_Elevation_Plotter&gt;`__</p>
-</dd>
-</dl>
-</td>
+<tr class="row-even"><td><p>Elevation</p></td>
 <td><p>2D</p></td>
 <td><p>Plots data as an image.
 Uses VTK.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="#_2D_Slice_Plotter">2D
-Slic
-e</a></p></td>
+<tr class="row-odd"><td><p>2D Slice</p></td>
 <td><p>2D</p></td>
 <td><p>Plots a subset of a 3D
 variable.</p></td>
 </tr>
-<tr class="row-even"><td><p><a href="#id4"><span class="problematic" id="id5">`Iso
-Surface &lt;
-#_Iso_Surface_Plotter&gt;`__</span></a></p></td>
+<tr class="row-even"><td><p>Isosurface</p></td>
 <td><p>3D</p></td>
 <td><p>A 3D plot depicting a
 surface through lines or
 one continuous surface.
 Uses VTK.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="#_Scalar-Field_Plotter">Scalar-Field</a></p></td>
+<tr class="row-odd"><td><p>Scalar-Field</p></td>
 <td><p>3D</p></td>
 <td></td>
 </tr>
@@ -725,29 +717,29 @@ derive an orthonormal set of three vectors v1, v2, v3 using the
 following scheme:</p>
 <ul>
 <li><div class="math">
-<p><span class="math">v_{1} = \frac{n_{1} + n_{2}}{\left| \left| {n_{1} + n_{2}} \right| \right|}</span></p>
+<p><img src="../_images/math/835be192d148b2fc664bf579224b43cf33d739ed.png" alt="v_{1} = \frac{n_{1} + n_{2}}{\left| \left| {n_{1} + n_{2}} \right| \right|}"/></p>
 </div><p>where <strong>n</strong><sub>1</sub> and <strong>n</strong><sub>2</sub> are respectively the
 normalized vectors along (<strong>a1,a2</strong>) and (<strong>a1,a3</strong>) directions.</p>
 </li>
 <li><p>v2 is defined as the clockwise normal vector orthogonal to v1 that
 belongs to the plane defined by a1, a2 and a3 atoms</p></li>
 <li><div class="math">
-<p><span class="math">{\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}</span></p>
+<p><img src="../_images/math/495f03f47239aa5565b6dd7ecc8cfe4c713d8072.png" alt="{\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}"/></p>
 </div></li>
 </ul>
 <p>Thus, one can define the following autocorrelation functions for the
 vectors v1, v2 and v3 defined on triplet t :</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/268520a6717d753cddfced45f5d3ac65fa723224.png" alt="\begin{matrix}
 {AC_{g,i}{(t) = \left\langle {v_{t,i}(0)\cdot v_{t,i}(t)} \right\rangle},{i = 1,2,3}} \\
 {({\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}1})} \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>And the angular correlation averaged over all triplets is:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/1f4256978eff33d874af6609756d425c9a9af770.png" alt="\begin{matrix}
 {AC_{i}{(t) = {\sum\limits_{g = 1}^{N_{\mathit{triplets}}}{AC_{g,i}(t)}}},{i = 1,2,3}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}2} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where N<sub>triplets</sub> is the number of selected triplets.</p>
 <p>GUI</p>
 <a class="reference internal image-reference" href="../_images/10000001000003220000021BA346CFB73717C1BE.png"><img alt="../_images/10000001000003220000021BA346CFB73717C1BE.png" src="../_images/10000001000003220000021BA346CFB73717C1BE.png" style="width: 15.921cm; height: 10.7cm;" /></a>
@@ -767,39 +759,33 @@ vectors v1, v2 and v3 defined on triplet t :</p>
 the mass-weighted <em>VACF</em> defines the phonon discrete <em>DOS</em>, (see the
 section on <a class="reference external" href="#_Theory_and_implementation_1">VACF</a>) defined as:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/db0875610dc89422192ea121c259536cdca843e7.png" alt="\begin{matrix}
 {\mathit{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)\doteq{\sum\limits_{\alpha}\omega_{\alpha}}{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}\left( {n\cdot\mathit{\Delta\nu}} \right),{n = 0}\ldots{N_{t} - 1.}} \\
 (3) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>N<sub>t</sub> is the total number of time steps and</p>
 <div class="math">
-<p><span class="math">{\mathit{\Delta\nu} = 1}\text{/}\left( {2N_{t}\Delta t} \right)</span></p>
+<p><img src="../_images/math/eaf4cb5116f407dac2bd0c2b940502b8e733012c.png" alt="{\mathit{\Delta\nu} = 1}\text{/}\left( {2N_{t}\Delta t} \right)"/></p>
 </div><p>is the frequency step.</p>
 <div class="math">
-<p><span class="math">\mathit{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)</span></p>
+<p><img src="../_images/math/fd92cb0904f02b090d8eedb81a3ffaaa5991f645.png" alt="\mathit{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)"/></p>
 </div><p>can be computed either for the isotropic case or with respect to a
 user-defined axis. The spectrum</p>
 <div class="math">
-<p><span class="math">\mathit{DOS}\left( {n\cdot\Delta\nu} \right)</span></p>
+<p><img src="../_images/math/d3017b4299ce6d157dd2421844658dc4981abad2.png" alt="\mathit{DOS}\left( {n\cdot\Delta\nu} \right)"/></p>
 </div><p>is computed from the <em>unnormalized VACF</em>, such that <em>DOS(0)</em> gives an
 approximate value for the diffusion constant</p>
 <div class="math">
-<p><span class="math">D = {\sum\limits_{\alpha}D_{\alpha}}</span></p>
-</div><p>(see Eqs.</p>
+<p><img src="../_images/math/73f8777fd9bdc95f4e30b2a8566645e4c9fa003f.png" alt="D = {\sum\limits_{\alpha}D_{\alpha}}"/></p>
+</div><p>(see Eqs. <img class="math" src="../_images/math/475d5964a90500c461804bca3d965ff8679e248c.png" alt="10"/> and <img class="math" src="../_images/math/2ee3680488bb1f7166e08a65cef9a7e3d7020d78.png" alt="11"/>).</p>
 <div class="math">
-<p><span class="math">10</span></p>
-</div><p><a class="reference external" href="#anchor-73">Error: Reference source not found</a> and</p>
-<div class="math">
-<p><span class="math">11</span></p>
-</div><p><a class="reference external" href="#anchor-74">Error: Reference source not found</a>).</p>
-<div class="math">
-<p><span class="math">\mathit{DOS}\left( {n\cdot\Delta\nu} \right)</span></p>
+<p><img src="../_images/math/d3017b4299ce6d157dd2421844658dc4981abad2.png" alt="\mathit{DOS}\left( {n\cdot\Delta\nu} \right)"/></p>
 </div><p>is smoothed by applying a Gaussian window in the time domain
 [<a class="reference external" href="#SignetBibliographie_010">10</a>] (see the section on <a class="reference external" href="#_Theory_and_implementation">Spatial
 Density</a>). Its width in the time domain
 is</p>
 <div class="math">
-<p><span class="math">{\sigma_{t} = \alpha}\text{/}T</span></p>
+<p><img src="../_images/math/d5ef271fd50635b3ea8f445e9cad09f00bc59d2e.png" alt="{\sigma_{t} = \alpha}\text{/}T"/></p>
 </div><p>, where T is the length of the simulation. We remark that the diffusion
 constant obtained from <em>DOS</em> is biased due to the spectral smoothing
 procedure since the <em>VACF</em> is weighted by this window Gaussian function.
@@ -868,10 +854,10 @@ motion. He showed that the Mean-Square Displacement (<em>MSD</em>) of a
 particle following a random walk is proportional to the time elapsed.
 This relationship can be written as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/dd689ac2171ce550747df4beb70db03acda8b2ad.png" alt="\begin{matrix}
 {{\left\langle r^{2} \right\rangle = 6}{\mathit{Dt} + C}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}3} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where &lt; r2 &gt; is the <em>MSD</em> and <em>t</em> is the time. <em>D</em> and <em>C</em> are
 constants. The constant <em>D</em> defines the so-called diffusion coefficient.</p>
 <p>The <a class="reference external" href="#figure1">Figure 1</a> shows an example of an <em>MSD</em> analysis
@@ -883,140 +869,130 @@ should be calculated.</p>
 molecules using NPT condition at 1 bar and 300 K.</p>
 <p>Defining</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/eeb285e393edc48359e43a45b42cdca8f3cb8347.png" alt="\begin{matrix}
 {d_{\alpha}\left( {t,t_{0}} \right)\doteq R_{\alpha}{\left( {t_{0} + t} \right) - R_{\alpha}}\left( t_{0} \right),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}4} \right) \\
-\end{matrix}</span></p>
-</div><p>the <em>MSD</em> of particle α can be defined as:</p>
+\end{matrix}"/></p>
+</div><p>the <em>MSD</em> of particle <img class="math" src="../_images/math/2f5aa019312e1bbc969deab8dca8b00f76025404.png" alt="\alpha"/> can be defined as:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/a10a113a802ca37d8f32825bb28c53f42744e529.png" alt="\begin{matrix}
 {\mathrm{\Delta}_{\alpha}^{2}{(t) = \left\langle {d_{\alpha}^{2}\left( {t,t_{0}} \right)} \right\rangle_{t_{0}}}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}5} \right) \\
-\end{matrix}</span></p>
-</div><p>where R_(t0) and R_(t0 + t) are respectively the position of particle α
+\end{matrix}"/></p>
+</div><p>where R_(t0) and R_(t0 + t) are respectively the position of particle <img class="math" src="../_images/math/2f5aa019312e1bbc969deab8dca8b00f76025404.png" alt="\alpha"/>
 at times t0 and t0 + t. One can introduce an <em>MSD</em> with respect to a
 given axis n:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/d789f59c5e9cd7a85571d198e4a850458b497808.png" alt="\begin{matrix}
 {\mathrm{\Delta}_{\alpha}^{2}\left( {t,t_{0};n} \right)\doteq\left\langle {d_{\alpha}^{2}\left( {t,\tau;n} \right)} \right\rangle_{t_{0}}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}6} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>with</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/4ec60efce0168a3ac00f5f91ecec9330f18e88eb.png" alt="\begin{matrix}
 {d_{\alpha}^{}\left( {t,\tau;n} \right)\doteq n\bullet d_{\alpha}^{}\left( {t,t_{0}} \right).} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}7} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The calculation of <em>MSD</em> is the standard way to obtain diffusion
 coefficients from Molecular Dynamics (<em>MD</em>) simulations. Assuming
 Einstein-diffusion in the long time limit one has for isotropic systems</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/83023dbb99837a143186ce437c113b8ba52221f6.png" alt="\begin{matrix}
 {{D_{\alpha} = {\lim\limits_{t\rightarrow\infty}{\frac{1}{6t}\mathrm{\Delta}_{\alpha}^{2}(t)}}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}8} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>There exists also a well-known relation between the <em>MSD</em> and the
 velocity autocorrelation function. Writing</p>
 <div class="math">
-<p><span class="math">d_{\alpha}{(t) = {\int\limits_{0}^{t}{\mathit{d\tau}v_{\alpha}(\tau)}}}</span></p>
-</div><p>in Eq.</p>
-<div class="math">
-<p><span class="math">5</span></p>
-</div><p><a class="reference external" href="#anchor-84">Error: Reference source not found</a> one can show (see
+<p><img src="../_images/math/55db49bbb8a66580d183ff657b2860c4b0b98716.png" alt="d_{\alpha}{(t) = {\int\limits_{0}^{t}{\mathit{d\tau}v_{\alpha}(\tau)}}}"/></p>
+</div><p>in Eq. <img class="math" src="../_images/math/51d4ace3c51c5a5490fc4464952d6c46d518fbc8.png" alt="5"/> one can show (see
 e.g. [<a class="reference external" href="#SignetBibliographie_011">11</a>]) that</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/1c6996081914a1c539b68868a867eaea67275985.png" alt="\begin{matrix}
 {\mathrm{\Delta}_{\alpha}^{2}{(t) = 6}{\int\limits_{0}^{t}{\mathit{d\tau}\left( {t - \tau} \right)C_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(t)}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}9} \right) \\
-\end{matrix}</span></p>
-</div><p>Using now the definition</p>
-<div class="math">
-<p><span class="math">8</span></p>
-</div><p><a class="reference external" href="#anchor-85">Error: Reference source not found</a> of the diffusion
+\end{matrix}"/></p>
+</div><p>Using now the definition <img class="math" src="../_images/math/963219eafec84d240711eb594e2b8904b8883d82.png" alt="8"/> of the diffusion
 coefficient one obtains the relation</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/7e05ac3659c9c682540dffbd02a2ccc670c347af.png" alt="\begin{matrix}
 {{D_{\alpha} = {\int\limits_{0}^{t}{\mathit{d\tau}C_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(t)}}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}10} \right) \\
-\end{matrix}</span></p>
-</div><p>With Eq.</p>
+\end{matrix}"/></p>
+</div><p>With Eq. <img class="math" src="../_images/math/5d9fae2fae50dbfa109b452f6cd56007137e5cc4.png" alt="28"/> this can also be written as</p>
 <div class="math">
-<p><span class="math">28</span></p>
-</div><p><a class="reference external" href="#anchor-86">Error: Reference source not found</a> this can also be
-written as</p>
-<div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/ef9bf60ff71eaccce492223d73a68066f5960bb7.png" alt="\begin{matrix}
 {{D_{\alpha} = \pi}{\overset{\sim}{C}}_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(0).} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}11} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>Computationally, the <em>MSD</em> is calculated using the Fast Correlation
 Algorithm (<em>FCA</em>) [<a class="reference external" href="#SignetBibliographie_012">12</a>]. In this
 framework, in the discrete case, the mean-square displacement of a
 particle is given by</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/6ded0e12fd16f14abb594c399d1fc54440fcdb5a.png" alt="\begin{matrix}
 {\mathrm{\Delta}^{2}{(m) = \frac{1}{N_{t} - m}}{\sum\limits_{k = 0}^{N_{t} - m - 1}\left\lbrack {r{\left( {k + m} \right) - r}(k)} \right\rbrack^{2}},{m = 0.}..{N_{t} - 1}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}12} \right) \\
-\end{matrix}</span></p>
-</div><p>where r(k) is the particle trajectory and Nt is the number of frames of
+\end{matrix}"/></p>
+</div><p>where r(k) is the particle trajectory and <img class="math" src="../_images/math/9833b53d840a07e6a9b33d17ddd3f5dbb7810ebe.png" alt="N_{t}"/> is the number of frames of
 the trajectory. We define now the auxiliary function</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/25f0d2d9aade76d9b9e6d2f559f81b97cc266166.png" alt="\begin{matrix}
 {S(m)\doteq{\sum\limits_{k = 0}^{N_{t} - m - 1}\left\lbrack {r{\left( {k + m} \right) - r}(k)} \right\rbrack^{2}},{m = 0}...N{t - 1},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}13} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>which is split as follows:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/b292dbf81c53298ee6189391ce175ee3d0931c61.png" alt="\begin{matrix}
 {S{(m) = S_{\mathit{AA} + \mathit{BB}}}{(m) - 2}S_{\mathit{AB}}(m),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}14} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/d896168364b8607f63fa944b6898f61058d84494.png" alt="\begin{matrix}
 {S_{\mathit{AA} + \mathit{BB}}{(m) = \sum\limits_{k = 0}^{N_{t} - m - 1}}\left\lbrack {r^{2}{\left( {k + m} \right) + r^{2}}(k)} \right\rbrack,} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}15} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/31bd8c6625640c1d07d493a2172eaea21dcc9180.png" alt="\begin{matrix}
 {S_{\mathit{AB}}{(m) = {\sum\limits_{k = 0}^{N_{t} - m - 1}{r(k)}}}\cdot r\left( {k + m} \right).} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}16} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The function SAB(m) can be computed using the <em>FCA</em> method described in
 the section on <a class="reference external" href="#_Theory_and_implementation">Spatial Density</a>. For
 SAA+BB(m) the following recursion relation holds:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/a2ab960d5c7e502a7cf1ea5bb12e845b685b108b.png" alt="\begin{matrix}
 {S_{\mathit{AA} + \mathit{BB}}{(m) = S_{\mathit{AA} + \mathit{BB}}}{\left( {m - 1} \right) - r^{2}}{\left( {m - 1} \right) - r^{2}}\left( {N_{t} - m} \right),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}17} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/53d13aa002ad2484099301b731526b2b76c1d0d4.png" alt="\begin{matrix}
 {S_{\mathit{AA} + \mathit{BB}}{(0) = {\sum\limits_{k = 0}^{N_{t} - 1}{r^{2}(k)}}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}18} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>This allows one to construct the following efficient scheme for the
 computation of the <em>MSD</em>:</p>
 <ol class="arabic">
 <li><p>Compute</p>
 <div class="math">
-<p><span class="math">\mathit{DSQ}{{(k)} = r}2{(k)},{k = 0}...N{t - 1}</span></p>
+<p><img src="../_images/math/57af766acda5a10a883ba77de42dc1b3c1fd49df.png" alt="\mathit{DSQ}{{(k)} = r}2{(k)},{k = 0}...N{t - 1}"/></p>
 </div><p>;</p>
 <div class="math">
-<p><span class="math">\mathit{DSQ}{{({- 1})} = \mathit{DSQ}}{{({Nt})} = 0}</span></p>
+<p><img src="../_images/math/65facfc6bce3b82418c95919a4290aa863b01024.png" alt="\mathit{DSQ}{{({- 1})} = \mathit{DSQ}}{{({Nt})} = 0}"/></p>
 </div><p>.</p>
 </li>
 <li><p>Compute</p>
 <div class="math">
-<p><span class="math">{\mathit{SUMSQ} = 2}\cdot{\sum\limits_{k = 0}^{N_{t} - 1}{\mathit{DSQ}(k)}}</span></p>
+<p><img src="../_images/math/9d117ec2b5fbe13ce43d2eb96c3278ec194197a2.png" alt="{\mathit{SUMSQ} = 2}\cdot{\sum\limits_{k = 0}^{N_{t} - 1}{\mathit{DSQ}(k)}}"/></p>
 </div></li>
 <li><p>Compute SAB(m) using the Fast Fourier Transform (<em>FFT</em>) method.</p></li>
 <li><p>Compute <em>MSD(m)</em> in the following loop:</p></li>
 </ol>
 <div class="math">
-<p><span class="math">\mathit{SUMSQ}\leftarrow{\mathit{SUMSQ} - \mathit{DSQ}}{{({m - 1})} - \mathit{DSQ}}{({N{t - m}})}</span></p>
+<p><img src="../_images/math/4ea7bf6f5f96cd4b153c724401fae135c06c46d5.png" alt="\mathit{SUMSQ}\leftarrow{\mathit{SUMSQ} - \mathit{DSQ}}{{({m - 1})} - \mathit{DSQ}}{({N{t - m}})}"/></p>
 </div><div class="math">
-<p><span class="math">\mathit{MSD}{(m)}\leftarrow{}</span></p>
-</div><p>m running from 0 to Nt – 1</p>
+<p><img src="../_images/math/f1a9318d3dac5bf852a08e62e639211885354749.png" alt="\mathit{MSD}{(m)}\leftarrow{}"/></p>
+</div><p>m running from 0 to Nt - 1</p>
 <p>It should be noted that the efficiency of this algorithm is the same as
 for the <em>FCA</em> computation</p>
 <p>of time correlation functions since the number of operations in step
@@ -1059,10 +1035,10 @@ symmetric with its axis parallel to the N-H bond, the relaxation rates
 of the <sup>15</sup>N nuclei are determined by a time correlation
 function,</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/196e8f9fbc6c284f848022a29c12b90b0f1038fe.png" alt="\begin{matrix}
 {C_{\mathit{ii}}{(t) = \left\langle {P_{2}\left( {\mu_{i}(0)\cdot\mu_{i}(t)} \right)} \right\rangle}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}19} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>which describes the dynamics of a unit vector μ<sub>i</sub>(t) pointing
 along the <sup>15</sup>N-<sup>1</sup>H bond of the residue <em>i</em> in the
 laboratory frame. Here P<sub>2</sub>(.) is the second order Legendre
@@ -1076,55 +1052,55 @@ of adjustable parameters. Usually, the tumbling motion of proteins in
 solution is assumed isotropic and uncorrelated with the internal
 motions, such that:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/8d495a4f26d0b68520108db3ab850cbc5ab3e2d3.png" alt="\begin{matrix}
 {C_{\mathit{ii}}{(t) = C^{G}}(t)\cdot C_{\mathit{ii}}^{I}(t)} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}20} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where C<sup>G</sup>(t) and</p>
 <div class="math">
-<p><span class="math">C_{\mathit{ii}}^{I}(t)</span></p>
+<p><img src="../_images/math/0d790c0d68c22bf5ed779490ee053c4b335e43d3.png" alt="C_{\mathit{ii}}^{I}(t)"/></p>
 </div><p>denote the global and the internal time correlation function,
 respectively. Within the so-called model free approach
 [<a class="reference external" href="#SignetBibliographie_014">14</a>], [<a class="reference external" href="#SignetBibliographie_015">15</a>]
 the internal correlation function is modelled by an exponential,</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/261001816b5e48e3e0478c5cd6db9c6e5e2981e8.png" alt="\begin{matrix}
 {C_{\mathit{ii}}^{I}{(t) = {S_{i}^{2} + \left( {1 - S_{i}^{2}} \right)}}\exp\left( \frac{- t}{\tau_{\mathit{eff},i}} \right)} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}21} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>Here the asymptotic value</p>
 <div class="math">
-<p><span class="math">{S_{i}^{2} = C_{\mathit{ii}}}\left( {+ \infty} \right)</span></p>
+<p><img src="../_images/math/79029b0b02397ed9d642737db70bdad9e2c6d511.png" alt="{S_{i}^{2} = C_{\mathit{ii}}}\left( {+ \infty} \right)"/></p>
 </div><p>is the so-called generalized order parameter, which indicates the
 degree of spatial restriction of the internal motions of a bond vector,
 while the characteristic time</p>
 <div class="math">
-<p><span class="math">\tau_{\mathit{eff},i}</span></p>
+<p><img src="../_images/math/85334237bc5749a165a899eb3d6c5974e6693d91.png" alt="\tau_{\mathit{eff},i}"/></p>
 </div><p>is an effective correlation time, setting the time scale of the
 internal relaxation processes.</p>
 <div class="math">
-<p><span class="math">S_{i}^{2}</span></p>
+<p><img src="../_images/math/5737277fc4550e92ca88423c431163c249cad389.png" alt="S_{i}^{2}"/></p>
 </div><p>can adopt values ranging from 0 (completely disordered) to 1 (fully
 ordered). So,</p>
 <div class="math">
-<p><span class="math">S_{i}^{2}</span></p>
+<p><img src="../_images/math/5737277fc4550e92ca88423c431163c249cad389.png" alt="S_{i}^{2}"/></p>
 </div><p>is the appropriate indicator of protein backbone motions in
 computationally feasible timescales as it describes the spatial aspects
 of the reorientational motion of N-H peptidic bonds vector.</p>
 <p>When performing Order Parameter analysis, <em>MDANSE</em> computes for each
 residue <em>i</em> both</p>
 <div class="math">
-<p><span class="math">C_{\mathit{ii}}(t)</span></p>
+<p><img src="../_images/math/fbbd5af804913faecf350b7ca56a0f500fbe2b42.png" alt="C_{\mathit{ii}}(t)"/></p>
 </div><p>and</p>
 <div class="math">
-<p><span class="math">S_{i}^{2}</span></p>
+<p><img src="../_images/math/5737277fc4550e92ca88423c431163c249cad389.png" alt="S_{i}^{2}"/></p>
 </div><p>. It also computes a correlation function averaged over all the selected
 bonds defined as:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/7f86f45394a90d701e70da5b56e5aca881488a44.png" alt="\begin{matrix}
 {C^{I}{(t) = {\sum\limits_{i = 1}^{N_{\mathit{bonds}}}{C_{\mathit{ii}}^{I}(t)}}}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}22} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where N<sub>bonds</sub> is the number of selected bonds for the analysis.</p>
 <p id="gui-3">GUI</p>
 <ul class="simple">
@@ -1213,53 +1189,50 @@ the density of the system. So, the <em>VACF</em> will just have one very damped
 oscillation before decaying to zero. This decaying time can be
 considered as the average time for a collision between two atoms to
 occur before they diffuse away.</p>
-<p>Mathematically, the <em>VACF</em> of atom α in an atomic or molecular system is
+<p>Mathematically, the <em>VACF</em> of atom <img class="math" src="../_images/math/2f5aa019312e1bbc969deab8dca8b00f76025404.png" alt="\alpha"/> in an atomic or molecular system is
 usually defined as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/a354b8a1b72c3e2b84bd92f5b31dfbbd5d53b344.png" alt="\begin{matrix}
 {C_{\mathit{vv};\mathit{\alpha\alpha}}(t)\doteq\frac{1}{3}\left\langle {v_{\alpha}\left( t_{0} \right)\cdot v_{\alpha}\left( {t_{0} + t} \right)} \right\rangle_{t_{0}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}23} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>In some cases, e.g. for non-isotropic systems, it is useful to define
 <em>VACF</em> along a given axis,</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/bef9a8a9100e59384284ce20380175c711bfefeb.png" alt="\begin{matrix}
 {C_{\mathit{vv};\mathit{\alpha\alpha}}\left( {t;n} \right)\doteq\left\langle {v_{\alpha}\left( {t_{0};n} \right)v_{\alpha}\left( {{t_{0} + t};n} \right)} \right\rangle_{t_{0}},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}24} \right) \\
-\end{matrix}</span></p>
-</div><p>where v<sub>α</sub>(t; <strong>n</strong>) is given by</p>
+\end{matrix}"/></p>
+</div><p>where v<sub>:math:</sub>alpha``(t; <strong>n</strong>) is given by</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/1051ae26976e16dbe1f967b1e130c8442e2eb6e6.png" alt="\begin{matrix}
 {v_{\alpha}\left( {t;n} \right)\doteq n\cdot v_{\alpha}(t).} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}25} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The vector n is a unit vector defining a space-fixed axis.</p>
 <p>The <em>VACF</em> of the particles in a many body system can be related to the
 incoherent dynamic structure factor by the relation:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/a9e11f94187bffa941788eed3e1b122051da5c11.png" alt="\begin{matrix}
 {\mathit{li}m_{q\rightarrow 0}\frac{\omega^{2}}{q^{2}}S{\left( {q,\omega} \right) = G}(\omega),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}26} \right) \\
-\end{matrix}</span></p>
-</div><p>where G(ω) is the Density Of States (<em>DOS</em>). For an isotropic system it
+\end{matrix}"/></p>
+</div><p>where G(<img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/>) is the Density Of States (<em>DOS</em>). For an isotropic system it
 reads</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/386206337570ecbcc43341020402f3d8f1ac7d4d.png" alt="\begin{matrix}
 {G{(\omega) = {\sum\limits_{\alpha}{b_{\alpha,\mathit{inc}}^{2}{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}(\omega)}}},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}27} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/58d8e9667d3a03f1d90b96d26dacaab12fbfad0d.png" alt="\begin{matrix}
 {{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}{(\omega) = \frac{1}{2\pi}}{\int\limits_{- \infty}^{+ \infty}\mathit{dt}}\exp\left\lbrack {{- i}\omega t} \right\rbrack C_{\mathit{vv};\mathit{\alpha\alpha}}(t).} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}28} \right) \\
-\end{matrix}</span></p>
-</div><p>For non-isotropic systems, relation</p>
-<div class="math">
-<p><span class="math">26</span></p>
-</div><p><a class="reference external" href="#anchor-98">Error: Reference source not found</a> holds if the <em>DOS</em>
+\end{matrix}"/></p>
+</div><p>For non-isotropic systems, relation <img class="math" src="../_images/math/553011ba8faacbc63e79977430412691af151728.png" alt="26"/> holds if the <em>DOS</em>
 is computed from the atomic velocity autocorrelation functions</p>
 <div class="math">
-<p><span class="math">C_{\mathit{vv};\mathit{\alpha\alpha}}\left( {t;n_{q}} \right)</span></p>
+<p><img src="../_images/math/966a51de56d6cdf640bc16d9c93af68c6fa0b338.png" alt="C_{\mathit{vv};\mathit{\alpha\alpha}}\left( {t;n_{q}} \right)"/></p>
 </div><p>, where nq is the unit vector in the direction of q.</p>
 <p id="gui-4">GUI</p>
 <ul class="simple">
@@ -1366,99 +1339,96 @@ aspect is present in <a class="reference external" href="#_Appendix_2">Appendix 
 <section id="theory-and-background">
 <h5><span class="section-number">7.9.1.4.1. </span>Theory and background<a class="headerlink" href="#theory-and-background" title="Permalink to this heading"></a></h5>
 <p>The quantity of interest in neutron scattering experiments with thermal
-neutrons is the <em>dynamic structure factor</em>, S(<strong>q</strong>, ω), which is
+neutrons is the <em>dynamic structure factor</em>, S(<strong>q</strong>, <img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/>), which is
 closely related to the double differential cross-section [7],</p>
 <div class="math">
-<p><span class="math">d^{2}{\sigma/\mathit{d\Omega dE}}</span></p>
+<p><img src="../_images/math/3efaf8fc1237e5b7c92030a2b2bacf1b6ab4c1af.png" alt="d^{2}{\sigma/\mathit{d\Omega dE}}"/></p>
 </div><p>. The double differential cross section is defined as the number of
 neutrons which are scattered per unit time into the solid angle interval</p>
 <div class="math">
-<p><span class="math">\left\lbrack {\Omega,{\Omega + d}\Omega} \right\rbrack</span></p>
+<p><img src="../_images/math/aa55808f17823d900e7a8663710a9a71981cbef8.png" alt="\left\lbrack {\Omega,{\Omega + d}\Omega} \right\rbrack"/></p>
 </div><p>and into the energy interval</p>
 <div class="math">
-<p><span class="math">{\lbrack{E,{E + \mathit{dE}}}\rbrack}.</span></p>
+<p><img src="../_images/math/7dd4d6b8b37390f94cde61694fd02f36ca8b9eef.png" alt="{\lbrack{E,{E + \mathit{dE}}}\rbrack}."/></p>
 </div><p>It is normalized to d, <em>dE</em>, and the flux of the incoming neutrons,</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/0eae470c66c51b3dc38641c9be14c3ee89d0d45e.png" alt="\begin{matrix}
 {{\frac{d^{2}\sigma}{d\Omega\mathit{dE}} = N}\cdot\frac{k}{k_{0}}S\left( {q,\omega} \right).} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}29} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>Here <em>N</em> is the number of atoms, and k ≡ |<strong>k</strong>| and k<sub>0</sub> ≡
 |<strong>k</strong><sub>0</sub>| are the wave numbers of scattered and incident
 neutrons, respectively. They are related to the corresponding neutron
 energies by</p>
 <div class="math">
-<p><span class="math">{E = \hslash^{2}}k^{2}\text{/}2m</span></p>
+<p><img src="../_images/math/7344e67f7c00e2c279ec59139924e1e1f1f3c100.png" alt="{E = \hslash^{2}}k^{2}\text{/}2m"/></p>
 </div><p>and</p>
 <div class="math">
-<p><span class="math">{E_{0} = \hslash^{2}}k_{0}^{2}\text{/}2m</span></p>
+<p><img src="../_images/math/173967f8d9e506d92b7b1ee5da81f41a6d6f03d6.png" alt="{E_{0} = \hslash^{2}}k_{0}^{2}\text{/}2m"/></p>
 </div><p>where</p>
 <div class="math">
-<p><span class="math">m</span></p>
+<p><img src="../_images/math/7053bba56d76947900b1cf048d7e2a626401ab95.png" alt="m"/></p>
 </div><p>is the neutron mass. The arguments of the dynamic structure factor,</p>
 <div class="math">
-<p><span class="math">q</span></p>
+<p><img src="../_images/math/30bf569473ab4f536e2b42749bd19ef3ff738548.png" alt="q"/></p>
 </div><p>and</p>
 <div class="math">
-<p><span class="math">\omega</span></p>
+<p><img src="../_images/math/fbc2e89f11661d09fc3cdd60987d425c9ebbdecd.png" alt="\omega"/></p>
 </div><p>, are the momentum and energy transfer in units of</p>
 <div class="math">
-<p><span class="math">\hslash</span></p>
+<p><img src="../_images/math/f56d6a065c9a726062a1cc4d20e9adc746c7b74c.png" alt="\hslash"/></p>
 </div><p>, respectively:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/4dd1dc503c9291fdfd31ece605a14f9d976f627f.png" alt="\begin{matrix}
 {{q = \frac{k_{0} - k}{\hslash}},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}30} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/4a18fc5dc3b8430f8a268b5bf5372d29a92e879b.png" alt="\begin{matrix}
 {{\omega = \frac{E_{0} - E}{\hslash}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}31} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The modulus of the momentum transfer can be expressed in the scattering
 angle</p>
 <div class="math">
-<p><span class="math">\theta</span></p>
+<p><img src="../_images/math/785e51e6362f35ddd4d25464849bbeddb1cb126d.png" alt="\theta"/></p>
 </div><p>, the energy transfer, and the energy of the incident neutrons:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/02ccae5989fac6dbc19433327bf3d2b33afe7938.png" alt="\begin{matrix}
 {{q = \sqrt{{2 - \frac{\mathit{\hslash\omega}}{E_{0}} - 2}\cos{\theta\sqrt{2 - \frac{\mathit{\hslash\omega}}{E_{0}}}}}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}32} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The dynamic structure factor contains information about the structure
 and dynamics of the scattering system
 [<a class="reference external" href="#SignetBibliographie_016">16</a>]. It can be written as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/2acbea99a29dbcdba5d1518b681592e4c0e56424.png" alt="\begin{matrix}
 {S{\left( {q,\omega} \right) = \frac{1}{2\pi}}{\int\limits_{- \infty}^{+ \infty}\mathit{dt}}\exp\left\lbrack {{- i}\omega t} \right\rbrack F\left( {q,t} \right).} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}33} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>F(<strong>q</strong>, t) is called the <em>intermediate scattering function</em> and is
 defined as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/1c1d750b73d4c1c50ace47f9d13590cfe03ebe7e.png" alt="\begin{matrix}
 {\text{F}{\left( {q,t} \right) = {\sum\limits_{\alpha,\beta}{\Gamma_{\mathit{\alpha\beta}}\left\langle {\exp\left\lbrack {{- i}q\cdot\hat{R_{\alpha}}(0)} \right\rbrack\exp\left\lbrack {iq\cdot\hat{R_{\beta}}(t)} \right\rbrack} \right\rangle}}},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}34} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/2e647a79fc3c37b8bc9666bedb37389433b0d60d.png" alt="\begin{matrix}
 {{\Gamma_{\mathit{\alpha\beta}} = \frac{1}{N}}\left\lbrack {\overline{b_{\alpha}}{\overline{b_{\beta}} + \delta_{\mathit{\alpha\beta}}}\left( {\overline{b_{\alpha}^{2}} - {\overline{b_{\alpha}}}^{2}} \right)} \right\rbrack.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}35} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The operators</p>
 <div class="math">
-<p><span class="math">\hat{R_{\alpha}}(t)</span></p>
-</div><p>in Eq.</p>
-<div class="math">
-<p><span class="math">34</span></p>
-</div><p><a class="reference external" href="#anchor-110">Error: Reference source not found</a> are the position
+<p><img src="../_images/math/40f07059b2784c7128570469b3f88d2c28bdca7c.png" alt="\hat{R_{\alpha}}(t)"/></p>
+</div><p>in Eq. <img class="math" src="../_images/math/fa825e0aa1d7943e7e894a4bb0abd3e8f9993a49.png" alt="34"/> are the position
 operators of the nuclei in the sample. The brackets</p>
 <div class="math">
-<p><span class="math">\langle\ldots\rangle</span></p>
+<p><img src="../_images/math/8e27796e3c1a48c570ca0908a18d1952a6afb186.png" alt="\langle\ldots\rangle"/></p>
 </div><p>denote a quantum thermal average and the time dependence of the position
 operators is defined by the Heisenberg picture. The quantities</p>
 <div class="math">
-<p><span class="math">b_{\alpha}</span></p>
+<p><img src="../_images/math/c1357995729e4fdce0d76b85c6729f7adf74a6f9.png" alt="b_{\alpha}"/></p>
 </div><p>are the scattering lengths of the nuclei which depend on the isotope and
 the relative orientation of the spin of the neutron and the spin of the
 scattering nucleus. If the spins of the nuclei and the neutron are not
@@ -1466,73 +1436,70 @@ prepared in a special orientation one can assume a random relative
 orientation and that spin and position of the nuclei are uncorrelated.
 The symbol</p>
 <div class="math">
-<p><span class="math">\overline{...\mspace{9mu}}</span></p>
+<p><img src="../_images/math/8208f8f86be2ec033f53ae5951782a3472806e82.png" alt="\overline{...\mspace{9mu}}"/></p>
 </div><p>appearing in</p>
 <div class="math">
-<p><span class="math">\Gamma_{\mathit{\alpha\beta}}</span></p>
+<p><img src="../_images/math/7cf94ae8d9a2561cfc92e09f407b073e919e4478.png" alt="\Gamma_{\mathit{\alpha\beta}}"/></p>
 </div><p>denotes an average over isotopes and relative spin orientations of
 neutron and nucleus.</p>
 <p>Usually, one splits the intermediate scattering function and the dynamic
 structure factor into their <em>coherent</em> and <em>incoherent</em> parts which
 describe collective and single particle motions, respectively. Defining</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/798831e8d4e88f6fb2b89e034f1bec9b2e857ade.png" alt="\begin{matrix}
 {b_{\alpha,\mathit{coh}}\doteq\overline{b_{\alpha}},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}36} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/c955aeee9a8af70446430118e3a1240856d166a5.png" alt="\begin{matrix}
 {b_{\alpha,\mathit{inc}}\doteq\sqrt{\overline{b_{\alpha}^{2}} - {\overline{b_{\alpha}}}^{2}},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}37} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>the coherent and incoherent intermediate scattering functions can be
 cast in the form</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/90fc991b414f201eddbb40fc18f60ecb5dbcebe8.png" alt="\begin{matrix}
 {\text{F}_{\text{coh}}{\left( {q,t} \right) = \frac{1}{N}}{\sum\limits_{\alpha,\beta}b_{\alpha,\mathit{coh}}}b_{\beta,\mathit{coh}}\left\langle {\exp\left\lbrack {{- i}q\cdot\hat{R_{\alpha}}(0)} \right\rbrack\exp\left\lbrack {iq\cdot\hat{R_{\beta}}(t)} \right\rbrack} \right\rangle,} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}38} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/87cfcd5960f3b5e914dd394b022e44e8e7e83970.png" alt="\begin{matrix}
 {\text{F}_{\text{inc}}{\left( {q,t} \right) = \frac{1}{N}}{\sum\limits_{\alpha}{b_{\alpha,\mathit{inc}}^{2}\left\langle {\exp\left\lbrack {{- i}q\cdot\hat{R_{\alpha}}(0)} \right\rbrack\exp\left\lbrack {iq\cdot\hat{R_{\alpha}}(t)} \right\rbrack} \right\rangle}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}39} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>Rewriting these formulas, <em>MDANSE</em> introduces the partial terms as:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/aedfc1f626ea07345d436e17572a3532e5a82e2b.png" alt="\begin{matrix}
 {\text{F}_{\text{coh}}{\left( {q,t} \right) = \sum\limits_{I,J\geq I}^{N_{\mathit{species}}}}\sqrt{n_{I}n_{J}\omega_{I,\text{coh}}\omega_{J,\text{coh}}}F_{\mathit{IJ},\text{coh}}\left( {q,t} \right),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}40} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/f1dae7b8b128564810f036d549bfd3d9bddedee8.png" alt="\begin{matrix}
 {\text{F}_{\text{inc}}{\left( {q,t} \right) = {\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}F_{I,\text{inc}}\left( {q,t} \right)}}}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}41} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/b3fbcb58d8a5c4134ad48aca777fec5c31501cc3.png" alt="\begin{matrix}
 {\text{F}_{\mathit{IJ},\text{coh}}{\left( {q,t} \right) = \frac{1}{\sqrt{n_{I}n_{J}}}}{\sum\limits_{\alpha}^{n_{I}}{\sum\limits_{\beta}^{n_{J}}\left\langle {\exp\left\lbrack {{- i}q\cdot\hat{R_{\alpha}}\left( t_{0} \right)} \right\rbrack\exp\left\lbrack {iq\cdot\hat{R_{\beta}}\left( {t_{0} + t} \right)} \right\rbrack} \right\rangle_{t_{0}}}},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}42} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/5d6efc0da9e9bfb6dfcf2bc4e7f79aec4e885b9c.png" alt="\begin{matrix}
 {\text{F}_{I,\text{inc}}{\left( {q,t} \right) = \frac{1}{n_{I}}}{\sum\limits_{\alpha = 1}^{n_{I}}\left\langle {\exp\left\lbrack {{- i}q\cdot\hat{R_{\alpha}}\left( t_{0} \right)} \right\rbrack\exp\left\lbrack {iq\cdot\hat{R_{\alpha}}\left( {t_{0} + t} \right)} \right\rbrack} \right\rangle_{t_{0}}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}43} \right) \\
-\end{matrix}</span></p>
-</div><p>where n<sub>I</sub>, n<sub>J</sub>, N<sub>species</sub>, ω<sub>I,coh,inc</sub>
-and ω<sub>J,coh,inc</sub> are defined in Section ??.</p>
+\end{matrix}"/></p>
+</div><p>where n<sub>I</sub>, n<sub>J</sub>, N<sub>species</sub>, <img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/><sub>I,coh,inc</sub>
+and <img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/><sub>J,coh,inc</sub> are defined in Section ??.</p>
 <p>The corresponding dynamic structure factors are obtained by performing
-the Fourier transformation defined in Eq.</p>
-<div class="math">
-<p><span class="math">33</span></p>
-</div><p><a class="reference external" href="#anchor-111">Error: Reference source not found</a>.</p>
+the Fourier transformation defined in Eq. <img class="math" src="../_images/math/bbc7a990dfe316302f86b4346f97373f54f55d84.png" alt="33"/>.</p>
 <p>An important quantity describing <em>structural</em> properties of liquids is
 the <em>static structure factor</em>, which is defined as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/4d549a91da001246935bd2ea643da0aca1052d91.png" alt="\begin{matrix}
 {\text{S}(q)\doteq{\int\limits_{- \infty}^{+ \infty}{d\omega}}\text{S}_{\mathit{coh}}\left( {q,\omega} \right)\text{F}_{\mathit{coh}}\left( {q,0} \right).} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}44} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>In the classical framework the intermediate scattering functions are
 interpreted as classical time correlation functions. The position
 operators are replaced by time-dependent vector functions and quantum
@@ -1540,66 +1507,60 @@ thermal averages are replaced by classical <em>ensemble averages</em>. It is
 well known that this procedure leads to a loss of the universal detailed
 balance relation,</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/c86cb36ce15e132699fa6d6c6b948241366330f7.png" alt="\begin{matrix}
 {\text{S}{\left( {q,\omega} \right) = \exp}\left\lbrack {\beta\hslash\omega} \right\rbrack\text{S}\left( {{- q}{, - \omega}} \right),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}45} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>and also to a loss of all odd moments</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/e1bc206d0b5acff783f2d6b959c135714771c8b6.png" alt="\begin{matrix}
 {\left\langle \omega^{2{n + 1}} \right\rangle\doteq{\int\limits_{- \infty}^{+ \infty}{d\omega}}\omega^{2{n + 1}}S\left( {q,\omega} \right),{n = 1,2},\ldots.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}46} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The odd moments vanish since the classical dynamic structure factor is
-even in ω, assuming invariance of the scattering process with respect to
+even in <img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/>, assuming invariance of the scattering process with respect to
 reflections in space. The first moment is also universal. For an atomic
 liquid, containing only one sort of atoms, it reads</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/b4e599ec5037c69a2487aa485322ed9facf169bf.png" alt="\begin{matrix}
 {{\left\langle \omega \right\rangle = \frac{\hslash q^{2}}{2M}},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}47} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where M is the mass of the atoms. Formula</p>
 <div class="math">
-<p><span class="math">47</span></p>
+<p><img src="../_images/math/771f17836c0e0287f5553b02f7554e0a1e87cef8.png" alt="47"/></p>
 </div><p><a class="reference external" href="#anchor-112">Error: Reference source not found</a> shows that the
 first moment is given by the average kinetic energy (in units of</p>
 <div class="math">
-<p><span class="math">\hslash</span></p>
+<p><img src="../_images/math/f56d6a065c9a726062a1cc4d20e9adc746c7b74c.png" alt="\hslash"/></p>
 </div><p>) of a particle which receives a momentum transfer</p>
 <div class="math">
-<p><span class="math">\hslash q</span></p>
+<p><img src="../_images/math/ce71b573b16c8bbe1e365deade3fc79650a3b82e.png" alt="\hslash q"/></p>
 </div><p>. Therefore,</p>
 <div class="math">
-<p><span class="math">\langle\omega\rangle</span></p>
+<p><img src="../_images/math/9b8ae4ea2cd13b62c600d5b09404c58cbc46e14b.png" alt="\langle\omega\rangle"/></p>
 </div><p>is called the <em>recoil moment</em>. A number of ‘recipes’ has been suggested
 to correct classical dynamic structure factors for detailed balance and
 to describe recoil effects in an approximate way. The most popular one
 has been suggested by Schofield [<a class="reference external" href="#SignetBibliographie_017">17</a>]</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/04c282aa3f35009153d2e53e7e9fba086ec0ef0b.png" alt="\begin{matrix}
 {{\text{S}\left( {q,\omega} \right)\approx\exp\left\lbrack \frac{\beta\hslash\omega}{2} \right\rbrack}_{}\text{S}_{\mathit{cl}}\left( {q,\omega} \right)} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}48} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>One can easily verify that the resulting dynamic structure factor
-fulfils the relation of detailed balance. Formally, the correction</p>
+fulfils the relation of detailed balance. Formally, the correction <img class="math" src="../_images/math/c881be065e460dc660b1b904f32cd68142f1f0dd.png" alt="48"/>
+is correct to first order in <img class="math" src="../_images/math/da2699bc8261759a879f7a22f588c79f8a061473.png" alt="\hslash"/>. Therefore, it cannot be used
+for large <em>q</em>-values which correspond to large momentum transfers</p>
 <div class="math">
-<p><span class="math">48</span></p>
-</div><p><a class="reference external" href="#anchor-113">Error: Reference source not found</a> is correct to
-first order in</p>
-<div class="math">
-<p><span class="math">\hslash</span></p>
-</div><p>. Therefore, it cannot be used for large <em>q</em>-values which correspond to
-large momentum transfers</p>
-<div class="math">
-<p><span class="math">\hslash q</span></p>
+<p><img src="../_images/math/ce71b573b16c8bbe1e365deade3fc79650a3b82e.png" alt="\hslash q"/></p>
 </div><p>. This is actually true for all correction methods which have suggested
 so far. For more details we refer to Ref.
 [<a class="reference external" href="#SignetBibliographie_018">18</a>].</p>
 <p>MDANSE computes the partial S(Q)’s as the Fourier transform of the
 partial g(r), corresponding to the Faber-Ziman definition:</p>
 <div class="math">
-<p><span class="math">{S_{\mathit{\text{αβ}}}(Q{) = {1 + \frac{4\mathit{\text{πρ}_{\mathrm{0}}}}{Q}}}{\int\limits_{0}^{\infty}{r\left\lbrack {g_{\mathit{\text{αβ}}}(r{) - 1}} \right\rbrack\text{sin}(\mathit{\text{Qr}})\mathit{dr}}}}{}</span></p>
+<p><img src="../_images/math/fe3a8e0df55cc3eaa2117dd3b17ff9f859cf5733.png" alt="S_{\alpha\beta}(Q) = 1 + \frac{4\pi\rho_0}{Q}\int\limits_{0}^{\infty}{r\left\lbrack {g_\alpha\beta}(r)-1 \right\rbrack\text{sin}(Qr)dr}"/></p>
 </div><p>(49)</p>
 <p>The total S(Q) is computed as a weighted sum similar to the one used for
 the total g(r). In the case of the analysis ‘X-ray Static structure
@@ -1611,7 +1572,7 @@ of confusion is that the data can be normalized in different ways (see
 Soper’s paper). Using the normalization II in that reference we have
 that:</p>
 <div class="math">
-<p><span class="math">D_{x}{(Q) = \frac{\sum\limits_{\mathit{\alpha\beta}\geq\alpha}{\left( {2 - \delta_{\mathit{\alpha\beta}}} \right)\times c_{\alpha}c_{\beta}f_{\alpha}{(Q)}f_{\beta}{(Q)}\left\lbrack {S_{\mathit{\alpha\beta}}{(Q) - 1}} \right\rbrack}}{\sum\limits_{\alpha}{c_{\alpha}f_{\alpha}^{2}{(Q)}}} = \left\lbrack {S{(Q) - 1}} \right\rbrack}\times\frac{\sum\limits_{\mathit{\alpha\beta}}{c_{\alpha}c_{\beta}f_{\alpha}{(Q)}f_{\beta}{(Q)}}}{\sum\limits_{\alpha}{c_{\alpha}f_{\alpha}^{2}{(Q)}}}\left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}50} \right)</span></p>
+<p><img src="../_images/math/e2aabb6adb9f3be6a54d7ab583e9812e998a2ece.png" alt="D_{x}{(Q) = \frac{\sum\limits_{\mathit{\alpha\beta}\geq\alpha}{\left( {2 - \delta_{\mathit{\alpha\beta}}} \right)\times c_{\alpha}c_{\beta}f_{\alpha}{(Q)}f_{\beta}{(Q)}\left\lbrack {S_{\mathit{\alpha\beta}}{(Q) - 1}} \right\rbrack}}{\sum\limits_{\alpha}{c_{\alpha}f_{\alpha}^{2}{(Q)}}} = \left\lbrack {S{(Q) - 1}} \right\rbrack}\times\frac{\sum\limits_{\mathit{\alpha\beta}}{c_{\alpha}c_{\beta}f_{\alpha}{(Q)}f_{\beta}{(Q)}}}{\sum\limits_{\alpha}{c_{\alpha}f_{\alpha}^{2}{(Q)}}}\left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}50} \right)"/></p>
 </div><p>Where S(Q) would be the static structure factor (going to 1 at large Q)
 computed by MDANSE. Therefore, even after using MDANSE we should
 recalculate the x-ray observable using the atomic factors.</p>
@@ -1717,108 +1678,96 @@ Background</a> for more details about the
 theoretical background related to the dynamic coherent structure factor.
 In this analysis, <em>MDANSE</em> proceeds in two steps. First, it computes the
 partial and total intermediate coherent scattering function using
-equation</p>
-<div class="math">
-<p><span class="math">40</span></p>
-</div><p><a class="reference external" href="#anchor-121">Error: Reference source not found</a>. Then, the partial
+equation <img class="math" src="../_images/math/879773531961e2d7e18bbaf92bd1c9f33a7edf0e.png" alt="40"/>. Then, the partial
 and total dynamic coherent structure factors are obtained by performing
-the Fourier Transformation, defined in Eq.</p>
-<div class="math">
-<p><span class="math">33</span></p>
-</div><p><a class="reference external" href="#anchor-122">Error: Reference source not found</a>, respectively on
+the Fourier Transformation, defined in Eq. <img class="math" src="../_images/math/bbc7a990dfe316302f86b4346f97373f54f55d84.png" alt="33"/>, respectively on
 the total and partial intermediate coherent scattering functions.</p>
 <p><em>MDANSE</em> computes the coherent intermediate scattering function on a
 rectangular grid of equidistantly spaced points along the time-and the
 <em>q</em>-axis, respectively:</p>
 <p>F</p>
 <div class="math">
-<p><span class="math">{}_{\text{coh}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\cdot\Delta t} \right)} \right\rangle}}^{q},</span></p>
+<p><img src="../_images/math/aed2df21b182bc2afada2b77c83829e44f9c56e7.png" alt="{}_{\text{coh}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\cdot\Delta t} \right)} \right\rangle}}^{q},"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/479ac8bb0b7ce3095577604d5f1db98098a55d89.png" alt="\begin{matrix}
 {{k = 0}\ldots{N_{t} - 1},{m = 0}\ldots{N_{q} - 1.}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}51} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where N<sub>t</sub> is the number of time steps in the coordinate time
 series, N<sub>q</sub> is a user-defined number of <em>q</em>-shells,
 N<sub>species</sub> is the number of selected species, n<sub>I</sub> the
-number of atoms of species <em>I</em>, ω<sub>I</sub> the weight for specie <em>I</em>
+number of atoms of species <em>I</em>, <img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/><sub>I</sub> the weight for specie <em>I</em>
 (see Section ?? for more details) and</p>
 <div class="math">
-<p><span class="math">\rho_{I}\left( {q,k\cdot\Delta t} \right)</span></p>
+<p><img src="../_images/math/047d123ea8d1b08cea2afb8e4ecd19539aab6659.png" alt="\rho_{I}\left( {q,k\cdot\Delta t} \right)"/></p>
 </div><p>is the Fourier transformed particle density for specie <em>I</em> defined as,</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/8a1c9f19208168bf23389c867d842a6b4a4500c0.png" alt="\begin{matrix}
 {\rho_{I}{\left( {q,k\cdot\Delta t} \right) = \sum\limits_{\alpha}^{n_{I}}}\exp\left\lbrack {\mathit{iq}\cdot R_{\alpha}\left( {k\cdot\Delta t} \right)} \right\rbrack.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}52} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The symbol</p>
 <div class="math">
-<p><span class="math">{\overline{...}}^{q}</span></p>
-</div><p>in Eq.</p>
-<div class="math">
-<p><span class="math">51</span></p>
-</div><p><a class="reference external" href="#anchor-123">Error: Reference source not found</a> denotes an average
+<p><img src="../_images/math/9a4a21e694a7ff5a5a8e22be701fc65d134a90cc.png" alt="{\overline{...}}^{q}"/></p>
+</div><p>in Eq. <img class="math" src="../_images/math/e518058340298a83683cf0aa7082915a32140aad.png" alt="51"/> denotes an average
 over <em>q</em>-vectors having <em>approximately</em> the same modulus</p>
 <div class="math">
-<p><span class="math">{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q</span></p>
+<p><img src="../_images/math/90fb3dfb3ab5ece19a5bf630218e78c8718dcc4b.png" alt="{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q"/></p>
 </div><p>. The particle density must not change if jumps in the particle
 trajectories due to periodic boundary conditions occur. In addition, the
 <em>average</em> particle density,</p>
 <div class="math">
-<p><span class="math">N/V</span></p>
+<p><img src="../_images/math/1962fb809ef45d2f130b87bd2342380d962ff0e5.png" alt="N/V"/></p>
 </div><p>, must not change. This can be achieved by choosing <em>q</em>-vectors on a
 lattice which is reciprocal to the lattice defined by the <em>MD</em> box. Let
 <strong>b</strong><sub>1</sub>, <strong>b</strong><sub>2</sub>, <strong>b</strong><sub>3</sub> be the basis vectors
 which span the <em>MD</em> cell. Any position vector in the <em>MD</em> cell can be
 written as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/fe3772287db0b6532cf866c6e00e155ab79efd4e.png" alt="\begin{matrix}
 {{R = x^{'}}{b_{1} + y^{'}}{b_{2} + z^{'}}b_{3},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}53} \right) \\
-\end{matrix}</span></p>
-</div><p>with x′, y′, z′ having values between 0 and 1. The primes indicate that
+\end{matrix}"/></p>
+</div><p>with x’, y’, z’ having values between 0 and 1. The primes indicate that
 the coordinates are box coordinates. A jump due to periodic boundary
-conditions causes x′, y′, z′ to jump by ∓1. The set of dual basis
+conditions causes x’, y’, z’ to jump by <img class="math" src="../_images/math/8132773d0d31840304900dc051b74321ba3bc11e.png" alt="\pm1"/>. The set of dual basis
 vectors <strong>b</strong><sup>1</sup>, <strong>b</strong><sup>2</sup>, <strong>b</strong><sup>3</sup> is defined by
 the relation</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/75a6fde178b07df2cc9911860f4d2bf83068321a.png" alt="\begin{matrix}
 {b_{i}{b^{j} = \delta_{i}^{j}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}54} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>If the q-vectors are now chosen as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/7c914a8ceca099e389fd7ce16268a89517f69cb1.png" alt="\begin{matrix}
 {{q = 2}\pi\left( {k{b^{1} + l}{b^{2} + m}b^{3}} \right),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}55} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where <em>k,l,m</em> are integer numbers, jumps in the particle trajectories
-produce phase changes of multiples of 2π in the Fourier transformed
+produce phase changes of multiples of <img class="math" src="../_images/math/2ef04e0a4bcc5f1840308dabe353cfe6e48632c4.png" alt="2\pi"/> in the Fourier transformed
 particle density, i.e. leave it unchanged. One can define a grid of
 <em>q</em>-shells or a grid of <em>q</em>-vectors along a given direction or on a
 given plane, giving in addition a <em>tolerance</em> for <em>q</em>. <em>MDANSE</em> looks
-then for <em>q</em>-vectors of the form given in Eq.</p>
-<div class="math">
-<p><span class="math">61</span></p>
-</div><p><a class="reference external" href="#anchor-124">Error: Reference source not found</a> whose moduli
+then for <em>q</em>-vectors of the form given in Eq. 61 whose moduli
 deviate within the prescribed tolerance from the equidistant <em>q</em>-grid.
 From these <em>q</em>-vectors only a maximum number per grid-point (called
 generically <em>q</em>-shell also in the anisotropic case) is kept.</p>
 <p>The <em>q</em>-vectors can be generated isotropically, anisotropically or along
 user-defined directions. The</p>
 <div class="math">
-<p><span class="math">\sqrt{\omega_{I}}</span></p>
+<p><img src="../_images/math/ab23a1c77f8cac793bda1f56d83342b2b78c0b29.png" alt="\sqrt{\omega_{I}}"/></p>
 </div><p>may be negative if they represent normalized coherent scattering
 lengths, i.e.</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/95bfa8063ddf7770db65a271554d191c842f7fc0.png" alt="\begin{matrix}
 {{\sqrt{\omega_{I}} = \frac{b_{I,\text{coh}}}{\sqrt{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}b_{I,\text{coh}}^{2}}}}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}56} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>Negative coherent scattering lengths occur in hydrogenous materials
 since</p>
 <div class="math">
-<p><span class="math">b_{\mathit{coh},H}</span></p>
+<p><img src="../_images/math/375f5bdae896050acd100fc20bc0aa4eb3c1d0bb.png" alt="b_{\mathit{coh},H}"/></p>
 </div><p>Is negative [<a class="reference external" href="#SignetBibliographie_020">20</a>]. The density-density
 correlation is computed via the <em>FCA</em> technique described in the section
 on <a class="reference external" href="#_Theory_and_implementation">Spatial Density</a>.</p>
@@ -1847,45 +1796,45 @@ dynamic incoherent structure factor. In this analysis, <em>MDANSE</em> proceeds
 in two steps. First, it computes the partial and total intermediate
 incoherent scattering function F<sub>inc</sub>(<strong>q</strong>, t) using equation</p>
 <div class="math">
-<p><span class="math">41</span></p>
+<p><img src="../_images/math/0dc7cf4c27162f0b971d4748a8139dda1b50fc01.png" alt="41"/></p>
 </div><p><a class="reference external" href="#anchor-129">Error: Reference source not found</a>. Then, the partial
 and total dynamic incoherent structure factors are obtained by
 performing the Fourier Transformation, defined in Eq.</p>
 <div class="math">
-<p><span class="math">33</span></p>
+<p><img src="../_images/math/8afd4a9559a6c15da7982df2380368b6a8018cf6.png" alt="33"/></p>
 </div><p><a class="reference external" href="#anchor-130">Error: Reference source not found</a>, respectively on
 the total and partial intermediate incoherent scattering function.</p>
 <p><em>MDANSE</em> computes the incoherent intermediate scattering function on a
 rectangular grid of equidistantly spaced points along the time-and the
 <em>q</em>-axis, respectively:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/21e42ed015ee30fd153f497fb73b6c3854c5bff4.png" alt="\begin{matrix}
 {\text{F}_{\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}}}\text{F}_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right),{k = 0}\ldots{N_{t} - 1},{m = 0}\ldots{N_{q} - 1.}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}57} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where N<sub>t</sub> is the number of time steps in the coordinate time
 series, N<sub>q</sub> is a user-defined number of <em>q</em>-shells,
 N<sub>species</sub> is the number of selected species, n<sub>I</sub> the
-number of atoms of species <em>I</em>, ω<sub>I</sub> the weight for specie <em>I</em>
+number of atoms of species <em>I</em>, <img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/><sub>I</sub> the weight for specie <em>I</em>
 (see Section ?? for more details) and</p>
 <div class="math">
-<p><span class="math">F_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)</span></p>
+<p><img src="../_images/math/dabdd00a800652ba8e789ad4032eeafb63efcd03.png" alt="F_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)"/></p>
 </div><p>is defined as:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/bd7a44ee67db5506aeae5cc7644ec308035e4d31.png" alt="\begin{matrix}
 {\text{F}_{I,\mathit{inc},\alpha}{\left( {q_{m},k\cdot\Delta t} \right) = \sum\limits_{\alpha = 1}^{n_{I}}}{\overline{\left\langle {\exp\left\lbrack {{-i}q\cdot R_{\alpha}(0)} \right\rbrack\exp\left\lbrack {iq\cdot R_{\alpha}(t)} \right\rbrack} \right\rangle}}^{q}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}58} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The symbol</p>
 <div class="math">
-<p><span class="math">{\overline{...}}^{q}</span></p>
+<p><img src="../_images/math/9a4a21e694a7ff5a5a8e22be701fc65d134a90cc.png" alt="{\overline{...}}^{q}"/></p>
 </div><p>in Eq.</p>
 <div class="math">
-<p><span class="math">58</span></p>
+<p><img src="../_images/math/78afc0fea41b1f3c40886afc3607cbb36c9f7665.png" alt="58"/></p>
 </div><p><a class="reference external" href="#anchor-131">Error: Reference source not found</a> denotes an average
 over <em>q</em>-vectors having <em>approximately</em> the same modulus</p>
 <div class="math">
-<p><span class="math">{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q</span></p>
+<p><img src="../_images/math/90fb3dfb3ab5ece19a5bf630218e78c8718dcc4b.png" alt="{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q"/></p>
 </div><p>. The particle density must not change if jumps in the particle
 trajectories due to periodic boundary conditions occur. In addition, the
 <em>average</em> particle density, N/V, must not change. This can be achieved
@@ -1894,26 +1843,26 @@ defined by the <em>MD</em> box. Let <strong>b</strong><sub>1</sub>, <strong>b</s
 <strong>b</strong><sub>3</sub> be the basis vectors which span the <em>MD</em> cell. Any
 position vector in the <em>MD</em> cell can be written as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/51c631161c5299d9dac75ef3cefb0570d01d94af.png" alt="\begin{matrix}
 {{R = x^{'}}{b_{1} + y^{'}}{b_{2} + z^{'}}b_{3},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}59} \right) \\
-\end{matrix}</span></p>
-</div><p>with x′, y′, z′ having values between 0 and 1. The primes indicate that
+\end{matrix}"/></p>
+</div><p>with x’, y’, z’ having values between 0 and 1. The primes indicate that
 the coordinates are box coordinates. A jump due to periodic boundary
-conditions causes x′, y′, z′ to jump by ∓1. The set of dual basis
+conditions causes x’, y’, z’ to jump by ∓1. The set of dual basis
 vectors <strong>b</strong><sup>1</sup>, <strong>b</strong><sup>2</sup>, <strong>b</strong><sup>3</sup> is defined by
 the relation</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/163c385ff7976bd5dc0cec5ce8d09847e124d2ca.png" alt="\begin{matrix}
 {b_{i}{b^{j} = \delta_{i}^{j}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}60} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>If the q-vectors are now chosen as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/8b0552db2f0a80272f41ab2174023a4367ecd9c8.png" alt="\begin{matrix}
 {{q = 2}\pi\left( {k{b^{1} + l}{b^{2} + m}b^{3}} \right),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}61} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where <em>k,l,m</em> are integer numbers, jumps in the particle trajectories
 produce phase changes of multiples of 2π in the Fourier transformed
 particle density, i.e. leave it unchanged. One can define a grid of
@@ -1921,7 +1870,7 @@ particle density, i.e. leave it unchanged. One can define a grid of
 given plane, giving in addition a <em>tolerance</em> for <em>q</em>. <em>MDANSE</em> looks
 then for <em>q</em>-vectors of the form given in Eq.</p>
 <div class="math">
-<p><span class="math">61</span></p>
+<p><img src="../_images/math/7b422db3bb8539b2092291b98f33053ebd121177.png" alt="61"/></p>
 </div><p><a class="reference external" href="#anchor-132">Error: Reference source not found</a> whose moduli
 deviate within the prescribed tolerance from the equidistant <em>q</em>-grid.
 From these <em>q</em>-vectors only a maximum number per grid-point (called
@@ -1930,7 +1879,7 @@ generically <em>q</em>-shell also in the anisotropic case) is kept.</p>
 user-defined directions.</p>
 <p>The correlation functions defined in</p>
 <div class="math">
-<p><span class="math">58</span></p>
+<p><img src="../_images/math/78afc0fea41b1f3c40886afc3607cbb36c9f7665.png" alt="58"/></p>
 </div><p><a class="reference external" href="#anchor-133">Error: Reference source not found</a> are computed via
 the <em>FCA</em> technique described in <a class="reference external" href="#_Theory_and_implementation">Spatial
 Density</a> section. Although the efficient
@@ -1964,24 +1913,24 @@ in <em>MDANSE</em>.</p>
 <p>The Elastic Incoherent Structure Factor (<em>EISF</em>) is defined as the limit
 of the incoherent intermediate scattering function for infinite time,</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/ba23ce3beacec92b87a9f9fd98ed35c69f5d21ef.png" alt="\begin{matrix}
 {\mathit{EISF}(q)\doteq\lim\limits_{t\rightarrow\infty}\text{F}_{\mathit{inc}}\left( {q,t} \right).} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}62} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>Using the above definition of the EISF one can decompose the incoherent
 intermediate scattering function as follows:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/4d1375ee4185bdcfcc27d2d626268571685f46e1.png" alt="\begin{matrix}
 {\text{F}_{\text{inc}}{\left( {q,t} \right) = \mathit{EISF}}{(q) + \text{F}_{\text{inc}}^{'}}\left( {q,t} \right),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}63} \right) \\
-\end{matrix}</span></p>
-</div><p>where F<sub>inc</sub>’(<strong>q</strong>,t) decays to zero for infinite time. Taking
+\end{matrix}"/></p>
+</div><p>where F<sub>inc</sub>‘(<strong>q</strong>,t) decays to zero for infinite time. Taking
 now the Fourier transform it follows immediately that</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/5cb2f5196f11e8c894281f127256bb8c33378518.png" alt="\begin{matrix}
 {\text{S}_{\text{inc}}{\left( {q,\omega} \right) = \mathit{EISF}}(q)\delta{(\omega) + \text{S}_{\text{inc}}^{'}}\left( {q,\omega} \right).} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}64} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The <em>EISF</em> appears as the amplitude of the <em>elastic</em> line in the neutron
 scattering spectrum. Elastic scattering is only present for systems in
 which the atomic motion is confined in space, as for solids. To
@@ -1993,18 +1942,18 @@ Incoherent scattering from hydrogen dominates by far all other
 contributions. Using the definition of the van Hove self-correlation
 function G<sub>s</sub>(r, t) [<a class="reference external" href="#SignetBibliographie_020">20</a>],</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/f450a49e9444764a996a0799721d1b7aab34f2fb.png" alt="\begin{matrix}
 {b_{\text{inc}}^{2}G_{s}\left( {r,t} \right)\doteq\frac{1}{2\pi^{3}}{\int d^{3}}q\exp\left\lbrack {{- i}q\cdot r} \right\rbrack\text{F}_{\mathit{inc}}\left( {q,t} \right),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}65} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>which can be interpreted as the conditional probability to find a tagged
 particle at the position <strong>r</strong> at time t, given it started at <strong>r</strong> = 0,
 one can write:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/11e490ad55b157257ba093466f7c4aef920d00c1.png" alt="\begin{matrix}
 {\mathit{EISF}{(q) = b_{\text{inc}}^{2{\int d^{3}}}}r\exp\left\lbrack {\mathit{iq}\cdot r} \right\rbrack G_{s}\left( {r,{t = \infty}} \right).} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}66} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The <em>EISF</em> gives the sampling distribution of the points in space in the
 limit of infinite time. In a real experiment this means times longer
 than the time which is observable with a given instrument. The <em>EISF</em>
@@ -2014,31 +1963,31 @@ the case for molecules in liquids and gases.</p>
 <p>For computational purposes it is convenient to use the following
 representation of the <em>EISF</em> [<a class="reference external" href="#SignetBibliographie_021">21</a>]:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/dd35881f5c36554116ade6ef0b2903d2ec9cfd45.png" alt="\begin{matrix}
 {\mathit{EISF}{(q) = {\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}\mathit{EIS}F_{I}(q)}}}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}67} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where N<sub>species</sub> is the number of selected species, n<sub>I</sub>
-the number of atoms of species <em>I</em>, ω<sub>I,inc</sub> the weight for
+the number of atoms of species <em>I</em>, <img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/><sub>I,inc</sub> the weight for
 specie <em>I</em> (see Section ?? for more details) and for each specie the
 following expression for the elastic incoherent scattering function is</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/86bd2823024c2ae3cf445c92b41c69acdb4dcd51.png" alt="\begin{matrix}
 {\mathit{EIS}F_{I}{(q) = \frac{1}{n_{I}}}{\sum\limits_{\alpha}^{n_{I}}\left\langle {|{\exp\left\lbrack {\mathit{iq}\cdot R_{\alpha}} \right\rbrack\left. {} \right|^{2}}} \right\rangle}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}68} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>This expression is derived from definition</p>
 <div class="math">
-<p><span class="math">62</span></p>
+<p><img src="../_images/math/e951609924db4eacea249735b94f9a98b5021f32.png" alt="62"/></p>
 </div><p><a class="reference external" href="#anchor-138">Error: Reference source not found</a> of the <em>EISF</em> and
 expression</p>
 <div class="math">
-<p><span class="math">41</span></p>
+<p><img src="../_images/math/0dc7cf4c27162f0b971d4748a8139dda1b50fc01.png" alt="41"/></p>
 </div><p><a class="reference external" href="#anchor-139">Error: Reference source not found</a> for the
 intermediate scattering function, using that for infinite time the
 relation</p>
 <div class="math">
-<p><span class="math">\left\langle {\mathit{ex}p\left\lbrack {{- \mathit{iq}}\cdot R_{\alpha}(0)} \right\rbrack\mathit{ex}p\left\lbrack {\mathit{iq}\cdot R_{\alpha}(t)} \right\rbrack} \right\rangle = \left\langle {|{\mathit{ex}p\left\lbrack {\mathit{iq}\cdot R_{\alpha}} \right\rbrack\left. {} \right|^{2}}} \right\rangle</span></p>
+<p><img src="../_images/math/e122d85b2cf12087bd33d5a8b240c609dfad317a.png" alt="\left\langle {\mathit{ex}p\left\lbrack {{- \mathit{iq}}\cdot R_{\alpha}(0)} \right\rbrack\mathit{ex}p\left\lbrack {\mathit{iq}\cdot R_{\alpha}(t)} \right\rbrack} \right\rangle = \left\langle {|{\mathit{ex}p\left\lbrack {\mathit{iq}\cdot R_{\alpha}} \right\rbrack\left. {} \right|^{2}}} \right\rangle"/></p>
 </div><p>holds. In this way the computation of the <em>EISF</em> is reduced to the
 computation of a static thermal average. We remark at this point that
 the length of the <em>MD</em> trajectory from which the <em>EISF</em> is computed
@@ -2047,24 +1996,24 @@ conformational space.</p>
 <p><em>MDANSE</em> allows one to compute the elastic incoherent structure factor
 on a grid of equidistantly spaced points along the <em>q</em>-axis:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/c6d563d592141229d9ed1a8438e8c513681a7e4c.png" alt="\begin{matrix}
 {\mathit{EISF}\left( q_{m} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I}\mathit{EIS}F_{I}\left( q_{m} \right)}},{m = 0}\ldots{N_{q} - 1.}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}69} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where N<sub>q</sub> is a user-defined number of <em>q</em>-shells, the values for
 q<sub>m</sub> are defined as</p>
 <div class="math">
-<p><span class="math">{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q</span></p>
+<p><img src="../_images/math/90fb3dfb3ab5ece19a5bf630218e78c8718dcc4b.png" alt="{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q"/></p>
 </div><p>, and for each specie the following expression for the elastic
 incoherent scattering function is:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/ce1fd30f5b6820a1d97bfc31a69e56d9789c336d.png" alt="\begin{matrix}
 {\mathit{EIS}F_{I}{\left( q_{m} \right) = \frac{1}{n_{I}}}{\sum\limits_{\alpha}^{n_{I}}{\overline{\left\langle {|{\exp\left\lbrack {\mathit{iq}\cdot R_{\alpha}} \right\rbrack\left. {} \right|^{2}}} \right\rangle}}^{q}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}70} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>Here the symbol</p>
 <div class="math">
-<p><span class="math">{\overline{...}}^{q}</span></p>
+<p><img src="../_images/math/9a4a21e694a7ff5a5a8e22be701fc65d134a90cc.png" alt="{\overline{...}}^{q}"/></p>
 </div><p>denotes an average over the <em>q</em>-vectors having the same modulus
 q<sub>m</sub>. The program corrects the atomic input trajectories for
 jumps due to periodic boundary conditions.</p>
@@ -2092,34 +2041,34 @@ jumps due to periodic boundary conditions.</p>
 function via the cumulant expansion [<a class="reference external" href="#SignetBibliographie_011">11</a>],
 [<a class="reference external" href="#SignetBibliographie_022">22</a>]</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/8ea08ad9d74394cdf1d9400d8fee25493dff6225.png" alt="\begin{matrix}
 {\text{F}_{\text{inc}}^{g}{\left( {q,t} \right) = {\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}}}}\text{F}_{I,\text{inc}}^{g}\left( {q,t} \right)} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}71} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where N<sub>species</sub> is the number of selected species, n<sub>I</sub>
-the number of atoms of species <em>I</em>, ω<sub>I,inc</sub> the weight for
+the number of atoms of species <em>I</em>, <img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/><sub>I,inc</sub> the weight for
 specie <em>I</em> (see Section ?? for more details) and</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/9de73f46f845c8539e6106a5b5596eae8bb69122.png" alt="\begin{matrix}
 {\text{F}_{I,\text{inc}}^{g}{\left( {q,t} \right) = \frac{1}{n_{I}}}\sum\limits_{\alpha}^{n_{I}}\exp\left\lbrack {{- q^{2}}\rho_{\alpha,1}{(t) + q^{4}}\rho_{\alpha,2}(t)\mp\ldots} \right\rbrack.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}72} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The cumulants</p>
 <div class="math">
-<p><span class="math">\rho_{\alpha,k}(t)</span></p>
+<p><img src="../_images/math/3410b185be827b57ebbacea2c744c16a41491473.png" alt="\rho_{\alpha,k}(t)"/></p>
 </div><p>are identified as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/818f3bb0952255206c130179cb31e28eb3828889.png" alt="\begin{matrix}
 {\rho_{\alpha,1}{(t) = \left\langle {d_{\alpha}^{2}\left( {t;n_{q}} \right)} \right\rangle}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}73} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/4ff086da4325c6b7af10a08790cec8f5ae218894.png" alt="\begin{matrix}
 {\rho_{\alpha,2}{(t) = \frac{1}{4!}}\left\lbrack {{\left\langle {d_{\alpha}^{4}\left( {t;n_{q}} \right)} \right\rangle - 3}\left\langle {d_{\alpha}^{2}\left( {t;n_{q}} \right)} \right\rangle^{2}} \right\rbrack} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}74} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\vdots</span></p>
+<p><img src="../_images/math/9e5b962fa83f81e127c9b523ec6ca223a2ae3a84.png" alt="\vdots"/></p>
 </div><p>The vector nq is the unit vector in the direction of q. In the Gaussian
 approximation the above expansion is truncated after the
 q<sup>2</sup>-term. For certain model systems like the ideal gas, the
@@ -2129,41 +2078,41 @@ function is completely determined by the <em>MSD</em>. <em>MDANSE</em> allows on
 compute the total and partial incoherent intermediate scattering
 function in the <em>Gaussian approximation</em> by discretizing equation</p>
 <div class="math">
-<p><span class="math">71</span></p>
+<p><img src="../_images/math/6991617fbc2c9de9cbc25f22da233225c157c372.png" alt="71"/></p>
 </div><p><a class="reference external" href="#anchor-144">Error: Reference source not found</a>:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/e1826087fce4e53aaabd7451a74be8eef7266f1d.png" alt="\begin{matrix}
 {\text{F}_{\text{inc}}^{g}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}\text{F}_{I,\text{inc}}^{g}\left( {q_{m},k\cdot\Delta t} \right)}},{k = 0}\ldots{N_{t} - 1},{m = 0}\ldots{N_{q} - 1.}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}75} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>with for each specie the following expression for the intermediate
 scattering function:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/24d5fccb12e291314cdb0f79b705bcc4f68fdb01.png" alt="\begin{matrix}
 {\text{F}_{I,\alpha,\text{inc}}^{g}{\left( {q_{m},k\cdot\Delta t} \right) = \frac{1}{n_{I}}}\sum\limits_{\alpha}^{n_{I}}\exp\left\lbrack {\frac{- \left( q_{m} \right)^{2}}{6}\Delta_{\alpha}^{2}\left( {k\cdot\Delta t} \right)} \right\rbrack\mathit{isotropic}\mathit{system}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}76} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/6d7efb348482fe96f3eeb9428e55b3d0a34d92cc.png" alt="\begin{matrix}
 {\text{F}_{I,\alpha,\text{inc}}^{g}{\left( {q_{m},k\cdot\Delta t} \right) = \frac{1}{n_{I}}}\sum\limits_{\alpha}^{n_{I}}\exp\left\lbrack {\frac{- \left( q_{m} \right)^{2}}{2}\Delta_{\alpha}^{2}\left( {k\cdot\Delta t;n} \right)} \right\rbrack\mathit{isotropic}\mathit{system}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}77} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>N<sub>t</sub> is the total number of time steps in the coordinate time
 series and N<sub>q</sub> is a user-defined number of <em>q</em>-shells. The (q,
 t)-grid is the same as for the calculation of the intermediate
 incoherent scattering function (see <a class="reference external" href="#_Dynamic_Incoherent_Structure">Dynamic Incoherent Structure
 Factor</a>). The quantities</p>
 <div class="math">
-<p><span class="math">\Delta_{\alpha}^{2}(t)</span></p>
+<p><img src="../_images/math/3e8bcfcfc6f55e5d824a9c137dc889288241ecd0.png" alt="\Delta_{\alpha}^{2}(t)"/></p>
 </div><p>and</p>
 <div class="math">
-<p><span class="math">\Delta_{\alpha}^{2}\left( {t;n} \right)</span></p>
+<p><img src="../_images/math/87b31202bde41b22f2d9c5f9d3365817ffe007f2.png" alt="\Delta_{\alpha}^{2}\left( {t;n} \right)"/></p>
 </div><p>are the mean-square displacements, defined in Equations</p>
 <div class="math">
-<p><span class="math">5</span></p>
+<p><img src="../_images/math/a3ad32e702d555860fd7216da6c90bd3a1ff4a62.png" alt="5"/></p>
 </div><p><a class="reference external" href="#anchor-145">Error: Reference source not found</a> and</p>
 <div class="math">
-<p><span class="math">6</span></p>
+<p><img src="../_images/math/432a0eb577df493f1ac5f491606aac7c3a0f1549.png" alt="6"/></p>
 </div><p><a class="reference external" href="#anchor-146">Error: Reference source not found</a>, respectively.
 They are computed by using the algorithm described in the <a class="reference external" href="#_Theory_and_implementation_2">Mean Square
 Displacement</a> section. <em>MDANSE</em>
@@ -2311,10 +2260,10 @@ group of atoms. So, if only one group made of only atom is selected for
 the analysis, then, the definition is the same as the original
 definition. In that context, the <em>CN</em> is defined as:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/865b4fe61d0d3052f89e659adff695d4c469f511.png" alt="\begin{matrix}
 {n{\left( {r,{r + \mathit{dr}}} \right) = \frac{1}{N_{G}}}{\sum\limits_{g = 1}^{N_{G}}{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{\mathit{gI}}\left( {r,{r + \mathit{dr}}} \right)}}}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}78} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where NG is the number of groups of atoms, N<sub>species</sub> is the
 number of species found in the system and n<sub>gI</sub>(r) is the <em>CN</em>
 defined for specie <em>I</em> defined as the number of atoms of species <em>I</em>
@@ -2323,25 +2272,25 @@ gravity of the group of atom <em>g</em>.</p>
 <p><em>MDANSE</em> allows one to compute the <em>CN</em> on a set of equidistantly spaced
 distances at different times</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/00e04ca5b2d8bd0d653c8b9378027340e24a9433.png" alt="\begin{matrix}
 {\mathit{CN}\left( r_{m} \right)\doteq\frac{1}{N_{\mathit{frames}}}\frac{1}{N_{G}}{\sum\limits_{f = 1}^{N_{\mathit{frames}}}{\sum\limits_{g = 1}^{N_{G}}{\sum\limits_{I = 1}^{N_{\mathit{species}}}{CN_{\mathit{gI}}\left( {r_{m},t_{f}} \right)}}}},{m = 0}\ldots{N_{r} - 1},{n = 0}\ldots{N_{\mathit{frames}} - 1.}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}79} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where N<sub>r</sub> and N<sub>frames</sub> are respectively the number of
 distances and times at which the <em>CN</em> is evaluated and</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/fd2a68f905898896f1f274dfe5024aa7cee52dd1.png" alt="\begin{matrix}
 {CN_{\mathit{gI}}{\left( {r_{m},t_{f}} \right) = n_{\mathit{gI}}}\left( {r_{m},t_{f}} \right),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}80} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>is the number of atoms of specie <em>I</em> found within [rm, rm + dr] at frame
 <em>f</em> from the centre of gravity of group <em>g</em>.</p>
 <p>From these expressions, several remarks can be done. Firstly, the Eqs.</p>
 <div class="math">
-<p><span class="math">79</span></p>
+<p><img src="../_images/math/9da9d201aa707aba940fb3d5012009d18e7d5f8f.png" alt="79"/></p>
 </div><p><a class="reference external" href="#anchor-158">Error: Reference source not found</a> and</p>
 <div class="math">
-<p><span class="math">80</span></p>
+<p><img src="../_images/math/51c6dbe752e2bb2f70d4fc22e28b81316f2d2b8f.png" alt="80"/></p>
 </div><p><a class="reference external" href="#anchor-159">Error: Reference source not found</a> can be restricted
 to intramolecular and intermolecular distances only. Secondly, these
 equations can be averaged over the selected frames providing a time
@@ -2482,46 +2431,46 @@ function to calculate the internal energy of the system, usually quite
 accurately.</p>
 <p>Mathematically, the <em>PDF</em> can be computed using the following formula:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/44e01aa1d95a3f3fb60864ffa1f33a705f9dfbd7.png" alt="\begin{matrix}
 {\mathit{PDF}{(r) = {\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}n_{I}}}n_{J}\omega_{I}\omega_{J}g_{\mathit{IJ}}(r)} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}81} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where N<sub>species</sub> is the number of selected species, n<sub>I</sub>
 and n<sub>J</sub> are respectively the numbers of atoms of species <em>I</em> and
-<em>J</em>, ω<sub>I</sub> and ω<sub>J</sub> respectively the weights for species
+<em>J</em>, <img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/><sub>I</sub> and <img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/><sub>J</sub> respectively the weights for species
 <em>I</em> and <em>J</em> (see Section ?? for more details) and</p>
 <div class="math">
-<p><span class="math">\mathit{PD}F_{\mathit{\alpha\beta}}(r)</span></p>
+<p><img src="../_images/math/37f2ac800fdf12a0c750ef9aa72cca256a99c553.png" alt="\mathit{PD}F_{\mathit{\alpha\beta}}(r)"/></p>
 </div><p>is the partial <em>PDF</em> for I and J species that can be defined as:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/e1674ea68d6b2fac3945fa01f0697d728cc3ecca.png" alt="\begin{matrix}
 {\mathit{PD}F_{\mathit{IJ}}{(r) = \frac{\left\langle {\sum\limits_{\alpha = 1}^{n_{I}}{n_{\alpha J}(r)}} \right\rangle}{n_{I}\rho_{J}4\pi r^{2}\mathit{dr}}}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}82} \right) \\
-\end{matrix}</span></p>
-</div><p>where ρ<sub>J</sub> is the density of atom of specie <em>J</em> and</p>
+\end{matrix}"/></p>
+</div><p>where <img class="math" src="../_images/math/27dc86f9f1b1c3435b2403a869b5870c582facea.png" alt="\rho"/><sub>J</sub> is the density of atom of specie <em>J</em> and</p>
 <div class="math">
-<p><span class="math">n_{\alpha J}(r)</span></p>
+<p><img src="../_images/math/b2da69b12d95e0e736639bc53a1c0c0051a7546e.png" alt="n_{\alpha J}(r)"/></p>
 </div><p>is the mean number of atoms of specie <em>J</em> in a shell of width <em>dr</em> at
-distance <em>r</em> of the atom α of specie <em>I</em>.</p>
+distance <em>r</em> of the atom <img class="math" src="../_images/math/2f5aa019312e1bbc969deab8dca8b00f76025404.png" alt="\alpha"/> of specie <em>I</em>.</p>
 <p>From the computation of PDF, two related quantities are also calculated;
 the Radial Distribution Function (RDF), defined as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/9b1b8e8666e703e10eac58c4ba773e1fd7a69d26.png" alt="\begin{matrix}
 {\mathit{RDF}{(r) = 4}\pi r^{2}\rho_{0}\mathit{PDF}(r),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}83} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>and the Total Correlation Function (TCF), defined as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/79db24b555d9d320b919e767cd1c336195362017.png" alt="\begin{matrix}
 {\mathit{TCF}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}{(r) - 1}} \right),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}83} \right) \\
-\end{matrix}</span></p>
-</div><p>where ρ<sub>0</sub> is the average atomic density, which is defined as</p>
+\end{matrix}"/></p>
+</div><p>where <img class="math" src="../_images/math/27dc86f9f1b1c3435b2403a869b5870c582facea.png" alt="\rho"/><sub>0</sub> is the average atomic density, which is defined as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/788ac07f4a9a4d3a059e28971eb14996e7ee04bd.png" alt="\begin{matrix}
 {{\rho_{0} = \frac{N}{V}},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}83} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where N is the total number of atoms in the system and V the volume of
 the simulation.</p>
 <p>All these quantities are initially calculated as intramolecular and
@@ -2532,20 +2481,20 @@ functions are computed. Please note, however, that in the case of TCF,
 the below set of equations has been chosen, which will return results
 that differ from those of nMOLDYN.</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/9d7b682f2b52a13683145356fbd170bd1cecd287.png" alt="\begin{matrix}
 {\mathit{TCF}_{\mathit{intramolecular}}{(r) = 4}\pi r\rho_{0}\mathit{PDF}_{\mathit{intramolecular}}(r),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}83} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/6ac9f60de0763a348f196f78f2f27b059f286720.png" alt="\begin{matrix}
 {\mathit{TCF}_{\mathit{intermolecular}}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}_{\mathit{intermolecular}}{(r) - 1}} \right),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}83} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/76b4a1201c4e43b7bfa8d8315df9938cf45b663e.png" alt="\begin{matrix}
 {\mathit{TCF}_{\mathit{total}}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}_{\mathit{total}}{(r) - 1}} \right),} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}83} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p id="gui-11">GUI</p>
 <ul class="simple">
 <li><p>available for trajectories only</p></li>
@@ -2601,12 +2550,12 @@ default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.</p>
 estimator of structural similarity. It is a numerical measure of the
 difference between two structures that can be defined as:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/12ffe58fd737b0ce50bbf362ffd8382f2fbbac69.png" alt="\begin{matrix}
 {\mathit{RMSD}{(t) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\alpha}}\left( t_{\mathit{ref}} \right)} \right)}{N_{\alpha}}}}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}85} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where N_ is the number of atoms of the system, and r_(t) and r_(tref )
-are respectively the position of atom α at time t and tref where tref is
+are respectively the position of atom <img class="math" src="../_images/math/2f5aa019312e1bbc969deab8dca8b00f76025404.png" alt="\alpha"/> at time t and tref where tref is
 a reference time usually chosen as the first step of the simulation.
 Typically, <em>RMSD</em> is used to quantify the structural evolution of the
 system during the simulation. It can provide precious information about
@@ -2615,16 +2564,16 @@ structural changes occurred during the simulation.</p>
 <p>In Molecular Dynamics Analysis for Neutron Scattering Experiments
 (<em>MDANSE</em>), <em>RMSD</em> is computed using the discretized version of equation</p>
 <div class="math">
-<p><span class="math">83</span></p>
+<p><img src="../_images/math/c049be68fad5aa9a5f131726ab16456812bcea0e.png" alt="83"/></p>
 </div><p><a class="reference external" href="#anchor-174">Error: Reference source not found</a>:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/7f1e6d282dd8665c2840f482689f130e8e0cb85d.png" alt="\begin{matrix}
 {\mathit{RMSD}{\left( {n\cdot\Delta t} \right) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\mathit{ref}}}(t)} \right)}{N_{\alpha}}}},{n = 0}\ldots{N_{t} - 1}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}86} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where Nt is the number of frames and</p>
 <div class="math">
-<p><span class="math">\mathrm{\Delta}t</span></p>
+<p><img src="../_images/math/ec69b2d65802357ebc57f516fabd05891742be09.png" alt="\mathrm{\Delta}t"/></p>
 </div><p>is the time step.</p>
 <p id="gui-12">GUI</p>
 <ul class="simple">
@@ -2673,28 +2622,28 @@ reference that can be either the centre of gravity of the system either
 a given axis. In <em>MDANSE</em>, the reference is chosen to be the centre of
 gravity of the system under study. Mathematically, it can be defined as:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/4b760983ef8f702fbe4967beec19a77d4acbfc54.png" alt="\begin{matrix}
 {\mathit{ROG}{(t) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\mathit{cms}}}(t)} \right)}{N_{\alpha}}}}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}87} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where</p>
 <div class="math">
-<p><span class="math">N_{\alpha}</span></p>
-</div><p>is the number of atoms of the system, and r<sub>α</sub>(t) and
-r<sub>cms</sub>(t) are respectively the position of atom α and the
+<p><img src="../_images/math/6bf0affade7e90918280a182545cc06c3b1f5f08.png" alt="N_{\alpha}"/></p>
+</div><p>is the number of atoms of the system, and r<sub>:math:</sub>alpha``(t) and
+r<sub>cms</sub>(t) are respectively the position of atom <img class="math" src="../_images/math/2f5aa019312e1bbc969deab8dca8b00f76025404.png" alt="\alpha"/> and the
 centre of mass of the system at time t.</p>
 <p><em>ROG</em> describes the overall spread of the molecule and as such is a good
 measure for the molecule compactness. For example, it can be useful when
 monitoring folding process.</p>
 <p>In <em>MDANSE</em>, <em>ROG</em> is computed using the discretized version of equation</p>
 <div class="math">
-<p><span class="math">85</span></p>
+<p><img src="../_images/math/be130604fa8e48b91d548fa4fd56e7b837dcde77.png" alt="85"/></p>
 </div><p><a class="reference external" href="#anchor-181">Error: Reference source not found</a>:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/1abfad44e1d50662755c37c62c3124f7bd95a093.png" alt="\begin{matrix}
 {\mathit{ROG}{\left( {n\cdot\Delta t} \right) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\mathit{cms}}}(t)} \right)}{N_{\alpha}}}},{n = 0}\ldots{N_{t} - 1.}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}88} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where N<sub>t</sub> is the number of frames and Δt is the time step.</p>
 <p id="gui-13">GUI</p>
 <ul class="simple">
@@ -2760,21 +2709,21 @@ complex system.</p>
 set of concentric shells surrounding the centres of mass of selected
 triplets of atoms using the formula:</p>
 <div class="math">
-<p><span class="math">\mathit{SD}\left( {r_{l},\theta_{m},\phi_{n}} \right)\doteq\frac{1}{N_{\mathit{triplets}N_{\mathit{groups}}}}{\sum\limits_{t = 1}^{N_{\mathit{triplets}}}{\sum\limits_{g = 1}^{N_{\mathit{groups}}}\left\langle {n_{\mathit{tg}}\left( {r_{l},\theta_{m},\phi_{n}} \right)} \right\rangle}},</span></p>
+<p><img src="../_images/math/16bc5e682e796aee19bc7ea4921624d27a62cd3e.png" alt="\mathit{SD}\left( {r_{l},\theta_{m},\phi_{n}} \right)\doteq\frac{1}{N_{\mathit{triplets}N_{\mathit{groups}}}}{\sum\limits_{t = 1}^{N_{\mathit{triplets}}}{\sum\limits_{g = 1}^{N_{\mathit{groups}}}\left\langle {n_{\mathit{tg}}\left( {r_{l},\theta_{m},\phi_{n}} \right)} \right\rangle}},"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/bec4ff1cac7c6a0bca1cfee004629658b0ede2af.png" alt="\begin{matrix}
 {{l = 0}\ldots{N_{r} - 1},{m = 0}\ldots{N_{\theta} - 1},{n = 0}\ldots{N_{\phi} - 1.}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}89} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where N<sub>triplets</sub> and N<sub>groups</sub> are respectively the
 number of triplets and groups, r<sub>l</sub>, θ<sub>m</sub> and φ<sub>n</sub>
 are the spherical coordinates at which the <em>SD</em> is evaluated,
 N<sub>r</sub>,</p>
 <div class="math">
-<p><span class="math">N_{\theta}</span></p>
+<p><img src="../_images/math/19af013fa4434f8092f948d22103161a2cad9ae8.png" alt="N_{\theta}"/></p>
 </div><p>and</p>
 <div class="math">
-<p><span class="math">N_{\phi}</span></p>
+<p><img src="../_images/math/3b58877e7e6e6ae940e0446eae6af0050c0e9683.png" alt="N_{\phi}"/></p>
 </div><p>are respectively the number of discrete <em>r</em>, θ and φ values and
 n<sub>tg</sub>(r<sub>l</sub>, θ<sub>m</sub>, φ<sub>n</sub>) is the number of
 group of atoms of type <em>g</em> whose centres of mass is found to be in the
@@ -2785,22 +2734,22 @@ following way:</p>
 <ul>
 <li><p>defines the centre of mass</p>
 <div class="math">
-<p><span class="math">c_{i}^{t}{i = 1},2\ldots N_{\mathit{triplets}}</span></p>
+<p><img src="../_images/math/7c6118d7922702f57f30604713f89e72e9e00aff.png" alt="c_{i}^{t}{i = 1},2\ldots N_{\mathit{triplets}}"/></p>
 </div><p>for each triplet of atoms,</p>
 </li>
 <li><p>defines the centre of mass</p>
 <div class="math">
-<p><span class="math">c_{i}^{g}{i = 1},2\ldots N_{\mathit{groups}}</span></p>
+<p><img src="../_images/math/60b9a84ffaa357f1187ca7c52eeee8892fe87556.png" alt="c_{i}^{g}{i = 1},2\ldots N_{\mathit{groups}}"/></p>
 </div><p>for each group of atoms,</p>
 </li>
 <li><p>constructs an oriented orthonormal basis</p>
 <div class="math">
-<p><span class="math">R_{i}^{t}{i = 1},2\ldots N_{\mathit{triplets}}</span></p>
+<p><img src="../_images/math/f8842d4ba49ddf8c6cef1f083528130c8c56e1e9.png" alt="R_{i}^{t}{i = 1},2\ldots N_{\mathit{triplets}}"/></p>
 </div><p>cantered on each c<sup>t</sup>, this basis is defined from the three
 vectors <strong>v1</strong>, <strong>v2</strong>, <strong>v3</strong>,</p>
 <ul>
 <li><div class="math">
-<p><span class="math">v_{1} = \frac{n_{1} + n_{2}}{\left| \left| {n_{1} + n_{2}} \right| \right|}</span></p>
+<p><img src="../_images/math/835be192d148b2fc664bf579224b43cf33d739ed.png" alt="v_{1} = \frac{n_{1} + n_{2}}{\left| \left| {n_{1} + n_{2}} \right| \right|}"/></p>
 </div><p>where <strong>n1</strong> and <strong>n2</strong> are respectively the normalized vectors
 in (<strong>a1</strong>,<strong>a2</strong>) and (<strong>a1</strong>,<strong>a3</strong>) directions where
 (<strong>a1</strong>,<strong>a2</strong>,<strong>a3</strong>) are the three atoms of the triplet <em>t</em>,</p>
@@ -2809,7 +2758,7 @@ in (<strong>a1</strong>,<strong>a2</strong>) and (<strong>a1</strong>,<strong>a3
 to v1 that belongs to the plane defined by <strong>a1</strong>, <strong>a2</strong> and
 <strong>a3</strong> atoms,</p></li>
 <li><div class="math">
-<p><span class="math">{\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}</span></p>
+<p><img src="../_images/math/495f03f47239aa5565b6dd7ecc8cfe4c713d8072.png" alt="{\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}"/></p>
 </div></li>
 </ul>
 </li>
@@ -2820,7 +2769,7 @@ R<sup>t</sup>,</p></li>
 φ<sub>n</sub>,</p></li>
 <li><p>does</p>
 <div class="math">
-<p><span class="math">n_{\mathit{tg}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) = n_{\mathit{tg}}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) + 1}</span></p>
+<p><img src="../_images/math/ff638837ce9c929f95a7662cf65cd0c0a3cb632b.png" alt="n_{\mathit{tg}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) = n_{\mathit{tg}}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) + 1}"/></p>
 </div></li>
 </ul>
 <p id="gui-14">GUI</p>
@@ -3224,74 +3173,74 @@ a least-squares sense.</p>
 <p><strong>Optimal superposition.</strong> We consider a given time frame in which the
 atomic positions of a (sub)molecule are given by</p>
 <div class="math">
-<p><span class="math">x_{\alpha},{\alpha = 1}\ldots N</span></p>
+<p><img src="../_images/math/bee10dfcf59c65080b215ab8d47685ab9b249cd5.png" alt="x_{\alpha},{\alpha = 1}\ldots N"/></p>
 </div><p>. The corresponding positions in the reference structure are denoted as</p>
 <div class="math">
-<p><span class="math">x_{\alpha}^{(0)},{\alpha = 1}\ldots N</span></p>
+<p><img src="../_images/math/81d0e35c95df531c07bd57832ae15000a33b00ae.png" alt="x_{\alpha}^{(0)},{\alpha = 1}\ldots N"/></p>
 </div><p>. For both the given structure and the reference structure we introduce
 the yet undetermined centroids X and X<sup>(0)</sup>, respectively, and
 define the deviation</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/27b3be207609eee3427ea43551be7c5f830aac84.png" alt="\begin{matrix}
 {\Delta_{\alpha}\doteq D(q){\left\lbrack {x_{\alpha}^{(0)} - X^{(0)}} \right\rbrack - \left\lbrack {x_{\alpha} - X} \right\rbrack}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}90} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>Here <strong>D(q)</strong> is a rotation matrix which depends on also yet
 undetermined angular coordinates which we chose to be <em>quaternion
 parameters</em>, abbreviated as vector <strong>q</strong> = (q<sub>0</sub>, q<sub>1</sub>,
 q<sub>2</sub>, q<sub>3</sub>). The quaternion parameters fulfil the
 normalization condition</p>
 <div class="math">
-<p><span class="math">q・{q = 1}</span></p>
+<p><img src="../_images/math/6ad74e3ac10f81ba2170b01e16c612b9ff6be463.png" alt="q \dot {q = 1}"/></p>
 </div><p>[<a class="reference external" href="#SignetBibliographie_025">25</a>]. The target function to be
 minimized is now defined as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/0311ddebc88ba907feadc2e73270bc0fd1103544.png" alt="\begin{matrix}
 {m{\left( {q;X,X^{(0)}} \right) = {\sum\limits_{\alpha}{\omega_{\alpha}|\Delta|_{\alpha}^{2}}}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}91} \right) \\
-\end{matrix}</span></p>
-</div><p>where ω<sub>α</sub> are atomic weights (see Section ??). The minimization
+\end{matrix}"/></p>
+</div><p>where <img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/><sub>:math:</sub>alpha`` are atomic weights (see Section ??). The minimization
 with respect to the centroids is decoupled from the minimization with
 respect to the quaternion parameters and yields</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/30bb8e4326bf40fc42774ff27b70604d7ef93e09.png" alt="\begin{matrix}
 {{X = {\sum\limits_{\alpha}\omega_{\alpha}}}x_{\alpha},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}92} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/3ffcf80bf5232b0ce45a65eeb5493a0f3180e75e.png" alt="\begin{matrix}
 {{X^{(0)} = {\sum\limits_{\alpha}\omega_{\alpha}}}x_{\alpha}^{(0)}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}93} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>We are now left with a minimization problem for the rotational part
 which can be written as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/a76ab6d4f8f8362dd06977a95272200e70eec5c0.png" alt="\begin{matrix}
 {m{(q) = {\sum\limits_{\alpha}{\omega_{\alpha}\left\lbrack {{D(q)r}_{\alpha}^{(0)} - r_{\alpha}} \right\rbrack^{2}}}\overset{!}{=}\mathit{Min}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}94} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The relative position vectors</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/bc5c1a5fb021a2907a952e3e1264a874671a94fa.png" alt="\begin{matrix}
 {{r_{\alpha} = {x_{\alpha} - X}},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}95} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/76332579184812f5b0a6fb0eaa11b0067620f781.png" alt="\begin{matrix}
 {r_{\alpha}^{(0)} = {x_{\alpha}^{(0)} - X^{(0)}}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}96} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>are fixed and the rotation matrix reads
 [<a class="reference external" href="#SignetBibliographie_025">25</a>]</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/e931b4b3b4a8455f3a07a0bc82f28c73e0813f34.png" alt="\begin{matrix}
 {D{(q) = \begin{pmatrix}
 {q_{0}^{2} + q_{1}^{2} - q_{2}^{2} - q_{3}^{2}} &amp; {2\left( {{- q_{0}}{q_{3} + q_{1}}q_{2}} \right)} &amp; {2\left( {q_{0}{q_{2} + q_{1}}q_{3}} \right)} \\
 {2\left( {q_{0}{q_{3} + q_{1}}q_{2}} \right)} &amp; {q_{0}^{2} + q_{2}^{2} - q_{1}^{2} - q_{3}^{2}} &amp; {2\left( {{- q_{0}}{q_{1} + q_{2}}q_{3}} \right)} \\
 {2\left( {{- q_{0}}{q_{2} + q_{1}}q_{3}} \right)} &amp; {2\left( {q_{0}{q_{1} + q_{2}}q_{3}} \right)} &amp; {q_{0}^{2} + q_{3}^{2} - q_{1}^{2} - q_{2}^{2}} \\
 \end{pmatrix}}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}97} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p><strong>Quaternions and rotations.</strong> The rotational minimization problem can
 be elegantly solved by using quaternion algebra. Quaternions are
 so-called hypercomplex numbers, having a real unit, 1, and three
@@ -3299,13 +3248,13 @@ imaginary units, <strong>I</strong>, <strong>J</strong>, and <strong>K</strong>.
 quaternion multiplication is not commutative. A possible matrix
 representation of an arbitrary quaternion,</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/34e27ffcdf8ebe88a81d081c854294f5d174290d.png" alt="\begin{matrix}
 {{A = a_{0}}\cdot{1 + a_{1}}\cdot{I + a_{2}}\cdot{J + a_{3}}\cdot K,} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}98} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>reads</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/64acd01c9d7ac60ab13fb73b7d01ae56a1ce4799.png" alt="\begin{matrix}
 {A = \begin{pmatrix}
 a_{0} &amp; {- a_{1}} &amp; {- a_{2}} &amp; {- a_{3}} \\
 a_{1} &amp; a_{0} &amp; {- a_{3}} &amp; a_{2} \\
@@ -3313,116 +3262,116 @@ a_{2} &amp; a_{3} &amp; a_{0} &amp; {- a_{1}} \\
 a_{3} &amp; {- a_{2}} &amp; a_{1} &amp; a_{0} \\
 \end{pmatrix}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}99} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The components</p>
 <div class="math">
-<p><span class="math">a_{\upsilon}</span></p>
+<p><img src="../_images/math/1e03ec8981cba5c622517119c6c3e4faec9bc9b3.png" alt="a_{\upsilon}"/></p>
 </div><p>are real numbers. Similarly, as normal complex numbers allow one to
 represent rotations in a plane, quaternions allow one to represent
 rotations in space. Consider the quaternion representation of a vector
 r, which is given by</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/6e8bc8249a9148085998a16b00f90965d78a0634.png" alt="\begin{matrix}
 {{R = x}\cdot{I + y}\cdot{J + z}\cdot K,} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}100} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>and perform the operation</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/0d0900c84eca2314ec503d63c3f85e6620a0c638.png" alt="\begin{matrix}
 {{R^{'} = \mathit{QRQ}^{T}},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}101} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>where Q is a normalised quaternion</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/1058072e2b0065b40195e13ae7b03d58b7314fda.png" alt="\begin{matrix}
 {\text{|}Q\text{|}^{2}\doteq{{q_{0}^{2} + q_{1}^{2} + q_{2}^{2} + q_{3}^{2}} = \frac{1}{4}}\mathit{tr}\text{\textbackslash\{}Q^{T}Q{\text{\textbackslash\}} = 1.}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}102} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The symbol <em>tr</em> stands for ‘trace’. We note that a normalized quaternion
-is represented by an <em>orthogonal</em> 4 × 4 matrix. <strong>R′</strong> may then be
+is represented by an <em>orthogonal</em> 4 x 4 matrix. <strong>R’</strong> may then be
 written as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/aa64d9b7b60c3fd13c0b945b89ea535297b2d2f3.png" alt="\begin{matrix}
 {{R^{'} = x^{'}}\cdot{I + y^{'}}\cdot{J + z^{'}}\cdot K,} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}103} \right) \\
-\end{matrix}</span></p>
-</div><p>where the components x′, y′, z′, abbreviated as r′, are given by</p>
+\end{matrix}"/></p>
+</div><p>where the components x’, y’, z’, abbreviated as r’, are given by</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/3a378a2a165c3689f6366e03c6bcbec110244afb.png" alt="\begin{matrix}
 {{r^{'} = D}(q)r.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}104} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The matrix <strong>D</strong>(<strong>q</strong>) is the rotation matrix defined in</p>
 <div class="math">
-<p><span class="math">95</span></p>
+<p><img src="../_images/math/1708a9036139891f938a947098c2f6f915eb799c.png" alt="95"/></p>
 </div><p><a class="reference external" href="#anchor-221">Error: Reference source not found</a>.</p>
 <p><strong>Solution of the minimization problem</strong>. In quaternion algebra, the
 rotational minimization problem may now be phrased as follows:</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/edc0f89629f8217b92dfb214213369a74486e824.png" alt="\begin{matrix}
 {m{(q) = {{\sum\limits_{\alpha}{{\omega_{\alpha}\text{|}\mathit{QR}}_{\alpha}^{(0)}Q}^{T}} - R_{\alpha}}}{\text{|}^{2}\overset{!}{=}\mathit{Min}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}105} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>Since the matrix Q representing a normalized quaternion is orthogonal
 this may also be written as</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/28780cdf06fd93064277be704320af60f3fb760c.png" alt="\begin{matrix}
 {{{m{(q) = {\sum\limits_{\alpha}\omega_{\alpha}}}\text{|}\mathit{QR}}_{\alpha}^{(0)} - R_{\alpha}}Q\text{|}^{2}{.\overset{!}{=}\mathit{Min}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}106} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>This follows from the simple fact that</p>
 <div class="math">
-<p><span class="math">\text{|}A{\text{|} = \text{|}}\mathit{AQ}\text{|}</span></p>
+<p><img src="../_images/math/33090077e778bc5983fc1d9cac7f82cc287105ad.png" alt="\text{|}A{\text{|} = \text{|}}\mathit{AQ}\text{|}"/></p>
 </div><p>, if Q is normalized. Eq.</p>
 <div class="math">
-<p><span class="math">104</span></p>
+<p><img src="../_images/math/a5cb1a7129bedbf5d09e24b33c74d1df5f7afb8d.png" alt="104"/></p>
 </div><p><a class="reference external" href="#anchor-222">Error: Reference source not found</a> shows that the
 target function to be minimized can be written as a simple quadratic
 form in the quaternion parameters [<a class="reference external" href="#SignetBibliographie_024">24</a>],</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/c3729c6f4631ece60415d44f4541429dcd57e010.png" alt="\begin{matrix}
 {m{(q) = q}\cdot\mathit{Mq},} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}107} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/f28bf002e0f6fb73accce78eb6c57570986a9e85.png" alt="\begin{matrix}
 {{M = {\sum\limits_{\alpha}{\omega_{\alpha}M_{\alpha}}}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}108} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>The matrices M_ are positive semi-definite matrices depending on the
 positions</p>
 <div class="math">
-<p><span class="math">r_{\alpha}</span></p>
+<p><img src="../_images/math/2e512ec873a5f2164cbf6e0dfcd0bca49c6c6429.png" alt="r_{\alpha}"/></p>
 </div><p>and</p>
 <div class="math">
-<p><span class="math">r_{\alpha}^{(0)}</span></p>
+<p><img src="../_images/math/d9d24bec30a859b53c977bd48a08d1ab1cee447d.png" alt="r_{\alpha}^{(0)}"/></p>
 </div><p>:</p>
 <p><a class="reference internal" href="../_images/1000000000000226000000D8F0CF60C6C4938937.png"><img alt="image32" src="../_images/1000000000000226000000D8F0CF60C6C4938937.png" style="width: 13.123cm; height: 5.154cm;" /></a></p>
 <div class="math">
-<p><span class="math">({\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}109})</span></p>
+<p><img src="../_images/math/d40497a74779ed0a13dadf009e26d061aa00086f.png" alt="({\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}109})"/></p>
 </div><p>The rotational fit is now reduced to the problem of finding the minimum
 of a quadratic form with the constraint that the quaternion to be
 determined must be normalized. Using the method of Lagrange multipliers
 to account for the normalization constraint we have</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/80fc0eae81256bc9e1fc65606720b525e927cf6b.png" alt="\begin{matrix}
 {m^{'}{\left( {q,\lambda} \right) = q}\cdot{\mathit{Mq} - \lambda}{\left( {q\cdot{q - 1}} \right)\overset{!}{=}\mathit{Min}}.} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}110} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>This leads immediately to the eigenvalue problem</p>
 <div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/5cefa0af8eb605d0bcf70cf435c22de2cf31c487.png" alt="\begin{matrix}
 {{\mathit{Mq} = \lambda}q,} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}111} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><div class="math">
-<p><span class="math">\begin{matrix}
+<p><img src="../_images/math/359c5f3c80618597dde288d0a23a26646e9343d9.png" alt="\begin{matrix}
 {q\cdot{q = 1.}} \\
 \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}112} \right) \\
-\end{matrix}</span></p>
+\end{matrix}"/></p>
 </div><p>Now any normalized eigenvector <strong>q</strong> fulfils the relation</p>
 <div class="math">
-<p><span class="math">{\lambda = q}\cdot\mathit{Mq}\equiv m(q)</span></p>
+<p><img src="../_images/math/a087d381a562f94b3e91c020bb36187c1b898c60.png" alt="{\lambda = q}\cdot\mathit{Mq}\equiv m(q)"/></p>
 </div><p>. Therefore, the eigenvector belonging to the smallest eigenvalue,
 λ<sub>min</sub>, is the desired solution. At the same time λ<sub>min</sub>
 gives the average error per atom. The result of <em>RBT</em> analysis is stored
@@ -3530,7 +3479,7 @@ performed.</p>
 <p><em>Default:</em> None</p>
 <p><em>Description:</em> &lt;insert&gt;</p>
 <ul class="simple">
-<li><p>mcstas parameters – these options become visible once a McStas
+<li><p>mcstas parameters - these options become visible once a McStas
 instrument has been chosen.</p></li>
 <li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
 <li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
@@ -3724,7 +3673,7 @@ to be run.</p>
 <section id="plotter">
 <h3><span class="section-number">7.9.4. </span>Plotter<a class="headerlink" href="#plotter" title="Permalink to this heading"></a></h3>
 <section id="d3d-plotter-1">
-<span id="id3"></span><h4><span class="section-number">7.9.4.1. </span>2D/3D Plotter<a class="headerlink" href="#d3d-plotter-1" title="Permalink to this heading"></a></h4>
+<span id="id1"></span><h4><span class="section-number">7.9.4.1. </span>2D/3D Plotter<a class="headerlink" href="#d3d-plotter-1" title="Permalink to this heading"></a></h4>
 <ul class="simple">
 <li><p>available for analysis results only</p></li>
 </ul>
