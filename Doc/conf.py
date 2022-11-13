@@ -119,3 +119,6 @@ latex_documents = [
     (master_doc, 'theory_help.tex', 'Theory background of MDANSE',
      'MDANSE developers', 'manual'),
 ]
+
+def setup(app):
+    app.add_css_file('custom.css')

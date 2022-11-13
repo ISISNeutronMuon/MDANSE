@@ -702,7 +702,10 @@ following scheme:
 
 -  
 
-   .. math:: v_{1} = \frac{n_{1} + n_{2}}{\left| \left| {n_{1} + n_{2}} \right| \right|}
+   .. math::
+     :label: pfx1
+   
+     v_{1} = \frac{n_{1} + n_{2}}{\left| \left| {n_{1} + n_{2}} \right| \right|}
 
    \ where **n**\ :sub:`1` and **n**\ :sub:`2` are respectively the
    normalized vectors along (**a1,a2**) and (**a1,a3**) directions.
@@ -710,12 +713,16 @@ following scheme:
    belongs to the plane defined by a1, a2 and a3 atoms
 -  
 
-   .. math:: {\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}
+   .. math::
+     :label: pfx2
+     
+     {\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}
 
 Thus, one can define the following autocorrelation functions for the
 vectors v1, v2 and v3 defined on triplet t :
 
 .. math::
+   :label: pfx3
 
    \begin{matrix}
    {AC_{g,i}{(t) = \left\langle {v_{t,i}(0)\cdot v_{t,i}(t)} \right\rangle},{i = 1,2,3}} \\
@@ -725,6 +732,7 @@ vectors v1, v2 and v3 defined on triplet t :
 And the angular correlation averaged over all triplets is:
 
 .. math::
+   :label: pfx4
 
    \begin{matrix}
    {AC_{i}{(t) = {\sum\limits_{g = 1}^{N_{\mathit{triplets}}}{AC_{g,i}(t)}}},{i = 1,2,3}} \\
@@ -761,6 +769,7 @@ the mass-weighted *VACF* defines the phonon discrete *DOS*, (see the
 section on `VACF <#_Theory_and_implementation_1>`__) defined as:
 
 .. math::
+   :label: pfx5
 
    \begin{matrix}
    {\mathit{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)\doteq{\sum\limits_{\alpha}\omega_{\alpha}}{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}\left( {n\cdot\mathit{\Delta\nu}} \right),{n = 0}\ldots{N_{t} - 1.}} \\
@@ -769,32 +778,50 @@ section on `VACF <#_Theory_and_implementation_1>`__) defined as:
 
 N\ :sub:`t` is the total number of time steps and
 
-.. math:: {\mathit{\Delta\nu} = 1}\text{/}\left( {2N_{t}\Delta t} \right)
+.. math::
+   :label: pfx6
+   
+   {\mathit{\Delta\nu} = 1}\text{/}\left( {2N_{t}\Delta t} \right)
 
 \ is the frequency step.
 
-.. math:: \mathit{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)
+.. math::
+   :label: pfx7
+   
+   \mathit{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)
 
 can be computed either for the isotropic case or with respect to a
 user-defined axis. The spectrum
 
-.. math:: \mathit{DOS}\left( {n\cdot\Delta\nu} \right)
+.. math::
+   :label: pfx8
+   
+   \mathit{DOS}\left( {n\cdot\Delta\nu} \right)
 
 is computed from the *unnormalized VACF*, such that *DOS(0)* gives an
 approximate value for the diffusion constant
 
-.. math:: D = {\sum\limits_{\alpha}D_{\alpha}}
+.. math::
+   :label: pfx9
+   
+   D = {\sum\limits_{\alpha}D_{\alpha}}
 
 (see Eqs. :math:`10` and :math:`11`).
 
-.. math:: \mathit{DOS}\left( {n\cdot\Delta\nu} \right)
+.. math::
+   :label: pfx10
+   
+   \mathit{DOS}\left( {n\cdot\Delta\nu} \right)
 
 is smoothed by applying a Gaussian window in the time domain
 [`10 <#SignetBibliographie_010>`__] (see the section on `Spatial
 Density <#_Theory_and_implementation>`__). Its width in the time domain
 is
 
-.. math:: {\sigma_{t} = \alpha}\text{/}T
+.. math::
+   :label: pfx11
+   
+   {\sigma_{t} = \alpha}\text{/}T
 
 , where T is the length of the simulation. We remark that the diffusion
 constant obtained from *DOS* is biased due to the spectral smoothing
@@ -874,6 +901,7 @@ particle following a random walk is proportional to the time elapsed.
 This relationship can be written as
 
 .. math::
+   :label: pfx12
 
    \begin{matrix}
    {{\left\langle r^{2} \right\rangle = 6}{\mathit{Dt} + C}} \\
@@ -898,6 +926,7 @@ molecules using NPT condition at 1 bar and 300 K.
 Defining
 
 .. math::
+   :label: pfx13
 
    \begin{matrix}
    {d_{\alpha}\left( {t,t_{0}} \right)\doteq R_{\alpha}{\left( {t_{0} + t} \right) - R_{\alpha}}\left( t_{0} \right),} \\
@@ -907,6 +936,7 @@ Defining
 the *MSD* of particle :math:`\alpha` can be defined as:
 
 .. math::
+   :label: pfx14
 
    \begin{matrix}
    {\mathrm{\Delta}_{\alpha}^{2}{(t) = \left\langle {d_{\alpha}^{2}\left( {t,t_{0}} \right)} \right\rangle_{t_{0}}}} \\
@@ -918,6 +948,7 @@ at times t0 and t0 + t. One can introduce an *MSD* with respect to a
 given axis n:
 
 .. math::
+   :label: pfx15
 
    \begin{matrix}
    {\mathrm{\Delta}_{\alpha}^{2}\left( {t,t_{0};n} \right)\doteq\left\langle {d_{\alpha}^{2}\left( {t,\tau;n} \right)} \right\rangle_{t_{0}}} \\
@@ -927,6 +958,7 @@ given axis n:
 with
 
 .. math::
+   :label: pfx16
 
    \begin{matrix}
    {d_{\alpha}^{}\left( {t,\tau;n} \right)\doteq n\bullet d_{\alpha}^{}\left( {t,t_{0}} \right).} \\
@@ -938,6 +970,7 @@ coefficients from Molecular Dynamics (*MD*) simulations. Assuming
 Einstein-diffusion in the long time limit one has for isotropic systems
 
 .. math::
+   :label: pfx17
 
    \begin{matrix}
    {{D_{\alpha} = {\lim\limits_{t\rightarrow\infty}{\frac{1}{6t}\mathrm{\Delta}_{\alpha}^{2}(t)}}}.} \\
@@ -947,12 +980,16 @@ Einstein-diffusion in the long time limit one has for isotropic systems
 There exists also a well-known relation between the *MSD* and the
 velocity autocorrelation function. Writing
 
-.. math:: d_{\alpha}{(t) = {\int\limits_{0}^{t}{\mathit{d\tau}v_{\alpha}(\tau)}}}
+.. math::
+   :label: pfx18
+   
+   d_{\alpha}{(t) = {\int\limits_{0}^{t}{\mathit{d\tau}v_{\alpha}(\tau)}}}
 
 \ in Eq. :math:`5` one can show (see
 e.g. [`11 <#SignetBibliographie_011>`__]) that
 
 .. math::
+   :label: pfx19
 
    \begin{matrix}
    {\mathrm{\Delta}_{\alpha}^{2}{(t) = 6}{\int\limits_{0}^{t}{\mathit{d\tau}\left( {t - \tau} \right)C_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(t)}}.} \\
@@ -963,6 +1000,7 @@ Using now the definition :math:`8` of the diffusion
 coefficient one obtains the relation
 
 .. math::
+   :label: pfx20
 
    \begin{matrix}
    {{D_{\alpha} = {\int\limits_{0}^{t}{\mathit{d\tau}C_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(t)}}}.} \\
@@ -972,6 +1010,7 @@ coefficient one obtains the relation
 With Eq. :math:`28` this can also be written as
 
 .. math::
+   :label: pfx21
 
    \begin{matrix}
    {{D_{\alpha} = \pi}{\overset{\sim}{C}}_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(0).} \\
@@ -984,6 +1023,7 @@ framework, in the discrete case, the mean-square displacement of a
 particle is given by
 
 .. math::
+   :label: pfx22
 
    \begin{matrix}
    {\mathrm{\Delta}^{2}{(m) = \frac{1}{N_{t} - m}}{\sum\limits_{k = 0}^{N_{t} - m - 1}\left\lbrack {r{\left( {k + m} \right) - r}(k)} \right\rbrack^{2}},{m = 0.}..{N_{t} - 1}} \\
@@ -994,6 +1034,7 @@ where r(k) is the particle trajectory and :math:`N_{t}` is the number of frames 
 the trajectory. We define now the auxiliary function
 
 .. math::
+   :label: pfx23
 
    \begin{matrix}
    {S(m)\doteq{\sum\limits_{k = 0}^{N_{t} - m - 1}\left\lbrack {r{\left( {k + m} \right) - r}(k)} \right\rbrack^{2}},{m = 0}...N{t - 1},} \\
@@ -1003,6 +1044,7 @@ the trajectory. We define now the auxiliary function
 which is split as follows:
 
 .. math::
+   :label: pfx24
 
    \begin{matrix}
    {S{(m) = S_{\mathit{AA} + \mathit{BB}}}{(m) - 2}S_{\mathit{AB}}(m),} \\
@@ -1010,6 +1052,7 @@ which is split as follows:
    \end{matrix}
 
 .. math::
+   :label: pfx25
 
    \begin{matrix}
    {S_{\mathit{AA} + \mathit{BB}}{(m) = \sum\limits_{k = 0}^{N_{t} - m - 1}}\left\lbrack {r^{2}{\left( {k + m} \right) + r^{2}}(k)} \right\rbrack,} \\
@@ -1017,6 +1060,7 @@ which is split as follows:
    \end{matrix}
 
 .. math::
+   :label: pfx26
 
    \begin{matrix}
    {S_{\mathit{AB}}{(m) = {\sum\limits_{k = 0}^{N_{t} - m - 1}{r(k)}}}\cdot r\left( {k + m} \right).} \\
@@ -1028,6 +1072,7 @@ the section on `Spatial Density <#_Theory_and_implementation>`__. For
 SAA+BB(m) the following recursion relation holds:
 
 .. math::
+   :label: pfx27
 
    \begin{matrix}
    {S_{\mathit{AA} + \mathit{BB}}{(m) = S_{\mathit{AA} + \mathit{BB}}}{\left( {m - 1} \right) - r^{2}}{\left( {m - 1} \right) - r^{2}}\left( {N_{t} - m} \right),} \\
@@ -1035,6 +1080,7 @@ SAA+BB(m) the following recursion relation holds:
    \end{matrix}
 
 .. math::
+   :label: pfx28
 
    \begin{matrix}
    {S_{\mathit{AA} + \mathit{BB}}{(0) = {\sum\limits_{k = 0}^{N_{t} - 1}{r^{2}(k)}}}.} \\
@@ -1046,22 +1092,37 @@ computation of the *MSD*:
 
 1. Compute
 
-   .. math:: \mathit{DSQ}{{(k)} = r}2{(k)},{k = 0}...N{t - 1}
+   .. math::
+     :label: pfx29
+   
+     \mathit{DSQ}{{(k)} = r}2{(k)},{k = 0}...N{t - 1}
 
    ;
 
-   .. math:: \mathit{DSQ}{{({- 1})} = \mathit{DSQ}}{{({Nt})} = 0}
+   .. math::
+     :label: pfx30 
+     
+     \mathit{DSQ}{{({- 1})} = \mathit{DSQ}}{{({Nt})} = 0}
 
    .
 2. Compute
 
-   .. math:: {\mathit{SUMSQ} = 2}\cdot{\sum\limits_{k = 0}^{N_{t} - 1}{\mathit{DSQ}(k)}}
+   .. math::
+     :label: pfx31
+     
+     {\mathit{SUMSQ} = 2}\cdot{\sum\limits_{k = 0}^{N_{t} - 1}{\mathit{DSQ}(k)}}
 3. Compute SAB(m) using the Fast Fourier Transform (*FFT*) method.
 4. Compute *MSD(m)* in the following loop:
 
-.. math:: \mathit{SUMSQ}\leftarrow{\mathit{SUMSQ} - \mathit{DSQ}}{{({m - 1})} - \mathit{DSQ}}{({N{t - m}})}
+.. math::
+   :label: pfx32
+   
+   \mathit{SUMSQ}\leftarrow{\mathit{SUMSQ} - \mathit{DSQ}}{{({m - 1})} - \mathit{DSQ}}{({N{t - m}})}
 
-.. math:: \mathit{MSD}{(m)}\leftarrow{}
+.. math::
+   :label: pfx33
+   
+   \mathit{MSD}{(m)}\leftarrow{}
 
 m running from 0 to Nt - 1
 
@@ -1119,6 +1180,7 @@ of the :sup:`15`\ N nuclei are determined by a time correlation
 function,
 
 .. math::
+   :label: pfx34
 
    \begin{matrix}
    {C_{\mathit{ii}}{(t) = \left\langle {P_{2}\left( {\mu_{i}(0)\cdot\mu_{i}(t)} \right)} \right\rangle}} \\
@@ -1139,6 +1201,7 @@ solution is assumed isotropic and uncorrelated with the internal
 motions, such that:
 
 .. math::
+   :label: pfx35
 
    \begin{matrix}
    {C_{\mathit{ii}}{(t) = C^{G}}(t)\cdot C_{\mathit{ii}}^{I}(t)} \\
@@ -1147,7 +1210,10 @@ motions, such that:
 
 where C\ :sup:`G`\ (t) and
 
-.. math:: C_{\mathit{ii}}^{I}(t)
+.. math::
+   :label: pfx36
+   
+   C_{\mathit{ii}}^{I}(t)
 
 \ denote the global and the internal time correlation function,
 respectively. Within the so-called model free approach
@@ -1155,6 +1221,7 @@ respectively. Within the so-called model free approach
 the internal correlation function is modelled by an exponential,
 
 .. math::
+   :label: pfx37
 
    \begin{matrix}
    {C_{\mathit{ii}}^{I}{(t) = {S_{i}^{2} + \left( {1 - S_{i}^{2}} \right)}}\exp\left( \frac{- t}{\tau_{\mathit{eff},i}} \right)} \\
@@ -1163,23 +1230,35 @@ the internal correlation function is modelled by an exponential,
 
 Here the asymptotic value
 
-.. math:: {S_{i}^{2} = C_{\mathit{ii}}}\left( {+ \infty} \right)
+.. math::
+   :label: pfx38
+   
+   {S_{i}^{2} = C_{\mathit{ii}}}\left( {+ \infty} \right)
 
 \ is the so-called generalized order parameter, which indicates the
 degree of spatial restriction of the internal motions of a bond vector,
 while the characteristic time
 
-.. math:: \tau_{\mathit{eff},i}
+.. math::
+   :label: pfx39
+   
+   tau_{\mathit{eff},i}
 
 \ is an effective correlation time, setting the time scale of the
 internal relaxation processes.
 
-.. math:: S_{i}^{2}
+.. math::
+   :label: pfx40
+   
+   S_{i}^{2}
 
 can adopt values ranging from 0 (completely disordered) to 1 (fully
 ordered). So,
 
-.. math:: S_{i}^{2}
+.. math::
+   :label: pfx41
+   
+   S_{i}^{2}
 
 is the appropriate indicator of protein backbone motions in
 computationally feasible timescales as it describes the spatial aspects
@@ -1188,16 +1267,23 @@ of the reorientational motion of N-H peptidic bonds vector.
 When performing Order Parameter analysis, *MDANSE* computes for each
 residue *i* both
 
-.. math:: C_{\mathit{ii}}(t)
+.. math::
+   :label: pfx42
+   
+   C_{\mathit{ii}}(t)
 
 \ and
 
-.. math:: S_{i}^{2}
+.. math::
+   :label: pfx43
+   
+   S_{i}^{2}
 
 . It also computes a correlation function averaged over all the selected
 bonds defined as:
 
 .. math::
+   :label: pfx44
 
    \begin{matrix}
    {C^{I}{(t) = {\sum\limits_{i = 1}^{N_{\mathit{bonds}}}{C_{\mathit{ii}}^{I}(t)}}}} \\
@@ -1313,6 +1399,7 @@ Mathematically, the *VACF* of atom :math:`\alpha` in an atomic or molecular syst
 usually defined as
 
 .. math::
+   :label: pfx45
 
    \begin{matrix}
    {C_{\mathit{vv};\mathit{\alpha\alpha}}(t)\doteq\frac{1}{3}\left\langle {v_{\alpha}\left( t_{0} \right)\cdot v_{\alpha}\left( {t_{0} + t} \right)} \right\rangle_{t_{0}}.} \\
@@ -1323,6 +1410,7 @@ In some cases, e.g. for non-isotropic systems, it is useful to define
 *VACF* along a given axis,
 
 .. math::
+   :label: pfx46
 
    \begin{matrix}
    {C_{\mathit{vv};\mathit{\alpha\alpha}}\left( {t;n} \right)\doteq\left\langle {v_{\alpha}\left( {t_{0};n} \right)v_{\alpha}\left( {{t_{0} + t};n} \right)} \right\rangle_{t_{0}},} \\
@@ -1332,6 +1420,7 @@ In some cases, e.g. for non-isotropic systems, it is useful to define
 where v\ :sub:`:math:`\alpha``\ (t; **n**) is given by
 
 .. math::
+   :label: pfx47
 
    \begin{matrix}
    {v_{\alpha}\left( {t;n} \right)\doteq n\cdot v_{\alpha}(t).} \\
@@ -1344,6 +1433,7 @@ The *VACF* of the particles in a many body system can be related to the
 incoherent dynamic structure factor by the relation:
 
 .. math::
+   :label: pfx48
 
    \begin{matrix}
    {\mathit{li}m_{q\rightarrow 0}\frac{\omega^{2}}{q^{2}}S{\left( {q,\omega} \right) = G}(\omega),} \\
@@ -1354,6 +1444,7 @@ where G(:math:`\omega`) is the Density Of States (*DOS*). For an isotropic syste
 reads
 
 .. math::
+   :label: pfx49
 
    \begin{matrix}
    {G{(\omega) = {\sum\limits_{\alpha}{b_{\alpha,\mathit{inc}}^{2}{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}(\omega)}}},} \\
@@ -1361,6 +1452,7 @@ reads
    \end{matrix}
 
 .. math::
+   :label: pfx50
 
    \begin{matrix}
    {{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}{(\omega) = \frac{1}{2\pi}}{\int\limits_{- \infty}^{+ \infty}\mathit{dt}}\exp\left\lbrack {{- i}\omega t} \right\rbrack C_{\mathit{vv};\mathit{\alpha\alpha}}(t).} \\
@@ -1370,7 +1462,10 @@ reads
 For non-isotropic systems, relation :math:`26` holds if the *DOS*
 is computed from the atomic velocity autocorrelation functions
 
-.. math:: C_{\mathit{vv};\mathit{\alpha\alpha}}\left( {t;n_{q}} \right)
+.. math::
+   :label: pfx51
+   
+   C_{\mathit{vv};\mathit{\alpha\alpha}}\left( {t;n_{q}} \right)
 
 , where nq is the unit vector in the direction of q.
 
@@ -1494,20 +1589,30 @@ The quantity of interest in neutron scattering experiments with thermal
 neutrons is the *dynamic structure factor*, S(**q**, :math:`\omega`), which is
 closely related to the double differential cross-section [7],
 
-.. math:: d^{2}{\sigma/\mathit{d\Omega dE}}
+.. math::
+   :label: pfx52
+   
+   ^{2}{\sigma/\mathit{d\Omega dE}}
 
 . The double differential cross section is defined as the number of
 neutrons which are scattered per unit time into the solid angle interval
 
-.. math:: \left\lbrack {\Omega,{\Omega + d}\Omega} \right\rbrack
+.. math::
+   :label: pfx53
+   
+   \left\lbrack {\Omega,{\Omega + d}\Omega} \right\rbrack
 
 and into the energy interval
 
-.. math:: {\lbrack{E,{E + \mathit{dE}}}\rbrack}.
+.. math::
+   :label: pfx54
+   
+   {\lbrack{E,{E + \mathit{dE}}}\rbrack}.
 
 It is normalized to d, *dE*, and the flux of the incoming neutrons,
 
 .. math::
+   :label: pfx55
 
    \begin{matrix}
    {{\frac{d^{2}\sigma}{d\Omega\mathit{dE}} = N}\cdot\frac{k}{k_{0}}S\left( {q,\omega} \right).} \\
@@ -1519,31 +1624,24 @@ Here *N* is the number of atoms, and k ≡ \|\ **k**\ \| and k\ :sub:`0` ≡
 neutrons, respectively. They are related to the corresponding neutron
 energies by
 
-.. math:: {E = \hslash^{2}}k^{2}\text{/}2m
+.. math::
+   :label: pfx56
+   
+   {E = \hslash^{2}}k^{2}\text{/}2m
 
 \ and
 
-.. math:: {E_{0} = \hslash^{2}}k_{0}^{2}\text{/}2m
+.. math::
+   :label: pfx57
+   
+   {E_{0} = \hslash^{2}}k_{0}^{2}\text{/}2m
 
-\ where
-
-.. math:: m
-
-is the neutron mass. The arguments of the dynamic structure factor,
-
-.. math:: q
-
-and
-
-.. math:: \omega
-
-, are the momentum and energy transfer in units of
-
-.. math:: \hslash
-
-, respectively:
+\ where :math:`m` is the neutron mass. The arguments of the dynamic structure factor,
+:math:`q` and :math:`\omega`, are the momentum and energy transfer in units of
+:math:`\hslash`, respectively:
 
 .. math::
+   :label: pfx58
 
    \begin{matrix}
    {{q = \frac{k_{0} - k}{\hslash}},} \\
@@ -1551,6 +1649,7 @@ and
    \end{matrix}
 
 .. math::
+   :label: pfx59
 
    \begin{matrix}
    {{\omega = \frac{E_{0} - E}{\hslash}}.} \\
@@ -1558,13 +1657,11 @@ and
    \end{matrix}
 
 The modulus of the momentum transfer can be expressed in the scattering
-angle
-
-.. math:: \theta
-
-, the energy transfer, and the energy of the incident neutrons:
+angle :math:`\theta` , the energy transfer, and the energy of the
+incident neutrons:
 
 .. math::
+   :label: pfx60
 
    \begin{matrix}
    {{q = \sqrt{{2 - \frac{\mathit{\hslash\omega}}{E_{0}} - 2}\cos{\theta\sqrt{2 - \frac{\mathit{\hslash\omega}}{E_{0}}}}}}.} \\
@@ -1576,6 +1673,7 @@ and dynamics of the scattering system
 [`16 <#SignetBibliographie_016>`__]. It can be written as
 
 .. math::
+   :label: pfx61
 
    \begin{matrix}
    {S{\left( {q,\omega} \right) = \frac{1}{2\pi}}{\int\limits_{- \infty}^{+ \infty}\mathit{dt}}\exp\left\lbrack {{- i}\omega t} \right\rbrack F\left( {q,t} \right).} \\
@@ -1586,6 +1684,7 @@ F(**q**, t) is called the *intermediate scattering function* and is
 defined as
 
 .. math::
+   :label: pfx62
 
    \begin{matrix}
    {\text{F}{\left( {q,t} \right) = {\sum\limits_{\alpha,\beta}{\Gamma_{\mathit{\alpha\beta}}\left\langle {\exp\left\lbrack {{- i}q\cdot\hat{R_{\alpha}}(0)} \right\rbrack\exp\left\lbrack {iq\cdot\hat{R_{\beta}}(t)} \right\rbrack} \right\rangle}}},} \\
@@ -1593,38 +1692,33 @@ defined as
    \end{matrix}
 
 .. math::
+   :label: pfx63
 
    \begin{matrix}
    {{\Gamma_{\mathit{\alpha\beta}} = \frac{1}{N}}\left\lbrack {\overline{b_{\alpha}}{\overline{b_{\beta}} + \delta_{\mathit{\alpha\beta}}}\left( {\overline{b_{\alpha}^{2}} - {\overline{b_{\alpha}}}^{2}} \right)} \right\rbrack.} \\
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}35} \right) \\
    \end{matrix}
 
-The operators
-
-.. math:: \hat{R_{\alpha}}(t)
-
-\ in Eq. :math:`34` are the position
+The operators :math:`\hat{R_{\alpha}}(t)`
+in Eq. :math:`34` are the position
 operators of the nuclei in the sample. The brackets
-
-.. math:: \langle\ldots\rangle
-
+:math:`\langle\ldots\rangle`
 denote a quantum thermal average and the time dependence of the position
 operators is defined by the Heisenberg picture. The quantities
-
-.. math:: b_{\alpha}
-
-are the scattering lengths of the nuclei which depend on the isotope and
+:math:`b_{\alpha}` are the scattering lengths of the nuclei
+which depend on the isotope and
 the relative orientation of the spin of the neutron and the spin of the
 scattering nucleus. If the spins of the nuclei and the neutron are not
 prepared in a special orientation one can assume a random relative
 orientation and that spin and position of the nuclei are uncorrelated.
-The symbol
-
-.. math:: \overline{...\mspace{9mu}}
+The symbol :math:`\overline{...}`
 
 appearing in
 
-.. math:: \Gamma_{\mathit{\alpha\beta}}
+.. math::
+   :label: pfx64
+   
+   \Gamma_{\mathit{\alpha\beta}}
 
 denotes an average over isotopes and relative spin orientations of
 neutron and nucleus.
@@ -1634,6 +1728,7 @@ structure factor into their *coherent* and *incoherent* parts which
 describe collective and single particle motions, respectively. Defining
 
 .. math::
+   :label: pfx65
 
    \begin{matrix}
    {b_{\alpha,\mathit{coh}}\doteq\overline{b_{\alpha}},} \\
@@ -1641,6 +1736,7 @@ describe collective and single particle motions, respectively. Defining
    \end{matrix}
 
 .. math::
+   :label: pfx66
 
    \begin{matrix}
    {b_{\alpha,\mathit{inc}}\doteq\sqrt{\overline{b_{\alpha}^{2}} - {\overline{b_{\alpha}}}^{2}},} \\
@@ -1651,6 +1747,7 @@ the coherent and incoherent intermediate scattering functions can be
 cast in the form
 
 .. math::
+   :label: pfx67
 
    \begin{matrix}
    {\text{F}_{\text{coh}}{\left( {q,t} \right) = \frac{1}{N}}{\sum\limits_{\alpha,\beta}b_{\alpha,\mathit{coh}}}b_{\beta,\mathit{coh}}\left\langle {\exp\left\lbrack {{- i}q\cdot\hat{R_{\alpha}}(0)} \right\rbrack\exp\left\lbrack {iq\cdot\hat{R_{\beta}}(t)} \right\rbrack} \right\rangle,} \\
@@ -1658,6 +1755,7 @@ cast in the form
    \end{matrix}
 
 .. math::
+   :label: pfx68
 
    \begin{matrix}
    {\text{F}_{\text{inc}}{\left( {q,t} \right) = \frac{1}{N}}{\sum\limits_{\alpha}{b_{\alpha,\mathit{inc}}^{2}\left\langle {\exp\left\lbrack {{- i}q\cdot\hat{R_{\alpha}}(0)} \right\rbrack\exp\left\lbrack {iq\cdot\hat{R_{\alpha}}(t)} \right\rbrack} \right\rangle}}.} \\
@@ -1667,6 +1765,7 @@ cast in the form
 Rewriting these formulas, *MDANSE* introduces the partial terms as:
 
 .. math::
+   :label: pfx69
 
    \begin{matrix}
    {\text{F}_{\text{coh}}{\left( {q,t} \right) = \sum\limits_{I,J\geq I}^{N_{\mathit{species}}}}\sqrt{n_{I}n_{J}\omega_{I,\text{coh}}\omega_{J,\text{coh}}}F_{\mathit{IJ},\text{coh}}\left( {q,t} \right),} \\
@@ -1674,6 +1773,7 @@ Rewriting these formulas, *MDANSE* introduces the partial terms as:
    \end{matrix}
 
 .. math::
+   :label: pfx70
 
    \begin{matrix}
    {\text{F}_{\text{inc}}{\left( {q,t} \right) = {\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}F_{I,\text{inc}}\left( {q,t} \right)}}}} \\
@@ -1683,6 +1783,7 @@ Rewriting these formulas, *MDANSE* introduces the partial terms as:
 where:
 
 .. math::
+   :label: pfx71
 
    \begin{matrix}
    {\text{F}_{\mathit{IJ},\text{coh}}{\left( {q,t} \right) = \frac{1}{\sqrt{n_{I}n_{J}}}}{\sum\limits_{\alpha}^{n_{I}}{\sum\limits_{\beta}^{n_{J}}\left\langle {\exp\left\lbrack {{- i}q\cdot\hat{R_{\alpha}}\left( t_{0} \right)} \right\rbrack\exp\left\lbrack {iq\cdot\hat{R_{\beta}}\left( {t_{0} + t} \right)} \right\rbrack} \right\rangle_{t_{0}}}},} \\
@@ -1690,6 +1791,7 @@ where:
    \end{matrix}
 
 .. math::
+   :label: pfx72
 
    \begin{matrix}
    {\text{F}_{I,\text{inc}}{\left( {q,t} \right) = \frac{1}{n_{I}}}{\sum\limits_{\alpha = 1}^{n_{I}}\left\langle {\exp\left\lbrack {{- i}q\cdot\hat{R_{\alpha}}\left( t_{0} \right)} \right\rbrack\exp\left\lbrack {iq\cdot\hat{R_{\alpha}}\left( {t_{0} + t} \right)} \right\rbrack} \right\rangle_{t_{0}}}.} \\
@@ -1706,6 +1808,7 @@ An important quantity describing *structural* properties of liquids is
 the *static structure factor*, which is defined as
 
 .. math::
+   :label: pfx73
 
    \begin{matrix}
    {\text{S}(q)\doteq{\int\limits_{- \infty}^{+ \infty}{d\omega}}\text{S}_{\mathit{coh}}\left( {q,\omega} \right)\text{F}_{\mathit{coh}}\left( {q,0} \right).} \\
@@ -1720,6 +1823,7 @@ well known that this procedure leads to a loss of the universal detailed
 balance relation,
 
 .. math::
+   :label: pfx74
 
    \begin{matrix}
    {\text{S}{\left( {q,\omega} \right) = \exp}\left\lbrack {\beta\hslash\omega} \right\rbrack\text{S}\left( {{- q}{, - \omega}} \right),} \\
@@ -1729,6 +1833,7 @@ balance relation,
 and also to a loss of all odd moments
 
 .. math::
+   :label: pfx75
 
    \begin{matrix}
    {\left\langle \omega^{2{n + 1}} \right\rangle\doteq{\int\limits_{- \infty}^{+ \infty}{d\omega}}\omega^{2{n + 1}}S\left( {q,\omega} \right),{n = 1,2},\ldots.} \\
@@ -1741,6 +1846,7 @@ reflections in space. The first moment is also universal. For an atomic
 liquid, containing only one sort of atoms, it reads
 
 .. math::
+   :label: pfx76
 
    \begin{matrix}
    {{\left\langle \omega \right\rangle = \frac{\hslash q^{2}}{2M}},} \\
@@ -1748,28 +1854,19 @@ liquid, containing only one sort of atoms, it reads
    \end{matrix}
 
 where M is the mass of the atoms. Formula
-
-.. math:: 47
-
-\ `Error: Reference source not found <#anchor-112>`__ shows that the
+47
+shows that the
 first moment is given by the average kinetic energy (in units of
-
-.. math:: \hslash
-
-) of a particle which receives a momentum transfer
-
-.. math:: \hslash q
-
-. Therefore,
-
-.. math:: \langle\omega\rangle
-
+:math:`\hslash`) of a particle which receives a momentum transfer
+:math:`\hslash q`. Therefore,
+:math:`\langle\omega\rangle`
 is called the *recoil moment*. A number of 'recipes' has been suggested
 to correct classical dynamic structure factors for detailed balance and
 to describe recoil effects in an approximate way. The most popular one
 has been suggested by Schofield [`17 <#SignetBibliographie_017>`__]
 
 .. math::
+   :label: pfx77
 
    \begin{matrix}
    {{\text{S}\left( {q,\omega} \right)\approx\exp\left\lbrack \frac{\beta\hslash\omega}{2} \right\rbrack}_{}\text{S}_{\mathit{cl}}\left( {q,\omega} \right)} \\
@@ -1780,10 +1877,8 @@ One can easily verify that the resulting dynamic structure factor
 fulfils the relation of detailed balance. Formally, the correction :math:`48`
 is correct to first order in :math:`\hslash`. Therefore, it cannot be used
 for large *q*-values which correspond to large momentum transfers
-
-.. math:: \hslash q
-
-. This is actually true for all correction methods which have suggested
+:math:`\hslash q`. This is actually true for all correction
+methods which have suggested
 so far. For more details we refer to Ref.
 [`18 <#SignetBibliographie_018>`__].
 
@@ -1791,6 +1886,7 @@ MDANSE computes the partial S(Q)'s as the Fourier transform of the
 partial g(r), corresponding to the Faber-Ziman definition:
 
 .. math::
+   :label: pfx78
    
    S_{\alpha\beta}(Q) = 1 + \frac{4\pi\rho_0}{Q}\int\limits_{0}^{\infty}{r\left\lbrack {g_\alpha\beta}(r)-1 \right\rbrack\text{sin}(Qr)dr}
 
@@ -1807,7 +1903,10 @@ of confusion is that the data can be normalized in different ways (see
 Soper's paper). Using the normalization II in that reference we have
 that:
 
-.. math:: D_{x}{(Q) = \frac{\sum\limits_{\mathit{\alpha\beta}\geq\alpha}{\left( {2 - \delta_{\mathit{\alpha\beta}}} \right)\times c_{\alpha}c_{\beta}f_{\alpha}{(Q)}f_{\beta}{(Q)}\left\lbrack {S_{\mathit{\alpha\beta}}{(Q) - 1}} \right\rbrack}}{\sum\limits_{\alpha}{c_{\alpha}f_{\alpha}^{2}{(Q)}}} = \left\lbrack {S{(Q) - 1}} \right\rbrack}\times\frac{\sum\limits_{\mathit{\alpha\beta}}{c_{\alpha}c_{\beta}f_{\alpha}{(Q)}f_{\beta}{(Q)}}}{\sum\limits_{\alpha}{c_{\alpha}f_{\alpha}^{2}{(Q)}}}\left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}50} \right)
+.. math::
+   :label: pfx79
+   
+   D_{x}{(Q) = \frac{\sum\limits_{\mathit{\alpha\beta}\geq\alpha}{\left( {2 - \delta_{\mathit{\alpha\beta}}} \right)\times c_{\alpha}c_{\beta}f_{\alpha}{(Q)}f_{\beta}{(Q)}\left\lbrack {S_{\mathit{\alpha\beta}}{(Q) - 1}} \right\rbrack}}{\sum\limits_{\alpha}{c_{\alpha}f_{\alpha}^{2}{(Q)}}} = \left\lbrack {S{(Q) - 1}} \right\rbrack}\times\frac{\sum\limits_{\mathit{\alpha\beta}}{c_{\alpha}c_{\beta}f_{\alpha}{(Q)}f_{\beta}{(Q)}}}{\sum\limits_{\alpha}{c_{\alpha}f_{\alpha}^{2}{(Q)}}}\left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}50} \right)
 
 Where S(Q) would be the static structure factor (going to 1 at large Q)
 computed by MDANSE. Therefore, even after using MDANSE we should
@@ -1945,9 +2044,13 @@ rectangular grid of equidistantly spaced points along the time-and the
 
 F\ 
 
-.. math:: {}_{\text{coh}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\cdot\Delta t} \right)} \right\rangle}}^{q},
+.. math::
+   :label: pfx80
+   
+   {}_{\text{coh}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\cdot\Delta t} \right)} \right\rangle}}^{q},
 
 .. math::
+   :label: pfx81
 
    \begin{matrix}
    {{k = 0}\ldots{N_{t} - 1},{m = 0}\ldots{N_{q} - 1.}} \\
@@ -1960,11 +2063,15 @@ N\ :sub:`species` is the number of selected species, n\ :sub:`I` the
 number of atoms of species *I*, :math:`\omega`\ :sub:`I` the weight for specie *I*
 (see Section ?? for more details) and
 
-.. math:: \rho_{I}\left( {q,k\cdot\Delta t} \right)
+.. math::
+   :label: pfx82
+   
+   \rho_{I}\left( {q,k\cdot\Delta t} \right)
 
 \ is the Fourier transformed particle density for specie *I* defined as,
 
 .. math::
+   :label: pfx83
 
    \begin{matrix}
    {\rho_{I}{\left( {q,k\cdot\Delta t} \right) = \sum\limits_{\alpha}^{n_{I}}}\exp\left\lbrack {\mathit{iq}\cdot R_{\alpha}\left( {k\cdot\Delta t} \right)} \right\rbrack.} \\
@@ -1973,19 +2080,22 @@ number of atoms of species *I*, :math:`\omega`\ :sub:`I` the weight for specie *
 
 The symbol
 
-.. math:: {\overline{...}}^{q}
+.. math::
+   :label: pfx84
+   
+   {\overline{...}}^{q}
 
 \ in Eq. :math:`51` denotes an average
 over *q*-vectors having *approximately* the same modulus
 
-.. math:: {q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q
+.. math::
+   :label: pfx85
+   
+   {q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q
 
 . The particle density must not change if jumps in the particle
 trajectories due to periodic boundary conditions occur. In addition, the
-*average* particle density,
-
-.. math:: N/V
-
+*average* particle density, :math:`N/V`
 , must not change. This can be achieved by choosing *q*-vectors on a
 lattice which is reciprocal to the lattice defined by the *MD* box. Let
 **b**\ :sub:`1`, **b**\ :sub:`2`, **b**\ :sub:`3` be the basis vectors
@@ -1993,6 +2103,7 @@ which span the *MD* cell. Any position vector in the *MD* cell can be
 written as
 
 .. math::
+   :label: pfx86
 
    \begin{matrix}
    {{R = x^{'}}{b_{1} + y^{'}}{b_{2} + z^{'}}b_{3},} \\
@@ -2006,6 +2117,7 @@ vectors **b**\ :sup:`1`, **b**\ :sup:`2`, **b**\ :sup:`3` is defined by
 the relation
 
 .. math::
+   :label: pfx87
 
    \begin{matrix}
    {b_{i}{b^{j} = \delta_{i}^{j}}.} \\
@@ -2015,6 +2127,7 @@ the relation
 If the q-vectors are now chosen as
 
 .. math::
+   :label: pfx88
 
    \begin{matrix}
    {{q = 2}\pi\left( {k{b^{1} + l}{b^{2} + m}b^{3}} \right),} \\
@@ -2032,14 +2145,13 @@ From these *q*-vectors only a maximum number per grid-point (called
 generically *q*-shell also in the anisotropic case) is kept.
 
 The *q*-vectors can be generated isotropically, anisotropically or along
-user-defined directions. The
-
-.. math:: \sqrt{\omega_{I}}
+user-defined directions. The :math:`\sqrt{\omega_{I}}`
 
 \ may be negative if they represent normalized coherent scattering
 lengths, i.e.
 
 .. math::
+   :label: pfx89
 
    \begin{matrix}
    {{\sqrt{\omega_{I}} = \frac{b_{I,\text{coh}}}{\sqrt{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}b_{I,\text{coh}}^{2}}}}}.} \\
@@ -2047,9 +2159,7 @@ lengths, i.e.
    \end{matrix}
 
 Negative coherent scattering lengths occur in hydrogenous materials
-since
-
-.. math:: b_{\mathit{coh},H}
+since :math:`b_{\mathit{coh},H}`
 
 \ Is negative [`20 <#SignetBibliographie_020>`__]. The density-density
 correlation is computed via the *FCA* technique described in the section
@@ -2086,16 +2196,10 @@ section for more details about the theoretical background related to the
 dynamic incoherent structure factor. In this analysis, *MDANSE* proceeds
 in two steps. First, it computes the partial and total intermediate
 incoherent scattering function F\ :sub:`inc`\ (**q**, t) using equation
-
-.. math:: 41
-
-\ `Error: Reference source not found <#anchor-129>`__. Then, the partial
+`41`. Then, the partial
 and total dynamic incoherent structure factors are obtained by
 performing the Fourier Transformation, defined in Eq.
-
-.. math:: 33
-
-\ `Error: Reference source not found <#anchor-130>`__, respectively on
+`33`, respectively on
 the total and partial intermediate incoherent scattering function.
 
 *MDANSE* computes the incoherent intermediate scattering function on a
@@ -2103,6 +2207,7 @@ rectangular grid of equidistantly spaced points along the time-and the
 *q*-axis, respectively:
 
 .. math::
+   :label: pfx90
 
    \begin{matrix}
    {\text{F}_{\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}}}\text{F}_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right),{k = 0}\ldots{N_{t} - 1},{m = 0}\ldots{N_{q} - 1.}} \\
@@ -2115,29 +2220,29 @@ N\ :sub:`species` is the number of selected species, n\ :sub:`I` the
 number of atoms of species *I*, :math:`\omega`\ :sub:`I` the weight for specie *I*
 (see Section ?? for more details) and
 
-.. math:: F_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)
+.. math::
+   :label: pfx91
+   
+   F_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)
 
 \ is defined as:
 
 .. math::
+   :label: pfx92
 
    \begin{matrix}
    {\text{F}_{I,\mathit{inc},\alpha}{\left( {q_{m},k\cdot\Delta t} \right) = \sum\limits_{\alpha = 1}^{n_{I}}}{\overline{\left\langle {\exp\left\lbrack {{-i}q\cdot R_{\alpha}(0)} \right\rbrack\exp\left\lbrack {iq\cdot R_{\alpha}(t)} \right\rbrack} \right\rangle}}^{q}.} \\
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}58} \right) \\
    \end{matrix}
 
-The symbol
-
-.. math:: {\overline{...}}^{q}
-
-\ in Eq.
-
-.. math:: 58
-
-\ `Error: Reference source not found <#anchor-131>`__ denotes an average
+The symbol :math:`{\overline{...}}^{q}` in Eq. `58`
+denotes an average
 over *q*-vectors having *approximately* the same modulus
 
-.. math:: {q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q
+.. math::
+   :label: pfx93
+   
+   {q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q
 
 . The particle density must not change if jumps in the particle
 trajectories due to periodic boundary conditions occur. In addition, the
@@ -2148,6 +2253,7 @@ defined by the *MD* box. Let **b**\ :sub:`1`, **b**\ :sub:`2`,
 position vector in the *MD* cell can be written as
 
 .. math::
+   :label: pfx94
 
    \begin{matrix}
    {{R = x^{'}}{b_{1} + y^{'}}{b_{2} + z^{'}}b_{3},} \\
@@ -2161,6 +2267,7 @@ vectors **b**\ :sup:`1`, **b**\ :sup:`2`, **b**\ :sup:`3` is defined by
 the relation
 
 .. math::
+   :label: pfx95
 
    \begin{matrix}
    {b_{i}{b^{j} = \delta_{i}^{j}}.} \\
@@ -2170,6 +2277,7 @@ the relation
 If the q-vectors are now chosen as
 
 .. math::
+   :label: pfx96
 
    \begin{matrix}
    {{q = 2}\pi\left( {k{b^{1} + l}{b^{2} + m}b^{3}} \right),} \\
@@ -2181,11 +2289,7 @@ produce phase changes of multiples of 2π in the Fourier transformed
 particle density, i.e. leave it unchanged. One can define a grid of
 *q*-shells or a grid of *q*-vectors along a given direction or on a
 given plane, giving in addition a *tolerance* for *q*. *MDANSE* looks
-then for *q*-vectors of the form given in Eq.
-
-.. math:: 61
-
-\ `Error: Reference source not found <#anchor-132>`__ whose moduli
+then for *q*-vectors of the form given in Eq. `61` whose moduli
 deviate within the prescribed tolerance from the equidistant *q*-grid.
 From these *q*-vectors only a maximum number per grid-point (called
 generically *q*-shell also in the anisotropic case) is kept.
@@ -2193,11 +2297,8 @@ generically *q*-shell also in the anisotropic case) is kept.
 The *q*-vectors can be generated isotropically, anisotropically or along
 user-defined directions.
 
-The correlation functions defined in
-
-.. math:: 58
-
-\ `Error: Reference source not found <#anchor-133>`__ are computed via
+The correlation functions defined in `58`
+are computed via
 the *FCA* technique described in `Spatial
 Density <#_Theory_and_implementation>`__ section. Although the efficient
 *FCA* technique is used to compute the atomic time correlation
@@ -2239,6 +2340,7 @@ The Elastic Incoherent Structure Factor (*EISF*) is defined as the limit
 of the incoherent intermediate scattering function for infinite time,
 
 .. math::
+   :label: pfx97
 
    \begin{matrix}
    {\mathit{EISF}(q)\doteq\lim\limits_{t\rightarrow\infty}\text{F}_{\mathit{inc}}\left( {q,t} \right).} \\
@@ -2249,6 +2351,7 @@ Using the above definition of the EISF one can decompose the incoherent
 intermediate scattering function as follows:
 
 .. math::
+   :label: pfx98
 
    \begin{matrix}
    {\text{F}_{\text{inc}}{\left( {q,t} \right) = \mathit{EISF}}{(q) + \text{F}_{\text{inc}}^{'}}\left( {q,t} \right),} \\
@@ -2259,6 +2362,7 @@ where F\ :sub:`inc`\ '(**q**,t) decays to zero for infinite time. Taking
 now the Fourier transform it follows immediately that
 
 .. math::
+   :label: pfx99
 
    \begin{matrix}
    {\text{S}_{\text{inc}}{\left( {q,\omega} \right) = \mathit{EISF}}(q)\delta{(\omega) + \text{S}_{\text{inc}}^{'}}\left( {q,\omega} \right).} \\
@@ -2277,6 +2381,7 @@ contributions. Using the definition of the van Hove self-correlation
 function G\ :sub:`s`\ (r, t) [`20 <#SignetBibliographie_020>`__],
 
 .. math::
+   :label: pfx100
 
    \begin{matrix}
    {b_{\text{inc}}^{2}G_{s}\left( {r,t} \right)\doteq\frac{1}{2\pi^{3}}{\int d^{3}}q\exp\left\lbrack {{- i}q\cdot r} \right\rbrack\text{F}_{\mathit{inc}}\left( {q,t} \right),} \\
@@ -2288,6 +2393,7 @@ particle at the position **r** at time t, given it started at **r** = 0,
 one can write:
 
 .. math::
+   :label: pfx101
 
    \begin{matrix}
    {\mathit{EISF}{(q) = b_{\text{inc}}^{2{\int d^{3}}}}r\exp\left\lbrack {\mathit{iq}\cdot r} \right\rbrack G_{s}\left( {r,{t = \infty}} \right).} \\
@@ -2305,6 +2411,7 @@ For computational purposes it is convenient to use the following
 representation of the *EISF* [`21 <#SignetBibliographie_021>`__]:
 
 .. math::
+   :label: pfx102
 
    \begin{matrix}
    {\mathit{EISF}{(q) = {\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}\mathit{EIS}F_{I}(q)}}}} \\
@@ -2317,26 +2424,23 @@ specie *I* (see Section ?? for more details) and for each specie the
 following expression for the elastic incoherent scattering function is
 
 .. math::
+   :label: pfx103
 
    \begin{matrix}
    {\mathit{EIS}F_{I}{(q) = \frac{1}{n_{I}}}{\sum\limits_{\alpha}^{n_{I}}\left\langle {|{\exp\left\lbrack {\mathit{iq}\cdot R_{\alpha}} \right\rbrack\left. {} \right|^{2}}} \right\rangle}.} \\
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}68} \right) \\
    \end{matrix}
 
-This expression is derived from definition
-
-.. math:: 62
-
-\ `Error: Reference source not found <#anchor-138>`__ of the *EISF* and
-expression
-
-.. math:: 41
-
-\ `Error: Reference source not found <#anchor-139>`__ for the
+This expression is derived from definition `62`
+of the *EISF* and
+expression `41` for the
 intermediate scattering function, using that for infinite time the
 relation
 
-.. math:: \left\langle {\mathit{ex}p\left\lbrack {{- \mathit{iq}}\cdot R_{\alpha}(0)} \right\rbrack\mathit{ex}p\left\lbrack {\mathit{iq}\cdot R_{\alpha}(t)} \right\rbrack} \right\rangle = \left\langle {|{\mathit{ex}p\left\lbrack {\mathit{iq}\cdot R_{\alpha}} \right\rbrack\left. {} \right|^{2}}} \right\rangle
+.. math::
+   :label: pfx104
+   
+   \left\langle {\mathit{ex}p\left\lbrack {{- \mathit{iq}}\cdot R_{\alpha}(0)} \right\rbrack\mathit{ex}p\left\lbrack {\mathit{iq}\cdot R_{\alpha}(t)} \right\rbrack} \right\rangle = \left\langle {|{\mathit{ex}p\left\lbrack {\mathit{iq}\cdot R_{\alpha}} \right\rbrack\left. {} \right|^{2}}} \right\rangle
 
 holds. In this way the computation of the *EISF* is reduced to the
 computation of a static thermal average. We remark at this point that
@@ -2348,6 +2452,7 @@ conformational space.
 on a grid of equidistantly spaced points along the *q*-axis:
 
 .. math::
+   :label: pfx105
 
    \begin{matrix}
    {\mathit{EISF}\left( q_{m} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I}\mathit{EIS}F_{I}\left( q_{m} \right)}},{m = 0}\ldots{N_{q} - 1.}} \\
@@ -2357,23 +2462,24 @@ on a grid of equidistantly spaced points along the *q*-axis:
 where N\ :sub:`q` is a user-defined number of *q*-shells, the values for
 q\ :sub:`m` are defined as
 
-.. math:: {q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q
+.. math::
+   :label: pfx106
+   
+   {q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q
 
 , and for each specie the following expression for the elastic
 incoherent scattering function is:
 
 .. math::
+   :label: pfx107
 
    \begin{matrix}
    {\mathit{EIS}F_{I}{\left( q_{m} \right) = \frac{1}{n_{I}}}{\sum\limits_{\alpha}^{n_{I}}{\overline{\left\langle {|{\exp\left\lbrack {\mathit{iq}\cdot R_{\alpha}} \right\rbrack\left. {} \right|^{2}}} \right\rangle}}^{q}}.} \\
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}70} \right) \\
    \end{matrix}
 
-Here the symbol
-
-.. math:: {\overline{...}}^{q}
-
-\ denotes an average over the *q*-vectors having the same modulus
+Here the symbol :math:`{\overline{...}}^{q}`
+denotes an average over the *q*-vectors having the same modulus
 q\ :sub:`m`. The program corrects the atomic input trajectories for
 jumps due to periodic boundary conditions.
 
@@ -2409,6 +2515,7 @@ function via the cumulant expansion [`11 <#SignetBibliographie_011>`__],
 [`22 <#SignetBibliographie_022>`__]
 
 .. math::
+   :label: pfx108
 
    \begin{matrix}
    {\text{F}_{\text{inc}}^{g}{\left( {q,t} \right) = {\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}}}}\text{F}_{I,\text{inc}}^{g}\left( {q,t} \right)} \\
@@ -2420,6 +2527,7 @@ the number of atoms of species *I*, :math:`\omega`\ :sub:`I,inc` the weight for
 specie *I* (see Section ?? for more details) and
 
 .. math::
+   :label: pfx109
 
    \begin{matrix}
    {\text{F}_{I,\text{inc}}^{g}{\left( {q,t} \right) = \frac{1}{n_{I}}}\sum\limits_{\alpha}^{n_{I}}\exp\left\lbrack {{- q^{2}}\rho_{\alpha,1}{(t) + q^{4}}\rho_{\alpha,2}(t)\mp\ldots} \right\rbrack.} \\
@@ -2428,11 +2536,15 @@ specie *I* (see Section ?? for more details) and
 
 The cumulants
 
-.. math:: \rho_{\alpha,k}(t)
+.. math::
+   :label: pfx110
+   
+   \rho_{\alpha,k}(t)
 
 \ are identified as
 
 .. math::
+   :label: pfx111
 
    \begin{matrix}
    {\rho_{\alpha,1}{(t) = \left\langle {d_{\alpha}^{2}\left( {t;n_{q}} \right)} \right\rangle}} \\
@@ -2440,13 +2552,16 @@ The cumulants
    \end{matrix}
 
 .. math::
+   :label: pfx112
 
    \begin{matrix}
    {\rho_{\alpha,2}{(t) = \frac{1}{4!}}\left\lbrack {{\left\langle {d_{\alpha}^{4}\left( {t;n_{q}} \right)} \right\rangle - 3}\left\langle {d_{\alpha}^{2}\left( {t;n_{q}} \right)} \right\rangle^{2}} \right\rbrack} \\
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}74} \right) \\
    \end{matrix}
 
-.. math:: \vdots
+.. math::
+   
+   \vdots
 
 The vector nq is the unit vector in the direction of q. In the Gaussian
 approximation the above expansion is truncated after the
@@ -2456,12 +2571,10 @@ is exact. For these systems the incoherent intermediate scattering
 function is completely determined by the *MSD*. *MDANSE* allows one to
 compute the total and partial incoherent intermediate scattering
 function in the *Gaussian approximation* by discretizing equation
-
-.. math:: 71
-
-\ `Error: Reference source not found <#anchor-144>`__:
+`71`:
 
 .. math::
+   :label: pfx113
 
    \begin{matrix}
    {\text{F}_{\text{inc}}^{g}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}\text{F}_{I,\text{inc}}^{g}\left( {q_{m},k\cdot\Delta t} \right)}},{k = 0}\ldots{N_{t} - 1},{m = 0}\ldots{N_{q} - 1.}} \\
@@ -2472,6 +2585,7 @@ with for each specie the following expression for the intermediate
 scattering function:
 
 .. math::
+   :label: pfx114
 
    \begin{matrix}
    {\text{F}_{I,\alpha,\text{inc}}^{g}{\left( {q_{m},k\cdot\Delta t} \right) = \frac{1}{n_{I}}}\sum\limits_{\alpha}^{n_{I}}\exp\left\lbrack {\frac{- \left( q_{m} \right)^{2}}{6}\Delta_{\alpha}^{2}\left( {k\cdot\Delta t} \right)} \right\rbrack\mathit{isotropic}\mathit{system}} \\
@@ -2479,6 +2593,7 @@ scattering function:
    \end{matrix}
 
 .. math::
+   :label: pfx115
 
    \begin{matrix}
    {\text{F}_{I,\alpha,\text{inc}}^{g}{\left( {q_{m},k\cdot\Delta t} \right) = \frac{1}{n_{I}}}\sum\limits_{\alpha}^{n_{I}}\exp\left\lbrack {\frac{- \left( q_{m} \right)^{2}}{2}\Delta_{\alpha}^{2}\left( {k\cdot\Delta t;n} \right)} \right\rbrack\mathit{isotropic}\mathit{system}} \\
@@ -2491,21 +2606,20 @@ t)-grid is the same as for the calculation of the intermediate
 incoherent scattering function (see `Dynamic Incoherent Structure
 Factor <#_Dynamic_Incoherent_Structure>`__). The quantities
 
-.. math:: \Delta_{\alpha}^{2}(t)
+.. math::
+   :label: pfx116
+   
+   \Delta_{\alpha}^{2}(t)
 
 \ and
 
-.. math:: \Delta_{\alpha}^{2}\left( {t;n} \right)
+.. math::
+   :label: pfx117
+   
+   \Delta_{\alpha}^{2}\left( {t;n} \right)
 
-are the mean-square displacements, defined in Equations
-
-.. math:: 5
-
-\ `Error: Reference source not found <#anchor-145>`__ and
-
-.. math:: 6
-
-\ `Error: Reference source not found <#anchor-146>`__, respectively.
+are the mean-square displacements, defined in Equations `5`
+and `6`, respectively.
 They are computed by using the algorithm described in the `Mean Square
 Displacement <#_Theory_and_implementation_2>`__ section. *MDANSE*
 corrects the atomic input trajectories for jumps due to periodic
@@ -2669,6 +2783,7 @@ the analysis, then, the definition is the same as the original
 definition. In that context, the *CN* is defined as:
 
 .. math::
+   :label: pfx118
 
    \begin{matrix}
    {n{\left( {r,{r + \mathit{dr}}} \right) = \frac{1}{N_{G}}}{\sum\limits_{g = 1}^{N_{G}}{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{\mathit{gI}}\left( {r,{r + \mathit{dr}}} \right)}}}} \\
@@ -2685,6 +2800,7 @@ gravity of the group of atom *g*.
 distances at different times
 
 .. math::
+   :label: pfx119
 
    \begin{matrix}
    {\mathit{CN}\left( r_{m} \right)\doteq\frac{1}{N_{\mathit{frames}}}\frac{1}{N_{G}}{\sum\limits_{f = 1}^{N_{\mathit{frames}}}{\sum\limits_{g = 1}^{N_{G}}{\sum\limits_{I = 1}^{N_{\mathit{species}}}{CN_{\mathit{gI}}\left( {r_{m},t_{f}} \right)}}}},{m = 0}\ldots{N_{r} - 1},{n = 0}\ldots{N_{\mathit{frames}} - 1.}} \\
@@ -2695,6 +2811,7 @@ where N\ :sub:`r` and N\ :sub:`frames` are respectively the number of
 distances and times at which the *CN* is evaluated and
 
 .. math::
+   :label: pfx120
 
    \begin{matrix}
    {CN_{\mathit{gI}}{\left( {r_{m},t_{f}} \right) = n_{\mathit{gI}}}\left( {r_{m},t_{f}} \right),} \\
@@ -2705,14 +2822,7 @@ is the number of atoms of specie *I* found within [rm, rm + dr] at frame
 *f* from the centre of gravity of group *g*.
 
 From these expressions, several remarks can be done. Firstly, the Eqs.
-
-.. math:: 79
-
-\ `Error: Reference source not found <#anchor-158>`__ and
-
-.. math:: 80
-
-\ `Error: Reference source not found <#anchor-159>`__ can be restricted
+`79` and `80` can be restricted
 to intramolecular and intermolecular distances only. Secondly, these
 equations can be averaged over the selected frames providing a time
 averaged intra and intermolecular *CN*. Finally, the same equations
@@ -2878,6 +2988,7 @@ accurately.
 Mathematically, the *PDF* can be computed using the following formula:
 
 .. math::
+   :label: pfx121
 
    \begin{matrix}
    {\mathit{PDF}{(r) = {\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}n_{I}}}n_{J}\omega_{I}\omega_{J}g_{\mathit{IJ}}(r)} \\
@@ -2889,11 +3000,15 @@ and n\ :sub:`J` are respectively the numbers of atoms of species *I* and
 *J*, :math:`\omega`\ :sub:`I` and :math:`\omega`\ :sub:`J` respectively the weights for species
 *I* and *J* (see Section ?? for more details) and
 
-.. math:: \mathit{PD}F_{\mathit{\alpha\beta}}(r)
+.. math::
+   :label: pfx122
+   
+   \mathit{PD}F_{\mathit{\alpha\beta}}(r)
 
 \ is the partial *PDF* for I and J species that can be defined as:
 
 .. math::
+   :label: pfx123
 
    \begin{matrix}
    {\mathit{PD}F_{\mathit{IJ}}{(r) = \frac{\left\langle {\sum\limits_{\alpha = 1}^{n_{I}}{n_{\alpha J}(r)}} \right\rangle}{n_{I}\rho_{J}4\pi r^{2}\mathit{dr}}}} \\
@@ -2902,7 +3017,10 @@ and n\ :sub:`J` are respectively the numbers of atoms of species *I* and
 
 where :math:`\rho`\ :sub:`J` is the density of atom of specie *J* and
 
-.. math:: n_{\alpha J}(r)
+.. math::
+   :label: pfx124
+   
+   n_{\alpha J}(r)
 
 \ is the mean number of atoms of specie *J* in a shell of width *dr* at
 distance *r* of the atom :math:`\alpha` of specie *I*.
@@ -2911,6 +3029,7 @@ From the computation of PDF, two related quantities are also calculated;
 the Radial Distribution Function (RDF), defined as
 
 .. math::
+   :label: pfx125
 
    \begin{matrix}
    {\mathit{RDF}{(r) = 4}\pi r^{2}\rho_{0}\mathit{PDF}(r),} \\
@@ -2920,6 +3039,7 @@ the Radial Distribution Function (RDF), defined as
 and the Total Correlation Function (TCF), defined as
 
 .. math::
+   :label: pfx126
 
    \begin{matrix}
    {\mathit{TCF}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}{(r) - 1}} \right),} \\
@@ -2929,6 +3049,7 @@ and the Total Correlation Function (TCF), defined as
 where :math:`\rho`\ :sub:`0` is the average atomic density, which is defined as
 
 .. math::
+   :label: pfx127
 
    \begin{matrix}
    {{\rho_{0} = \frac{N}{V}},} \\
@@ -2947,6 +3068,7 @@ the below set of equations has been chosen, which will return results
 that differ from those of nMOLDYN.
 
 .. math::
+   :label: pfx128
 
    \begin{matrix}
    {\mathit{TCF}_{\mathit{intramolecular}}{(r) = 4}\pi r\rho_{0}\mathit{PDF}_{\mathit{intramolecular}}(r),} \\
@@ -2954,6 +3076,7 @@ that differ from those of nMOLDYN.
    \end{matrix}
 
 .. math::
+   :label: pfx129
 
    \begin{matrix}
    {\mathit{TCF}_{\mathit{intermolecular}}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}_{\mathit{intermolecular}}{(r) - 1}} \right),} \\
@@ -2961,6 +3084,7 @@ that differ from those of nMOLDYN.
    \end{matrix}
 
 .. math::
+   :label: pfx130
 
    \begin{matrix}
    {\mathit{TCF}_{\mathit{total}}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}_{\mathit{total}}{(r) - 1}} \right),} \\
@@ -3035,6 +3159,7 @@ estimator of structural similarity. It is a numerical measure of the
 difference between two structures that can be defined as:
 
 .. math::
+   :label: pfx131
 
    \begin{matrix}
    {\mathit{RMSD}{(t) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\alpha}}\left( t_{\mathit{ref}} \right)} \right)}{N_{\alpha}}}}} \\
@@ -3052,11 +3177,13 @@ structural changes occurred during the simulation.
 In Molecular Dynamics Analysis for Neutron Scattering Experiments
 (*MDANSE*), *RMSD* is computed using the discretized version of equation
 
-.. math:: 83
+.. math::
+   :label: pfx 83
 
 \ `Error: Reference source not found <#anchor-174>`__:
 
 .. math::
+   :label: pfx132
 
    \begin{matrix}
    {\mathit{RMSD}{\left( {n\cdot\Delta t} \right) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\mathit{ref}}}(t)} \right)}{N_{\alpha}}}},{n = 0}\ldots{N_{t} - 1}.} \\
@@ -3065,7 +3192,10 @@ In Molecular Dynamics Analysis for Neutron Scattering Experiments
 
 where Nt is the number of frames and
 
-.. math:: \mathrm{\Delta}t
+.. math::
+   :label: pfx133
+   
+   \mathrm{\Delta}t
 
 \ is the time step.
 
@@ -3129,17 +3259,15 @@ a given axis. In *MDANSE*, the reference is chosen to be the centre of
 gravity of the system under study. Mathematically, it can be defined as:
 
 .. math::
+   :label: pfx134
 
    \begin{matrix}
    {\mathit{ROG}{(t) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\mathit{cms}}}(t)} \right)}{N_{\alpha}}}}} \\
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}87} \right) \\
    \end{matrix}
 
-where
-
-.. math:: N_{\alpha}
-
-\ is the number of atoms of the system, and r\ :sub:`:math:`\alpha``\ (t) and
+where :math:`N_{\alpha}`
+is the number of atoms of the system, and r\ :sub:`:math:`\alpha``\ (t) and
 r\ :sub:`cms`\ (t) are respectively the position of atom :math:`\alpha` and the
 centre of mass of the system at time t.
 
@@ -3148,12 +3276,10 @@ measure for the molecule compactness. For example, it can be useful when
 monitoring folding process.
 
 In *MDANSE*, *ROG* is computed using the discretized version of equation
-
-.. math:: 85
-
-\ `Error: Reference source not found <#anchor-181>`__:
+`85`:
 
 .. math::
+   :label: pfx135
 
    \begin{matrix}
    {\mathit{ROG}{\left( {n\cdot\Delta t} \right) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\mathit{cms}}}(t)} \right)}{N_{\alpha}}}},{n = 0}\ldots{N_{t} - 1.}} \\
@@ -3241,9 +3367,13 @@ complex system.
 set of concentric shells surrounding the centres of mass of selected
 triplets of atoms using the formula:
 
-.. math:: \mathit{SD}\left( {r_{l},\theta_{m},\phi_{n}} \right)\doteq\frac{1}{N_{\mathit{triplets}N_{\mathit{groups}}}}{\sum\limits_{t = 1}^{N_{\mathit{triplets}}}{\sum\limits_{g = 1}^{N_{\mathit{groups}}}\left\langle {n_{\mathit{tg}}\left( {r_{l},\theta_{m},\phi_{n}} \right)} \right\rangle}},
+.. math::
+   :label: pfx136
+   
+   \mathit{SD}\left( {r_{l},\theta_{m},\phi_{n}} \right)\doteq\frac{1}{N_{\mathit{triplets}N_{\mathit{groups}}}}{\sum\limits_{t = 1}^{N_{\mathit{triplets}}}{\sum\limits_{g = 1}^{N_{\mathit{groups}}}\left\langle {n_{\mathit{tg}}\left( {r_{l},\theta_{m},\phi_{n}} \right)} \right\rangle}},
 
 .. math::
+   :label: pfx137
 
    \begin{matrix}
    {{l = 0}\ldots{N_{r} - 1},{m = 0}\ldots{N_{\theta} - 1},{n = 0}\ldots{N_{\phi} - 1.}} \\
@@ -3253,14 +3383,7 @@ triplets of atoms using the formula:
 where N\ :sub:`triplets` and N\ :sub:`groups` are respectively the
 number of triplets and groups, r\ :sub:`l`, θ\ :sub:`m` and φ\ :sub:`n`
 are the spherical coordinates at which the *SD* is evaluated,
-N\ :sub:`r`,
-
-.. math:: N_{\theta}
-
-\ and
-
-.. math:: N_{\phi}
-
+N\ :sub:`r`, :math:`N_{\theta}` and :math:`N_{\phi}`
 are respectively the number of discrete *r*, θ and φ values and
 n\ :sub:`tg`\ (r\ :sub:`l`, θ\ :sub:`m`, φ\ :sub:`n`) is the number of
 group of atoms of type *g* whose centres of mass is found to be in the
@@ -3271,26 +3394,38 @@ following way:
 
 -  defines the centre of mass
 
-   .. math:: c_{i}^{t}{i = 1},2\ldots N_{\mathit{triplets}}
+   .. math::
+     :label: pfx138
+   
+     c_{i}^{t}{i = 1},2\ldots N_{\mathit{triplets}}
 
    \ for each triplet of atoms,
 
 -  defines the centre of mass
 
-   .. math:: c_{i}^{g}{i = 1},2\ldots N_{\mathit{groups}}
+   .. math::
+     :label: pfx139
+     
+     c_{i}^{g}{i = 1},2\ldots N_{\mathit{groups}}
 
    \ for each group of atoms,
 
 -  constructs an oriented orthonormal basis
 
-   .. math:: R_{i}^{t}{i = 1},2\ldots N_{\mathit{triplets}}
+   .. math::
+     :label: pfx140
+     
+     R_{i}^{t}{i = 1},2\ldots N_{\mathit{triplets}}
 
    \ cantered on each c\ :sup:`t`, this basis is defined from the three
    vectors **v1**, **v2**, **v3**,
 
    -  
 
-      .. math:: v_{1} = \frac{n_{1} + n_{2}}{\left| \left| {n_{1} + n_{2}} \right| \right|}
+      .. math::
+        :label: pfx141 
+        
+        v_{1} = \frac{n_{1} + n_{2}}{\left| \left| {n_{1} + n_{2}} \right| \right|}
 
       \ where **n1** and **n2** are respectively the normalized vectors
       in (**a1**,\ **a2**) and (**a1**,\ **a3**) directions where
@@ -3300,7 +3435,10 @@ following way:
       **a3** atoms,
    -  
 
-      .. math:: {\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}
+      .. math::
+        :label: pfx142
+        
+        {\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}
 
 -  expresses the cartesian coordinates of each c\ :sup:`g` in each
    R\ :sup:`t`,
@@ -3312,7 +3450,10 @@ following way:
 
 -  does
 
-   .. math:: n_{\mathit{tg}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) = n_{\mathit{tg}}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) + 1}
+   .. math::
+     :label: pfx143
+     
+     n_{\mathit{tg}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) = n_{\mathit{tg}}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) + 1}
 
 .. _gui-14:
 
@@ -3785,17 +3926,24 @@ a least-squares sense.
 **Optimal superposition.** We consider a given time frame in which the
 atomic positions of a (sub)molecule are given by
 
-.. math:: x_{\alpha},{\alpha = 1}\ldots N
+.. math::
+   :label: pfx145
+   
+   x_{\alpha},{\alpha = 1}\ldots N
 
 . The corresponding positions in the reference structure are denoted as
 
-.. math:: x_{\alpha}^{(0)},{\alpha = 1}\ldots N
+.. math::
+   :label: pfx146
+   
+   x_{\alpha}^{(0)},{\alpha = 1}\ldots N
 
 . For both the given structure and the reference structure we introduce
 the yet undetermined centroids X and X\ :sup:`(0)`, respectively, and
 define the deviation
 
 .. math::
+   :label: pfx147
 
    \begin{matrix}
    {\Delta_{\alpha}\doteq D(q){\left\lbrack {x_{\alpha}^{(0)} - X^{(0)}} \right\rbrack - \left\lbrack {x_{\alpha} - X} \right\rbrack}.} \\
@@ -3808,12 +3956,16 @@ parameters*, abbreviated as vector **q** = (q\ :sub:`0`, q\ :sub:`1`,
 q\ :sub:`2`, q\ :sub:`3`). The quaternion parameters fulfil the
 normalization condition
 
-.. math:: q \dot {q = 1}
+.. math::
+   :label: pfx148
+   
+   q \dot {q = 1}
 
 \ [`25 <#SignetBibliographie_025>`__]. The target function to be
 minimized is now defined as
 
 .. math::
+   :label: pfx149
 
    \begin{matrix}
    {m{\left( {q;X,X^{(0)}} \right) = {\sum\limits_{\alpha}{\omega_{\alpha}|\Delta|_{\alpha}^{2}}}}.} \\
@@ -3825,6 +3977,7 @@ with respect to the centroids is decoupled from the minimization with
 respect to the quaternion parameters and yields
 
 .. math::
+   :label: pfx150
 
    \begin{matrix}
    {{X = {\sum\limits_{\alpha}\omega_{\alpha}}}x_{\alpha},} \\
@@ -3832,6 +3985,7 @@ respect to the quaternion parameters and yields
    \end{matrix}
 
 .. math::
+   :label: pfx151
 
    \begin{matrix}
    {{X^{(0)} = {\sum\limits_{\alpha}\omega_{\alpha}}}x_{\alpha}^{(0)}.} \\
@@ -3842,6 +3996,7 @@ We are now left with a minimization problem for the rotational part
 which can be written as
 
 .. math::
+   :label: pfx152
 
    \begin{matrix}
    {m{(q) = {\sum\limits_{\alpha}{\omega_{\alpha}\left\lbrack {{D(q)r}_{\alpha}^{(0)} - r_{\alpha}} \right\rbrack^{2}}}\overset{!}{=}\mathit{Min}}.} \\
@@ -3851,6 +4006,7 @@ which can be written as
 The relative position vectors
 
 .. math::
+   :label: pfx153
 
    \begin{matrix}
    {{r_{\alpha} = {x_{\alpha} - X}},} \\
@@ -3858,6 +4014,7 @@ The relative position vectors
    \end{matrix}
 
 .. math::
+   :label: pfx154
 
    \begin{matrix}
    {r_{\alpha}^{(0)} = {x_{\alpha}^{(0)} - X^{(0)}}} \\
@@ -3868,6 +4025,7 @@ are fixed and the rotation matrix reads
 [`25 <#SignetBibliographie_025>`__]
 
 .. math::
+   :label: pfx155
 
    \begin{matrix}
    {D{(q) = \begin{pmatrix}
@@ -3886,6 +4044,7 @@ quaternion multiplication is not commutative. A possible matrix
 representation of an arbitrary quaternion,
 
 .. math::
+   :label: pfx156
 
    \begin{matrix}
    {{A = a_{0}}\cdot{1 + a_{1}}\cdot{I + a_{2}}\cdot{J + a_{3}}\cdot K,} \\
@@ -3895,6 +4054,7 @@ representation of an arbitrary quaternion,
 reads
 
 .. math::
+   :label: pfx157
 
    \begin{matrix}
    {A = \begin{pmatrix}
@@ -3906,16 +4066,14 @@ reads
    \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}99} \right) \\
    \end{matrix}
 
-The components
-
-.. math:: a_{\upsilon}
-
-\ are real numbers. Similarly, as normal complex numbers allow one to
+The components :math:`a_{\upsilon}`
+are real numbers. Similarly, as normal complex numbers allow one to
 represent rotations in a plane, quaternions allow one to represent
 rotations in space. Consider the quaternion representation of a vector
 r, which is given by
 
 .. math::
+   :label: pfx158
 
    \begin{matrix}
    {{R = x}\cdot{I + y}\cdot{J + z}\cdot K,} \\
@@ -3925,6 +4083,7 @@ r, which is given by
 and perform the operation
 
 .. math::
+   :label: pfx159
 
    \begin{matrix}
    {{R^{'} = \mathit{QRQ}^{T}},} \\
@@ -3934,6 +4093,7 @@ and perform the operation
 where Q is a normalised quaternion
 
 .. math::
+   :label: pfx160
 
    \begin{matrix}
    {\text{|}Q\text{|}^{2}\doteq{{q_{0}^{2} + q_{1}^{2} + q_{2}^{2} + q_{3}^{2}} = \frac{1}{4}}\mathit{tr}\text{\textbackslash\{}Q^{T}Q{\text{\textbackslash\}} = 1.}} \\
@@ -3945,6 +4105,7 @@ is represented by an *orthogonal* 4 x 4 matrix. **R'** may then be
 written as
 
 .. math::
+   :label: pfx161
 
    \begin{matrix}
    {{R^{'} = x^{'}}\cdot{I + y^{'}}\cdot{J + z^{'}}\cdot K,} \\
@@ -3954,6 +4115,7 @@ written as
 where the components x', y', z', abbreviated as r', are given by
 
 .. math::
+   :label: pfx162
 
    \begin{matrix}
    {{r^{'} = D}(q)r.} \\
@@ -3961,15 +4123,13 @@ where the components x', y', z', abbreviated as r', are given by
    \end{matrix}
 
 The matrix **D**\ (**q**) is the rotation matrix defined in
-
-.. math:: 95
-
-\ `Error: Reference source not found <#anchor-221>`__.
+`95`.
 
 **Solution of the minimization problem**. In quaternion algebra, the
 rotational minimization problem may now be phrased as follows:
 
 .. math::
+   :label: pfx163
 
    \begin{matrix}
    {m{(q) = {{\sum\limits_{\alpha}{{\omega_{\alpha}\text{|}\mathit{QR}}_{\alpha}^{(0)}Q}^{T}} - R_{\alpha}}}{\text{|}^{2}\overset{!}{=}\mathit{Min}}.} \\
@@ -3980,6 +4140,7 @@ Since the matrix Q representing a normalized quaternion is orthogonal
 this may also be written as
 
 .. math::
+   :label: pfx164
 
    \begin{matrix}
    {{{m{(q) = {\sum\limits_{\alpha}\omega_{\alpha}}}\text{|}\mathit{QR}}_{\alpha}^{(0)} - R_{\alpha}}Q\text{|}^{2}{.\overset{!}{=}\mathit{Min}}.} \\
@@ -3988,17 +4149,17 @@ this may also be written as
 
 This follows from the simple fact that
 
-.. math:: \text{|}A{\text{|} = \text{|}}\mathit{AQ}\text{|}
+.. math::
+   :label: pfx165
+   
+   \text{|}A{\text{|} = \text{|}}\mathit{AQ}\text{|}
 
-, if Q is normalized. Eq.
-
-.. math:: 104
-
-\ `Error: Reference source not found <#anchor-222>`__ shows that the
+, if Q is normalized. Eq. `104` shows that the
 target function to be minimized can be written as a simple quadratic
 form in the quaternion parameters [`24 <#SignetBibliographie_024>`__],
 
 .. math::
+   :label: pfx166
 
    \begin{matrix}
    {m{(q) = q}\cdot\mathit{Mq},} \\
@@ -4006,6 +4167,7 @@ form in the quaternion parameters [`24 <#SignetBibliographie_024>`__],
    \end{matrix}
 
 .. math::
+   :label: pfx167
 
    \begin{matrix}
    {{M = {\sum\limits_{\alpha}{\omega_{\alpha}M_{\alpha}}}}.} \\
@@ -4013,19 +4175,14 @@ form in the quaternion parameters [`24 <#SignetBibliographie_024>`__],
    \end{matrix}
 
 The matrices M\_ are positive semi-definite matrices depending on the
-positions
-
-.. math:: r_{\alpha}
-
-\ and
-
-.. math:: r_{\alpha}^{(0)}
-
-:
+positions :math:`r_{\alpha}` and :math:`r_{\alpha}^{(0)}`:
 
 |image32|\ 
 
-.. math:: ({\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}109})
+.. math::
+   :label: pfx168
+   
+   ({\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}109})
 
 The rotational fit is now reduced to the problem of finding the minimum
 of a quadratic form with the constraint that the quaternion to be
@@ -4033,6 +4190,7 @@ determined must be normalized. Using the method of Lagrange multipliers
 to account for the normalization constraint we have
 
 .. math::
+   :label: pfx169
 
    \begin{matrix}
    {m^{'}{\left( {q,\lambda} \right) = q}\cdot{\mathit{Mq} - \lambda}{\left( {q\cdot{q - 1}} \right)\overset{!}{=}\mathit{Min}}.} \\
@@ -4042,6 +4200,7 @@ to account for the normalization constraint we have
 This leads immediately to the eigenvalue problem
 
 .. math::
+   :label: pfx170
 
    \begin{matrix}
    {{\mathit{Mq} = \lambda}q,} \\
@@ -4049,6 +4208,7 @@ This leads immediately to the eigenvalue problem
    \end{matrix}
 
 .. math::
+   :label: pfx171
 
    \begin{matrix}
    {q\cdot{q = 1.}} \\
@@ -4057,7 +4217,10 @@ This leads immediately to the eigenvalue problem
 
 Now any normalized eigenvector **q** fulfils the relation
 
-.. math:: {\lambda = q}\cdot\mathit{Mq}\equiv m(q)
+.. math::
+   :label: pfx172
+   
+   {\lambda = q}\cdot\mathit{Mq}\equiv m(q)
 
 . Therefore, the eigenvector belonging to the smallest eigenvalue,
 λ\ :sub:`min`, is the desired solution. At the same time λ\ :sub:`min`
