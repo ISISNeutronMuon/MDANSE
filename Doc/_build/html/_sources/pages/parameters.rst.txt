@@ -1424,7 +1424,10 @@ similar to the one of the experimental resolutions. For example, if you
 are going to compare your simulation with data measured on a
 spectrometer having a resolution of 0.1 meV (FWHM), then use:
 
-.. math:: \sigma\approx\frac{\mathit{FWHM}{\lbrack\text{meV}\rbrack}}{2.35}\times 1.519\frac{\lbrack\text{ps}^{\text{-1}}\rbrack}{\lbrack\text{meV}\rbrack}\approx 0.065\text{ps}^{\text{-1}}
+.. math::
+   :label: eq1
+   
+   {\sigma\approx\frac{\mathit{FWHM}{\lbrack\text{meV}\rbrack}}{2.35}\times 1.519\frac{\lbrack\text{ps}^{\text{-1}}\rbrack}{\lbrack\text{meV}\rbrack}\approx 0.065\text{ps}^{\text{-1}}}
 
 This parameter is available for the following analyses: `Current
 Correlation Function <#_Current_Correlation_Function>`__, `Density of
@@ -1455,11 +1458,9 @@ differentiate using 1\ :sup:`st` to 5\ :sup:`th` order.
       calculated as
 
 .. math::
+   :label: eq113
 
-   \begin{matrix}
-   {\overset{˙}{r}{\left( t_{i} \right) = \frac{r{\left( t_{i + 1} \right) - r}\left( t_{i} \right)}{\mathit{\Delta t}}}} \\
-   \left( {\mathit{SEQ}\mathit{Equation}\mathit{ARABIC}113} \right) \\
-   \end{matrix}
+   {\overset{.}{r}{\left( t_{i} \right) = \frac{r{\left( t_{i + 1} \right) - r}\left( t_{i} \right)}{\mathit{\Delta t}}}}
 
 -  
 
@@ -1553,7 +1554,10 @@ analysis such as the partial distribution function or the dynamic
 coherent structure factor). The partials *P*\ :sub:`i` or *P*\ :sub:`ij`
 are saved together with the total result, which is calculated as:
 
-.. math:: {P_{\mathit{total}} = \frac{\sum\limits_{i}{c_{i}w_{i}P}_{i}}{\sum\limits_{i}{c_{i}\left| w_{i} \right|}}}\text{or}{P_{\mathit{total}} = \frac{\sum\limits_{\mathit{ij}}{c_{i}{c_{j}w}_{i}w_{j}P}_{i}}{\sum\limits_{\mathit{ij}}{c_{i}c_{j}\left| w_{i} \right|\left| w_{j} \right|}}},
+.. math::
+   :label: eq3
+
+   {P_{\mathit{total}} = \frac{\sum\limits_{i}{c_{i}w_{i}P}_{i}}{\sum\limits_{i}{c_{i}\left| w_{i} \right|}}}\text{or}{P_{\mathit{total}} = \frac{\sum\limits_{\mathit{ij}}{c_{i}{c_{j}w}_{i}w_{j}P}_{i}}{\sum\limits_{\mathit{ij}}{c_{i}c_{j}\left| w_{i} \right|\left| w_{j} \right|}}},
 
 where the sum runs over the number of different chemical elements,
 *c*\ :sub:`i` is the number concentration of element *i* and

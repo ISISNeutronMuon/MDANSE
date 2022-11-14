@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10. Analysis: Structure &mdash; MDANSE 1.5.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="11. Analysis: other options" href="analysis.html" />
+    <link rel="prev" title="9. Analysis: Scattering" href="scattering.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> MDANSE
+            <img src="../_static/mdanse_logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">MDANSE User Manual</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="opening.html">1. MDANSE User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">2. Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">3. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">4. Installing MDANSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build.html">5. Building MDANSE from source code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="files.html">6. Input and output files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">7. Using MDANSE Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dynamics.html">8. Analysis: Dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scattering.html">9. Analysis: Scattering</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">10. Analysis: Structure</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#area-per-molecule">10.1. Area Per Molecule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coordination-number">10.2. Coordination Number</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#density-profile">10.3. Density Profile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#eccentricity">10.4. Eccentricity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#molecular-trace">10.5. Molecular Trace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pair-distribution-function">10.6. Pair Distribution Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#root-mean-square-deviation">10.7. Root Mean Square Deviation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#root-mean-square-fluctuation">10.8. Root Mean Square Fluctuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#radius-of-gyration">10.9. Radius Of Gyration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solvent-accessible-surface">10.10. Solvent Accessible Surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spatial-density">10.11. Spatial Density</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#static-structure-factor">10.12. Static Structure Factor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#voronoi">10.13. Voronoi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#xray-static-structure-factor">10.14. Xray Static Structure Factor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">11. Analysis: other options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmd.html">12. Using MDANSE from command line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">13. Trajectory Converters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">14. Plotting Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html#units">15. Units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">16. Glossary of Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">17. References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MDANSE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><span class="section-number">10. </span>Analysis: Structure</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pages/structure.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="analysis-structure">
+<h1><span class="section-number">10. </span>Analysis: Structure<a class="headerlink" href="#analysis-structure" title="Permalink to this heading"></a></h1>
+<p>This section has the following Plugins:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Area_Per_Molecule">Are Per Molecule</a></p></li>
+<li><p><a class="reference external" href="#_Coordination_Number">Coordination Number</a></p></li>
+<li><p><a class="reference external" href="#_Density_Profile">Density Profile</a></p></li>
+<li><p><a class="reference external" href="#_Eccentricity">Eccentricity</a></p></li>
+<li><p><a class="reference external" href="#_Molecular_Trace">Molecular Trace</a></p></li>
+<li><p><a class="reference external" href="#_Pair_Distribution_Function">Pair Distribution Function</a></p></li>
+<li><p><a class="reference external" href="#_Root_Mean_Square">Root Mean Square Deviation</a></p></li>
+<li><p><a class="reference external" href="#_Root_Mean_Square_1">Root Mean Square Fluctuation</a></p></li>
+<li><p><a class="reference external" href="#_Radius_Of_Gyration">Radius Of Gyration</a></p></li>
+<li><p><a class="reference external" href="#_Solvent_Accessible_Surface">Solvent Accessible Surface</a></p></li>
+<li><p><a class="reference external" href="#_Spatial_Density">Spatial Density</a></p></li>
+<li><p><a class="reference external" href="#_Static_Structure_Factor">Static Structure Factor</a></p></li>
+<li><p><a class="reference external" href="#_Voronoi">Voronoi</a></p></li>
+<li><p><a class="reference external" href="#_Xray_Static_Structure">XRay Static Structure Factor</a></p></li>
+</ul>
+<section id="area-per-molecule">
+<h2><span class="section-number">10.1. </span>Area Per Molecule<a class="headerlink" href="#area-per-molecule" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/100000010000032500000217C794C16C077B23E0.png"><img alt="../_images/100000010000032500000217C794C16C077B23E0.png" src="../_images/100000010000032500000217C794C16C077B23E0.png" style="width: 15.774cm; height: 10.582cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p><strong>area vectors</strong></p></li>
+</ul>
+<p><em>Format:</em> drop-down</p>
+<p><em>Default:</em> a, b</p>
+<p><em>Description:</em> &lt;insert&gt;</p>
+<ul class="simple">
+<li><p><strong>molecule name</strong></p></li>
+</ul>
+<p><em>Format:</em> str</p>
+<p><em>Default:</em> DMPC</p>
+<p><em>Description:</em> the name of the molecules for which the calculation will
+take place. The name inputted here must match a name that MMTK assigned
+to inside the NetCDF file.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+<li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
+</ul>
+</section>
+<section id="coordination-number">
+<h2><span class="section-number">10.2. </span>Coordination Number<a class="headerlink" href="#coordination-number" title="Permalink to this heading"></a></h2>
+<p id="theory-and-implementation-10">Theory and implementation</p>
+<p>In chemistry, the Coordination Number (<em>CN</em>) is the total number of
+neighbours of a central atom in a molecule or ion. The definition used
+in <em>MDANSE</em> is somewhat different and can be seen as an extension of as
+the former definition. Indeed, in <em>MDANSE</em>, the <em>CN</em> is not defined over
+one defined central atom but around the centres of gravity of a set of
+group of atoms. So, if only one group made of only atom is selected for
+the analysis, then, the definition is the same as the original
+definition. In that context, the <em>CN</em> is defined as:</p>
+<div class="math" id="equation-pfx118">
+<p><span class="eqno">(1)<a class="headerlink" href="#equation-pfx118" title="Permalink to this equation"></a></span><img src="../_images/math/4e3232aee4b6d840faf483a2b9e28902661f3cee.png" alt="{n{\left( {r,{r + \mathit{dr}}} \right) = \frac{1}{N_{G}}}{\sum\limits_{g = 1}^{N_{G}}{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{\mathit{gI}}\left( {r,{r + \mathit{dr}}} \right)}}}}"/></p>
+</div><p>where NG is the number of groups of atoms, N<sub>species</sub> is the
+number of species found in the system and n<sub>gI</sub>(r) is the <em>CN</em>
+defined for species <em>I</em> defined as the number of atoms of species <em>I</em>
+found in a shell of width <em>dr</em> at a distance <em>r</em> of the center of
+gravity of the group of atom <em>g</em>.</p>
+<p><em>MDANSE</em> allows one to compute the <em>CN</em> on a set of equidistantly spaced
+distances at different times</p>
+<div class="math" id="equation-pfx119">
+<p><span class="eqno">(2)<a class="headerlink" href="#equation-pfx119" title="Permalink to this equation"></a></span><img src="../_images/math/6bf276c6305c1a18ac1a2efaf68ac96584230288.png" alt="{\mathit{CN}\left( r_{m} \right)\doteq\frac{1}{N_{\mathit{frames}}}\frac{1}{N_{G}}{\sum\limits_{f = 1}^{N_{\mathit{frames}}}{\sum\limits_{g = 1}^{N_{G}}{\sum\limits_{I = 1}^{N_{\mathit{species}}}{CN_{\mathit{gI}}\left( {r_{m},t_{f}} \right)}}}},{m = 0}\ldots{N_{r} - 1},{n = 0}\ldots{N_{\mathit{frames}} - 1.}}"/></p>
+</div><p>where N<sub>r</sub> and N<sub>frames</sub> are respectively the number of
+distances and times at which the <em>CN</em> is evaluated and</p>
+<div class="math" id="equation-pfx120">
+<p><span class="eqno">(3)<a class="headerlink" href="#equation-pfx120" title="Permalink to this equation"></a></span><img src="../_images/math/2faee5e8310bac93930c17c3e8307c4f2b306139.png" alt="{CN_{\mathit{gI}}{\left( {r_{m},t_{f}} \right) = n_{\mathit{gI}}}\left( {r_{m},t_{f}} \right),}"/></p>
+</div><p>is the number of atoms of species <em>I</em> found within [rm, rm + dr] at frame
+<em>f</em> from the centre of gravity of group <em>g</em>.</p>
+<p>From these expressions, several remarks can be done. Firstly, the Eqs.
+<cite>79</cite> and <cite>80</cite> can be restricted
+to intramolecular and intermolecular distances only. Secondly, these
+equations can be averaged over the selected frames providing a time
+averaged intra and intermolecular <em>CN</em>. Finally, the same equations
+(time-dependent and time-averaged) can be integrated over r to provide a
+cumulative <em>CN</em>. <em>MDANSE</em> computes all these variations.</p>
+<p>The concept of <em>CN</em> is useful for structure-related analysis. It can
+reveal for instance some packing effects that may have occurred during
+the simulation.</p>
+<p id="gui-10">GUI</p>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/100000010000031E000002773364C0C15571A8B0.png"><img alt="../_images/100000010000031E000002773364C0C15571A8B0.png" src="../_images/100000010000031E000002773364C0C15571A8B0.png" style="width: 15.921cm; height: 12.589cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p>r values</p>
+<ul>
+<li><p><strong>from</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 0</p>
+<p><em>Description:</em> the minimum distance from a central particle in
+nanometers taken into consideration. Only particles at that distance or
+further will be counted.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>to</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 10</p>
+<p><em>Description:</em> the maximum distance from a central particle in
+nanometers. Only particles up to and including this distance will be
+counted.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>by step of</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 1</p>
+<p><em>Description:</em> the size of the step in nanometers used to generate a
+range of values between the above two extremes above. Eg. using the
+default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Atom_Selection_1">atom selection</a></p></li>
+<li><p><a class="reference external" href="#_Atom_Transmutation_1">atom transmutation</a></p></li>
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+<li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
+</ul>
+</section>
+<section id="density-profile">
+<h2><span class="section-number">10.3. </span>Density Profile<a class="headerlink" href="#density-profile" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/1000000100000323000002F7066E8CC898B27610.png"><img alt="../_images/1000000100000323000002F7066E8CC898B27610.png" src="../_images/1000000100000323000002F7066E8CC898B27610.png" style="width: 15.921cm; height: 15.048cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p><a class="reference external" href="#_Atom_Selection_1">atom selection</a></p></li>
+<li><p><a class="reference external" href="#_Atom_Transmutation_1">atom transmutation</a></p></li>
+<li><p><strong>axis</strong></p></li>
+</ul>
+<p><em>Format:</em> drop-down</p>
+<p><em>Default:</em> c</p>
+<p><em>Description:</em> the simulation box axis that Density Profile will be
+calculated along.</p>
+<ul class="simple">
+<li><p><strong>dr</strong></p></li>
+</ul>
+<p><em>Format:</em> float</p>
+<p><em>Default:</em> 0.01</p>
+<p><em>Description:</em> during Density Profile calculation the axis specified in
+the <strong>axis</strong> field is divided into a number of bins along its length.
+<strong>dr</strong> specifies how large each of these bins will be.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Weights">weights</a></p></li>
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+<li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
+</ul>
+</section>
+<section id="eccentricity">
+<h2><span class="section-number">10.4. </span>Eccentricity<a class="headerlink" href="#eccentricity" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/100000010000032200000217EAF4D97A16B24CBA.png"><img alt="../_images/100000010000032200000217EAF4D97A16B24CBA.png" src="../_images/100000010000032200000217EAF4D97A16B24CBA.png" style="width: 15.921cm; height: 10.62cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p><a class="reference external" href="#_Atom_Selection_1">atom selection</a></p></li>
+<li><p><a class="reference external" href="#_Atom_Transmutation_1">atom transmutation</a></p></li>
+<li><p><a class="reference external" href="#_Weights">weights</a></p></li>
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+</ul>
+</section>
+<section id="molecular-trace">
+<h2><span class="section-number">10.5. </span>Molecular Trace<a class="headerlink" href="#molecular-trace" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/100000010000032200000221CA1B5E3FC473217D.png"><img alt="../_images/100000010000032200000221CA1B5E3FC473217D.png" src="../_images/100000010000032200000221CA1B5E3FC473217D.png" style="width: 15.921cm; height: 10.82cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p><a class="reference external" href="#_Atom_Selection_1">atom selection</a></p></li>
+<li><p><strong>spatial resolution</strong></p></li>
+</ul>
+<p><em>Format:</em> float</p>
+<p><em>Default:</em> 0.1</p>
+<p><em>Description:</em> the resolution with which Molecular Trace is calculated.
+It is used to determine how many grid points are used to represent a
+unit of length.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+<li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
+</ul>
+</section>
+<section id="pair-distribution-function">
+<h2><span class="section-number">10.6. </span>Pair Distribution Function<a class="headerlink" href="#pair-distribution-function" title="Permalink to this heading"></a></h2>
+<p id="theory-and-implementation-11">Theory and implementation</p>
+<p>The Pair Distribution Function (<em>PDF</em>) is an example of a pair
+correlation function, which describes how, on average, the atoms in a
+system are radially packed around each other. This proves to be a
+particularly effective way of describing the average structure of
+disordered molecular systems such as liquids. Also in systems like
+liquids, where there is continual movement of the atoms and a single
+snapshot of the system shows only the instantaneous disorder, it is
+extremely useful to be able to deal with the average structure.</p>
+<p>The <em>PDF</em> is useful in other ways. For example, it is something that can
+be deduced experimentally from x-ray or neutron diffraction studies,
+thus providing a direct comparison between experiment and simulation. It
+can also be used in conjunction with the interatomic pair potential
+function to calculate the internal energy of the system, usually quite
+accurately.</p>
+<p>Mathematically, the <em>PDF</em> can be computed using the following formula:</p>
+<div class="math" id="equation-pfx121">
+<p><span class="eqno">(4)<a class="headerlink" href="#equation-pfx121" title="Permalink to this equation"></a></span><img src="../_images/math/4b2d13725e80274643a00b8426a0d1e78ccfd134.png" alt="{\mathit{PDF}{(r) = {\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}n_{I}}}n_{J}\omega_{I}\omega_{J}g_{\mathit{IJ}}(r)}"/></p>
+</div><p>where N<sub>species</sub> is the number of selected species, n<sub>I</sub>
+and n<sub>J</sub> are respectively the numbers of atoms of species <em>I</em> and
+<em>J</em>, <img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/><sub>I</sub> and <img class="math" src="../_images/math/16cb1e006199f0853a2dc67ea814446a38beb54e.png" alt="\omega"/><sub>J</sub> respectively the weights for species
+<em>I</em> and <em>J</em> (see Section ?? for more details) and</p>
+<div class="math" id="equation-pfx122">
+<p><span class="eqno">(5)<a class="headerlink" href="#equation-pfx122" title="Permalink to this equation"></a></span><img src="../_images/math/66203113de3cdfb47bceecee704607e5ea4aa9e2.png" alt="{\mathit{PD}F_{\mathit{\alpha\beta}}(r)}"/></p>
+</div><p>is the partial <em>PDF</em> for I and J species that can be defined as:</p>
+<div class="math" id="equation-pfx123">
+<p><span class="eqno">(6)<a class="headerlink" href="#equation-pfx123" title="Permalink to this equation"></a></span><img src="../_images/math/a702ac290e33d2eb29ebaf9e41ee7ab0e8849573.png" alt="{\mathit{PD}F_{\mathit{IJ}}{(r) = \frac{\left\langle {\sum\limits_{\alpha = 1}^{n_{I}}{n_{\alpha J}(r)}} \right\rangle}{n_{I}\rho_{J}4\pi r^{2}\mathit{dr}}}}"/></p>
+</div><p>where <img class="math" src="../_images/math/27dc86f9f1b1c3435b2403a869b5870c582facea.png" alt="\rho"/><sub>J</sub> is the density of atom of species <em>J</em> and</p>
+<div class="math" id="equation-pfx124">
+<p><span class="eqno">(7)<a class="headerlink" href="#equation-pfx124" title="Permalink to this equation"></a></span><img src="../_images/math/966f589c191783970a14b569180dec21e30258ea.png" alt="{n_{\alpha J}(r)}"/></p>
+</div><p>is the mean number of atoms of species <em>J</em> in a shell of width <em>dr</em> at
+distance <em>r</em> of the atom <img class="math" src="../_images/math/2f5aa019312e1bbc969deab8dca8b00f76025404.png" alt="\alpha"/> of species <em>I</em>.</p>
+<p>From the computation of PDF, two related quantities are also calculated;
+the Radial Distribution Function (RDF), defined as</p>
+<div class="math" id="equation-pfx125">
+<p><span class="eqno">(8)<a class="headerlink" href="#equation-pfx125" title="Permalink to this equation"></a></span><img src="../_images/math/325f9c7f0bbd3113f0d1bc06906679dd4480c83f.png" alt="{\mathit{RDF}{(r) = 4}\pi r^{2}\rho_{0}\mathit{PDF}(r),}"/></p>
+</div><p>and the Total Correlation Function (TCF), defined as</p>
+<div class="math" id="equation-pfx126">
+<p><span class="eqno">(9)<a class="headerlink" href="#equation-pfx126" title="Permalink to this equation"></a></span><img src="../_images/math/9031e230a6e42f3e0110c741c0be9e152e512317.png" alt="{\mathit{TCF}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}{(r) - 1}} \right),}"/></p>
+</div><p>where <img class="math" src="../_images/math/27dc86f9f1b1c3435b2403a869b5870c582facea.png" alt="\rho"/><sub>0</sub> is the average atomic density, which is defined as</p>
+<div class="math" id="equation-pfx127">
+<p><span class="eqno">(10)<a class="headerlink" href="#equation-pfx127" title="Permalink to this equation"></a></span><img src="../_images/math/e6d0961609bd52530cf9483ae4336c82e05892f4.png" alt="{{\rho_{0} = \frac{N}{V}},}"/></p>
+</div><p>where N is the total number of atoms in the system and V the volume of
+the simulation.</p>
+<p>All these quantities are initially calculated as intramolecular and
+intermolecular parts for each pair of atoms, which are then added to
+create the total PDF/RDF/TCF for each pair of atoms, as well as the
+total intramolecular and total intermolecular values. Lastly, the total
+functions are computed. Please note, however, that in the case of TCF,
+the below set of equations has been chosen, which will return results
+that differ from those of nMOLDYN.</p>
+<div class="math" id="equation-pfx128">
+<p><span class="eqno">(11)<a class="headerlink" href="#equation-pfx128" title="Permalink to this equation"></a></span><img src="../_images/math/c4b330d2dd2d103ee031939a841cdfaa7c9b0db4.png" alt="{\mathit{TCF}_{\mathit{intramolecular}}{(r) = 4}\pi r\rho_{0}\mathit{PDF}_{\mathit{intramolecular}}(r),}"/></p>
+</div><div class="math" id="equation-pfx129">
+<p><span class="eqno">(12)<a class="headerlink" href="#equation-pfx129" title="Permalink to this equation"></a></span><img src="../_images/math/1379a1f5bbf18c00bbe3a3c6346bb3ca87a773cf.png" alt="{\mathit{TCF}_{\mathit{intermolecular}}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}_{\mathit{intermolecular}}{(r) - 1}} \right),}"/></p>
+</div><div class="math" id="equation-pfx130">
+<p><span class="eqno">(13)<a class="headerlink" href="#equation-pfx130" title="Permalink to this equation"></a></span><img src="../_images/math/b6e5b3ba134cffc7260b18158dc94011a4475ff0.png" alt="{\mathit{TCF}_{\mathit{total}}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}_{\mathit{total}}{(r) - 1}} \right),}"/></p>
+</div><p id="gui-11">GUI</p>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/1000000100000321000002AF539D7E98B51D2ABC.png"><img alt="../_images/1000000100000321000002AF539D7E98B51D2ABC.png" src="../_images/1000000100000321000002AF539D7E98B51D2ABC.png" style="width: 15.921cm; height: 13.656cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p>r values</p>
+<ul>
+<li><p><strong>from</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 0</p>
+<p><em>Description:</em> the minimum distance from a central particle in
+nanometers taken into consideration. Only particles at that distance or
+further will be counted.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>to</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 10</p>
+<p><em>Description:</em> the maximum distance from a central particle in
+nanometers. Only particles up to and including this distance will be
+counted.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>by step of</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 1</p>
+<p><em>Description:</em> the size of the step in nanometers used to generate a
+range of values between the above two extremes above. Eg. using the
+default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Atom_Selection_1">atom selection</a></p></li>
+<li><p><a class="reference external" href="#_Atom_Transmutation_1">atom transmutation</a></p></li>
+<li><p><a class="reference external" href="#_Weights">weights</a></p></li>
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+<li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
+</ul>
+</section>
+<section id="root-mean-square-deviation">
+<h2><span class="section-number">10.7. </span>Root Mean Square Deviation<a class="headerlink" href="#root-mean-square-deviation" title="Permalink to this heading"></a></h2>
+<p id="theory-and-implementation-12">Theory and implementation</p>
+<p>The Root Mean-Square Deviation (<em>RMSD</em>) is maybe the most popular
+estimator of structural similarity. It is a numerical measure of the
+difference between two structures that can be defined as:</p>
+<div class="math" id="equation-pfx131">
+<p><span class="eqno">(14)<a class="headerlink" href="#equation-pfx131" title="Permalink to this equation"></a></span><img src="../_images/math/0eb7b78011fcf0976d94866c6548c66c76f79419.png" alt="{\mathit{RMSD}{(t) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\alpha}}\left( t_{\mathit{ref}} \right)} \right)}{N_{\alpha}}}}}"/></p>
+</div><p>where N_ is the number of atoms of the system, and r_(t) and r_(tref )
+are respectively the position of atom <img class="math" src="../_images/math/2f5aa019312e1bbc969deab8dca8b00f76025404.png" alt="\alpha"/> at time t and tref where tref is
+a reference time usually chosen as the first step of the simulation.
+Typically, <em>RMSD</em> is used to quantify the structural evolution of the
+system during the simulation. It can provide precious information about
+the system especially if it reached equilibrium or conversely if major
+structural changes occurred during the simulation.</p>
+<p>In Molecular Dynamics Analysis for Neutron Scattering Experiments
+(<em>MDANSE</em>), <em>RMSD</em> is computed using the discretized version of equation
+<cite>83</cite>:</p>
+<div class="math" id="equation-pfx132">
+<p><span class="eqno">(15)<a class="headerlink" href="#equation-pfx132" title="Permalink to this equation"></a></span><img src="../_images/math/8d9f411d93970c4b8046a2303535ebe041a0c610.png" alt="{\mathit{RMSD}{\left( {n\cdot\Delta t} \right) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\mathit{ref}}}(t)} \right)}{N_{\alpha}}}},{n = 0}\ldots{N_{t} - 1}.}"/></p>
+</div><p>where Nt is the number of frames and</p>
+<div class="math" id="equation-pfx133">
+<p><span class="eqno">(16)<a class="headerlink" href="#equation-pfx133" title="Permalink to this equation"></a></span><img src="../_images/math/6f225f16365a611f060db977f09a4db33d5709ee.png" alt="{\mathrm{\Delta}t}"/></p>
+</div><p>is the time step.</p>
+<p id="gui-12">GUI</p>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/1000000100000320000002F9EA9ADCD8260F39E8.png"><img alt="../_images/1000000100000320000002F9EA9ADCD8260F39E8.png" src="../_images/1000000100000320000002F9EA9ADCD8260F39E8.png" style="width: 15.921cm; height: 15.145cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p><strong>reference frame</strong></p></li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 0</p>
+<p><em>Description:</em> the number of the frame which will be used as reference
+for the calculation. The deviation will be calculated as how it deviates
+from the values in this frame.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Atom_Selection_1">atom selection</a></p></li>
+<li><p><a class="reference external" href="#_Group_coordinates_by">Group coordinates by</a></p></li>
+<li><p><a class="reference external" href="#_Atom_Transmutation_1">atom transmutation</a></p></li>
+<li><p><a class="reference external" href="#_Weights">weights</a></p></li>
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+<li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
+</ul>
+</section>
+<section id="root-mean-square-fluctuation">
+<h2><span class="section-number">10.8. </span>Root Mean Square Fluctuation<a class="headerlink" href="#root-mean-square-fluctuation" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/100000010000031E0000021D3A0201B22A02F0F8.png"><img alt="../_images/100000010000031E0000021D3A0201B22A02F0F8.png" src="../_images/100000010000031E0000021D3A0201B22A02F0F8.png" style="width: 15.921cm; height: 10.793cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p><a class="reference external" href="#_Atom_Selection_1">atom selection</a></p></li>
+<li><p><a class="reference external" href="#_Group_coordinates_by">Group coordinates by</a></p></li>
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+<li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
+</ul>
+</section>
+<section id="radius-of-gyration">
+<h2><span class="section-number">10.9. </span>Radius Of Gyration<a class="headerlink" href="#radius-of-gyration" title="Permalink to this heading"></a></h2>
+<p id="theory-and-implementation-13">Theory and implementation</p>
+<p>Radius Of Gyration (<em>ROG</em>) is the name of several related measures of
+the size of an object, a surface, or an ensemble of points. It is
+calculated as the Root Mean Square Distance between the system and a
+reference that can be either the centre of gravity of the system either
+a given axis. In <em>MDANSE</em>, the reference is chosen to be the centre of
+gravity of the system under study. Mathematically, it can be defined as:</p>
+<div class="math" id="equation-pfx134">
+<p><span class="eqno">(17)<a class="headerlink" href="#equation-pfx134" title="Permalink to this equation"></a></span><img src="../_images/math/f8876dd393f7557e2c53679a210a0e0f0e96cf21.png" alt="{\mathit{ROG}{(t) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\mathit{cms}}}(t)} \right)}{N_{\alpha}}}}}"/></p>
+</div><p>where <img class="math" src="../_images/math/af3cfba1ef1854543b12c2e02f0cfa706caa58e9.png" alt="N_{\alpha}"/>
+is the number of atoms of the system, and <img class="math" src="../_images/math/75c9b9b64cca24b4bc1cc7213bd06510758f8a8f.png" alt="r_{\alpha}(t)"/> and
+<img class="math" src="../_images/math/1127255313e9492c0aa4bb60a08ed1a915cb1b0c.png" alt="r_{cms}(t)"/> are respectively the position of atom <img class="math" src="../_images/math/2f5aa019312e1bbc969deab8dca8b00f76025404.png" alt="\alpha"/> and the
+centre of mass of the system at time t.</p>
+<p><em>ROG</em> describes the overall spread of the molecule and as such is a good
+measure for the molecule compactness. For example, it can be useful when
+monitoring folding process.</p>
+<p>In <em>MDANSE</em>, <em>ROG</em> is computed using the discretized version of equation
+<cite>85</cite>:</p>
+<div class="math" id="equation-pfx135">
+<p><span class="eqno">(18)<a class="headerlink" href="#equation-pfx135" title="Permalink to this equation"></a></span><img src="../_images/math/51c38f6bd6072319ef82dfe83d6e682008c8a41b.png" alt="{\mathit{ROG}{\left( {n\cdot\Delta t} \right) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\mathit{cms}}}(t)} \right)}{N_{\alpha}}}},{n = 0}\ldots{N_{t} - 1.}}"/></p>
+</div><p>where N<sub>t</sub> is the number of frames and Δt is the time step.</p>
+<p id="gui-13">GUI</p>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/10000001000003210000021F447FD4560DD7995B.png"><img alt="../_images/10000001000003210000021F447FD4560DD7995B.png" src="../_images/10000001000003210000021F447FD4560DD7995B.png" style="width: 15.921cm; height: 10.793cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p><a class="reference external" href="#_Atom_Selection_1">atom selection</a></p></li>
+<li><p><a class="reference external" href="#_Weights">weights</a></p></li>
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+<li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
+</ul>
+</section>
+<section id="solvent-accessible-surface">
+<h2><span class="section-number">10.10. </span>Solvent Accessible Surface<a class="headerlink" href="#solvent-accessible-surface" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/1000000100000326000002790EB025922D724131.png"><img alt="../_images/1000000100000326000002790EB025922D724131.png" src="../_images/1000000100000326000002790EB025922D724131.png" style="width: 15.921cm; height: 12.504cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p><a class="reference external" href="#_Atom_Selection_1">atom selection</a></p></li>
+<li><p><strong>n sphere points</strong></p></li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 1000</p>
+<p><em>Description:</em> Solvent Accessible Surface calculation involves the
+creation of a mesh of points equidistant form each atom or molecule.
+This field determines how many of these points should be created.</p>
+<ul class="simple">
+<li><p><strong>probe radius</strong></p></li>
+</ul>
+<p><em>Format:</em> float</p>
+<p><em>Default:</em> 0.14</p>
+<p><em>Description:</em> (in nanometers) affects the observed surface area.
+Smaller probe radius detects more detail and therefore reports larger
+surface area. The default value is approximately equal to the radius of
+a water molecule.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+<li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
+</ul>
+</section>
+<section id="spatial-density">
+<h2><span class="section-number">10.11. </span>Spatial Density<a class="headerlink" href="#spatial-density" title="Permalink to this heading"></a></h2>
+<p id="theory-and-implementation-14">Theory and implementation</p>
+<p>The Spatial Density (<em>SD</em>) can be seen as a generalization of the pair
+distribution function. Indeed, pair distribution functions are defined
+as orientationally averaged distribution functions. Although these
+correlation functions reflect many key features of the short-range order
+in molecular systems, it should be realized that an average spatial
+assembly of non-spherical particles cannot be uniquely characterized
+from these one-dimensional functions. So, structural models postulated
+for the molecular ordering in non-simple systems based only on
+one-dimensional <em>PDF</em> will always be somewhat ambiguous. The goal of
+<em>SD</em> analysis is to provide greater clarity in the structural analysis
+of molecular systems by utilizing distribution function which span both
+the radial and angular coordinates of the separation vector. This can
+provide useful information about the average local structure in a
+complex system.</p>
+<p><em>MDANSE</em> allows one to compute the <em>SD</em> in spherical coordinates on a
+set of concentric shells surrounding the centres of mass of selected
+triplets of atoms using the formula:</p>
+<div class="math" id="equation-pfx136">
+<p><span class="eqno">(19)<a class="headerlink" href="#equation-pfx136" title="Permalink to this equation"></a></span><img src="../_images/math/e252a738a27c3597113ca05e3c4d206fb44238ba.png" alt="{\mathit{SD}\left( {r_{l},\theta_{m},\phi_{n}} \right)\doteq\frac{1}{N_{\mathit{triplets}N_{\mathit{groups}}}}{\sum\limits_{t = 1}^{N_{\mathit{triplets}}}{\sum\limits_{g = 1}^{N_{\mathit{groups}}}\left\langle {n_{\mathit{tg}}\left( {r_{l},\theta_{m},\phi_{n}} \right)} \right\rangle}},}"/></p>
+</div><div class="math" id="equation-pfx137">
+<p><span class="eqno">(20)<a class="headerlink" href="#equation-pfx137" title="Permalink to this equation"></a></span><img src="../_images/math/17f4961f645f64365e4b8b59484746d9225e05be.png" alt="{l = 0}\ldots{N_{r} - 1},{m = 0}\ldots{N_{\theta} - 1},{n = 0}\ldots{N_{\phi} - 1.}"/></p>
+</div><p>where N<sub>triplets</sub> and N<sub>groups</sub> are respectively the
+number of triplets and groups, r<sub>l</sub>, θ<sub>m</sub> and φ<sub>n</sub>
+are the spherical coordinates at which the <em>SD</em> is evaluated,
+N<sub>r</sub>, <img class="math" src="../_images/math/e824af86a93c5ad52da542c425c0633676daaa0e.png" alt="N_{\theta}"/> and <img class="math" src="../_images/math/e2ea99c459cc454168000e3f0ec0ac2f65cbd17f.png" alt="N_{\phi}"/>
+are respectively the number of discrete <em>r</em>, θ and φ values and
+n<sub>tg</sub>(r<sub>l</sub>, θ<sub>m</sub>, φ<sub>n</sub>) is the number of
+group of atoms of type <em>g</em> whose centres of mass is found to be in the
+volume element defined by [r, r + dr], [θ, θ + dθ] and [φ, φ + dφ] in
+the spherical coordinates basis cantered on the centre of mass of
+triplet <em>t</em>. So technically, <em>MDANSE</em> proceeds more or less in the
+following way:</p>
+<ul>
+<li><p>defines the centre of mass</p>
+<div class="math" id="equation-pfx138">
+<p><span class="eqno">(21)<a class="headerlink" href="#equation-pfx138" title="Permalink to this equation"></a></span><img src="../_images/math/21f760412e588fa7b9121713196142a43eb31dac.png" alt="{c_{i}^{t}{i = 1},2\ldots N_{\mathit{triplets}}}"/></p>
+</div><p>for each triplet of atoms,</p>
+</li>
+<li><p>defines the centre of mass</p>
+<div class="math" id="equation-pfx139">
+<p><span class="eqno">(22)<a class="headerlink" href="#equation-pfx139" title="Permalink to this equation"></a></span><img src="../_images/math/914a1568bfda59e54e9f9a642275da82cde54f2c.png" alt="{c_{i}^{g}{i = 1},2\ldots N_{\mathit{groups}}}"/></p>
+</div><p>for each group of atoms,</p>
+</li>
+<li><p>constructs an oriented orthonormal basis</p>
+<div class="math" id="equation-pfx140">
+<p><span class="eqno">(23)<a class="headerlink" href="#equation-pfx140" title="Permalink to this equation"></a></span><img src="../_images/math/7cdd05849e46df5bf5bc8865e370c230c5740ae5.png" alt="{R_{i}^{t}{i = 1},2\ldots N_{\mathit{triplets}}}"/></p>
+</div><p>cantered on each c<sup>t</sup>, this basis is defined from the three
+vectors <strong>v1</strong>, <strong>v2</strong>, <strong>v3</strong>,</p>
+<ul>
+<li><div class="math" id="equation-pfx141">
+<p><span class="eqno">(24)<a class="headerlink" href="#equation-pfx141" title="Permalink to this equation"></a></span><img src="../_images/math/2489d97b8303a29a4356e2eb3b2b417f55bf46be.png" alt="{v_{1} = \frac{n_{1} + n_{2}}{\left| \left| {n_{1} + n_{2}} \right| \right|}}"/></p>
+</div><p>where <strong>n1</strong> and <strong>n2</strong> are respectively the normalized vectors
+in (<strong>a1</strong>,<strong>a2</strong>) and (<strong>a1</strong>,<strong>a3</strong>) directions where
+(<strong>a1</strong>,<strong>a2</strong>,<strong>a3</strong>) are the three atoms of the triplet <em>t</em>,</p>
+</li>
+<li><p>v<sub>2</sub> is defined as the clockwise normal vector orthogonal
+to v1 that belongs to the plane defined by <strong>a1</strong>, <strong>a2</strong> and
+<strong>a3</strong> atoms,</p></li>
+<li><div class="math" id="equation-pfx142">
+<p><span class="eqno">(25)<a class="headerlink" href="#equation-pfx142" title="Permalink to this equation"></a></span><img src="../_images/math/a5383b9a39faed2a25042d29dc79ba9dbd9d87e4.png" alt="{{\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}}"/></p>
+</div></li>
+</ul>
+</li>
+<li><p>expresses the cartesian coordinates of each c<sup>g</sup> in each
+R<sup>t</sup>,</p></li>
+<li><p>transforms these coordinates in spherical coordinates,</p></li>
+<li><p>discretizes the spherical coordinates in r<sub>l</sub>, θ<sub>m</sub> and
+φ<sub>n</sub>,</p></li>
+<li><p>does</p>
+<div class="math" id="equation-pfx143">
+<p><span class="eqno">(26)<a class="headerlink" href="#equation-pfx143" title="Permalink to this equation"></a></span><img src="../_images/math/27c62ebdd628608c510cbec1b5960161e2ed28c6.png" alt="{n_{\mathit{tg}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) = n_{\mathit{tg}}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) + 1}}"/></p>
+</div></li>
+</ul>
+<p id="gui-14">GUI</p>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/10000001000003200000027836715F0544BCA168.png"><img alt="../_images/10000001000003200000027836715F0544BCA168.png" src="../_images/10000001000003200000027836715F0544BCA168.png" style="width: 15.921cm; height: 12.578cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p><strong>spatial resolution</strong></p></li>
+</ul>
+<p><em>Format:</em> float</p>
+<p><em>Default:</em> 0.1</p>
+<p><em>Description:</em> the resolution with which Spatial Density is calculated.
+It is used to determine how many grid points are used to represent a
+unit of length.</p>
+<ul class="simple">
+<li><p><strong>reference basis</strong></p></li>
+</ul>
+<p><em>Format:</em> drop-down</p>
+<p><em>Default:</em> None</p>
+<p><em>Description:</em> can be used exactly like <a class="reference external" href="#_Axis_Selection_1">Axis
+Selection</a>. &lt;insert&gt; what it does</p>
+<ul class="simple">
+<li><p><strong>target molecule</strong></p></li>
+</ul>
+<p><em>Format:</em> drop-down</p>
+<p><em>Default:</em> None</p>
+<p><em>Description:</em> can be used exactly an Atom Selection. Allows for a
+subset of particles to be selected on which the analysis will be
+performed. More information in <a class="reference external" href="#_Atom_Selection_1">Atom Selection</a>.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+<li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
+</ul>
+</section>
+<section id="static-structure-factor">
+<h2><span class="section-number">10.12. </span>Static Structure Factor<a class="headerlink" href="#static-structure-factor" title="Permalink to this heading"></a></h2>
+<p id="theory-and-implementation-15">Theory and implementation</p>
+<p>This analysis is a shortcut to obtain the static coherent structure
+factor defined as S(q) = F<sub>coh</sub>(q, t = 0). It uses exactly the
+same procedure as the one defined in the <a class="reference external" href="#_Theory_and_implementation_3">Dynamic Coherent Structure
+Factor</a> section.</p>
+<p id="gui-15">GUI</p>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/1000000100000320000002FC939CE5AA59D4D2C7.png"><img alt="../_images/1000000100000320000002FC939CE5AA59D4D2C7.png" src="../_images/1000000100000320000002FC939CE5AA59D4D2C7.png" style="width: 15.921cm; height: 15.205cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p>r values</p>
+<ul>
+<li><p><strong>from</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 0</p>
+<p><em>Description:</em> the minimum distance from a central particle in
+nanometers taken into consideration. Only particles at that distance or
+further will be counted.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>to</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 10</p>
+<p><em>Description:</em> the maximum distance from a central particle in
+nanometers. Only particles up to and including this distance will be
+counted.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>by step of</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 1</p>
+<p><em>Description:</em> the size of the step in nanometers used to generate a
+range of values between the above two extremes above. Eg. using the
+default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.</p>
+<ul class="simple">
+<li><p>q values</p>
+<ul>
+<li><p><strong>from</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 0</p>
+<p><em>Description:</em> the minimum value used to generate the range of q values.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>to</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 10</p>
+<p><em>Description:</em> the maximum value used to generate the range of q values.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>by step of</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 1</p>
+<p><em>Description:</em> the step size value used to generate the range of q
+values.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Atom_Selection_1">atom selection</a></p></li>
+<li><p><a class="reference external" href="#_Atom_Transmutation_1">atom transmutation</a></p></li>
+<li><p><a class="reference external" href="#_Weights">weights</a></p></li>
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+<li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
+</ul>
+</section>
+<section id="voronoi">
+<h2><span class="section-number">10.13. </span>Voronoi<a class="headerlink" href="#voronoi" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/1000000100000321000001B102EE53DCF2A6701F.png"><img alt="../_images/1000000100000321000001B102EE53DCF2A6701F.png" src="../_images/1000000100000321000001B102EE53DCF2A6701F.png" style="width: 15.921cm; height: 8.606cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p><strong>apply periodic_boundary_condition</strong></p></li>
+</ul>
+<p><em>Format:</em> bool</p>
+<p><em>Default:</em> True</p>
+<p><em>Description:</em> determines if the periodic boundary conditions is applied
+to the Voronoi cell.</p>
+<ul class="simple">
+<li><p><strong>pbc border size</strong></p></li>
+</ul>
+<p><em>Format:</em> float</p>
+<p><em>Default:</em> 0.0</p>
+<p><em>Description:</em> &lt;insert&gt;</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+<li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
+</ul>
+</section>
+<section id="xray-static-structure-factor">
+<h2><span class="section-number">10.14. </span>Xray Static Structure Factor<a class="headerlink" href="#xray-static-structure-factor" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>available for trajectories only</p></li>
+</ul>
+<a class="reference internal image-reference" href="../_images/1000000100000321000002B4804828B2E2D13E48.png"><img alt="../_images/1000000100000321000002B4804828B2E2D13E48.png" src="../_images/1000000100000321000002B4804828B2E2D13E48.png" style="width: 15.921cm; height: 13.755cm;" /></a>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Frames">frames</a></p></li>
+<li><p>r values</p>
+<ul>
+<li><p><strong>from</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 0</p>
+<p><em>Description:</em> the minimum distance from a central particle in
+nanometers taken into consideration. Only particles at that distance or
+further will be counted.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>to</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 10</p>
+<p><em>Description:</em> the maximum distance from a central particle in
+nanometers. Only particles up to and including this distance will be
+counted.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>by step of</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 1</p>
+<p><em>Description:</em> the size of the step in nanometers used to generate a
+range of values between the above two extremes above. Eg. using the
+default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.</p>
+<ul class="simple">
+<li><p>q values</p>
+<ul>
+<li><p><strong>from</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 0</p>
+<p><em>Description:</em> the minimum value used to generate the range of q values.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>to</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 10</p>
+<p><em>Description:</em> the maximum value used to generate the range of q values.</p>
+<ul class="simple">
+<li><ul>
+<li><p><strong>by step of</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><em>Format:</em> int</p>
+<p><em>Default:</em> 1</p>
+<p><em>Description:</em> the step size value used to generate the range of q
+values.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#_Atom_Selection_1">atom selection</a></p></li>
+<li><p><a class="reference external" href="#_Atom_Transmutation_1">atom transmutation</a></p></li>
+<li><p><a class="reference external" href="#_Output_files">output files</a></p></li>
+<li><p><a class="reference external" href="#_Running_mode">running mode</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="scattering.html" class="btn btn-neutral float-left" title="9. Analysis: Scattering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="analysis.html" class="btn btn-neutral float-right" title="11. Analysis: other options" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2015, Gael Goret, Bachir Aoun and Eric C. Pellegrini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
