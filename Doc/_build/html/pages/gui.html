@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="8. Analysis GUI" href="analysis.html" />
+    <link rel="next" title="8. Analysis: Dynamics" href="dynamics.html" />
     <link rel="prev" title="6. Input and output files" href="files.html" /> 
 </head>
 
@@ -83,15 +83,19 @@
 <li class="toctree-l2"><a class="reference internal" href="#data-panel">7.7. Data panel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#working-panel">7.8. Working panel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#plugins-panel">7.9. Plugins panel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis">7.10. Analysis</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="analysis.html">8. Analysis GUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cmd.html">9. Using MDANSE from command line</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trajectory.html">10. Trajectory Converters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">11. Plotting Options</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html#units">12. Units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="parameters.html">13. Glossary of Parameters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">14. References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dynamics.html">8. Analysis: Dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scattering.html">9. Analysis: Scattering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">10. Analysis: Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">11. Analysis: other options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmd.html">12. Using MDANSE from command line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">13. Trajectory Converters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">14. Plotting Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html#units">15. Units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">16. Glossary of Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">17. References</a></li>
 </ul>
 
         </div>
@@ -620,6 +624,46 @@ plugins, click on the ‘plus’ buttons next to the text to unhide the
 options. If there is no such button next to a text, that means that that
 is a plugin and can be launched by double-clicking on the text.</p>
 </section>
+<section id="analysis">
+<h2><span class="section-number">7.10. </span>Analysis<a class="headerlink" href="#analysis" title="Permalink to this heading"></a></h2>
+<p>This menu contains all data manipulations and appears as in the picture
+below when a trajectory is loaded. As indicated by the plus buttons,
+each of these options is a menu in itself.</p>
+<a class="reference internal image-reference" href="../_images/10000001000000F9000000B9A79707AE37EC9465.png"><img alt="../_images/10000001000000F9000000B9A79707AE37EC9465.png" src="../_images/10000001000000F9000000B9A79707AE37EC9465.png" style="width: 6.588cm; height: 4.895cm;" /></a>
+<p>They are explored in greater depth in the following sections, and the
+analyses are in turn explored in their subsections. Some contain a
+discussion of the theory behind the computation, and all show the
+analysis window of that analysis, the one that is launched by
+double-clicking the option in this Plugins panel.</p>
+<p>Each analysis window is different since each requires different
+parameters to be configured before it can be run. However, all of them
+have the same structure (example window below), consisting of these
+parts:</p>
+<ul class="simple">
+<li><p><strong>trajectory</strong> box shows the path to the <a class="reference external" href="#_NetCDF_file_format">MMTK
+NetCDF</a> trajectory that this analysis will
+be performed on.</p></li>
+<li><p><strong>Parameters</strong> are a group of options, of which the common ones are
+discussed in depth in <a class="reference external" href="#_Appendix_2">Appendix 2</a>. These are the
+options which vary from analysis to analysis. The only parameters
+that exist on every analysis are Frames and Output files.</p></li>
+<li><p><strong>Buttons</strong> are situated at the bottom of each analysis and consist
+of these options:</p>
+<ul>
+<li><p><strong>Help</strong> opens the source code documentation for the relevant
+class in an MDANSE window.</p></li>
+<li><p><strong>Save</strong> opens a file browser that allows you to save the current
+analysis with the set options into a python script which can be
+run from the command line. More information about scripts in
+<a class="reference external" href="#_Using_MDANSE_from">Using MDANSE from command line.</a></p></li>
+<li><p><strong>Run</strong> starts the analysis and prompts you whether you want to
+close the window. The status of the analysis can be found in the
+<a class="reference external" href="#_Jobs">Jobs</a> panel, though there is a known bug where
+successful analyses do not show up.</p></li>
+</ul>
+</li>
+</ul>
+</section>
 </section>
 
 
@@ -627,7 +671,7 @@ is a plugin and can be launched by double-clicking on the text.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="files.html" class="btn btn-neutral float-left" title="6. Input and output files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="analysis.html" class="btn btn-neutral float-right" title="8. Analysis GUI" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="dynamics.html" class="btn btn-neutral float-right" title="8. Analysis: Dynamics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -623,6 +623,52 @@ options. If there is no such button next to a text, that means that that
 is a plugin and can be launched by double-clicking on the text.
 
 
+Analysis
+--------
+
+This menu contains all data manipulations and appears as in the picture
+below when a trajectory is loaded. As indicated by the plus buttons,
+each of these options is a menu in itself.
+
+.. image:: ./Pictures/10000001000000F9000000B9A79707AE37EC9465.png
+   :width: 6.588cm
+   :height: 4.895cm
+
+They are explored in greater depth in the following sections, and the
+analyses are in turn explored in their subsections. Some contain a
+discussion of the theory behind the computation, and all show the
+analysis window of that analysis, the one that is launched by
+double-clicking the option in this Plugins panel.
+
+Each analysis window is different since each requires different
+parameters to be configured before it can be run. However, all of them
+have the same structure (example window below), consisting of these
+parts:
+
+-  **trajectory** box shows the path to the `MMTK
+   NetCDF <#_NetCDF_file_format>`__ trajectory that this analysis will
+   be performed on.
+
+-  **Parameters** are a group of options, of which the common ones are
+   discussed in depth in `Appendix 2 <#_Appendix_2>`__. These are the
+   options which vary from analysis to analysis. The only parameters
+   that exist on every analysis are Frames and Output files.
+
+-  **Buttons** are situated at the bottom of each analysis and consist
+   of these options:
+
+   -  **Help** opens the source code documentation for the relevant
+      class in an MDANSE window.
+   -  **Save** opens a file browser that allows you to save the current
+      analysis with the set options into a python script which can be
+      run from the command line. More information about scripts in
+      `Using MDANSE from command line. <#_Using_MDANSE_from>`__
+   -  **Run** starts the analysis and prompts you whether you want to
+      close the window. The status of the analysis can be found in the
+      `Jobs <#_Jobs>`__ panel, though there is a known bug where
+      successful analyses do not show up.
+
+
 .. |image1| image:: ./Pictures/100000010000028D000001F1F632B1C1173DE220.png
    :width: 7.096cm
    :height: 5.426cm

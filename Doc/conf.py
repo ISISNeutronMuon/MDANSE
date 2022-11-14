@@ -78,6 +78,8 @@ source_encoding = 'utf-8-sig'
 # The master toctree document.
 master_doc = 'index'
 
+numfig = True
+
 # General information about the project.
 project = u'MDANSE'
 copyright = u'2015, Gael Goret, Bachir Aoun and Eric C. Pellegrini'

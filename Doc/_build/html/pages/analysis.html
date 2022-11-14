@@ -370,46 +370,46 @@ a least-squares sense.</p>
 <p><strong>Optimal superposition.</strong> We consider a given time frame in which the
 atomic positions of a (sub)molecule are given by</p>
 <div class="math" id="equation-pfx145">
-<p><span class="eqno">(1)<a class="headerlink" href="#equation-pfx145" title="Permalink to this equation"></a></span><img src="../_images/math/762a41572aceddc99b02aaedd5f3e27832c73dab.png" alt="{x_{\alpha},{\alpha = 1}\ldots N}"/></p>
+<p><span class="eqno">(11.1)<a class="headerlink" href="#equation-pfx145" title="Permalink to this equation"></a></span><img src="../_images/math/762a41572aceddc99b02aaedd5f3e27832c73dab.png" alt="{x_{\alpha},{\alpha = 1}\ldots N}"/></p>
 </div><p>. The corresponding positions in the reference structure are denoted as</p>
 <div class="math" id="equation-pfx146">
-<p><span class="eqno">(2)<a class="headerlink" href="#equation-pfx146" title="Permalink to this equation"></a></span><img src="../_images/math/bae3506fd09ad752963f8a4ead173462576de569.png" alt="{x_{\alpha}^{(0)},{\alpha = 1}\ldots N}"/></p>
+<p><span class="eqno">(11.2)<a class="headerlink" href="#equation-pfx146" title="Permalink to this equation"></a></span><img src="../_images/math/bae3506fd09ad752963f8a4ead173462576de569.png" alt="{x_{\alpha}^{(0)},{\alpha = 1}\ldots N}"/></p>
 </div><p>. For both the given structure and the reference structure we introduce
 the yet undetermined centroids X and X<sup>(0)</sup>, respectively, and
 define the deviation</p>
 <div class="math" id="equation-pfx147">
-<p><span class="eqno">(3)<a class="headerlink" href="#equation-pfx147" title="Permalink to this equation"></a></span><img src="../_images/math/4c6cf8a81fef8c4a33fbc542d92ffd157884ac15.png" alt="{\Delta_{\alpha}\doteq D(q){\left\lbrack {x_{\alpha}^{(0)} - X^{(0)}} \right\rbrack - \left\lbrack {x_{\alpha} - X} \right\rbrack}.}"/></p>
+<p><span class="eqno">(11.3)<a class="headerlink" href="#equation-pfx147" title="Permalink to this equation"></a></span><img src="../_images/math/4c6cf8a81fef8c4a33fbc542d92ffd157884ac15.png" alt="{\Delta_{\alpha}\doteq D(q){\left\lbrack {x_{\alpha}^{(0)} - X^{(0)}} \right\rbrack - \left\lbrack {x_{\alpha} - X} \right\rbrack}.}"/></p>
 </div><p>Here <strong>D(q)</strong> is a rotation matrix which depends on also yet
 undetermined angular coordinates which we chose to be <em>quaternion
 parameters</em>, abbreviated as vector <strong>q</strong> = (q<sub>0</sub>, q<sub>1</sub>,
 q<sub>2</sub>, q<sub>3</sub>). The quaternion parameters fulfil the
 normalization condition</p>
 <div class="math" id="equation-pfx148">
-<p><span class="eqno">(4)<a class="headerlink" href="#equation-pfx148" title="Permalink to this equation"></a></span><img src="../_images/math/fcde3dc00a8e9523c285c648084298f97d64bea6.png" alt="{q \dot {q = 1}}"/></p>
+<p><span class="eqno">(11.4)<a class="headerlink" href="#equation-pfx148" title="Permalink to this equation"></a></span><img src="../_images/math/fcde3dc00a8e9523c285c648084298f97d64bea6.png" alt="{q \dot {q = 1}}"/></p>
 </div><p>[<a class="reference external" href="#SignetBibliographie_025">25</a>]. The target function to be
 minimized is now defined as</p>
 <div class="math" id="equation-pfx149">
-<p><span class="eqno">(5)<a class="headerlink" href="#equation-pfx149" title="Permalink to this equation"></a></span><img src="../_images/math/f42cd36fb75ece13e2bd098130ea32acdde83e4e.png" alt="{m{\left( {q;X,X^{(0)}} \right) = {\sum\limits_{\alpha}{\omega_{\alpha}|\Delta|_{\alpha}^{2}}}}.}"/></p>
+<p><span class="eqno">(11.5)<a class="headerlink" href="#equation-pfx149" title="Permalink to this equation"></a></span><img src="../_images/math/f42cd36fb75ece13e2bd098130ea32acdde83e4e.png" alt="{m{\left( {q;X,X^{(0)}} \right) = {\sum\limits_{\alpha}{\omega_{\alpha}|\Delta|_{\alpha}^{2}}}}.}"/></p>
 </div><p>where <img class="math" src="../_images/math/efe7e7aeecaf0956359232cd0f90cfcb1f8d5e71.png" alt="\omega_{\alpha}"/> are atomic weights (see Section ??). The minimization
 with respect to the centroids is decoupled from the minimization with
 respect to the quaternion parameters and yields</p>
 <div class="math" id="equation-pfx150">
-<p><span class="eqno">(6)<a class="headerlink" href="#equation-pfx150" title="Permalink to this equation"></a></span><img src="../_images/math/2c64915c6e85fe0ec35109c4fecb4317ab6e0e00.png" alt="{{X = {\sum\limits_{\alpha}\omega_{\alpha}}}x_{\alpha},}"/></p>
+<p><span class="eqno">(11.6)<a class="headerlink" href="#equation-pfx150" title="Permalink to this equation"></a></span><img src="../_images/math/2c64915c6e85fe0ec35109c4fecb4317ab6e0e00.png" alt="{{X = {\sum\limits_{\alpha}\omega_{\alpha}}}x_{\alpha},}"/></p>
 </div><div class="math" id="equation-pfx151">
-<p><span class="eqno">(7)<a class="headerlink" href="#equation-pfx151" title="Permalink to this equation"></a></span><img src="../_images/math/9350c59f119fd24bd7d241a6c1e79f0f59d458f2.png" alt="{{X^{(0)} = {\sum\limits_{\alpha}\omega_{\alpha}}}x_{\alpha}^{(0)}.}"/></p>
+<p><span class="eqno">(11.7)<a class="headerlink" href="#equation-pfx151" title="Permalink to this equation"></a></span><img src="../_images/math/9350c59f119fd24bd7d241a6c1e79f0f59d458f2.png" alt="{{X^{(0)} = {\sum\limits_{\alpha}\omega_{\alpha}}}x_{\alpha}^{(0)}.}"/></p>
 </div><p>We are now left with a minimization problem for the rotational part
 which can be written as</p>
 <div class="math" id="equation-pfx152">
-<p><span class="eqno">(8)<a class="headerlink" href="#equation-pfx152" title="Permalink to this equation"></a></span><img src="../_images/math/fc7974d8d112a0e200ef51341d619978e8701747.png" alt="m{(q) = {\sum\limits_{\alpha}{\omega_{\alpha}\left\lbrack {{D(q)r}_{\alpha}^{(0)} - r_{\alpha}} \right\rbrack^{2}}}\overset{!}{=}\mathit{Min}}."/></p>
+<p><span class="eqno">(11.8)<a class="headerlink" href="#equation-pfx152" title="Permalink to this equation"></a></span><img src="../_images/math/fc7974d8d112a0e200ef51341d619978e8701747.png" alt="m{(q) = {\sum\limits_{\alpha}{\omega_{\alpha}\left\lbrack {{D(q)r}_{\alpha}^{(0)} - r_{\alpha}} \right\rbrack^{2}}}\overset{!}{=}\mathit{Min}}."/></p>
 </div><p>The relative position vectors</p>
 <div class="math" id="equation-pfx153">
-<p><span class="eqno">(9)<a class="headerlink" href="#equation-pfx153" title="Permalink to this equation"></a></span><img src="../_images/math/2841cd3c5eadc017fdb605c754c99082f2b87c0b.png" alt="{{r_{\alpha} = {x_{\alpha} - X}},}"/></p>
+<p><span class="eqno">(11.9)<a class="headerlink" href="#equation-pfx153" title="Permalink to this equation"></a></span><img src="../_images/math/2841cd3c5eadc017fdb605c754c99082f2b87c0b.png" alt="{{r_{\alpha} = {x_{\alpha} - X}},}"/></p>
 </div><div class="math" id="equation-pfx154">
-<p><span class="eqno">(10)<a class="headerlink" href="#equation-pfx154" title="Permalink to this equation"></a></span><img src="../_images/math/abda0315f72e4b53eef703be9d4d17a5d2960b2f.png" alt="{r_{\alpha}^{(0)} = {x_{\alpha}^{(0)} - X^{(0)}}}"/></p>
+<p><span class="eqno">(11.10)<a class="headerlink" href="#equation-pfx154" title="Permalink to this equation"></a></span><img src="../_images/math/abda0315f72e4b53eef703be9d4d17a5d2960b2f.png" alt="{r_{\alpha}^{(0)} = {x_{\alpha}^{(0)} - X^{(0)}}}"/></p>
 </div><p>are fixed and the rotation matrix reads
 [<a class="reference external" href="#SignetBibliographie_025">25</a>]</p>
 <div class="math" id="equation-pfx155">
-<p><span class="eqno">(11)<a class="headerlink" href="#equation-pfx155" title="Permalink to this equation"></a></span><img src="../_images/math/f76310bf9e709ef6100c397f32d29f69eda1369a.png" alt="D(q) = \begin{matrix}
+<p><span class="eqno">(11.11)<a class="headerlink" href="#equation-pfx155" title="Permalink to this equation"></a></span><img src="../_images/math/f76310bf9e709ef6100c397f32d29f69eda1369a.png" alt="D(q) = \begin{matrix}
 {q_{0}^{2} + q_{1}^{2} - q_{2}^{2} - q_{3}^{2}} &amp; {2\left( {{- q_{0}}{q_{3} + q_{1}}q_{2}} \right)} &amp; {2\left( {q_{0}{q_{2} + q_{1}}q_{3}} \right)} \\
 {2\left( {q_{0}{q_{3} + q_{1}}q_{2}} \right)} &amp; {q_{0}^{2} + q_{2}^{2} - q_{1}^{2} - q_{3}^{2}} &amp; {2\left( {{- q_{0}}{q_{1} + q_{2}}q_{3}} \right)} \\
 {2\left( {{- q_{0}}{q_{2} + q_{1}}q_{3}} \right)} &amp; {2\left( {q_{0}{q_{1} + q_{2}}q_{3}} \right)} &amp; {q_{0}^{2} + q_{3}^{2} - q_{1}^{2} - q_{2}^{2}} \\
@@ -421,10 +421,10 @@ imaginary units, <strong>I</strong>, <strong>J</strong>, and <strong>K</strong>.
 quaternion multiplication is not commutative. A possible matrix
 representation of an arbitrary quaternion,</p>
 <div class="math" id="equation-pfx156">
-<p><span class="eqno">(12)<a class="headerlink" href="#equation-pfx156" title="Permalink to this equation"></a></span><img src="../_images/math/0af837aff2151fb3b98842d03f0ef2f6e3b9765b.png" alt="{{A = a_{0}}\cdot{1 + a_{1}}\cdot{I + a_{2}}\cdot{J + a_{3}}\cdot K,}"/></p>
+<p><span class="eqno">(11.12)<a class="headerlink" href="#equation-pfx156" title="Permalink to this equation"></a></span><img src="../_images/math/0af837aff2151fb3b98842d03f0ef2f6e3b9765b.png" alt="{{A = a_{0}}\cdot{1 + a_{1}}\cdot{I + a_{2}}\cdot{J + a_{3}}\cdot K,}"/></p>
 </div><p>reads</p>
 <div class="math" id="equation-pfx157">
-<p><span class="eqno">(13)<a class="headerlink" href="#equation-pfx157" title="Permalink to this equation"></a></span><img src="../_images/math/7f54fe325fa1adf8f1dfaeda47bccd928ce70c42.png" alt="A = \begin{matrix}
+<p><span class="eqno">(11.13)<a class="headerlink" href="#equation-pfx157" title="Permalink to this equation"></a></span><img src="../_images/math/7f54fe325fa1adf8f1dfaeda47bccd928ce70c42.png" alt="A = \begin{matrix}
 a_{0} &amp; {- a_{1}} &amp; {- a_{2}} &amp; {- a_{3}} \\
 a_{1} &amp; a_{0} &amp; {- a_{3}} &amp; a_{2} \\
 a_{2} &amp; a_{3} &amp; a_{0} &amp; {- a_{1}} \\
@@ -436,41 +436,41 @@ represent rotations in a plane, quaternions allow one to represent
 rotations in space. Consider the quaternion representation of a vector
 r, which is given by</p>
 <div class="math" id="equation-pfx158">
-<p><span class="eqno">(14)<a class="headerlink" href="#equation-pfx158" title="Permalink to this equation"></a></span><img src="../_images/math/bbc6b31763f0ae59a66914ad9ffe5a3717dbdb60.png" alt="{{R = x}\cdot{I + y}\cdot{J + z}\cdot K,}"/></p>
+<p><span class="eqno">(11.14)<a class="headerlink" href="#equation-pfx158" title="Permalink to this equation"></a></span><img src="../_images/math/bbc6b31763f0ae59a66914ad9ffe5a3717dbdb60.png" alt="{{R = x}\cdot{I + y}\cdot{J + z}\cdot K,}"/></p>
 </div><p>and perform the operation</p>
 <div class="math" id="equation-pfx159">
-<p><span class="eqno">(15)<a class="headerlink" href="#equation-pfx159" title="Permalink to this equation"></a></span><img src="../_images/math/142b6c0ceca4ff64f6363e5db958b13fe60b2872.png" alt="{{R^{'} = \mathit{QRQ}^{T}},}"/></p>
+<p><span class="eqno">(11.15)<a class="headerlink" href="#equation-pfx159" title="Permalink to this equation"></a></span><img src="../_images/math/142b6c0ceca4ff64f6363e5db958b13fe60b2872.png" alt="{{R^{'} = \mathit{QRQ}^{T}},}"/></p>
 </div><p>where Q is a normalised quaternion</p>
 <div class="math" id="equation-pfx160">
-<p><span class="eqno">(16)<a class="headerlink" href="#equation-pfx160" title="Permalink to this equation"></a></span><img src="../_images/math/f43199f0f8ee8586e9aff7f5404fa46368695552.png" alt="{\text{|}Q\text{|}^{2}\doteq{{q_{0}^{2} + q_{1}^{2} + q_{2}^{2} + q_{3}^{2}} = \frac{1}{4}}\mathit{tr}\text{\textbackslash\{}Q^{T}Q{\text{\textbackslash\}} = 1.}}"/></p>
+<p><span class="eqno">(11.16)<a class="headerlink" href="#equation-pfx160" title="Permalink to this equation"></a></span><img src="../_images/math/f43199f0f8ee8586e9aff7f5404fa46368695552.png" alt="{\text{|}Q\text{|}^{2}\doteq{{q_{0}^{2} + q_{1}^{2} + q_{2}^{2} + q_{3}^{2}} = \frac{1}{4}}\mathit{tr}\text{\textbackslash\{}Q^{T}Q{\text{\textbackslash\}} = 1.}}"/></p>
 </div><p>The symbol <em>tr</em> stands for ‘trace’. We note that a normalized quaternion
 is represented by an <em>orthogonal</em> 4 x 4 matrix. <strong>R’</strong> may then be
 written as</p>
 <div class="math" id="equation-pfx161">
-<p><span class="eqno">(17)<a class="headerlink" href="#equation-pfx161" title="Permalink to this equation"></a></span><img src="../_images/math/c39587d6fbbf87895a116b709d54c9cacec9c1b7.png" alt="{{R^{'} = x^{'}}\cdot{I + y^{'}}\cdot{J + z^{'}}\cdot K,}"/></p>
+<p><span class="eqno">(11.17)<a class="headerlink" href="#equation-pfx161" title="Permalink to this equation"></a></span><img src="../_images/math/c39587d6fbbf87895a116b709d54c9cacec9c1b7.png" alt="{{R^{'} = x^{'}}\cdot{I + y^{'}}\cdot{J + z^{'}}\cdot K,}"/></p>
 </div><p>where the components x’, y’, z’, abbreviated as r’, are given by</p>
 <div class="math" id="equation-pfx162">
-<p><span class="eqno">(18)<a class="headerlink" href="#equation-pfx162" title="Permalink to this equation"></a></span><img src="../_images/math/df4bd293e7d8e2c5db9444f9f6867c57c29d2d1f.png" alt="{{r^{'} = D}(q)r.}"/></p>
+<p><span class="eqno">(11.18)<a class="headerlink" href="#equation-pfx162" title="Permalink to this equation"></a></span><img src="../_images/math/df4bd293e7d8e2c5db9444f9f6867c57c29d2d1f.png" alt="{{r^{'} = D}(q)r.}"/></p>
 </div><p>The matrix <strong>D</strong>(<strong>q</strong>) is the rotation matrix defined in
 <cite>95</cite>.</p>
 <p><strong>Solution of the minimization problem</strong>. In quaternion algebra, the
 rotational minimization problem may now be phrased as follows:</p>
 <div class="math" id="equation-pfx163">
-<p><span class="eqno">(19)<a class="headerlink" href="#equation-pfx163" title="Permalink to this equation"></a></span><img src="../_images/math/f2c29a8a75e0f10e808d7c7afdcf6f9e4fda4d56.png" alt="{m{(q) = {{\sum\limits_{\alpha}{{\omega_{\alpha}\text{|}\mathit{QR}}_{\alpha}^{(0)}Q}^{T}} - R_{\alpha}}}{\text{|}^{2}\overset{!}{=}\mathit{Min}}.}"/></p>
+<p><span class="eqno">(11.19)<a class="headerlink" href="#equation-pfx163" title="Permalink to this equation"></a></span><img src="../_images/math/f2c29a8a75e0f10e808d7c7afdcf6f9e4fda4d56.png" alt="{m{(q) = {{\sum\limits_{\alpha}{{\omega_{\alpha}\text{|}\mathit{QR}}_{\alpha}^{(0)}Q}^{T}} - R_{\alpha}}}{\text{|}^{2}\overset{!}{=}\mathit{Min}}.}"/></p>
 </div><p>Since the matrix Q representing a normalized quaternion is orthogonal
 this may also be written as</p>
 <div class="math" id="equation-pfx164">
-<p><span class="eqno">(20)<a class="headerlink" href="#equation-pfx164" title="Permalink to this equation"></a></span><img src="../_images/math/8df4e1e2eaee2825477406969f6cb0abd875d744.png" alt="{{{m{(q) = {\sum\limits_{\alpha}\omega_{\alpha}}}\text{|}\mathit{QR}}_{\alpha}^{(0)} - R_{\alpha}}Q\text{|}^{2}{.\overset{!}{=}\mathit{Min}}.}"/></p>
+<p><span class="eqno">(11.20)<a class="headerlink" href="#equation-pfx164" title="Permalink to this equation"></a></span><img src="../_images/math/8df4e1e2eaee2825477406969f6cb0abd875d744.png" alt="{{{m{(q) = {\sum\limits_{\alpha}\omega_{\alpha}}}\text{|}\mathit{QR}}_{\alpha}^{(0)} - R_{\alpha}}Q\text{|}^{2}{.\overset{!}{=}\mathit{Min}}.}"/></p>
 </div><p>This follows from the simple fact that</p>
 <div class="math" id="equation-pfx165">
-<p><span class="eqno">(21)<a class="headerlink" href="#equation-pfx165" title="Permalink to this equation"></a></span><img src="../_images/math/33832ab760a37c1bbf01a345f1090c00afcffbc8.png" alt="{\text{|}A{\text{|} = \text{|}}\mathit{AQ}\text{|}}"/></p>
+<p><span class="eqno">(11.21)<a class="headerlink" href="#equation-pfx165" title="Permalink to this equation"></a></span><img src="../_images/math/33832ab760a37c1bbf01a345f1090c00afcffbc8.png" alt="{\text{|}A{\text{|} = \text{|}}\mathit{AQ}\text{|}}"/></p>
 </div><p>, if Q is normalized. Eq. <cite>104</cite> shows that the
 target function to be minimized can be written as a simple quadratic
 form in the quaternion parameters [<a class="reference external" href="#SignetBibliographie_024">24</a>],</p>
 <div class="math" id="equation-pfx166">
-<p><span class="eqno">(22)<a class="headerlink" href="#equation-pfx166" title="Permalink to this equation"></a></span><img src="../_images/math/fb7e3ee23884e73033f3716085772e8f78c67122.png" alt="{m{(q) = q}\cdot\mathit{Mq},}"/></p>
+<p><span class="eqno">(11.22)<a class="headerlink" href="#equation-pfx166" title="Permalink to this equation"></a></span><img src="../_images/math/fb7e3ee23884e73033f3716085772e8f78c67122.png" alt="{m{(q) = q}\cdot\mathit{Mq},}"/></p>
 </div><div class="math" id="equation-pfx167">
-<p><span class="eqno">(23)<a class="headerlink" href="#equation-pfx167" title="Permalink to this equation"></a></span><img src="../_images/math/795422ef1605bdb876197a977b762f3230716de3.png" alt="{{M = {\sum\limits_{\alpha}{\omega_{\alpha}M_{\alpha}}}}.}"/></p>
+<p><span class="eqno">(11.23)<a class="headerlink" href="#equation-pfx167" title="Permalink to this equation"></a></span><img src="../_images/math/795422ef1605bdb876197a977b762f3230716de3.png" alt="{{M = {\sum\limits_{\alpha}{\omega_{\alpha}M_{\alpha}}}}.}"/></p>
 </div><p>The matrices M_ are positive semi-definite matrices depending on the
 positions <img class="math" src="../_images/math/60f25398fae5a2ca09130006f6613881ccea6821.png" alt="r_{\alpha}"/> and <img class="math" src="../_images/math/be744cb6c003824227ad37a0231b47e72e61b509.png" alt="r_{\alpha}^{(0)}"/>:</p>
 <p><a class="reference internal" href="../_images/1000000000000226000000D8F0CF60C6C4938937.png"><img alt="image32" src="../_images/1000000000000226000000D8F0CF60C6C4938937.png" style="width: 13.123cm; height: 5.154cm;" /></a></p>
@@ -479,15 +479,15 @@ of a quadratic form with the constraint that the quaternion to be
 determined must be normalized. Using the method of Lagrange multipliers
 to account for the normalization constraint we have</p>
 <div class="math" id="equation-pfx169">
-<p><span class="eqno">(24)<a class="headerlink" href="#equation-pfx169" title="Permalink to this equation"></a></span><img src="../_images/math/a072b8d722cd746298746d028c56bc4d0845bf26.png" alt="{m^{'}{\left( {q,\lambda} \right) = q}\cdot{\mathit{Mq} - \lambda}{\left( {q\cdot{q - 1}} \right)\overset{!}{=}\mathit{Min}}.}"/></p>
+<p><span class="eqno">(11.24)<a class="headerlink" href="#equation-pfx169" title="Permalink to this equation"></a></span><img src="../_images/math/a072b8d722cd746298746d028c56bc4d0845bf26.png" alt="{m^{'}{\left( {q,\lambda} \right) = q}\cdot{\mathit{Mq} - \lambda}{\left( {q\cdot{q - 1}} \right)\overset{!}{=}\mathit{Min}}.}"/></p>
 </div><p>This leads immediately to the eigenvalue problem</p>
 <div class="math" id="equation-pfx170">
-<p><span class="eqno">(25)<a class="headerlink" href="#equation-pfx170" title="Permalink to this equation"></a></span><img src="../_images/math/b8f609781f95c49f192ef34cebd55e5016dd2a27.png" alt="{{\mathit{Mq} = \lambda}q,}"/></p>
+<p><span class="eqno">(11.25)<a class="headerlink" href="#equation-pfx170" title="Permalink to this equation"></a></span><img src="../_images/math/b8f609781f95c49f192ef34cebd55e5016dd2a27.png" alt="{{\mathit{Mq} = \lambda}q,}"/></p>
 </div><div class="math" id="equation-pfx171">
-<p><span class="eqno">(26)<a class="headerlink" href="#equation-pfx171" title="Permalink to this equation"></a></span><img src="../_images/math/4bf9f4f3419b7cc5fd23d4082a764e4c3eb57122.png" alt="{q\cdot{q = 1.}}"/></p>
+<p><span class="eqno">(11.26)<a class="headerlink" href="#equation-pfx171" title="Permalink to this equation"></a></span><img src="../_images/math/4bf9f4f3419b7cc5fd23d4082a764e4c3eb57122.png" alt="{q\cdot{q = 1.}}"/></p>
 </div><p>Now any normalized eigenvector <strong>q</strong> fulfils the relation</p>
 <div class="math" id="equation-pfx172">
-<p><span class="eqno">(27)<a class="headerlink" href="#equation-pfx172" title="Permalink to this equation"></a></span><img src="../_images/math/dc6d950c4e8da7a20941367098744aa28e622ae0.png" alt="{{\lambda = q}\cdot\mathit{Mq}\equiv m(q)}"/></p>
+<p><span class="eqno">(11.27)<a class="headerlink" href="#equation-pfx172" title="Permalink to this equation"></a></span><img src="../_images/math/dc6d950c4e8da7a20941367098744aa28e622ae0.png" alt="{{\lambda = q}\cdot\mathit{Mq}\equiv m(q)}"/></p>
 </div><p>. Therefore, the eigenvector belonging to the smallest eigenvalue,
 λ<sub>min</sub>, is the desired solution. At the same time λ<sub>min</sub>
 gives the average error per atom. The result of <em>RBT</em> analysis is stored

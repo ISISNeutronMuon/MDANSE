@@ -2,51 +2,6 @@
 Analysis: Dynamics
 ==================
 
-This menu contains all data manipulations and appears as in the picture
-below when a trajectory is loaded. As indicated by the plus buttons,
-each of these options is a menu in itself.
-
-.. image:: ./Pictures/10000001000000F9000000B9A79707AE37EC9465.png
-   :width: 6.588cm
-   :height: 4.895cm
-
-They are explored in greater depth in the following sections, and the
-analyses are in turn explored in their subsections. Some contain a
-discussion of the theory behind the computation, and all show the
-analysis window of that analysis, the one that is launched by
-double-clicking the option in this Plugins panel.
-
-Each analysis window is different since each requires different
-parameters to be configured before it can be run. However, all of them
-have the same structure (example window below), consisting of these
-parts:
-
--  **trajectory** box shows the path to the `MMTK
-   NetCDF <#_NetCDF_file_format>`__ trajectory that this analysis will
-   be performed on.
-
--  **Parameters** are a group of options, of which the common ones are
-   discussed in depth in `Appendix 2 <#_Appendix_2>`__. These are the
-   options which vary from analysis to analysis. The only parameters
-   that exist on every analysis are Frames and Output files.
-
--  **Buttons** are situated at the bottom of each analysis and consist
-   of these options:
-
-   -  **Help** opens the source code documentation for the relevant
-      class in an MDANSE window.
-   -  **Save** opens a file browser that allows you to save the current
-      analysis with the set options into a python script which can be
-      run from the command line. More information about scripts in
-      `Using MDANSE from command line. <#_Using_MDANSE_from>`__
-   -  **Run** starts the analysis and prompts you whether you want to
-      close the window. The status of the analysis can be found in the
-      `Jobs <#_Jobs>`__ panel, though there is a known bug where
-      successful analyses do not show up.
-
-Dynamics
-^^^^^^^^
-
 This section contains the following Plugins:
 
 -  `Angular Correlation <#_Angular_Correlation>`__
@@ -77,23 +32,12 @@ For a given triplet of non-colinear atoms *g*\ =(a1,a2,a3), one can
 derive an orthonormal set of three vectors v1, v2, v3 using the
 following scheme:
 
--  
-
-   .. math::
-     :label: pfx1
-   
-     v_{1} = \frac{n_{1} + n_{2}}{\left| \left| {n_{1} + n_{2}} \right| \right|}
-
-   \ where **n**\ :sub:`1` and **n**\ :sub:`2` are respectively the
+-  :math:`v_{1} = \frac{n_{1} + n_{2}}{\left| \left| {n_{1} + n_{2}} \right| \right|}`
+   where **n**\ :sub:`1` and **n**\ :sub:`2` are respectively the
    normalized vectors along (**a1,a2**) and (**a1,a3**) directions.
 -  v2 is defined as the clockwise normal vector orthogonal to v1 that
    belongs to the plane defined by a1, a2 and a3 atoms
--  
-
-   .. math::
-     :label: pfx2
-     
-     {\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}
+-  :math:`{\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}`
 
 Thus, one can define the following autocorrelation functions for the
 vectors v1, v2 and v3 defined on triplet t :
@@ -145,52 +89,22 @@ section on `VACF <#_Theory_and_implementation_1>`__) defined as:
    {\mathit{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)\doteq{\sum\limits_{\alpha}\omega_{\alpha}}{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}\left( {n\cdot\mathit{\Delta\nu}} \right),{n = 0}\ldots{N_{t} - 1.}}
 
 N\ :sub:`t` is the total number of time steps and
-
-.. math::
-   :label: pfx6
-   
-   {\mathit{\Delta\nu} = 1}\text{/}\left( {2N_{t}\Delta t} \right)
-
-\ is the frequency step.
-
-.. math::
-   :label: pfx7
-   
-   {\mathit{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)}
-
+:math:`{\mathit{\Delta\nu} = 1}\text{/}\left( {2N_{t}\Delta t} \right)`
+is the frequency step.
+:math:`{\mathit{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)}`
 can be computed either for the isotropic case or with respect to a
 user-defined axis. The spectrum
-
-.. math::
-   :label: pfx8
-   
-   {\mathit{DOS}\left( {n\cdot\Delta\nu} \right)}
-
+:math:`{\mathit{DOS}\left( {n\cdot\Delta\nu} \right)}`
 is computed from the *unnormalized VACF*, such that *DOS(0)* gives an
 approximate value for the diffusion constant
+:math:`{D = {\sum\limits_{\alpha}D_{\alpha}}}`
+(see Eqs. :math:numref:`pfx20` and :math:numref:`pfx21`).
 
-.. math::
-   :label: pfx9
-   
-   {D = {\sum\limits_{\alpha}D_{\alpha}}}
-
-(see Eqs. :math:`10` and :math:`11`).
-
-.. math::
-   :label: pfx10
-   
-   {\mathit{DOS}\left( {n\cdot\Delta\nu} \right)}
-
+:math:`{\mathit{DOS}\left( {n\cdot\Delta\nu} \right)}`
 is smoothed by applying a Gaussian window in the time domain
 [`10 <#SignetBibliographie_010>`__] (see the section on `Spatial
 Density <#_Theory_and_implementation>`__). Its width in the time domain
-is
-
-.. math::
-   :label: pfx11
-   
-   {\sigma_{t} = \alpha}\text{/}T
-
+is :math:`{\sigma_{t} = \alpha}\text{/}T`
 , where T is the length of the simulation. We remark that the diffusion
 constant obtained from *DOS* is biased due to the spectral smoothing
 procedure since the *VACF* is weighted by this window Gaussian function.
@@ -273,20 +187,22 @@ This relationship can be written as
 
    {\left\langle r^{2} \right\rangle = 6}{\mathit{Dt} + C}
 
-where < r2 > is the *MSD* and *t* is the time. *D* and *C* are
+where :math:`\langle r^{2}\rangle` is the *MSD* and *t* is the time. *D* and *C* are
 constants. The constant *D* defines the so-called diffusion coefficient.
 
-The `Figure 1 <#figure1>`__ shows an example of an *MSD* analysis
+The Figure :numref:`figure-one` shows an example of an *MSD* analysis
 performed on a water box of 768 water molecules. To get the diffusion
 coefficient out of this plot, the slope of the linear part of the plot
 should be calculated.
 
-.. image:: ./Pictures/10000000000001BC00000163C18A769B32940652.png
+.. _figure-one:
+
+.. figure:: ./Pictures/10000000000001BC00000163C18A769B32940652.png
    :width: 11.748cm
    :height: 9.393cm
 
-Figure 1: *MSD* calculated for a 100 ps MD simulation of 256 water
-molecules using NPT condition at 1 bar and 300 K.
+   *MSD* calculated for a 100 ps MD simulation of 256 water
+   molecules using NPT condition at 1 bar and 300 K.
 
 Defining
 
@@ -302,9 +218,10 @@ the *MSD* of particle :math:`\alpha` can be defined as:
 
    \mathrm{\Delta}_{\alpha}^{2}{(t) = \left\langle {d_{\alpha}^{2}\left( {t,t_{0}} \right)} \right\rangle_{t_{0}}}
 
-where R_(t0) and R_(t0 + t) are respectively the position of particle :math:`\alpha`
-at times t0 and t0 + t. One can introduce an *MSD* with respect to a
-given axis n:
+where :math:`R_{\alpha}(t_0)` and :math:`R_{\alpha}(t_0 + t)` are
+respectively the position of particle :math:`\alpha`
+at times :math:`t_0` and :math:`t_0 + t`. One can introduce
+an *MSD* with respect to a given axis n:
 
 .. math::
    :label: pfx15
@@ -335,7 +252,7 @@ velocity autocorrelation function. Writing
    
    {d_{\alpha}{(t) = {\int\limits_{0}^{t}{\mathit{d\tau}v_{\alpha}(\tau)}}}}
 
-\ in Eq. :math:`5` one can show (see
+in Eq. :math:numref:`pfx14` one can show (see
 e.g. [`11 <#SignetBibliographie_011>`__]) that
 
 .. math::
@@ -343,7 +260,7 @@ e.g. [`11 <#SignetBibliographie_011>`__]) that
 
    {\mathrm{\Delta}_{\alpha}^{2}{(t) = 6}{\int\limits_{0}^{t}{\mathit{d\tau}\left( {t - \tau} \right)C_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(t)}}.}
 
-Using now the definition :math:`8` of the diffusion
+Using now the definition :math:numref:`pfx17` of the diffusion
 coefficient one obtains the relation
 
 .. math::
@@ -351,7 +268,7 @@ coefficient one obtains the relation
 
    {{D_{\alpha} = {\int\limits_{0}^{t}{\mathit{d\tau}C_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(t)}}}.}
 
-With Eq. :math:`28` this can also be written as
+With Eq. :math:numref:`pfx50` this can also be written as
 
 .. math::
    :label: pfx21
@@ -750,7 +667,7 @@ reads
 
    {{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}{(\omega) = \frac{1}{2\pi}}{\int\limits_{- \infty}^{+ \infty}\mathit{dt}}\exp\left\lbrack {{- i}\omega t} \right\rbrack C_{\mathit{vv};\mathit{\alpha\alpha}}(t).}
 
-For non-isotropic systems, relation :math:`26` holds if the *DOS*
+For non-isotropic systems, relation :math:numref:`pfx48` holds if the *DOS*
 is computed from the atomic velocity autocorrelation functions
 
 .. math::
