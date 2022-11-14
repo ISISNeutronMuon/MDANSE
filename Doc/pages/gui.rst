@@ -1577,7 +1577,7 @@ and dynamics of the scattering system
 .. math::
    :label: pfx61
 
-   {S{\left( {q,\omega} \right) = \frac{1}{2\pi}}{\int\limits_{- \infty}^{+ \infty}\mathit{dt}}\exp\left\lbrack {{- i}\omega t}}
+   {S{\left( {q,\omega} \right) = \frac{1}{2\pi}}{\int\limits_{- \infty}^{+ \infty}\mathit{dt}}\exp\left\lbrack {{- i}\omega t}}\right\rbrack
 
 F(**q**, t) is called the *intermediate scattering function* and is
 defined as
@@ -3727,11 +3727,11 @@ are fixed and the rotation matrix reads
 .. math::
    :label: pfx155
 
-   {D{(q) = \begin{pmatrix}
+   D(q) = \begin{matrix}
    {q_{0}^{2} + q_{1}^{2} - q_{2}^{2} - q_{3}^{2}} & {2\left( {{- q_{0}}{q_{3} + q_{1}}q_{2}} \right)} & {2\left( {q_{0}{q_{2} + q_{1}}q_{3}} \right)} \\
    {2\left( {q_{0}{q_{3} + q_{1}}q_{2}} \right)} & {q_{0}^{2} + q_{2}^{2} - q_{1}^{2} - q_{3}^{2}} & {2\left( {{- q_{0}}{q_{1} + q_{2}}q_{3}} \right)} \\
    {2\left( {{- q_{0}}{q_{2} + q_{1}}q_{3}} \right)} & {2\left( {q_{0}{q_{1} + q_{2}}q_{3}} \right)} & {q_{0}^{2} + q_{3}^{2} - q_{1}^{2} - q_{2}^{2}} \\
-   \end{pmatrix}}}
+   \end{matrix}
 
 **Quaternions and rotations.** The rotational minimization problem can
 be elegantly solved by using quaternion algebra. Quaternions are
@@ -3750,12 +3750,12 @@ reads
 .. math::
    :label: pfx157
 
-   {A = \begin{pmatrix}
+   A = \begin{matrix}
    a_{0} & {- a_{1}} & {- a_{2}} & {- a_{3}} \\
    a_{1} & a_{0} & {- a_{3}} & a_{2} \\
    a_{2} & a_{3} & a_{0} & {- a_{1}} \\
    a_{3} & {- a_{2}} & a_{1} & a_{0} \\
-   \end{pmatrix}}
+   \end{matrix}
 
 The components :math:`a_{\upsilon}`
 are real numbers. Similarly, as normal complex numbers allow one to
