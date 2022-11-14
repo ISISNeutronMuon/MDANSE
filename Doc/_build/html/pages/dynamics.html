@@ -340,13 +340,13 @@ computation of the <em>MSD</em>:</p>
 <div class="math" id="equation-pfx32">
 <p><span class="eqno">(8.24)<a class="headerlink" href="#equation-pfx32" title="Permalink to this equation"></a></span><img src="../_images/math/3771eaa19b3350522425f1caaf8f222439588415.png" alt="{\mathit{SUMSQ}\leftarrow{\mathit{SUMSQ} - \mathit{DSQ}}{{({m - 1})} - \mathit{DSQ}}{({N{t - m}})}}"/></p>
 </div><div class="math" id="equation-pfx33">
-<p><span class="eqno">(8.25)<a class="headerlink" href="#equation-pfx33" title="Permalink to this equation"></a></span><img src="../_images/math/6723a0605e6a70352bde8271f8e4ddc5aafdda45.png" alt="{\mathit{MSD}{(m)}\leftarrow{}}"/></p>
-</div><p>m running from 0 to Nt - 1</p>
+<p><span class="eqno">(8.25)<a class="headerlink" href="#equation-pfx33" title="Permalink to this equation"></a></span><img src="../_images/math/b80a39c1557d383f43652c0d663eeaa164f53156.png" alt="{\mathit{MSD}{(m)}\leftarrow{} (SUMSQ - 2 S_{AB}(m)/(N_t - m)}"/></p>
+</div><p>m running from 0 to <img class="math" src="../_images/math/4c222db3aec2a7da51e33162103ab5c2f224284d.png" alt="N_t"/> - 1</p>
 <p>It should be noted that the efficiency of this algorithm is the same as
 for the <em>FCA</em> computation</p>
 <p>of time correlation functions since the number of operations in step
 (1), (2), and (4) grows</p>
-<p>linearly with Nt.</p>
+<p>linearly with <img class="math" src="../_images/math/4c222db3aec2a7da51e33162103ab5c2f224284d.png" alt="N_t"/>.</p>
 <p id="gui-2">GUI</p>
 <p><a class="reference internal" href="../_images/100000010000031F00000247259172131CFA3B36.png"><img alt="image18" src="../_images/100000010000031F00000247259172131CFA3B36.png" style="width: 15.921cm; height: 11.617cm;" /></a> <a class="reference internal" href="../_images/100000010000031F000001000B539E0E94164B2D.png"><img alt="image19" src="../_images/100000010000031F000001000B539E0E94164B2D.png" style="width: 15.921cm; height: 5.101cm;" /></a></p>
 <ul class="simple">
@@ -552,7 +552,7 @@ reads</p>
 is computed from the atomic velocity autocorrelation functions</p>
 <div class="math" id="equation-pfx51">
 <p><span class="eqno">(8.43)<a class="headerlink" href="#equation-pfx51" title="Permalink to this equation"></a></span><img src="../_images/math/294f7ee490ada9bb3746c0cf5ff0fe4a064c3773.png" alt="{C_{\mathit{vv};\mathit{\alpha\alpha}}\left( {t;n_{q}} \right)}"/></p>
-</div><p>, where nq is the unit vector in the direction of q.</p>
+</div><p>, where <img class="math" src="../_images/math/c9cc851f1673ff995c577fded401fe53910ecfa3.png" alt="n_q"/> is the unit vector in the direction of q.</p>
 <p id="gui-4">GUI</p>
 <ul class="simple">
 <li><p>available for trajectories only</p></li>

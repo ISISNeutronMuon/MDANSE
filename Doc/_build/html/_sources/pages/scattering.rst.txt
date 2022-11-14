@@ -29,27 +29,12 @@ Theory and background
 The quantity of interest in neutron scattering experiments with thermal
 neutrons is the *dynamic structure factor*, S(**q**, :math:`\omega`), which is
 closely related to the double differential cross-section [7],
-
-.. math::
-   :label: pfx52
-   
-   {^{2}{\sigma/\mathit{d\Omega dE}}}
-
-. The double differential cross section is defined as the number of
+:math:`{d^{2}{\sigma/\mathit{d\Omega dE}}}`.
+The double differential cross section is defined as the number of
 neutrons which are scattered per unit time into the solid angle interval
-
-.. math::
-   :label: pfx53
-   
-   {\left\lbrack {\Omega,{\Omega + d}\Omega} \right\rbrack}
-
+:math:`{\left\lbrack {\Omega,{\Omega + d}\Omega} \right\rbrack}`
 and into the energy interval
-
-.. math::
-   :label: pfx54
-   
-   {{\lbrack{E,{E + \mathit{dE}}}\rbrack}.}
-
+:math:`{{\lbrack{E,{E + \mathit{dE}}}\rbrack}}`.
 It is normalized to d, *dE*, and the flux of the incoming neutrons,
 
 .. math::
@@ -120,7 +105,7 @@ defined as
    {{\Gamma_{\mathit{\alpha\beta}} = \frac{1}{N}}\left\lbrack {\overline{b_{\alpha}}{\overline{b_{\beta}} + \delta_{\mathit{\alpha\beta}}}\left( {\overline{b_{\alpha}^{2}} - {\overline{b_{\alpha}}}^{2}} \right)} \right\rbrack.}
 
 The operators :math:`\hat{R_{\alpha}}(t)`
-in Eq. :math:`34` are the position
+in Eq. :math:numref:`pfx62` are the position
 operators of the nuclei in the sample. The brackets
 :math:`\langle\ldots\rangle`
 denote a quantum thermal average and the time dependence of the position
@@ -131,15 +116,7 @@ the relative orientation of the spin of the neutron and the spin of the
 scattering nucleus. If the spins of the nuclei and the neutron are not
 prepared in a special orientation one can assume a random relative
 orientation and that spin and position of the nuclei are uncorrelated.
-The symbol :math:`\overline{...}`
-
-appearing in
-
-.. math::
-   :label: pfx64
-   
-   {\Gamma_{\mathit{\alpha\beta}}}
-
+The symbol :math:`\overline{...}` appearing in :math:`{\Gamma_{\mathit{\alpha\beta}}}`
 denotes an average over isotopes and relative spin orientations of
 neutron and nucleus.
 
@@ -198,7 +175,7 @@ where n\ :sub:`I`, n\ :sub:`J`, N\ :sub:`species`, :math:`\omega`\ :sub:`I,coh,i
 and :math:`\omega`\ :sub:`J,coh,inc` are defined in Section ??.
 
 The corresponding dynamic structure factors are obtained by performing
-the Fourier transformation defined in Eq. :math:`33`.
+the Fourier transformation defined in Eq. :math:numref:`pfx61`.
 
 An important quantity describing *structural* properties of liquids is
 the *static structure factor*, which is defined as
@@ -237,8 +214,7 @@ liquid, containing only one sort of atoms, it reads
 
    {{\left\langle \omega \right\rangle = \frac{\hslash q^{2}}{2M}},}
 
-where M is the mass of the atoms. Formula
-47
+where M is the mass of the atoms. Formula :math:numref:`pfx76`
 shows that the
 first moment is given by the average kinetic energy (in units of
 :math:`\hslash`) of a particle which receives a momentum transfer
@@ -255,7 +231,7 @@ has been suggested by Schofield [`17 <#SignetBibliographie_017>`__]
    {{\text{S}\left( {q,\omega} \right)\approx\exp\left\lbrack \frac{\beta\hslash\omega}{2} \right\rbrack}_{}\text{S}_{\mathit{cl}}\left( {q,\omega} \right)}
 
 One can easily verify that the resulting dynamic structure factor
-fulfils the relation of detailed balance. Formally, the correction :math:`48`
+fulfils the relation of detailed balance. Formally, the correction :math:numref:`pfx77`
 is correct to first order in :math:`\hslash`. Therefore, it cannot be used
 for large *q*-values which correspond to large momentum transfers
 :math:`\hslash q`. This is actually true for all correction
@@ -270,8 +246,6 @@ partial g(r), corresponding to the Faber-Ziman definition:
    :label: pfx78
    
    {S_{\alpha\beta}(Q) = 1 + \frac{4\pi\rho_0}{Q}\int\limits_{0}^{\infty}{r\left\lbrack {g_\alpha\beta}(r)-1 \right\rbrack\text{sin}(Qr)dr}}
-
-\ (49)
 
 The total S(Q) is computed as a weighted sum similar to the one used for
 the total g(r). In the case of the analysis 'X-ray Static structure
@@ -414,21 +388,19 @@ Background <#_Theory_and_background>`__ for more details about the
 theoretical background related to the dynamic coherent structure factor.
 In this analysis, *MDANSE* proceeds in two steps. First, it computes the
 partial and total intermediate coherent scattering function using
-equation :math:`40`. Then, the partial
+equation :math:numref:`pfx69`. Then, the partial
 and total dynamic coherent structure factors are obtained by performing
-the Fourier Transformation, defined in Eq. :math:`33`, respectively on
+the Fourier Transformation, defined in Eq. :math:numref:`pfx61`, respectively on
 the total and partial intermediate coherent scattering functions.
 
 *MDANSE* computes the coherent intermediate scattering function on a
 rectangular grid of equidistantly spaced points along the time-and the
 *q*-axis, respectively:
 
-F\ 
-
 .. math::
    :label: pfx80
    
-   {{}_{\text{coh}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\cdot\Delta t} \right)} \right\rangle}}^{q},}
+   {{F}_{\text{coh}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\cdot\Delta t} \right)} \right\rangle}}^{q},}
 
 .. math::
    :label: pfx81
@@ -460,7 +432,7 @@ The symbol
    
    {\overline{...}}^{q}
 
-\ in Eq. :math:`51` denotes an average
+\ in Eq. :math:numref:`pfx80` denotes an average
 over *q*-vectors having *approximately* the same modulus
 
 .. math::
@@ -559,10 +531,10 @@ section for more details about the theoretical background related to the
 dynamic incoherent structure factor. In this analysis, *MDANSE* proceeds
 in two steps. First, it computes the partial and total intermediate
 incoherent scattering function F\ :sub:`inc`\ (**q**, t) using equation
-`41`. Then, the partial
+:math:numref:`pfx69`. Then, the partial
 and total dynamic incoherent structure factors are obtained by
-performing the Fourier Transformation, defined in Eq.
-`33`, respectively on
+performing the Fourier Transformation, defined in Eq. :math:numref:`pfx61`,
+respectively on
 the total and partial intermediate incoherent scattering function.
 
 *MDANSE* computes the incoherent intermediate scattering function on a
@@ -592,16 +564,11 @@ number of atoms of species *I*, :math:`\omega`\ :sub:`I` the weight for species 
 
    {\text{F}_{I,\mathit{inc},\alpha}{\left( {q_{m},k\cdot\Delta t} \right) = \sum\limits_{\alpha = 1}^{n_{I}}}{\overline{\left\langle {\exp\left\lbrack {{-i}q\cdot R_{\alpha}(0)} \right\rbrack\exp\left\lbrack {iq\cdot R_{\alpha}(t)} \right\rbrack} \right\rangle}}^{q}.}
 
-The symbol :math:`{\overline{...}}^{q}` in Eq. `58`
+The symbol :math:`{\overline{...}}^{q}` in Eq. :math:numref:`pfx92`
 denotes an average
 over *q*-vectors having *approximately* the same modulus
-
-.. math::
-   :label: pfx93
-   
-   {{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q}
-
-. The particle density must not change if jumps in the particle
+:math:`{{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q}`. The
+particle density must not change if jumps in the particle
 trajectories due to periodic boundary conditions occur. In addition, the
 *average* particle density, N/V, must not change. This can be achieved
 by choosing *q*-vectors on a lattice which is reciprocal to the lattice
@@ -616,7 +583,7 @@ position vector in the *MD* cell can be written as
 
 with x', y', z' having values between 0 and 1. The primes indicate that
 the coordinates are box coordinates. A jump due to periodic boundary
-conditions causes x', y', z' to jump by ∓1. The set of dual basis
+conditions causes x', y', z' to jump by :math:`\pm 1`. The set of dual basis
 vectors **b**\ :sup:`1`, **b**\ :sup:`2`, **b**\ :sup:`3` is defined by
 the relation
 
@@ -637,7 +604,7 @@ produce phase changes of multiples of 2π in the Fourier transformed
 particle density, i.e. leave it unchanged. One can define a grid of
 *q*-shells or a grid of *q*-vectors along a given direction or on a
 given plane, giving in addition a *tolerance* for *q*. *MDANSE* looks
-then for *q*-vectors of the form given in Eq. `61` whose moduli
+then for *q*-vectors of the form given in Eq. :math:numref:`pfx96` whose moduli
 deviate within the prescribed tolerance from the equidistant *q*-grid.
 From these *q*-vectors only a maximum number per grid-point (called
 generically *q*-shell also in the anisotropic case) is kept.
@@ -645,7 +612,7 @@ generically *q*-shell also in the anisotropic case) is kept.
 The *q*-vectors can be generated isotropically, anisotropically or along
 user-defined directions.
 
-The correlation functions defined in `58`
+The correlation functions defined in :math:numref:`pfx92`
 are computed via
 the *FCA* technique described in `Spatial
 Density <#_Theory_and_implementation>`__ section. Although the efficient
@@ -758,9 +725,8 @@ following expression for the elastic incoherent scattering function is
 
    {\mathit{EIS}F_{I}{(q) = \frac{1}{n_{I}}}{\sum\limits_{\alpha}^{n_{I}}\left\langle {|{\exp\left\lbrack {\mathit{iq}\cdot R_{\alpha}} \right\rbrack\left. {} \right|^{2}}} \right\rangle}.}
 
-This expression is derived from definition `62`
-of the *EISF* and
-expression `41` for the
+This expression is derived from definition :math:numref:`pfx97`
+of the *EISF* and expression :math:numref:`pfx70` for the
 intermediate scattering function, using that for infinite time the
 relation
 
@@ -880,7 +846,7 @@ is exact. For these systems the incoherent intermediate scattering
 function is completely determined by the *MSD*. *MDANSE* allows one to
 compute the total and partial incoherent intermediate scattering
 function in the *Gaussian approximation* by discretizing equation
-`71`:
+:math:numref:`pfx108`:
 
 .. math::
    :label: pfx113
@@ -918,8 +884,8 @@ Factor <#_Dynamic_Incoherent_Structure>`__). The quantities
    
    {\Delta_{\alpha}^{2}\left( {t;n} \right)}
 
-are the mean-square displacements, defined in Equations `5`
-and `6`, respectively.
+are the mean-square displacements, defined in Equations :math:numref:`pfx14`
+and :math:numref:`pfx15`, respectively.
 They are computed by using the algorithm described in the `Mean Square
 Displacement <#_Theory_and_implementation_2>`__ section. *MDANSE*
 corrects the atomic input trajectories for jumps due to periodic

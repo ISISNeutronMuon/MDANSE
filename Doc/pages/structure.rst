@@ -84,7 +84,8 @@ distances at different times
 .. math::
    :label: pfx119
 
-   {\mathit{CN}\left( r_{m} \right)\doteq\frac{1}{N_{\mathit{frames}}}\frac{1}{N_{G}}{\sum\limits_{f = 1}^{N_{\mathit{frames}}}{\sum\limits_{g = 1}^{N_{G}}{\sum\limits_{I = 1}^{N_{\mathit{species}}}{CN_{\mathit{gI}}\left( {r_{m},t_{f}} \right)}}}},{m = 0}\ldots{N_{r} - 1},{n = 0}\ldots{N_{\mathit{frames}} - 1.}}
+   {\mathit{CN}\left( r_{m} \right)\doteq\frac{1}{N_{\mathit{frames}}}\frac{1}{N_{G}}{\sum\limits_{f = 1}^{N_{\mathit{frames}}}{\sum\limits_{g = 1}^{N_{G}}{\sum\limits_{I = 1}^{N_{\mathit{species}}}{CN_{\mathit{gI}}\left( {r_{m},t_{f}} \right)}}}},\\
+   {m = 0}\ldots{N_{r} - 1},{n = 0}\ldots{N_{\mathit{frames}} - 1.}}
 
 where N\ :sub:`r` and N\ :sub:`frames` are respectively the number of
 distances and times at which the *CN* is evaluated and
@@ -98,7 +99,7 @@ is the number of atoms of species *I* found within [rm, rm + dr] at frame
 *f* from the centre of gravity of group *g*.
 
 From these expressions, several remarks can be done. Firstly, the Eqs.
-`79` and `80` can be restricted
+:math:numref:`pfx119` and :math:numref:`pfx120` can be restricted
 to intramolecular and intermolecular distances only. Secondly, these
 equations can be averaged over the selected frames providing a time
 averaged intra and intermolecular *CN*. Finally, the same equations
@@ -425,7 +426,7 @@ structural changes occurred during the simulation.
 
 In Molecular Dynamics Analysis for Neutron Scattering Experiments
 (*MDANSE*), *RMSD* is computed using the discretized version of equation
-`83`:
+:math:numref:`pfx130`:
 
 .. math::
    :label: pfx132
@@ -515,7 +516,7 @@ measure for the molecule compactness. For example, it can be useful when
 monitoring folding process.
 
 In *MDANSE*, *ROG* is computed using the discretized version of equation
-`85`:
+:math:numref:`pfx131`:
 
 .. math::
    :label: pfx135

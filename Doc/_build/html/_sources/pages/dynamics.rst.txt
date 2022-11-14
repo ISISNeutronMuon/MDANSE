@@ -360,9 +360,9 @@ computation of the *MSD*:
 .. math::
    :label: pfx33
    
-   {\mathit{MSD}{(m)}\leftarrow{}}
+   {\mathit{MSD}{(m)}\leftarrow{} (SUMSQ - 2 S_{AB}(m)/(N_t - m)}
 
-m running from 0 to Nt - 1
+m running from 0 to :math:`N_t` - 1
 
 It should be noted that the efficiency of this algorithm is the same as
 for the *FCA* computation
@@ -370,7 +370,7 @@ for the *FCA* computation
 of time correlation functions since the number of operations in step
 (1), (2), and (4) grows
 
-linearly with Nt.
+linearly with :math:`N_t`.
 
 .. _gui-2:
 
@@ -675,7 +675,7 @@ is computed from the atomic velocity autocorrelation functions
    
    {C_{\mathit{vv};\mathit{\alpha\alpha}}\left( {t;n_{q}} \right)}
 
-, where nq is the unit vector in the direction of q.
+, where :math:`n_q` is the unit vector in the direction of q.
 
 .. _gui-4:
 
