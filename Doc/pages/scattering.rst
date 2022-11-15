@@ -2,21 +2,8 @@
 Analysis: Scattering
 ====================
 
-Below is a list of Plugins contained in this section. They are all used
+This section discusses plugins used
 to calculate neutron spectroscopy observables from the trajectory.
-
--  `Current Correlation Function <#_Current_Correlation_Function>`__
--  `Dynamic Coherent Structure Factor <#_Dynamic_Coherent_Structure>`__
--  `Dynamic Incoherent Structure
-   Factor <#_Dynamic_Incoherent_Structure>`__
--  `Elastic Incoherent Structure
-   Factor <#_Elastic_Incoherent_Structure>`__
--  `Gaussian Dynamic Incoherent Structure
-   Factor <#_Gaussian_Dynamic_Incoherent>`__
--  `Neutron Dynamic Total Structure Factor <#_Neutron_Dynamic_Total>`__
--  `Structure Factor From Scattering
-   Function <#_Structure_Factor_From>`__
-
 These plugins will be explored in depth in further sections, however,
 before that, it is important to understand how MDANSE performs these
 analyses. A part of that are `Q vectors <#_A3.4._Q_vectors>`__, which
@@ -84,7 +71,7 @@ incident neutrons:
 
 The dynamic structure factor contains information about the structure
 and dynamics of the scattering system
-[`16 <#SignetBibliographie_016>`__]. It can be written as
+[Ref16]_. It can be written as
 
 .. math::
    :label: pfx61
@@ -172,7 +159,7 @@ where:
    {\text{F}_{I,\text{inc}}{\left( {q,t} \right) = \frac{1}{n_{I}}}{\sum\limits_{\alpha = 1}^{n_{I}}\left\langle {\exp\left\lbrack {{- i}q\cdot\hat{R_{\alpha}}\left( t_{0} \right)} \right\rbrack\exp\left\lbrack {iq\cdot\hat{R_{\alpha}}\left( {t_{0} + t} \right)} \right\rbrack} \right\rangle_{t_{0}}}.}
 
 where n\ :sub:`I`, n\ :sub:`J`, N\ :sub:`species`, :math:`\omega`\ :sub:`I,coh,inc`
-and :math:`\omega`\ :sub:`J,coh,inc` are defined in Section ??.
+and :math:`\omega`\ :sub:`J,coh,inc` are defined in Section :ref:`target_CN`.
 
 The corresponding dynamic structure factors are obtained by performing
 the Fourier transformation defined in Eq. :math:numref:`pfx61`.
@@ -223,7 +210,7 @@ first moment is given by the average kinetic energy (in units of
 is called the *recoil moment*. A number of 'recipes' has been suggested
 to correct classical dynamic structure factors for detailed balance and
 to describe recoil effects in an approximate way. The most popular one
-has been suggested by Schofield [`17 <#SignetBibliographie_017>`__]
+has been suggested by Schofield [Ref17]_
 
 .. math::
    :label: pfx77
@@ -237,7 +224,7 @@ for large *q*-values which correspond to large momentum transfers
 :math:`\hslash q`. This is actually true for all correction
 methods which have suggested
 so far. For more details we refer to Ref.
-[`18 <#SignetBibliographie_018>`__].
+[Ref18]_.
 
 MDANSE computes the partial S(Q)'s as the Fourier transform of the
 partial g(r), corresponding to the Faber-Ziman definition:
@@ -279,7 +266,7 @@ Current correlation function is typically used to study the propagation
 of excitations in disordered systems. In MDANSE, its longitudinal and
 transverse components are calculated, which are related to density
 fluctuations and propagating shear modes respectively. Formalism and
-other details can be found in Ref [`19 <#SignetBibliographie_019>`__].
+other details can be found in Ref [Ref19]_.
 
 .. _gui-5:
 
@@ -383,8 +370,7 @@ Dynamic Coherent Structure Factor
 Theory and implementation
                          
 
-Please refer to `Scattering Theory and
-Background <#_Theory_and_background>`__ for more details about the
+Please refer to `Theory and background`_ for more details about the
 theoretical background related to the dynamic coherent structure factor.
 In this analysis, *MDANSE* proceeds in two steps. First, it computes the
 partial and total intermediate coherent scattering function using
@@ -411,7 +397,7 @@ where N\ :sub:`t` is the number of time steps in the coordinate time
 series, N\ :sub:`q` is a user-defined number of *q*-shells,
 N\ :sub:`species` is the number of selected species, n\ :sub:`I` the
 number of atoms of species *I*, :math:`\omega`\ :sub:`I` the weight for species *I*
-(see Section ?? for more details) and
+(see Section :ref:`target_CN` for more details) and
 
 .. math::
    :label: pfx82
@@ -496,7 +482,7 @@ lengths, i.e.
 Negative coherent scattering lengths occur in hydrogenous materials
 since :math:`b_{\mathit{coh},H}`
 
-\ Is negative [`20 <#SignetBibliographie_020>`__]. The density-density
+\ Is negative [Ref20]_. The density-density
 correlation is computed via the *FCA* technique described in the section
 on `Spatial Density <#_Theory_and_implementation>`__.
 
@@ -526,7 +512,7 @@ Dynamic Incoherent Structure Factor
 Theory and implementation
                          
 
-Please refer to `Scattering Theory and Background <#_Q_Vectors>`__
+Please refer to `Theory and background`_
 section for more details about the theoretical background related to the
 dynamic incoherent structure factor. In this analysis, *MDANSE* proceeds
 in two steps. First, it computes the partial and total intermediate
@@ -550,7 +536,7 @@ where N\ :sub:`t` is the number of time steps in the coordinate time
 series, N\ :sub:`q` is a user-defined number of *q*-shells,
 N\ :sub:`species` is the number of selected species, n\ :sub:`I` the
 number of atoms of species *I*, :math:`\omega`\ :sub:`I` the weight for species *I*
-(see Section ?? for more details) and
+(see Section :ref:`target_CN` for more details) and
 
 .. math::
    :label: pfx91
@@ -684,7 +670,7 @@ neutrons. To a very good approximation this is the case for all systems
 containing a large amount of hydrogen atoms, as biological systems.
 Incoherent scattering from hydrogen dominates by far all other
 contributions. Using the definition of the van Hove self-correlation
-function G\ :sub:`s`\ (r, t) [`20 <#SignetBibliographie_020>`__],
+function G\ :sub:`s`\ (r, t) [Ref20]_,
 
 .. math::
    :label: pfx100
@@ -708,7 +694,7 @@ volume since G\ :sub:`s`\ (r, t) approaches 1/V for large times. This is
 the case for molecules in liquids and gases.
 
 For computational purposes it is convenient to use the following
-representation of the *EISF* [`21 <#SignetBibliographie_021>`__]:
+representation of the *EISF* [Ref21]_:
 
 .. math::
    :label: pfx102
@@ -717,7 +703,7 @@ representation of the *EISF* [`21 <#SignetBibliographie_021>`__]:
 
 where N\ :sub:`species` is the number of selected species, n\ :sub:`I`
 the number of atoms of species *I*, :math:`\omega`\ :sub:`I,inc` the weight for
-species *I* (see Section ?? for more details) and for each species the
+species *I* (see Section :ref:`target_CN` for more details) and for each species the
 following expression for the elastic incoherent scattering function is
 
 .. math::
@@ -798,8 +784,8 @@ Theory and implementation
                          
 
 The *MSD* can be related to the incoherent intermediate scattering
-function via the cumulant expansion [`11 <#SignetBibliographie_011>`__],
-[`22 <#SignetBibliographie_022>`__]
+function via the cumulant expansion [Ref11]_,
+[Ref22]_
 
 .. math::
    :label: pfx108
@@ -808,7 +794,7 @@ function via the cumulant expansion [`11 <#SignetBibliographie_011>`__],
 
 where N\ :sub:`species` is the number of selected species, n\ :sub:`I`
 the number of atoms of species *I*, :math:`\omega`\ :sub:`I,inc` the weight for
-species *I* (see Section ?? for more details) and
+species *I* (see Section :ref:`target_CN` for more details) and
 
 .. math::
    :label: pfx109

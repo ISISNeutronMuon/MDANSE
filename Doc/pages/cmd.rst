@@ -246,8 +246,8 @@ Table <#_Periodic_table_viewer>`__ GUI window.
 mdanse_plotter
 ~~~~~~~~~~~~~~
 
-This script has no options. When run, it opens the `2D/3D
-Plotter <#_2D/3D_Plotter>`__ GUI window.
+This script has no options. When run, it opens the :ref:`2d3dplotter`
+GUI window.
 
 mdanse_ud_editor
 ~~~~~~~~~~~~~~~~

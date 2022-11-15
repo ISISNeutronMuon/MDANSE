@@ -14,6 +14,7 @@ Rastislav Turanyi [1]_, Miguel A. Gonzalez [2]_, Eric Pellegrini [2]_, Maciej Ba
 
 November 2022
 
+.. _cite-mdanse:
 
 Citing MDANSE
 -------------

@@ -2,7 +2,7 @@
 Glossary of Parameters
 =======================
 
-Each `analysis <#_Analysis>`__ window is different since each requires
+Each :ref:`analysis` window is different since each requires
 different parameters to be configured before it can be run. However, all
 of them have the same structure (example window below), consisting of
 these parts:
@@ -1474,7 +1474,7 @@ differentiate using 1\ :sup:`st` to 5\ :sup:`th` order.
       r(t\ :sub:`i`) (r = x,y,z) using the N-order polynomial,
       interpolating the N+1 points across r(t\ :sub:`i`), where
       r(t\ :sub:`i`) belongs to this set. Please see Ref
-      [`36 <#SignetBibliographie_036>`__] for more information.
+      [Ref36]_ for more information.
 
 Interpolation order is available for the following analyses: `Current
 Correlation Function <#_Current_Correlation_Function>`__, `Density of

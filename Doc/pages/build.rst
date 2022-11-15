@@ -1,4 +1,6 @@
 
+.. _build-mdanse:
+
 Building MDANSE from source code
 ================================
 
@@ -15,7 +17,7 @@ Building MDANSE from source code
 
 MDANSE is an open-source software, and so the source code is widely
 available. Currently, it is hosted by ISIS at GitHub
-[`38 <#SignetBibliographie_038>`__]. The code can be freely altered and
+[Ref38]_. The code can be freely altered and
 distributed as per the GPL-3.0 license that it is licensed under. All
 the necessary information is present in the repository. In any case
 though, to access the very latest features that have not been released
@@ -35,10 +37,10 @@ To build MDANSE on Windows, the following software will have to be
 downloaded and installed. All three programs have executables which can
 be used in the typical windows fashion.
 
--  Miniconda [`39 <#SignetBibliographie_039>`__] (or any other conda
+-  Miniconda [Ref39]_ (or any other conda
    installation)
 
--  Microsoft Visual Studio 2008 [`40 <#SignetBibliographie_040>`__]
+-  Microsoft Visual Studio 2008 [Ref40]_
 
    -  If MDANSE is to be built on an x64 system, during this
       installation, the ‘x64 Compilers and Tools’ option has to be
@@ -46,7 +48,7 @@ be used in the typical windows fashion.
       selected, which will install all parts including this one.
 
 Then, download the following wheels from Ref
-[`41 <#SignetBibliographie_041>`__], selecting the appropriate version
+[Ref41]_, selecting the appropriate version
 based on your architecture. The asterisks in the names stand for
 architecture.
 
@@ -136,7 +138,7 @@ MacOS
 
 Like on Windows, on MacOS the easiest way to build MDANSE is to use
 conda all the way, which can be downloaded from Ref
-[`42 <#SignetBibliographie_042>`__]. A virtualenv/venv environment can
+[Ref42]_. A virtualenv/venv environment can
 be used but conda still has to be used to download multiple packages
 unless they are built from source. This guide uses conda fully.
 
@@ -192,7 +194,7 @@ any case, what is always required is a C compiler, preferably GTK2, and
 netcdf. A development version of netcdf, something like netcdf-devel,
 may also be necessary. An exact guide for when everything is built from
 source on CentOS 7 is on MDANSE GitHub issue #8
-[`5 <#SignetBibliographie_005>`__]. Other than that, we do not keep
+[Ref5]_. Other than that, we do not keep
 instructions specific to any other distributions, though inspiration can
 be taken from our continuous integration pipeline at
 .github/workflows/CI.yml.

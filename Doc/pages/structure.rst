@@ -2,23 +2,6 @@
 Analysis: Structure
 ===================
 
-This section has the following Plugins:
-
--  `Are Per Molecule <#_Area_Per_Molecule>`__
--  `Coordination Number <#_Coordination_Number>`__
--  `Density Profile <#_Density_Profile>`__
--  `Eccentricity <#_Eccentricity>`__
--  `Molecular Trace <#_Molecular_Trace>`__
--  `Pair Distribution Function <#_Pair_Distribution_Function>`__
--  `Root Mean Square Deviation <#_Root_Mean_Square>`__
--  `Root Mean Square Fluctuation <#_Root_Mean_Square_1>`__
--  `Radius Of Gyration <#_Radius_Of_Gyration>`__
--  `Solvent Accessible Surface <#_Solvent_Accessible_Surface>`__
--  `Spatial Density <#_Spatial_Density>`__
--  `Static Structure Factor <#_Static_Structure_Factor>`__
--  `Voronoi <#_Voronoi>`__
--  `XRay Static Structure Factor <#_Xray_Static_Structure>`__
-
 Area Per Molecule
 '''''''''''''''''
 
@@ -49,6 +32,8 @@ to inside the NetCDF file.
 
 -  `output files <#_Output_files>`__
 -  `running mode <#_Running_mode>`__
+
+.. _target_CN:
 
 Coordination Number
 '''''''''''''''''''
@@ -272,7 +257,7 @@ Mathematically, the *PDF* can be computed using the following formula:
 where N\ :sub:`species` is the number of selected species, n\ :sub:`I`
 and n\ :sub:`J` are respectively the numbers of atoms of species *I* and
 *J*, :math:`\omega`\ :sub:`I` and :math:`\omega`\ :sub:`J` respectively the weights for species
-*I* and *J* (see Section ?? for more details) and
+*I* and *J* (see Section `Coordination Number`_ for more details) and
 
 .. math::
    :label: pfx122

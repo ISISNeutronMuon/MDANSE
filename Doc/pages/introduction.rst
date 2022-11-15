@@ -18,7 +18,7 @@ experimental data.
 
 Some of these steps were implemented in the open source MDANSE
 (Molecular Dynamics Analysis of Neutron Scattering Experiments)
-[`1 <#SignetBibliographie_001>`__]. This software is a Python based
+[Ref1]_. This software is a Python based
 application for analysing MD simulation data. This has interface with
 more than ten MD codes including ab-initio MD codes as listed in
 Appendix 1. MDANSE is benefited from a simple python-based graphical

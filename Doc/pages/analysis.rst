@@ -266,7 +266,7 @@ however, these variables are not directly available from *MD*
 simulations since *MD* algorithms typically work in cartesian
 coordinates. Molecules are either treated as flexible, or, if they are
 treated as rigid, constraints are taken into account in the framework of
-cartesian coordinates [`23 <#SignetBibliographie_023>`__]. In *MDANSE*,
+cartesian coordinates [Ref23]_. In *MDANSE*,
 Rigid-Body Trajectory (*RBT*) can be defined from a *MD* trajectory by
 fitting rigid reference structures, defining a (sub)molecule, to the
 corresponding structure in each time frame of the trajectory. Here 'fit'
@@ -274,7 +274,7 @@ means the optimal superposition of the structures in a least-squares
 sense. We will describe now how rigid body motions, i.e. global
 translations and rotations of molecules or subunits of complex
 molecules, can be extracted from a *MD* trajectory. A more detailed
-presentation is given in [`24 <#SignetBibliographie_024>`__]. We define
+presentation is given in [Ref24]_. We define
 an optimal rigid-body trajectory in the following way: for each time
 frame of the trajectory the atomic positions of a rigid reference
 structure, defined by the three cartesian components of its centroid
@@ -318,7 +318,7 @@ normalization condition
    
    {q \dot {q = 1}}
 
-\ [`25 <#SignetBibliographie_025>`__]. The target function to be
+\ [Ref25]_. The target function to be
 minimized is now defined as
 
 .. math::
@@ -361,7 +361,7 @@ The relative position vectors
    {r_{\alpha}^{(0)} = {x_{\alpha}^{(0)} - X^{(0)}}}
 
 are fixed and the rotation matrix reads
-[`25 <#SignetBibliographie_025>`__]
+[Ref25]_
 
 .. math::
    :label: pfx155
@@ -465,7 +465,7 @@ This follows from the simple fact that
 
 , if Q is normalized. Eq. `104` shows that the
 target function to be minimized can be written as a simple quadratic
-form in the quaternion parameters [`24 <#SignetBibliographie_024>`__],
+form in the quaternion parameters [Ref24]_,
 
 .. math::
    :label: pfx166
@@ -873,8 +873,7 @@ Plotter
 -  available for analysis results only
 
 Launches the 2D/3D Plotter inside the current tab of the working panel,
-like below. For more information, please see `2D/3D
-Plotter <#_2D/3D_Plotter>`__.
+like below. For more information, please see :ref:`2d3dplotter`.
 
 .. image:: ./Pictures/1000000100000456000001F7F9358DAEDACCE259.png
    :width: 15.921cm
@@ -937,7 +936,7 @@ following menu:
    all the atoms inside it.
 -  **Parallel projection** toggles on/off trimetric parallel projection
    of the camera. According to Wikipedia
-   [`26 <#SignetBibliographie_026>`__], this means that three axes of
+   [Ref26]_, this means that three axes of
    space should appear unequally foreshortened. The scale along each of
    the three axes and the angles among them are determined separately as
    dictated by the angle of viewing.

@@ -613,7 +613,7 @@ both axes range between the same values.
 
 *Description:* the algorithm to use for image scaling. For more
 information, see matplotlib documentation
-[`37 <#SignetBibliographie_037>`__].
+[Ref37]_.
 
 -  
 
@@ -789,13 +789,15 @@ Scalar-Field Plotter
 
 <insert>
 
+.. _units:
+
 Units
 =====
 
 The units used by MDANSE are nm for length and ps for time, and their
 inverses for Q (nm\ :sup:`-1`) and angular frequencies, 
 (ps\ :sup:`-1`). Any input must be given using these units, and the
-output files do also employ the same units. The 2D/3D plotter includes
+output files do also employ the same units. The :ref:`2d3dplotter` includes
 the Python magnitude module, so you can modify the units when plotting
 the results using the `Axes settings <#_Axes_settings>`__ (available
 from the context menu that appears by right clicking on the plot). If
@@ -804,8 +806,8 @@ your output file will be saved with the desired units. But remember that
 the original output file (typically a netCDF4) is written using the
 original standard units.
 
-The list of prefixes to physical quantities is listed in `Table
-1 <#anchor-339>`__. The leftmost column is what can be written in front
+The list of prefixes to physical quantities is listed in Table 1.
+The leftmost column is what can be written in front
 of the symbol of a physical quantity.
 
 Table 1: A list of prefixes that can be used to modify units.
@@ -834,9 +836,9 @@ Z      zetta 1e21
 Y      yotta 1e24
 ====== ===== =====
 
-All these prefixes can be used with any of the units from `Table
-2 <#anchor-340>`__. All these units can also be accessed through the
-`Units Editor <#_Unites_Editor>`__.
+All these prefixes can be used with any of the units from Table 2.
+All these units can also be accessed through the
+:ref:`units-editor`.
 
 Table 2: A list of all units that can be used in MDANSE.
 

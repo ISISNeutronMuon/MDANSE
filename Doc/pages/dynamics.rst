@@ -102,7 +102,7 @@ approximate value for the diffusion constant
 
 :math:`{\mathit{DOS}\left( {n\cdot\Delta\nu} \right)}`
 is smoothed by applying a Gaussian window in the time domain
-[`10 <#SignetBibliographie_010>`__] (see the section on `Spatial
+[Ref10]_ (see the section on `Spatial
 Density <#_Theory_and_implementation>`__). Its width in the time domain
 is :math:`{\sigma_{t} = \alpha}\text{/}T`
 , where T is the length of the simulation. We remark that the diffusion
@@ -253,7 +253,7 @@ velocity autocorrelation function. Writing
    {d_{\alpha}{(t) = {\int\limits_{0}^{t}{\mathit{d\tau}v_{\alpha}(\tau)}}}}
 
 in Eq. :math:numref:`pfx14` one can show (see
-e.g. [`11 <#SignetBibliographie_011>`__]) that
+e.g. [Ref11]_) that
 
 .. math::
    :label: pfx19
@@ -276,7 +276,7 @@ With Eq. :math:numref:`pfx50` this can also be written as
    {{D_{\alpha} = \pi}{\overset{\sim}{C}}_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(0).}
 
 Computationally, the *MSD* is calculated using the Fast Correlation
-Algorithm (*FCA*) [`12 <#SignetBibliographie_012>`__]. In this
+Algorithm (*FCA*) [Ref12]_. In this
 framework, in the discrete case, the mean-square displacement of a
 particle is given by
 
@@ -409,7 +409,7 @@ backbone as well as side chain dynamics. Among them, the heteronuclear
 relaxation measurement of amide backbone :sup:`15`\ N nuclei is one of
 the most widespread techniques. The relationship between microscopic
 motions and measured spin relaxation rates is given by Redfield's theory
-[`13 <#SignetBibliographie_013>`__]. Under the hypothesis that
+[Ref13]_. Under the hypothesis that
 :sup:`15`\ N relaxation occurs through dipole-dipole interactions with
 the directly bonded :sup:`1`\ H atom and chemical shift anisotropy
 (CSA), and assuming that the tensor describing the CSA is axially
@@ -449,7 +449,7 @@ where C\ :sup:`G`\ (t) and
 
 \ denote the global and the internal time correlation function,
 respectively. Within the so-called model free approach
-[`14 <#SignetBibliographie_014>`__], [`15 <#SignetBibliographie_015>`__]
+[Ref14]_, [Ref15]_
 the internal correlation function is modelled by an exponential,
 
 .. math::

@@ -55,9 +55,9 @@ If you installed it normally, MDANSE icon should appear in Applications
 like any other app. However, starting it the first time is a bit more
 complicated since Apple implements stricter protections and we are not
 registered as trusted developers. Therefore, you might have to change
-some settings (see Ref [`4 <#SignetBibliographie_004>`__] for a guide).
+some settings (see Ref [Ref4]_ for a guide).
 Before you do that though, try simply opening MDANSE from the right
-click menu (see Ref [`3 <#SignetBibliographie_003>`__] for a guide).
+click menu (see Ref [Ref3]_ for a guide).
 
 To start MDANSE GUI from terminal, you will have to run the following
 command (change /Applications if you installed MDANSE elsewhere):
@@ -118,7 +118,7 @@ equally well, bugs notwithstanding, on all platforms.
     calculations.
 6.  `Elements database editor <#_Elements_database_editor>`__ allows you
     to change the atomic constants that MDANSE uses for calculations.
-7.  `2D/3D Plotter <#_2D/3D_Plotter>`__ launches a window where the
+7.  :ref:`2d3dplotter` launches a window where the
     calculated data can be plotted, and the plots formatted.
 8.  **User definitions editor** opens a window where you can view the
     definitions that have been created for each trajectory. More on
@@ -134,12 +134,12 @@ equally well, bugs notwithstanding, on all platforms.
 12. **Open MDANSE API** opens MDANSE documentation in a browser. This is
     very similar to MDANSE classes framework.
 13. **Open MDANSE website** opens the MDANSE
-    website[`8 <#SignetBibliographie_008>`__] in a browser.
+    website [Ref8]_ in a browser.
 14. **About** launches a window with very basic information about the
     MDANSE you have installed.
 15. **Bug report** opens your default mail application. Please use this
     or create an issue on MDANSE
-    GitHub[`9 <#SignetBibliographie_009>`__] to inform us of any issues
+    GitHub [Ref9]_ to inform us of any issues
     you have come across.
 16. `Quit MDANSE <#_Quit>`__ closes the MDANSE window.
 17. `Data panel <#_Data_panel>`__ contains any NetCDF files you loaded
@@ -290,7 +290,7 @@ more complex ones.
     calculations.
 3.  `Elements database editor <#_Elements_database_editor>`__ allows you
     to change the atomic constants that MDANSE uses for calculations.
-4.  `2D/3D Plotter <#_2D/3D_Plotter>`__ launches a window where the
+4.  :ref:`2d3dplotter` launches a window where the
     calculated data can be plotted, and the plots formatted.
 5.  **User definitions editor** opens a window where you can view the
     definitions that have been created for each trajectory. More on
@@ -309,7 +309,7 @@ more complex ones.
 11. **About** launches a window with very basic information about the
     MDANSE you have installed.
 12. **Bug report** opens your default mail application. Please use this
-    or our GitHub[`9 <#SignetBibliographie_009>`__] to inform us of any
+    or our GitHub [Ref9]_ to inform us of any
     issues you have come across. When reporting an issue, please include
     a picture or copy of the error, such as the `traceback from job
     failure <#STATE>`__.
@@ -382,6 +382,8 @@ Clicking on Database opens this menu:
 
 -  **New element** allows you to add a new element.
 -  **New property** allows you to add a new property.
+
+.. _2d3dplotter:
 
 2D/3D Plotter
 ~~~~~~~~~~~~~
@@ -471,6 +473,8 @@ options for this, represented by the two buttons:
 As can be seen, the plot automatically adjusts the axes so that all
 plots fit. More details on plotting options is in `Appendix
 3 <#_Appendix_3_1>`__.
+
+.. _units-editor:
 
 Units Editor
 ~~~~~~~~~~~~
@@ -581,7 +585,7 @@ and other operations when using the Plugins panel.
 
 The Working panel is also the space which some of the plugins use to do
 their job. `The Molecular Viewer <#_Molecular_Viewer>`__,
-`Animation <#_Animation>`__, and `2D/3D Plotter <#_Plotter>`__ plugins
+`Animation <#_Animation>`__, and :ref:`2d3dplotter` plugins
 all load into the `Working panel <#_Working_panel>`__. Furthermore, it
 is possible to bring the windows opened by the other plugins into the
 working panel, like below. To do that, you have to drag the window so
@@ -622,6 +626,8 @@ plugins, click on the 'plus' buttons next to the text to unhide the
 options. If there is no such button next to a text, that means that that
 is a plugin and can be launched by double-clicking on the text.
 
+
+.. _analysis:
 
 Analysis
 --------
