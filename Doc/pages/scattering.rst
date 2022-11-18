@@ -6,9 +6,11 @@ This section discusses plugins used
 to calculate neutron spectroscopy observables from the trajectory.
 These plugins will be explored in depth in further sections, however,
 before that, it is important to understand how MDANSE performs these
-analyses. A part of that are `Q vectors <#_A3.4._Q_vectors>`__, which
+analyses. A part of that are :ref:`param-q-vectors`, which
 are used to perform these analyses. An in-depth discussion of this
 aspect is present in `Appendix 2 <#_Appendix_2>`__.
+
+.. _scattering_theory:
 
 Theory and background
 '''''''''''''''''''''
@@ -254,13 +256,15 @@ Where S(Q) would be the static structure factor (going to 1 at large Q)
 computed by MDANSE. Therefore, even after using MDANSE we should
 recalculate the x-ray observable using the atomic factors.
 
+.. _current-correlation-function:
+
 Current Correlation Function
 ''''''''''''''''''''''''''''
 
 .. _theory-and-implementation-5:
 
 Theory and implementation
-                         
+-------------------------                         
 
 Current correlation function is typically used to study the propagation
 of excitations in disordered systems. In MDANSE, its longitudinal and
@@ -271,7 +275,7 @@ other details can be found in Ref [Ref19]_.
 .. _gui-5:
 
 GUI
-   
+---   
 
 -  available for trajectories only
 
@@ -279,9 +283,9 @@ GUI
    :width: 11.883cm
    :height: 15.921cm
 
--  `frames <#_Frames>`__
--  `instrument resolution <#_Instrument_resolution>`__
--  `interpolation order <#_Interpolation_order>`__
+-  :ref:`param-frames`
+-  :ref:`param-instrument-resolution`
+-  :ref:`param-interpolation-order`
 -  **interpolation mode** (only applicable when interpolation order is
    set to something different than 'no interpolation')
 
@@ -354,13 +358,15 @@ comparable to the 'repeated interpolation' interpolation mode. Further,
 when SSD is used, the analysis can be faster than in the 'repeated
 interpolation' mode.
 
--  `q vectors <#_A3.4._Q_vectors>`__
--  `atom selection <#_Atom_Selection_1>`__
+-  :ref:`param-q-vectors`
+-  :ref:`param-atom-selection`
 -  `normalize <#_Normalize>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
+
+.. _dynamic-coherent-structure-factor:
 
 Dynamic Coherent Structure Factor
 '''''''''''''''''''''''''''''''''
@@ -368,7 +374,7 @@ Dynamic Coherent Structure Factor
 .. _theory-and-implementation-6:
 
 Theory and implementation
-                         
+-------------------------                         
 
 Please refer to `Theory and background`_ for more details about the
 theoretical background related to the dynamic coherent structure factor.
@@ -484,25 +490,27 @@ since :math:`b_{\mathit{coh},H}`
 
 \ Is negative [Ref20]_. The density-density
 correlation is computed via the *FCA* technique described in the section
-on `Spatial Density <#_Theory_and_implementation>`__.
+:ref:`appendix-fca`.
 
 .. _gui-6:
 
 GUI
-   
+---   
 
 -  available for trajectories only
 
 |image24| |image25|
 
--  `frames <#_Frames>`__
--  `instrument resolution <#_Instrument_resolution>`__
--  `q vectors <#_A3.4._Q_vectors>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-frames`
+-  :ref:`param-instrument-resolution`
+-  :ref:`param-q-vectors`
+-  :ref:`param-atom-selection`
+-  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
+
+.. _dynamic-incoherent-structure-factor:
 
 Dynamic Incoherent Structure Factor
 '''''''''''''''''''''''''''''''''''
@@ -510,7 +518,7 @@ Dynamic Incoherent Structure Factor
 .. _theory-and-implementation-7:
 
 Theory and implementation
-                         
+-------------------------                         
 
 Please refer to `Theory and background`_
 section for more details about the theoretical background related to the
@@ -530,7 +538,8 @@ rectangular grid of equidistantly spaced points along the time-and the
 .. math::
    :label: pfx90
 
-   {\text{F}_{\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}}}\text{F}_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right),{k = 0}\ldots{N_{t} - 1},{m = 0}\ldots{N_{q} - 1.}}
+   {\text{F}_{\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}}}\text{F}_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right),\\
+   {k = 0}\ldots{N_{t} - 1},{m = 0}\ldots{N_{q} - 1.}}
 
 where N\ :sub:`t` is the number of time steps in the coordinate time
 series, N\ :sub:`q` is a user-defined number of *q*-shells,
@@ -600,8 +609,8 @@ user-defined directions.
 
 The correlation functions defined in :math:numref:`pfx92`
 are computed via
-the *FCA* technique described in `Spatial
-Density <#_Theory_and_implementation>`__ section. Although the efficient
+the *FCA* technique described in the section :ref:`appendix-fca`.
+Although the efficient
 *FCA* technique is used to compute the atomic time correlation
 functions, the program may consume a considerable amount of CPU-time
 since the number of time correlation functions to be computed equals the
@@ -612,22 +621,24 @@ in *MDANSE*.
 .. _gui-7:
 
 GUI
-   
+---   
 
 -  available for trajectories only
 
 |image26| |image27|
 
--  `frames <#_Frames>`__
--  `instrument resolution <#_Instrument_resolution>`__
--  `q vectors <#_A3.4._Q_vectors>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `Group coordinates by <#_Group_coordinates_by>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-frames`
+-  :ref:`param-instrument-resolution`
+-  :ref:`param-q-vectors`
+-  :ref:`param-atom-selection`
+-  :ref:`param-group-coordinates`
+-  :ref:`param-atom-transmutation`
 -  `project coordinates <#_Project_coordinates>`__
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
+
+.. _elastic-incoherent-structure-factor:
 
 Elastic Incoherent Structure Factor
 '''''''''''''''''''''''''''''''''''
@@ -635,7 +646,7 @@ Elastic Incoherent Structure Factor
 .. _theory-and-implementation-8:
 
 Theory and implementation
-                         
+-------------------------                        
 
 The Elastic Incoherent Structure Factor (*EISF*) is defined as the limit
 of the incoherent intermediate scattering function for infinite time,
@@ -759,21 +770,23 @@ jumps due to periodic boundary conditions.
 .. _gui-8:
 
 GUI
-   
+---   
 
 -  available for trajectories only
 
 |image28|\ |image29|
 
--  `frames <#_Frames>`__
--  `q vectors <#_A3.4._Q_vectors>`__
+-  :ref:`param-frames`
+-  :ref:`param-q-vectors`
 -  `project coordinates <#_Project_coordinates>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `Group coordinates by <#_Group_coordinates_by>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-atom-selection`
+-  :ref:`param-group-coordinates`
+-  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
+
+.. _gaussian-dynamic-incoherent-structure-factor:
 
 Gaussian Dynamic Incoherent Structure Factor
 ''''''''''''''''''''''''''''''''''''''''''''
@@ -781,7 +794,7 @@ Gaussian Dynamic Incoherent Structure Factor
 .. _theory-and-implementation-9:
 
 Theory and implementation
-                         
+-------------------------                         
 
 The *MSD* can be related to the incoherent intermediate scattering
 function via the cumulant expansion [Ref11]_,
@@ -885,13 +898,13 @@ mean-square displacement per atom.
 .. _gui-9:
 
 GUI
-   
+---   
 
 -  available for trajectories only
 
 |image30| |image31|
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 
 -  q shells
 
@@ -925,14 +938,16 @@ GUI
 which are skipped. 1 means that all values are used, 2 means every other
 one is, etc.
 
--  `instrument resolution <#_Instrument_resolution>`__
+-  :ref:`param-instrument-resolution`
 -  `project coordinates <#_Project_coordinates>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `Group coordinates by <#_Group_coordinates_by>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-atom-selection`
+-  :ref:`param-group-coordinates`
+-  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
+
+.. _neutron-dynamic-total-structure-factor:
 
 Neutron Dynamic Total Structure Factor
 ''''''''''''''''''''''''''''''''''''''
@@ -943,13 +958,15 @@ Neutron Dynamic Total Structure Factor
    :width: 15.921cm
    :height: 14.372cm
 
--  `frames <#_Frames>`__
--  `instrument resolution <#_Instrument_resolution>`__
--  `q vectors <#_A3.4._Q_vectors>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-frames`
+-  :ref:`param-instrument-resolution`
+-  :ref:`param-q-vectors`
+-  :ref:`param-atom-selection`
+-  :ref:`param-atom-transmutation`
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
+
+.. _structure-factor-from-scattering-function:
 
 Structure Factor From Scattering Function
 '''''''''''''''''''''''''''''''''''''''''
@@ -963,8 +980,8 @@ Structure Factor From Scattering Function
    :width: 15.921cm
    :height: 6.272cm
 
--  `instrument resolution <#_Instrument_resolution>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-instrument-resolution`
+-  :ref:`param-output-files`
 
 .. |image24| image:: ./Pictures/100000010000032200000261D8E9E9FE2C36FF14.png
    :width: 15.921cm

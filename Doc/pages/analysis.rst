@@ -2,6 +2,8 @@
 Analysis: other options
 =======================
 
+.. _analysis-infrared:
+
 Infrared
 ^^^^^^^^
 
@@ -19,6 +21,9 @@ Dipole AutoCorrelation Function
 -  `atom charges <#_Atom_Charges_1>`__
 -  `output files <#_Output_files>`__
 -  `running mode <#_Running_mode>`__
+
+
+.. _analysis-macromolecules:
 
 Macromolecules
 ^^^^^^^^^^^^^^
@@ -563,6 +568,8 @@ Unfolded Trajectory
 -  `output files <#_Output_files>`__
 -  `running mode <#_Running_mode>`__
 
+.. _analysis-virtual-instruments:
+
 Virtual Instruments
 ^^^^^^^^^^^^^^^^^^^
 
@@ -644,12 +651,16 @@ performed.
 -  `output files <#_Output_files>`__
 -  `running mode <#_Running_mode>`__
 
+.. _analysis-misc:
+
 Miscellaneous
-~~~~~~~~~~~~~
+^^^^^^^^^^^^^
 
 This section normally contains only one Plugin, which is present for
 both trajectories and analysis results. However, some other Plugins
 appear under certain circumstances.
+
+.. _analysis-info:
 
 Data info
 ^^^^^^^^^
@@ -674,11 +685,13 @@ for a trajectory:
    :width: 11.441cm
    :height: 12.053cm
 
+.. _analysis-animation:
+
 Animation
 ^^^^^^^^^
 
 -  available for trajectories only
--  appears only when `Molecular Viewer <#_Molecular_Viewer>`__ is active
+-  appears only when :ref:`molecular-viewer` is active
 
 Once double-clicked, it creates a new bar below Molecular Viewer that
 allows you to watch the whole MD simulation.
@@ -704,11 +717,13 @@ allows you to watch the whole MD simulation.
 -  **Speed** determines how fast the simulation is displayed. The higher
    the number, the faster the playback.
 
+.. _analysis-den-sup:
+
 Density Superposition
 ^^^^^^^^^^^^^^^^^^^^^
 
 -  available for trajectories only
--  appears only when `Molecular Viewer <#_Molecular_Viewer>`__ is active
+-  appears only when :ref:`molecular-viewer` is active
    and you have left-clicked anywhere inside it
 
 Double-clicking this opens the following window:
@@ -760,16 +775,16 @@ displayed.
 
 *Description:* determines the level of detail?<insert>
 
--  **Clear** button removes the Density Superposition from `Molecular
-   Viewer <#_Molecular_Viewer>`__.
--  **Draw** button add Density Superposition on top of `Molecular
-   Viewer <#_Molecular_Viewer>`__.
+-  **Clear** button removes the Density Superposition from :ref:`molecular-viewer`.
+-  **Draw** button adds Density Superposition on top of :ref:`molecular-viewer`.
+
+.. _trajectory-viewer:
 
 Trajectory Viewer
 ^^^^^^^^^^^^^^^^^
 
 -  Available for trajectories only
--  appears only when `Molecular Viewer <#_Molecular_Viewer>`__ is active
+-  appears only when :ref:`molecular-viewer` is active
 
 This plugin was designed to help visualise the variables contained in a
 trajectory. It can only plot the 3D trajectory variables, and nothing
@@ -855,7 +870,7 @@ When True, the legend appears in the location matplotlib determines as
 'best'.
 
 My jobs
-~~~~~~~
+^^^^^^^
 
 This section only appears if you have used the `Save analysis
 template <#save_analysis_template>`__ button in the main window's
@@ -863,12 +878,12 @@ toolbar. It contains all the analyses created this way and allows them
 to be run.
 
 Plotter
-~~~~~~~
+^^^^^^^
 
 .. _d3d-plotter-1:
 
 2D/3D Plotter
-^^^^^^^^^^^^^
+'''''''''''''
 
 -  available for analysis results only
 
@@ -880,7 +895,7 @@ like below. For more information, please see :ref:`2d3dplotter`.
    :height: 7.214cm
 
 User definition
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^
 
 This section contains all the
 definitions/`selections <#_Creating_selections>`__ that have been made
@@ -888,10 +903,12 @@ for the selected NetCDF file, serving similar purpose to `User
 definition editor <#user_definitions_editor>`__.
 
 Viewer
-~~~~~~
+^^^^^^
+
+.. _molecular-viewer:
 
 Molecular Viewer
-^^^^^^^^^^^^^^^^
+''''''''''''''''
 
 -  available for trajectories only
 
@@ -944,7 +961,7 @@ following menu:
    which the system is bound.
 
 Jobs
-----
+^^^^
 
 When an analysis is started by clicking on the Run button, it appears as
 a job in this panel, like so:

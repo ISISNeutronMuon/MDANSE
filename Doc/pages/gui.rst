@@ -584,8 +584,8 @@ and other operations when using the Plugins panel.
    :height: 1.217cm
 
 The Working panel is also the space which some of the plugins use to do
-their job. `The Molecular Viewer <#_Molecular_Viewer>`__,
-`Animation <#_Animation>`__, and :ref:`2d3dplotter` plugins
+their job. :ref:`molecular-viewer`,
+:ref:`analysis-animation`, and :ref:`2d3dplotter` plugins
 all load into the `Working panel <#_Working_panel>`__. Furthermore, it
 is possible to bring the windows opened by the other plugins into the
 working panel, like below. To do that, you have to drag the window so
@@ -651,12 +651,12 @@ parameters to be configured before it can be run. However, all of them
 have the same structure (example window below), consisting of these
 parts:
 
--  **trajectory** box shows the path to the `MMTK
-   NetCDF <#_NetCDF_file_format>`__ trajectory that this analysis will
+-  **trajectory** box shows the path to the :ref:`netcdf`
+   trajectory that this analysis will
    be performed on.
 
 -  **Parameters** are a group of options, of which the common ones are
-   discussed in depth in `Appendix 2 <#_Appendix_2>`__. These are the
+   discussed in depth in :ref:`parameters`. These are the
    options which vary from analysis to analysis. The only parameters
    that exist on every analysis are Frames and Output files.
 
@@ -668,7 +668,7 @@ parts:
    -  **Save** opens a file browser that allows you to save the current
       analysis with the set options into a python script which can be
       run from the command line. More information about scripts in
-      `Using MDANSE from command line. <#_Using_MDANSE_from>`__
+      :ref:`mdanse-cli` and :ref:`mdanse-scripts`.
    -  **Run** starts the analysis and prompts you whether you want to
       close the window. The status of the analysis can be found in the
       `Jobs <#_Jobs>`__ panel, though there is a known bug where

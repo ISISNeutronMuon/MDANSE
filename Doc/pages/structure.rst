@@ -11,7 +11,7 @@ Area Per Molecule
    :width: 15.774cm
    :height: 10.582cm
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 -  **area vectors**
 
 *Format:* drop-down
@@ -30,7 +30,7 @@ Area Per Molecule
 take place. The name inputted here must match a name that MMTK assigned
 to inside the NetCDF file.
 
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 .. _target_CN:
@@ -106,7 +106,7 @@ GUI
    :width: 15.921cm
    :height: 12.589cm
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 
 -  r values
 
@@ -144,9 +144,9 @@ counted.
 range of values between the above two extremes above. Eg. using the
 default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.
 
--  `atom selection <#_Atom_Selection_1>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-atom-selection`
+-  :ref:`param-atom-transmutation`
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Density Profile
@@ -158,9 +158,9 @@ Density Profile
    :width: 15.921cm
    :height: 15.048cm
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
+-  :ref:`param-atom-transmutation`
 -  **axis**
 
 *Format:* drop-down
@@ -181,7 +181,7 @@ the **axis** field is divided into a number of bins along its length.
 **dr** specifies how large each of these bins will be.
 
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Eccentricity
@@ -193,11 +193,11 @@ Eccentricity
    :width: 15.921cm
    :height: 10.62cm
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
+-  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 
 Molecular Trace
 '''''''''''''''
@@ -208,8 +208,8 @@ Molecular Trace
    :width: 15.921cm
    :height: 10.82cm
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
 -  **spatial resolution**
 
 *Format:* float
@@ -220,7 +220,7 @@ Molecular Trace
 It is used to determine how many grid points are used to represent a
 unit of length.
 
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Pair Distribution Function
@@ -340,7 +340,7 @@ GUI
    :width: 15.921cm
    :height: 13.656cm
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 
 -  r values
 
@@ -378,10 +378,10 @@ counted.
 range of values between the above two extremes above. Eg. using the
 default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.
 
--  `atom selection <#_Atom_Selection_1>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-atom-selection`
+-  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Root Mean Square Deviation
@@ -438,7 +438,7 @@ GUI
    :width: 15.921cm
    :height: 15.145cm
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 -  **reference frame**
 
 *Format:* int
@@ -449,11 +449,11 @@ GUI
 for the calculation. The deviation will be calculated as how it deviates
 from the values in this frame.
 
--  `atom selection <#_Atom_Selection_1>`__
--  `Group coordinates by <#_Group_coordinates_by>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-atom-selection`
+-  :ref:`param-group-coordinates`
+-  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Root Mean Square Fluctuation
@@ -465,10 +465,10 @@ Root Mean Square Fluctuation
    :width: 15.921cm
    :height: 10.793cm
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `Group coordinates by <#_Group_coordinates_by>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
+-  :ref:`param-group-coordinates`
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Radius Of Gyration
@@ -521,10 +521,10 @@ GUI
    :width: 15.921cm
    :height: 10.793cm
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Solvent Accessible Surface
@@ -536,8 +536,8 @@ Solvent Accessible Surface
    :width: 15.921cm
    :height: 12.504cm
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
 -  **n sphere points**
 
 *Format:* int
@@ -559,7 +559,7 @@ Smaller probe radius detects more detail and therefore reports larger
 surface area. The default value is approximately equal to the radius of
 a water molecule.
 
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Spatial Density
@@ -685,7 +685,7 @@ GUI
    :width: 15.921cm
    :height: 12.578cm
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 -  **spatial resolution**
 
 *Format:* float
@@ -713,9 +713,9 @@ Selection <#_Axis_Selection_1>`__. <insert> what it does
 
 *Description:* can be used exactly an Atom Selection. Allows for a
 subset of particles to be selected on which the analysis will be
-performed. More information in `Atom Selection <#_Atom_Selection_1>`__.
+performed. More information in :ref:`param-atom-selection`.
 
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Static Structure Factor
@@ -742,7 +742,7 @@ GUI
    :width: 15.921cm
    :height: 15.205cm
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 
 -  r values
 
@@ -811,10 +811,10 @@ default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.
 *Description:* the step size value used to generate the range of q
 values.
 
--  `atom selection <#_Atom_Selection_1>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-atom-selection`
+-  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Voronoi
@@ -826,7 +826,7 @@ Voronoi
    :width: 15.921cm
    :height: 8.606cm
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 -  **apply periodic_boundary_condition**
 
 *Format:* bool
@@ -844,7 +844,7 @@ to the Voronoi cell.
 
 *Description:* <insert>
 
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Xray Static Structure Factor
@@ -856,7 +856,7 @@ Xray Static Structure Factor
    :width: 15.921cm
    :height: 13.755cm
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 
 -  r values
 
@@ -925,7 +925,7 @@ default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.
 *Description:* the step size value used to generate the range of q
 values.
 
--  `atom selection <#_Atom_Selection_1>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-atom-selection`
+-  :ref:`param-atom-transmutation`
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__

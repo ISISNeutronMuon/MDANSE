@@ -2,7 +2,7 @@
 Acknowledgements
 ================
 
-MDANSE was born at the ILL in 2012, as an extension of the nMOLDYN
+MDANSE was born at the ILL in 2012, as a fork of the nMOLDYN
 program, originally developed by Gerald Kneller in 1995. Subsequent
 versions of nMOLDYN were further developed by Gerald Kneller, Konrad
 Hinsen and Eric Pellegrini. We are grateful to all the people who have

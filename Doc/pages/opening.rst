@@ -5,7 +5,7 @@ MDANSE User Guide
 **MDANSE (Molecular Dynamics Analysis of Neutron Scattering
 Experiments)**
 
-User Guide, Version 1.1
+User Guide for MDANSE Version 1.5.2
 
 Rastislav Turanyi [1]_, Miguel A. Gonzalez [2]_, Eric Pellegrini [2]_, Maciej Bartkowiak [1]_, Sanghamitra Mukhopadhyay [1]_
 

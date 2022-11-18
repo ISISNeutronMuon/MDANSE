@@ -65,10 +65,10 @@ GUI
 
 Parameters:
 
--  `frames <#_Frames>`__
--  `axis selection <#_Axis_Selection_1>`__
+-  :ref:`param-frames`
+-  :ref:`param-axis-selection`
 -  `output contribution per axis <#_Output_contribution_per>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Density Of States
@@ -102,8 +102,7 @@ approximate value for the diffusion constant
 
 :math:`{\mathit{DOS}\left( {n\cdot\Delta\nu} \right)}`
 is smoothed by applying a Gaussian window in the time domain
-[Ref10]_ (see the section on `Spatial
-Density <#_Theory_and_implementation>`__). Its width in the time domain
+[Ref10]_ (see the section :ref:`appendix-fca`). Its width in the time domain
 is :math:`{\sigma_{t} = \alpha}\text{/}T`
 , where T is the length of the simulation. We remark that the diffusion
 constant obtained from *DOS* is biased due to the spectral smoothing
@@ -122,15 +121,15 @@ GUI
 
 |image14| |image15|
 
--  `frames <#_Frames>`__
--  `instrument resolution <#_Instrument_resolution>`__
--  `interpolation order <#_Interpolation_order>`__
+-  :ref:`param-frames`
+-  :ref:`param-instrument-resolution`
+-  :ref:`param-interpolation-order`
 -  `project coordinates <#_Project_coordinates>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `Group coordinates by <#_Group_coordinates_by>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-atom-selection`
+-  :ref:`param-group-coordinates`
+-  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 General AutoCorrelation Function
@@ -140,10 +139,10 @@ General AutoCorrelation Function
 
 |image16| |image17|
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `Group coordinates by <#_Group_coordinates_by>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
+-  :ref:`param-group-coordinates`
+-  :ref:`param-atom-transmutation`
 -  **trajectory variable**
 
 *Format:* drop-down
@@ -157,7 +156,7 @@ calculated.
 
 -  `normalize <#_Normalize>`__
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Mean Square Displacement
@@ -311,7 +310,7 @@ which is split as follows:
    {S_{\mathit{AB}}{(m) = {\sum\limits_{k = 0}^{N_{t} - m - 1}{r(k)}}}\cdot r\left( {k + m} \right).}
 
 The function SAB(m) can be computed using the *FCA* method described in
-the section on `Spatial Density <#_Theory_and_implementation>`__. For
+the section :ref:`appendix-fca`. For
 SAA+BB(m) the following recursion relation holds:
 
 .. math::
@@ -379,13 +378,13 @@ GUI
 
 |image18| |image19|
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 -  `project coordinates <#_Project_coordinates>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `Group coordinates by <#_Group_coordinates_by>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-atom-selection`
+-  :ref:`param-group-coordinates`
+-  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Order Parameter
@@ -529,9 +528,9 @@ GUI
    :width: 15.921cm
    :height: 12.487cm
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 
--  `axis selection <#_Axis_Selection_1>`__
+-  :ref:`param-axis-selection`
 
 -  reference direction
 
@@ -564,7 +563,7 @@ GUI
 *Description:* <insert>
 
 -  `output contribution per axis <#_Output_contribution_per>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Position AutoCorrelation Function
@@ -574,14 +573,14 @@ Position AutoCorrelation Function
 
 |image20| |image21|
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 -  `normalize <#_Normalize>`__
 -  `project coordinates <#_Project_coordinates>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `Group coordinates by <#_Group_coordinates_by>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-atom-selection`
+-  :ref:`param-group-coordinates`
+-  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 Velocity AutoCorrelation Function
@@ -686,15 +685,15 @@ GUI
 
 |image22| |image23|
 
--  `frames <#_Frames>`__
--  `interpolation order <#_Interpolation_order>`__
+-  :ref:`param-frames`
+-  :ref:`param-interpolation-order`
 -  `project coordinates <#_Project_coordinates>`__
 -  `normalize <#_Normalize>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `Group coordinates by <#_Group_coordinates_by>`__
--  `atom transmutation <#_Atom_Transmutation_1>`__
+-  :ref:`param-atom-selection`
+-  :ref:`param-group-coordinates`
+-  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 -  `running mode <#_Running_mode>`__
 
 .. |image14| image:: ./Pictures/1000000100000323000002D1329469D922AFA541.png

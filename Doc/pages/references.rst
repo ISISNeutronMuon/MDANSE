@@ -137,3 +137,12 @@ References
 .. [Ref42] “Conda MacOS.”
    https://docs.conda.io/projects/conda/en/latest/user-guide/install/macos.html.
 
+.. [Ref43] “CP2K Open Source Molecular Dynamics.” https://www.cp2k.org
+
+.. [Ref44] Brigham, E.O. "The Fast Fourier Transfrom"
+   Prentice Hall, Englewood Cliffs (NJ) USA, 1974.
+
+.. [Ref45] Papoulis, A. "Signal Analysis"
+   McGraw-Hill, Singapore, 1984.
+
+.. [Ref46] Harris, F.J. "Proc. IEEE" (1978), 66 *1*, 51-83.

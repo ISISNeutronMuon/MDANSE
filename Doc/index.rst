@@ -55,6 +55,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/trajectory
    pages/plotting
    pages/parameters
+   pages/fca
    pages/references
 
 Indices and tables

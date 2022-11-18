@@ -98,7 +98,7 @@ variable:
 -  type of plot (this represents the dimensions of plot)
 -  which variable is on the x-axis if the variable in this DAT file were
    to be plotted on the y-axis
--  `units <#_Units>`__ in which the data is written
+-  :ref:`units` in which the data is written
 -  the length of the trajectory (indicated as slice:[length])
 
 After that is a list of numbers representing the variable as described.
@@ -112,5 +112,4 @@ These files are python scripts that, when run, perform a given analysis
 with all the options set the way they were when this script was created.
 It can be run like any other script, you only have to make sure you use
 the python interpreter that comes with MDANSE. For more information
-about MDANSE python, read `Using MDANSE from command
-line <#_Using_MDANSE_from>`__.
+about MDANSE python, read :ref:`mdanse-cli`.

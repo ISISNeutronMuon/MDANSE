@@ -161,6 +161,53 @@ directory)
 MMTK NetCDF format, containing all the information from the PDB and DCD
 files except velocities.
 
+CP2K converter
+~~~~~~~~~~~~~~
+
+This converter allows the conversion from a trajectory generated with
+CP2K [Ref43]_. Selecting CP2K button
+will open a window with the following input fields:
+
+-  **pos file**
+
+*Format:* string
+
+*Default:* ../../../Data/Trajectories/CP2K/p1-supercell-pos-ejemplo.xyz
+
+*Description:* an XYZ output file containing the atom positions
+for every step of the simulation.
+
+-  **vel file**
+
+*Format:* string
+
+*Default:* ../../../Data/Trajectories/CP2K/p1-supercell-vel-ejemplo.xyz
+
+*Description:* an XYZ output file containing atom velocities for
+every step of the simulation.
+
+This input is optional, as MDANSE can create approximate velocities
+of atoms based on their positions.
+
+-  **cell file**
+
+*Format:* string
+
+*Default:* ../../../Data/Trajectories/CP2K/p1-supercell-1.cell
+
+*Description:* an output file containing the dimensions of the 
+simulation unit cell for each frame of the simulation.
+
+-  **output files**
+
+*Format:* string
+
+*Default:* ~\\output_trajectory_conversion (where ~ is the home
+directory)
+
+*Description:* the path to and name of the file that will be created in
+MMTK NetCDF format, containing all the information from the input files.
+
 DFTB converter
 ~~~~~~~~~~~~~~
 

@@ -1,4 +1,6 @@
 
+.. _mdanse-cli:
+
 Using MDANSE from command line
 ==============================
 
@@ -34,7 +36,7 @@ The python can also be used to install other packages, run short code
 
 The last way to use MDANSE from the command line is to use default
 MDANSE scripts to interface with select parts of MDANSE GUI. This is
-described in a `this section <#_MDANSE_Scripts>`__.
+described in a :ref:`_mdanse-scripts`.
 
 Custom scripts
 --------------
