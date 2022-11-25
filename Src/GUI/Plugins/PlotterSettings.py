@@ -574,6 +574,7 @@ class LinesSettingsDialog(wx.Dialog):
 
         self.parent.selectedLine.set_alpha(1.0)
         self.parent.figure.canvas.draw()
+        self.EndModal(0)
         self.Destroy()
 
     def set_lines(self):
