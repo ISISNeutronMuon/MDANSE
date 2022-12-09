@@ -1,8 +1,8 @@
 \documentclass[a4paper,11pt]{article}
 
 \usepackage{array}
-% \usepackage{fullpage}
-% \usepackage{html}
+\usepackage{fullpage}
+\usepackage{html}
 \usepackage{graphicx}
 \usepackage[pdfborder={0 0 1},colorlinks]{hyperref}
 \usepackage[titletoc]{appendix}
@@ -1384,7 +1384,7 @@ New Jersey, 1957.
 \appendixpage
 \addappheadtotoc
 \begin{appendices}
-\section{The FCA algorithm}
+\chapter{The FCA algorithm}
 \label{fca}
 Most of the quantities which can be extracted from \gls{MD} simulations are time correlation functions. 
 Correlation functions of discrete time series can be efficiently calculated by using the \gls{FFT} \cite{Brigham}. The \gls{FCA} allows the number of multiplications (complexity) to be reduced from $\propto N_t^2$ to $\propto N_t \log_2(N_t)$. In 
