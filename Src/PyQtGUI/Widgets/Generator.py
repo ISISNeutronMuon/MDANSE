@@ -29,6 +29,7 @@ class WidgetGenerator:
                    name: str = "",
                    scrollable: bool =False,
                    dockable: bool =False,
+                   acceptsDrops: bool =True,
                    **kwargs):
         """Takes the constructor for any QWidget
         and creates additional widgets around it
@@ -61,6 +62,8 @@ class WidgetGenerator:
             if base is None:
                 base = scroller
         instance = cls(*args, parent=next_parent, **kwargs)
+        if acceptsDrops:
+            instance.setAcceptDrops(True)
         centre = instance
         if base is None:
             base = instance
