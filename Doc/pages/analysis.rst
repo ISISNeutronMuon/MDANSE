@@ -7,6 +7,8 @@ Analysis: other options
 Infrared
 ^^^^^^^^
 
+.. _analysis-dacf:
+
 Dipole AutoCorrelation Function
 '''''''''''''''''''''''''''''''
 
@@ -16,11 +18,11 @@ Dipole AutoCorrelation Function
    :width: 15.921cm
    :height: 10.986cm
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `atom charges <#_Atom_Charges_1>`__
--  `output files <#_Output_files>`__
--  `running mode <#_Running_mode>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
+-  :ref:`param-atom-charges`
+-  :ref:`param-output-files`
+-  :ref:`param-running-mode`
 
 
 .. _analysis-macromolecules:
@@ -33,6 +35,8 @@ Plugins:
 
 -  Refolded Membrane Trajectory
 
+.. _analysis-rmt:
+
 Refolded Membrane Trajectory
 ''''''''''''''''''''''''''''
 
@@ -42,7 +46,7 @@ Refolded Membrane Trajectory
    :width: 15.921cm
    :height: 10.204cm
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 -  **membrane axis**
 
 *Format:* drop-down
@@ -74,15 +78,17 @@ the membrane. It will be repositioned into the lower part of the
 simulation box. The name must be the name with which MMTK refers to the
 lipid.
 
--  `output files <#_Output_files>`__
+-  :ref:`param-output-files`
 
 Thermodynamics
 ^^^^^^^^^^^^^^
 
 This section contains the following Plugins:
 
--  `Density <#_Density>`__
--  `Temperature <#_Temperature>`__
+-  :ref:`analysis-density`
+-  :ref:`analysis-temperature`
+
+.. _analysis-density:
 
 Density
 '''''''
@@ -93,9 +99,11 @@ Density
    :width: 15.921cm
    :height: 8.059cm
 
--  `frames <#_Frames>`__
--  `output files <#_Output_files>`__
--  `running mode <#_Running_mode>`__
+-  :ref:`param-frames`
+-  :ref:`param-output-files`
+-  :ref:`param-running-mode`
+
+.. _analysis-temperature:
 
 Temperature
 '''''''''''
@@ -106,10 +114,10 @@ Temperature
    :width: 15.921cm
    :height: 7.504cm
 
--  `frames <#_Frames>`__
--  `interpolation order <#_Interpolation_order>`__
--  `output files <#_Output_files>`__
--  `running mode <#_Running_mode>`__
+-  :ref:`param-frames`
+-  :ref:`param-interpolation-order`
+-  :ref:`param-output-files`
+-  :ref:`param-running-mode`
 
 Trajectory
 ^^^^^^^^^^
@@ -117,12 +125,14 @@ Trajectory
 The Plugins within this section are listed below. They are used to
 adjust the trajectory in some way.
 
--  `Box Translated Trajectory <#_Box_Translated_Trajectory>`__
--  `Centre Of Masses Trajectory <#_Center_Of_Masses>`__
--  `Cropped Trajectory <#_Cropped_Trajectory>`__
--  `Global Motion Filtered Trajectory <#_Global_Motion_Filtered>`__
--  `Rigid Body Trajectory <#_Rigid_Body_Trajectory>`__
--  `Unfolded Trajectory <#_Unfolded_Trajectory>`__
+-  :ref:`trajectory-btt`
+-  :ref:`trajectory-comt`
+-  :ref:`trajectory-ct`
+-  :ref:`trajectory-gmft`
+-  :ref:`trajectory-rbt`
+-  :ref:`trajectory-ut`
+
+.. _trajectory-btt:
 
 Box Translated Trajectory
 '''''''''''''''''''''''''
@@ -133,10 +143,12 @@ Box Translated Trajectory
    :width: 15.921cm
    :height: 7.682cm
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `output files <#_Output_files>`__
--  `running mode <#_Running_mode>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
+-  :ref:`param-output-files`
+-  :ref:`param-running-mode`
+
+.. _trajectory-comt:
 
 Center Of Masses Trajectory
 '''''''''''''''''''''''''''
@@ -165,11 +177,13 @@ GUI
    :width: 15.921cm
    :height: 9.148cm
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `Group coordinates by <#_Group_coordinates_by>`__
--  `output files <#_Output_files>`__
--  `running mode <#_Running_mode>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
+-  :ref:`param-group-coordinates`
+-  :ref:`param-output-files`
+-  :ref:`param-running-mode`
+
+.. _trajectory-ct:
 
 Cropped Trajectory
 ''''''''''''''''''
@@ -180,10 +194,12 @@ Cropped Trajectory
    :width: 15.921cm
    :height: 7.781cm
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `output files <#_Output_files>`__
--  `running mode <#_Running_mode>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
+-  :ref:`param-output-files`
+-  :ref:`param-running-mode`
+
+.. _trajectory-gmft:
 
 Global Motion Filtered Trajectory
 '''''''''''''''''''''''''''''''''
@@ -228,16 +244,16 @@ GUI
    :width: 15.921cm
    :height: 10.661cm
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
 -  **reference basis**
 
 *Format:* drop-down
 
 *Default:* None
 
-*Description:* can be used exactly like `Axis
-Selection <#_Axis_Selection_1>`__. <insert> what it does
+*Description:* can be used exactly like
+:ref:`param-axis-selection`
 
 -  **Make the chemical object contiguous**
 
@@ -248,8 +264,10 @@ Selection <#_Axis_Selection_1>`__. <insert> what it does
 *Description:* makes the configuration contiguous. This is done via MMTK
 universe's contiguousObjectConfiguration() method.
 
--  `output files <#_Output_files>`__
--  `running mode <#_Running_mode>`__
+-  :ref:`param-output-files`
+-  :ref:`param-running-mode`
+
+.. _trajectory-rbt:
 
 Rigid Body Trajectory
 '''''''''''''''''''''
@@ -532,9 +550,9 @@ GUI
    :width: 15.921cm
    :height: 12.487cm
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `Group coordinates by <#_Group_coordinates_by>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
+-  :ref:`param-group-coordinates`
 -  **reference**
 
 *Format:* int
@@ -551,8 +569,10 @@ GUI
 
 *Description:* <insert>
 
--  `output files <#_Output_files>`__
--  `running mode <#_Running_mode>`__
+-  :ref:`param-output-files`
+-  :ref:`param-running-mode`
+
+.. _trajectory-ut:
 
 Unfolded Trajectory
 '''''''''''''''''''
@@ -563,10 +583,10 @@ Unfolded Trajectory
    :width: 15.921cm
    :height: 7.93cm
 
--  `frames <#_Frames>`__
--  `atom selection <#_Atom_Selection_1>`__
--  `output files <#_Output_files>`__
--  `running mode <#_Running_mode>`__
+-  :ref:`param-frames`
+-  :ref:`param-atom-selection`
+-  :ref:`param-output-files`
+-  :ref:`param-running-mode`
 
 .. _analysis-virtual-instruments:
 
@@ -580,7 +600,7 @@ McStas Virtual Instrument
 
 |image33| |image34|
 
--  `frames <#_Frames>`__
+-  :ref:`param-frames`
 -  **MDANSE Coherent Structure Factor**
 
 *Format:* str
@@ -648,8 +668,8 @@ performed.
 
 -  mcstas parameters - these options become visible once a McStas
    instrument has been chosen.
--  `output files <#_Output_files>`__
--  `running mode <#_Running_mode>`__
+-  :ref:`param-output-files`
+-  :ref:`param-running-mode`
 
 .. _analysis-misc:
 

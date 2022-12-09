@@ -31,7 +31,7 @@ take place. The name inputted here must match a name that MMTK assigned
 to inside the NetCDF file.
 
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 .. _target_CN:
 
@@ -147,7 +147,7 @@ default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.
 -  :ref:`param-atom-selection`
 -  :ref:`param-atom-transmutation`
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 Density Profile
 '''''''''''''''
@@ -182,7 +182,7 @@ the **axis** field is divided into a number of bins along its length.
 
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 Eccentricity
 ''''''''''''
@@ -221,7 +221,7 @@ It is used to determine how many grid points are used to represent a
 unit of length.
 
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 Pair Distribution Function
 ''''''''''''''''''''''''''
@@ -342,9 +342,9 @@ GUI
 
 -  :ref:`param-frames`
 
--  r values
+r values
 
-   -  **from**
+-  **from**
 
 *Format:* int
 
@@ -354,9 +354,7 @@ GUI
 nanometers taken into consideration. Only particles at that distance or
 further will be counted.
 
--  
-
-   -  **to**
+-  **to**
 
 *Format:* int
 
@@ -366,9 +364,7 @@ further will be counted.
 nanometers. Only particles up to and including this distance will be
 counted.
 
--  
-
-   -  **by step of**
+-  **by step of**
 
 *Format:* int
 
@@ -382,7 +378,7 @@ default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.
 -  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 Root Mean Square Deviation
 ''''''''''''''''''''''''''
@@ -454,7 +450,7 @@ from the values in this frame.
 -  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 Root Mean Square Fluctuation
 ''''''''''''''''''''''''''''
@@ -469,7 +465,7 @@ Root Mean Square Fluctuation
 -  :ref:`param-atom-selection`
 -  :ref:`param-group-coordinates`
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 Radius Of Gyration
 ''''''''''''''''''
@@ -525,7 +521,7 @@ GUI
 -  :ref:`param-atom-selection`
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 Solvent Accessible Surface
 ''''''''''''''''''''''''''
@@ -560,7 +556,7 @@ surface area. The default value is approximately equal to the radius of
 a water molecule.
 
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 Spatial Density
 '''''''''''''''
@@ -716,7 +712,7 @@ subset of particles to be selected on which the analysis will be
 performed. More information in :ref:`param-atom-selection`.
 
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 Static Structure Factor
 '''''''''''''''''''''''
@@ -815,7 +811,7 @@ values.
 -  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 Voronoi
 '''''''
@@ -845,7 +841,7 @@ to the Voronoi cell.
 *Description:* <insert>
 
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 Xray Static Structure Factor
 ''''''''''''''''''''''''''''
@@ -928,4 +924,4 @@ values.
 -  :ref:`param-atom-selection`
 -  :ref:`param-atom-transmutation`
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`

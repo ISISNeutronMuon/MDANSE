@@ -784,18 +784,13 @@ and – keys.
 -  **Save current view** button opens a file browser that allows the
    current view to be saved as a PNG file.
 
-Scalar-Field Plotter
-~~~~~~~~~~~~~~~~~~~~
-
-<insert>
-
 .. _units:
 
 Units
 =====
 
 The units used by MDANSE are nm for length and ps for time, and their
-inverses for Q (nm\ :sup:`-1`) and angular frequencies, 
+inverses for Q (nm\ :sup:`-1`) and angular frequencies, :math:`\omega`
 (ps\ :sup:`-1`). Any input must be given using these units, and the
 output files do also employ the same units. The :ref:`2d3dplotter` includes
 the Python magnitude module, so you can modify the units when plotting

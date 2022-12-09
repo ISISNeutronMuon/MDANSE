@@ -2,10 +2,31 @@
 References
 ==========
 
+.. [nMOLDYN_ref1]
+   :Title: nMOLDYN: A program package for a neutron scattering
+     oriented analysis of Molecular Dynamics simulations
+   :Authors: G. R. Kneller, V. Keiner, M. Kneller, M. Schiller
+   :Journal: Comp. Phys. Comm. 91, 191-214 (1995)
+   :DOI: `10.1016/0010-4655(95)00048-K <https://doi.org/10.1016/0010-4655(95)00048-K>`_
+
+.. [nMOLDYN_ref2]
+   :Title: nMoldyn: A program package for a neutron scattering
+     oriented analysis of Molecular Dynamics simulations”
+   :Authors: T. Róg, K. Murzyn, K. Hinsen, G. R. Kneller
+   :Journal: J. Comput. Chem. 24, 657-667 (2003)
+   :DOI: `10.1002/jcc.10243 <https://doi.org/10.1002/jcc.10243>`_
+
+.. [nMOLDYN_ref3]
+   :Title: nMoldyn3: Using task farming for a parallel spectroscopy-oriented
+     analysis of molecular dynamics simulations”
+   :Authors: K. Hinsen, E. Pellegrini, S. Stachura, G. R. Kneller
+   :Journal: J. Comput. Chem. 33, 2043-2048 (2012)
+   :DOI: `10.1002/jcc.23035 <https://doi.org/10.1002/jcc.23035>`_
+
 .. [Ref1] G. Goret, B. Aoun, and E. Pellegrini, “MDANSE: An Interactive
    Analysis Environment for Molecular Dynamics Simulations,” *J. Chem. Inf.
-   Model.*, vol. 57, no. 1, pp. 1–5, Jan. 2017, doi:
-   10.1021/acs.jcim.6b00571.
+   Model.*, vol. 57, no. 1, pp. 1-5, Jan. 2017, 
+   `DOI: 10.1021/acs.jcim.6b00571 <https://doi.org/10.1021/acs.jcim.6b00571>`_.
 
 .. [Ref2] “MDANSE GitHub Actions.”
    https://github.com/ISISNeutronMuon/MDANSE/actions.

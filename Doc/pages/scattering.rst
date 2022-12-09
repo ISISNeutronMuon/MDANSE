@@ -364,7 +364,7 @@ interpolation' mode.
 -  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 .. _dynamic-coherent-structure-factor:
 
@@ -508,7 +508,7 @@ GUI
 -  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 .. _dynamic-incoherent-structure-factor:
 
@@ -636,7 +636,7 @@ GUI
 -  `project coordinates <#_Project_coordinates>`__
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 .. _elastic-incoherent-structure-factor:
 
@@ -784,7 +784,7 @@ GUI
 -  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 .. _gaussian-dynamic-incoherent-structure-factor:
 
@@ -945,7 +945,7 @@ one is, etc.
 -  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 .. _neutron-dynamic-total-structure-factor:
 
@@ -964,7 +964,7 @@ Neutron Dynamic Total Structure Factor
 -  :ref:`param-atom-selection`
 -  :ref:`param-atom-transmutation`
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 .. _structure-factor-from-scattering-function:
 

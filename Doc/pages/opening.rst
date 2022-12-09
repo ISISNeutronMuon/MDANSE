@@ -12,7 +12,7 @@ Rastislav Turanyi [1]_, Miguel A. Gonzalez [2]_, Eric Pellegrini [2]_, Maciej Ba
 .. [1] ISIS Neutron and Muon Source, Science and Technology Facilities Council, UKRI
 .. [2] Institut Laue-Langevin, France
 
-November 2022
+December 2022
 
 .. _cite-mdanse:
 

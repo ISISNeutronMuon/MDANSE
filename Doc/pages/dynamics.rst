@@ -4,16 +4,15 @@ Analysis: Dynamics
 
 This section contains the following Plugins:
 
--  `Angular Correlation <#_Angular_Correlation>`__
--  `Density Of States <#_Density_Of_States>`__
--  `General AutoCorrelation
-   Function <#_General_AutoCorrelation_Function>`__
--  `Mean Square Displacement <#_Mean_Square_Displacement>`__
--  `Order Parameter <#_Order_Parameter>`__
--  `Position AutoCorrelation
-   Function <#_Position_AutoCorrelation_Function>`__
--  `Velocity AutoCorrelation
-   Function <#_Velocity_AutoCorrelation_Function>`__
+-  :ref:`analysis-angular-correlation`
+-  :ref:`analysis-dos`
+-  :ref:`analysis-gacf`
+-  :ref:`analysis-msd`
+-  :ref:`analysis-op`
+-  :ref:`analysis-pacf`
+-  :ref:`analysis-vacf`
+
+.. _analysis-angular-correlation:
 
 Angular Correlation
 '''''''''''''''''''
@@ -69,7 +68,9 @@ Parameters:
 -  :ref:`param-axis-selection`
 -  `output contribution per axis <#_Output_contribution_per>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
+
+.. _analysis-dos:
 
 Density Of States
 '''''''''''''''''
@@ -81,7 +82,7 @@ Theory and implementation
 
 *MDANSE* calculates the power spectrum of the *VACF*, which in case of
 the mass-weighted *VACF* defines the phonon discrete *DOS*, (see the
-section on `VACF <#_Theory_and_implementation_1>`__) defined as:
+section on :ref:`analysis-vacf`) defined as:
 
 .. math::
    :label: pfx5
@@ -130,7 +131,9 @@ GUI
 -  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
+
+.. _analysis-gacf:
 
 General AutoCorrelation Function
 ''''''''''''''''''''''''''''''''
@@ -157,7 +160,9 @@ calculated.
 -  `normalize <#_Normalize>`__
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
+
+.. _analysis-msd:
 
 Mean Square Displacement
 ''''''''''''''''''''''''
@@ -385,7 +390,9 @@ GUI
 -  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
+
+.. _analysis-op:
 
 Order Parameter
 '''''''''''''''
@@ -564,7 +571,9 @@ GUI
 
 -  `output contribution per axis <#_Output_contribution_per>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
+
+.. _analysis-pacf:
 
 Position AutoCorrelation Function
 '''''''''''''''''''''''''''''''''
@@ -581,7 +590,9 @@ Position AutoCorrelation Function
 -  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
+
+.. _analysis-vacf:
 
 Velocity AutoCorrelation Function
 '''''''''''''''''''''''''''''''''
@@ -694,7 +705,7 @@ GUI
 -  :ref:`param-atom-transmutation`
 -  `weights <#_Weights>`__
 -  :ref:`param-output-files`
--  `running mode <#_Running_mode>`__
+-  :ref:`param-running-mode`
 
 .. |image14| image:: ./Pictures/1000000100000323000002D1329469D922AFA541.png
    :width: 15.921cm

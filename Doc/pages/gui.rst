@@ -14,6 +14,14 @@ analysis python script. Both kind of files provide a convenient starting
 point to set up and run new analysis directly from the `command
 line <#_Using_MDANSE_from>`__.
 
+.. note::
+   The MDANSE GUI can be operated by double-clicking different objects,
+   but it also offers a less-advertised option of performing operations
+   using the Drag & Drop mechanism. Just drag your trajectory into the main
+   GUI window, and a tab will be created. Drop an analysis operation into
+   the tab, and you will perform the analysis on the trajectory. Drop the
+   Molecular Viewer into the tab, and yoy will visualise the trajectory.
+
 Opening MDANSE GUI
 ------------------
 
@@ -79,7 +87,9 @@ start the GUI.
 
 Otherwise, you will need to use the terminal. First, try running:
 
-mdanse_gui
+.. code-block:: console
+
+  mdanse_gui
 
 If that doesn't work, you will need to know where MDANSE got installed.
 By default, it should be in /usr/local, so try looking if the above
@@ -87,7 +97,66 @@ script is inside /usr/local/bin. If it isn't there, the best bet is
 searching for it with find / -name mdanse_gui. Once you know the path
 (let's call it mdanse_bin), run the following:
 
-mdanse_bin/mdanse_gui
+.. code-block:: console
+
+  mdanse_bin/mdanse_gui
+
+The standalone GUI elements
+---------------------------
+
+Some parts of the GUI can also be started on their own. These are:
+
+mdanse_elements_database
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This script has no options. When run, it opens the `Elements Database
+Editor <#_Elements_database_editor>`__ GUI window.
+
+mdanse_gui
+~~~~~~~~~~
+
+This script has no options. When run, it opens the main `MDANSE
+GUI <#_The_main_window>`__ window.
+
+mdanse_job
+~~~~~~~~~~
+
+This script is used to run a `job <#_Analysis>`__. It opens the GUI
+window for the selected job without opening the main window. To do this,
+two positional arguments are required (meaning only the values should be
+placed after mdanse_job, no -- options like for the mdanse script).
+These two arguments are as follows:
+
+-  **job** – the short name of the job to be run (e.g., pdf for Pair
+   Distribution Function).
+-  **trajectory** – (only required for analyses; should be left blank
+   for trajectory converters) the path to an MMTK trajectory file used
+   for the job.
+
+mdanse_periodic_table
+~~~~~~~~~~~~~~~~~~~~~
+
+This script has no options. When run, it opens the `Periodic
+Table <#_Periodic_table_viewer>`__ GUI window.
+
+mdanse_plotter
+~~~~~~~~~~~~~~
+
+This script has no options. When run, it opens the :ref:`2d3dplotter`
+GUI window.
+
+mdanse_ud_editor
+~~~~~~~~~~~~~~~~
+
+This script has no options. When run, it opens the `User Definitions
+Editor <#_User_definition>`__ GUI window.
+
+mdanse_units_editor
+~~~~~~~~~~~~~~~~~~~
+
+This script has no options. When run, it opens the Units Editor GUI
+window.
+
 
 The main window
 ---------------

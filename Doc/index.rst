@@ -47,11 +47,11 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/build
    pages/files
    pages/gui
+   pages/cmd
    pages/dynamics
    pages/scattering
    pages/structure
    pages/analysis
-   pages/cmd
    pages/trajectory
    pages/plotting
    pages/parameters
