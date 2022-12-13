@@ -24,7 +24,7 @@ any other software on that OS. After that, we recommend starting by using the GU
 3. Perform an analysis of choice (through the Plugins panel)
 4. Check the results with the plotter
 
-For a more detailed guide on how to use MDANSE, please see the **[MDANSE User Guide](https://epubs.stfc.ac.uk/work/51935555)** \
+The most complete user documentation of MDANSE can be found on [our Read the Docs page](https://mdanse.readthedocs.io). At the same time, it is still possible to access the original **[MDANSE User Guide](https://epubs.stfc.ac.uk/work/51935555)** \
 Other information including example scripts can be found on the MDANSE website [mdanse.org](https://mdanse.org/) 
 
 ## Installing from source
