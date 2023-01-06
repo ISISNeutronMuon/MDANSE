@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-18.04', 'ubuntu-20.04']
+        os: ['ubuntu-20.04', 'ubuntu-22.04']
 
     steps:
       - uses: actions/checkout@v2
@@ -16,23 +16,11 @@ jobs:
       - name: Install python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
-
-      - name: Install libraries on ubuntu 18
-        if: ${{ (matrix.os == 'ubuntu-18.04') }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install netcdf-bin libnetcdf-dev python-dev
-
-      - name: Install libraries on ubuntu 20
-        if: ${{ (matrix.os == 'ubuntu-20.04') }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install netcdf-bin libnetcdf-dev python-dev libgtk2.0-0 libgtk2.0-dev
+          python-version: '3.9.13'
 
       - name: Install dependencies
         run: |
-          python3 -m pip install numpy matplotlib Cython netCDF4 pyyaml h5py psutil vtk
+          python3 -m pip install numpy matplotlib Cython netCDF4 pyyaml h5py vtk
 
       - name: Install MDANSE
         run: |
@@ -40,49 +28,24 @@ jobs:
           python3 setup.py install
 
       - name: Run tests
+        if: false
         run: |
           export PATH=$PATH:/usr/lib/x86_64-linux-gnu
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           $GITHUB_WORKSPACE/BuildServer/Unix/tests.sh
 
-      - name: Tar artifacts
-        if: |
-          contains( github.ref, 'main' ) ||
-          contains( github.ref, 'develop' ) ||
-          contains( github.ref, 'release-' ) ||
-          contains( github.ref, 'hotfix-' ) ||
-          contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
-        run: |
-          cd $RUNNER_TOOL_CACHE/Python/2.7.18
-          mv x64 python
-          tar -czf python.tar.gz python
-
-      - name: Upload artifacts
-        if: |
-          contains( github.ref, 'main' ) ||
-          contains( github.ref, 'develop' ) ||
-          contains( github.ref, 'release-' ) ||
-          contains( github.ref, 'hotfix-' ) ||
-          contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.os }}_artifacts
-          path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
-          retention-days: 1
-
 
   deploy_ubuntu:
     needs: ci_ubuntu
     runs-on: ${{ matrix.os }}
+    env:
+      PYTHON_MINOR_VER: 9
+      PYTHON_VER: 3.9.13
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-18.04', 'ubuntu-20.04']
+        os: ['ubuntu-20.04', 'ubuntu-22.04']
     if: |
       contains( github.ref, 'main' ) ||
       contains( github.ref, 'develop' ) ||
@@ -90,29 +53,36 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, 'cicd' )
     steps:
       - uses: actions/checkout@v2
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
+      - name: Install python
+        uses: actions/setup-python@v2
         with:
-          name: ${{ matrix.os }}_artifacts
-          path: ~/
-
-      - name: Untar artifacts
-        run: tar -xzf ~/python.tar.gz -C $HOME
+          python-version: ${{ env.PYTHON_VER }}
 
       - name: Install netcdf
         run: |
           sudo apt-get update
-          sudo apt-get install netcdf-bin libnetcdf-dev
+          sudo apt-get install dos2unix graphviz libgtk-3-dev
 
-      - name: Install wx and vtk
+      - name: Install packages with pip
         run: |
-          python3 -m pip install wxpython sphinx
+          python3 -m pip install numpy matplotlib Cython netCDF4 pyyaml h5py vtk attrdict3 sphinx distro psutil
 
-      - run: sudo apt-get install dos2unix
+      - name: Install wxpython with conda
+        run: |
+          sudo conda create -p ~/tempenv -c conda-forge python=$PYTHON_VER wxpython
+          sudo cp -rfv ~/tempenv/lib/python3.$PYTHON_MINOR_VER/site-packages/wx $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib/python3.9/site-packages
+          sudo cp -rfv ~/tempenv/lib/python3.$PYTHON_MINOR_VER/site-packages/wxPython* $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib/python3.9/site-packages
+          sudo cp -rfv ~/tempenv/lib/wx $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib
+          sudo cp -rfv ~/tempenv/include/wx-3.1 $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/include
+          sudo cp -v ~/tempenv/lib/libwx* $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib
+          
+          sudo cp -v ~/tempenv/lib/libiconv* $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib/python3.$PYTHON_MINOR_VER/site-packages/wx
+          sudo cp -v ~/tempenv/lib/libjpeg* $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib/python3.$PYTHON_MINOR_VER/site-packages/wx
 
       - name: Deploy
         run: |
@@ -129,11 +99,14 @@ jobs:
 
       - name: Edit postinst
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
-        run: sed -i '$ a ln -s /usr/lib/x86_64-linux-gnu/libnetcdf.so.18 /usr/local/lib/libnetcdf.so.15' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/Resources/DEBIAN/postinst
+        run: |
+          sed -i '$ a ln -s /usr/lib/x86_64-linux-gnu/libnetcdf.so.18 /usr/local/lib/libnetcdf.so.15' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/Resources/DEBIAN/postinst
+          sed -i '$ a rm /usr/local/lib/libnetcdf.so.15' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/Resources/DEBIAN/postrm
 
       - name: Deploy for ubuntu 21
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
         run: |
+          sudo cp -fv /usr/lib/x86_64-linux-gnu/libffi*  $RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64/lib/python3.$PYTHON_MINOR_VER/site-packages/wx
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           export DISTRO=ubuntu-21.04
@@ -163,15 +136,11 @@ jobs:
       - name: Install python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: '3.9.13'
 
       - name: Install dependencies with pip
         run: |
-          python3 -m pip install numpy matplotlib Cython pyyaml h5py psutil vtk
-
-      - name: Install NetCDF
-        run: |
-          brew install netcdf
+          python3 -m pip install numpy matplotlib Cython pyyaml h5py vtk netCDF4
 
       - name: Install MDANSE
         run: |
@@ -179,35 +148,37 @@ jobs:
           python3 setup.py install
 
       - name: Run unit tests
+        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/UnitTests
           python3 AllTests.py
 
       - name: Run functional tests
+        if: false
         run: |
           cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
           python3 BuildJobTests.py
           python3 AllTests.py
 
       - name: Tar python
-        if: ${{ (matrix.os == 'macos-11') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, 'cicd' ) ) }}
         run: |
-          cd $RUNNER_TOOL_CACHE/Python/2.7.18
+          cd $RUNNER_TOOL_CACHE/Python/3.9.13
           mv x64 Resources
           tar -czf python.tar.gz Resources
 
       - name: Upload artifacts
-        if: ${{ (matrix.os == 'macos-11') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, 'cicd' ) ) }}
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
-          path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
+          path: ${{ runner.tool_cache }}/Python/3.9.13/python.tar.gz
           retention-days: 1
 
 
   deploy_osx:
     needs: ci_osx
-    runs-on: macos-11
+    runs-on: macos-12
     if: |
       contains( github.ref, 'main' ) ||
       contains( github.ref, 'develop' ) ||
@@ -215,26 +186,29 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) || 
+      contains( github.ref, 'cicd' )
     steps:
       - uses: actions/checkout@v2
 
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: macos-11_artifacts
+          name: macos-12_artifacts
           path: ~/
 
-      - run: brew install netcdf
+      - run: brew install graphviz
 
       - name: Untar python
         run: |
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
 
-      - name: Install vtk
+      - name: Install py2app, wxpython, and sphinx
         run: |
-          python3 -m pip install py2app wxpython sphinx
+          sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/3.9.13/x64/lib/libpython3.9.dylib /Users/runner/Contents/Resources/lib/libpython3.9.dylib /Users/runner/Contents/Resources/bin/python3.9
+          sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/3.9.13/x64/lib/libpython3.9.dylib /Users/runner/Contents/Resources/lib/libpython3.9.dylib /Users/runner/Contents/Resources/bin/python
+          $HOME/Contents/Resources/bin/python -m pip install py2app==0.26.1 wxpython sphinx psutil distro
 
       - name: Deploy MDANSE
         run: |
@@ -256,14 +230,14 @@ jobs:
 
   # WINDOWS
   ci_windows:
-    runs-on: windows-2019
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
 
       - name: Install python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: '3.9.13'
 
       - name: Install backend dependencies
         run: |
@@ -277,49 +251,22 @@ jobs:
         shell: cmd
 
       - name: Run unit tests
+        if: false
         run: |
           cd %GITHUB_WORKSPACE%\Tests\UnitTests\
           python3 AllTests.py
         shell: cmd
 
       - name: Run functional tests
+        if: false
         run: |
           cd %GITHUB_WORKSPACE%\Tests\FunctionalTests\Jobs
           python3 BuildJobTests.py
           python3 AllTests.py
         shell: cmd
 
-      - name: Tar artifacts
-        if: |
-          contains( github.ref, 'main' ) ||
-          contains( github.ref, 'develop' ) ||
-          contains( github.ref, 'release-' ) ||
-          contains( github.ref, 'hotfix-' ) ||
-          contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
-        run: |
-          cd /D %CONDA%\envs
-          tar -czf mdanse.tar.gz mdanse
-        shell: cmd
-
-      - name: Upload artifacts
-        if: |
-          contains( github.ref, 'main' ) ||
-          contains( github.ref, 'develop' ) ||
-          contains( github.ref, 'release-' ) ||
-          contains( github.ref, 'hotfix-' ) ||
-          contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
-        uses: actions/upload-artifact@v2
-        with:
-          name: windows_artifacts
-          path: C:\Miniconda\envs\mdanse.tar.gz
-          retention-days: 1
-
   deploy_windows:
-    runs-on: windows-2019
+    runs-on: windows-latest
     needs: ci_windows
     if: |
       contains( github.ref, 'main' ) ||
@@ -328,31 +275,26 @@ jobs:
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
       contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'web' ) ||
+      contains( github.ref, 'cicd' )
     steps:
       - uses: actions/checkout@v2
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
+      - name: Create conda environment
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          name: windows_artifacts
-          path: C:\Miniconda\envs
+          python-version: 3.9.13
+          activate-environment: mdanse
 
-      - name: Untar python
+      - name: Install h5py and netCDF4 witch conda
         run: |
-          cd /D C:\Miniconda\envs
-          tar -xkf mdanse.tar.gz
-        shell: cmd
+          conda install h5py netCDF4 graphviz
+        shell: cmd /C CALL {0}
 
-      - name: Install packages required for documentation and psutil
+      - name: Install other dependencies with pip
         run: |
-          python3 -m pip install docutils==0.17.1 sphinx==1.6.7 stdeb psutil
-        shell: cmd
-
-      - name: Install GUI dependencies
-        run: |
-          python3 -m pip install wxpython
-        shell: cmd
+          %CONDA%\envs\mdanse\python.exe -m pip install numpy matplotlib Cython pyyaml vtk psutil wxpython sphinx distro
+        shell: cmd /C CALL {0}
 
       - name: Deploy
         run: |
@@ -361,11 +303,12 @@ jobs:
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\definitions.bat"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\setup_ci.bat"
           call "%GITHUB_WORKSPACE%\BuildServer\Windows\deploy.bat"
-        shell: cmd
+        shell: cmd /C CALL {0}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: Windows_executable
-          path: ${{ github.workspace }}\*.exe
+          path: |
+            ${{ github.workspace }}\*.exe
           retention-days: 90

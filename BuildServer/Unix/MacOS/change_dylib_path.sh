@@ -17,7 +17,7 @@ do
 done
 
 echo -e "${BLUE}" "Changing site-packages/wx so files""${NORMAL}"
-cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/wx || exit
+cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python3.9/site-packages/wx || exit
 files=(*.so)
 echo ${files[*]}
 for f in ${files[*]}
@@ -26,7 +26,7 @@ do
 done
 
 echo -e "${BLUE}" "Changing lib-dynload/wx so files""${NORMAL}"
-cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/wx || exit
+cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python3.9/lib-dynload/wx
 files=(*.so)
 echo ${files[*]}
 for f in ${files[*]}
@@ -52,7 +52,7 @@ do
 done
 
 echo -e "${BLUE}" "Changing lib-dynload/vtk so files""${NORMAL}"
-cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/lib-dynload/vtk || exit
+cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python3.9/lib-dynload/vtkmodules
 files=(vtk*.so)
 echo ${files[*]}
 for f in ${files[*]}
@@ -62,7 +62,7 @@ do
 done
 
 echo -e "${BLUE}" "Changing site-packages/vtk so files""${NORMAL}"
-cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/vtk || exit
+cd ${MDANSE_APP_DIR}/Contents/Resources/lib/python3.9/site-packages/vtkmodules || exit
 files=(vtk*.so)
 echo ${files[*]}
 for f in ${files[*]}

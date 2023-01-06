@@ -41,7 +41,7 @@ __repo__             = "https://github.com/ISISNeutronMuon/MDANSE"
 
 __license__          = "GPL 3"
 
-__version__ = "1.5.0"
+__version__ = "2.0.0"
 
 __date__ = "01-01-1970"
 

@@ -5,7 +5,7 @@
 #############################
 # Debug option for py2app, if needed
 export DISTUTILS_DEBUG=0
-export PYTHONEXE=$HOME/python
+export PYTHONEXE=$RUNNER_TOOL_CACHE/Python/$PYTHON_VER/x64
 #############################
 # PREPARATION
 #############################
@@ -14,7 +14,6 @@ SCRIPT_DIR=$GITHUB_WORKSPACE/BuildServer/Unix/Debian/
 
 DEBIAN_ROOT_DIR=$GITHUB_WORKSPACE/temp
 
-rm -rf ${DEBIAN_ROOT_DIR}
 mkdir -p ${DEBIAN_ROOT_DIR}
 
 #############################
@@ -41,30 +40,34 @@ cp $GITHUB_WORKSPACE/Src/GUI/Icons/mdanse.png ${DEBIAN_PIXMAPS_DIR}/
 # Build the /usr/local/bin directory inside the debian root directory and copy the mdanse scripts inside
 DEBIAN_BIN_DIR=${DEBIAN_ROOT_DIR}/usr/local/bin
 mkdir -p ${DEBIAN_BIN_DIR}
-cp $GITHUB_WORKSPACE/Scripts/* ${DEBIAN_BIN_DIR}/
+cp -rv $PYTHONEXE/bin/* ${DEBIAN_BIN_DIR}/
+cp -fv $GITHUB_WORKSPACE/Scripts/* ${DEBIAN_BIN_DIR}/
 dos2unix ${DEBIAN_BIN_DIR}/mdanse_*
-cp $PYTHONEXE/bin/* ${DEBIAN_BIN_DIR}/
 
 # Replace the shebang in mdanse scripts to point to the correct python location, and also edit them
 # so that if LD_LIBRARY_PATH is not set up by bash, it the script sets it up for itself.
+echo "Editing scripts"
 cd ${DEBIAN_BIN_DIR}/ || exit
 files=(mdanse*)
 for f in ${files[*]}
 do
   sudo sed -i '1s%.*%#!/usr/local/bin/python%' $f
-  sudo sed -i '2i import os' $f
-  sudo sed -i '3i if not "/usr/local/lib" in os.environ.get("LD_LIBRARY_PATH", ""):' $f
-  sudo sed -i '4i \ \ \ \ from sys import argv' $f
-  sudo sed -i '5i \ \ \ \ if os.environ.get("LD_LIBRARY_PATH"):' $f
-  sudo sed -i '6i \ \ \ \ \ \ \ \ os.environ["LD_LIBRARY_PATH"] = ":".join(["/usr/local/lib", os.environ["LD_LIBRARY_PATH"]])' $f
-  sudo sed -i '7i \ \ \ \ else: os.environ["LD_LIBRARY_PATH"] = "/usr/local/lib"' $f
-  sudo sed -i '8i \ \ \ \ os.execve(os.path.realpath(__file__), argv, os.environ)' $f
+
+  sudo sed -i '20s|from|try: from|' $f
+  sudo sed -i '21i \ \ \ \ except ImportError:' $f
+  sudo sed -i '22i \ \ \ \ \ \ \ \ import os, subprocess' $f
+  sudo sed -i "23i \ \ \ \ \ \ \ \ os.environ['LD_LIBRARY_PATH'] = f'/usr/local/lib:/usr/local/lib/python3.$PYTHON_MINOR_VER/site-packages/wx:{os.environ.get(NONE)}'" $f
+  sudo sed -i '23s|NONE|"LD_LIBRARY_PATH", "/usr/local"|' $f
+  sudo sed -i '24i \ \ \ \ \ \ \ \ subprocess.check_call(str(os.path.abspath(__file__)), env=os.environ, shell=True)' $f
+
+  sudo sed -i "s|python3.9|python3.$PYTHON_MINOR_VER|" $f
 done
 
 cd $GITHUB_WORKSPACE || exit
 
 # Build API
-sudo $PYTHONEXE/bin/python setup.py build build_api build_help install
+# sudo $PYTHONEXE/bin/python setup.py build build_api build_help install
+sudo $PYTHONEXE/bin/python setup.py build install
 
 status=$?
 if [ $status -ne 0 ]; then

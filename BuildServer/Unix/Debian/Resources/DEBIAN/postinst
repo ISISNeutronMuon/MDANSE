@@ -1,5 +1,5 @@
 #!/bin/bash
 
-sudo sed -i '$ a export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH' ~/.bashrc
-sudo sed -i '$ a export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH' ~/.profile
-echo 'export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH' > /etc/profile.d/mdanse.sh
+sudo sed -i '$ a export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH' /etc/bash.bashrc
+
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH

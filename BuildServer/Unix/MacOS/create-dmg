@@ -4,6 +4,8 @@
 
 set -e;
 
+MAXIMUM_UNMOUNTING_ATTEMPTS=15
+
 function pure_version() {
   echo '1.0.0.2'
 }
@@ -153,7 +155,7 @@ ACTUAL_SIZE=$(du -sm "$SRC_FOLDER" | sed -e 's/	.*//g')
 DISK_IMAGE_SIZE=$(expr $ACTUAL_SIZE + 200)
 echo $DISK_IMAGE_SIZE
 df -h
-sudo hdiutil create -srcfolder "$SRC_FOLDER" -volname "${VOLUME_NAME}" -fs HFS+ -fsargs "-c c=64,a=16,e=16" -format UDRW -size "${DISK_IMAGE_SIZE}m" "${DMG_TEMP_NAME}"
+sudo hdiutil create -verbose -srcfolder "$SRC_FOLDER" -volname "${VOLUME_NAME}" -fs HFS+ -fsargs "-c c=64,a=16,e=16" -format UDRW -size "${DISK_IMAGE_SIZE}m" "${DMG_TEMP_NAME}"
 
 # mount it
 echo "Mounting disk image..."
@@ -215,8 +217,28 @@ if ! test -z "$VOLUME_ICON_FILE"; then
 fi
 
 # unmount
-echo "Unmounting disk image..."
-sudo hdiutil detach "${DEV_NAME}"
+echo "Start unmounting disk image..."
+function hdiutil_detach_retry() {
+	# Unmount
+	unmounting_attempts=0
+	until
+		echo "Unmounting disk image..."
+		(( unmounting_attempts++ ))
+		sudo hdiutil detach "$1"
+		exit_code=$?
+		(( exit_code ==  0 )) && break            # nothing goes wrong
+		#(( exit_code != 16 )) && exit $exit_code  # exit with the original exit code
+		# The above statement returns 1 if test failed (exit_code == 16).
+		#   It can make the code in the {do... done} block to be executed
+	do
+		(( unmounting_attempts == MAXIMUM_UNMOUNTING_ATTEMPTS )) && exit 16  # patience exhausted, exit with code EBUSY
+		echo "Wait a moment..."
+		sleep $(( 1 * (2 ** unmounting_attempts) ))
+	done
+	unset unmounting_attempts
+}
+hdiutil_detach_retry "${DEV_NAME}"
+echo "Disk image unmounted"
 
 # compress image
 echo "Compressing disk image..."
