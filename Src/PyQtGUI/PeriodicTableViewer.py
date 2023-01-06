@@ -1,6 +1,9 @@
 
 from qtpy.QtWidgets import QDialog, QToolButton, QFrame, QGridLayout,\
-                           QVBoxLayout, QWidget, QLabel, QApplication
+                           QVBoxLayout, QWidget, QLabel, QApplication,\
+                           QSizePolicy, QMenu, QTextEdit
+from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize
+from qtpy.QtGui import QFont, QEnterEvent, QFontDatabase
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 # from MDANSE.GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
@@ -148,7 +151,7 @@ _FAMILY = {'default' : (128, 128, 128),
            'post-transition metal' : (204, 204, 204),
            'transition metal' : (255, 192, 192),
            'lanthanoid' : (255, 191, 255),
-           'actinoid' : (255, 153, 294)}
+           'actinoid' : (255, 153, 254)}
     
 # Dictionary that maps the chemical state with a RGB color.
 _STATE = {'default' : (128, 128, 128),
@@ -159,20 +162,161 @@ _STATE = {'default' : (128, 128, 128),
           'unknown' : (0,150,0)}
 
 
+class QHLine(QFrame):
+    """A placeholder GUI element. Draws a horizontal line."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setFrameShape(QFrame.HLine)
+        self.setFrameShadow(QFrame.Sunken)
+
+
+class PopupTextbox(QDialog):
+    """A simple dialog displaying text information about a specific
+    chemical isotope.
+    """
+
+    def __init__(self, *args, input_text = "", **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.setStyleSheet("font-family: Courier New;")
+        self.text_to_show = input_text
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
+
+        # self.mainpart = QTextEdit(self)
+        # self.mainpart.append(self.text_to_show)
+        temp = QLabel(input_text, self)
+        # layout.addWidget(self.mainpart)
+        layout.addWidget(temp)
+
+        self.setWindowTitle("Element information summary")
+        self.show()
+        # self.mainpart.resize(QSize(300,500))
+
+
+
 class ElementButton(QToolButton):
+    """Subclassed from QToolButton, this object shows the name of a
+    chemical element, and creates a pop-up menu giving access to information
+    about isotopes when clicked.
+    """
+
+    atom_info = Signal(object)
+    isotope_info = Signal(str)
 
     def __init__(self, *args, element = 'Xx', **kwargs):
         super().__init__(*args, **kwargs)
 
-        # try:
-        #     chemical_element = kwargs['element']
-        # except KeyError:
-        #     chemical_element = 'Xx'
-        
+        self.info = ATOMS_DATABASE[element]
         self.setText(element)
+        self.setGroupStyleSheet()
+        self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+
+        self.isotopes = []
+
+        for iso in ATOMS_DATABASE.get_isotopes(element):
+            self.isotopes.append(iso)
+        
+        self.clicked.connect(self.altContextMenu)
+        self.isotope_info.connect(self.popIstopeInfo)
+    
+    @Slot()
+    def setGroupStyleSheet(self):
+        rgb = _FAMILY[self.info['family']]
+        text_rgb = ",".join([str(int(x)) for x in rgb])
+        varbox_stylesheet =  "QToolButton {background-color:rgb("+text_rgb+"); font-size: 20pt ; font-weight: bold}"
+        self.setStyleSheet(varbox_stylesheet)
+    
+    def enterEvent(self, a0: QEnterEvent) -> None:
+        self.atom_info.emit(self.info)
+        return super().enterEvent(a0)
+
+    def populateMenu(self, menu: QMenu):
+        for iso in self.isotopes:
+            menu.addAction(iso)
+
+    def altContextMenu(self):
+        menu = QMenu()
+        self.populateMenu(menu)
+        res = menu.exec_(self.mapToGlobal(QPoint(10, 10)))
+        if res is not None:
+            self.isotope_info.emit(res.text())
+        
+    @Slot(str)
+    def popIstopeInfo(self, isotope):
+        infotext = ATOMS_DATABASE.info(isotope)
+        PopupTextbox(self, input_text= infotext)
+
+    def contextMenuEvent(self, event):
+        menu = QMenu()
+        self.populateMenu(menu)
+        res = menu.exec_(event.globalPos())
+        if res is not None:
+            self.isotope_info.emit(res.text())
+
+
+class InfoDisplay(QFrame):
+    """A field embedded in the periodic table of elements.
+    Displays information about the chemical elements that the mouse cursor
+    is hovering over.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.base = QWidget(self)
+        layout = QGridLayout(self.base)
+        self.setLayout(layout)
+
+        tooltips = [   
+        "Atomic number",   
+        "Symbol"  ,
+        "Group,Period,Block",
+        "Atom",
+        "Chemical family",
+        "Electron configuration",
+        "Relative atomic mass (uma)",
+        "Electronegativity",
+        "Electroaffinity (eV)",
+        "Ionization energy (eV)"]
+
+        fields = []
+        for n in range(10):
+            temp = QLabel(self.base)
+            fields.append(temp)
+            temp.setToolTip(tooltips[n])
+        # in the end it was not necessary to have field[0]
+        layout.addWidget(fields[1],0,0)
+        layout.addWidget(fields[2],1,0, 1, 4)  # rowspan, columnspan
+        layout.addWidget(fields[3],3,0)
+        for n in range(4,10):
+            layout.addWidget(fields[n],n-4,4)
+        
+        self.fields = fields
+
+        stylesheet =  "background-color:rgb(180,220,180); font-weight: bold"
+        self.setStyleSheet(stylesheet)
+
+    @Slot(object)
+    def updateDisplay(self, info_object):
+        # self.fields[0].setText(str(info_object["proton"]))
+        self.fields[1].setText("<sup>"+str(info_object["proton"])+"</sup>"+
+                               str(info_object["symbol"]))
+        self.fields[2].setText("%2s,%s,%s" % (info_object['group'],
+                                    info_object['period'], info_object['block']))
+        self.fields[3].setText(str(info_object["element"]))
+        self.fields[4].setText(str(info_object["family"]))
+        self.fields[5].setText(str(info_object["configuration"]))
+        self.fields[6].setText("atomic weight = "+str(info_object["atomic_weight"])+" amu")
+        self.fields[7].setText("electronegativity = "+str(info_object["electronegativity"]))
+        self.fields[8].setText("electroaffinity = "+str(info_object["electroaffinity"])+" eV")
+        self.fields[9].setText("ionization energy = "+str(info_object["ionization_energy"])+" eV")
 
 
 class PeriodicTableViewer(QDialog):
+    """A widget displaying the periodic table of elements.
+    Can be used within MDANSE, or as a standalone program.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -182,17 +326,39 @@ class PeriodicTableViewer(QDialog):
         self.glayout = QGridLayout(self)
         self.setLayout(self.glayout)
 
+        self.data_display = InfoDisplay(self)
+
+        self.glayout.addWidget(self.data_display, 1, 5, 3, 8)
+
         self.placeElements()
+
+        self.setStyleSheet("QLabel {background-color:rgb(250,250,250); qproperty-alignment: AlignCenter}")
 
     def placeElements(self):
 
         for key, value in _LAYOUT.items():
             element = ElementButton(self, element=key)
+            element.atom_info.connect(self.data_display.updateDisplay)
             row, column = value[0] + 1, value[1] + 1
             self.glayout.addWidget(element,row,column)
 
-        # for col_num in range(19):
-        #     for row_num in range(10):
+        for col_num in range(18):
+            self.glayout.addWidget(QLabel(str(col_num+1), self),0,col_num+2, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        for row_num in range(7):
+            self.glayout.addWidget(QLabel(_ROWS[row_num], self),row_num+1,0, alignment=Qt.AlignmentFlag.AlignCenter)
+        
+        # now some simple placeholders
+        onestar_start = QLabel(self, text="*", alignment=Qt.AlignmentFlag.AlignCenter)
+        onestar_end = QLabel(self, text="*", alignment=Qt.AlignmentFlag.AlignCenter)
+        twostar_start = QLabel(self, text="**", alignment=Qt.AlignmentFlag.AlignCenter)
+        twostar_end = QLabel(self, text="**", alignment=Qt.AlignmentFlag.AlignCenter)
+        self.glayout.addWidget(onestar_start, 6, 4)
+        self.glayout.addWidget(twostar_start, 7, 4)
+        self.glayout.addWidget(onestar_end, 9, 4)
+        self.glayout.addWidget(twostar_end, 10, 4)
+
+        self.glayout.addWidget(QHLine(self),8,0,1,20)
 
 if __name__ == '__main__':
     import sys

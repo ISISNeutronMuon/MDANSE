@@ -205,7 +205,7 @@ class AtomsDatabase(metaclass=Singleton):
         # The isotopes are searched according to |symbol| property
         symbol = self._data[atom]["symbol"]
 
-        return [iname for iname,props in self._data.iteritems() if props["symbol"] == symbol]
+        return [iname for iname,props in self._data.items() if props["symbol"] == symbol]
 
     @property
     def properties(self):
@@ -339,7 +339,7 @@ class AtomsDatabase(metaclass=Singleton):
                         
         # The values for all element's properties
         for pname in sorted(self._properties):
-            info.append("%s" % " {0:<20}{1:>50}".format(pname,self._data[atom].get(pname,None)))
+            info.append("%s" % " {0:<20}{1:>50}".format(pname,str(self._data[atom].get(pname,None))))
 
         # Append a delimiter.                
         info.append(delimiter)
