@@ -243,7 +243,7 @@ class ElementButton(QToolButton):
             self.isotope_info.emit(res.text())
         
     @Slot(str)
-    def popIstopeInfo(self, isotope):
+    def popIstopeInfo(self, isotope: str):
         infotext = ATOMS_DATABASE.info(isotope)
         PopupTextbox(self, input_text= infotext)
 
