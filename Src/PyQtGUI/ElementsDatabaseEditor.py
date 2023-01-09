@@ -1,7 +1,7 @@
 
-from qtpy.QtWidgets import QDialog, QToolButton, QFrame, QGridLayout,\
+from qtpy.QtWidgets import QDialog, QPushButton, QFrame, QGridLayout,\
                            QVBoxLayout, QWidget, QLabel, QApplication,\
-                           QSizePolicy, QMenu, QTextEdit, QTableView
+                           QSizePolicy, QMenu, QLineEdit, QTableView
 from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel
 from qtpy.QtGui import QFont, QEnterEvent, QStandardItem, QStandardItemModel
 
@@ -14,6 +14,37 @@ class ElementView(QTableView):
         super().__init__(*args, **kwargs)
 
         self.setSortingEnabled(True)
+
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        self.clickedPos = event.pos()
+        Action = menu.addAction("New Entry")
+        temp_model = self.model().sourceModel()
+        if temp_model is not None:
+            Action.triggered.connect(temp_model.new_line_dialog)
+        menu.exec_(event.globalPos())
+
+
+class NewElementDialog(QDialog):
+
+    got_name = Signal(str)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        layout = QVBoxLayout(self)
+        edit = QLineEdit(self)
+        layout.addWidget(edit)
+        self.setLayout(layout)
+        self.textedit = edit
+        self.button = QPushButton("Accept!", self)
+        self.button.clicked.connect(self.accept)
+        self.accepted.connect(self.return_value)
+        layout.addWidget(self.button)
+    
+    @Slot()
+    def return_value(self):
+        self.got_name.emit(self.textedit.text())
 
 
 class ElementModel(QStandardItemModel):
@@ -74,6 +105,28 @@ class ElementModel(QStandardItemModel):
     def save_changes(self):
 
         self.database.save()
+    
+    @Slot()
+    def new_line_dialog(self):
+        ne_dialog = NewElementDialog()
+        ne_dialog.got_name.connect(self.add_new_line)
+        ne_dialog.show()
+        result = ne_dialog.exec()
+    
+    @Slot(str)
+    def add_new_line(self, new_label: str):
+        if not new_label in self.database.atoms:
+            self.database.add_atom(new_label)
+            row = []
+            for key in self.all_column_names:
+                new_value = self.database.get_value(new_label, key)
+                self.database.set_value(new_label, key, new_value)
+                item = QStandardItem(str(new_value))
+                row.append(item)
+            self.all_row_names.append(new_label)
+            self.appendRow(row)
+            self.setVerticalHeaderItem(self.rowCount()-1, QStandardItem(str(new_label)))
+            print(f"self.all_row_names has length: {len(self.all_row_names)}")
 
 
 class ElementsDatabaseEditor(QDialog):
