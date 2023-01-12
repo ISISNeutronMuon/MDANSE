@@ -6,6 +6,7 @@ from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel
 from qtpy.QtGui import QFont, QEnterEvent, QStandardItem, QStandardItemModel
 
 from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.PyQtGUI.Widgets.GeneralWidgets import InputVariable, InputDialog
 
 
 class ElementView(QTableView):
@@ -18,10 +19,12 @@ class ElementView(QTableView):
     def contextMenuEvent(self, event):
         menu = QMenu(self)
         self.clickedPos = event.pos()
-        Action = menu.addAction("New Entry")
+        Action1 = menu.addAction("New Atom")
+        Action2 = menu.addAction("New Property")
         temp_model = self.model().sourceModel()
         if temp_model is not None:
-            Action.triggered.connect(temp_model.new_line_dialog)
+            Action1.triggered.connect(temp_model.new_line_dialog)
+            Action2.triggered.connect(temp_model.new_column_dialog)
         menu.exec_(event.globalPos())
 
 
@@ -106,15 +109,46 @@ class ElementModel(QStandardItemModel):
 
         self.database.save()
     
-    @Slot()
+    @Slot() 
     def new_line_dialog(self):
-        ne_dialog = NewElementDialog()
-        ne_dialog.got_name.connect(self.add_new_line)
+        dialog_variables = [
+            InputVariable(input_dict={'keyval':'atom_name',
+                                      'format': str,
+                                      'label':'New element name',
+                                      'tooltip':'Type the name of the new chemical element here.',
+                                      'values':['']})
+        ]
+        ne_dialog = InputDialog(fields = dialog_variables)
+        ne_dialog.got_values.connect(self.add_new_line)
         ne_dialog.show()
         result = ne_dialog.exec()
     
-    @Slot(str)
-    def add_new_line(self, new_label: str):
+    @Slot()
+    def new_column_dialog(self):
+        dialog_variables = [
+            InputVariable(input_dict={'keyval':'property_name',
+                                      'format': str,
+                                      'label':'New property name',
+                                      'tooltip':'Type the name of the new property here; it will be added to the table.',
+                                      'values':['']}),
+            InputVariable(input_dict={'keyval':'property_type',
+                                      'format': str,
+                                      'label':'Type of the new property',
+                                      'tooltip':'One of the following: int, float, str, list',
+                                      'values':['float']}),
+        ]
+        ne_dialog = InputDialog(fields = dialog_variables)
+        ne_dialog.got_values.connect(self.add_new_column)
+        ne_dialog.show()
+        result = ne_dialog.exec()
+    
+    @Slot(dict)
+    def add_new_line(self, input_variables: dict):
+        new_label = 'Xx'
+        try:
+            new_label = input_variables['atom_name']
+        except KeyError:
+            return None
         if not new_label in self.database.atoms:
             self.database.add_atom(new_label)
             row = []
@@ -127,6 +161,31 @@ class ElementModel(QStandardItemModel):
             self.appendRow(row)
             self.setVerticalHeaderItem(self.rowCount()-1, QStandardItem(str(new_label)))
             print(f"self.all_row_names has length: {len(self.all_row_names)}")
+    
+    @Slot(dict)
+    def add_new_column(self, input_variables: dict):
+        new_label = 'Xx'
+        new_type = 'float'
+        try:
+            new_label = input_variables['property_name']
+        except KeyError:
+            return None
+        try:
+            new_type = input_variables['property_type']
+        except KeyError:
+            return None
+        if not new_label in self.database.atoms:
+            self.database.add_property(new_label, new_type)
+            column = []
+            for key in self.all_row_names:
+                new_value = self.database.get_value(key, new_label)
+                self.database.set_value(key, new_label, new_value)
+                item = QStandardItem(str(new_value))
+                column.append(item)
+            self.all_column_names.append(new_label)
+            self.appendColumn(column)
+            self.setHorizontalHeaderItem(self.columnCount()-1, QStandardItem(str(new_label)))
+            print(f"self.all_column_names has length: {len(self.all_column_names)}")
 
 
 class ElementsDatabaseEditor(QDialog):
