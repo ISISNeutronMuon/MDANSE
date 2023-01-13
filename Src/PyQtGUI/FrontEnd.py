@@ -15,9 +15,9 @@
 
 from collections import defaultdict
 
-from PyQt6.QtCore import pyqtSlot, QSize, QMetaObject, QLocale, QObject, QThread, QMutex, QSortFilterProxyModel,\
+from qtpy.QtCore import Slot, QSize, QMetaObject, QLocale, QObject, QThread, QMutex, QSortFilterProxyModel,\
                          Qt
-from PyQt6.QtGui import QFont, QAction
+from qtpy.QtGui import QFont, QAction
 
 class FrontEnd(QObject):
     """This object will connect to a BackEnd by means
@@ -44,7 +44,7 @@ class FrontEnd(QObject):
         self.connectViews()
         self.attachActions()
     
-    @pyqtSlot()
+    @Slot()
     def connectViews(self):
         for key in self.backend.data_holders.keys():
             skey = str(key)

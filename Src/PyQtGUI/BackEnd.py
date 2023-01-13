@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from PyQt6.QtCore import pyqtSlot, QObject, QThread, QMutex, pyqtSignal, QProcess
+from qtpy.QtCore import pyqtSlot, QObject, QThread, QMutex, pyqtSignal, QProcess
 
 from MDANSE.PyQtGUI.DataViewModel.TrajectoryHolder import TrajectoryHolder
 from MDANSE.PyQtGUI.DataViewModel.JobHolder import JobHolder

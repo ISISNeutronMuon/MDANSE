@@ -15,10 +15,10 @@
 
 from collections import defaultdict
 
-from PyQt6.QtCore import pyqtSlot, QSize, QMetaObject, QLocale, QObject, QThread, QMutex, QSortFilterProxyModel,\
+from qtpy.QtCore import Slot, QSize, QMetaObject, QLocale, QObject, QThread, QMutex, QSortFilterProxyModel,\
                          Qt, QTimer, QDir
-from PyQt6.QtGui import QFont, QAction
-from PyQt6.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMainWindow, \
+from qtpy.QtGui import QFont, QAction
+from qtpy.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMainWindow, \
                                                 QPushButton,  QVBoxLayout, QWidget, \
                                                 QLineEdit, QHBoxLayout, QAbstractItemView, \
                                                 QFileDialog, QLabel, QToolBar, \
@@ -102,7 +102,7 @@ class Main(QMainWindow, FrontEnd):
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, base)
         self._views['jobs'].append(temp)
 
-    @pyqtSlot()
+    @Slot()
     def saveSettings(self):
         self.settings.beginGroup("MainWindow")
         self.settings.setValue("geometry", self.saveGeometry())

@@ -15,8 +15,8 @@
 
 import sys
 
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import QSettings, QThread
+from qtpy.QtWidgets import QApplication
+from qtpy.QtCore import QSettings, QThread
 
 from MDANSE.PyQtGUI.MainWindow import Main
 from MDANSE.PyQtGUI.BackEnd import BackEnd

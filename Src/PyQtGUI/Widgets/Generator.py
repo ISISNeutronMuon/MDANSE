@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from PyQt6.QtWidgets import QWidget, QDockWidget, QScrollArea
+from qtpy.QtWidgets import QWidget, QDockWidget, QScrollArea
 
 class WidgetGenerator:
     """The GUI elements will typically belong to one of the few

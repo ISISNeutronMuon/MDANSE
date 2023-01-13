@@ -15,8 +15,8 @@
 
 import os
 
-from PyQt6.QtCore import QDir
-from PyQt6.QtGui import QIcon
+from qtpy.QtCore import QDir
+from qtpy.QtGui import QIcon
 
 class PyQtIcons():
             

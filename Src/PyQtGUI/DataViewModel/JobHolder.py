@@ -13,8 +13,8 @@
 #
 # **************************************************************************
 
-from PyQt6.QtGui import QStandardItemModel, QStandardItem
-from PyQt6.QtCore import QObject, pyqtSlot, QProcess
+from qtpy.QtGui import QStandardItemModel, QStandardItem
+from qtpy.QtCore import QObject, Slot, QProcess
 
 
 class JobItem(QStandardItem):
@@ -30,12 +30,12 @@ class JobHolder(QStandardItemModel):
         super().__init__(parent=parent)
         self.python_interpreter = python
 
-    @pyqtSlot(object)
+    @Slot(object)
     def addItem(self, new_entry: QProcess):
         traj = JobItem(new_entry.basename, trajectory = new_entry)
         self.appendRow([traj])
     
-    @pyqtSlot(int)
+    @Slot(int)
     def startJob(self, job_id: int = -1):
         handle = QProcess(parent=self)
 
