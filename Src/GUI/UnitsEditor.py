@@ -323,8 +323,10 @@ class UnitsEditor(wx.Dialog):
                 wx.MessageBox("Units database saved successfully", "Success", wx.OK | wx.ICON_INFORMATION)
             else:
                 LOGGER("Units database saved successfully","info")
+                self.EndModal(wx.ID_OK)
                 self.Destroy()
         else:
+            self.EndModal(wx.ID_OK)
             self.Destroy()
 
 if __name__ == "__main__":
