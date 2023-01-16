@@ -27,7 +27,10 @@ from qtpy.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMai
 from MDANSE.PyQtGUI.Widgets.Generator import WidgetGenerator
 from MDANSE.PyQtGUI.FrontEnd import FrontEnd
 from MDANSE.PyQtGUI.Resources import Resources
-from MDANSE.PyQtGUI.Icons import ICONS
+from MDANSE.PyQtGUI.UnitsEditor import UnitsEditor
+from MDANSE.PyQtGUI.PeriodicTableViewer import PeriodicTableViewer
+from MDANSE.PyQtGUI.ElementsDatabaseEditor import ElementsDatabaseEditor
+
 
 class Main(QMainWindow, FrontEnd):
     """The main window of the MDANSE GUI,
@@ -42,7 +45,6 @@ class Main(QMainWindow, FrontEnd):
         self.setWindowTitle(title)
         self.wid_gen = WidgetGenerator()
         self.resources = Resources()
-        # self.resources = ICONS
         self.makeBasicLayout()
         self.settings = settings
         if settings is not None:
@@ -74,13 +76,40 @@ class Main(QMainWindow, FrontEnd):
         self.exitAct.triggered.connect(self.destroy)
         self._menuBar.addAction(self.exitAct)
 
+    Slot()
+    def launchPeriodicTable(self):
+        dialog = PeriodicTableViewer
+        dialog_instance = dialog(self)
+        dialog_instance.show()
+        result = dialog_instance.exec()
+
+    Slot()
+    def launchUnitsEditor(self):
+        dialog = UnitsEditor
+        dialog_instance = dialog(self)
+        dialog_instance.show()
+        result = dialog_instance.exec()
+
+    Slot()
+    def launchElementsEditor(self):
+        dialog = ElementsDatabaseEditor
+        dialog_instance = dialog(self)
+        dialog_instance.show()
+        result = dialog_instance.exec()
+
     def setupToolbar(self):
         self._toolBar = QToolBar("Main MDANSE toolbar", self)
         # self._toolBar.setMovable(True)
         self._toolBar.setObjectName("main toolbar")
-        for key, icon in self.resources._icons.items():
+        valid_keys = [
+            ('periodic_table', self.launchPeriodicTable),
+            ('element', self.launchElementsEditor),
+            ('units', self.launchUnitsEditor),
+        ]
+        for key, slot in valid_keys:
+            icon = self.resources._icons[key]
             action = QAction(icon, str(key), self._toolBar)
-            action.triggered.connect(self.onMyToolBarButtonClick)
+            action.triggered.connect(slot)
             self._actions.append(action)
             # self._actions.append(self._toolBar.addAction(icon, str(key)))
         for act in self._actions:

@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from qtpy.QtCore import pyqtSlot, QObject, QThread, QMutex, pyqtSignal, QProcess
+from qtpy.QtCore import Slot, QObject, QThread, QMutex, Signal, QProcess
 
 from MDANSE.PyQtGUI.DataViewModel.TrajectoryHolder import TrajectoryHolder
 from MDANSE.PyQtGUI.DataViewModel.JobHolder import JobHolder
@@ -54,11 +54,11 @@ class BackEnd(QObject):
         ]
         return callable_slots
 
-    @pyqtSlot()
+    @Slot()
     def loadFile(self):
         print("LoadFile triggered in BackEnd.")
 
-    @pyqtSlot()
+    @Slot()
     def startJob(self):
         print("startJob triggered in BackEnd.")
         pass  # whatever happens here, a QProcess will be involved at some point
