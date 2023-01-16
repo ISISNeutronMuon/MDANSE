@@ -15,7 +15,8 @@
 
 from collections import defaultdict
 
-from qtpy.QtCore import Slot, QSize, QMetaObject, QLocale, QObject, QThread, QMutex, QSortFilterProxyModel,\
+from qtpy.QtCore import Slot, Signal, QMetaObject, QLocale, QObject,\
+                         QThread, QMutex, QSortFilterProxyModel,\
                          Qt
 from qtpy.QtGui import QFont, QAction
 
@@ -28,6 +29,8 @@ class FrontEnd(QObject):
     Args:
         QObject - the base class.
     """
+
+    file_name_for_loading = Signal(str)
 
     def __init__(self, parent = None):
         super().__init__(parent)
@@ -53,10 +56,11 @@ class FrontEnd(QObject):
                 view.setModel(data_holder)
     
     def attachActions(self):
-        backend_actions = self.backend.getActions()
-        for act in backend_actions:
-            a_text = act[1]
-            a_slot = act[0]
-            temp = QAction(a_text, parent=self)
-            temp.triggered.connect(a_slot)
-            self._actions.append(temp)
+        self.file_name_for_loading.connect(self.backend.loadFile)
+        # backend_actions = self.backend.getActions()
+        # for act in backend_actions:
+        #     a_text = act[1]
+        #     a_slot = act[0]
+        #     temp = QAction(a_text, parent=self)
+        #     temp.triggered.connect(a_slot)
+        #     self._actions.append(temp)

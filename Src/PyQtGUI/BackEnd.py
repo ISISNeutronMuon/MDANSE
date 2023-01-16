@@ -14,9 +14,14 @@
 # **************************************************************************
 
 from qtpy.QtCore import Slot, QObject, QThread, QMutex, Signal, QProcess
-
+ 
+from MDANSE import LOGGER, PLATFORM, REGISTRY
+from MDANSE.__pkginfo__ import __author__, __commit__, __version__, __beta__
+from MDANSE.Core.Platform import PLATFORM
+from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.PyQtGUI.DataViewModel.TrajectoryHolder import TrajectoryHolder
 from MDANSE.PyQtGUI.DataViewModel.JobHolder import JobHolder
+
 
 class BackEnd(QObject):
     """The main window of the MDANSE GUI,
@@ -38,6 +43,7 @@ class BackEnd(QObject):
         # FrontEnd's self.views dictionary.
         self.createTrajectoryHolder()
         self.createJobHolder()
+        self.registry = REGISTRY
 
     def createTrajectoryHolder(self):
         self.trajectory_holder = TrajectoryHolder(parent=self)
@@ -54,9 +60,9 @@ class BackEnd(QObject):
         ]
         return callable_slots
 
-    @Slot()
-    def loadFile(self):
-        print("LoadFile triggered in BackEnd.")
+    @Slot(str)
+    def loadFile(self, fname: str):
+        print(f"LoadFile triggered in BackEnd. File name is {fname}.")
 
     @Slot()
     def startJob(self):

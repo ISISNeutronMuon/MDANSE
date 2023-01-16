@@ -13,10 +13,11 @@
 #
 # **************************************************************************
 
+import os
 from collections import defaultdict
 
 from qtpy.QtCore import Slot, QSize, QMetaObject, QLocale, QObject, QThread, QMutex, QSortFilterProxyModel,\
-                         Qt, QTimer, QDir
+                         Qt, QTimer, QDir, Signal
 from qtpy.QtGui import QFont, QAction
 from qtpy.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMainWindow, \
                                                 QPushButton,  QVBoxLayout, QWidget, \
@@ -24,6 +25,7 @@ from qtpy.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMai
                                                 QFileDialog, QLabel, QToolBar, \
                                                 QMenuBar, QWidgetAction, QTreeView
 
+from MDANSE.PyQtGUI.BackEnd import BackEnd
 from MDANSE.PyQtGUI.Widgets.Generator import WidgetGenerator
 from MDANSE.PyQtGUI.FrontEnd import FrontEnd
 from MDANSE.PyQtGUI.Resources import Resources
@@ -46,6 +48,7 @@ class Main(QMainWindow, FrontEnd):
         self.wid_gen = WidgetGenerator()
         self.resources = Resources()
         self.makeBasicLayout()
+        self.workdir = os.path.expanduser('~')
         self.settings = settings
         if settings is not None:
             settings.beginGroup("MainWindow")
@@ -97,11 +100,19 @@ class Main(QMainWindow, FrontEnd):
         dialog_instance.show()
         result = dialog_instance.exec()
 
+    Slot()
+    def loadTrajectory(self):
+        fname = QFileDialog.getOpenFileName(self, "Load an MD trajectory",
+                                    self.workdir, 'HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)')
+        if fname is not None:
+            self.file_name_for_loading.emit(fname)
+
     def setupToolbar(self):
         self._toolBar = QToolBar("Main MDANSE toolbar", self)
         # self._toolBar.setMovable(True)
         self._toolBar.setObjectName("main toolbar")
         valid_keys = [
+            ('plus', self.loadTrajectory),
             ('periodic_table', self.launchPeriodicTable),
             ('element', self.launchElementsEditor),
             ('units', self.launchUnitsEditor),
