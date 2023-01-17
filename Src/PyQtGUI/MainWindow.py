@@ -27,14 +27,13 @@ from qtpy.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMai
 
 from MDANSE.PyQtGUI.BackEnd import BackEnd
 from MDANSE.PyQtGUI.Widgets.Generator import WidgetGenerator
-from MDANSE.PyQtGUI.FrontEnd import FrontEnd
 from MDANSE.PyQtGUI.Resources import Resources
 from MDANSE.PyQtGUI.UnitsEditor import UnitsEditor
 from MDANSE.PyQtGUI.PeriodicTableViewer import PeriodicTableViewer
 from MDANSE.PyQtGUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 
 
-class Main(QMainWindow, FrontEnd):
+class Main(QMainWindow):
     """The main window of the MDANSE GUI,
     inherits QMainWindow.
 
@@ -42,8 +41,13 @@ class Main(QMainWindow, FrontEnd):
         QMainWindow - the base class.
     """
 
-    def __init__(self, parent = None, title = "MDANSE", settings = None):
-        super().__init__(parent)
+    file_name_for_loading = Signal(str)
+
+    def __init__(self, *args, parent = None, title = "MDANSE", settings = None,
+                       **kwargs):
+        super().__init__(parent, *args, **kwargs)
+        self._views = defaultdict(list)
+        self._actions = []
         self.setWindowTitle(title)
         self.wid_gen = WidgetGenerator()
         self.resources = Resources()
@@ -64,6 +68,27 @@ class Main(QMainWindow, FrontEnd):
         self.settings_timer.setInterval(2000)
         self.settings_timer.start()
         self.destroyed.connect(self.settings_timer.stop)
+
+    def setBackend(self, backend = None):
+        """Attaches a MDANSE backend to the GUI.
+        This handle is stored so we can connect
+        all the QActions from the GUI
+        to the correct backend slots.
+        """
+        self.backend = backend
+        self.connectViews()
+        self.attachActions()
+    
+    @Slot()
+    def connectViews(self):
+        for key in self.backend.data_holders.keys():
+            skey = str(key)
+            data_holder = self.backend.data_holders[skey]
+            for view in self._views[skey]:
+                view.setModel(data_holder)
+    
+    def attachActions(self):
+        self.file_name_for_loading.connect(self.backend.loadFile)
 
     def makeBasicLayout(self):
         self.createTrajectoryViewer()
@@ -105,7 +130,9 @@ class Main(QMainWindow, FrontEnd):
         fname = QFileDialog.getOpenFileName(self, "Load an MD trajectory",
                                     self.workdir, 'HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)')
         if fname is not None:
-            self.file_name_for_loading.emit(fname)
+            print(f"fname[0]:{fname[0]}")
+            print(f"fname[1]:{fname[1]}")
+            self.file_name_for_loading.emit(fname[0])
 
     def setupToolbar(self):
         self._toolBar = QToolBar("Main MDANSE toolbar", self)

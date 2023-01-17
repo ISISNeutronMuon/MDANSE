@@ -32,7 +32,7 @@ class FrontEnd(QObject):
 
     file_name_for_loading = Signal(str)
 
-    def __init__(self, parent = None):
+    def __init__(self, *args, parent = None, **kwargs):
         super().__init__(parent)
         self._views = defaultdict(list)
         self._actions = []
