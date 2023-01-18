@@ -82,7 +82,7 @@ numfig = True
 
 # General information about the project.
 project = u'MDANSE'
-copyright = u'2016, Gael Goret, Bachir Aoun and Eric C. Pellegrini'
+copyright = u'2015, Gael Goret, Bachir Aoun and Eric C. Pellegrini'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
