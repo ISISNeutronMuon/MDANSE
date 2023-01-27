@@ -8,6 +8,7 @@ from qtpy.QtCore import QObject, Slot, Signal, QSortFilterProxyModel, QModelInde
 from qtpy.QtWidgets import QDialog, QTreeView, QGridLayout,\
                            QVBoxLayout, QWidget, QLabel, QApplication,\
                            QSizePolicy, QMenu, QLineEdit, QTextEdit
+from qtpy.QtCore import Qt
 
 to_be_omitted = dir(None)
 
@@ -19,6 +20,8 @@ class RegistryTree(QStandardItemModel):
         super().__init__(*args, **kwargs)
 
         self._nodes = {}
+        self._docstrings = {}
+        # self._items = []  # to avoid garbage collection
         self.nodecounter = 0
 
         self.populateTree()
@@ -29,23 +32,28 @@ class RegistryTree(QStandardItemModel):
 
     def addNode(self, thing, name = "Registry", parent : int = -1):
         item = QStandardItem(name)
-        item.setData(thing)
         retval = int(self.nodecounter)
+        item.setData(retval, role = Qt.ItemDataRole.UserRole)
         self._nodes[self.nodecounter] = item
+        self._docstrings[self.nodecounter] = thing.__doc__
         self.nodecounter += 1
         if parent < 0:
             self.appendRow(item)
         else:
             parent_node = self._nodes[parent]
             parent_node.appendRow(item)
+        # self._items.append(item)
         return retval
 
     def addTerminalNodes(self, thing, parent : int = -1):
         for attr in dir(thing):
             if attr not in to_be_omitted:
                 item = QStandardItem(str(attr))
-                item.setData(attr)
+                attr_object = getattr(thing,attr,None)
+                item.setData(self.nodecounter, role = Qt.ItemDataRole.UserRole)
+                # self._items.append(item)
                 self._nodes[self.nodecounter] = item
+                self._docstrings[self.nodecounter] = attr_object.__doc__
                 self.nodecounter += 1
                 if parent < 0:
                     self.appendRow(item)
@@ -112,13 +120,12 @@ class RegistryViewer(QDialog):
     
     @Slot(QModelIndex)
     def updateDocstring(self, index = QModelIndex):
-        node = self.datamodel.itemFromIndex(index)
+        n_index = self.viewer.currentIndex()
+        number = self.proxy.itemData(n_index)[256]
         try:
-            thing = node.data()
+            docstring = self.datamodel._docstrings[number]
         except AttributeError:
             docstring = ""
-        else:
-            docstring = thing.__doc__
         self.side_panel.setText(docstring)
     
 
