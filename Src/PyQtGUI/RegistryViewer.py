@@ -21,6 +21,7 @@ class RegistryTree(QStandardItemModel):
 
         self._nodes = {}
         self._docstrings = {}
+        self._values = {}
         # self._items = []  # to avoid garbage collection
         self.nodecounter = 0
 
@@ -54,6 +55,7 @@ class RegistryTree(QStandardItemModel):
                 # self._items.append(item)
                 self._nodes[self.nodecounter] = item
                 self._docstrings[self.nodecounter] = attr_object.__doc__
+                self._values[self.nodecounter] = str(attr_object)
                 self.nodecounter += 1
                 if parent < 0:
                     self.appendRow(item)
@@ -74,6 +76,14 @@ class RegistryTree(QStandardItemModel):
                     self.parseNode(child, name = str(key), parent = parent_number)
         else:
             self.addTerminalNodes(node, parent_number)
+    
+    def getAncestry(self, number: int):
+        parents = []
+        item = self._nodes[number]
+        while item is not None:
+            parents.append(item.text())
+            item = item.parent()
+        return parents[::-1]
 
 
 class RegistryViewer(QDialog):
@@ -91,12 +101,15 @@ class RegistryViewer(QDialog):
 
         self.viewer = QTreeView(self)
         self.viewer.setObjectName("MDANSE Registry")
-        self.glayout.addWidget(self.viewer,0,0, 1,2)
+        self.glayout.addWidget(self.viewer,0,0, 4,2)
 
-        self.glayout.addWidget(QLabel("Filter", self),1,0)
+        self.glayout.addWidget(QLabel("Filter", self),4,0)
 
         self.filter_field = QLineEdit(self)
-        self.glayout.addWidget(self.filter_field, 1,1)
+        self.glayout.addWidget(self.filter_field, 4,1)
+
+        self.path_field = QLineEdit(self)
+        self.glayout.addWidget(self.path_field, 0,2)
 
         self.proxy = QSortFilterProxyModel(self)
 
@@ -105,13 +118,17 @@ class RegistryViewer(QDialog):
 
         self.viewer.setModel(self.proxy)
 
-        self.side_panel = QTextEdit(self)
-        self.glayout.addWidget(self.side_panel, 0,2,1,1)
+        self.value_panel = QTextEdit(self)
+        self.glayout.addWidget(self.value_panel, 1,2,2,1)
+
+        self.doc_panel = QTextEdit(self)
+        self.glayout.addWidget(self.doc_panel, 3,2,1,1)
 
         self.setStyleSheet("QLabel {background-color:rgb(250,250,250); qproperty-alignment: AlignCenter}")
         self.filter_field.textChanged.connect(self.filterEntries)
 
         self.viewer.clicked.connect(self.updateDocstring)
+        self.viewer.clicked.connect(self.updatePath)
     
     @Slot()
     def filterEntries(self):
@@ -126,7 +143,26 @@ class RegistryViewer(QDialog):
             docstring = self.datamodel._docstrings[number]
         except AttributeError:
             docstring = ""
-        self.side_panel.setText(docstring)
+        self.doc_panel.setText(docstring)
+        try:
+            valstring = self.datamodel._values[number]
+        except KeyError:
+            valstring = ""
+        self.value_panel.setText(valstring)
+
+    
+    @Slot(QModelIndex)
+    def updatePath(self, index = QModelIndex):
+        n_index = self.viewer.currentIndex()
+        number = self.proxy.itemData(n_index)[256]
+        parents = self.datamodel.getAncestry(number)
+        try:
+            valstring = self.datamodel._values[number]
+        except KeyError:
+            pathstring = "REGISTRY['" + "']['".join(parents) + "']"
+        else:
+            pathstring = "REGISTRY['" + "']['".join(parents[:-1]) + "']." + parents[-1]
+        self.path_field.setText(pathstring)
     
 
             
