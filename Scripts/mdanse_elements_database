@@ -15,10 +15,10 @@
 #
 # **************************************************************************
 
-if __name__ == "__main__":
-
-    from MDANSE.GUI.Apps import ElementsDatabaseEditorApp
-    
-    app = ElementsDatabaseEditorApp(None)
-    app.MainLoop()
-    
+if __name__ == '__main__':
+    from MDANSE.PyQtGUI.ElementsDatabaseEditor import ElementsDatabaseEditor, QApplication
+    import sys
+    app = QApplication(sys.argv)
+    root = ElementsDatabaseEditor()
+    root.show()
+    app.exec()

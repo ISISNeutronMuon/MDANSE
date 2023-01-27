@@ -13,13 +13,14 @@
 #
 # **************************************************************************
 
+from icecream import ic
 from qtpy.QtCore import Slot, QObject, QThread, QMutex, Signal, QProcess
  
 from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE.__pkginfo__ import __author__, __commit__, __version__, __beta__
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Framework.Jobs.Converter import Converter
-from MDANSE.PyQtGUI.DataViewModel.TrajectoryHolder import TrajectoryHolder
+from MDANSE.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeModel
 from MDANSE.PyQtGUI.DataViewModel.JobHolder import JobHolder
 
 
@@ -30,6 +31,8 @@ class BackEnd(QObject):
     Args:
         QMainWindow - the base class.
     """
+
+    new_trajectory = Signal(str)
     
     def __init__(self, parent = None, python = ""):
         super().__init__(parent)
@@ -46,8 +49,9 @@ class BackEnd(QObject):
         self.registry = REGISTRY
 
     def createTrajectoryHolder(self):
-        self.trajectory_holder = TrajectoryHolder(parent=self)
+        self.trajectory_holder = DataTreeModel(parent=self)
         self.data_holders['trajectory'] = self.trajectory_holder
+        self.new_trajectory.connect(self.trajectory_holder.acceptNewTrajectory)
 
     def createJobHolder(self):
         self.job_holder = JobHolder(parent=self, python = self.python_interpreter)
@@ -62,11 +66,12 @@ class BackEnd(QObject):
 
     @Slot(str)
     def loadFile(self, fname: str):
-        print(f"LoadFile triggered in BackEnd. File name is {fname}.")
+        ic(f"LoadFile triggered in BackEnd. File name is {fname}.")
+        self.new_trajectory.emit(fname)
 
     @Slot()
     def startJob(self):
-        print("startJob triggered in BackEnd.")
+        ic("startJob triggered in BackEnd.")
         pass  # whatever happens here, a QProcess will be involved at some point
 
 

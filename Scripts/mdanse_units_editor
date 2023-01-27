@@ -15,10 +15,11 @@
 #
 # **************************************************************************
 
-if __name__ == "__main__":
-    
-    from MDANSE.GUI.Apps import UnitsEditorApp
+if __name__ == '__main__':
+    from MDANSE.PyQtGUI.UnitsEditor import UnitsEditor, QApplication
+    import sys
+    app = QApplication(sys.argv)
+    root = UnitsEditor()
+    root.show()
+    app.exec()
 
-    app = UnitsEditorApp(None)
-    app.MainLoop()
-    
