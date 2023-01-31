@@ -115,7 +115,7 @@ Temperature
    :height: 7.504cm
 
 -  :ref:`param-frames`
--  :ref:`param-interpolation-order`
+-  :ref:`params-interpolation-order`
 -  :ref:`param-output-files`
 -  :ref:`param-running-mode`
 

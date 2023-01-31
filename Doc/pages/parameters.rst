@@ -33,8 +33,6 @@ these parts:
       successful analyses do not show up.
 
 .. image:: ./Pictures/10000001000003220000021BA346CFB73717C1BE.png
-   :width: 15.921cm
-   :height: 10.7cm
 
 .. _param-frames:
 
@@ -42,8 +40,6 @@ Frames
 ~~~~~~
 
 .. image:: ./Pictures/10000001000003220000021BA346CFB73717C1BE.png
-   :width: 15.921cm
-   :height: 1.27cm
 
 This parameter is always situated at the top of the analysis window,
 right below the trajectory box. It allows you to configure which frames
@@ -52,27 +48,21 @@ in the trajectory are to be analysed. It consists of these three boxes:
 -  **First frame**
 
 *Format:* int
-
 *Default:* 0
-
 *Description:* the frame from which the analysis will begin, the first
 frame taken into account.
 
 -  **Last frame**
 
 *Format:* int
-
 *Default:* the last frame in the trajectory
-
 *Description:* the frame until which the analysis proceeds. The last
 frame taken into account.
 
 -  **Frame step**
 
 *Format:* int
-
 *Default:* 1
-
 *Description:* determines the periodicity of which steps are used and
 which are skipped. 1 means that all frames are read, 2 means every other
 is read, etc.
@@ -83,8 +73,6 @@ Output files
 ~~~~~~~~~~~~
 
 .. image:: ./Pictures/100000010000030400000042DC1FC2D755A00B07.png
-   :width: 15.921cm
-   :height: 1.362cm
 
 This is one of the two parameters that are present in each analysis, the
 other being :ref:`param-frames`. It usually appears at the bottom of
@@ -107,7 +95,7 @@ practice can be seen in the picture above.
 
 Further, if the above path already exists, (n) will be appended to the
 end of the file name, where n is the lowest number for which a file
-doesn’t exist. This way, no overwriting occurs.
+doesn't exist. This way, no overwriting occurs.
 
 *Description:* determines the location where the analysis results will
 be stored. **Browse** button can be used to find the location using a
@@ -124,7 +112,7 @@ file browser.
 *Description:* specifies the `file formats <#_Input_and_output>`__ in
 which the analysis results are saved. :ref:`netcdf`,
 `ASCII <#_DAT_file_format>`__, or both can be selected. The name of
-these files is given in the ‘Basename’ string.
+these files is given in the 'Basename' string.
 
 Creating selections
 ~~~~~~~~~~~~~~~~~~~
@@ -160,8 +148,6 @@ Axis Selection/Reference Basis
 Inside an analysis window, Axis Selection looks like this:
 
 .. image:: ./Pictures/10000001000003090000003B6471CB689476B467.png
-   :width: 15.921cm
-   :height: 1.208cm
 
 The drop-down menu is used to choose one of the existing definitions.
 Only the definitions with the format matching the analysis, i.e. those
@@ -172,11 +158,9 @@ selected definition can be viewed in the User Definition Viewer by
 clicking on the **View selected definition**.
 
 .. image:: ./Pictures/100000010000024A000002509C35D54A8D72A4C8.png
-   :width: 8.629cm
-   :height: 8.717cm
 
-When this window is opened from an analysis window, the ‘Number of
-atoms’ field at the top will be set to the number of atoms that must be
+When this window is opened from an analysis window, the 'Number of
+atoms' field at the top will be set to the number of atoms that must be
 selected for the selection to work in the analysis from whose window it
 was opened. The field will also not be editable. Thus, when the New
 definition button is clicked in :ref:`analysis-angular-correlation`
@@ -184,16 +168,14 @@ analysis, the field will be set
 to 2, because that is how many it requires.
 
 The number of atoms indicates how many atoms from one molecule must be
-selected. To select an atom, click on the + button in the ‘Molecules’
+selected. To select an atom, click on the + button in the 'Molecules'
 list to show which atoms that molecule contains, and then double-click
-the atom. That will cause the chosen atom to appear in the ‘Selected
-atoms’ list, and its details in the box below. An atom can be removed
-from selection by clicking on it in the ‘Selected atoms’ list and
+the atom. That will cause the chosen atom to appear in the 'Selected
+atoms' list, and its details in the box below. An atom can be removed
+from selection by clicking on it in the 'Selected atoms' list and
 hitting the Delete key on the keyboard.
 
 .. image:: ./Pictures/100000010000024A0000024F4D31AD6A44D2DC96.png
-   :width: 8.412cm
-   :height: 8.484cm
 
 Axis selection is available for :ref:`analysis-angular-correlation`
 and :ref:`analysis-op` analyses, which both require 2 atoms to
@@ -204,8 +186,6 @@ Output contribution per axis
 ''''''''''''''''''''''''''''
 
 .. image:: ./Pictures/10000001000003220000027563B8CBFF70E2089C.png
-   :width: 15.921cm
-   :height: 1.147cm
 
 This is an option that is always and only available in analyses that use
 :ref:`param-axis-selection`. It is a checkbox and is by
@@ -230,15 +210,11 @@ optional.
 Inside an analysis window, Atom Selection appears thusly:
 
 .. image:: ./Pictures/100000010000030800000047DA737593A6C8ED75.png
-   :width: 15.921cm
-   :height: 1.457cm
 
 The green button adds a line for another selection, allowing you to
 choose one more selection to apply to that analysis:
 
 .. image:: ./Pictures/100000010000030200000070CC785E9ACCB53208.png
-   :width: 15.921cm
-   :height: 2.316cm
 
 The line can be removed by clicking on the red button. The drop-down
 menu and the **View selected definition** button work the way they do in
@@ -246,24 +222,18 @@ Axis Selection <link>. The **Set new selection** button opens the
 following window:
 
 .. image:: ./Pictures/100000010000024B00000251035B45CB484FE36D.png
-   :width: 8.871cm
-   :height: 8.962cm
 
 The **Filter by** field contains different ways to access the various
 particles in the loaded trajectory. Clicking on a filter will make all
 the relevant particles appear in the top right box:
 
 .. image:: ./Pictures/10000001000002480000024FA666A56C2A7CF8F5.png
-   :width: 10.421cm
-   :height: 10.546cm
 
 Clicking on the particles/groups in that window will highlight them and
 make them appear in the **Selection** box. Together with the buttons for
 logical operations, it is possible to make complex selections, like so:
 
 .. image:: ./Pictures/100000010000024900000255AD8D31ECFB0A37B1.png
-   :width: 10.663cm
-   :height: 10.881cm
 
 The large box below the **Selection** box should show information about
 your selection, but it is broken for complex selections. The box at the
@@ -299,8 +269,6 @@ fact, it requires an Atom Selection to function. That is because Atom
 Transmutation gets applied to an Atom Selection.
 
 .. image:: ./Pictures/10000001000003070000007D5FB1F7297C409C62.png
-   :width: 15.921cm
-   :height: 2.568cm
 
 To use Atom Transmutation, simply select an Atom Selection in the grey
 drop-down menu on the left, and then choose the element into which the
@@ -309,8 +277,6 @@ menu next to the red button. For example, the below Atom Transmutation
 will transmute all sodium ions into potassium ions:
 
 .. image:: ./Pictures/10000001000002FC00000077E7EBAA5ADD00FF40.png
-   :width: 15.921cm
-   :height: 2.48cm
 
 This parameter is available for the following analyses: `Coordination
 Number <#_Coordination_Number>`__, `Current Correlation
@@ -349,8 +315,6 @@ the selection using the box at the bottom, then click the **Save**
 button, and finally close the window.
 
 .. image:: ./Pictures/100000010000024900000250A7ED210266718E94.png
-   :width: 9.945cm
-   :height: 10.065cm
 
 This parameter is only available for the
 :ref:`analysis-dacf`
@@ -366,8 +330,6 @@ Plugin <#_Scattering>`__\ s, Q vectors give the opportunity to change
 how the analysis is performed. Each window has a part like this:
 
 .. image:: ./Pictures/10000001000003050000003F7D1CF6AF37C53021.png
-   :width: 15.921cm
-   :height: 1.298cm
 
 This section must be filled for analysis to be able to run. Like for
 other selections, there are no definitions by default. Therefore, one
@@ -402,15 +364,11 @@ coherent structure factor on an isotropic sample (a liquid or a
 crystalline powder).
 
 .. image:: ./Pictures/1000000100000312000002131D552DD432567B3E.png
-   :width: 15.921cm
-   :height: 10.756cm
 
 -  **seed**
 
 *Format:* int
-
 *Default:* 0
-
 *Description*: the RNG seed used to generate the vectors. This will
 ensure that the same random numbers are generated when the same **seed**
 is used, therefore making the calculation more reproducible.
@@ -419,64 +377,52 @@ is used, therefore making the calculation more reproducible.
 
    -  **from**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the minimum value used to construct the range of shells.
 
 -  
 
    -  **to**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the maximum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the maximum value used to construct the range of shells.
 
 -  
 
    -  **by step of**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the step used to construct the range of shells. If it is
-1, every integer between **from** and **to** is placed into the range,
-if it is 2, every other, etc.
+      *Format:* int
+      *Default:* 1
+      *Description:* the step used to construct the range of shells. If it is
+      1, every integer between **from** and **to** is placed into the range,
+      if it is 2, every other, etc.
 
 -  **n vectors**
 
-*Format:* int
-
-*Default:* 50
-
-*Description:* the number of hkl vectors in each shell. Higher values
-result in higher accuracy but at the cost of longer computational time.
+   *Format:* int
+   *Default:* 50
+   *Description:* the number of hkl vectors in each shell. Higher values
+   result in higher accuracy but at the cost of longer computational time.
 
 -  **width**
 
-*Format:* float
-
-*Default:* 1.0
-
-*Description:* the accepted tolerance of each shell. It is often
-identical to **by step of**.
+   *Format:* float
+   *Default:* 1.0
+   *Description:* the accepted tolerance of each shell. It is often
+   identical to **by step of**.
 
 -  **Generate** button generates the hkl vectors based on the
    specifications above. It must be clicked before the vectors can be
    saved.
 -  **Name**
 
-*Format:* str
-
-*Default:* None
-
-*Description:* this is the empty box at the bottom of the window. It
-allows you to name the generated vectors. This must be set before the
-vectors can be saved.
+   *Format:* str
+   *Default:* None
+   *Description:* this is the empty box at the bottom of the window. It
+   allows you to name the generated vectors. This must be set before the
+   vectors can be saved.
 
 -  **Save** button saves the generated vectors. It does not close the Q
    Vectors window.
@@ -488,147 +434,119 @@ Similar to Spherical Lattice Vectors, but in this case the vectors are
 generated only in a plane perpendicular to the two axes given.
 
 .. image:: ./Pictures/1000000100000313000002B80FE3D39AE365B8F3.png
-   :width: 15.921cm
-   :height: 14.079cm
 
 -  **seed**
 
-*Format:* int
-
-*Default:* 0
-
-*Description*: the RNG seed used to generate the vectors. This will
-ensure that the same random numbers are generated when the same **seed**
-is used, therefore making the calculation more reproducible.
+   *Format:* int
+   *Default:* 0
+   *Description*: the RNG seed used to generate the vectors. This will
+   ensure that the same random numbers are generated when the same **seed**
+   is used, therefore making the calculation more reproducible.
 
 -  shells
 
    -  **from**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the minimum value used to construct the range of shells.
 
 -  
 
    -  **to**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the maximum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the maximum value used to construct the range of shells.
 
 -  
 
    -  **by step of**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the step used to construct the range of shells. If it is
-1, every integer between **from** and **to** is placed into the range,
-if it is 2, every other, etc.
+      *Format:* int
+      *Default:* 1
+      *Description:* the step used to construct the range of shells. If it is
+      1, every integer between **from** and **to** is placed into the range,
+      if it is 2, every other, etc.
 
 -  **n vectors**
 
-*Format:* int
-
-*Default:* 50
-
-*Description:* the number of hkl vectors in each shell. Higher values
-result in higher accuracy but at the cost of longer computational time.
+   *Format:* int
+   *Default:* 50
+   *Description:* the number of hkl vectors in each shell. Higher values
+   result in higher accuracy but at the cost of longer computational time.
 
 -  **width**
 
-*Format:* float
-
-*Default:* 1.0
-
-*Description:* the accepted tolerance of each shell. It is often
-identical to **by step of**.
+   *Format:* float
+   *Default:* 1.0
+   *Description:* the accepted tolerance of each shell. It is often
+   identical to **by step of**.
 
 -  axis 1
 
    -  **x-component**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the x-components of the first axis used to specify the
-plane.
+      *Format:* int
+      *Default:* 1
+      *Description:* the x-components of the first axis used to specify the
+      plane.
 
 -  
 
    -  **y-component**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the y-components of the first axis used to specify the
-plane.
+      *Format:* int
+      *Default:* 0
+      *Description:* the y-components of the first axis used to specify the
+      plane.
 
 -  
 
    -  **z-component**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the z-components of the first axis used to specify the
-plane.
+      *Format:* int
+      *Default:* 0
+      *Description:* the z-components of the first axis used to specify the
+      plane.
 
 -  axis 2
 
    -  **x-component**
 
-*Format:* int
-
-*Default: 0*
-
-*Description:* the x-components of the second axis used to specify the
-plane.
+      *Format:* int
+      *Default: 0*
+      *Description:* the x-components of the second axis used to specify the
+      plane.
 
 -  
 
    -  **y-component**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the y-components of the second axis used to specify the
-plane.
+      *Format:* int
+      *Default:* 1
+      *Description:* the y-components of the second axis used to specify the
+      plane.
 
 -  
 
    -  **z-component**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the z-components of the second axis used to specify the
-plane.
+      *Format:* int
+      *Default:* 0
+      *Description:* the z-components of the second axis used to specify the
+      plane.
 
 -  **Generate** button generates the hkl vectors based on the
    specifications above. It must be clicked before the vectors can be
    saved.
 -  **Name**
 
-*Format:* str
-
-*Default:* None
-
-*Description:* this is the empty box at the bottom of the window. It
-allows you to name the generated vectors. This must be set before the
-vectors can be saved.
+   *Format:* str
+   *Default:* None
+   *Description:* this is the empty box at the bottom of the window. It
+   allows you to name the generated vectors. This must be set before the
+   vectors can be saved.
 
 -  **Save** button saves the generated vectors. It does not close the Q
    Vectors window.
@@ -641,111 +559,89 @@ now the vectors are generated only along a specific direction determined
 by the axis given.
 
 .. image:: ./Pictures/100000010000030F0000025C4113EA5B9835A7B9.png
-   :width: 15.921cm
-   :height: 12.282cm
 
 -  **seed**
 
-*Format:* int
-
-*Default:* 0
-
-*Description*: the RNG seed used to generate the vectors. This will
-ensure that the same random numbers are generated when the same **seed**
-is used, therefore making the calculation more reproducible.
+   *Format:* int
+   *Default:* 0
+   *Description*: the RNG seed used to generate the vectors. This will
+   ensure that the same random numbers are generated when the same **seed**
+   is used, therefore making the calculation more reproducible.
 
 -  shells
 
    -  **from**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the minimum value used to construct the range of shells.
 
 -  
 
    -  **to**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the maximum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the maximum value used to construct the range of shells.
 
 -  
 
    -  **by step of**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the step used to construct the range of shells. If it is
-1, every integer between **from** and **to** is placed into the range,
-if it is 2, every other, etc.
+      *Format:* int
+      *Default:* 1
+      *Description:* the step used to construct the range of shells. If it is
+      1, every integer between **from** and **to** is placed into the range,
+      if it is 2, every other, etc.
 
 -  **n vectors**
 
-*Format:* int
-
-*Default:* 50
-
-*Description:* the number of hkl vectors in each shell. Higher values
-result in higher accuracy but at the cost of longer computational time.
+   *Format:* int
+   *Default:* 50
+   *Description:* the number of hkl vectors in each shell. Higher values
+   result in higher accuracy but at the cost of longer computational time.
 
 -  **width**
 
-*Format:* float
-
-*Default:* 1.0
-
-*Description:* the accepted tolerance of each shell. It is often
-identical to **by step of**.
+   *Format:* float
+   *Default:* 1.0
+   *Description:* the accepted tolerance of each shell. It is often
+   identical to **by step of**.
 
 -  axis
 
    -  **x-component**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the x-components of the specified axis.
+      *Format:* int
+      *Default:* 1
+      *Description:* the x-components of the specified axis.
 
 -  
 
    -  **y-component**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the y-components of the specified axis..
+      *Format:* int
+      *Default:* 0
+      *Description:* the y-components of the specified axis.
 
 -  
 
    -  **z-component**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the z-components of the specified axis.
+      *Format:* int
+      *Default:* 0
+      *Description:* the z-components of the specified axis.
 
 -  **Generate** button generates the hkl vectors based on the
    specifications above. It must be clicked before the vectors can be
    saved.
 -  **Name**
 
-*Format:* str
-
-*Default:* None
-
-*Description:* this is the empty box at the bottom of the window. It
-allows you to name the generated vectors. This must be set before the
-vectors can be saved.
+   *Format:* str
+   *Default:* None
+   *Description:* this is the empty box at the bottom of the window. It
+   allows you to name the generated vectors. This must be set before the
+   vectors can be saved.
 
 -  **Save** button saves the generated vectors. It does not close the Q
    Vectors window.
@@ -758,106 +654,86 @@ provides extra flexibility in selecting the hkl values. For example, it
 can be used to generate only h00 vectors.
 
 .. image:: ./Pictures/100000010000031100000260CCD5B8A592078403.png
-   :width: 15.921cm
-   :height: 12.331cm
 
 -  **seed**
 
-*Format:* int
-
-*Default:* 0
-
-*Description*: the RNG seed used to generate the vectors. This will
-ensure that the same random numbers are generated when the same **seed**
-is used, therefore making the calculation more reproducible.
+   *Format:* int
+   *Default:* 0
+   *Description*: the RNG seed used to generate the vectors. This will
+   ensure that the same random numbers are generated when the same **seed**
+   is used, therefore making the calculation more reproducible.
 
 -  shells
 
    -  **from**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the minimum value used to construct the range of shells.
 
 -  
 
    -  **to**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the maximum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the maximum value used to construct the range of shells.
 
 -  
 
    -  **by step of**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the step used to construct the range of shells. If it is
-1, every integer between **from** and **to** is placed into the range,
-if it is 2, every other, etc.
+      *Format:* int
+      *Default:* 1
+      *Description:* the step used to construct the range of shells. If it is
+      1, every integer between **from** and **to** is placed into the range,
+      if it is 2, every other, etc.
 
 -  **width**
 
-*Format:* float
-
-*Default:* 1.0
-
-*Description:* the accepted tolerance of each shell. It is often
-identical to **by step of**.
+   *Format:* float
+   *Default:* 1.0
+   *Description:* the accepted tolerance of each shell. It is often
+   identical to **by step of**.
 
 -  h (and the same goes for k and l fields)
 
    -  **from**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum value used to construct the range of h
-vectors.
+      *Format:* int
+      *Default:* 0
+      *Description:* the minimum value used to construct the range of h
+      vectors.
 
 -  
 
    -  **to**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the maximum value used to construct the range of h
-vectors.
+      *Format:* int
+      *Default:* 0
+      *Description:* the maximum value used to construct the range of h
+      vectors.
 
 -  
 
    -  **by step of**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the step used to construct the range of h vectors. If it
-is 1, every integer between **from** and **to** is placed into the
-range, if it is 2, every other, etc.
+      *Format:* int
+      *Default:* 1
+      *Description:* the step used to construct the range of h vectors. If it
+      is 1, every integer between **from** and **to** is placed into the
+      range, if it is 2, every other, etc.
 
 -  **Generate** button generates the hkl vectors based on the
    specifications above. It must be clicked before the vectors can be
    saved.
 -  **Name**
 
-*Format:* str
-
-*Default:* None
-
-*Description:* this is the empty box at the bottom of the window. It
-allows you to name the generated vectors. This must be set before the
-vectors can be saved.
+   *Format:* str
+   *Default:* None
+   *Description:* this is the empty box at the bottom of the window. It
+   allows you to name the generated vectors. This must be set before the
+   vectors can be saved.
 
 -  **Save** button saves the generated vectors. It does not close the Q
    Vectors window.
@@ -879,81 +755,65 @@ that you generate a single set of vectors using the Spherical_lattice
 option and use the same set for both calculations.
 
 .. image:: ./Pictures/10000001000003130000021078646D692A64AF83.png
-   :width: 15.921cm
-   :height: 10.682cm
 
 -  **seed**
 
-*Format:* int
-
-*Default:* 0
-
-*Description*: the RNG seed used to generate the vectors. This will
-ensure that the same random numbers are generated when the same **seed**
-is used, therefore making the calculation more reproducible.
+   *Format:* int
+   *Default:* 0
+   *Description*: the RNG seed used to generate the vectors. This will
+   ensure that the same random numbers are generated when the same **seed**
+   is used, therefore making the calculation more reproducible.
 
 -  shells
 
    -  **from**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the minimum value used to construct the range of shells.
 
 -  
 
    -  **to**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the maximum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the maximum value used to construct the range of shells.
 
 -  
 
    -  **by step of**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the step used to construct the range of shells. If it is
-1, every integer between **from** and **to** is placed into the range,
-if it is 2, every other, etc.
+      *Format:* int
+      *Default:* 1
+      *Description:* the step used to construct the range of shells. If it is
+      1, every integer between **from** and **to** is placed into the range,
+      if it is 2, every other, etc.
 
 -  **n vectors**
 
-*Format:* int
-
-*Default:* 50
-
-*Description:* the number of hkl vectors in each shell. Higher values
-result in higher accuracy but at the cost of longer computational time.
+   *Format:* int
+   *Default:* 50
+   *Description:* the number of hkl vectors in each shell. Higher values
+   result in higher accuracy but at the cost of longer computational time.
 
 -  **width**
 
-*Format:* float
-
-*Default:* 1.0
-
-*Description:* the accepted tolerance of each shell. It is often
-identical to **by step of**.
+   *Format:* float
+   *Default:* 1.0
+   *Description:* the accepted tolerance of each shell. It is often
+   identical to **by step of**.
 
 -  **Generate** button generates the hkl vectors based on the
    specifications above. It must be clicked before the vectors can be
    saved.
 -  **Name**
 
-*Format:* str
-
-*Default:* None
-
-*Description:* this is the empty box at the bottom of the window. It
-allows you to name the generated vectors. This must be set before the
-vectors can be saved.
+   *Format:* str
+   *Default:* None
+   *Description:* this is the empty box at the bottom of the window. It
+   allows you to name the generated vectors. This must be set before the
+   vectors can be saved.
 
 -  **Save** button saves the generated vectors. It does not close the Q
    Vectors window.
@@ -965,147 +825,119 @@ Similar to Spherical Vectors, but in this case the vectors are generated
 only in a plane perpendicular to the two axes given.
 
 .. image:: ./Pictures/1000000100000312000002D77678DDABC09BFDCA.png
-   :width: 15.921cm
-   :height: 14.727cm
 
 -  **seed**
 
-*Format:* int
-
-*Default:* 0
-
-*Description*: the RNG seed used to generate the vectors. This will
-ensure that the same random numbers are generated when the same **seed**
-is used, therefore making the calculation more reproducible.
+   *Format:* int
+   *Default:* 0
+   *Description*: the RNG seed used to generate the vectors. This will
+   ensure that the same random numbers are generated when the same **seed**
+   is used, therefore making the calculation more reproducible.
 
 -  shells
 
    -  **from**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the minimum value used to construct the range of shells.
 
 -  
 
    -  **to**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the maximum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the maximum value used to construct the range of shells.
 
 -  
 
    -  **by step of**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the step used to construct the range of shells. If it is
-1, every integer between **from** and **to** is placed into the range,
-if it is 2, every other, etc.
+      *Format:* int
+      *Default:* 1
+      *Description:* the step used to construct the range of shells. If it is
+      1, every integer between **from** and **to** is placed into the range,
+      if it is 2, every other, etc.
 
 -  **n vectors**
 
-*Format:* int
-
-*Default:* 50
-
-*Description:* the number of hkl vectors in each shell. Higher values
-result in higher accuracy but at the cost of longer computational time.
+   *Format:* int
+   *Default:* 50
+   *Description:* the number of hkl vectors in each shell. Higher values
+   result in higher accuracy but at the cost of longer computational time.
 
 -  **width**
 
-*Format:* float
-
-*Default:* 1.0
-
-*Description:* the accepted tolerance of each shell. It is often
-identical to **by step of**.
+   *Format:* float
+   *Default:* 1.0
+   *Description:* the accepted tolerance of each shell. It is often
+   identical to **by step of**.
 
 -  axis 1
 
    -  **x-component**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the x-components of the first axis used to specify the
-plane.
+      *Format:* int
+      *Default:* 1
+      *Description:* the x-components of the first axis used to specify the
+      plane.
 
 -  
 
    -  **y-component**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the y-components of the first axis used to specify the
-plane.
+      *Format:* int
+      *Default:* 0
+      *Description:* the y-components of the first axis used to specify the
+      plane.
 
 -  
 
    -  **z-component**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the z-components of the first axis used to specify the
-plane.
+      *Format:* int
+      *Default:* 0
+      *Description:* the z-components of the first axis used to specify the
+      plane.
 
 -  axis 2
 
    -  **x-component**
 
-*Format:* int
-
-*Default: 0*
-
-*Description:* the x-components of the second axis used to specify the
-plane.
+      *Format:* int
+      *Default: 0*
+      *Description:* the x-components of the second axis used to specify the
+      plane.
 
 -  
 
    -  **y-component**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the y-components of the second axis used to specify the
-plane.
+      *Format:* int
+      *Default:* 1
+      *Description:* the y-components of the second axis used to specify the
+      plane.
 
 -  
 
    -  **z-component**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the z-components of the second axis used to specify the
-plane.
+      *Format:* int
+      *Default:* 0
+      *Description:* the z-components of the second axis used to specify the
+      plane.
 
 -  **Generate** button generates the hkl vectors based on the
    specifications above. It must be clicked before the vectors can be
    saved.
 -  **Name**
 
-*Format:* str
-
-*Default:* None
-
-*Description:* this is the empty box at the bottom of the window. It
-allows you to name the generated vectors. This must be set before the
-vectors can be saved.
+   *Format:* str
+   *Default:* None
+   *Description:* this is the empty box at the bottom of the window. It
+   allows you to name the generated vectors. This must be set before the
+   vectors can be saved.
 
 -  **Save** button saves the generated vectors. It does not close the Q
    Vectors window.
@@ -1118,111 +950,89 @@ are generated only along a specific direction determined by the axis
 given.
 
 .. image:: ./Pictures/1000000100000312000002623129F3A7253B13AD.png
-   :width: 15.921cm
-   :height: 12.356cm
 
 -  **seed**
 
-*Format:* int
-
-*Default:* 0
-
-*Description*: the RNG seed used to generate the vectors. This will
-ensure that the same random numbers are generated when the same **seed**
-is used, therefore making the calculation more reproducible.
+   *Format:* int
+   *Default:* 0
+   *Description*: the RNG seed used to generate the vectors. This will
+   ensure that the same random numbers are generated when the same **seed**
+   is used, therefore making the calculation more reproducible.
 
 -  shells
 
    -  **from**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the minimum value used to construct the range of shells.
 
 -  
 
    -  **to**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the maximum value used to construct the range of shells.
+      *Format:* int
+      *Default:* 0
+      *Description:* the maximum value used to construct the range of shells.
 
 -  
 
    -  **by step of**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the step used to construct the range of shells. If it is
-1, every integer between **from** and **to** is placed into the range,
-if it is 2, every other, etc.
+      *Format:* int
+      *Default:* 1
+      *Description:* the step used to construct the range of shells. If it is
+      1, every integer between **from** and **to** is placed into the range,
+      if it is 2, every other, etc.
 
 -  **n vectors**
 
-*Format:* int
-
-*Default:* 50
-
-*Description:* the number of hkl vectors in each shell. Higher values
-result in higher accuracy but at the cost of longer computational time.
+   *Format:* int
+   *Default:* 50
+   *Description:* the number of hkl vectors in each shell. Higher values
+   result in higher accuracy but at the cost of longer computational time.
 
 -  **width**
 
-*Format:* float
-
-*Default:* 1.0
-
-*Description:* the accepted tolerance of each shell. It is often
-identical to **by step of**.
+   *Format:* float
+   *Default:* 1.0
+   *Description:* the accepted tolerance of each shell. It is often
+   identical to **by step of**.
 
 -  axis
 
    -  **x-component**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the x-components of the specified axis.
+      *Format:* int
+      *Default:* 1
+      *Description:* the x-components of the specified axis.
 
 -  
 
    -  **y-component**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the y-components of the specified axis..
+      *Format:* int
+      *Default:* 0
+      *Description:* the y-components of the specified axis.
 
 -  
 
    -  **z-component**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the z-components of the specified axis.
+      *Format:* int
+      *Default:* 0
+      *Description:* the z-components of the specified axis.
 
 -  **Generate** button generates the hkl vectors based on the
    specifications above. It must be clicked before the vectors can be
    saved.
 -  **Name**
 
-*Format:* str
-
-*Default:* None
-
-*Description:* this is the empty box at the bottom of the window. It
-allows you to name the generated vectors. This must be set before the
-vectors can be saved.
+   *Format:* str
+   *Default:* None
+   *Description:* this is the empty box at the bottom of the window. It
+   allows you to name the generated vectors. This must be set before the
+   vectors can be saved.
 
 -  **Save** button saves the generated vectors. It does not close the Q
    Vectors window.
@@ -1234,73 +1044,59 @@ Generates hkl vectors in the given range. They are grouped together
 according to the given qstep.
 
 .. image:: ./Pictures/1000000100000312000002168C1C6AF89094EC7A.png
-   :width: 14.843cm
-   :height: 10.084cm
 
 -  **seed**
 
-*Format:* int
-
-*Default:* 0
-
-*Description*: the RNG seed used to generate the vectors. This will
-ensure that the same random numbers are generated when the same **seed**
-is used, therefore making the calculation more reproducible.
+   *Format:* int
+   *Default:* 0
+   *Description*: the RNG seed used to generate the vectors. This will
+   ensure that the same random numbers are generated when the same **seed**
+   is used, therefore making the calculation more reproducible.
 
 -  hrange (and the same goes for krange and lrange fields)
 
    -  **from**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum value used to construct the range of h
-vectors.
+      *Format:* int
+      *Default:* 0
+      *Description:* the minimum value used to construct the range of h
+      vectors.
 
 -  
 
    -  **to**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the maximum value used to construct the range of h
-vectors.
+      *Format:* int
+      *Default:* 0
+      *Description:* the maximum value used to construct the range of h
+      vectors.
 
 -  
 
    -  **by step of**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the step used to construct the range of h vectors. If it
-is 1, every integer between **from** and **to** is placed into the
-range, if it is 2, every other, etc.
+      *Format:* int
+      *Default:* 1
+      *Description:* the step used to construct the range of h vectors. If it
+      is 1, every integer between **from** and **to** is placed into the
+      range, if it is 2, every other, etc.
 
 -  **qstep**
 
-*Format:* float
-
-*Default:* 0.01
-
-*Description:* determines how the hkl vectors are grouped.
+   *Format:* float
+   *Default:* 0.01
+   *Description:* determines how the hkl vectors are grouped.
 
 -  **Generate** button generates the hkl vectors based on the
    specifications above. It must be clicked before the vectors can be
    saved.
 -  **Name**
 
-*Format:* str
-
-*Default:* None
-
-*Description:* this is the empty box at the bottom of the window. It
-allows you to name the generated vectors. This must be set before the
-vectors can be saved.
+   *Format:* str
+   *Default:* None
+   *Description:* this is the empty box at the bottom of the window. It
+   allows you to name the generated vectors. This must be set before the
+   vectors can be saved.
 
 -  **Save** button saves the generated vectors. It does not close the Q
    Vectors window.
@@ -1312,70 +1108,56 @@ Generates Q vectors along the line joining the 2 Q-points given as
 input.
 
 .. image:: ./Pictures/1000000100000315000001D1BF3B69F011009E2F.png
-   :width: 15.921cm
-   :height: 9.382cm
 
 -  **generator**
 
-*Format:* drop-down
-
-*Default:* circular_lattice
-
-*Description:* the selection of which type of Q Vectors is being
-defined.
+   *Format:* drop-down
+   *Default:* circular_lattice
+   *Description:* the selection of which type of Q Vectors is being
+   defined.
 
 -  Q start (nm^-1) – the first of the two Q points (the same goes for
    the second one)
 
    -  **x-component**
 
-*Format:* int
-
-*Default:* 1
-
-*Description:* the x-component of this Q point.
+      *Format:* int
+      *Default:* 1
+      *Description:* the x-component of this Q point.
 
 -  
 
    -  **y-component**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the y-component of this Q point.
+      *Format:* int
+      *Default:* 0
+      *Description:* the y-component of this Q point.
 
 -  
 
    -  **z-component**
 
-*Format:* int
-
-*Default:* 0
-
-*Description:* the z-component of this Q point.
+      *Format:* int
+      *Default:* 0
+      *Description:* the z-component of this Q point.
 
 -  **Q step (nm^-1)**
 
-*Format:* float
-
-*Default:* 0.1
-
-*Description:* the increment by which Q is increased when tracing the
-line between the two points.
+   *Format:* float
+   *Default:* 0.1
+   *Description:* the increment by which Q is increased when tracing the
+   line between the two points.
 
 -  **Generate** button generates the hkl vectors based on the
    specifications above. It must be clicked before the vectors can be
    saved.
 -  **Name**
 
-*Format:* str
-
-*Default:* None
-
-*Description:* this is the empty box at the bottom of the window. It
-allows you to name the generated vectors. This must be set before the
-vectors can be saved.
+   *Format:* str
+   *Default:* None
+   *Description:* this is the empty box at the bottom of the window. It
+   allows you to name the generated vectors. This must be set before the
+   vectors can be saved.
 
 -  **Save** button saves the generated vectors. It does not close the Q
    Vectors window.
@@ -1386,8 +1168,6 @@ Group coordinates
 ~~~~~~~~~~~~~~~~~
 
 .. image:: ./Pictures/1000000100000323000002D1329469D922AFA541.png
-   :width: 15.921cm
-   :height: 1.27cm
 
 Most of the analyses provide the Group coordinates option. The default
 value is atom, indicating that the calculation will be done using the
@@ -1400,7 +1180,7 @@ options (group, residue, chain, molecule) will depend on the nature of
 your system and how MDANSE interpreted during the conversion step.
 
 This parameter is available in the following analyses: 
-:ref:`analysis-comt`,
+:ref:`trajectory-comt`,
 :ref:`analysis-dos`, :ref:`analysis-disf`,
 :ref:`analysis-eisf`, :ref:`analysis-gdisf`, 
 :ref:`analysis-gacf`, :ref:`analysis-msd`, 
@@ -1417,7 +1197,6 @@ Instrument resolution
 
 .. image:: ./Pictures/1000000100000323000002D1329469D922AFA541.png
    :width: 15.921cm
-   :height: 1.411cm
 
 This option is available in all the analyses performing a time Fourier
 Transform, e.g. for the calculation of the density of states or the
@@ -1461,7 +1240,6 @@ Interpolation order
 
 .. image:: ./Pictures/1000000100000323000002D1329469D922AFA541.png
    :width: 15.921cm
-   :height: 1.341cm
 
 Analyses that require atomic velocity data have an option to interpolate
 this data from atomic positions. By default, no interpolation is
@@ -1511,7 +1289,6 @@ Normalize
 
 .. image:: ./Pictures/100000010000031F00000248D8781028790CCDA5.png
    :width: 15.963cm
-   :height: 1.094cm
 
 This parameter provides the option to normalise the results of the
 analysis. By default, no normalisation is performed.
@@ -1530,7 +1307,6 @@ Project coordinates
 
 .. image:: ./Pictures/1000000100000323000002D1329469D922AFA541.png
    :width: 15.552cm
-   :height: 2.399cm
 
 Use this option to use only the projection of the atom coordinates on a
 particular axis or plane. Note that the reference axis are the
@@ -1556,10 +1332,9 @@ Weights
 
 .. image:: ./Pictures/1000000100000323000002D1329469D922AFA541.png
    :width: 15.921cm
-   :height: 1.295cm
 
 Most of the analyses include a weights option. The default value depends
-on the nature of the analysis. In many cases, it is set to ‘equal’,
+on the nature of the analysis. In many cases, it is set to 'equal',
 indicating that all atoms in the system contribute with the same weight
 to the computation of this property. But in scattering analysis, the
 default is b\ :sub:`coh` for coherent and b\ :sup:`2`\ :sub:`inc` for
@@ -1612,7 +1387,6 @@ Running mode
 
 .. image:: ./Pictures/10000001000003220000021BA346CFB73717C1BE.png
    :width: 15.921cm
-   :height: 1.605cm
 
 This parameter allows for the configuration of the number of processors
 used to perform the analysis. By default, only one processor is used,
