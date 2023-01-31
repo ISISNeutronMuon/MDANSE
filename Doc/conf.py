@@ -26,6 +26,7 @@
 
 import os
 import sys
+import datetime
 
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -80,9 +81,10 @@ master_doc = 'index'
 
 numfig = True
 
+current_year = datetime.date.today().year
 # General information about the project.
 project = u'MDANSE'
-copyright = u'2015-2023, MDANSE is developed and supported by the Institut Laue-Langevin and the ISIS Neutron and Muon Source.'
+copyright = u'2015-' + str(current_year) + u', MDANSE is developed and supported by the Institut Laue-Langevin and the ISIS Neutron and Muon Source.'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
