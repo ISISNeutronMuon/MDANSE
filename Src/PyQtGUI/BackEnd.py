@@ -67,6 +67,9 @@ class BackEnd(QObject):
     @Slot(str)
     def loadFile(self, fname: str):
         ic(f"LoadFile triggered in BackEnd. File name is {fname}.")
+        if len(fname) < 2:
+            ic(f"Strangely short file name - not proceeding.")
+            return None
         self.new_trajectory.emit(fname)
 
     @Slot()
