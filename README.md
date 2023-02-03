@@ -6,7 +6,7 @@ MDANSE is a python application designed for computing neutron observables from m
 be directly compared with neutron scattering experiments, particularly inelastic and quasi-elastic neutron scattering 
 spectroscopies.
 
-To do this, it interfaces with a variety of MD simulation software such as CASTEP, VASP, DMOL, Gromacs, DLPOY, CHARMM, LAMMPS, PBD, DFTB etc., 
+To do this, it interfaces with a variety of MD simulation software such as CASTEP, VASP, DMOL, Gromacs, DL_POLY, CHARMM, LAMMPS, PBD, DFTB etc., 
 and provides both a graphical user interface (GUI) and a command line interface. 
 
 This project is built on the development published previously: \
