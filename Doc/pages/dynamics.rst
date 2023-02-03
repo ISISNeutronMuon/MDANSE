@@ -124,7 +124,7 @@ GUI
 
 -  :ref:`param-frames`
 -  :ref:`param-instrument-resolution`
--  :ref:`param-interpolation-order`
+-  :ref:`params-interpolation-order`
 -  `project coordinates <#_Project_coordinates>`__
 -  :ref:`param-atom-selection`
 -  :ref:`param-group-coordinates`
@@ -697,7 +697,7 @@ GUI
 |image22| |image23|
 
 -  :ref:`param-frames`
--  :ref:`param-interpolation-order`
+-  :ref:`params-interpolation-order`
 -  `project coordinates <#_Project_coordinates>`__
 -  `normalize <#_Normalize>`__
 -  :ref:`param-atom-selection`

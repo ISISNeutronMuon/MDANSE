@@ -285,7 +285,7 @@ GUI
 
 -  :ref:`param-frames`
 -  :ref:`param-instrument-resolution`
--  :ref:`param-interpolation-order`
+-  :ref:`params-interpolation-order`
 -  **interpolation mode** (only applicable when interpolation order is
    set to something different than 'no interpolation')
 

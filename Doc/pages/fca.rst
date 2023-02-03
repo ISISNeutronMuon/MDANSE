@@ -43,7 +43,7 @@ defined as
 
 The prefactors in front of the sums ensure the proper normalization of
 the individual channels, :math:`m = -(N_t-1)\ldots N_t-1`.  The asterisk
-denotes a complex conjugate. According to :math:numref:`eq:dacf`,
+denotes a complex conjugate. According to :math:numref:`eqn-fca2`,
 :math:`c_{ab}(m)` has :math:`2N_t - 1` data points and obeys
 the symmetry relation
 
@@ -92,7 +92,7 @@ It is easy to see that
    c_{ab}(m) = \frac{1}{N_t-|m|}S_{AB}(m),\qquad -(N_t-1) \le m \le N_t-1.
 
 Using the correlation theorem of discrete periodic functions [Ref44]_
-, `:math:S_{AB}(m)` can be written as
+, :math:`S_{AB}(m)` can be written as
 
 .. math::
    :label: eqn-fca8
@@ -118,14 +118,13 @@ discrete Fourier transforms of
 
 If the Fourier transforms of the signals :math:`A(k)`
 and :math:`B(k)` as well as the inverse transform in
-:math:numref:`eq:s_fft` are computed by FFT,
+:math:numref:`eqn-fca8` are computed by FFT,
 $S_{AB}(m)$ can be computed by $\propto N_t\log_2(N_t)$ instead of
 $\propto N_t^2$ multiplications. It is sometimes said that the FFT}
 method induces spurious correlations. We emphasize that this is only
 the case if the time series $a(k)$ and $b(k)$ are not properly
-extended, as indicated in Eqs. :math:numref:`eq:a` and
-:math:numref:`eq:b`. The FFT
-method and the direct scheme :math:numref:`eq:dacf` give, apart from
+extended, as indicated in Eqs. :math:numref:`eqn-fca4`. The FFT
+method and the direct scheme :math:numref:`eqn-fca2` give, apart from
 round-off errors, *identical results*.
 
 In many cases not only the computation of a correlation function is
@@ -138,7 +137,7 @@ principle one could use the product
    \tilde A^*\left(\frac{n}{2N_t}\right) \tilde B\left(\frac{n}{2N_t}\right)
 
 which is already available as an intermediate step in the computation
-of :math:`S_{AB}(m)` according to :math:numref:`eq:s_fft`.
+of :math:`S_{AB}(m)` according to :math:numref:`eqn-fca8`.
 This would, however, not be a good estimate for the spectrum
 of :math:`c_{ab}(m)` [Ref45]_ . In
 MDANSE all spectra are smoothed by applying a window in the time

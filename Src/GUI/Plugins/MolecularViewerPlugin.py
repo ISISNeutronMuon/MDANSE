@@ -139,7 +139,7 @@ class MolecularViewerPlugin(ComponentPlugin):
             
     label = "Molecular Viewer"
 
-    if platform.system() == "Darwin":
+    if platform.system() == "Darwin" and 'arm' in platform.processor():
         ancestor = ["this_must_be_disabled"]
     else:
         ancestor = ["mmtk_trajectory"]
