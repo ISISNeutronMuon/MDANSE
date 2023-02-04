@@ -317,8 +317,7 @@ button, and finally close the window.
 .. image:: ./Pictures/100000010000024900000250A7ED210266718E94.png
 
 This parameter is only available for the
-:ref:`analysis-dacf`
- analysis.
+:ref:`analysis-dacf` analysis.
 
 .. _param-q-vectors:
 

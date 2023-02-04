@@ -139,7 +139,8 @@ class MolecularViewerPlugin(ComponentPlugin):
             
     label = "Molecular Viewer"
 
-    if platform.system() == "Darwin" and 'arm' in platform.processor():
+    if platform.system() == "Darwin" and 'ARM64' in os.uname()[3]:
+        LOGGER("Disabling the Molecular Viewer: Not available on ARM-based MacOS")
         ancestor = ["this_must_be_disabled"]
     else:
         ancestor = ["mmtk_trajectory"]
