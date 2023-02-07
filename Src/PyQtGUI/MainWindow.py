@@ -61,7 +61,7 @@ class LoaderButton(QToolButton):
         menu.addAction("Load HDF5")
         menu.addSeparator()
         for cjob in self.converter_source.backend.getConverters():
-            menu.addAction("Convert " + str(cjob))
+            menu.addAction("Convert using " + str(cjob))
 
     def altContextMenu(self):
         menu = QMenu()

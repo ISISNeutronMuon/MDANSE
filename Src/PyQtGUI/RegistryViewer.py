@@ -114,9 +114,9 @@ class RegistryTree(QStandardItemModel):
                     pass
                 else:
                     if is_conv:
-                        self._converters[name] = thing
+                        self._converters[name] = thing.__name__
                     else:
-                        self._jobs[name] = thing
+                        self._jobs[name] = thing.__name__
         # end of the finer assignment
         return retval
 

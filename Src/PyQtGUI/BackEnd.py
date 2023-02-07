@@ -88,7 +88,7 @@ class BackEnd(QObject):
         self.lock.lock()
         self._converters = []
         for _, conv in self.registry._converters.items():
-            self._converters.append(conv.name)
+            self._converters.append(conv)
         self.lock.unlock()
 
     def getConverters(self):
