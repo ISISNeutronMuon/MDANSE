@@ -17,13 +17,13 @@ import os
 from collections import defaultdict
 
 from qtpy.QtCore import Slot, QSize, QMetaObject, QLocale, QObject, QThread, QMutex, QSortFilterProxyModel,\
-                         Qt, QTimer, QDir, Signal
-from qtpy.QtGui import QFont, QAction
+                         Qt, QTimer, QPoint, Signal
+from qtpy.QtGui import QFont, QAction, QEnterEvent
 from qtpy.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMainWindow, \
-                                                QPushButton,  QVBoxLayout, QWidget, \
+                                                QToolButton,  QVBoxLayout, QWidget, \
                                                 QLineEdit, QHBoxLayout, QAbstractItemView, \
                                                 QFileDialog, QLabel, QToolBar, \
-                                                QMenuBar, QWidgetAction, QTreeView
+                                                QMenu, QWidgetAction, QTreeView
 
 from MDANSE.PyQtGUI.BackEnd import BackEnd
 from MDANSE.PyQtGUI.Widgets.Generator import WidgetGenerator
@@ -31,6 +31,52 @@ from MDANSE.PyQtGUI.Resources import Resources
 from MDANSE.PyQtGUI.UnitsEditor import UnitsEditor
 from MDANSE.PyQtGUI.PeriodicTableViewer import PeriodicTableViewer
 from MDANSE.PyQtGUI.ElementsDatabaseEditor import ElementsDatabaseEditor
+
+
+
+class LoaderButton(QToolButton):
+    """Subclassed from QToolButton, this object shows the name of a
+    chemical element, and creates a pop-up menu giving access to information
+    about isotopes when clicked.
+    """
+
+    load_hdf = Signal()
+    start_converter = Signal(str)
+
+    def __init__(self, *args, caption = 'Load', backend = None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.setText(caption)
+        # self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+
+        self.converter_source = backend
+        
+        self.clicked.connect(self.altContextMenu)
+    
+    # def enterEvent(self, a0: QEnterEvent) -> None:
+    #     self.atom_info.emit(self.info)
+    #     return super().enterEvent(a0)
+
+    def populateMenu(self, menu: QMenu):
+        menu.addAction("Load HDF5")
+        menu.addSeparator()
+        for cjob in self.converter_source.backend.getConverters():
+            menu.addAction("Convert " + str(cjob))
+
+    def altContextMenu(self):
+        menu = QMenu()
+        self.populateMenu(menu)
+        res = menu.exec_(self.mapToGlobal(QPoint(10, 10)))
+        if res is not None:
+            self.start_converter.emit(res.text())
+
+    def contextMenuEvent(self, event):
+        menu = QMenu()
+        self.populateMenu(menu)
+        res = menu.exec_(event.globalPos())
+        if res is not None:
+            self.start_converter.emit(res.text())
+
 
 
 class Main(QMainWindow):
@@ -138,8 +184,12 @@ class Main(QMainWindow):
         self._toolBar = QToolBar("Main MDANSE toolbar", self)
         # self._toolBar.setMovable(True)
         self._toolBar.setObjectName("main toolbar")
+        loader = LoaderButton(backend = self)
+        loader.setIcon(self.resources._icons['plus'])
+        self._toolBar.addWidget(loader)
         valid_keys = [
-            ('plus', self.loadTrajectory),
+            # ('load', self.loadTrajectory),
+            # ('plus', self.loadTrajectory),
             ('periodic_table', self.launchPeriodicTable),
             ('element', self.launchElementsEditor),
             ('units', self.launchUnitsEditor),

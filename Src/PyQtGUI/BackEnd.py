@@ -13,6 +13,7 @@
 #
 # **************************************************************************
 
+import copy
 from icecream import ic
 from qtpy.QtCore import Slot, QObject, QThread, QMutex, Signal, QProcess
  
@@ -22,6 +23,7 @@ from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeModel
 from MDANSE.PyQtGUI.DataViewModel.JobHolder import JobHolder
+from MDANSE.PyQtGUI.RegistryViewer import RegistryTree
 
 
 class BackEnd(QObject):
@@ -33,10 +35,12 @@ class BackEnd(QObject):
     """
 
     new_trajectory = Signal(str)
+    all_converters = Signal(object)
     
     def __init__(self, parent = None, python = ""):
         super().__init__(parent)
 
+        self.lock = QMutex()
         self.data_holders = {}
         self.python_interpreter = python  # we need it to call scripts
         # ^^^^^^^^^^^^^^^
@@ -46,7 +50,9 @@ class BackEnd(QObject):
         # FrontEnd's self.views dictionary.
         self.createTrajectoryHolder()
         self.createJobHolder()
-        self.registry = REGISTRY
+        self.registry = RegistryTree()
+        self._converters = []
+        self.checkConverters()
 
     def createTrajectoryHolder(self):
         self.trajectory_holder = DataTreeModel(parent=self)
@@ -77,5 +83,18 @@ class BackEnd(QObject):
         ic("startJob triggered in BackEnd.")
         pass  # whatever happens here, a QProcess will be involved at some point
 
+    def checkConverters(self):
+        ic("checkConverters triggered in BackEnd.")
+        self.lock.lock()
+        self._converters = []
+        for _, conv in self.registry._converters.items():
+            self._converters.append(conv.name)
+        self.lock.unlock()
 
-        
+    def getConverters(self):
+        ic("getConverters triggered in BackEnd.")
+        temp = None
+        self.lock.lock()
+        temp = copy.deepcopy(self._converters)
+        self.lock.unlock()
+        return temp

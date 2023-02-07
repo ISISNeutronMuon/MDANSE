@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/GUI/UserDefinitionViewer.py
+# @file      Src/PyQtGUI/UnitsEditor.py
 # @brief     Shows the physical unit editor. Can run standalone.
 #
 # @homepage  https://mdanse.org

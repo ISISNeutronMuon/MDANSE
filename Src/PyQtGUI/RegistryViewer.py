@@ -1,3 +1,25 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Src/PyQtGUI/RegistryViewer.py
+# @brief     Shows the MDANSE REGISTRY. Can run standalone.
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
+# @authors   Scientific Computing Group at ILL (see AUTHORS)
+#
+# **************************************************************************
+
+
+"""This module contains a RegistryTree data model,
+and a RegistryViewer dialog.
+The puprose of those is to create a visualisation
+of the classes that can be accessed from the
+MDANSE REGISTRY object. 
+"""
 
 import os
 
@@ -10,28 +32,64 @@ from qtpy.QtWidgets import QDialog, QTreeView, QGridLayout,\
                            QSizePolicy, QMenu, QLineEdit, QTextEdit
 from qtpy.QtCore import Qt
 
+# we check what attributes always exist in a Python object.
+# we will not include those in the tree view, since they
+# are not defined by the MDANSE code.
 to_be_omitted = dir(None)
 
 class RegistryTree(QStandardItemModel):
+    """RegistryTree creates a tree structure
+    of QStandardItem objects, and stores information
+    about the names and docstrings of different
+    classes contained in the REGISTRY.
 
+    It inherits the QStandardItemModel, so it can be
+    used in the Qt data/view/proxy model.
+    """
     doc_string = Signal(str)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._nodes = {}
-        self._docstrings = {}
-        self._values = {}
-        # self._items = []  # to avoid garbage collection
-        self.nodecounter = 0
+        self._nodes = {}  # dict of {number: QStandardItem}
+        self._docstrings = {}  # dict of {number: str}
+        self._values = {}  # dict of {number: str}
+
+        self._converters = {}
+        self._jobs = {}
+
+        self.nodecounter = 0  # each node is given a unique number
+        # the number is the key to the dictionary entries.
 
         self.populateTree()
+        # Some useful debugging here, for now
+        # print("Converters")
+        # print(self._converters)
+        # print("Jobs")
+        # print(self._jobs)
 
     def populateTree(self):
+        """This function starts the recursive process of scanning
+        the registry tree. Only called once on startup.
+        """
         for key in REGISTRY.interfaces:
             self.parseNode(REGISTRY[key], key)
 
     def addNode(self, thing, name = "Registry", parent : int = -1):
+        """This function adds a new node to the tree data model.
+
+        Arguments:
+            thing -- a Python class from MDANSE.Framework
+
+        Keyword Arguments:
+            name -- the text tag that will be shown in the tree view
+                    (default: {"Registry"})
+            parent -- number (key) of the parent node in the data model
+                    (default: {-1})
+
+        Returns:
+            the number of the new node
+        """
         item = QStandardItem(name)
         retval = int(self.nodecounter)
         item.setData(retval, role = Qt.ItemDataRole.UserRole)
@@ -43,10 +101,37 @@ class RegistryTree(QStandardItemModel):
         else:
             parent_node = self._nodes[parent]
             parent_node.appendRow(item)
-        # self._items.append(item)
+        # here start the finer separation into categories
+        if hasattr(thing, "ancestor") and hasattr(thing, "section"):
+            try:
+                cat = thing.category
+            except AttributeError:
+                pass
+            else:
+                try:
+                    is_conv = cat[0] == "Converters"
+                except IndexError:
+                    pass
+                else:
+                    if is_conv:
+                        self._converters[name] = thing
+                    else:
+                        self._jobs[name] = thing
+        # end of the finer assignment
         return retval
 
     def addTerminalNodes(self, thing, parent : int = -1):
+        """A separate function for adding nodes to the
+        tree structure which are _attributes_ and not
+        _classes_.
+
+        Arguments:
+            thing -- the attribute of the parent node
+            class to be stored here.
+
+        Keyword Arguments:
+            parent -- the number of the parent node (default: {-1})
+        """
         for attr in dir(thing):
             if attr not in to_be_omitted:
                 item = QStandardItem(str(attr))
@@ -64,6 +149,20 @@ class RegistryTree(QStandardItemModel):
                     parent_node.appendRow(item)
 
     def parseNode(self, node, name= "unknown", parent = -1):
+        """A recursive function which discovers information
+        about the Python object to be added to the data tree,
+        and decides where to add it.
+
+        Arguments:
+            node -- the Python object to be added to the data
+                   tree
+
+        Keyword Arguments:
+            name -- the name tag to be used for the new node
+                   (default: {"unknown"})
+            parent -- the number of the parent of the new node
+                   (default: {-1})
+        """
         parent_number = self.addNode(node, name, parent)
         if hasattr(node, "keys"):
             try:
@@ -78,6 +177,16 @@ class RegistryTree(QStandardItemModel):
             self.addTerminalNodes(node, parent_number)
     
     def getAncestry(self, number: int):
+        """This function discovers the keys needed to be put
+        into the REGISTRY to get the class attached to the
+        specific node.
+
+        Arguments:
+            number -- number of the object in the data model.
+
+        Returns:
+            list[str] of all the parents of the given node.
+        """
         parents = []
         item = self._nodes[number]
         while item is not None:
@@ -87,8 +196,11 @@ class RegistryTree(QStandardItemModel):
 
 
 class RegistryViewer(QDialog):
-    """A widget displaying the periodic table of elements.
-    Can be used within MDANSE, or as a standalone program.
+    """A widget displaying the contents of the MDANSE
+    REGISTRY.
+    Normally intended to be used as a standalone
+    program, since it is of little interest to the
+    end users of MDANSE.
     """
 
     def __init__(self, *args, **kwargs):
