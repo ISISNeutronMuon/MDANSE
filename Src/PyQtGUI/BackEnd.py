@@ -106,5 +106,5 @@ class BackEnd(QObject):
     
     @Slot(str)
     def returnConverter(self, key:str):
-        thing = self._reverse_converters[str(key)]
+        thing = self._reverse_converters[str(key).split()[-1]]
         self.selected_converter.emit(thing)

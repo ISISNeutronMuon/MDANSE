@@ -1,5 +1,9 @@
 
 from typing import Union, Iterable
+from collections import OrderedDict
+import copy
+
+from icecream import ic
 
 from qtpy.QtWidgets import QDialog, QPushButton, QFrame, QGridLayout,\
                            QVBoxLayout, QWidget, QLabel, QApplication,\
@@ -10,6 +14,7 @@ from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel,\
 from qtpy.QtGui import QFont, QEnterEvent, QStandardItem, QStandardItemModel,\
                     QIntValidator, QDoubleValidator, QValidator
 
+from MDANSE.Framework.Jobs.IJob import IJob
 
 
 class InputVariable(QObject):
@@ -42,16 +47,59 @@ class InputVariable(QObject):
         return result
 
 
+class GeneralInput(QObject):
+
+    final_value = Signal(object)
+
+    def __init__(self, *args, data_type = None, **kwargs):
+        new_kwargs = copy.copy(kwargs)
+        for kkey in InputFactory.reserved_keywords:
+            if kkey in new_kwargs.keys():
+                new_kwargs.pop(kkey)
+        super().__init__(*args, **new_kwargs)
+
+        self.data_type = data_type
+        self.default_value = getattr(kwargs, 'default', None)
+        self.current_value = self.default_value
+
+    @Slot(str)
+    @Slot(object)
+    def updateValue(self, newone):
+        try:
+            converted = self.data_type(newone)
+        except ValueError:
+            converted = self.default_value
+            ic(f"ValueError converting {newone} using {self.data_type}")
+        except TypeError:
+            converted = self.default_value
+            ic(f"TypeError converting {newone} using {self.data_type}")
+        self.current_value = converted
+
+    def returnValue(self):
+        self.final_value.emit(self.current_value)
+        return self.current_value
+
+
+
 class InputFactory():
 
-    def createInputField(self, *args, kind = 'int', **kwargs):
+    reserved_keywords = ['kind', 'default_value', 'label', 'tooltip']
 
-        if kind == 'int':
-            result = self.createInt(*args, **kwargs)
+    def createInputField(*args, **kwargs):
+        kind = kwargs.get('kind', 'str')
+
+        if kind == 'str':
+            result = InputFactory.createSingle(*args, **kwargs)
+        elif kind == 'int':
+            result = InputFactory.createSingle(*args, **kwargs)
+        elif kind == 'float':
+            result = InputFactory.createSingle(*args, **kwargs)
+        else:
+            result = InputFactory.createBlank(*args, **kwargs)
         
         return result
     
-    def createBase(self, *args, **kwargs):
+    def createBase(*args, **kwargs):
         """Some parts of the input will always be the same,
         so we handle them in one function that will be called
         before we get to the specific details
@@ -59,16 +107,85 @@ class InputFactory():
         Returns:
             [base, layout] pair of QWidget and associated layout
         """
-        parent = getattr(kwargs, 'parent', None)
-        label_text = getattr(kwargs, 'label', None)
-        tooltip_text = getattr(kwargs, 'tooltip', None)
+        parent = kwargs.get('parent', None)
+        label_text = kwargs.get('label', None)
+        tooltip_text = kwargs.get('tooltip', None)
         base = QWidget(parent)
         layout = QHBoxLayout(base)
         base.setLayout(layout)
-        label = QLabel(label_text)
+        label = QLabel(label_text, base)
         label.setToolTip(tooltip_text)
         layout.addWidget(label)
         return [base, layout]
+    
+    def createBlank(*args, **kwargs):
+        kind = kwargs.get('kind', 'str')
+        base, layout = InputFactory.createBase(
+            label = f"<b>MISSING TYPE</b>:{kind}",
+            tooltip = 'This is not handled by the MDANSE GUI correctly! Please report the problem to the authors.')
+        return [base, layout]
+
+    def createSingle(*args, **kwargs):
+        kind = kwargs.get('kind', 'str')
+        default_value = kwargs.get('default_value', None)
+        tooltip_text = kwargs.get('tooltip', None)
+        ic(kind)
+        ic(default_value)
+        ic(tooltip_text)
+        ic(kwargs)
+        base, layout = InputFactory.createBase(*args, **kwargs)
+        field = QLineEdit(base)
+        if kind == 'int':
+            data_handler = GeneralInput(data_type=int, **kwargs)
+            validator = QIntValidator(field)
+        elif kind == 'float':
+            data_handler = GeneralInput(data_type=float, **kwargs)
+            validator = QDoubleValidator(field)
+        elif kind == 'str':
+            data_handler = GeneralInput(data_type=str, **kwargs)
+            validator = None
+        if validator is not None:
+            field.setValidator(validator)
+        field.textChanged.connect(data_handler.updateValue)
+        field.setText(str(default_value))
+        field.setToolTip(tooltip_text)
+        layout.addWidget(field)
+        return [base, data_handler]
+    
+
+class ConverterDialog(QDialog):
+
+
+    def __init__(self, *args, converter: IJob = 'Dummy', **kwargs):
+        super().__init__(*args, **kwargs)
+
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
+        self.handlers = {}
+
+        if converter == 'Dummy':
+            settings = OrderedDict([('dummy int', ('int', {'default': 1.0, 'label': 'Time step (ps)'})),
+                                    ('time_step', ('float', {'default': 1.0, 'label': 'Time step (ps)'})),
+                                    ('fold', ('boolean', {'default': False, 'label': 'Fold coordinates in to box'})),
+                                    # ('dcd_file', ('input_file', {'wildcard': 'DCD files (*.dcd)|*.dcd|All files|*', 'default': '../../../Data/Trajectories/CHARMM/2vb1.dcd'})),
+                                    # ('output_file', ('single_output_file', {'format': 'hdf', 'root': 'pdb_file'}))
+                                    ])
+        else:
+            converter_instance = converter()
+            converter_instance.build_configuration()
+            settings = converter_instance.settings
+        for key, value in settings.items():
+            dtype = value[0]
+            ddict = value[1]
+            defaultvalue = ddict.get('default', 0.0)
+            labeltext = ddict.get('label', "Mystery X the Unknown")
+            base, data_handler = InputFactory.createInputField(kind = dtype, default_value = defaultvalue, label = labeltext)
+            layout.addWidget(base)
+            self.handlers[key] = data_handler
+
+
+
+
 
 
 class InputDialog(QDialog):

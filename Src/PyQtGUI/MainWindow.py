@@ -28,6 +28,7 @@ from qtpy.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMai
 
 from MDANSE.PyQtGUI.BackEnd import BackEnd
 from MDANSE.PyQtGUI.Widgets.Generator import WidgetGenerator
+from MDANSE.PyQtGUI.Widgets.GeneralWidgets import ConverterDialog
 from MDANSE.PyQtGUI.Resources import Resources
 from MDANSE.PyQtGUI.UnitsEditor import UnitsEditor
 from MDANSE.PyQtGUI.PeriodicTableViewer import PeriodicTableViewer
@@ -138,7 +139,8 @@ class Main(QMainWindow):
     def attachActions(self):
         self.file_name_for_loading.connect(self.backend.loadFile)
         self.converter_name_for_dialog.connect(self.backend.returnConverter)
-        self.backend.selected_converter.connect(self.launchConverter)
+        self.loader_button.start_converter.connect(self.backend.returnConverter)
+        self.backend.selected_converter.connect(self.convertTrajectory)
 
     def makeBasicLayout(self):
         self.createTrajectoryViewer()
@@ -184,9 +186,13 @@ class Main(QMainWindow):
             print(f"fname[1]:{fname[1]}")
             self.file_name_for_loading.emit(fname[0])
 
-    Slot(str)
-    def convertTrajectory(self, converter = ""):
+    Slot(object)
+    def convertTrajectory(self, converter = None):
         ic(f"Received converter: {converter}")
+        dialog = ConverterDialog
+        dialog_instance = dialog(self, converter=converter)
+        dialog_instance.show()
+        result = dialog_instance.exec()
 
     Slot(object)
     def launchConverter(self, converter = None):
@@ -201,7 +207,7 @@ class Main(QMainWindow):
         loader = LoaderButton(backend = self)
         loader.setIcon(self.resources._icons['plus'])
         loader.load_hdf.connect(self.loadTrajectory)
-        loader.start_converter.connect(self.convertTrajectory)
+        self.loader_button = loader
         self._toolBar.addWidget(loader)
         valid_keys = [
             # ('load', self.loadTrajectory),
