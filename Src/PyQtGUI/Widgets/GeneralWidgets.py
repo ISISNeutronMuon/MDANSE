@@ -11,6 +11,7 @@ from qtpy.QtGui import QFont, QEnterEvent, QStandardItem, QStandardItemModel,\
                     QIntValidator, QDoubleValidator, QValidator
 
 
+
 class InputVariable(QObject):
 
     def __init__(self, *args, input_dict: dict = None, **kwargs):
@@ -39,6 +40,36 @@ class InputVariable(QObject):
                 temp = widget.text()
             result.append(temp)
         return result
+
+
+class InputFactory():
+
+    def createInputField(self, *args, kind = 'int', **kwargs):
+
+        if kind == 'int':
+            result = self.createInt(*args, **kwargs)
+        
+        return result
+    
+    def createBase(self, *args, **kwargs):
+        """Some parts of the input will always be the same,
+        so we handle them in one function that will be called
+        before we get to the specific details
+
+        Returns:
+            [base, layout] pair of QWidget and associated layout
+        """
+        parent = getattr(kwargs, 'parent', None)
+        label_text = getattr(kwargs, 'label', None)
+        tooltip_text = getattr(kwargs, 'tooltip', None)
+        base = QWidget(parent)
+        layout = QHBoxLayout(base)
+        base.setLayout(layout)
+        label = QLabel(label_text)
+        label.setToolTip(tooltip_text)
+        layout.addWidget(label)
+        return [base, layout]
+
 
 class InputDialog(QDialog):
 

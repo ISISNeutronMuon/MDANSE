@@ -36,6 +36,7 @@ class BackEnd(QObject):
 
     new_trajectory = Signal(str)
     all_converters = Signal(object)
+    selected_converter = Signal(object)
     
     def __init__(self, parent = None, python = ""):
         super().__init__(parent)
@@ -52,6 +53,7 @@ class BackEnd(QObject):
         self.createJobHolder()
         self.registry = RegistryTree()
         self._converters = []
+        self._reverse_converters = {}
         self.checkConverters()
 
     def createTrajectoryHolder(self):
@@ -87,8 +89,11 @@ class BackEnd(QObject):
         ic("checkConverters triggered in BackEnd.")
         self.lock.lock()
         self._converters = []
-        for _, conv in self.registry._converters.items():
+        self._reverse_converters = {}
+        for key, conv in self.registry._converters.items():
+            ic(f"key:{key}, val:{conv}")
             self._converters.append(conv)
+            self._reverse_converters[str(conv)] = REGISTRY['job'][str(key)]
         self.lock.unlock()
 
     def getConverters(self):
@@ -98,3 +103,8 @@ class BackEnd(QObject):
         temp = copy.deepcopy(self._converters)
         self.lock.unlock()
         return temp
+    
+    @Slot(str)
+    def returnConverter(self, key:str):
+        thing = self._reverse_converters[str(key)]
+        self.selected_converter.emit(thing)

@@ -16,6 +16,7 @@
 import os
 from collections import defaultdict
 
+from icecream import ic
 from qtpy.QtCore import Slot, QSize, QMetaObject, QLocale, QObject, QThread, QMutex, QSortFilterProxyModel,\
                          Qt, QTimer, QPoint, Signal
 from qtpy.QtGui import QFont, QAction, QEnterEvent
@@ -31,7 +32,6 @@ from MDANSE.PyQtGUI.Resources import Resources
 from MDANSE.PyQtGUI.UnitsEditor import UnitsEditor
 from MDANSE.PyQtGUI.PeriodicTableViewer import PeriodicTableViewer
 from MDANSE.PyQtGUI.ElementsDatabaseEditor import ElementsDatabaseEditor
-
 
 
 class LoaderButton(QToolButton):
@@ -58,7 +58,8 @@ class LoaderButton(QToolButton):
     #     return super().enterEvent(a0)
 
     def populateMenu(self, menu: QMenu):
-        menu.addAction("Load HDF5")
+        hdf_action = menu.addAction("Load HDF5")
+        hdf_action.triggered.connect(self.load_hdf)
         menu.addSeparator()
         for cjob in self.converter_source.backend.getConverters():
             menu.addAction("Convert using " + str(cjob))
@@ -88,6 +89,7 @@ class Main(QMainWindow):
     """
 
     file_name_for_loading = Signal(str)
+    converter_name_for_dialog = Signal(str)
 
     def __init__(self, *args, parent = None, title = "MDANSE", settings = None,
                        **kwargs):
@@ -135,6 +137,8 @@ class Main(QMainWindow):
     
     def attachActions(self):
         self.file_name_for_loading.connect(self.backend.loadFile)
+        self.converter_name_for_dialog.connect(self.backend.returnConverter)
+        self.backend.selected_converter.connect(self.launchConverter)
 
     def makeBasicLayout(self):
         self.createTrajectoryViewer()
@@ -180,12 +184,24 @@ class Main(QMainWindow):
             print(f"fname[1]:{fname[1]}")
             self.file_name_for_loading.emit(fname[0])
 
+    Slot(str)
+    def convertTrajectory(self, converter = ""):
+        ic(f"Received converter: {converter}")
+
+    Slot(object)
+    def launchConverter(self, converter = None):
+        dialog_instance = ConverterDialog(converter)
+        dialog_instance.show()
+        result = dialog_instance.exec()
+
     def setupToolbar(self):
         self._toolBar = QToolBar("Main MDANSE toolbar", self)
         # self._toolBar.setMovable(True)
         self._toolBar.setObjectName("main toolbar")
         loader = LoaderButton(backend = self)
         loader.setIcon(self.resources._icons['plus'])
+        loader.load_hdf.connect(self.loadTrajectory)
+        loader.start_converter.connect(self.convertTrajectory)
         self._toolBar.addWidget(loader)
         valid_keys = [
             # ('load', self.loadTrajectory),
