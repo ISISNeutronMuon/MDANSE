@@ -4,11 +4,10 @@ from collections import OrderedDict
 import copy
 
 from icecream import ic
-
-from qtpy.QtWidgets import QDialog, QPushButton, QFrame, QGridLayout,\
+from qtpy.QtWidgets import QDialog, QPushButton, QFileDialog, QGridLayout,\
                            QVBoxLayout, QWidget, QLabel, QApplication,\
                            QSizePolicy, QMenu, QLineEdit, QTableView,\
-                           QFormLayout, QHBoxLayout
+                           QFormLayout, QHBoxLayout, QCheckBox
 from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel,\
                         QObject
 from qtpy.QtGui import QFont, QEnterEvent, QStandardItem, QStandardItemModel,\
@@ -50,21 +49,36 @@ class InputVariable(QObject):
 class GeneralInput(QObject):
 
     final_value = Signal(object)
+    string_value = Signal(str)
 
     def __init__(self, *args, data_type = None, **kwargs):
         new_kwargs = copy.copy(kwargs)
         for kkey in InputFactory.reserved_keywords:
             if kkey in new_kwargs.keys():
                 new_kwargs.pop(kkey)
-        super().__init__(*args, **new_kwargs)
+        super().__init__(*args, **{})
 
         self.data_type = data_type
-        self.default_value = getattr(kwargs, 'default', None)
+        self.default_value = kwargs.get('default', None)
         self.current_value = self.default_value
+        self.file_association = kwargs.get('file_association', None)
+        self.file_direction = kwargs.get('file_direction', 'none')
+        self.file_format = kwargs.get('format','')
+        if self.file_association is not None:
+            if len(self.file_association) < 1 and len(self.file_format) > 1:
+                self.file_association = '*.' + self.file_format
+        if self.file_direction == 'in':
+            self.file_dialog = QFileDialog.getOpenFileName
+        elif self.file_direction == 'out':
+            self.file_dialog = QFileDialog.getSaveFileName
+        else:
+            self.file_dialog = None
+        ic(kwargs)
 
     @Slot(str)
+    @Slot(int)
     @Slot(object)
-    def updateValue(self, newone):
+    def updateValue(self, newone, emit = False):
         try:
             converted = self.data_type(newone)
         except ValueError:
@@ -74,26 +88,55 @@ class GeneralInput(QObject):
             converted = self.default_value
             ic(f"TypeError converting {newone} using {self.data_type}")
         self.current_value = converted
+        if emit:
+            self.string_value.emit(self.current_value)
 
     def returnValue(self):
+        if self.file_dialog is not None:
+            ic(f"File Field Return Value: {self.current_value}")
         self.final_value.emit(self.current_value)
+        if self.file_direction == 'out':
+            return (self.current_value, 'hdf')
         return self.current_value
 
+    @Slot()
+    def valueFromDialog(self):
+        new_value = self.file_dialog(self.parent(),  # the parent of the dialog
+                                    "Load a file",  # the label of the window
+                                    '.',  # the initial search path
+                                    self.file_association  # text string specifying the file name filter.
+                                    )
+        if new_value is not None:
+            self.updateValue(new_value[0], emit = True)
+
+
+def translate_file_associations(input_str: str):
+    toks = input_str.split('|')
+    basic_replacement = ";;".join(toks[::2])
+    return basic_replacement
 
 
 class InputFactory():
 
-    reserved_keywords = ['kind', 'default_value', 'label', 'tooltip']
+    reserved_keywords = ['kind', 'default', 'label', 'tooltip', 'wildcard',
+                         'mini',
+                         'file_association', 'file_direction']
 
     def createInputField(*args, **kwargs):
         kind = kwargs.get('kind', 'str')
 
         if kind == 'str':
             result = InputFactory.createSingle(*args, **kwargs)
-        elif kind == 'int':
+        elif kind == 'int' or kind == 'integer':
             result = InputFactory.createSingle(*args, **kwargs)
         elif kind == 'float':
             result = InputFactory.createSingle(*args, **kwargs)
+        elif kind == 'bool' or kind == 'boolean':
+            result = InputFactory.createBool(*args, **kwargs)
+        elif kind == 'input_file':
+            result = InputFactory.createFile(*args, direction = 'in', **kwargs)
+        elif kind == 'single_output_file':
+            result = InputFactory.createFile(*args, direction = 'out', **kwargs)
         else:
             result = InputFactory.createBlank(*args, **kwargs)
         
@@ -123,19 +166,62 @@ class InputFactory():
         base, layout = InputFactory.createBase(
             label = f"<b>MISSING TYPE</b>:{kind}",
             tooltip = 'This is not handled by the MDANSE GUI correctly! Please report the problem to the authors.')
-        return [base, layout]
+        return [base, GeneralInput()]
 
-    def createSingle(*args, **kwargs):
+    def createFile(*args, direction = 'in', **kwargs):
         kind = kwargs.get('kind', 'str')
-        default_value = kwargs.get('default_value', None)
+        default_value = kwargs.get('default', "")
+        tooltip_text = kwargs.get('tooltip', "Specify a path to an existing file.")
+        file_association = kwargs.get('wildcard', "")
+        qt_file_association = translate_file_associations(file_association)
+        ic(kind)
+        ic(default_value)
+        ic(tooltip_text)
+        ic(file_association)
+        ic(kwargs)
+        base, layout = InputFactory.createBase(*args, **kwargs)
+        field = QLineEdit(base)
+        data_handler = GeneralInput(data_type=str, file_association = qt_file_association, file_direction = direction, **kwargs)
+        data_handler.string_value.connect(field.setText)
+        field.textChanged.connect(data_handler.updateValue)
+        field.setText(str(default_value))
+        field.setToolTip(tooltip_text)
+        layout.addWidget(field)
+        button = QPushButton("Browse", base)
+        button.clicked.connect(data_handler.valueFromDialog)
+        layout.addWidget(button)
+        return [base, data_handler]
+
+    def createBool(*args, **kwargs):
+        kind = kwargs.get('kind', 'bool')
+        default_value = kwargs.get('default', False)
         tooltip_text = kwargs.get('tooltip', None)
         ic(kind)
         ic(default_value)
         ic(tooltip_text)
         ic(kwargs)
         base, layout = InputFactory.createBase(*args, **kwargs)
+        field = QCheckBox(base)
+        field.setTristate(False)
+        data_handler = GeneralInput(data_type=bool, **kwargs)
+        field.stateChanged.connect(data_handler.updateValue)
+        field.setChecked(bool(default_value))
+        field.setToolTip(tooltip_text)
+        layout.addWidget(field)
+        return [base, data_handler]
+
+    def createSingle(*args, **kwargs):
+        kind = kwargs.get('kind', 'str')
+        default_value = kwargs.get('default', None)
+        tooltip_text = kwargs.get('tooltip', None)
+        minval = kwargs.get('mini', None)
+        ic(kind)
+        ic(default_value)
+        ic(tooltip_text)
+        ic(kwargs)
+        base, layout = InputFactory.createBase(*args, **kwargs)
         field = QLineEdit(base)
-        if kind == 'int':
+        if kind == 'int' or kind == 'integer':
             data_handler = GeneralInput(data_type=int, **kwargs)
             validator = QIntValidator(field)
         elif kind == 'float':
@@ -146,6 +232,8 @@ class InputFactory():
             validator = None
         if validator is not None:
             field.setValidator(validator)
+            if minval is not None:
+                validator.setBottom(minval)
         field.textChanged.connect(data_handler.updateValue)
         field.setText(str(default_value))
         field.setToolTip(tooltip_text)
@@ -162,6 +250,7 @@ class ConverterDialog(QDialog):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         self.handlers = {}
+        self.converter_instance = None
 
         if converter == 'Dummy':
             settings = OrderedDict([('dummy int', ('int', {'default': 1.0, 'label': 'Time step (ps)'})),
@@ -174,15 +263,49 @@ class ConverterDialog(QDialog):
             converter_instance = converter()
             converter_instance.build_configuration()
             settings = converter_instance.settings
+            self.converter_instance = converter_instance
         for key, value in settings.items():
             dtype = value[0]
             ddict = value[1]
             defaultvalue = ddict.get('default', 0.0)
             labeltext = ddict.get('label', "Mystery X the Unknown")
-            base, data_handler = InputFactory.createInputField(kind = dtype, default_value = defaultvalue, label = labeltext)
+            base, data_handler = InputFactory.createInputField(parent = self, kind = dtype, **ddict)
             layout.addWidget(base)
             self.handlers[key] = data_handler
+        
+        buttonbase = QWidget(self)
+        buttonlayout = QHBoxLayout(buttonbase)
+        buttonbase.setLayout(buttonlayout)
+        self.cancel_button = QPushButton("Cancel", buttonbase)
+        self.execute_button = QPushButton("CONVERT!", buttonbase)
+        self.execute_button.setStyleSheet("font-weight: bold")
 
+        self.cancel_button.clicked.connect(self.cancel_dialog)
+        self.execute_button.clicked.connect(self.execute_converter)
+
+        buttonlayout.addWidget(self.cancel_button)
+        buttonlayout.addWidget(self.execute_button)
+
+        layout.addWidget(buttonbase)
+
+
+    @Slot()
+    def cancel_dialog(self):
+        self.destroy()
+
+    @Slot()
+    def execute_converter(self):
+        if self.converter_instance is None:
+            ic("No converter instance attached to the Dialog")
+            return False
+        pardict = {}
+        ic(f"handlers: {self.handlers}")
+        for key, value in self.handlers.items():
+            pardict[key] = value.returnValue()
+        ic(f"Passing {pardict} to the converter instance {self.converter_instance}")
+        # self.converter_instance.setup(pardict)
+        # when we are ready, we can consider running it
+        self.converter_instance.run(pardict)
 
 
 
