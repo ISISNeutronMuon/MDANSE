@@ -75,7 +75,11 @@ class FileObject():
 class DataTreeItem(QStandardItem):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        new_kwargs = {}
+        for key, val in kwargs.items():
+            if key not in ['mdanse_tag']:
+                new_kwargs[key] = val
+        super().__init__(*args, **new_kwargs)
 
         self.mdanse_tag = kwargs.get('mdanse_tag', 'unknown')
         
@@ -98,7 +102,11 @@ class DataTreeItem(QStandardItem):
 class TrajectoryItem(DataTreeItem):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        new_kwargs = {}
+        for key, val in kwargs.items():
+            if key not in ['fname', 'trajectory']:
+                new_kwargs[key] = val
+        super().__init__(*args, **new_kwargs)
         
         self.filename = kwargs.get('fname', 'NULL')
         self.trajectory = kwargs.get('trajectory', None)
@@ -121,6 +129,8 @@ class AnalysisItem(DataTreeItem):
 
 class DataTreeModel(QStandardItemModel):
 
+    
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
         self._trajectory_objects = {}
@@ -136,7 +146,7 @@ class DataTreeModel(QStandardItemModel):
         data = REGISTRY["input_data"]["hdf_trajectory"](fname)
         # data = REGISTRY["hdf_trajectory"](fname)
         ic()
-        item = TrajectoryItem(filename= fname, data= data, mdanse_tag = "trajectory")
+        item = TrajectoryItem(fname= fname, trajectory= data, mdanse_tag = "trajectory")
         ic("Created TrajectoryItem")
         self.appendRow(item)
         tkey = item.file_info.hash
