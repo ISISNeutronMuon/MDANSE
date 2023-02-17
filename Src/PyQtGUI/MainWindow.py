@@ -191,12 +191,7 @@ class Main(QMainWindow):
         ic(f"Received converter: {converter}")
         dialog = ConverterDialog
         dialog_instance = dialog(self, converter=converter)
-        dialog_instance.show()
-        result = dialog_instance.exec()
-
-    Slot(object)
-    def launchConverter(self, converter = None):
-        dialog_instance = ConverterDialog(converter)
+        dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
         dialog_instance.show()
         result = dialog_instance.exec()
 

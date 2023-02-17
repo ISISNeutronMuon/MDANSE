@@ -111,8 +111,8 @@ class GeneralInput(QObject):
 
 
 def translate_file_associations(input_str: str):
-    toks = input_str.split('|')
-    basic_replacement = ";;".join(toks[::2])
+    toks = input_str.split('|')[::2]
+    basic_replacement = ";;".join(toks[:-1] + ["All files (*.*)"])
     return basic_replacement
 
 
@@ -243,6 +243,7 @@ class InputFactory():
 
 class ConverterDialog(QDialog):
 
+    new_thread_objects = Signal(list)
 
     def __init__(self, *args, converter: IJob = 'Dummy', **kwargs):
         super().__init__(*args, **kwargs)
@@ -251,6 +252,7 @@ class ConverterDialog(QDialog):
         self.setLayout(layout)
         self.handlers = {}
         self.converter_instance = None
+        self.converter_constructor = converter
 
         if converter == 'Dummy':
             settings = OrderedDict([('dummy int', ('int', {'default': 1.0, 'label': 'Time step (ps)'})),
@@ -303,9 +305,12 @@ class ConverterDialog(QDialog):
         for key, value in self.handlers.items():
             pardict[key] = value.returnValue()
         ic(f"Passing {pardict} to the converter instance {self.converter_instance}")
-        # self.converter_instance.setup(pardict)
+        self.converter_instance.setup(pardict)
         # when we are ready, we can consider running it
         self.converter_instance.run(pardict)
+        # this would send the actual instance, which _may_ be wrong
+        # self.new_thread_objects.emit([self.converter_instance, pardict])
+        # self.new_thread_objects.emit([self.converter_constructor, pardict])
 
 
 

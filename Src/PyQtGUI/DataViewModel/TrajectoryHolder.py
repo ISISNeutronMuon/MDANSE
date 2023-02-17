@@ -23,27 +23,27 @@ from qtpy.QtCore import QObject, Slot
 from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE.Framework.InputData import InputFileData
 
-class TrajectoryItem(QStandardItem):
+# class TrajectoryItem(QStandardItem):
 
-    def __init__(self, *args, trajectory = None):
-        super().__init__(*args)
-        self._trajectory = trajectory
+#     def __init__(self, *args, trajectory = None):
+#         super().__init__(*args)
+#         self._trajectory = trajectory
 
 
-class TrajectoryHolder(QStandardItemModel):
+# class TrajectoryHolder(QStandardItemModel):
 
-    def __init__(self, parent: QObject = None):
-        super().__init__(parent=parent)
+#     def __init__(self, parent: QObject = None):
+#         super().__init__(parent=parent)
 
-    @Slot(object)
-    def addItem(self, new_entry: InputFileData):
-        traj = TrajectoryItem(new_entry.basename, trajectory = new_entry)
-        self.appendRow([traj])
+#     @Slot(object)
+#     def addItem(self, new_entry: InputFileData):
+#         traj = TrajectoryItem(new_entry.basename, trajectory = new_entry)
+#         self.appendRow([traj])
     
-    @Slot(object)
-    def acceptNewTrajectory(self, new_trajectory):
+#     @Slot(object)
+#     def acceptNewTrajectory(self, new_trajectory):
         
-        data = REGISTRY["input_data"]["hdf_trajectory"](new_trajectory)
+#         data = REGISTRY["input_data"]["hdf_trajectory"](new_trajectory)
 
 
 class FileObject():
@@ -133,8 +133,9 @@ class DataTreeModel(QStandardItemModel):
     @Slot(str)
     def acceptNewTrajectory(self, fname: str):
         ic(f"Received {fname}")
-        # data = REGISTRY["input_data"]["hdf_trajectory"](fname)
-        data = REGISTRY["hdf_trajectory"](fname)
+        data = REGISTRY["input_data"]["hdf_trajectory"](fname)
+        # data = REGISTRY["hdf_trajectory"](fname)
+        ic()
         item = TrajectoryItem(filename= fname, data= data, mdanse_tag = "trajectory")
         ic("Created TrajectoryItem")
         self.appendRow(item)
