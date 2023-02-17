@@ -1,4 +1,5 @@
 import numpy as np
+from icecream import ic
 
 class UnitCell:
     """This class stores a unit cell. is stored row-wise i.e. the a, b and c vectors are 
@@ -11,10 +12,11 @@ class UnitCell:
         :param unit_cell: the unit cell matrix
         :type unit_cell: 3x3 numpy array
         """
-
-        self._unit_cell = unit_cell.astype(np.float64)
-
-        self._inverse_unit_cell = np.linalg.inv(self._unit_cell)
+        ic(f"UnitCell received {unit_cell}")
+        self._unit_cell = np.array(unit_cell).astype(np.float64)
+        ic(f"UnitCell saved self._unit_cell")
+        self._inverse_unit_cell = np.linalg.pinv(self._unit_cell)
+        ic(f"UnitCell saved self._inverse_unit_cell as {self._inverse_unit_cell}")
 
     @property
     def a_vector(self):

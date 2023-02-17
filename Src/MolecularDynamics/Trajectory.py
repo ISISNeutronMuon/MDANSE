@@ -15,7 +15,7 @@
 import os
 
 import numpy as np
-
+from icecream import ic
 import h5py
 
 from MDANSE.Chemistry import ATOMS_DATABASE
@@ -36,18 +36,22 @@ class Trajectory:
         :param h5_filename: the trajectory filename
         :type h5_filename: str
         """
-
+        
+        ic("Trajectory.__init__ started")
         self._h5_filename = h5_filename
 
         self._h5_file = h5py.File(self._h5_filename,'r')
 
+        ic("Trajectory.__init__ h5py.File created")
         # Load the chemical system
         self._chemical_system = ChemicalSystem(os.path.splitext(os.path.basename(self._h5_filename))[0])
         self._chemical_system.load(self._h5_filename)
 
+        ic("Trajectory.__init__ created ChemicalSystem")
         # Load all the unit cells
         self._load_unit_cells()
 
+        ic("Trajectory.__init__ loaded unit cells")
         # Load the first configuration
         coords = self._h5_file['/configuration/coordinates'][0,:,:]
         if self._unit_cells:
@@ -57,11 +61,13 @@ class Trajectory:
             conf = RealConfiguration(self._chemical_system,coords)
         self._chemical_system.configuration = conf
 
+        ic("Trajectory.__init__ read coordinates")
         # Define a default name for all chemical entities which have no name
         resolve_undefined_molecules_name(self._chemical_system)
 
         # Retrieve the connectivity
         build_connectivity(self._chemical_system)
+        ic("Trajectory.__init__ ended")
 
     def close(self):
         """Close the trajectory.
@@ -147,12 +153,15 @@ class Trajectory:
     def _load_unit_cells(self):
         """Load all the unit cells.
         """
-
+        ic("_load_unit_cells")
         if 'unit_cell' in self._h5_file:
-            
+            ic("_load_unit_cells: unit_cell IS in self._h5_file")
             self._unit_cells = [UnitCell(uc) for uc in self._h5_file['unit_cell'][:]]
+            ic("_load_unit_cells: got unit_cell from self._h5_file")
         else:
+            ic("_load_unit_cells: unit_cell IS NOT in self._h5_file")
             self._unit_cells = None
+        ic("_load_unit_cells finished")
 
     def unit_cell(self,frame):
         """Return the unit cell at a given frame. If no unit cell is defined, returns None.
@@ -380,7 +389,11 @@ class TrajectoryWriterError(Exception):
 
 class TrajectoryWriter:
 
-    def __init__(self, h5_filename, chemical_system, n_steps, selected_atoms=None):
+    allowed_compression = ['gzip', 'lzf']
+
+    def __init__(self, h5_filename, chemical_system, n_steps, selected_atoms=None,
+                       positions_dtype = np.float64, chunking_axis = 1,
+                       compression = 'none'):
         """Constructor.
 
         :param h5_filename: the trajectory filename
@@ -421,6 +434,12 @@ class TrajectoryWriter:
 
         self._current_index = 0
 
+        self._dtype = positions_dtype
+
+        self._chunking_axis = chunking_axis
+
+        self._compression = compression
+
     def _dump_chemical_system(self):
         """Dump the chemical system to the trajectory file.
         """
@@ -460,6 +479,11 @@ class TrajectoryWriter:
 
         n_atoms = self._chemical_system.total_number_of_atoms()
 
+        if self._chunking_axis == 1:
+            chunk_tuple = (1,n_atoms,3)
+        else:
+            chunk_tuple = (self._n_steps,1,3)
+
         # Write the configuration variables
         configuration_grp = self._h5_file['/configuration']
         for k, v in configuration.variables.items():
@@ -468,11 +492,19 @@ class TrajectoryWriter:
             data[self._selected_atoms,:] = v[self._selected_atoms,:]
             dset = configuration_grp.get(k,None)
             if dset is None:
-                dset = configuration_grp.create_dataset(
-                    k,
-                    shape=(self._n_steps,n_atoms,3),
-                    chunks=(1,n_atoms,3),                    
-                    dtype=np.float)
+                if self._compression in TrajectoryWriter.allowed_compression:
+                    dset = configuration_grp.create_dataset(
+                        k,
+                        shape=(self._n_steps,n_atoms,3),
+                        chunks=(1,n_atoms,3),                    
+                        dtype=self._dtype,
+                        compression=self._compression)
+                else:
+                    dset = configuration_grp.create_dataset(
+                        k,
+                        shape=(self._n_steps,n_atoms,3),
+                        chunks=(1,n_atoms,3),                    
+                        dtype=self._dtype)
                 dset.attrs['units'] = units.get(k,'')
             dset[self._current_index] = data
 
