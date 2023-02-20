@@ -312,6 +312,15 @@ class Atom(_ChemicalEntity):
         a._bonds = [bat.copy() for bat in self._bonds]
 
         return a
+    
+    def __eq__(self, other):
+        if not self._index == other._index:
+            return False
+        if not self._symbol == other._symbol:
+            return False
+        if not self._name == other._name:
+            return False
+        return True
 
     def __getitem__(self,item):
 
@@ -1259,6 +1268,19 @@ class ChemicalSystem(_ChemicalEntity):
         self._name = name
 
         self._atoms = None
+
+    def __eq__(self, other):
+        if not self._number_of_atoms == other._number_of_atoms:
+            return False
+        if not self._total_number_of_atoms == other._total_number_of_atoms:
+            return False
+        if not self._name == other._name:
+            return False
+        if not self._chemical_entities == other._chemical_entities:
+            return False
+        if not self._atoms == other._atoms:
+            return False
+        return True
 
     def __getstate__(self):
         return self.__dict__
