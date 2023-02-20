@@ -93,7 +93,8 @@ class GromacsConverter(Converter):
         self._trajectory = TrajectoryWriter(
             self.configuration['output_file']['file'],
             chemical_system,
-            self.numberOfSteps)
+            self.numberOfSteps,
+            positions_dtype = np.float32)
 
     def run_step(self, index):
         """Runs a single step of the job.

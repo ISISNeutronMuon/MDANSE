@@ -375,7 +375,13 @@ class LAMMPSConverter(Converter):
                 for cluster in g.build_connected_components():
                     if len(cluster) == 1:
                         node = cluster.pop()
-                        obj = Atom(node.element, name=node.atomName)
+                        try:
+                            obj = Atom(node.element, name=node.atomName)
+                        except TypeError:
+                            print("EXCEPTION in LAMMPS loader")
+                            print(f"node.element = {node.element}")
+                            print(f"node.atomName = {node.atomName}")
+                            print(f"rankToName = {self._rankToName}")
                         obj.index = node.name
                     else:
                         atList = []

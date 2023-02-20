@@ -58,6 +58,7 @@ class GeneralInput(QObject):
                 new_kwargs.pop(kkey)
         super().__init__(*args, **{})
 
+        self.default_path = kwargs.get('path', None)
         self.data_type = data_type
         self.default_value = kwargs.get('default', None)
         self.current_value = self.default_value
@@ -74,6 +75,10 @@ class GeneralInput(QObject):
         else:
             self.file_dialog = None
         ic(kwargs)
+    
+    @Slot(str)
+    def updatePath(self, newpath: str):
+        self.default_path = newpath
 
     @Slot(str)
     @Slot(int)
@@ -103,7 +108,7 @@ class GeneralInput(QObject):
     def valueFromDialog(self):
         new_value = self.file_dialog(self.parent(),  # the parent of the dialog
                                     "Load a file",  # the label of the window
-                                    '.',  # the initial search path
+                                    self.default_path,  # the initial search path
                                     self.file_association  # text string specifying the file name filter.
                                     )
         if new_value is not None:
@@ -244,6 +249,7 @@ class InputFactory():
 class ConverterDialog(QDialog):
 
     new_thread_objects = Signal(list)
+    new_path = Signal(str)
 
     def __init__(self, *args, converter: IJob = 'Dummy', **kwargs):
         super().__init__(*args, **kwargs)
@@ -253,6 +259,7 @@ class ConverterDialog(QDialog):
         self.handlers = {}
         self.converter_instance = None
         self.converter_constructor = converter
+        self.default_path = '.'
 
         if converter == 'Dummy':
             settings = OrderedDict([('dummy int', ('int', {'default': 1.0, 'label': 'Time step (ps)'})),
@@ -289,7 +296,12 @@ class ConverterDialog(QDialog):
         buttonlayout.addWidget(self.execute_button)
 
         layout.addWidget(buttonbase)
-
+    
+    @Slot(dict)
+    def parse_updated_params(self, new_params: dict):
+        if 'path' in new_params.keys():
+            self.default_path = new_params['path']
+            self.new_path.emit(self.default_path)
 
     @Slot()
     def cancel_dialog(self):
