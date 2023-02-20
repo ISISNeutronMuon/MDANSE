@@ -20,6 +20,10 @@ from qtpy.QtCore import Slot, Signal, QMetaObject, QLocale, QObject,\
                          Qt
 from qtpy.QtGui import QFont, QAction
 
+
+# it seems that the FrontEnd has become obsolete.
+# DELETE it, if nobody needs it
+
 class FrontEnd(QObject):
     """This object will connect to a BackEnd by means
     of Qt slots and signals.

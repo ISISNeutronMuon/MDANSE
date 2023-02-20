@@ -15,6 +15,9 @@
 
 from qtpy.QtWidgets import QWidget, QDialog, QVBoxLayout
 
+# THIS in NOT being USED at the moment.
+# DELETE it if no other modules need it.
+
 
 class InputDialog(QDialog):
     """This is the self-constructing Dialog which creates
