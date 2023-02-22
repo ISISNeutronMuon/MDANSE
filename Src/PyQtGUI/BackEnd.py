@@ -53,7 +53,7 @@ class BackEnd(QObject):
         self.createJobHolder()
         self.registry = RegistryTree()
         self._converters = []
-        self._reverse_converters = {}
+        self._reverse_converters = {}  # internal dictionary for finding converters
         self.checkConverters()
 
     def createTrajectoryHolder(self):
@@ -106,6 +106,14 @@ class BackEnd(QObject):
     
     @Slot(str)
     def returnConverter(self, key:str):
-        ic("returnConverter has been triggered in BackEnd - but what for?")
-        # thing = self._reverse_converters[str(key).split()[-1]]
-        # self.selected_converter.emit(thing)
+        """This slot will make Backend emit a signal that will
+        create a Dialog for a specific trajectory converter.
+        The type of the converter is chosen by the 'key' input
+        parameter.
+
+        Arguments:
+            key -- a string specifying which converter is needed.
+        """
+        # ic("returnConverter has been triggered in BackEnd - but what for?")
+        thing = self._reverse_converters[str(key).split()[-1]]
+        self.selected_converter.emit(thing)

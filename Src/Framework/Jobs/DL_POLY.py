@@ -295,8 +295,9 @@ class DL_POLYConverter(Converter):
                                               'default':os.path.join('..','..','..','Data','Trajectories','DL_Poly','HISTORY_cumen')})
     settings['atom_aliases'] = ('python_object',{'default':{}})
     settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
-    settings['version'] = ('single_choice', {'choices':list(_HISTORY_FORMAT.keys()), 'default':'2'})
-    settings['output_files'] = ('output_files', {'formats':["hdf"]})
+    settings['version'] = ('single_choice', {'choices':list(_HISTORY_FORMAT.keys()), 'default':'2', 'label':'Version'})
+    # settings['output_files'] = ('output_files', {'formats':["hdf"]})
+    settings['output_file'] = ('single_output_file', {'format':"hdf",'root':'history_file'})
                     
     def initialize(self):
         '''
