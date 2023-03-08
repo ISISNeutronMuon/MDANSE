@@ -3,7 +3,7 @@
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
 # @file      Src/Framework/Jobs/ASEConverter.py
-# @brief     Implements module/class/test LAMMPS
+# @brief     Implements a general-purpose loader based on ASE
 #
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -16,6 +16,7 @@
 import collections
 import os
 import re
+from os.path import expanduser
 
 from ase.io import iread
 import numpy as np
@@ -45,6 +46,8 @@ class ASEConverter(Converter):
 
     settings = collections.OrderedDict()
     settings['trajectory_file'] = ('input_file', {'label':"Any MD trajectory file",
+                                                  'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.lammps')})
+    settings['configuration_file'] = ('input_file', {'label':"An optional structure/configuration file",
                                                   'default':os.path.join('..','..','..','Data','Trajectories','LAMMPS','glycyl_L_alanine_charmm.lammps')})
     settings['time_step'] = ('float', {'label':"time step (fs)", 'default':1.0, 'mini':1.0e-9})      
     settings['time_unit'] = ('single_choice', {'label':"time step unit", 'choices':['fs','ps','ns'], 'default':'fs'})    
