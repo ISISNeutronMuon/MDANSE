@@ -51,7 +51,7 @@ class StructureFactorFromScatteringFunction(IJob):
         
         self._outputData.add("time","line", inputFile.variables['time'][:], units='ps')
 
-        self._outputData.add("time_window","line", inputFile.variables['time_window'][:], axis="time", units="au") 
+        self._outputData.add("time_window","line", inputFile.variables['time_window'][:], units="au") 
 
         self._outputData.add("q","line", inputFile.variables['q'][:], units="1/nm") 
 
