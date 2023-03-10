@@ -13,19 +13,74 @@
 #
 # **************************************************************************
 
-import abc
+from abc import ABCMeta, abstractmethod, abstractclassmethod
 
 import netCDF4
 
 from MDANSE.Framework.Jobs.IJob import IJob
 
-class Converter(IJob,metaclass=abc.ABCMeta):
+
+class InteractiveConverter(IJob, metaclass = ABCMeta):
+
+    _converter_registry = {}
+    _next_number = 1
+
+    @classmethod
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        newkey = getattr('label', None)
+        if newkey is not None:
+            cls._converter_registry[newkey] = cls
+
+    @classmethod
+    def __getitem__(cls, name):
+        converter_class = cls._converter_registry[name]
+        return converter_class
+    
+    @classmethod
+    def converters(cls):
+        return list(cls._converter_registry.keys())
+
+    @abstractmethod
+    def createInputs(self):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def parseConfigFile(self):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def takeCorrectedValues(self):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def readTrajectoryFile(self):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def readAFrame(self):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def createOutput(self):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def finalise(self):
+        raise NotImplementedError
+    
+    
+
+
+
+
+class Converter(IJob,metaclass=ABCMeta):
     
     category = ('Converters',)
     
     ancestor = ['empty_data']
 
-    @abc.abstractmethod
+    @abstractmethod
     def run_step(self,index):
         pass
 
