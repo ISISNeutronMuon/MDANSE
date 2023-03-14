@@ -66,7 +66,7 @@ class DynamicIncoherentStructureFactor(IJob):
         self._outputData.add("q","line", self.configuration["q_vectors"]["shells"], units="1/nm") 
 
         self._outputData.add("time","line", self.configuration['frames']['duration'], units='ps')
-        self._outputData.add("time_window","line", self._instrResolution["time_window"], axis="time", units="au") 
+        self._outputData.add("time_window","line", self._instrResolution["time_window"], units="au") 
 
         self._outputData.add("omega","line", self._instrResolution["omega"], units='rad/ps')
         self._outputData.add("omega_window","line", self._instrResolution["omega_window"], axis="omega", units="au") 
