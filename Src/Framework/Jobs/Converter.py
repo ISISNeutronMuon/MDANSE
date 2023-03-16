@@ -26,14 +26,15 @@ class InteractiveConverter(IJob, metaclass = ABCMeta):
     _next_number = 1
 
     @classmethod
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls, regkey = None, **kwargs):
         super().__init_subclass__(**kwargs)
-        newkey = getattr('label', None)
-        if newkey is not None:
-            cls._converter_registry[newkey] = cls
+        if regkey is not None:
+            cls._converter_registry[regkey] = cls
+        else:
+            raise ValueError("A regkey keyword parameter is needed in the subclass.")
 
     @classmethod
-    def __getitem__(cls, name):
+    def create(cls, name):
         converter_class = cls._converter_registry[name]
         return converter_class
     
