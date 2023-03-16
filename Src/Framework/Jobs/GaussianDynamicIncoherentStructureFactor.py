@@ -70,7 +70,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         self._outputData.add("q2","line",self._kSquare,units="1/nm2") 
 
         self._outputData.add("time","line",self.configuration['frames']['duration'], units='ps')
-        self._outputData.add("time_window","line",self._instrResolution["time_window"], axis="time", units="au") 
+        self._outputData.add("time_window","line",self._instrResolution["time_window"], units="au") 
 
         self._outputData.add("omega","line",self.configuration["instrument_resolution"]["omega"], units='rad/ps')
         self._outputData.add("omega_window","line",self._instrResolution["omega_window"], axis="omega", units="au") 

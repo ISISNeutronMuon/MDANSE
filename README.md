@@ -6,7 +6,7 @@ MDANSE is a python application designed for computing neutron observables from m
 be directly compared with neutron scattering experiments, particularly inelastic and quasi-elastic neutron scattering 
 spectroscopies.
 
-To do this, it interfaces with a variety of MD simulation software such as CASTEP, VASP, DMOL, Gromacs, DLPOY, CHARMM, LAMMPS, PBD, DFTB etc., 
+To do this, it interfaces with a variety of MD simulation software such as CASTEP, VASP, DMOL, Gromacs, DL_POLY, CHARMM, LAMMPS, PBD, DFTB etc., 
 and provides both a graphical user interface (GUI) and a command line interface. 
 
 This project is built on the development published previously: \
@@ -24,7 +24,7 @@ any other software on that OS. After that, we recommend starting by using the GU
 3. Perform an analysis of choice (through the Plugins panel)
 4. Check the results with the plotter
 
-For a more detailed guide on how to use MDANSE, please see the **[MDANSE User Guide](https://epubs.stfc.ac.uk/work/51935555)** \
+The most complete user documentation of MDANSE can be found on [our Read the Docs page](https://mdanse.readthedocs.io). At the same time, it is still possible to access the original **[MDANSE User Guide](https://epubs.stfc.ac.uk/work/51935555)** \
 Other information including example scripts can be found on the MDANSE website [mdanse.org](https://mdanse.org/) 
 
 ## Installing from source
@@ -124,9 +124,13 @@ information.
 
 ## Acknowledgements
 
-MDANSE has inherited some code from the [nMOLDYN program](https://github.com/khinsen/nMOLDYN3), originally developed
-by Gerald Kneller in 1995 and subsequently also by Konrad Hinsen, Tomasz Rog, Krzysztof Murzyn, Slawomir Stachura,
-and Eric Pellegrini. For more information see:
+MDANSE started as a fork of [version 3 of the nMOLDYN program](https://github.com/khinsen/nMOLDYN3).
+nMOLDYN was originally developed by Gerald Kneller in 1995 and subsequently also by Konrad Hinsen, Tomasz Rog,
+Krzysztof Murzyn, Slawomir Stachura, and Eric Pellegrini. MDANSE includes most of the code of nMOLDYN3, and also code
+from the libraries [MMTK](https://github.com/khinsen/MMTK) and [ScientificPython](https://github.com/khinsen/ScientificPython),
+in order to reduce dependencies and thus facilitate installation.
+
+For more information see:
 
 >nMoldyn 3: Using task farming for a parallel spectroscopy-oriented analysis of molecular dynamics simulations.
 K. Hinsen, E. Pellegrini, S. Stachura, G.R. Kneller J. Comput. Chem. (2012) 33:2043-2048 [https://doi.org/10.1002/jcc.23035][https://doi.org/10.1002/jcc.23035]. 

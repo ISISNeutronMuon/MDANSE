@@ -29,7 +29,6 @@ from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.Converter import Converter
 
-
 class XYZFileError(Error):
     pass
 
@@ -46,10 +45,11 @@ class XYZFile(dict):
         except ValueError:
             raise XYZFileError("Could not read the number of atoms in %s file" % filename)
 
+        self._nAtomsLineSize = self["instance"].tell()
         self["instance"].readline()
         self._headerSize = self["instance"].tell()
         self["atoms"] = []
-        for i in range(self["n_atoms"]):
+        for _ in range(self["n_atoms"]):
             line  = self["instance"].readline()
             atom = line.split()[0].strip()
             self["atoms"].append(atom)
@@ -57,26 +57,34 @@ class XYZFile(dict):
         # The frame size define the total size of a frame (number of atoms header + time info line + coordinates block)
         self._frameSize = self["instance"].tell()
         self._coordinatesSize = self._frameSize - self._headerSize
-                    
-        # Skip the first step in order to fetch the timestep
-        self.read_step(0)
-        self["instance"].readline()
-        line = self["instance"].readline().strip()
-        matches = re.findall("^i =.*, time =(.*), E =.*$",line)
-        if len(matches) != 1:
-            raise XYZFileError("Could not fetch the time step from XYZ file")
-        try:
-            self["time_step"] = float(matches[0])
-        except ValueError:
-            raise XYZFileError("Could not cast the timestep to a floating")
 
-        # Read frame number
+        # Compute the frame number
         self["instance"].seek(0,2)
-        self["n_frames"] = self['instance'].tell()/self._frameSize
-        
+        self["n_frames"] = self['instance'].tell()//self._frameSize
+
+        # If the trajectory has more than one step, compute the time step as the difference between the second and the first time step
+        if self["n_frames"] > 1:
+            firstTimeStep = self.fetch_time_step(0)
+            secondTimeStep = self.fetch_time_step(1)
+            self["time_step"] = secondTimeStep - firstTimeStep
+        else:
+            self["time_step"] = self.fetch_time_step(0)
+                    
         # Go back to top
         self["instance"].seek(0)
 
+    def fetch_time_step(self,step):
+        self['instance'].seek(step*self._frameSize + self._nAtomsLineSize)
+        timeLine = self["instance"].readline().strip()
+        matches = re.findall("^i =.*, time =(.*), E =.*$",timeLine)
+        if len(matches) != 1:
+            raise XYZFileError("Could not fetch the time step from XYZ file")
+        try:
+            timeStep = float(matches[0])
+        except ValueError:
+            raise XYZFileError("Could not cast the timestep to a floating")
+        else:
+            return timeStep
 
     def read_step(self, step):
         self['instance'].seek(step*self._frameSize + self._headerSize)
@@ -184,6 +192,7 @@ class CP2KConverter(Converter):
         self._cellFile = CellFile(self.configuration["cell_file"]["filename"])
 
         if abs(self._cellFile["time_step"] - self._xyzFile["time_step"]) > 1.0e-09:
+            print(self._cellFile["time_step"],self._xyzFile["time_step"])
             raise CP2KConverterError("Inconsistent time step between pos and cell files")
 
         if self._cellFile["n_frames"] != self._xyzFile["n_frames"]:
