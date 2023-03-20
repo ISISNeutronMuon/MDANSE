@@ -954,6 +954,26 @@ Neutron Dynamic Total Structure Factor
 
 -  available for trajectories only
 
+This is a specific combination of the Dynamic Coherent and the
+Dynamic Incoherent Structure Factors. It calculates both the
+coherent and the incoherent parts of the strucutre factor, using
+the neutron scattering lengths of atoms as weights, and then
+combines them into the Dynamic Total Structure Factor (DTFS).
+
+It is important to note that the coherent and the incoherent
+components of the DTFS need to be rescaled before they can
+be combined. While the DISF :ref:`dynamic-incoherent-structure-factor`
+is a time correlation and is normalised to the value at t=0
+so that the :math:`DISF(t=0)=1``, the same constaint is not 
+present for the DCSF :ref:`dynamic-coherent-structure-factor`.
+Therefore, the calculation of the Neutron Dynamic Total Structure Factor
+applies a scaling factor to the DCSF before it can be included
+in the final result. For this reason, one should *not* expect
+the DCSF component in the output of the analysis to be identical
+to the output of the :ref:`dynamic-coherent-structure-factor`
+analysis; these will differ by a scaling factor.
+
+
 .. image:: ./Pictures/1000000100000322000002D4E0AD4E9A3996DE2A.png
    :width: 15.921cm
    :height: 14.372cm

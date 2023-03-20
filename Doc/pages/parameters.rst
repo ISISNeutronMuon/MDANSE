@@ -1200,20 +1200,25 @@ Instrument resolution
 This option is available in all the analyses performing a time Fourier
 Transform, e.g. for the calculation of the density of states or the
 dynamic structure factor. You can choose the shape of the resolution
-(default is Gaussian), the position (default is at =0) and the
-parameter defining the width of the function in frequency space ( for
-the Gaussian resolution). Those parameters define a function R() and
-its analytical Fourier Transform R(t) is then used to compute I(t)R(t),
-where I(t) is the time-dependent property directly computed from the
+(default is Gaussian), the position (default is at :math:`\omega=0`) and the
+parameter defining the width of the function in frequency space
+(:math:`\sigma` for
+the Gaussian resolution). Those parameters define a function
+:math:`R(\omega)` and
+its analytical Fourier Transform :math:`R(t)` is then used to compute
+:math:`I(t) \dot R(t)`,
+where :math:`I(t)` is the time-dependent property directly computed from the
 trajectory (e.g. the velocity autocorrelation function for the DOS, or
-the intermediate scattering function for the S(Q,)). The product is the
+the intermediate scattering function for the
+:math:`S(Q,\omega)`). The product is the
 Fourier transformed to obtain the final result.
 
 The main purpose of the instrument resolution is therefore to smooth the
 function computed directly in time before performing its Fourier
 Transform into frequency space, in order to avoid numerical artefacts
 when FT noisy data. But it can be also used as an approximate way of
-estimating instrument resolution effects if you give a value of 
+estimating instrument resolution effects if you give a value of
+:math:`sigma`
 similar to the one of the experimental resolutions. For example, if you
 are going to compare your simulation with data measured on a
 spectrometer having a resolution of 0.1 meV (FWHM), then use:
@@ -1292,6 +1297,12 @@ Normalize
 This parameter provides the option to normalise the results of the
 analysis. By default, no normalisation is performed.
 
+At the moment the normalisation is performed by dividing the number
+array by its first element. For the time correlation analysis the
+normalisation means that the correlation curve is divided by
+the value at :math:`t=0`, and the normalised function :math:`f(t)`
+will, as a result, fullfil the criterion :math:`f(t)\rvert_{t=0}=1`. 
+
 Normalisation is available for the following analyses: `Current
 Correlation Function <#_Current_Correlation_Function>`__, `General Auto
 Correlation Function <#_General_AutoCorrelation_Function>`__, `Position
@@ -1355,7 +1366,9 @@ are saved together with the total result, which is calculated as:
 .. math::
    :label: eq3
 
-   {P_{\mathit{total}} = \frac{\sum\limits_{i}{c_{i}w_{i}P}_{i}}{\sum\limits_{i}{c_{i}\left| w_{i} \right|}}}\text{or}{P_{\mathit{total}} = \frac{\sum\limits_{\mathit{ij}}{c_{i}{c_{j}w}_{i}w_{j}P}_{i}}{\sum\limits_{\mathit{ij}}{c_{i}c_{j}\left| w_{i} \right|\left| w_{j} \right|}}},
+   {P_{\mathit{total}} = \frac{\sum\limits_{i}{c_{i}w_{i}P}_{i}}{\sum\limits_{i}{c_{i}w_{i}}}}\\
+   \text{or}\\
+   {P_{\mathit{total}} = \frac{\sum\limits_{\mathit{ij}}{c_{i}{c_{j}w}_{i}w_{j}P}_{i}}{\sum\limits_{\mathit{ij}}{c_{i}c_{j} w_{i}  w_{j} }}},
 
 where the sum runs over the number of different chemical elements,
 *c*\ :sub:`i` is the number concentration of element *i* and

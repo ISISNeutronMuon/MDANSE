@@ -16,11 +16,11 @@ line <#_Using_MDANSE_from>`__.
 
 .. note::
    The MDANSE GUI can be operated by double-clicking different objects,
-   but it also offers a less-advertised option of performing operations
-   using the Drag & Drop mechanism. Just drag your trajectory into the main
+   but it also offers an equivalent Drag & Drop mechanism.
+   Just drag your trajectory into the main
    GUI window, and a tab will be created. Drop an analysis operation into
    the tab, and you will perform the analysis on the trajectory. Drop the
-   Molecular Viewer into the tab, and yoy will visualise the trajectory.
+   Molecular Viewer into the tab, and you will visualise the trajectory.
 
 Opening MDANSE GUI
 ------------------
