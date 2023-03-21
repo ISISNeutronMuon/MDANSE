@@ -48,6 +48,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/files
    pages/gui
    pages/cmd
+   pages/workflow
    pages/dynamics
    pages/scattering
    pages/structure

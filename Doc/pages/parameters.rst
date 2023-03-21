@@ -1213,12 +1213,29 @@ the intermediate scattering function for the
 :math:`S(Q,\omega)`). The product is the
 Fourier transformed to obtain the final result.
 
+The window function in the frequency units is first inverse Fourier-transformed to
+produce its equivalent in time units
+
+.. math::
+   :label: _param-window-function
+
+   w(t) = \mathscr{F}(w(\omega) )
+
+The correlation function calculated in the analysis is then multiplied by 
+the window function and Fourier-transformed to produce a spectrum in energy
+units.
+
+.. math::
+   :label: _param-resolution-equation
+
+   I(\omega) = \frac{1}{2 \pi} \mathscr{F}(f(t)w(t))
+
 The main purpose of the instrument resolution is therefore to smooth the
 function computed directly in time before performing its Fourier
 Transform into frequency space, in order to avoid numerical artefacts
 when FT noisy data. But it can be also used as an approximate way of
 estimating instrument resolution effects if you give a value of
-:math:`sigma`
+:math:`\sigma`
 similar to the one of the experimental resolutions. For example, if you
 are going to compare your simulation with data measured on a
 spectrometer having a resolution of 0.1 meV (FWHM), then use:

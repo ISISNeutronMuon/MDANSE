@@ -67,6 +67,8 @@ needs_sphinx = '1.0'
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx.ext.graphviz', 'sphinx.ext.inheritance_diagram', 'sphinx.ext.imgmath']#,'rst2pdf.pdfbuilder']
 
+imgmath_latex_preamble = "\\usepackage{mathrsfs}"
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
