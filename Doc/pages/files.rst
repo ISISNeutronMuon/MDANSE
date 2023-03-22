@@ -1,9 +1,21 @@
 
+.. _file_formats:
+
 Input and output files
 ======================
 
-Almost, if not all, functionalities provided by MDANSE are based on
-Network Common Data Form (NetCDF) input file. However, in certain
+At the moment there are two binary file formats extensively used by MDANSE:
+Network Common Data Form (NetCDF) and Hierarchical Data Format (HDF5).
+The former is used for storing trajectories, and the latter for the
+analysis results.
+
+.. note::
+   The plan for the future releases of MDANSE is to phase out the NetCDF
+   format and focus exclusively on HDF5. This does not affect the way you
+   use MDANSE at the moment, but please be aware that you may need to convert
+   your trajectories into HDF5 when switching to MDANSE 2.0.
+
+However, in certain
 circumstances MDANSE can use or produce another type of files. We will
 start this section by explaining in detail the NetCDF file format
 introducing next the other file formats used by MDANSE.

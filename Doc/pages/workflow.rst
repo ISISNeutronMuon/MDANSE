@@ -26,7 +26,7 @@ Frames
 It is not necessary to use all the time frames of your MD simulation. You can decide
 to limit the range of simluation time, and reduce the number of the frames taken in that
 range by increasing the step between them. Only the frames you selected will
-be passed to the analysis.
+be passed to the analysis. See also :ref:`param-frames`.
 
 Atom selection
 ^^^^^^^^^^^^^^
@@ -35,7 +35,7 @@ Just as it is not necessary to include all the time frames in the analysis, it i
 possible to select only a subset of all the atoms present in the trajectory. Once you
 have defined a selection, you can decide to run an analysis on the selected atoms, and
 ignore the rest. This is useful if you are trying to determine which atoms contribute
-to a specific feature in your signal.
+to a specific feature in your signal. See also :ref:`param-atom-selection`.
 
 Analysis
 --------
@@ -87,4 +87,4 @@ All the output arrays created in the analysis are written to the filesystem in t
 format chosen by the user. (If you intend to continue visualsing the results within
 the MDANSE GUI, you will have chosen the HDF5 format. If, however, you were planning
 to process the results further using other software, then you have most likely picked
-the ASCII output.)
+the ASCII output. See also :ref:`param-output-files`)

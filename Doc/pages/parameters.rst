@@ -107,9 +107,9 @@ file browser.
 
 *Format:* drop-down
 
-*Default:* netcdf
+*Default:* HDF5 (for analysis), NetCDF (for trajectory conversion)
 
-*Description:* specifies the `file formats <#_Input_and_output>`__ in
+*Description:* specifies the :ref:`file_formats` in
 which the analysis results are saved. :ref:`hdf5`, :ref:`netcdf`,
 :ref:`text_output`, or cominbations of those can be selected.
 The name of these files is given in the 'Basename' string.
@@ -245,7 +245,7 @@ should appear in the drop-down menu in the analysis window.
 
 Atom selection is available for all the analyses for which
 :ref:`param-atom-transmutation` is available, as well as all
-:ref:`trajectory` analyses, :ref:`analysis-gacf`, `Molecular
+:ref:`analysis-trajectory` analyses, :ref:`analysis-gacf`, `Molecular
 Trace <#_Molecular_Trace>`__, `Root Mean Square
 Fluctuation, <#_Root_Mean_Square_1>`__ `Radius of
 Gyration <#_Radius_Of_Gyration>`__, `Solvent Accessible
@@ -1141,25 +1141,84 @@ in MDANSE at the moment:
 
 - Gaussian
 
+  The following formula is used for the calculation of the Gaussian function:
+
+  .. math::
+
+    G(\omega;\sigma,\mu) = \frac{\sqrt{2\pi}}{\sigma} e^{\frac{(\omega-\mu)^{2}}{-2\sigma^{2}}}
+
+  The corresponding MDANSE input is:
+
   :code:`('gaussian', {'mu': 0.0, 'sigma': 1.0})`
 
 - Lorentzian
+
+  The following formula is used for the calculation of the Lorentzian function:
+
+  .. math::
+
+    L(\omega;\sigma,\mu) = \frac{2\sigma}{(\omega-\mu)^{2} + \sigma^{2}}
+
+  The corresponding MDANSE input is:
 
   :code:`('lorentzian', {'mu': 0.0, 'sigma': 1.0})`
 
 - Pseudo-Voigt
 
+  The Pseudo-Voigt profile is expressed as a combination of Lorentzian and Gaussian functions:
+  
+  .. math::
+
+    V_p(\omega) = \eta L(\omega,\sigma_L,\mu_L) + (1 - \eta) G(\omega,\sigma_G,\mu_G)
+
+  The corresponding MDANSE input is:
+
   :code:`('pseudo-voigt', {'eta': 0.5, 'mu_lorentzian': 0.0, 'sigma_lorentzian': 1.0, 'mu_gaussian': 0.0, 'sigma_gaussian': 1.0})`
 
 - square
+
+  Square profile is a constant for points that are separated from :math:`\mu` by a distance
+  less than :math:`\sigma`, and 0 otherwise:
+   
+  .. math::
+
+     R(\omega) = \begin{cases}
+                \frac{\pi}{\sigma} & if \ |\omega - \mu| \leq \sigma, \\
+                0 & if \ |\omega - \mu| > \sigma.
+                \end{cases}
+
+  The corresponding MDANSE input is:
 
   :code:`('square', {'mu': 0.0, 'sigma': 1.0})`
 
 - triangular
 
+  Triangular profile drops linearly on either side of the :math:`\mu` argument
+  and reaches 0 at the distance :math:`\sigma` from :math:`\mu`:
+
+  .. math::
+
+     R(\omega) = \begin{cases}
+                \frac{2\pi}{\sigma^{2}} (\sigma - |\omega - \mu|) & if \ |\omega - \mu| \leq \sigma, \\
+                0 & if \ |\omega - \mu| > \sigma.
+                \end{cases}
+
+  The corresponding MDANSE input is:
+
   :code:`('triangular', {'mu': 0.0, 'sigma': 1.0})`
 
 - ideal
+  
+  The ideal resolution is expressed as a Dirac function:
+
+  .. math::
+    
+    D(\omega) = \begin{cases}
+                1 & if \ \omega = 0, \\
+                0 & if \ \omega \neq 0.
+                \end{cases}
+
+  The corresponding MDANSE input is:
 
   :code:`('ideal', {})`
 
@@ -1286,7 +1345,11 @@ At the moment the normalisation is performed by dividing the number
 array by its first element. For the time correlation analysis the
 normalisation means that the correlation curve is divided by
 the value at :math:`t=0`, and the normalised function :math:`f(t)`
-will, as a result, fullfil the criterion :math:`f(t)\rvert_{t=0}=1`. 
+will, as a result, fullfil the criterion :math:`f(t)\rvert_{t=0}=1`.
+
+.. math::
+
+   f_{norm}(t) = \frac{f(t)}{f(t)\rvert_{t=0}}
 
 Normalisation is available for the following analyses: `Current
 Correlation Function <#_Current_Correlation_Function>`__, `General Auto

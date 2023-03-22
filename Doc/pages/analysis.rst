@@ -123,6 +123,8 @@ Temperature
 -  :ref:`param-output-files`
 -  :ref:`param-running-mode`
 
+.. _analysis-trajectory:
+
 Trajectory
 ^^^^^^^^^^
 
