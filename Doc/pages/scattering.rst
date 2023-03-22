@@ -1,4 +1,8 @@
 
+This section is dealing with specific types of analysis performed by
+MDANSE. If you are not sure where these fit into the general workflow
+of data analysis, please read :ref:`workflow-of-analysis`.
+
 Analysis: Scattering
 ====================
 
@@ -366,7 +370,7 @@ interpolation' mode.
 -  :ref:`param-output-files`
 -  :ref:`param-running-mode`
 
-.. _dynamic-coherent-structure-factor:
+.. _analysis-dcsf:
 
 Dynamic Coherent Structure Factor
 '''''''''''''''''''''''''''''''''
@@ -510,7 +514,7 @@ GUI
 -  :ref:`param-output-files`
 -  :ref:`param-running-mode`
 
-.. _dynamic-incoherent-structure-factor:
+.. _analysis-disf:
 
 Dynamic Incoherent Structure Factor
 '''''''''''''''''''''''''''''''''''
@@ -638,7 +642,7 @@ GUI
 -  :ref:`param-output-files`
 -  :ref:`param-running-mode`
 
-.. _elastic-incoherent-structure-factor:
+.. _analysis-eisf:
 
 Elastic Incoherent Structure Factor
 '''''''''''''''''''''''''''''''''''
@@ -786,7 +790,7 @@ GUI
 -  :ref:`param-output-files`
 -  :ref:`param-running-mode`
 
-.. _gaussian-dynamic-incoherent-structure-factor:
+.. _analysis-gdisf:
 
 Gaussian Dynamic Incoherent Structure Factor
 ''''''''''''''''''''''''''''''''''''''''''''
@@ -947,7 +951,7 @@ one is, etc.
 -  :ref:`param-output-files`
 -  :ref:`param-running-mode`
 
-.. _neutron-dynamic-total-structure-factor:
+.. _analysis-ndtsf:
 
 Neutron Dynamic Total Structure Factor
 ''''''''''''''''''''''''''''''''''''''
@@ -962,15 +966,15 @@ combines them into the Dynamic Total Structure Factor (DTFS).
 
 It is important to note that the coherent and the incoherent
 components of the DTFS need to be rescaled before they can
-be combined. While the DISF :ref:`dynamic-incoherent-structure-factor`
+be combined. While the DISF :ref:`analysis-disf`
 is a time correlation and is normalised to the value at t=0
 so that the :math:`DISF(t=0)=1``, the same constaint is not 
-present for the DCSF :ref:`dynamic-coherent-structure-factor`.
+present for the DCSF :ref:`analysis-dcsf`.
 Therefore, the calculation of the Neutron Dynamic Total Structure Factor
 applies a scaling factor to the DCSF before it can be included
 in the final result. For this reason, one should *not* expect
 the DCSF component in the output of the analysis to be identical
-to the output of the :ref:`dynamic-coherent-structure-factor`
+to the output of the :ref:`analysis-dcsf`
 analysis; these will differ by a scaling factor.
 
 

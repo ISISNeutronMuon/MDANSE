@@ -76,13 +76,14 @@ It is a goal to replace NetCDF with HDF5 as the main storage format, and
 therefore MDANSE supports HDF5 output for :ref:`analysis` and
 input for plotters.
 
+.. _text_output:
+
 DAT file format
 ---------------
 
-When performing an :ref:`analysis`, it there are two options
-for output file formats: NetCDF and ASCII. By default, only NetCDF is
-selected, creating an MMTK NetCDF file, but it is possible to change
-that to ASCII or both. If the ASCII option is selected, a tarball is
+When performing an :ref:`analysis`, a binary output format is selected
+by default, but it is possible to change it to ASCII, which indicates
+a text file output. If the ASCII option is selected, a tarball is
 generated. Inside are multiple files which together contain the results
 of the analysis. Firstly, there is a text file, jobinfo.txt, which
 contains the options that were selected when performing the analysis.

@@ -110,9 +110,9 @@ file browser.
 *Default:* netcdf
 
 *Description:* specifies the `file formats <#_Input_and_output>`__ in
-which the analysis results are saved. :ref:`netcdf`,
-`ASCII <#_DAT_file_format>`__, or both can be selected. The name of
-these files is given in the 'Basename' string.
+which the analysis results are saved. :ref:`hdf5`, :ref:`netcdf`,
+:ref:`text_output`, or cominbations of those can be selected.
+The name of these files is given in the 'Basename' string.
 
 Creating selections
 ~~~~~~~~~~~~~~~~~~~
@@ -380,15 +380,11 @@ is used, therefore making the calculation more reproducible.
       *Default:* 0
       *Description:* the minimum value used to construct the range of shells.
 
--  
-
    -  **to**
 
       *Format:* int
       *Default:* 0
       *Description:* the maximum value used to construct the range of shells.
-
--  
 
    -  **by step of**
 
@@ -450,15 +446,11 @@ generated only in a plane perpendicular to the two axes given.
       *Default:* 0
       *Description:* the minimum value used to construct the range of shells.
 
--  
-
    -  **to**
 
       *Format:* int
       *Default:* 0
       *Description:* the maximum value used to construct the range of shells.
-
--  
 
    -  **by step of**
 
@@ -491,16 +483,12 @@ generated only in a plane perpendicular to the two axes given.
       *Description:* the x-components of the first axis used to specify the
       plane.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 0
       *Description:* the y-components of the first axis used to specify the
       plane.
-
--  
 
    -  **z-component**
 
@@ -518,16 +506,12 @@ generated only in a plane perpendicular to the two axes given.
       *Description:* the x-components of the second axis used to specify the
       plane.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 1
       *Description:* the y-components of the second axis used to specify the
       plane.
-
--  
 
    -  **z-component**
 
@@ -575,15 +559,11 @@ by the axis given.
       *Default:* 0
       *Description:* the minimum value used to construct the range of shells.
 
--  
-
    -  **to**
 
       *Format:* int
       *Default:* 0
       *Description:* the maximum value used to construct the range of shells.
-
--  
 
    -  **by step of**
 
@@ -615,15 +595,11 @@ by the axis given.
       *Default:* 1
       *Description:* the x-components of the specified axis.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 0
       *Description:* the y-components of the specified axis.
-
--  
 
    -  **z-component**
 
@@ -670,15 +646,11 @@ can be used to generate only h00 vectors.
       *Default:* 0
       *Description:* the minimum value used to construct the range of shells.
 
--  
-
    -  **to**
 
       *Format:* int
       *Default:* 0
       *Description:* the maximum value used to construct the range of shells.
-
--  
 
    -  **by step of**
 
@@ -704,16 +676,12 @@ can be used to generate only h00 vectors.
       *Description:* the minimum value used to construct the range of h
       vectors.
 
--  
-
    -  **to**
 
       *Format:* int
       *Default:* 0
       *Description:* the maximum value used to construct the range of h
       vectors.
-
--  
 
    -  **by step of**
 
@@ -771,15 +739,11 @@ option and use the same set for both calculations.
       *Default:* 0
       *Description:* the minimum value used to construct the range of shells.
 
--  
-
    -  **to**
 
       *Format:* int
       *Default:* 0
       *Description:* the maximum value used to construct the range of shells.
-
--  
 
    -  **by step of**
 
@@ -841,15 +805,11 @@ only in a plane perpendicular to the two axes given.
       *Default:* 0
       *Description:* the minimum value used to construct the range of shells.
 
--  
-
    -  **to**
 
       *Format:* int
       *Default:* 0
       *Description:* the maximum value used to construct the range of shells.
-
--  
 
    -  **by step of**
 
@@ -882,16 +842,12 @@ only in a plane perpendicular to the two axes given.
       *Description:* the x-components of the first axis used to specify the
       plane.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 0
       *Description:* the y-components of the first axis used to specify the
       plane.
-
--  
 
    -  **z-component**
 
@@ -909,16 +865,12 @@ only in a plane perpendicular to the two axes given.
       *Description:* the x-components of the second axis used to specify the
       plane.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 1
       *Description:* the y-components of the second axis used to specify the
       plane.
-
--  
 
    -  **z-component**
 
@@ -966,15 +918,11 @@ given.
       *Default:* 0
       *Description:* the minimum value used to construct the range of shells.
 
--  
-
    -  **to**
 
       *Format:* int
       *Default:* 0
       *Description:* the maximum value used to construct the range of shells.
-
--  
 
    -  **by step of**
 
@@ -1006,15 +954,11 @@ given.
       *Default:* 1
       *Description:* the x-components of the specified axis.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 0
       *Description:* the y-components of the specified axis.
-
--  
 
    -  **z-component**
 
@@ -1061,16 +1005,12 @@ according to the given qstep.
       *Description:* the minimum value used to construct the range of h
       vectors.
 
--  
-
    -  **to**
 
       *Format:* int
       *Default:* 0
       *Description:* the maximum value used to construct the range of h
       vectors.
-
--  
 
    -  **by step of**
 
@@ -1124,15 +1064,11 @@ input.
       *Default:* 1
       *Description:* the x-component of this Q point.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 0
       *Description:* the y-component of this Q point.
-
--  
 
    -  **z-component**
 
@@ -1150,6 +1086,7 @@ input.
 -  **Generate** button generates the hkl vectors based on the
    specifications above. It must be clicked before the vectors can be
    saved.
+
 -  **Name**
 
    *Format:* str
@@ -1199,21 +1136,57 @@ Instrument resolution
 
 This option is available in all the analyses performing a time Fourier
 Transform, e.g. for the calculation of the density of states or the
-dynamic structure factor. You can choose the shape of the resolution
-(default is Gaussian), the position (default is at :math:`\omega=0`) and the
-parameter defining the width of the function in frequency space
-(:math:`\sigma` for
-the Gaussian resolution). Those parameters define a function
-:math:`R(\omega)` and
-its analytical Fourier Transform :math:`R(t)` is then used to compute
-:math:`I(t) \dot R(t)`,
-where :math:`I(t)` is the time-dependent property directly computed from the
-trajectory (e.g. the velocity autocorrelation function for the DOS, or
-the intermediate scattering function for the
-:math:`S(Q,\omega)`). The product is the
-Fourier transformed to obtain the final result.
+dynamic structure factor. The following resolution shapes are supported
+in MDANSE at the moment:
 
-The window function in the frequency units is first inverse Fourier-transformed to
+- Gaussian
+
+  :code:`('gaussian', {'mu': 0.0, 'sigma': 1.0})`
+
+- Lorentzian
+
+  :code:`('lorentzian', {'mu': 0.0, 'sigma': 1.0})`
+
+- Pseudo-Voigt
+
+  :code:`('pseudo-voigt', {'eta': 0.5, 'mu_lorentzian': 0.0, 'sigma_lorentzian': 1.0, 'mu_gaussian': 0.0, 'sigma_gaussian': 1.0})`
+
+- square
+
+  :code:`('square', {'mu': 0.0, 'sigma': 1.0})`
+
+- triangular
+
+  :code:`('triangular', {'mu': 0.0, 'sigma': 1.0})`
+
+- ideal
+
+  :code:`('ideal', {})`
+
+You can choose the shape of the resolution
+(default is Gaussian), the centre position (default is at :math:`\mu=0`) and the
+parameter defining the width of the function in frequency space
+(:math:`\sigma`). Since MDANSE uses frequency units, and most
+neutron scientists work with meV energy units, you can follow the simple
+conversion for the *Gaussian* function:
+
+.. math::
+
+   \sigma (\text{FWHM}=1\text{meV}) \approx 0.65 \text{ps}^{\text{-1}},
+
+which means that :math:`\sigma=0.65` will correspond to a 1 meV resolution. 
+The conversion factor is derived here:
+
+.. math::
+   :label: eq1
+   
+   {\sigma\approx\frac{\mathit{FWHM}{\lbrack\text{meV}\rbrack}}{2.35}\times 1.519\frac{\lbrack\text{ps}^{\text{-1}}\rbrack}{\lbrack\text{meV}\rbrack}\approx 0.065\text{ps}^{\text{-1}}},
+
+where the 2.35 is the :math:`2\sqrt{2\log2}` factor connecting the
+FWHM with the :math:`\sigma` parameter of the Gaussian function.
+
+The selected resolution function (window function) in the frequency units
+is first inverse Fourier-transformed to
 produce its equivalent in time units
 
 .. math::
@@ -1221,7 +1194,9 @@ produce its equivalent in time units
 
    w(t) = \mathscr{F}(w(\omega) )
 
-The correlation function calculated in the analysis is then multiplied by 
+The time-dependent function (e.g. velocity autocorrelation function for the DOS, or
+the intermediate scattering function fot the :math:`S(Q,\omega)`)
+calculated in the analysis is then multiplied by 
 the window function and Fourier-transformed to produce a spectrum in energy
 units.
 
@@ -1230,20 +1205,11 @@ units.
 
    I(\omega) = \frac{1}{2 \pi} \mathscr{F}(f(t)w(t))
 
-The main purpose of the instrument resolution is therefore to smooth the
+Therefore, apart from simulating the effect of the instrumental resolution
+in an experiment, thepurpose of the instrument resolution is to smooth the
 function computed directly in time before performing its Fourier
 Transform into frequency space, in order to avoid numerical artefacts
-when FT noisy data. But it can be also used as an approximate way of
-estimating instrument resolution effects if you give a value of
-:math:`\sigma`
-similar to the one of the experimental resolutions. For example, if you
-are going to compare your simulation with data measured on a
-spectrometer having a resolution of 0.1 meV (FWHM), then use:
-
-.. math::
-   :label: eq1
-   
-   {\sigma\approx\frac{\mathit{FWHM}{\lbrack\text{meV}\rbrack}}{2.35}\times 1.519\frac{\lbrack\text{ps}^{\text{-1}}\rbrack}{\lbrack\text{meV}\rbrack}\approx 0.065\text{ps}^{\text{-1}}}
+when FT noisy data.
 
 This parameter is available for the following analyses: `Current
 Correlation Function <#_Current_Correlation_Function>`__, `Density of
@@ -1265,33 +1231,35 @@ Interpolation order
 Analyses that require atomic velocity data have an option to interpolate
 this data from atomic positions. By default, no interpolation is
 performed and instead MDANSE attempts to use the velocities stored int
-the NetCDF trajectory. If an order is selected, MDANSE performs a
+the NetCDF trajectory. Of course, depending on the way your simulation
+was set up, it is possible that the atoms velocities were not even stored
+in the output. It is still possible to derive the velocities of atoms
+from their positions at known time intervals, which is the subject of this
+section.
+
+If an interpolation order is selected, MDANSE performs a
 numerical differentiation of the positional data. There are options to
 differentiate using 1\ :sup:`st` to 5\ :sup:`th` order.
 
 -  Order 1
 
-   -  The first time-derivative of each point r(t\ :sub:`i`) is
-      calculated as
+   The first time-derivative of each point r(t\ :sub:`i`) is
+   calculated as
 
-.. math::
-   :label: eq113
+   .. math::
+      :label: eq113
 
-   {\overset{.}{r}{\left( t_{i} \right) = \frac{r{\left( t_{i + 1} \right) - r}\left( t_{i} \right)}{\mathit{\Delta t}}}}
+      {\overset{.}{r}{\left( t_{i} \right) = \frac{r{\left( t_{i + 1} \right) - r}\left( t_{i} \right)}{\mathit{\Delta t}}}},
 
--  
-
-   -  
-
-      -  Δt is the time step
+   where :math:`\mathit{\Delta t}` is the time step.
 
 -  Order N = {2, 3, 4, 5}
 
-   -  MDANSE calculates the first time-derivative of each point
-      r(t\ :sub:`i`) (r = x,y,z) using the N-order polynomial,
-      interpolating the N+1 points across r(t\ :sub:`i`), where
-      r(t\ :sub:`i`) belongs to this set. Please see Ref
-      [Ref36]_ for more information.
+   MDANSE calculates the first time-derivative of each point
+   r(t\ :sub:`i`) (r = x,y,z) using the Nth-order polynomial,
+   interpolating the N+1 points across r(t\ :sub:`i`), where
+   r(t\ :sub:`i`) belongs to this set. Please see Ref
+   [Ref36]_ for more information.
 
 Interpolation order is available for the following analyses: `Current
 Correlation Function <#_Current_Correlation_Function>`__, `Density of
