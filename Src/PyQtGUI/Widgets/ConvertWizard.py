@@ -55,10 +55,30 @@ class ConvertWizard(QWizard):
                                     # ('output_file', ('single_output_file', {'format': 'hdf', 'root': 'pdb_file'}))
                                     ])
         else:
-            converter_instance = converter()
+            converter_instance = InteractiveConverter.create(converter)()
             converter_instance.build_configuration()
             settings = converter_instance.settings
             self.converter_instance = converter_instance
+        
+        firstpage = ConverterFirstPage(self, converter= converter)
+        self.addPage(firstpage)
+
+    @Slot()
+    def execute_converter(self):
+        if self.converter_instance is None:
+            ic("No converter instance attached to the Dialog")
+            return False
+        pardict = {}
+        ic(f"handlers: {self.handlers}")
+        for key, value in self.handlers.items():
+            pardict[key] = value.returnValue()
+        ic(f"Passing {pardict} to the converter instance {self.converter_instance}")
+        self.converter_instance.setup(pardict)
+        # when we are ready, we can consider running it
+        self.converter_instance.run(pardict)
+        # this would send the actual instance, which _may_ be wrong
+        # self.new_thread_objects.emit([self.converter_instance, pardict])
+        # self.new_thread_objects.emit([self.converter_constructor, pardict])
 
 class ConverterFirstPage(QWizardPage):
 
@@ -121,19 +141,55 @@ class ConverterFirstPage(QWizardPage):
     def cancel_dialog(self):
         self.destroy()
 
+
+
+
+
+import sys
+
+from qtpy.QtWidgets import QApplication, QMainWindow, QPushButton
+from qtpy.QtCore import QSettings, QThread, Qt
+
+from MDANSE.PyQtGUI.MainWindow import Main
+from MDANSE.PyQtGUI.BackEnd import BackEnd
+from MDANSE.PyQtGUI.Widgets.Generator import WidgetGenerator
+
+from MDANSE.Framework.Jobs.Converter import InteractiveConverter
+
+class DummyLauncher(QMainWindow):
+
+    def __init__(self, *args, title = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        self.setWindowTitle(title)
+
+        self.widgen = WidgetGenerator()
+
+        # butt = QPushButton("Launch The Wizard!")
+        # butt.clicked.connect(self.launchWizard)
+        # butt.setText("Launch The Wizard!")
+
+        docker, button = self.widgen.wrapWidget(cls = QPushButton, parent= self, dockable = True,
+                                             name="Trajectories")
+        # lay = self.layout()
+        # lay.addWidget(butt)
+
+        button.clicked.connect(self.launchWizard)
+        button.setText("Launch The Wizard!")
+
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, docker)
+
     @Slot()
-    def execute_converter(self):
-        if self.converter_instance is None:
-            ic("No converter instance attached to the Dialog")
-            return False
-        pardict = {}
-        ic(f"handlers: {self.handlers}")
-        for key, value in self.handlers.items():
-            pardict[key] = value.returnValue()
-        ic(f"Passing {pardict} to the converter instance {self.converter_instance}")
-        self.converter_instance.setup(pardict)
-        # when we are ready, we can consider running it
-        self.converter_instance.run(pardict)
-        # this would send the actual instance, which _may_ be wrong
-        # self.new_thread_objects.emit([self.converter_instance, pardict])
-        # self.new_thread_objects.emit([self.converter_constructor, pardict])
+    def launchWizard(self):
+        whizz = ConvertWizard(converter = 'ase')
+        whizz.show()
+        result = whizz.result()
+
+def startGUI(some_args):
+    app = QApplication(some_args)
+    root = DummyLauncher(parent=None, title = "<b>dummy</b> window!")
+    root.show()
+    app.exec()
+
+if __name__ == '__main__':
+    startGUI(sys.argv)
