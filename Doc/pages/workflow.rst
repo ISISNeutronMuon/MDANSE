@@ -24,7 +24,7 @@ Frames
 ^^^^^^
 
 It is not necessary to use all the time frames of your MD simulation. You can decide
-to limit the range of simluation time, and reduce the number of the frames taken in that
+to limit the range of simulation time, and reduce the number of the frames taken in that
 range by increasing the step between them. Only the frames you selected will
 be passed to the analysis. See also :ref:`param-frames`.
 
@@ -84,7 +84,7 @@ Writing output
 --------------
 
 All the output arrays created in the analysis are written to the filesystem in the
-format chosen by the user. (If you intend to continue visualsing the results within
+format chosen by the user. (If you intend to continue visualising the results within
 the MDANSE GUI, you will have chosen the HDF5 format. If, however, you were planning
 to process the results further using other software, then you have most likely picked
 the ASCII output. See also :ref:`param-output-files`)

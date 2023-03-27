@@ -1265,7 +1265,7 @@ units.
    I(\omega) = \frac{1}{2 \pi} \mathscr{F}(f(t)w(t))
 
 Therefore, apart from simulating the effect of the instrumental resolution
-in an experiment, thepurpose of the instrument resolution is to smooth the
+in an experiment, the purpose of the instrument resolution is to smooth the
 function computed directly in time before performing its Fourier
 Transform into frequency space, in order to avoid numerical artefacts
 when FT noisy data.
@@ -1345,7 +1345,7 @@ At the moment the normalisation is performed by dividing the number
 array by its first element. For the time correlation analysis the
 normalisation means that the correlation curve is divided by
 the value at :math:`t=0`, and the normalised function :math:`f(t)`
-will, as a result, fullfil the criterion :math:`f(t)\rvert_{t=0}=1`.
+will, as a result, fullfil the criterion :math:`f(0)=1`.
 
 .. math::
 
