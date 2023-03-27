@@ -18,8 +18,10 @@ import os
 import re
 from os.path import expanduser
 
-from ase.io import iread
+from ase.io import iread, read
+from ase.atoms import Atoms as ASEAtoms
 import numpy as np
+import h5py
 
 from MDANSE import REGISTRY
 from MDANSE.Chemistry import ATOMS_DATABASE
@@ -297,6 +299,154 @@ class ASEInteractiveConverter(InteractiveConverter, regkey = "ase"):
         self._start = 0
 
         float(self.configuration['time_step']['value'])*measure(1.0,self.configuration['time_unit']['value'])
+
+    def primaryInputs(self) -> dict:
+        """Returns the list of inputs needed for the first page
+        of the wizard. These should typically be the names of
+        the input files passed to the converter.
+        """
+        return  self.input_files
+
+    def secondaryInputs(self) -> dict:
+        """Returns the list of inputs needed for the second page
+        of the wizard. These should typically be the parameters
+        specifying how to read the trajectory: time step, number
+        of frames, frame step, etc.
+        """
+        return  self.settings
+
+    def finalInputs(self) -> dict:
+        """Normally this should just give the user a chance
+        to input the name of the (converted) output trajectory.
+        It is done at the last step, since the user may want
+        to base the name on the decisions they made for the
+        input parameters.
+        """
+        return  self.output_files
+
+    def systemSummary(self) -> dict:
+        """Returns all the information about the simulation
+        that is currently stored by the converter. This will
+        allow the users to verify if all the information was
+        read correctly (or at all). This function must also
+        place default values in the fields related to the
+        parameters that could not be read.
+        """
+        raise NotImplementedError
+
+    def guessFromConfig(self, fname: str):
+        """Tries to retrieve as much information as possible
+        about the simulation to be converted from a config file.
+        
+        Arguments
+        ---------
+
+        fname (str) - name of the config file to be opened.
+        """
+        temp = read(fname)
+        self.parseASE(temp)
+
+    def guessFromTrajectory(self, fname: str):
+        """Tries to retrieve as much information as possible
+        about the simulation to be converted from a trajectory file.
+        This will typically mean that the first frame of the trajectory
+        will be read and parsed, while the rest of it will be ignored for now.
+
+        Arguments
+        ---------
+
+        fname (str) - name of the trajectory file to be opened.
+        """
+        gen = iread(fname, 0)  # gen is a generator which can yield Atoms objects
+
+        for i in gen[:1]:
+            temp = i  # now temp is the Atoms object from the first frame
+
+        self.parseASE(temp)
+
+    def parseASE(self, input: ASEAtoms):
+        
+        g = Graph()
+
+        element_count = {}
+        element_list = input.get_chemical_symbols()
+        id_list = np.arange(len(element_list)) + 1
+
+        self._nAtoms = len(element_list)
+
+        self._chemicalSystem = ChemicalSystem()
+
+
+        for atnum, element in enumerate(element_list):
+            if element in element_count.keys():
+                element_count[element] += 1
+            else:
+                element_count[element] = 1
+            g.add_node(atnum, element= element, atomName = f"{element}_{atnum+1}")
+
+        for cluster in g.build_connected_components():
+            if len(cluster) == 1:
+                node = cluster.pop()
+                try:
+                    obj = Atom(node.element, name=node.atomName)
+                except TypeError:
+                    print("EXCEPTION in LAMMPS loader")
+                    print(f"node.element = {node.element}")
+                    print(f"node.atomName = {node.atomName}")
+                    print(f"rankToName = {self._rankToName}")
+                obj.index = node.name
+            else:
+                atList = []
+                for atom in cluster:
+                    at = Atom(symbol=atom.element, name=atom.atomName)
+                    atList.append(at) 
+                c = collections.Counter([at.element for at in cluster])
+                name = "".join(["{:s}{:d}".format(k,v) for k,v in sorted(c.items())])
+                obj = AtomCluster(name, atList)
+                
+            self._chemicalSystem.add_chemical_entity(obj)
+
+    def finalize(self):
+        """I am not sure if this function is necessary. The specific converters
+        seem to override it with their own version.
+        """
+
+        if not hasattr(self,'_trajectory'):
+            return
+
+        try:
+            output_file = h5py.File(self._trajectory.filename, 'a')
+            # f = netCDF4.Dataset(self._trajectory.filename,'a')
+        except:
+            return
+        
+        try:
+            if 'time' in output_file.variables:
+                output_file.variables['time'].units = 'ps'
+                output_file.variables['time'].axis = 'time'
+                output_file.variables['time'].name = 'time'
+
+            if 'box_size' in output_file.variables:
+                output_file.variables['box_size'].units = 'ps'
+                output_file.variables['box_size'].axis = 'time'
+                output_file.variables['box_size'].name = 'box_size'
+
+            if 'configuration' in output_file.variables:
+                output_file.variables['configuration'].units = 'nm'
+                output_file.variables['configuration'].axis = 'time'
+                output_file.variables['configuration'].name = 'configuration'
+
+            if 'velocities' in output_file.variables:
+                output_file.variables['velocities'].units = 'nm/ps'
+                output_file.variables['velocities'].axis = 'time'
+                output_file.variables['velocities'].name = 'velocities'
+
+            if 'gradients' in output_file.variables:
+                output_file.variables['gradients'].units = 'amu*nm/ps'
+                output_file.variables['gradients'].axis = 'time'
+                output_file.variables['gradients'].name = 'gradients'
+        finally:
+            output_file.close()
 
     def run_step(self, index):
         """Runs a single step of the job.

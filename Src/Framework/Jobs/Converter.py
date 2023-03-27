@@ -35,41 +35,13 @@ class InteractiveConverter(IJob, metaclass = ABCMeta):
             raise ValueError("A regkey keyword parameter is needed in the subclass.")
 
     @classmethod
-    def create(cls, name):
+    def create(cls, name: str) -> 'InteractiveConverter':
         converter_class = cls._converter_registry[name]
         return converter_class
     
     @classmethod
     def converters(cls):
         return list(cls._converter_registry.keys())
-
-    @abstractmethod
-    def createInputs(self):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def parseConfigFile(self):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def takeCorrectedValues(self):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def readTrajectoryFile(self):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def readAFrame(self):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def createOutput(self):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def finalise(self):
-        raise NotImplementedError
     
     @abstractmethod
     def primaryInputs(self) -> dict:
