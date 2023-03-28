@@ -959,11 +959,12 @@ Neutron Dynamic Total Structure Factor
 -  available for trajectories only
 
 This is a combination of the Dynamic Coherent and the Dynamic Incoherent
-Structure Factors. It is a fully neutron specific analysis, where the
+Structure Factors. It is a fully neutron-specific analysis, where the
 coherent part of the intermediate scattering function is calculated
-using the atomic coherent neutron scattering lengths (b_coherent) and
+using the atomic coherent neutron scattering lengths
+:math:`b_{coherent}` and
 the incoherent one is calculated using the square of the atomic
-incoherent neutron scattering lengths (b_incoherent2). Therefore, in
+incoherent neutron scattering lengths :math:`{b^{2}}_{incoherent}`. Therefore, in
 this analysis the weights option is not available.
 
 The partial coherent intermediate scattering functions
@@ -972,7 +973,10 @@ transforms giving the partial coherent dynamic structure factors,
 :math:`S_{\alpha\beta}^{coh}(Q,\omega)`) are calculated exactly in the
 same way as in the DCSF analysis, i.e.:
 
-.. math:: I_{\alpha\beta}^{coh}(Q,t) = \left| \frac{1}{\sqrt{N_{\alpha}N_{\beta}}}\sum_{i \in \alpha,j \in \beta}^{N_{\alpha},N_{\beta}}\left\langle e^{- i\mathbf{Q}\mathbf{r}_{i}(t_{0})}e^{i\mathbf{Q}\mathbf{r}_{j}(t_{0} + t)} \right\rangle \right|_{\mathbf{Q}}
+.. math::
+   :label: ntdsf-eq1
+   
+   I_{\alpha\beta}^{coh}(Q,t) = \left| \frac{1}{\sqrt{N_{\alpha}N_{\beta}}}\sum_{i \in \alpha,j \in \beta}^{N_{\alpha},N_{\beta}}\left\langle e^{- i\mathbf{Q}\mathbf{r}_{i}(t_{0})}e^{i\mathbf{Q}\mathbf{r}_{j}(t_{0} + t)} \right\rangle \right|_{\mathbf{Q}}
 
 where :math:`\alpha` and :math:`\beta` refer to the chemical elements,
 :math:`N_{\alpha}` and :math:`N_{\beta}` are the respective number of
@@ -991,7 +995,10 @@ Similarly, the partial incoherent intermediate scattering functions
 structure factors :math:`S_{\alpha}^{inc}(Q,\omega)` are obtained as in
 the DISF analysis:
 
-.. math:: I_{\alpha}^{inc}(Q,t) = \left| \frac{1}{N_{\alpha}}\sum_{i \in \alpha}^{N_{\alpha}}\left\langle e^{- i\mathbf{Q}\mathbf{r}_{i}(t_{0})}e^{i\mathbf{Q}\mathbf{r}_{i}(t_{0} + t)} \right\rangle \right|_{\mathbf{Q}}
+.. math::
+   :label: ntdsf-eq2
+   
+   I_{\alpha}^{inc}(Q,t) = \left| \frac{1}{N_{\alpha}}\sum_{i \in \alpha}^{N_{\alpha}}\left\langle e^{- i\mathbf{Q}\mathbf{r}_{i}(t_{0})}e^{i\mathbf{Q}\mathbf{r}_{i}(t_{0} + t)} \right\rangle \right|_{\mathbf{Q}}
 
 The main difference between this analysis and the DCSF and DISF
 analyses, apart from the fact that the coherent and incoherent
@@ -1000,20 +1007,27 @@ partial contributions are combined. In this analysis the total
 incoherent, total coherent and total (coherent + incoherent) signals are
 calculated as:
 
-.. math:: I^{inc}(Q,t) = \sum_{\alpha}^{N_{\alpha}}{c_{\alpha}b_{\alpha,\text{inc}}^{2}}I_{\alpha}^{inc}(Q,t)
+.. math::
+   :label: ntdsf-eq3
+   
+   I^{inc}(Q,t) = \sum_{\alpha}^{N_{\alpha}}{c_{\alpha}b_{\alpha,\text{inc}}^{2}}I_{\alpha}^{inc}(Q,t)
 
-.. math:: I^{coh}(Q,t) = \sum_{\alpha,\beta}^{N_{\alpha},N_{\beta}}{\sqrt{c_{\alpha}c_{\beta}}b_{\alpha,\text{coh}}b_{\beta,\text{coh}}I_{\alpha\beta}^{coh}(Q,t)}
+.. math::
+   :label: ntdsf-eq4
+   
+   I^{coh}(Q,t) = \sum_{\alpha,\beta}^{N_{\alpha},N_{\beta}}{\sqrt{c_{\alpha}c_{\beta}}b_{\alpha,\text{coh}}b_{\beta,\text{coh}}I_{\alpha\beta}^{coh}(Q,t)}
 
-.. math:: I^{tot}(Q,t) = I^{inc}(Q,t) + I^{coh}(Q,t) = \sum_{\alpha}^{N_{\alpha}}{c_{\alpha}b_{\alpha,\text{inc}}^{2}}I_{\alpha}^{inc}(Q,t) + \sum_{\alpha,\beta}^{N_{\alpha},N_{\beta}}{\sqrt{c_{\alpha}c_{\beta}}b_{\alpha,\text{coh}}b_{\beta,\text{coh}}I_{\alpha\beta}^{coh}(Q,t)}
+.. math::
+   :label: ntdsf-eq5
+   
+   I^{tot}(Q,t) = I^{inc}(Q,t) + I^{coh}(Q,t) = \sum_{\alpha}^{N_{\alpha}}{c_{\alpha}b_{\alpha,\text{inc}}^{2}}I_{\alpha}^{inc}(Q,t) + \sum_{\alpha,\beta}^{N_{\alpha},N_{\beta}}{\sqrt{c_{\alpha}c_{\beta}}b_{\alpha,\text{coh}}b_{\beta,\text{coh}}I_{\alpha\beta}^{coh}(Q,t)}
 
 where :math:`c_{\alpha} = \frac{N_{\alpha}}{N}` and
 :math:`c_{\beta} = \frac{N_{\beta}}{N}` are the concentration numbers
 for elements :math:`\alpha` and :math:`\beta`, respectively.
 
 These expressions correspond to the formalism and equations given in
-Neutron scattering fundamenals (vol. 44 of Experimental methods in the
-physical sciences), chapter 1: “An introduction to neutron scattering”,
-by F. Fernández-Alonso and D. Price.
+[Ref47]_, chapter 1: “An introduction to neutron scattering” .
 
 As in the MDANSE database the coherent and incoherent neutron scattering
 lengths are given in Å, the total intermediate scattering functions
@@ -1023,32 +1037,24 @@ neutron observables in barn/sterad/atom and compare them directly to the
 experimental results (assuming the later have been properly normalized
 and presented in absolute units).
 
-Note: I think all the above is right, but we should check that the code
-really implements the equations above (in particular the use of the
-square root in :math:`\sqrt{N_{\alpha}N_{\beta}}` and
-:math:`\sqrt{c_{\alpha}c_{\beta}}`) and that there are no other unit
-transformations in the analysis (I am less sure about that).
-
-And one point to keep in mind and discuss in the future is if the
-scattering lengths in the database should be in Angstrom. As the MDANSE units
-are nm, it will seem more logical that they are given in nm. Otherwise,
-it will make sense to use fm (as in the Sears' tables) or give them in
-10\ :sup:`-14` m units in order to have the result directly in barns.
-Until now, since all the other analysis are “weight-normalized”, this
-had no practical implications.
-
 On the other hand, the DISF and DCSF analyses use the standard weight
-normalization procedure implemented in MDANSE (see Ref: Normalisation
-section). Therefore the total coherent intermediate scattering function
+normalization procedure implemented in MDANSE (see :ref:`param-normalize`).
+Therefore the total coherent intermediate scattering function
 returned by the DCSF analysis is (assuming that the chosen weights are
 b_coherent):
 
-.. math:: I^{coh}(Q,t) = \frac{\sum_{\alpha\beta}^{n}{c_{\alpha}c_{\beta}b_{\alpha,coh}b_{\beta,coh}I_{\alpha\beta}^{coh}(Q,t)}}{\sum_{\alpha\beta}^{n}{c_{\alpha}c_{\beta}b_{\alpha,coh}b_{\beta,coh}}}
+.. math::
+   :label: ntdsf-eq6
+   
+   I^{coh}(Q,t) = \frac{\sum_{\alpha\beta}^{n}{c_{\alpha}c_{\beta}b_{\alpha,coh}b_{\beta,coh}I_{\alpha\beta}^{coh}(Q,t)}}{\sum_{\alpha\beta}^{n}{c_{\alpha}c_{\beta}b_{\alpha,coh}b_{\beta,coh}}}
 
 And the incoherent intermedicate scattering function given by the DISF
 analysis is (assuming that the chosen weights are b_incoherent2):
 
-.. math:: I^{inc}(Q,t) = \frac{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,inc}^{2}I_{\alpha}^{inc}(Q,t)}}{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,inc}^{2}}}
+.. math::
+   :label: ntdsf-eq7
+   
+   I^{inc}(Q,t) = \frac{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,inc}^{2}I_{\alpha}^{inc}(Q,t)}}{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,inc}^{2}}}
 
 Naturally similar expressions apply to the dynamic structure factors,
 :math:`S_{\alpha\beta}^{coh}(Q,\omega)` and
