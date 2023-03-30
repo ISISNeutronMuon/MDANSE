@@ -51,10 +51,9 @@ class ConvertWizard(QWizard):
         converter_instance.build_configuration()
         settings = converter_instance.settings
         self.converter_instance = converter_instance
-    
-    def startChain(self):
+
         firstone = self.converter_instance.primaryInputs()
-        firstpage = ConverterFirstPage(self, firstone)
+        firstpage = ConverterFirstPage(self, parameter_dict = firstone)
         self.addPage(firstpage)
 
     @Slot()
@@ -79,17 +78,15 @@ class ConverterFirstPage(QWizardPage):
     new_thread_objects = Signal(list)
     new_path = Signal(str)
 
-    def __init__(self, *args, converter: IJob = 'Dummy', **kwargs):
+    def __init__(self, *args, parameter_dict : dict = {}, **kwargs):
         super().__init__(*args, **kwargs)
 
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         self.handlers = {}
-        self.converter_instance = None
-        self.converter_constructor = converter
         self.default_path = '.'
 
-        if converter == 'Dummy':
+        if len(parameter_dict) < 1:
             settings = OrderedDict([('dummy int', ('int', {'default': 1.0, 'label': 'Time step (ps)'})),
                                     ('time_step', ('float', {'default': 1.0, 'label': 'Time step (ps)'})),
                                     ('fold', ('boolean', {'default': False, 'label': 'Fold coordinates in to box'})),
@@ -97,10 +94,7 @@ class ConverterFirstPage(QWizardPage):
                                     # ('output_file', ('single_output_file', {'format': 'hdf', 'root': 'pdb_file'}))
                                     ])
         else:
-            converter_instance = converter()
-            converter_instance.build_configuration()
-            settings = converter_instance.settings
-            self.converter_instance = converter_instance
+            settings = parameter_dict
         for key, value in settings.items():
             dtype = value[0]
             ddict = value[1]
@@ -109,21 +103,6 @@ class ConverterFirstPage(QWizardPage):
             base, data_handler = InputFactory.createInputField(parent = self, kind = dtype, **ddict)
             layout.addWidget(base)
             self.handlers[key] = data_handler
-        
-        buttonbase = QWidget(self)
-        buttonlayout = QHBoxLayout(buttonbase)
-        buttonbase.setLayout(buttonlayout)
-        self.cancel_button = QPushButton("Cancel", buttonbase)
-        self.execute_button = QPushButton("CONVERT!", buttonbase)
-        self.execute_button.setStyleSheet("font-weight: bold")
-
-        self.cancel_button.clicked.connect(self.cancel_dialog)
-        self.execute_button.clicked.connect(self.execute_converter)
-
-        buttonlayout.addWidget(self.cancel_button)
-        buttonlayout.addWidget(self.execute_button)
-
-        layout.addWidget(buttonbase)
     
     @Slot(dict)
     def parse_updated_params(self, new_params: dict):
@@ -134,6 +113,10 @@ class ConverterFirstPage(QWizardPage):
     @Slot()
     def cancel_dialog(self):
         self.destroy()
+    
+    def validatePage(self) -> bool:
+        # here we could try to parse some stuff.
+        return super().validatePage()
 
 
 
