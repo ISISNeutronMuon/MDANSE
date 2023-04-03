@@ -75,12 +75,13 @@ Q shells
 Reciprocal vectors are used in MDANSE for the analysis related
 to scattering experiments such as dynamic coherent structure 
 or elastic incoherent structure factor analysis.
-In MDANSE, properties that depends on Q vectors are always scalar regarding 
-Q vectors in the sense that the values of these properties will be
-computed for a given norm of Q vectors and not for a given Q vectors.
-Hence, the Q vectors generator supported by MDANSE always generates
+The Q vectors generator supported by MDANSE always generates
 Q vectors on *Q-shells*, each shell containing a set of Q vectors whose 
-norm match the Q shell value within a given tolerance.
+norm match the Q shell value within a given tolerance (typically
+given in a separate input labeled *width*.)
+
+The following inputs can be used to define the number of Q shells and the
+average length of the Q vectors in each shell:
 
    -  **from**
 
