@@ -72,7 +72,7 @@ class RangeConfigurator(IConfigurator):
         first, last, step = value
         
         if self._includeLast:
-            last += step/2.0
+            last += step*0.01  # less likely to overstep the upper limit
             
         value = numpy.arange(first, last, step)
         value = value.astype(self._valueType)

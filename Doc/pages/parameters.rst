@@ -67,6 +67,52 @@ frame taken into account.
 which are skipped. 1 means that all frames are read, 2 means every other
 is read, etc.
 
+.. _param-qshells:
+
+Q shells
+~~~~~~~~
+
+Reciprocal vectors are used in MDANSE for the analysis related
+to scattering experiments such as dynamic coherent structure 
+or elastic incoherent structure factor analysis.
+In MDANSE, properties that depends on Q vectors are always scalar regarding 
+Q vectors in the sense that the values of these properties will be
+computed for a given norm of Q vectors and not for a given Q vectors.
+Hence, the Q vectors generator supported by MDANSE always generates
+Q vectors on *Q-shells*, each shell containing a set of Q vectors whose 
+norm match the Q shell value within a given tolerance.
+
+   -  **from**
+
+      *Format:* float
+
+      *Default:* 0
+
+      *Description:* The lowest value of :math:`|Q|` to be used in
+      Q-vector generation.
+
+   -  **to**
+
+      *Format:* float
+
+      *Default:* 10
+
+      *Description:* The highest value of :math:`|Q|` to be used in
+      Q-vector generation.
+
+   -  **by step of**
+
+      *Format:* float
+
+      *Default:* 1
+
+      *Description:* The step by which :math:`|Q|` in incremented when
+      changing from one Q-shell to the next one. Please keep in mind
+      that the *width* input parameter should be adjusted as well when
+      chaning the step.
+
+The *unit* of the Q-vector length in MDANSE is :math:`\text{nm}^{-1}`.
+
 .. _param-output-files:
 
 Output files
@@ -372,27 +418,7 @@ crystalline powder).
 ensure that the same random numbers are generated when the same **seed**
 is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **n vectors**
 
@@ -438,27 +464,7 @@ generated only in a plane perpendicular to the two axes given.
    ensure that the same random numbers are generated when the same **seed**
    is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **n vectors**
 
@@ -551,27 +557,7 @@ by the axis given.
    ensure that the same random numbers are generated when the same **seed**
    is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **n vectors**
 
@@ -638,27 +624,7 @@ can be used to generate only h00 vectors.
    ensure that the same random numbers are generated when the same **seed**
    is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **width**
 
@@ -731,27 +697,7 @@ option and use the same set for both calculations.
    ensure that the same random numbers are generated when the same **seed**
    is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **n vectors**
 
@@ -797,27 +743,7 @@ only in a plane perpendicular to the two axes given.
    ensure that the same random numbers are generated when the same **seed**
    is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **n vectors**
 
@@ -910,27 +836,7 @@ given.
    ensure that the same random numbers are generated when the same **seed**
    is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **n vectors**
 

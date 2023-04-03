@@ -396,39 +396,22 @@ rectangular grid of equidistantly spaced points along the time-and the
 .. math::
    :label: pfx80
    
-   {{F}_{\text{coh}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\cdot\Delta t} \right)} \right\rangle}}^{q},}
-
-.. math::
-   :label: pfx81
-
+   {{F}_{\text{coh}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\cdot\Delta t} \right)} \right\rangle}}^{q},} \\
    {{k = 0}\ldots{N_{t} - 1},{m = 0}\ldots{N_{q} - 1.}}
 
 where N\ :sub:`t` is the number of time steps in the coordinate time
 series, N\ :sub:`q` is a user-defined number of *q*-shells,
 N\ :sub:`species` is the number of selected species, n\ :sub:`I` the
 number of atoms of species *I*, :math:`\omega`\ :sub:`I` the weight for species *I*
-(see Section :ref:`target_CN` for more details) and
-
-.. math::
-   :label: pfx82
-   
-   {\rho_{I}\left( {q,k\cdot\Delta t} \right)}
-
-\ is the Fourier transformed particle density for species *I* defined as,
+(see Section :ref:`target_CN` for more details) and :math:`{\rho_{I}\left( {q,k\cdot\Delta t} \right)}`
+is the Fourier transformed particle density for species *I* defined as
 
 .. math::
    :label: pfx83
 
    {\rho_{I}{\left( {q,k\cdot\Delta t} \right) = \sum\limits_{\alpha}^{n_{I}}}\exp\left\lbrack {\mathit{iq}\cdot R_{\alpha}\left( {k\cdot\Delta t} \right)} \right\rbrack.}
 
-The symbol
-
-.. math::
-   :label: pfx84
-   
-   {\overline{...}}^{q}
-
-\ in Eq. :math:numref:`pfx80` denotes an average
+The symbol :math:`{\overline{...}}^{q}` in Eq. :math:numref:`pfx80` denotes an average
 over *q*-vectors having *approximately* the same modulus
 
 .. math::
@@ -479,9 +462,8 @@ From these *q*-vectors only a maximum number per grid-point (called
 generically *q*-shell also in the anisotropic case) is kept.
 
 The *q*-vectors can be generated isotropically, anisotropically or along
-user-defined directions. The :math:`\sqrt{\omega_{I}}`
-
-\ may be negative if they represent normalized coherent scattering
+user-defined directions. The :math:`\sqrt{\omega_{I}}` may be negative
+if they represent normalized coherent scattering
 lengths, i.e.
 
 .. math::
@@ -490,11 +472,13 @@ lengths, i.e.
    {{\sqrt{\omega_{I}} = \frac{b_{I,\text{coh}}}{\sqrt{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}b_{I,\text{coh}}^{2}}}}}.}
 
 Negative coherent scattering lengths occur in hydrogenous materials
-since :math:`b_{\mathit{coh},H}`
-
-\ Is negative [Ref20]_. The density-density
+since :math:`b_{\mathit{coh},H}` is negative [Ref20]_. The density-density
 correlation is computed via the *FCA* technique described in the section
 :ref:`appendix-fca`.
+
+When the default value of weights (:math:`b_{coherent}`) is chosen for this
+analysis, the result will correspond to that of the equation :math:numref:`ntdsf-eq6`
+from the :ref:`analysis-ndtsf`.
 
 .. _gui-6:
 
@@ -549,14 +533,8 @@ where N\ :sub:`t` is the number of time steps in the coordinate time
 series, N\ :sub:`q` is a user-defined number of *q*-shells,
 N\ :sub:`species` is the number of selected species, n\ :sub:`I` the
 number of atoms of species *I*, :math:`\omega`\ :sub:`I` the weight for species *I*
-(see Section :ref:`target_CN` for more details) and
-
-.. math::
-   :label: pfx91
-   
-   {F_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)}
-
-\ is defined as:
+(see Section :ref:`target_CN` for more details) and :math:`{F_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)}`
+is defined as:
 
 .. math::
    :label: pfx92
@@ -621,6 +599,10 @@ since the number of time correlation functions to be computed equals the
 number of atoms times the total number of *q*-vectors. This analysis is
 actually one of the most time-consuming among all the analysis available
 in *MDANSE*.
+
+When the default value of weights (:math:`{b^{2}}_{incoherent}`) is chosen for this
+analysis, the result will correspond to that of the equation :math:numref:`ntdsf-eq7`
+from the :ref:`analysis-ndtsf`.
 
 .. _gui-7:
 
@@ -909,45 +891,13 @@ GUI
 |image30| |image31|
 
 -  :ref:`param-frames`
-
--  q shells
-
-   -  **from**
-
-*Format:* int
-
-*Default:* 0
-
-*Description:* <insert>
-
--  
-
-   -  **to**
-
-*Format:* int
-
-*Default:* 10
-
-*Description:* <insert>
-
--  
-
-   -  **by step of**
-
-*Format:* int
-
-*Default:* 1
-
-*Description:* determines the periodicity of which values are used and
-which are skipped. 1 means that all values are used, 2 means every other
-one is, etc.
-
+-  :ref:`param-qshells`
 -  :ref:`param-instrument-resolution`
 -  `project coordinates <#_Project_coordinates>`__
 -  :ref:`param-atom-selection`
 -  :ref:`param-group-coordinates`
 -  :ref:`param-atom-transmutation`
--  `weights <#_Weights>`__
+-  :ref:`param-weights`
 -  :ref:`param-output-files`
 -  :ref:`param-running-mode`
 
@@ -1056,7 +1006,7 @@ analysis is (assuming that the chosen weights are b_incoherent2):
    
    I^{inc}(Q,t) = \frac{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,inc}^{2}I_{\alpha}^{inc}(Q,t)}}{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,inc}^{2}}}
 
-Naturally similar expressions apply to the dynamic structure factors,
+Naturally, similar expressions apply to the dynamic structure factors,
 :math:`S_{\alpha\beta}^{coh}(Q,\omega)` and
 :math:`S_{\alpha}^{inc}(Q,\omega)`.
 
