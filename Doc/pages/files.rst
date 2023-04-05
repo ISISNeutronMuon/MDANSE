@@ -1,9 +1,21 @@
 
+.. _file_formats:
+
 Input and output files
 ======================
 
-Almost, if not all, functionalities provided by MDANSE are based on
-Network Common Data Form (NetCDF) input file. However, in certain
+At the moment there are two binary file formats extensively used by MDANSE:
+Network Common Data Form (NetCDF) and Hierarchical Data Format (HDF5).
+The former is used for storing trajectories, and the latter for the
+analysis results.
+
+.. note::
+   The plan for the future releases of MDANSE is to phase out the NetCDF
+   format and focus exclusively on HDF5. This does not affect the way you
+   use MDANSE at the moment, but please be aware that you may need to convert
+   your trajectories into HDF5 when switching to MDANSE 2.0.
+
+However, in certain
 circumstances MDANSE can use or produce another type of files. We will
 start this section by explaining in detail the NetCDF file format
 introducing next the other file formats used by MDANSE.
@@ -76,13 +88,14 @@ It is a goal to replace NetCDF with HDF5 as the main storage format, and
 therefore MDANSE supports HDF5 output for :ref:`analysis` and
 input for plotters.
 
+.. _text_output:
+
 DAT file format
 ---------------
 
-When performing an :ref:`analysis`, it there are two options
-for output file formats: NetCDF and ASCII. By default, only NetCDF is
-selected, creating an MMTK NetCDF file, but it is possible to change
-that to ASCII or both. If the ASCII option is selected, a tarball is
+When performing an :ref:`analysis`, a binary output format is selected
+by default, but it is possible to change it to ASCII, which indicates
+a text file output. If the ASCII option is selected, a tarball is
 generated. Inside are multiple files which together contain the results
 of the analysis. Firstly, there is a text file, jobinfo.txt, which
 contains the options that were selected when performing the analysis.

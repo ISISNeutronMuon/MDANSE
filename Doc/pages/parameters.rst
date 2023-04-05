@@ -67,6 +67,53 @@ frame taken into account.
 which are skipped. 1 means that all frames are read, 2 means every other
 is read, etc.
 
+.. _param-qshells:
+
+Q shells
+~~~~~~~~
+
+Reciprocal vectors are used in MDANSE for the analysis related
+to scattering experiments such as dynamic coherent structure 
+or elastic incoherent structure factor analysis.
+The Q vectors generator supported by MDANSE always generates
+Q vectors on *Q-shells*, each shell containing a set of Q vectors whose 
+norm match the Q shell value within a given tolerance (typically
+given in a separate input labeled *width*.)
+
+The following inputs can be used to define the number of Q shells and the
+average length of the Q vectors in each shell:
+
+   -  **from**
+
+      *Format:* float
+
+      *Default:* 0
+
+      *Description:* The lowest value of :math:`|Q|` to be used in
+      Q-vector generation.
+
+   -  **to**
+
+      *Format:* float
+
+      *Default:* 10
+
+      *Description:* The highest value of :math:`|Q|` to be used in
+      Q-vector generation.
+
+   -  **by step of**
+
+      *Format:* float
+
+      *Default:* 1
+
+      *Description:* The step by which :math:`|Q|` in incremented when
+      changing from one Q-shell to the next one. Please keep in mind
+      that the *width* input parameter should be adjusted as well when
+      chaning the step.
+
+The *unit* of the Q-vector length in MDANSE is :math:`\text{nm}^{-1}`.
+
 .. _param-output-files:
 
 Output files
@@ -107,12 +154,12 @@ file browser.
 
 *Format:* drop-down
 
-*Default:* netcdf
+*Default:* HDF5 (for analysis), NetCDF (for trajectory conversion)
 
-*Description:* specifies the `file formats <#_Input_and_output>`__ in
-which the analysis results are saved. :ref:`netcdf`,
-`ASCII <#_DAT_file_format>`__, or both can be selected. The name of
-these files is given in the 'Basename' string.
+*Description:* specifies the :ref:`file_formats` in
+which the analysis results are saved. :ref:`hdf5`, :ref:`netcdf`,
+:ref:`text_output`, or cominbations of those can be selected.
+The name of these files is given in the 'Basename' string.
 
 Creating selections
 ~~~~~~~~~~~~~~~~~~~
@@ -245,7 +292,7 @@ should appear in the drop-down menu in the analysis window.
 
 Atom selection is available for all the analyses for which
 :ref:`param-atom-transmutation` is available, as well as all
-:ref:`trajectory` analyses, :ref:`analysis-gacf`, `Molecular
+:ref:`analysis-trajectory` analyses, :ref:`analysis-gacf`, `Molecular
 Trace <#_Molecular_Trace>`__, `Root Mean Square
 Fluctuation, <#_Root_Mean_Square_1>`__ `Radius of
 Gyration <#_Radius_Of_Gyration>`__, `Solvent Accessible
@@ -372,31 +419,7 @@ crystalline powder).
 ensure that the same random numbers are generated when the same **seed**
 is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
--  
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
--  
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **n vectors**
 
@@ -442,31 +465,7 @@ generated only in a plane perpendicular to the two axes given.
    ensure that the same random numbers are generated when the same **seed**
    is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
--  
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
--  
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **n vectors**
 
@@ -491,16 +490,12 @@ generated only in a plane perpendicular to the two axes given.
       *Description:* the x-components of the first axis used to specify the
       plane.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 0
       *Description:* the y-components of the first axis used to specify the
       plane.
-
--  
 
    -  **z-component**
 
@@ -518,16 +513,12 @@ generated only in a plane perpendicular to the two axes given.
       *Description:* the x-components of the second axis used to specify the
       plane.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 1
       *Description:* the y-components of the second axis used to specify the
       plane.
-
--  
 
    -  **z-component**
 
@@ -567,31 +558,7 @@ by the axis given.
    ensure that the same random numbers are generated when the same **seed**
    is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
--  
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
--  
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **n vectors**
 
@@ -615,15 +582,11 @@ by the axis given.
       *Default:* 1
       *Description:* the x-components of the specified axis.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 0
       *Description:* the y-components of the specified axis.
-
--  
 
    -  **z-component**
 
@@ -662,31 +625,7 @@ can be used to generate only h00 vectors.
    ensure that the same random numbers are generated when the same **seed**
    is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
--  
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
--  
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **width**
 
@@ -704,16 +643,12 @@ can be used to generate only h00 vectors.
       *Description:* the minimum value used to construct the range of h
       vectors.
 
--  
-
    -  **to**
 
       *Format:* int
       *Default:* 0
       *Description:* the maximum value used to construct the range of h
       vectors.
-
--  
 
    -  **by step of**
 
@@ -763,31 +698,7 @@ option and use the same set for both calculations.
    ensure that the same random numbers are generated when the same **seed**
    is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
--  
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
--  
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **n vectors**
 
@@ -833,31 +744,7 @@ only in a plane perpendicular to the two axes given.
    ensure that the same random numbers are generated when the same **seed**
    is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
--  
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
--  
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **n vectors**
 
@@ -882,16 +769,12 @@ only in a plane perpendicular to the two axes given.
       *Description:* the x-components of the first axis used to specify the
       plane.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 0
       *Description:* the y-components of the first axis used to specify the
       plane.
-
--  
 
    -  **z-component**
 
@@ -909,16 +792,12 @@ only in a plane perpendicular to the two axes given.
       *Description:* the x-components of the second axis used to specify the
       plane.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 1
       *Description:* the y-components of the second axis used to specify the
       plane.
-
--  
 
    -  **z-component**
 
@@ -958,31 +837,7 @@ given.
    ensure that the same random numbers are generated when the same **seed**
    is used, therefore making the calculation more reproducible.
 
--  shells
-
-   -  **from**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the minimum value used to construct the range of shells.
-
--  
-
-   -  **to**
-
-      *Format:* int
-      *Default:* 0
-      *Description:* the maximum value used to construct the range of shells.
-
--  
-
-   -  **by step of**
-
-      *Format:* int
-      *Default:* 1
-      *Description:* the step used to construct the range of shells. If it is
-      1, every integer between **from** and **to** is placed into the range,
-      if it is 2, every other, etc.
+-  :ref:`param-qshells`
 
 -  **n vectors**
 
@@ -1006,15 +861,11 @@ given.
       *Default:* 1
       *Description:* the x-components of the specified axis.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 0
       *Description:* the y-components of the specified axis.
-
--  
 
    -  **z-component**
 
@@ -1061,16 +912,12 @@ according to the given qstep.
       *Description:* the minimum value used to construct the range of h
       vectors.
 
--  
-
    -  **to**
 
       *Format:* int
       *Default:* 0
       *Description:* the maximum value used to construct the range of h
       vectors.
-
--  
 
    -  **by step of**
 
@@ -1124,15 +971,11 @@ input.
       *Default:* 1
       *Description:* the x-component of this Q point.
 
--  
-
    -  **y-component**
 
       *Format:* int
       *Default:* 0
       *Description:* the y-component of this Q point.
-
--  
 
    -  **z-component**
 
@@ -1150,6 +993,7 @@ input.
 -  **Generate** button generates the hkl vectors based on the
    specifications above. It must be clicked before the vectors can be
    saved.
+
 -  **Name**
 
    *Format:* str
@@ -1199,29 +1043,139 @@ Instrument resolution
 
 This option is available in all the analyses performing a time Fourier
 Transform, e.g. for the calculation of the density of states or the
-dynamic structure factor. You can choose the shape of the resolution
-(default is Gaussian), the position (default is at =0) and the
-parameter defining the width of the function in frequency space ( for
-the Gaussian resolution). Those parameters define a function R() and
-its analytical Fourier Transform R(t) is then used to compute I(t)R(t),
-where I(t) is the time-dependent property directly computed from the
-trajectory (e.g. the velocity autocorrelation function for the DOS, or
-the intermediate scattering function for the S(Q,)). The product is the
-Fourier transformed to obtain the final result.
+dynamic structure factor. The following resolution shapes are supported
+in MDANSE at the moment:
 
-The main purpose of the instrument resolution is therefore to smooth the
-function computed directly in time before performing its Fourier
-Transform into frequency space, in order to avoid numerical artefacts
-when FT noisy data. But it can be also used as an approximate way of
-estimating instrument resolution effects if you give a value of 
-similar to the one of the experimental resolutions. For example, if you
-are going to compare your simulation with data measured on a
-spectrometer having a resolution of 0.1 meV (FWHM), then use:
+- Gaussian
+
+  The following formula is used for the calculation of the Gaussian function:
+
+  .. math::
+
+    G(\omega;\sigma,\mu) = \frac{\sqrt{2\pi}}{\sigma} e^{\frac{(\omega-\mu)^{2}}{-2\sigma^{2}}}
+
+  The corresponding MDANSE input is:
+
+  :code:`('gaussian', {'mu': 0.0, 'sigma': 1.0})`
+
+- Lorentzian
+
+  The following formula is used for the calculation of the Lorentzian function:
+
+  .. math::
+
+    L(\omega;\sigma,\mu) = \frac{2\sigma}{(\omega-\mu)^{2} + \sigma^{2}}
+
+  The corresponding MDANSE input is:
+
+  :code:`('lorentzian', {'mu': 0.0, 'sigma': 1.0})`
+
+- Pseudo-Voigt
+
+  The Pseudo-Voigt profile is expressed as a combination of Lorentzian and Gaussian functions:
+  
+  .. math::
+
+    V_p(\omega) = \eta L(\omega,\sigma_L,\mu_L) + (1 - \eta) G(\omega,\sigma_G,\mu_G)
+
+  The corresponding MDANSE input is:
+
+  :code:`('pseudo-voigt', {'eta': 0.5, 'mu_lorentzian': 0.0, 'sigma_lorentzian': 1.0, 'mu_gaussian': 0.0, 'sigma_gaussian': 1.0})`
+
+- square
+
+  Square profile is a constant for points that are separated from :math:`\mu` by a distance
+  less than :math:`\sigma`, and 0 otherwise:
+   
+  .. math::
+
+     R(\omega) = \begin{cases}
+                \frac{\pi}{\sigma} & if \ |\omega - \mu| \leq \sigma, \\
+                0 & if \ |\omega - \mu| > \sigma.
+                \end{cases}
+
+  The corresponding MDANSE input is:
+
+  :code:`('square', {'mu': 0.0, 'sigma': 1.0})`
+
+- triangular
+
+  Triangular profile drops linearly on either side of the :math:`\mu` argument
+  and reaches 0 at the distance :math:`\sigma` from :math:`\mu`:
+
+  .. math::
+
+     R(\omega) = \begin{cases}
+                \frac{2\pi}{\sigma^{2}} (\sigma - |\omega - \mu|) & if \ |\omega - \mu| \leq \sigma, \\
+                0 & if \ |\omega - \mu| > \sigma.
+                \end{cases}
+
+  The corresponding MDANSE input is:
+
+  :code:`('triangular', {'mu': 0.0, 'sigma': 1.0})`
+
+- ideal
+  
+  The ideal resolution is expressed as a Dirac function:
+
+  .. math::
+    
+    D(\omega) = \begin{cases}
+                1 & if \ \omega = 0, \\
+                0 & if \ \omega \neq 0.
+                \end{cases}
+
+  The corresponding MDANSE input is:
+
+  :code:`('ideal', {})`
+
+You can choose the shape of the resolution
+(default is Gaussian), the centre position (default is at :math:`\mu=0`) and the
+parameter defining the width of the function in frequency space
+(:math:`\sigma`). Since MDANSE uses frequency units, and most
+neutron scientists work with meV energy units, you can follow the simple
+conversion for the *Gaussian* function:
+
+.. math::
+
+   \sigma (\text{FWHM}=1\text{meV}) \approx 0.65 \text{ps}^{\text{-1}},
+
+which means that :math:`\sigma=0.65` will correspond to a 1 meV resolution. 
+The conversion factor is derived here:
 
 .. math::
    :label: eq1
    
-   {\sigma\approx\frac{\mathit{FWHM}{\lbrack\text{meV}\rbrack}}{2.35}\times 1.519\frac{\lbrack\text{ps}^{\text{-1}}\rbrack}{\lbrack\text{meV}\rbrack}\approx 0.065\text{ps}^{\text{-1}}}
+   {\sigma\approx\frac{\mathit{FWHM}{\lbrack\text{meV}\rbrack}}{2.35}\times 1.519\frac{\lbrack\text{ps}^{\text{-1}}\rbrack}{\lbrack\text{meV}\rbrack}\approx 0.065\text{ps}^{\text{-1}}},
+
+where the 2.35 is the :math:`2\sqrt{2\log2}` factor connecting the
+FWHM with the :math:`\sigma` parameter of the Gaussian function.
+
+The selected resolution function (window function) in the frequency units
+is first inverse Fourier-transformed to
+produce its equivalent in time units
+
+.. math::
+   :label: _param-window-function
+
+   w(t) = \mathscr{F}(w(\omega) )
+
+The time-dependent function (e.g. velocity autocorrelation function for the DOS, or
+the intermediate scattering function fot the :math:`S(Q,\omega)`)
+calculated in the analysis is then multiplied by 
+the window function and Fourier-transformed to produce a spectrum in energy
+units.
+
+.. math::
+   :label: _param-resolution-equation
+
+   I(\omega) = \frac{1}{2 \pi} \mathscr{F}(f(t)w(t))
+
+Therefore, apart from simulating the effect of the instrumental resolution
+in an experiment, the purpose of the instrument resolution is to smooth the
+function computed directly in time before performing its Fourier
+Transform into frequency space, in order to avoid numerical artefacts
+when FT noisy data.
 
 This parameter is available for the following analyses: `Current
 Correlation Function <#_Current_Correlation_Function>`__, `Density of
@@ -1243,33 +1197,35 @@ Interpolation order
 Analyses that require atomic velocity data have an option to interpolate
 this data from atomic positions. By default, no interpolation is
 performed and instead MDANSE attempts to use the velocities stored int
-the NetCDF trajectory. If an order is selected, MDANSE performs a
+the NetCDF trajectory. Of course, depending on the way your simulation
+was set up, it is possible that the atoms velocities were not even stored
+in the output. It is still possible to derive the velocities of atoms
+from their positions at known time intervals, which is the subject of this
+section.
+
+If an interpolation order is selected, MDANSE performs a
 numerical differentiation of the positional data. There are options to
 differentiate using 1\ :sup:`st` to 5\ :sup:`th` order.
 
 -  Order 1
 
-   -  The first time-derivative of each point r(t\ :sub:`i`) is
-      calculated as
+   The first time-derivative of each point r(t\ :sub:`i`) is
+   calculated as
 
-.. math::
-   :label: eq113
+   .. math::
+      :label: eq113
 
-   {\overset{.}{r}{\left( t_{i} \right) = \frac{r{\left( t_{i + 1} \right) - r}\left( t_{i} \right)}{\mathit{\Delta t}}}}
+      {\overset{.}{r}{\left( t_{i} \right) = \frac{r{\left( t_{i + 1} \right) - r}\left( t_{i} \right)}{\mathit{\Delta t}}}},
 
--  
-
-   -  
-
-      -  Δt is the time step
+   where :math:`\mathit{\Delta t}` is the time step.
 
 -  Order N = {2, 3, 4, 5}
 
-   -  MDANSE calculates the first time-derivative of each point
-      r(t\ :sub:`i`) (r = x,y,z) using the N-order polynomial,
-      interpolating the N+1 points across r(t\ :sub:`i`), where
-      r(t\ :sub:`i`) belongs to this set. Please see Ref
-      [Ref36]_ for more information.
+   MDANSE calculates the first time-derivative of each point
+   r(t\ :sub:`i`) (r = x,y,z) using the Nth-order polynomial,
+   interpolating the N+1 points across r(t\ :sub:`i`), where
+   r(t\ :sub:`i`) belongs to this set. Please see Ref
+   [Ref36]_ for more information.
 
 Interpolation order is available for the following analyses: `Current
 Correlation Function <#_Current_Correlation_Function>`__, `Density of
@@ -1291,6 +1247,16 @@ Normalize
 
 This parameter provides the option to normalise the results of the
 analysis. By default, no normalisation is performed.
+
+At the moment the normalisation is performed by dividing the number
+array by its first element. For the time correlation analysis the
+normalisation means that the correlation curve is divided by
+the value at :math:`t=0`, and the normalised function :math:`f(t)`
+will, as a result, fullfil the criterion :math:`f(0)=1`.
+
+.. math::
+
+   f_{norm}(t) = \frac{f(t)}{f(t)\rvert_{t=0}}
 
 Normalisation is available for the following analyses: `Current
 Correlation Function <#_Current_Correlation_Function>`__, `General Auto
@@ -1355,7 +1321,9 @@ are saved together with the total result, which is calculated as:
 .. math::
    :label: eq3
 
-   {P_{\mathit{total}} = \frac{\sum\limits_{i}{c_{i}w_{i}P}_{i}}{\sum\limits_{i}{c_{i}\left| w_{i} \right|}}}\text{or}{P_{\mathit{total}} = \frac{\sum\limits_{\mathit{ij}}{c_{i}{c_{j}w}_{i}w_{j}P}_{i}}{\sum\limits_{\mathit{ij}}{c_{i}c_{j}\left| w_{i} \right|\left| w_{j} \right|}}},
+   {P_{\mathit{total}} = \frac{\sum\limits_{i}{c_{i}w_{i}P}_{i}}{\sum\limits_{i}{c_{i}w_{i}}}}\\
+   \text{or}\\
+   {P_{\mathit{total}} = \frac{\sum\limits_{\mathit{ij}}{c_{i}{c_{j}w}_{i}w_{j}P}_{i}}{\sum\limits_{\mathit{ij}}{c_{i}c_{j} w_{i}  w_{j} }}},
 
 where the sum runs over the number of different chemical elements,
 *c*\ :sub:`i` is the number concentration of element *i* and

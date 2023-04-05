@@ -1,4 +1,8 @@
 
+This section is dealing with specific types of analysis performed by
+MDANSE. If you are not sure where these fit into the general workflow
+of data analysis, please read :ref:`workflow-of-analysis`.
+
 Analysis: Scattering
 ====================
 
@@ -366,7 +370,7 @@ interpolation' mode.
 -  :ref:`param-output-files`
 -  :ref:`param-running-mode`
 
-.. _dynamic-coherent-structure-factor:
+.. _analysis-dcsf:
 
 Dynamic Coherent Structure Factor
 '''''''''''''''''''''''''''''''''
@@ -392,39 +396,22 @@ rectangular grid of equidistantly spaced points along the time-and the
 .. math::
    :label: pfx80
    
-   {{F}_{\text{coh}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\cdot\Delta t} \right)} \right\rangle}}^{q},}
-
-.. math::
-   :label: pfx81
-
+   {{F}_{\text{coh}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\cdot\Delta t} \right)} \right\rangle}}^{q},} \\
    {{k = 0}\ldots{N_{t} - 1},{m = 0}\ldots{N_{q} - 1.}}
 
 where N\ :sub:`t` is the number of time steps in the coordinate time
 series, N\ :sub:`q` is a user-defined number of *q*-shells,
 N\ :sub:`species` is the number of selected species, n\ :sub:`I` the
 number of atoms of species *I*, :math:`\omega`\ :sub:`I` the weight for species *I*
-(see Section :ref:`target_CN` for more details) and
-
-.. math::
-   :label: pfx82
-   
-   {\rho_{I}\left( {q,k\cdot\Delta t} \right)}
-
-\ is the Fourier transformed particle density for species *I* defined as,
+(see Section :ref:`target_CN` for more details) and :math:`{\rho_{I}\left( {q,k\cdot\Delta t} \right)}`
+is the Fourier transformed particle density for species *I* defined as
 
 .. math::
    :label: pfx83
 
    {\rho_{I}{\left( {q,k\cdot\Delta t} \right) = \sum\limits_{\alpha}^{n_{I}}}\exp\left\lbrack {\mathit{iq}\cdot R_{\alpha}\left( {k\cdot\Delta t} \right)} \right\rbrack.}
 
-The symbol
-
-.. math::
-   :label: pfx84
-   
-   {\overline{...}}^{q}
-
-\ in Eq. :math:numref:`pfx80` denotes an average
+The symbol :math:`{\overline{...}}^{q}` in Eq. :math:numref:`pfx80` denotes an average
 over *q*-vectors having *approximately* the same modulus
 
 .. math::
@@ -475,9 +462,8 @@ From these *q*-vectors only a maximum number per grid-point (called
 generically *q*-shell also in the anisotropic case) is kept.
 
 The *q*-vectors can be generated isotropically, anisotropically or along
-user-defined directions. The :math:`\sqrt{\omega_{I}}`
-
-\ may be negative if they represent normalized coherent scattering
+user-defined directions. The :math:`\sqrt{\omega_{I}}` may be negative
+if they represent normalized coherent scattering
 lengths, i.e.
 
 .. math::
@@ -486,11 +472,13 @@ lengths, i.e.
    {{\sqrt{\omega_{I}} = \frac{b_{I,\text{coh}}}{\sqrt{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}b_{I,\text{coh}}^{2}}}}}.}
 
 Negative coherent scattering lengths occur in hydrogenous materials
-since :math:`b_{\mathit{coh},H}`
-
-\ Is negative [Ref20]_. The density-density
+since :math:`b_{\mathit{coh},H}` is negative [Ref20]_. The density-density
 correlation is computed via the *FCA* technique described in the section
 :ref:`appendix-fca`.
+
+When the default value of weights (:math:`b_{coherent}`) is chosen for this
+analysis, the result will correspond to that of the equation :math:numref:`ntdsf-eq6`
+from the :ref:`analysis-ndtsf`.
 
 .. _gui-6:
 
@@ -510,7 +498,7 @@ GUI
 -  :ref:`param-output-files`
 -  :ref:`param-running-mode`
 
-.. _dynamic-incoherent-structure-factor:
+.. _analysis-disf:
 
 Dynamic Incoherent Structure Factor
 '''''''''''''''''''''''''''''''''''
@@ -545,14 +533,8 @@ where N\ :sub:`t` is the number of time steps in the coordinate time
 series, N\ :sub:`q` is a user-defined number of *q*-shells,
 N\ :sub:`species` is the number of selected species, n\ :sub:`I` the
 number of atoms of species *I*, :math:`\omega`\ :sub:`I` the weight for species *I*
-(see Section :ref:`target_CN` for more details) and
-
-.. math::
-   :label: pfx91
-   
-   {F_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)}
-
-\ is defined as:
+(see Section :ref:`target_CN` for more details) and :math:`{F_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)}`
+is defined as:
 
 .. math::
    :label: pfx92
@@ -618,6 +600,10 @@ number of atoms times the total number of *q*-vectors. This analysis is
 actually one of the most time-consuming among all the analysis available
 in *MDANSE*.
 
+When the default value of weights (:math:`{b^{2}}_{incoherent}`) is chosen for this
+analysis, the result will correspond to that of the equation :math:numref:`ntdsf-eq7`
+from the :ref:`analysis-ndtsf`.
+
 .. _gui-7:
 
 GUI
@@ -638,7 +624,7 @@ GUI
 -  :ref:`param-output-files`
 -  :ref:`param-running-mode`
 
-.. _elastic-incoherent-structure-factor:
+.. _analysis-eisf:
 
 Elastic Incoherent Structure Factor
 '''''''''''''''''''''''''''''''''''
@@ -786,7 +772,7 @@ GUI
 -  :ref:`param-output-files`
 -  :ref:`param-running-mode`
 
-.. _gaussian-dynamic-incoherent-structure-factor:
+.. _analysis-gdisf:
 
 Gaussian Dynamic Incoherent Structure Factor
 ''''''''''''''''''''''''''''''''''''''''''''
@@ -905,54 +891,126 @@ GUI
 |image30| |image31|
 
 -  :ref:`param-frames`
-
--  q shells
-
-   -  **from**
-
-*Format:* int
-
-*Default:* 0
-
-*Description:* <insert>
-
--  
-
-   -  **to**
-
-*Format:* int
-
-*Default:* 10
-
-*Description:* <insert>
-
--  
-
-   -  **by step of**
-
-*Format:* int
-
-*Default:* 1
-
-*Description:* determines the periodicity of which values are used and
-which are skipped. 1 means that all values are used, 2 means every other
-one is, etc.
-
+-  :ref:`param-qshells`
 -  :ref:`param-instrument-resolution`
 -  `project coordinates <#_Project_coordinates>`__
 -  :ref:`param-atom-selection`
 -  :ref:`param-group-coordinates`
 -  :ref:`param-atom-transmutation`
--  `weights <#_Weights>`__
+-  :ref:`param-weights`
 -  :ref:`param-output-files`
 -  :ref:`param-running-mode`
 
-.. _neutron-dynamic-total-structure-factor:
+.. _analysis-ndtsf:
 
 Neutron Dynamic Total Structure Factor
 ''''''''''''''''''''''''''''''''''''''
 
 -  available for trajectories only
+
+This is a combination of the Dynamic Coherent and the Dynamic Incoherent
+Structure Factors. It is a fully neutron-specific analysis, where the
+coherent part of the intermediate scattering function is calculated
+using the atomic coherent neutron scattering lengths
+:math:`b_{coherent}` and
+the incoherent one is calculated using the square of the atomic
+incoherent neutron scattering lengths :math:`{b^{2}}_{incoherent}`. Therefore, in
+this analysis the weights option is not available.
+
+The partial coherent intermediate scattering functions
+:math:`I_{\alpha\beta}^{coh}(Q,t)` (and their corresponding Fourier
+transforms giving the partial coherent dynamic structure factors,
+:math:`S_{\alpha\beta}^{coh}(Q,\omega)`) are calculated exactly in the
+same way as in the DCSF analysis, i.e.:
+
+.. math::
+   :label: ntdsf-eq1
+   
+   I_{\alpha\beta}^{coh}(Q,t) = \left| \frac{1}{\sqrt{N_{\alpha}N_{\beta}}}\sum_{i \in \alpha,j \in \beta}^{N_{\alpha},N_{\beta}}\left\langle e^{- i\mathbf{Q}\mathbf{r}_{i}(t_{0})}e^{i\mathbf{Q}\mathbf{r}_{j}(t_{0} + t)} \right\rangle \right|_{\mathbf{Q}}
+
+where :math:`\alpha` and :math:`\beta` refer to the chemical elements,
+:math:`N_{\alpha}` and :math:`N_{\beta}` are the respective number of
+atoms of each type, :math:`i` and :math:`j` are two specific atoms of
+type :math:`\alpha` and :math:`\beta`, respectively, and
+:math:`\mathbf{r}_{i}(0)` and :math:`\mathbf{r}_{j}(t)` are their
+positions at the time origin and at the time :math:`t`, respectively.
+The notation :math:`\left\langle \ldots \right\rangle` indicates an
+average over all possible time origins :math:`t_{0}` and
+:math:`|\ldots|_{\mathbf{Q}}` represents an average over all the
+:math:`\mathbf{Q}` vectors contributing to the corresponding
+:math:`Q`-bin.
+
+Similarly, the partial incoherent intermediate scattering functions
+:math:`I_{\alpha}^{inc}(Q,t)` and the partial incoherent dynamic
+structure factors :math:`S_{\alpha}^{inc}(Q,\omega)` are obtained as in
+the DISF analysis:
+
+.. math::
+   :label: ntdsf-eq2
+   
+   I_{\alpha}^{inc}(Q,t) = \left| \frac{1}{N_{\alpha}}\sum_{i \in \alpha}^{N_{\alpha}}\left\langle e^{- i\mathbf{Q}\mathbf{r}_{i}(t_{0})}e^{i\mathbf{Q}\mathbf{r}_{i}(t_{0} + t)} \right\rangle \right|_{\mathbf{Q}}
+
+The main difference between this analysis and the DCSF and DISF
+analyses, apart from the fact that the coherent and incoherent
+contributions are calculated simultaneously, is the way the different
+partial contributions are combined. In this analysis the total
+incoherent, total coherent and total (coherent + incoherent) signals are
+calculated as:
+
+.. math::
+   :label: ntdsf-eq3
+   
+   I^{inc}(Q,t) = \sum_{\alpha}^{N_{\alpha}}{c_{\alpha}b_{\alpha,\text{inc}}^{2}}I_{\alpha}^{inc}(Q,t)
+
+.. math::
+   :label: ntdsf-eq4
+   
+   I^{coh}(Q,t) = \sum_{\alpha,\beta}^{N_{\alpha},N_{\beta}}{\sqrt{c_{\alpha}c_{\beta}}b_{\alpha,\text{coh}}b_{\beta,\text{coh}}I_{\alpha\beta}^{coh}(Q,t)}
+
+.. math::
+   :label: ntdsf-eq5
+   
+   I^{tot}(Q,t) = I^{inc}(Q,t) + I^{coh}(Q,t) = \sum_{\alpha}^{N_{\alpha}}{c_{\alpha}b_{\alpha,\text{inc}}^{2}}I_{\alpha}^{inc}(Q,t) + \sum_{\alpha,\beta}^{N_{\alpha},N_{\beta}}{\sqrt{c_{\alpha}c_{\beta}}b_{\alpha,\text{coh}}b_{\beta,\text{coh}}I_{\alpha\beta}^{coh}(Q,t)}
+
+where :math:`c_{\alpha} = \frac{N_{\alpha}}{N}` and
+:math:`c_{\beta} = \frac{N_{\beta}}{N}` are the concentration numbers
+for elements :math:`\alpha` and :math:`\beta`, respectively.
+
+These expressions correspond to the formalism and equations given in
+[Ref47]_, chapter 1: “An introduction to neutron scattering” .
+
+As in the MDANSE database the coherent and incoherent neutron scattering
+lengths are given in Å, the total intermediate scattering functions
+above will be given in Å\ :sup:`2`/sterad/atom. Therefore, multiplying
+the output from MDANSE by a factor 10\ :sup:`8` we can obtain these
+neutron observables in barn/sterad/atom and compare them directly to the
+experimental results (assuming the later have been properly normalized
+and presented in absolute units).
+
+On the other hand, the DISF and DCSF analyses use the standard weight
+normalization procedure implemented in MDANSE (see :ref:`param-normalize`).
+Therefore the total coherent intermediate scattering function
+returned by the DCSF analysis is (assuming that the chosen weights are
+b_coherent):
+
+.. math::
+   :label: ntdsf-eq6
+   
+   I^{coh}(Q,t) = \frac{\sum_{\alpha\beta}^{n}{c_{\alpha}c_{\beta}b_{\alpha,coh}b_{\beta,coh}I_{\alpha\beta}^{coh}(Q,t)}}{\sum_{\alpha\beta}^{n}{c_{\alpha}c_{\beta}b_{\alpha,coh}b_{\beta,coh}}}
+
+And the incoherent intermedicate scattering function given by the DISF
+analysis is (assuming that the chosen weights are b_incoherent2):
+
+.. math::
+   :label: ntdsf-eq7
+   
+   I^{inc}(Q,t) = \frac{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,inc}^{2}I_{\alpha}^{inc}(Q,t)}}{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,inc}^{2}}}
+
+Naturally, similar expressions apply to the dynamic structure factors,
+:math:`S_{\alpha\beta}^{coh}(Q,\omega)` and
+:math:`S_{\alpha}^{inc}(Q,\omega)`.
+
+
 
 .. image:: ./Pictures/1000000100000322000002D4E0AD4E9A3996DE2A.png
    :width: 15.921cm

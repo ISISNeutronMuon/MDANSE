@@ -167,3 +167,7 @@ References
    McGraw-Hill, Singapore, 1984.
 
 .. [Ref46] Harris, F.J. "Proc. IEEE" (1978), 66 *1*, 51-83.
+
+.. [Ref47] Fernandez-Alonso, F. and Price, D.
+   "Neutron Scattering (Experimental Methods in the Physical Sciences)"
+   ISBN: 9780123983749
