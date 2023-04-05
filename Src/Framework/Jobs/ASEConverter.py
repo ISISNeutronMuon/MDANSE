@@ -332,7 +332,7 @@ class ASEInteractiveConverter(InteractiveConverter, regkey = "ase"):
         place default values in the fields related to the
         parameters that could not be read.
         """
-        raise NotImplementedError
+        return {"Mock Numbers": [1, 2, 3]}
 
     def guessFromConfig(self, fname: str):
         """Tries to retrieve as much information as possible

@@ -4,11 +4,12 @@ from collections import OrderedDict
 import copy
 
 from icecream import ic
+import qtpy
 from qtpy.QtWidgets import QDialog, QPushButton, QFileDialog, QGridLayout,\
                            QVBoxLayout, QWidget, QLabel, QApplication,\
                            QComboBox, QMenu, QLineEdit, QTableView,\
                            QFormLayout, QHBoxLayout, QCheckBox, \
-                           QWizard, QWizardPage
+                           QWizard, QWizardPage, QProgressBar
 from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel,\
                         QObject
 from qtpy.QtGui import QFont, QEnterEvent, QStandardItem, QStandardItemModel,\
@@ -53,8 +54,18 @@ class ConvertWizard(QWizard):
         self.converter_instance = converter_instance
 
         firstone = self.converter_instance.primaryInputs()
+        middleone = self.converter_instance.secondaryInputs()
+        lastone = self.converter_instance.finalInputs()
         firstpage = ConverterFirstPage(self, parameter_dict = firstone)
+        progpage = ConverterProgressPage(self)
+        secondpage = ConverterSecondPage(self, parameter_dict = middleone)
+        thirdpage = ConverterThirdPage(self, parameter_dict = lastone)
+        # will adding the pages at the end help avoid the race condition?
         self.addPage(firstpage)
+        self.addPage(secondpage)
+        self.addPage(progpage)
+        self.addPage(thirdpage)
+
 
     @Slot()
     def execute_converter(self):
@@ -72,15 +83,24 @@ class ConvertWizard(QWizard):
         # this would send the actual instance, which _may_ be wrong
         # self.new_thread_objects.emit([self.converter_instance, pardict])
         # self.new_thread_objects.emit([self.converter_constructor, pardict])
+    
+    # def closeEvent(self, event) -> None:
+    #     event.accept()
+    #     # return super().closeEvent(event)
 
 class ConverterFirstPage(QWizardPage):
+    """The first page of the converter is where the user can specify
+    the input files.
+    """
 
     new_thread_objects = Signal(list)
     new_path = Signal(str)
 
     def __init__(self, *args, parameter_dict : dict = {}, **kwargs):
         super().__init__(*args, **kwargs)
-
+        ic(dir(self))
+        # ic(dir(self.wizard()))
+        self.setTitle("The Input Files")
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         self.handlers = {}
@@ -110,6 +130,9 @@ class ConverterFirstPage(QWizardPage):
             self.default_path = new_params['path']
             self.new_path.emit(self.default_path)
 
+    def initializePage(self) -> None:
+        return super().initializePage()
+
     @Slot()
     def cancel_dialog(self):
         self.destroy()
@@ -119,6 +142,126 @@ class ConverterFirstPage(QWizardPage):
         return super().validatePage()
 
 
+class ConverterProgressPage(QWizardPage):
+    """The page with a progress bar will be shown whenever
+    some inputs are processed. The typical use cases will be:
+    1) preliminary reading of the input files,
+    2) actual conversion of the trajectory.
+    """
+
+    new_thread_objects = Signal(list)
+    new_path = Signal(str)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setTitle("Work in progress")
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
+        tag = QLabel("Your inputs are being processed!", self)
+        self.progbar = QProgressBar(self)
+        layout.addWidget(tag)
+        layout.addWidget(self.progbar)
+
+    def initializePage(self) -> None:
+        return super().initializePage()
+
+    @Slot()
+    def cancel_dialog(self):
+        self.destroy()
+    
+    def validatePage(self) -> bool:
+        # here we could try to parse some stuff.
+        return super().validatePage()
+
+class ConverterSecondPage(QWizardPage):
+    """The second page is the most complicated one: it will
+    allow the user to modify some of the parameters after
+    they have been read from the files.
+    """
+
+    new_thread_objects = Signal(list)
+    new_path = Signal(str)
+
+    def __init__(self, *args, parameter_dict : dict = {}, **kwargs):
+        super().__init__(*args, **kwargs)
+        # ic(dir(self))
+        # ic(dir(self.wizard()))
+        self.setTitle("Verify the information")
+
+        self.parameter_dict = parameter_dict
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
+        self.handlers = {}
+        self.default_path = '.'
+        parameter_dict = self.parameter_dict
+
+        if len(parameter_dict) < 1:
+            settings = OrderedDict([('first_frame', ('int', {'default': 1.0, 'label': 'Number of the first frame'})),
+                                    ('last_frame', ('int', {'default': 1.0, 'label': 'Number of the last frame'})),
+                                    ('frame_step', ('int', {'default': 1.0, 'label': 'Step (take every N frames)'})),
+                                    ('time_step', ('float', {'default': 1.0, 'label': 'Time step (ps)'})),
+                                    ('fold', ('boolean', {'default': False, 'label': 'Fold coordinates in to box'})),
+                                    ])
+        else:
+            settings = parameter_dict
+        for key, value in settings.items():
+            dtype = value[0]
+            ddict = value[1]
+            defaultvalue = ddict.get('default', 0.0)
+            labeltext = ddict.get('label', "Mystery X the Unknown")
+            base, data_handler = InputFactory.createInputField(parent = self, kind = dtype, **ddict)
+            layout.addWidget(base)
+            self.handlers[key] = data_handler
+
+    def initializePage(self) -> None:
+        return super().initializePage()
+
+    @Slot()
+    def cancel_dialog(self):
+        self.destroy()
+    
+    def validatePage(self) -> bool:
+        # here we could try to parse some stuff.
+        return super().validatePage()
+
+class ConverterThirdPage(QWizardPage):
+    """This page will normally be used just to specify the name
+    of the output file.
+    """
+
+    new_thread_objects = Signal(list)
+    new_path = Signal(str)
+
+    def __init__(self, *args, parameter_dict : dict = {}, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setTitle("The Output File")
+
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
+        self.handlers = {}
+        self.default_path = '.'
+
+        if len(parameter_dict) < 1:
+            settings = OrderedDict([('single_output_file', {'format':"hdf",'root':'config_file'})
+                                    ])
+        else:
+            settings = parameter_dict
+        for key, value in settings.items():
+            dtype = value[0]
+            ddict = value[1]
+            defaultvalue = ddict.get('default', 0.0)
+            labeltext = ddict.get('label', "Mystery X the Unknown")
+            base, data_handler = InputFactory.createInputField(parent = self, kind = dtype, **ddict)
+            layout.addWidget(base)
+            self.handlers[key] = data_handler
+
+    @Slot()
+    def cancel_dialog(self):
+        self.destroy()
+    
+    def validatePage(self) -> bool:
+        # here we could try to parse some stuff.
+        return super().validatePage()
 
 
 
@@ -161,8 +304,10 @@ class DummyLauncher(QMainWindow):
         whizz = ConvertWizard(converter = 'ase')
         whizz.show()
         result = whizz.result()
+        # whizz.accept()
 
 def startGUI(some_args):
+    ic(qtpy.API)
     app = QApplication(some_args)
     root = DummyLauncher(parent=None, title = "<b>dummy</b> window!")
     root.show()
