@@ -75,6 +75,13 @@ class RangeConfigurator(IConfigurator):
             last += step*0.01  # less likely to overstep the upper limit
             
         value = numpy.arange(first, last, step)
+        # we add additional check if the points are all within limits
+        value = value[numpy.where(value >= first)]
+        if self._includeLast:
+            value = value[numpy.where(value <= last)]
+        else:
+            value = value[numpy.where(value < last)]
+        # end of the range check
         value = value.astype(self._valueType)
         
         if self._mini is not None:
