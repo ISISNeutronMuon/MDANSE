@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro stdeb pyyaml h5py psutil
           sudo cp /usr/include/netcdf.h $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/python2.7
 
       - name: Install netCDF4 python package
@@ -81,8 +81,7 @@ jobs:
           contains( github.ref, 'release-' ) ||
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'tags' )
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 python
@@ -95,8 +94,7 @@ jobs:
           contains( github.ref, 'release-' ) ||
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
-          contains( github.ref, 'web' )
+          contains( github.ref, 'tags' )
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -117,8 +115,7 @@ jobs:
       contains( github.ref, 'release-' ) ||
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'tags' )
     steps:
       - uses: actions/checkout@v2
 
@@ -151,10 +148,11 @@ jobs:
           sudo cp -r ~/tempenv/lib/python2.7/site-packages/vtk ~/python/lib/python2.7/site-packages
           sudo cp ~/tempenv/lib/libvtk* ~/python/lib
 
-      - run: sudo apt-get install dos2unix
+      - run: sudo apt-get install dos2unix graphviz
 
       - name: Deploy
         run: |
+          sudo ~/python/bin/python -m pip install sphinx==1.6.7 stdeb docutils==0.17.1 graphviz
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
           source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
@@ -185,6 +183,159 @@ jobs:
           name: ubuntu-21.04_installer
           path: ${{ github.workspace }}/*21*.deb
           retention-days: 90
+
+
+  ci_ubuntu22:
+    runs-on: 'ubuntu-22.04'
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install netcdf-bin libnetcdf-dev libgtk2.0-0 libgtk2.0-dev
+
+      - name: Create conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 2.7.18
+          activate-environment: mdanse
+
+      - name: Install python netCDF4 package
+        run: conda install netCDF4 -n mdanse
+
+      - name: Install python packages
+        run: |
+          $CONDA/envs/mdanse/bin/python -m pip install numpy matplotlib Cython Pyro stdeb pyyaml h5py psutil
+
+      - name: Install ScientificPython
+        run: |
+          cd $HOME
+          git clone https://code.ill.fr/scientific-software/scientific-python.git
+          cd scientific-python/
+          sudo $CONDA/envs/mdanse/bin/python setup.py install
+
+      - name: Install MMTK
+        run: |
+          cd $HOME
+          git clone https://code.ill.fr/scientific-software/mmtk.git
+          cd mmtk
+          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/setup.py ~/mmtk
+          sudo $CONDA/envs/mdanse/bin/python setup.py install
+
+      - name: Install MDANSE
+        run: |
+          cd $GITHUB_WORKSPACE
+          $CONDA/envs/mdanse/bin/python setup.py install
+
+      - name: Run unit tests
+        run: |
+          cd $GITHUB_WORKSPACE/Tests/UnitTests
+          $CONDA/envs/mdanse/bin/python AllTests.py
+
+      - name: Run dependency tests
+        run: |
+          cd $GITHUB_WORKSPACE/Tests/DependenciesTests
+          $CONDA/envs/mdanse/bin/python AllTests.py
+
+      - name: Run functional tests
+        run: |
+          cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
+          $CONDA/envs/mdanse/bin/python BuildJobTests.py
+          $CONDA/envs/mdanse/bin/python AllTests.py
+
+      - name: Tar python
+        if: |
+          contains( github.ref, 'main' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' )
+        run: |
+          cd $CONDA/envs
+          tar -czf python.tar.gz mdanse
+
+      - name: Upload artifacts
+        if: |
+          contains( github.ref, 'main' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' )
+        uses: actions/upload-artifact@v2
+        with:
+          name: ubuntu-22.04_artifacts
+          path: /usr/share/miniconda/envs/python.tar.gz
+          retention-days: 1
+
+  deploy_ubuntu22:
+    needs: ci_ubuntu22
+    runs-on: 'ubuntu-22.04'
+    strategy:
+      fail-fast: false
+    if: |
+      contains( github.ref, 'main' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' )
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Initialise conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 2.7.18
+          activate-environment: mdanse
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: ubuntu-22.04_artifacts
+          path: /usr/share/miniconda/envs
+
+      - name: Untar python
+        run: |
+          cd $CONDA/envs
+          tar -xzf python.tar.gz
+
+      - name: Install netcdf
+        run: |
+          sudo apt-get update
+          sudo apt-get install netcdf-bin libnetcdf-dev
+
+      - name: Install wxPython and VTK python packages
+        run: |
+          sudo conda install -n mdanse -c daf wxpython
+          sudo conda install -n mdanse -c ccordoba12 vtk
+
+      - run: sudo apt-get install dos2unix graphviz
+
+      - run: conda remove ncurses --force
+
+      - name: Deploy
+        run: |
+          sudo $CONDA/envs/mdanse/bin/python -m pip install sphinx==1.6.7 docutils==0.17.1 graphviz
+          sed -i 's|PYTHONEXE=$HOME/python|PYTHONEXE=$CONDA/envs/mdanse|' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
+          sudo rm $CONDA/envs/mdanse/lib/libtinfo*
+          sudo rm $CONDA/envs/mdanse/lib/libncurses*
+          sudo rm -v $CONDA/envs/mdanse/lib/libstdc*
+          source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
+          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
+          source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ubuntu-22.04_installer
+          path: ${{ github.workspace }}/*.deb
+          retention-days: 90
+
 
 
 
@@ -346,7 +497,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['macos-10.15', 'macos-11']
+        os: ['macos-11', 'macos-12']
 
     steps:
       - uses: actions/checkout@v2
@@ -356,9 +507,9 @@ jobs:
         with:
           python-version: '2.7.18'
 
-      - name: Install dependecies with pip
+      - name: Install dependencies with pip
         run: |
-          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro sphinx==1.6.7 stdeb docutils==0.17.1 py2app==0.26.1 pyyaml h5py psutil
+          python2 -m pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro stdeb pyyaml h5py psutil
 
       - name: Install netCDF4 python package
         run: |
@@ -375,7 +526,7 @@ jobs:
       - name: Install NetCDF
         run: |
           brew install netcdf
-          sudo cp -r /usr/local/include/netcdf $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include
+          sudo cp -r /usr/local/opt/netcdf/include $RUNNER_TOOL_CACHE/Python/2.7.18/x64/include/netcdf
 
       - name: Install ScientificPython
         run: |
@@ -398,14 +549,14 @@ jobs:
           sudo cp -fv $GITHUB_WORKSPACE/BuildServer/setup.py $GITHUB_WORKSPACE
           python2 setup.py install
 
-      - name: Run unit tests
-        run: |
-          cd $GITHUB_WORKSPACE/Tests/UnitTests
-          python2 AllTests.py
-
       - name: Run dependency tests
         run: |
           cd $GITHUB_WORKSPACE/Tests/DependenciesTests
+          python2 AllTests.py
+
+      - name: Run unit tests
+        run: |
+          cd $GITHUB_WORKSPACE/Tests/UnitTests
           python2 AllTests.py
 
       - name: Run functional tests
@@ -415,24 +566,24 @@ jobs:
           python2 AllTests.py
 
       - name: Tar python
-        if: ${{ (matrix.os == 'macos-10.15') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/2.7.18
           mv x64 Resources
           tar -czf python.tar.gz Resources
 
       - name: Upload artifacts
-        if: ${{ (matrix.os == 'macos-10.15') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) ) }}
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.os }}_artifacts
+          name: MacOS_artifacts
           path: ${{ runner.tool_cache }}/Python/2.7.18/python.tar.gz
           retention-days: 1
 
 
   deploy_osx:
     needs: ci_osx
-    runs-on: macos-10.15
+    runs-on: macos-12
     if: |
       contains( github.ref, 'main' ) ||
       contains( github.ref, 'develop' ) ||
@@ -447,28 +598,30 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: macos-10.15_artifacts
+          name: MacOS_artifacts
           path: ~/
 
-      - run: brew install netcdf
+      - run: brew install netcdf graphviz
 
       - name: Untar python
         run: |
           mkdir -p ~/Contents
           tar -xzf ~/python.tar.gz -C $HOME/Contents
-
-      - name: Install vtk
-        run: |
-          sudo conda create -p $HOME/tempenv python=2.7
-          sudo conda install -p $HOME/tempenv -c free vtk
-          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk ~/Contents/Resources/lib/python2.7/site-packages
-          sudo cp $HOME/tempenv/lib/libvtk* ~/Contents/Resources/lib
+          sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python2.7
+          sudo install_name_tool -change /Users/runner/hostedtoolcache/Python/2.7.18/x64/lib/libpython2.7.dylib /Users/runner/Contents/Resources/lib/libpython2.7.dylib /Users/runner/Contents/Resources/bin/python
 
       - name: Install wx
         run: |
+          sudo conda create -p $HOME/tempenv python=2.7
           sudo conda install -p $HOME/tempenv -c david_baddeley wxpython
           sudo cp -rv $HOME/tempenv/lib/python2.7/site-packages/wx-3.0-osx_cocoa/* ~/Contents/Resources/lib/python2.7/site-packages
           sudo cp -v $HOME/tempenv/lib/libwx*  ~/Contents/Resources/lib
+
+      - name: Install vtk
+        run: |
+          sudo conda install -p $HOME/tempenv -c free vtk
+          sudo cp -r $HOME/tempenv/lib/python2.7/site-packages/vtk ~/Contents/Resources/lib/python2.7/site-packages
+          sudo cp $HOME/tempenv/lib/libvtk* ~/Contents/Resources/lib
 
       - name: Deploy MDANSE
         run: |
@@ -485,6 +638,7 @@ jobs:
             ${{ github.workspace }}/*.dmg
             ${{ github.workspace }}/README.txt
           retention-days: 90
+
 
 
 
@@ -538,7 +692,7 @@ jobs:
 
       - name: Install backend dependencies
         run: |
-          %CONDA%\envs\mdanse\python.exe -m pip install numpy matplotlib Cython pyyaml Pyro
+          %CONDA%\envs\mdanse\python.exe -m pip install numpy==1.16.6 matplotlib Cython pyyaml Pyro
         shell: cmd /C CALL {0}
 
       - name: Install ScientificPython
@@ -560,7 +714,7 @@ jobs:
           git clone https://code.ill.fr/scientific-software/mmtk.git
           copy /y %GITHUB_WORKSPACE%\BuildServer\Windows\mmtk-setup.py %GITHUB_WORKSPACE%\mmtk
           cd mmtk
-          %CONDA%\envs\mdanse\python.exe mmtk-setup.py build 
+          %CONDA%\envs\mdanse\python.exe mmtk-setup.py build
           %CONDA%\envs\mdanse\python.exe setup.py install
         shell: cmd /C CALL {0}
 
@@ -598,9 +752,7 @@ jobs:
           contains( github.ref, 'release-' ) ||
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
-
-          contains( github.ref, 'web' )
+          contains( github.ref, 'tags' )
         run: |
           cd /D %CONDA%\envs
           tar -czf mdanse.tar.gz mdanse
@@ -613,10 +765,7 @@ jobs:
           contains( github.ref, 'release-' ) ||
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
-
-          contains( github.ref, 'web' )
-
+          contains( github.ref, 'tags' )
         uses: actions/upload-artifact@v2
         with:
           name: windows_artifacts
@@ -632,8 +781,7 @@ jobs:
       contains( github.ref, 'release-' ) ||
       contains( github.ref, 'hotfix-' ) ||
       contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' )
+      contains( github.ref, 'tags' )
     steps:
       - uses: actions/checkout@v2
 
@@ -690,6 +838,7 @@ jobs:
       - name: Install packages required for documentation and psutil
         run: |
           %CONDA%\envs\mdanse\python.exe -m pip install docutils==0.17.1 sphinx==1.6.7 stdeb psutil
+          conda install graphviz
         shell: cmd /C CALL {0}
 
       - name: Install GUI dependencies
@@ -697,6 +846,11 @@ jobs:
           cd "%GITHUB_WORKSPACE%\BuildServer\Windows\Dependencies\"
           %CONDA%\envs\mdanse\python.exe -m pip install PyQt4‑4.11.4‑cp27‑cp27m‑win_amd64.whl VTK‑6.3.0‑cp27‑cp27m‑win_amd64.whl wxPython_common‑3.0.2.0‑py2‑none‑any.whl wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
         shell: cmd /C CALL {0}
+
+      - name: Alter conf_api.py for correct sphinx build
+        run: |
+          Set-Location $Env:GITHUB_WORKSPACE\Doc\
+          (gc conf_api.py) -replace '#graphviz_dot', 'graphviz_dot' | Out-File -encoding UTF8 conf_api.py
 
       - name: Deploy
         run: |

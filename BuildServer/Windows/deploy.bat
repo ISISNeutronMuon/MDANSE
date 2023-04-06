@@ -36,6 +36,9 @@ rmdir /s /q cmake
 del /f /q USING*
 cd bin
 del /f /q *.exe
+rmdir /s /q graphviz
+cd ..\share
+rmdir /s /q graphviz
 
 cd /D "%GITHUB_WORKSPACE%\BuildServer\Windows"
 
@@ -46,9 +49,7 @@ rem copy CHANGELOG to CHANGELOG.txt (compulsory to be opened by nsis through an 
 copy "%GITHUB_WORKSPACE%\CHANGELOG" "%GITHUB_WORKSPACE%\BuildServer\Windows\Resources\nsis\CHANGELOG.txt"
 
 rem Copy site.py 
-
 copy /y "%GITHUB_WORKSPACE%\\BuildServer\\Windows\\Resources\\mdanse.pth" "%MDANSE_TEMPORARY_INSTALLATION_DIR%\\Lib\\site-packages\\"
-
 
 rem create the MDANSE installer
 echo "Creating nsis installer for target %MDANSE_TEMPORARY_INSTALLATION_DIR%..."

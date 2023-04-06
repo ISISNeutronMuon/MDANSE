@@ -1,3 +1,17 @@
+version 1.5.2
+--------------
+* CHANGED issue #191 Extended and improved the text output of Analysis
+* FIXED issues #178 #182 minor GUI problems have been removed
+* CHANGED issue #157 DISABLED 3D viewer on ARM (Apple Silicon) MacOS; this will only be fixed in MDANSE 2
+* ADDED issue #167 CP2K Trajectory Converter with example files have been added to MDANSE
+* CHANGED issue #165 The Trajectory Viewer functionality can now be opened without having to open the Molecular Viewer first
+* FIXED issue #158 Molecular Viewer and Elevation, Iso-Surface, and Scalar-Field plotters no longer crash MDANSE on Ubuntu 22
+* FIXED issue #152 MDANSE API documentation that comes with released installers now has class inheritance diagrams displayed properly
+* FIXED issue #151 MDANSE should no longer interfere with system functionalities such as nano on Ubuntu 22
+* FIXED issue #148 The python2 script that comes with MacOS installer can now be used to run scripts
+* FIXED issue #147 MDANSE installed with the installer can now be started on MacOS 11 and MacOS 12. However, Molecular Viewer, Animation, and the Elevation, Iso-Surface, and Scalar-Field plotters continue to crash MDANSE, which will not be fixed until MDANSE 2.0.0
+* CHANGED (internal) issue #136 MDANSE is now tested only on MacOS 11 and MacOS 12 (for MacOS)
+
 version 1.5.1
 --------------
 * ADDED issue #129 Installers for Ubuntu 22.x are now automatically generated and available for download
