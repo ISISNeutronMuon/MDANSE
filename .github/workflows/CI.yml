@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-18.04', 'ubuntu-20.04']
+        os: ['ubuntu-20.04']
 
     steps:
       - uses: actions/checkout@v2
@@ -17,12 +17,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '2.7.18'
-
-      - name: Install libraries on ubuntu 18
-        if: ${{ (matrix.os == 'ubuntu-18.04') }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install netcdf-bin libnetcdf-dev python-dev
 
       - name: Install libraries on ubuntu 20
         if: ${{ (matrix.os == 'ubuntu-20.04') }}
@@ -108,7 +102,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-18.04', 'ubuntu-20.04']
+        os: ['ubuntu-20.04']
     if: |
       contains( github.ref, 'main' ) ||
       contains( github.ref, 'develop' ) ||
