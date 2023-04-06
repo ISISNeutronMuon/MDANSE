@@ -47,6 +47,7 @@ PKG_INFO=$GITHUB_WORKSPACE/Src/__pkginfo__.py
 # Get MDANSE version
 MDANSE_VERSION=`sed -n 's/__version__.*=.*\"\(.*\)\"/\1/p' ${PKG_INFO}`
 
+
 # Check if branch is main
 if [[ $GITHUB_REF == "refs/heads/main" ]]
 then
