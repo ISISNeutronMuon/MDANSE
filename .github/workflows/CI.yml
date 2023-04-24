@@ -332,6 +332,158 @@ jobs:
 
 
 
+  ci_ubuntu22:
+    runs-on: 'ubuntu-22.04'
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install netcdf-bin libnetcdf-dev libgtk2.0-0 libgtk2.0-dev
+
+      - name: Create conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 2.7.18
+          activate-environment: mdanse
+
+      - name: Install python netCDF4 package
+        run: conda install netCDF4 -n mdanse
+
+      - name: Install python packages
+        run: |
+          $CONDA/envs/mdanse/bin/python -m pip install numpy matplotlib Cython Pyro sphinx==1.6.7 stdeb docutils==0.17.1 pyyaml h5py psutil
+
+      - name: Install ScientificPython
+        run: |
+          cd $HOME
+          git clone https://code.ill.fr/scientific-software/scientific-python.git
+          cd scientific-python/
+          sudo $CONDA/envs/mdanse/bin/python setup.py install
+
+      - name: Install MMTK
+        run: |
+          cd $HOME
+          git clone https://code.ill.fr/scientific-software/mmtk.git
+          cd mmtk
+          sudo cp -fv $GITHUB_WORKSPACE/BuildServer/Unix/setup.py ~/mmtk
+          sudo $CONDA/envs/mdanse/bin/python setup.py install
+
+      - name: Install MDANSE
+        run: |
+          cd $GITHUB_WORKSPACE
+          $CONDA/envs/mdanse/bin/python setup.py install
+
+      - name: Run unit tests
+        run: |
+          cd $GITHUB_WORKSPACE/Tests/UnitTests
+          $CONDA/envs/mdanse/bin/python AllTests.py
+
+      - name: Run dependency tests
+        run: |
+          cd $GITHUB_WORKSPACE/Tests/DependenciesTests
+          $CONDA/envs/mdanse/bin/python AllTests.py
+
+      - name: Run functional tests
+        run: |
+          cd $GITHUB_WORKSPACE/Tests/FunctionalTests/Jobs
+          $CONDA/envs/mdanse/bin/python BuildJobTests.py
+          $CONDA/envs/mdanse/bin/python AllTests.py
+
+      - name: Tar python
+        if: |
+          contains( github.ref, 'main' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' )
+        run: |
+          cd $CONDA/envs
+          tar -czf python.tar.gz mdanse
+
+      - name: Upload artifacts
+        if: |
+          contains( github.ref, 'main' ) ||
+          contains( github.ref, 'develop' ) ||
+          contains( github.ref, 'release-' ) ||
+          contains( github.ref, 'hotfix-' ) ||
+          contains( github.ref, 'build-' ) ||
+          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'web' )
+        uses: actions/upload-artifact@v2
+        with:
+          name: ubuntu-22.04_artifacts
+          path: /usr/share/miniconda/envs/python.tar.gz
+          retention-days: 1
+
+  deploy_ubuntu22:
+    needs: ci_ubuntu22
+    runs-on: 'ubuntu-22.04'
+    strategy:
+      fail-fast: false
+    if: |
+      contains( github.ref, 'main' ) ||
+      contains( github.ref, 'develop' ) ||
+      contains( github.ref, 'release-' ) ||
+      contains( github.ref, 'hotfix-' ) ||
+      contains( github.ref, 'build-' ) ||
+      contains( github.ref, 'tags' ) ||
+      contains( github.ref, 'web' )
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Initialise conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 2.7.18
+          activate-environment: mdanse
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: ubuntu-22.04_artifacts
+          path: /usr/share/miniconda/envs
+
+      - name: Untar python
+        run: |
+          cd $CONDA/envs
+          tar -xzf python.tar.gz
+
+      - name: Install netcdf
+        run: |
+          sudo apt-get update
+          sudo apt-get install netcdf-bin libnetcdf-dev
+
+      - name: Install wxPython and VTK python packages
+        run: |
+          sudo conda install -n mdanse -c daf wxpython
+          sudo conda install -n mdanse -c ccordoba12 vtk
+
+      - run: sudo apt-get install dos2unix
+
+      - name: Deploy
+        run: |
+          sed -i 's|PYTHONEXE=$HOME/python|PYTHONEXE=$CONDA/envs/mdanse|' $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
+          source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/definitions.sh
+          source $GITHUB_WORKSPACE/BuildServer/Unix/setup_ci.sh
+          source $GITHUB_WORKSPACE/BuildServer/Unix/Debian/deploy.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ubuntu-22.04_installer
+          path: ${{ github.workspace }}/*.deb
+          retention-days: 90
+
+
+
+
+
   # OSX
   ci_osx:
     runs-on: ${{ matrix.os }}
@@ -593,7 +745,8 @@ jobs:
           contains( github.ref, 'release-' ) ||
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' )
+          contains( github.ref, 'tags' ) ||
+
         run: |
           cd /D %CONDA%\envs
           tar -czf mdanse.tar.gz mdanse
@@ -606,7 +759,9 @@ jobs:
           contains( github.ref, 'release-' ) ||
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' )
+          contains( github.ref, 'tags' ) ||
+
+       
         uses: actions/upload-artifact@v2
         with:
           name: windows_artifacts

@@ -1,3 +1,4 @@
+
 version 1.5.2
 --------------
 * CHANGED issue #191 Extended and improved the text output of Analysis
@@ -11,6 +12,7 @@ version 1.5.2
 * FIXED issue #148 The python2 script that comes with MacOS installer can now be used to run scripts
 * FIXED issue #147 MDANSE installed with the installer can now be started on MacOS 11 and MacOS 12. However, Molecular Viewer, Animation, and the Elevation, Iso-Surface, and Scalar-Field plotters continue to crash MDANSE, which will not be fixed until MDANSE 2.0.0
 * CHANGED (internal) issue #136 MDANSE is now tested only on MacOS 11 and MacOS 12 (for MacOS)
+
 
 version 1.5.1
 --------------
