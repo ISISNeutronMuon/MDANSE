@@ -7,8 +7,6 @@ set PYTHONPATH=
 
 set dirname=%~dp0
 
-
 set PATH=%dirname%;%PATH%
-
 
 start /B /D "%dirname%" pythonw.exe Scripts\mdanse_gui

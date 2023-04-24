@@ -36,6 +36,9 @@ rmdir /s /q cmake
 del /f /q USING*
 cd bin
 del /f /q *.exe
+rmdir /s /q graphviz
+cd ..\share
+rmdir /s /q graphviz
 
 cd /D "%GITHUB_WORKSPACE%\BuildServer\Windows"
 
