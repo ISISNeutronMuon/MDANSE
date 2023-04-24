@@ -43,30 +43,31 @@ class InteractiveConverter(IJob, metaclass = ABCMeta):
     def converters(cls):
         return list(cls._converter_registry.keys())
     
+    def __init__(self, *args, **kwargs):
+        """Should be called in the derived classes
+        using super().
+        Initialises the list of Wizard pages,
+        which then has to be populated with
+        dictionaries of fields.
+        """
+        self.pages = []
+
     @abstractmethod
-    def primaryInputs(self) -> dict:
-        """Returns the list of inputs needed for the first page
-        of the wizard. These should typically be the names of
-        the input files passed to the converter.
+    def getFieldValues(self, page_number : int = 0, values : dict = None) -> dict:
+        """Returns the values of the GUI fields
+        on the Nth page of the wizard interface.
+        It is intended to be used for updating
+        the values shown by the GUI, since the GUI
+        will be initialised using default values.
+        The page numbering starts from 0.
         """
         raise NotImplementedError
-    
+
     @abstractmethod
-    def secondaryInputs(self) -> dict:
-        """Returns the list of inputs needed for the second page
-        of the wizard. These should typically be the parameters
-        specifying how to read the trajectory: time step, number
-        of frames, frame step, etc.
-        """
-        raise NotImplementedError
-    
-    @abstractmethod
-    def finalInputs(self) -> dict:
-        """Normally this should just give the user a chance
-        to input the name of the (converted) output trajectory.
-        It is done at the last step, since the user may want
-        to base the name on the decisions they made for the
-        input parameters.
+    def setFieldValues(self, page_number : int = 0, values : dict = None) -> None:
+        """Accepts the values of the input fields from the
+        Nth page of the wizard. It uses the same key values
+        as those returned by the getFields method.
         """
         raise NotImplementedError
     
@@ -118,6 +119,22 @@ class InteractiveConverter(IJob, metaclass = ABCMeta):
             by the converter
         """
         pass
+
+    def __len__(self):
+        """The length of an InteractiveConverter is the number
+        of the Wizard pages it is expected to create.
+
+        Returns:
+            int - number of wizard pages needed by the converter
+        """
+        return len(self.pages)
+
+    def __getitem__(self, index: int):
+        if abs(index) >= self.__len__():
+            raise IndexError("Trying to access a nonexistent page"
+                                " of the InteractiveConverter.")
+        else:
+            return self.pages[index]
 
     def finalize(self):
         """I am not sure if this function is necessary. The specific converters

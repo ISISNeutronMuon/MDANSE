@@ -278,6 +278,13 @@ class ASEInteractiveConverter(InteractiveConverter, regkey = "ase"):
     
     output_files['output_file'] = ('single_output_file', {'format':"hdf",'root':'config_file'})
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
+
+        self.pages.append(self.input_files)
+        self.pages.append(self.settings)
+        self.pages.append(self.output_files)
+
     def initialize(self):
         '''
         Initialize the job.
@@ -298,7 +305,24 @@ class ASEInteractiveConverter(InteractiveConverter, regkey = "ase"):
 
         self._start = 0
 
-        float(self.configuration['time_step']['value'])*measure(1.0,self.configuration['time_unit']['value'])
+        float(self.configuration['time_step']['value'])*measure(1.0,self.configuration['time_unit']['value']) 
+
+    def getFieldValues(self, page_number : int = 0, values : dict = None) -> dict:
+        """Returns the values of the GUI fields
+        on the Nth page of the wizard interface.
+        It is intended to be used for updating
+        the values shown by the GUI, since the GUI
+        will be initialised using default values.
+        The page numbering starts from 0.
+        """
+        raise NotImplementedError
+
+    def setFieldValues(self, page_number : int = 0, values : dict = None) -> None:
+        """Accepts the values of the input fields from the
+        Nth page of the wizard. It uses the same key values
+        as those returned by the getFields method.
+        """
+        raise NotImplementedError
 
     def primaryInputs(self) -> dict:
         """Returns the list of inputs needed for the first page

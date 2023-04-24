@@ -53,6 +53,9 @@ class ConvertWizard(QWizard):
         settings = converter_instance.settings
         self.converter_instance = converter_instance
 
+        for page_dict in self.converter_instance:
+            self.addPage(ConverterPage(page_dict))
+
         firstone = self.converter_instance.primaryInputs()
         middleone = self.converter_instance.secondaryInputs()
         lastone = self.converter_instance.finalInputs()
@@ -84,9 +87,76 @@ class ConvertWizard(QWizard):
         # self.new_thread_objects.emit([self.converter_instance, pardict])
         # self.new_thread_objects.emit([self.converter_constructor, pardict])
     
+    def setInputFiles(self, input_filenames : list[str]):
+        """This function is called by a wizard page. The wizard will pass the
+        input parameters (i.e. file names) to the instance of the InteractiveConverter.
+        This way the converter will be able to read information from the input
+        files, and make it available in the next page of the wizard.
+
+        Arguments
+        ---------
+            trajectory_filename (str) : name of the trajectory to be read.
+            configuration_filename (str) : name of an optional configuration file.
+        """
+        self.converter_instance.setFilenames(...)
+    
     # def closeEvent(self, event) -> None:
     #     event.accept()
     #     # return super().closeEvent(event)
+
+
+class ConverterPage(QWizardPage):
+    """The first page of the converter is where the user can specify
+    the input files.
+    """
+
+    new_thread_objects = Signal(list)
+    new_path = Signal(str)
+
+    def __init__(self, *args, parameter_dict : dict = {}, **kwargs):
+        super().__init__(*args, **kwargs)
+        ic(dir(self))
+        # ic(dir(self.wizard()))
+        self.setTitle("The Input Files")
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
+        self.handlers = {}
+        self.default_path = '.'
+
+        if len(parameter_dict) < 1:
+            settings = OrderedDict([('dummy int', ('int', {'default': 1.0, 'label': 'Time step (ps)'})),
+                                    ('time_step', ('float', {'default': 1.0, 'label': 'Time step (ps)'})),
+                                    ('fold', ('boolean', {'default': False, 'label': 'Fold coordinates in to box'})),
+                                    # ('dcd_file', ('input_file', {'wildcard': 'DCD files (*.dcd)|*.dcd|All files|*', 'default': '../../../Data/Trajectories/CHARMM/2vb1.dcd'})),
+                                    # ('output_file', ('single_output_file', {'format': 'hdf', 'root': 'pdb_file'}))
+                                    ])
+        else:
+            settings = parameter_dict
+        for key, value in settings.items():
+            dtype = value[0]
+            ddict = value[1]
+            defaultvalue = ddict.get('default', 0.0)
+            labeltext = ddict.get('label', "Mystery X the Unknown")
+            base, data_handler = InputFactory.createInputField(parent = self, kind = dtype, **ddict)
+            layout.addWidget(base)
+            self.handlers[key] = data_handler
+    
+    @Slot(dict)
+    def parse_updated_params(self, new_params: dict):
+        if 'path' in new_params.keys():
+            self.default_path = new_params['path']
+            self.new_path.emit(self.default_path)
+
+    def initializePage(self) -> None:
+        return super().initializePage()
+
+    @Slot()
+    def cancel_dialog(self):
+        self.destroy()
+    
+    def validatePage(self) -> bool:
+        # here we could try to parse some stuff.
+        return super().validatePage()
 
 class ConverterFirstPage(QWizardPage):
     """The first page of the converter is where the user can specify
