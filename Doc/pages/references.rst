@@ -45,7 +45,7 @@ References
 
 .. [Ref7] “The HDF Group.” https://www.hdfgroup.org/.
 
-.. [Ref8] “MDANSE.” https://mdanse.org/.
+.. [Ref8] “MDANSE.” https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 
 .. [Ref9] “MDANSE GitHub Issues.”
    https://github.com/ISISNeutronMuon/MDANSE/issues.

@@ -5,7 +5,7 @@
 # @file      Src/GUI/MainFrame.py
 # @brief     Implements module/class/test MainFrame
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -383,7 +383,7 @@ Authors:
 
     def on_open_mdanse_url(self, event):
 
-        webbrowser.open('http://mdanse.org')
+        webbrowser.open('https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx')
 
     def on_quit(self, event=None):
         
