@@ -592,7 +592,7 @@ jobs:
           contains( github.ref, 'release-' ) ||
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'tags' ) 
 
         run: |
           cd /D %CONDA%\envs
@@ -606,7 +606,7 @@ jobs:
           contains( github.ref, 'release-' ) ||
           contains( github.ref, 'hotfix-' ) ||
           contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' ) ||
+          contains( github.ref, 'tags' ) 
 
        
         uses: actions/upload-artifact@v2
