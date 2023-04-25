@@ -1,7 +1,7 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0
 Upstream-Name: mdanse
 Upstream-Contact: Sanghamitra Mukhopadhyay <sanghamitra.mukhopadhyay@stfc.ac.uk>
-Source: https://mdanse.org/
+Source: https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 
 Files: *
 Copyright: Copyright 2016, Eric Pellegrini <pellegrini@ill.fr>; Copyright 2021, Sanghamitra Mukhopadhyay <sanghamitra.mukhopadhyay@stfc.ac.uk>
