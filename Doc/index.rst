@@ -18,9 +18,12 @@ Welcome to MDANSE's documentation!
 Introduction
 ============
 
-Molecular Dynamics Analysis for Neutron Scattering Experiments
+`MDANSE Project Website <https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx>`_
 
-MDANSE is a python application designed for computing neutron observables
+`MDANSE GitHub Page <https://github.com/ISISNeutronMuon/MDANSE>`_
+
+**MDANSE** (**Molecular Dynamics Analysis for Neutron Scattering Experiments**)
+is a python application designed for computing neutron observables
 from molecular dynamics (MD) trajectories that can be directly compared with
 neutron scattering experiments, particularly inelastic and quasi-elastic
 neutron scattering spectroscopies.
