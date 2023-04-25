@@ -7,6 +7,7 @@ be directly compared with neutron scattering experiments, particularly inelastic
 spectroscopies.
 
 To do this, it interfaces with a variety of MD simulation software such as CASTEP, VASP, DMOL, Gromacs, DL_POLY, CHARMM, LAMMPS, PBD, DFTB etc., 
+
 and provides both a graphical user interface (GUI) and a command line interface. 
 
 This project is built on the development published previously: \
@@ -24,7 +25,9 @@ any other software on that OS. After that, we recommend starting by using the GU
 3. Perform an analysis of choice (through the Plugins panel)
 4. Check the results with the plotter
 
+
 The most complete user documentation of MDANSE can be found on [our Read the Docs page](https://mdanse.readthedocs.io). At the same time, it is still possible to access the original **[MDANSE User Guide](https://epubs.stfc.ac.uk/work/51935555)** \
+
 Other information including example scripts can be found on the [MDANSE website](https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx) 
 
 ## Installing from source
@@ -121,6 +124,7 @@ G. Goret, B. Aoun, E. Pellegrini. J Chem Inf Model. (2017) 57(1):1-5.
 
 MDANSE is licensed under GPL-3.0. See [LICENSE](https://github.com/ISISNeutronMuon/MDANSE/blob/develop/LICENSE) for more 
 information.
+
 
 ## Acknowledgements
 
