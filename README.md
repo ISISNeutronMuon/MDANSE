@@ -16,7 +16,8 @@ J Chem Inf Model. 57(1):1-5 (2017).
 
 ## Quick start
 
-The easiest way to start using MDANSE is to download a built installer from out latest [github release](https://github.com/ISISNeutronMuon/MDANSE/releases/).
+The easiest way to start using MDANSE is to download a built installer from [MDANSE website](https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx) 
+or our latest [github release](https://github.com/ISISNeutronMuon/MDANSE/releases/).
 There, we provide installers for the major operating systems, Windows, Linux and MacOS, which can be downloaded and installed
 any other software on that OS. After that, we recommend starting by using the GUI. The typical workflow will look as follows:
 
@@ -29,6 +30,7 @@ any other software on that OS. After that, we recommend starting by using the GU
 The most complete user documentation of MDANSE can be found on [our Read the Docs page](https://mdanse.readthedocs.io). At the same time, it is still possible to access the original **[MDANSE User Guide](https://epubs.stfc.ac.uk/work/51935555)** \
 
 Other information including example scripts can be found on the [MDANSE website](https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx) 
+
 
 ## Installing from source
 
