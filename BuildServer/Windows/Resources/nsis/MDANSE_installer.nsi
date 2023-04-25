@@ -32,7 +32,7 @@ ShowInstDetails show
 ShowUnInstDetails show
 
 !define PUBLISHER "ISIS Neutron and Muon Source"
-!define WEB_SITE "http://www.mdanse.org"
+!define WEB_SITE "https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx"
 !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\MDANSE"
 !define UNINST_ROOT_KEY "HKLM"
 

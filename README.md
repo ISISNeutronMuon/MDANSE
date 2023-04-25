@@ -28,7 +28,7 @@ any other software on that OS. After that, we recommend starting by using the GU
 
 The most complete user documentation of MDANSE can be found on [our Read the Docs page](https://mdanse.readthedocs.io). At the same time, it is still possible to access the original **[MDANSE User Guide](https://epubs.stfc.ac.uk/work/51935555)** \
 
-Other information including example scripts can be found on the MDANSE website [mdanse.org](https://mdanse.org/) 
+Other information including example scripts can be found on the [MDANSE website](https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx) 
 
 ## Installing from source
 

@@ -5,7 +5,7 @@
 # @file      Src/__pkginfo__.py
 # @brief     Implements module/class/test __pkginfo__
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -35,7 +35,7 @@ __maintainer_email__ = "perenon@ill.fr, sanghamitra.mukhopadhyay@stfc.ac.uk"
 
 __former_contributors__ = "G. Goret, B. Aoun, E.C. Pellegrini"
 
-__url__              = "https://mdanse.org/"
+__url__              = "https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx"
 
 __repo__             = "https://github.com/ISISNeutronMuon/MDANSE"
 
