@@ -47,7 +47,7 @@ class ApproximatedDispersionQVectors(LatticeQVectors):
         hkls = numpy.rint(numpy.dot(self._invReciprocalMatrix,vects)) 
         
         dists = numpy.sqrt(numpy.sum(vects**2,axis=0))        
-        dists = zip(xrange(len(dists)),dists)
+        dists = list(zip(list(range(len(dists))),dists))
         dists.sort(key=operator.itemgetter(1))
         qGroups = itertools.groupby(dists, key=operator.itemgetter(1))
         qGroups = collections.OrderedDict([(k,[item[0] for item in v]) for k,v in qGroups])
@@ -57,7 +57,7 @@ class ApproximatedDispersionQVectors(LatticeQVectors):
 
         self._configuration["q_vectors"] = collections.OrderedDict()
 
-        for k,v in qGroups.iteritems():
+        for k,v in qGroups.items():
 
             self._configuration["q_vectors"][k] = {}
             self._configuration["q_vectors"][k]['q']           = k

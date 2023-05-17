@@ -30,12 +30,10 @@ class PlatformError(Error):
     '''
     pass
 
-class Platform(object):
+class Platform(object, metaclass=abc.ABCMeta):
     """
     This is the base class for OS-free standard operations.
     """
-    
-    __metaclass__ = abc.ABCMeta    
 
     __instance = None
 
@@ -509,7 +507,7 @@ class PlatformWin(Platform):
                                                     ctypes.byref(usertime))
         
         
-        creationtime.value -= ctypes.c_longlong(116444736000000000L).value
+        creationtime.value -= ctypes.c_longlong(116444736000000000).value
         creationtime.value /= 10000000
         
         return creationtime.value    
@@ -593,7 +591,7 @@ class PlatformWin(Platform):
         # Close the handle.
         ctypes.windll.kernel32.CloseHandle(handle)                
              
-import platform
+from . import platform
 system = platform.system()
 
 # Instantiate the proper platform class depending on the OS on which MDANSE runs

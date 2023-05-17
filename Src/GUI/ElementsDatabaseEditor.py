@@ -51,7 +51,7 @@ def create_mmtk_atom_entry(entryname, name, symbol, mass, **props):
     f.write('\n\nsymbol = "%s"' % symbol)
     f.write('\n\nmass = %f' % mass)
 
-    for k, v in props.items():
+    for k, v in list(props.items()):
         f.write('\n\n%s = %r' % (k, v))
 
     f.close()
@@ -176,7 +176,7 @@ class NewPropertyDialog(wx.Dialog):
         staticLabel1 = wx.StaticText(panel, wx.ID_ANY, "Name")
         self.name = wx.TextCtrl(panel, wx.ID_ANY)
         staticLabel2 = wx.StaticText(panel, wx.ID_ANY, "Numeric type")
-        self.propertyType = wx.ComboBox(panel, id=wx.ID_ANY, choices=ELEMENTS._TYPES.keys(), style=wx.CB_READONLY)
+        self.propertyType = wx.ComboBox(panel, id=wx.ID_ANY, choices=list(ELEMENTS._TYPES.keys()), style=wx.CB_READONLY)
 
         # Create button widgets
         cancel = wx.Button(panel, wx.ID_CANCEL, "Cancel")
@@ -224,9 +224,7 @@ class NewPropertyDialog(wx.Dialog):
         return pname, pdefault
 
 
-class Database(wxgrid.PyGridTableBase):
-    __metaclass__ = Singleton
-
+class Database(wxgrid.PyGridTableBase, metaclass=Singleton):
     def GetColLabelValue(self, col):
         return "%s" % ELEMENTS.properties[col]
 

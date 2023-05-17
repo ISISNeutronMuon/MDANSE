@@ -174,7 +174,7 @@ class GenericConverter(Converter):
         
         for _ in range(nMolecularTypes):
             molName = self._gtFile.readline().strip()
-            if self._molecularTypes.has_key(molName):
+            if molName in self._molecularTypes:
                 raise GenericConverterError("Duplicate molecule name.")
             self._molecularTypes[molName] = []
             line = self._gtFile.readline().strip()
@@ -192,7 +192,7 @@ class GenericConverter(Converter):
         line=self._gtFile.readline().strip()
         while line:
             molName,nMols=line.strip().split()
-            if not self._molecularTypes.has_key(molName):
+            if molName not in self._molecularTypes:
                 raise GenericConverterError("Unknown molecule name: %s" % molName)
             try:
                 nMols = int(nMols)

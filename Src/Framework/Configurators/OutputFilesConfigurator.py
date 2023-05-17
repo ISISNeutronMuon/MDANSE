@@ -77,7 +77,7 @@ class OutputFilesConfigurator(IConfigurator):
             if not fmt in self._formats:
                 raise ConfiguratorError("the output file format %r is not a valid output format" % fmt, self)
             
-            if not REGISTRY["format"].has_key(fmt):
+            if fmt not in REGISTRY["format"]:
                 raise ConfiguratorError("the output file format %r is not registered as a valid file format." % fmt, self)
 
         self['root'] = root

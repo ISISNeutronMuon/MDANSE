@@ -134,7 +134,7 @@ class MainFrame(wx.Frame):
         converterMenu = wx.Menu()
         self._converters = {}
 
-        converters = [job for job in REGISTRY["job"].items() if issubclass(job[1],Converter)]
+        converters = [job for job in list(REGISTRY["job"].items()) if issubclass(job[1],Converter)]
         converters = sorted(converters)
         for name,job in converters:
             item = converterMenu.Append(wx.ID_ANY,job.label)
@@ -316,9 +316,9 @@ Authors:
             
     def on_load_data(self, event=None):
 
-        wildcards = collections.OrderedDict([kls._type, "%s (*.%s)|*.%s" % (kls._type,kls.extension,kls.extension)] for kls in REGISTRY["input_data"].values() if kls.extension is not None)
+        wildcards = collections.OrderedDict([kls._type, "%s (*.%s)|*.%s" % (kls._type,kls.extension,kls.extension)] for kls in list(REGISTRY["input_data"].values()) if kls.extension is not None)
 
-        dialog = wx.FileDialog ( None, message='Open data ...', wildcard="automatic (*.mvi,*.nc)|*.mvi;*.nc|" + "|".join(wildcards.values()), style=wx.OPEN)
+        dialog = wx.FileDialog ( None, message='Open data ...', wildcard="automatic (*.mvi,*.nc)|*.mvi;*.nc|" + "|".join(list(wildcards.values())), style=wx.OPEN)
         
         if dialog.ShowModal() == wx.ID_CANCEL:
             return ""
@@ -328,7 +328,7 @@ Authors:
         if idx <= 0:
             dataType = "automatic"
         else:
-            dataType = wildcards.keys()[idx-1]
+            dataType = list(wildcards.keys())[idx-1]
                         
         filename = dialog.GetPath()
         

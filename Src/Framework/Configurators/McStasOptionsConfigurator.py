@@ -39,13 +39,13 @@ class McStasOptionsConfigurator(IConfigurator):
         
         options = self._default.copy()
         
-        for k,v in value.items():
+        for k,v in list(value.items()):
             if k not in options:
                 continue
             options[k] = v
             
         tmp = ['']
-        for k,v in options.items():     
+        for k,v in list(options.items()):     
             if k == "dir":
                 # If the output directory already exists, defines a 'unique' output directory name because otherwise McStas throws.
                 if os.path.exists(v):

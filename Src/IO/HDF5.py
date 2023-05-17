@@ -50,7 +50,7 @@ def find_numeric_variables(var_dict, group):
     :type group: h5py.File or h5py.Group
     """
 
-    for var_key, var in group.items():
+    for var_key, var in list(group.items()):
 
         if isinstance(var, h5py.Group):
             find_numeric_variables(var_dict, var)

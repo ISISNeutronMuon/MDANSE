@@ -70,7 +70,7 @@ class DensityProfile(IJob):
 
         self._indexesPerElement = self.configuration['atom_selection'].get_indexes()
 
-        for element in self._indexesPerElement.keys():
+        for element in list(self._indexesPerElement.keys()):
             self._outputData.add("dp_%s" % element,"line", (self._nBins,), axis="r", units="au") 
 
         self._extent = 0.0
@@ -100,7 +100,7 @@ class DensityProfile(IJob):
         
         dpPerFrame = {}
         
-        for k,v in self._indexesPerElement.iteritems():
+        for k,v in self._indexesPerElement.items():
             h = numpy.histogram(conf.array[v,self.configuration["axis"]["index"]],bins=self._nBins, range=[-0.5,0.5])
             dpPerFrame[k] = h[0]
             
@@ -117,7 +117,7 @@ class DensityProfile(IJob):
         
         self._extent += x[0]
         
-        for element, hist in x[1].items():
+        for element, hist in list(x[1].items()):
             self._outputData["dp_%s" % element] += hist
                         
     def finalize(self):
@@ -126,7 +126,7 @@ class DensityProfile(IJob):
         """
  
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()        
-        for element in nAtomsPerElement.keys():
+        for element in list(nAtomsPerElement.keys()):
             self._outputData["dp_%s" % element] += self.numberOfSteps
 
         dpTotal = weight(self.configuration["weights"].get_weights(),self._outputData,nAtomsPerElement,1,"dp_%s")

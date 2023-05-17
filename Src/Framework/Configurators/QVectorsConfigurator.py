@@ -50,7 +50,7 @@ class QVectorsConfigurator(IConfigurator):
         '''
 
         trajConfig = self._configurable[self._dependencies['trajectory']]
-        if isinstance(value,basestring): 
+        if isinstance(value,str): 
             if UD_STORE.has_definition(trajConfig["basename"],"q_vectors",value):
                 ud = UD_STORE.get_definition(trajConfig["basename"],"q_vectors",value)
                 self["parameters"] = ud['parameters']
@@ -80,7 +80,7 @@ class QVectorsConfigurator(IConfigurator):
             else:
                 raise ConfiguratorError("Q vectors setting must be a tuple %s" % value, self)
                                         
-        self["shells"] = self["q_vectors"].keys()
+        self["shells"] = list(self["q_vectors"].keys())
         self["n_shells"] = len(self["q_vectors"])    
         self["value"] = self["q_vectors"]
 
@@ -93,7 +93,7 @@ class QVectorsConfigurator(IConfigurator):
         '''
         
         info = ["%d Q shells generated\n" % self["n_shells"]]
-        for (qValue,qVectors) in self["q_vectors"].items():
+        for (qValue,qVectors) in list(self["q_vectors"].items()):
             info.append("Shell %s: %d Q vectors generated\n" % (qValue,len(qVectors)))
         
         return "".join(info)

@@ -61,7 +61,7 @@ class ResidueClass(ISelector):
         
             selRes = set()
             for v in vals:
-                if CHEMFAMILIES.has_key(v):
+                if v in CHEMFAMILIES:
                     selRes.update(CHEMFAMILIES[v])
                                                                                  
             for obj in self._universe.objectList():

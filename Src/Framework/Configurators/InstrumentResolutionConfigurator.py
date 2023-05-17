@@ -93,13 +93,13 @@ class InstrumentResolutionConfigurator(IConfigurator):
         :rtype: str
         '''
         
-        if not self.has_key("kernel"):
+        if "kernel" not in self:
             return "No configured yet"
         
         info = ["Instrument resolution kernel: %s" % self["kernel"]]
         if self["parameters"]:
             info.append("Parameters:")
-            for k,v in self["parameters"].items():
+            for k,v in list(self["parameters"].items()):
                 info.append("%s = %s" % (k,v))
                 
         info = "\n".join(info)

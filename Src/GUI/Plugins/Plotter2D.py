@@ -389,7 +389,7 @@ class Plotter2D(wx.Panel):
             
     def get_circular_color(self, idx):
         circ_idx = idx%len(self.color_list)
-        return self.color_list.values()[circ_idx]
+        return list(self.color_list.values())[circ_idx]
                     
     def extract_cross_slice(self, x, y):
         x = int(x)
@@ -488,7 +488,7 @@ class Plotter2D(wx.Panel):
         
     def scale(self, onReplot = False):
         
-        if not NORMALIZER.has_key(self.normType):
+        if self.normType not in NORMALIZER:
             self.color_bar.set_clim(self.data.min(), self.data.max())
             self.ax.set_norm(None)
             return

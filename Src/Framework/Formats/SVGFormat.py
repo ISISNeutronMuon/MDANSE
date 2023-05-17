@@ -15,7 +15,7 @@
 
 import os
 import re
-import StringIO
+import io
 import tarfile
 
 import numpy
@@ -62,7 +62,7 @@ class SVGFormat(IFormat):
 
         tf = tarfile.open(filename,'w')
                                 
-        for var in data.values():
+        for var in list(data.values()):
                         
             if var.ndim != 1:
                 continue
@@ -76,7 +76,7 @@ class SVGFormat(IFormat):
                 
             ytitle = "%s (%s)" % (var.varname,format_unit_string(var.units))
                         
-            pl = Poly(zip(axis,var),stroke='blue')
+            pl = Poly(list(zip(axis,var)),stroke='blue')
 
             svgfilename = os.path.join(os.path.dirname(filename),'%s%s' % (var.varname,cls.extensions[0]))
             
@@ -87,7 +87,7 @@ class SVGFormat(IFormat):
             os.remove(svgfilename)
             
         if header:
-            tempStr = StringIO.StringIO()
+            tempStr = io.StringIO()
             tempStr.write(header)
             tempStr.write('\n\n')  
             tempStr.seek(0)

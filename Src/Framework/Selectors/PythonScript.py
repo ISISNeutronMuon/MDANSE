@@ -43,12 +43,12 @@ class PythonScript(ISelector):
             namespace = {"universe" : self._universe}
         
             try:
-                execfile(s,namespace)
+                exec(compile(open(s, "rb").read(), s, 'exec'),namespace)
             # Any kind of error that may occur in the script must be caught 
             except:
                 continue
             else:
-                if not namespace.has_key("selection"):
+                if "selection" not in namespace:
                     continue
                                 
                 sel.update([self._rindexes[idx] for idx in namespace["selection"]])

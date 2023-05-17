@@ -223,7 +223,7 @@ class IConfigurator(dict):
         :rtype: bool
         '''
         
-        for c in self._dependencies.values():
+        for c in list(self._dependencies.values()):
             if c not in configured:
                 return False
 

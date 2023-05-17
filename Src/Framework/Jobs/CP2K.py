@@ -192,7 +192,7 @@ class CP2KConverter(Converter):
         self._cellFile = CellFile(self.configuration["cell_file"]["filename"])
 
         if abs(self._cellFile["time_step"] - self._xyzFile["time_step"]) > 1.0e-09:
-            print(self._cellFile["time_step"],self._xyzFile["time_step"])
+            print((self._cellFile["time_step"],self._xyzFile["time_step"]))
             raise CP2KConverterError("Inconsistent time step between pos and cell files")
 
         if self._cellFile["n_frames"] != self._xyzFile["n_frames"]:

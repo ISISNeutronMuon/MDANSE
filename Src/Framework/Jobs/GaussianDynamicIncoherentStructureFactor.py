@@ -137,7 +137,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         """
         
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()        
-        for element, number in nAtomsPerElement.items():
+        for element, number in list(nAtomsPerElement.items()):
             self._outputData["f(q,t)_%s" % element][:] /= number
             self._outputData["s(q,f)_%s" % element][:] = get_spectrum(self._outputData["f(q,t)_%s" % element],
                                                                       self.configuration["instrument_resolution"]["time_window"],

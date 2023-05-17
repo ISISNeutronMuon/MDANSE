@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-import cPickle
+import pickle
 import os
 import shutil
 
@@ -30,7 +30,7 @@ class MMTKDefinitionsError(Error):
     '''
     pass
 
-class MMTKDefinitions(dict):
+class MMTKDefinitions(dict, metaclass=Singleton):
     '''
     This singleton class stores the patches for MMTK chemical database in a dictionary which is reloaded at MDANSE 
     start through the use of cPickle mechanism.
@@ -39,8 +39,6 @@ class MMTKDefinitions(dict):
     that some molecules (molecule, amino acids, nucleic acids) are not defined in the default database shipped with MMTK. 
     In such case, it is compulsory to register them in order that they can be recognized as a valid molecule by MMTK.
     '''
-
-    __metaclass__ = Singleton
     
     _path = os.path.join(PLATFORM.application_directory(),"mmtk_definitions")
     
@@ -97,8 +95,8 @@ class MMTKDefinitions(dict):
         # Try to open the UD file.
         try:
             with open(MMTKDefinitions._path, "rb") as f: 
-                mmtkDef = cPickle.load(f)
-                for name,(typ,databaseName) in mmtkDef.items():
+                mmtkDef = pickle.load(f)
+                for name,(typ,databaseName) in list(mmtkDef.items()):
                     self.add(name,typ,databaseName)
                     
         # If for whatever reason the pickle file loading failed do not even try to restore it
@@ -121,7 +119,7 @@ class MMTKDefinitions(dict):
         except IOError:
             return
         else:
-            cPickle.dump(self, f, protocol=2)
+            pickle.dump(self, f, protocol=2)
             f.close()
 
 MMTK_DEFINITIONS = MMTKDefinitions()

@@ -128,7 +128,7 @@ class MeanSquareDisplacement(IJob):
 
         # The MSDs per element are averaged.
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
-        for element, number in nAtomsPerElement.items():
+        for element, number in list(nAtomsPerElement.items()):
             self._outputData["msd_%s" % element] /= number
 
         weights = self.configuration["weights"].get_weights()

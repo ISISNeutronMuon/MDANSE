@@ -140,7 +140,7 @@ class VelocityAutoCorrelationFunction(IJob):
         """      
 
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
-        for element, number in nAtomsPerElement.items():
+        for element, number in list(nAtomsPerElement.items()):
             self._outputData["vacf_%s" % element] /= number
 
         weights = self.configuration["weights"].get_weights()
@@ -149,7 +149,7 @@ class VelocityAutoCorrelationFunction(IJob):
         self._outputData["vacf_total"][:] = vacfTotal
         
         if self.configuration['normalize']["value"]:
-            for element in nAtomsPerElement.keys():
+            for element in list(nAtomsPerElement.keys()):
                 self._outputData["vacf_%s" % element] = normalize(self._outputData["vacf_%s" % element], axis=0)
             self._outputData["vacf_total"] = normalize(self._outputData["vacf_total"], axis=0)
                                     

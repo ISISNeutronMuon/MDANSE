@@ -53,10 +53,10 @@ class PythonScriptConfigurator(InputFileConfigurator):
         
         namespace = {}
         
-        execfile(value,self.__dict__,namespace)
+        exec(compile(open(value, "rb").read(), value, 'exec'),self.__dict__,namespace)
                 
         for v in self._variables:
-            if not namespace.has_key(v):
+            if v not in namespace:
                 raise ConfiguratorError("The variable %r is not defined in the %r python script file" % (v,self["value"]))
             
         self.update(namespace)
@@ -82,7 +82,7 @@ class PythonScriptConfigurator(InputFileConfigurator):
         
         info = ["NetCDF input file: %r" % self["value"]]
         
-        if self.has_key('instance'):
+        if 'instance' in self:
             info.append("Contains the following variables:")
             for v in self['instance'].variables:
                 info.append(v)

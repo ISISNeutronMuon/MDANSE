@@ -45,7 +45,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         :type value: one of the numeric properties of MDANSE.Data.ElementsDatabase.ElementsDatabase
         '''
         
-        if not isinstance(value,basestring):
+        if not isinstance(value,str):
             raise ConfiguratorError("Invalid type for weight. Must be a string.", self)
         
         value = value.lower()
@@ -64,12 +64,12 @@ class WeightsConfigurator(SingleChoiceConfigurator):
             name = ascfg["names"][i]
             for el in ascfg["elements"][i]:
                 p = ELEMENTS[el,self["property"]]
-                if weights.has_key(name):
+                if name in weights:
                     weights[name] += p
                 else:
                     weights[name] = p
                     
-        for k,v in ascfg.get_natoms().items():
+        for k,v in list(ascfg.get_natoms().items()):
             weights[k] /= v
             
         return weights

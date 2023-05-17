@@ -99,7 +99,7 @@ class HisFile(dict):
             recSize = struct.calcsize(rec)
             self["movable_atoms"] = numpy.array(struct.unpack(rec,hisfile.read(recSize)), dtype=numpy.int32) - 1
         else:
-            self["movable_atoms"] = range(self["n_atoms"])
+            self["movable_atoms"] = list(range(self["n_atoms"]))
         rec = "!8x"
         recSize = struct.calcsize(rec)
         hisfile.read(recSize)

@@ -124,7 +124,7 @@ class DensityOfStates(IJob):
         """
 
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()        
-        for element, number in nAtomsPerElement.items():
+        for element, number in list(nAtomsPerElement.items()):
             self._outputData["vacf_%s" % element][:] /= number
             self._outputData["dos_%s" % element][:] = get_spectrum(self._outputData["vacf_%s" % element],
                                                                    self.configuration["instrument_resolution"]["time_window"],

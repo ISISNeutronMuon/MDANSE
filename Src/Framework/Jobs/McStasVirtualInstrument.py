@@ -19,7 +19,7 @@ import shutil
 import subprocess
 import tempfile
 import string
-import StringIO
+import io
 
 import numpy
 
@@ -117,7 +117,7 @@ class McStasVirtualInstrument(IJob):
             fout = tempfile.NamedTemporaryFile(mode = 'w', delete=False)
                         
             fout.write('# Physical parameters:\n')
-            for k,v in self._mcStasPhysicalParameters.items():
+            for k,v in list(self._mcStasPhysicalParameters.items()):
                 fout.write("# %s %s \n" % (k,v))
             
             fout.write('# Temperature %s \n'%self.configuration['temperature']['value']) 
@@ -179,7 +179,7 @@ class McStasVirtualInstrument(IJob):
         """
                 
         # Rename and move to the result dir the SQW file input
-        for typ, fname in self.outFile.items():
+        for typ, fname in list(self.outFile.items()):
             shutil.move(fname, os.path.join(self.configuration["options"]["mcstas_output_directory"], typ + '.sqw'))
         
         # Convert McStas output files into NetCDF format
@@ -194,12 +194,12 @@ class McStasVirtualInstrument(IJob):
         skey = key
         i = 0
         if value is not None:
-            for k, v in d.items():
+            for k, v in list(d.items()):
                 if v.shape != value.shape:
                     continue
                 if numpy.allclose(v, value):
                     return k
-        while d.has_key(key):
+        while key in d:
             key = skey + '_%d'%i
             i += 1
         return key 
@@ -222,7 +222,7 @@ class McStasVirtualInstrument(IJob):
         isBegin = lambda line: line.strip().startswith('begin')
         isCompFilename = lambda line: line.strip().startswith('filename:')
         # First, determine if this is single or overview plot...
-        SimFile = filter(isBegin, open(sim_file).readlines())
+        SimFile = list(filter(isBegin, open(sim_file).readlines()))
         Datfile = 0
         if SimFile == []:
             FS = self.read_monitor(sim_file)
@@ -233,7 +233,7 @@ class McStasVirtualInstrument(IJob):
                 Datfile = 1
     
         # Get filenames from the sim file
-        MonFiles = filter(isCompFilename, open(sim_file).readlines())
+        MonFiles = list(filter(isCompFilename, open(sim_file).readlines()))
         L = len(MonFiles)
         FSlist = []
         # Scan or overview?
@@ -242,7 +242,7 @@ class McStasVirtualInstrument(IJob):
             if Datfile==0:
                 isFilename = lambda line: line.strip().startswith('filename')
                 
-                Scanfile = filter(isFilename, open(sim_file).readlines())
+                Scanfile = list(filter(isFilename, open(sim_file).readlines()))
                 Scanfile = Scanfile[0].split(': ')
                 Scanfile = os.path.join(sim_dir,Scanfile[1].strip())
                 # Proceed to load scan datafile
@@ -327,7 +327,7 @@ class McStasVirtualInstrument(IJob):
         isHeader = lambda line: line.startswith('#')
         f = open(simFile)
         Lines= f.readlines()
-        Header = filter(isHeader, Lines)
+        Header = list(filter(isHeader, Lines))
         f.close()
         
         # Traverse header and define corresponding 'struct'
@@ -364,7 +364,7 @@ class McStasVirtualInstrument(IJob):
                 data.append(l)
         
         
-        Filestruct['data'] = numpy.genfromtxt(StringIO.StringIO(' '.join(data)))
+        Filestruct['data'] = numpy.genfromtxt(io.StringIO(' '.join(data)))
         Filestruct['fullpath'] = simFile
         
         return Filestruct

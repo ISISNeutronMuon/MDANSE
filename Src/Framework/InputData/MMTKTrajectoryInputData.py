@@ -62,7 +62,7 @@ class MMTKTrajectoryInputData(InputFileData):
         molSize = get_chemical_objects_size(self._data.universe)
         molNumber = get_chemical_objects_number(self._data.universe)
         
-        for k,v in molSize.items():
+        for k,v in list(molSize.items()):
             val.append('\t- %d molecule(s) of %s (%d atoms)' % (molNumber[k],k,v))
 
         val.append("\nVariables found in trajectory:")

@@ -55,7 +55,7 @@ class NetCDFInputFileWidget(IWidget):
         if not isinstance(self._netcdf, netCDF4.Dataset):
             return
 
-        self._selectNetCDF.SetItems(DATA_CONTROLLER.keys())
+        self._selectNetCDF.SetItems(list(DATA_CONTROLLER.keys()))
         
         self._selectNetCDF.SetStringSelection(datakey)
         

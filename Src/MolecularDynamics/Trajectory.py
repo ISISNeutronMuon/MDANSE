@@ -111,7 +111,7 @@ def get_chemical_objects_size(universe):
     d = {}
     for obj in universe.objectList():
         if isChemicalObject(obj):
-            if d.has_key(obj.name):
+            if obj.name in d:
                 continue
             d[obj.name] = obj.numberOfAtoms()
         
@@ -131,7 +131,7 @@ def get_chemical_objects_number(universe):
     d = {}
     for obj in universe.objectList():
         if isChemicalObject(obj):
-            if d.has_key(obj.name):
+            if obj.name in d:
                 d[obj.name] += 1
             else:
                 d[obj.name] = 1
@@ -154,7 +154,7 @@ def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable=
     if last is None:
         last = len(trajectory)
         
-    nFrames = len(range(first, last, step))
+    nFrames = len(list(range(first, last, step)))
     
     serie = numpy.zeros((nFrames,3), dtype=dtype)
     

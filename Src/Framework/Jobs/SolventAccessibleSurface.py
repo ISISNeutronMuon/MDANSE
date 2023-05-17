@@ -76,7 +76,7 @@ class SolventAccessibleSurface(IJob):
         # A mapping between the atom indexes and covalent_radius radius for the whole universe.
         self.vdwRadii = dict([(at.index,ELEMENTS[at.symbol,'covalent_radius']) for at in self.configuration['trajectory']['instance'].universe.atomList()])
         self.vdwRadii_list = numpy.zeros( (max(self.vdwRadii.keys())+1,2), dtype = numpy.float64)
-        for k,v in self.vdwRadii.items():
+        for k,v in list(self.vdwRadii.items()):
             self.vdwRadii_list[k] = numpy.array([k,v])[:]   
 
         self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]

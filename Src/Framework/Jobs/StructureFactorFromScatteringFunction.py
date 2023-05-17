@@ -62,7 +62,7 @@ class StructureFactorFromScatteringFunction(IJob):
         nQVectors = len(inputFile.variables['q'][:])
         nOmegas = resolution['n_omegas']
 
-        for k, v in inputFile.variables.items():
+        for k, v in list(inputFile.variables.items()):
             if k.startswith('f(q,t)_'):
                 self._outputData.add(k,"surface", v[:], axis="q|time", units="au")                                                 
                 suffix = k[7:]

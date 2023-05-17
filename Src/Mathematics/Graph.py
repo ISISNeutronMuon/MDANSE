@@ -20,7 +20,7 @@ class Node(object):
     def __init__(self, name, **kwargs):
         self._name  = name
         self._links = set()
-        for k,v in kwargs.items():
+        for k,v in list(kwargs.items()):
             setattr(self,k,v)
 
     @property

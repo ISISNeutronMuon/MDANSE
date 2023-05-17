@@ -45,7 +45,7 @@ class ProjectionConfigurator(IConfigurator):
         except (TypeError,ValueError) as e:
             raise ConfiguratorError(e)
 
-        if not isinstance(mode,basestring):
+        if not isinstance(mode,str):
             raise ConfiguratorError("invalid type for projection mode: must be a string")            
         
         mode = mode.lower()

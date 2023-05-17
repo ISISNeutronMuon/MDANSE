@@ -135,7 +135,7 @@ class Eccentricity(IJob):
 
         # calculate the inertia moments and the radius of gyration
         xx = xy = xz = yy = yz = zz = 0
-        for name, idxs in self._indexes.items():
+        for name, idxs in list(self._indexes.items()):
             atomsCoordinates = series[idxs,:]
             difference = atomsCoordinates-com
             

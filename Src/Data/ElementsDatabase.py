@@ -56,7 +56,7 @@ def indent(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
-class ElementsDatabase(object):
+class ElementsDatabase(object, metaclass=Singleton):
     '''
     This class implements the elements database of MDANSE.
     
@@ -93,8 +93,6 @@ class ElementsDatabase(object):
     >>> elements = ELEMENTS.get_elements()
     '''
     
-    __metaclass__ = Singleton
-    
     _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__),"elements_database.csv")
     
     # The user path
@@ -130,7 +128,7 @@ class ElementsDatabase(object):
         
         ename = ename.lower()
 
-        return self._data.has_key(ename)
+        return ename in self._data
 
     def __getitem__(self,item):
         '''
@@ -145,7 +143,7 @@ class ElementsDatabase(object):
         :type item: str or tuple
         '''
 
-        if isinstance(item,basestring):
+        if isinstance(item,str):
             item = item.lower()
             return copy.deepcopy(self._data[item])
 
@@ -197,7 +195,7 @@ class ElementsDatabase(object):
         Return a generator over the elements stored in the database.
         '''
                         
-        for v in self._data.itervalues():
+        for v in self._data.values():
             yield copy.deepcopy(v)
                 
     def _export_csv(self, filename, delimiter=',', lineterminator='\n', restval='undefined'):
@@ -216,19 +214,19 @@ class ElementsDatabase(object):
 
         f = open(filename, 'w')
 
-        propNames = ["id"] + self._properties.keys()
+        propNames = ["id"] + list(self._properties.keys())
                 
         # Return a csv writer object.            
         databaseWriter = csv.DictWriter(f, propNames, delimiter=delimiter, lineterminator=lineterminator, restval=restval)
         databaseWriter.writeheader()
         
-        rtypes = dict([(v,k) for k,v in ElementsDatabase._TYPES.items()])
+        rtypes = dict([(v,k) for k,v in list(ElementsDatabase._TYPES.items())])
         ptypes = {'id':'type'}
-        ptypes.update(dict([(k,rtypes[v]) for k,v in self._properties.items()]))
+        ptypes.update(dict([(k,rtypes[v]) for k,v in list(self._properties.items())]))
         databaseWriter.writerow(ptypes)
-        for ename, props in self._data.items():
+        for ename, props in list(self._data.items()):
             p = {"id":ename}
-            p.update(dict([(pname,props.get(pname,prop())) for pname,prop in self._properties.items()]))
+            p.update(dict([(pname,props.get(pname,prop())) for pname,prop in list(self._properties.items())]))
             databaseWriter.writerow(p)
                                                  
         # Closes the csv file. 
@@ -248,14 +246,14 @@ class ElementsDatabase(object):
         root = etree.Element('elements_database')
     
         # Write all the elements.
-        for ename,props in self._data.iteritems():
+        for ename,props in self._data.items():
                         
             # Create a XML node for the element.
             node = etree.Element('element')
             
             node.attrib["id"] = ename
                         
-            for pname,prop in self._properties.iteritems():
+            for pname,prop in self._properties.items():
                         
                 # Creates a XML node for the property.      
                 subnode = etree.Element(pname)
@@ -294,7 +292,7 @@ class ElementsDatabase(object):
             
             line = ["#"]
             while line[0].strip().startswith("#"):
-                line = reader.next()
+                line = next(reader)
                 
             properties = line        
             if properties.pop(0).lower() != "id":
@@ -304,7 +302,7 @@ class ElementsDatabase(object):
                 
                 pname = pname.lower()
                 
-                if self._properties.has_key(pname):
+                if pname in self._properties:
                     continue
                 
                 self._properties[pname] = self._TYPES[ptype]
@@ -339,8 +337,8 @@ class ElementsDatabase(object):
         
         ename = ename.lower()
 
-        if not self._data.has_key(ename):
-            self._data[ename] = collections.OrderedDict([(pname,prop()) for pname,prop in self._properties.iteritems()])
+        if ename not in self._data:
+            self._data[ename] = collections.OrderedDict([(pname,prop()) for pname,prop in self._properties.items()])
             
     def add_property(self, pname, typ):
         '''
@@ -358,15 +356,15 @@ class ElementsDatabase(object):
         
         pname = pname.lower()
 
-        if self._properties.has_key(pname):
+        if pname in self._properties:
             raise ElementsDatabaseError("The property %r is already registered in the database." % pname)
 
-        if typ not in self._TYPES.keys():
+        if typ not in list(self._TYPES.keys()):
             raise ElementsDatabaseError("Invalid type for %r property" % pname)
 
         self._properties[pname] = self._TYPES[typ]
         
-        for v in self._data.values():
+        for v in list(self._data.values()):
             v[pname] = self._properties[pname]()
                         
     @property
@@ -378,7 +376,7 @@ class ElementsDatabase(object):
         :rtype: list
         '''
         
-        return self._data.keys()
+        return list(self._data.keys())
 
     def export(self, fmt, filename, *args, **kwargs):
         '''
@@ -422,7 +420,7 @@ class ElementsDatabase(object):
         :rtype: list
         '''
         
-        return self._data.keys()
+        return list(self._data.keys())
 
     def get_isotopes(self,ename):
         '''
@@ -440,7 +438,7 @@ class ElementsDatabase(object):
         # The isotopes are searched according to |symbol| property
         symbol = self._data[ename]["symbol"]
 
-        return [iname for iname,props in self._data.iteritems() if props["symbol"] == symbol]
+        return [iname for iname,props in self._data.items() if props["symbol"] == symbol]
 
     def get_properties(self):
         '''
@@ -450,7 +448,7 @@ class ElementsDatabase(object):
         :rtype: list
         '''
 
-        return self._properties.keys()
+        return list(self._properties.keys())
         
     def get_property(self,pname):
         '''
@@ -465,10 +463,10 @@ class ElementsDatabase(object):
         
         pname = pname.lower()
         
-        if not self._properties.has_key(pname):
+        if pname not in self._properties:
             raise ElementsDatabaseError("The property %r is not registered in the elements database" % pname)
         
-        return collections.OrderedDict([(k,self[k,pname]) for k in self._data.iterkeys()])
+        return collections.OrderedDict([(k,self[k,pname]) for k in self._data.keys()])
 
     def get_property_type(self,pname):
         '''
@@ -493,7 +491,7 @@ class ElementsDatabase(object):
         :rtype: list
         '''
 
-        return [name for name,typ in self._properties.items() if issubclass(typ,numbers.Number)]
+        return [name for name,typ in list(self._properties.items()) if issubclass(typ,numbers.Number)]
 
     def has_element(self,ename):
         '''
@@ -508,7 +506,7 @@ class ElementsDatabase(object):
         
         ename = ename.lower()
 
-        return self._data.has_key(ename)
+        return ename in self._data
 
     def has_property(self,pname):
         '''
@@ -523,7 +521,7 @@ class ElementsDatabase(object):
         
         pname = pname.lower()
 
-        return self._properties.has_key(pname)
+        return pname in self._properties
 
     def info(self, ename):
         '''
@@ -557,7 +555,7 @@ class ElementsDatabase(object):
         info.append(delimiter)
                         
         # The values for all element's properties
-        for pname in self._properties.keys():
+        for pname in list(self._properties.keys()):
             info.append("%s" % " {0:<20}{1:>50}".format(pname,self[ename,pname]))
 
         # Append a delimiter.                
@@ -590,7 +588,7 @@ class ElementsDatabase(object):
 
         pvalues = self.get_property(pname)
 
-        return [ename for ename,pval in pvalues.items() if abs(pval-value)<tolerance]
+        return [ename for ename,pval in list(pvalues.items()) if abs(pval-value)<tolerance]
            
     @property
     def nElements(self):
@@ -654,7 +652,7 @@ class ElementsDatabase(object):
         :rtype: list
         '''
         
-        return self._properties.keys()
+        return list(self._properties.keys())
     
     def _reset(self):
         '''

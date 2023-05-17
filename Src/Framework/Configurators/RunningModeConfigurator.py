@@ -39,7 +39,7 @@ class RunningModeConfigurator(IConfigurator):
         :type value: *'monoprocessor'* or 2-tuple
         '''
                 
-        if isinstance(value,basestring):
+        if isinstance(value,str):
             mode = value
         else:            
             mode = value[0].lower()

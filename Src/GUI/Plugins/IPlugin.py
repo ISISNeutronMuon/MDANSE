@@ -14,7 +14,7 @@
 # **************************************************************************
 
 import abc
-import cPickle
+import pickle
 
 import wx
 import wx.aui as aui
@@ -57,7 +57,7 @@ class PluginDropTarget(wx.DropTarget):
     def OnData(self, x, y, d):
 
         if self.GetData():
-            pluginName = cPickle.loads(self._data.GetData())
+            pluginName = pickle.loads(self._data.GetData())
             self._targetPanel.drop(pluginName)
 
         return d

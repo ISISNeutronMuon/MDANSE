@@ -145,7 +145,7 @@ class NewUnitDialog(wx.Dialog):
 
         factor = self._factor.GetValue()
 
-        dim = [v.GetValue() for v in self._dimensions.values()]
+        dim = [v.GetValue() for v in list(self._dimensions.values())]
 
         return unit, factor, dim
 

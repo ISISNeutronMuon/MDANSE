@@ -35,7 +35,7 @@ class PDBFile(ISelector):
         @type filename: string
         '''
         
-        if not isinstance(filename,basestring):
+        if not isinstance(filename,str):
             raise SelectorError("Invalid type for PDB filename %r" % filename)
                 
         sel = set()
@@ -67,7 +67,7 @@ class PDBFile(ISelector):
                 # Loop over the PDB atoms marked for selection.
                 for p in pdbSelection:
                     # Add to the selection the index of the atom that matches this position.
-                    if univCoord.has_key(p):
+                    if p in univCoord:
                         sel.update([univCoord[p]])
                         
         return sel

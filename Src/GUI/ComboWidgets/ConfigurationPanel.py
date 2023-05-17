@@ -39,7 +39,7 @@ class ConfigurationPanel(wx.Panel):
 
         self._configurable.build_configuration()
 
-        for cfgName in self._configurable.settings.keys():
+        for cfgName in list(self._configurable.settings.keys()):
             
             widget = self._configurable.configuration[cfgName].widget
                         
@@ -65,7 +65,7 @@ class ConfigurationPanel(wx.Panel):
                  
     def get_value(self):
         
-        return dict([(k,v.get_value()) for k,v in self._widgets.items()])
+        return dict([(k,v.get_value()) for k,v in list(self._widgets.items())])
     
     def validate(self):
                

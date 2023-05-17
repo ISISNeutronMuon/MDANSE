@@ -23,7 +23,7 @@ or maintained.
 
 '''
 
-import pubsubconf
+from . import pubsubconf
 pubsubconf.setVersion(2)
 
 

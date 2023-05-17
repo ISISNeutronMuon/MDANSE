@@ -103,7 +103,7 @@ class RootMeanSquareDeviation(IJob):
                 
         # The RMSDs per element are averaged.
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
-        for element, number in nAtomsPerElement.items():
+        for element, number in list(nAtomsPerElement.items()):
             self._outputData["rmsd_%s" % element] /= number
 
         weights = self.configuration["weights"].get_weights()
@@ -111,7 +111,7 @@ class RootMeanSquareDeviation(IJob):
         rmsdTotal = numpy.sqrt(rmsdTotal)
         self._outputData.add("rmsd_total","line", rmsdTotal, axis="time", units="nm") 
             
-        for element, number in nAtomsPerElement.items():
+        for element, number in list(nAtomsPerElement.items()):
             self._outputData["rmsd_%s" % element]  = numpy.sqrt(self._outputData["rmsd_%s" % element])
       
         # Write the output variables.

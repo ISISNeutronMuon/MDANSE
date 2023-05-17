@@ -274,7 +274,7 @@ class DataPanel(wx.Panel):
         
     def show_data(self):
         self.datalist.DeleteAllItems()
-        variables = self.dataproxy.keys()
+        variables = list(self.dataproxy.keys())
         for i, var in enumerate(sorted(variables)):
             self.datalist.InsertStringItem(i, var)
             axis = ','.join(self.dataproxy[var]['axis'])
@@ -293,7 +293,7 @@ class DataPanel(wx.Panel):
         ndim = data.ndim
         self.plot_type.Clear()
         types = []
-        for _type, req_dim in self.plotter_list.items():
+        for _type, req_dim in list(self.plotter_list.items()):
             if ndim == req_dim:
                 types += [_type]
         self.plot_type.SetItems(types)
@@ -491,7 +491,7 @@ class PlotterFrame(wx.Frame):
     def unique(self, key, dic):
         skey = key
         i = 0
-        while key in dic.keys():
+        while key in list(dic.keys()):
             key = skey + '_%d'%i
             i += 1
         return key 

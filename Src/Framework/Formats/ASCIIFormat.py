@@ -14,7 +14,7 @@
 # **************************************************************************
 
 import os
-import StringIO
+import io
 import tarfile
 
 import numpy
@@ -52,8 +52,8 @@ class ASCIIFormat(IFormat):
 
         tf = tarfile.open(filename,'w')
         
-        for var in data.values():
-            tempStr = StringIO.StringIO()
+        for var in list(data.values()):
+            tempStr = io.StringIO()
             tempStr.write(var.info())
             tempStr.write('\n\n')            
             cls.write_data(tempStr,var,data)
@@ -64,7 +64,7 @@ class ASCIIFormat(IFormat):
             tf.addfile(tarinfo=info, fileobj=tempStr)
             
         if header:
-            tempStr = StringIO.StringIO()
+            tempStr = io.StringIO()
             tempStr.write(header)
             tempStr.write('\n\n')  
             tempStr.seek(0)

@@ -19,10 +19,8 @@ from Scientific.IO.NetCDF import NetCDFFile
 
 from MDANSE.Framework.Jobs.IJob import IJob
 
-class Converter(IJob):
+class Converter(IJob, metaclass=abc.ABCMeta):
 
-    __metaclass__ = abc.ABCMeta
-    
     category = ('Converters',)
     
     ancestor = ['empty_data']

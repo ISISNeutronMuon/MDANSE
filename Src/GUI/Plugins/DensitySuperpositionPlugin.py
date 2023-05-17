@@ -163,7 +163,7 @@ class DensitySuperpositionPlugin(ComponentPlugin):
     def unique(self, key, dic):
         skey = key
         i = 0
-        while key in dic.keys():
+        while key in list(dic.keys()):
             key = skey + '_%d'%i
             i += 1
         return key     
@@ -205,7 +205,7 @@ class DensitySuperpositionPlugin(ComponentPlugin):
         f = netCDF4.Dataset(filename,"r")
         variables = f.variables
         
-        if not variables.has_key('molecular_trace'):
+        if 'molecular_trace' not in variables:
             raise DensitySuperpositionError('Trace file format not compatible with Plugin')
         
         self.dim.SetValue(str(variables['molecular_trace'][:].shape))

@@ -17,7 +17,7 @@ import os
 import warnings
 warnings.filterwarnings("ignore")
 
-from __pkginfo__ import __version__, __author__, __date__
+from .__pkginfo__ import __version__, __author__, __date__
 
 from MDANSE.Logging.Logger import LOGGER
 

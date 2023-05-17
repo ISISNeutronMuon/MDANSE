@@ -14,7 +14,7 @@
 # **************************************************************************
 
 import collections
-import cPickle
+import pickle
 
 import wx
 
@@ -75,7 +75,7 @@ class PluginsTreePanel(wx.Panel):
         
         self._hierarchy = collections.OrderedDict()
             
-        for kls in REGISTRY["plugin"].values():
+        for kls in list(REGISTRY["plugin"].values()):
             
             ancestor = getattr(kls,"ancestor",[])
 
@@ -87,7 +87,7 @@ class PluginsTreePanel(wx.Panel):
             ancestors = []
             for anc in ancestor:
                 ancestors.append(anc)
-                if anc in REGISTRY['plugin'].keys():
+                if anc in list(REGISTRY['plugin'].keys()):
                     ancestors.extend([c._type for c in REGISTRY['plugin'][anc].__subclasses__()])
             
             for a in ancestors:
@@ -115,7 +115,7 @@ class PluginsTreePanel(wx.Panel):
         if data is None:
             return
 
-        draginfo = cPickle.dumps(data)
+        draginfo = pickle.dumps(data)
         
         tdo = wx.CustomDataObject(wx.CustomDataFormat("Plugin"))
         

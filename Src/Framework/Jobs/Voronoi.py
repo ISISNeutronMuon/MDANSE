@@ -126,14 +126,14 @@ class Voronoi(IJob):
         for i in range(len(neighbourhood)):
             v = neighbourhood[i]
             if i in valid_region_id:
-                if not self.neighbourhood_hist.has_key(v):
+                if v not in self.neighbourhood_hist:
                     self.neighbourhood_hist[v] = 1
                 else:
                     self.neighbourhood_hist[v] += 1
 
         # Delaunay Tesselation of each valid voronoi region ...
         delaunay_regions_for_each_valid_voronoi_region = {}
-        for vrid, ids in valid_regions.items():
+        for vrid, ids in list(valid_regions.items()):
             if vrid >= self.nb_init_pts:
                 continue
             if len(ids) == 3:
@@ -145,7 +145,7 @@ class Voronoi(IJob):
             
         # Volume Computation ... "    
         global_volumes = {}
-        for vrid, regions in delaunay_regions_for_each_valid_voronoi_region.items():
+        for vrid, regions in list(delaunay_regions_for_each_valid_voronoi_region.items()):
             regions_volumes = []
             for vidx in regions:
                 coords = vertices_coords[vidx]
@@ -155,7 +155,7 @@ class Voronoi(IJob):
             global_volumes[vrid] = sum(regions_volumes)
         
         # Mean volume of Voronoi regions  
-        mean =  numpy.array(global_volumes.values()).mean()
+        mean =  numpy.array(list(global_volumes.values())).mean()
         self.mean_volume[index] = mean
         
         return index, None
@@ -176,7 +176,7 @@ class Voronoi(IJob):
         """
         max_nb_neighbour = max(self.neighbourhood_hist.keys())
         self.neighbourhood = numpy.zeros((max_nb_neighbour+1), dtype=numpy.int32)
-        for k, v in self.neighbourhood_hist.items():
+        for k, v in list(self.neighbourhood_hist.items()):
             self.neighbourhood[k] = v 
             
         self._outputData.add('mean_volume',"line", self.mean_volume, units="nm3") 

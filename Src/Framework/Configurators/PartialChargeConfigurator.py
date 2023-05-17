@@ -39,14 +39,14 @@ class PartialChargeConfigurator(IConfigurator):
         if UD_STORE.has_definition(trajConfig["basename"],'partial_charges',value):
             self.update(UD_STORE.get_definition(trajConfig["basename"],'partial_charges',value))
         else:
-            if isinstance(value,basestring):                
+            if isinstance(value,str):                
                 # Case of a python script
                 if os.path.exists(value):
                     namespace = {}
                     
-                    execfile(value,self.__dict__,namespace)
+                    exec(compile(open(value, "rb").read(), value, 'exec'),self.__dict__,namespace)
                             
-                    if not namespace.has_key('charges'):
+                    if 'charges' not in namespace:
                         raise ConfiguratorError("The variable 'charges' is not defined in the %r python script file" % (self["value"],))
                         
                     self.update(namespace)

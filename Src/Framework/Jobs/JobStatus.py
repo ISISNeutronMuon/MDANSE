@@ -14,7 +14,7 @@
 # **************************************************************************
 
 import collections
-import cPickle
+import pickle
 import datetime
 import os
 import threading
@@ -76,7 +76,7 @@ class JobStatus(Status):
     def save_status(self):
 
         with open(self._state['temporary_file'], 'wb') as f:
-            cPickle.dump(self._state, f, protocol=2)
+            pickle.dump(self._state, f, protocol=2)
 
     def stop_status(self):
         pass

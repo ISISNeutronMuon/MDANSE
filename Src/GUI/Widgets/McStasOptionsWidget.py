@@ -33,7 +33,7 @@ class McStasOptionsWidget(IWidget):
         options = Configurable()
         
         settings = collections.OrderedDict()
-        for name,value in self._configurator.default.items():
+        for name,value in list(self._configurator.default.items()):
             settings[name] = (self._mcStasTypes[type(value).__name__],{'default':value})
         
         options.set_settings(settings)                    

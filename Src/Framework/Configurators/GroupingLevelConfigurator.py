@@ -55,7 +55,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         '''
         
         if choices is None:
-            choices = LEVELS.keys()
+            choices = list(LEVELS.keys())
         else:
             choices = list(set(LEVELS.keys()).intersection(choices))
 

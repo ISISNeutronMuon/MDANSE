@@ -68,7 +68,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         for expression,element in value:
                   
             # Otherwise, it must be a string that will be found as a user-definition keys
-            if not isinstance(expression,basestring):
+            if not isinstance(expression,str):
                 raise ConfiguratorError("Wrong format for atom transmutation configurator.",self)
                 
             if UD_STORE.has_definition(trajConfig["basename"],"atom_selection",expression):                
@@ -116,7 +116,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         :rtype: str
         '''
 
-        if not self.has_key("value"):
+        if "value" not in self:
             return "Not configured yet"
                 
         if self["value"] is None:

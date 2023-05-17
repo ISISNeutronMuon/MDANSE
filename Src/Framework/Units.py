@@ -557,7 +557,7 @@ class _Unit(object):
             return None
 
         powerized_equivalences = {}
-        for k, v in _EQUIVALENCES[dimension].items():
+        for k, v in list(_EQUIVALENCES[dimension].items()):
             pk = tuple([d*upower for d in k])
             powerized_equivalences[pk] = pow(v,upower)
            
@@ -667,9 +667,7 @@ yaml.add_representer(_Unit, represent_unit)
 
 process_tag = yaml.emitter.Emitter.process_tag
 
-class UnitsManager:
-
-    __metaclass__ = Singleton
+class UnitsManager(metaclass=Singleton):
 
     _UNITS = {}
 
@@ -688,7 +686,7 @@ class UnitsManager:
 
     def delete_unit(self, uname):
 
-        if UnitsManager._UNITS.has_key(uname):
+        if uname in UnitsManager._UNITS:
             del UnitsManager._UNITS[uname]
 
     def get_unit(self, uname):
@@ -711,7 +709,7 @@ class UnitsManager:
             with open(UnitsManager._DEFAULT_DATABASE, 'r') as fin:
                 d.update(yaml.safe_load(fin))
         finally:
-            for uname, udict in d.items():
+            for uname, udict in list(d.items()):
                 factor = udict.get('factor',1.0)
                 dim = udict.get('dimension',[0,0,0,0,0,0,0,0,0])
                 UnitsManager._UNITS[uname] = _Unit(uname,factor,*dim)

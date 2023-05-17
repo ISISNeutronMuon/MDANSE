@@ -32,7 +32,7 @@ class NetCDFInputData(InputFileData):
         
         val = ['Variables found in NetCDF file:']
 
-        for k, v in self._netcdf.variables.items():
+        for k, v in list(self._netcdf.variables.items()):
             val.append('\t - %s: %s' % (k,v.shape))
         
         val = "\n".join(val)

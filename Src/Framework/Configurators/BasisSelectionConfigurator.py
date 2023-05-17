@@ -60,7 +60,7 @@ class BasisSelection(IConfigurator):
         
         self["value"] = value
         
-        self['basis'] = zip(e1,e2,e3)      
+        self['basis'] = list(zip(e1,e2,e3))      
         
         self['n_basis'] = len(self['basis'])
 

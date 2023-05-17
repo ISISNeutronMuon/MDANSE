@@ -323,7 +323,7 @@ def setupMsgTree(RootClass, yourModuleLocals=None):
     or "import pubsub2; pubsub2.sendMessage()". '''
     RootClass._setupChaining()
     if yourModuleLocals is not None:
-        gg = [(key, val) for key, val in globals().iteritems() 
+        gg = [(key, val) for key, val in globals().items() 
               if not key.startswith('_') and key not in ('setupMsgTree','weakmethod')]
         yourModuleLocals.update(dict(gg))
 
@@ -605,7 +605,7 @@ class Message:
         
         # go down into children:
         cls._childrenClasses = []
-        for childName, child in vars(cls).iteritems():
+        for childName, child in vars(cls).items():
             if (not childName.startswith('_')) and issubclass(child, Message):
                 cls._childrenClasses.append(child)
                 child._setupChaining(lineage)

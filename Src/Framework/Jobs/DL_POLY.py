@@ -110,7 +110,7 @@ class FieldFile(dict):
                     
                         vals = lines[comp][8:].split()
 
-                        if self._aliases.has_key(sitnam):
+                        if sitnam in self._aliases:
                             element = self._aliases[sitnam]
                         else:
                             element = sitnam
@@ -189,10 +189,10 @@ class HistoryFile(dict):
                                 
         self["keytrj"], self["imcon"], self["natms"] = [int(v) for v in data.split()[0:3]] 
         
-        if self["keytrj"] not in range(3):
+        if self["keytrj"] not in list(range(3)):
             raise HistoryFileError("Invalid value for trajectory output key.")
 
-        if self["imcon"] not in range(4):
+        if self["imcon"] not in list(range(4)):
             raise HistoryFileError("Invalid value for periodic boundary conditions key.")
 
         self._configHeaderSize = _HISTORY_FORMAT[self["version"]]["reci"] + 3*_HISTORY_FORMAT[self["version"]]["recii"] + 4*offset
@@ -217,7 +217,7 @@ class HistoryFile(dict):
 
         self._maskStep = 3+3*(self["keytrj"]+1)+1
         
-        if (self["version"] == u'3') or (self["version"] == u'4'):
+        if (self["version"] == '3') or (self["version"] == '4'):
             self._maskStep += 1
         
         self['instance'].seek(0)        
@@ -247,7 +247,7 @@ class HistoryFile(dict):
         mask[1::self._maskStep] = False
         mask[2::self._maskStep] = False
         mask[3::self._maskStep] = False
-        if (self["version"] == u'3') or (self["version"] == u'4'):
+        if (self["version"] == '3') or (self["version"] == '4'):
             mask[4::self._maskStep] = False
 
         config = numpy.array(numpy.compress(mask,data),dtype=numpy.float64)
@@ -281,7 +281,7 @@ class DL_POLYConverter(Converter):
     settings['history_file'] = ('input_file',{'wildcard':"HISTORY files|HISTORY*|All files|*",
                                               'default':os.path.join('..','..','..','Data','Trajectories','DL_Poly','HISTORY_cumen')})
     settings['atom_aliases'] = ('python_object',{'default':{}})
-    settings['version'] = ('single_choice', {'choices':_HISTORY_FORMAT.keys(), 'default':'2'})
+    settings['version'] = ('single_choice', {'choices':list(_HISTORY_FORMAT.keys()), 'default':'2'})
     settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'field_file'})
                     
     def initialize(self):

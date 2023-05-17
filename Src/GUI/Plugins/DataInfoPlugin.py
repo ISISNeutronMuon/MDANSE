@@ -23,7 +23,7 @@ class DataInfoPlugin(ComponentPlugin):
         
     label = "Data info"
     
-    ancestor = REGISTRY["input_data"].keys()
+    ancestor = list(REGISTRY["input_data"].keys())
 
     def __init__(self, parent, *args, **kwargs):
         

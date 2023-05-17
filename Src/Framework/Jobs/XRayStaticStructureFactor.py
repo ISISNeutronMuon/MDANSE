@@ -122,7 +122,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
         self._outputData.add("xssf_inter","line", (nq,), axis='q', units="au")                                                 
         self._outputData.add("xssf_total","line", (nq,), axis='q', units="au")                                                 
 
-        asf = dict((k,atomic_scattering_factor(k,self._outputData['q'])) for k in nAtomsPerElement.keys())
+        asf = dict((k,atomic_scattering_factor(k,self._outputData['q'])) for k in list(nAtomsPerElement.keys()))
                         
         xssfIntra = weight(asf,self._outputData,nAtomsPerElement,2,"xssf_intra_%s%s")
         self._outputData["xssf_intra"][:] = xssfIntra

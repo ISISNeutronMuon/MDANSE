@@ -90,8 +90,8 @@ class _PubModuleInfo:
         (pubsubInitGlobals), assumed to be pubsub.__init__'s global dict.
         The pub module will provide the legacy "version 1" API for pubsub,
         and Publisher will be the singleton stored in that module.'''
-        import pub
-        from pub import Publisher
+        from . import pub
+        from .pub import Publisher
 
         self.__pubsubDict['Publisher'] = Publisher
         self.__pubsubDict['pub'] = pub
@@ -108,7 +108,7 @@ class _PubModuleInfo:
         '''Remove the given module object from the sys.modules map.'''
         pubsub1 = self.__pubsubDict['pub']
         import sys
-        for (modName, modObj) in sys.modules.iteritems():
+        for (modName, modObj) in sys.modules.items():
             if modObj is pubsub1:
                 del sys.modules[modName]
                 break

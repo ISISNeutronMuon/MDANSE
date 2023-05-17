@@ -258,7 +258,7 @@ class Plotter1D(wx.Panel):
 
         first = True
 
-        for v in self.plots.values():
+        for v in list(self.plots.values()):
 
             line, label, varname = v
             if first:
@@ -347,7 +347,7 @@ class Plotter1D(wx.Panel):
     def delete_line(self, line):
 
         self.add_offset(-self.offset)
-        for k, v in self.plots.items():
+        for k, v in list(self.plots.items()):
             if v[0] is line:
                 d = wx.MessageDialog(None,
                                     'Do you really want delete this line ?',
@@ -357,7 +357,7 @@ class Plotter1D(wx.Panel):
                     return False
                 self.plots.pop(k)
 
-        if not self.plots.values():
+        if not list(self.plots.values()):
             self.figure.gca().set_prop_cycle(None)
 
         # remove line
@@ -434,7 +434,7 @@ class Plotter1D(wx.Panel):
 
     def update_legend(self):
 
-        if not self.plots.values():
+        if not list(self.plots.values()):
             self.figure.gca().legend().remove()
             return 
 
@@ -442,7 +442,7 @@ class Plotter1D(wx.Panel):
             return
             
         legend = [[], []]
-        for v in self.plots.values():
+        for v in list(self.plots.values()):
             legend[0].append(v[0])
             legend[1].append(v[1])
         self.figure.gca().legend(tuple(legend[0]), tuple(legend[1]), loc=self.legend_location,
@@ -524,7 +524,7 @@ class Plotter1D(wx.Panel):
     def unique(key, dic):
         skey = key
         i = 0
-        while dic.has_key(key):
+        while key in dic:
             key = skey + '_%d' % i
             i += 1
         return key

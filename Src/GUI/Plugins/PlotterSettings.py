@@ -580,7 +580,7 @@ class LinesSettingsDialog(wx.Dialog):
     def set_lines(self):
         self.lines.DeleteAllItems()
         _id = 0
-        for k in self.parent.plots.keys():
+        for k in list(self.parent.plots.keys()):
             if type(self.parent.plots[k][0].get_color()) is str:
                 try:
                     r,g,b = matplotlib.colors.colorConverter.colors[self.parent.plots[k][0].get_color()]
@@ -628,7 +628,7 @@ class LinesSettingsDialog(wx.Dialog):
         
         color = self.color_picker.GetColour()
         self.current_line.set_color((color.Red()/255., color.Green()/255., color.Blue()/255.))
-        for v in self.parent.plots.values():
+        for v in list(self.parent.plots.values()):
             if v[0] is self.current_line:
                 new_legend = self.legend.GetValue()
                 if new_legend != v[1]:

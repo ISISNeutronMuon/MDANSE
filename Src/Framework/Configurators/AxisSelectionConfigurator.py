@@ -59,7 +59,7 @@ class AxisSelection(IConfigurator):
 
         self["value"] = value
           
-        self['endpoints'] = zip(e1,e2)      
+        self['endpoints'] = list(zip(e1,e2))      
         
         self['n_axis'] = len(self['endpoints'])
 

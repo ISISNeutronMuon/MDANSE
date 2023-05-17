@@ -147,7 +147,7 @@ _LAYOUT["Md"]  = (9,16)
 _LAYOUT["No"]  = (9,17)
 _LAYOUT["Lr"]  = (9,18)
 
-_COLS = range(1,19)
+_COLS = list(range(1,19))
 _ROWS = ["i","ii","iii","iv","v","vi","vii"]
 
 # Dictionary that maps the chemical family with a RGB color.

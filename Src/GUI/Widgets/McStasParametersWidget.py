@@ -59,7 +59,7 @@ class McStasParametersWidget(IWidget):
         self._parameters = Configurable()
          
         settings = collections.OrderedDict()
-        for name, value in parameters.items():
+        for name, value in list(parameters.items()):
             typ, default = value
             settings[name] = (self._mcStasTypes[typ], {"default":default})
             
@@ -70,7 +70,7 @@ class McStasParametersWidget(IWidget):
         self._widgetPanel.Freeze()
         self._configurationPanel = ConfigurationPanel(self._widgetPanel, self._parameters,None)
          
-        for name, value in parameters.items():
+        for name, value in list(parameters.items()):
             typ, default = value
             if typ == 'string':
                 self._configurationPanel.widgets[name]._browser.SetLabel('Text/File Entry')

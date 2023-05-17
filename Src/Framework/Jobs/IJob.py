@@ -310,7 +310,7 @@ class IJob(Configurable):
             if getattr(self,'numberOfSteps', 0) <= 0:
                 raise JobError(self,"Invalid number of steps for job %s" % self._name)
     
-            if self.configuration.has_key('running_mode'):
+            if 'running_mode' in self.configuration:
                 mode = self.configuration['running_mode']['mode']
             else:
                 mode = 'monoprocessor'
@@ -333,7 +333,7 @@ class IJob(Configurable):
     @classmethod
     def save_template(cls, shortname,classname):
                     
-        if REGISTRY['job'].has_key(shortname):
+        if shortname in REGISTRY['job']:
             raise KeyError('A job with %r name is already stored in the registry' % shortname)
                                 
         templateFile = os.path.join(PLATFORM.macros_directory(),"%s.py" % classname)

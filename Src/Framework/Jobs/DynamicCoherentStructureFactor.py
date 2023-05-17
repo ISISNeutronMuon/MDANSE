@@ -123,7 +123,7 @@ class DynamicCoherentStructureFactor(IJob):
                                 
                 conf = traj.configuration[frame]
 
-                for element,idxs in self._indexesPerElement.items():
+                for element,idxs in list(self._indexesPerElement.items()):
 
                     selectedCoordinates = numpy.take(conf.array, idxs, axis=0)
                     rho[element][i,:] = numpy.sum(numpy.exp(1j*numpy.dot(selectedCoordinates, qVectors)),axis=0)

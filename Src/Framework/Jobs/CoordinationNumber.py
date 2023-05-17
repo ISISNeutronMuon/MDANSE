@@ -72,7 +72,7 @@ class CoordinationNumber(DistanceHistogram):
         r2 = self.configuration['r_values']['mid_points']**2
         dr = self.configuration['r_values']['step']
         
-        for k in self._concentrations.keys():
+        for k in list(self._concentrations.keys()):
             self._concentrations[k] /= nFrames
 
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()

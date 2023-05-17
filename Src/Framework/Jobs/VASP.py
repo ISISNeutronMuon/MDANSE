@@ -62,7 +62,7 @@ class XDATCARFile(dict):
                 
         self["cell_shape"] = numpy.reshape(cell,(3,3))*Units.Ang*self["scale_factor"]
                     
-        self["atoms"] = zip(header[4].split(),[int(v) for v in header[5].split()])
+        self["atoms"] = list(zip(header[4].split(),[int(v) for v in header[5].split()]))
                     
         self["n_atoms"] = sum([v[1] for v in self["atoms"]])
         

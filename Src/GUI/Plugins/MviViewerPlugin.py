@@ -317,17 +317,18 @@ class MviViewerPlugin(ComponentPlugin):
         points.append(points[0])
         return points
 
-    def rotate(self, point, (origin, rotm)):
+    def rotate(self, point, xxx_todo_changeme):
         ''' 
         Rotate and move v according to origin and rotation matrix 
         '''
+        (origin, rotm) = xxx_todo_changeme
         return numpy.dot(point, rotm) + origin
 
-    def rotate_points(self, points, (origin, rotm)):
+    def rotate_points(self, points, xxx_todo_changeme1):
         ''' 
         Rotate and move v according to origin and rotation matrix 
         '''
-        
+        (origin, rotm) = xxx_todo_changeme1
         count = 0
         rpoints=[]
         x=[]
@@ -353,7 +354,7 @@ class MviViewerPlugin(ComponentPlugin):
         x=[]
         y=[]
         z=[]
-        for i in xrange(0, POINTS_IN_CIRCLE):
+        for i in range(0, POINTS_IN_CIRCLE):
             walk = 2 * numpy.pi * i / POINTS_IN_CIRCLE
             xyz = numpy.array(pos)
             xyz[plane[0]] += numpy.cos(walk) * radius

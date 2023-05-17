@@ -834,9 +834,9 @@ class Plotter3D(wx.Panel):
         fuzz=1e-3
         R=numpy.asarray(R,float)
         if det(R) < 0. :
-            raise Exception, "determinant is negative\n"+str(R)
+            raise Exception("determinant is negative\n"+str(R))
         if not numpy.allclose(numpy.mat(R)*R.T,numpy.identity(3),atol=tolerance):
-            raise Exception, "not an orthogonal matrix\n"+str(R)
+            raise Exception("not an orthogonal matrix\n"+str(R))
         cang = 2.0-numpy.sum(numpy.square([ R[0,2],R[1,2],R[2,0],R[2,1],R[2,2] ]))
         cang = numpy.sqrt(min(max(cang,0.0),1.0))
         if (R[2,2]<0.0): cang=-cang

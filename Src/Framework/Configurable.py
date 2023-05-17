@@ -57,7 +57,7 @@ class Configurable(object):
         
         self._configuration.clear()
 
-        for name,(typ,kwds) in self.settings.items():
+        for name,(typ,kwds) in list(self.settings.items()):
             
             try:
                 self._configuration[name] = REGISTRY["configurator"][typ](name, configurable=self,**kwds)
@@ -113,9 +113,9 @@ class Configurable(object):
         
         if isinstance(parameters,dict):
             # Loop over the configuration items          
-            for k,v in self._configuration.items():
+            for k,v in list(self._configuration.items()):
                 # If no input parameter has been set for this item, use its default value.
-                if not parameters.has_key(k):
+                if k not in parameters:
                     raise ConfigurationError("The parameter '%s' is missing" % k)
         else:
             raise ConfigurationError("Invalid type for configuration parameters")             
@@ -127,7 +127,7 @@ class Configurable(object):
                         
             progress = False
 
-            for name,conf in self._configuration.items():
+            for name,conf in list(self._configuration.items()):
                                                                                 
                 if name in configured:
                     continue
@@ -187,7 +187,7 @@ class Configurable(object):
                                     
         doclist = []
         
-        for name,(typ,kwds) in settings.items():
+        for name,(typ,kwds) in list(settings.items()):
             cfg=REGISTRY["configurator"][typ](name, **kwds)
             descr = kwds.get("description","")
             descr += "\n"+str(cfg.__doc__)
@@ -197,7 +197,7 @@ class Configurable(object):
         docstring += ">>> from MDANSE import REGISTRY\n"
         docstring += ">>> \n"
         docstring += ">>> parameters = {}\n"
-        for k,v in cls.get_default_parameters().items():
+        for k,v in list(cls.get_default_parameters().items()):
             docstring += ">>> parameters[%r]=%r\n" % (k,v)
         docstring += ">>> \n"
         docstring += ">>> job = REGISTRY['job'][%r]()\n" % cls._type            
@@ -252,7 +252,7 @@ class Configurable(object):
             raise ConfigurationError("Invalid type for settings: must be a mapping-like object")
                                     
         params = collections.OrderedDict()
-        for name,(typ,kwds) in settings.items():
+        for name,(typ,kwds) in list(settings.items()):
             cfg=REGISTRY["configurator"][typ](name, **kwds)
             params[name] = cfg.default
             

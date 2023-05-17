@@ -151,10 +151,10 @@ class XTDFile(object):
                                      
         graph = Graph()
 
-        for idx, at in self._atoms.items():
+        for idx, at in list(self._atoms.items()):
             graph.add_node(name=idx,**at)
 
-        for idx, at in self._atoms.items():
+        for idx, at in list(self._atoms.items()):
             for bat in at['bonded_to']:
                 graph.add_link(idx,bat)
 

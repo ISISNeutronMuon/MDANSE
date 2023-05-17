@@ -59,7 +59,7 @@ class GridLatticeQVectors(LatticeQVectors):
             
         dists = bins[inds]
         
-        dists = zip(xrange(len(dists)),dists)
+        dists = list(zip(list(range(len(dists))),dists))
         dists.sort(key=operator.itemgetter(1))
         qGroups = itertools.groupby(dists, key=operator.itemgetter(1))
         qGroups = collections.OrderedDict([(k,[item[0] for item in v]) for k,v in qGroups])
@@ -69,7 +69,7 @@ class GridLatticeQVectors(LatticeQVectors):
 
         self._configuration["q_vectors"] = collections.OrderedDict()
 
-        for q,v in qGroups.iteritems():
+        for q,v in qGroups.items():
                         
             self._configuration["q_vectors"][q] = {}
             self._configuration["q_vectors"][q]['q'] = q

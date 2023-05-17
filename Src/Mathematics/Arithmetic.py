@@ -62,7 +62,7 @@ def get_weights(props, contents, dim):
 
     weights = {}
                 
-    cartesianProduct = set(itertools.product(props.keys(), repeat=dim))
+    cartesianProduct = set(itertools.product(list(props.keys()), repeat=dim))
     for elements in cartesianProduct:
     
         n = numpy.product([contents[el] for el in elements])        
@@ -77,7 +77,7 @@ def get_weights(props, contents, dim):
         else:
             normFactor += fact
         
-    for k in weights.keys():
+    for k in list(weights.keys()):
         weights[k] /= numpy.float64(normFactor)
        
     return weights, normFactor
@@ -85,11 +85,11 @@ def get_weights(props, contents, dim):
 def weight(props,values,contents,dim,key,symmetric=True):
     weights = get_weights(props,contents,dim)[0]
     weightedSum = None      
-    matches = dict([(key%k,k) for k in weights.keys()])
+    matches = dict([(key%k,k) for k in list(weights.keys())])
             
-    for k,val in values.iteritems():
+    for k,val in values.items():
         
-        if not matches.has_key(k):
+        if k not in matches:
             continue
                     
         if symmetric:

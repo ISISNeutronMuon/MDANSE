@@ -14,7 +14,7 @@
 # **************************************************************************
 
 import collections
-import cPickle
+import pickle
 import datetime
 import glob
 import os
@@ -32,7 +32,7 @@ from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.Icons import ICONS
 from MDANSE.GUI.Events.JobControllerEvent import EVT_JOB_CONTROLLER, JobControllerEvent
         
-class JobController(threading.Thread):
+class JobController(threading.Thread, metaclass=Singleton):
     '''
     This class sets up the job controlling daemon that will regurlarly check for the status of running MDANSE jobs.
     
@@ -45,8 +45,6 @@ class JobController(threading.Thread):
     to EVT_JOB_CONTROLLER and it will receive the updated version of :py:attr:`_runningJobs` dictionnary every time 
     the :py:meth:run is called.     
     '''
-    
-    __metaclass__ = Singleton
     
     def __init__(self, window, start=False):
         '''
@@ -81,7 +79,7 @@ class JobController(threading.Thread):
 
     def kill_job(self, info):
                 
-        if self._runningJobs.has_key(info["name"]):
+        if info["name"] in self._runningJobs:
 
             if info['state'] == 'running':
                 try:
@@ -117,7 +115,7 @@ class JobController(threading.Thread):
         jobs = [f for f in glob.glob(os.path.join(PLATFORM.temporary_files_directory(),'*'))]
                         
         # Loop over the job registered at the previous controller check point     
-        for job in self._runningJobs.keys():            
+        for job in list(self._runningJobs.keys()):            
 
             # Case where a job has finished during two controller check points (i.e. its temporary file has been deleted)
             if self._runningJobs[job]['state'] == 'finished':
@@ -137,7 +135,7 @@ class JobController(threading.Thread):
             # Open the job temporary file
             try:
                 f = open(job, 'rb')
-                info = cPickle.load(f)
+                info = pickle.load(f)
                 f.close()
                 
             # If the file could not be opened/unpickled for whatever reason, try at the next checkpoint
@@ -286,9 +284,9 @@ class JobControllerPanel(wx.ScrolledWindow):
         runningJobs = event.runningJobs
 
         # Remove the widgets corresponding to the jobs that are not running anymore  
-        for k,v in self._jobs.items():
+        for k,v in list(self._jobs.items()):
 
-            if runningJobs.has_key(k):
+            if k in runningJobs:
                 continue
                                     
             row,_ = self._gbSizer.GetItemPosition(v['name'])            
@@ -304,9 +302,9 @@ class JobControllerPanel(wx.ScrolledWindow):
                         continue
                     self._gbSizer.SetItemPosition(w.GetWindow(),(r-1,i))
 
-        for jobName, jobStatus in runningJobs.items():
+        for jobName, jobStatus in list(runningJobs.items()):
                         
-            if self._jobs.has_key(jobName):
+            if jobName in self._jobs:
                 self._jobs[jobName]['progress'].SetValue(jobStatus['progress'])
                 self._jobs[jobName]['elapsed'].SetValue(jobStatus['elapsed'])
                 self._jobs[jobName]['state'].SetLabel(jobStatus['state'])

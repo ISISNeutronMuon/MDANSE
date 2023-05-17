@@ -12,14 +12,12 @@ from MDANSE.IO.NetCDF import find_numeric_variables as netcdf_find_numeric_varia
 from MDANSE.IO.HDF5 import find_numeric_variables as hdf_find_numeric_variables
 
 
-class _IPlotterData:
+class _IPlotterData(metaclass=abc.ABCMeta):
     """
     This is the interface for plotter data.
 
     Plotter data are data supported by the plotter. Currently, only NetCDF is supported but HDF should be supported soon.
     """
-
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def __init__(self):

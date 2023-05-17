@@ -51,10 +51,8 @@ class UserDefinitionDialog(wx.Dialog):
         
         return self._plugin
 
-class UserDefinitionWidget(IWidget):
+class UserDefinitionWidget(IWidget, metaclass=abc.ABCMeta):
     
-    __metaclass__ = abc.ABCMeta
-                    
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)

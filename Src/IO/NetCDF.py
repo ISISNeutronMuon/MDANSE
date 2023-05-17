@@ -52,7 +52,7 @@ def find_numeric_variables(var_dict, group):
     :rtype: collections.OrderedDict[str, (str, NetCDFFileVariable)]
     """
 
-    for var_key, var in group.variables.items():
+    for var_key, var in list(group.variables.items()):
         if group.path == '/':
             path = '/{}'.format(var_key)
         else:
@@ -72,7 +72,7 @@ def find_numeric_variables(var_dict, group):
 
         var_dict[var_key] = (path, NetCDFFileVariable(var))
 
-    for _, sub_group in group.groups.items():
+    for _, sub_group in list(group.groups.items()):
         var_dict.update(find_numeric_variables(var_dict, sub_group))
 
     return var_dict

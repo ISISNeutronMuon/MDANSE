@@ -59,7 +59,7 @@ class NetCDFFormat(IFormat):
         
         # Loop over the OutputVariable instances to write.
         
-        for var in data.values():
+        for var in list(data.values()):
                                     
             varName = str(var.varname).strip().encode('string-escape').replace('/', '|')
             
@@ -77,7 +77,7 @@ class NetCDFFormat(IFormat):
             NETCDFVAR[:] = var
 
             # All the attributes stored in the OutputVariable instance are written to the NetCDF file.
-            for k, v in vars(var).items():
+            for k, v in list(vars(var).items()):
                 setattr(NETCDFVAR,str(k),str(v))
         
         # The NetCDF file is closed.

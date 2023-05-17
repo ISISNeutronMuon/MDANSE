@@ -134,7 +134,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                                 
                 conf = traj.configuration[frame]
 
-                for element,idxs in self._indexesPerElement.items():
+                for element,idxs in list(self._indexesPerElement.items()):
 
                     selectedCoordinates = numpy.take(conf.array, idxs, axis=0)
                     rho[element][i,:] = numpy.sum(numpy.exp(1j*numpy.dot(selectedCoordinates, qVectors)),axis=0)
@@ -180,7 +180,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 corr = correlation(rho[pair[0]],rho[pair[1]], average=1)
                 self._outputData["f(q,t)_coh_%s%s" % pair][index,:] += corr
 
-            for k,v in disf.items():
+            for k,v in list(disf.items()):
                 self._outputData["f(q,t)_inc_%s" % k][index,:] += v
             
     def finalize(self):
@@ -191,7 +191,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
         
         # Compute concentrations
         nTotalAtoms = 0
-        for val in nAtomsPerElement.values():
+        for val in list(nAtomsPerElement.values()):
             nTotalAtoms += val
         
         # Compute coherent functions and structure factor
@@ -219,7 +219,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 self._outputData["s(q,f)_coh_total"][:] += 2*self._outputData["s(q,f)_coh_weighted_%s%s" % pair][:]
         
         # Compute incoherent functions and structure factor
-        for element, ni in nAtomsPerElement.items():
+        for element, ni in list(nAtomsPerElement.items()):
             bi = ELEMENTS[element,"b_incoherent2"]
             ni = nAtomsPerElement[element]
             ci = float(ni)/nTotalAtoms

@@ -35,7 +35,7 @@ def path_to_module(path,stop=""):
             
     return module
         
-class ClassRegistry(object):
+class ClassRegistry(object, metaclass=Singleton):
     '''
     Metaclass that registers the classes that make the MDANSE framework.
 
@@ -49,8 +49,6 @@ class ClassRegistry(object):
     their own :py:attr:`type` class attribute. Any concrete class of those interfaces that does not define the :py:attr:`type` 
     class attribute will not be registered.    
     '''
-    
-    __metaclass__ = Singleton
 
     def __init__(self):
         
@@ -66,14 +64,14 @@ class ClassRegistry(object):
             return
         
         # And this attribute must be a string for the class to be registerable otherwise return
-        if not isinstance(clsRegistry,basestring):
+        if not isinstance(clsRegistry,str):
             return
         
         # Fetch the branch of the registry corresponding the one of the class to be registred, otherwise create a new branch        
         d = self._registry.setdefault(clsRegistry,{})
         
         # If a class has already been registered with that name return
-        if d.has_key(name):
+        if name in d:
             return
 
         setattr(cls,"_type",name)
@@ -126,7 +124,7 @@ class ClassRegistry(object):
         :rtype: str
         '''
                 
-        if not self._registry.has_key(interface):
+        if interface not in self._registry:
             return "The interface " + interface + " is not registered"
 
         words = ["Name", "Class","File"]

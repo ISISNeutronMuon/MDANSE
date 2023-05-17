@@ -24,7 +24,7 @@ class MoleculeIndex(ISelector):
 
         ISelector.__init__(self,trajectory)
                 
-        self._choices.extend(range(len(self._universe.objectList())))    
+        self._choices.extend(list(range(len(self._universe.objectList()))))    
 
     def select(self, values):
         '''
