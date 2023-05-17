@@ -165,14 +165,13 @@ SCRIPTS = glob.glob(os.path.join(SCRIPTS_PATH,'mdanse*'))
 
 if sphinx:
 
-    import sphinx.setup_command
-
     try:
         from sphinx.ext.apidoc import main as sphinx_apidoc_main
     except ImportError:
         from sphinx.apidoc import main as sphinx_apidoc_main
 
-    class mdanse_build_doc(sphinx.setup_command.BuildDoc):
+#     class mdanse_build_doc(sphinx.setup_command.BuildDoc):
+    class mdanse_build_doc():
 
         def run(self):
             
