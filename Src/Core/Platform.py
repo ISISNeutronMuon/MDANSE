@@ -570,7 +570,7 @@ class PlatformWin(Platform):
         # Close the handle.
         ctypes.windll.kernel32.CloseHandle(handle)                
              
-from . import platform
+import platform
 system = platform.system()
 
 # Instantiate the proper platform class depending on the OS on which MDANSE runs

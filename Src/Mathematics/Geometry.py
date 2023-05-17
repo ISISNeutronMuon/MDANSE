@@ -14,7 +14,7 @@
 # **************************************************************************
 
 import numpy as np
-from np.linalg import det
+from numpy.linalg import det
 
 from MDANSE.Core.Error import Error
 from MDANSE.Mathematics.LinearAlgebra import Vector
