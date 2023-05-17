@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
@@ -74,13 +74,13 @@ class RangeConfigurator(IConfigurator):
         if self._includeLast:
             last += step*0.01  # less likely to overstep the upper limit
             
-        value = numpy.arange(first, last, step)
+        value = np.arange(first, last, step)
         # we add additional check if the points are all within limits
-        value = value[numpy.where(value >= first)]
+        value = value[np.where(value >= first)]
         if self._includeLast:
-            value = value[numpy.where(value <= last)]
+            value = value[np.where(value <= last)]
         else:
-            value = value[numpy.where(value < last)]
+            value = value[np.where(value < last)]
         # end of the range check
         value = value.astype(self._valueType)
         
@@ -94,7 +94,7 @@ class RangeConfigurator(IConfigurator):
             raise ConfiguratorError("the input range is empty." , self)
         
         if self._sort:
-            value = numpy.sort(value)
+            value = np.sort(value)
         
         if self._toList:
             value = value.tolist()

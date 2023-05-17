@@ -84,7 +84,7 @@ class AngularCorrelation(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step. 
-            #. vectors (numpy.array): The calculated vectors 
+            #. vectors (np.array): The calculated vectors 
         """
 
         e1, e2 = self.configuration['axis_selection']['atoms'][index]

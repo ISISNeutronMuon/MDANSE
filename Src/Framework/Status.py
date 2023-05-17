@@ -17,7 +17,7 @@ import abc
 
 import datetime
 
-import numpy
+import numpy as np
 
 def total_seconds(td):
     
@@ -154,7 +154,7 @@ class Status(object, metaclass=abc.ABCMeta):
             if self._nSteps is not None:
                 self._elapsedTime = '%02dd:%02dh:%02dm:%02ds' % convert_duration(total_seconds(datetime.datetime.today() - self._startTime))
                 duration = [total_seconds(self._deltas[i+1]-self._deltas[i]) for i in range(self._currentStep)]
-                duration = numpy.median(duration)*(self._nSteps-self._currentStep)
+                duration = np.median(duration)*(self._nSteps-self._currentStep)
                 duration = datetime.timedelta(seconds=round(duration))
                 duration = convert_duration(total_seconds(duration))            
                 self._eta = '%02dd:%02dh:%02dm:%02ds' % duration

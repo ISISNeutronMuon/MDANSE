@@ -17,7 +17,7 @@ import collections
 import os
 import re
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE
@@ -245,15 +245,15 @@ class HistoryFile(dict):
         timeStep = (currentStep - self._firstStep)*self._timeStep
         if self['imcon'] > 0:        
             cell = " ".join(data[1:]).split()
-            cell = numpy.array(cell,dtype=numpy.float64)
-            cell = numpy.reshape(cell,(3,3)).T            
+            cell = np.array(cell,dtype=np.float64)
+            cell = np.reshape(cell,(3,3)).T            
             cell *= measure(1.0,'ang').toval('nm')
         else:
             cell = None
                 
-        data = numpy.array(self['instance'].read(self._configSize).split())
+        data = np.array(self['instance'].read(self._configSize).split())
 
-        mask = numpy.ones((len(data),), dtype=numpy.bool)
+        mask = np.ones((len(data),), dtype=np.bool)
         mask[0::self._maskStep] = False
         mask[1::self._maskStep] = False
         mask[2::self._maskStep] = False
@@ -261,9 +261,9 @@ class HistoryFile(dict):
         if (self["version"] == '3') or (self["version"] == '4'):
             mask[4::self._maskStep] = False
 
-        config = numpy.array(numpy.compress(mask,data),dtype=numpy.float64)
+        config = np.array(np.compress(mask,data),dtype=np.float64)
 
-        config = numpy.reshape(config,(self["natms"],3*(self["keytrj"]+1)))
+        config = np.reshape(config,(self["natms"],3*(self["keytrj"]+1)))
                 
         config[:,0:3] *= measure(1.0,'ang').toval('nm')
         

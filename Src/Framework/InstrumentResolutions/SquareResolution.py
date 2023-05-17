@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import IInstrumentResolution
@@ -33,9 +33,9 @@ class SquareInstrumentResolution(IInstrumentResolution):
         mu = self._configuration["mu"]["value"]
         sigma = self._configuration["sigma"]["value"]
                                 
-        self._omegaWindow = 2.0*numpy.pi*numpy.where((numpy.abs(omegas-mu)-sigma) > 0,0.0,1.0/(2.0*sigma))
+        self._omegaWindow = 2.0*np.pi*np.where((np.abs(omegas-mu)-sigma) > 0,0.0,1.0/(2.0*sigma))
                         
-        self._timeWindow = numpy.fft.fftshift(numpy.fft.ifft(numpy.fft.ifftshift(self._omegaWindow))/dt)
+        self._timeWindow = np.fft.fftshift(np.fft.ifft(np.fft.ifftshift(self._omegaWindow))/dt)
 
 REGISTRY['square'] = SquareInstrumentResolution
     

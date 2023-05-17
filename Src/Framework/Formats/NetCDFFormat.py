@@ -15,7 +15,7 @@
 
 import os
 
-import numpy
+import numpy as np
 
 import netCDF4
 
@@ -71,7 +71,7 @@ class NetCDFFormat(IFormat):
                 outputFile.createDimension(name, int(v))
 
             # A NetCDF variable instance is created for the running OutputVariable instance.        
-            NETCDFVAR = outputFile.createVariable(varName, numpy.dtype(var.dtype).char, tuple(dimensions))
+            NETCDFVAR = outputFile.createVariable(varName, np.dtype(var.dtype).char, tuple(dimensions))
 
             # The array stored in the OutputVariable instance is written to the NetCDF file.
             NETCDFVAR[:] = var

@@ -16,7 +16,7 @@
 import collections
 from distutils.version import LooseVersion
 
-import numpy
+import numpy as np
 
 import matplotlib
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg, NavigationToolbar2WxAgg
@@ -193,8 +193,8 @@ class Plotter2D(wx.Panel):
                 try:
                     dx = (self.Xmax - self.Xmin)/float(self.data.shape[1])
                     dy = (self.Ymax - self.Ymin)/float(self.data.shape[0])
-                    X = numpy.floor((x - self.Xmin)/dx)
-                    Y = numpy.floor((y - self.Ymin)/dy)
+                    X = np.floor((x - self.Xmin)/dx)
+                    Y = np.floor((y - self.Ymin)/dy)
                     i = self.data[Y, X]
                     self.annotation.SetLabel('x : %g (%g), y : %g (%g), data[x,y] : %g'%(X,x*self.Xunit_conversion_factor,Y,y*self.Yunit_conversion_factor,i))
                 except:
@@ -208,12 +208,12 @@ class Plotter2D(wx.Panel):
         header = '# Data         : %s\n# First row    : %s (%s)\n# First column : %s (%s)\n' % (self.varname,self.Xlabel,self.Xunit,self.Ylabel,self.Yunit)
         output_fname = self.get_output_filename()
         
-        x = numpy.concatenate(([0],self.Xaxis))*self.Xunit_conversion_factor
-        data = numpy.vstack((x,numpy.hstack((self.Yaxis[:,numpy.newaxis]*self.Yunit_conversion_factor,self.data))))
+        x = np.concatenate(([0],self.Xaxis))*self.Xunit_conversion_factor
+        data = np.vstack((x,np.hstack((self.Yaxis[:,np.newaxis]*self.Yunit_conversion_factor,self.data))))
         if output_fname:
             with open(output_fname, 'w') as f:
                 f.write(header)
-                numpy.savetxt(f, data, fmt='%12.4e', delimiter="  ")
+                np.savetxt(f, data, fmt='%12.4e', delimiter="  ")
                 f.close()
     
     def get_output_filename(self):
@@ -265,8 +265,8 @@ class Plotter2D(wx.Panel):
             x, y = event.xdata , event.ydata
             dx = (self.Xmax - self.Xmin)/float(self.data.shape[1])
             dy = (self.Ymax - self.Ymin)/float(self.data.shape[0])
-            X = numpy.floor((x - self.Xmin)/dx)
-            Y = numpy.floor((y - self.Ymin)/dy)
+            X = np.floor((x - self.Xmin)/dx)
+            Y = np.floor((y - self.Ymin)/dy)
             vslice, hslice = self.extract_cross_slice(X, Y)
             
             if not self.parent.unique_slicer is None:
@@ -547,7 +547,7 @@ class Plotter2D(wx.Panel):
         except:
             self.Xaxis_label = 'x'
             self.Xunit = self.Xinit_unit = 'au'
-            self.Xaxis = numpy.arange(data.shape[0])
+            self.Xaxis = np.arange(data.shape[0])
             
         try :
             self.Yaxis_label = self.dataproxy[varname]['axis'][1]
@@ -558,7 +558,7 @@ class Plotter2D(wx.Panel):
         except:
             self.Yaxis_label = 'y'
             self.Yunit = self.Yinit_unit = 'au'
-            self.Yaxis = numpy.arange(data.shape[1]) 
+            self.Yaxis = np.arange(data.shape[1]) 
             
         if not oldXunit is None:
             if oldXunit != self.Xinit_unit:

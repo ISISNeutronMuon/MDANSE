@@ -98,7 +98,7 @@ class DynamicCoherentStructureFactor(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step. 
-            #. rho (numpy.array): The exponential part of I(k,t)
+            #. rho (np.array): The exponential part of I(k,t)
         """
         
         shell = self.configuration["q_vectors"]["shells"][index]

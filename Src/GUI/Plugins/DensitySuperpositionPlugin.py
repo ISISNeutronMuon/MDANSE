@@ -18,7 +18,7 @@ import wx.aui as aui
 
 import vtk
 
-import numpy
+import numpy as np
 
 import netCDF4
 
@@ -224,7 +224,7 @@ class DensitySuperpositionPlugin(ComponentPlugin):
     
     def get_spacing(self):
         spacing = float(self.spacing.GetValue())
-        return numpy.array([spacing, spacing, spacing])
+        return np.array([spacing, spacing, spacing])
     
     def on_clear(self, event=None):
         if self.surface is None:

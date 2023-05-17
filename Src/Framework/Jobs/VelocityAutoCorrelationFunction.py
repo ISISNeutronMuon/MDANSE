@@ -93,8 +93,8 @@ class VelocityAutoCorrelationFunction(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step. 
-            #. atomicDOS (numpy.array): The calculated density of state for atom of index=index
-            #. atomicVACF (numpy.array): The calculated velocity auto-correlation function for atom of index=index
+            #. atomicDOS (np.array): The calculated density of state for atom of index=index
+            #. atomicVACF (np.array): The calculated velocity auto-correlation function for atom of index=index
         """
 
         trajectory = self.configuration['trajectory']['instance']

@@ -18,7 +18,7 @@ import re
 import io
 import tarfile
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Externals.svgfig.svgfig import _hacks, Frame, Poly
@@ -71,7 +71,7 @@ class SVGFormat(IFormat):
                 axis = data[var.axis]
                 xtitle = "%s (%s)" % (axis.name,format_unit_string(axis.units))
             else:
-                axis = numpy.arange(len(var))
+                axis = np.arange(len(var))
                 xtitle = 'index'
                 
             ytitle = "%s (%s)" % (var.varname,format_unit_string(var.units))

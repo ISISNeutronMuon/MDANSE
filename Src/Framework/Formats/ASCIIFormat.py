@@ -17,7 +17,7 @@ import os
 import io
 import tarfile
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Formats.IFormat import IFormat
@@ -96,32 +96,32 @@ class ASCIIFormat(IFormat):
             xData,yData = data.axis.split("|")
 
             if xData == "index":
-                xValues = numpy.arange(data.shape[0])
+                xValues = np.arange(data.shape[0])
                 fileobject.write("# 1st column: %s (%s)\n"% (xData,"au"))
             else:
                 xValues = allData[xData]
                 fileobject.write("# 1st column: %s (%s)\n"% (allData[xData].varname,allData[xData].units))
 
             if yData == "index":
-                yValues = numpy.arange(data.shape[1])
+                yValues = np.arange(data.shape[1])
                 fileobject.write("# 1st row: %s (%s)\n\n"% (yData,"au"))
             else:
                 yValues = allData[yData]
                 fileobject.write("# 1st row: %s (%s)\n\n"% (allData[yData].varname,allData[yData].units))
 
-            zData = numpy.zeros((data.shape[0]+1,data.shape[1]+1),dtype=numpy.float)
+            zData = np.zeros((data.shape[0]+1,data.shape[1]+1),dtype=np.float)
             zData[1:,0] = xValues
             zData[0,1:] = yValues
             zData[1:,1:] = data
 
-            numpy.savetxt(fileobject,zData)
+            np.savetxt(fileobject,zData)
             fileobject.write('\n')
 
         else:
             xData = data.axis.split("|")[0]
 
             if xData == "index":
-                xValues = numpy.arange(data.size)
+                xValues = np.arange(data.size)
                 fileobject.write("# 1st column: %s (%s)\n"% (xData,"au"))
             else:
                 xValues = allData[xData]
@@ -129,7 +129,7 @@ class ASCIIFormat(IFormat):
 
             fileobject.write("# 2nd column: %s (%s)\n\n"% (data.varname,data.units))
 
-            numpy.savetxt(fileobject,numpy.column_stack([xValues,data]))
+            np.savetxt(fileobject,np.column_stack([xValues,data]))
             fileobject.write('\n')
 
 REGISTRY['ascii'] = ASCIIFormat

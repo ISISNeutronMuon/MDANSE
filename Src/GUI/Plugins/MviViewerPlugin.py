@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-import numpy
+import numpy as np
 
 import vtk
 from vtk.wx.wxVTKRenderWindowInteractor import wxVTKRenderWindowInteractor 
@@ -110,7 +110,7 @@ class MviViewerPlugin(ComponentPlugin):
         comps = {}
     
         # active (position, rotation matrix)
-        comp = (numpy.array([0,0,0]),numpy.array([1,0,0,0,1,0,0,0,1]).reshape(3,3))
+        comp = (np.array([0,0,0]),np.array([1,0,0,0,1,0,0,0,1]).reshape(3,3))
     
         # previous neutron position
         prev = None
@@ -148,9 +148,9 @@ class MviViewerPlugin(ComponentPlugin):
                 nums = [x.strip() for x in info[4:].split(',')]
                 # extract fields
                 name = line[len(UC_COMP):].strip(' "\n')
-                pos = numpy.array([float(x) for x in nums[:3]])
+                pos = np.array([float(x) for x in nums[:3]])
                 # read flat 3x3 rotation matrix
-                rot = numpy.array([float(x) for x in nums[3:3+9]]).reshape(3, 3)
+                rot = np.array([float(x) for x in nums[3:3+9]]).reshape(3, 3)
                 comps[name] = (pos, rot)
     
             # switch perspective
@@ -213,7 +213,7 @@ class MviViewerPlugin(ComponentPlugin):
             # deactivate neutron when it leaves
             elif line.startswith(MC_LEAVE):
                 
-                coords = numpy.column_stack([xstate, ystate, zstate])
+                coords = np.column_stack([xstate, ystate, zstate])
                 beg = neutron_pid
                 for p in coords:
                     neutronPoints.InsertNextPoint(p)
@@ -321,7 +321,7 @@ class MviViewerPlugin(ComponentPlugin):
         ''' 
         Rotate and move v according to origin and rotation matrix 
         '''
-        return numpy.dot(point, rotm) + origin
+        return np.dot(point, rotm) + origin
 
     def rotate_points(self, points, origin, rotm):
         ''' 
@@ -343,7 +343,7 @@ class MviViewerPlugin(ComponentPlugin):
         x.append(x[0]);
         y.append(y[0]);
         z.append(z[0]);
-        return numpy.column_stack([x,y,z])
+        return np.column_stack([x,y,z])
 
     def draw_circle(self, plane, pos, radius, comp):
         ''' 
@@ -353,10 +353,10 @@ class MviViewerPlugin(ComponentPlugin):
         y=[]
         z=[]
         for i in range(0, POINTS_IN_CIRCLE):
-            walk = 2 * numpy.pi * i / POINTS_IN_CIRCLE
-            xyz = numpy.array(pos)
-            xyz[plane[0]] += numpy.cos(walk) * radius
-            xyz[plane[1]] += numpy.sin(walk) * radius
+            walk = 2 * np.pi * i / POINTS_IN_CIRCLE
+            xyz = np.array(pos)
+            xyz[plane[0]] += np.cos(walk) * radius
+            xyz[plane[1]] += np.sin(walk) * radius
             # rotate
             xyz = self.rotate(xyz, comp)
             x.append(xyz[0])
@@ -365,6 +365,6 @@ class MviViewerPlugin(ComponentPlugin):
         x.append(x[0]);
         y.append(y[0]);
         z.append(z[0]); 
-        return numpy.column_stack([x,y,z])
+        return np.column_stack([x,y,z])
     
 REGISTRY["mvi_viewer"] = MviViewerPlugin

@@ -16,7 +16,7 @@
 import collections
 import os
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
@@ -56,9 +56,9 @@ class XDATCARFile(dict):
 
         cell = " ".join(header[1:4]).split()
 
-        cell = numpy.array(cell,dtype=numpy.float64)
+        cell = np.array(cell,dtype=np.float64)
                 
-        self["cell_shape"] = numpy.reshape(cell,(3,3))*self["scale_factor"]*measure(1.0,'ang').toval('nm')
+        self["cell_shape"] = np.reshape(cell,(3,3))*self["scale_factor"]*measure(1.0,'ang').toval('nm')
                     
         self["atoms"] = list(zip(header[4].split(),[int(v) for v in header[5].split()]))
                     
@@ -137,14 +137,14 @@ class XDATCARFile(dict):
                     break
                 header.append(line)
             cell = " ".join(header[1:4]).split()
-            cell = numpy.array(cell,dtype=numpy.float64)
-            self["cell_shape"] = numpy.reshape(cell,(3,3))*self["scale_factor"]*measure(1.0,'ang').toval('nm')
+            cell = np.array(cell,dtype=np.float64)
+            self["cell_shape"] = np.reshape(cell,(3,3))*self["scale_factor"]*measure(1.0,'ang').toval('nm')
         else:
             self['instance'].read(self._frameHeaderSize)
                         
-        data = numpy.array(self['instance'].read(self._actualFrameSize).split(), dtype=numpy.float64)
+        data = np.array(self['instance'].read(self._actualFrameSize).split(), dtype=np.float64)
         
-        config = numpy.reshape(data,(self["n_atoms"],3))
+        config = np.reshape(data,(self["n_atoms"],3))
                                                         
         return config
                                 

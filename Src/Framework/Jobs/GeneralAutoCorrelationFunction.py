@@ -66,7 +66,7 @@ class GeneralAutoCorrelationFunction(IJob):
             #. index (int): the index of the step.
         :Returns:
             #. index (int): the index of the step. 
-            #. atomicGACF (numpy.array): the calculated auto-correlation function for the index
+            #. atomicGACF (np.array): the calculated auto-correlation function for the index
         """
 
         indexes = self.configuration['atom_selection']["indexes"][index]

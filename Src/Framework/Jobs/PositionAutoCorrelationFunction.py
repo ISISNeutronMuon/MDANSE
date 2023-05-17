@@ -67,7 +67,7 @@ class PositionAutoCorrelationFunction(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step. 
-            #. atomicPACF (numpy.array): The calculated position auto-correlation function for atom index
+            #. atomicPACF (np.array): The calculated position auto-correlation function for atom index
         """
         
         # get atom index

@@ -92,7 +92,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step. 
-            #. atomicSF (numpy.array): The atomic structure factor
+            #. atomicSF (np.array): The atomic structure factor
         """
 
         # get atom index

@@ -16,7 +16,7 @@
 import collections
 import os
 
-import numpy
+import numpy as np
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg

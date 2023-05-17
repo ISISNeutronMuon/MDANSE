@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import IInstrumentResolution
@@ -39,12 +39,12 @@ class PseudoVoigtInstrumentResolution(IInstrumentResolution):
         muG = self._configuration["mu_gaussian"]["value"]
         sigmaG = self._configuration["sigma_gaussian"]["value"]
 
-        gaussian = (numpy.sqrt(2.0*numpy.pi)/sigmaG)*numpy.exp(-0.5*((omegas-muG)/sigmaG)**2)
+        gaussian = (np.sqrt(2.0*np.pi)/sigmaG)*np.exp(-0.5*((omegas-muG)/sigmaG)**2)
                           
         lorentzian = (2.0*sigmaL)/((omegas-muL)**2 + sigmaL**2)
         
         self._omegaWindow = eta*lorentzian + (1.0-eta)*gaussian
-        self._timeWindow = numpy.fft.fftshift(numpy.fft.ifft(numpy.fft.ifftshift(self._omegaWindow))/dt)
+        self._timeWindow = np.fft.fftshift(np.fft.ifft(np.fft.ifftshift(self._omegaWindow))/dt)
 
 REGISTRY['pseudo-voigt'] = PseudoVoigtInstrumentResolution
                 

@@ -18,10 +18,10 @@ import os
 import wx
 import wx.aui as wxaui
 
-import numpy
+import numpy as np
 
 import vtk
-from vtk.util.numpy_support import numpy_to_vtk
+from vtk.util.numpy_support import numpy as np_to_vtk
 from vtk.wx.wxVTKRenderWindowInteractor import wxVTKRenderWindowInteractor 
 
 from MDANSE.Core.Error import Error
@@ -773,7 +773,7 @@ class Plotter3D(wx.Panel):
         # Display the image
         self.slice_actor = vtk.vtkImageActor()
 
-        R = numpy.array(self.ExtractRotMat(self.orientation_matrix)) #extraction de la matrice de rotation depuit la vtk 4x4
+        R = np.array(self.ExtractRotMat(self.orientation_matrix)) #extraction de la matrice de rotation depuit la vtk 4x4
         alpha, beta, gamma = self.R2Eul(R)
         self.RotaEuler(self.slice_actor, alpha, beta, gamma)
         
@@ -829,32 +829,32 @@ class Plotter3D(wx.Panel):
         R must be an indexable of shape (3,3) and represent and ORTHOGONAL POSITIVE
         DEFINITE matrix. Otherwise, one should use GetEul().
         """
-        from numpy.linalg import det
+        from np.linalg import det
         
         fuzz=1e-3
-        R=numpy.asarray(R,float)
+        R=np.asarray(R,float)
         if det(R) < 0. :
             raise Exception("determinant is negative\n"+str(R))
-        if not numpy.allclose(numpy.mat(R)*R.T,numpy.identity(3),atol=tolerance):
+        if not np.allclose(np.mat(R)*R.T,np.identity(3),atol=tolerance):
             raise Exception("not an orthogonal matrix\n"+str(R))
-        cang = 2.0-numpy.sum(numpy.square([ R[0,2],R[1,2],R[2,0],R[2,1],R[2,2] ]))
-        cang = numpy.sqrt(min(max(cang,0.0),1.0))
+        cang = 2.0-np.sum(np.square([ R[0,2],R[1,2],R[2,0],R[2,1],R[2,2] ]))
+        cang = np.sqrt(min(max(cang,0.0),1.0))
         if (R[2,2]<0.0): cang=-cang
-        ang= numpy.arccos(cang)
-        beta=numpy.degrees(ang)
-        sang=numpy.sin(ang)
+        ang= np.arccos(cang)
+        beta=np.degrees(ang)
+        sang=np.sin(ang)
         if(sang>fuzz):
-            alpha=numpy.degrees(numpy.arctan2(R[1,2], R[0,2]))
-            gamma=numpy.degrees(numpy.arctan2(R[2,1],-R[2,0]))
+            alpha=np.degrees(np.arctan2(R[1,2], R[0,2]))
+            gamma=np.degrees(np.arctan2(R[2,1],-R[2,0]))
         else:
-            alpha=numpy.degrees(numpy.arctan2(-R[0,1],R[0,0]*R[2,2]))
+            alpha=np.degrees(np.arctan2(-R[0,1],R[0,0]*R[2,2]))
             gamma=0.
         if   self.almost(beta,0.,fuzz):
             alpha,beta,gamma = alpha+gamma,  0.,0.
         elif self.almost(beta,180.,fuzz):
             alpha,beta,gamma = alpha-gamma,180.,0.
-        alpha=numpy.mod(alpha,360.);
-        gamma=numpy.mod(gamma,360.)
+        alpha=np.mod(alpha,360.);
+        gamma=np.mod(gamma,360.)
         if self.almost(alpha,360.,fuzz):
             alpha=0.
         if self.almost(gamma,360.,fuzz):

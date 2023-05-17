@@ -1,7 +1,7 @@
 import abc
 import collections
 
-import numpy
+import numpy as np
 
 import netCDF4
 

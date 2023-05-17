@@ -79,7 +79,7 @@ class ElasticIncoherentStructureFactor(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step. 
-            #. atomicEISF (numpy.array): The atomic elastic incoherent structure factor
+            #. atomicEISF (np.array): The atomic elastic incoherent structure factor
         """
 
         # get atom index

@@ -125,7 +125,7 @@ class MDFile(dict):
         :type step: int
 
         :return: The time of the chosen frame, the cell vectors, and the positions of all atoms in three different units
-        :rtype: (float, tuple, numpy.array)-tuple
+        :rtype: (float, tuple, np.array)-tuple
         """
         
         start = self._headerSize+step*self._frameSize  # Determine where the step-th frame starts in the file

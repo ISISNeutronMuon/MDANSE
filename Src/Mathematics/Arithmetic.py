@@ -16,7 +16,7 @@
 import cmath
 import itertools
 
-import numpy
+import numpy as np
 
 def factorial(n):
     """Returns n!
@@ -33,7 +33,7 @@ def factorial(n):
         return 1
     else:
         # multiply is a ufunc of Numeric module
-        return numpy.multiply.reduce(numpy.arange(2,n+1, dtype=numpy.float64))
+        return np.multiply.reduce(np.arange(2,n+1, dtype=np.float64))
 
 def pgcd(n):
     """Computes the pgcd for a set of integers.
@@ -65,12 +65,12 @@ def get_weights(props, contents, dim):
     cartesianProduct = set(itertools.product(list(props.keys()), repeat=dim))
     for elements in cartesianProduct:
     
-        n = numpy.product([contents[el] for el in elements])        
-        p = numpy.product(numpy.array([props[el] for el in elements]),axis=0)
+        n = np.product([contents[el] for el in elements])        
+        p = np.product(np.array([props[el] for el in elements]),axis=0)
                 
         fact = n*p
 
-        weights[elements] = numpy.float64(numpy.copy(fact))
+        weights[elements] = np.float64(np.copy(fact))
                 
         if normFactor is None:
             normFactor = fact
@@ -78,7 +78,7 @@ def get_weights(props, contents, dim):
             normFactor += fact
         
     for k in list(weights.keys()):
-        weights[k] /= numpy.float64(normFactor)
+        weights[k] /= np.float64(normFactor)
        
     return weights, normFactor
 
@@ -111,5 +111,5 @@ class ComplexNumber(complex):
         return cmath.phase(self)
         
     def modulus(self):
-        return numpy.sqrt(self*self.conjugate()).real
+        return np.sqrt(self*self.conjugate()).real
                 

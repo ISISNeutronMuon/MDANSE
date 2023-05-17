@@ -69,7 +69,7 @@ class DipoleAutoCorrelationFunction(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step. 
-            #. dipoleMomemt (numpy.array): The calculated dipolar auto-correlation function for atom of index=index
+            #. dipoleMomemt (np.array): The calculated dipolar auto-correlation function for atom of index=index
         """
 
         # get the Frame index

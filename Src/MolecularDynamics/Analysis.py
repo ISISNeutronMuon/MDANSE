@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-import numpy
+import numpy as np
 
 from MDANSE.Core.Error import Error
 from MDANSE.Mathematics.Geometry import center_of_mass
@@ -41,12 +41,12 @@ def mean_square_deviation(coords1, coords2, masses=None, root=False):
         raise AnalysisError("The input coordinates shapes do not match")
 
     if masses is None:
-        masses = numpy.ones((coords1.shape[0]),dtype=numpy.float64)
+        masses = np.ones((coords1.shape[0]),dtype=np.float64)
 
-    rmsd = numpy.sum(numpy.sum((coords1-coords2)**2,axis=1)*masses)/numpy.sum(masses)
+    rmsd = np.sum(np.sum((coords1-coords2)**2,axis=1)*masses)/np.sum(masses)
 
     if root:
-        rmsd = numpy.sqrt(rmsd)
+        rmsd = np.sqrt(rmsd)
     
     return rmsd
 
@@ -59,13 +59,13 @@ def mean_square_displacement(coords):
     :rtype: float
     '''
     
-    dsq = numpy.add.reduce(coords**2,1)
+    dsq = np.add.reduce(coords**2,1)
 
     # sum_dsq1 is the cumulative sum of dsq
-    sum_dsq1 = numpy.add.accumulate(dsq)
+    sum_dsq1 = np.add.accumulate(dsq)
 
     # sum_dsq1 is the reversed cumulative sum of dsq
-    sum_dsq2 = numpy.add.accumulate(dsq[::-1])
+    sum_dsq2 = np.add.accumulate(dsq[::-1])
 
     # sumsq refers to SUMSQ in the published algorithm
     sumsq = 2.0*sum_dsq1[-1]
@@ -73,11 +73,11 @@ def mean_square_displacement(coords):
     # this line refers to the instruction SUMSQ <-- SUMSQ - DSQ(m-1) - DSQ(N - m) of the published algorithm
     # In this case, msd is an array because the instruction is computed for each m ranging from 0 to len(traj) - 1
     # So, this single instruction is performing the loop in the published algorithm
-    Saabb  = sumsq - numpy.concatenate(([0.0], sum_dsq1[:-1])) - numpy.concatenate(([0.0], sum_dsq2[:-1]))
+    Saabb  = sumsq - np.concatenate(([0.0], sum_dsq1[:-1])) - np.concatenate(([0.0], sum_dsq2[:-1]))
 
     # Saabb refers to SAA+BB/(N-m) in the published algorithm
     # Sab refers to SAB(m)/(N-m) in the published algorithm
-    Saabb = Saabb / (len(dsq) - numpy.arange(len(dsq)))
+    Saabb = Saabb / (len(dsq) - np.arange(len(dsq)))
     Sab   = 2.0*correlation(coords, axis=0, sumOverAxis=1)
 
     # The atomic MSD.
@@ -87,10 +87,10 @@ def mean_square_displacement(coords):
 
 def mean_square_fluctuation(coords, root=False):
     
-    msf = numpy.average(numpy.sum((coords-numpy.average(coords,axis=0))**2,axis=1))
+    msf = np.average(np.sum((coords-np.average(coords,axis=0))**2,axis=1))
     
     if root:
-        msf = numpy.sqrt(msf)
+        msf = np.sqrt(msf)
         
     return msf    
 
@@ -108,14 +108,14 @@ def radius_of_gyration(coords, masses=None, root=False):
     '''
     
     if masses is None:
-        masses = numpy.ones((coords.shape[0]),dtype=numpy.float64)
+        masses = np.ones((coords.shape[0]),dtype=np.float64)
             
     com = center_of_mass(coords,masses)
         
-    rog = numpy.sum(numpy.sum((coords-com)**2,axis=1)*masses)/numpy.sum(masses)
+    rog = np.sum(np.sum((coords-com)**2,axis=1)*masses)/np.sum(masses)
     
     if root:
-        rog = numpy.sqrt(rog)
+        rog = np.sqrt(rog)
         
     return rog
 

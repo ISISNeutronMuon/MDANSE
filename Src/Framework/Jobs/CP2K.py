@@ -17,7 +17,7 @@ import collections
 import os
 import re
 
-import numpy
+import numpy as np
 
 from MMTK import Atom
 from MMTK import Units
@@ -89,9 +89,9 @@ class XYZFile(dict):
     def read_step(self, step):
         self['instance'].seek(step*self._frameSize + self._headerSize)
 
-        temp = numpy.array(self['instance'].read(self._coordinatesSize).split()).reshape((self["n_atoms"],4))
+        temp = np.array(self['instance'].read(self._coordinatesSize).split()).reshape((self["n_atoms"],4))
                                 
-        config = numpy.array(temp[:,1:], dtype=numpy.float64)
+        config = np.array(temp[:,1:], dtype=np.float64)
                                                                 
         return config
                                 
@@ -131,7 +131,7 @@ class CellFile(dict):
                 raise CellFileError("Can not cast time step to floating")
 
             try:
-                cell = numpy.array(words[2:11],dtype=numpy.float).reshape((3,3))
+                cell = np.array(words[2:11],dtype=np.float).reshape((3,3))
             except ValueError:
                 raise CellFileError("Can not cast cell coordinates to floating")
 

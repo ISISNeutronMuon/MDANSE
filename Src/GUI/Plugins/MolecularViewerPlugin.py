@@ -16,7 +16,7 @@
 import os
 import platform
 
-import numpy
+import numpy as np
 
 import vtk
 from vtk.wx.wxVTKRenderWindowInteractor import wxVTKRenderWindowInteractor 
@@ -287,16 +287,16 @@ class MolecularViewerPlugin(ComponentPlugin):
         self._nAtoms = trajectory.chemical_system.number_of_atoms()
         
         # Hack for reducing objects resolution when the system is big
-        self._resolution = int(numpy.sqrt(300000.0 / self._nAtoms))
+        self._resolution = int(np.sqrt(300000.0 / self._nAtoms))
         self._resolution = 10 if self._resolution > 10 else self._resolution
         self._resolution = 4 if self._resolution < 4 else self._resolution
                              
         # The array that will store the color and alpha scale for all the atoms.
         self._atomsColours , self._lut= self.build_ColorTransferFunction()
-        self.atomsColours = numpy.copy(self._atomsColours)
+        self.atomsColours = np.copy(self._atomsColours)
                         
         # The array that will store the scale for all the atoms.
-        self._atomsScales = numpy.array([ATOMS_DATABASE[at.symbol]['vdw_radius'] for at in self._atoms]).astype(numpy.float32)
+        self._atomsScales = np.array([ATOMS_DATABASE[at.symbol]['vdw_radius'] for at in self._atoms]).astype(np.float32)
         
         scalars = ndarray_to_vtkarray(self.atomsColours, self._atomsScales, self._nAtoms) 
 
@@ -333,7 +333,7 @@ class MolecularViewerPlugin(ComponentPlugin):
         if not s.strip():
             s = "1;1;1"
         
-        return numpy.array(s.split(';')).astype(numpy.float32)/255.
+        return np.array(s.split(';')).astype(np.float32)/255.
         
     def build_ColorTransferFunction(self):
         
@@ -687,7 +687,7 @@ class MolecularViewerPlugin(ComponentPlugin):
         if not self._trajectoryLoaded:
             return
                                         
-        self.atomsColours = numpy.copy(self._atomsColours)
+        self.atomsColours = np.copy(self._atomsColours)
         
         for i in range(self._nAtoms):
             self._polydata.GetPointData().GetArray("scalars").SetTuple3(i, self._atomsScales[i], self._atomsColours[i], i)
@@ -738,7 +738,7 @@ class MolecularViewerPlugin(ComponentPlugin):
         if not isinstance(selection,dict):
             selection = {"selection":selection}
                             
-        self.atomsColours = numpy.copy(self._atomsColours)
+        self.atomsColours = np.copy(self._atomsColours)
         
         for k,v in list(selection.items()):
             self.atomsColours[v] = RGB_COLOURS[k][0]
@@ -866,11 +866,11 @@ class MolecularViewerPlugin(ComponentPlugin):
         
     def build_bbox(self, basis_vector):
         
-        cell = numpy.array(basis_vector).astype(numpy.float32)
-        Xmax,Ymax,Zmax =  numpy.array([cell[0,0], cell[1,1], cell[2,2]], dtype = numpy.float32)
+        cell = np.array(basis_vector).astype(np.float32)
+        Xmax,Ymax,Zmax =  np.array([cell[0,0], cell[1,1], cell[2,2]], dtype = np.float32)
         bbox_points = vtk.vtkPoints()
         
-        self.cell_bounds_coords = numpy.array([-Xmax/2. , Xmax/2.,  -Ymax/2., Ymax/2.,  -Zmax/2., Zmax/2.])
+        self.cell_bounds_coords = np.array([-Xmax/2. , Xmax/2.,  -Ymax/2., Ymax/2.,  -Zmax/2., Zmax/2.])
         
         bbox_points.InsertNextPoint(-Xmax/2. , -Ymax/2., -Zmax/2.)
         bbox_points.InsertNextPoint(Xmax/2. , Ymax/2., Zmax/2.)

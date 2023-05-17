@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import IInstrumentResolution
@@ -33,7 +33,7 @@ class GaussianInstrumentResolution(IInstrumentResolution):
         mu = self._configuration["mu"]["value"]
         sigma = self._configuration["sigma"]["value"]
                         
-        self._omegaWindow = (numpy.sqrt(2.0*numpy.pi)/sigma)*numpy.exp(-0.5*((omegas-mu)/sigma)**2)
-        self._timeWindow = numpy.fft.fftshift(numpy.fft.ifft(numpy.fft.ifftshift(self._omegaWindow))/dt)
+        self._omegaWindow = (np.sqrt(2.0*np.pi)/sigma)*np.exp(-0.5*((omegas-mu)/sigma)**2)
+        self._timeWindow = np.fft.fftshift(np.fft.ifft(np.fft.ifftshift(self._omegaWindow))/dt)
 
 REGISTRY['gaussian'] = GaussianInstrumentResolution

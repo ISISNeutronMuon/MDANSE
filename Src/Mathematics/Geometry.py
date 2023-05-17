@@ -13,8 +13,8 @@
 #
 # **************************************************************************
 
-import numpy
-from numpy.linalg import det
+import numpy as np
+from np.linalg import det
 
 from MDANSE.Core.Error import Error
 from MDANSE.Mathematics.LinearAlgebra import Vector
@@ -39,11 +39,11 @@ def get_basis_vectors_from_cell_parameters(parameters):
     e1 = Vector(a, 0.0, 0.0)
 
     # By construction the b vector is in the xy plane.
-    e2 = b*Vector(numpy.cos(gamma), numpy.sin(gamma), 0.0)
+    e2 = b*Vector(np.cos(gamma), np.sin(gamma), 0.0)
     
-    e3_x = numpy.cos(beta)
-    e3_y = (numpy.cos(alpha) - numpy.cos(beta)*numpy.cos(gamma)) / numpy.sin(gamma)
-    e3_z = numpy.sqrt(1.0 - e3_x**2 - e3_y**2)
+    e3_x = np.cos(beta)
+    e3_y = (np.cos(alpha) - np.cos(beta)*np.cos(gamma)) / np.sin(gamma)
+    e3_z = np.sqrt(1.0 - e3_x**2 - e3_y**2)
     e3 = c*Vector(e3_x, e3_y, e3_z)
 
     return (e1, e2, e3)
@@ -52,34 +52,34 @@ def get_basis_vectors_from_cell_parameters(parameters):
 def center_of_mass(coords, masses=None):
     """Computes the center of massfor a set of coordinates and masses 
     :param coords: the n input coordinates.
-    :type coords: (n,3)-NumPy.array
+    :type coords: (n,3)-np.array
     :param masses: it not None, the n input masses. If None, the center of gravity is computed.
-    :type masses: (n,)-NumPy.array
+    :type masses: (n,)-np.array
     :return: the center of mass.
-    :rtype: (3,)-NumPy.array
+    :rtype: (3,)-np.array
     """
         
-    return numpy.average(coords,weights=masses,axis=0)
+    return np.average(coords,weights=masses,axis=0)
 
 center = center_of_mass
 
-def build_cartesian_axes(origin, p1, p2, dtype = numpy.float64):
+def build_cartesian_axes(origin, p1, p2, dtype = np.float64):
     
-    origin = numpy.array(origin, dtype = dtype)
-    p1 = numpy.array(p1, dtype = dtype)
-    p2 = numpy.array(p2, dtype = dtype)    
+    origin = np.array(origin, dtype = dtype)
+    p1 = np.array(p1, dtype = dtype)
+    p2 = np.array(p2, dtype = dtype)    
     
     v1 = p1 - origin
     v2 = p2 - origin
         
     n1 = (v1 + v2)
-    n1 /= numpy.linalg.norm(n1)
+    n1 /= np.linalg.norm(n1)
         
-    n3 = numpy.cross(v1,n1)
-    n3 /= numpy.linalg.norm(n3)
+    n3 = np.cross(v1,n1)
+    n3 /= np.linalg.norm(n3)
     
-    n2 = numpy.cross(n3,n1)
-    n2 /= numpy.linalg.norm(n2)
+    n2 = np.cross(n3,n1)
+    n2 /= np.linalg.norm(n2)
     
     return n1,n2,n3
     
@@ -90,26 +90,26 @@ def generate_sphere_points(n):
     
     points = []
     
-    inc = numpy.pi * (3 - numpy.sqrt(5))
+    inc = np.pi * (3 - np.sqrt(5))
     
     offset = 2 / float(n)
     
     for k in range(int(n)):
         y = k * offset - 1 + (offset / 2)
-        r = numpy.sqrt(1 - y*y)
+        r = np.sqrt(1 - y*y)
         phi = k * inc
-        points.append([numpy.cos(phi)*r, y, numpy.sin(phi)*r])
+        points.append([np.cos(phi)*r, y, np.sin(phi)*r])
     
     return points    
 
 def random_points_on_sphere(radius=1.0, nPoints=100):
 
-    points = numpy.zeros((3,nPoints),dtype=numpy.float)
+    points = np.zeros((3,nPoints),dtype=np.float)
     
-    theta = 2.0*numpy.pi*numpy.random.uniform(nPoints)
-    u = numpy.random.uniform(-1.0,1.0,nPoints)
-    points[0,:] = radius * numpy.sqrt(1 - u**2) * numpy.cos(theta)
-    points[1,:] = radius * numpy.sqrt(1 - u**2) * numpy.sin(theta)
+    theta = 2.0*np.pi*np.random.uniform(nPoints)
+    u = np.random.uniform(-1.0,1.0,nPoints)
+    points[0,:] = radius * np.sqrt(1 - u**2) * np.cos(theta)
+    points[1,:] = radius * np.sqrt(1 - u**2) * np.sin(theta)
     points[2,:] = radius * u
     
     return points
@@ -118,11 +118,11 @@ def random_points_on_disk(axis, radius=1.0, nPoints=100):
 
     axis = Vector(axis).normal().array
     
-    points = numpy.random.uniform(-radius,radius,3*nPoints)
+    points = np.random.uniform(-radius,radius,3*nPoints)
     points = points.reshape((3,nPoints))
 
-    proj = numpy.dot(axis,points)
-    proj = numpy.dot(axis[:,numpy.newaxis],proj[numpy.newaxis,:])
+    proj = np.dot(axis,points)
+    proj = np.dot(axis[:,np.newaxis],proj[np.newaxis,:])
     
     points -= proj
                         
@@ -132,15 +132,15 @@ def random_points_on_circle(axis, radius=1.0, nPoints=100):
 
     axis = Vector(axis).normal().array
     
-    points = numpy.random.uniform(-radius,radius,3*nPoints)
+    points = np.random.uniform(-radius,radius,3*nPoints)
     points = points.reshape((3,nPoints))
 
-    proj = numpy.dot(axis,points)
-    proj = numpy.dot(axis[:,numpy.newaxis],proj[numpy.newaxis,:])
+    proj = np.dot(axis,points)
+    proj = np.dot(axis[:,np.newaxis],proj[np.newaxis,:])
     
     points -= proj
     
-    points *= (radius/numpy.sqrt(numpy.sum(points**2,axis=0)))
+    points *= (radius/np.sqrt(np.sum(points**2,axis=0)))
                         
     return points    
 
@@ -154,31 +154,31 @@ def get_euler_angles(rotation,tolerance=1e-5):
     """
         
     fuzz=1e-3
-    rotation=numpy.asarray(rotation,float)
+    rotation=np.asarray(rotation,float)
 
     if det(rotation) < 0. :
         raise GeometryError("determinant is negative\n"+str(rotation))
 
-    if not numpy.allclose(numpy.mat(rotation)*rotation.T,numpy.identity(3),atol=tolerance):
+    if not np.allclose(np.mat(rotation)*rotation.T,np.identity(3),atol=tolerance):
         raise GeometryError("not an orthogonal matrix\n"+str(rotation))
-    cang = 2.0-numpy.sum(numpy.square([rotation[0,2],rotation[1,2],rotation[2,0],rotation[2,1],rotation[2,2] ]))
-    cang = numpy.sqrt(min(max(cang,0.0),1.0))
+    cang = 2.0-np.sum(np.square([rotation[0,2],rotation[1,2],rotation[2,0],rotation[2,1],rotation[2,2] ]))
+    cang = np.sqrt(min(max(cang,0.0),1.0))
     if (rotation[2,2]<0.0): cang=-cang
-    ang= numpy.arccos(cang)
-    beta=numpy.degrees(ang)
-    sang=numpy.sin(ang)
+    ang= np.arccos(cang)
+    beta=np.degrees(ang)
+    sang=np.sin(ang)
     if(sang>fuzz):
-        alpha=numpy.degrees(numpy.arctan2(rotation[1,2], rotation[0,2]))
-        gamma=numpy.degrees(numpy.arctan2(rotation[2,1],-rotation[2,0]))
+        alpha=np.degrees(np.arctan2(rotation[1,2], rotation[0,2]))
+        gamma=np.degrees(np.arctan2(rotation[2,1],-rotation[2,0]))
     else:
-        alpha=numpy.degrees(numpy.arctan2(-rotation[0,1],rotation[0,0]*rotation[2,2]))
+        alpha=np.degrees(np.arctan2(-rotation[0,1],rotation[0,0]*rotation[2,2]))
         gamma=0.
     if almost(beta,0.,fuzz):
         alpha,beta,gamma = alpha+gamma,  0.,0.
     elif almost(beta,180.,fuzz):
         alpha,beta,gamma = alpha-gamma,180.,0.
-    alpha=numpy.mod(alpha,360.)
-    gamma=numpy.mod(gamma,360.)
+    alpha=np.mod(alpha,360.)
+    gamma=np.mod(gamma,360.)
     if almost(alpha,360.,fuzz):
         alpha=0.
     if almost(gamma,360.,fuzz):
@@ -195,23 +195,23 @@ def superposition_fit(confs):
               and the RMS distance after the optimal superposition
     """
     w_sum = 0.
-    wr_sum = numpy.zeros((3,), numpy.float)
+    wr_sum = np.zeros((3,), np.float)
     for w, r_ref, r in confs:
         w_sum += w
         wr_sum += w*r_ref.array
     ref_cms = wr_sum/w_sum
-    pos = numpy.zeros((3,), numpy.float)
+    pos = np.zeros((3,), np.float)
     possq = 0.
-    cross = numpy.zeros((3, 3), numpy.float)
+    cross = np.zeros((3, 3), np.float)
     for w, r_ref, r in confs:
         w = w/w_sum
         r_ref = r_ref.array-ref_cms
         r = r.array
         pos = pos + w*r
-        possq = possq + w*numpy.add.reduce(r*r) \
-                      + w*numpy.add.reduce(r_ref*r_ref)
-        cross = cross + w*r[:, numpy.newaxis]*r_ref[numpy.newaxis, :]
-    k = numpy.zeros((4, 4), numpy.float)
+        possq = possq + w*np.add.reduce(r*r) \
+                      + w*np.add.reduce(r_ref*r_ref)
+        cross = cross + w*r[:, np.newaxis]*r_ref[np.newaxis, :]
+    k = np.zeros((4, 4), np.float)
     k[0, 0] = -cross[0, 0]-cross[1, 1]-cross[2, 2]
     k[0, 1] = cross[1, 2]-cross[2, 1]
     k[0, 2] = cross[2, 0]-cross[0, 2]
@@ -227,16 +227,16 @@ def superposition_fit(confs):
             k[i, j] = k[j, i]
     k = 2.*k
     for i in range(4):
-        k[i, i] = k[i, i] + possq - numpy.add.reduce(pos*pos)
-    e, v = numpy.linalg.eig(k)
-    v = numpy.transpose(v)
-    i = numpy.argmin(e)
+        k[i, i] = k[i, i] + possq - np.add.reduce(pos*pos)
+    e, v = np.linalg.eig(k)
+    v = np.transpose(v)
+    i = np.argmin(e)
     v = v[i]
     if v[0] < 0: v = -v
     if e[i] <= 0.:
         rms = 0.
     else:
-        rms = numpy.sqrt(e[i])
+        rms = np.sqrt(e[i])
     
     from MDANSE.Mathematics.LinearAlgebra import Quaternion, Vector
     

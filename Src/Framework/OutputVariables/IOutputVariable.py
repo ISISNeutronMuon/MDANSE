@@ -15,7 +15,7 @@
 
 import collections
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
@@ -34,7 +34,7 @@ class OutputData(collections.OrderedDict):
         for fmt in formats:  
             REGISTRY["format"][fmt].write(basename, self, header)
 
-class IOutputVariable(numpy.ndarray):
+class IOutputVariable(np.ndarray):
     '''
     Defines a MDANSE output variable.
     
@@ -62,16 +62,16 @@ class IOutputVariable(numpy.ndarray):
         '''
         
         if isinstance(value, tuple):
-            value = numpy.zeros(value, dtype=numpy.float64)
+            value = np.zeros(value, dtype=np.float64)
         else:        
-            value = numpy.array(list(value), dtype=numpy.float64)
+            value = np.array(list(value), dtype=np.float64)
             
         if value.ndim != cls._nDimensions:
             raise OutputVariableError("Invalid number of dimensions for an output variable of type %r" % cls.name)
 
         # Input array is an already formed ndarray instance
         # We first cast to be our class type
-        obj = numpy.asarray(value).view(cls)
+        obj = np.asarray(value).view(cls)
                                                         
         # The name of the output variable.               
         obj.varname = varname
@@ -95,7 +95,7 @@ class IOutputVariable(numpy.ndarray):
 
     def __array_wrap__(self, out_arr, context=None):
 
-        return numpy.ndarray.__array_wrap__(self, out_arr, context)
+        return np.ndarray.__array_wrap__(self, out_arr, context)
         
     def info(self):
         

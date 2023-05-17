@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-import numpy
+import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
@@ -64,7 +64,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
         self['time_step'] = self._timeStep
                 
         # We compute angular frequency AND NOT ORDINARY FREQUENCY ANYMORE
-        self["omega"] = 2.0*numpy.pi*numpy.fft.fftshift(numpy.fft.fftfreq(2*self["n_frames"]-1,self["time_step"]))
+        self["omega"] = 2.0*np.pi*np.fft.fftshift(np.fft.fftfreq(2*self["n_frames"]-1,self["time_step"]))
                 
         self["n_omegas"] = len(self["omega"])
 

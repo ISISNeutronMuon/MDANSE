@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-import numpy
+import numpy as np
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigCanvas
@@ -38,7 +38,7 @@ class InstrumentResolutionDialog(wx.Dialog):
         
         self._timeStep = timeStep
         
-        self._omegas = 2.0*numpy.pi*numpy.fft.fftshift(numpy.fft.fftfreq(self._nSteps,timeStep))
+        self._omegas = 2.0*np.pi*np.fft.fftshift(np.fft.fftfreq(self._nSteps,timeStep))
                 
         self._currentKernel = None
                           

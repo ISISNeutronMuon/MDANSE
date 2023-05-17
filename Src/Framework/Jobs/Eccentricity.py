@@ -124,13 +124,13 @@ class Eccentricity(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step. 
-            #. moment_of_inertia_xx (numpy.array)
-            #. moment_of_inertia_xy (numpy.array)
-            #. moment_of_inertia_xz (numpy.array)
-            #. moment_of_inertia_yy (numpy.array)
-            #. moment_of_inertia_yz (numpy.array)
-            #. moment_of_inertia_zz (numpy.array)
-            #. radius_of_gyration (numpy.array)
+            #. moment_of_inertia_xx (np.array)
+            #. moment_of_inertia_xy (np.array)
+            #. moment_of_inertia_xz (np.array)
+            #. moment_of_inertia_yy (np.array)
+            #. moment_of_inertia_yz (np.array)
+            #. moment_of_inertia_zz (np.array)
+            #. radius_of_gyration (np.array)
         """
         # get the Frame index
         frameIndex = self.configuration['frames']['value'][index]  

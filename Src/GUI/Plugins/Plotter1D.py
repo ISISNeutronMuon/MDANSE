@@ -16,7 +16,7 @@
 from distutils.version import LooseVersion
 import os
 
-import numpy
+import numpy as np
 
 import matplotlib
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg, NavigationToolbar2WxAgg
@@ -103,8 +103,8 @@ class Plotter1D(wx.Panel):
         self.Xinit_unit = None
         self.Yinit_unit = None
 
-        self.Xaxis = numpy.array([])
-        self.Yaxis = numpy.array([])
+        self.Xaxis = np.array([])
+        self.Yaxis = np.array([])
 
         self.Xticks = []
         self.Yticks = []
@@ -267,7 +267,7 @@ class Plotter1D(wx.Panel):
                     data = [self.dataproxy[axis]['data'] * self.Xunit_conversion_factor]
                     labels = ['%s (%s)' % (axis, self.Xunit)]
                 except:
-                    data = [numpy.arange(self.dataproxy[varname]['data'].shape[0])]
+                    data = [np.arange(self.dataproxy[varname]['data'].shape[0])]
                     labels = ['default_axis (au)']
                 first = False
 
@@ -286,7 +286,7 @@ class Plotter1D(wx.Panel):
         if output_fname:
             with open(output_fname, 'w') as f:
                 f.write(header)
-                numpy.savetxt(f, numpy.column_stack(data), fmt='%12.4e', delimiter="  ")
+                np.savetxt(f, np.column_stack(data), fmt='%12.4e', delimiter="  ")
                 f.close()
 
     def get_output_filename(self):
@@ -395,7 +395,7 @@ class Plotter1D(wx.Panel):
         elif scaleStr == 'symlog':
             self.figure.gca().set_xscale('symlog')
         elif scaleStr == 'ln':
-            self.figure.gca().set_xscale('log', basex=numpy.exp(1))
+            self.figure.gca().set_xscale('log', basex=np.exp(1))
         elif scaleStr == 'log 10':
             self.figure.gca().set_xscale('log', basex=10)
         elif scaleStr == 'log 2':
@@ -410,7 +410,7 @@ class Plotter1D(wx.Panel):
         elif scaleStr == 'symlog':
             self.figure.gca().set_yscale('symlog')
         elif scaleStr == 'ln':
-            self.figure.gca().set_yscale('log', basey=numpy.exp(1))
+            self.figure.gca().set_yscale('log', basey=np.exp(1))
         elif scaleStr == 'log 10':
             self.figure.gca().set_yscale('log', basey=10)
         elif scaleStr == 'log 2':
@@ -481,7 +481,7 @@ class Plotter1D(wx.Panel):
             self.Xaxis = self.dataproxy[self.Xaxis_label]['data']
         except:
             self.Xunit = self.Xinit_unit = 'au'
-            self.Xaxis = numpy.arange(data.shape[0])
+            self.Xaxis = np.arange(data.shape[0])
         try:
             self.Yunit = self.Yinit_unit = self.dataproxy[varname]['units']
         except:

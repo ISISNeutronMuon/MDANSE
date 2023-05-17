@@ -65,7 +65,7 @@ class RootMeanSquareFluctuation(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step. 
-            #. rmsf (numpy.array): the calculated root mean square fluctuation for atom index
+            #. rmsf (np.array): the calculated root mean square fluctuation for atom index
         """
         # read the particle trajectory  
         indexes = self.configuration['atom_selection']["indexes"][index]

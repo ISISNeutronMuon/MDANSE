@@ -73,7 +73,7 @@ class Temperature(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step. 
-            #. kineticEnergy (numpy.array): The calculated kinetic energy
+            #. kineticEnergy (np.array): The calculated kinetic energy
         """
         
         atom = self._atoms[index]
