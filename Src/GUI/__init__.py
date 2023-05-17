@@ -5,7 +5,7 @@
 # @file      Src/GUI/__init__.py
 # @brief     Implements module/class/test __init__
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -41,7 +41,7 @@ REGISTRY.update(os.path.join(os.path.dirname(__file__),"Handlers"))
 REGISTRY.update(os.path.join(os.path.dirname(__file__),"Plugins"))
 REGISTRY.update(os.path.join(os.path.dirname(__file__),"Widgets"))
 
-for job in REGISTRY["job"].values():
+for job in list(REGISTRY["job"].values()):
 
     if not hasattr(job, "_type"):
         continue
@@ -54,7 +54,7 @@ for job in REGISTRY["job"].values():
     kls = type("%sPlugin" % job.__name__, (JobPlugin,), attrs)
     REGISTRY[job._type] = kls
 
-for data in REGISTRY["input_data"].values():
+for data in list(REGISTRY["input_data"].values()):
 
     if not hasattr(data, "_type"):
         continue

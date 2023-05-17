@@ -5,7 +5,7 @@
 # @file      Src/GUI/PeriodicTableViewer.py
 # @brief     Implements module/class/test PeriodicTableViewer
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -147,7 +147,7 @@ _LAYOUT["Md"]  = (9,16)
 _LAYOUT["No"]  = (9,17)
 _LAYOUT["Lr"]  = (9,18)
 
-_COLS = range(1,19)
+_COLS = list(range(1,19))
 _ROWS = ["i","ii","iii","iv","v","vi","vii"]
 
 # Dictionary that maps the chemical family with a RGB color.

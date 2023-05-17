@@ -5,7 +5,9 @@
 #############################
 # Debug option for py2app, if needed
 export DISTUTILS_DEBUG=0
-export PYTHONEXE=$HOME/Contents/Resources/bin/python
+export PYTHON_FOLDER=$HOME/Contents/Resources
+export PYTHONEXE=$PYTHON_FOLDER/bin/python
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 #############################
 # PREPARATION
 #############################
@@ -37,7 +39,7 @@ echo -e "${BLUE}""Packaging MDANSE""${NORMAL}"
 MDANSE_DMG=MDANSE-${VERSION_NAME}-${DISTRO}-${ARCH}.dmg
 
 echo "Uninstall sphinx and its dependencies"
-sudo ${PYTHONEXE} -m pip uninstall -y sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3
+sudo ${PYTHONEXE} -m pip uninstall -y sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3 graphviz
 
 echo "Building mdanse app"
 cd "${GITHUB_WORKSPACE}/BuildServer/Unix/MacOS" || exit
@@ -66,7 +68,7 @@ echo -e "${BLUE}""Copying python""${NORMAL}"
 sudo mkdir -p ${MDANSE_APP_DIR}/Contents/Resources/bin
 
 echo "Copy lib"
-sudo cp -r $HOME/Contents/Resources/lib ${MDANSE_APP_DIR}/Contents/Resources
+sudo cp -rv $PYTHON_FOLDER/lib ${MDANSE_APP_DIR}/Contents/Resources
 
 echo "Copy dependency dylibs"
 sudo mv -v ${MDANSE_APP_DIR}/Contents/Resources/lib/lib* ${MDANSE_APP_DIR}/Contents/Frameworks
@@ -131,6 +133,10 @@ sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/zmq
 sudo rm -rf $HOME/Contents
 #Remove py2app
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/py2app
+# Delete duplicates
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/MDANSE
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/MMTK
+sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/lib/python2.7/site-packages/Scientific
 
 sudo rm -rf ${MDANSE_APP_DIR}/Contents/Resources/conf_
 #############################

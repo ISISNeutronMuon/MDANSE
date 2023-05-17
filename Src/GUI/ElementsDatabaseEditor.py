@@ -5,7 +5,7 @@
 # @file      Src/GUI/ElementsDatabaseEditor.py
 # @brief     Implements module/class/test ElementsDatabaseEditor
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -176,8 +176,8 @@ class NewPropertyDialog(wx.Dialog):
 
         return pname, pclass
 
-class Database(wxgrid.GridTableBase):
 
+class Database(wxgrid.PyGridTableBase, metaclass=Singleton):
     def GetColLabelValue(self, col):
         return "%s" % ATOMS_DATABASE.properties[col]
 

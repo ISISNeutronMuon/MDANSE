@@ -5,7 +5,7 @@
 # @file      Src/GUI/Plugins/MviViewerPlugin.py
 # @brief     Implements module/class/test MviViewerPlugin
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -327,7 +327,6 @@ class MviViewerPlugin(ComponentPlugin):
         ''' 
         Rotate and move v according to origin and rotation matrix 
         '''
-        
         count = 0
         rpoints=[]
         x=[]
@@ -353,7 +352,7 @@ class MviViewerPlugin(ComponentPlugin):
         x=[]
         y=[]
         z=[]
-        for i in xrange(0, POINTS_IN_CIRCLE):
+        for i in range(0, POINTS_IN_CIRCLE):
             walk = 2 * numpy.pi * i / POINTS_IN_CIRCLE
             xyz = numpy.array(pos)
             xyz[plane[0]] += numpy.cos(walk) * radius

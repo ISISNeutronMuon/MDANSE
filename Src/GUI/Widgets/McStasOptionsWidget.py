@@ -5,7 +5,7 @@
 # @file      Src/GUI/Widgets/McStasOptionsWidget.py
 # @brief     Implements module/class/test McStasOptionsWidget
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -33,7 +33,7 @@ class McStasOptionsWidget(IWidget):
         options = Configurable()
         
         settings = collections.OrderedDict()
-        for name,value in self._configurator.default.items():
+        for name,value in list(self._configurator.default.items()):
             settings[name] = (self._mcStasTypes[type(value).__name__],{'default':value})
         
         options.set_settings(settings)                    

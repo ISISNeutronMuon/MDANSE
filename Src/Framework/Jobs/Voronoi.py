@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/Voronoi.py
 # @brief     Implements module/class/test Voronoi
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -140,7 +140,7 @@ class Voronoi(IJob):
 
         # Delaunay Tesselation of each valid voronoi region ...
         delaunay_regions_for_each_valid_voronoi_region = {}
-        for vrid, ids in valid_regions.items():
+        for vrid, ids in list(valid_regions.items()):
             if vrid >= self.nb_init_pts:
                 continue
             if len(ids) == 3:
@@ -152,7 +152,7 @@ class Voronoi(IJob):
             
         # Volume Computation ... "    
         global_volumes = {}
-        for vrid, regions in delaunay_regions_for_each_valid_voronoi_region.items():
+        for vrid, regions in list(delaunay_regions_for_each_valid_voronoi_region.items()):
             regions_volumes = []
             for vidx in regions:
                 coords = vertices_coords[vidx]

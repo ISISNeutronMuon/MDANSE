@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/MeanSquareDisplacement.py
 # @brief     Implements module/class/test MeanSquareDisplacement
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -140,7 +140,7 @@ class MeanSquareDisplacement(IJob):
 
         # The MSDs per element are averaged.
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
-        for element, number in nAtomsPerElement.items():
+        for element, number in list(nAtomsPerElement.items()):
             self._outputData["msd_%s" % element] /= number
 
         weights = self.configuration["weights"].get_weights()

@@ -5,7 +5,7 @@
 # @file      Src/Mathematics/Graph.py
 # @brief     Implements module/class/test Graph
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -20,7 +20,7 @@ class Node(object):
     def __init__(self, name, **kwargs):
         self._name  = name
         self._links = set()
-        for k,v in kwargs.items():
+        for k,v in list(kwargs.items()):
             setattr(self,k,v)
 
     @property

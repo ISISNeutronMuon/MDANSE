@@ -5,7 +5,7 @@
 # @file      Src/GUI/Plugins/AtomSelectionPlugin.py
 # @brief     Implements module/class/test AtomSelectionPlugin
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
@@ -31,7 +31,7 @@ class TrajectoryViewerPlugin(ComponentPlugin):
         
     label = "Trajectory Viewer"
     
-    ancestor = ["molecular_viewer"]
+    ancestor = ["mmtk_trajectory", "molecular_viewer"]
     
     _dimensions = {'x':0, 'y':1, 'z':2}
 

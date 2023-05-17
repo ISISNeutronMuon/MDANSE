@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/NeutronDynamicTotalStructureFactor.py
 # @brief     Implements module/class/test NeutronDynamicTotalStructureFactor
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -175,10 +175,61 @@ class NeutronDynamicTotalStructureFactor(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step. 
-            #. rho (numpy.array): The exponential part of I(k,t)
+            #. rho (np.array): The exponential part of I(k,t)
         """
         
-        return index, None    
+        shell = self.configuration["q_vectors"]["shells"][index]
+        
+        if not shell in self.configuration["q_vectors"]["value"]:
+            return index, None
+            
+        else:
+
+            traj = self.configuration['trajectory']['instance']
+            
+            nQVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"].shape[1]
+                                                                                    
+            rho = {}
+            for element in self.configuration['atom_selection']['unique_names']:
+                rho[element] = np.zeros((self._nFrames, nQVectors), dtype = np.complex64)
+
+            # loop over the trajectory time steps
+            for i, frame in enumerate(self.configuration['frames']['value']):
+            
+                qVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"]
+                                
+                conf = traj.configuration[frame]
+
+                for element,idxs in list(self._indexesPerElement.items()):
+
+                    selectedCoordinates = np.take(conf.array, idxs, axis=0)
+                    rho[element][i,:] = np.sum(np.exp(1j*np.dot(selectedCoordinates, qVectors)),axis=0)
+
+
+            disf_per_q_shell = {}
+            for element in self.configuration['atom_selection']['unique_names']:
+                disf_per_q_shell[element] = np.zeros((self._nFrames,), dtype = np.float)
+
+            for i,atom_indexes in enumerate(self.configuration['atom_selection']["indexes"]):
+
+                masses = self.configuration['atom_selection']["masses"][i]
+
+                element = self.configuration['atom_selection']["names"][i]
+                        
+                series = read_atoms_trajectory(self.configuration["trajectory"]["instance"],
+                                               atom_indexes,
+                                               first=self.configuration['frames']['first'],
+                                               last=self.configuration['frames']['last']+1,
+                                               step=self.configuration['frames']['step'],
+                                               weights=[masses])
+                                                                                                    
+                temp = np.exp(1j*np.dot(series, qVectors))
+                res = correlation(temp, axis=0, average=1)
+                    
+                disf_per_q_shell[element] += res
+
+            return index, (rho, disf_per_q_shell)
+    
     
     def combine(self, index, x):
         """
@@ -187,6 +238,16 @@ class NeutronDynamicTotalStructureFactor(IJob):
             #. index (int): The index of the step.\n
             #. x (any): The returned result(s) of run_step
         """
+               
+        if x is not None:
+            rho,disf = x
+
+            for pair in self._elementsPairs:
+                corr = correlation(rho[pair[0]],rho[pair[1]], average=1)
+                self._outputData["f(q,t)_coh_%s%s" % pair][index,:] += corr
+
+            for k,v in list(disf.items()):
+                self._outputData["f(q,t)_inc_%s" % k][index,:] += v
             
     def finalize(self):
         """
@@ -197,7 +258,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
         
         # Compute concentrations
         nTotalAtoms = 0
-        for val in nAtomsPerElement.values():
+        for val in list(nAtomsPerElement.values()):
             nTotalAtoms += val
         
         # Compute coherent functions and structure factor

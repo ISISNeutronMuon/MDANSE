@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/VASP.py
 # @brief     Implements module/class/test VASP
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -60,7 +60,7 @@ class XDATCARFile(dict):
                 
         self["cell_shape"] = numpy.reshape(cell,(3,3))*self["scale_factor"]*measure(1.0,'ang').toval('nm')
                     
-        self["atoms"] = zip(header[4].split(),[int(v) for v in header[5].split()])
+        self["atoms"] = list(zip(header[4].split(),[int(v) for v in header[5].split()]))
                     
         self["n_atoms"] = sum([v[1] for v in self["atoms"]])
         

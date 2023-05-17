@@ -5,7 +5,7 @@
 # @file      Src/Framework/Status.py
 # @brief     Implements module/class/test Status
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -32,7 +32,7 @@ def convert_duration(seconds):
 
     return (d.day-1,d.hour,d.minute,d.second)
 
-class Status(object,metaclass=abc.ABCMeta):
+class Status(object, metaclass=abc.ABCMeta):
     """
     This class defines an interface for status objects.
     This kind of object is used to store the status a loop-based task.  

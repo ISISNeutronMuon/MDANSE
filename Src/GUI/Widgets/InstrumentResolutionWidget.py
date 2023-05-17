@@ -5,7 +5,7 @@
 # @file      Src/GUI/Widgets/InstrumentResolutionWidget.py
 # @brief     Implements module/class/test InstrumentResolutionWidget
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -163,7 +163,7 @@ class InstrumentResolutionDialog(wx.Dialog):
         self.Freeze()
         
         self._parametersPanel = ConfigurationPanel(self, resolution,None)
-        for w in self._parametersPanel.widgets.values():
+        for w in list(self._parametersPanel.widgets.values()):
             self.Bind(wx.EVT_TEXT_ENTER,self.plot,w.widget)
         
         self._parametersSizer.Add(self._parametersPanel, 0, wx.ALL|wx.EXPAND, 5)

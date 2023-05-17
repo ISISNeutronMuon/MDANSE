@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/StructureFactorFromScatteringFunction.py
 # @brief     Implements module/class/test StructureFactorFromScatteringFunction
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -62,7 +62,7 @@ class StructureFactorFromScatteringFunction(IJob):
         nQVectors = len(inputFile.variables['q'][:])
         nOmegas = resolution['n_omegas']
 
-        for k, v in inputFile.variables.items():
+        for k, v in list(inputFile.variables.items()):
             if k.startswith('f(q,t)_'):
                 self._outputData.add(k,'surface', v[:], axis='q|time', units='au')                                                 
                 suffix = k[7:]

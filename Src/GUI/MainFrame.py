@@ -5,7 +5,7 @@
 # @file      Src/GUI/MainFrame.py
 # @brief     Implements module/class/test MainFrame
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -134,7 +134,7 @@ class MainFrame(wx.Frame):
         converterMenu = wx.Menu()
         self._converters = {}
 
-        converters = [job for job in REGISTRY["job"].items() if issubclass(job[1],Converter)]
+        converters = [job for job in list(REGISTRY["job"].items()) if issubclass(job[1],Converter)]
         converters = sorted(converters)
         for name,job in converters:
             item = converterMenu.Append(wx.ID_ANY,job.label)
@@ -314,7 +314,7 @@ Authors:
             
     def on_load_data(self, event=None):
 
-        wildcards = collections.OrderedDict([kls._type, "%s (*.%s)|*.%s" % (kls._type,kls.extension,kls.extension)] for kls in REGISTRY["input_data"].values() if kls.extension is not None)
+        wildcards = collections.OrderedDict([kls._type, "%s (*.%s)|*.%s" % (kls._type,kls.extension,kls.extension)] for kls in list(REGISTRY["input_data"].values()) if kls.extension is not None)
 
         dialog = wx.FileDialog ( None, message='Open data ...', wildcard="automatic (*.mvi,*.nc,*.h5)|*.mvi;*.nc;*.h5|" + "|".join(wildcards.values()), style=wx.FD_OPEN)
         
@@ -381,7 +381,7 @@ Authors:
 
     def on_open_mdanse_url(self, event):
 
-        webbrowser.open('http://mdanse.org')
+        webbrowser.open('https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx')
 
     def _uninit_aui_managers(self):
 

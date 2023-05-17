@@ -5,7 +5,7 @@
 # @file      Src/Core/ClassRegistry.py
 # @brief     Implements module/class/test ClassRegistry
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -35,7 +35,7 @@ def path_to_module(path,stop=""):
             
     return module
         
-class ClassRegistry(object,metaclass=Singleton):
+class ClassRegistry(object, metaclass=Singleton):
     '''
     Metaclass that registers the classes that make the MDANSE framework.
 

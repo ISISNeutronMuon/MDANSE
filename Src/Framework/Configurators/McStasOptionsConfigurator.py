@@ -5,7 +5,7 @@
 # @file      Src/Framework/Configurators/McStasOptionsConfigurator.py
 # @brief     Implements module/class/test McStasOptionsConfigurator
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -39,13 +39,13 @@ class McStasOptionsConfigurator(IConfigurator):
         
         options = self._default.copy()
         
-        for k,v in value.items():
+        for k,v in list(value.items()):
             if k not in options:
                 continue
             options[k] = v
             
         tmp = ['']
-        for k,v in options.items():     
+        for k,v in list(options.items()):     
             if k == "dir":
                 # If the output directory already exists, defines a 'unique' output directory name because otherwise McStas throws.
                 if os.path.exists(v):

@@ -5,7 +5,7 @@
 # @file      Src/GUI/Plugins/PlotterPlugin.py
 # @brief     Implements module/class/test PlotterPlugin
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -192,9 +192,13 @@ class DataPanel(wx.Panel):
         sb_sizer2.Fit(qviewPanel)
         qviewPanel.Layout()
         
-        self._mgr.AddPane(qviewPanel,wxaui.AuiPaneInfo().Dock().Bottom().Floatable(False).CloseButton(False).Caption("Quick View").MinSize((300,300)))
-        self._mgr.AddPane(self.setup,wxaui.AuiPaneInfo().Dock().Center().Floatable(False).CloseButton(False).Caption("Data"))
+        self._mgr.AddPane(qviewPanel, wxaui.AuiPaneInfo().Dock().Bottom().Floatable(False).CloseButton(False)
+                          .Caption("Quick View").MinSize((300, 300)).BestSize((300, 300)))
+        self._mgr.AddPane(self.setup,wxaui.AuiPaneInfo().Dock().Center().Floatable(False).CloseButton(False)
+                          .Caption("Data"))
         
+        self._mgr.Update()
+        self._mgr.GetPane(qviewPanel).MinSize((100, 100))
         self._mgr.Update()
 
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select_variables,  self.datalist) 
@@ -291,7 +295,7 @@ class DataPanel(wx.Panel):
         ndim = data.ndim
         self.plot_type.Clear()
         types = []
-        for _type, req_dim in self.plotter_list.items():
+        for _type, req_dim in list(self.plotter_list.items()):
             if ndim == req_dim:
                 types += [_type]
         self.plot_type.SetItems(types)
@@ -493,7 +497,7 @@ class PlotterFrame(wx.Frame):
     def unique(self, key, dic):
         skey = key
         i = 0
-        while key in dic.keys():
+        while key in list(dic.keys()):
             key = skey + '_%d'%i
             i += 1
         return key 

@@ -5,7 +5,7 @@
 # @file      Src/Framework/Configurators/PythonScriptConfigurator.py
 # @brief     Implements module/class/test PythonScriptConfigurator
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -53,7 +53,7 @@ class PythonScriptConfigurator(InputFileConfigurator):
         
         namespace = {}
         
-        exec(open(value,'r').read(),self.__dict__,namespace)
+        exec(compile(open(value, "rb").read(), value, 'exec'),self.__dict__,namespace)
                 
         for v in self._variables:
             if v not in namespace:

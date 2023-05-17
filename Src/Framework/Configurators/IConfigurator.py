@@ -5,7 +5,7 @@
 # @file      Src/Framework/Configurators/IConfigurator.py
 # @brief     Implements module/class/test IConfigurator
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -108,6 +108,8 @@ class IConfigurator(dict):
         self._label = kwargs.get('label'," ".join(name.split('_')).strip())
 
         self._widget = kwargs.get('widget',self._type)
+
+        self._optional = kwargs.get('optional',False)
         
         self._configured = False
             
@@ -161,6 +163,17 @@ class IConfigurator(dict):
         return self._name
 
     @property
+    def optional(self):
+        '''
+        Returns the optional state name of this configurator.
+        
+        :return: the optional state.
+        :rtype: boolean
+        '''
+
+        return self._optional
+
+    @property
     def root(self):
 
         return self._root
@@ -210,7 +223,7 @@ class IConfigurator(dict):
         :rtype: bool
         '''
         
-        for c in self._dependencies.values():
+        for c in list(self._dependencies.values()):
             if c not in configured:
                 return False
 

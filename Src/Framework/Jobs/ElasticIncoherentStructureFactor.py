@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/ElasticIncoherentStructureFactor.py
 # @brief     Implements module/class/test ElasticIncoherentStructureFactor
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -129,7 +129,7 @@ class ElasticIncoherentStructureFactor(IJob):
         """
         
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()        
-        for element, number in nAtomsPerElement.items():
+        for element, number in list(nAtomsPerElement.items()):
             self._outputData["eisf_%s" % element][:] /= number
 
         weights = self.configuration["weights"].get_weights()        

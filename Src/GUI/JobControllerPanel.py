@@ -5,7 +5,7 @@
 # @file      Src/GUI/JobControllerPanel.py
 # @brief     Implements module/class/test JobControllerPanel
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -32,7 +32,7 @@ from MDANSE.GUI import PUBLISHER
 from MDANSE.GUI.Icons import ICONS
 from MDANSE.GUI.Events.JobControllerEvent import EVT_JOB_CONTROLLER, JobControllerEvent
         
-class JobController(threading.Thread,metaclass=Singleton):
+class JobController(threading.Thread, metaclass=Singleton):
     '''
     This class sets up the job controlling daemon that will regurlarly check for the status of running MDANSE jobs.
     
@@ -45,7 +45,7 @@ class JobController(threading.Thread,metaclass=Singleton):
     to EVT_JOB_CONTROLLER and it will receive the updated version of :py:attr:`_runningJobs` dictionnary every time 
     the :py:meth:run is called.     
     '''
-        
+    
     def __init__(self, window, start=False):
         '''
         
@@ -115,7 +115,7 @@ class JobController(threading.Thread,metaclass=Singleton):
         jobs = [f for f in glob.glob(os.path.join(PLATFORM.temporary_files_directory(),'*'))]
                         
         # Loop over the job registered at the previous controller check point     
-        for job in self._runningJobs.keys():            
+        for job in list(self._runningJobs.keys()):            
 
             # Case where a job has finished during two controller check points (i.e. its temporary file has been deleted)
             if self._runningJobs[job]['state'] == 'finished':
@@ -284,7 +284,7 @@ class JobControllerPanel(wx.ScrolledWindow):
         runningJobs = event.runningJobs
 
         # Remove the widgets corresponding to the jobs that are not running anymore  
-        for k,v in self._jobs.items():
+        for k,v in list(self._jobs.items()):
 
             if k in runningJobs:
                 continue
@@ -302,7 +302,7 @@ class JobControllerPanel(wx.ScrolledWindow):
                         continue
                     self._gbSizer.SetItemPosition(w.GetWindow(),(r-1,i))
 
-        for jobName, jobStatus in runningJobs.items():
+        for jobName, jobStatus in list(runningJobs.items()):
                         
             if jobName in self._jobs:
                 self._jobs[jobName]['progress'].SetValue(jobStatus['progress'])

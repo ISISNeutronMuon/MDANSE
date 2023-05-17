@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/GaussianDynamicIncoherentStructureFactor.py
 # @brief     Implements module/class/test GaussianDynamicIncoherentStructureFactor
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -70,7 +70,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         self._outputData.add("q2","line",self._kSquare,units="1/nm2") 
 
         self._outputData.add("time","line",self.configuration['frames']['duration'], units='ps')
-        self._outputData.add("time_window","line",self._instrResolution["time_window"], axis="time", units="au") 
+        self._outputData.add("time_window","line",self._instrResolution["time_window"], units="au") 
 
         self._outputData.add("omega","line",self.configuration["instrument_resolution"]["omega"], units='rad/ps')
         self._outputData.add("omega_window","line",self._instrResolution["omega_window"], axis="omega", units="au") 

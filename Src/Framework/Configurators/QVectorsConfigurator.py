@@ -5,7 +5,7 @@
 # @file      Src/Framework/Configurators/QVectorsConfigurator.py
 # @brief     Implements module/class/test QVectorsConfigurator
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -36,7 +36,7 @@ class QVectorsConfigurator(IConfigurator):
     :note: this configurator depends on 'trajectory' configurator to be configured.
     """
         
-    _default = ("spherical_lattice",{"shells":(0.1,5,0.1), "width" : 0.1, "n_vectors" : 50})
+    _default = ("spherical_lattice",{"shells":(0.1,5,0.1), "width" : 0.1, "n_vectors" : 50, "seed": 0})
 
     def configure(self, value):
         '''
@@ -93,7 +93,7 @@ class QVectorsConfigurator(IConfigurator):
         '''
         
         info = ["%d Q shells generated\n" % self["n_shells"]]
-        for (qValue,qVectors) in self["q_vectors"].items():
+        for (qValue,qVectors) in list(self["q_vectors"].items()):
             info.append("Shell %s: %d Q vectors generated\n" % (qValue,len(qVectors)))
         
         return "".join(info)

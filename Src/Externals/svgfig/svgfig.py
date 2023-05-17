@@ -5,7 +5,7 @@
 # @file      Src/Externals/svgfig/svgfig.py
 # @brief     Implements module/class/test svgfig
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -37,8 +37,8 @@ _epsilon = 1e-5
 
 if re.search("windows", platform.system(), re.I):
   try:
-    import _winreg
-    _default_directory = _winreg.QueryValueEx(_winreg.OpenKey(_winreg.HKEY_CURRENT_USER, \
+    import winreg
+    _default_directory = winreg.QueryValueEx(winreg.OpenKey(winreg.HKEY_CURRENT_USER, \
                        r"Software\Microsoft\Windows\Current Version\Explorer\Shell Folders"), "Desktop")[0]
 #   tmpdir = _winreg.QueryValueEx(_winreg.OpenKey(_winreg.HKEY_CURRENT_USER, "Environment"), "TEMP")[0]
 #   if tmpdir[0:13] != "%USERPROFILE%":
@@ -59,7 +59,7 @@ def rgb(r, g, b, maximum=1.):
   return "#%02x%02x%02x" % (max(0, min(r*255./maximum, 255)), max(0, min(g*255./maximum, 255)), max(0, min(b*255./maximum, 255)))
 
 def attr_preprocess(attr):
-  for name in attr.keys():
+  for name in list(attr.keys()):
     name_colon = re.sub("__", ":", name)
     if name_colon != name:
       attr[name_colon] = attr[name]
@@ -155,7 +155,7 @@ class SVG:
       for i in ti[:-1]: obj = obj[i]
       ti = ti[-1]
 
-    if isinstance(ti, (int, long, slice)): return obj.sub[ti]
+    if isinstance(ti, (int, slice)): return obj.sub[ti]
     else: return obj.attr[ti]
 
   def __setitem__(self, ti, value):
@@ -166,7 +166,7 @@ class SVG:
       for i in ti[:-1]: obj = obj[i]
       ti = ti[-1]
 
-    if isinstance(ti, (int, long, slice)): obj.sub[ti] = value
+    if isinstance(ti, (int, slice)): obj.sub[ti] = value
     else: obj.attr[ti] = value
 
   def __delitem__(self, ti):
@@ -177,7 +177,7 @@ class SVG:
       for i in ti[:-1]: obj = obj[i]
       ti = ti[-1]
 
-    if isinstance(ti, (int, long, slice)): del obj.sub[ti]
+    if isinstance(ti, (int, slice)): del obj.sub[ti]
     else: del obj.attr[ti]
 
   def __contains__(self, value):
@@ -226,7 +226,7 @@ class SVG:
 
     def __iter__(self): return self
 
-    def next(self):
+    def __next__(self):
       if not self.shown:
         self.shown = True
         if self.ti != ():
@@ -239,11 +239,11 @@ class SVG:
         self.iterators = []
         for i, s in enumerate(self.svg.sub):
           self.iterators.append(self.__class__(s, self.ti + (i,), self.depth_limit))
-        for k, s in self.svg.attr.items():
+        for k, s in list(self.svg.attr.items()):
           self.iterators.append(self.__class__(s, self.ti + (k,), self.depth_limit))
         self.iterators = itertools.chain(*self.iterators)
 
-      return self.iterators.next()
+      return next(self.iterators)
   ### end nested class
 
   def depth_first(self, depth_limit=None):
@@ -270,7 +270,7 @@ class SVG:
     output = []
     for ti, s in self:
       show = False
-      if isinstance(ti[-1], (int, long)):
+      if isinstance(ti[-1], int):
         if isinstance(s, str): show = text
         else: show = sub
       else: show = attr
@@ -343,9 +343,9 @@ class SVG:
     """
 
     attrstr = []
-    for n, v in self.attr.items():
+    for n, v in list(self.attr.items()):
       if isinstance(v, dict):
-        v = "; ".join(["%s:%s" % (ni, vi) for ni, vi in v.items()])
+        v = "; ".join(["%s:%s" % (ni, vi) for ni, vi in list(v.items())])
       elif isinstance(v, (list, tuple)):
         v = ", ".join(v)
       attrstr.append(" %s=%s" % (n, repr(v)))
@@ -385,31 +385,31 @@ class SVG:
 """ + ("".join(top.__standalone_xml(indent, newl)))  # end of return statement
 
   def __standalone_xml(self, indent, newl):
-    output = [u"<%s" % self.t]
+    output = ["<%s" % self.t]
 
-    for n, v in self.attr.items():
+    for n, v in list(self.attr.items()):
       if isinstance(v, dict):
-        v = "; ".join(["%s:%s" % (ni, vi) for ni, vi in v.items()])
+        v = "; ".join(["%s:%s" % (ni, vi) for ni, vi in list(v.items())])
       elif isinstance(v, (list, tuple)):
         v = ", ".join(v)
-      output.append(u" %s=\"%s\"" % (n, v))
+      output.append(" %s=\"%s\"" % (n, v))
 
     if len(self.sub) == 0:
-      output.append(u" />%s%s" % (newl, newl))
+      output.append(" />%s%s" % (newl, newl))
       return output
 
     elif self.t == "text" or self.t == "tspan" or self.t == "style":
-      output.append(u">")
+      output.append(">")
 
     else:
-      output.append(u">%s%s" % (newl, newl))
+      output.append(">%s%s" % (newl, newl))
 
     for s in self.sub:
       if isinstance(s, SVG): output.extend(s.__standalone_xml(indent, newl))
-      else: output.append(unicode(s))
+      else: output.append(str(s))
 
-    if self.t == "tspan": output.append(u"</%s>" % self.t)
-    else: output.append(u"</%s>%s%s" % (self.t, newl, newl))
+    if self.t == "tspan": output.append("</%s>" % self.t)
+    else: output.append("</%s>%s%s" % (self.t, newl, newl))
 
     return output
 
@@ -576,7 +576,7 @@ def load_stream(stream):
 
     def startElement(self, name, attr):
       s = SVG(name)
-      s.attr = dict(attr.items())
+      s.attr = dict(list(attr.items()))
       if len(self.stack) > 0:
         last = self.stack[-1]
         last.sub.append(s)
@@ -623,13 +623,13 @@ def totrans(expr, vars=("x", "y"), globals=None, locals=None):
   """
 
   if callable(expr):
-    if expr.func_code.co_argcount == 2:
+    if expr.__code__.co_argcount == 2:
       return expr
 
-    elif expr.func_code.co_argcount == 1:
+    elif expr.__code__.co_argcount == 1:
       split = lambda z: (z.real, z.imag)
       output = lambda x, y: split(expr(x + y*1j))
-      output.func_name = expr.func_name
+      output.__name__ = expr.__name__
       return output
 
     else:
@@ -639,7 +639,7 @@ def totrans(expr, vars=("x", "y"), globals=None, locals=None):
     g = math.__dict__
     if globals != None: g.update(globals)
     output = eval("lambda %s, %s: (%s)" % (vars[0], vars[1], expr), g, locals)
-    output.func_name = "%s,%s -> %s" % (vars[0], vars[1], expr)
+    output.__name__ = "%s,%s -> %s" % (vars[0], vars[1], expr)
     return output
 
   elif len(vars) == 1:
@@ -648,7 +648,7 @@ def totrans(expr, vars=("x", "y"), globals=None, locals=None):
     output = eval("lambda %s: (%s)" % (vars[0], expr), g, locals)
     split = lambda z: (z.real, z.imag)
     output2 = lambda x, y: split(output(x + y*1j))
-    output2.func_name = "%s -> %s" % (vars[0], expr)
+    output2.__name__ = "%s -> %s" % (vars[0], expr)
     return output2
 
   else:
@@ -713,7 +713,7 @@ def window(xmin, xmax, ymin, ymax, x=0, y=0, width=100, height=100, xlogbase=Non
 
   output = lambda x, y: (xfunc(x), yfunc(y))
 
-  output.func_name = "(%g, %g), (%g, %g) -> (%g, %g), (%g, %g)%s%s" % (ix1, ix2, iy1, iy2, ox1, ox2, oy1, oy2, xlogstr, ylogstr)
+  output.__name__ = "(%g, %g), (%g, %g) -> (%g, %g), (%g, %g)%s%s" % (ix1, ix2, iy1, iy2, ox1, ox2, oy1, oy2, xlogstr, ylogstr)
   return output
 
 def rotate(angle, cx=0, cy=0):
@@ -751,7 +751,7 @@ class Fig:
     elif isinstance(self.trans, str):
       return "<Fig (%d items) x,y -> %s>" % (len(self.d), self.trans)
     else:
-      return "<Fig (%d items) %s>" % (len(self.d), self.trans.func_name)
+      return "<Fig (%d items) %s>" % (len(self.d), self.trans.__name__)
 
   def __init__(self, *d, **kwds):
     self.d = list(d)
@@ -761,7 +761,7 @@ class Fig:
 
     self.trans = kwds["trans"]; del kwds["trans"]
     if len(kwds) != 0:
-      raise TypeError("Fig() got unexpected keyword arguments %s" % kwds.keys())
+      raise TypeError("Fig() got unexpected keyword arguments %s" % list(kwds.keys()))
 
   def SVG(self, trans=None):
     """Apply the transformation "trans" and return an SVG object.
@@ -832,7 +832,7 @@ class Plot:
     if self.trans == None:
       return "<Plot (%d items)>" % len(self.d)
     else:
-      return "<Plot (%d items) %s>" % (len(self.d), self.trans.func_name)
+      return "<Plot (%d items) %s>" % (len(self.d), self.trans.__name__)
 
   def __init__(self, xmin, xmax, ymin, ymax, *d, **kwds):
     self.xmin, self.xmax, self.ymin, self.ymax = xmin, xmax, ymin, ymax
@@ -866,7 +866,7 @@ class Plot:
     self.text_attr = kwds["text_attr"]; del kwds["text_attr"]
     self.axis_attr = kwds["axis_attr"]; del kwds["axis_attr"]
     if len(kwds) != 0:
-      raise TypeError("Plot() got unexpected keyword arguments %s" % kwds.keys())
+      raise TypeError("Plot() got unexpected keyword arguments %s" % list(kwds.keys()))
 
   def SVG(self, trans=None):
     """Apply the transformation "trans" and return an SVG object."""
@@ -965,7 +965,7 @@ class Frame:
     self.axis_attr.update(kwds["axis_attr"]); del kwds["axis_attr"]
 
     if len(kwds) != 0:
-      raise TypeError("Frame() got unexpected keyword arguments %s" % kwds.keys())
+      raise TypeError("Frame() got unexpected keyword arguments %s" % list(kwds.keys()))
 
   def SVG(self):
     """Apply the window transformation and return an SVG object."""
@@ -1025,7 +1025,7 @@ def pathtoPath(svg):
   attr = dict(svg.attr)
   d = attr["d"]
   del attr["d"]
-  for key in attr.keys():
+  for key in list(attr.keys()):
     if not isinstance(key, str):
       value = attr[key]
       del attr[key]
@@ -1477,7 +1477,7 @@ def funcRtoC(expr, var="t", globals=None, locals=None):
   output = eval("lambda %s: (%s)" % (var, expr), g, locals)
   split = lambda z: (z.real, z.imag)
   output2 = lambda t: split(output(t))
-  output2.func_name = "%s -> %s" % (var, expr)
+  output2.__name__ = "%s -> %s" % (var, expr)
   return output2
 
 def funcRtoR2(expr, var="t", globals=None, locals=None):
@@ -1492,7 +1492,7 @@ def funcRtoR2(expr, var="t", globals=None, locals=None):
   g = math.__dict__
   if globals != None: g.update(globals)
   output = eval("lambda %s: (%s)" % (var, expr), g, locals)
-  output.func_name = "%s -> %s" % (var, expr)
+  output.__name__ = "%s -> %s" % (var, expr)
   return output
 
 def funcRtoR(expr, var="x", globals=None, locals=None):
@@ -1507,7 +1507,7 @@ def funcRtoR(expr, var="x", globals=None, locals=None):
   g = math.__dict__
   if globals != None: g.update(globals)
   output = eval("lambda %s: (%s, %s)" % (var, var, expr), g, locals)
-  output.func_name = "%s -> %s" % (var, expr)
+  output.__name__ = "%s -> %s" % (var, expr)
   return output
 
 class Curve:
@@ -1580,7 +1580,7 @@ class Curve:
       self.current = self.left
       return self
 
-    def next(self):
+    def __next__(self):
       current = self.current
       if current == None: raise StopIteration
       self.current = self.current.right
@@ -1772,7 +1772,7 @@ class Poly:
       raise ValueError("mode must be \"lines\", \"bezier\", \"velocity\", \"foreback\", \"smooth\", or an abbreviation")
 
     d = []
-    indexes = range(len(self.d))
+    indexes = list(range(len(self.d)))
     if self.loop and len(self.d) > 0: indexes.append(0)
 
     for i in indexes:
@@ -2299,35 +2299,35 @@ def unumber(x):
   """Converts numbers to a Unicode string, taking advantage of special
   Unicode characters to make nice minus signs and scientific notation.
   """
-  output = u"%g" % x
+  output = "%g" % x
 
-  if output[0] == u"-":
-    output = u"\u2013" + output[1:]
+  if output[0] == "-":
+    output = "\u2013" + output[1:]
 
-  index = output.find(u"e")
+  index = output.find("e")
   if index != -1:
-    uniout = str(output[:index]) + u"\u00d710"
+    uniout = str(output[:index]) + "\u00d710"
     saw_nonzero = False
     for n in output[index+1:]:
-      if n == u"+": pass # uniout += u"\u207a"
-      elif n == u"-": uniout += u"\u207b"
-      elif n == u"0":
-        if saw_nonzero: uniout += u"\u2070"
-      elif n == u"1":
+      if n == "+": pass # uniout += u"\u207a"
+      elif n == "-": uniout += "\u207b"
+      elif n == "0":
+        if saw_nonzero: uniout += "\u2070"
+      elif n == "1":
         saw_nonzero = True
-        uniout += u"\u00b9"
-      elif n == u"2":
+        uniout += "\u00b9"
+      elif n == "2":
         saw_nonzero = True
-        uniout += u"\u00b2"
-      elif n == u"3":
+        uniout += "\u00b2"
+      elif n == "3":
         saw_nonzero = True
-        uniout += u"\u00b3"
-      elif u"4" <= n <= u"9":
+        uniout += "\u00b3"
+      elif "4" <= n <= "9":
         saw_nonzero = True
-        if saw_nonzero: uniout += eval("u\"\\u%x\"" % (0x2070 + ord(n) - ord(u"0")))
+        if saw_nonzero: uniout += eval("u\"\\u%x\"" % (0x2070 + ord(n) - ord("0")))
       else: uniout += n
 
-    if uniout[:2] == u"1\u00d7": uniout = uniout[2:]
+    if uniout[:2] == "1\u00d7": uniout = uniout[2:]
     return uniout
 
   return output
@@ -2479,7 +2479,7 @@ class Ticks:
 
     eps = _epsilon * (self.high - self.low)
 
-    for t, label in self.last_ticks.items():
+    for t, label in list(self.last_ticks.items()):
       (X, Y), (xhatx, xhaty), (yhatx, yhaty), angle = self.orient_tickmark(t, trans)
       
       if (not self.arrow_start or abs(t - self.low) > eps) and (not self.arrow_end or abs(t - self.high) > eps):
@@ -2504,7 +2504,7 @@ class Ticks:
 
     for t in self.last_miniticks:
       skip = False
-      for tt in self.last_ticks.keys():
+      for tt in list(self.last_ticks.keys()):
         if abs(t - tt) < eps:
           skip = True
           break
@@ -2583,7 +2583,7 @@ class Ticks:
         eps = _epsilon * (self.high - self.low)
         for x in ticks:
           if format == unumber and abs(x) < eps:
-            output[x] = u"0"
+            output[x] = "0"
           else:
             output[x] = format(x)
         ticks = output
@@ -2627,7 +2627,7 @@ class Ticks:
       output = {}
       x = self.low
       for i in range(N):
-        if format == unumber and abs(x) < eps: label = u"0"
+        if format == unumber and abs(x) < eps: label = "0"
         else: label = format(x)
         output[x] = label
         x += (self.high - self.low)/(N-1.)
@@ -2656,7 +2656,7 @@ class Ticks:
       trial = {}
       for n in range(int(lowN), int(highN)+1):
         x = n * granularity
-        if format == unumber and abs(x) < eps: label = u"0"
+        if format == unumber and abs(x) < eps: label = "0"
         else: label = format(x)
         trial[x] = label
 
@@ -2666,7 +2666,7 @@ class Ticks:
           return {v1: format(v1), v2: format(v2)}
         else:
           low_in_ticks, high_in_ticks = False, False
-          for t in last_trial.keys():
+          for t in list(last_trial.keys()):
             if 1.*abs(t - self.low)/last_granularity < _epsilon: low_in_ticks = True
             if 1.*abs(t - self.high)/last_granularity < _epsilon: high_in_ticks = True
 
@@ -2707,7 +2707,7 @@ class Ticks:
     Normally only used internally.
     """
     if len(original_ticks) < 2: original_ticks = ticks(self.low, self.high)
-    original_ticks = original_ticks.keys()
+    original_ticks = list(original_ticks.keys())
     original_ticks.sort()
 
     if self.low > original_ticks[0] + _epsilon or self.high < original_ticks[-1] - _epsilon:
@@ -2744,7 +2744,7 @@ class Ticks:
       output = {}
       x = self.low
       for i in range(N):
-        if format == unumber and abs(x) < eps: label = u"0"
+        if format == unumber and abs(x) < eps: label = "0"
         else: label = format(x)
         output[x] = label
         x += (self.high - self.low)/(N-1.)
@@ -2764,9 +2764,9 @@ class Ticks:
       keys = list(output.keys())
       keys.sort()
       keys = keys[::i]
-      values = map(lambda k: output[k], keys)
+      values = [output[k] for k in keys]
       if len(values) <= N:
-        for k in output.keys():
+        for k in list(output.keys()):
           if k not in keys:
             output[k] = ""
         break
@@ -2910,14 +2910,14 @@ class LineAxis(Line, Ticks):
 
   def interpret(self):
     if self.exclude != None and not (isinstance(self.exclude, (tuple, list)) and len(self.exclude) == 2 and \
-                                     isinstance(self.exclude[0], (int, long, float)) and isinstance(self.exclude[1], (int, long, float))):
+                                     isinstance(self.exclude[0], (int, float)) and isinstance(self.exclude[1], (int, float))):
       raise TypeError("exclude must either be None or (low, high)")
 
     ticks, miniticks = Ticks.interpret(self)
     if self.exclude == None: return ticks, miniticks
 
     ticks2 = {}
-    for loc, label in ticks.items():
+    for loc, label in list(ticks.items()):
       if self.exclude[0] <= loc <= self.exclude[1]:
         ticks2[loc] = ""
       else:
@@ -3175,7 +3175,7 @@ class HGrid(Ticks):
     self.last_ticks, self.last_miniticks = Ticks.interpret(self)
 
     ticksd = []
-    for t in self.last_ticks.keys():
+    for t in list(self.last_ticks.keys()):
       ticksd += Line(self.xmin, t, self.xmax, t).Path(trans).d
 
     miniticksd = []
@@ -3225,7 +3225,7 @@ class VGrid(Ticks):
     self.last_ticks, self.last_miniticks = Ticks.interpret(self)
 
     ticksd = []
-    for t in self.last_ticks.keys():
+    for t in list(self.last_ticks.keys()):
       ticksd += Line(t, self.ymin, t, self.ymax).Path(trans).d
 
     miniticksd = []
@@ -3278,9 +3278,9 @@ class Grid(Ticks):
     self.last_yticks, self.last_yminiticks = Ticks.interpret(self)
 
     ticksd = []
-    for t in self.last_xticks.keys():
+    for t in list(self.last_xticks.keys()):
       ticksd += Line(t, self.ymin, t, self.ymax).Path(trans).d
-    for t in self.last_yticks.keys():
+    for t in list(self.last_yticks.keys()):
       ticksd += Line(self.xmin, t, self.xmax, t).Path(trans).d
 
     miniticksd = []

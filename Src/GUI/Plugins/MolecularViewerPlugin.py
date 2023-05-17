@@ -5,7 +5,7 @@
 # @file      Src/GUI/Plugins/MolecularViewerPlugin.py
 # @brief     Implements module/class/test MolecularViewerPlugin
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -14,6 +14,7 @@
 # **************************************************************************
 
 import os
+import platform
 
 import numpy
 
@@ -338,7 +339,7 @@ class MolecularViewerPlugin(ComponentPlugin):
         
         lut = vtk.vtkColorTransferFunction()
         
-        for (idx,color) in RGB_COLOURS.values():
+        for (idx,color) in list(RGB_COLOURS.values()):
             lut.AddRGBPoint(idx,*color)
             
         colours = []
@@ -349,7 +350,7 @@ class MolecularViewerPlugin(ComponentPlugin):
         
         for col in color_string_list:
             tup_col = tuple(col) 
-            if not (tup_col in unic_colours.keys()):
+            if not (tup_col in list(unic_colours.keys())):
                 unic_colours[tup_col]=col_ids
                 lut.AddRGBPoint(col_ids,*tup_col)
                 colours.append(col_ids)
@@ -739,7 +740,7 @@ class MolecularViewerPlugin(ComponentPlugin):
                             
         self.atomsColours = numpy.copy(self._atomsColours)
         
-        for k,v in selection.items():
+        for k,v in list(selection.items()):
             self.atomsColours[v] = RGB_COLOURS[k][0]
 
         for idx in range(self._nAtoms):

@@ -5,7 +5,7 @@
 # @file      Src/Framework/Configurators/PythonObjectConfigurator.py
 # @brief     Implements module/class/test PythonObjectConfigurator
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -16,7 +16,7 @@
 import ast
 
 from MDANSE import REGISTRY
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
         
 class PythonObjectConfigurator(IConfigurator):
     """
@@ -30,16 +30,18 @@ class PythonObjectConfigurator(IConfigurator):
     _default = '""'
 
     def configure(self, value):
-        '''
-        Configure a python object. 
-                
-        :param configuration: the current configuration.
-        :type configuration: a MDANSE.Framework.Configurable.Configurable object
+        """
+        Configure a python object.
+
         :param value: the python object to be configured and evaluated.
         :type value: strings, numbers, tuples, lists, dicts, booleans or None type.
-        '''
-        
-        value = ast.literal_eval(repr(value))
+        """
+
+        try:
+            value = ast.literal_eval(repr(value))
+        except SyntaxError as e:
+            raise ConfiguratorError('The inputted python code could not be parsed due to the following error:\n\n'
+                                    'SyntaxError: %s' % e, self)
                                 
         self['value'] = value
 

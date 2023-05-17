@@ -5,7 +5,7 @@
 # @file      Src/GUI/Plugins/DensitySuperpositionPlugin.py
 # @brief     Implements module/class/test DensitySuperpositionPlugin
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -163,7 +163,7 @@ class DensitySuperpositionPlugin(ComponentPlugin):
     def unique(self, key, dic):
         skey = key
         i = 0
-        while key in dic.keys():
+        while key in list(dic.keys()):
             key = skey + '_%d'%i
             i += 1
         return key     

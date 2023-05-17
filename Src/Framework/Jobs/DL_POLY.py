@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/DL_POLY.py
 # @brief     Implements module/class/test DL_POLY
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -197,10 +197,10 @@ class HistoryFile(dict):
                                 
         self["keytrj"], self["imcon"], self["natms"] = [int(v) for v in data.split()[0:3]] 
         
-        if self["keytrj"] not in range(3):
+        if self["keytrj"] not in list(range(3)):
             raise HistoryFileError("Invalid value for trajectory output key.")
 
-        if self["imcon"] not in range(4):
+        if self["imcon"] not in list(range(4)):
             raise HistoryFileError("Invalid value for periodic boundary conditions key.")
 
         if self["imcon"] == 0:
@@ -228,7 +228,7 @@ class HistoryFile(dict):
 
         self._maskStep = 3+3*(self["keytrj"]+1)+1
         
-        if (self["version"] == u'3') or (self["version"] == u'4'):
+        if (self["version"] == '3') or (self["version"] == '4'):
             self._maskStep += 1
         
         self['instance'].seek(0)        
@@ -258,7 +258,7 @@ class HistoryFile(dict):
         mask[1::self._maskStep] = False
         mask[2::self._maskStep] = False
         mask[3::self._maskStep] = False
-        if (self["version"] == u'3') or (self["version"] == u'4'):
+        if (self["version"] == '3') or (self["version"] == '4'):
             mask[4::self._maskStep] = False
 
         config = numpy.array(numpy.compress(mask,data),dtype=numpy.float64)

@@ -5,7 +5,7 @@
 # @file      Src/Framework/Configurators/WeightsConfigurator.py
 # @brief     Implements module/class/test WeightsConfigurator
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -70,7 +70,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
                 else:
                     weights[name] = p
                     
-        for k,v in ascfg.get_natoms().items():
+        for k,v in list(ascfg.get_natoms().items()):
             weights[k] /= v
             
         return weights

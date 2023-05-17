@@ -5,7 +5,7 @@
 # @file      Src/Framework/Configurators/RangeConfigurator.py
 # @brief     Implements module/class/test RangeConfigurator
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -72,9 +72,16 @@ class RangeConfigurator(IConfigurator):
         first, last, step = value
         
         if self._includeLast:
-            last += step/2.0
+            last += step*0.01  # less likely to overstep the upper limit
             
         value = numpy.arange(first, last, step)
+        # we add additional check if the points are all within limits
+        value = value[numpy.where(value >= first)]
+        if self._includeLast:
+            value = value[numpy.where(value <= last)]
+        else:
+            value = value[numpy.where(value < last)]
+        # end of the range check
         value = value.astype(self._valueType)
         
         if self._mini is not None:

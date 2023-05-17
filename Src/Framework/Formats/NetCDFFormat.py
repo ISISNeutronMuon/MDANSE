@@ -5,7 +5,7 @@
 # @file      Src/Framework/Formats/NetCDFFormat.py
 # @brief     Implements module/class/test NetCDFFormat
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -59,7 +59,7 @@ class NetCDFFormat(IFormat):
         
         # Loop over the OutputVariable instances to write.
         
-        for var in data.values():
+        for var in list(data.values()):
                                     
             varName = str(var.varname).strip().replace('/', '|')
             
@@ -77,7 +77,7 @@ class NetCDFFormat(IFormat):
             NETCDFVAR[:] = var
 
             # All the attributes stored in the OutputVariable instance are written to the NetCDF file.
-            for k, v in vars(var).items():
+            for k, v in list(vars(var).items()):
                 setattr(NETCDFVAR,str(k),str(v))
         
         # The NetCDF file is closed.

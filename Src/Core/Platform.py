@@ -5,7 +5,7 @@
 # @file      Src/Core/Platform.py
 # @brief     Implements module/class/test Platform
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -570,7 +570,7 @@ class PlatformWin(Platform):
         # Close the handle.
         ctypes.windll.kernel32.CloseHandle(handle)                
              
-import platform
+from . import platform
 system = platform.system()
 
 # Instantiate the proper platform class depending on the OS on which MDANSE runs

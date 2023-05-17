@@ -5,7 +5,7 @@
 # @file      Src/Framework/Configurators/PartialChargeConfigurator.py
 # @brief     Implements module/class/test PartialChargeConfigurator
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -44,7 +44,7 @@ class PartialChargeConfigurator(IConfigurator):
                 if os.path.exists(value):
                     namespace = {}
                     
-                    exec(open(value,'r').read(),self.__dict__,namespace)
+                    exec(compile(open(value, "rb").read(), value, 'exec'),self.__dict__,namespace)
                             
                     if 'charges' not in namespace:
                         raise ConfiguratorError("The variable 'charges' is not defined in the %r python script file" % (self["value"],))

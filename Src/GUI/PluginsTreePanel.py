@@ -5,7 +5,7 @@
 # @file      Src/GUI/PluginsTreePanel.py
 # @brief     Implements module/class/test PluginsTreePanel
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -75,7 +75,7 @@ class PluginsTreePanel(wx.Panel):
         
         self._hierarchy = collections.OrderedDict()
             
-        for kls in REGISTRY["plugin"].values():
+        for kls in list(REGISTRY["plugin"].values()):
             
             ancestor = getattr(kls,"ancestor",[])
 
@@ -87,7 +87,8 @@ class PluginsTreePanel(wx.Panel):
             ancestors = []
             for anc in ancestor:
                 ancestors.append(anc)
-                ancestors.extend([c._type for c in REGISTRY['plugin'][anc].__subclasses__()])
+                if anc in list(REGISTRY['plugin'].keys()):
+                    ancestors.extend([c._type for c in REGISTRY['plugin'][anc].__subclasses__()])
             
             for a in ancestors:
 

@@ -5,7 +5,7 @@
 # @file      Src/Framework/Configurable.py
 # @brief     Implements module/class/test Configurable
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -57,7 +57,7 @@ class Configurable(object):
         
         self._configuration.clear()
 
-        for name,(typ,kwds) in self.settings.items():
+        for name,(typ,kwds) in list(self.settings.items()):
             
             try:
                 self._configuration[name] = REGISTRY["configurator"][typ](name, configurable=self,**kwds)
@@ -113,7 +113,7 @@ class Configurable(object):
         
         if isinstance(parameters,dict):
             # Loop over the configuration items          
-            for k,v in self._configuration.items():
+            for k,v in list(self._configuration.items()):
                 # If no input parameter has been set for this item, use its default value.
                 if k not in parameters:
                     parameters[k] = v.default
@@ -127,21 +127,25 @@ class Configurable(object):
                         
             progress = False
 
-            for name,conf in self._configuration.items():
+            for name,conf in list(self._configuration.items()):
                                                                                 
                 if name in configured:
                     continue
                 
                 if conf.check_dependencies(configured):
-                                                            
-                    conf.configure(parameters[name])
+
+                    if not conf.optional:
+                        conf.configure(parameters[name])
+                        self._info.append(conf.get_information())
+                    else:
+                        if parameters[name]:
+                            conf.configure(parameters[name])
+                            self._info.append(conf.get_information())
                     
                     conf.set_configured(True)
                     
                     self._configuration[name]=conf
-                    
-                    self._info.append(conf.get_information())
-                                                            
+                                                                            
                     configured.add(name)
                                         
                     progress = True
@@ -183,7 +187,7 @@ class Configurable(object):
                                     
         doclist = []
         
-        for name,(typ,kwds) in settings.items():
+        for name,(typ,kwds) in list(settings.items()):
             cfg=REGISTRY["configurator"][typ](name, **kwds)
             descr = kwds.get("description","")
             descr += "\n"+str(cfg.__doc__)
@@ -193,7 +197,7 @@ class Configurable(object):
         docstring += ">>> from MDANSE import REGISTRY\n"
         docstring += ">>> \n"
         docstring += ">>> parameters = {}\n"
-        for k,v in cls.get_default_parameters().items():
+        for k,v in list(cls.get_default_parameters().items()):
             docstring += ">>> parameters[%r]=%r\n" % (k,v)
         docstring += ">>> \n"
         docstring += ">>> job = REGISTRY['job'][%r]()\n" % cls._type            
@@ -248,7 +252,7 @@ class Configurable(object):
             raise ConfigurationError("Invalid type for settings: must be a mapping-like object")
                                     
         params = collections.OrderedDict()
-        for name,(typ,kwds) in settings.items():
+        for name,(typ,kwds) in list(settings.items()):
             cfg=REGISTRY["configurator"][typ](name, **kwds)
             params[name] = cfg.default
             

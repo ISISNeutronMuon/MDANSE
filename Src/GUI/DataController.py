@@ -5,7 +5,7 @@
 # @file      Src/GUI/DataController.py
 # @brief     Implements module/class/test DataController
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -20,8 +20,8 @@ from MDANSE.Core.Singleton import Singleton
 
 from MDANSE.GUI import PUBLISHER
 
-class DataController(collections.OrderedDict,metaclass=Singleton):
-        
+class DataController(collections.OrderedDict, metaclass=Singleton):
+    
     def __delitem__(self, item):
         
         if item not in self:

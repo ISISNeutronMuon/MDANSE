@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/DistanceHistogram.py
 # @brief     Implements module/class/test DistanceHistogram
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -72,7 +72,7 @@ class DistanceHistogram(IJob):
         
         self._nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
         self._concentrations = {}
-        for k in self._nAtomsPerElement.keys():
+        for k in list(self._nAtomsPerElement.keys()):
             self._concentrations[k] = 0.0
         
         self._elementsPairs = sorted(itertools.combinations_with_replacement(self.selectedElements,2))
@@ -143,5 +143,5 @@ class DistanceHistogram(IJob):
         self.hIntra += x[1]
         self.hInter += x[2]
         
-        for k,v in self._nAtomsPerElement.items():
+        for k,v in list(self._nAtomsPerElement.items()):
             self._concentrations[k] += float(v)/nAtoms

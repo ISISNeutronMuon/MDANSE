@@ -5,7 +5,7 @@
 # @file      Src/GUI/Widgets/McStasParametersWidget.py
 # @brief     Implements module/class/test McStasParametersWidget
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -59,7 +59,7 @@ class McStasParametersWidget(IWidget):
         self._parameters = Configurable()
          
         settings = collections.OrderedDict()
-        for name, value in parameters.items():
+        for name, value in list(parameters.items()):
             typ, default = value
             settings[name] = (self._mcStasTypes[typ], {"default":default})
             
@@ -70,7 +70,7 @@ class McStasParametersWidget(IWidget):
         self._widgetPanel.Freeze()
         self._configurationPanel = ConfigurationPanel(self._widgetPanel, self._parameters,None)
          
-        for name, value in parameters.items():
+        for name, value in list(parameters.items()):
             typ, default = value
             if typ == 'string':
                 self._configurationPanel.widgets[name]._browser.SetLabel('Text/File Entry')

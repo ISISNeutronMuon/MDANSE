@@ -5,7 +5,7 @@
 # @file      Src/Framework/Configurators/InstrumentResolutionConfigurator.py
 # @brief     Implements module/class/test InstrumentResolutionConfigurator
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -99,7 +99,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
         info = ["Instrument resolution kernel: %s" % self["kernel"]]
         if self["parameters"]:
             info.append("Parameters:")
-            for k,v in self["parameters"].items():
+            for k,v in list(self["parameters"].items()):
                 info.append("%s = %s" % (k,v))
                 
         info = "\n".join(info)

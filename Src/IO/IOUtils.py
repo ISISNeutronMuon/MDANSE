@@ -5,7 +5,7 @@
 # @file      Src/Framework/InputData/IInputData.py
 # @brief     Implements module/class/test IInputData
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -17,13 +17,11 @@ import abc
 from collections import OrderedDict
 
 
-class _IFileVariable:
+class _IFileVariable(metaclass=abc.ABCMeta):
     """This is the abstract base class for file variable.
 
     Basically, this class allows to have a common interface for the data formats supported by MDANSE.
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, variable):
         self._variable = variable
@@ -69,7 +67,7 @@ def load_variables(dictionary):
     :rtype: collections.OrderedDict[str, dict]
     """
     data = OrderedDict()
-    for vname, vinfo in dictionary.items():
+    for vname, vinfo in list(dictionary.items()):
         vpath, variable = vinfo
         arr = variable.get_array()
         attributes = variable.get_attributes()

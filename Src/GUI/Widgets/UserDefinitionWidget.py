@@ -5,7 +5,7 @@
 # @file      Src/GUI/Widgets/UserDefinitionWidget.py
 # @brief     Implements module/class/test UserDefinitionWidget
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -51,8 +51,8 @@ class UserDefinitionDialog(wx.Dialog):
         
         return self._plugin
 
-class UserDefinitionWidget(IWidget,metaclass=abc.ABCMeta):
-                        
+class UserDefinitionWidget(IWidget, metaclass=abc.ABCMeta):
+    
     def add_widgets(self):
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)

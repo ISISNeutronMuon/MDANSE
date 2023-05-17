@@ -5,7 +5,7 @@
 # @file      Src/GUI/Widgets/OutputFilesWidget.py
 # @brief     Implements module/class/test OutputFilesWidget
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -13,6 +13,8 @@
 #
 # **************************************************************************
 
+import glob
+import itertools
 import os
 import os.path
 
@@ -33,7 +35,7 @@ class OutputFilesWidget(IWidget):
     @staticmethod
     def _get_unique_filename(directory,basename):
 
-        filesInDirectory = [os.path.join(directory,e) for e in os.listdir(directory) 
+        filesInDirectory = [os.path.join(directory,e) for e in itertools.chain(glob.iglob(os.path.join(directory,"*")),glob.iglob(os.path.join(directory,".*"))) 
                             if os.path.isfile(os.path.join(directory,e))]
         basenames = [os.path.splitext(f)[0] for f in filesInDirectory]
 

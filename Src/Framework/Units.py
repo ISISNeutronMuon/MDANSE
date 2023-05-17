@@ -558,7 +558,7 @@ class _Unit(object):
             return None
 
         powerized_equivalences = {}
-        for k, v in _EQUIVALENCES[dimension].items():
+        for k, v in list(_EQUIVALENCES[dimension].items()):
             pk = tuple([d*upower for d in k])
             powerized_equivalences[pk] = pow(v,upower)
            
@@ -711,7 +711,7 @@ class UnitsManager(metaclass=Singleton):
             with open(UnitsManager._DEFAULT_DATABASE, 'r') as fin:
                 d.update(json.load(fin))
         finally:
-            for uname, udict in d.items():
+            for uname, udict in list(d.items()):
                 factor = udict.get('factor',1.0)
                 dim = udict.get('dimension',[0,0,0,0,0,0,0,0,0])
                 UnitsManager._UNITS[uname] = _Unit(uname,factor,*dim)

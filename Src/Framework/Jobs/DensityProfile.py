@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/DensityProfile.py
 # @brief     Implements module/class/test DensityProfile
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -99,7 +99,7 @@ class DensityProfile(IJob):
         
         dp_per_frame = {}
         
-        for k,v in self._indexes_per_element.iteritems():
+        for k,v in self._indexes_per_element.items():
             h = np.histogram(box_coords[v,axis_index],bins=self._n_bins, range=[-0.5,0.5])
             dp_per_frame[k] = h[0]
             
@@ -116,7 +116,7 @@ class DensityProfile(IJob):
         
         self._extent += x[0]
         
-        for element, hist in x[1].items():
+        for element, hist in list(x[1].items()):
             self._outputData["dp_%s" % element] += hist
                         
     def finalize(self):

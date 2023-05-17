@@ -5,7 +5,7 @@
 # @file      Src/GUI/Plugins/QVectorsPlugin.py
 # @brief     Implements module/class/test QVectorsPlugin
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -38,7 +38,7 @@ class QVectorsData(wxgrid.PyGridTableBase):
         self._grid = []                     
         if self._data is not None:
             
-            for v in self._data.values():
+            for v in list(self._data.values()):
 
                 if not v:
                     continue
@@ -196,7 +196,7 @@ class QVectorsPlugin(UserDefinitionPlugin):
         if self._trajectory.universe.is_periodic:
             choices = list(REGISTRY["q_vectors"].keys())
         else:
-            choices = [k for k,v in REGISTRY["q_vectors"].items() if not v.is_lattice]        
+            choices = [k for k,v in list(REGISTRY["q_vectors"].items()) if not v.is_lattice]        
         self._availableGenerators.SetItems(choices)
         self._availableGenerators.SetSelection(0)
 

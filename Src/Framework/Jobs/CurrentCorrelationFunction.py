@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/CurrentCorrelationFunction.py
 # @brief     Implements module/class/test CurrentCorrelationFunction
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -126,7 +126,7 @@ class CurrentCorrelationFunction(IJob):
                 self._mode = 0
             else:
                 most_atoms = 0
-                for idxs in self._indexesPerElement.values():
+                for idxs in list(self._indexesPerElement.values()):
                     if len(idxs) > most_atoms:
                         most_atoms = len(idxs)
 
@@ -220,7 +220,7 @@ class CurrentCorrelationFunction(IJob):
 
         # Certain interpolation strategies are faster when looping occurs primarily over elements
         if self._order != 'no interpolation' and (self._mode == 1 or (self._mode == 2 and self._preload == -1)):
-            for element, idxs in self._indexesPerElement.items():
+            for element, idxs in list(self._indexesPerElement.items()):
                 nFrames = self.configuration['frames']['n_frames']
                 all_velocities = np.empty((len(idxs), nFrames, 3), dtype=float)
 
@@ -275,7 +275,7 @@ class CurrentCorrelationFunction(IJob):
                             preloaded_velocities = vel = self._velocities[:, i:, :]
                     vel = preloaded_velocities[:, i%self._preload, :]
 
-                for element, idxs in self._indexesPerElement.items():
+                for element, idxs in list(self._indexesPerElement.items()):
                     selectedCoordinates = conf.array[idxs,:]
                     selectedVelocities = vel[idxs,:]
                     selectedVelocities = np.transpose(selectedVelocities)[:,:,np.newaxis]

@@ -5,7 +5,7 @@
 # @file      Src/GUI/Plugins/PlotterSettings.py
 # @brief     Implements module/class/test PlotterSettings
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -517,7 +517,7 @@ class LinesSettingsDialog(wx.Dialog):
         
         Sizer = wx.BoxSizer(wx.VERTICAL)
         
-        bagSizer    = wx.GridBagSizer(hgap=5, vgap=5)
+        bagSizer = wx.GridBagSizer(hgap=5, vgap=5)
         
         self.lines = wx.ListCtrl(self, wx.ID_ANY, style = wx.LC_REPORT)
         self.lines.InsertColumn(0, 'Lines')
@@ -566,13 +566,21 @@ class LinesSettingsDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.delete_line, self.del_button)
         self.Bind(wx.EVT_BUTTON, self.set_settings, self.apply_button)
         self.Bind(wx.EVT_LIST_ITEM_FOCUSED, self.on_select_item, self.lines)
+        self.Bind(wx.EVT_CLOSE,self.close_dialog)
     
         self.set_lines()
     
+    def close_dialog(self,event):
+
+        self.parent.selectedLine.set_alpha(1.0)
+        self.parent.figure.canvas.draw()
+        self.EndModal(0)
+        self.Destroy()
+
     def set_lines(self):
         self.lines.DeleteAllItems()
         _id = 0
-        for k in self.parent.plots.keys():
+        for k in list(self.parent.plots.keys()):
             if type(self.parent.plots[k][0].get_color()) is str:
                 try:
                     r,g,b = matplotlib.colors.colorConverter.colors[self.parent.plots[k][0].get_color()]
@@ -618,9 +626,9 @@ class LinesSettingsDialog(wx.Dialog):
         if self.current_line is None:
             return
         
-        color= self.color_picker.GetColour()
+        color = self.color_picker.GetColour()
         self.current_line.set_color((color.Red()/255., color.Green()/255., color.Blue()/255.))
-        for v in self.parent.plots.values():
+        for v in list(self.parent.plots.values()):
             if v[0] is self.current_line:
                 new_legend = self.legend.GetValue()
                 if new_legend != v[1]:

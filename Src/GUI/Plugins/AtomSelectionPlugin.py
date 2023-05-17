@@ -5,7 +5,7 @@
 # @file      Src/GUI/Plugins/AtomSelectionPlugin.py
 # @brief     Implements module/class/test AtomSelectionPlugin
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -102,7 +102,7 @@ class Query(object):
                 else:
                     self._list.extend([' or ', query])
                         
-            elif isinstance(self._list[-1], basestring):
+            elif isinstance(self._list[-1], str):
                 if self._list[-1] in [' and ',' or ','(',' not ']:
                     self._list.append(query)                    
 
@@ -167,7 +167,7 @@ class AtomSelectionPlugin(UserDefinitionPlugin):
           
         root = self.filterTree.AddRoot("filters")
         filters = self.filterTree.AppendItem(root, "Filter by")
-        selectors = REGISTRY["selector"].values()
+        selectors = list(REGISTRY["selector"].values())
         self.__filters = collections.OrderedDict()
         for selector in selectors:            
             if selector.section is not None:

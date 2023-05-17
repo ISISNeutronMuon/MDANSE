@@ -5,7 +5,7 @@
 # @file      Src/Framework/Configurators/McStasParametersConfigurator.py
 # @brief     Implements module/class/test McStasParametersConfigurator
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -75,12 +75,12 @@ class McStasParametersConfigurator(IConfigurator):
         instrParameters = dict([(v[0],[v[1],v[2]]) for v in re.findall("\s*(\w+)\s*\((\w+)\)\s*\[default=\'(\S+)\'\]",s.communicate()[0]) if v[0] not in self._exclude])
                 
         val = {}
-        for k,v in value.items():
+        for k,v in list(value.items()):
             if k not in instrParameters:
                 instrParameters.pop(k)
             val[k] = self._mcStasTypes[instrParameters[k][0]](v)
                                                       
-        self["value"] = ["%s=%s" % (k,v) for k,v in val.items()]
+        self["value"] = ["%s=%s" % (k,v) for k,v in list(val.items())]
         
     @property
     def exclude(self):

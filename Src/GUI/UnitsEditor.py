@@ -5,7 +5,7 @@
 # @file      Src/GUI/UserDefinitionViewer.py
 # @brief     Implements module/class/test UserDefinitionViewer
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -145,7 +145,7 @@ class NewUnitDialog(wx.Dialog):
 
         factor = self._factor.GetValue()
 
-        dim = [v.GetValue() for v in self._dimensions.values()]
+        dim = [v.GetValue() for v in list(self._dimensions.values())]
 
         return unit, factor, dim
 
@@ -323,8 +323,10 @@ class UnitsEditor(wx.Dialog):
                 wx.MessageBox("Units database saved successfully", "Success", wx.OK | wx.ICON_INFORMATION)
             else:
                 LOGGER("Units database saved successfully","info")
+                self.EndModal(wx.ID_OK)
                 self.Destroy()
         else:
+            self.EndModal(wx.ID_OK)
             self.Destroy()
 
 if __name__ == "__main__":

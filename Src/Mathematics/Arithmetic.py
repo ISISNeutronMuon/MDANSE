@@ -5,7 +5,7 @@
 # @file      Src/Mathematics/Arithmetic.py
 # @brief     Implements module/class/test Arithmetic
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -77,7 +77,7 @@ def get_weights(props, contents, dim):
         else:
             normFactor += fact
         
-    for k in weights.keys():
+    for k in list(weights.keys()):
         weights[k] /= numpy.float64(normFactor)
        
     return weights, normFactor
@@ -85,7 +85,7 @@ def get_weights(props, contents, dim):
 def weight(props,values,contents,dim,key,symmetric=True):
     weights = get_weights(props,contents,dim)[0]
     weightedSum = None      
-    matches = dict([(key%k,k) for k in weights.keys()])
+    matches = dict([(key%k,k) for k in list(weights.keys())])
             
     for k,val in values.items():
         

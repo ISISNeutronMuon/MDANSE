@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/DynamicIncoherentStructureFactor.py
 # @brief     Implements module/class/test DynamicIncoherentStructureFactor
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -68,7 +68,7 @@ class DynamicIncoherentStructureFactor(IJob):
         self._outputData.add("q","line", self.configuration["q_vectors"]["shells"], units="1/nm") 
 
         self._outputData.add("time","line", self.configuration['frames']['duration'], units='ps')
-        self._outputData.add("time_window","line", self._instrResolution["time_window"], axis="time", units="au") 
+        self._outputData.add("time_window","line", self._instrResolution["time_window"], units="au") 
 
         self._outputData.add("omega","line", self._instrResolution["omega"], units='rad/ps')
         self._outputData.add("omega_window","line", self._instrResolution["omega_window"], axis="omega", units="au") 
@@ -145,7 +145,7 @@ class DynamicIncoherentStructureFactor(IJob):
         """
         
         nAtomsPerElement = self.configuration['atom_selection'].get_natoms()
-        for element, number in nAtomsPerElement.items():
+        for element, number in list(nAtomsPerElement.items()):
             self._outputData["f(q,t)_%s" % element][:] /= number
             self._outputData["s(q,f)_%s" % element][:] = get_spectrum(self._outputData["f(q,t)_%s" % element],
                                                                       self.configuration["instrument_resolution"]["time_window"],

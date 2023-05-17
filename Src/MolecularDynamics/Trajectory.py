@@ -5,7 +5,7 @@
 # @file      Src/MolecularDynamics/Trajectory.py
 # @brief     Implements module/class/test Trajectory
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
@@ -658,18 +658,62 @@ class RigidBodyTrajectoryGenerator:
         from MDANSE.Mathematics.LinearAlgebra import Quaternion
         return Vector(self.cms[index]), Quaternion(self.quaternions[index])
 
-if __name__ == '__main__':
+def get_chemical_objects_size(universe):
+    
+    d = {}
+    for obj in universe.objectList():
+        if isChemicalObject(obj):
+            if obj.name in d:
+                continue
+            d[obj.name] = obj.numberOfAtoms()
+        
+    return d
 
     # t = Trajectory('test.h5')
     # cs = t.chemical_system
     # t.close()
     
-    # from Configuration import RealConfiguration
-    # import numpy as np
+    d = {}
+    for obj in universe.objectList():
+        if isChemicalObject(obj):
+            d.setdefault(obj.name, []).append(obj)
+        
+    return d
+        
+def get_chemical_objects_number(universe):
+    
+    d = {}
+    for obj in universe.objectList():
+        if isChemicalObject(obj):
+            if obj.name in d:
+                d[obj.name] += 1
+            else:
+                d[obj.name] = 1
+        
+    return d
+                                                                    
+def partition_universe(universe,groups):
+    
+    atoms = sorted(universe.atomList(), key = operator.attrgetter('index'))
+                                        
+    coll = [Collection([atoms[index] for index in gr]) for gr in groups]
+    
+    return coll
 
-    # coordinates = np.random.uniform(0,10,(30714,3))
-    # unit_cell = np.random.uniform(0,10,(3,3))
-    # conf = RealConfiguration(cs,coordinates,unit_cell)
+def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable="configuration", weights=None, dtype=numpy.float64):
+    
+    if not isinstance(atoms,(list,tuple)):
+        atoms = [atoms]
+        
+    if last is None:
+        last = len(trajectory)
+        
+    nFrames = len(list(range(first, last, step)))
+    
+    serie = np.zeros((nFrames,3), dtype=dtype)
+    
+    if weights is None or len(atoms) == 1:
+        weights = [1.0]*len(atoms)
 
     # cs.configuration = conf
 
@@ -705,6 +749,8 @@ if __name__ == '__main__':
 
     # t = Trajectory('waterbox.h5')
     # t.close()
+
+if __name__ == '__main__':
 
     from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 

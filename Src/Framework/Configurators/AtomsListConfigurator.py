@@ -5,7 +5,7 @@
 # @file      Src/Framework/Configurators/AtomsListConfigurator.py
 # @brief     Implements module/class/test AtomsListConfigurator
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -61,8 +61,18 @@ class AtomsListConfigurator(IConfigurator):
                           
         traj_configurator = self._configurable[self._dependencies['trajectory']]
                 
-        if UD_STORE.has_definition(traj_configurator["basename"],"%d_atoms_list" % self._nAtoms,value): 
-            molecule,atoms = UD_STORE.get_definition(traj_configurator["basename"],"%d_atoms_list" % self._nAtoms,value)
+        if UD_STORE.has_definition(trajConfig["basename"],"%d_atoms_list" % self._nAtoms,value): 
+            molecule,atoms = UD_STORE.get_definition(trajConfig["basename"],"%d_atoms_list" % self._nAtoms,value)
+        elif UD_STORE.has_definition(trajConfig["basename"],"atoms_list",value):
+            tempdict = UD_STORE.get_definition(trajConfig["basename"],"atoms_list",value)
+            natoms = tempdict['natoms']
+            if not natoms == self._nAtoms:
+                raise ValueError("The atom list must have " + str(self._nAtoms) + " atoms per molecule, but " + str(natoms) + " were found.")
+            atoms = tempdict['indexes']
+            self["value"] = value
+            self['atoms'] = atoms
+            self['n_values'] = len(self['atoms'])
+            return None  # this new section should be self-sufficient.
         else:
             molecule,atoms=value
 

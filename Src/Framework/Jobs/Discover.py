@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/Discover.py
 # @brief     Implements module/class/test Discover
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -99,7 +99,7 @@ class HisFile(dict):
             recSize = struct.calcsize(rec)
             self["movable_atoms"] = np.array(struct.unpack(rec,hisfile.read(recSize)), dtype=np.int32) - 1
         else:
-            self["movable_atoms"] = range(self["n_atoms"])
+            self["movable_atoms"] = list(range(self["n_atoms"]))
         rec = "!8x"
         recSize = struct.calcsize(rec)
         hisfile.read(recSize)

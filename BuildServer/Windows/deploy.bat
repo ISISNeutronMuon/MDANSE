@@ -26,7 +26,6 @@ rmdir /s /q PyQT4-4.11.4.dist-info
 rmdir /s /q matplotlib\mpl-data\sample_data
 "%PYTHON_EXE%" -m pip uninstall sphinx Jinja2 MarkupSafe Pygments alabaster babel chardet colorama docutils idna imagesize requests snowballstemmer sphinxcontrib-websupport typing urllib3 -y
 
-
 cd /D "%GITHUB_WORKSPACE%\BuildServer\Windows"
 
 rem copy LICENSE

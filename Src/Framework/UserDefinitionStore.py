@@ -5,7 +5,7 @@
 # @file      Src/Framework/UserDefinitionStore.py
 # @brief     Implements module/class/test UserDefinitionStore
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -24,7 +24,7 @@ class UserDefinitionStoreError(Error):
     pass
 
 
-class UserDefinitionStore(object,metaclass=Singleton):
+class UserDefinitionStore(object, metaclass=Singleton):
     '''
     This class is used to register, save and delete MDANSE user definitions (a.k.a. UD).
     
@@ -33,7 +33,7 @@ class UserDefinitionStore(object,metaclass=Singleton):
     This definitions can be selections of atoms, Q vectors definitions, axis definitions ... The 
     user definitions are loaded when MDANSE starts through a cPickle file that will store these definitions.    
     '''
-            
+        
     UD_PATH = os.path.join(PLATFORM.application_directory(),"user_definitions.ud")
     
     def __init__(self):

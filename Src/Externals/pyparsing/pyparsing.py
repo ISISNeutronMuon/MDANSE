@@ -5,7 +5,7 @@
 # @file      Src/Externals/pyparsing/pyparsing.py
 # @brief     Implements module/class/test pyparsing
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -107,6 +107,7 @@ __all__ = [
 ]
 
 _MAX_INT = sys.maxsize
+range = xrange
 set = lambda s : dict( [(c,0) for c in s] )
 
 def _ustr(obj):
@@ -405,7 +406,7 @@ class ParseResults(object):
 
     def values( self ):
         """Returns all named result values."""
-        return [ v[-1][0] for v in self.__tokdict.values() ]
+        return [ v[-1][0] for v in list(self.__tokdict.values()) ]
 
     def __getattr__( self, name ):
         if True: #name not in self.__slots__:
@@ -427,7 +428,7 @@ class ParseResults(object):
         if other.__tokdict:
             offset = len(self.__toklist)
             addoffset = ( lambda a: (a<0 and offset) or (a+offset) )
-            otheritems = other.__tokdict.items()
+            otheritems = list(other.__tokdict.items())
             otherdictitems = [(k, _ParseResultsWithOffset(v[0],addoffset(v[1])) )
                                 for (k,vlist) in otheritems for v in vlist]
             for k,v in otherdictitems:
@@ -478,7 +479,7 @@ class ParseResults(object):
 
     def asDict( self ):
         """Returns the named parse results as dictionary."""
-        return dict( self.items() )
+        return dict( list(self.items()) )
 
     def copy( self ):
         """Returns a new copy of a C{ParseResults} object."""
@@ -493,7 +494,7 @@ class ParseResults(object):
         """Returns the parse results as XML. Tags are created for tokens and lists that have defined results names."""
         nl = "\n"
         out = []
-        namedItems = dict( [ (v[1],k) for (k,vlist) in self.__tokdict.items()
+        namedItems = dict( [ (v[1],k) for (k,vlist) in list(self.__tokdict.items())
                                                             for v in vlist ] )
         nextLevelIndent = indent + "  "
 
@@ -550,7 +551,7 @@ class ParseResults(object):
         return "".join(out)
 
     def __lookup(self,sub):
-        for k,vlist in self.__tokdict.items():
+        for k,vlist in list(self.__tokdict.items()):
             for v,loc in vlist:
                 if sub is v:
                     return k
@@ -579,14 +580,14 @@ class ParseResults(object):
            in a nested display of other data."""
         out = []
         out.append( indent+_ustr(self.asList()) )
-        keys = self.items()
+        keys = list(self.items())
         keys.sort()
         for k,v in keys:
             if out:
                 out.append('\n')
             out.append( "%s%s- %s: " % (indent,('  '*depth), k) )
             if isinstance(v,ParseResults):
-                if v.keys():
+                if list(v.keys()):
                     out.append( v.dump(indent,depth+1) )
                 else:
                     out.append(_ustr(v))
@@ -653,13 +654,13 @@ def line( loc, strg ):
         return strg[lastCR+1:]
 
 def _defaultStartDebugAction( instring, loc, expr ):
-    print ("Match " + _ustr(expr) + " at loc " + _ustr(loc) + "(%d,%d)" % ( lineno(loc,instring), col(loc,instring) ))
+    print(("Match " + _ustr(expr) + " at loc " + _ustr(loc) + "(%d,%d)" % ( lineno(loc,instring), col(loc,instring) )))
 
 def _defaultSuccessDebugAction( instring, startloc, endloc, expr, toks ):
-    print ("Matched " + _ustr(expr) + " -> " + str(toks.asList()))
+    print(("Matched " + _ustr(expr) + " -> " + str(toks.asList())))
 
 def _defaultExceptionDebugAction( instring, loc, expr, exc ):
-    print ("Exception raised:" + _ustr(exc))
+    print(("Exception raised:" + _ustr(exc)))
 
 def nullDebugAction(*args):
     """'Do-nothing' debug action, to suppress debugging output during parsing."""
@@ -2357,7 +2358,7 @@ class And(ParseExpression):
                     raise ParseSyntaxException( ParseException(instring, len(instring), self.errmsg, self) )
             else:
                 loc, exprtokens = e._parse( instring, loc, doActions )
-            if exprtokens or exprtokens.keys():
+            if exprtokens or list(exprtokens.keys()):
                 resultlist += exprtokens
         return loc, resultlist
 
@@ -2566,13 +2567,13 @@ class Each(ParseExpression):
         finalResults = ParseResults([])
         for r in resultlist:
             dups = {}
-            for k in r.keys():
-                if k in finalResults.keys():
+            for k in list(r.keys()):
+                if k in list(finalResults.keys()):
                     tmp = ParseResults(finalResults[k])
                     tmp += ParseResults(r[k])
                     dups[k] = tmp
             finalResults += ParseResults(r)
-            for k,v in dups.items():
+            for k,v in list(dups.items()):
                 finalResults[k] = v
         return loc, finalResults
 
@@ -2730,7 +2731,7 @@ class ZeroOrMore(ParseElementEnhance):
                 else:
                     preloc = loc
                 loc, tmptokens = self.expr._parse( instring, preloc, doActions )
-                if tmptokens or tmptokens.keys():
+                if tmptokens or list(tmptokens.keys()):
                     tokens += tmptokens
         except (ParseException,IndexError):
             pass
@@ -2765,7 +2766,7 @@ class OneOrMore(ParseElementEnhance):
                 else:
                     preloc = loc
                 loc, tmptokens = self.expr._parse( instring, preloc, doActions )
-                if tmptokens or tmptokens.keys():
+                if tmptokens or list(tmptokens.keys()):
                     tokens += tmptokens
         except (ParseException,IndexError):
             pass
@@ -3015,7 +3016,7 @@ class Combine(TokenConverter):
         del retToks[:]
         retToks += ParseResults([ "".join(tokenlist._asStringList(self.joinString)) ], modal=self.modalResults)
 
-        if self.resultsName and len(retToks.keys())>0:
+        if self.resultsName and len(list(retToks.keys()))>0:
             return [ retToks ]
         else:
             return retToks
@@ -3052,7 +3053,7 @@ class Dict(TokenConverter):
             else:
                 dictvalue = tok.copy() #ParseResults(i)
                 del dictvalue[0]
-                if len(dictvalue)!= 1 or (isinstance(dictvalue,ParseResults) and dictvalue.keys()):
+                if len(dictvalue)!= 1 or (isinstance(dictvalue,ParseResults) and list(dictvalue.keys())):
                     tokenlist[ikey] = _ParseResultsWithOffset(dictvalue,i)
                 else:
                     tokenlist[ikey] = _ParseResultsWithOffset(dictvalue[0],i)
@@ -3090,7 +3091,7 @@ def traceParseAction(f):
     """Decorator for debugging parse actions."""
     f = _trim_arity(f)
     def z(*paArgs):
-        thisFunc = f.func_name
+        thisFunc = f.__name__
         s,l,t = paArgs[-3:]
         if len(paArgs)>3:
             thisFunc = paArgs[0].__class__.__name__ + '.' + thisFunc
@@ -3474,7 +3475,7 @@ def withAttribute(*args,**attrDict):
     if args:
         attrs = args[:]
     else:
-        attrs = attrDict.items()
+        attrs = list(attrDict.items())
     attrs = [(k,v) for k,v in attrs]
     def pa(s,l,tokens):
         for attrName,attrValue in attrs:
@@ -3678,7 +3679,7 @@ punc8bit = srange(r"[\0xa1-\0xbf\0xd7\0xf7]")
 
 anyOpenTag,anyCloseTag = makeHTMLTags(Word(alphas,alphanums+"_:"))
 commonHTMLEntity = Combine(_L("&") + oneOf("gt lt amp nbsp quot").setResultsName("entity") +";").streamline()
-_htmlEntityMap = dict(zip("gt lt amp nbsp quot".split(),'><& "'))
+_htmlEntityMap = dict(list(zip("gt lt amp nbsp quot".split(),'><& "')))
 replaceHTMLEntity = lambda t : t.entity in _htmlEntityMap and _htmlEntityMap[t.entity] or None
 
 # it's easy to get these comment structures wrong - they're very common, so may as well make them available
@@ -3704,15 +3705,15 @@ if __name__ == "__main__":
         try:
             tokens = simpleSQL.parseString( teststring )
             tokenlist = tokens.asList()
-            print (teststring + "->"   + str(tokenlist))
-            print ("tokens = "         + str(tokens))
-            print ("tokens.columns = " + str(tokens.columns))
-            print ("tokens.tables = "  + str(tokens.tables))
-            print (tokens.asXML("SQL",True))
+            print((teststring + "->"   + str(tokenlist)))
+            print(("tokens = "         + str(tokens)))
+            print(("tokens.columns = " + str(tokens.columns)))
+            print(("tokens.tables = "  + str(tokens.tables)))
+            print((tokens.asXML("SQL",True)))
         except ParseBaseException as err:
-            print (teststring + "->")
-            print (err.line)
-            print (" "*(err.column-1) + "^")
+            print((teststring + "->"))
+            print((err.line))
+            print((" "*(err.column-1) + "^"))
             print (err)
         print()
 

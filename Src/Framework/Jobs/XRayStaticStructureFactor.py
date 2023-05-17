@@ -5,7 +5,7 @@
 # @file      Src/Framework/Jobs/XRayStaticStructureFactor.py
 # @brief     Implements module/class/test XRayStaticStructureFactor
 #
-# @homepage  https://mdanse.org
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -123,7 +123,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
         self._outputData.add('xssf_inter','line', (nq,), axis='q', units='au')                                                 
         self._outputData.add('xssf_total','line', (nq,), axis='q', units='au')                                                 
 
-        asf = dict((k,atomic_scattering_factor(k,self._outputData['q'])) for k in nAtomsPerElement.keys())
+        asf = dict((k,atomic_scattering_factor(k,self._outputData['q'])) for k in list(nAtomsPerElement.keys()))
                         
         xssfIntra = weight(asf,self._outputData,nAtomsPerElement,2,'xssf_intra_%s%s')
         self._outputData['xssf_intra'][:] = xssfIntra
