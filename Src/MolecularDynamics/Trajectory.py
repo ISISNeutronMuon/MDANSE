@@ -12,7 +12,9 @@
 #
 # **************************************************************************
 
+from ast import operator
 import os
+from typing import Collection
 
 import numpy as np
 from icecream import ic
@@ -657,40 +659,6 @@ class RigidBodyTrajectoryGenerator:
         from MDANSE.Mathematics.Geometry import Vector
         from MDANSE.Mathematics.LinearAlgebra import Quaternion
         return Vector(self.cms[index]), Quaternion(self.quaternions[index])
-
-def get_chemical_objects_size(universe):
-    
-    d = {}
-    for obj in universe.objectList():
-        if isChemicalObject(obj):
-            if obj.name in d:
-                continue
-            d[obj.name] = obj.numberOfAtoms()
-        
-    return d
-
-    # t = Trajectory('test.h5')
-    # cs = t.chemical_system
-    # t.close()
-    
-    d = {}
-    for obj in universe.objectList():
-        if isChemicalObject(obj):
-            d.setdefault(obj.name, []).append(obj)
-        
-    return d
-        
-def get_chemical_objects_number(universe):
-    
-    d = {}
-    for obj in universe.objectList():
-        if isChemicalObject(obj):
-            if obj.name in d:
-                d[obj.name] += 1
-            else:
-                d[obj.name] = 1
-        
-    return d
                                                                     
 def partition_universe(universe,groups):
     
@@ -700,7 +668,7 @@ def partition_universe(universe,groups):
     
     return coll
 
-def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable="configuration", weights=None, dtype=numpy.float64):
+def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable="configuration", weights=None, dtype=np.float64):
     
     if not isinstance(atoms,(list,tuple)):
         atoms = [atoms]
