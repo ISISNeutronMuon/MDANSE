@@ -9,6 +9,8 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-20.04', 'ubuntu-22.04']
+    if: |
+      !contains( github.ref, 'protos' )
 
     steps:
       - uses: actions/checkout@v2
@@ -126,6 +128,8 @@ jobs:
     runs-on: 'ubuntu-22.04'
     strategy:
       fail-fast: false
+    if: |
+      !contains( github.ref, 'protos' )
     steps:
       - uses: actions/checkout@v2
 
@@ -277,6 +281,8 @@ jobs:
   # OSX
   ci_osx:
     runs-on: ${{ matrix.os }}
+    if: |
+      !contains( github.ref, 'protos' )
     strategy:
       fail-fast: false
       matrix:
@@ -395,6 +401,8 @@ jobs:
   # WINDOWS
   ci_windows:
     runs-on: windows-latest
+    if: |
+      !contains( github.ref, 'protos' )
     steps:
       - uses: actions/checkout@v2
 
