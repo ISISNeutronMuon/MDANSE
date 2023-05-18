@@ -3,3 +3,6 @@ matplotlib
 sphinx
 icecream
 cython
+vtk
+qtpy
+wxPython
