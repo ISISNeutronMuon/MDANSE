@@ -1,9 +1,0 @@
-numpy
-matplotlib
-h5py
-netCDF4
-sphinx
-icecream
-cython
-vtk
-qtpy
