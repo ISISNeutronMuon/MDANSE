@@ -9,6 +9,8 @@ import numpy
 from setuptools import setup, Extension
 from Cython.Distutils import build_ext as cython_build_ext
 
+from pip._internal.req import parse_requirements
+from pip._internal.network.session import PipSession
 from distutils.command.build import build
 #from distutils.core import setup, Extension
 from distutils.sysconfig import get_config_vars
@@ -23,6 +25,14 @@ try:
     import stdeb
 except ImportError:
     stdeb = None
+
+requirements = []
+
+with open('requirements.txt', 'r') as source:
+    for line in source:
+        toks = line.split()
+        if len(toks[0]) > 0:
+            requirements.append(toks[0])
 
 #################################
 # Modules variables
@@ -331,4 +341,7 @@ setup (name             = "MDANSE",
        platforms        = ['Unix','Windows'],
        ext_modules      = EXTENSIONS,
        scripts          = SCRIPTS,
-       cmdclass         = CMDCLASS)
+       cmdclass         = CMDCLASS,
+       # entry_points     = {"console_scripts": []}
+       install_requires = [pr.requirement for pr in parse_requirements('requirements.txt', session= PipSession())],
+    )

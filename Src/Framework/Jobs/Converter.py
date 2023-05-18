@@ -198,35 +198,36 @@ class Converter(IJob,metaclass=ABCMeta):
             return
 
         try:
-            f = netCDF4.Dataset(self._trajectory.filename,'a')
+            output_file = h5py.File(self._trajectory.filename, 'a')
+            # f = netCDF4.Dataset(self._trajectory.filename,'a')
         except:
             return
         
         try:
-            if 'time' in f.variables:
-                f.variables['time'].units = 'ps'
-                f.variables['time'].axis = 'time'
-                f.variables['time'].name = 'time'
+            if 'time' in output_file.variables:
+                output_file.variables['time'].units = 'ps'
+                output_file.variables['time'].axis = 'time'
+                output_file.variables['time'].name = 'time'
 
-            if 'box_size' in f.variables:
-                f.variables['box_size'].units = 'ps'
-                f.variables['box_size'].axis = 'time'
-                f.variables['box_size'].name = 'box_size'
+            if 'box_size' in output_file.variables:
+                output_file.variables['box_size'].units = 'ps'
+                output_file.variables['box_size'].axis = 'time'
+                output_file.variables['box_size'].name = 'box_size'
 
-            if 'configuration' in f.variables:
-                f.variables['configuration'].units = 'nm'
-                f.variables['configuration'].axis = 'time'
-                f.variables['configuration'].name = 'configuration'
+            if 'configuration' in output_file.variables:
+                output_file.variables['configuration'].units = 'nm'
+                output_file.variables['configuration'].axis = 'time'
+                output_file.variables['configuration'].name = 'configuration'
 
-            if 'velocities' in f.variables:
-                f.variables['velocities'].units = 'nm/ps'
-                f.variables['velocities'].axis = 'time'
-                f.variables['velocities'].name = 'velocities'
+            if 'velocities' in output_file.variables:
+                output_file.variables['velocities'].units = 'nm/ps'
+                output_file.variables['velocities'].axis = 'time'
+                output_file.variables['velocities'].name = 'velocities'
 
-            if 'gradients' in f.variables:
-                f.variables['gradients'].units = 'amu*nm/ps'
-                f.variables['gradients'].axis = 'time'
-                f.variables['gradients'].name = 'gradients'
+            if 'gradients' in output_file.variables:
+                output_file.variables['gradients'].units = 'amu*nm/ps'
+                output_file.variables['gradients'].axis = 'time'
+                output_file.variables['gradients'].name = 'gradients'
         finally:
-            f.close()
+            output_file.close()
 
