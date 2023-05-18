@@ -1,4 +1,4 @@
-name: Build MDANSE
+name: Build MDANSE GUI
 
 on: [push, pull_request]
 
@@ -12,7 +12,8 @@ jobs:
         os: [ubuntu-20.04, windows-2019, macOS-11]
         # os: [ubuntu-20.04, windows-2019, macOS-11, ubuntu-latest, windows-latest, macOS-latest]
     if: |
-      contains( github.ref, 'protos' )
+      contains( github.ref, 'protos' ) &&
+      contains( github.ref, 'GUI' )
     steps:
       - uses: actions/checkout@v3
 
@@ -22,10 +23,10 @@ jobs:
         run: python -m pip install build wheel setuptools
 
       - name: Install dependencies
-        run: (cd MDANSE && python -m pip install -r requirements.txt)
+        run: (cd MDANSE_GUI && python -m pip install -r requirements.txt)
 
       - name: Build wheels
-        run: (cd MDANSE && python setup.py bdist_wheel)
+        run: (cd MDANSE_GUI && python setup.py bdist_wheel)
         # to supply options, put them in 'env', like:
         # env:
         #   CIBW_SOME_OPTION: value
@@ -33,4 +34,4 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os }}_wheel
-          path: ./MDANSE/dist/*.whl
+          path: ./MDANSE_GUI/dist/*.whl
