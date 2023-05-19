@@ -1,3 +1,0 @@
-qtpy
-vtk
-MDANSE
