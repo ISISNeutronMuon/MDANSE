@@ -3,16 +3,6 @@ include LICENCE
 
 recursive-include Extensions/qhull_lib *.h *c *.pxd
 
-recursive-include Src/GUI/Resources/Icons *.png
-
-recursive-include Src/PyQtGUI/Icons *.png
-
-include Src/Data/elements_database.csv
-
-include Src/Data/Atoms/*
-
-recursive-include Data *
-
 recursive-include Doc *
 
 include Scripts/*

@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools", "numpy"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "MDANSE_GUI"
+version = "0.0.1"
+description = 'MDANSE GUI package - the graphical interface for MDANSE'
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+keywords = ["molecular dynamics", "science", "simulation", "analysis"]
+authors = [
+  {name = "Maciej Bartkowiak", email = "maciej.bartkowiak@stfc.ac.uk"}
+]
+maintainers = [
+  {name = "Sanghamitra Mukhopadhyay", email = "sanghamitra.mukhopadhyay@stfc.ac.uk"}
+]
+classifiers = [
+        'Development Status :: 3 - Alpha',
+
+        'Intended Audience :: Science/Research',
+        'Topic :: Software Development :: Build Tools',
+
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3 :: Only',
+        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        'Operating System :: OS Independent'
+]
+
+dependencies = [
+  "qtpy",
+  "vtk",
+  "MDANSE",
+]
+
+# dynamic = ["version", "description"]
+
+[project.urls]
+homepage = "https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx"
+documentation = "https://mdanse.readthedocs.io/en/latest/"
+repository = "https://github.com/ISISNeutronMuon/MDANSE"
+
+[tool.setuptools]
+package-dir = {"MDANSE" = "src"}
+
+# [tool.setuptools.packages.find]
+# where = ["src"]

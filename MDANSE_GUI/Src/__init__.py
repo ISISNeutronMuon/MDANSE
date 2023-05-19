@@ -18,11 +18,5 @@ warnings.filterwarnings("ignore")
 
 from .__pkginfo__ import __version__, __author__, __date__
 
-from MDANSE.Logging.Logger import LOGGER
-
-from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Core.ClassRegistry import REGISTRY
-
-import MDANSE.Framework
-
-PLATFORM.create_directory(PLATFORM.macros_directory())
+import vtk
+vtk.vtkObject.GlobalWarningDisplayOff()

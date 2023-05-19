@@ -155,13 +155,6 @@ PACKAGES = find_packages(path="Src",base="MDANSE")
 PACKAGE_DATA = find_package_data(where='Src', package='MDANSE', show_ignored=False)
 
 #################################
-# User data section
-#################################
-
-DATA_FILES = []
-DATA_FILES.extend(find_data('Doc',exclude=[],prefix='conf_'))
-
-#################################
 # Scripts section
 #################################
 
@@ -281,7 +274,6 @@ setup (name             = "MDANSE GUI",
        packages         = PACKAGES,
        package_data     = PACKAGE_DATA,
        package_dir      = {"MDANSE":"Src"},
-       data_files       = DATA_FILES,
        platforms        = ['Unix','Windows'],
        scripts          = SCRIPTS,
        cmdclass         = CMDCLASS,
