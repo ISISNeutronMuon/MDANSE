@@ -33,5 +33,5 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}_wheel
+          name: ${{ matrix.os }}_GUI_wheel
           path: ./MDANSE_GUI/dist/*.whl
