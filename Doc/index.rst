@@ -11,9 +11,8 @@ Welcome to MDANSE's documentation!
    :caption: Contents:
 
 .. note::
-   The MDANSE branch 1.5.x is the last one to be based on Python 2.
-   Currently all the efforts of the developers of MDANSE are focused
-   on preparing the MDANSE 2.0 release, based on Python 3.
+   This is the documentation of the MDANSE 2.0 release.
+   The documentation, just like the code itself, is still under development.
 
 Introduction
 ============
