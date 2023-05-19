@@ -6,6 +6,7 @@
 .project
 .pydevproject
 .settings
+.vscode
 MANIFEST
 *.pyc
 build/
