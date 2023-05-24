@@ -26,7 +26,7 @@ class Resources():
     
     def load_icons(self):
         from importlib.resources import files
-        temp = files('MDANSE.PyQtGUI')
+        temp = files('MDANSE_GUI.PyQtGUI')
         # print(f"I got {temp} from the importlib.resources")
         res_dir = QDir(str(temp.joinpath('Icons')))
         print(f"Resources are in {res_dir.absolutePath()}")
