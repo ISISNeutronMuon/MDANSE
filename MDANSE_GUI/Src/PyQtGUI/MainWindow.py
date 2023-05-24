@@ -26,13 +26,13 @@ from qtpy.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMai
                                                 QFileDialog, QLabel, QToolBar, \
                                                 QMenu, QWidgetAction, QTreeView
 
-from MDANSE.PyQtGUI.BackEnd import BackEnd
-from MDANSE.PyQtGUI.Widgets.Generator import WidgetGenerator
-from MDANSE.PyQtGUI.Widgets.GeneralWidgets import ConverterDialog
-from MDANSE.PyQtGUI.Resources import Resources
-from MDANSE.PyQtGUI.UnitsEditor import UnitsEditor
-from MDANSE.PyQtGUI.PeriodicTableViewer import PeriodicTableViewer
-from MDANSE.PyQtGUI.ElementsDatabaseEditor import ElementsDatabaseEditor
+from MDANSE_GUI.PyQtGUI.BackEnd import BackEnd
+from MDANSE_GUI.PyQtGUI.Widgets.Generator import WidgetGenerator
+from MDANSE_GUI.PyQtGUI.Widgets.ConvertDialog import ConverterDialog
+from MDANSE_GUI.PyQtGUI.Resources import Resources
+from MDANSE_GUI.PyQtGUI.UnitsEditor import UnitsEditor
+from MDANSE_GUI.PyQtGUI.PeriodicTableViewer import PeriodicTableViewer
+from MDANSE_GUI.PyQtGUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 
 
 class LoaderButton(QToolButton):

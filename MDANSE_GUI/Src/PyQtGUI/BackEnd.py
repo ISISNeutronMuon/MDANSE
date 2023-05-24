@@ -21,9 +21,9 @@ from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE.__pkginfo__ import __author__, __commit__, __version__, __beta__
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Framework.Jobs.Converter import Converter
-from MDANSE.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeModel
-from MDANSE.PyQtGUI.DataViewModel.JobHolder import JobHolder
-from MDANSE.PyQtGUI.RegistryViewer import RegistryTree
+from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeModel
+from MDANSE_GUI.PyQtGUI.DataViewModel.JobHolder import JobHolder
+from MDANSE_GUI.PyQtGUI.RegistryViewer import RegistryTree
 
 
 class BackEnd(QObject):

@@ -16,7 +16,7 @@
 # **************************************************************************
 
 if __name__ == '__main__':
-    from MDANSE.PyQtGUI.PeriodicTableViewer import PeriodicTableViewer, QApplication
+    from MDANSE_GUI.PyQtGUI.PeriodicTableViewer import PeriodicTableViewer, QApplication
     import sys
     app = QApplication(sys.argv)
     root = PeriodicTableViewer()

@@ -145,14 +145,14 @@ def find_data(where=".", exclude=EXCLUDE, exclude_directories=EXCLUDE_DIRECTORIE
 PACKAGE_INFO = {}
 exec(open('Src/__pkginfo__.py','r').read(), {}, PACKAGE_INFO)
 
-PACKAGES = find_packages(path="Src",base="MDANSE")
+PACKAGES = find_packages(path="Src",base="MDANSE_GUI")
 
 #################################
 # Package data section
 #################################
 
 # Retrieve all the data related to the MDANSE package.
-PACKAGE_DATA = find_package_data(where='Src', package='MDANSE', show_ignored=False)
+PACKAGE_DATA = find_package_data(where='Src', package='MDANSE_GUI', show_ignored=False)
 
 #################################
 # Scripts section
@@ -273,7 +273,7 @@ setup (name             = "MDANSE GUI",
        license          = PACKAGE_INFO["__license__"],
        packages         = PACKAGES,
        package_data     = PACKAGE_DATA,
-       package_dir      = {"MDANSE":"Src"},
+       package_dir      = {"MDANSE_GUI":"Src"},
        platforms        = ['Unix','Windows'],
        scripts          = SCRIPTS,
        cmdclass         = CMDCLASS,

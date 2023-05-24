@@ -19,7 +19,7 @@ import sys
 
 if __name__ == "__main__":
 
-    from MDANSE.PyQtGUI.main import startGUI
+    from MDANSE_GUI.PyQtGUI.main import startGUI
     startGUI(sys.argv)
 
     

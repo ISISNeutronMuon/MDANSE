@@ -17,7 +17,7 @@ from qtpy.QtGui import QFont, QEnterEvent, QStandardItem, QStandardItemModel,\
 
 from MDANSE.Framework.Jobs.IJob import IJob
 # from MDANSE.Framework.Jobs.Converter import InteractiveConverter
-from MDANSE.PyQtGUI.Widgets.GeneralWidgets import GeneralInput, InputFactory
+from MDANSE_GUI.PyQtGUI.Widgets.GeneralWidgets import GeneralInput, InputFactory
 
 # I think that a Trajectory Converter should, in general,
 # create a Wizard and not a single Dialog.
@@ -340,9 +340,9 @@ import sys
 from qtpy.QtWidgets import QApplication, QMainWindow, QPushButton
 from qtpy.QtCore import QSettings, QThread, Qt
 
-from MDANSE.PyQtGUI.MainWindow import Main
-from MDANSE.PyQtGUI.BackEnd import BackEnd
-from MDANSE.PyQtGUI.Widgets.Generator import WidgetGenerator
+from MDANSE_GUI.PyQtGUI.MainWindow import Main
+from MDANSE_GUI.PyQtGUI.BackEnd import BackEnd
+from MDANSE_GUI.PyQtGUI.Widgets.Generator import WidgetGenerator
 
 from MDANSE.Framework.Jobs.Converter import InteractiveConverter
 

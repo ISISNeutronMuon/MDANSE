@@ -18,8 +18,8 @@ import sys
 from qtpy.QtWidgets import QApplication
 from qtpy.QtCore import QSettings, QThread
 
-from MDANSE.PyQtGUI.MainWindow import Main
-from MDANSE.PyQtGUI.BackEnd import BackEnd
+from MDANSE_GUI.PyQtGUI.MainWindow import Main
+from MDANSE_GUI.PyQtGUI.BackEnd import BackEnd
 
 def startGUI(some_args):
     app = QApplication(some_args)  # this is quite important, just to activate Qt

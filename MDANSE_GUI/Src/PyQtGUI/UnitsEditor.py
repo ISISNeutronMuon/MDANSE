@@ -27,7 +27,7 @@ from qtpy.QtGui import QFont, QEnterEvent, QStandardItem, QStandardItemModel,\
 from MDANSE import LOGGER
 from MDANSE.Framework.Units import _UNAMES, UNITS_MANAGER
 
-from MDANSE.PyQtGUI.Widgets.GeneralWidgets import InputVariable, InputDialog
+from MDANSE_GUI.PyQtGUI.Widgets.GeneralWidgets import InputVariable, InputDialog
 
 
 class UnitVisualiser(QFrame):

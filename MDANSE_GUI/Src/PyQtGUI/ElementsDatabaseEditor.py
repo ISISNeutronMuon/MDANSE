@@ -20,7 +20,7 @@ from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel
 from qtpy.QtGui import QFont, QEnterEvent, QStandardItem, QStandardItemModel
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.PyQtGUI.Widgets.GeneralWidgets import InputVariable, InputDialog
+from MDANSE_GUI.PyQtGUI.Widgets.GeneralWidgets import InputVariable, InputDialog
 
 
 class ElementView(QTableView):
