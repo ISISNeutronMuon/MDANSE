@@ -1,0 +1,11 @@
+include LICENSE
+include LICENCE
+
+recursive-include Extensions/qhull_lib *.h *c *.pxd
+
+recursive-include Doc *
+
+include Scripts/*
+
+recursive-include Tests *.py
+

@@ -1,10 +1,12 @@
 .DS_Store
 .env
 .eggs
+.egg-info
 .gitignore
 .project
 .pydevproject
 .settings
+.vscode
 MANIFEST
 *.pyc
 build/

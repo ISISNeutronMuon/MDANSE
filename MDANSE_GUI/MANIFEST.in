@@ -1,0 +1,13 @@
+include LICENSE
+include LICENCE
+
+recursive-include Src/GUI/Resources/Icons *.png
+
+recursive-include Src/PyQtGUI/Icons *.png
+
+recursive-include Doc *
+
+include Scripts/*
+
+recursive-include Tests *.py
+
