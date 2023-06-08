@@ -23,7 +23,7 @@ from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeModel
 from MDANSE_GUI.PyQtGUI.DataViewModel.JobHolder import JobHolder
-from MDANSE_GUI.PyQtGUI.DataViewModel.ActionsHolder import ActionsHolder
+from MDANSE_GUI.PyQtGUI.DataViewModel.ActionsHolder import ActionsSuperModel
 from MDANSE_GUI.PyQtGUI.RegistryViewer import RegistryTree
 
 
@@ -54,6 +54,7 @@ class BackEnd(QObject):
         self.createTrajectoryHolder()
         self.createJobHolder()
         self.registry = RegistryTree()
+        self.createActionsHolder()
         self._converters = []
         self._reverse_converters = {}  # internal dictionary for finding converters
         self.checkConverters()
@@ -66,9 +67,10 @@ class BackEnd(QObject):
         self.data_holders['trajectory'] = self.trajectory_holder
         self.new_trajectory.connect(self.trajectory_holder.acceptNewTrajectory)
 
-#     def createActionsHolder(self):
-#         self.trajectory_holder = ActionsHolder(parent=self)
-#         self.data_holders['actions'] = self.trajectory_holder
+    def createActionsHolder(self):
+        self.actions_holder = ActionsSuperModel(parent=self)
+        self.actions_holder.buildModels(self.registry)
+        # self.data_holders['actions'] = self.trajectory_holder
 
     def createJobHolder(self):
         self.job_holder = JobHolder(parent=self, python = self.python_interpreter)

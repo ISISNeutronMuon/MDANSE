@@ -19,7 +19,7 @@ from icecream import ic
 from qtpy.QtWidgets import QTreeView, QWidget, QMenu, QAbstractItemView,\
                            QApplication
 from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
-from qtpy.QtGui import QContextMenuEvent, QMouseEvent, QDrag
+from qtpy.QtGui import QContextMenuEvent, QMouseEvent, QDrag, QStandardItem
 
 from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.PyQtGUI.DataViewModel.ActionsHolder import ActionsHolder
@@ -27,7 +27,7 @@ from MDANSE_GUI.PyQtGUI.DataViewModel.ActionsHolder import ActionsHolder
 
 class ActionsTree(QTreeView):
 
-    action_selected = Signal(DataTreeItem)
+    action_selected = Signal(QStandardItem)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

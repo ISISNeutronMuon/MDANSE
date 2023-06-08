@@ -31,6 +31,18 @@ class ActionsHolder(QStandardItemModel):
 
         self._node_numbers = []
         self._nodes = {}
+        self._next_number = 1
+        # the nodes used for structuring the data tree
+        # will be kept here
+        self._sections = {}
+        self._section_names = []
+    
+    def append_object(self, thing):
+        self._nodes[self._next_number] = thing
+        self._node_numbers.append(self._next_number)
+        retval = int(self._next_number)
+        self._next_number += 1
+        return retval
 
 
 
@@ -40,12 +52,15 @@ class ActionsSuperModel(QObject):
     ActionsTree widget, depending on which data object
     has been selected."""
 
-    def __init__(self, viewer: typing.Optional['QTreeView'],
+    def __init__(self, viewer: typing.Optional['QTreeView'] = None,
                        parent: typing.Optional['QObject'] = None) -> None:
         super().__init__(parent)
 
         self.viewer = viewer
         self.models = {}
+
+    def setViewer(self, viewer):
+        self.viewer = viewer
 
     @Slot(str)
     def switchModel(self, ancestor: str):
@@ -56,10 +71,11 @@ class ActionsSuperModel(QObject):
             ancestor -- name of the MDANSE object type
                         selected in the DataView.
         """
+        ic("received ancestor:", ancestor)
         try:
             current_model = self.models[ancestor]
         except KeyError:
-            current_model = ActionsHolder(self)
+            current_model = ActionsHolder()
         self.viewer.setModel(current_model)
     
     def buildModels(self, registry: RegistryTree):
@@ -73,33 +89,45 @@ class ActionsSuperModel(QObject):
         """
         valid_ancestors = registry._by_ancestor.keys()
         for anc in valid_ancestors:
-            model = ActionsHolder(self)
+            model = ActionsHolder()
             nodes_added = []
             node_numbers = sorted(registry._by_ancestor[anc])
             for nn in node_numbers:
                 if nn not in model._node_numbers:
                     temp_item = registry._nodes[nn]
-                    self.copyNodeIntoModel(temp_item, model)
+                    regkeys = registry.getAncestry(nn)
+                    registry_section = REGISTRY
+                    for rkey in regkeys:
+                        registry_section = registry_section[rkey]
+                    self.copyNodeIntoModel(registry_section, model)
             # here the processing ends
             self.models[anc] = model
+        ic("Build the following models:", self.models.keys())
     
-    def copyNodeIntoModel(self, node: QStandardItem, model: ActionsHolder):
-        parent = node.parent()
-        node_number = node.data()
-        node_text = node.text()
+    def copyNodeIntoModel(self, thing: typing.Any, model: ActionsHolder):
+        node_parents = thing.category
+        rootnode = None
+        for name in node_parents:
+            if name not in model._section_names:
+                section_node = QStandardItem()
+                section_node.setText(name)
+                if rootnode is None:
+                    model.appendRow(section_node)
+                else:
+                    rootnode.appendRow(section_node)
+                model._section_names.append(name)
+                model._sections[name] = section_node
+                rootnode = section_node
+            else:
+                rootnode = model._sections[name]
+        node_text = thing.label
+        node_contents = thing
+        node_number = model.append_object(thing)
         newitem = QStandardItem()
         newitem.setText(node_text)
         newitem.setData(node_number, role = Qt.ItemDataRole.UserRole)
-        if parent is not None:
-            parent_number = parent.data()
-            if parent_number not in model._node_numbers:
-                newparent = self.copyNodeIntoModel(parent, model)
-            else:
-                newparent = model._nodes[parent_number]
-            newparent.appendRow(newitem)
-        else:
+        if rootnode is None:
             model.appendRow(newitem)
-        model._nodes[node_number] = newitem
-        model._node_numbers.append(node_number)
-        return newitem
+        else:
+            rootnode.appendRow(newitem)
         

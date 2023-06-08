@@ -146,7 +146,7 @@ class DataTreeModel(QStandardItemModel):
         data = REGISTRY["input_data"]["hdf_trajectory"](fname)
         # data = REGISTRY["hdf_trajectory"](fname)
         ic()
-        item = TrajectoryItem(fname= fname, trajectory= data, mdanse_tag = "trajectory")
+        item = TrajectoryItem(fname= fname, trajectory= data, mdanse_tag = "hdf_trajectory")
         ic("Created TrajectoryItem")
         self.appendRow(item)
         tkey = item.file_info.hash

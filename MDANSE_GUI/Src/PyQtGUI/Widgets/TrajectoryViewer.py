@@ -30,6 +30,7 @@ class TrajectoryViewer(QTreeView):
     """
 
     itemPicked = Signal(DataTreeItem)
+    pickedAncestor = Signal(str)
 
     def __init__(self, parent: typing.Optional[QWidget] = None) -> None:
         super().__init__(parent)
@@ -39,8 +40,10 @@ class TrajectoryViewer(QTreeView):
     def requestChildren(self, index: QModelIndex):
         # item = index.data()
         item = self.model().itemFromIndex(index)
-        ic("Emitting", item)
-        self.itemPicked.emit(item)
+        ic("Emitting items ancestor. Item:", item)
+        anc = item.ancestors()
+        ic("ancestor:", anc[-1])
+        self.pickedAncestor.emit(anc[-1])
         
     # def contextMenuEvent(self, event: QContextMenuEvent) -> None:
     #     index = self.indexAt(event.pos())

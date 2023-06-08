@@ -137,7 +137,10 @@ class Main(QMainWindow):
             for view in self._views[skey]:
                 view.setModel(data_holder)
         # extra connections
-        self.traj_view.itemPicked.connect(self.actions_view.showValidActions)
+        self.backend.actions_holder.setViewer(self.actions_view)
+        self.traj_view.pickedAncestor.connect(self.backend.actions_holder.switchModel)
+        #
+        # self.traj_view.itemPicked.connect(self.actions_view.showValidActions)
     
     def attachActions(self):
         self.file_name_for_loading.connect(self.backend.loadFile)
@@ -243,7 +246,7 @@ class Main(QMainWindow):
 
     def createActionsViewer(self):
         base, temp = self.wid_gen.wrapWidget(cls = ActionsTree, parent= self, dockable = True,
-                                             name="Jobs")
+                                             name="Actions")
         self.actions_view = temp
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, base)
         self._views['actions'].append(temp)
