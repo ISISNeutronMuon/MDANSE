@@ -37,6 +37,7 @@ from qtpy.QtCore import Qt
 # are not defined by the MDANSE code.
 to_be_omitted = dir(None)
 
+
 class RegistryTree(QStandardItemModel):
     """RegistryTree creates a tree structure
     of QStandardItem objects, and stores information
@@ -57,6 +58,8 @@ class RegistryTree(QStandardItemModel):
 
         self._converters = {}
         self._jobs = {}
+
+        self._by_ancestor = {}  # dict of list[int]
 
         self.nodecounter = 0  # each node is given a unique number
         # the number is the key to the dictionary entries.
@@ -108,6 +111,11 @@ class RegistryTree(QStandardItemModel):
             except AttributeError:
                 pass
             else:
+                if len(thing.ancestor) > 0:
+                    for ancestor in thing.ancestor:
+                        if ancestor not in self._by_ancestor.keys():
+                            self._by_ancestor[ancestor] = []
+                        self._by_ancestor[ancestor].append(retval)
                 try:
                     is_conv = cat[0] == "Converters"
                 except IndexError:

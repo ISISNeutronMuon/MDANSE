@@ -29,11 +29,12 @@ from qtpy.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMai
 from MDANSE_GUI.PyQtGUI.BackEnd import BackEnd
 from MDANSE_GUI.PyQtGUI.Widgets.Generator import WidgetGenerator
 from MDANSE_GUI.PyQtGUI.Widgets.ConvertDialog import ConverterDialog
+from MDANSE_GUI.PyQtGUI.Widgets.ActionsTree import ActionsTree
 from MDANSE_GUI.PyQtGUI.Resources import Resources
 from MDANSE_GUI.PyQtGUI.UnitsEditor import UnitsEditor
 from MDANSE_GUI.PyQtGUI.PeriodicTableViewer import PeriodicTableViewer
 from MDANSE_GUI.PyQtGUI.ElementsDatabaseEditor import ElementsDatabaseEditor
-
+from MDANSE_GUI.PyQtGUI.Widgets.TrajectoryViewer import TrajectoryViewer
 
 class LoaderButton(QToolButton):
     """Subclassed from QToolButton, this object shows the name of a
@@ -135,6 +136,8 @@ class Main(QMainWindow):
             data_holder = self.backend.data_holders[skey]
             for view in self._views[skey]:
                 view.setModel(data_holder)
+        # extra connections
+        self.traj_view.itemPicked.connect(self.actions_view.showValidActions)
     
     def attachActions(self):
         self.file_name_for_loading.connect(self.backend.loadFile)
@@ -145,6 +148,7 @@ class Main(QMainWindow):
     def makeBasicLayout(self):
         self.createTrajectoryViewer()
         self.createJobsViewer()
+        self.createActionsViewer()
         self.setupMenubar()
         self.setupToolbar()
     
@@ -224,7 +228,7 @@ class Main(QMainWindow):
         print(f"Icon size is {self._toolBar.iconSize()}")
 
     def createTrajectoryViewer(self):
-        base, temp = self.wid_gen.wrapWidget(cls = QTreeView, parent= self, dockable = True,
+        base, temp = self.wid_gen.wrapWidget(cls = TrajectoryViewer, parent= self, dockable = True,
                                              name="Trajectories")
         self.traj_view = temp
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, base)
@@ -236,6 +240,13 @@ class Main(QMainWindow):
         self.job_view = temp
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, base)
         self._views['jobs'].append(temp)
+
+    def createActionsViewer(self):
+        base, temp = self.wid_gen.wrapWidget(cls = ActionsTree, parent= self, dockable = True,
+                                             name="Jobs")
+        self.actions_view = temp
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, base)
+        self._views['actions'].append(temp)
 
     @Slot()
     def saveSettings(self):
