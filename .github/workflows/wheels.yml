@@ -60,7 +60,12 @@ jobs:
         run: python -m pip install build wheel setuptools
 
       - name: Install MDANSE
+        if: contains( ${{ matrix.os }}, 'ubuntu') || contains( ${{ matrix.os }}, 'macOS')
         run: python -m pip install *.whl
+
+      - name: Install MDANSE on Windows
+        if: contains( ${{ matrix.os }}, 'windows')
+        run: FOR %%i in (*.whl) DO python -m pip install %i
 
       - name: Install dependencies
         run: (cd MDANSE_GUI && python -m pip install -r requirements.txt)
