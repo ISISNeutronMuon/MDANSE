@@ -91,8 +91,8 @@ class TestConfiguration(unittest.TestCase):
         conf = RealConfiguration(self._chemicalSystem,coordinates)
         self.assertTrue(np.allclose(conf.to_box_coordinates(),coordinates,rtol=1.0e-6))
 
-        unitCell = np.array([[1.0,2.0,1.0],[2.0,-1.0,1.0],[3.0,1.0,1.0]],dtype=np.float)
-        coordinates = np.array(([1,2,3],[4,5,6],[7,8,9],[10,11,12]),dtype=np.float)
+        unitCell = np.array([[1.0,2.0,1.0],[2.0,-1.0,1.0],[3.0,1.0,1.0]],dtype=np.float64)
+        coordinates = np.array(([1,2,3],[4,5,6],[7,8,9],[10,11,12]),dtype=np.float64)
         conf = RealConfiguration(self._chemicalSystem,coordinates,unitCell)
 
         boxCoordinates = conf.to_box_coordinates()
@@ -103,8 +103,8 @@ class TestConfiguration(unittest.TestCase):
 
     def test_fold_coordinates(self):
 
-        unitCell = np.array([[1.0,2.0,1.0],[2.0,-1.0,1.0],[3.0,1.0,1.0]],dtype=np.float)
-        coordinates = np.array(([1,2,3],[4,5,6],[7,8,9],[10,11,12]),dtype=np.float)
+        unitCell = np.array([[1.0,2.0,1.0],[2.0,-1.0,1.0],[3.0,1.0,1.0]],dtype=np.float64)
+        coordinates = np.array(([1,2,3],[4,5,6],[7,8,9],[10,11,12]),dtype=np.float64)
         conf = RealConfiguration(self._chemicalSystem,coordinates,unitCell)
         conf.fold_coordinates()
 
@@ -121,8 +121,8 @@ class TestConfiguration(unittest.TestCase):
 
     def test_to_real_coordinates(self):
 
-        unitCell = np.array([[1.0,2.0,1.0],[2.0,-1.0,1.0],[3.0,1.0,1.0]],dtype=np.float)
-        coordinates = np.array(([1,2,3],[4,5,6],[7,8,9],[10,11,12]),dtype=np.float)
+        unitCell = np.array([[1.0,2.0,1.0],[2.0,-1.0,1.0],[3.0,1.0,1.0]],dtype=np.float64)
+        coordinates = np.array(([1,2,3],[4,5,6],[7,8,9],[10,11,12]),dtype=np.float64)
         conf = BoxConfiguration(self._chemicalSystem,coordinates,unitCell)
 
         realCoordinates = conf.to_real_coordinates()
@@ -133,7 +133,7 @@ class TestConfiguration(unittest.TestCase):
             
     def test_fold_coordinates_real_pbc(self):
 
-        unit_cell = np.array([[2,1,0],[-3,2,0],[2,1,-4]],dtype=np.float)
+        unit_cell = np.array([[2,1,0],[-3,2,0],[2,1,-4]],dtype=np.float64)
         coords = np.array([
             [-1.65955991,  4.40648987, -9.9977125 ],
             [-3.95334855, -7.06488218, -8.1532281 ],
@@ -167,7 +167,7 @@ class TestConfiguration(unittest.TestCase):
 
     def test_fold_coordinates_box_pbc(self):
 
-        unit_cell = np.array([[2,1,0],[-3,2,0],[2,1,-4]],dtype=np.float)
+        unit_cell = np.array([[2,1,0],[-3,2,0],[2,1,-4]],dtype=np.float64)
         coords = np.array([
             [ 0.6, 0.8, -0.7],
             [ 0.3, -0.1, 1.2],
@@ -201,7 +201,7 @@ class TestConfiguration(unittest.TestCase):
 
     def test_contiguous_configuration_real_pbc(self):
 
-        unit_cell = np.array([[2,1,0],[-3,2,0],[2,1,-4]],dtype=np.float)
+        unit_cell = np.array([[2,1,0],[-3,2,0],[2,1,-4]],dtype=np.float64)
 
         box_coords = [[0.1,0.1,0.1],[0.3,0.2,0.4],[-1.3,-1.1,-1.3],[1.9,1.5,1.9]]
         box_conf = BoxConfiguration(self._chemicalSystem,box_coords,unit_cell)

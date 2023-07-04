@@ -37,6 +37,8 @@ def factorial(n):
 
 def pgcd(n):
     """Computes the pgcd for a set of integers.
+    MB: I'm guessing that this is meant to be
+    Something Greatest Common Denominator.
     
     @param n: n.
     @type: list of integers
@@ -65,8 +67,8 @@ def get_weights(props, contents, dim):
     cartesianProduct = set(itertools.product(list(props.keys()), repeat=dim))
     for elements in cartesianProduct:
     
-        n = np.product([contents[el] for el in elements])        
-        p = np.product(np.array([props[el] for el in elements]),axis=0)
+        n = np.prod([contents[el] for el in elements])        
+        p = np.prod(np.array([props[el] for el in elements]),axis=0)
                 
         fact = n*p
 
