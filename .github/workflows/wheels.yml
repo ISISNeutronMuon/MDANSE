@@ -55,13 +55,12 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: ${{ matrix.os }}_wheel
-          path: ./MDANSE.whl
 
       - name: Install build packages
         run: python -m pip install build wheel setuptools
 
       - name: Install MDANSE
-        run: (cp /home/runner/work/MDANSE/MDANSE/MDANSE.whl ./MDANSE.whl && python -m pip install MDANSE.whl)
+        run: python -m pip install *.whl
 
       - name: Install dependencies
         run: (cd MDANSE_GUI && python -m pip install -r requirements.txt)
