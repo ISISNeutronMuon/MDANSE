@@ -65,7 +65,7 @@ jobs:
 
       - name: Install MDANSE on Windows
         if: runner.os == 'Windows'
-        run: FOR %i in (*.whl) DO python -m pip install %i
+        run: foreach ($file in Get-ChildItem *.whl) {python -m pip install $file}
 
       - name: Install dependencies
         run: (cd MDANSE_GUI && python -m pip install -r requirements.txt)
