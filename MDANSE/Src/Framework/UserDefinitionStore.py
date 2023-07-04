@@ -61,7 +61,9 @@ class UserDefinitionStore(object, metaclass=Singleton):
             UD = pickle.load(f)
   
         # If for whatever reason the pickle file loading failed do not even try to restore it
-        except:
+        except Exception as e:
+            print("Exception reading the User Definitions")
+            print(e)
             return
           
         else:

@@ -131,7 +131,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 
         coords = configuration['coordinates']
 
-        com = np.zeros((3,),dtype=np.float)
+        com = np.zeros((3,),dtype=np.float64)
         sum_masses = 0.0
         for at in self.atom_list():
             m = ATOMS_DATABASE[at.symbol]['atomic_weight']
@@ -301,6 +301,20 @@ class Atom(_ChemicalEntity):
 
         for k,v in kwargs.items():
             setattr(self,k,v)
+    
+    def __hash__(self) -> int:
+        text = self._symbol
+        number = self._index
+        hash = 0
+        try:
+            hash += text.__hash__()
+        except:
+            hash += 1024
+        try:
+            hash += 1024*number.__hash__()
+        except:
+            hash += 33
+        return hash
 
     def copy(self):
 

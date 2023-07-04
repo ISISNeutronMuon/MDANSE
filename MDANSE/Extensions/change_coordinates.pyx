@@ -35,7 +35,7 @@ def box_coordinates(ndarray[np.float64_t, ndim=2] real_coords not None,
 
     cdef int i
 
-    cdef ndarray[np.float64_t, ndim=2] box_coords = np.empty((real_coords.shape[0],3),dtype=np.float)
+    cdef ndarray[np.float64_t, ndim=2] box_coords = np.empty((real_coords.shape[0],3),dtype=np.float64)
 
     for 0 <= i < real_coords.shape[0]:
 
@@ -56,7 +56,7 @@ def real_coordinates(ndarray[np.float64_t, ndim=2] box_coords not None,
 
     cdef int i
 
-    cdef ndarray[np.float64_t, ndim=2] real_coords = np.empty((box_coords.shape[0],3),dtype=np.float)
+    cdef ndarray[np.float64_t, ndim=2] real_coords = np.empty((box_coords.shape[0],3),dtype=np.float64)
 
     for 0 <= i < box_coords.shape[0]:
 

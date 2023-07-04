@@ -131,7 +131,7 @@ class CellFile(dict):
                 raise CellFileError("Can not cast time step to floating")
 
             try:
-                cell = np.array(words[2:11],dtype=np.float).reshape((3,3))
+                cell = np.array(words[2:11],dtype=np.float64).reshape((3,3))
             except ValueError:
                 raise CellFileError("Can not cast cell coordinates to floating")
 

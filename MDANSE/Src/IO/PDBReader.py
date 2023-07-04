@@ -552,9 +552,9 @@ if __name__ == '__main__':
 
     conf = RealConfiguration(
         cs,
-        np.empty((cs.number_of_atoms(),3),dtype=np.float),
-        np.empty((3,3),dtype=np.float),
-        **{'velocities':np.empty((cs.number_of_atoms(),3),dtype=np.float)})
+        np.empty((cs.number_of_atoms(),3),dtype=np.float64),
+        np.empty((3,3),dtype=np.float64),
+        **{'velocities':np.empty((cs.number_of_atoms(),3),dtype=np.float64)})
     cs.configuration = conf
 
     cs1 = cs.copy()

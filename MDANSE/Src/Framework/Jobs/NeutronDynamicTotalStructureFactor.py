@@ -208,7 +208,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
 
             disf_per_q_shell = {}
             for element in self.configuration['atom_selection']['unique_names']:
-                disf_per_q_shell[element] = np.zeros((self._nFrames,), dtype = np.float)
+                disf_per_q_shell[element] = np.zeros((self._nFrames,), dtype = np.float64)
 
             for i,atom_indexes in enumerate(self.configuration['atom_selection']["indexes"]):
 

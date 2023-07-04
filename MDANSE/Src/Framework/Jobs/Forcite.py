@@ -289,12 +289,12 @@ class ForciteConverter(Converter):
         self.numberOfSteps = self._trjfile['n_frames']
         
         if self._trjfile["velocities_written"]:
-            self._velocities = np.zeros((self._chemicalSystem.number_of_atoms(),3),dtype=np.float)
+            self._velocities = np.zeros((self._chemicalSystem.number_of_atoms(),3),dtype=np.float64)
         else:
             self._velocities = None
 
         if self._trjfile["gradients_written"]:
-            self._gradients = np.zeros((self._chemicalSystem.number_of_atoms(),3),dtype=np.float)
+            self._gradients = np.zeros((self._chemicalSystem.number_of_atoms(),3),dtype=np.float64)
         else:
             self._gradients = None
 

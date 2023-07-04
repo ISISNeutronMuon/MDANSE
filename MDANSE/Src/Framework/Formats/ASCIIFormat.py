@@ -109,7 +109,7 @@ class ASCIIFormat(IFormat):
                 yValues = allData[yData]
                 fileobject.write("# 1st row: %s (%s)\n\n"% (allData[yData].varname,allData[yData].units))
 
-            zData = np.zeros((data.shape[0]+1,data.shape[1]+1),dtype=np.float)
+            zData = np.zeros((data.shape[0]+1,data.shape[1]+1),dtype=np.float64)
             zData[1:,0] = xValues
             zData[0,1:] = yValues
             zData[1:,1:] = data

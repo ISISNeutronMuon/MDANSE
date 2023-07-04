@@ -74,7 +74,7 @@ def cpt_cluster_connectivity_pbc(
 
     nbat = len(covRadii)
 
-    cdef np.ndarray[np.float64_t, ndim=2] scaleconfig = np.empty((coords.shape[0],3),dtype=np.float)
+    cdef np.ndarray[np.float64_t, ndim=2] scaleconfig = np.empty((coords.shape[0],3),dtype=np.float64)
 
     for 0 <= i < coords.shape[0]:
 

@@ -15,9 +15,11 @@
 
 import operator
 
+from pyparsing import delimitedList, oneOf, opAssoc, printables, Optional, infixNotation
+from pyparsing.core import Forward, OneOrMore, Word
+
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
-from MDANSE.Externals.pyparsing.pyparsing import delimitedList, oneOf, opAssoc, operatorPrecedence, printables, Forward, OneOrMore, Optional, Word
 
 class AtomSelectionParserError(Error):
     pass
@@ -71,7 +73,7 @@ class AtomSelectionParser(object):
         
         grammar << selector.setParseAction(self.parse_expression)
         
-        grammar = operatorPrecedence(grammar, [(oneOf(["and","&"],caseless=True), 2, opAssoc.RIGHT , self.operator_and),
+        grammar = infixNotation(grammar, [(oneOf(["and","&"],caseless=True), 2, opAssoc.RIGHT , self.operator_and),
                                                (oneOf(["not","~"],caseless=True), 1, opAssoc.RIGHT, self.operator_not),
                                                (oneOf(["or","|"] ,caseless=True), 2, opAssoc.RIGHT , self.operator_or)],
                                      lpar="(",
@@ -102,7 +104,7 @@ class AtomSelectionParser(object):
     
 if __name__ == "__main__":
 
-    from MDANSE.Externals.pyparsing.pyparsing import *
+    from pyparsing import *
 
     def parse_keyword(token):
                                     
@@ -140,7 +142,7 @@ if __name__ == "__main__":
     
     grammar << selector.setParseAction(parse_expression)
     
-    expr = operatorPrecedence(grammar, [(oneOf(["and"],caseless=True), 2, opAssoc.RIGHT , operator_and),
+    expr = infixNotation(grammar, [(oneOf(["and"],caseless=True), 2, opAssoc.RIGHT , operator_and),
                                            (oneOf(["or"] ,caseless=True), 2, opAssoc.RIGHT , operator_or)],
                                  lpar="(",
                                  rpar=")")

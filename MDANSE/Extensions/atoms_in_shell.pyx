@@ -38,7 +38,7 @@ def atoms_in_shell_real(ndarray[np.float64_t, ndim=2]  config not None,
 
     cdef int i
 
-    cdef ndarray[np.float64_t, ndim=2] scaleconfig = np.empty((config.shape[0],3),dtype=np.float)
+    cdef ndarray[np.float64_t, ndim=2] scaleconfig = np.empty((config.shape[0],3),dtype=np.float64)
 
     cdef double mini2 = mini**2
     cdef double maxi2 = maxi**2
@@ -130,7 +130,7 @@ def atoms_in_shell_box(ndarray[np.float64_t, ndim=2]  config not None,
 
     cdef int i
 
-    cdef ndarray[np.float64_t, ndim=2] scaleconfig = np.empty((config.shape[0],3),dtype=np.float)
+    cdef ndarray[np.float64_t, ndim=2] scaleconfig = np.empty((config.shape[0],3),dtype=np.float64)
 
     cdef double mini2 = mini**2
     cdef double maxi2 = maxi**2
