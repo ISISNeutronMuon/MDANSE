@@ -60,11 +60,11 @@ jobs:
       - name: Install build packages
         run: python -m pip install build wheel setuptools
 
-      - name: Install dependencies
-        run: (cd MDANSE_GUI && python -m pip install -r requirements.txt)
-      
       - name: Install MDANSE
         run: python -m pip install MDANSE.whl
+
+      - name: Install dependencies
+        run: (cd MDANSE_GUI && python -m pip install -r requirements.txt)
 
       - name: Build wheels
         run: (cd MDANSE_GUI && python setup.py bdist_wheel)
