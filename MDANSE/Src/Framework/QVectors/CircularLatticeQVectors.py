@@ -18,7 +18,7 @@ import random
 
 import numpy as np
 
-from Scientific.Geometry import Vector
+from MDANSE.Mathematics.LinearAlgebra import Vector
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors

@@ -15,7 +15,7 @@
 
 import numpy as np
 
-from Scientific.Geometry import Vector
+from MDANSE.Mathematics.LinearAlgebra import Vector
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Projectors.IProjector import IProjector, ProjectorError

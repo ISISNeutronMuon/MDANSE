@@ -29,6 +29,7 @@ from qtpy.QtWidgets import QFrame,  QTabWidget, QSizePolicy, QApplication,  QMai
 from MDANSE_GUI.PyQtGUI.BackEnd import BackEnd
 from MDANSE_GUI.PyQtGUI.Widgets.Generator import WidgetGenerator
 from MDANSE_GUI.PyQtGUI.Widgets.ConvertDialog import ConverterDialog
+from MDANSE_GUI.PyQtGUI.Widgets.ActionDialog import ActionDialog
 from MDANSE_GUI.PyQtGUI.Widgets.ActionsTree import ActionsTree
 from MDANSE_GUI.PyQtGUI.Resources import Resources
 from MDANSE_GUI.PyQtGUI.UnitsEditor import UnitsEditor
@@ -140,6 +141,7 @@ class Main(QMainWindow):
         self.backend.actions_holder.setViewer(self.actions_view)
         self.traj_view.pickedAncestor.connect(self.backend.actions_holder.switchModel)
         #
+        self.actions_view.execute_action.connect(self.runAction)
         # self.traj_view.itemPicked.connect(self.actions_view.showValidActions)
     
     def attachActions(self):
@@ -198,6 +200,15 @@ class Main(QMainWindow):
     def convertTrajectory(self, converter = None):
         ic(f"Received converter: {converter}")
         dialog = ConverterDialog
+        dialog_instance = dialog(self, converter=converter)
+        dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
+        dialog_instance.show()
+        result = dialog_instance.exec()
+
+    Slot(object)
+    def runAction(self, converter = None):
+        ic(f"Received action: {converter}")
+        dialog = ActionDialog
         dialog_instance = dialog(self, converter=converter)
         dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
         dialog_instance.show()

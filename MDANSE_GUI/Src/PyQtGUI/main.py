@@ -29,14 +29,14 @@ def startGUI(some_args):
                          parent = app)
     # the backend has no parent, because it runs in a separate QThread
     backend = BackEnd(parent=None, python = sys.executable)
-    backend_thread = QThread()
-    backend.moveToThread(backend_thread)
-    backend_thread.start()
+    # backend_thread = QThread()
+    # backend.moveToThread(backend_thread)
+    # backend_thread.start()
     # Main is the main window of the GUI
     # It runs in the main thread, and has to connect to the BackEnd
     # using slots and signals.
     root = Main(parent=None, title = "MDANSE for Python 3", settings = settings)
-    root.destroyed.connect(backend_thread.exit)
+    # root.destroyed.connect(backend_thread.exit)
     root.setBackend(backend)
     root.show()
     app.exec() # once this is done, the GUI has its event loop running.

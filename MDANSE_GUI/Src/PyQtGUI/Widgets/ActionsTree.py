@@ -23,11 +23,13 @@ from qtpy.QtGui import QContextMenuEvent, QMouseEvent, QDrag, QStandardItem
 
 from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.PyQtGUI.DataViewModel.ActionsHolder import ActionsHolder
+from MDANSE_GUI.PyQtGUI.Widgets.ActionDialog import ActionDialog
 
 
 class ActionsTree(QTreeView):
 
     action_selected = Signal(QStandardItem)
+    execute_action = Signal(object)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -37,13 +39,12 @@ class ActionsTree(QTreeView):
         self.click_position = None
 
         self.clicked.connect(self.on_select_action)
+        self.doubleClicked.connect(self.pop_action_dialog)
 
     def mousePressEvent(self, e: QMouseEvent) -> None:
         self.click_position = e.position()
         if self.model() is None:
             return None
-        text = self.model().data(self.currentIndex(), Qt.ItemDataRole.DisplayRole)
-        print("tree: clicked on ", text)
         return super().mousePressEvent(e)
     
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
@@ -64,7 +65,21 @@ class ActionsTree(QTreeView):
     def on_select_action(self,index):
         model = self.model()
         item = model.itemFromIndex(index)
+        text = item.text()
+        print("tree: clicked on ", text)
         self.action_selected.emit(item)
+
+    def pop_action_dialog(self,index):
+        model = self.model()
+        item = model.itemFromIndex(index)
+        # debug
+        text = item.text()
+        ic(f"About to execute action {text}")
+        # 
+        number = item.data()
+        ic(f"Node number is {number}")
+        action = model._nodes[number]
+        self.execute_action.emit(action)
     
     @Slot(DataTreeItem)
     def showValidActions(self, item : DataTreeItem):

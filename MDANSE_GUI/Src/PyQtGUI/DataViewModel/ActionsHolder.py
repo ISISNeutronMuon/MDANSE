@@ -17,7 +17,7 @@ import typing
 
 from icecream import ic
 from qtpy.QtGui import QStandardItemModel, QStandardItem
-from qtpy.QtCore import QObject, Slot, Qt
+from qtpy.QtCore import QObject, Slot, Qt, QMutex
 from qtpy.QtWidgets import QTreeView
 
 from MDANSE import LOGGER, PLATFORM, REGISTRY
@@ -29,6 +29,7 @@ class ActionsHolder(QStandardItemModel):
     def __init__(self, parent = None):
         super().__init__(parent)
 
+        self.mutex = QMutex()
         self._node_numbers = []
         self._nodes = {}
         self._next_number = 1
@@ -37,11 +38,14 @@ class ActionsHolder(QStandardItemModel):
         self._sections = {}
         self._section_names = []
     
+    @Slot(object)
     def append_object(self, thing):
+        self.mutex.lock()
         self._nodes[self._next_number] = thing
         self._node_numbers.append(self._next_number)
         retval = int(self._next_number)
         self._next_number += 1
+        self.mutex.unlock()
         return retval
 
 
@@ -94,7 +98,6 @@ class ActionsSuperModel(QObject):
             node_numbers = sorted(registry._by_ancestor[anc])
             for nn in node_numbers:
                 if nn not in model._node_numbers:
-                    temp_item = registry._nodes[nn]
                     regkeys = registry.getAncestry(nn)
                     registry_section = REGISTRY
                     for rkey in regkeys:
@@ -121,11 +124,11 @@ class ActionsSuperModel(QObject):
             else:
                 rootnode = model._sections[name]
         node_text = thing.label
-        node_contents = thing
         node_number = model.append_object(thing)
+        ic(node_number)
         newitem = QStandardItem()
         newitem.setText(node_text)
-        newitem.setData(node_number, role = Qt.ItemDataRole.UserRole)
+        newitem.setData(node_number)
         if rootnode is None:
             model.appendRow(newitem)
         else:
