@@ -13,32 +13,16 @@
 #
 # **************************************************************************
 
+import math
 import cmath
 import itertools
+from functools import reduce
 
 import numpy as np
 
-def factorial(n):
-    """Returns n!
-    
-    @param n: n.
-    @type: integer
-    
-    @return: n!.
-    @rtype: integer
-    """
-    
-    # 0! = 1! = 1
-    if n < 2:
-        return 1
-    else:
-        # multiply is a ufunc of Numeric module
-        return np.multiply.reduce(np.arange(2,n+1, dtype=np.float64))
-
-def pgcd(n):
-    """Computes the pgcd for a set of integers.
-    MB: I'm guessing that this is meant to be
-    Something Greatest Common Denominator.
+def pgcd(numbers: 'list[int]'):
+    """Computes the Greatest Common Denominator
+    of an iterable (e.g. list) of integer numbers.
     
     @param n: n.
     @type: list of integers
@@ -46,17 +30,8 @@ def pgcd(n):
     @return: pgcd([i1,i2,i3...]).
     @rtype: integer
     """   
-    
-    def _pgcd(a,b):
-        while b: a, b = b, a%b
-        return a
-    
-    p = _pgcd(n[0],n[1])
-    
-    for x in n[2:]:
-        p = _pgcd(p, x)
-        
-    return p
+
+    return reduce(math.gcd, numbers)
 
 def get_weights(props, contents, dim):
                                         
@@ -113,5 +88,5 @@ class ComplexNumber(complex):
         return cmath.phase(self)
         
     def modulus(self):
-        return np.sqrt(self*self.conjugate()).real
+        return np.abs(self)
                 
