@@ -27,6 +27,9 @@ class AbstractSession(ABC):
     @abstractmethod
     def set_directories(self):
         raise NotImplementedError
+    
+    def load_session(self, fname: str):
+        raise NotImplementedError
 
 
 class SessionSettings(AbstractSession):

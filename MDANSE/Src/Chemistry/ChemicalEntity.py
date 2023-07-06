@@ -305,16 +305,8 @@ class Atom(_ChemicalEntity):
     def __hash__(self) -> int:
         text = self._symbol
         number = self._index
-        hash = 0
-        try:
-            hash += text.__hash__()
-        except:
-            hash += 1024
-        try:
-            hash += 1024*number.__hash__()
-        except:
-            hash += 33
-        return hash
+        temp = text + "_" + str(number)
+        return temp.__hash__()
 
     def copy(self):
 

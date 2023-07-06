@@ -31,7 +31,7 @@ def pgcd(numbers: 'list[int]'):
     @rtype: integer
     """   
 
-    return reduce(math.gcd, numbers)
+    return math.gcd(*numbers)  # this is valid since Python 3.9
 
 def get_weights(props, contents, dim):
                                         
