@@ -7,6 +7,7 @@ from os import path
 import pytest
 from icecream import ic
 import numpy as np
+import h5py
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
@@ -51,6 +52,30 @@ def test_basic_meansquare(trajectory):
     assert path.exists(temp_name + '.h5')
     assert path.isfile(temp_name + '.h5')
     os.remove(temp_name + '.h5')
+
+def test_parallel_meansquare(trajectory):
+    temp_name = tempfile.mktemp()
+    parameters = {}
+    parameters['frames'] = (0, 10, 1)
+    parameters['output_files'] = (temp_name, ('hdf',))
+    parameters['running_mode'] = ('monoprocessor',)
+    parameters['trajectory'] = short_traj
+    msd = REGISTRY['job']['msd']()
+    msd.run(parameters,status=True)
+    temp_name2 = tempfile.mktemp()
+    parameters = {}
+    parameters['frames'] = (0, 10, 1)
+    parameters['output_files'] = (temp_name2, ('hdf',))
+    parameters['running_mode'] = ('threadpool',4)
+    parameters['trajectory'] = short_traj
+    msd_par = REGISTRY['job']['msd']()
+    msd_par.run(parameters,status=True)
+    single = h5py.File(temp_name + '.h5')
+    parallel = h5py.File(temp_name2 + '.h5')
+    for kk in single.keys():
+        assert np.allclose(np.array(single[kk]), np.array(parallel[kk]), 1e-5, 1e-4)
+    os.remove(temp_name + '.h5')
+    os.remove(temp_name2 + '.h5')
 
 def test_atom_selection(trajectory):
     temp_name = tempfile.mktemp()
