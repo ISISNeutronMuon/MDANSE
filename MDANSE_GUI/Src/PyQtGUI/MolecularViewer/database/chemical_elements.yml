@@ -1,0 +1,1081 @@
+atoms:
+  Lp:
+    name: lone-pair
+    symbol: Lp
+    atomic_weight: 1.0079
+    vdw_radius: 1.09
+    covalent_radius: 0.22999999999999998
+    atomic_radius: 0.79
+    color: 255;255;255
+    element: H
+  Mw:
+    name: ghost-atom
+    symbol: Mw
+    atomic_weight: 1.0079
+    vdw_radius: 1.09
+    covalent_radius: 0.22999999999999998
+    atomic_radius: 0.79
+    color: 255;255;255
+    element: H
+  H:
+    name: hydrogen
+    symbol: H
+    atomic_weight: 1.0079
+    vdw_radius: 1.09
+    covalent_radius: 0.22999999999999998
+    atomic_radius: 0.79
+    color: 255;255;255
+    element: H
+  He:
+    name: helium
+    symbol: He
+    atomic_weight: 4.0026
+    vdw_radius: 1.4000000000000001
+    covalent_radius: 1.5
+    atomic_radius: 0.49
+    color: 1;1;1
+    element: He
+  Li:
+    name: lithium
+    symbol: Li
+    atomic_weight: 6.941
+    vdw_radius: 1.8199999999999998
+    covalent_radius: 1.28
+    atomic_radius: 2.05
+    color: 1;1;1
+    element: Li
+  Be:
+    name: beryllium
+    symbol: Be
+    atomic_weight: 9.0121821
+    vdw_radius: 2.0
+    covalent_radius: 0.96
+    atomic_radius: 1.4000000000000001
+    color: 1;1;1
+    element: Be
+  B:
+    name: boron
+    symbol: B
+    atomic_weight: 10.811
+    vdw_radius: 2.0
+    covalent_radius: 0.8300000000000001
+    atomic_radius: 1.1700000000000002
+    color: 1;1;1
+    element: B
+  C:
+    name: carbon
+    symbol: C
+    atomic_weight: 12.0107
+    vdw_radius: 1.7000000000000002
+    covalent_radius: 0.68
+    atomic_radius: 0.9099999999999999
+    color: 0;255;0
+    element: C
+  N:
+    name: nitrogen
+    symbol: N
+    atomic_weight: 14.0067
+    vdw_radius: 1.55
+    covalent_radius: 0.68
+    atomic_radius: 0.75
+    color: 0;0;255
+    element: N
+  O:
+    name: oxygen
+    symbol: O
+    atomic_weight: 15.9994
+    vdw_radius: 1.52
+    covalent_radius: 0.68
+    atomic_radius: 0.65
+    color: 255;0;0
+    element: O
+  F:
+    name: fluorine
+    symbol: F
+    atomic_weight: 18.9984032
+    vdw_radius: 1.47
+    covalent_radius: 0.64
+    atomic_radius: 0.5700000000000001
+    color: 229;127;127
+    element: F
+  Ne:
+    name: neon
+    symbol: Ne
+    atomic_weight: 20.1797
+    vdw_radius: 1.54
+    covalent_radius: 1.5
+    atomic_radius: 0.51
+    color: 1;1;1
+    element: Ne
+  Na:
+    name: sodium
+    symbol: Na
+    atomic_weight: 22.98976967
+    vdw_radius: 2.27
+    covalent_radius: 1.6600000000000001
+    atomic_radius: 2.23
+    color: 1;1;1
+    element: Na
+  Mg:
+    name: magnesium
+    symbol: Mg
+    atomic_weight: 24.305
+    vdw_radius: 1.73
+    covalent_radius: 1.41
+    atomic_radius: 1.7199999999999998
+    color: 1;1;1
+    element: Mg
+  Al:
+    name: aluminium
+    symbol: Al
+    atomic_weight: 26.98153844
+    vdw_radius: 2.0
+    covalent_radius: 1.21
+    atomic_radius: 1.8199999999999998
+    color: 1;1;1
+    element: Al
+  Si:
+    name: silicon
+    symbol: Si
+    atomic_weight: 28.0855
+    vdw_radius: 2.1
+    covalent_radius: 1.2
+    atomic_radius: 1.46
+    color: 1;1;1
+    element: Si
+  P:
+    name: phosphorus
+    symbol: P
+    atomic_weight: 30.97376151
+    vdw_radius: 1.7999999999999998
+    covalent_radius: 1.05
+    atomic_radius: 1.23
+    color: 1;1;1
+    element: P
+  S:
+    name: sulfur
+    symbol: S
+    atomic_weight: 32.065
+    vdw_radius: 1.7999999999999998
+    covalent_radius: 1.02
+    atomic_radius: 1.09
+    color: 255;255;0
+    element: S
+  Cl:
+    name: chlorine
+    symbol: Cl
+    atomic_weight: 35.453
+    vdw_radius: 1.75
+    covalent_radius: 0.99
+    atomic_radius: 0.97
+    color: 0;255;0
+    element: Cl
+  Ar:
+    name: argon
+    symbol: Ar
+    atomic_weight: 39.948
+    vdw_radius: 1.88
+    covalent_radius: 1.51
+    atomic_radius: 0.8799999999999999
+    color: 1;1;1
+    element: Ar
+  K:
+    name: potassium
+    symbol: K
+    atomic_weight: 39.0983
+    vdw_radius: 2.75
+    covalent_radius: 2.0300000000000002
+    atomic_radius: 2.7700000000000005
+    color: 1;1;1
+    element: K
+  Ca:
+    name: calcium
+    symbol: Ca
+    atomic_weight: 40.078
+    vdw_radius: 2.0
+    covalent_radius: 1.7599999999999998
+    atomic_radius: 2.23
+    color: 1;1;1
+    element: Ca
+  Sc:
+    name: scandium
+    symbol: Sc
+    atomic_weight: 44.9559102
+    vdw_radius: 2.0
+    covalent_radius: 1.7000000000000002
+    atomic_radius: 2.09
+    color: 1;1;1
+    element: Sc
+  Ti:
+    name: titanium
+    symbol: Ti
+    atomic_weight: 47.867
+    vdw_radius: 2.0
+    covalent_radius: 1.6
+    atomic_radius: 2.0
+    color: 1;1;1
+    element: Ti
+  V:
+    name: vanadium
+    symbol: V
+    atomic_weight: 50.9415
+    vdw_radius: 2.0
+    covalent_radius: 1.53
+    atomic_radius: 1.92
+    color: 1;1;1
+    element: V
+  Cr:
+    name: chromium
+    symbol: Cr
+    atomic_weight: 51.9961
+    vdw_radius: 2.0
+    covalent_radius: 1.3900000000000001
+    atomic_radius: 1.85
+    color: 1;1;1
+    element: Cr
+  Mn:
+    name: manganese
+    symbol: Mn
+    atomic_weight: 54.9380496
+    vdw_radius: 2.0
+    covalent_radius: 1.61
+    atomic_radius: 1.79
+    color: 1;1;1
+    element: Mn
+  Fe:
+    name: iron
+    symbol: Fe
+    atomic_weight: 55.845
+    vdw_radius: 2.0
+    covalent_radius: 1.52
+    atomic_radius: 1.7199999999999998
+    color: 1;1;1
+    element: Fe
+  Co:
+    name: cobalt
+    symbol: Co
+    atomic_weight: 58.9332002
+    vdw_radius: 2.0
+    covalent_radius: 1.26
+    atomic_radius: 1.6700000000000002
+    color: 1;1;1
+    element: Co
+  Ni:
+    name: nickel
+    symbol: Ni
+    atomic_weight: 58.6934
+    vdw_radius: 1.6300000000000001
+    covalent_radius: 1.24
+    atomic_radius: 1.62
+    color: 1;1;1
+    element: Ni
+  Cu:
+    name: copper
+    symbol: Cu
+    atomic_weight: 63.546
+    vdw_radius: 1.4000000000000001
+    covalent_radius: 1.32
+    atomic_radius: 1.57
+    color: 1;1;1
+    element: Cu
+  Zn:
+    name: zinc
+    symbol: Zn
+    atomic_weight: 65.39
+    vdw_radius: 1.3900000000000001
+    covalent_radius: 1.22
+    atomic_radius: 1.53
+    color: 1;1;1
+    element: Zn
+  Ga:
+    name: gallium
+    symbol: Ga
+    atomic_weight: 69.723
+    vdw_radius: 1.87
+    covalent_radius: 1.22
+    atomic_radius: 1.81
+    color: 1;1;1
+    element: Ga
+  Ge:
+    name: germanium
+    symbol: Ge
+    atomic_weight: 72.64
+    vdw_radius: 2.0
+    covalent_radius: 1.1700000000000002
+    atomic_radius: 1.52
+    color: 1;1;1
+    element: Ge
+  As:
+    name: arsenic
+    symbol: As
+    atomic_weight: 74.9215964
+    vdw_radius: 1.85
+    covalent_radius: 1.21
+    atomic_radius: 1.33
+    color: 1;1;1
+    element: As
+  Se:
+    name: selenium
+    symbol: Se
+    atomic_weight: 78.96
+    vdw_radius: 1.9
+    covalent_radius: 1.22
+    atomic_radius: 1.22
+    color: 1;1;1
+    element: Se
+  Br:
+    name: bromine
+    symbol: Br
+    atomic_weight: 79.904
+    vdw_radius: 1.85
+    covalent_radius: 1.21
+    atomic_radius: 1.12
+    color: 226;114;91
+    element: Br
+  Kr:
+    name: krypton
+    symbol: Kr
+    atomic_weight: 83.8
+    vdw_radius: 2.02
+    covalent_radius: 1.5
+    atomic_radius: 1.03
+    color: 1;1;1
+    element: Kr
+  Rb:
+    name: rubidium
+    symbol: Rb
+    atomic_weight: 85.4678
+    vdw_radius: 2.0
+    covalent_radius: 2.2
+    atomic_radius: 2.98
+    color: 1;1;1
+    element: Rb
+  Sr:
+    name: strontium
+    symbol: Sr
+    atomic_weight: 87.62
+    vdw_radius: 2.0
+    covalent_radius: 1.9500000000000002
+    atomic_radius: 2.45
+    color: 1;1;1
+    element: Sr
+  Y:
+    name: yttrium
+    symbol: Y
+    atomic_weight: 88.9058479
+    vdw_radius: 2.0
+    covalent_radius: 1.9
+    atomic_radius: 2.27
+    color: 1;1;1
+    element: Y
+  Zr:
+    name: zirconium
+    symbol: Zr
+    atomic_weight: 91.224
+    vdw_radius: 2.0
+    covalent_radius: 1.75
+    atomic_radius: 2.16
+    color: 1;1;1
+    element: Zr
+  Nb:
+    name: niobium
+    symbol: Nb
+    atomic_weight: 92.9063775
+    vdw_radius: 2.0
+    covalent_radius: 1.6400000000000001
+    atomic_radius: 2.08
+    color: 1;1;1
+    element: Nb
+  Mo:
+    name: molybdenum
+    symbol: Mo
+    atomic_weight: 95.94
+    vdw_radius: 2.0
+    covalent_radius: 1.54
+    atomic_radius: 2.0100000000000002
+    color: 1;1;1
+    element: Mo
+  Tc:
+    name: technetium
+    symbol: Tc
+    atomic_weight: 98.0
+    vdw_radius: 2.0
+    covalent_radius: 1.47
+    atomic_radius: 1.9500000000000002
+    color: 1;1;1
+    element: Tc
+  Ru:
+    name: ruthenium
+    symbol: Ru
+    atomic_weight: 101.07
+    vdw_radius: 2.0
+    covalent_radius: 1.46
+    atomic_radius: 1.8900000000000001
+    color: 1;1;1
+    element: Ru
+  Rh:
+    name: rhodium
+    symbol: Rh
+    atomic_weight: 102.905504
+    vdw_radius: 2.0
+    covalent_radius: 1.45
+    atomic_radius: 1.83
+    color: 1;1;1
+    element: Rh
+  Pd:
+    name: palladium
+    symbol: Pd
+    atomic_weight: 106.42
+    vdw_radius: 1.6300000000000001
+    covalent_radius: 1.3900000000000001
+    atomic_radius: 1.79
+    color: 1;1;1
+    element: Pd
+  Ag:
+    name: silver
+    symbol: Ag
+    atomic_weight: 107.8682
+    vdw_radius: 1.7199999999999998
+    covalent_radius: 1.45
+    atomic_radius: 1.75
+    color: 1;1;1
+    element: Ag
+  Cd:
+    name: cadmium
+    symbol: Cd
+    atomic_weight: 112.411
+    vdw_radius: 1.58
+    covalent_radius: 1.44
+    atomic_radius: 1.7100000000000002
+    color: 1;1;1
+    element: Cd
+  In:
+    name: indium
+    symbol: In
+    atomic_weight: 114.818
+    vdw_radius: 1.9300000000000002
+    covalent_radius: 1.42
+    atomic_radius: 2.0
+    color: 1;1;1
+    element: In
+  Sn:
+    name: tin
+    symbol: Sn
+    atomic_weight: 118.71
+    vdw_radius: 2.17
+    covalent_radius: 1.3900000000000001
+    atomic_radius: 1.7199999999999998
+    color: 1;1;1
+    element: Sn
+  Sb:
+    name: antimony
+    symbol: Sb
+    atomic_weight: 121.76
+    vdw_radius: 2.0
+    covalent_radius: 1.3900000000000001
+    atomic_radius: 1.53
+    color: 1;1;1
+    element: Sb
+  Te:
+    name: tellurium
+    symbol: Te
+    atomic_weight: 127.6
+    vdw_radius: 2.06
+    covalent_radius: 1.47
+    atomic_radius: 1.42
+    color: 1;1;1
+    element: Te
+  I:
+    name: iodine
+    symbol: I
+    atomic_weight: 126.904468
+    vdw_radius: 1.98
+    covalent_radius: 1.4000000000000001
+    atomic_radius: 1.32
+    color: 218;165;32
+    element: I
+  Xe:
+    name: xenon
+    symbol: Xe
+    atomic_weight: 131.293
+    vdw_radius: 2.16
+    covalent_radius: 1.5
+    atomic_radius: 1.24
+    color: 1;1;1
+    element: Xe
+  Cs:
+    name: caesium
+    symbol: Cs
+    atomic_weight: 132.905447
+    vdw_radius: 2.0
+    covalent_radius: 2.44
+    atomic_radius: 3.3400000000000003
+    color: 1;1;1
+    element: Cs
+  Ba:
+    name: barium
+    symbol: Ba
+    atomic_weight: 137.327
+    vdw_radius: 2.0
+    covalent_radius: 2.15
+    atomic_radius: 2.7800000000000002
+    color: 1;1;1
+    element: Ba
+  La:
+    name: lanthanum
+    symbol: La
+    atomic_weight: 138.9055
+    vdw_radius: 2.0
+    covalent_radius: 2.07
+    atomic_radius: 2.74
+    color: 1;1;1
+    element: La
+  Ce:
+    name: cerium
+    symbol: Ce
+    atomic_weight: 140.116
+    vdw_radius: 2.0
+    covalent_radius: 2.04
+    atomic_radius: 2.7
+    color: 1;1;1
+    element: Ce
+  Pr:
+    name: praseodymium
+    symbol: Pr
+    atomic_weight: 140.907648
+    vdw_radius: 2.0
+    covalent_radius: 2.0300000000000002
+    atomic_radius: 2.67
+    color: 1;1;1
+    element: Pr
+  Nd:
+    name: neodymium
+    symbol: Nd
+    atomic_weight: 144.24
+    vdw_radius: 2.0
+    covalent_radius: 2.0100000000000002
+    atomic_radius: 2.64
+    color: 1;1;1
+    element: Nd
+  Pm:
+    name: promethium
+    symbol: Pm
+    atomic_weight: 145.0
+    vdw_radius: 2.0
+    covalent_radius: 1.9900000000000002
+    atomic_radius: 2.62
+    color: 1;1;1
+    element: Pm
+  Sm:
+    name: samarium
+    symbol: Sm
+    atomic_weight: 150.36
+    vdw_radius: 2.0
+    covalent_radius: 1.98
+    atomic_radius: 2.59
+    color: 1;1;1
+    element: Sm
+  Eu:
+    name: europium
+    symbol: Eu
+    atomic_weight: 151.964
+    vdw_radius: 2.0
+    covalent_radius: 1.98
+    atomic_radius: 2.56
+    color: 1;1;1
+    element: Eu
+  Gd:
+    name: gadolinium
+    symbol: Gd
+    atomic_weight: 157.25
+    vdw_radius: 2.0
+    covalent_radius: 1.96
+    atomic_radius: 2.54
+    color: 1;1;1
+    element: Gd
+  Tb:
+    name: terbium
+    symbol: Tb
+    atomic_weight: 158.925343
+    vdw_radius: 2.0
+    covalent_radius: 1.94
+    atomic_radius: 2.51
+    color: 1;1;1
+    element: Tb
+  Dy:
+    name: dysprosium
+    symbol: Dy
+    atomic_weight: 162.5
+    vdw_radius: 2.0
+    covalent_radius: 1.92
+    atomic_radius: 2.49
+    color: 1;1;1
+    element: Dy
+  Ho:
+    name: holmium
+    symbol: Ho
+    atomic_weight: 164.930319
+    vdw_radius: 2.0
+    covalent_radius: 1.92
+    atomic_radius: 2.4699999999999998
+    color: 1;1;1
+    element: Ho
+  Er:
+    name: erbium
+    symbol: Er
+    atomic_weight: 167.259
+    vdw_radius: 2.0
+    covalent_radius: 1.8900000000000001
+    atomic_radius: 2.45
+    color: 1;1;1
+    element: Er
+  Tm:
+    name: thulium
+    symbol: Tm
+    atomic_weight: 168.934211
+    vdw_radius: 2.0
+    covalent_radius: 1.9
+    atomic_radius: 2.42
+    color: 1;1;1
+    element: Tm
+  Yb:
+    name: ytterbium
+    symbol: Yb
+    atomic_weight: 173.04
+    vdw_radius: 2.0
+    covalent_radius: 1.87
+    atomic_radius: 2.4
+    color: 1;1;1
+    element: Yb
+  Lu:
+    name: lutetium
+    symbol: Lu
+    atomic_weight: 174.967
+    vdw_radius: 2.0
+    covalent_radius: 1.87
+    atomic_radius: 2.25
+    color: 1;1;1
+    element: Lu
+  Hf:
+    name: hafnium
+    symbol: Hf
+    atomic_weight: 178.49
+    vdw_radius: 2.0
+    covalent_radius: 1.75
+    atomic_radius: 2.16
+    color: 1;1;1
+    element: Hf
+  Ta:
+    name: tantalum
+    symbol: Ta
+    atomic_weight: 180.9479
+    vdw_radius: 2.0
+    covalent_radius: 1.7000000000000002
+    atomic_radius: 2.09
+    color: 1;1;1
+    element: Ta
+  W:
+    name: tungsten
+    symbol: W
+    atomic_weight: 183.84
+    vdw_radius: 2.0
+    covalent_radius: 1.62
+    atomic_radius: 2.02
+    color: 1;1;1
+    element: W
+  Re:
+    name: rhenium
+    symbol: Re
+    atomic_weight: 186.207
+    vdw_radius: 2.0
+    covalent_radius: 1.51
+    atomic_radius: 1.9700000000000002
+    color: 1;1;1
+    element: Re
+  Os:
+    name: osmium
+    symbol: Os
+    atomic_weight: 190.23
+    vdw_radius: 2.0
+    covalent_radius: 1.44
+    atomic_radius: 1.92
+    color: 1;1;1
+    element: Os
+  Ir:
+    name: iridium
+    symbol: Ir
+    atomic_weight: 192.217
+    vdw_radius: 2.0
+    covalent_radius: 1.41
+    atomic_radius: 1.87
+    color: 1;1;1
+    element: Ir
+  Pt:
+    name: platinum
+    symbol: Pt
+    atomic_weight: 195.078
+    vdw_radius: 1.7199999999999998
+    covalent_radius: 1.36
+    atomic_radius: 1.83
+    color: 1;1;1
+    element: Pt
+  Au:
+    name: gold
+    symbol: Au
+    atomic_weight: 196.966552
+    vdw_radius: 1.6600000000000001
+    covalent_radius: 1.5
+    atomic_radius: 1.79
+    color: 1;1;1
+    element: Au
+  Hg:
+    name: mercury
+    symbol: Hg
+    atomic_weight: 200.59
+    vdw_radius: 1.55
+    covalent_radius: 1.32
+    atomic_radius: 1.7599999999999998
+    color: 1;1;1
+    element: Hg
+  Tl:
+    name: thallium
+    symbol: Tl
+    atomic_weight: 204.3833
+    vdw_radius: 1.96
+    covalent_radius: 1.45
+    atomic_radius: 2.08
+    color: 1;1;1
+    element: Tl
+  Pb:
+    name: lead
+    symbol: Pb
+    atomic_weight: 207.2
+    vdw_radius: 2.02
+    covalent_radius: 1.46
+    atomic_radius: 1.81
+    color: 1;1;1
+    element: Pb
+  Bi:
+    name: bismuth
+    symbol: Bi
+    atomic_weight: 208.980383
+    vdw_radius: 2.0
+    covalent_radius: 1.48
+    atomic_radius: 1.6300000000000001
+    color: 1;1;1
+    element: Bi
+  Po:
+    name: polonium
+    symbol: Po
+    atomic_weight: 209.0
+    vdw_radius: 2.0
+    covalent_radius: 1.4000000000000001
+    atomic_radius: 1.53
+    color: 1;1;1
+    element: Po
+  At:
+    name: astatine
+    symbol: At
+    atomic_weight: 210.0
+    vdw_radius: 2.0
+    covalent_radius: 1.21
+    atomic_radius: 1.43
+    color: 1;1;1
+    element: At
+  Rn:
+    name: radon
+    symbol: Rn
+    atomic_weight: 222.0
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: 1.34
+    color: 1;1;1
+    element: Rn
+  Fr:
+    name: francium
+    symbol: Fr
+    atomic_weight: 223.0
+    vdw_radius: 2.0
+    covalent_radius: 2.6
+    atomic_radius: null
+    color: 1;1;1
+    element: Fr
+  Ra:
+    name: radium
+    symbol: Ra
+    atomic_weight: 226.0
+    vdw_radius: 2.0
+    covalent_radius: 2.21
+    atomic_radius: null
+    color: 1;1;1
+    element: Ra
+  Ac:
+    name: actinium
+    symbol: Ac
+    atomic_weight: 227.0
+    vdw_radius: 2.0
+    covalent_radius: 2.15
+    atomic_radius: null
+    color: 1;1;1
+    element: Ac
+  Th:
+    name: thorium
+    symbol: Th
+    atomic_weight: 232.0381
+    vdw_radius: 2.0
+    covalent_radius: 2.06
+    atomic_radius: null
+    color: 1;1;1
+    element: Th
+  Pa:
+    name: protactinium
+    symbol: Pa
+    atomic_weight: 231.0359
+    vdw_radius: 2.0
+    covalent_radius: 2.0
+    atomic_radius: null
+    color: 1;1;1
+    element: Pa
+  U:
+    name: uranium
+    symbol: U
+    atomic_weight: 238.0289
+    vdw_radius: 1.8599999999999999
+    covalent_radius: 1.96
+    atomic_radius: null
+    color: 1;1;1
+    element: U
+  Np:
+    name: neptunium
+    symbol: Np
+    atomic_weight: 237.0
+    vdw_radius: 2.0
+    covalent_radius: 1.9
+    atomic_radius: null
+    color: 1;1;1
+    element: Np
+  Pu:
+    name: plutonium
+    symbol: Pu
+    atomic_weight: 244.0
+    vdw_radius: 2.0
+    covalent_radius: 1.87
+    atomic_radius: null
+    color: 1;1;1
+    element: Pu
+  Am:
+    name: americium
+    symbol: Am
+    atomic_weight: 243.0
+    vdw_radius: 2.0
+    covalent_radius: 1.7999999999999998
+    atomic_radius: null
+    color: 1;1;1
+    element: Am
+  Cm:
+    name: curium
+    symbol: Cm
+    atomic_weight: 247.0
+    vdw_radius: 2.0
+    covalent_radius: 1.6900000000000002
+    atomic_radius: null
+    color: 1;1;1
+    element: Cm
+  Bk:
+    name: berkelium
+    symbol: Bk
+    atomic_weight: 247.0
+    vdw_radius: 2.0
+    covalent_radius: 1.54
+    atomic_radius: null
+    color: 1;1;1
+    element: Bk
+  Cf:
+    name: californium
+    symbol: Cf
+    atomic_weight: 251.0
+    vdw_radius: 2.0
+    covalent_radius: 1.83
+    atomic_radius: null
+    color: 1;1;1
+    element: Cf
+  Es:
+    name: einsteinium
+    symbol: Es
+    atomic_weight: 252.08297
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Es
+  Fm:
+    name: fermium
+    symbol: Fm
+    atomic_weight: 257.095099
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Fm
+  Md:
+    name: mendelevium
+    symbol: Md
+    atomic_weight: 258.0
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Md
+  'No':
+    name: nobelium
+    symbol: 'No'
+    atomic_weight: 259.10102
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: 'No'
+  Lr:
+    name: lawrencium
+    symbol: Lr
+    atomic_weight: 262.10969
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Lr
+  Rf:
+    name: rutherfordium
+    symbol: Rf
+    atomic_weight: 261.10875
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Rf
+  Db:
+    name: dubnium
+    symbol: Db
+    atomic_weight: 262.11415
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Db
+  Sg:
+    name: seaborgium
+    symbol: Sg
+    atomic_weight: 266.12193
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Sg
+  Bh:
+    name: bohrium
+    symbol: Bh
+    atomic_weight: 264.12473
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Bh
+  Hs:
+    name: hassium
+    symbol: Hs
+    atomic_weight: 277.0
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Hs
+  Mt:
+    name: meitnerium
+    symbol: Mt
+    atomic_weight: 268.13882
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Mt
+  Ds:
+    name: darmstadtium
+    symbol: Ds
+    atomic_weight: 281.0
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Ds
+  Rg:
+    name: roentgenium
+    symbol: Rg
+    atomic_weight: 272.15348
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Rg
+  Cn:
+    name: copernicium
+    symbol: Cn
+    atomic_weight: 285.0
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Cn
+  Uut:
+    name: ununtrium
+    symbol: Uut
+    atomic_weight: 284.0
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Uut
+  Fl:
+    name: flerovium
+    symbol: Fl
+    atomic_weight: 289.0
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Fl
+  Uup:
+    name: ununpentium
+    symbol: Uup
+    atomic_weight: 288.0
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Uup
+  Lv:
+    name: livermorium
+    symbol: Lv
+    atomic_weight: 293.0
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Lv
+  Uus:
+    name: ununseptium
+    symbol: Uus
+    atomic_weight: 291.0
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Uus
+  Uuo:
+    name: ununoctium
+    symbol: Uuo
+    atomic_weight: 294.0
+    vdw_radius: 2.0
+    covalent_radius: 1.5
+    atomic_radius: null
+    color: 1;1;1
+    element: Uuo

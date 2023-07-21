@@ -36,6 +36,7 @@ from MDANSE_GUI.PyQtGUI.UnitsEditor import UnitsEditor
 from MDANSE_GUI.PyQtGUI.PeriodicTableViewer import PeriodicTableViewer
 from MDANSE_GUI.PyQtGUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE_GUI.PyQtGUI.Widgets.TrajectoryViewer import TrajectoryViewer
+from MDANSE_GUI.PyQtGUI.MolecularViewer.MolecularViewer import MolecularViewer
 
 class LoaderButton(QToolButton):
     """Subclassed from QToolButton, this object shows the name of a
@@ -129,6 +130,7 @@ class Main(QMainWindow):
         self.backend = backend
         self.connectViews()
         self.attachActions()
+        self.backend.new_trajectory.connect(self._visualiser._new_trajectory)
     
     @Slot()
     def connectViews(self):
@@ -156,6 +158,7 @@ class Main(QMainWindow):
         self.createActionsViewer()
         self.setupMenubar()
         self.setupToolbar()
+        self.createMolecularViewer()
     
     def setupMenubar(self):
         self._menuBar = self.menuBar()
@@ -247,6 +250,12 @@ class Main(QMainWindow):
         self.traj_view = temp
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, base)
         self._views['trajectory'].append(temp)
+
+    def createMolecularViewer(self):
+        base, temp = self.wid_gen.wrapWidget(cls = MolecularViewer, parent= self, dockable = True,
+                                             name="3D View")
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, base)
+        self._visualiser = temp
 
     def createJobsViewer(self):
         base, temp = self.wid_gen.wrapWidget(cls = QTreeView, parent= self, dockable = True,
