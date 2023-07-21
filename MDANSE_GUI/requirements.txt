@@ -1,3 +1,4 @@
 MDANSE
 vtk
 qtpy
+PyYAML
