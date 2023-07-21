@@ -11,7 +11,7 @@ from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from MDANSE import REGISTRY
 from MDANSE_GUI.PyQtGUI.MolecularViewer.database import CHEMICAL_ELEMENTS
 from MDANSE_GUI.PyQtGUI.MolecularViewer.readers import hdf5wrapper
-# from waterstay.extensions.connectivity import PyConnectivity
+from MDANSE_GUI.PyQtGUI.MolecularViewer.Dummy import PyConnectivity
 # from waterstay.extensions.histogram_3d import histogram_3d
 # from waterstay.gui.atomic_trace_settings_dialog import AtomicTraceSettingsDialog
 
@@ -185,8 +185,8 @@ class MolecularViewer(QtWidgets.QWidget):
     @Slot(str)
     def _new_trajectory(self, fname: str):
         data = REGISTRY["input_data"]["hdf_trajectory"](fname)
-        self._reader = hdf5wrapper(data.trajectory, data.chemical_system)
-
+        reader = hdf5wrapper.HDF5Wrapper(fname, data.trajectory, data.chemical_system)
+        self.set_reader(reader)
 
     def _draw_isosurface(self, index):
         """Draw the isosurface of an atom with the given index
@@ -532,8 +532,6 @@ class MolecularViewer(QtWidgets.QWidget):
         # Enlarge it a bit to not miss any atom
         lower_bound -= 1.0e-6
         upper_bound += 1.0e-6
-        
-        return  # PyConnectivity will be added later
 
         # Initializes the octree used to build the connectivity
         self._connectivity_builder = PyConnectivity(lower_bound, upper_bound, 0, 10, 18)

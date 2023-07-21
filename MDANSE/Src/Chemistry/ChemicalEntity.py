@@ -1328,7 +1328,7 @@ class ChemicalSystem(_ChemicalEntity):
         from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
         if self._atoms is None:
-            self._atoms = sorted_atoms(self._atom_list())
+            self._atoms = sorted_atoms(self.atom_list())
 
         return self._atoms
             
