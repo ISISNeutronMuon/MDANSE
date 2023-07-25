@@ -134,6 +134,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
     show_atom_info = Signal(int)
 
+    new_max_frames = Signal(int)
+
     def __init__(self, parent):
 
         super(MolecularViewer, self).__init__(parent)
@@ -149,6 +151,11 @@ class MolecularViewer(QtWidgets.QWidget):
         self._iren.GetInteractorStyle().SetCurrentStyleToTrackballCamera()
 
         self._iren.Enable()
+
+        self._iren.GetRenderWindow()
+
+        layout = QtWidgets.QStackedLayout(self)
+        layout.addWidget(self._iren)
 
         # create camera
         self._camera = vtk.vtkCamera()
@@ -288,7 +295,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         glyph.SetScaleModeToScaleByScalar()
         glyph.SetColorModeToColorByScalar()
-        glyph.SetScaleFactor(1)
+        glyph.SetScaleFactor(0.1)
         glyph.SetSourceConnection(sphere.GetOutputPort())
         glyph.SetIndexModeToScalar()
         sphere_mapper = vtk.vtkPolyDataMapper()
@@ -540,7 +547,8 @@ class MolecularViewer(QtWidgets.QWidget):
         for index, xyz, radius in zip(range(self._n_atoms), coords, covalent_radii):
             self._connectivity_builder.add_point(index, xyz, radius)
 
-    def set_coordinates(self, frame):
+    @Slot(int)
+    def set_coordinates(self, frame: int):
         '''Sets a new configuration.
 
         @param frame: the configuration number
@@ -597,6 +605,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._n_atoms = self._reader.n_atoms
         self._n_frames = self._reader.n_frames
+
+        self.new_max_frames.emit(self._n_frames)
 
         self._atoms = self._reader.atom_types
 
