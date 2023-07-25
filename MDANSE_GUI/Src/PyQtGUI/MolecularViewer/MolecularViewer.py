@@ -3,7 +3,8 @@ import logging
 import numpy as np
 
 from qtpy import QtCore, QtWidgets
-from qtpy.QtCore import Signal, Slot
+from qtpy.QtCore import Signal, Slot, Qt
+from qtpy.QtWidgets import QSizePolicy
 
 import vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
@@ -156,6 +157,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         layout = QtWidgets.QStackedLayout(self)
         layout.addWidget(self._iren)
+        self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         # create camera
         self._camera = vtk.vtkCamera()

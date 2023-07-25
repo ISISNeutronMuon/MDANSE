@@ -1,7 +1,7 @@
 
 from qtpy.QtCore import Signal, Slot, Qt, QTimer, QMutex
 from qtpy.QtWidgets import QWidget, QGridLayout, QSlider, QLineEdit, QHBoxLayout, QSpinBox,\
-                           QVBoxLayout, QPushButton, QStyle
+                           QVBoxLayout, QPushButton, QStyle, QSizePolicy
 from qtpy.QtGui import QDoubleValidator, QIntValidator, QIcon
 
 from MDANSE_GUI.PyQtGUI.MolecularViewer.MolecularViewer import MolecularViewer
@@ -78,6 +78,7 @@ class ViewerControls(QWidget):
         trajectory animation.
         """
         base = QWidget(self)
+        base.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)
         hlay = QHBoxLayout(base)
         frame_slider = QSlider(base)
         frame_slider.setToolTip("Select a frame")
@@ -107,6 +108,7 @@ class ViewerControls(QWidget):
         animation.
         """
         base = QWidget(self)
+        base.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)
         if orientation == Qt.Orientation.Horizontal:
             layout = QHBoxLayout(base)
             self.layout().addWidget(base, 3,0,1,2)  # row, column, rowSpan, columnSpan
