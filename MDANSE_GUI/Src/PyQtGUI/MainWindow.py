@@ -38,6 +38,7 @@ from MDANSE_GUI.PyQtGUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE_GUI.PyQtGUI.Widgets.TrajectoryViewer import TrajectoryViewer
 from MDANSE_GUI.PyQtGUI.MolecularViewer.MolecularViewer import MolecularViewer
 from MDANSE_GUI.PyQtGUI.MolecularViewer.Controls import ViewerControls
+from MDANSE_GUI.PyQtGUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
 
 class LoaderButton(QToolButton):
     """Subclassed from QToolButton, this object shows the name of a
@@ -101,6 +102,7 @@ class Main(QMainWindow):
         super().__init__(parent, *args, **kwargs)
         self._views = defaultdict(list)
         self._actions = []
+        self._style_database = StyleDatabase(self)
         self.setWindowTitle(title)
         self.wid_gen = WidgetGenerator()
         self.resources = Resources()
@@ -184,6 +186,15 @@ class Main(QMainWindow):
         result = dialog_instance.exec()
 
     Slot()
+    def launchStyleSelector(self):
+        dialog = StyleDialog
+        dialog_instance = dialog(self)
+        dialog_instance.connectStyleDatabase(self._style_database)
+        dialog_instance.show()
+        dialog_instance.new_style.connect(self.setStyleSheet)
+        result = dialog_instance.exec()
+
+    Slot()
     def launchElementsEditor(self):
         dialog = ElementsDatabaseEditor
         dialog_instance = dialog(self)
@@ -233,6 +244,7 @@ class Main(QMainWindow):
             ('periodic_table', self.launchPeriodicTable),
             ('element', self.launchElementsEditor),
             ('units', self.launchUnitsEditor),
+            ('user', self.launchStyleSelector)
         ]
         for key, slot in valid_keys:
             icon = self.resources._icons[key]

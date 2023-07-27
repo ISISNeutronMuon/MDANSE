@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+from icecream import ic
 
 from qtpy import QtCore, QtWidgets
 from qtpy.QtCore import Signal, Slot, Qt
@@ -21,7 +22,7 @@ RGB_COLOURS["selection"] = (0, (1.00, 0.20, 1.00))
 RGB_COLOURS["default"] = (1, (1.00, 0.90, 0.90))
 
 
-def build_color_transfer_function(atoms):
+def build_color_transfer_function(atoms, element_database = None):
     """Returns the colors and their associated transfer function
     """
 
@@ -33,6 +34,8 @@ def build_color_transfer_function(atoms):
     colours = []
     unic_colours = {}
 
+    if element_database is None:
+        element_database = CHEMICAL_ELEMENTS
     color_string_list = [color_string_to_rgb(
         CHEMICAL_ELEMENTS['atoms'][at]['color']) for at in atoms]
 
