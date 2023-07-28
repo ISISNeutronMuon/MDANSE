@@ -102,6 +102,7 @@ class Main(QMainWindow):
         super().__init__(parent, *args, **kwargs)
         self._views = defaultdict(list)
         self._actions = []
+        self._toolbar_buttons = []  # list of (widget, icon_key:str) pairs
         self._style_database = StyleDatabase(self)
         self.setWindowTitle(title)
         self.wid_gen = WidgetGenerator()
@@ -192,6 +193,7 @@ class Main(QMainWindow):
         dialog_instance.connectStyleDatabase(self._style_database)
         dialog_instance.show()
         dialog_instance.new_style.connect(self.setStyleSheet)
+        dialog_instance.icon_swap.connect(self.invertToolbar)
         result = dialog_instance.exec()
 
     Slot()
@@ -238,6 +240,7 @@ class Main(QMainWindow):
         loader.load_hdf.connect(self.loadTrajectory)
         self.loader_button = loader
         self._toolBar.addWidget(loader)
+        self._toolbar_buttons.append((loader, 'plus'))
         valid_keys = [
             # ('load', self.loadTrajectory),
             # ('plus', self.loadTrajectory),
@@ -251,11 +254,21 @@ class Main(QMainWindow):
             action = QAction(icon, str(key), self._toolBar)
             action.triggered.connect(slot)
             self._actions.append(action)
+            self._toolbar_buttons.append((action, key))
             # self._actions.append(self._toolBar.addAction(icon, str(key)))
         for act in self._actions:
             self._toolBar.addAction(act)
         self.addToolBar(self._toolBar)
         print(f"Icon size is {self._toolBar.iconSize()}")
+    
+    @Slot(bool)
+    def invertToolbar(self, dark = False):
+        if dark:
+            for obj, key in self._toolbar_buttons:
+                obj.setIcon(self.resources._inverted_icons[key])
+        else:
+            for obj, key in self._toolbar_buttons:
+                obj.setIcon(self.resources._icons[key])
 
     def createTrajectoryViewer(self):
         base, temp = self.wid_gen.wrapWidget(cls = TrajectoryViewer, parent= self, dockable = True,

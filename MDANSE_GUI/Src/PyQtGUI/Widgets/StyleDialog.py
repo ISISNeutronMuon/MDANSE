@@ -20,12 +20,11 @@ from MDANSE_GUI.PyQtGUI.Widgets.GeneralWidgets import InputFactory
 sample_styles = {
 'initial_stylesheet' : """QWidget
 {   background-color:rgb(230,250,250);
-    border-radius: 6px;
-    border-style: outset;
-    border-width: 4px;
+    border-radius: 2px;
+    border-style: inset;
+    border-width: 0px;
     border-color: rgb(30,250,250);
     font: bold 14px;
-    min-width: 10em;
     padding: 6px;
 }""",
 
@@ -38,9 +37,21 @@ sample_styles = {
     border-color: rgb(10,20,200);
     font: bold 14px;
     color: rgb(10,200,10);
-    min-width: 10em;
+    padding: 6px;
+}""",
+
+
+'hippie_stylesheet' : """QWidget
+{   background-image: radial-gradient(rgb(200,160,160), rgb(0, 150,250), rgb(250,100,250));
+    border-radius: 10px;
+    border-style: outset;
+    border-width: 4px;
+    border-color: rgb(10,200,50);
+    font: bold 14px;
+    color: rgb(10,200,10);
     padding: 6px;
 }"""
+
 }
 
 
@@ -79,6 +90,7 @@ class StyleDatabase(QObject):
 class StyleDialog(QDialog):
 
     new_style = Signal(str)
+    icon_swap = Signal(bool)
 
     def __init__(self, *args, converter: IJob = 'Dummy', **kwargs):
         super().__init__(*args, **kwargs)
@@ -107,6 +119,11 @@ class StyleDialog(QDialog):
     def commitChanges(self):
         text = self._display.document().toPlainText()
         self.new_style.emit(text)
+        label = self._selector.currentText()
+        if 'dark' in label:
+            self.icon_swap.emit(True)
+        else:
+            self.icon_swap.emit(False)
 
 
         
