@@ -1,10 +1,13 @@
 
 from qtpy.QtCore import Signal, Slot, Qt, QTimer, QMutex
 from qtpy.QtWidgets import QWidget, QGridLayout, QSlider, QLineEdit, QHBoxLayout, QSpinBox,\
-                           QVBoxLayout, QPushButton, QStyle, QSizePolicy
-from qtpy.QtGui import QDoubleValidator, QIntValidator, QIcon
+                           QVBoxLayout, QPushButton, QStyle, QSizePolicy, QTableView,\
+                           QDoubleSpinBox, QColorDialog
+from qtpy.QtGui import QDoubleValidator, QIntValidator, QIcon, QPaintEvent, QPainter,\
+                       QColor
 
 from MDANSE_GUI.PyQtGUI.MolecularViewer.MolecularViewer import MolecularViewer
+from MDANSE_GUI.PyQtGUI.MolecularViewer.Contents import TrajectoryAtomData
 
 button_lookup = {
     'start' : QStyle.StandardPixmap.SP_MediaSkipBackward,
@@ -59,6 +62,27 @@ QSpinBox::down-button  {
 """
 
 
+class ColourButton(QPushButton):
+
+    def __init__(self, *args, colour = (255,255,255), **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._current_colour = QColor(colour[0], colour[1], colour[2])
+    
+    def paintEvent(self, a0: QPaintEvent) -> None:
+        painter = QPainter()
+        painter.setBrush(self._current_colour)
+        painter.fillRect(self.rect())
+        return super().paintEvent(a0)
+    
+    @Slot()
+    def pickColour(self):
+        new_colour = QColorDialog.getColor(initial=self._current_colour)
+        if new_colour is not None:
+            self._current_colour = new_colour
+
+
+
 class ViewerControls(QWidget):
 
     def __init__(self, *args, **kwargs):
@@ -70,8 +94,11 @@ class ViewerControls(QWidget):
         self._animation_timer.timeout.connect(self.advance_frame)
         self._mutex = QMutex()
         self._frame_step = 1
+        self._time_per_frame = 80  # in ms
+        self._frame_factor = 10  # just a scalar multiplication factor
         self.createSlider()
         self.createButtons(Qt.Orientation.Horizontal)
+        self.createSidePanel()
 
     def createSlider(self):
         """This method creates a slider which illustrates the progress of the
@@ -93,7 +120,7 @@ class ViewerControls(QWidget):
         frame_selector.valueChanged.connect(frame_slider.setValue)
         frame_slider.valueChanged.connect(frame_selector.setValue)
         self._frame_selector = frame_selector
-        self.layout().addWidget(base, 2,0,1,2)  # row, column, rowSpan, columnSpan
+        self.layout().addWidget(base, 2,0,1,3)  # row, column, rowSpan, columnSpan
 
     def setViewer(self, viewer: MolecularViewer):
         self._viewer = viewer
@@ -102,6 +129,8 @@ class ViewerControls(QWidget):
         viewer.new_max_frames.connect(self._frame_slider.setMaximum)
         viewer.new_max_frames.connect(self._frame_selector.setMaximum)
         viewer.new_max_frames.connect(self.stop_animation)
+        self._database.setViewer(viewer)
+        viewer.setDataModel(self._database)
 
     def createButtons(self, orientation : Qt.Orientation):
         """Create a bar with video player buttons for controlling the
@@ -111,7 +140,7 @@ class ViewerControls(QWidget):
         base.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)
         if orientation == Qt.Orientation.Horizontal:
             layout = QHBoxLayout(base)
-            self.layout().addWidget(base, 3,0,1,2)  # row, column, rowSpan, columnSpan
+            self.layout().addWidget(base, 3,0,1,3)  # row, column, rowSpan, columnSpan
         elif orientation == Qt.Orientation.Vertical:
             layout = QVBoxLayout(base)
             self.layout().addWidget(base, 0,2,2,1)  # row, column, rowSpan, columnSpan
@@ -127,7 +156,61 @@ class ViewerControls(QWidget):
         self._buttons['back'].clicked.connect(lambda: self.animate(step_size=-10))
         self._buttons['start'].clicked.connect(lambda: self.go_to_end(last_frame=False))
         self._buttons['end'].clicked.connect(lambda: self.go_to_end(last_frame=True))
-        
+
+    def createSidePanel(self):
+        """Adds widgets for finer control of the playback
+        """
+        base = QWidget(self)
+        layout = QVBoxLayout(base)
+        base.setLayout(layout)
+        # the table of chemical elements
+        self._atom_details = QTableView(base)
+        self._atom_details.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        layout.addWidget(self._atom_details)
+        # the widget selecting time per animation frame
+        frame_time_selector = QSpinBox(base)
+        frame_time_selector.setToolTip("Time per frame (in ms)")
+        frame_time_selector.setValue(80)
+        frame_time_selector.setMinimum(1)
+        frame_time_selector.setMaximum(5000)
+        frame_time_selector.valueChanged.connect(self.setTimeStep)
+        layout.addWidget(frame_time_selector)
+        # the widget for frame skipping
+        frame_skip = QSpinBox(base)
+        frame_skip.setToolTip("Animate every N frames in fast forward")
+        frame_skip.setValue(10)
+        frame_skip.setMinimum(1)
+        frame_skip.setMaximum(5000)
+        frame_skip.valueChanged.connect(self.setFrameSkip)
+        layout.addWidget(frame_skip)
+        # the widget for atom size scaling
+        size_factor = QDoubleSpinBox(base)
+        size_factor.setToolTip("Scaling factor for atom size")
+        size_factor.setValue(0.2)
+        size_factor.setMinimum(0.0)
+        size_factor.setMaximum(50.0)
+        size_factor.setSingleStep(0.05)
+        size_factor.valueChanged.connect(self.setAtomSize)
+        layout.addWidget(size_factor)
+        # the database of atom types
+        self._database = TrajectoryAtomData()
+        self._atom_details.setModel(self._database)
+        self.layout().addWidget(base, 0,2,2,1)  # row, column, rowSpan, columnSpan
+
+    @Slot(int)
+    def setTimeStep(self, new_value: int):
+        self._time_per_frame = new_value
+
+    @Slot(int)
+    def setFrameSkip(self, new_value: int):
+        self._frame_factor = new_value
+
+    @Slot(float)
+    def setAtomSize(self, new_value: float):
+        if self._viewer is None:
+            return
+        self._viewer._new_scaling(new_value)
+
     @Slot(bool)
     def go_to_end(self, last_frame: bool = True):
         self.stop_animation()
@@ -146,7 +229,7 @@ class ViewerControls(QWidget):
             self._animation_timer.stop()
         self._mutex.unlock()
 
-    def animate(self, step_time: int = 80, step_size: int = 1):
+    def animate(self, step_size: int = 1):
         """Plays the animation as a movie.
 
         Keyword Arguments:
@@ -155,8 +238,8 @@ class ViewerControls(QWidget):
         """
         if self._animation_timer.isActive():
             self._animation_timer.stop()
-        self._frame_step = step_size
-        self._animation_timer.setInterval(step_time)
+        self._frame_step = step_size * self._frame_factor
+        self._animation_timer.setInterval(self._time_per_frame)
         self._animation_timer.start()
     
     def advance_frame(self):

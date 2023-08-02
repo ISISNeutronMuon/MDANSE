@@ -14,57 +14,10 @@ from MDANSE import REGISTRY
 from MDANSE_GUI.PyQtGUI.MolecularViewer.database import CHEMICAL_ELEMENTS
 from MDANSE_GUI.PyQtGUI.MolecularViewer.readers import hdf5wrapper
 from MDANSE_GUI.PyQtGUI.MolecularViewer.Dummy import PyConnectivity
+from MDANSE_GUI.PyQtGUI.MolecularViewer.Contents import TrajectoryAtomData
+from MDANSE_GUI.PyQtGUI.MolecularViewer.ColourManager import ColourManager
 # from waterstay.extensions.histogram_3d import histogram_3d
 # from waterstay.gui.atomic_trace_settings_dialog import AtomicTraceSettingsDialog
-
-RGB_COLOURS = {}
-RGB_COLOURS["selection"] = (0, (1.00, 0.20, 1.00))
-RGB_COLOURS["default"] = (1, (1.00, 0.90, 0.90))
-
-
-def build_color_transfer_function(atoms, element_database = None):
-    """Returns the colors and their associated transfer function
-    """
-
-    lut = vtk.vtkColorTransferFunction()
-
-    for (idx, color) in RGB_COLOURS.values():
-        lut.AddRGBPoint(idx, *color)
-
-    colours = []
-    unic_colours = {}
-
-    if element_database is None:
-        element_database = CHEMICAL_ELEMENTS
-    color_string_list = [color_string_to_rgb(
-        CHEMICAL_ELEMENTS['atoms'][at]['color']) for at in atoms]
-
-    col_ids = len(RGB_COLOURS)
-
-    for col in color_string_list:
-        tup_col = tuple(col)
-        if tup_col not in unic_colours.keys():
-            unic_colours[tup_col] = col_ids
-            lut.AddRGBPoint(col_ids, *tup_col)
-            colours.append(col_ids)
-            col_ids += 1
-        else:
-            colours.append(unic_colours[tup_col])
-
-    return colours, lut
-
-
-def color_string_to_rgb(color):
-    """Convert a color stroed in r;g;b format to [r/255.0,g/255.0,b/255.0] format.
-
-    Args:
-        color (str): the color to convert
-    """
-
-    if not color.strip():
-        color = "1;1;1"
-
-    return np.array(color.split(';')).astype(np.float32)/255.
 
 
 def ndarray_to_vtkarray(colors, scales, n_atoms):
@@ -78,22 +31,28 @@ def ndarray_to_vtkarray(colors, scales, n_atoms):
     # define the colours
     color_scalars = vtk.vtkFloatArray()
     color_scalars.SetNumberOfValues(len(colors))
+    # print("colors")
     for i, c in enumerate(colors):
+        # print(i,c)
         color_scalars.SetValue(i, c)
     color_scalars.SetName("colors")
 
     # some scales
     scales_scalars = vtk.vtkFloatArray()
     scales_scalars.SetNumberOfValues(scales.shape[0])
+    # print("scales")
     for i, r in enumerate(scales):
         scales_scalars.SetValue(i, r)
+        # print(i,r)
     scales_scalars.SetName("scales")
 
     # the original index
     index_scalars = vtk.vtkIntArray()
     index_scalars.SetNumberOfValues(n_atoms)
+    # print("index")
     for i in range(n_atoms):
         index_scalars.SetValue(i, i)
+        # print(i,i)
     index_scalars.SetName("index")
 
     scalars = vtk.vtkFloatArray()
@@ -144,6 +103,10 @@ class MolecularViewer(QtWidgets.QWidget):
 
         super(MolecularViewer, self).__init__(parent)
 
+        self._scale_factor = 0.2
+
+        self._datamodel = None
+
         self._iren = QVTKRenderWindowInteractor(self)
 
         self._renderer = vtk.vtkRenderer()
@@ -188,17 +151,43 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._current_frame = 0
 
-        self._lut = None
-
         self._previously_picked_atom = None
 
+        self._colour_manager = ColourManager()
+
         self.build_events()
+
+    def setDataModel(self, datamodel: TrajectoryAtomData):
+        self._datamodel = datamodel
 
     @Slot(str)
     def _new_trajectory(self, fname: str):
         data = REGISTRY["input_data"]["hdf_trajectory"](fname)
         reader = hdf5wrapper.HDF5Wrapper(fname, data.trajectory, data.chemical_system)
         self.set_reader(reader)
+    
+    @Slot(float)
+    def _new_scaling(self, scale_factor: float):
+        self._scale_factor = scale_factor
+        self.update_renderer()
+
+    @Slot()
+    def _new_atom_parameters(self):
+        if self._polydata is None or self._datamodel is None:
+            return
+        
+        colours = self._datamodel.colours()
+        radii = self._datamodel.radii()
+        # we need to add the new colours to LUT
+        # then assign new colour NUMBERS to _atom_colours
+
+        # we also need to assign new atom radii to _atom_scales
+
+        scalars = ndarray_to_vtkarray(self._atom_colours, self._atom_scales, self._n_atoms)
+
+        self._polydata.GetPointData().SetScalars(scalars)
+
+        self.update_renderer()
 
     def _draw_isosurface(self, index):
         """Draw the isosurface of an atom with the given index
@@ -279,7 +268,7 @@ class MolecularViewer(QtWidgets.QWidget):
         else:
             line_mapper.SetInputData(self._polydata)
 
-        line_mapper.SetLookupTable(self._lut)
+        line_mapper.SetLookupTable(self._colour_manager._lut)
         line_mapper.ScalarVisibilityOn()
         line_mapper.ColorByArrayComponent("scalars", 1)
         line_actor = vtk.vtkLODActor()
@@ -287,9 +276,10 @@ class MolecularViewer(QtWidgets.QWidget):
         line_actor.SetMapper(line_mapper)
         actor_list.append(line_actor)
 
+        temp_radius = float(1.0 * self._scale_factor)
         sphere = vtk.vtkSphereSource()
         sphere.SetCenter(0, 0, 0)
-        sphere.SetRadius(0.2)
+        sphere.SetRadius(temp_radius)
         sphere.SetThetaResolution(self._resolution)
         sphere.SetPhiResolution(self._resolution)
         glyph = vtk.vtkGlyph3D()
@@ -298,13 +288,14 @@ class MolecularViewer(QtWidgets.QWidget):
         else:
             glyph.SetInputData(self._polydata)
 
+        temp_scale = float(0.5*self._scale_factor)
         glyph.SetScaleModeToScaleByScalar()
         glyph.SetColorModeToColorByScalar()
-        glyph.SetScaleFactor(0.1)
+        glyph.SetScaleFactor(temp_scale)
         glyph.SetSourceConnection(sphere.GetOutputPort())
         glyph.SetIndexModeToScalar()
         sphere_mapper = vtk.vtkPolyDataMapper()
-        sphere_mapper.SetLookupTable(self._lut)
+        sphere_mapper.SetLookupTable(self._colour_manager._lut)
         sphere_mapper.SetScalarRange(self._polydata.GetScalarRange())
         sphere_mapper.SetInputConnection(glyph.GetOutputPort())
         sphere_mapper.ScalarVisibilityOn()
@@ -620,7 +611,10 @@ class MolecularViewer(QtWidgets.QWidget):
         self._resolution = 10 if self._resolution > 10 else self._resolution
         self._resolution = 4 if self._resolution < 4 else self._resolution
 
+        self._colour_manager.initialise_from_database()
+
         self._atom_colours, self._lut = build_color_transfer_function(self._atoms)
+        print(self._l)
 
         self._atom_scales = np.array([CHEMICAL_ELEMENTS['atoms'][at]['vdw_radius'] for at in self._atoms]).astype(np.float32)
 
@@ -630,6 +624,8 @@ class MolecularViewer(QtWidgets.QWidget):
         self._polydata.GetPointData().SetScalars(scalars)
 
         self.set_coordinates(frame)
+
+        self._datamodel.setReader(reader)
 
     def update_renderer(self):
         '''
