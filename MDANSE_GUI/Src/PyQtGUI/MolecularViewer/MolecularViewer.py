@@ -15,54 +15,12 @@ from MDANSE_GUI.PyQtGUI.MolecularViewer.database import CHEMICAL_ELEMENTS
 from MDANSE_GUI.PyQtGUI.MolecularViewer.readers import hdf5wrapper
 from MDANSE_GUI.PyQtGUI.MolecularViewer.Dummy import PyConnectivity
 from MDANSE_GUI.PyQtGUI.MolecularViewer.Contents import TrajectoryAtomData
-from MDANSE_GUI.PyQtGUI.MolecularViewer.ColourManager import ColourManager
+# from MDANSE_GUI.PyQtGUI.MolecularViewer.ColourManager import ColourManager
+from MDANSE_GUI.PyQtGUI.MolecularViewer.AtomProperties import AtomProperties, \
+                                                              ndarray_to_vtkarray
 # from waterstay.extensions.histogram_3d import histogram_3d
 # from waterstay.gui.atomic_trace_settings_dialog import AtomicTraceSettingsDialog
 
-
-def ndarray_to_vtkarray(colors, scales, n_atoms):
-    """Convert the colors and scales NumPy arrays to vtk arrays.
-
-    Args:
-        colors (numpy.array): the colors
-        scales (numpy.array): the scales
-        n_atoms (int): the number of atoms
-    """
-    # define the colours
-    color_scalars = vtk.vtkFloatArray()
-    color_scalars.SetNumberOfValues(len(colors))
-    # print("colors")
-    for i, c in enumerate(colors):
-        # print(i,c)
-        color_scalars.SetValue(i, c)
-    color_scalars.SetName("colors")
-
-    # some scales
-    scales_scalars = vtk.vtkFloatArray()
-    scales_scalars.SetNumberOfValues(scales.shape[0])
-    # print("scales")
-    for i, r in enumerate(scales):
-        scales_scalars.SetValue(i, r)
-        # print(i,r)
-    scales_scalars.SetName("scales")
-
-    # the original index
-    index_scalars = vtk.vtkIntArray()
-    index_scalars.SetNumberOfValues(n_atoms)
-    # print("index")
-    for i in range(n_atoms):
-        index_scalars.SetValue(i, i)
-        # print(i,i)
-    index_scalars.SetName("index")
-
-    scalars = vtk.vtkFloatArray()
-    scalars.SetNumberOfComponents(3)
-    scalars.SetNumberOfTuples(scales_scalars.GetNumberOfTuples())
-    scalars.CopyComponent(0, scales_scalars, 0)
-    scalars.CopyComponent(1, color_scalars, 0)
-    scalars.CopyComponent(2, index_scalars, 0)
-    scalars.SetName("scalars")
-    return scalars
 
 
 def array_to_3d_imagedata(data, spacing):
@@ -153,7 +111,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._previously_picked_atom = None
 
-        self._colour_manager = ColourManager()
+        self._colour_manager = AtomProperties()
 
         self.build_events()
 
@@ -623,7 +581,15 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self.set_coordinates(frame)
 
-        self._datamodel.setReader(reader)
+    @Slot(object)
+    def take_atom_properties(self, scalars):
+
+        self._polydata = vtk.vtkPolyData()
+        self._polydata.GetPointData().SetScalars(scalars)    
+
+        self.set_coordinates(self._current_frame)
+
+        # self._datamodel.setReader(reader)
 
     def update_renderer(self):
         '''

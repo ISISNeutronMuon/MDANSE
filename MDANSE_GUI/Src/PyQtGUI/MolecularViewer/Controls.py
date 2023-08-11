@@ -129,8 +129,10 @@ class ViewerControls(QWidget):
         viewer.new_max_frames.connect(self._frame_slider.setMaximum)
         viewer.new_max_frames.connect(self._frame_selector.setMaximum)
         viewer.new_max_frames.connect(self.stop_animation)
-        self._database.setViewer(viewer)
-        viewer.setDataModel(self._database)
+        # self._database.setViewer(viewer)
+        # viewer.setDataModel(viewer._colour_manager)
+        self._atom_details.setModel(viewer._colour_manager)
+        viewer._colour_manager.new_atom_properties.connect(viewer.take_atom_properties)
 
     def createButtons(self, orientation : Qt.Orientation):
         """Create a bar with video player buttons for controlling the
@@ -193,8 +195,7 @@ class ViewerControls(QWidget):
         size_factor.valueChanged.connect(self.setAtomSize)
         layout.addWidget(size_factor)
         # the database of atom types
-        self._database = TrajectoryAtomData()
-        self._atom_details.setModel(self._database)
+        # self._database = TrajectoryAtomData()
         self.layout().addWidget(base, 0,2,2,1)  # row, column, rowSpan, columnSpan
 
     @Slot(int)
