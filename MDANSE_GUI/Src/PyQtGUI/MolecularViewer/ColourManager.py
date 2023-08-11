@@ -9,28 +9,60 @@ RGB_COLOURS.append((1.00, 0.90, 0.90))  # background
 
 class ColourManager():
 
-    def __init__(self, *args, init_colours: list, **kwargs):
+    def __init__(self, *args, init_colours: list = None, **kwargs):
 
         self._lut = vtk.vtkColorTransferFunction()
-        self._colour_list = init_colours
+        if init_colours is None:
+            self._colour_list = RGB_COLOURS
+        else:
+            self._colour_list = init_colours
         self.rebuild_colours()
 
     def rebuild_colours(self):
+        """Puts the colours from the internal _colour_list
+        into the VTK vtkColorTransferFunction object.
+        The colours stored internally in self_.colour_list
+        should be the same as the colours in self._lut
+        AFTER this method has been called.
+        """
         self._lut.RemoveAllPoints()
 
         for index, colour in enumerate(self._colour_list):
             self._lut.AddRGBPoint(index, colour[0], colour[1], colour[2])
 
     def add_colour(self, rgb: tuple[int,int,int]) -> int:
+        """Puts the colour into the list and returns the
+        index of the colour in the list, to be used by VTK.
+
+        Arguments:
+            rgb -- RGB colour values for the colour
+
+        Returns:
+            int - the index of the colour in the list
+        """
         float_rgb = tuple([x/255.0 for x in rgb])
         for index, value in enumerate(self._colour_list):
             if value == float_rgb:
                 return index
         new_index = len(self._colour_list)
         self._colour_list.append(float_rgb)
+        self.rebuild_colours()
         return new_index
     
     def initialise_from_database(self, atoms : list[str], element_database = None) -> list[int]:
+        """Puts colours into the list based on chemical elements list
+        and a database with colour values.
+
+        Arguments:
+            atoms -- list[str] of chemical element names
+
+        Keyword Arguments:
+            element_database -- a dictionary containing RGB values for chemical elements,
+               typically the MDANSE_GUI.PyQtGUI.MolecularViewer.database.CHEMICAL_ELEMENTS
+
+        Returns:
+            list[int] -- a list of indices of colours, with one numbed per atom.
+        """
         index_list = []
         for atom in atoms:
             rgb = (int(x) for x in element_database['atoms'][atom]['color'].split(';'))

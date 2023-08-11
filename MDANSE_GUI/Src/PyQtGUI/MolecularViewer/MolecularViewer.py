@@ -611,10 +611,8 @@ class MolecularViewer(QtWidgets.QWidget):
         self._resolution = 10 if self._resolution > 10 else self._resolution
         self._resolution = 4 if self._resolution < 4 else self._resolution
 
-        self._colour_manager.initialise_from_database()
-
-        self._atom_colours, self._lut = build_color_transfer_function(self._atoms)
-        print(self._l)
+        self._atom_colours = self._colour_manager.initialise_from_database(self._atoms, CHEMICAL_ELEMENTS)
+        # this returs a list of indices, mapping colours to atoms
 
         self._atom_scales = np.array([CHEMICAL_ELEMENTS['atoms'][at]['vdw_radius'] for at in self._atoms]).astype(np.float32)
 
