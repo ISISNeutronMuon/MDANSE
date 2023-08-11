@@ -18,6 +18,14 @@ class ColourManager():
             self._colour_list = init_colours
         self.rebuild_colours()
 
+    def clear_table(self):
+        """This was meant to be used for cleaning up,
+        but the underlying VTK object seems to survive.
+        The unit test shows 5 colours in the list when there
+        should be 2.
+        """
+        self._lut.RemoveAllPoints()
+
     def rebuild_colours(self):
         """Puts the colours from the internal _colour_list
         into the VTK vtkColorTransferFunction object.
