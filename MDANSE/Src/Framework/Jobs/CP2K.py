@@ -79,7 +79,19 @@ class XYZFile(dict):
         # Go back to top
         self["instance"].seek(0)
 
-    def fetch_time_step(self,step):
+    def fetch_time_step(self, step: int):
+        """Finds the value of simulation time at the
+        nth simulation step.
+
+        Arguments:
+            step -- number of the simulation frame to check
+
+        Raises:
+            XYZFileError: If a valid time stamp could not be find
+
+        Returns:
+            float -- the time stamp of the frame
+        """
         self['instance'].seek(step*self._frameSize + self._nAtomsLineSize)
         timeLine = self["instance"].readline().strip()
         matches = re.findall("^i =.*, time =(.*), E =.*$",timeLine)
@@ -92,7 +104,17 @@ class XYZFile(dict):
         else:
             return timeStep
 
-    def read_step(self, step):
+    def read_step(self, step: int):
+        """Reads and returns an array of atom coordinates the nth
+        simulation frame.
+
+        Arguments:
+            step -- the number of the simulation step (frame) to be returned.
+
+        Returns:
+            ndarray -- an (N,3) array containing the coordinates of N atoms
+               at the requested simulation step.
+        """
         self['instance'].seek(step*self._frameSize + self._headerSize)
 
         temp = np.array(self['instance'].read(self._coordinatesSize).split()).reshape((self["n_atoms"],4))
@@ -102,6 +124,8 @@ class XYZFile(dict):
         return config
                                 
     def close(self):
+        """Closes the file that was, until now, open for reading.
+        """
         self["instance"].close()
 
 
@@ -109,6 +133,9 @@ class CellFileError(Error):
     pass
 
 class CellFile(dict):
+    """Opens and reads the CP2K output file containing the
+    unit cell size for each simulation step.
+    """
     
     def __init__(self, filename):
         
@@ -148,7 +175,19 @@ class CellFile(dict):
         else:
             self["time_step"] = time_steps[1] - time_steps[0]
 
-    def read_step(self, step):
+    def read_step(self, step: int):
+        """Reads and returns the unit cell constants at the requested
+        simulation step (frame)
+
+        Arguments:
+            step -- number of the simulation frame to be read
+
+        Raises:
+            CellFileError: if the frame with the number *step* cannot be read
+
+        Returns:
+            ndarray -- a (3,3) array of unit cell constants
+        """
 
         if step < 0 or step >= self["n_frames"]:
             raise CellFileError("Invalid step number")
@@ -156,6 +195,8 @@ class CellFile(dict):
         return self["cells"][step]
                                 
     def close(self):
+        """Closes the file that was, until now, open for reading.
+        """
         self["instance"].close()
 
 
@@ -165,7 +206,7 @@ class CP2KConverterError(Error):
 
 class CP2KConverter(Converter):
     """
-    Converts a CP2K trajectory to a MMTK trajectory.
+    Converts a CP2K trajectory to an HDF5 trajectory in the MDANSE format.
     """
                   
     label = "CP2K"
@@ -183,6 +224,7 @@ class CP2KConverter(Converter):
     def initialize(self):
         '''
         Initialize the job.
+        Opens the input files and checks them for consistency.
         '''
                 
         self._xyzFile = XYZFile(self.configuration["pos_file"]["filename"])
@@ -272,6 +314,8 @@ class CP2KConverter(Converter):
     def finalize(self):
         """
         Finalize the job.
+        Closes the files and calls the
+        superclass finalize method.
         """
         
         self._xyzFile.close()
