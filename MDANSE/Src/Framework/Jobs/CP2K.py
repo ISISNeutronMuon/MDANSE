@@ -19,24 +19,30 @@ import re
 
 import numpy as np
 
-from MMTK import Atom
-from MMTK import Units
-from MMTK.ParticleProperties import Configuration, ParticleVector
-from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
-from MMTK.Universe import ParallelepipedicPeriodicUniverse
-
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.Converter import Converter
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
+from MDANSE.Core.Error import Error
+from MDANSE.Framework.Units import measure
+from MDANSE.Mathematics.Graph import Graph
+from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration, PeriodicRealConfiguration
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 class XYZFileError(Error):
     pass
 
 class XYZFile(dict):
+    """This class loads the contents of an XYZ file,
+    which in the case of CP2K may contain either the
+    positions of atoms, or velocities. In either case
+    there will be 3 components per atom.
+    """
     
     def __init__(self, filename):
         
-        self['instance'] = open(filename, 'rb')
+        self['instance'] = open(filename, 'r')
 
         self["instance"].seek(0,0)
 
@@ -172,7 +178,7 @@ class CP2KConverter(Converter):
                                                 'optional':True})
     settings['cell_file'] = ('input_file',{'wildcard':'Cell files (*.cell)|*.cell|All files|*',
                                                 'default':os.path.join('..','..','..','Data','Trajectories','CP2K','p1-supercell-1.cell')})
-    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'xdatcar_file'})
+    settings['output_file'] = ('single_output_file', {'format':"hdf",'root':'xdatcar_file'})
                 
     def initialize(self):
         '''
@@ -201,21 +207,20 @@ class CP2KConverter(Converter):
         # The number of steps of the analysis.
         self.numberOfSteps = self._xyzFile['n_frames']
 
-        self._universe = ParallelepipedicPeriodicUniverse()
+        self._chemical_system = ChemicalSystem()
         
         for i, symbol in enumerate(self._xyzFile["atoms"]):
-            self._universe.addObject(Atom(symbol, name="%s_%d" % (symbol,i+1)))
+            self._chemical_system.add_chemical_entity(Atom(symbol=symbol, name="%s_%d" % (symbol,i+1)))
 
+        self._trajectory = TrajectoryWriter(
+            self.configuration['output_file']['file'],
+            self._chemical_system,
+            self.numberOfSteps)
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
 
         data_to_be_written = ["configuration","time"]
         if self.configuration["vel_file"]:
-            self._universe.initializeVelocitiesToTemperature(0.0)
             data_to_be_written.append("velocities")
-
-        # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
 
     def run_step(self, index):
         """Runs a single step of the job.
@@ -227,27 +232,29 @@ class CP2KConverter(Converter):
         """
 
         # Read the current coordinates in the XYZ file.
-        config = self._xyzFile.read_step(index)*Units.Ang
+        coords = self._xyzFile.read_step(index)*measure(1.0, iunit='ang').toval('nm')
         
-        self._universe.setShape(self._cellFile.read_step(index)*Units.Ang)
+        unitcell = UnitCell(self._cellFile.read_step(index)*measure(1.0, iunit='ang').toval('nm'))
         
-        conf = Configuration(self._universe,config)
-                
-        self._universe.setConfiguration(conf)
-                                        
-        # The real coordinates are foled then into the simulation box (-L/2,L/2). 
-        self._universe.foldCoordinatesIntoBox()
+        variables = {}
 
-        time = index*self._xyzFile["time_step"]*Units.fs
+        variables['velocities'] = self._velFile.read_step(index)*measure(1.0, iunit='ang/fs').toval('nm/ps')
 
-        data = {"time": time}
-        if self.configuration["vel_file"]:
-            velocities = ParticleVector(self._universe)
-            velocities.array = self._velFile.read_step(index)*Units.Ang/Units.fs
-            data["velocities"] = velocities
+        realConf = PeriodicRealConfiguration(
+                self._trajectory.chemical_system,
+                coords,
+                unitcell,
+                **variables
+            )
 
-        # A call to the snapshot generator produces the step corresponding to the current frame.
-        self._snapshot(data = data)
+        realConf.fold_coordinates()
+
+        self._trajectory.chemical_system.configuration = realConf
+
+        time = index*self._xyzFile["time_step"]*measure(1.0, iunit='fs').toval('ps')
+
+        # A snapshot is created out of the current configuration.
+        self._trajectory.dump_configuration(time,units={'time':'ps','unit_cell':'nm','coordinates':'nm', 'velocities':'nm/ps'})
 
         return index, None
 
