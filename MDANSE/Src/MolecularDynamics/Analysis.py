@@ -22,34 +22,6 @@ from MDANSE.Mathematics.Signal import correlation
 class AnalysisError(Error):
     pass
                                               
-def mean_square_deviation(coords1, coords2, masses=None, root=False):
-    '''
-    Computes the mean square deviation between two sets of coordinates 
-    :param coords1: the first set of n coordinates.
-    :type coords1: (n,3) numpy array
-    :param coords2: the second set of n coordinates.
-    :type coords2: (n,3) numpy array
-    :param masses: the n input masses. If None the center of gravity is computed.
-    :type masses: n-numpy array
-    :param root: if True, return the square root of the radius of gyration.
-    :type root: bool
-    :return: the mean square deviation.
-    :rtype: float
-    '''
-
-    if coords1.shape != coords2.shape:
-        raise AnalysisError("The input coordinates shapes do not match")
-
-    if masses is None:
-        masses = np.ones((coords1.shape[0]),dtype=np.float64)
-
-    rmsd = np.sum(np.sum((coords1-coords2)**2,axis=1)*masses)/np.sum(masses)
-
-    if root:
-        rmsd = np.sqrt(rmsd)
-    
-    return rmsd
-
 def mean_square_displacement(coords):
     '''
     Computes the mean square displacement of a set of coordinates 
