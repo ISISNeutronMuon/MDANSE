@@ -4,7 +4,7 @@ import rdkit
 import rdkit.Chem as Chem
 import rdkit.Chem.rdmolfiles as rdmolfiles
 from rdkit.Chem.rdmolfiles import MolFromPDBFile
-from rdkit.Chem.rdchem import Mol
+from rdkit.Chem.rdchem import Mol, GetPeriodicTable
 from rdkit.Chem.rdmolops import SanitizeMol
 from rdkit.Chem.rdmolops import GetMolFrags
 import pytest
@@ -40,3 +40,10 @@ def test_splitting(mol_from_rdkit: Mol):
     assert len(gas_bits) == 20
     assert np.all(all_lengths == 3)
 
+def test_periodic():
+    ptable = GetPeriodicTable()
+    for element in ['H', 'C', 'O', 'Fe', 'Cu', 'Ne', 'Cl']:
+        cov = ptable.GetRcovalent(element)
+        vdw = ptable.GetRvdw(element)
+        print(element, cov, vdw)
+    assert False

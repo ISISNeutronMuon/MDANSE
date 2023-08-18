@@ -16,7 +16,7 @@
 from MDANSE import REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.MolecularDynamics.Trajectory import find_atoms_in_molecule
+from MDANSE.MolecularDynamics.TrajectoryUtils import find_atoms_in_molecule
 
 class BasisSelection(IConfigurator):
     """
