@@ -157,7 +157,7 @@ class InteractiveConverter(IJob, metaclass = ABCMeta):
                 output_file.variables['time'].name = 'time'
 
             if 'box_size' in output_file.variables:
-                output_file.variables['box_size'].units = 'ps'
+                output_file.variables['box_size'].units = 'nm'
                 output_file.variables['box_size'].axis = 'time'
                 output_file.variables['box_size'].name = 'box_size'
 
@@ -210,7 +210,7 @@ class Converter(IJob,metaclass=ABCMeta):
                 output_file.variables['time'].name = 'time'
 
             if 'box_size' in output_file.variables:
-                output_file.variables['box_size'].units = 'ps'
+                output_file.variables['box_size'].units = 'nm'
                 output_file.variables['box_size'].axis = 'time'
                 output_file.variables['box_size'].name = 'box_size'
 
