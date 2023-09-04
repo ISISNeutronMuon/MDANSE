@@ -15,8 +15,36 @@
 
 import os
 from os.path import expanduser
-
 import json
+from abc import ABC, abstractmethod
+
+
+class AbstractSession(ABC):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    @abstractmethod
+    def set_directories(self):
+        raise NotImplementedError
+    
+    def load_session(self, fname: str):
+        raise NotImplementedError
+
+
+class SessionSettings(AbstractSession):
+
+    def __init__(self):
+        super().__init__()
+        self.main_path = "."
+    
+    def create_structured_project(self):
+
+        self.relative_paths = {
+            'raw_files' : 'raw_data/',
+            'trajectories' : 'mdanse_trajectories/',
+            'results' : 'results/'
+        }
 
 
 class CurrentSession():
@@ -24,6 +52,8 @@ class CurrentSession():
     def __init__(self, fname = None):
 
         self.settings_dir = os.path.join(expanduser('~'), '.MDANSE')
+        if fname is not None:
+            self.loadSettings(fname)
     
     def loadSettings(self, fname = None):
         

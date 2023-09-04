@@ -40,9 +40,9 @@ def contiguous_coordinates_real(ndarray[np.float64_t, ndim=2] coords not None,
     cdef int i
 
 
-    cdef ndarray[np.float64_t, ndim=2] contiguous_coords = np.empty((coords.shape[0],3),dtype=np.float)
+    cdef ndarray[np.float64_t, ndim=2] contiguous_coords = np.empty((coords.shape[0],3),dtype=np.float64)
 
-    cdef ndarray[np.float64_t, ndim=2] scaleconfig = np.empty((coords.shape[0],3),dtype=np.float)
+    cdef ndarray[np.float64_t, ndim=2] scaleconfig = np.empty((coords.shape[0],3),dtype=np.float64)
 
     for 0 <= i < coords.shape[0]:
 
@@ -92,7 +92,7 @@ def contiguous_coordinates_box(ndarray[np.float64_t, ndim=2]  coords not None,
 
     cdef double sdx, sdy, sdz, newx, newy, newz
 
-    cdef ndarray[np.float64_t, ndim=2] contiguous_coords = np.empty((coords.shape[0],3),dtype=np.float)
+    cdef ndarray[np.float64_t, ndim=2] contiguous_coords = np.empty((coords.shape[0],3),dtype=np.float64)
 
     for idxs in indexes:
         contiguous_coords[idxs[0],0] = coords[idxs[0],0]
@@ -131,9 +131,9 @@ def contiguous_offsets_real(ndarray[np.float64_t, ndim=2]  coords not None,
 
     cdef int i
 
-    cdef ndarray[np.float64_t, ndim=2] scaleconfig = np.empty((coords.shape[0],3),dtype=np.float)
+    cdef ndarray[np.float64_t, ndim=2] scaleconfig = np.empty((coords.shape[0],3),dtype=np.float64)
 
-    cdef ndarray[np.float64_t, ndim=2] offsets = np.zeros((coords.shape[0],3),dtype=np.float)
+    cdef ndarray[np.float64_t, ndim=2] offsets = np.zeros((coords.shape[0],3),dtype=np.float64)
 
     for 0 <= i < coords.shape[0]:
 
@@ -167,7 +167,7 @@ def contiguous_offsets_box(ndarray[np.float64_t, ndim=2]  coords not None,
 
     cdef double sdx, sdy, sdz
 
-    cdef ndarray[np.float64_t, ndim=2] offsets = np.zeros((coords.shape[0],3),dtype=np.float)
+    cdef ndarray[np.float64_t, ndim=2] offsets = np.zeros((coords.shape[0],3),dtype=np.float64)
 
     for idxs in indexes:
         if len(idxs) == 1:

@@ -163,11 +163,11 @@ class RigidBodyTrajectory(IJob):
         n_groups = self.configuration['atom_selection']['selection_length']
         n_frames = self.configuration['frames']['number']
 
-        quaternions = outputFile.create_dataset('quaternions',shape=(n_groups, n_frames, 4),dtype=np.float)
+        quaternions = outputFile.create_dataset('quaternions',shape=(n_groups, n_frames, 4),dtype=np.float64)
 
-        coms = outputFile.create_dataset('coms',shape=(n_groups, n_frames, 3),dtype=np.float)
+        coms = outputFile.create_dataset('coms',shape=(n_groups, n_frames, 3),dtype=np.float64)
               
-        fits = outputFile.create_dataset('fits',shape=(n_groups, n_frames),dtype=np.float)
+        fits = outputFile.create_dataset('fits',shape=(n_groups, n_frames),dtype=np.float64)
   
         outputFile.attrs['info'] = str(self)
    

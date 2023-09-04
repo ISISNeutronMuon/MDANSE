@@ -131,7 +131,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
 
         coords = configuration['coordinates']
 
-        com = np.zeros((3,),dtype=np.float)
+        com = np.zeros((3,),dtype=np.float64)
         sum_masses = 0.0
         for at in self.atom_list():
             m = ATOMS_DATABASE[at.symbol]['atomic_weight']
@@ -301,6 +301,12 @@ class Atom(_ChemicalEntity):
 
         for k,v in kwargs.items():
             setattr(self,k,v)
+    
+    def __hash__(self) -> int:
+        text = self._symbol
+        number = self._index
+        temp = text + "_" + str(number)
+        return temp.__hash__()
 
     def copy(self):
 
@@ -1322,7 +1328,7 @@ class ChemicalSystem(_ChemicalEntity):
         from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
         if self._atoms is None:
-            self._atoms = sorted_atoms(self._atom_list())
+            self._atoms = sorted_atoms(self.atom_list())
 
         return self._atoms
             

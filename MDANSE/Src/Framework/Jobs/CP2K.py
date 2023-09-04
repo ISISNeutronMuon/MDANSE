@@ -19,24 +19,30 @@ import re
 
 import numpy as np
 
-from MMTK import Atom
-from MMTK import Units
-from MMTK.ParticleProperties import Configuration, ParticleVector
-from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
-from MMTK.Universe import ParallelepipedicPeriodicUniverse
-
 from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.Converter import Converter
+from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
+from MDANSE.Core.Error import Error
+from MDANSE.Framework.Units import measure
+from MDANSE.Mathematics.Graph import Graph
+from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration, PeriodicRealConfiguration
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 class XYZFileError(Error):
     pass
 
 class XYZFile(dict):
+    """This class loads the contents of an XYZ file,
+    which in the case of CP2K may contain either the
+    positions of atoms, or velocities. In either case
+    there will be 3 components per atom.
+    """
     
     def __init__(self, filename):
         
-        self['instance'] = open(filename, 'rb')
+        self['instance'] = open(filename, 'r')
 
         self["instance"].seek(0,0)
 
@@ -73,7 +79,19 @@ class XYZFile(dict):
         # Go back to top
         self["instance"].seek(0)
 
-    def fetch_time_step(self,step):
+    def fetch_time_step(self, step: int):
+        """Finds the value of simulation time at the
+        nth simulation step.
+
+        Arguments:
+            step -- number of the simulation frame to check
+
+        Raises:
+            XYZFileError: If a valid time stamp could not be find
+
+        Returns:
+            float -- the time stamp of the frame
+        """
         self['instance'].seek(step*self._frameSize + self._nAtomsLineSize)
         timeLine = self["instance"].readline().strip()
         matches = re.findall("^i =.*, time =(.*), E =.*$",timeLine)
@@ -86,7 +104,17 @@ class XYZFile(dict):
         else:
             return timeStep
 
-    def read_step(self, step):
+    def read_step(self, step: int):
+        """Reads and returns an array of atom coordinates the nth
+        simulation frame.
+
+        Arguments:
+            step -- the number of the simulation step (frame) to be returned.
+
+        Returns:
+            ndarray -- an (N,3) array containing the coordinates of N atoms
+               at the requested simulation step.
+        """
         self['instance'].seek(step*self._frameSize + self._headerSize)
 
         temp = np.array(self['instance'].read(self._coordinatesSize).split()).reshape((self["n_atoms"],4))
@@ -96,6 +124,8 @@ class XYZFile(dict):
         return config
                                 
     def close(self):
+        """Closes the file that was, until now, open for reading.
+        """
         self["instance"].close()
 
 
@@ -103,6 +133,9 @@ class CellFileError(Error):
     pass
 
 class CellFile(dict):
+    """Opens and reads the CP2K output file containing the
+    unit cell size for each simulation step.
+    """
     
     def __init__(self, filename):
         
@@ -131,7 +164,7 @@ class CellFile(dict):
                 raise CellFileError("Can not cast time step to floating")
 
             try:
-                cell = np.array(words[2:11],dtype=np.float).reshape((3,3))
+                cell = np.array(words[2:11],dtype=np.float64).reshape((3,3))
             except ValueError:
                 raise CellFileError("Can not cast cell coordinates to floating")
 
@@ -142,7 +175,19 @@ class CellFile(dict):
         else:
             self["time_step"] = time_steps[1] - time_steps[0]
 
-    def read_step(self, step):
+    def read_step(self, step: int):
+        """Reads and returns the unit cell constants at the requested
+        simulation step (frame)
+
+        Arguments:
+            step -- number of the simulation frame to be read
+
+        Raises:
+            CellFileError: if the frame with the number *step* cannot be read
+
+        Returns:
+            ndarray -- a (3,3) array of unit cell constants
+        """
 
         if step < 0 or step >= self["n_frames"]:
             raise CellFileError("Invalid step number")
@@ -150,6 +195,8 @@ class CellFile(dict):
         return self["cells"][step]
                                 
     def close(self):
+        """Closes the file that was, until now, open for reading.
+        """
         self["instance"].close()
 
 
@@ -159,7 +206,7 @@ class CP2KConverterError(Error):
 
 class CP2KConverter(Converter):
     """
-    Converts a CP2K trajectory to a MMTK trajectory.
+    Converts a CP2K trajectory to an HDF5 trajectory in the MDANSE format.
     """
                   
     label = "CP2K"
@@ -172,11 +219,12 @@ class CP2KConverter(Converter):
                                                 'optional':True})
     settings['cell_file'] = ('input_file',{'wildcard':'Cell files (*.cell)|*.cell|All files|*',
                                                 'default':os.path.join('..','..','..','Data','Trajectories','CP2K','p1-supercell-1.cell')})
-    settings['output_file'] = ('single_output_file', {'format':"netcdf",'root':'xdatcar_file'})
+    settings['output_file'] = ('single_output_file', {'format':"hdf",'root':'xdatcar_file'})
                 
     def initialize(self):
         '''
         Initialize the job.
+        Opens the input files and checks them for consistency.
         '''
                 
         self._xyzFile = XYZFile(self.configuration["pos_file"]["filename"])
@@ -201,21 +249,20 @@ class CP2KConverter(Converter):
         # The number of steps of the analysis.
         self.numberOfSteps = self._xyzFile['n_frames']
 
-        self._universe = ParallelepipedicPeriodicUniverse()
+        self._chemical_system = ChemicalSystem()
         
         for i, symbol in enumerate(self._xyzFile["atoms"]):
-            self._universe.addObject(Atom(symbol, name="%s_%d" % (symbol,i+1)))
+            self._chemical_system.add_chemical_entity(Atom(symbol=symbol, name="%s_%d" % (symbol,i+1)))
 
+        self._trajectory = TrajectoryWriter(
+            self.configuration['output_file']['file'],
+            self._chemical_system,
+            self.numberOfSteps)
         # A MMTK trajectory is opened for writing.
-        self._trajectory = Trajectory(self._universe, self.configuration['output_file']['file'], mode='w')
 
         data_to_be_written = ["configuration","time"]
         if self.configuration["vel_file"]:
-            self._universe.initializeVelocitiesToTemperature(0.0)
             data_to_be_written.append("velocities")
-
-        # A frame generator is created.
-        self._snapshot = SnapshotGenerator(self._universe, actions = [TrajectoryOutput(self._trajectory, data_to_be_written, 0, None, 1)])
 
     def run_step(self, index):
         """Runs a single step of the job.
@@ -227,27 +274,29 @@ class CP2KConverter(Converter):
         """
 
         # Read the current coordinates in the XYZ file.
-        config = self._xyzFile.read_step(index)*Units.Ang
+        coords = self._xyzFile.read_step(index)*measure(1.0, iunit='ang').toval('nm')
         
-        self._universe.setShape(self._cellFile.read_step(index)*Units.Ang)
+        unitcell = UnitCell(self._cellFile.read_step(index)*measure(1.0, iunit='ang').toval('nm'))
         
-        conf = Configuration(self._universe,config)
-                
-        self._universe.setConfiguration(conf)
-                                        
-        # The real coordinates are foled then into the simulation box (-L/2,L/2). 
-        self._universe.foldCoordinatesIntoBox()
+        variables = {}
 
-        time = index*self._xyzFile["time_step"]*Units.fs
+        variables['velocities'] = self._velFile.read_step(index)*measure(1.0, iunit='ang/fs').toval('nm/ps')
 
-        data = {"time": time}
-        if self.configuration["vel_file"]:
-            velocities = ParticleVector(self._universe)
-            velocities.array = self._velFile.read_step(index)*Units.Ang/Units.fs
-            data["velocities"] = velocities
+        realConf = PeriodicRealConfiguration(
+                self._trajectory.chemical_system,
+                coords,
+                unitcell,
+                **variables
+            )
 
-        # A call to the snapshot generator produces the step corresponding to the current frame.
-        self._snapshot(data = data)
+        realConf.fold_coordinates()
+
+        self._trajectory.chemical_system.configuration = realConf
+
+        time = index*self._xyzFile["time_step"]*measure(1.0, iunit='fs').toval('ps')
+
+        # A snapshot is created out of the current configuration.
+        self._trajectory.dump_configuration(time,units={'time':'ps','unit_cell':'nm','coordinates':'nm', 'velocities':'nm/ps'})
 
         return index, None
 
@@ -265,6 +314,8 @@ class CP2KConverter(Converter):
     def finalize(self):
         """
         Finalize the job.
+        Closes the files and calls the
+        superclass finalize method.
         """
         
         self._xyzFile.close()

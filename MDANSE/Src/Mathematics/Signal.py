@@ -88,7 +88,11 @@ def correlation(x, y=None, axis=0, sumOverAxis=None, average=None):
     
     s = [slice(None)]*x.ndim
 
-    s[axis] = slice(0,x.shape[axis],1)
+    s[axis] = slice(0,n,1)  # the total lenght along 'axis' direction is 2*n
+    # s selects all elements along all other directions,
+    # and only half the elements along the 'axis' direction.
+
+    s = tuple(s)
     
     corr = np.real(np.fft.ifft(np.conjugate(X)*Y,axis=axis)[s])
             
@@ -96,6 +100,8 @@ def correlation(x, y=None, axis=0, sumOverAxis=None, average=None):
         
     s = [np.newaxis]*x.ndim
     s[axis] = slice(None)
+
+    s = tuple(s)
         
     corr = corr/norm[s]
                     
@@ -110,6 +116,8 @@ def normalize(x, axis=0):
 
     s = [slice(None)]*x.ndim
     s[axis] = slice(0,1,1)
+
+    s = tuple(s)
     
     nx = x/x[s]
     return nx
@@ -123,7 +131,7 @@ def differentiate(a, dt=1.0, order="1st order"):
     coefs = INTERPOLATION_ORDER[order]
         
     # outputSeries is the output resulting from the differentiation
-    ts = np.zeros(a.shape, dtype=np.float)
+    ts = np.zeros(a.shape, dtype=np.float64)
     
     fact = 1.0/dt
         
@@ -143,7 +151,7 @@ def differentiate(a, dt=1.0, order="1st order"):
         ts[0]  = np.add.reduce(coefs[0,:]*a[:3])
         ts[-1] = np.add.reduce(coefs[2,:]*a[-3:])
 
-        gj      = np.zeros((a.size-2,3), dtype=np.float)
+        gj      = np.zeros((a.size-2,3), dtype=np.float64)
         gj[:,0] = coefs[1,0]*a[:-2]
         gj[:,1] = coefs[1,1]*a[1:-1]
         gj[:,2] = coefs[1,2]*a[2:]
@@ -160,7 +168,7 @@ def differentiate(a, dt=1.0, order="1st order"):
         ts[-1] = np.add.reduce(coefs[3,:]*a[-4:])
 
         # General case
-        gj      = np.zeros((a.size-3,4), dtype=np.float)
+        gj      = np.zeros((a.size-3,4), dtype=np.float64)
         gj[:,0] = coefs[2,0]*a[:-3]
         gj[:,1] = coefs[2,1]*a[1:-2]
         gj[:,2] = coefs[2,2]*a[2:-1]
@@ -179,7 +187,7 @@ def differentiate(a, dt=1.0, order="1st order"):
         ts[-1] = np.add.reduce(coefs[4,:]*a[-5:])
 
         # General case
-        gj      = np.zeros((a.size-4,5), dtype=np.float)
+        gj      = np.zeros((a.size-4,5), dtype=np.float64)
         gj[:,0] = coefs[2,0]*a[:-4]
         gj[:,1] = coefs[2,1]*a[1:-3]
         gj[:,2] = coefs[2,2]*a[2:-2]
@@ -200,7 +208,7 @@ def differentiate(a, dt=1.0, order="1st order"):
         ts[-1] = np.add.reduce(coefs[5,:]*a[-6:])
 
         # General case
-        gj      = np.zeros((a.size-5,6), dtype=np.float)
+        gj      = np.zeros((a.size-5,6), dtype=np.float64)
         gj[:,0] = coefs[3,0]*a[:-5]
         gj[:,1] = coefs[3,1]*a[1:-4]
         gj[:,2] = coefs[3,2]*a[2:-3]
@@ -227,6 +235,8 @@ def symmetrize(signal, axis=0):
     
     s = [slice(None)]*signal.ndim
     s[axis] = slice(-1,0,-1)
+
+    s = tuple(s)
             
     signal = np.concatenate((signal[s],signal),axis=axis)
     
@@ -243,6 +253,8 @@ def get_spectrum(signal,window=None,timeStep=1.0,axis=0):
 
     s = [np.newaxis]*signal.ndim
     s[axis] = slice(None)
+
+    s = tuple(s)
 
     # We compute the unitary inverse fourier transform with angular frequencies as described in
     # https://en.wikipedia.org/wiki/Fourier_transform#Discrete_Fourier_Transforms_and_Fast_Fourier_Transforms

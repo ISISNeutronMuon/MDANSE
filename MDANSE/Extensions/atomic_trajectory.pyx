@@ -40,7 +40,7 @@ def atomic_trajectory(
 
     cdef int i, j
 
-    cdef ndarray[np.float64_t, ndim=2] trajectory = np.empty((config.shape[0],3),dtype=np.float)
+    cdef ndarray[np.float64_t, ndim=2] trajectory = np.empty((config.shape[0],3),dtype=np.float64)
 
     # Loop over the time
     for 0 <= i < config.shape[0]:

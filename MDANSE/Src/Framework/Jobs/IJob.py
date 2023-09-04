@@ -24,6 +24,7 @@ import string
 import subprocess
 import sys
 import traceback
+from concurrent.futures import ThreadPoolExecutor as PoolExecutor
 
 from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Core.Error import Error
@@ -91,7 +92,7 @@ class IJob(Configurable):
     section = "job"
     
     ancestor = []
-        
+
     @staticmethod
     def define_unique_name():
         """
@@ -209,6 +210,17 @@ class IJob(Configurable):
             idx, result = self.run_step(index)                            
             self.combine(idx,result)
 
+    def _run_threadpool(self):
+
+        def helper(self, index):
+            idx, result = self.run_step(index)                            
+            self.combine(idx,result)
+
+        pool = PoolExecutor(max_workers=self.configuration['running_mode']['slots'])
+
+        futures = [pool.submit(helper, self, index) for index in range(self.numberOfSteps)]
+        results = [future.result() for future in futures]
+
     def process_tasks_queue(self,tasks,outputs):
 
         while True:
@@ -286,7 +298,8 @@ class IJob(Configurable):
             else:
                 self._status.update()
             
-    _runner = {"monoprocessor" : _run_monoprocessor, "multiprocessor" : _run_multiprocessor, "remote" : _run_remote}
+    _runner = {"monoprocessor" : _run_monoprocessor, "threadpool" : _run_threadpool,
+               "multiprocessor" : _run_multiprocessor, "remote" : _run_remote}
 
     def run(self,parameters,status=False):
         """

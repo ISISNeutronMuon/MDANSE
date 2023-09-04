@@ -74,7 +74,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
                 n = min(nHits,nVectors)
 
                 if nHits > nVectors:
-                    hits = random.sample(hits,nVectors)
+                    hits = random.sample(sorted(hits),nVectors)
 
                 self._configuration["q_vectors"][q] = {}
                 self._configuration["q_vectors"][q]['q_vectors'] = vects[:,hits]

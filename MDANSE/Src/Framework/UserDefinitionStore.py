@@ -34,7 +34,7 @@ class UserDefinitionStore(object, metaclass=Singleton):
     user definitions are loaded when MDANSE starts through a cPickle file that will store these definitions.    
     '''
         
-    UD_PATH = os.path.join(PLATFORM.application_directory(),"user_definitions.ud")
+    UD_PATH = os.path.join(PLATFORM.application_directory(),"user_definitions_md3.ud")
     
     def __init__(self):
         
@@ -61,7 +61,9 @@ class UserDefinitionStore(object, metaclass=Singleton):
             UD = pickle.load(f)
   
         # If for whatever reason the pickle file loading failed do not even try to restore it
-        except:
+        except Exception as e:
+            print("Exception reading the User Definitions")
+            print(e)
             return
           
         else:

@@ -13,8 +13,8 @@
 #
 # **************************************************************************
 
-from qtpy.QtCore import QDir
-from qtpy.QtGui import QIcon
+from qtpy.QtCore import QDir, QSize
+from qtpy.QtGui import QIcon, QImage, QPixmap
 
 
 
@@ -22,6 +22,7 @@ class Resources():
 
     def __init__(self):
         self._icons = {}
+        self._inverted_icons = {}
         self.load_icons()
     
     def load_icons(self):
@@ -37,5 +38,11 @@ class Resources():
             label = ".".join(str(f).split('.')[:-1])
             self._icons[label] = QIcon(res_dir.filePath(f))
             # print(f"Loaded {f} from {res_dir}")
+        for iname, icon, in self._icons.items():
+            pixmap = icon.pixmap(QSize(32,32))
+            image = pixmap.toImage()
+            image.invertPixels()
+            newpixmap =  QPixmap.fromImage(image)
+            self._inverted_icons[iname] = QIcon(newpixmap)
 
     

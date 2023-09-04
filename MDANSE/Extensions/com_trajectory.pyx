@@ -92,13 +92,13 @@ def com_trajectory(
 
     cdef int i, j, idx, idx0
 
-    cdef np.ndarray[np.float64_t, ndim=2] trajectory = np.empty((coords.shape[0],3),dtype=np.float)
+    cdef np.ndarray[np.float64_t, ndim=2] trajectory = np.empty((coords.shape[0],3),dtype=np.float64)
 
     cdef np.ndarray[np.float64_t, ndim=2] com_coords
 
     cdef np.ndarray[np.int8_t] processed
 
-    cdef np.ndarray[np.float64_t, ndim=3] box_coords = np.empty((coords.shape[0],coords.shape[1],3),dtype=np.float)
+    cdef np.ndarray[np.float64_t, ndim=3] box_coords = np.empty((coords.shape[0],coords.shape[1],3),dtype=np.float64)
 
 
     old_recursionlimit = sys.getrecursionlimit()

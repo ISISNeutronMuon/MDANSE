@@ -298,8 +298,7 @@ class Quaternion:
         @returns: the inverse
         @rtype: L{Quaternion}
         """
-        import Scientific.LA
-        inverse = Scientific.LA.inverse(self.asMatrix())
+        inverse = np.linalg.inv(self.asMatrix())
         return Quaternion(inverse[:, 0])
 
     def asMatrix(self):
@@ -571,8 +570,7 @@ class Tensor:
         @raises ValueError: if rank !=2 
         """
         if self.rank == 2:
-            from Scientific.LA import inverse
-            return Tensor(inverse(self.array))
+            return Tensor(np.linalg.inv(self.array))
         else:
             raise ValueError('Undefined operation')
 

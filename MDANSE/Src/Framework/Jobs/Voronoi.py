@@ -14,13 +14,13 @@
 # **************************************************************************
 
 import collections
+import math
 
 import numpy as np
 
 from MDANSE import REGISTRY
 from MDANSE.Extensions import mic_fast_calc, qhull
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Arithmetic import factorial
 
 def no_exc_min(l):
     try:
@@ -157,7 +157,7 @@ class Voronoi(IJob):
             for vidx in regions:
                 coords = vertices_coords[vidx]
                 delta = coords[1:,:]-coords[0,:]
-                vidx_volume = np.abs(np.linalg.det(delta))/factorial(self.dim)
+                vidx_volume = np.abs(np.linalg.det(delta))/math.factorial(self.dim)
                 regions_volumes.append(vidx_volume)
             global_volumes[vrid] = sum(regions_volumes)
         

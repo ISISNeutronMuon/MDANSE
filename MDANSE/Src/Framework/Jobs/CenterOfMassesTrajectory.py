@@ -86,7 +86,7 @@ class CenterOfMassesTrajectory(IJob):
         conf = self.configuration['trajectory']['instance'].configuration(frameIndex)
         conf = conf.continuous_configuration()
 
-        com_coords = np.empty((n_coms,3),dtype=np.float) 
+        com_coords = np.empty((n_coms,3),dtype=np.float64) 
         for i, group in enumerate(self._grouped_atoms):
             com_coords[i,:] = group.center_of_mass(conf)
 

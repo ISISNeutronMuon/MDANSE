@@ -270,7 +270,7 @@ class Trajectory:
         """
 
         if self._unit_cells is not None:
-            real_coordinates = np.empty(box_coordinates.shape,dtype=np.float)
+            real_coordinates = np.empty(box_coordinates.shape,dtype=np.float64)
             comp = 0
             for i in range(first,last,step):
                 direct_cell = self._unit_cells[i].transposed_direct
@@ -519,7 +519,7 @@ class TrajectoryWriter:
                     'unit_cell',
                     shape=(self._n_steps,3,3),
                     chunks=(1,3,3),
-                    dtype=np.float)
+                    dtype=np.float64)
                 unit_cell_dset.attrs['units'] = units.get('unit_cell','')
             unit_cell_dset[self._current_index] = unit_cell.direct
 
@@ -529,7 +529,7 @@ class TrajectoryWriter:
             time_dset = self._h5_file.create_dataset(
                 'time',
                 shape=(self._n_steps,),
-                dtype=np.float)
+                dtype=np.float64)
             time_dset.attrs['units'] = units.get('time','')
         time_dset[self._current_index] = time
 
@@ -577,13 +577,13 @@ class RigidBodyTrajectoryGenerator:
 
         n_steps = len(range(first,last,step))
 
-        possq = np.zeros((n_steps,), np.float)
-        cross = np.zeros((n_steps, 3, 3), np.float)
+        possq = np.zeros((n_steps,), np.float64)
+        cross = np.zeros((n_steps, 3, 3), np.float64)
 
         rcms = self._trajectory.read_com_trajectory(atoms,first,last,step,box_coordinates=True)
 
         # relative coords of the CONTIGUOUS reference
-        r_ref = np.zeros((len(atoms), 3), np.float)
+        r_ref = np.zeros((len(atoms), 3), np.float64)
         for i, at in enumerate(atoms):
             r_ref[i] = reference['coordinates'][at.index,:] - ref_com
 
@@ -614,7 +614,7 @@ class RigidBodyTrajectoryGenerator:
         rcms = self._trajectory.to_real_coordinates(rcms, first, last, step)
 
         # filling matrix M
-        k = np.zeros((n_steps, 4, 4), np.float)
+        k = np.zeros((n_steps, 4, 4), np.float64)
         k[:, 0, 0] = -cross[:, 0, 0]-cross[:, 1, 1]-cross[:, 2, 2]
         k[:, 0, 1] =  cross[:, 1, 2]-cross[:, 2, 1]
         k[:, 0, 2] =  cross[:, 2, 0]-cross[:, 0, 2]
@@ -633,8 +633,8 @@ class RigidBodyTrajectoryGenerator:
         for i in range(4):
             np.add(k[:,i,i], possq, k[:,i,i])
 
-        quaternions = np.zeros((n_steps, 4), np.float)
-        fit = np.zeros((n_steps,), np.float)
+        quaternions = np.zeros((n_steps, 4), np.float64)
+        fit = np.zeros((n_steps,), np.float64)
         for i in range(n_steps):
             e, v = np.linalg.eig(k[i])
             v = np.transpose(v)
@@ -730,7 +730,7 @@ if __name__ == '__main__':
     tw = TrajectoryWriter('test.h5',cs)
     unit_cell = 10.0*np.identity(3)
 
-    coords = np.empty((2,3),dtype=np.float)
+    coords = np.empty((2,3),dtype=np.float64)
     coords[0,:] = [-4,0,0]
     coords[1,:] = [ 4,0,0]
 

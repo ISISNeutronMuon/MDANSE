@@ -114,7 +114,7 @@ class DynamicIncoherentStructureFactor(IJob):
 
         disf_per_q_shell = collections.OrderedDict()
         for q in self.configuration["q_vectors"]["shells"]:
-            disf_per_q_shell[q] = np.zeros((self._nFrames,), dtype=np.float)
+            disf_per_q_shell[q] = np.zeros((self._nFrames,), dtype=np.float64)
 
         for q in self.configuration["q_vectors"]["shells"]:
             

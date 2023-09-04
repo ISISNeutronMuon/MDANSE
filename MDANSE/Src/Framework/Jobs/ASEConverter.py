@@ -150,12 +150,12 @@ class ASEConverter(Converter):
         for _ in range(self._itemsPosition["BOX BOUNDS"][1], self._itemsPosition["ATOMS"][0]):
             self._lammps.readline()
 
-        coords = np.empty((self._trajectory.chemical_system.number_of_atoms(),3),dtype=np.float)
+        coords = np.empty((self._trajectory.chemical_system.number_of_atoms(),3),dtype=np.float64)
 
         for i,_ in enumerate(range(self._itemsPosition["ATOMS"][0], self._itemsPosition["ATOMS"][1])):
             temp = self._lammps.readline().split()
             idx = self._nameToIndex[self._rankToName[int(temp[0])-1]]
-            coords[idx,:] = np.array([temp[self._x],temp[self._y],temp[self._z]],dtype=np.float)
+            coords[idx,:] = np.array([temp[self._x],temp[self._y],temp[self._z]],dtype=np.float64)
 
         if self._fractionalCoordinates:
             conf = PeriodicBoxConfiguration(
@@ -544,12 +544,12 @@ class ASEInteractiveConverter(InteractiveConverter, regkey = "ase"):
         for _ in range(self._itemsPosition["BOX BOUNDS"][1], self._itemsPosition["ATOMS"][0]):
             self._lammps.readline()
 
-        coords = np.empty((self._trajectory.chemical_system.number_of_atoms(),3),dtype=np.float)
+        coords = np.empty((self._trajectory.chemical_system.number_of_atoms(),3),dtype=np.float64)
 
         for i,_ in enumerate(range(self._itemsPosition["ATOMS"][0], self._itemsPosition["ATOMS"][1])):
             temp = self._lammps.readline().split()
             idx = self._nameToIndex[self._rankToName[int(temp[0])-1]]
-            coords[idx,:] = np.array([temp[self._x],temp[self._y],temp[self._z]],dtype=np.float)
+            coords[idx,:] = np.array([temp[self._x],temp[self._y],temp[self._z]],dtype=np.float64)
 
         if self._fractionalCoordinates:
             conf = PeriodicBoxConfiguration(

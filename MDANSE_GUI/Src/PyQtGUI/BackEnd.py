@@ -23,6 +23,7 @@ from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeModel
 from MDANSE_GUI.PyQtGUI.DataViewModel.JobHolder import JobHolder
+from MDANSE_GUI.PyQtGUI.DataViewModel.ActionsHolder import ActionsSuperModel
 from MDANSE_GUI.PyQtGUI.RegistryViewer import RegistryTree
 
 
@@ -37,6 +38,7 @@ class BackEnd(QObject):
     new_trajectory = Signal(str)
     all_converters = Signal(object)
     selected_converter = Signal(object)
+    selected_action = Signal(object)
     
     def __init__(self, parent = None, python = ""):
         super().__init__(parent)
@@ -52,14 +54,23 @@ class BackEnd(QObject):
         self.createTrajectoryHolder()
         self.createJobHolder()
         self.registry = RegistryTree()
+        self.createActionsHolder()
         self._converters = []
         self._reverse_converters = {}  # internal dictionary for finding converters
         self.checkConverters()
+        self._actions = []
+        self._reverse_actions = {}  # internal dictionary for finding converters
+        self.checkActions()
 
     def createTrajectoryHolder(self):
         self.trajectory_holder = DataTreeModel(parent=self)
         self.data_holders['trajectory'] = self.trajectory_holder
         self.new_trajectory.connect(self.trajectory_holder.acceptNewTrajectory)
+
+    def createActionsHolder(self):
+        self.actions_holder = ActionsSuperModel(parent=self)
+        self.actions_holder.buildModels(self.registry)
+        # self.data_holders['actions'] = self.trajectory_holder
 
     def createJobHolder(self):
         self.job_holder = JobHolder(parent=self, python = self.python_interpreter)
@@ -117,3 +128,37 @@ class BackEnd(QObject):
         # ic("returnConverter has been triggered in BackEnd - but what for?")
         thing = self._reverse_converters[str(key).split()[-1]]
         self.selected_converter.emit(thing)
+
+    def checkActions(self):
+        ic("checkActions triggered in BackEnd.")
+        self.lock.lock()
+        self._actions = []
+        self._reverse_actions = {}
+        for key, act in self.registry._jobs.items():
+            ic(f"key:{key}, val:{act}")
+            self._actions.append(act)
+            self._reverse_actions[str(act)] = REGISTRY['job'][str(key)]
+        self.lock.unlock()
+
+    def getActions(self):
+        ic("getActions triggered in BackEnd.")
+        temp = None
+        self.lock.lock()
+        temp = copy.deepcopy(self._actions)
+        self.lock.unlock()
+        return temp
+    
+    @Slot(str)
+    def returnActions(self, key:str):
+        """This slot will make Backend emit a signal that will
+        create a Dialog for a specific trajectory converter.
+        The type of the converter is chosen by the 'key' input
+        parameter.
+
+        Arguments:
+            key -- a string specifying which converter is needed.
+        """
+        ic("returnActions has been triggered in BackEnd")
+        thing = self._reverse_actions[str(key).split()[-1]]
+        self.selected_action.emit(thing)
+

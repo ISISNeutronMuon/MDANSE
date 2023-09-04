@@ -30,7 +30,7 @@ class IdealInstrumentResolution(IInstrumentResolution):
                 
         nOmegas = len(omegas)
         self._omegaWindow = np.zeros(nOmegas, dtype=np.float64)
-        self._omegaWindow[nOmegas/2] = 1.0
+        self._omegaWindow[int(nOmegas/2)] = 1.0
 
         self._timeWindow = np.ones(nOmegas, dtype=np.float64)
         

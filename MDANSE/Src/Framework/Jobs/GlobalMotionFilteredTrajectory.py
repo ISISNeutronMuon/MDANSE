@@ -175,7 +175,7 @@ class GlobalMotionFilteredTrajectory(IJob):
 
         outputFile = h5py.File(self.configuration['output_file']['file'], 'r+')
  
-        outputFile.create_dataset('rms',data=self._rms,dtype=np.float)
+        outputFile.create_dataset('rms',data=self._rms,dtype=np.float64)
                            
         outputFile.close()
 
