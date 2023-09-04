@@ -274,12 +274,12 @@ class PDBFile:
             position = data['position']
             line = line + [data.get('serial_number', 1),
                            data.get('name'),
-                           data.get('alternate', ''),
-                           data.get('residue_name', '').rjust(3),
-                           data.get('chain_id', ''),
-                           data.get('residue_number', 1),
+                           data.get('alternate', ''),#
+                           data.get('residue_name', '').rjust(3),#
+                           data.get('chain_id', ''),#
+                           data.get('residue_number', 1),#
                            data.get('insertion_code', ''),
-                           position[0], position[1], position[2],
+                           position[0], position[1], position[2],#
                            data.get('occupancy', 0.),
                            data.get('temperature_factor', 0.),
                            data.get('segment_id', ''),
