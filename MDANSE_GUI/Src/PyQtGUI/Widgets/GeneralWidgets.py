@@ -1,17 +1,35 @@
-
 from typing import Union, Iterable
 from collections import OrderedDict
 import copy
 
 from icecream import ic
-from qtpy.QtWidgets import QDialog, QPushButton, QFileDialog, QGridLayout,\
-                           QVBoxLayout, QWidget, QLabel, QApplication,\
-                           QComboBox, QMenu, QLineEdit, QTableView,\
-                           QFormLayout, QHBoxLayout, QCheckBox
-from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel,\
-                        QObject
-from qtpy.QtGui import QFont, QEnterEvent, QStandardItem, QStandardItemModel,\
-                    QIntValidator, QDoubleValidator, QValidator
+from qtpy.QtWidgets import (
+    QDialog,
+    QPushButton,
+    QFileDialog,
+    QGridLayout,
+    QVBoxLayout,
+    QWidget,
+    QLabel,
+    QApplication,
+    QComboBox,
+    QMenu,
+    QLineEdit,
+    QTableView,
+    QFormLayout,
+    QHBoxLayout,
+    QCheckBox,
+)
+from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel, QObject
+from qtpy.QtGui import (
+    QFont,
+    QEnterEvent,
+    QStandardItem,
+    QStandardItemModel,
+    QIntValidator,
+    QDoubleValidator,
+    QValidator,
+)
 
 from MDANSE.Framework.Jobs.IJob import IJob
 
@@ -29,7 +47,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 # 1. The initial Dialog is created based on settings from the Converter
 # 2. The user specifies the input files
 # 3. The converter tries to get as much information as possible from the files
-# 4. The information gathered is shown to the user, 
+# 4. The information gathered is shown to the user,
 # with a possibility of correcting the entries.
 # 5. The corrected parameters are passed to the converter, and the job is started.
 
@@ -46,31 +64,31 @@ class GeneralInput(QObject):
     final_value = Signal(object)
     string_value = Signal(str)
 
-    def __init__(self, *args, data_type = None, **kwargs):
+    def __init__(self, *args, data_type=None, **kwargs):
         new_kwargs = copy.copy(kwargs)
         for kkey in InputFactory.reserved_keywords:
             if kkey in new_kwargs.keys():
                 new_kwargs.pop(kkey)
         super().__init__(*args, **{})
 
-        self.default_path = kwargs.get('path', None)
+        self.default_path = kwargs.get("path", None)
         self.data_type = data_type
-        self.default_value = kwargs.get('default', None)
+        self.default_value = kwargs.get("default", None)
         self.current_value = self.default_value
-        self.file_association = kwargs.get('file_association', None)
-        self.file_direction = kwargs.get('file_direction', 'none')
-        self.file_format = kwargs.get('format','')
+        self.file_association = kwargs.get("file_association", None)
+        self.file_direction = kwargs.get("file_direction", "none")
+        self.file_format = kwargs.get("format", "")
         if self.file_association is not None:
             if len(self.file_association) < 1 and len(self.file_format) > 1:
-                self.file_association = '*.' + self.file_format
-        if self.file_direction == 'in':
+                self.file_association = "*." + self.file_format
+        if self.file_direction == "in":
             self.file_dialog = QFileDialog.getOpenFileName
-        elif self.file_direction == 'out':
+        elif self.file_direction == "out":
             self.file_dialog = QFileDialog.getSaveFileName
         else:
             self.file_dialog = None
         ic(kwargs)
-    
+
     @Slot(str)
     def updatePath(self, newpath: str):
         """Interesting only to the variables using a FileDialog,
@@ -86,7 +104,7 @@ class GeneralInput(QObject):
     @Slot(str)
     @Slot(int)
     @Slot(object)
-    def updateValue(self, newone, emit = False):
+    def updateValue(self, newone, emit=False):
         """This slot allows the GeneralInput to receive a new value
         from the corresponding GUI element. In principle, the GUI
         should have produced a valid input, but tests for valid
@@ -123,8 +141,8 @@ class GeneralInput(QObject):
         if self.file_dialog is not None:
             ic(f"File Field Return Value: {self.current_value}")
         self.final_value.emit(self.current_value)
-        if self.file_direction == 'out':
-            return (self.current_value, 'hdf')
+        if self.file_direction == "out":
+            return (self.current_value, "hdf")
         return self.current_value
 
     @Slot()
@@ -134,13 +152,14 @@ class GeneralInput(QObject):
         This will start a FileDialog, take the resulting path,
         and emit a signal to update the value show by the GUI.
         """
-        new_value = self.file_dialog(self.parent(),  # the parent of the dialog
-                                    "Load a file",  # the label of the window
-                                    self.default_path,  # the initial search path
-                                    self.file_association  # text string specifying the file name filter.
-                                    )
+        new_value = self.file_dialog(
+            self.parent(),  # the parent of the dialog
+            "Load a file",  # the label of the window
+            self.default_path,  # the initial search path
+            self.file_association,  # text string specifying the file name filter.
+        )
         if new_value is not None:
-            self.updateValue(new_value[0], emit = True)
+            self.updateValue(new_value[0], emit=True)
 
 
 def translate_file_associations(input_str: str):
@@ -156,20 +175,28 @@ def translate_file_associations(input_str: str):
         String of the valid file formats in the FileDialog, in the format
         valid for Qt.
     """
-    toks = input_str.split('|')[::2]
+    toks = input_str.split("|")[::2]
     basic_replacement = ";;".join(toks[:-1] + ["All files (*.*)"])
     return basic_replacement
 
 
-class InputFactory():
+class InputFactory:
     """Factory generating input fields for Dialogs. It is meant to standardise
     the way inputs are hanlded, so that any kind of variable can be processed
     using the same methods.
     """
 
-    reserved_keywords = ['kind', 'default', 'label', 'tooltip', 'wildcard',
-                         'mini', 'choices',
-                         'file_association', 'file_direction']
+    reserved_keywords = [
+        "kind",
+        "default",
+        "label",
+        "tooltip",
+        "wildcard",
+        "mini",
+        "choices",
+        "file_association",
+        "file_direction",
+    ]
 
     def createInputField(*args, **kwargs):
         """Creates an input field for the specified kind of variable.
@@ -182,27 +209,27 @@ class InputFactory():
         Returns:
             [QWidget, GeneralInput] pair
         """
-        kind = kwargs.get('kind', 'str')
+        kind = kwargs.get("kind", "str")
 
-        if kind == 'str':
+        if kind == "str":
             result = InputFactory.createSingle(*args, **kwargs)
-        elif kind == 'int' or kind == 'integer':
+        elif kind == "int" or kind == "integer":
             result = InputFactory.createSingle(*args, **kwargs)
-        elif kind == 'float':
+        elif kind == "float":
             result = InputFactory.createSingle(*args, **kwargs)
-        elif kind == 'single_choice':
+        elif kind == "single_choice":
             result = InputFactory.createCombo(*args, **kwargs)
-        elif kind == 'bool' or kind == 'boolean':
+        elif kind == "bool" or kind == "boolean":
             result = InputFactory.createBool(*args, **kwargs)
-        elif kind == 'input_file':
-            result = InputFactory.createFile(*args, direction = 'in', **kwargs)
-        elif kind == 'single_output_file':
-            result = InputFactory.createFile(*args, direction = 'out', **kwargs)
+        elif kind == "input_file":
+            result = InputFactory.createFile(*args, direction="in", **kwargs)
+        elif kind == "single_output_file":
+            result = InputFactory.createFile(*args, direction="out", **kwargs)
         else:
             result = InputFactory.createBlank(*args, **kwargs)
-        
+
         return result
-    
+
     def createBase(*args, **kwargs):
         """Some parts of the input will always be the same,
         so we handle them in one function that will be called
@@ -211,9 +238,9 @@ class InputFactory():
         Returns:
             [base, layout] pair of QWidget and associated layout
         """
-        parent = kwargs.get('parent', None)
-        label_text = kwargs.get('label', None)
-        tooltip_text = kwargs.get('tooltip', None)
+        parent = kwargs.get("parent", None)
+        label_text = kwargs.get("label", None)
+        tooltip_text = kwargs.get("tooltip", None)
         base = QWidget(parent)
         layout = QHBoxLayout(base)
         base.setLayout(layout)
@@ -221,19 +248,20 @@ class InputFactory():
         label.setToolTip(tooltip_text)
         layout.addWidget(label)
         return [base, layout]
-    
+
     def createBlank(*args, **kwargs):
         """This method creates a placeholder which will inform
         the users that the requested input field could not
         be constructed.
         """
-        kind = kwargs.get('kind', 'str')
+        kind = kwargs.get("kind", "str")
         base, layout = InputFactory.createBase(
-            label = f"<b>MISSING TYPE</b>:{kind}",
-            tooltip = 'This is not handled by the MDANSE GUI correctly! Please report the problem to the authors.')
+            label=f"<b>MISSING TYPE</b>:{kind}",
+            tooltip="This is not handled by the MDANSE GUI correctly! Please report the problem to the authors.",
+        )
         return [base, GeneralInput()]
 
-    def createFile(*args, direction = 'in', **kwargs):
+    def createFile(*args, direction="in", **kwargs):
         """Creates an input field with an additional button which
         creates a FileDialog, to allow the user to browse the file system.
 
@@ -241,10 +269,10 @@ class InputFactory():
             direction -- if 'in', create a FileDialog for an exisitng file,
               if 'out', a FileDialog for creating a new file.
         """
-        kind = kwargs.get('kind', 'str')
-        default_value = kwargs.get('default', "")
-        tooltip_text = kwargs.get('tooltip', "Specify a path to an existing file.")
-        file_association = kwargs.get('wildcard', "")
+        kind = kwargs.get("kind", "str")
+        default_value = kwargs.get("default", "")
+        tooltip_text = kwargs.get("tooltip", "Specify a path to an existing file.")
+        file_association = kwargs.get("wildcard", "")
         qt_file_association = translate_file_associations(file_association)
         ic(kind)
         ic(default_value)
@@ -253,7 +281,12 @@ class InputFactory():
         ic(kwargs)
         base, layout = InputFactory.createBase(*args, **kwargs)
         field = QLineEdit(base)
-        data_handler = GeneralInput(data_type=str, file_association = qt_file_association, file_direction = direction, **kwargs)
+        data_handler = GeneralInput(
+            data_type=str,
+            file_association=qt_file_association,
+            file_direction=direction,
+            **kwargs,
+        )
         data_handler.string_value.connect(field.setText)
         field.textChanged.connect(data_handler.updateValue)
         field.setText(str(default_value))
@@ -268,9 +301,9 @@ class InputFactory():
         """Creates an input field for a logical variable,
         which is currently implemented as a check box.
         """
-        kind = kwargs.get('kind', 'bool')
-        default_value = kwargs.get('default', False)
-        tooltip_text = kwargs.get('tooltip', None)
+        kind = kwargs.get("kind", "bool")
+        default_value = kwargs.get("default", False)
+        tooltip_text = kwargs.get("tooltip", None)
         ic(kind)
         ic(default_value)
         ic(tooltip_text)
@@ -291,23 +324,23 @@ class InputFactory():
         For numerical values, it adds a QValidator instance
         to filter out invalid inputs.
         """
-        kind = kwargs.get('kind', 'str')
-        default_value = kwargs.get('default', None)
-        tooltip_text = kwargs.get('tooltip', None)
-        minval = kwargs.get('mini', None)
+        kind = kwargs.get("kind", "str")
+        default_value = kwargs.get("default", None)
+        tooltip_text = kwargs.get("tooltip", None)
+        minval = kwargs.get("mini", None)
         ic(kind)
         ic(default_value)
         ic(tooltip_text)
         ic(kwargs)
         base, layout = InputFactory.createBase(*args, **kwargs)
         field = QLineEdit(base)
-        if kind == 'int' or kind == 'integer':
+        if kind == "int" or kind == "integer":
             data_handler = GeneralInput(data_type=int, **kwargs)
             validator = QIntValidator(field)
-        elif kind == 'float':
+        elif kind == "float":
             data_handler = GeneralInput(data_type=float, **kwargs)
             validator = QDoubleValidator(field)
-        elif kind == 'str':
+        elif kind == "str":
             data_handler = GeneralInput(data_type=str, **kwargs)
             validator = None
         if validator is not None:
@@ -319,14 +352,14 @@ class InputFactory():
         field.setToolTip(tooltip_text)
         layout.addWidget(field)
         return [base, data_handler]
-    
+
     def createCombo(*args, **kwargs):
         """For the variable where one option has to be picked from
         a list of possible values, we create a ComboBox"""
-        kind = kwargs.get('kind', 'str')
-        default_value = kwargs.get('default', False)
-        tooltip_text = kwargs.get('tooltip', None)
-        option_list = kwargs.get('choices', [])
+        kind = kwargs.get("kind", "str")
+        default_value = kwargs.get("default", False)
+        tooltip_text = kwargs.get("tooltip", None)
+        option_list = kwargs.get("choices", [])
         ic(kind)
         ic(default_value)
         ic(tooltip_text)
@@ -339,7 +372,6 @@ class InputFactory():
         field.setToolTip(tooltip_text)
         layout.addWidget(field)
         return [base, data_handler]
-        
 
 
 # the following code was useful at first - but could it be replaced by
@@ -347,9 +379,9 @@ class InputFactory():
 # The InputVariable/InputDialog combo seems to be offering a subset
 # of what InputFactory and GeneralInput can do.
 
+
 class InputVariable(QObject):
-    """A general-purpose input field, used by the InputDialog.
-    """
+    """A general-purpose input field, used by the InputDialog."""
 
     def __init__(self, *args, input_dict: dict = None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -365,9 +397,9 @@ class InputVariable(QObject):
         self.placeholder = ""
         for key, item in input_dict.items():
             self.__setattr__(str(key), item)
-        
+
         self.input_widgets = []
-    
+
     def returnValues(self):
         result = []
         for widget in self.input_widgets:
@@ -386,10 +418,10 @@ class InputDialog(QDialog):
 
     got_values = Signal(dict)
 
-    def __init__(self, *args, fields: Iterable['InputVariable'] = None, **kwargs):
+    def __init__(self, *args, fields: Iterable["InputVariable"] = None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields = fields #  we need to store it for later
+        self.fields = fields  #  we need to store it for later
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         # now some basic elements
@@ -438,7 +470,7 @@ class InputDialog(QDialog):
         self.button.clicked.connect(self.accept)
         self.accepted.connect(self.return_value)
         button_layout.addWidget(self.button)
-    
+
     @Slot()
     def return_value(self):
         result = {}

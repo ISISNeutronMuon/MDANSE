@@ -16,29 +16,30 @@
 from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
 from MDANSE.Framework.Selectors.ISelector import ISelector
-    
-class SideChain(ISelector):
 
+
+class SideChain(ISelector):
     section = "proteins"
 
     def select(self, names):
-        '''Returns the sidechains atoms.
-    
+        """Returns the sidechains atoms.
+
         Only for Protein, PeptideChain and NucleotideChain objects.
-        '''
-        
+        """
+
         sel = set()
 
-        if '*' in names:
+        if "*" in names:
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, (PeptideChain, Protein)):
                     sel.update(ce.sidechains)
-        else:            
+        else:
             vals = set(names)
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, (PeptideChain, Protein)) and ce.name in vals:
                     sel.update(ce.sidechains)
 
         return sel
+
 
 REGISTRY["sidechain"] = SideChain

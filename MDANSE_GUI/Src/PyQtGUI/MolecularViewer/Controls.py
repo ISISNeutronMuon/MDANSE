@@ -1,21 +1,38 @@
-
 from qtpy.QtCore import Signal, Slot, Qt, QTimer, QMutex
-from qtpy.QtWidgets import QWidget, QGridLayout, QSlider, QLineEdit, QHBoxLayout, QSpinBox,\
-                           QVBoxLayout, QPushButton, QStyle, QSizePolicy, QTableView,\
-                           QDoubleSpinBox, QColorDialog
-from qtpy.QtGui import QDoubleValidator, QIntValidator, QIcon, QPaintEvent, QPainter,\
-                       QColor
+from qtpy.QtWidgets import (
+    QWidget,
+    QGridLayout,
+    QSlider,
+    QLineEdit,
+    QHBoxLayout,
+    QSpinBox,
+    QVBoxLayout,
+    QPushButton,
+    QStyle,
+    QSizePolicy,
+    QTableView,
+    QDoubleSpinBox,
+    QColorDialog,
+)
+from qtpy.QtGui import (
+    QDoubleValidator,
+    QIntValidator,
+    QIcon,
+    QPaintEvent,
+    QPainter,
+    QColor,
+)
 
 from MDANSE_GUI.PyQtGUI.MolecularViewer.MolecularViewer import MolecularViewer
 from MDANSE_GUI.PyQtGUI.MolecularViewer.Contents import TrajectoryAtomData
 
 button_lookup = {
-    'start' : QStyle.StandardPixmap.SP_MediaSkipBackward,
-    'back' : QStyle.StandardPixmap.SP_MediaSeekBackward,
-    'stop' : QStyle.StandardPixmap.SP_MediaStop,
-    'play' : QStyle.StandardPixmap.SP_MediaPlay,
-    'fwd' : QStyle.StandardPixmap.SP_MediaSeekForward,
-    'end' : QStyle.StandardPixmap.SP_MediaSkipForward,
+    "start": QStyle.StandardPixmap.SP_MediaSkipBackward,
+    "back": QStyle.StandardPixmap.SP_MediaSeekBackward,
+    "stop": QStyle.StandardPixmap.SP_MediaStop,
+    "play": QStyle.StandardPixmap.SP_MediaPlay,
+    "fwd": QStyle.StandardPixmap.SP_MediaSeekForward,
+    "end": QStyle.StandardPixmap.SP_MediaSkipForward,
 }
 
 jogger_stylesheet = """QSpinBox {
@@ -63,18 +80,17 @@ QSpinBox::down-button  {
 
 
 class ColourButton(QPushButton):
-
-    def __init__(self, *args, colour = (255,255,255), **kwargs):
+    def __init__(self, *args, colour=(255, 255, 255), **kwargs):
         super().__init__(*args, **kwargs)
 
         self._current_colour = QColor(colour[0], colour[1], colour[2])
-    
+
     def paintEvent(self, a0: QPaintEvent) -> None:
         painter = QPainter()
         painter.setBrush(self._current_colour)
         painter.fillRect(self.rect())
         return super().paintEvent(a0)
-    
+
     @Slot()
     def pickColour(self):
         new_colour = QColorDialog.getColor(initial=self._current_colour)
@@ -82,9 +98,7 @@ class ColourButton(QPushButton):
             self._current_colour = new_colour
 
 
-
 class ViewerControls(QWidget):
-
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
         layout = QGridLayout(self)
@@ -120,11 +134,11 @@ class ViewerControls(QWidget):
         frame_selector.valueChanged.connect(frame_slider.setValue)
         frame_slider.valueChanged.connect(frame_selector.setValue)
         self._frame_selector = frame_selector
-        self.layout().addWidget(base, 2,0,1,3)  # row, column, rowSpan, columnSpan
+        self.layout().addWidget(base, 2, 0, 1, 3)  # row, column, rowSpan, columnSpan
 
     def setViewer(self, viewer: MolecularViewer):
         self._viewer = viewer
-        self.layout().addWidget(viewer, 0,0,2,2)  # row, column, rowSpan, columnSpan
+        self.layout().addWidget(viewer, 0, 0, 2, 2)  # row, column, rowSpan, columnSpan
         self._frame_slider.valueChanged.connect(viewer.set_coordinates)
         viewer.new_max_frames.connect(self._frame_slider.setMaximum)
         viewer.new_max_frames.connect(self._frame_selector.setMaximum)
@@ -134,7 +148,7 @@ class ViewerControls(QWidget):
         self._atom_details.setModel(viewer._colour_manager)
         viewer._colour_manager.new_atom_properties.connect(viewer.take_atom_properties)
 
-    def createButtons(self, orientation : Qt.Orientation):
+    def createButtons(self, orientation: Qt.Orientation):
         """Create a bar with video player buttons for controlling the
         animation.
         """
@@ -142,32 +156,37 @@ class ViewerControls(QWidget):
         base.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)
         if orientation == Qt.Orientation.Horizontal:
             layout = QHBoxLayout(base)
-            self.layout().addWidget(base, 3,0,1,3)  # row, column, rowSpan, columnSpan
+            self.layout().addWidget(
+                base, 3, 0, 1, 3
+            )  # row, column, rowSpan, columnSpan
         elif orientation == Qt.Orientation.Vertical:
             layout = QVBoxLayout(base)
-            self.layout().addWidget(base, 0,2,2,1)  # row, column, rowSpan, columnSpan
+            self.layout().addWidget(
+                base, 0, 2, 2, 1
+            )  # row, column, rowSpan, columnSpan
         for button_name, button_role in button_lookup.items():
             temp = QPushButton(base)
             icon = self.style().standardIcon(button_role)
             temp.setIcon(icon)
             layout.addWidget(temp)
             self._buttons[button_name] = temp
-        self._buttons['stop'].clicked.connect(self.stop_animation)
-        self._buttons['play'].clicked.connect(lambda: self.animate())
-        self._buttons['fwd'].clicked.connect(lambda: self.animate(step_size=10))
-        self._buttons['back'].clicked.connect(lambda: self.animate(step_size=-10))
-        self._buttons['start'].clicked.connect(lambda: self.go_to_end(last_frame=False))
-        self._buttons['end'].clicked.connect(lambda: self.go_to_end(last_frame=True))
+        self._buttons["stop"].clicked.connect(self.stop_animation)
+        self._buttons["play"].clicked.connect(lambda: self.animate())
+        self._buttons["fwd"].clicked.connect(lambda: self.animate(step_size=10))
+        self._buttons["back"].clicked.connect(lambda: self.animate(step_size=-10))
+        self._buttons["start"].clicked.connect(lambda: self.go_to_end(last_frame=False))
+        self._buttons["end"].clicked.connect(lambda: self.go_to_end(last_frame=True))
 
     def createSidePanel(self):
-        """Adds widgets for finer control of the playback
-        """
+        """Adds widgets for finer control of the playback"""
         base = QWidget(self)
         layout = QVBoxLayout(base)
         base.setLayout(layout)
         # the table of chemical elements
         self._atom_details = QTableView(base)
-        self._atom_details.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        self._atom_details.setSizePolicy(
+            QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum
+        )
         layout.addWidget(self._atom_details)
         # the widget selecting time per animation frame
         frame_time_selector = QSpinBox(base)
@@ -196,7 +215,7 @@ class ViewerControls(QWidget):
         layout.addWidget(size_factor)
         # the database of atom types
         # self._database = TrajectoryAtomData()
-        self.layout().addWidget(base, 0,2,2,1)  # row, column, rowSpan, columnSpan
+        self.layout().addWidget(base, 0, 2, 2, 1)  # row, column, rowSpan, columnSpan
 
     @Slot(int)
     def setTimeStep(self, new_value: int):
@@ -223,8 +242,7 @@ class ViewerControls(QWidget):
 
     @Slot()
     def stop_animation(self):
-        """Stop changing trajectory frames.
-        """
+        """Stop changing trajectory frames."""
         self._mutex.lock()
         if self._animation_timer.isActive():
             self._animation_timer.stop()
@@ -242,7 +260,7 @@ class ViewerControls(QWidget):
         self._frame_step = step_size * self._frame_factor
         self._animation_timer.setInterval(self._time_per_frame)
         self._animation_timer.start()
-    
+
     def advance_frame(self):
         firstFrame = self._frame_selector.minimum()
         lastFrame = self._frame_selector.maximum()
@@ -255,5 +273,3 @@ class ViewerControls(QWidget):
             self.stop_animation()
         else:
             self._frame_selector.setValue(new_value)
-
-        

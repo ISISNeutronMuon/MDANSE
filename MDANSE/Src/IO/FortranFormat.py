@@ -55,6 +55,7 @@ Examples::
 
 import string
 
+
 #
 # The class FortranLine represents a single line of input/output,
 # which can be accessed as text or as a list of items.
@@ -80,8 +81,8 @@ class FortranLine:
          take more space, instead of being replaced by stars according
          to Fortran conventions.
     """
-    
-    def __init__(self, line, format, length = 80):
+
+    def __init__(self, line, format, length=80):
         """
         @param line: either a sequence of Python objects, or a string
                      formatted according to Fortran rules
@@ -97,13 +98,13 @@ class FortranLine:
                        extended by spaces to have the indicated length.
                        The default value of 80 is almost always correct.
         """
-        if type(line) == type(''):
+        if type(line) == type(""):
             self.text = line
             self.data = None
         else:
             self.text = None
             self.data = line
-        if type(format) == type(''):
+        if type(format) == type(""):
             self.format = FortranFormat(format)
         else:
             self.format = format
@@ -154,7 +155,8 @@ class FortranLine:
 
     def _input(self):
         text = self.text
-        if len(text) < self.length: text = text + (self.length-len(text))*' '
+        if len(text) < self.length:
+            text = text + (self.length - len(text)) * " "
         self.data = []
         for field in self.format:
             l = field[1]
@@ -162,28 +164,28 @@ class FortranLine:
             text = text[l:]
             type = field[0]
             value = None
-            if type == 'A':
+            if type == "A":
                 value = s
-            elif type == 'I':
+            elif type == "I":
                 s = s.strip()
                 if len(s) == 0:
                     value = 0
                 else:
                     # by AP
-                    # sometimes a line does not match to expected format, 
+                    # sometimes a line does not match to expected format,
                     # e.g.: pdb2myd.ent.Z chain: - model: 0 : CONECT*****
                     # catch this and set value to None
                     try:
                         value = int(s)
                     except:
                         value = None
-            elif type == 'D' or type == 'E' or type == 'F' or type == 'G':
+            elif type == "D" or type == "E" or type == "F" or type == "G":
                 s = s.strip().lower()
-                n = s.find('d')
+                n = s.find("d")
                 if n >= 0:
-                    s = s[:n] + 'e' + s[n+1:]
+                    s = s[:n] + "e" + s[n + 1 :]
                 if len(s) == 0:
-                    value = 0.
+                    value = 0.0
                 else:
                     try:
                         value = float(s)
@@ -194,40 +196,42 @@ class FortranLine:
 
     def _output(self):
         data = self.data
-        self.text = ''
+        self.text = ""
         for field in self.format:
             type = field[0]
             if type == "'":
                 self.text = self.text + field[1]
-            elif type == 'X':
-                self.text = self.text + field[1]*' '
-            else: # fields that use input data
+            elif type == "X":
+                self.text = self.text + field[1] * " "
+            else:  # fields that use input data
                 length = field[1]
-                if len(field) > 2: fraction = field[2]
+                if len(field) > 2:
+                    fraction = field[2]
                 value = data[0]
                 data = data[1:]
-                if type == 'A':
-                    self.text = self.text + (value+length*' ')[:length]
-                else: # numeric fields
+                if type == "A":
+                    self.text = self.text + (value + length * " ")[:length]
+                else:  # numeric fields
                     if value is None:
-                        s = ''
-                    elif type == 'I':
+                        s = ""
+                    elif type == "I":
                         s = repr(value)
-                    elif type == 'D':
-                        s = ('%'+repr(length)+'.'+repr(fraction)+'e') % value
-                        n = s.find('e')
-                        s = s[:n] + 'D' + s[n+1:]
-                    elif type == 'E':
-                        s = ('%'+repr(length)+'.'+repr(fraction)+'e') % value
-                    elif type == 'F':
-                        s = ('%'+repr(length)+'.'+repr(fraction)+'f') % value
-                    elif type == 'G':
-                        s = ('%'+repr(length)+'.'+repr(fraction)+'g') % value
+                    elif type == "D":
+                        s = ("%" + repr(length) + "." + repr(fraction) + "e") % value
+                        n = s.find("e")
+                        s = s[:n] + "D" + s[n + 1 :]
+                    elif type == "E":
+                        s = ("%" + repr(length) + "." + repr(fraction) + "e") % value
+                    elif type == "F":
+                        s = ("%" + repr(length) + "." + repr(fraction) + "f") % value
+                    elif type == "G":
+                        s = ("%" + repr(length) + "." + repr(fraction) + "g") % value
                     else:
-                        raise ValueError('Not yet implemented')
+                        raise ValueError("Not yet implemented")
                     s = s.upper()
-                    self.text = self.text + ((length*' ')+s)[-length:]
+                    self.text = self.text + ((length * " ") + s)[-length:]
         self.text = self.text.rstrip()
+
 
 #
 # The class FortranFormat represents a format specification.
@@ -245,7 +249,7 @@ class FortranFormat:
     object has the advantage that the format string is parsed only once.
     """
 
-    def __init__(self, format, nested = False):
+    def __init__(self, format, nested=False):
         """
         @param format: a Fortran format specification
         @type format: C{str}
@@ -253,46 +257,47 @@ class FortranFormat:
         """
         fields = []
         format = format.strip()
-        while format and format[0] != ')':
+        while format and format[0] != ")":
             n = 0
             while format[0] in string.digits:
-                n = 10*n + int(format[0])
+                n = 10 * n + int(format[0])
                 format = format[1:]
-            if n == 0: n = 1
+            if n == 0:
+                n = 1
             type = format[0].upper()
             if type == "'":
                 eof = format.find("'", 1)
                 text = format[1:eof]
-                format = format[eof+1:]
+                format = format[eof + 1 :]
             else:
                 format = format[1:].strip()
-            if type == '(':
+            if type == "(":
                 subformat = FortranFormat(format, 1)
-                fields = fields + n*subformat.fields
+                fields = fields + n * subformat.fields
                 format = subformat.rest
-                eof = format.find(',')
+                eof = format.find(",")
                 if eof >= 0:
-                    format = format[eof+1:]
+                    format = format[eof + 1 :]
             else:
-                eof = format.find(',')
+                eof = format.find(",")
                 if eof >= 0:
                     field = format[:eof]
-                    format = format[eof+1:]
+                    format = format[eof + 1 :]
                 else:
-                    eof = format.find(')')
+                    eof = format.find(")")
                     if eof >= 0:
                         field = format[:eof]
-                        format = format[eof+1:]
+                        format = format[eof + 1 :]
                     else:
                         field = format
-                        format = ''
+                        format = ""
                 if type == "'":
                     field = (type, text)
                 else:
-                    dot = field.find('.')
+                    dot = field.find(".")
                     if dot > 0:
                         length = int(field[:dot])
-                        fraction = int(field[dot+1:])
+                        fraction = int(field[dot + 1 :])
                         field = (type, length, fraction)
                     else:
                         if field:
@@ -300,7 +305,7 @@ class FortranFormat:
                         else:
                             length = 1
                         field = (type, length)
-                fields = fields + n*[field]
+                fields = fields + n * [field]
         self.fields = fields
         if nested:
             self.rest = format
@@ -314,10 +319,10 @@ class FortranFormat:
 
 # Test code
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     f = FortranFormat("'!!',D10.3,F10.3,G10.3,'!!'")
     l = FortranLine([1.5707963, 3.14159265358, 2.71828], f)
     print(str(l))
     f = FortranFormat("F12.0")
-    l = FortranLine('2.1D2', f)
+    l = FortranLine("2.1D2", f)
     print(l[0])

@@ -1,4 +1,3 @@
-
 import numpy as np
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtWidgets import QTableView, QColorDialog
@@ -16,7 +15,6 @@ class TrajectoryAtomData(QStandardItemModel):
     """
 
     def __init__(self, *args, **kwargs):
-
         super(TrajectoryAtomData, self).__init__(*args, **kwargs)
         self._viewer = None
         self._reader = None
@@ -41,8 +39,8 @@ class TrajectoryAtomData(QStandardItemModel):
             ireader -- a trajectory reader for the MolecularViewer.
         """
         self._reader = ireader
-    
-    def parseInformation(self, unique = True):
+
+    def parseInformation(self, unique=True):
         if self._reader is None or self._viewer is None:
             return
         atom_names = self._reader.atom_names
@@ -57,7 +55,3 @@ class TrajectoryAtomData(QStandardItemModel):
             crit = np.where(atom_types == type)
             grouped_by_type[type] = atom_ids[crit]
             name_by_type[type] = atom_names[crit][0]
-        
-
-
-

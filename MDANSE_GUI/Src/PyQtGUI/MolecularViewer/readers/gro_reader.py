@@ -9,11 +9,9 @@ from waterstay.readers.i_reader import InvalidFileError
 from waterstay.readers.reader_registry import register_reader
 
 
-@register_reader('.gro')
+@register_reader(".gro")
 class GroReader(ASCIIReader):
-
     def __init__(self, filename):
-
         super(GroReader, self).__init__(filename)
 
         # Read the title line and store its length
@@ -44,9 +42,9 @@ class GroReader(ASCIIReader):
                     eof = True
                     break
                 if i == 0:
-                    match = re.search('.* t= (.*) step=', line)
+                    match = re.search(".* t= (.*) step=", line)
                     if match is None:
-                        raise InvalidFileError('Invalid PDB file')
+                        raise InvalidFileError("Invalid PDB file")
                     self._times.append(float(match.groups()[0]))
                 elif i == 1:
                     self._frame_starts.append(self._fin.tell())
@@ -61,15 +59,14 @@ class GroReader(ASCIIReader):
 
         self._coords_size = 45
 
-        self._frame_size = self._n_atoms*self._coords_size
+        self._frame_size = self._n_atoms * self._coords_size
 
         self.parse_first_frame()
 
-        logging.info('Read {} successfully'.format(filename))
+        logging.info("Read {} successfully".format(filename))
 
     def parse_first_frame(self):
-        """Parse the first frame to get resp. the residue ids and names and the atoms ids and names.
-        """
+        """Parse the first frame to get resp. the residue ids and names and the atoms ids and names."""
 
         # Rewind the file to the beginning of the first frame
         self._fin.seek(self._frame_starts[0])
@@ -82,7 +79,7 @@ class GroReader(ASCIIReader):
         self._residue_ids = []
 
         for i in range(self._n_atoms):
-            start = i*self._coords_size
+            start = i * self._coords_size
             end = start + self._coords_size
             line = data[start:end]
             self._residue_ids.append(int(line[0:5]))
@@ -110,7 +107,7 @@ class GroReader(ASCIIReader):
         coords = np.empty((self._n_atoms, 3), dtype=np.float)
 
         for i in range(self._n_atoms):
-            start = i*self._coords_size
+            start = i * self._coords_size
             end = start + self._coords_size
             line = data[start:end]
             x = float(line[20:28])
@@ -158,14 +155,13 @@ class GroReader(ASCIIReader):
         return pbc
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     import sys
 
     gro_file = sys.argv[1]
 
     reader = GromacsReader(gro_file)
 
-    indexes = reader.get_mol_indexes('ARG', ['2HH2'])
+    indexes = reader.get_mol_indexes("ARG", ["2HH2"])
 
     print(indexes)

@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-__description__  = "Graphical User Interface for the MDANSE software"
+__description__ = "Graphical User Interface for the MDANSE software"
 
 __long_description__ = """MDANSE is an interactive program for the analysis of Molecular
 Dynamics simulations. While it is possible to use MDANSE from the command line,
@@ -21,23 +21,25 @@ a GUI has been developed to provide a more complete user experience and visualis
 options.
 """
 
-__author__           = "M.Bartkowiak, R. Perenon, E.C. Pellegrini, S. Mukhopadhyay, R. Turanyi"
+__author__ = "M.Bartkowiak, R. Perenon, E.C. Pellegrini, S. Mukhopadhyay, R. Turanyi"
 
-__author_email__     = "maciej.bartkowiak@stfc.ac.uk, " \
-                       "perenon@ill.fr, pellegrini@ill.fr, sanghamitra.mukhopadhyay@stfc.ac.uk, " \
-                       "rastislav.turanyi@stfc.ac.uk"
+__author_email__ = (
+    "maciej.bartkowiak@stfc.ac.uk, "
+    "perenon@ill.fr, pellegrini@ill.fr, sanghamitra.mukhopadhyay@stfc.ac.uk, "
+    "rastislav.turanyi@stfc.ac.uk"
+)
 
-__maintainer__       = "R. Perenon, S. Mukhopadhyay"
+__maintainer__ = "R. Perenon, S. Mukhopadhyay"
 
 __maintainer_email__ = "perenon@ill.fr, sanghamitra.mukhopadhyay@stfc.ac.uk"
 
 __former_contributors__ = "G. Goret, B. Aoun, E.C. Pellegrini"
 
-__url__              = "https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx"
+__url__ = "https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx"
 
-__repo__             = "https://github.com/ISISNeutronMuon/MDANSE"
+__repo__ = "https://github.com/ISISNeutronMuon/MDANSE"
 
-__license__          = "GPL 3"
+__license__ = "GPL 3"
 
 __version__ = "0.0.1"
 
@@ -46,7 +48,3 @@ __date__ = "01-01-1970"
 __commit__ = "undefined"
 
 __beta__ = "alpha"
-
-
-
-

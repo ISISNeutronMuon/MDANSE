@@ -15,20 +15,23 @@
 
 import logging
 
-class Formatter(logging.Formatter):
-    '''
-    Converts the log record to a string.
-    '''
 
-    FORMATS = {'DEBUG'    : '%(asctime)s - %(levelname)-8s - %(message)s --- %(pathname)s %(funcName)s line %(lineno)s',
-               'INFO'     : '%(asctime)s - %(levelname)-8s - %(message)s',
-               'WARNING'  : '%(asctime)s - %(levelname)-8s - %(message)s',
-               'ERROR'    : '%(asctime)s - %(levelname)-8s - %(message)s',
-               'CRITICAL' : '%(asctime)s - %(levelname)-8s - %(message)s',
-               'FATAL'    : '%(asctime)s - %(levelname)-8s - %(message)s'}
-                                            
+class Formatter(logging.Formatter):
+    """
+    Converts the log record to a string.
+    """
+
+    FORMATS = {
+        "DEBUG": "%(asctime)s - %(levelname)-8s - %(message)s --- %(pathname)s %(funcName)s line %(lineno)s",
+        "INFO": "%(asctime)s - %(levelname)-8s - %(message)s",
+        "WARNING": "%(asctime)s - %(levelname)-8s - %(message)s",
+        "ERROR": "%(asctime)s - %(levelname)-8s - %(message)s",
+        "CRITICAL": "%(asctime)s - %(levelname)-8s - %(message)s",
+        "FATAL": "%(asctime)s - %(levelname)-8s - %(message)s",
+    }
+
     def formatTime(self, record, datefmt=None):
-        '''
+        """
         Return the creation time of the specified LogRecord as formatted text.
 
         This method should be called from format() by a formatter which
@@ -44,32 +47,31 @@ class Formatter(logging.Formatter):
         time.localtime() or time.gmtime(). To change it for all formatters,
         for example if you want all logging times to be shown in GMT,
         set the 'converter' attribute in the Formatter class.
-        
+
         :param record: the log record.
         :type record: logging.LogRecord
-        
+
         :param datefmt: the format that will be used to produce the stringified date.
         :type datefmt: str
-        '''
+        """
 
         import time
-                
+
         # The log time is converted to local time.
         ct = self.converter(record.created)
-        
-        # Case where datefmt was set, use it. 
+
+        # Case where datefmt was set, use it.
         if datefmt:
             s = time.strftime(datefmt, ct)
-            
+
         # Otherwise use a default format.
         else:
             s = time.strftime("%Y-%m-%d %H:%M:%S", ct)
 
         return s
-    
-                        
+
     def format(self, record):
-        '''
+        """
         Format the logging record to a string that will further throw to the logger's handlers.
 
         The record's attribute dictionary is used as the operand to a
@@ -79,27 +81,26 @@ class Formatter(logging.Formatter):
         using LogRecord.getMessage(). If the formatting string uses the
         time (as determined by a call to usesTime(), formatTime() is
         called to format the event time. If there is exception information,
-        its value are used to overwrite the pathname, lineno and funcName 
+        its value are used to overwrite the pathname, lineno and funcName
         attribute of the record being processed and appended to the message.
-        
+
         @param record: the loggign record to be formatted.
         @type record: logging.LogRecord
-        '''
-        
-        # The format is set according to the record level.        
+        """
+
+        # The format is set according to the record level.
         fmt = Formatter.FORMATS[record.levelname]
-        
+
         # Get the record message.
         record.message = record.getMessage()
-                
+
         if not record.message:
             s = record.message
 
-        else: 
-            record.asctime = self.formatTime(record, self.datefmt)                      
-            # Creates the actual output string.  
+        else:
+            record.asctime = self.formatTime(record, self.datefmt)
+            # Creates the actual output string.
             s = fmt % record.__dict__
-            s = s.replace('\n', '\n' + ' '*33)
-        
-        return s
+            s = s.replace("\n", "\n" + " " * 33)
 
+        return s

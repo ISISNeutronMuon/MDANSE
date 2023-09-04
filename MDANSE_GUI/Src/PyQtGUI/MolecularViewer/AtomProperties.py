@@ -1,4 +1,3 @@
-
 import numpy as np
 import vtk
 from qtpy.QtGui import QStandardItemModel, QStandardItem, QColor
@@ -7,7 +6,6 @@ from qtpy.QtCore import Signal, Slot
 RGB_COLOURS = []
 RGB_COLOURS.append((1.00, 0.20, 1.00))  # selection
 RGB_COLOURS.append((1.00, 0.90, 0.90))  # background
-
 
 
 def ndarray_to_vtkarray(colors, scales, n_atoms):
@@ -56,7 +54,6 @@ def ndarray_to_vtkarray(colors, scales, n_atoms):
 
 
 class AtomProperties(QStandardItemModel):
-
     new_atom_properties = Signal(object)
 
     def __init__(self, *args, init_colours: list = None, **kwargs):
@@ -68,12 +65,7 @@ class AtomProperties(QStandardItemModel):
         else:
             self._colour_list = init_colours
         self.rebuild_colours()
-        self.setHorizontalHeaderLabels([
-            "Index",
-            "Element",
-            "Radius",
-            "Colour"
-        ])
+        self.setHorizontalHeaderLabels(["Index", "Element", "Radius", "Colour"])
         self.itemChanged.connect(self.onNewValues)
 
     def clear_table(self):
@@ -96,7 +88,7 @@ class AtomProperties(QStandardItemModel):
         for index, colour in enumerate(self._colour_list):
             self._lut.AddRGBPoint(index, colour[0], colour[1], colour[2])
 
-    def add_colour(self, rgb: tuple[int,int,int]) -> int:
+    def add_colour(self, rgb: tuple[int, int, int]) -> int:
         """Puts the colour into the list and returns the
         index of the colour in the list, to be used by VTK.
 
@@ -106,7 +98,7 @@ class AtomProperties(QStandardItemModel):
         Returns:
             int - the index of the colour in the list
         """
-        float_rgb = tuple([x/255.0 for x in rgb])
+        float_rgb = tuple([x / 255.0 for x in rgb])
         for index, value in enumerate(self._colour_list):
             if value == float_rgb:
                 return index
@@ -114,8 +106,10 @@ class AtomProperties(QStandardItemModel):
         self._colour_list.append(float_rgb)
         self.rebuild_colours()
         return new_index
-    
-    def initialise_from_database(self, atoms : list[str], element_database = None) -> list[int]:
+
+    def initialise_from_database(
+        self, atoms: list[str], element_database=None
+    ) -> list[int]:
         """Puts colours into the list based on chemical elements list
         and a database with colour values.
 
@@ -132,15 +126,25 @@ class AtomProperties(QStandardItemModel):
         index_list = []
         for nat, atom in enumerate(atoms):
             row = []
-            rgb = [int(x) for x in element_database['atoms'][atom]['color'].split(';')]
+            rgb = [int(x) for x in element_database["atoms"][atom]["color"].split(";")]
             index_list.append(self.add_colour(rgb))
-            row.append(QStandardItem(str(nat+1)))  # atom number
-            row.append(QStandardItem(str(element_database['atoms'][atom]['symbol'])))  # chemical element name
-            row.append(QStandardItem(str(round(element_database['atoms'][atom]['atomic_radius'],2))))
-            row.append(QStandardItem(QColor(rgb[0], rgb[1], rgb[2]).name(QColor.NameFormat.HexRgb)))
+            row.append(QStandardItem(str(nat + 1)))  # atom number
+            row.append(
+                QStandardItem(str(element_database["atoms"][atom]["symbol"]))
+            )  # chemical element name
+            row.append(
+                QStandardItem(
+                    str(round(element_database["atoms"][atom]["atomic_radius"], 2))
+                )
+            )
+            row.append(
+                QStandardItem(
+                    QColor(rgb[0], rgb[1], rgb[2]).name(QColor.NameFormat.HexRgb)
+                )
+            )
             self.appendRow(row)
         return index_list
-    
+
     @Slot()
     def onNewValues(self):
         colours = []
@@ -149,11 +153,10 @@ class AtomProperties(QStandardItemModel):
         for row in range(self.rowCount()):
             colour = QColor(self.item(row, 3).text())
             red, green, blue = colour.red(), colour.green(), colour.blue()
-            colours.append(self.add_colour((red,green,blue)))
+            colours.append(self.add_colour((red, green, blue)))
             radius = float(self.item(row, 2).text())
             radii.append(radius)
-            numbers.append(int(self.item(row,0).text()))
+            numbers.append(int(self.item(row, 0).text()))
 
         scalars = ndarray_to_vtkarray(colours, radii, len(numbers))
         self.new_atom_properties.emit(scalars)
-

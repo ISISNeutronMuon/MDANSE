@@ -1,24 +1,43 @@
-
 from typing import Union, Iterable, Optional
 from collections import OrderedDict
 import copy
 
 from icecream import ic
-from qtpy.QtWidgets import QDialog, QPushButton, QFileDialog, QGridLayout,\
-                           QVBoxLayout, QWidget, QLabel, QApplication,\
-                           QComboBox, QMenu, QLineEdit, QTableView,\
-                           QFormLayout, QHBoxLayout, QCheckBox, QTextEdit
-from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel,\
-                        QObject
-from qtpy.QtGui import QFont, QEnterEvent, QStandardItem, QStandardItemModel,\
-                    QIntValidator, QDoubleValidator, QValidator
+from qtpy.QtWidgets import (
+    QDialog,
+    QPushButton,
+    QFileDialog,
+    QGridLayout,
+    QVBoxLayout,
+    QWidget,
+    QLabel,
+    QApplication,
+    QComboBox,
+    QMenu,
+    QLineEdit,
+    QTableView,
+    QFormLayout,
+    QHBoxLayout,
+    QCheckBox,
+    QTextEdit,
+)
+from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel, QObject
+from qtpy.QtGui import (
+    QFont,
+    QEnterEvent,
+    QStandardItem,
+    QStandardItemModel,
+    QIntValidator,
+    QDoubleValidator,
+    QValidator,
+)
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE_GUI.PyQtGUI.Widgets.GeneralWidgets import InputFactory
 
 
 sample_styles = {
-'initial_stylesheet' : """QWidget
+    "initial_stylesheet": """QWidget
 {   background-color:rgb(230,250,250);
     border-radius: 2px;
     border-style: inset;
@@ -27,9 +46,7 @@ sample_styles = {
     font: bold 14px;
     padding: 6px;
 }""",
-
-
-'dark_stylesheet' : """QWidget
+    "dark_stylesheet": """QWidget
 {   background-color:rgb(80,10,80);
     border-radius: 6px;
     border-style: outset;
@@ -39,9 +56,7 @@ sample_styles = {
     color: rgb(10,200,10);
     padding: 6px;
 }""",
-
-
-'hippie_stylesheet' : """QWidget
+    "hippie_stylesheet": """QWidget
 {   background-image: radial-gradient(rgb(200,160,160), rgb(0, 150,250), rgb(250,100,250));
     border-radius: 10px;
     border-style: outset;
@@ -50,17 +65,15 @@ sample_styles = {
     font: bold 14px;
     color: rgb(10,200,10);
     padding: 6px;
-}"""
-
+}""",
 }
 
 
 class StyleDatabase(QObject):
-
     stored_style = Signal(str)
     stored_labels = Signal(list)
 
-    def __init__(self, parent: Optional['QObject'] = ...) -> None:
+    def __init__(self, parent: Optional["QObject"] = ...) -> None:
         super().__init__(parent)
         self._styles = sample_styles
 
@@ -69,7 +82,7 @@ class StyleDatabase(QObject):
         label = style[0]
         text = style[1]
         self._styles[label] = text
-    
+
     @Slot(str)
     def returnStyleString(self, label: str) -> str:
         try:
@@ -79,7 +92,7 @@ class StyleDatabase(QObject):
         else:
             self.stored_style.emit(temp)
             return temp
-    
+
     @Slot()
     def showStoredLabels(self) -> list[str]:
         temp = [str(x) for x in self._styles.keys()]
@@ -88,11 +101,10 @@ class StyleDatabase(QObject):
 
 
 class StyleDialog(QDialog):
-
     new_style = Signal(str)
     icon_swap = Signal(bool)
 
-    def __init__(self, *args, converter: IJob = 'Dummy', **kwargs):
+    def __init__(self, *args, converter: IJob = "Dummy", **kwargs):
         super().__init__(*args, **kwargs)
 
         self._database = None
@@ -106,7 +118,7 @@ class StyleDialog(QDialog):
 
         for x in [self._selector, self._display, self._confirm]:
             layout.addWidget(x)
-    
+
     def connectStyleDatabase(self, dbase: StyleDatabase):
         self._database = dbase
         labels = dbase.showStoredLabels()
@@ -115,18 +127,12 @@ class StyleDialog(QDialog):
         dbase.stored_style.connect(self._display.setText)
         self._selector.currentTextChanged.connect(dbase.returnStyleString)
         self._selector.setCurrentIndex(0)
-    
+
     def commitChanges(self):
         text = self._display.document().toPlainText()
         self.new_style.emit(text)
         label = self._selector.currentText()
-        if 'dark' in label:
+        if "dark" in label:
             self.icon_swap.emit(True)
         else:
             self.icon_swap.emit(False)
-
-
-        
-
-
-        

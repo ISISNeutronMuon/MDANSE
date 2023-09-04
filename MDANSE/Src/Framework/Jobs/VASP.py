@@ -27,6 +27,7 @@ from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
+
 class XDATCARFileError(Error):
     pass
 
@@ -36,10 +37,8 @@ class VASPConverterError(Error):
 
 
 class XDATCARFile(dict):
-    
     def __init__(self, filename):
-        
-        self['instance'] = open(filename, 'rb')
+        self["instance"] = open(filename, "rb")
 
         # Read header
         self["instance"].readline()
@@ -51,29 +50,35 @@ class XDATCARFile(dict):
                 self._frameHeaderSize = self["instance"].tell() - self._headerSize
                 break
             header.append(line)
-                                   
+
         self["scale_factor"] = float(header[0])
 
         cell = " ".join(header[1:4]).split()
 
-        cell = np.array(cell,dtype=np.float64)
-                
-        self["cell_shape"] = np.reshape(cell,(3,3))*self["scale_factor"]*measure(1.0,'ang').toval('nm')
-                    
-        self["atoms"] = list(zip(header[4].split(),[int(v) for v in header[5].split()]))
-                    
+        cell = np.array(cell, dtype=np.float64)
+
+        self["cell_shape"] = (
+            np.reshape(cell, (3, 3))
+            * self["scale_factor"]
+            * measure(1.0, "ang").toval("nm")
+        )
+
+        self["atoms"] = list(
+            zip(header[4].split(), [int(v) for v in header[5].split()])
+        )
+
         self["n_atoms"] = sum([v[1] for v in self["atoms"]])
-        
+
         # The point here is to determine if the trajectory is NVT or NPT. If traj is NPT, the box will change at each iteration and the "header" will appear betwwen every frame
         # We try to read the two first frames to figure it out
         nAtoms = 0
         while True:
-            self._frameSize = self['instance'].tell()
+            self._frameSize = self["instance"].tell()
             line = self["instance"].readline().strip()
             if not line or line.lower().startswith("direct"):
                 break
             nAtoms += 1
-                    
+
         if nAtoms == self["n_atoms"]:
             # Traj is NVT
             # Structure is
@@ -106,7 +111,7 @@ class XDATCARFile(dict):
             self["instance"].seek(self._frameHeaderSize)
             nAtoms = 0
             while True:
-                self._frameSize = self['instance'].tell()
+                self._frameSize = self["instance"].tell()
                 line = self["instance"].readline().strip()
                 if len(line.split("  ")) != 3:
                     break
@@ -114,19 +119,23 @@ class XDATCARFile(dict):
 
             if nAtoms != self["n_atoms"]:
                 # Something went wrong
-                raise XDATCARFileError("The number of atoms (%d) does not match the size of a frame (%d)." % (nAtoms, self["n_atoms"]))
-            
+                raise XDATCARFileError(
+                    "The number of atoms (%d) does not match the size of a frame (%d)."
+                    % (nAtoms, self["n_atoms"])
+                )
+
         # Read frame number
-        self["instance"].seek(0,2)
-        self["n_frames"] = (self['instance'].tell()-self._headerSize)/self._frameSize
-        
+        self["instance"].seek(0, 2)
+        self["n_frames"] = (
+            self["instance"].tell() - self._headerSize
+        ) / self._frameSize
+
         # Go back to top
         self["instance"].seek(0)
-                
-                
+
     def read_step(self, step):
-        self['instance'].seek(self._headerSize+step*self._frameSize)
-        
+        self["instance"].seek(self._headerSize + step * self._frameSize)
+
         if self._npt:
             # Read box size
             self["instance"].readline()
@@ -137,17 +146,23 @@ class XDATCARFile(dict):
                     break
                 header.append(line)
             cell = " ".join(header[1:4]).split()
-            cell = np.array(cell,dtype=np.float64)
-            self["cell_shape"] = np.reshape(cell,(3,3))*self["scale_factor"]*measure(1.0,'ang').toval('nm')
+            cell = np.array(cell, dtype=np.float64)
+            self["cell_shape"] = (
+                np.reshape(cell, (3, 3))
+                * self["scale_factor"]
+                * measure(1.0, "ang").toval("nm")
+            )
         else:
-            self['instance'].read(self._frameHeaderSize)
-                        
-        data = np.array(self['instance'].read(self._actualFrameSize).split(), dtype=np.float64)
-        
-        config = np.reshape(data,(self["n_atoms"],3))
-                                                        
+            self["instance"].read(self._frameHeaderSize)
+
+        data = np.array(
+            self["instance"].read(self._actualFrameSize).split(), dtype=np.float64
+        )
+
+        config = np.reshape(data, (self["n_atoms"], 3))
+
         return config
-                                
+
     def close(self):
         self["instance"].close()
 
@@ -156,66 +171,96 @@ class VASPConverter(Converter):
     """
     Converts a VASP trajectory to a HDF trajectory.
     """
-                  
+
     label = "VASP (>=5)"
 
-    settings = collections.OrderedDict()           
-    settings['xdatcar_file'] = ('input_file',{'wildcard':'XDATCAR files (XDATCAR*)|XDATCAR*|All files|*',
-                                                'default':os.path.join('..','..','..','Data','Trajectories','VASP','XDATCAR_version5')})
-    settings['time_step'] = ('float', {'label':"time step", 'default':1.0, 'mini':1.0e-9})        
-    settings['fold'] = ('boolean', {'default':False,'label':"Fold coordinates in to box"})    
-    settings['output_file'] = ('single_output_file', {'format':"hdf",'root':'xdatcar_file'})
-                
+    settings = collections.OrderedDict()
+    settings["xdatcar_file"] = (
+        "input_file",
+        {
+            "wildcard": "XDATCAR files (XDATCAR*)|XDATCAR*|All files|*",
+            "default": os.path.join(
+                "..", "..", "..", "Data", "Trajectories", "VASP", "XDATCAR_version5"
+            ),
+        },
+    )
+    settings["time_step"] = (
+        "float",
+        {"label": "time step", "default": 1.0, "mini": 1.0e-9},
+    )
+    settings["fold"] = (
+        "boolean",
+        {"default": False, "label": "Fold coordinates in to box"},
+    )
+    settings["output_file"] = (
+        "single_output_file",
+        {"format": "hdf", "root": "xdatcar_file"},
+    )
+
     def initialize(self):
-        '''
+        """
         Initialize the job.
-        '''
-                
+        """
+
         self._xdatcarFile = XDATCARFile(self.configuration["xdatcar_file"]["filename"])
 
         # The number of steps of the analysis.
-        self.numberOfSteps = self._xdatcarFile['n_frames']
-        
+        self.numberOfSteps = self._xdatcarFile["n_frames"]
+
         self._chemicalSystem = ChemicalSystem()
-        
-        for symbol,number in self._xdatcarFile["atoms"]:
+
+        for symbol, number in self._xdatcarFile["atoms"]:
             for i in range(number):
-                self._chemicalSystem.add_chemical_entity(Atom(symbol=symbol, name="{:s}_{:d}".format(symbol,i)))
+                self._chemicalSystem.add_chemical_entity(
+                    Atom(symbol=symbol, name="{:s}_{:d}".format(symbol, i))
+                )
 
         # A trajectory is opened for writing.
-        self._trajectory = TrajectoryWriter(self.configuration['output_file']['file'],self._chemicalSystem, self.numberOfSteps)
+        self._trajectory = TrajectoryWriter(
+            self.configuration["output_file"]["file"],
+            self._chemicalSystem,
+            self.numberOfSteps,
+        )
 
     def run_step(self, index):
         """Runs a single step of the job.
-        
+
         @param index: the index of the step.
         @type index: int.
 
-        @note: the argument index is the index of the loop note the index of the frame.      
+        @note: the argument index is the index of the loop note the index of the frame.
         """
 
         # Read the current step in the xdatcar file.
         coords = self._xdatcarFile.read_step(index)
-                
+
         unitCell = UnitCell(self._xdatcarFile["cell_shape"])
 
-        conf = PeriodicBoxConfiguration(self._trajectory.chemical_system,coords,unitCell)
+        conf = PeriodicBoxConfiguration(
+            self._trajectory.chemical_system, coords, unitCell
+        )
 
         # The coordinates in VASP are in box format. Convert them into real coordinates.
         real_conf = conf.to_real_configuration()
 
-        if self.configuration['fold']['value']:
-            # The real coordinates are folded then into the simulation box (-L/2,L/2). 
+        if self.configuration["fold"]["value"]:
+            # The real coordinates are folded then into the simulation box (-L/2,L/2).
             real_conf.fold_coordinates()
 
         # Bind the configuration to the chemcial system
         self._trajectory.chemical_system.configuration = real_conf
 
         # Compute the actual time
-        time = index*self.configuration["time_step"]["value"]*measure(1.0,'fs').toval('ps')
+        time = (
+            index
+            * self.configuration["time_step"]["value"]
+            * measure(1.0, "fs").toval("ps")
+        )
 
         # Dump the configuration to the output trajectory
-        self._trajectory.dump_configuration(time,units={'time':'ps','unit_cell':'nm','coordinates':'nm'})
+        self._trajectory.dump_configuration(
+            time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
+        )
 
         return index, None
 
@@ -223,7 +268,7 @@ class VASPConverter(Converter):
         """
         @param index: the index of the step.
         @type index: int.
-        
+
         @param x:
         @type x: any.
         """
@@ -234,14 +279,13 @@ class VASPConverter(Converter):
         """
         Finalize the job.
         """
-        
+
         self._xdatcarFile.close()
 
         # Close the output trajectory.
         self._trajectory.close()
 
-        super(VASPConverter,self).finalize()
+        super(VASPConverter, self).finalize()
 
 
-REGISTRY['vasp'] = VASPConverter
-
+REGISTRY["vasp"] = VASPConverter

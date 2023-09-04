@@ -44,7 +44,7 @@ class TrajectoryViewer(QTreeView):
         anc = item.ancestors()
         ic("ancestor:", anc[-1])
         self.pickedAncestor.emit(anc[-1])
-        
+
     # def contextMenuEvent(self, event: QContextMenuEvent) -> None:
     #     index = self.indexAt(event.pos())
     #     model = self.model()
@@ -56,7 +56,6 @@ class TrajectoryViewer(QTreeView):
     #     self.populateMenu(menu)
     #     picked = menu.exec(menu.)
     #     res = menu.exec_(event.globalPos())
-
 
     #     return super().contextMenuEvent(event)
 

@@ -15,29 +15,29 @@
 
 from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
-                
+
+
 class PythonScript(ISelector):
-        
-    section = 'miscellaneous'
-        
+    section = "miscellaneous"
+
     def select(self, scripts):
-        
         sel = set()
 
-        if '*' in scripts:
+        if "*" in scripts:
             sel.update([at for at in self._chemicalSystem.atom_list()])
-                                
+
         for s in scripts:
-            namespace = {"chemicalSystem" : self._chemicalSystem}
-        
+            namespace = {"chemicalSystem": self._chemicalSystem}
+
             try:
-                exec(compile(open(s, "rb").read(), s, 'exec'),namespace)
-            # Any kind of error that may occur in the script must be caught 
+                exec(compile(open(s, "rb").read(), s, "exec"), namespace)
+            # Any kind of error that may occur in the script must be caught
             except:
                 continue
             else:
-                sel.update(namespace.get("selection",[]))
-                                        
+                sel.update(namespace.get("selection", []))
+
         return sel
-    
+
+
 REGISTRY["python_script"] = PythonScript

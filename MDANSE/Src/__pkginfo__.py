@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-__description__  = "Analysis of Molecular Dynamics trajectories"
+__description__ = "Analysis of Molecular Dynamics trajectories"
 
 __long_description__ = """MDANSE is an interactive program for the analysis of Molecular
 Dynamics simulations. It is especially designed for the computation
@@ -24,22 +24,24 @@ of complex systems, rigid-body motions of arbitrarily chosen molecular
 subunits can be studied.
 """
 
-__author__           = "R. Perenon, E.C. Pellegrini, S. Mukhopadhyay, R. Turanyi"
+__author__ = "R. Perenon, E.C. Pellegrini, S. Mukhopadhyay, R. Turanyi"
 
-__author_email__     = "perenon@ill.fr, pellegrini@ill.fr, sanghamitra.mukhopadhyay@stfc.ac.uk, " \
-                       "rastislav.turanyi@stfc.ac.uk"
+__author_email__ = (
+    "perenon@ill.fr, pellegrini@ill.fr, sanghamitra.mukhopadhyay@stfc.ac.uk, "
+    "rastislav.turanyi@stfc.ac.uk"
+)
 
-__maintainer__       = "R. Perenon, S. Mukhopadhyay"
+__maintainer__ = "R. Perenon, S. Mukhopadhyay"
 
 __maintainer_email__ = "perenon@ill.fr, sanghamitra.mukhopadhyay@stfc.ac.uk"
 
 __former_contributors__ = "G. Goret, B. Aoun, E.C. Pellegrini"
 
-__url__              = "https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx"
+__url__ = "https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx"
 
-__repo__             = "https://github.com/ISISNeutronMuon/MDANSE"
+__repo__ = "https://github.com/ISISNeutronMuon/MDANSE"
 
-__license__          = "GPL 3"
+__license__ = "GPL 3"
 
 __version__ = "2.0.0"
 
@@ -48,7 +50,3 @@ __date__ = "01-01-1970"
 __commit__ = "undefined"
 
 __beta__ = "beta"
-
-
-
-

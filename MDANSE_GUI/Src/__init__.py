@@ -14,9 +14,11 @@
 # **************************************************************************
 
 import warnings
+
 warnings.filterwarnings("ignore")
 
 from .__pkginfo__ import __version__, __author__, __date__
 
 import vtk
+
 vtk.vtkObject.GlobalWarningDisplayOff()

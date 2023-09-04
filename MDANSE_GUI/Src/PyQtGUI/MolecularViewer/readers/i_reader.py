@@ -7,24 +7,25 @@ import os
 
 import numpy as np
 
-from MDANSE_GUI.PyQtGUI.MolecularViewer.database import CHEMICAL_ELEMENTS, STANDARD_RESIDUES
+from MDANSE_GUI.PyQtGUI.MolecularViewer.database import (
+    CHEMICAL_ELEMENTS,
+    STANDARD_RESIDUES,
+)
+
 # from waterstay.extensions.atoms_in_shell import atoms_in_shell
 # from waterstay.utils.progress_bar import progress_bar
 
 
 class InvalidFileError(Exception):
-    """This class implements an exception for invalid file.
-    """
+    """This class implements an exception for invalid file."""
 
 
 class InvalidAtomError(Exception):
-    """This class implements an exception raised in case of an invalid atom selection.
-    """
+    """This class implements an exception raised in case of an invalid atom selection."""
 
 
 class IReader(abc.ABC):
-    """This class implements an interface for trajectory readers.
-    """
+    """This class implements an interface for trajectory readers."""
 
     def __init__(self, filename):
         """Constructor.
@@ -64,7 +65,6 @@ class IReader(abc.ABC):
 
     @property
     def molecules(self):
-
         mol_indexes = collections.OrderedDict()
 
         for i, resid in enumerate(self._residue_ids):
@@ -97,7 +97,7 @@ class IReader(abc.ABC):
         pass
 
     def get_atom_indexes(self, residue_names, atom_names):
-        """Return the nested list of the indexes of the atoms whose residue and name are respectively in the provided 
+        """Return the nested list of the indexes of the atoms whose residue and name are respectively in the provided
         list of residue and atom names.
 
         Args:
@@ -126,31 +126,29 @@ class IReader(abc.ABC):
     def guess_atom_types(self):
         """Guess the atom type (element) from their atom names.
 
-        For standard residues, the strategy is to start from the left and search 
+        For standard residues, the strategy is to start from the left and search
         by increasing length until a valid element is found.
-        For unknown residue, the strategy is opposite. Indeed, we start from the 
-        right and search by decreasing length until a valid element is found. 
+        For unknown residue, the strategy is opposite. Indeed, we start from the
+        right and search by decreasing length until a valid element is found.
         The elemenents are searched in an internal YAML database.
         """
 
         # Retrieve all the chemical symbols from the internal database
-        symbols = [at['symbol'].upper() for at in CHEMICAL_ELEMENTS['atoms'].values()]
+        symbols = [at["symbol"].upper() for at in CHEMICAL_ELEMENTS["atoms"].values()]
 
         self._atom_types = []
         for i in range(self._n_atoms):
-
             atom_name = self._atom_names[i]
             residue_name = self._residue_names[i]
 
             # Remove the trailing and initial digits from the upperized atom names
             upper_atom_name = atom_name.upper()
-            upper_atom_name = upper_atom_name.lstrip('0123456789').rstrip('0123456789')
+            upper_atom_name = upper_atom_name.lstrip("0123456789").rstrip("0123456789")
 
             # Case of the an atom that belongs to a standard residue
             # Guess the atom type by the starting from the first alpha letter from the left,
             # increasing the word by one letter if there was no success in guessing the atom type
             if residue_name in STANDARD_RESIDUES:
-
                 start = 1
                 while True:
                     upper_atom_name = upper_atom_name[:start]
@@ -158,7 +156,7 @@ class IReader(abc.ABC):
                         self._atom_types.append(upper_atom_name.capitalize())
                         break
                     if start > len(atom_name):
-                        raise ValueError('Unknown atom type: {}'.format(atom_name))
+                        raise ValueError("Unknown atom type: {}".format(atom_name))
                     start += 1
             # Case of the an atom that does not belong to a standard residue
             # Guess the atom type by the starting from whole atom name,
@@ -171,7 +169,7 @@ class IReader(abc.ABC):
                         self._atom_types.append(upper_atom_name.capitalize())
                         break
                     if start == 0:
-                        raise ValueError('Unknown atom type: {}'.format(atom_name))
+                        raise ValueError("Unknown atom type: {}".format(atom_name))
                     start -= 1
 
     def read_atom_trajectory(self, index):
@@ -182,7 +180,7 @@ class IReader(abc.ABC):
         """
 
         if index < 0 or index >= self._n_atoms:
-            raise InvalidAtomError('Invalid atom index')
+            raise InvalidAtomError("Invalid atom index")
 
         coords = []
         lower_bounds = []
@@ -199,7 +197,9 @@ class IReader(abc.ABC):
 
         return coords, lower_bounds, upper_bounds
 
-    def residues_in_shell(self, residue_names, atom_names, center, radius, *, selected_frames=None):
+    def residues_in_shell(
+        self, residue_names, atom_names, center, radius, *, selected_frames=None
+    ):
         """Compute the residence time of molecules of a given type which are within a shell around an atomic center.
 
         Args:
@@ -215,17 +215,20 @@ class IReader(abc.ABC):
         # Retrieve the indexes of the atoms which belongs to each molecule of the selected type
         target_indexes = self.get_atom_indexes(residue_names, atom_names)
         if not target_indexes:
-            logging.warning('No atom found that matches {}@{}'.format(atom_names, residue_names))
+            logging.warning(
+                "No atom found that matches {}@{}".format(atom_names, residue_names)
+            )
             return None
 
         # Initialize the output array
-        occupancies = np.zeros((len(target_indexes), len(selected_frames)), dtype=np.int32)
+        occupancies = np.zeros(
+            (len(target_indexes), len(selected_frames)), dtype=np.int32
+        )
 
         progress_bar.reset(len(selected_frames))
 
         # Loop over the frame of the trajectory
         for i, frame in enumerate(selected_frames):
-
             # Read the frame at time=frame
             coords = self.read_frame(frame)
 
@@ -236,9 +239,11 @@ class IReader(abc.ABC):
             rcell = np.linalg.inv(cell)
 
             # Scan for the molecules of the selected type which are found around the atomic center by the selected radius
-            atoms_in_shell(coords, cell, rcell, target_indexes, center, radius, occupancies[:, i])
+            atoms_in_shell(
+                coords, cell, rcell, target_indexes, center, radius, occupancies[:, i]
+            )
 
-            progress_bar.update(i+1)
+            progress_bar.update(i + 1)
 
         mol_ids = [self._residue_ids[v[0]] for v in target_indexes]
 

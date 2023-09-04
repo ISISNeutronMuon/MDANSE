@@ -17,59 +17,64 @@ from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 
+
 class PythonScriptConfigurator(InputFileConfigurator):
     """
     This configurator allows to input a Python script.
     """
-        
-    _default = ''
-        
+
+    _default = ""
+
     def __init__(self, name, variables=None, **kwargs):
-        '''
+        """
         Initializes the configurator.
-        
+
         :param name: the name of the configurator as it will appear in the configuration.
         :type name: str
         :param variables: the list of NetCDF variables that must be present in the input NetCDF file or None if there is no compulsory variable.
         :type variables: list of str or None
-        '''        
+        """
 
         # The base class constructor.
         InputFileConfigurator.__init__(self, name, **kwargs)
-        
+
         self._variables = variables if variables is not None else []
-           
+
     def configure(self, value):
-        '''
-        Configure a python script. 
-                
+        """
+        Configure a python script.
+
         :param configuration: the current configuration.
         :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the path for the python script.
-        :type value: str 
-        '''
-                
+        :type value: str
+        """
+
         InputFileConfigurator.configure(self, value)
-        
+
         namespace = {}
-        
-        exec(compile(open(value, "rb").read(), value, 'exec'),self.__dict__,namespace)
-                
+
+        exec(compile(open(value, "rb").read(), value, "exec"), self.__dict__, namespace)
+
         for v in self._variables:
             if v not in namespace:
-                raise ConfiguratorError("The variable %r is not defined in the %r python script file" % (v,self["value"]))
-            
+                raise ConfiguratorError(
+                    "The variable %r is not defined in the %r python script file"
+                    % (v, self["value"])
+                )
+
         self.update(namespace)
-        
+
     @property
     def variables(self):
-        '''
+        """
         Returns the list of NetCDF variables that must be present in the NetCDF file.
-        
+
         :return: the list of NetCDF variables that must be present in the NetCDF file.
         :rtype: list of str
-        '''
-        
+        """
+
         return self._variables
-    
-REGISTRY['python_script'] = PythonScriptConfigurator
+
+
+REGISTRY["python_script"] = PythonScriptConfigurator

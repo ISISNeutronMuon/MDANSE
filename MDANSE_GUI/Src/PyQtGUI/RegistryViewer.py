@@ -27,9 +27,19 @@ from MDANSE import PLATFORM, REGISTRY
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, Signal, QSortFilterProxyModel, QModelIndex
-from qtpy.QtWidgets import QDialog, QTreeView, QGridLayout,\
-                           QVBoxLayout, QWidget, QLabel, QApplication,\
-                           QSizePolicy, QMenu, QLineEdit, QTextEdit
+from qtpy.QtWidgets import (
+    QDialog,
+    QTreeView,
+    QGridLayout,
+    QVBoxLayout,
+    QWidget,
+    QLabel,
+    QApplication,
+    QSizePolicy,
+    QMenu,
+    QLineEdit,
+    QTextEdit,
+)
 from qtpy.QtCore import Qt
 
 # we check what attributes always exist in a Python object.
@@ -47,6 +57,7 @@ class RegistryTree(QStandardItemModel):
     It inherits the QStandardItemModel, so it can be
     used in the Qt data/view/proxy model.
     """
+
     doc_string = Signal(str)
 
     def __init__(self, *args, **kwargs):
@@ -78,7 +89,7 @@ class RegistryTree(QStandardItemModel):
         for key in REGISTRY.interfaces:
             self.parseNode(REGISTRY[key], key)
 
-    def addNode(self, thing, name = "Registry", parent : int = -1):
+    def addNode(self, thing, name="Registry", parent: int = -1):
         """This function adds a new node to the tree data model.
 
         Arguments:
@@ -95,7 +106,7 @@ class RegistryTree(QStandardItemModel):
         """
         item = QStandardItem(name)
         retval = int(self.nodecounter)
-        item.setData(retval, role = Qt.ItemDataRole.UserRole)
+        item.setData(retval, role=Qt.ItemDataRole.UserRole)
         self._nodes[self.nodecounter] = item
         self._docstrings[self.nodecounter] = thing.__doc__
         self.nodecounter += 1
@@ -128,7 +139,7 @@ class RegistryTree(QStandardItemModel):
         # end of the finer assignment
         return retval
 
-    def addTerminalNodes(self, thing, parent : int = -1):
+    def addTerminalNodes(self, thing, parent: int = -1):
         """A separate function for adding nodes to the
         tree structure which are _attributes_ and not
         _classes_.
@@ -143,8 +154,8 @@ class RegistryTree(QStandardItemModel):
         for attr in dir(thing):
             if attr not in to_be_omitted:
                 item = QStandardItem(str(attr))
-                attr_object = getattr(thing,attr,None)
-                item.setData(self.nodecounter, role = Qt.ItemDataRole.UserRole)
+                attr_object = getattr(thing, attr, None)
+                item.setData(self.nodecounter, role=Qt.ItemDataRole.UserRole)
                 # self._items.append(item)
                 self._nodes[self.nodecounter] = item
                 self._docstrings[self.nodecounter] = attr_object.__doc__
@@ -156,7 +167,7 @@ class RegistryTree(QStandardItemModel):
                     parent_node = self._nodes[parent]
                     parent_node.appendRow(item)
 
-    def parseNode(self, node, name= "unknown", parent = -1):
+    def parseNode(self, node, name="unknown", parent=-1):
         """A recursive function which discovers information
         about the Python object to be added to the data tree,
         and decides where to add it.
@@ -180,10 +191,10 @@ class RegistryTree(QStandardItemModel):
             else:
                 for key in node.keys():
                     child = node[key]
-                    self.parseNode(child, name = str(key), parent = parent_number)
+                    self.parseNode(child, name=str(key), parent=parent_number)
         else:
             self.addTerminalNodes(node, parent_number)
-    
+
     def getAncestry(self, number: int):
         """This function discovers the keys needed to be put
         into the REGISTRY to get the class attached to the
@@ -221,15 +232,15 @@ class RegistryViewer(QDialog):
 
         self.viewer = QTreeView(self)
         self.viewer.setObjectName("MDANSE Registry")
-        self.glayout.addWidget(self.viewer,0,0, 4,2)
+        self.glayout.addWidget(self.viewer, 0, 0, 4, 2)
 
-        self.glayout.addWidget(QLabel("Filter", self),4,0)
+        self.glayout.addWidget(QLabel("Filter", self), 4, 0)
 
         self.filter_field = QLineEdit(self)
-        self.glayout.addWidget(self.filter_field, 4,1)
+        self.glayout.addWidget(self.filter_field, 4, 1)
 
         self.path_field = QLineEdit(self)
-        self.glayout.addWidget(self.path_field, 0,2)
+        self.glayout.addWidget(self.path_field, 0, 2)
 
         self.proxy = QSortFilterProxyModel(self)
 
@@ -239,24 +250,26 @@ class RegistryViewer(QDialog):
         self.viewer.setModel(self.proxy)
 
         self.value_panel = QTextEdit(self)
-        self.glayout.addWidget(self.value_panel, 1,2,2,1)
+        self.glayout.addWidget(self.value_panel, 1, 2, 2, 1)
 
         self.doc_panel = QTextEdit(self)
-        self.glayout.addWidget(self.doc_panel, 3,2,1,1)
+        self.glayout.addWidget(self.doc_panel, 3, 2, 1, 1)
 
-        self.setStyleSheet("QLabel {background-color:rgb(250,250,250); qproperty-alignment: AlignCenter}")
+        self.setStyleSheet(
+            "QLabel {background-color:rgb(250,250,250); qproperty-alignment: AlignCenter}"
+        )
         self.filter_field.textChanged.connect(self.filterEntries)
 
         self.viewer.clicked.connect(self.updateDocstring)
         self.viewer.clicked.connect(self.updatePath)
-    
+
     @Slot()
     def filterEntries(self):
         phrase = self.filter_field.text()
         self.proxy.setFilterFixedString(phrase)
-    
+
     @Slot(QModelIndex)
-    def updateDocstring(self, index = QModelIndex):
+    def updateDocstring(self, index=QModelIndex):
         n_index = self.viewer.currentIndex()
         number = self.proxy.itemData(n_index)[256]
         try:
@@ -270,9 +283,8 @@ class RegistryViewer(QDialog):
             valstring = ""
         self.value_panel.setText(valstring)
 
-    
     @Slot(QModelIndex)
-    def updatePath(self, index = QModelIndex):
+    def updatePath(self, index=QModelIndex):
         n_index = self.viewer.currentIndex()
         number = self.proxy.itemData(n_index)[256]
         parents = self.datamodel.getAncestry(number)
@@ -283,11 +295,11 @@ class RegistryViewer(QDialog):
         else:
             pathstring = "REGISTRY['" + "']['".join(parents[:-1]) + "']." + parents[-1]
         self.path_field.setText(pathstring)
-    
 
-            
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import sys
+
     app = QApplication(sys.argv)
     root = RegistryViewer()
     root.show()

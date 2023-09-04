@@ -8,11 +8,9 @@ from waterstay.readers.i_reader import InvalidFileError
 from waterstay.readers.reader_registry import register_reader
 
 
-@register_reader('.pdb')
+@register_reader(".pdb")
 class PDBReader(ASCIIReader):
-
     def __init__(self, filename):
-
         super(PDBReader, self).__init__(filename)
 
         # Compute the number of atoms
@@ -42,9 +40,9 @@ class PDBReader(ASCIIReader):
                     eof = True
                     break
                 if i == 1:
-                    match = re.search('.* t= (.*) step=', line)
+                    match = re.search(".* t= (.*) step=", line)
                     if match is None:
-                        raise InvalidFileError('Invalid PDB file')
+                        raise InvalidFileError("Invalid PDB file")
                     self._times.append(float(match.groups()[0]))
                 if i == 2:
                     self._pbc_starts.append(self._fin.tell())
@@ -59,15 +57,14 @@ class PDBReader(ASCIIReader):
 
         self._coords_size = 79
 
-        self._frame_size = self._n_atoms*self._coords_size
+        self._frame_size = self._n_atoms * self._coords_size
 
         self.parse_first_frame()
 
-        logging.info('Read {} successfully'.format(filename))
+        logging.info("Read {} successfully".format(filename))
 
     def parse_first_frame(self):
-        """Parse the first frame to get resp. the residue ids and names and the atoms ids and names.
-        """
+        """Parse the first frame to get resp. the residue ids and names and the atoms ids and names."""
 
         # Rewind the file to the beginning of the first frame
         self._fin.seek(self._frame_starts[0])
@@ -80,7 +77,7 @@ class PDBReader(ASCIIReader):
         self._residue_ids = []
 
         for i in range(self._n_atoms):
-            start = i*self._coords_size
+            start = i * self._coords_size
             end = start + self._coords_size
             line = data[start:end]
             self._atom_ids.append(int(line[6:11]))
@@ -108,7 +105,7 @@ class PDBReader(ASCIIReader):
         coords = np.empty((self._n_atoms, 3), dtype=np.float)
 
         for i in range(self._n_atoms):
-            start = i*self._coords_size
+            start = i * self._coords_size
             end = start + self._coords_size
             line = data[start:end]
             x = float(line[30:38])
@@ -146,31 +143,30 @@ class PDBReader(ASCIIReader):
 
         pbc = np.zeros((3, 3), dtype=np.float)
 
-        fact = (cos_alpha - cos_beta*cos_gamma)/sin_gamma
+        fact = (cos_alpha - cos_beta * cos_gamma) / sin_gamma
 
         # The a vector
         pbc[0, 0] = a
 
         # The b vector
-        pbc[1, 0] = b*cos_gamma
-        pbc[1, 1] = b*sin_gamma
+        pbc[1, 0] = b * cos_gamma
+        pbc[1, 1] = b * sin_gamma
 
         # The c vector
-        pbc[2, 0] = c*cos_beta
-        pbc[2, 1] = c*fact
-        pbc[2, 2] = c*np.sqrt(1.0 - cos_beta*cos_beta - fact*fact)
+        pbc[2, 0] = c * cos_beta
+        pbc[2, 1] = c * fact
+        pbc[2, 2] = c * np.sqrt(1.0 - cos_beta * cos_beta - fact * fact)
 
         return pbc
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     import sys
 
     pdb_file = sys.argv[1]
 
     reader = PDBReader(pdb_file)
 
-    indexes = reader.get_atom_indexes('ARG', ['2HH2'])
+    indexes = reader.get_atom_indexes("ARG", ["2HH2"])
 
     print(reader.residue_ids)

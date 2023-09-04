@@ -17,36 +17,36 @@ from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
-class Backbone(ISelector):
 
+class Backbone(ISelector):
     section = "proteins"
 
     def __init__(self, chemicalSystem):
-        
-        ISelector.__init__(self,chemicalSystem)
-                
+        ISelector.__init__(self, chemicalSystem)
+
         for ce in self._chemicalSystem.chemical_entities:
             if isinstance(ce, (PeptideChain, Protein)):
                 self._choices.extend([c.name for c in ce.peptide_chains])
 
     def select(self, names):
-        '''Returns the backbone atoms.
-        
+        """Returns the backbone atoms.
+
         Only for Protein, PeptideChain and NucleotideChain objects.
-        '''
+        """
 
         sel = set()
 
-        if '*' in names:
+        if "*" in names:
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, (PeptideChain, Protein)):
                     sel.update([at for at in ce.backbone()])
-        else:            
+        else:
             vals = set(names)
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, (PeptideChain, Protein)) and ce.name in vals:
                     sel.update([at for at in ce.backbone()])
-            
+
         return sel
+
 
 REGISTRY["backbone"] = Backbone

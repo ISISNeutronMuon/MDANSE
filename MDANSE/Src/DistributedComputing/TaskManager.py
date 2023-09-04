@@ -17,6 +17,7 @@ distributed computing setups.
 
 debug = False
 
+
 class TaskManagerTermination(Exception):
 
     """
@@ -24,6 +25,7 @@ class TaskManagerTermination(Exception):
     """
 
     pass
+
 
 class TaskRaisedException(Exception):
 
@@ -42,8 +44,9 @@ class TaskRaisedException(Exception):
         self.exception = exception
         self.traceback = traceback
 
+
 class Task(object):
-    
+
     """
     Describes a task inside the task manager.
     """
@@ -65,6 +68,7 @@ class Task(object):
         self.request_time = None
         self.start_time = None
         self.end_time = None
+
 
 class TaskQueue(object):
 
@@ -202,7 +206,7 @@ class TaskManager(Pyro.core.ObjBase):
 
     """
     Manager for computational tasks.
-    
+
     A TaskManager accepts task requests and hands them out to other processes.
     It stores the results that can then be picked up by the requester. A
     TaskManager also keeps track of its compute processes. If a process
@@ -237,7 +241,7 @@ class TaskManager(Pyro.core.ObjBase):
         @type info: C{str}
         @returns: a unique process id
         @rtype: C{int}
-        
+
         Registers a process with the task manager. All processes must call
         this method before making any other task manager calls.
         """
@@ -258,7 +262,7 @@ class TaskManager(Pyro.core.ObjBase):
         """
         @param process_id: the id of the process
         @type process_id: C{int}
-        
+
         Removes the process from the task manager's process list. All
         processes should unregister when they are no longer available
         for accepting tasks. The task manager will also unregister processes
@@ -282,7 +286,7 @@ class TaskManager(Pyro.core.ObjBase):
         """
         @param process_id: the id of the process
         @type process_id: C{int}
-        
+
         Tells the task manager that a process is still alive.
         """
         if self.watchdog is not None:
@@ -330,7 +334,7 @@ class TaskManager(Pyro.core.ObjBase):
         @rtype: C{str}
         """
         self.lock.acquire()
-        task_id = tag + '_' + str(self.id_counter)
+        task_id = tag + "_" + str(self.id_counter)
         self.id_counter += 1
         self.lock.release()
         new_task = Task(tag, parameters, task_id)
@@ -350,7 +354,7 @@ class TaskManager(Pyro.core.ObjBase):
         @type process_id: C{int}
         @returns: the task id and the parameters
         @rtype: C{tuple}
-        
+
         Returns a waiting task with the given tag. The task is removed from
         the list of waiting tasks and added to the list of running tasks.
         """
@@ -364,7 +368,7 @@ class TaskManager(Pyro.core.ObjBase):
         @type process_id: C{int}
         @returns: the task id, the task tag, and the parameters
         @rtype: C{tuple}
-        
+
         Returns a waiting task of arbitrary tag. The task is removed from
         the list of waiting tasks and added to the list of running tasks.
         """
@@ -382,15 +386,14 @@ class TaskManager(Pyro.core.ObjBase):
             self.tasks_by_process[position].append(task)
             self.lock.release()
         if debug:
-            print("Handing out task %s to process %s" \
-                  % (task.id, str(process_id)))
+            print("Handing out task %s to process %s" % (task.id, str(process_id)))
 
     def storeResult(self, task_id, result):
         """
         @param task_id: the id of the task for which the result is provided
         @type task_id: C{str}
         @param result: the result of the task
-        
+
         Stores the result associated with the task. The task is removed from
         the list of running tasks and added to the list of finished tasks.
         """
@@ -446,7 +449,7 @@ class TaskManager(Pyro.core.ObjBase):
         task.start_time = None
         task.handling_processor = None
         self.waiting_tasks.addTask(task, in_front=True)
-        
+
     def _removeTask(self, task):
         if task.handling_processor is not None:
             self.lock.acquire()
@@ -461,7 +464,7 @@ class TaskManager(Pyro.core.ObjBase):
         """
         @returns: the task id, the task tag, and the result of the task
         @rtype: C{tuple}
-        
+
         Returns the result of an arbitrary finished task. The task is removed
         from the list of finished tasks.
         """
@@ -478,7 +481,7 @@ class TaskManager(Pyro.core.ObjBase):
         @param tag: a task tag
         @returns: the task id and the result of the task
         @rtype: C{tuple}
-        
+
         Returns the result of a finished task that has the given tag. The
         task is removed from the list of finished tasks.
         """
@@ -496,7 +499,7 @@ class TaskManager(Pyro.core.ObjBase):
         """
         @param kw: a keyword list of data items to be stored
         @type kw: C{dict}
-        
+
         This routine permits processes to exchange arbitrary data items
         through the task manager.
         """
@@ -549,7 +552,7 @@ class Watchdog(object):
         self.last_ping = {}
         self.done = False
         self.lock = threading.RLock()
-        self.background_thread = threading.Thread(target = self.watchdogThread)
+        self.background_thread = threading.Thread(target=self.watchdogThread)
         self.background_thread.setDaemon(True)
         self.thread_started = False
 
@@ -586,11 +589,11 @@ class Watchdog(object):
         while True:
             now = time.time()
             dead_processes = []
-            min_delay = min(self.ping_period.values() + [60.])
+            min_delay = min(self.ping_period.values() + [60.0])
             self.lock.acquire()
             for process_id in self.ping_period.keys():
-                delay = now-self.last_ping[process_id]
-                if delay > 4*self.ping_period[process_id]:
+                delay = now - self.last_ping[process_id]
+                if delay > 4 * self.ping_period[process_id]:
                     dead_processes.append(process_id)
             self.lock.release()
             for process_id in dead_processes:
@@ -600,4 +603,3 @@ class Watchdog(object):
             if self.done:
                 break
             time.sleep(min_delay)
-

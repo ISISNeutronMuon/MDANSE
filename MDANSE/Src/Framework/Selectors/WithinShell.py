@@ -15,20 +15,20 @@
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
-               
-class WithinShell(ISelector):
 
+
+class WithinShell(ISelector):
     type = "within_selection"
 
     section = None
 
     def select(self, ref, mini=0.0, maxi=1.0):
-
         sel = set()
 
         if self._chemicalSystem.configuration is not None:
-            sel.update(self._chemicalSystem.configuration.atomsInShell(ref,mini,maxi))
-        
+            sel.update(self._chemicalSystem.configuration.atomsInShell(ref, mini, maxi))
+
         return sel
-    
+
+
 REGISTRY["within_shell"] = WithinShell

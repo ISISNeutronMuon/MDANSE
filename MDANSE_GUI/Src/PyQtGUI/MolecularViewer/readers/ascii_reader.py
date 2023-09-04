@@ -5,8 +5,7 @@ from waterstay.database import CHEMICAL_ELEMENTS, STANDARD_RESIDUES
 
 
 class ASCIIReader(IReader):
-    """This class implements an interface for trajectory readers based on ASCII trajectory file.
-    """
+    """This class implements an interface for trajectory readers based on ASCII trajectory file."""
 
     def __init__(self, filename):
         """Constructor.
@@ -20,13 +19,11 @@ class ASCIIReader(IReader):
         self._fin = open(self._filename, "r")
 
     def __del__(self):
-        """Called when the object is destructed.
-        """
+        """Called when the object is destructed."""
 
         # Close the opened file
         self._fin.close()
 
     @abc.abstractmethod
     def parse_first_frame(self):
-        """Parse the first frame to define the topology of the system.
-        """
+        """Parse the first frame to define the topology of the system."""

@@ -13,10 +13,10 @@
 #
 # **************************************************************************
 
-from MDANSE.GUI.Plugins.IPlugin import IPlugin 
-             
+from MDANSE.GUI.Plugins.IPlugin import IPlugin
+
+
 class ComponentPlugin(IPlugin):
-    
     @property
     def datakey(self):
         return self.parent.datakey
@@ -24,8 +24,7 @@ class ComponentPlugin(IPlugin):
     @property
     def dataproxy(self):
         return self.parent.dataproxy
-    
+
     @property
     def dataplugin(self):
         return self.parent.dataplugin
-

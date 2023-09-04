@@ -16,43 +16,49 @@
 from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
-class AtomElement(ISelector):
 
+class AtomElement(ISelector):
     section = "atoms"
 
     def __init__(self, chemicalSystem):
+        ISelector.__init__(self, chemicalSystem)
 
-        ISelector.__init__(self,chemicalSystem)
-                
-        self._choices.extend(sorted(set([at.element.lower() for at in self._chemicalSystem.atom_list()])))
+        self._choices.extend(
+            sorted(set([at.element.lower() for at in self._chemicalSystem.atom_list()]))
+        )
 
     def select(self, elements):
-        '''Returns the atoms that matches a given list of elements.
-        
+        """Returns the atoms that matches a given list of elements.
+
         @param elements: the atom elements list.
         @type elements: list
-        '''
-                
-        sel = set()
-                
-        if '*' in elements:
+        """
 
+        sel = set()
+
+        if "*" in elements:
             sel.update([at for at in self._chemicalSystem.atom_list()])
-        
+
         else:
-            
             vals = [v.lower() for v in elements]
-                
+
             if "sulfur" in vals:
                 vals.append("sulphur")
-            else:                    
+            else:
                 if "sulphur" in vals:
                     vals.append("sulfur")
-                
+
             vals = set(vals)
-            
-            sel.update([at for at in self._chemicalSystem.atom_list() if at.element.strip().lower() in vals])
+
+            sel.update(
+                [
+                    at
+                    for at in self._chemicalSystem.atom_list()
+                    if at.element.strip().lower() in vals
+                ]
+            )
 
         return sel
+
 
 REGISTRY["atom_element"] = AtomElement

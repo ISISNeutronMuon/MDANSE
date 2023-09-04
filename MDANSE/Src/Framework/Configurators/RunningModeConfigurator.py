@@ -17,34 +17,38 @@ import os
 import multiprocessing
 
 from MDANSE import PLATFORM, REGISTRY
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
-                        
+from MDANSE.Framework.Configurators.IConfigurator import (
+    IConfigurator,
+    ConfiguratorError,
+)
+
+
 class RunningModeConfigurator(IConfigurator):
     """
     This configurator allows to choose the mode used to run the calculation.
-    
-    MDANSE currently support monoprocessor or multiprocessor (SMP) running modes. In the laster case, you have to 
+
+    MDANSE currently support monoprocessor or multiprocessor (SMP) running modes. In the laster case, you have to
     specify the number of slots used for running the analysis.
     """
-    
+
     availablesModes = ["monoprocessor", "threadpool", "multiprocessor"]
-    
-    _default = ("monoprocessor", 1)                
+
+    _default = ("monoprocessor", 1)
 
     def configure(self, value):
-        '''
+        """
         Configure the running mode.
      
         :param value: the running mode specification. It can be *'monoprocessor'* or a 2-tuple whose first element \
         must be *'multiprocessor'* and 2nd element the number of slots allocated for running the analysis.
         :type value: *'monoprocessor'* or 2-tuple
-        '''
-                
-        if isinstance(value,str):
+        """
+
+        if isinstance(value, str):
             mode = value
-        else:            
+        else:
             mode = value[0].lower()
-                    
+
         if not mode in self.availablesModes:
             raise ConfiguratorError("%r is not a valid running mode." % mode, self)
 
@@ -52,29 +56,29 @@ class RunningModeConfigurator(IConfigurator):
             slots = 1
 
         else:
-
             slots = int(value[1])
-                        
+
             if mode == "multiprocessor":
                 maxSlots = multiprocessing.cpu_count()
                 if slots > maxSlots:
                     raise ConfiguratorError("invalid number of allocated slots.", self)
-                      
+
             if slots <= 0:
                 raise ConfiguratorError("invalid number of allocated slots.", self)
-               
-        self['mode'] = mode
-        
-        self['slots'] = slots
+
+        self["mode"] = mode
+
+        self["slots"] = slots
 
     def get_information(self):
-        '''
+        """
         Returns string information about this configurator.
-        
+
         :return: the information about this configurator.
         :rtype: str
-        '''
-        
-        return "Run in %s mode (%d slots)" % (self["mode"],self["slots"])
-    
-REGISTRY['running_mode'] = RunningModeConfigurator
+        """
+
+        return "Run in %s mode (%d slots)" % (self["mode"], self["slots"])
+
+
+REGISTRY["running_mode"] = RunningModeConfigurator

@@ -15,8 +15,11 @@
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
-from MDANSE.Framework.Configurators.SingleChoiceConfigurator import SingleChoiceConfigurator
-            
+from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
+    SingleChoiceConfigurator,
+)
+
+
 class InterpolationOrderConfigurator(SingleChoiceConfigurator):
     """
     This configurator allows to input the interpolation order to be applied when deriving velocities from atomic coordinates.
@@ -29,46 +32,55 @@ class InterpolationOrderConfigurator(SingleChoiceConfigurator):
 
     :note: this configurator depends on 'trajectory' configurator to be configured.
     """
-        
+
     _default = "no interpolation"
-        
-    def __init__(self, name, orders=None,**kwargs):
-        '''
+
+    def __init__(self, name, orders=None, **kwargs):
+        """
         Initializes the configurator.
-        
+
         :param name: the name of the configurator as it will appear in the configuration.
         :type name: str.
-        '''
+        """
 
         if orders is None:
-            orders = ["no interpolation","1st order","2nd order","3rd order","4th order","5th order"] 
-                
+            orders = [
+                "no interpolation",
+                "1st order",
+                "2nd order",
+                "3rd order",
+                "4th order",
+                "5th order",
+            ]
+
         SingleChoiceConfigurator.__init__(self, name, choices=orders, **kwargs)
 
     def configure(self, value):
-        '''
+        """
         Configure the input interpolation order.
-                
+
         :param value: the interpolation order to be configured.
         :type value: str one of *'no interpolation'*,*'1st order'*,*'2nd order'*,*'3rd order'*,*'4th order'* or *'5th order'*.
-        '''
+        """
 
         if not value:
             value = self._default
 
         SingleChoiceConfigurator.configure(self, value)
-        
+
         if value == "no interpolation":
+            trajConfig = self._configurable[self._dependencies["trajectory"]]
 
-            trajConfig = self._configurable[self._dependencies['trajectory']]
+            if not "velocities" in trajConfig["instance"].variables():
+                raise ConfiguratorError(
+                    "the trajectory does not contain any velocities. Use an interpolation order higher than 0",
+                    self,
+                )
 
-            if not "velocities" in trajConfig['instance'].variables():
-                raise ConfiguratorError("the trajectory does not contain any velocities. Use an interpolation order higher than 0", self)
-            
             self["variable"] = "velocities"
-            
-        else:
 
+        else:
             self["variable"] = "coordinates"
-            
+
+
 REGISTRY["interpolation_order"] = InterpolationOrderConfigurator
