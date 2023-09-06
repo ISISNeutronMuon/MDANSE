@@ -65,6 +65,7 @@ from MDANSE_GUI.PyQtGUI.Widgets.TrajectoryViewer import TrajectoryViewer
 from MDANSE_GUI.PyQtGUI.MolecularViewer.MolecularViewer import MolecularViewer
 from MDANSE_GUI.PyQtGUI.MolecularViewer.Controls import ViewerControls
 from MDANSE_GUI.PyQtGUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
+from MDANSE_GUI.PyQtGUI.pygenplot.widgets.main_window import MainWindow
 
 
 class LoaderButton(QToolButton):
@@ -197,24 +198,21 @@ class Main(QMainWindow):
         self.exitAct.triggered.connect(self.destroy)
         self._menuBar.addAction(self.exitAct)
 
-    Slot()
-
+    @Slot()
     def launchPeriodicTable(self):
         dialog = PeriodicTableViewer
         dialog_instance = dialog(self)
         dialog_instance.show()
         result = dialog_instance.exec()
 
-    Slot()
-
+    @Slot()
     def launchUnitsEditor(self):
         dialog = UnitsEditor
         dialog_instance = dialog(self)
         dialog_instance.show()
         result = dialog_instance.exec()
 
-    Slot()
-
+    @Slot()
     def launchStyleSelector(self):
         dialog = StyleDialog
         dialog_instance = dialog(self)
@@ -224,16 +222,20 @@ class Main(QMainWindow):
         dialog_instance.icon_swap.connect(self.invertToolbar)
         result = dialog_instance.exec()
 
-    Slot()
-
+    @Slot()
     def launchElementsEditor(self):
         dialog = ElementsDatabaseEditor
         dialog_instance = dialog(self)
         dialog_instance.show()
         result = dialog_instance.exec()
 
-    Slot()
+    @Slot()
+    def launchDataPlotter(self):
+        dialog = MainWindow
+        dialog_instance = dialog(self)
+        dialog_instance.show()
 
+    @Slot()
     def loadTrajectory(self):
         fname = QFileDialog.getOpenFileName(
             self,
@@ -247,8 +249,7 @@ class Main(QMainWindow):
             print(f"fname[1]:{fname[1]}")
             self.file_name_for_loading.emit(fname[0])
 
-    Slot(object)
-
+    @Slot(object)
     def convertTrajectory(self, converter=None):
         ic(f"Received converter: {converter}")
         dialog = ConverterDialog
@@ -257,8 +258,7 @@ class Main(QMainWindow):
         dialog_instance.show()
         result = dialog_instance.exec()
 
-    Slot(object)
-
+    @Slot(object)
     def runAction(self, converter=None):
         ic(f"Received action: {converter}")
         dialog = ActionDialog
@@ -280,6 +280,7 @@ class Main(QMainWindow):
         valid_keys = [
             # ('load', self.loadTrajectory),
             # ('plus', self.loadTrajectory),
+            ("plot", self.launchDataPlotter),
             ("periodic_table", self.launchPeriodicTable),
             ("element", self.launchElementsEditor),
             ("units", self.launchUnitsEditor),
