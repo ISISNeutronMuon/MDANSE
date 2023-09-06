@@ -48,7 +48,7 @@ class Temperature(IJob):
     settings['interpolation_order'] = ('interpolation_order', {'label':"velocities",
                                                                'dependencies':{'trajectory':'trajectory'},
                                                                'default':'no interpolation'})
-    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
+    settings['output_files'] = ('output_files', {'formats':['hdf','ascii']})
             
     def initialize(self):
         """

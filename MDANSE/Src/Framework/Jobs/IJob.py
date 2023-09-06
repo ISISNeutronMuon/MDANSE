@@ -380,7 +380,7 @@ class %(classname)s(IJob):
     settings = collections.OrderedDict()
     settings['trajectory']=('hdf_trajectory',{})
     settings['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
-    settings['output_files']=('output_files', {"formats":["hdf","netcdf","ascii"]})
+    settings['output_files']=('output_files', {"formats":["hdf","ascii"]})
             
     def initialize(self):
         """

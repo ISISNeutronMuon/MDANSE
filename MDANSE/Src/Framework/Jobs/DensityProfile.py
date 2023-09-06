@@ -46,7 +46,7 @@ class DensityProfile(IJob):
     settings['axis'] = ('single_choice', {'choices':['a','b','c'], 'default':'c'})
     settings['dr'] = ('float', {'default':0.01, 'mini':1.0e-9})
     settings['weights']=('weights',{"dependencies":{"atom_selection":"atom_selection"}})
-    settings['output_files'] = ('output_files', {'formats':["hdf","netcdf","ascii"]})
+    settings['output_files'] = ('output_files', {'formats':["hdf","ascii"]})
     settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):

@@ -39,7 +39,7 @@ class RootMeanSquareFluctuation(IJob):
     settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
     settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
     settings['grouping_level']=('grouping_level',{'dependencies':{'trajectory':'trajectory','atom_selection':'atom_selection'}})
-    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
+    settings['output_files'] = ('output_files', {'formats':['hdf','ascii']})
     settings['running_mode'] = ('running_mode',{})
     
     def initialize(self):

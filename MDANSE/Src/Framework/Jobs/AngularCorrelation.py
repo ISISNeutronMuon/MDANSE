@@ -57,7 +57,7 @@ class AngularCorrelation(IJob):
                                                 'dependencies':{'trajectory':'trajectory'},
                                                 'default' : ('Water',('OW','HW'))})
     settings['per_axis'] = ('boolean', {'label':'output contribution per axis', 'default':False})
-    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
+    settings['output_files'] = ('output_files', {'formats':['hdf','ascii']})
     settings['running_mode'] = ('running_mode',{})
         
     def initialize(self):

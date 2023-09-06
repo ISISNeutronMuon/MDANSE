@@ -74,7 +74,7 @@ class McStasVirtualInstrument(IJob):
     settings['parameters'] = ('mcstas_parameters', {'label':'instrument parameters',
                                                     'dependencies':{'instrument':'instrument'},
                                                     'exclude':['sample_coh','sample_inc']}) 
-    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
+    settings['output_files'] = ('output_files', {'formats':['hdf','ascii']})
     
     def initialize(self):
         """
