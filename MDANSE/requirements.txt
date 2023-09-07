@@ -7,4 +7,3 @@ icecream
 cython
 railroad-diagrams
 pyparsing
-black
