@@ -1,3 +1,17 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Src/PyQtGUI/pygenplot/__init__.py
+# @brief     extension of the waterstay code
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2023-now
+# @authors   Maciej Bartkowiak
+#
+# **************************************************************************
+
 import numpy as np
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtWidgets import QTableView, QColorDialog
