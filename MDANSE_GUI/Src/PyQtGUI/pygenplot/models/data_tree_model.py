@@ -292,7 +292,11 @@ class HDFDataItem(DataItem):
         info["variable"] = os.path.basename(hdf_variable.name)
 
         # Check units
-        info["units"] = hdf_variable.attrs.get("units", b"au").decode("utf-8")
+        try:
+            info["units"] = hdf_variable.attrs.get("units", b"au").decode("utf-8")
+        except AttributeError:
+            info["units"] = hdf_variable.attrs.get("units", "au")
+
         try:
             _ = measure(1.0, info["units"], equivalent=True)
         except UnitError:
