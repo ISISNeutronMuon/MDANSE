@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-'''
+"""
 Distributed computing using a master-slave model
 
 The classes in this module provide a simple way to parallelize independent
@@ -58,7 +58,7 @@ This is more flexible because task requests and result retrievals
 can be made from anywhere in the master code.
 
 :author: Konrad Hinsen
-'''
+"""
 
 import copy
 import time
@@ -74,13 +74,15 @@ from MDANSE import PLATFORM
 
 debug = False
 
+
 class MasterProcessError(Exception):
     pass
+
 
 class MasterProcess(object):
     """
     Master process in a master-slave setup
-    
+
     A master process in a program is implemented by subclassing
     this class and overriding the method "run", which calls the methods
     "requestTask" and "retrieveResult". The process is then
@@ -91,7 +93,7 @@ class MasterProcess(object):
         """
         :param label: the label that identifies the task manager
         :type label: C{str}
-        
+
         :param use_name_server: If C{True} (default), the task manager is
                                 registered with the Pyro name server. If
                                 C{False}, the name server is not used and
@@ -101,13 +103,12 @@ class MasterProcess(object):
         """
         self.label = label
         self.task_manager = TaskManager()
-        self.process_id = \
-            self.task_manager.registerProcess(info = getMachineInfo())
+        self.process_id = self.task_manager.registerProcess(info=getMachineInfo())
         Pyro.core.initServer(banner=False)
         self.pyro_ns = None
         if use_name_server:
-            self.pyro_ns=Pyro.naming.NameServerLocator().getNS()
-        self.manager_thread = threading.Thread(target = self.taskManagerThread)
+            self.pyro_ns = Pyro.naming.NameServerLocator().getNS()
+        self.manager_thread = threading.Thread(target=self.taskManagerThread)
         self.manager_thread.start()
         self.global_states = {}
         nTrials = 0
@@ -121,7 +122,9 @@ class MasterProcess(object):
                     continue
                 if maxTrials is not None:
                     if nTrials == maxTrials:
-                        raise MasterProcessError("The number of trials to access the pyro daemon has reached its limit. Abort master process creation")
+                        raise MasterProcessError(
+                            "The number of trials to access the pyro daemon has reached its limit. Abort master process creation"
+                        )
             else:
                 break
 
@@ -130,16 +133,16 @@ class MasterProcess(object):
         This method represents the code that is executed in a background
         thread for remote access to the task manager.
         """
-        self.pyro_daemon=Pyro.core.Daemon()
+        self.pyro_daemon = Pyro.core.Daemon()
         if self.pyro_ns is not None:
             # Make another name server proxy for this thread
-            pyro_ns=Pyro.naming.NameServerLocator().getNS()
+            pyro_ns = Pyro.naming.NameServerLocator().getNS()
             self.pyro_daemon.useNameServer(pyro_ns)
             try:
                 pyro_ns.createGroup("TaskManager")
             except Pyro.errors.NamingError:
                 pass
-        self.pyro_daemon.connect(self.task_manager,"TaskManager.%s" % self.label)
+        self.pyro_daemon.connect(self.task_manager, "TaskManager.%s" % self.label)
         try:
             self.pyro_daemon.requestLoop()
         finally:
@@ -151,7 +154,7 @@ class MasterProcess(object):
                 pass
 
     def requestTask(self, tag, *parameters):
-        '''
+        """
         Launches a task request. The task will be executed by a slave
         process in a method called 'do\_'+tag that is called with the
         parameters given in the task request. Note that the order of
@@ -167,8 +170,8 @@ class MasterProcess(object):
 
         :return: a unique task id
         :rtype: C{str}
-        '''
-        
+        """
+
         return self.task_manager.addTaskRequest(tag, parameters)
 
     def retrieveResult(self, tag=None):
@@ -179,7 +182,7 @@ class MasterProcess(object):
         :type tag: C{str}
 
         :return: a tuple containing three values: the task id to which the
-                 result corresponds, the tag of the computational task, 
+                 result corresponds, the tag of the computational task,
                  and the result returned by the slave method that handled
                  the task
         :rtype: C{tuple}
@@ -242,7 +245,10 @@ class MasterProcess(object):
         @type n: C{int}
         """
         import subprocess, sys
-        slave_script = ('label="%s"\nport=%d\n' % (self.label,port)) + '''
+
+        slave_script = (
+            ('label="%s"\nport=%d\n' % (self.label, port))
+            + """
 import Pyro.core
 import Pyro.errors
 import sys
@@ -264,19 +270,21 @@ namespace = {}
 sys.modules["__main__"].SLAVE_PROCESS_LABEL = label
 sys.modules["__main__"].SLAVE_NAMESPACE = namespace
 exec slave_code % port in namespace
-'''
+"""
+        )
         directory = self.task_manager.retrieveData("cwd")
         for _ in range(n):
-            process = subprocess.Popen([sys.executable],
-                                       stdin=subprocess.PIPE,
-                                       cwd=directory)
+            process = subprocess.Popen(
+                [sys.executable], stdin=subprocess.PIPE, cwd=directory
+            )
             process.stdin.write(slave_script)
             process.stdin.close()
+
 
 class SlaveProcess(object):
     """
     Slave process in a master-slave setup
-    
+
     A concrete slave process in a program is implemented by subclassing
     this class and adding the methods that handle the computational
     tasks. Such a method has the name 'do\_' followed by the tag of the
@@ -284,11 +292,11 @@ class SlaveProcess(object):
     method 'start'.
     """
 
-    def __init__(self, label, master_host=None, watchdog_period=120.):
+    def __init__(self, label, master_host=None, watchdog_period=120.0):
         """
         :param label: the label that identifies the task manager
         :type label: C{str}
-        
+
         :param master_host: If C{None} (default), the task manager of the
                             master process is located using the Pyro name
                             server. If no name server is used, this parameter
@@ -307,8 +315,9 @@ class SlaveProcess(object):
         """
         Pyro.core.initClient(banner=False)
         if master_host is None:
-            self.task_manager = \
-                Pyro.core.getProxyForURI("PYRONAME://TaskManager.%s" % label)
+            self.task_manager = Pyro.core.getProxyForURI(
+                "PYRONAME://TaskManager.%s" % label
+            )
         else:
             # URI defaults to "PYROLOC://localhost:7766/"
             uri = "PYROLOC://%s/TaskManager.%s" % (master_host, label)
@@ -318,6 +327,7 @@ class SlaveProcess(object):
         self.global_state_cache = {}
         # Compile a dictionary of methods that implement tasks
         import inspect
+
         self.task_methods = {}
         if debug:
             print("Scanning task handler methods...")
@@ -352,8 +362,9 @@ class SlaveProcess(object):
             except KeyError:
                 if debug:
                     print("Retrieving state value", parameter.label)
-                self.global_state_cache[parameter.label] = \
-                        self.task_manager.retrieveData(parameter.label)
+                self.global_state_cache[
+                    parameter.label
+                ] = self.task_manager.retrieveData(parameter.label)
                 return self.global_state_cache[parameter.label]
         else:
             return parameter
@@ -366,12 +377,11 @@ class SlaveProcess(object):
             print("Starting slave process")
         if namespace is None:
             namespace = self.task_methods
-        self.process_id = \
-            self.task_manager.registerProcess(self.watchdog_period,
-                                              info = getMachineInfo())
+        self.process_id = self.task_manager.registerProcess(
+            self.watchdog_period, info=getMachineInfo()
+        )
         if self.watchdog_period is not None:
-            self.background_thread = \
-                              threading.Thread(target=self.watchdogThread)
+            self.background_thread = threading.Thread(target=self.watchdogThread)
             self.background_thread.setDaemon(True)
             self.background_thread.start()
         # The slave process main loop
@@ -381,8 +391,7 @@ class SlaveProcess(object):
                 break
             # Get a task
             try:
-                task_id, tag, parameters = \
-                       self.task_manager.getAnyTask(self.process_id)
+                task_id, tag, parameters = self.task_manager.getAnyTask(self.process_id)
                 if debug:
                     print("Got task", task_id, "of type", tag)
             except TaskManagerTermination:
@@ -412,6 +421,7 @@ class SlaveProcess(object):
                 raise
             except Exception as e:
                 import traceback, io
+
                 if debug:
                     print("Exception:")
                     traceback.print_exc()
@@ -432,24 +442,25 @@ class SlaveProcess(object):
     def terminationTest(self):
         return False
 
+
 def getMachineInfo():
     import os
     import platform
+
     _, nodename, _, _, machine, _ = platform.uname()
     pid = os.getpid()
     return "PID %d on %s (%s)" % (pid, nodename, machine)
 
 
 class GlobalStateValue(object):
-
     def __init__(self, state_id, name):
         self.label = "state_%d_%s" % (state_id, name)
+
 
 #
 # Job handling utility
 #
-def runJob(label, master_class, slave_class, watchdog_period=120.,
-           launch_slaves=0):
+def runJob(label, master_class, slave_class, watchdog_period=120.0, launch_slaves=0):
     """
     Creates an instance of the master_class and runs it. A copy
     of the script and the current working directory are stored in the
@@ -481,7 +492,8 @@ def runJob(label, master_class, slave_class, watchdog_period=120.,
     import inspect
     import os
     import sys
-    main_module = sys.modules['__main__']
+
+    main_module = sys.modules["__main__"]
     try:
         slave_label = main_module.SLAVE_PROCESS_LABEL
         master = label != slave_label
@@ -489,21 +501,22 @@ def runJob(label, master_class, slave_class, watchdog_period=120.,
         master = True
     if master:
         filename = inspect.getsourcefile(main_module)
-        source = open(filename,'r').read()
+        source = open(filename, "r").read()
         process = master_class(label)
-        process.task_manager.storeData(slave_code = source,
-                                       cwd = os.getcwd())
+        process.task_manager.storeData(slave_code=source, cwd=os.getcwd())
         if launch_slaves > 0:
             process.launchSlaveJobs(launch_slaves)
         process.start()
     else:
         slave_class(label, watchdog_period=watchdog_period).start()
 
+
 #
 # Alternate interface for multi-module programs
 #
-def initializeMasterProcess(label, slave_script=None, slave_module=None,
-                            use_name_server=True):
+def initializeMasterProcess(
+    label, slave_script=None, slave_module=None, use_name_server=True
+):
     """
     Initializes a master process.
 
@@ -535,12 +548,15 @@ def initializeMasterProcess(label, slave_script=None, slave_module=None,
     atexit.register(process.shutdown)
     if slave_script is not None or slave_module is not None:
         if slave_script is not None:
-            source = open(slave_script,'r').read()
+            source = open(slave_script, "r").read()
         else:
-            source = """
+            source = (
+                """
 import MDANSE.DistributedComputing.MasterSlave
 from %s import *
-""" % slave_module
+"""
+                % slave_module
+            )
             if debug:
                 source += "print('Slave definitions:'\n)"
                 source += "print(dir()\n)"
@@ -548,14 +564,14 @@ from %s import *
             source += """
 MDANSE.DistributedComputing.MasterSlave.startSlaveProcess()
 """
-        process.task_manager.storeData(slave_code = source,
-                                       cwd = PLATFORM.home_directory())
+        process.task_manager.storeData(slave_code=source, cwd=PLATFORM.home_directory())
         if debug:
             print("Slave source code:")
-            print(50*'-')
+            print(50 * "-")
             print(source)
-            print(50*'-')
+            print(50 * "-")
     return process
+
 
 def startSlaveProcess(label=None, master_host=None):
     """
@@ -576,7 +592,8 @@ def startSlaveProcess(label=None, master_host=None):
     :type master_host: C{str} or C{NoneType}
     """
     import sys
-    main_module = sys.modules['__main__']
+
+    main_module = sys.modules["__main__"]
     if label is None:
         label = main_module.SLAVE_PROCESS_LABEL
         namespace = main_module.SLAVE_NAMESPACE

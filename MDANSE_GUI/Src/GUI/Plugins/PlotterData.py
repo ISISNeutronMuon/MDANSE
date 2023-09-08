@@ -26,7 +26,7 @@ class _IPlotterData(metaclass=abc.ABCMeta):
     def __enter__(self):
         return self
 
-    def  __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
     @compatibleabstractproperty
@@ -36,7 +36,8 @@ class _IPlotterData(metaclass=abc.ABCMeta):
     def close(self):
         """Close the data."""
         self._file.close()
-        
+
+
 class NetCDFPlotterData(_IPlotterData):
     """This class implements the plotter data interface for NetCDF data."""
 
@@ -45,7 +46,9 @@ class NetCDFPlotterData(_IPlotterData):
 
         self._file = netCDF4.Dataset(*args, **kwargs)
 
-        self._variables = netcdf_find_numeric_variables(collections.OrderedDict(), self._file)
+        self._variables = netcdf_find_numeric_variables(
+            collections.OrderedDict(), self._file
+        )
 
     @property
     def variables(self):
@@ -70,8 +73,9 @@ class HDFPlotterData(_IPlotterData):
 
 
 PLOTTER_DATA_TYPES = {
-    '.nc': NetCDFPlotterData,
-    '.cdf': NetCDFPlotterData,
-    '.netcdf': NetCDFPlotterData,
-    '.hdf': HDFPlotterData,
-    '.h5': HDFPlotterData}
+    ".nc": NetCDFPlotterData,
+    ".cdf": NetCDFPlotterData,
+    ".netcdf": NetCDFPlotterData,
+    ".hdf": HDFPlotterData,
+    ".h5": HDFPlotterData,
+}

@@ -16,8 +16,7 @@
 import typing
 
 from icecream import ic
-from qtpy.QtWidgets import QTreeView, QWidget, QMenu, QAbstractItemView,\
-                           QApplication
+from qtpy.QtWidgets import QTreeView, QWidget, QMenu, QAbstractItemView, QApplication
 from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
 from qtpy.QtGui import QContextMenuEvent, QMouseEvent, QDrag, QStandardItem
 
@@ -27,7 +26,6 @@ from MDANSE_GUI.PyQtGUI.Widgets.ActionDialog import ActionDialog
 
 
 class ActionsTree(QTreeView):
-
     action_selected = Signal(QStandardItem)
     execute_action = Signal(object)
 
@@ -46,43 +44,45 @@ class ActionsTree(QTreeView):
         if self.model() is None:
             return None
         return super().mousePressEvent(e)
-    
+
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         # print("Mouse Move Event!", event.button(), QtCore.Qt.MouseButton.LeftButton)
         if event.buttons() == Qt.MouseButton.LeftButton:
-        # if event.button():
+            # if event.button():
             print("dragging")
             new_position = event.position()
             distance = (self.click_position - new_position).manhattanLength()
             if distance > QApplication.startDragDistance():
                 drag = QDrag(self)
                 mime_data = QMimeData()
-                text = self.model().data(self.currentIndex(), Qt.ItemDataRole.DisplayRole)
+                text = self.model().data(
+                    self.currentIndex(), Qt.ItemDataRole.DisplayRole
+                )
                 mime_data.setText(text)
                 drag.setMimeData(mime_data)
                 drag.exec()
 
-    def on_select_action(self,index):
+    def on_select_action(self, index):
         model = self.model()
         item = model.itemFromIndex(index)
         text = item.text()
         print("tree: clicked on ", text)
         self.action_selected.emit(item)
 
-    def pop_action_dialog(self,index):
+    def pop_action_dialog(self, index):
         model = self.model()
         item = model.itemFromIndex(index)
         # debug
         text = item.text()
         ic(f"About to execute action {text}")
-        # 
+        #
         number = item.data()
         ic(f"Node number is {number}")
         action = model._nodes[number]
         self.execute_action.emit(action)
-    
+
     @Slot(DataTreeItem)
-    def showValidActions(self, item : DataTreeItem):
+    def showValidActions(self, item: DataTreeItem):
         ic("Creating model from", item)
         new_model = ActionsHolder(item)
         self.setModel(new_model)

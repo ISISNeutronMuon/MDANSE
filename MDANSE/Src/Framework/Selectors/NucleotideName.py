@@ -16,34 +16,32 @@
 from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import NucleotideChain
 from MDANSE.Framework.Selectors.ISelector import ISelector
-    
-class NucleotideName(ISelector):
 
+
+class NucleotideName(ISelector):
     section = "nucleic acids"
 
     def __init__(self, chemicalSystem):
-
-        ISelector.__init__(self,chemicalSystem)
+        ISelector.__init__(self, chemicalSystem)
 
         for ce in self._chemicalSystem.chemical_entities:
             if isinstance(ce, NucleotideChain):
                 self._choices.extend([n.name for n in ce.nucleotides])
-        
 
     def select(self, names):
-        '''Returns the atoms that matches a given list of nucleotide names.
-        
+        """Returns the atoms that matches a given list of nucleotide names.
+
         @param names: the nucletodide names list.
         @type names: list
-        '''
-        
+        """
+
         sel = set()
 
-        if '*' in names:
+        if "*" in names:
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, NucleotideChain):
                     sel.update([at for at in ce.atom_list()])
-        
+
         else:
             vals = set([v for v in names])
 
@@ -54,7 +52,8 @@ class NucleotideName(ISelector):
                             sel.update([at for at in nucl.atom_list()])
                 except AttributeError:
                     pass
-                       
+
         return sel
-    
+
+
 REGISTRY["nucleotide_name"] = NucleotideName

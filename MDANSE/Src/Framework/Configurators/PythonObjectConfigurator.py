@@ -16,17 +16,21 @@
 import ast
 
 from MDANSE import REGISTRY
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
-        
+from MDANSE.Framework.Configurators.IConfigurator import (
+    IConfigurator,
+    ConfiguratorError,
+)
+
+
 class PythonObjectConfigurator(IConfigurator):
     """
     This Configurator allows to input and evaluate basic python object.
-    
+
     The python object supported are strings, numbers, tuples, lists, dicts, booleans and None type.
-    
+
     :note: this configurator is based on a literal and safe evaluation of the input using ast standard library module.
     """
-        
+
     _default = '""'
 
     def configure(self, value):
@@ -40,19 +44,23 @@ class PythonObjectConfigurator(IConfigurator):
         try:
             value = ast.literal_eval(repr(value))
         except SyntaxError as e:
-            raise ConfiguratorError('The inputted python code could not be parsed due to the following error:\n\n'
-                                    'SyntaxError: %s' % e, self)
-                                
-        self['value'] = value
+            raise ConfiguratorError(
+                "The inputted python code could not be parsed due to the following error:\n\n"
+                "SyntaxError: %s" % e,
+                self,
+            )
+
+        self["value"] = value
 
     def get_information(self):
-        '''
+        """
         Returns string information about this configurator.
-        
+
         :return: the information about this configurator.
         :rtype: str
-        '''
-        
-        return "Python object: %r" % self['value']
-    
-REGISTRY['python_object'] = PythonObjectConfigurator
+        """
+
+        return "Python object: %r" % self["value"]
+
+
+REGISTRY["python_object"] = PythonObjectConfigurator

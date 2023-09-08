@@ -1,3 +1,16 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      Src/PyQtGUI/pygenplot/__init__.py
+# @brief     extension of the waterstay code
+#
+# @homepage  https://mdanse.org
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2023-now
+# @authors   Maciej Bartkowiak
+#
+# **************************************************************************
 
 import numpy as np
 import vtk
@@ -7,10 +20,8 @@ RGB_COLOURS.append((1.00, 0.20, 1.00))  # selection
 RGB_COLOURS.append((1.00, 0.90, 0.90))  # background
 
 
-class ColourManager():
-
+class ColourManager:
     def __init__(self, *args, init_colours: list = None, **kwargs):
-
         self._lut = vtk.vtkColorTransferFunction()
         if init_colours is None:
             self._colour_list = RGB_COLOURS
@@ -38,7 +49,7 @@ class ColourManager():
         for index, colour in enumerate(self._colour_list):
             self._lut.AddRGBPoint(index, colour[0], colour[1], colour[2])
 
-    def add_colour(self, rgb: tuple[int,int,int]) -> int:
+    def add_colour(self, rgb: tuple[int, int, int]) -> int:
         """Puts the colour into the list and returns the
         index of the colour in the list, to be used by VTK.
 
@@ -48,7 +59,7 @@ class ColourManager():
         Returns:
             int - the index of the colour in the list
         """
-        float_rgb = tuple([x/255.0 for x in rgb])
+        float_rgb = tuple([x / 255.0 for x in rgb])
         for index, value in enumerate(self._colour_list):
             if value == float_rgb:
                 return index
@@ -56,8 +67,10 @@ class ColourManager():
         self._colour_list.append(float_rgb)
         self.rebuild_colours()
         return new_index
-    
-    def initialise_from_database(self, atoms : list[str], element_database = None) -> list[int]:
+
+    def initialise_from_database(
+        self, atoms: list[str], element_database=None
+    ) -> list[int]:
         """Puts colours into the list based on chemical elements list
         and a database with colour values.
 
@@ -73,7 +86,6 @@ class ColourManager():
         """
         index_list = []
         for atom in atoms:
-            rgb = (int(x) for x in element_database['atoms'][atom]['color'].split(';'))
+            rgb = (int(x) for x in element_database["atoms"][atom]["color"].split(";"))
             index_list.append(self.add_colour(rgb))
         return index_list
-

@@ -23,116 +23,154 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import generate_sphere_points
 from MDANSE.Extensions import sas_fast_calc
 
+
 class SolventAccessibleSurface(IJob):
     """
-    The Solvent Accessible Surface (SAS) is the surface area of a molecule that is accessible to a solvent. 
-    SAS is typically calculated using the 'rolling ball' algorithm developed by Shrake & Rupley in 1973. 
-    
+    The Solvent Accessible Surface (SAS) is the surface area of a molecule that is accessible to a solvent.
+    SAS is typically calculated using the 'rolling ball' algorithm developed by Shrake & Rupley in 1973.
+
     * Shrake, A., and J. A. Rupley. JMB (1973) 79:351-371.
-    
+
     This algorithm uses a sphere (of solvent) of a particular radius to 'probe' the surface of the molecule.
-   
-    It involves constructing a mesh of points equidistant from each atom of the molecule 
-    and uses the number of these points that are solvent accessible to determine the surface area. 
-    The points are drawn at a water molecule's estimated radius beyond the van der Waals radius, 
+
+    It involves constructing a mesh of points equidistant from each atom of the molecule
+    and uses the number of these points that are solvent accessible to determine the surface area.
+    The points are drawn at a water molecule's estimated radius beyond the van der Waals radius,
     which is effectively similar to 'rolling a ball' along the surface.
-    All points are checked against the surface of neighboring atoms to determine whether they are buried or accessible. 
-    The number of points accessible is multiplied by the portion of surface area each point represents to calculate the SAS. 
-    The choice of the 'probe radius' has an effect on the observed surface area - 
-    using a smaller probe radius detects more surface details and therefore reports a larger surface. 
-    A typical value is 0.14 nm, which is approximately the radius of a water molecule. 
-    Another factor that affects the result is the definition of the VDW radii of the atoms in the molecule under study.     
+    All points are checked against the surface of neighboring atoms to determine whether they are buried or accessible.
+    The number of points accessible is multiplied by the portion of surface area each point represents to calculate the SAS.
+    The choice of the 'probe radius' has an effect on the observed surface area -
+    using a smaller probe radius detects more surface details and therefore reports a larger surface.
+    A typical value is 0.14 nm, which is approximately the radius of a water molecule.
+    Another factor that affects the result is the definition of the VDW radii of the atoms in the molecule under study.
     """
 
     label = "Solvent Accessible Surface"
-    
-    category = ('Analysis','Structure',)
-    
-    ancestor = ['hdf_trajectory','molecular_viewer']
-    
-    settings = collections.OrderedDict()
-    settings['trajectory'] = ('hdf_trajectory',{})
-    settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}, 'default':(0,2,1)})
-    settings['atom_selection'] = ('atom_selection', {'dependencies':{'trajectory':'trajectory'}})
-    settings['n_sphere_points'] = ('integer', {'mini':1, 'default':1000})
-    settings['probe_radius'] = ('float', {'mini':0.0, 'default':0.14})
-    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
-    settings['running_mode'] = ('running_mode',{})
-                
-    def initialize(self):
 
-        self.numberOfSteps = self.configuration['frames']['number']
+    category = (
+        "Analysis",
+        "Structure",
+    )
+
+    ancestor = ["hdf_trajectory", "molecular_viewer"]
+
+    settings = collections.OrderedDict()
+    settings["trajectory"] = ("hdf_trajectory", {})
+    settings["frames"] = (
+        "frames",
+        {"dependencies": {"trajectory": "trajectory"}, "default": (0, 2, 1)},
+    )
+    settings["atom_selection"] = (
+        "atom_selection",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
+    settings["n_sphere_points"] = ("integer", {"mini": 1, "default": 1000})
+    settings["probe_radius"] = ("float", {"mini": 0.0, "default": 0.14})
+    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
+    settings["running_mode"] = ("running_mode", {})
+
+    def initialize(self):
+        self.numberOfSteps = self.configuration["frames"]["number"]
 
         # Will store the time.
-        self._outputData.add('time',"line",self.configuration['frames']['time'],units='ps')
-        
-        # Will store the solvent accessible surface.                
-        self._outputData.add('sas',"line",(self.configuration['frames']['number'],),axis='time',units='nm2')
-        
+        self._outputData.add(
+            "time", "line", self.configuration["frames"]["time"], units="ps"
+        )
+
+        # Will store the solvent accessible surface.
+        self._outputData.add(
+            "sas",
+            "line",
+            (self.configuration["frames"]["number"],),
+            axis="time",
+            units="nm2",
+        )
+
         # Generate the sphere points that will be used to evaluate the sas per atom.
-        self.spherePoints = np.array(generate_sphere_points(self.configuration['n_sphere_points']['value']), dtype=np.float64)
+        self.spherePoints = np.array(
+            generate_sphere_points(self.configuration["n_sphere_points"]["value"]),
+            dtype=np.float64,
+        )
         # The solid angle increment used to convert the sas from a number of accessible point to a surface.
-        self.solidAngleIncr = 4.0*np.pi/len(self.spherePoints)
-        
+        self.solidAngleIncr = 4.0 * np.pi / len(self.spherePoints)
+
         # A mapping between the atom indexes and covalent_radius radius for the whole universe.
         self.vdwRadii = dict(
-            [(at.index,ATOMS_DATABASE[at.symbol]['covalent_radius']) for at in self.configuration['trajectory']['instance'].chemical_system.atom_list()])
-        self.vdwRadii_list = np.zeros( (max(self.vdwRadii.keys())+1,2), dtype=np.float64)
-        for k,v in self.vdwRadii.items():
-            self.vdwRadii_list[k] = np.array([k,v])[:]   
+            [
+                (at.index, ATOMS_DATABASE[at.symbol]["covalent_radius"])
+                for at in self.configuration["trajectory"][
+                    "instance"
+                ].chemical_system.atom_list()
+            ]
+        )
+        self.vdwRadii_list = np.zeros(
+            (max(self.vdwRadii.keys()) + 1, 2), dtype=np.float64
+        )
+        for k, v in self.vdwRadii.items():
+            self.vdwRadii_list[k] = np.array([k, v])[:]
 
-        self._indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]
-        
+        self._indexes = [
+            idx
+            for idxs in self.configuration["atom_selection"]["indexes"]
+            for idx in idxs
+        ]
+
     def run_step(self, index):
         """
         Runs a single step of the job.
-        
+
         @param index: the index of the step.
-        @type index: int.      
+        @type index: int.
         """
-        
+
         # This is the actual index of the frame corresponding to the loop index.
-        frameIndex = self.configuration['frames']['value'][index]                        
-        
+        frameIndex = self.configuration["frames"]["value"][index]
+
         # Fetch the configuration.
-        conf = self.configuration['trajectory']['instance'].configuration(frameIndex)
-        
+        conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
+
         # The configuration is made continuous.
         conf = conf.continuous_configuration()
-                
+
         # Loop over the indexes of the selected atoms for the sas calculation.
-        sas = sas_fast_calc.sas(conf['coordinates'],
-                                self._indexes,
-                                self.vdwRadii_list,
-                                self.spherePoints,
-                                self.configuration['probe_radius']['value'])
-    
+        sas = sas_fast_calc.sas(
+            conf["coordinates"],
+            self._indexes,
+            self.vdwRadii_list,
+            self.spherePoints,
+            self.configuration["probe_radius"]["value"],
+        )
+
         return index, sas
-    
+
     def combine(self, index, x):
         """
         @param index: the index of the step.
         @type index: int.
-        
+
         @param x: the output of run_step method.
         @type x: no specific type.
         """
 
         # The SAS is updated with the value obtained for frame |index|.
-        self._outputData['sas'][index] = x        
-    
+        self._outputData["sas"][index] = x
+
     def finalize(self):
         """
         Finalize the job.
         """
-        
+
         # The SAS is converted from a number of accessible points to a surface.
-        self._outputData['sas'] *= self.solidAngleIncr
-                
+        self._outputData["sas"] *= self.solidAngleIncr
+
         # Write the output variables.
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
-        
-        self.configuration['trajectory']['instance'].close()
-        
-REGISTRY['sas'] = SolventAccessibleSurface
-     
+        self._outputData.write(
+            self.configuration["output_files"]["root"],
+            self.configuration["output_files"]["formats"],
+            self._info,
+        )
+
+        self.configuration["trajectory"]["instance"].close()
+
+
+REGISTRY["sas"] = SolventAccessibleSurface

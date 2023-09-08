@@ -4,8 +4,7 @@ import os
 # from .reader_registry import REGISTERED_READERS
 
 
-def path_to_module(path, stop=''):
-
+def path_to_module(path, stop=""):
     path, _ = os.path.splitext(path)
 
     splitted_path = path.split(os.sep)
@@ -15,7 +14,7 @@ def path_to_module(path, stop=''):
     except ValueError:
         idx = 0
     finally:
-        module = ".".join(splitted_path[len(splitted_path)-1-idx:])
+        module = ".".join(splitted_path[len(splitted_path) - 1 - idx :])
 
     return module
 

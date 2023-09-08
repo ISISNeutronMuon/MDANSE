@@ -16,26 +16,29 @@
 from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
-class MoleculeName(ISelector):
 
+class MoleculeName(ISelector):
     section = "molecules"
 
     def __init__(self, chemicalSystem):
+        ISelector.__init__(self, chemicalSystem)
 
-        ISelector.__init__(self,chemicalSystem)
-        
-        self._choices.extend(sorted(set([ce.name.strip() for ce in self._chemicalSystem.chemical_entities])))
+        self._choices.extend(
+            sorted(
+                set([ce.name.strip() for ce in self._chemicalSystem.chemical_entities])
+            )
+        )
 
     def select(self, names):
-        '''Returns the atoms that matches a given list of molecule names.
-    
+        """Returns the atoms that matches a given list of molecule names.
+
         @param names: the molecule names list.
         @type names: list
-        '''
-        
+        """
+
         sel = set()
-        
-        if '*' in names:
+
+        if "*" in names:
             sel.update([at for at in self._chemicalSystem.atom_list()])
 
         else:
@@ -43,7 +46,8 @@ class MoleculeName(ISelector):
             for ce in self._chemicalSystem.chemical_entities:
                 if ce.name.strip() in vals:
                     sel.update([at for at in ce.atom_list()])
-                
+
         return sel
-    
+
+
 REGISTRY["molecule_name"] = MoleculeName

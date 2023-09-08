@@ -1,4 +1,9 @@
-from MDANSE.Chemistry.Databases import AtomsDatabase, MoleculesDatabase, NucleotidesDatabase, ResiduesDatabase
+from MDANSE.Chemistry.Databases import (
+    AtomsDatabase,
+    MoleculesDatabase,
+    NucleotidesDatabase,
+    ResiduesDatabase,
+)
 
 ATOMS_DATABASE = AtomsDatabase()
 

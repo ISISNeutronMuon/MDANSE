@@ -17,38 +17,42 @@ from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import NucleotideChain, PeptideChain, Protein
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
+
 class Macromolecule(ISelector):
-        
     section = "miscellaneous"
-    
-    lookup = {NucleotideChain:"nucleotide_chain",PeptideChain:"peptide_chain",Protein:"protein"}
+
+    lookup = {
+        NucleotideChain: "nucleotide_chain",
+        PeptideChain: "peptide_chain",
+        Protein: "protein",
+    }
 
     def __init__(self, chemicalSystem):
+        ISelector.__init__(self, chemicalSystem)
 
-        ISelector.__init__(self,chemicalSystem)
-                
-        self._choices.extend(["peptide_chain","protein","nucleotide_chain"])
-         
+        self._choices.extend(["peptide_chain", "protein", "nucleotide_chain"])
+
     def select(self, macromolecules):
-        '''Return the macromolecules.
+        """Return the macromolecules.
 
         @param classes: the residue classes list.
         @type classes: list
-        '''
-                                
+        """
+
         sel = set()
 
-        if '*' in macromolecules:
+        if "*" in macromolecules:
             for ce in self._chemicalSystem.chemical_entities:
-                if isinstance(ce, (NucleotideChain,PeptideChain,Protein)):
+                if isinstance(ce, (NucleotideChain, PeptideChain, Protein)):
                     sel.update([at for at in ce.atom_list()])
-        
+
         else:
             for ce in self._chemicalSystem.chemical_entities:
-                m = Macromolecule.lookup.get(ce.__class__,None)
+                m = Macromolecule.lookup.get(ce.__class__, None)
                 if m in macromolecules:
                     sel.update([at for at in ce.atom_list()])
 
         return sel
+
 
 REGISTRY["macromolecule"] = Macromolecule

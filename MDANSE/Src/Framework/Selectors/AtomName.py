@@ -16,35 +16,40 @@
 from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
-class AtomName(ISelector):
 
+class AtomName(ISelector):
     section = "atoms"
 
     def __init__(self, chemicalSystem):
+        ISelector.__init__(self, chemicalSystem)
 
-        ISelector.__init__(self,chemicalSystem)
-                
-        self._choices.extend(sorted(set([at.name.strip() for at in self._chemicalSystem.atom_list()])))
-
+        self._choices.extend(
+            sorted(set([at.name.strip() for at in self._chemicalSystem.atom_list()]))
+        )
 
     def select(self, names):
-        '''Returns the atoms that matches a given list of atom types.
-            
+        """Returns the atoms that matches a given list of atom types.
+
         @param types: the atom types list.
         @type types: list
-        '''
-        
+        """
+
         sel = set()
 
-        if '*' in names:
-
+        if "*" in names:
             sel.update([at for at in self._chemicalSystem.atom_list()])
 
         else:
-
             vals = set([v for v in names])
-            sel.update([at for at in self._chemicalSystem.atom_list() if at.name.strip() in vals])
-        
+            sel.update(
+                [
+                    at
+                    for at in self._chemicalSystem.atom_list()
+                    if at.name.strip() in vals
+                ]
+            )
+
         return sel
+
 
 REGISTRY["atom_name"] = AtomName

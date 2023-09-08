@@ -16,39 +16,48 @@
 from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
-class Methyl(ISelector):
 
+class Methyl(ISelector):
     section = "chemical groups"
 
     def __init__(self, chemicalSystem):
-        
-        ISelector.__init__(self,chemicalSystem)
+        ISelector.__init__(self, chemicalSystem)
 
         for ce in self._chemicalSystem.chemical_entities:
-                                        
-            carbons = [at for at in ce.atom_list() if at.element.strip().lower() == 'carbon']
-            
+            carbons = [
+                at for at in ce.atom_list() if at.element.strip().lower() == "carbon"
+            ]
+
             for car in carbons:
                 neighbours = car.bonds
-                hydrogens = [neigh.full_name().strip() for neigh in neighbours if neigh.element.strip().lower() == 'hydrogen']
+                hydrogens = [
+                    neigh.full_name().strip()
+                    for neigh in neighbours
+                    if neigh.element.strip().lower() == "hydrogen"
+                ]
                 if len(hydrogens) >= 3:
                     self._choices.extend([car] + sorted(hydrogens))
 
-
     def select(self, names):
-        '''Returns the methyl atoms.
-        '''
+        """Returns the methyl atoms."""
 
         sel = set()
 
-        if '*' in names:
+        if "*" in names:
             if len(self._choices) == 1:
                 return sel
             names = self._choices[1:]
 
         vals = set([v for v in names])
-        sel.update([at for at in self._chemicalSystem.atom_list() if at.full_name().strip() in vals])
+        sel.update(
+            [
+                at
+                for at in self._chemicalSystem.atom_list()
+                if at.full_name().strip() in vals
+            ]
+        )
 
         return sel
+
 
 REGISTRY["methyl"] = Methyl

@@ -17,56 +17,89 @@ from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
-# Dictionnary associating tuples of residue names (values) to their corresponding chemical family (key). 
-CHEMFAMILIES = {'acidic'      : ('ASP','GLU'),
-                'aliphatic'   : ('ILE','LEU','VAL'),
-                'aromatic'    : ('HIS','PHE','TRP','TYR'),
-                'basic'       : ('ARG','HIS','LYS'),
-                'charged'     : ('ARG','ASP','GLU','HIS','LYS'),
-                'hydrophobic' : ('ALA','CYS','CYX','GLY','HIS','HID','HIP','HIE','ILE','LEU','LYS','MET','PHE','THR','TRP','TYR','VAL'),
-                'polar'       : ('ARG','ASN','ASP','CYS','GLN','GLU','HIS','LYS','SER','THR','TRP','TYR'),
-                'small'       : ('ALA','ASN','ASP','CYS','CYX','GLY','PRO','SER','THR','VAL')}
-                                         
-class ResidueClass(ISelector):
+# Dictionnary associating tuples of residue names (values) to their corresponding chemical family (key).
+CHEMFAMILIES = {
+    "acidic": ("ASP", "GLU"),
+    "aliphatic": ("ILE", "LEU", "VAL"),
+    "aromatic": ("HIS", "PHE", "TRP", "TYR"),
+    "basic": ("ARG", "HIS", "LYS"),
+    "charged": ("ARG", "ASP", "GLU", "HIS", "LYS"),
+    "hydrophobic": (
+        "ALA",
+        "CYS",
+        "CYX",
+        "GLY",
+        "HIS",
+        "HID",
+        "HIP",
+        "HIE",
+        "ILE",
+        "LEU",
+        "LYS",
+        "MET",
+        "PHE",
+        "THR",
+        "TRP",
+        "TYR",
+        "VAL",
+    ),
+    "polar": (
+        "ARG",
+        "ASN",
+        "ASP",
+        "CYS",
+        "GLN",
+        "GLU",
+        "HIS",
+        "LYS",
+        "SER",
+        "THR",
+        "TRP",
+        "TYR",
+    ),
+    "small": ("ALA", "ASN", "ASP", "CYS", "CYX", "GLY", "PRO", "SER", "THR", "VAL"),
+}
 
+
+class ResidueClass(ISelector):
     section = "proteins"
 
     def __init__(self, chemicalSystem):
+        ISelector.__init__(self, chemicalSystem)
 
-        ISelector.__init__(self,chemicalSystem)
-                        
         self._choices.extend(sorted(CHEMFAMILIES.keys()))
 
     def select(self, classes):
-        '''Returns the atoms that matches a given list of peptide classes.
-        
+        """Returns the atoms that matches a given list of peptide classes.
+
         @param classes: the residue classes list.
         @type classes: list
-        '''
-                
+        """
+
         sel = set()
 
-        if '*' in classes:
+        if "*" in classes:
             for ce in self._chemicalSystem.chemical_entities:
-                if isinstance(ce, (PeptideChain,Protein)):
+                if isinstance(ce, (PeptideChain, Protein)):
                     sel.update([at for at in ce.atom_list()])
-        
-        else:        
+
+        else:
             vals = set(classes)
-        
+
             selRes = set()
             for v in vals:
                 if v in CHEMFAMILIES:
                     selRes.update(CHEMFAMILIES[v])
-            
+
             for ce in self._chemicalSystem.chemical_entities:
-                if isinstance(ce,(PeptideChain,Protein)):
+                if isinstance(ce, (PeptideChain, Protein)):
                     res = ce.residues
                     for r in res:
                         resName = r.code.strip()
                         if resName in selRes:
                             sel.update([at for at in r.atom_list()])
-                                                   
+
         return sel
-    
+
+
 REGISTRY["residue_class"] = ResidueClass

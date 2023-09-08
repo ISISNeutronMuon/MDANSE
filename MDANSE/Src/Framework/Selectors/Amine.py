@@ -15,41 +15,53 @@
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
-                    
+
+
 class Amine(ISelector):
-    '''
+    """
     Returns the amine atoms.
-    '''
+    """
 
     section = "chemical groups"
 
     def __init__(self, chemicalSystem):
-        
-        ISelector.__init__(self,chemicalSystem)
+        ISelector.__init__(self, chemicalSystem)
 
         for ce in self._chemicalSystem.chemical_entities:
-                                        
-            nitrogens = [at for at in ce.atom_list() if at.element.strip().lower() == 'nitrogen']
-                    
+            nitrogens = [
+                at for at in ce.atom_list() if at.element.strip().lower() == "nitrogen"
+            ]
+
             for nitro in nitrogens:
                 neighbours = nitro.bonds
-                hydrogens = [neigh.full_name().strip() for neigh in neighbours if neigh.element.strip().lower() == 'hydrogen']
+                hydrogens = [
+                    neigh.full_name().strip()
+                    for neigh in neighbours
+                    if neigh.element.strip().lower() == "hydrogen"
+                ]
                 if len(hydrogens) == 2:
-                    self._choices.extend([nitro.full_name().strip()] + sorted(hydrogens))
-
+                    self._choices.extend(
+                        [nitro.full_name().strip()] + sorted(hydrogens)
+                    )
 
     def select(self, names):
-
         sel = set()
 
-        if '*' in names:
+        if "*" in names:
             if len(self._choices) == 1:
                 return sel
             names = self._choices[1:]
 
         vals = set(names)
-        sel.update([at for at in self._chemicalSystem.atom_list() if at.full_name().strip() in vals])
+        sel.update(
+            [
+                at
+                for at in self._chemicalSystem.atom_list()
+                if at.full_name().strip() in vals
+            ]
+        )
 
         return sel
+
 
 REGISTRY["amine"] = Amine

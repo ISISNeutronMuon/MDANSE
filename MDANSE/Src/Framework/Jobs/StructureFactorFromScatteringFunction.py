@@ -20,23 +20,35 @@ from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import get_spectrum
 
+
 class StructureFactorFromScatteringFunction(IJob):
     """
     Computes the structure factor from a NetCDF file containing an intermediate scattering function.
     """
-        
+
     label = "Structure Factor From Scattering Function"
 
-    category = ('Analysis','Scattering',)
-    
-    ancestor = ['netcdf_data']
-    
+    category = (
+        "Analysis",
+        "Scattering",
+    )
+
+    ancestor = ["netcdf_data"]
+
     settings = collections.OrderedDict()
-    settings['netcdf_input_file'] = ('netcdf_input_file', {'variables':['time','f(q,t)_total'],
-                                                           'default':os.path.join('..','..','..','Data','NetCDF','disf_prot.nc')})
-    settings['instrument_resolution'] = ('instrument_resolution', {'dependencies':{'frames' : 'netcdf_input_file'}})
-    settings['output_files'] = ('output_files', {'formats':['hdf','netcdf','ascii']})
-    
+    settings["netcdf_input_file"] = (
+        "netcdf_input_file",
+        {
+            "variables": ["time", "f(q,t)_total"],
+            "default": os.path.join("..", "..", "..", "Data", "NetCDF", "disf_prot.nc"),
+        },
+    )
+    settings["instrument_resolution"] = (
+        "instrument_resolution",
+        {"dependencies": {"frames": "netcdf_input_file"}},
+    )
+    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
+
     def initialize(self):
         """
         Initialize the input parameters and analysis self variables
@@ -44,44 +56,60 @@ class StructureFactorFromScatteringFunction(IJob):
 
         # The number of steps is set to 1 as everything is performed in the finalize method
         self.numberOfSteps = 1
-        
-        inputFile = self.configuration['netcdf_input_file']['instance'] 
-        
+
+        inputFile = self.configuration["netcdf_input_file"]["instance"]
+
         resolution = self.configuration["instrument_resolution"]
-        
-        self._outputData.add('time','line', inputFile.variables['time'][:], units='ps')
 
-        self._outputData.add('time_window','line', inputFile.variables['time_window'][:], axis='time', units='au') 
+        self._outputData.add("time", "line", inputFile.variables["time"][:], units="ps")
 
-        self._outputData.add('q','line', inputFile.variables['q'][:], units='1/nm') 
+        self._outputData.add(
+            "time_window",
+            "line",
+            inputFile.variables["time_window"][:],
+            axis="time",
+            units="au",
+        )
 
-        self._outputData.add('omega','line', resolution['omega'], units='rad/ps')
-        
-        self._outputData.add('omega_window','line', resolution['omega_window'], axis='omega', units='au') 
+        self._outputData.add("q", "line", inputFile.variables["q"][:], units="1/nm")
 
-        nQVectors = len(inputFile.variables['q'][:])
-        nOmegas = resolution['n_omegas']
+        self._outputData.add("omega", "line", resolution["omega"], units="rad/ps")
+
+        self._outputData.add(
+            "omega_window", "line", resolution["omega_window"], axis="omega", units="au"
+        )
+
+        nQVectors = len(inputFile.variables["q"][:])
+        nOmegas = resolution["n_omegas"]
 
         for k, v in list(inputFile.variables.items()):
-            if k.startswith('f(q,t)_'):
-                self._outputData.add(k,'surface', v[:], axis='q|time', units='au')                                                 
+            if k.startswith("f(q,t)_"):
+                self._outputData.add(k, "surface", v[:], axis="q|time", units="au")
                 suffix = k[7:]
-                self._outputData.add('s(q,f)_%s' % suffix,'surface', (nQVectors,nOmegas), axis="q|omega", units="au") 
-                self._outputData['s(q,f)_%s' % suffix][:] = get_spectrum(v[:],
-                                                                         self.configuration["instrument_resolution"]["time_window"],
-                                                                         self.configuration["instrument_resolution"]["time_step"],
-                                                                         axis=1)
-                        
+                self._outputData.add(
+                    "s(q,f)_%s" % suffix,
+                    "surface",
+                    (nQVectors, nOmegas),
+                    axis="q|omega",
+                    units="au",
+                )
+                self._outputData["s(q,f)_%s" % suffix][:] = get_spectrum(
+                    v[:],
+                    self.configuration["instrument_resolution"]["time_window"],
+                    self.configuration["instrument_resolution"]["time_step"],
+                    axis=1,
+                )
+
     def run_step(self, index):
         """
         Runs a single step of the job.\n
- 
+
         :Parameters:
             #. index (int): The index of the step.
         :Returns:
-            #. index (int): The index of the step. 
+            #. index (int): The index of the step.
         """
-        
+
         return index, None
 
     def combine(self, index, x):
@@ -96,10 +124,15 @@ class StructureFactorFromScatteringFunction(IJob):
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
-        """ 
+        """
 
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
-        
-        self.configuration['netcdf_input_file']['instance'].close()
+        self._outputData.write(
+            self.configuration["output_files"]["root"],
+            self.configuration["output_files"]["formats"],
+            self._info,
+        )
 
-REGISTRY['sffsf'] = StructureFactorFromScatteringFunction
+        self.configuration["netcdf_input_file"]["instance"].close()
+
+
+REGISTRY["sffsf"] = StructureFactorFromScatteringFunction

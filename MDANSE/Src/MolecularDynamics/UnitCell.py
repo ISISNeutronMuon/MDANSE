@@ -1,12 +1,13 @@
 import numpy as np
 from icecream import ic
 
+
 class UnitCell:
-    """This class stores a unit cell. is stored row-wise i.e. the a, b and c vectors are 
+    """This class stores a unit cell. is stored row-wise i.e. the a, b and c vectors are
     respectively the first, second and thrid row of the unit cell matrix.
     """
 
-    def __init__(self,unit_cell):
+    def __init__(self, unit_cell):
         """The constructor.
 
         :param unit_cell: the unit cell matrix
@@ -25,7 +26,7 @@ class UnitCell:
         :return: the a vector
         :rtype: numpy array
         """
-        return self._unit_cell[0,:]
+        return self._unit_cell[0, :]
 
     @property
     def b_vector(self):
@@ -34,7 +35,7 @@ class UnitCell:
         :return: the b vector
         :rtype: numpy array
         """
-        return self._unit_cell[1,:]
+        return self._unit_cell[1, :]
 
     @property
     def c_vector(self):
@@ -43,7 +44,7 @@ class UnitCell:
         :return: the c vector
         :rtype: numpy array
         """
-        return self._unit_cell[2,:]
+        return self._unit_cell[2, :]
 
     @property
     def direct(self):
@@ -92,6 +93,7 @@ class UnitCell:
 
         return np.abs(
             np.dot(
-                np.cross(self._unit_cell[0,:],self._unit_cell[1,:]),
-                self._unit_cell[2,:])
+                np.cross(self._unit_cell[0, :], self._unit_cell[1, :]),
+                self._unit_cell[2, :],
             )
+        )

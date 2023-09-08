@@ -21,64 +21,81 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
+
 class CroppedTrajectory(IJob):
     """
     Crop a trajectory in terms of the contents of the simulation box (selected atoms or molecules) and the trajectory length.
     """
-        
+
     label = "Cropped Trajectory"
 
-    category = ('Analysis','Trajectory',)
-    
-    ancestor = ['hdf_trajectory','molecular_viewer']
+    category = (
+        "Analysis",
+        "Trajectory",
+    )
+
+    ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings['trajectory'] = ('hdf_trajectory',{})
-    settings['frames'] = ('frames', {'dependencies':{'trajectory':'trajectory'}})
-    settings['atom_selection'] = ('atom_selection',{'dependencies':{'trajectory':'trajectory'}})
-    settings['output_file'] = ('single_output_file', {'format': 'hdf','root':'trajectory'})
-                
+    settings["trajectory"] = ("hdf_trajectory", {})
+    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["atom_selection"] = (
+        "atom_selection",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
+    settings["output_file"] = (
+        "single_output_file",
+        {"format": "hdf", "root": "trajectory"},
+    )
+
     def initialize(self):
         """
         Initialize the input parameters and analysis self variables
         """
 
-        self.numberOfSteps = self.configuration['frames']['number']
-                
-        atoms = sorted_atoms(self.configuration['trajectory']['instance'].chemical_system.atom_list())
-        
+        self.numberOfSteps = self.configuration["frames"]["number"]
+
+        atoms = sorted_atoms(
+            self.configuration["trajectory"]["instance"].chemical_system.atom_list()
+        )
+
         # The collection of atoms corresponding to the atoms selected for output.
-        indexes  = [idx for idxs in self.configuration['atom_selection']['indexes'] for idx in idxs]        
+        indexes = [
+            idx
+            for idxs in self.configuration["atom_selection"]["indexes"]
+            for idx in idxs
+        ]
         self._selectedAtoms = [atoms[ind] for ind in indexes]
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
-            self.configuration['output_file']['file'],
-            self.configuration['trajectory']['instance'].chemical_system,
+            self.configuration["output_file"]["file"],
+            self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
-            self._selectedAtoms)
-                        
+            self._selectedAtoms,
+        )
+
     def run_step(self, index):
         """
         Runs a single step of the job.\n
- 
+
         :Parameters:
             #. index (int): The index of the step.
         :Returns:
-            #. index (int): The index of the step. 
+            #. index (int): The index of the step.
             #. None
         """
 
         # get the Frame index
-        frame_index = self.configuration['frames']['value'][index]
-              
-        conf = self.configuration['trajectory']['instance'].configuration(frame_index)
+        frame_index = self.configuration["frames"]["value"][index]
+
+        conf = self.configuration["trajectory"]["instance"].configuration(frame_index)
 
         cloned_conf = conf.clone(self._output_trajectory.chemical_system)
 
         self._output_trajectory.chemical_system.configuration = cloned_conf
 
-        time = self.configuration['frames']['time'][index]
+        time = self.configuration["frames"]["time"][index]
 
         self._output_trajectory.dump_configuration(time)
 
@@ -90,17 +107,18 @@ class CroppedTrajectory(IJob):
         :Parameters:
             #. index (int): The index of the step.\n
             #. x (any): The returned result(s) of run_step
-        """   
+        """
         pass
-        
+
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
-        """ 
+        """
         # The input trajectory is closed.
-        self.configuration['trajectory']['instance'].close()
-                                                    
-        # The output trajectory is closed.
-        self._output_trajectory.close()   
+        self.configuration["trajectory"]["instance"].close()
 
-REGISTRY['ct'] = CroppedTrajectory
+        # The output trajectory is closed.
+        self._output_trajectory.close()
+
+
+REGISTRY["ct"] = CroppedTrajectory

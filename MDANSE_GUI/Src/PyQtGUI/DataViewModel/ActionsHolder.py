@@ -25,8 +25,7 @@ from MDANSE_GUI.PyQtGUI.RegistryViewer import RegistryTree
 
 
 class ActionsHolder(QStandardItemModel):
-
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__(parent)
 
         self.mutex = QMutex()
@@ -37,7 +36,7 @@ class ActionsHolder(QStandardItemModel):
         # will be kept here
         self._sections = {}
         self._section_names = []
-    
+
     @Slot(object)
     def append_object(self, thing):
         self.mutex.lock()
@@ -49,15 +48,17 @@ class ActionsHolder(QStandardItemModel):
         return retval
 
 
-
 class ActionsSuperModel(QObject):
     """This object will create and store all the possible
     tree models of actions. These will be assigned to the
     ActionsTree widget, depending on which data object
     has been selected."""
 
-    def __init__(self, viewer: typing.Optional['QTreeView'] = None,
-                       parent: typing.Optional['QObject'] = None) -> None:
+    def __init__(
+        self,
+        viewer: typing.Optional["QTreeView"] = None,
+        parent: typing.Optional["QObject"] = None,
+    ) -> None:
         super().__init__(parent)
 
         self.viewer = viewer
@@ -81,7 +82,7 @@ class ActionsSuperModel(QObject):
         except KeyError:
             current_model = ActionsHolder()
         self.viewer.setModel(current_model)
-    
+
     def buildModels(self, registry: RegistryTree):
         """Creates several subtrees out of the registry tree.
         Each tree will only contain nodes that share the same
@@ -106,7 +107,7 @@ class ActionsSuperModel(QObject):
             # here the processing ends
             self.models[anc] = model
         ic("Build the following models:", self.models.keys())
-    
+
     def copyNodeIntoModel(self, thing: typing.Any, model: ActionsHolder):
         node_parents = thing.category
         rootnode = None
@@ -133,4 +134,3 @@ class ActionsSuperModel(QObject):
             model.appendRow(newitem)
         else:
             rootnode.appendRow(newitem)
-        
