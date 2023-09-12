@@ -14,7 +14,7 @@
 # **************************************************************************
 
 from qtpy.QtWidgets import QCheckBox
-from qtpy.QtCore import Slot
+from qtpy.QtCore import Slot, Qt
 
 from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
 
@@ -38,4 +38,4 @@ class BooleanWidget(WidgetBase):
 
     @Slot()
     def updateValue(self):
-        self._configurator.configure(self._field.checkState() > 0)
+        self._configurator.configure(self._field.checkState() == Qt.CheckState.Checked)

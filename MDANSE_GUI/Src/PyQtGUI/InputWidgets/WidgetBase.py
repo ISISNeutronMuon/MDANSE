@@ -26,9 +26,8 @@ from qtpy.QtWidgets import (
 
 class WidgetBase(QObject):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
         parent = kwargs.get("parent", None)
+        super().__init__(*args, parent=parent)
         label_text = kwargs.get("label", "")
         tooltip_text = kwargs.get("tooltip", "")
         base_type = kwargs.get("base_type", "QGroupBox")
@@ -46,7 +45,7 @@ class WidgetBase(QObject):
             label = QLabel(label_text, base)
             layout.addWidget(label)
         elif base_type == "QGroupBox":
-            base = QGroupBox(label)
+            base = QGroupBox(label_text)
             base.setToolTip(tooltip_text)
             layout = layoutClass(base)
             base.setLayout(layout)

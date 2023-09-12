@@ -110,17 +110,20 @@ class ActionDialog(QDialog):
         for key, value in settings.items():
             dtype = value[0]
             ddict = value[1]
-            defaultvalue = ddict.get("default", 0.0)
+            configurator = converter_instance.configuration[key]
+            ddict["configurator"] = configurator
             labeltext = ddict.get("label", "Mystery X the Unknown")
             if not dtype in widget_lookup.keys():
                 placeholder = QLabel(labeltext)
-                placeholder.toolTip(
+                placeholder.setToolTip(
                     "This is not implemented in the MDANSE GUI at the moment, and it MUST BE!"
                 )
                 layout.addWidget(placeholder)
             else:
-                input_widget = widget_lookup[dtype](parent=self, **ddict)
-                layout.addWidget(input_widget.base)
+                widget_class = widget_lookup[dtype]
+                # expected = {key: ddict[key] for key in widget_class.__init__.__code__.co_varnames}
+                input_widget = widget_class(parent=self, **ddict)
+                layout.addWidget(input_widget._base)
             # self.handlers[key] = data_handler
 
         buttonbase = QWidget(self)
