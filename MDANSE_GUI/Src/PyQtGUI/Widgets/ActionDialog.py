@@ -49,6 +49,15 @@ from qtpy.QtGui import (
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE_GUI.PyQtGUI.Widgets.GeneralWidgets import InputFactory
+from MDANSE_GUI.PyQtGUI.InputWidgets import *
+
+
+widget_lookup = {  # these all come from MDANSE_GUI.PyQtGUI.InputWidgets
+    "float": FloatWidget,
+    "boolean": BooleanWidget,
+    "string": StringWidget,
+    "integer": IntegerWidget,
+}
 
 
 class ActionDialog(QDialog):
@@ -103,11 +112,16 @@ class ActionDialog(QDialog):
             ddict = value[1]
             defaultvalue = ddict.get("default", 0.0)
             labeltext = ddict.get("label", "Mystery X the Unknown")
-            base, data_handler = InputFactory.createInputField(
-                parent=self, kind=dtype, **ddict
-            )
-            layout.addWidget(base)
-            self.handlers[key] = data_handler
+            if not dtype in widget_lookup.keys():
+                placeholder = QLabel(labeltext)
+                placeholder.toolTip(
+                    "This is not implemented in the MDANSE GUI at the moment, and it MUST BE!"
+                )
+                layout.addWidget(placeholder)
+            else:
+                input_widget = widget_lookup[dtype](parent=self, **ddict)
+                layout.addWidget(input_widget.base)
+            # self.handlers[key] = data_handler
 
         buttonbase = QWidget(self)
         buttonlayout = QHBoxLayout(buttonbase)

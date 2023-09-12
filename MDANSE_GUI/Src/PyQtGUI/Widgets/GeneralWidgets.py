@@ -16,8 +16,11 @@
 from typing import Union, Iterable
 from collections import OrderedDict
 import copy
+import abc
+from PyQt6.QtCore import QObject
 
 from icecream import ic
+import numpy as np
 from qtpy.QtWidgets import (
     QDialog,
     QPushButton,
@@ -78,6 +81,7 @@ class GeneralInput(QObject):
 
     final_value = Signal(object)
     string_value = Signal(str)
+    value_changed = Signal()
 
     def __init__(self, *args, data_type=None, **kwargs):
         new_kwargs = copy.copy(kwargs)
@@ -141,6 +145,7 @@ class GeneralInput(QObject):
             converted = self.default_value
             ic(f"TypeError converting {newone} using {self.data_type}")
         self.current_value = converted
+        self.value_changed.emit()
         if emit:
             self.string_value.emit(self.current_value)
 
@@ -175,6 +180,54 @@ class GeneralInput(QObject):
         )
         if new_value is not None:
             self.updateValue(new_value[0], emit=True)
+
+
+# class MultipleInput(GeneralInput):
+#     """
+#     This class is more specifically designed for handling variables
+#     with multiple values of the same type.
+#     """
+
+#     def __init__(self, *args, data_type=None, **kwargs):
+#         super().__init__(*args, data_type=data_type, **kwargs)
+#         self.length = kwargs.get("length", 1)
+#         if isinstance(self.default_value, Iterable) and not isinstance(self.default_value, str):
+#             if len(self.default_value) == self.length:
+#                 self.default_value = np.array(list(self.default_value), dtype=self.data_type)
+#             elif len(self.default_value) > self.length:
+#                 self.default_value = np.array(list(self.default_value)[:self.length], dtype=self.data_type)
+#             else:
+#                 padding = self.length - len(self.default_value)
+#                 self.default_value = np.array(list(self.default_value) + padding*[0]).astype(self.data_type)
+#         else:
+#             self.default_value = np.array(self.length*[self.default_value], dtype=self.data_type)
+#         self.current_value = self.default_value
+
+
+class InputGroup(QObject):
+    final_value = Signal(object)
+    string_value = Signal(str)
+
+    def __init__(self, parent: QObject | None = ...) -> None:
+        super().__init__(parent)
+        self.fields = []
+        self.values = []
+
+    @Slot()
+    def valueChanged(self):
+        """This slot is triggered when one of the inputs
+        changes its value. It then checks ALL the inputs
+        and outputs their values put together."""
+        result = []
+        for field in self.fields:
+            result.append(field.returnValue())
+        self.final_value.emit(result)
+        self.string_value.emit(str(result))
+
+    def register_value(self, field: GeneralInput):
+        """Adds an input field to the list of fields"""
+        self.fields.append(field)
+        field.value_changed.connect(self.valueChanged)
 
 
 def translate_file_associations(input_str: str):
@@ -230,6 +283,10 @@ class InputFactory:
             result = InputFactory.createSingle(*args, **kwargs)
         elif kind == "int" or kind == "integer":
             result = InputFactory.createSingle(*args, **kwargs)
+        elif kind == "range" or kind == "intrange":
+            result = InputFactory.createMultiple(*args, **kwargs)
+        elif kind == "arange" or kind == "floatrange":
+            result = InputFactory.createMultiple(*args, **kwargs)
         elif kind == "float":
             result = InputFactory.createSingle(*args, **kwargs)
         elif kind == "single_choice":
@@ -367,6 +424,48 @@ class InputFactory:
         field.setToolTip(tooltip_text)
         layout.addWidget(field)
         return [base, data_handler]
+
+    def createMultiple(*args, **kwargs):
+        """Creates a number of LineEdit fields, for
+        input of multiple values.
+        Can be used to handle int, float or str variables.
+        For numerical values, it adds a QValidator instance
+        to filter out invalid inputs.
+        """
+        kind = kwargs.get("kind", "str")
+        default_value = kwargs.get("default", None)
+        tooltip_text = kwargs.get("tooltip", None)
+        minval = kwargs.get("mini", None)
+        number_of_fields = kwargs.get("howmany", None)
+        if number_of_fields is None:
+            number_of_fields = len(default_value)
+        ic(kind)
+        ic(default_value)
+        ic(tooltip_text)
+        ic(kwargs)
+        base, layout = InputFactory.createBase(*args, **kwargs)
+        main_handler = InputGroup(base)
+        for nfield in range(number_of_fields):
+            field = QLineEdit(base)
+            if kind == "int" or kind == "integer":
+                data_handler = GeneralInput(data_type=int, **kwargs)
+                validator = QIntValidator(field)
+            elif kind == "float":
+                data_handler = GeneralInput(data_type=float, **kwargs)
+                validator = QDoubleValidator(field)
+            elif kind == "str":
+                data_handler = GeneralInput(data_type=str, **kwargs)
+                validator = None
+            if validator is not None:
+                field.setValidator(validator)
+                if minval is not None:
+                    validator.setBottom(minval)
+            field.textChanged.connect(data_handler.updateValue)
+            field.setText(str(default_value[nfield]))
+            field.setToolTip(tooltip_text)
+            main_handler.register_value(data_handler)
+        layout.addWidget(field)
+        return [base, main_handler]
 
     def createCombo(*args, **kwargs):
         """For the variable where one option has to be picked from
