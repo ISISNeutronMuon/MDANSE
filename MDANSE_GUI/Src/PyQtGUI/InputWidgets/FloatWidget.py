@@ -24,15 +24,10 @@ class FloatWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._value = 0
-        configurator = kwargs.get("configurator", None)
-        if configurator is None:
-            option_list = kwargs.get("choices", [])
-        else:
-            option_list = configurator.choices
-            try:
-                default_option = int(configurator.default)
-            except ValueError:
-                default_option = 0
+        try:
+            default_option = float(self._configurator.default)
+        except ValueError:
+            default_option = 0.0
         if self._configurator.choices:
             field = QDoubleSpinBox(self._base)
             field.setMinimum(self._configurator.choices[0])
@@ -46,8 +41,11 @@ class FloatWidget(WidgetBase):
         else:
             field = QLineEdit(self._base)
             validator = QDoubleValidator(field)
-            validator.setBottom(self._configurator.mini)
-            validator.setTop(self._configurator.maxi)
+            minval, maxval = self._configurator.mini, self._configurator.maxi
+            if minval is not None:
+                validator.setBottom(minval)
+            if maxval is not None:
+                validator.setTop(maxval)
             field.setValidator(validator)
             field.setText(str(default_option))
             field.textChanged.connect(self.newText)
@@ -55,7 +53,6 @@ class FloatWidget(WidgetBase):
         field.setToolTip(self._tooltip)
         self._field = field
         self._layout.addWidget(field)
-        self._configurator = configurator
 
     @Slot(str)
     def newText(self, text: str):

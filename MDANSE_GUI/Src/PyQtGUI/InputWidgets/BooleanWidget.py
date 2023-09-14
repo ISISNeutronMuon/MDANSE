@@ -22,11 +22,7 @@ from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
 class BooleanWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        configurator = kwargs.get("configurator", None)
-        if configurator is not None:
-            default_option = configurator.default
-        else:
-            default_option = True
+        default_option = self._configurator.default
         field = QCheckBox(self._base)
         field.setTristate(False)
         field.setChecked(default_option)
@@ -34,7 +30,6 @@ class BooleanWidget(WidgetBase):
         field.setToolTip(self._tooltip)
         self._field = field
         self._layout.addWidget(field)
-        self._configurator = configurator
 
     @Slot()
     def updateValue(self):

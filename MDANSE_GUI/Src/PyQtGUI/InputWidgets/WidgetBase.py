@@ -32,6 +32,7 @@ class WidgetBase(QObject):
         tooltip_text = kwargs.get("tooltip", "")
         base_type = kwargs.get("base_type", "QGroupBox")
         layout_type = kwargs.get("layout_type", "QHBoxLayout")
+        configurator = kwargs.get("configurator", None)
         if layout_type == "QHBoxLayout":
             layoutClass = QHBoxLayout
         elif layout_type == "QVBoxLayout":
@@ -52,3 +53,4 @@ class WidgetBase(QObject):
         self._base = base
         self._layout = layout
         self._tooltip = tooltip_text
+        self._configurator = configurator

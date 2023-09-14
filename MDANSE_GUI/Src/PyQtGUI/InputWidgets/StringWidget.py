@@ -22,18 +22,13 @@ from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
 class StringWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        configurator = kwargs.get("configurator", None)
-        if configurator is not None:
-            default_option = configurator.default
-        else:
-            default_option = ""
+        default_option = self._configurator.default
         field = QLineEdit(self._base)
         field.setText(default_option)
         field.textChanged.connect(self.updateValue)
         field.setToolTip(self._tooltip)
         self._field = field
         self._layout.addWidget(field)
-        self._configurator = configurator
 
     @Slot()
     def updateValue(self):
