@@ -12,7 +12,7 @@ from MDANSE.Chemistry import (
     NUCLEOTIDES_DATABASE,
     RESIDUES_DATABASE,
 )
-from MDANSE.Mathematics.Geometry import superposition_fit
+from MDANSE.Mathematics.Geometry import superposition_fit, center_of_mass
 from MDANSE.Mathematics.LinearAlgebra import delta, Tensor, Vector
 from MDANSE.Mathematics.Transformation import Rotation, Transformation, Translation
 
@@ -134,18 +134,21 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         return selected_atoms
 
     def center_of_mass(self, configuration):
-        coords = configuration["coordinates"]
+        # Retrieve atom symbols and indices as a numpy array
+        atom_data = np.array([[at.symbol, str(at.index)] for at in self.atom_list()])
 
-        com = np.zeros((3,), dtype=np.float64)
-        sum_masses = 0.0
-        for at in self.atom_list():
-            m = ATOMS_DATABASE[at.symbol]["atomic_weight"]
-            com += m * coords[at.index, :]
-            sum_masses += m
+        # Sort indices and reorder both symbols and indices using this order
+        sort = np.argsort(atom_data[:, 1])
+        symbols = atom_data[sort, 0]
+        indices = atom_data[sort, 1]
 
-        com /= sum_masses
+        # Retrieve atom masses and coordinates, ensuring that they are ordered correctly
+        masses = np.array(
+            ATOMS_DATABASE.get_values_for_multiple_atoms(symbols, "atomic_weight")
+        )
+        coords = configuration["coordinates"][indices.astype(int), :]
 
-        return com
+        return center_of_mass(coords, masses)
 
     def mass(self):
         sum_masses = 0.0
