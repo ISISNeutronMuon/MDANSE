@@ -242,7 +242,7 @@ class Trajectory:
             inverse_cells = np.array([uc.transposed_inverse for uc in self._unit_cells])
 
             top_lvl_chemical_entities = set(
-                [at.top_level_chemical_entity() for at in atoms]
+                [at.top_level_chemical_entity for at in atoms]
             )
             top_lvl_chemical_entities_indexes = [
                 [at.index for at in e.atom_list] for e in top_lvl_chemical_entities
