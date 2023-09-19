@@ -19,18 +19,20 @@ class UnitCell:
         self._unit_cell = np.array(unit_cell).astype(np.float64)
 
         if self._unit_cell.shape != (3, 3):
-            raise ValueError(f'the unit cell must have a shape of 3×3 but {self._unit_cell.shape} was provided.')
+            raise ValueError(
+                f"the unit cell must have a shape of 3×3 but {self._unit_cell.shape} was provided."
+            )
 
         self._inverse_unit_cell = np.linalg.pinv(self._unit_cell)
 
-    def __eq__(self, other: 'UnitCell') -> bool:
+    def __eq__(self, other: "UnitCell") -> bool:
         if isinstance(other, UnitCell):
             return np.allclose(self._unit_cell, other._unit_cell)
         else:
             return False
 
     def __repr__(self) -> str:
-        return f'MDANSE.MolecularDynamics.UnitCell.UnitCell({repr(self._unit_cell)})'
+        return f"MDANSE.MolecularDynamics.UnitCell.UnitCell({repr(self._unit_cell)})"
 
     @property
     def a_vector(self) -> np.ndarray:
