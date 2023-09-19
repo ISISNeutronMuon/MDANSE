@@ -106,7 +106,7 @@ class RigidBodyTrajectory(IJob):
         )
 
         atoms = sorted_atoms(
-            self.configuration["trajectory"]["instance"].chemical_system.atom_list()
+            self.configuration["trajectory"]["instance"].chemical_system.atom_list
         )
 
         self._groups = []
@@ -139,7 +139,7 @@ class RigidBodyTrajectory(IJob):
             selectedAtoms,
         )
 
-        self._group_atoms = [group.atom_list() for group in self._groups]
+        self._group_atoms = [group.atom_list for group in self._groups]
 
         conf = RealConfiguration(
             self._output_trajectory.chemical_system, coords, unitCell

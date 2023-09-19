@@ -119,7 +119,7 @@ class ASEConverter(Converter):
         )
 
         self._nameToIndex = dict(
-            [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list()]
+            [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list]
         )
 
         self._start = 0
@@ -408,7 +408,7 @@ class ASEInteractiveConverter(InteractiveConverter, regkey="ase"):
         )
 
         self._nameToIndex = dict(
-            [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list()]
+            [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list]
         )
 
         self._start = 0

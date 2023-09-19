@@ -134,7 +134,7 @@ class Eccentricity(IJob):
         self._comIndexes = self.configuration["center_of_mass"]["flatten_indexes"]
 
         self._atoms = sorted_atoms(
-            self.configuration["trajectory"]["instance"].chemical_system.atom_list()
+            self.configuration["trajectory"]["instance"].chemical_system.atom_list
         )
 
         self._selectionMasses = [

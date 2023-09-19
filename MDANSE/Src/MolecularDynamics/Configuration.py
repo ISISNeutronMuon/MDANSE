@@ -289,7 +289,7 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
 
         indexes = []
         for ce in self._chemical_system.chemical_entities:
-            indexes.append([at.index for at in ce.atom_list()])
+            indexes.append([at.index for at in ce.atom_list])
 
         contiguous_coords = contiguous_coordinates.contiguous_coordinates_box(
             self._variables["coordinates"], self._unit_cell.transposed_direct, indexes
@@ -420,7 +420,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 
         indexes = []
         for ce in self._chemical_system.chemical_entities:
-            indexes.append([at.index for at in ce.atom_list()])
+            indexes.append([at.index for at in ce.atom_list])
 
         contiguous_coords = contiguous_coordinates.contiguous_coordinates_real(
             self._variables["coordinates"],

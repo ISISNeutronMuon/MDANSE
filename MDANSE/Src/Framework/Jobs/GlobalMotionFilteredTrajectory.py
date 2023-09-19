@@ -79,7 +79,7 @@ class GlobalMotionFilteredTrajectory(IJob):
 
         # The collection of atoms corresponding to the atoms selected for output.
         atoms = sorted_atoms(
-            self.configuration["trajectory"]["instance"].chemical_system.atom_list()
+            self.configuration["trajectory"]["instance"].chemical_system.atom_list
         )
         self._selected_atoms = []
         for indexes in self.configuration["atom_selection"]["indexes"]:
@@ -97,7 +97,7 @@ class GlobalMotionFilteredTrajectory(IJob):
             self.configuration["output_file"]["file"],
             self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
-            self._selected_atoms.atom_list(),
+            self._selected_atoms.atom_list,
         )
 
         # This will store the configuration used as the reference for the following step.

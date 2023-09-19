@@ -250,7 +250,7 @@ class LAMMPSConverter(Converter):
         )
 
         self._nameToIndex = dict(
-            [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list()]
+            [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list]
         )
 
         self._lammps.seek(0, 0)

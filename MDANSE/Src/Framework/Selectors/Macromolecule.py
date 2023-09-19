@@ -55,7 +55,7 @@ class Macromolecule(ISelector):
             for ce in self._chemicalSystem.chemical_entities:
                 m = Macromolecule.lookup.get(ce.__class__, None)
                 if m in macromolecules:
-                    sel.update([at for at in ce.atom_list()])
+                    sel.update([at for at in ce.atom_list])
 
         return sel
 
