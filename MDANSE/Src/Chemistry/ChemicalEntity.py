@@ -1328,6 +1328,11 @@ class ChemicalSystem(_ChemicalEntity):
             return False
         return True
 
+    def __hash__(self):
+        tempkey = (self._number_of_atoms, self._total_number_of_atoms,
+                   self._name, self._atoms)
+        return hash(tempkey)
+
     def __getstate__(self):
         return self.__dict__
 
