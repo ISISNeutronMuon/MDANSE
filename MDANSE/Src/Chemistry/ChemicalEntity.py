@@ -2558,7 +2558,8 @@ class ChemicalSystem(_ChemicalEntity):
                 )
             try:
                 arguments = [
-                    literal_eval(arg) for arg in h5_contents[entity_type][entity_index]
+                    literal_eval(arg.decode("utf8"))
+                    for arg in h5_contents[entity_type][entity_index]
                 ]
             except KeyError:
                 raise CorruptedFileError(

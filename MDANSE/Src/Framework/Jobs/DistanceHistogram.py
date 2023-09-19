@@ -185,7 +185,7 @@ class DistanceHistogram(IJob):
 
         nAtoms = self.configuration["trajectory"][
             "instance"
-        ].chemical_system.number_of_atoms()
+        ].chemical_system.number_of_atoms
 
         self.averageDensity += nAtoms / x[0]
 

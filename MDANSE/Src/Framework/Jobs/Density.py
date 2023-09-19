@@ -55,7 +55,7 @@ class Density(IJob):
 
         self._n_atoms = self.configuration["trajectory"][
             "instance"
-        ].chemical_system.number_of_atoms()
+        ].chemical_system.number_of_atoms
 
         self._symbols = sorted_atoms(
             self.configuration["trajectory"]["instance"].chemical_system.atom_list,

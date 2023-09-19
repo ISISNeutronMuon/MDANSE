@@ -209,7 +209,7 @@ class ASEConverter(Converter):
             self._lammps.readline()
 
         coords = np.empty(
-            (self._trajectory.chemical_system.number_of_atoms(), 3), dtype=np.float64
+            (self._trajectory.chemical_system.number_of_atoms, 3), dtype=np.float64
         )
 
         for i, _ in enumerate(
@@ -661,7 +661,7 @@ class ASEInteractiveConverter(InteractiveConverter, regkey="ase"):
             self._lammps.readline()
 
         coords = np.empty(
-            (self._trajectory.chemical_system.number_of_atoms(), 3), dtype=np.float64
+            (self._trajectory.chemical_system.number_of_atoms, 3), dtype=np.float64
         )
 
         for i, _ in enumerate(
