@@ -14,18 +14,18 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
 class AtomIndex(ISelector):
     section = "atoms"
 
-    def __init__(self, chemicalSystem):
-        ISelector.__init__(self, chemicalSystem)
+    def __init__(self, chemicalSystem: ChemicalSystem):
 
-        self._choices.extend(
-            sorted([at.index for at in self._chemicalSystem.atom_list()])
-        )
+        ISelector.__init__(self,chemicalSystem)
+                
+        self._choices.extend(sorted([at.index for at in self._chemicalSystem.atom_list]))
 
     def select(self, indexes):
         """Returns the atoms that matches a given list of indexes.
@@ -37,12 +37,12 @@ class AtomIndex(ISelector):
         sel = set()
 
         if "*" in indexes:
-            sel.update([at for at in self._chemicalSystem.atom_list()])
+            sel.update([at for at in self._chemicalSystem.atom_list])
 
         else:
             vals = set([int(v) for v in indexes])
             sel.update(
-                [at for at in self._chemicalSystem.atom_list() if at.index in vals]
+                [at for at in self._chemicalSystem.atom_list if at.index in vals]
             )
 
         return sel

@@ -65,7 +65,7 @@ def atom_index_to_molecule_index(chemical_system: ChemicalSystem) -> dict[int, i
 
     lut = {}
     for i, ce in enumerate(chemical_system.chemical_entities):
-        for at in ce.atom_list():
+        for at in ce.atom_list:
             lut[at.index] = i
 
     return lut
@@ -104,7 +104,7 @@ def brute_formula(
 
     contents = {}
 
-    for at in chemical_entity.atom_list():
+    for at in chemical_entity.atom_list:
         contents[at.symbol] = str(int(contents.get(at.symbol, 0)) + 1)
 
     formula = sep.join(["".join(v) for v in sorted(contents.items())])
@@ -213,13 +213,13 @@ def build_connectivity(
             atom_clusters.append(ce)
         else:
             if ce.number_of_atoms() == 1:
-                single_atoms_objects.extend(ce.atom_list())
+                single_atoms_objects.extend(ce.atom_list)
 
     if single_atoms_objects:
         atom_clusters.append(AtomCluster("", single_atoms_objects, parentless=True))
 
     for ce in atom_clusters:
-        atoms = sorted(ce.atom_list(), key=operator.attrgetter("index"))
+        atoms = sorted(ce.atom_list, key=operator.attrgetter("index"))
 
         n_atoms = len(atoms)
         indexes = [at.index for at in atoms]
@@ -298,7 +298,7 @@ def find_atoms_in_molecule(
 
     match = []
     for ce in chemical_entities:
-        atoms = ce.atom_list()
+        atoms = ce.atom_list
         names = [at.name for at in atoms]
         try:
             match.append([atoms[names.index(at_name)] for at_name in atom_names])
@@ -388,7 +388,7 @@ def group_atoms(
     >>> groups[2].atom_list
     [Atom(name='HW2'), Atom(name='OW'), Atom(name='HW1')]
     """
-    atoms = chemical_system.atom_list()
+    atoms = chemical_system.atom_list
 
     groups = [AtomGroup([atoms[index] for index in gr]) for gr in groups if gr]
 

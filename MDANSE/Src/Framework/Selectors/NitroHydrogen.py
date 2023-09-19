@@ -14,27 +14,24 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
 class NitroHydrogen(ISelector):
     section = "hydrogens"
 
-    def __init__(self, chemicalSystem):
-        ISelector.__init__(self, chemicalSystem)
+    def __init__(self, chemicalSystem: ChemicalSystem):
+        
+        ISelector.__init__(self,chemicalSystem)
 
         for ce in self._chemicalSystem.chemical_entities:
-            nitrogens = [
-                at for at in ce.atom_list() if at.element.strip().lower() == "nitrogen"
-            ]
-
+                                        
+            nitrogens = [at for at in ce.atom_list if at.element.strip().lower() == 'nitrogen']
+            
             for nitro in nitrogens:
                 neighbours = nitro.bonds
-                hydrogens = [
-                    neigh.full_name().strip()
-                    for neigh in neighbours
-                    if neigh.element.strip().lower() == "hydrogen"
-                ]
+                hydrogens = [neigh.full_name.strip() for neigh in neighbours if neigh.element.strip().lower() == 'hydrogen']
                 self._choices.extend(sorted(hydrogens))
 
     def select(self, names):
@@ -46,14 +43,8 @@ class NitroHydrogen(ISelector):
             names = self._choices[1:]
 
         vals = set([v for v in names])
-        sel.update(
-            [
-                at
-                for at in self._chemicalSystem.atom_list()
-                if at.full_name().strip() in vals
-            ]
-        )
-
+        sel.update([at for at in self._chemicalSystem.atom_list if at.full_name.strip() in vals])
+        
         return sel
 
 

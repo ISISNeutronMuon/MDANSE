@@ -14,18 +14,18 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
 class AtomElement(ISelector):
     section = "atoms"
 
-    def __init__(self, chemicalSystem):
-        ISelector.__init__(self, chemicalSystem)
+    def __init__(self, chemicalSystem: ChemicalSystem):
 
-        self._choices.extend(
-            sorted(set([at.element.lower() for at in self._chemicalSystem.atom_list()]))
-        )
+        ISelector.__init__(self,chemicalSystem)
+                
+        self._choices.extend(sorted(set([at.element.lower() for at in self._chemicalSystem.atom_list])))
 
     def select(self, elements):
         """Returns the atoms that matches a given list of elements.
@@ -37,7 +37,7 @@ class AtomElement(ISelector):
         sel = set()
 
         if "*" in elements:
-            sel.update([at for at in self._chemicalSystem.atom_list()])
+            sel.update([at for at in self._chemicalSystem.atom_list])
 
         else:
             vals = [v.lower() for v in elements]
@@ -49,14 +49,8 @@ class AtomElement(ISelector):
                     vals.append("sulfur")
 
             vals = set(vals)
-
-            sel.update(
-                [
-                    at
-                    for at in self._chemicalSystem.atom_list()
-                    if at.element.strip().lower() in vals
-                ]
-            )
+            
+            sel.update([at for at in self._chemicalSystem.atom_list if at.element.strip().lower() in vals])
 
         return sel
 

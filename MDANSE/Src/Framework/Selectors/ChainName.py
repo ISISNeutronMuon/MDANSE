@@ -14,16 +14,17 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
-from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
+from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
 class ChainName(ISelector):
     section = "proteins"
 
-    def __init__(self, chemicalSystem):
-        ISelector.__init__(self, chemicalSystem)
-
+    def __init__(self, chemicalSystem: ChemicalSystem):
+        
+        ISelector.__init__(self,chemicalSystem)
+                
         for ce in self._chemicalSystem.chemical_entities:
             if isinstance(ce, (PeptideChain, Protein)):
                 self._choices.extend([c.name for c in ce.peptide_chains])
@@ -41,7 +42,7 @@ class ChainName(ISelector):
             for ce in self._chemicalSystem.chemical_entities:
                 try:
                     for pc in ce.peptide_chains:
-                        sel.update([at for at in pc.atom_list()])
+                        sel.update([at for at in pc.atom_list])
                 except AttributeError:
                     pass
 
@@ -53,8 +54,8 @@ class ChainName(ISelector):
                     for chain in ce.peptide_chains:
                         chainName = chain.name.strip()
                         if chainName in vals:
-                            sel.update([at for at in chain.atom_list()])
-                except (AttributeError, TypeError):
+                            sel.update([at for at in chain.atom_list])
+                except (AttributeError,TypeError):
                     continue
 
         return sel

@@ -16,6 +16,7 @@
 import abc
 
 from MDANSE.Core.Error import Error
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 
 
 class SelectorError(Error):
@@ -24,8 +25,9 @@ class SelectorError(Error):
 
 class ISelector(object):
     _registry = "selector"
-
-    def __init__(self, chemicalSystem):
+        
+    def __init__(self, chemicalSystem: ChemicalSystem):
+        
         self._chemicalSystem = chemicalSystem
 
         self._choices = ["*"]

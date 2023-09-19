@@ -5,6 +5,7 @@ def cmp(a, b):
     return (a > b) - (a < b)
 
 
+
 class Vector:
 
     """Vector in 3D space
@@ -125,6 +126,12 @@ class Vector:
 
     def __getitem__(self, index):
         return self.array[index]
+
+    def __eq__(self, other):
+        if isinstance(other, Vector):
+            return np.all(self.array == other.array)
+        else:
+            return False
 
     def x(self):
         """
@@ -283,6 +290,12 @@ class Quaternion:
 
     def __repr__(self):
         return "Quaternion(" + str(list(self.array)) + ")"
+
+    def __eq__(self, other):
+        if isinstance(other, Quaternion):
+            return np.all(self.array == other.array)
+        else:
+            return False
 
     def dot(self, other):
         return np.add.reduce(self.array * other.array)
@@ -472,6 +485,12 @@ class Tensor:
             return Tensor(elements)
         else:
             return elements
+
+    def __eq__(self, other):
+        if isinstance(other, Tensor):
+            return np.all(self.array == other.array)
+        else:
+            return False
 
     def asVector(self):
         """

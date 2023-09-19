@@ -21,7 +21,7 @@ from icecream import ic
 import h5py
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
+from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem, _ChemicalEntity
 from MDANSE.Extensions import atomic_trajectory, com_trajectory, fold_coordinates
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
@@ -421,7 +421,7 @@ class TrajectoryWriter:
     def __init__(
         self,
         h5_filename,
-        chemical_system,
+        chemical_system: ChemicalSystem,
         n_steps,
         selected_atoms=None,
         positions_dtype=np.float64,
@@ -447,18 +447,16 @@ class TrajectoryWriter:
         self._chemical_system = chemical_system.copy()
 
         if selected_atoms is None:
-            self._selected_atoms = self._chemical_system.atom_list()
+            self._selected_atoms = self._chemical_system.atom_list
         else:
             for at in selected_atoms:
-                if at.root_chemical_system() != chemical_system:
-                    raise TrajectoryWriterError(
-                        "One or more atoms of the selection comes from a different chemical system"
-                    )
+                if at.root_chemical_system != chemical_system:
+                    raise TrajectoryWriterError('One or more atoms of the selection comes from a different chemical system')
             self._selected_atoms = sorted_atoms(selected_atoms)
 
         self._selected_atoms = [at.index for at in self._selected_atoms]
 
-        all_atoms = self._chemical_system.atom_list()
+        all_atoms = self._chemical_system.atom_list
         for idx in self._selected_atoms:
             all_atoms[idx] = False
 
@@ -512,7 +510,7 @@ class TrajectoryWriter:
         if units is None:
             units = {}
 
-        n_atoms = self._chemical_system.total_number_of_atoms()
+        n_atoms = self._chemical_system.total_number_of_atoms
 
         if self._chunking_axis == 1:
             chunk_tuple = (1, n_atoms, 3)
@@ -580,10 +578,8 @@ class RigidBodyTrajectoryGenerator:
      * rbt[i] is the value at step i (a vector for the center of mass
        and a quaternion for the orientation)
     """
-
-    def __init__(
-        self, trajectory, chemical_entity, reference, first=0, last=None, step=1
-    ):
+    
+    def __init__(self, trajectory, chemical_entity: _ChemicalEntity, reference, first=0, last=None, step=1):
         """Constructor.
 
         :param trajectory: the input trajectory
@@ -605,7 +601,7 @@ class RigidBodyTrajectoryGenerator:
         if last is None:
             last = len(self._trajectory)
 
-        atoms = chemical_entity.atom_list()
+        atoms = chemical_entity.atom_list
 
         masses = [ATOMS_DATABASE[at.symbol]["atomic_weight"] for at in atoms]
 
