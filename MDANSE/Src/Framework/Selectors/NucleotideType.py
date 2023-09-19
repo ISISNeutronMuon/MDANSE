@@ -43,7 +43,7 @@ class NucleotideType(ISelector):
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, NucleotideChain):
                     sel.update([at for at in ce.atom_list])
-        
+
         else:
             vals = set([v for v in types])
 
@@ -53,7 +53,7 @@ class NucleotideType(ISelector):
                         nuclType = nucl.code.strip()
                         if nuclType in vals:
                             sel.update([at for at in nucl.atom_list])
-                
+
         return sel
 
 

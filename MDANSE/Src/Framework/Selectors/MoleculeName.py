@@ -38,8 +38,8 @@ class MoleculeName(ISelector):
         """
 
         sel = set()
-        
-        if '*' in names:
+
+        if "*" in names:
             sel.update([at for at in self._chemicalSystem.atom_list])
 
         else:
@@ -47,7 +47,7 @@ class MoleculeName(ISelector):
             for ce in self._chemicalSystem.chemical_entities:
                 if ce.name.strip() in vals:
                     sel.update([at for at in ce.atom_list])
-                
+
         return sel
 
 

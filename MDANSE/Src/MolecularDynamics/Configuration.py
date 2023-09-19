@@ -17,7 +17,7 @@ class ConfigurationError(Exception):
 class _Configuration(metaclass=abc.ABCMeta):
     is_periodic: bool
 
-    def __init__(self, chemical_system: ChemicalSystem,coordinates,**variables):
+    def __init__(self, chemical_system: ChemicalSystem, coordinates, **variables):
         """Constructor.
 
         Args:
@@ -31,7 +31,7 @@ class _Configuration(metaclass=abc.ABCMeta):
 
         coordinates = np.array(coordinates)
         if coordinates.shape != (self._chemical_system.number_of_atoms, 3):
-            raise ValueError('Invalid coordinates dimensions')
+            raise ValueError("Invalid coordinates dimensions")
 
         self["coordinates"] = coordinates
 
@@ -67,7 +67,7 @@ class _Configuration(metaclass=abc.ABCMeta):
 
         item = np.array(value)
         if item.shape != (self._chemical_system.number_of_atoms, 3):
-            raise ValueError('Invalid item dimensions')
+            raise ValueError("Invalid item dimensions")
 
         self._variables[name] = value
 
@@ -132,8 +132,11 @@ class _Configuration(metaclass=abc.ABCMeta):
         """
         return self._variables
 
+
 class _PeriodicConfiguration(_Configuration):
-    def __init__(self, chemical_system: ChemicalSystem, coordinates, unit_cell, **variables):
+    def __init__(
+        self, chemical_system: ChemicalSystem, coordinates, unit_cell, **variables
+    ):
         """Constructor.
 
         Args:
@@ -157,8 +160,11 @@ class _PeriodicConfiguration(_Configuration):
             chemical_system (MDANSE.Chemistry.ChemicalEntity.ChemicalSystem): the chemical system
         """
 
-        if chemical_system.total_number_of_atoms != self.chemical_system.total_number_of_atoms:
-            raise ConfigurationError('Mismatch between the chemical systems')
+        if (
+            chemical_system.total_number_of_atoms
+            != self.chemical_system.total_number_of_atoms
+        ):
+            raise ConfigurationError("Mismatch between the chemical systems")
 
         unit_cell = copy.deepcopy(self._unit_cell)
 
@@ -264,11 +270,10 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
             maxi (float): the outer radius of the shell
         """
 
-        indexes = atoms_in_shell.atoms_in_shell_box(self._variables['coordinates'],
-                                                    ref,
-                                                    mini,
-                                                    maxi)
-        
+        indexes = atoms_in_shell.atoms_in_shell_box(
+            self._variables["coordinates"], ref, mini, maxi
+        )
+
         atom_list = self._chemical_system.atom_list
 
         selected_atoms = [atom_list[idx] for idx in indexes]
@@ -309,12 +314,14 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
         else:
             for ce in chemical_entities:
                 if ce.root_chemical_system is not self._chemical_system:
-                    raise ConfigurationError('One or more chemical entities comes from another chemical system')
+                    raise ConfigurationError(
+                        "One or more chemical entities comes from another chemical system"
+                    )
 
         indexes = []
         for ce in chemical_entities:
             indexes.append([at.index for at in ce.atom_list])
-        
+
         offsets = contiguous_coordinates.contiguous_offsets_box(
             self._variables["coordinates"],
             self._unit_cell.transposed_direct,
@@ -459,12 +466,14 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         else:
             for ce in chemical_entities:
                 if ce.root_chemical_system is not self._chemical_system:
-                    raise ConfigurationError('One or more chemical entities comes from another chemical system')
+                    raise ConfigurationError(
+                        "One or more chemical entities comes from another chemical system"
+                    )
 
         indexes = []
         for ce in chemical_entities:
             indexes.append([at.index for at in ce.atom_list])
-        
+
         offsets = contiguous_coordinates.contiguous_offsets_real(
             self._variables["coordinates"],
             self._unit_cell.transposed_direct,
@@ -485,8 +494,11 @@ class RealConfiguration(_Configuration):
             chemical_system (MDANSE.Chemistry.ChemicalEntity.ChemicalSystem): the chemical system
         """
 
-        if chemical_system.total_number_of_atoms != self.chemical_system.total_number_of_atoms:
-            raise ConfigurationError('Mismatch between the chemical systems')
+        if (
+            chemical_system.total_number_of_atoms
+            != self.chemical_system.total_number_of_atoms
+        ):
+            raise ConfigurationError("Mismatch between the chemical systems")
 
         variables = copy.deepcopy(self.variables)
 
@@ -556,7 +568,9 @@ class RealConfiguration(_Configuration):
         else:
             for ce in chemical_entities:
                 if ce.root_chemical_system is not self._chemical_system:
-                    raise ConfigurationError('One or more chemical entities comes from another chemical system')
+                    raise ConfigurationError(
+                        "One or more chemical entities comes from another chemical system"
+                    )
 
         offsets = np.zeros((self._chemical_system.number_of_atoms, 3))
 

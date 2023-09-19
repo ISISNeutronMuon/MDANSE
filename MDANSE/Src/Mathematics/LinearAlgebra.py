@@ -5,7 +5,6 @@ def cmp(a, b):
     return (a > b) - (a < b)
 
 
-
 class Vector:
 
     """Vector in 3D space

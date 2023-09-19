@@ -22,13 +22,13 @@ from MDANSE.Framework.Selectors.ISelector import ISelector
 class ResidueName(ISelector):
     section = "proteins"
 
-    def __init__(self, chemicalSystem:ChemicalSystem):
+    def __init__(self, chemicalSystem: ChemicalSystem):
         ISelector.__init__(self, chemicalSystem)
 
         for ce in self._chemicalSystem.chemical_entities:
             if isinstance(ce, (PeptideChain, Protein)):
                 self._choices.extend([r.full_name for r in ce.residues])
-                        
+
     def select(self, names):
         """Returns the atoms that matches a given list of peptide names.
 
@@ -40,19 +40,19 @@ class ResidueName(ISelector):
 
         if "*" in names:
             for ce in self._chemicalSystem.chemical_entities:
-                if isinstance(ce, (PeptideChain,Protein)):
+                if isinstance(ce, (PeptideChain, Protein)):
                     sel.update([at for at in ce.atom_list])
-        
-        else:            
+
+        else:
             vals = set([v.strip() for v in names])
 
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, (PeptideChain, Protein)):
                     for r in ce.residues:
                         resName = r.full_name.strip()
-                        if resName in vals: 
+                        if resName in vals:
                             sel.update([at for at in r.atom_list])
-                
+
         return sel
 
 

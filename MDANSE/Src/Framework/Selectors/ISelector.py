@@ -25,9 +25,8 @@ class SelectorError(Error):
 
 class ISelector(object):
     _registry = "selector"
-        
+
     def __init__(self, chemicalSystem: ChemicalSystem):
-        
         self._chemicalSystem = chemicalSystem
 
         self._choices = ["*"]

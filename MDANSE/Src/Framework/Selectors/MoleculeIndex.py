@@ -35,17 +35,16 @@ class MoleculeIndex(ISelector):
 
         sel = set()
 
-        if '*' in values:
-
+        if "*" in values:
             sel.update([at for at in self._chemicalSystem.atom_list])
 
         else:
             vals = set([int(v) for v in values])
 
             ceList = self._chemicalSystem.chemical_entities
-        
+
             sel.update([at for v in vals for at in ceList[v].atom_list])
-        
+
         return sel
 
 

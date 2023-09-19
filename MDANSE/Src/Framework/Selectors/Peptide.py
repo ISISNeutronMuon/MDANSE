@@ -22,8 +22,7 @@ class Peptide(ISelector):
     section = "proteins"
 
     def __init__(self, chemicalSystem: ChemicalSystem):
-
-        ISelector.__init__(self,chemicalSystem)
+        ISelector.__init__(self, chemicalSystem)
 
         for ce in self._chemicalSystem.chemical_entities:
             if isinstance(ce, (PeptideChain, Protein)):

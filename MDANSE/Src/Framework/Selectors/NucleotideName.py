@@ -22,8 +22,7 @@ class NucleotideName(ISelector):
     section = "nucleic acids"
 
     def __init__(self, chemicalSystem: ChemicalSystem):
-
-        ISelector.__init__(self,chemicalSystem)
+        ISelector.__init__(self, chemicalSystem)
 
         for ce in self._chemicalSystem.chemical_entities:
             if isinstance(ce, NucleotideChain):
@@ -42,7 +41,7 @@ class NucleotideName(ISelector):
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, NucleotideChain):
                     sel.update([at for at in ce.atom_list])
-        
+
         else:
             vals = set([v for v in names])
 

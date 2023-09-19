@@ -451,7 +451,9 @@ class TrajectoryWriter:
         else:
             for at in selected_atoms:
                 if at.root_chemical_system != chemical_system:
-                    raise TrajectoryWriterError('One or more atoms of the selection comes from a different chemical system')
+                    raise TrajectoryWriterError(
+                        "One or more atoms of the selection comes from a different chemical system"
+                    )
             self._selected_atoms = sorted_atoms(selected_atoms)
 
         self._selected_atoms = [at.index for at in self._selected_atoms]
@@ -578,8 +580,16 @@ class RigidBodyTrajectoryGenerator:
      * rbt[i] is the value at step i (a vector for the center of mass
        and a quaternion for the orientation)
     """
-    
-    def __init__(self, trajectory, chemical_entity: _ChemicalEntity, reference, first=0, last=None, step=1):
+
+    def __init__(
+        self,
+        trajectory,
+        chemical_entity: _ChemicalEntity,
+        reference,
+        first=0,
+        last=None,
+        step=1,
+    ):
         """Constructor.
 
         :param trajectory: the input trajectory

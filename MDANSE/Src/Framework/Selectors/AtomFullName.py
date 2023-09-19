@@ -22,10 +22,11 @@ class AtomFullName(ISelector):
     section = "atoms"
 
     def __init__(self, chemicalSystem: ChemicalSystem):
-        
-        ISelector.__init__(self,chemicalSystem)
-                
-        self._choices.extend(sorted(set([at.full_name.strip() for at in self._chemicalSystem.atom_list])))
+        ISelector.__init__(self, chemicalSystem)
+
+        self._choices.extend(
+            sorted(set([at.full_name.strip() for at in self._chemicalSystem.atom_list]))
+        )
 
     def select(self, names):
         """Returns the atoms that matches a given list of atom names.
@@ -36,14 +37,19 @@ class AtomFullName(ISelector):
 
         sel = set()
 
-        if '*' in names:
-
+        if "*" in names:
             sel.update([at for at in self._chemicalSystem.atom_list])
-            
+
         else:
             vals = set([v for v in names])
-            sel.update([at for at in self._chemicalSystem.atom_list if at.full_name.strip() in vals])
-        
+            sel.update(
+                [
+                    at
+                    for at in self._chemicalSystem.atom_list
+                    if at.full_name.strip() in vals
+                ]
+            )
+
         return sel
 
 

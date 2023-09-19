@@ -22,10 +22,11 @@ class AtomSymbol(ISelector):
     section = "atoms"
 
     def __init__(self, chemicalSystem: ChemicalSystem):
+        ISelector.__init__(self, chemicalSystem)
 
-        ISelector.__init__(self,chemicalSystem)
-                
-        self._choices.extend(sorted(set([at.symbol.strip() for at in self._chemicalSystem.atom_list])))
+        self._choices.extend(
+            sorted(set([at.symbol.strip() for at in self._chemicalSystem.atom_list]))
+        )
 
     def select(self, symbols):
         """Returns the atoms that matches a given list of atom types.
@@ -36,14 +37,19 @@ class AtomSymbol(ISelector):
 
         sel = set()
 
-        if '*' in symbols:
-
+        if "*" in symbols:
             sel.update([at for at in self._chemicalSystem.atom_list])
 
         else:
             vals = set([v for v in symbols])
-            sel.update([at for at in self._chemicalSystem.atom_list if at.symbol.strip() in vals])
-        
+            sel.update(
+                [
+                    at
+                    for at in self._chemicalSystem.atom_list
+                    if at.symbol.strip() in vals
+                ]
+            )
+
         return sel
 
 

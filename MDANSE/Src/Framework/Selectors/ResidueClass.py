@@ -80,10 +80,10 @@ class ResidueClass(ISelector):
 
         if "*" in classes:
             for ce in self._chemicalSystem.chemical_entities:
-                if isinstance(ce, (PeptideChain,Protein)):
+                if isinstance(ce, (PeptideChain, Protein)):
                     sel.update([at for at in ce.atom_list])
-        
-        else:        
+
+        else:
             vals = set(classes)
 
             selRes = set()
@@ -98,7 +98,7 @@ class ResidueClass(ISelector):
                         resName = r.code.strip()
                         if resName in selRes:
                             sel.update([at for at in r.atom_list])
-                                                   
+
         return sel
 
 

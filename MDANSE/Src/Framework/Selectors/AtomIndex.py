@@ -22,10 +22,11 @@ class AtomIndex(ISelector):
     section = "atoms"
 
     def __init__(self, chemicalSystem: ChemicalSystem):
+        ISelector.__init__(self, chemicalSystem)
 
-        ISelector.__init__(self,chemicalSystem)
-                
-        self._choices.extend(sorted([at.index for at in self._chemicalSystem.atom_list]))
+        self._choices.extend(
+            sorted([at.index for at in self._chemicalSystem.atom_list])
+        )
 
     def select(self, indexes):
         """Returns the atoms that matches a given list of indexes.
