@@ -209,14 +209,14 @@ class FortranLine:
                     fraction = field[2]
                 value = data[0]
                 data = data[1:]
-                if type == 'A':
+                if type == "A":
                     try:
-                        self.text = self.text + (value+length*' ')[:length]
+                        self.text = self.text + (value + length * " ")[:length]
                     except:
                         print(self.text)
                         print(value)
                         print(length)
-                else: # numeric fields
+                else:  # numeric fields
                     if value is None:
                         s = ""
                     elif type == "I":
