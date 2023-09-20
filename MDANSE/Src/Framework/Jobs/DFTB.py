@@ -24,16 +24,34 @@ class DFTBConverter(ForciteConverter):
     """
     Converts a DFTB trajectory to a HDF trajectory.
     """
-    
+
     label = "DFTB"
 
     settings = collections.OrderedDict()
-    settings['xtd_file'] = ('input_file',
-                            {'default': os.path.join('..', '..', '..', 'Data', 'Trajectories', 'DFTB', 'H2O.xtd')})
-    settings['trj_file'] = ('input_file',
-                            {'default': os.path.join('..', '..', '..', 'Data', 'Trajectories', 'DFTB', 'H2O.trj')})
-    settings['fold'] = ('boolean', {'default':True,'label':"Fold coordinates in to box"})
-    settings['output_file'] = ('single_output_file', {'format': 'netcdf', 'root': 'xtd_file'})
+    settings["xtd_file"] = (
+        "input_file",
+        {
+            "default": os.path.join(
+                "..", "..", "..", "Data", "Trajectories", "DFTB", "H2O.xtd"
+            )
+        },
+    )
+    settings["trj_file"] = (
+        "input_file",
+        {
+            "default": os.path.join(
+                "..", "..", "..", "Data", "Trajectories", "DFTB", "H2O.trj"
+            )
+        },
+    )
+    settings["fold"] = (
+        "boolean",
+        {"default": True, "label": "Fold coordinates in to box"},
+    )
+    settings["output_file"] = (
+        "single_output_file",
+        {"format": "netcdf", "root": "xtd_file"},
+    )
 
 
-REGISTRY['dftb'] = DFTBConverter
+REGISTRY["dftb"] = DFTBConverter

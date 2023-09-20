@@ -19,34 +19,36 @@ import wx
 
 from MDANSE import REGISTRY
 
-from MDANSE.GUI.Widgets.UserDefinitionWidget import UserDefinitionDialog, UserDefinitionWidget
-        
+from MDANSE.GUI.Widgets.UserDefinitionWidget import (
+    UserDefinitionDialog,
+    UserDefinitionWidget,
+)
+
+
 class QVectorsWidget(UserDefinitionWidget):
-    
     pass
-        
+
+
 REGISTRY["q_vectors"] = QVectorsWidget
-        
+
 if __name__ == "__main__":
-        
     from MDANSE import PLATFORM
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
-    t = Trajectory(os.path.join(
-        PLATFORM.example_data_directory(),
-        'Trajectories',
-        'HDF',
-        'waterbox.h5'))
-        
+    t = Trajectory(
+        os.path.join(
+            PLATFORM.example_data_directory(), "Trajectories", "HDF", "waterbox.h5"
+        )
+    )
+
     app = wx.App(False)
-    
-    p = UserDefinitionDialog(None,t,'q_vectors')
-        
-    p.SetSize((800,800))
-            
+
+    p = UserDefinitionDialog(None, t, "q_vectors")
+
+    p.SetSize((800, 800))
+
     p.ShowModal()
-    
+
     p.Destroy()
-    
+
     app.MainLoop()
-        

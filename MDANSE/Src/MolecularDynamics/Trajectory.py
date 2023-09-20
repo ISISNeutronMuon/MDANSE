@@ -23,30 +23,40 @@ import h5py
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.Extensions import atomic_trajectory, com_trajectory, fold_coordinates
-from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration, RealConfiguration
-from MDANSE.MolecularDynamics.TrajectoryUtils import build_connectivity, resolve_undefined_molecules_name, sorted_atoms
+from MDANSE.MolecularDynamics.Configuration import (
+    PeriodicRealConfiguration,
+    RealConfiguration,
+)
+from MDANSE.MolecularDynamics.TrajectoryUtils import (
+    build_connectivity,
+    resolve_undefined_molecules_name,
+    sorted_atoms,
+)
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
 
 class TrajectoryError(Exception):
     pass
 
-class Trajectory:
 
+class Trajectory:
     def __init__(self, h5_filename):
         """Constructor.
 
         :param h5_filename: the trajectory filename
         :type h5_filename: str
         """
-        
+
         ic("Trajectory.__init__ started")
         self._h5_filename = h5_filename
 
-        self._h5_file = h5py.File(self._h5_filename,'r')
+        self._h5_file = h5py.File(self._h5_filename, "r")
 
         ic("Trajectory.__init__ h5py.File created")
         # Load the chemical system
-        self._chemical_system = ChemicalSystem(os.path.splitext(os.path.basename(self._h5_filename))[0])
+        self._chemical_system = ChemicalSystem(
+            os.path.splitext(os.path.basename(self._h5_filename))[0]
+        )
         self._chemical_system.load(self._h5_filename)
 
         ic("Trajectory.__init__ created ChemicalSystem")
@@ -55,12 +65,12 @@ class Trajectory:
 
         ic("Trajectory.__init__ loaded unit cells")
         # Load the first configuration
-        coords = self._h5_file['/configuration/coordinates'][0,:,:]
+        coords = self._h5_file["/configuration/coordinates"][0, :, :]
         if self._unit_cells:
             unit_cell = self._unit_cells[0]
-            conf = PeriodicRealConfiguration(self._chemical_system,coords,unit_cell)
+            conf = PeriodicRealConfiguration(self._chemical_system, coords, unit_cell)
         else:
-            conf = RealConfiguration(self._chemical_system,coords)
+            conf = RealConfiguration(self._chemical_system, coords)
         self._chemical_system.configuration = conf
 
         ic("Trajectory.__init__ read coordinates")
@@ -72,12 +82,11 @@ class Trajectory:
         ic("Trajectory.__init__ ended")
 
     def close(self):
-        """Close the trajectory.
-        """
+        """Close the trajectory."""
 
         self._h5_file.close()
 
-    def __getitem__(self,frame):
+    def __getitem__(self, frame):
         """Return the configuration at a given frame
 
         :param frame: the frame
@@ -87,7 +96,7 @@ class Trajectory:
         :rtype: dict of ndarray
         """
 
-        grp = self._h5_file['/configuration']
+        grp = self._h5_file["/configuration"]
 
         configuration = {}
         for k, v in grp.items():
@@ -97,14 +106,14 @@ class Trajectory:
 
     def __getstate__(self):
         d = self.__dict__.copy()
-        del d['_h5_file']
+        del d["_h5_file"]
         return d
 
-    def __setstate__(self,state):
+    def __setstate__(self, state):
         self.__dict__ = state
-        self._h5_file = h5py.File(state['_h5_filename'],'r')
+        self._h5_file = h5py.File(state["_h5_filename"], "r")
 
-    def coordinates(self,frame):
+    def coordinates(self, frame):
         """Return the coordinates at a given frame.
 
         :param frame: the frame
@@ -115,13 +124,13 @@ class Trajectory:
         """
 
         if frame < 0 or frame >= len(self):
-            raise TrajectoryError('Invalid frame number')
+            raise TrajectoryError("Invalid frame number")
 
-        grp = self._h5_file['/configuration']
+        grp = self._h5_file["/configuration"]
 
-        return grp['coordinates'][frame].astype(np.float64)
+        return grp["coordinates"][frame].astype(np.float64)
 
-    def configuration(self,frame):
+    def configuration(self, frame):
         """Build and return a configuration at a given frame.
 
         :param frame: the frame
@@ -132,7 +141,7 @@ class Trajectory:
         """
 
         if frame < 0 or frame >= len(self):
-            raise TrajectoryError('Invalid frame number')
+            raise TrajectoryError("Invalid frame number")
 
         if self._unit_cells is not None:
             unit_cell = self._unit_cells[frame]
@@ -140,32 +149,33 @@ class Trajectory:
             unit_cell = None
 
         variables = {}
-        for k,v in self._h5_file['configuration'].items():
-            variables[k] = v[frame,:,:].astype(np.float64)
+        for k, v in self._h5_file["configuration"].items():
+            variables[k] = v[frame, :, :].astype(np.float64)
 
-        coordinates = variables.pop('coordinates')
+        coordinates = variables.pop("coordinates")
 
         if unit_cell is None:
-            conf = RealConfiguration(self._chemical_system,coordinates,**variables)
+            conf = RealConfiguration(self._chemical_system, coordinates, **variables)
         else:
-            conf = PeriodicRealConfiguration(self._chemical_system,coordinates,unit_cell,**variables)
+            conf = PeriodicRealConfiguration(
+                self._chemical_system, coordinates, unit_cell, **variables
+            )
 
         return conf
 
     def _load_unit_cells(self):
-        """Load all the unit cells.
-        """
+        """Load all the unit cells."""
         ic("_load_unit_cells")
-        if 'unit_cell' in self._h5_file:
+        if "unit_cell" in self._h5_file:
             ic("_load_unit_cells: unit_cell IS in self._h5_file")
-            self._unit_cells = [UnitCell(uc) for uc in self._h5_file['unit_cell'][:]]
+            self._unit_cells = [UnitCell(uc) for uc in self._h5_file["unit_cell"][:]]
             ic("_load_unit_cells: got unit_cell from self._h5_file")
         else:
             ic("_load_unit_cells: unit_cell IS NOT in self._h5_file")
             self._unit_cells = None
         ic("_load_unit_cells finished")
 
-    def unit_cell(self,frame):
+    def unit_cell(self, frame):
         """Return the unit cell at a given frame. If no unit cell is defined, returns None.
 
         :param frame: the frame number
@@ -176,7 +186,7 @@ class Trajectory:
         """
 
         if frame < 0 or frame >= len(self):
-            raise TrajectoryError('Invalid frame number')
+            raise TrajectoryError("Invalid frame number")
 
         if self._unit_cells is not None:
             return self._unit_cells[frame]
@@ -190,11 +200,13 @@ class Trajectory:
         :rtype: int
         """
 
-        grp = self._h5_file['/configuration']
+        grp = self._h5_file["/configuration"]
 
-        return grp['coordinates'].shape[0]
+        return grp["coordinates"].shape[0]
 
-    def read_com_trajectory(self, atoms, first=0, last=None, step=1, box_coordinates=False):
+    def read_com_trajectory(
+        self, atoms, first=0, last=None, step=1, box_coordinates=False
+    ):
         """Build the trajectory of the center of mass of a set of atoms.
 
         :param atoms: the atoms for which the center of mass should be computed
@@ -216,22 +228,25 @@ class Trajectory:
             last = len(self)
 
         indexes = [at.index for at in atoms]
-        masses = np.array([ATOMS_DATABASE[at.symbol]['atomic_weight'] for at in atoms])
+        masses = np.array([ATOMS_DATABASE[at.symbol]["atomic_weight"] for at in atoms])
 
-        grp = self._h5_file['/configuration']
+        grp = self._h5_file["/configuration"]
 
-        coords = grp['coordinates'][first:last:step,:,:].astype(np.float64)
+        coords = grp["coordinates"][first:last:step, :, :].astype(np.float64)
 
         if coords.ndim == 2:
-            coords = coords[np.newaxis,:,:]
+            coords = coords[np.newaxis, :, :]
 
         if self._unit_cells is not None:
-
             direct_cells = np.array([uc.transposed_direct for uc in self._unit_cells])
             inverse_cells = np.array([uc.transposed_inverse for uc in self._unit_cells])
 
-            top_lvl_chemical_entities = set([at.top_level_chemical_entity() for at in atoms])
-            top_lvl_chemical_entities_indexes = [[at.index for at in e.atom_list()] for e in top_lvl_chemical_entities]
+            top_lvl_chemical_entities = set(
+                [at.top_level_chemical_entity() for at in atoms]
+            )
+            top_lvl_chemical_entities_indexes = [
+                [at.index for at in e.atom_list()] for e in top_lvl_chemical_entities
+            ]
             bonds = {}
             for e in top_lvl_chemical_entities:
                 for at in e.atom_list():
@@ -245,10 +260,13 @@ class Trajectory:
                 top_lvl_chemical_entities_indexes,
                 indexes,
                 bonds,
-                box_coordinates=box_coordinates)
-        
+                box_coordinates=box_coordinates,
+            )
+
         else:
-            com_traj = np.sum(coords[:,indexes,:]*masses[np.newaxis,:,np.newaxis],axis=1)
+            com_traj = np.sum(
+                coords[:, indexes, :] * masses[np.newaxis, :, np.newaxis], axis=1
+            )
             com_traj /= np.sum(masses)
 
         return com_traj
@@ -270,17 +288,21 @@ class Trajectory:
         """
 
         if self._unit_cells is not None:
-            real_coordinates = np.empty(box_coordinates.shape,dtype=np.float64)
+            real_coordinates = np.empty(box_coordinates.shape, dtype=np.float64)
             comp = 0
-            for i in range(first,last,step):
+            for i in range(first, last, step):
                 direct_cell = self._unit_cells[i].transposed_direct
-                real_coordinates[comp,:] = np.matmul(direct_cell,box_coordinates[comp,:])
+                real_coordinates[comp, :] = np.matmul(
+                    direct_cell, box_coordinates[comp, :]
+                )
                 comp += 1
             return real_coordinates
         else:
             return box_coordinates
 
-    def read_atomic_trajectory(self, index, first=0, last=None, step=1, box_coordinates=False):
+    def read_atomic_trajectory(
+        self, index, first=0, last=None, step=1, box_coordinates=False
+    ):
         """Read an atomic trajectory. The trajectory is corrected from box jumps.
 
         :param index: the index of the atom
@@ -301,22 +323,22 @@ class Trajectory:
         if last is None:
             last = len(self)
 
-        grp = self._h5_file['/configuration']
-        coords = grp['coordinates'][first:last:step,index,:].astype(np.float64)
+        grp = self._h5_file["/configuration"]
+        coords = grp["coordinates"][first:last:step, index, :].astype(np.float64)
 
         if self._unit_cells is not None:
             direct_cells = np.array([uc.transposed_direct for uc in self._unit_cells])
             inverse_cells = np.array([uc.transposed_inverse for uc in self._unit_cells])
             atomic_traj = atomic_trajectory.atomic_trajectory(
-                coords,
-                direct_cells,
-                inverse_cells,
-                box_coordinates)
+                coords, direct_cells, inverse_cells, box_coordinates
+            )
             return atomic_traj
         else:
-            return coords    
+            return coords
 
-    def read_configuration_trajectory(self, index, first=0, last=None, step=1,variable='velocities'):
+    def read_configuration_trajectory(
+        self, index, first=0, last=None, step=1, variable="velocities"
+    ):
         """Read a given configuration variable through the trajectory for a given ato.
 
         :param index: the index of the atom
@@ -337,12 +359,14 @@ class Trajectory:
         if last is None:
             last = len(self)
 
-        grp = self._h5_file['/configuration']
+        grp = self._h5_file["/configuration"]
 
         if variable not in grp:
-            raise TrajectoryError('The variable {} is not stored in the trajectory'.format(variable))
+            raise TrajectoryError(
+                "The variable {} is not stored in the trajectory".format(variable)
+            )
 
-        variable = grp[variable][first:last:step,index,:].astype(np.float64)
+        variable = grp[variable][first:last:step, index, :].astype(np.float64)
 
         return variable
 
@@ -382,20 +406,28 @@ class Trajectory:
         :rtype: list
         """
 
-        grp = self._h5_file['/configuration']
+        grp = self._h5_file["/configuration"]
 
         return list(grp.keys())
+
 
 class TrajectoryWriterError(Exception):
     pass
 
+
 class TrajectoryWriter:
+    allowed_compression = ["gzip", "lzf"]
 
-    allowed_compression = ['gzip', 'lzf']
-
-    def __init__(self, h5_filename, chemical_system, n_steps, selected_atoms=None,
-                       positions_dtype = np.float64, chunking_axis = 1,
-                       compression = 'none'):
+    def __init__(
+        self,
+        h5_filename,
+        chemical_system,
+        n_steps,
+        selected_atoms=None,
+        positions_dtype=np.float64,
+        chunking_axis=1,
+        compression="none",
+    ):
         """Constructor.
 
         :param h5_filename: the trajectory filename
@@ -410,7 +442,7 @@ class TrajectoryWriter:
 
         self._h5_filename = h5_filename
 
-        self._h5_file = h5py.File(self._h5_filename,'w')
+        self._h5_file = h5py.File(self._h5_filename, "w")
 
         self._chemical_system = chemical_system.copy()
 
@@ -419,9 +451,11 @@ class TrajectoryWriter:
         else:
             for at in selected_atoms:
                 if at.root_chemical_system() != chemical_system:
-                    raise TrajectoryWriterError('One or more atoms of the selection comes from a different chemical system')
+                    raise TrajectoryWriterError(
+                        "One or more atoms of the selection comes from a different chemical system"
+                    )
             self._selected_atoms = sorted_atoms(selected_atoms)
-            
+
         self._selected_atoms = [at.index for at in self._selected_atoms]
 
         all_atoms = self._chemical_system.atom_list()
@@ -430,7 +464,7 @@ class TrajectoryWriter:
 
         self._dump_chemical_system()
 
-        self._h5_file.create_group('/configuration')
+        self._h5_file.create_group("/configuration")
 
         self._n_steps = n_steps
 
@@ -443,19 +477,16 @@ class TrajectoryWriter:
         self._compression = compression
 
     def _dump_chemical_system(self):
-        """Dump the chemical system to the trajectory file.
-        """
+        """Dump the chemical system to the trajectory file."""
 
         self._chemical_system.serialize(self._h5_file)
 
     @property
     def chemical_system(self):
-
         return self._chemical_system
 
     def close(self):
-        """Close the trajectory file
-        """
+        """Close the trajectory file"""
 
         self._h5_file.close()
 
@@ -470,7 +501,9 @@ class TrajectoryWriter:
         """
 
         if self._current_index >= self._n_steps:
-            raise TrajectoryError('The current steps is greater than the actual number of steps of the trajectory')
+            raise TrajectoryError(
+                "The current steps is greater than the actual number of steps of the trajectory"
+            )
 
         configuration = self._chemical_system.configuration
         if configuration is None:
@@ -482,58 +515,61 @@ class TrajectoryWriter:
         n_atoms = self._chemical_system.total_number_of_atoms()
 
         if self._chunking_axis == 1:
-            chunk_tuple = (1,n_atoms,3)
+            chunk_tuple = (1, n_atoms, 3)
         else:
-            chunk_tuple = (self._n_steps,1,3)
+            chunk_tuple = (self._n_steps, 1, 3)
 
         # Write the configuration variables
-        configuration_grp = self._h5_file['/configuration']
+        configuration_grp = self._h5_file["/configuration"]
         for k, v in configuration.variables.items():
             data = np.empty(v.shape)
             data[:] = np.nan
-            data[self._selected_atoms,:] = v[self._selected_atoms,:]
-            dset = configuration_grp.get(k,None)
+            data[self._selected_atoms, :] = v[self._selected_atoms, :]
+            dset = configuration_grp.get(k, None)
             if dset is None:
                 if self._compression in TrajectoryWriter.allowed_compression:
                     dset = configuration_grp.create_dataset(
                         k,
-                        shape=(self._n_steps,n_atoms,3),
-                        chunks=(1,n_atoms,3),                    
+                        shape=(self._n_steps, n_atoms, 3),
+                        chunks=(1, n_atoms, 3),
                         dtype=self._dtype,
-                        compression=self._compression)
+                        compression=self._compression,
+                    )
                 else:
                     dset = configuration_grp.create_dataset(
                         k,
-                        shape=(self._n_steps,n_atoms,3),
-                        chunks=(1,n_atoms,3),                    
-                        dtype=self._dtype)
-                dset.attrs['units'] = units.get(k,'')
+                        shape=(self._n_steps, n_atoms, 3),
+                        chunks=(1, n_atoms, 3),
+                        dtype=self._dtype,
+                    )
+                dset.attrs["units"] = units.get(k, "")
             dset[self._current_index] = data
 
         # Write the unit cell
         if configuration.is_periodic:
             unit_cell = configuration.unit_cell
-            unit_cell_dset = self._h5_file.get('unit_cell',None)            
+            unit_cell_dset = self._h5_file.get("unit_cell", None)
             if unit_cell_dset is None:
                 unit_cell_dset = self._h5_file.create_dataset(
-                    'unit_cell',
-                    shape=(self._n_steps,3,3),
-                    chunks=(1,3,3),
-                    dtype=np.float64)
-                unit_cell_dset.attrs['units'] = units.get('unit_cell','')
+                    "unit_cell",
+                    shape=(self._n_steps, 3, 3),
+                    chunks=(1, 3, 3),
+                    dtype=np.float64,
+                )
+                unit_cell_dset.attrs["units"] = units.get("unit_cell", "")
             unit_cell_dset[self._current_index] = unit_cell.direct
 
         # Write the time
-        time_dset = self._h5_file.get('time',None)
+        time_dset = self._h5_file.get("time", None)
         if time_dset is None:
             time_dset = self._h5_file.create_dataset(
-                'time',
-                shape=(self._n_steps,),
-                dtype=np.float64)
-            time_dset.attrs['units'] = units.get('time','')
+                "time", shape=(self._n_steps,), dtype=np.float64
+            )
+            time_dset.attrs["units"] = units.get("time", "")
         time_dset[self._current_index] = time
 
         self._current_index += 1
+
 
 class RigidBodyTrajectoryGenerator:
     """Compute the Rigid-body trajectory data
@@ -544,8 +580,10 @@ class RigidBodyTrajectoryGenerator:
      * rbt[i] is the value at step i (a vector for the center of mass
        and a quaternion for the orientation)
     """
-    
-    def __init__(self, trajectory, chemical_entity, reference, first=0, last=None, step=1):
+
+    def __init__(
+        self, trajectory, chemical_entity, reference, first=0, last=None, step=1
+    ):
         """Constructor.
 
         :param trajectory: the input trajectory
@@ -563,75 +601,76 @@ class RigidBodyTrajectoryGenerator:
         """
 
         self._trajectory = trajectory
-        
+
         if last is None:
             last = len(self._trajectory)
 
         atoms = chemical_entity.atom_list()
 
-        masses = [ATOMS_DATABASE[at.symbol]['atomic_weight'] for at in atoms]
+        masses = [ATOMS_DATABASE[at.symbol]["atomic_weight"] for at in atoms]
 
         mass = sum(masses)
 
         ref_com = chemical_entity.center_of_mass(reference)
 
-        n_steps = len(range(first,last,step))
+        n_steps = len(range(first, last, step))
 
         possq = np.zeros((n_steps,), np.float64)
         cross = np.zeros((n_steps, 3, 3), np.float64)
 
-        rcms = self._trajectory.read_com_trajectory(atoms,first,last,step,box_coordinates=True)
+        rcms = self._trajectory.read_com_trajectory(
+            atoms, first, last, step, box_coordinates=True
+        )
 
         # relative coords of the CONTIGUOUS reference
         r_ref = np.zeros((len(atoms), 3), np.float64)
         for i, at in enumerate(atoms):
-            r_ref[i] = reference['coordinates'][at.index,:] - ref_com
+            r_ref[i] = reference["coordinates"][at.index, :] - ref_com
 
         unit_cells, inverse_unit_cells = self._trajectory.get_unit_cells()
         if unit_cells is not None:
-            unit_cells = unit_cells[first:last:step,:,:]
-            inverse_unit_cells = inverse_unit_cells[first:last:step,:,:]
+            unit_cells = unit_cells[first:last:step, :, :]
+            inverse_unit_cells = inverse_unit_cells[first:last:step, :, :]
 
         for i, at in enumerate(atoms):
-            r = self._trajectory.read_atomic_trajectory(at.index,first, last, step, True)
+            r = self._trajectory.read_atomic_trajectory(
+                at.index, first, last, step, True
+            )
             r = r - rcms
 
-            r = r[:,np.newaxis,:]
+            r = r[:, np.newaxis, :]
             r = fold_coordinates.fold_coordinates(
-                r,
-                unit_cells,
-                inverse_unit_cells,
-                True
+                r, unit_cells, inverse_unit_cells, True
             )
-            r = np.squeeze(r)            
+            r = np.squeeze(r)
 
-            r = self._trajectory.to_real_coordinates(r,first,last,step)
-            w = masses[i]/mass
-            np.add(possq, w*np.add.reduce(r*r, -1), possq)
-            np.add(possq, w*np.add.reduce(r_ref[i]*r_ref[i],-1),possq)
-            np.add(cross, w*r[:,:,np.newaxis]*r_ref[np.newaxis,i,:],cross)
-            
+            r = self._trajectory.to_real_coordinates(r, first, last, step)
+            w = masses[i] / mass
+            np.add(possq, w * np.add.reduce(r * r, -1), possq)
+            np.add(possq, w * np.add.reduce(r_ref[i] * r_ref[i], -1), possq)
+            np.add(cross, w * r[:, :, np.newaxis] * r_ref[np.newaxis, i, :], cross)
+
         rcms = self._trajectory.to_real_coordinates(rcms, first, last, step)
 
         # filling matrix M
         k = np.zeros((n_steps, 4, 4), np.float64)
-        k[:, 0, 0] = -cross[:, 0, 0]-cross[:, 1, 1]-cross[:, 2, 2]
-        k[:, 0, 1] =  cross[:, 1, 2]-cross[:, 2, 1]
-        k[:, 0, 2] =  cross[:, 2, 0]-cross[:, 0, 2]
-        k[:, 0, 3] =  cross[:, 0, 1]-cross[:, 1, 0]
-        k[:, 1, 1] = -cross[:, 0, 0]+cross[:, 1, 1]+cross[:, 2, 2]
-        k[:, 1, 2] = -cross[:, 0, 1]-cross[:, 1, 0]
-        k[:, 1, 3] = -cross[:, 0, 2]-cross[:, 2, 0]
-        k[:, 2, 2] =  cross[:, 0, 0]-cross[:, 1, 1]+cross[:, 2, 2]
-        k[:, 2, 3] = -cross[:, 1, 2]-cross[:, 2, 1]
-        k[:, 3, 3] =  cross[:, 0, 0]+cross[:, 1, 1]-cross[:, 2, 2]
+        k[:, 0, 0] = -cross[:, 0, 0] - cross[:, 1, 1] - cross[:, 2, 2]
+        k[:, 0, 1] = cross[:, 1, 2] - cross[:, 2, 1]
+        k[:, 0, 2] = cross[:, 2, 0] - cross[:, 0, 2]
+        k[:, 0, 3] = cross[:, 0, 1] - cross[:, 1, 0]
+        k[:, 1, 1] = -cross[:, 0, 0] + cross[:, 1, 1] + cross[:, 2, 2]
+        k[:, 1, 2] = -cross[:, 0, 1] - cross[:, 1, 0]
+        k[:, 1, 3] = -cross[:, 0, 2] - cross[:, 2, 0]
+        k[:, 2, 2] = cross[:, 0, 0] - cross[:, 1, 1] + cross[:, 2, 2]
+        k[:, 2, 3] = -cross[:, 1, 2] - cross[:, 2, 1]
+        k[:, 3, 3] = cross[:, 0, 0] + cross[:, 1, 1] - cross[:, 2, 2]
 
         for i in range(1, 4):
             for j in range(i):
                 k[:, i, j] = k[:, j, i]
-        np.multiply(k, 2., k)
+        np.multiply(k, 2.0, k)
         for i in range(4):
-            np.add(k[:,i,i], possq, k[:,i,i])
+            np.add(k[:, i, i], possq, k[:, i, i])
 
         quaternions = np.zeros((n_steps, 4), np.float64)
         fit = np.zeros((n_steps,), np.float64)
@@ -640,10 +679,10 @@ class RigidBodyTrajectoryGenerator:
             v = np.transpose(v)
             j = np.argmin(e)
             if e[j] < 0.0:
-                fit[i] = 0.
+                fit[i] = 0.0
             else:
                 fit[i] = np.sqrt(e[j])
-            if v[j,0] < 0.0:
+            if v[j, 0] < 0.0:
                 quaternions[i] = -v[j]
             else:
                 quaternions[i] = v[j]
@@ -658,30 +697,40 @@ class RigidBodyTrajectoryGenerator:
     def __getitem__(self, index):
         from MDANSE.Mathematics.Geometry import Vector
         from MDANSE.Mathematics.LinearAlgebra import Quaternion
+
         return Vector(self.cms[index]), Quaternion(self.quaternions[index])
-                                                                    
-def partition_universe(universe,groups):
-    
-    atoms = sorted(universe.atomList(), key = operator.attrgetter('index'))
-                                        
+
+
+def partition_universe(universe, groups):
+    atoms = sorted(universe.atomList(), key=operator.attrgetter("index"))
+
     coll = [Collection([atoms[index] for index in gr]) for gr in groups]
-    
+
     return coll
 
-def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable="configuration", weights=None, dtype=np.float64):
-    
-    if not isinstance(atoms,(list,tuple)):
+
+def read_atoms_trajectory(
+    trajectory,
+    atoms,
+    first,
+    last=None,
+    step=1,
+    variable="configuration",
+    weights=None,
+    dtype=np.float64,
+):
+    if not isinstance(atoms, (list, tuple)):
         atoms = [atoms]
-        
+
     if last is None:
         last = len(trajectory)
-        
+
     nFrames = len(list(range(first, last, step)))
-    
-    serie = np.zeros((nFrames,3), dtype=dtype)
-    
+
+    serie = np.zeros((nFrames, 3), dtype=dtype)
+
     if weights is None or len(atoms) == 1:
-        weights = [1.0]*len(atoms)
+        weights = [1.0] * len(atoms)
 
     # cs.configuration = conf
 
@@ -704,7 +753,7 @@ def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable=
 
     # coords = np.load('coords.npy')
     # unit_cell = np.load('unit_cell.npy')
-    
+
     # tw = TrajectoryWriter('waterbox.h5',cs)
 
     # n_frames = coords.shape[0]
@@ -712,35 +761,34 @@ def read_atoms_trajectory(trajectory, atoms, first, last=None, step=1, variable=
     #     c = RealConfiguration(cs,coords[i,:,:],unit_cell[i,:,:])
     #     cs.configuration = c
     #     tw.dump_configuration()
-    
+
     # tw.close()
 
     # t = Trajectory('waterbox.h5')
     # t.close()
 
-if __name__ == '__main__':
 
+if __name__ == "__main__":
     from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 
     from MDANSE.Chemistry.ChemicalEntity import Atom
+
     cs = ChemicalSystem()
     for i in range(2):
-        cs.add_chemical_entity(Atom(symbol='H'))
+        cs.add_chemical_entity(Atom(symbol="H"))
 
-    tw = TrajectoryWriter('test.h5',cs)
-    unit_cell = 10.0*np.identity(3)
+    tw = TrajectoryWriter("test.h5", cs)
+    unit_cell = 10.0 * np.identity(3)
 
-    coords = np.empty((2,3),dtype=np.float64)
-    coords[0,:] = [-4,0,0]
-    coords[1,:] = [ 4,0,0]
+    coords = np.empty((2, 3), dtype=np.float64)
+    coords[0, :] = [-4, 0, 0]
+    coords[1, :] = [4, 0, 0]
 
-    c = RealConfiguration(cs,coords,unit_cell)
+    c = RealConfiguration(cs, coords, unit_cell)
     cs.configuration = c
     tw.dump_configuration(1.0)
     tw.close()
 
-    t = Trajectory('test.h5')
-    print(t.read_cog_trajectory([0,1],0,10,1).shape)
+    t = Trajectory("test.h5")
+    print(t.read_cog_trajectory([0, 1], 0, 10, 1).shape)
     t.close()
-
-

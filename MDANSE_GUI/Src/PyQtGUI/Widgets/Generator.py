@@ -15,6 +15,7 @@
 
 from qtpy.QtWidgets import QWidget, QDockWidget, QScrollArea
 
+
 class WidgetGenerator:
     """The GUI elements will typically belong to one of the few
     possible categories. The generator will make it easier
@@ -22,15 +23,17 @@ class WidgetGenerator:
     dockable, scrollable, etc.
     """
 
-    def wrapWidget(self,
-                   *args,
-                   cls: QWidget =None,
-                   parent: QWidget =None,
-                   name: str = "",
-                   scrollable: bool =False,
-                   dockable: bool =False,
-                   acceptsDrops: bool =True,
-                   **kwargs):
+    def wrapWidget(
+        self,
+        *args,
+        cls: QWidget = None,
+        parent: QWidget = None,
+        name: str = "",
+        scrollable: bool = False,
+        dockable: bool = False,
+        acceptsDrops: bool = True,
+        **kwargs,
+    ):
         """Takes the constructor for any QWidget
         and creates additional widgets around it
         to enable docking, scrolling, etc.
@@ -52,7 +55,7 @@ class WidgetGenerator:
         base = None
         if dockable:
             docker = QDockWidget(name, parent=parent)
-            docker.setObjectName(name+"_dockWidget")
+            docker.setObjectName(name + "_dockWidget")
             next_parent = docker
             if base is None:
                 base = docker
@@ -73,6 +76,3 @@ class WidgetGenerator:
         if dockable:
             docker.setWidget(centre)
         return base, instance
-
-        
-

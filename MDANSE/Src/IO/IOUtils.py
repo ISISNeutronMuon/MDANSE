@@ -73,16 +73,16 @@ def load_variables(dictionary):
         attributes = variable.get_attributes()
 
         data[vname] = {}
-        if 'axis' in attributes:
-            axis = attributes['axis']
+        if "axis" in attributes:
+            axis = attributes["axis"]
             if axis:
-                data[vname]['axis'] = axis.split('|')
+                data[vname]["axis"] = axis.split("|")
             else:
-                data[vname]['axis'] = []
+                data[vname]["axis"] = []
         else:
-            data[vname]['axis'] = []
-        data[vname]['path'] = vpath
-        data[vname]['data'] = arr
-        data[vname]['units'] = attributes.get('units', 'au')
+            data[vname]["axis"] = []
+        data[vname]["path"] = vpath
+        data[vname]["data"] = arr
+        data[vname]["units"] = attributes.get("units", "au")
 
     return data

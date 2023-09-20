@@ -16,44 +16,43 @@
 from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
 from MDANSE.Framework.Selectors.ISelector import ISelector
-        
-class ResidueType(ISelector):
 
+
+class ResidueType(ISelector):
     section = "proteins"
 
     def __init__(self, chemicalSystem):
+        ISelector.__init__(self, chemicalSystem)
 
-        ISelector.__init__(self,chemicalSystem)
-                                
         for ce in self._chemicalSystem.chemical_entities:
             if isinstance(ce, (PeptideChain, Protein)):
                 self._choices.extend([r.code.strip() for r in ce.residues])
-                
 
     def select(self, types):
-        '''Returns the atoms that matches a given list of peptide types.
-        
+        """Returns the atoms that matches a given list of peptide types.
+
         @param types: the residue types list.
         @type types: list
-        '''
-        
+        """
+
         sel = set()
 
-        if '*' in types:
+        if "*" in types:
             for ce in self._chemicalSystem.chemical_entities:
-                if isinstance(ce, (PeptideChain,Protein)):
+                if isinstance(ce, (PeptideChain, Protein)):
                     sel.update([at for at in ce.atom_list()])
-        
-        else:                
+
+        else:
             vals = set([v.strip() for v in types])
 
             for ce in self._chemicalSystem.chemical_entities:
-                if isinstance(ce, (PeptideChain,Protein)):
+                if isinstance(ce, (PeptideChain, Protein)):
                     for r in ce.residues:
                         resType = r.code.strip()
                         if resType in vals:
                             sel.update([at for at in r.atom_list()])
-                
+
         return sel
-    
+
+
 REGISTRY["residue_type"] = ResidueType

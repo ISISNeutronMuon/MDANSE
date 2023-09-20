@@ -22,32 +22,34 @@ from MDANSE.Framework.Configurable import Configurable
 from MDANSE.GUI.ComboWidgets.ConfigurationPanel import ConfigurationPanel
 from MDANSE.GUI.Widgets.IWidget import IWidget
 
+
 class McStasOptionsWidget(IWidget):
-     
-    _mcStasTypes = {'double' : 'float', 'int' : 'integer', 'str' : 'input_file'}
- 
+    _mcStasTypes = {"double": "float", "int": "integer", "str": "input_file"}
+
     def add_widgets(self):
-         
         sizer = wx.BoxSizer(wx.VERTICAL)
-  
+
         options = Configurable()
-        
+
         settings = collections.OrderedDict()
-        for name,value in list(self._configurator.default.items()):
-            settings[name] = (self._mcStasTypes[type(value).__name__],{'default':value})
-        
-        options.set_settings(settings)                    
-         
-        self._panel = ConfigurationPanel(self._widgetPanel, options,None)
-         
-        sizer.Add(self._panel, 0, wx.ALL|wx.EXPAND, 5)
-         
+        for name, value in list(self._configurator.default.items()):
+            settings[name] = (
+                self._mcStasTypes[type(value).__name__],
+                {"default": value},
+            )
+
+        options.set_settings(settings)
+
+        self._panel = ConfigurationPanel(self._widgetPanel, options, None)
+
+        sizer.Add(self._panel, 0, wx.ALL | wx.EXPAND, 5)
+
         return sizer
-         
+
     def get_widget_value(self):
-         
         val = self._panel.get_value()
-         
+
         return val
-    
+
+
 REGISTRY["mcstas_options"] = McStasOptionsWidget

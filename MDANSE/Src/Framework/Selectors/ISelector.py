@@ -17,17 +17,17 @@ import abc
 
 from MDANSE.Core.Error import Error
 
+
 class SelectorError(Error):
     pass
 
+
 class ISelector(object):
-    
     _registry = "selector"
-        
-    def __init__(self,chemicalSystem):
-        
+
+    def __init__(self, chemicalSystem):
         self._chemicalSystem = chemicalSystem
-                
+
         self._choices = ["*"]
 
     @property

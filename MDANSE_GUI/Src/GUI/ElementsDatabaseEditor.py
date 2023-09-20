@@ -21,6 +21,7 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
 
+
 class ElementsDatabaseError(Error):
     pass
 
@@ -63,11 +64,21 @@ class NewElementDialog(wx.Dialog):
         # Place the other text and answer box widgets in a grid
         body_sizer = wx.FlexGridSizer(rows=4, cols=2, vgap=10, hgap=20)
         body_sizer.Add(staticLabel1, flag=wx.ALIGN_CENTER_VERTICAL | wx.LEFT, border=10)
-        body_sizer.Add(self._entry, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT | wx.EXPAND, border=10)
+        body_sizer.Add(
+            self._entry, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT | wx.EXPAND, border=10
+        )
         body_sizer.Add(staticLabel2, flag=wx.ALIGN_CENTER_VERTICAL | wx.LEFT, border=10)
-        body_sizer.Add(self._element, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT | wx.EXPAND, border=10)
+        body_sizer.Add(
+            self._element,
+            flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT | wx.EXPAND,
+            border=10,
+        )
         body_sizer.Add(staticLabel3, flag=wx.ALIGN_CENTER_VERTICAL | wx.LEFT, border=10)
-        body_sizer.Add(self._symbol, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT | wx.EXPAND, border=10)
+        body_sizer.Add(
+            self._symbol,
+            flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT | wx.EXPAND,
+            border=10,
+        )
         main_sizer.Add(body_sizer, 0, wx.ALL | wx.EXPAND, 5)
 
         # Place buttons to appear as a standard dialogue
@@ -129,7 +140,12 @@ class NewPropertyDialog(wx.Dialog):
         staticLabel1 = wx.StaticText(panel, wx.ID_ANY, "Name")
         self.name = wx.TextCtrl(panel, wx.ID_ANY)
         staticLabel2 = wx.StaticText(panel, wx.ID_ANY, "Property type")
-        self.propertyType = wx.ComboBox(panel, id=wx.ID_ANY, choices=list(ATOMS_DATABASE._TYPES.keys()), style=wx.CB_READONLY)
+        self.propertyType = wx.ComboBox(
+            panel,
+            id=wx.ID_ANY,
+            choices=list(ATOMS_DATABASE._TYPES.keys()),
+            style=wx.CB_READONLY,
+        )
 
         # Create button widgets
         cancel = wx.Button(panel, wx.ID_CANCEL, "Cancel")
@@ -143,10 +159,16 @@ class NewPropertyDialog(wx.Dialog):
         # Create sizer for the other texts and the answer boxes, and add the widets
         body_sizer = wx.FlexGridSizer(rows=2, cols=2, vgap=15, hgap=20)
         main_sizer.Add(body_sizer, flag=wx.EXPAND)
-        body_sizer.Add(staticLabel1, flag=wx.ALIGN_LEFT | wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=10)
+        body_sizer.Add(
+            staticLabel1,
+            flag=wx.ALIGN_LEFT | wx.LEFT | wx.ALIGN_CENTER_VERTICAL,
+            border=10,
+        )
         body_sizer.Add(self.name, flag=wx.ALIGN_LEFT | wx.EXPAND | wx.RIGHT, border=10)
         body_sizer.Add(staticLabel2, flag=wx.ALIGN_LEFT | wx.LEFT, border=10)
-        body_sizer.Add(self.propertyType, flag=wx.ALIGN_LEFT | wx.EXPAND | wx.RIGHT, border=10)
+        body_sizer.Add(
+            self.propertyType, flag=wx.ALIGN_LEFT | wx.EXPAND | wx.RIGHT, border=10
+        )
 
         # Button sizer and widgets
         button_sizer = wx.StdDialogButtonSizer()
@@ -192,28 +214,27 @@ class Database(wxgrid.PyGridTableBase, metaclass=Singleton):
 
     def GetValue(self, row, col):
         atom = ATOMS_DATABASE.atoms[row]
-        pname = ATOMS_DATABASE.properties[col] 
-        return ATOMS_DATABASE.get_value(atom,pname)
+        pname = ATOMS_DATABASE.properties[col]
+        return ATOMS_DATABASE.get_value(atom, pname)
 
     def SetValue(self, row, col, val):
         atom = ATOMS_DATABASE.atoms[row]
         pname = ATOMS_DATABASE.properties[col]
 
-        ATOMS_DATABASE.set_value(atom,pname,val)
+        ATOMS_DATABASE.set_value(atom, pname, val)
 
     def add_column(self, pname, ptype):
-        ATOMS_DATABASE.add_property(pname,ptype)
+        ATOMS_DATABASE.add_property(pname, ptype)
 
         self.notify_grid(wxgrid.GRIDTABLE_NOTIFY_COLS_APPENDED, 1)
 
     def add_row(self, entry, element, symbol):
-
         if ATOMS_DATABASE.has_atom(entry):
             return
 
         ATOMS_DATABASE.add_atom(entry)
-        ATOMS_DATABASE.set_value(entry,"element",element)
-        ATOMS_DATABASE.set_value(entry,"symbol",symbol)
+        ATOMS_DATABASE.set_value(entry, "element", element)
+        ATOMS_DATABASE.set_value(entry, "symbol", symbol)
 
         self.notify_grid(wxgrid.GRIDTABLE_NOTIFY_ROWS_APPENDED, 1)
 
@@ -228,8 +249,8 @@ class Database(wxgrid.PyGridTableBase, metaclass=Singleton):
     def save():
         ATOMS_DATABASE.save()
 
-class ElementsDatabaseEditor(wx.Frame):
 
+class ElementsDatabaseEditor(wx.Frame):
     def __init__(self, parent):
         """
         The constructor.
@@ -237,8 +258,13 @@ class ElementsDatabaseEditor(wx.Frame):
             #. parent  (wx window): the parent window.
         """
 
-        wx.Frame.__init__(self, parent, wx.ID_ANY, title="Elements database editor",
-                          style=wx.DEFAULT_FRAME_STYLE | wx.RESIZE_BORDER)
+        wx.Frame.__init__(
+            self,
+            parent,
+            wx.ID_ANY,
+            title="Elements database editor",
+            style=wx.DEFAULT_FRAME_STYLE | wx.RESIZE_BORDER,
+        )
 
         self._database = Database()
 
@@ -249,7 +275,6 @@ class ElementsDatabaseEditor(wx.Frame):
         self.CenterOnParent()
 
     def build_dialog(self):
-
         mainPanel = wx.Panel(self, wx.ID_ANY)
 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -283,16 +308,15 @@ class ElementsDatabaseEditor(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def build_menu(self):
-
         menubar = wx.MenuBar()
 
         fileMenu = wx.Menu()
-        saveItem = fileMenu.Append(wx.ID_ANY, '&Save database\tCtrl+S')
+        saveItem = fileMenu.Append(wx.ID_ANY, "&Save database\tCtrl+S")
         menubar.Append(fileMenu, "File")
 
         databaseMenu = wx.Menu()
-        addElementItem = databaseMenu.Append(wx.ID_ANY, 'New element')
-        addPropertyItem = databaseMenu.Append(wx.ID_ANY, 'New property')
+        addElementItem = databaseMenu.Append(wx.ID_ANY, "New element")
+        addPropertyItem = databaseMenu.Append(wx.ID_ANY, "New property")
         menubar.Append(databaseMenu, "Database")
 
         self.Bind(wx.EVT_MENU, self.on_add_element, addElementItem)
@@ -303,14 +327,13 @@ class ElementsDatabaseEditor(wx.Frame):
         self.SetMenuBar(menubar)
 
     def on_show_popup_menu(self, event):
-
         menu = wx.Menu()
 
-        saveItem = menu.Append(wx.ID_ANY, 'Save database')
+        saveItem = menu.Append(wx.ID_ANY, "Save database")
         menu.AppendSeparator()
 
-        addElementItem = menu.Append(wx.ID_ANY, 'New element')
-        addPropertyItem = menu.Append(wx.ID_ANY, 'New property')
+        addElementItem = menu.Append(wx.ID_ANY, "New element")
+        addPropertyItem = menu.Append(wx.ID_ANY, "New property")
 
         self.Bind(wx.EVT_MENU, self.on_add_element, addElementItem)
         self.Bind(wx.EVT_MENU, self.on_add_property, addPropertyItem)
@@ -322,9 +345,12 @@ class ElementsDatabaseEditor(wx.Frame):
         menu.Destroy()
 
     def on_close(self, event):
-
-        d = wx.MessageDialog(None, 'This will close the database editor. Continue ?', 'Question',
-                             wx.YES_NO | wx.YES_DEFAULT | wx.ICON_WARNING)
+        d = wx.MessageDialog(
+            None,
+            "This will close the database editor. Continue ?",
+            "Question",
+            wx.YES_NO | wx.YES_DEFAULT | wx.ICON_WARNING,
+        )
 
         if d.ShowModal() == wx.ID_NO:
             return
@@ -332,7 +358,6 @@ class ElementsDatabaseEditor(wx.Frame):
         self.Destroy()
 
     def on_edit_cell(self, event):
-
         event.Skip()
 
         self._grid.Refresh()
@@ -371,20 +396,25 @@ class ElementsDatabaseEditor(wx.Frame):
         # Get rid of wxpython unicode string formatting
         pname = str(pname)
 
-        self._database.add_column(pname,ptype)
+        self._database.add_column(pname, ptype)
 
     def on_save_database(self, event=None):
         """
         Handler called when the user saves the database to its defaut location.
         """
 
-        d = wx.MessageDialog(None, 'This will overwrite your database. Continue ?', 'Question',
-                             wx.YES_NO | wx.YES_DEFAULT | wx.ICON_WARNING)
+        d = wx.MessageDialog(
+            None,
+            "This will overwrite your database. Continue ?",
+            "Question",
+            wx.YES_NO | wx.YES_DEFAULT | wx.ICON_WARNING,
+        )
 
         if d.ShowModal() == wx.ID_NO:
             return
 
         self._database.save()
+
 
 if __name__ == "__main__":
     app = wx.App(False)

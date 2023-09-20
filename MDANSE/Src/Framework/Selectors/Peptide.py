@@ -17,37 +17,36 @@ from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
-class Peptide(ISelector):
 
+class Peptide(ISelector):
     section = "proteins"
 
     def __init__(self, chemicalSystem):
-
-        ISelector.__init__(self,chemicalSystem)
+        ISelector.__init__(self, chemicalSystem)
 
         for ce in self._chemicalSystem.chemical_entities:
-            if isinstance(ce, (PeptideChain,Protein)):
+            if isinstance(ce, (PeptideChain, Protein)):
                 self._choices.append(ce.name)
 
-
     def select(self, names):
-        '''Returns the sugar atoms.
-        
+        """Returns the sugar atoms.
+
         Only for NucleotideChain objects.
-        '''
+        """
 
         sel = set()
 
-        if '*' in names:
+        if "*" in names:
             for ce in self._chemicalSystem.chemical_entities:
-                if isinstance(ce, (PeptideChain,Protein)):
+                if isinstance(ce, (PeptideChain, Protein)):
                     sel.update([at for at in ce.peptides])
-        else:            
+        else:
             vals = set(names)
             for ce in self._chemicalSystem.chemical_entities:
-                if isinstance(ce, (PeptideChain,Protein)) and ce.name in vals:
+                if isinstance(ce, (PeptideChain, Protein)) and ce.name in vals:
                     sel.update([at for at in ce.peptides])
-            
+
         return sel
-    
+
+
 REGISTRY["peptide"] = Peptide

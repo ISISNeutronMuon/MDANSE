@@ -28,10 +28,14 @@ import wx
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Units import UnitError, measure
 
-from MDANSE.GUI.Plugins.PlotterSettings import LinesSettingsDialog, GeneralSettingsDialog, AxesSettingsDialog
+from MDANSE.GUI.Plugins.PlotterSettings import (
+    LinesSettingsDialog,
+    GeneralSettingsDialog,
+    AxesSettingsDialog,
+)
 from MDANSE.GUI.Plugins.PlotterTicker import ScaledFormatter, ScaledLocator
 
-NORMALIZER = {'log': LogNorm(), 'auto': Normalize()}
+NORMALIZER = {"log": LogNorm(), "auto": Normalize()}
 
 
 class Plotter1DError(Error):
@@ -39,10 +43,9 @@ class Plotter1DError(Error):
 
 
 class Plotter1D(wx.Panel):
-    type = 'line'
+    type = "line"
 
     def __init__(self, parent, data=None):
-
         wx.Panel.__init__(self, parent, wx.ID_ANY)
 
         self.setting = None
@@ -52,50 +55,56 @@ class Plotter1D(wx.Panel):
         self.figure = Figure(figsize=(5, 4), dpi=None)
 
         if LooseVersion(matplotlib.__version__) < LooseVersion("2.0.0"):
-            self.axes = self.figure.add_axes((10, 10, 10, 10), frameon=True, axis_bgcolor='b')
+            self.axes = self.figure.add_axes(
+                (10, 10, 10, 10), frameon=True, axis_bgcolor="b"
+            )
         else:
-            self.axes = self.figure.add_axes((10, 10, 10, 10), frameon=True, facecolor='b')
+            self.axes = self.figure.add_axes(
+                (10, 10, 10, 10), frameon=True, facecolor="b"
+            )
         self.canvas = FigureCanvasWxAgg(self, wx.ID_ANY, self.figure)
         self.toolbar = NavigationToolbar2WxAgg(self.canvas)
         self.plots = {}
         self.selectedLine = None
 
-        self.annotation = wx.StaticText(self, label='x : , y : ', style=wx.ALIGN_CENTER_VERTICAL)
+        self.annotation = wx.StaticText(
+            self, label="x : , y : ", style=wx.ALIGN_CENTER_VERTICAL
+        )
 
         ### Initialize figure parameters ###
-        self.title = ''
+        self.title = ""
         self.titleStyle = 0
         self.titleWeight = 0
         self.titleWidth = 4  # large
 
-        self.xlabel = ''
+        self.xlabel = ""
         self.xlabelStyle = 0
         self.xlabelWeight = 0
         self.xlabelWidth = 3  # medium
 
-        self.ylabel = ''
+        self.ylabel = ""
         self.ylabelStyle = 0
         self.ylabelWeight = 0
         self.ylabelWidth = 3  # medium
 
-        self.gridStyle = 'None'
+        self.gridStyle = "None"
         self.gridWidth = 1
         self.gridColor = (1, 0, 0)
 
-        self.Xscale = 'linear'
-        self.Yscale = 'linear'
+        self.Xscale = "linear"
+        self.Yscale = "linear"
 
         self.xMinorTicks = False
         self.yMinorTicks = False
 
-        self.Xposition = 'none'
-        self.Yposition = 'none'
+        self.Xposition = "none"
+        self.Yposition = "none"
 
-        self.Xlabel = ''
-        self.Ylabel = ''
+        self.Xlabel = ""
+        self.Ylabel = ""
 
-        self.Xaxis_label = ''
-        self.Yaxis_label = ''
+        self.Xaxis_label = ""
+        self.Yaxis_label = ""
 
         self.Xunit = None
         self.Yunit = None
@@ -118,17 +127,25 @@ class Plotter1D(wx.Panel):
         self.verticalCut = None
 
         self.show_legend = True
-        self.legend_location = 'best'
+        self.legend_location = "best"
         self.legend_frameon = True
         self.legend_shadow = True
         self.legend_fancybox = False
 
         # add sliders
-        self.offset_label = wx.StaticText(self, label="Offset Value", style=wx.ALIGN_CENTER_VERTICAL)
-        self.yAxisSliderOffset = wx.Slider(self, wx.ID_ANY, size=(60, 27), style=wx.SL_HORIZONTAL)
-        self.offset_multiplier_label = wx.StaticText(self, label="Modulation", style=wx.ALIGN_CENTER_VERTICAL)
-        self.yAxisOffset = wx.TextCtrl(self, wx.ID_ANY, size=(60, 27), style=wx.TE_PROCESS_ENTER)
-        self.yAxisOffset.SetValue('0.0')
+        self.offset_label = wx.StaticText(
+            self, label="Offset Value", style=wx.ALIGN_CENTER_VERTICAL
+        )
+        self.yAxisSliderOffset = wx.Slider(
+            self, wx.ID_ANY, size=(60, 27), style=wx.SL_HORIZONTAL
+        )
+        self.offset_multiplier_label = wx.StaticText(
+            self, label="Modulation", style=wx.ALIGN_CENTER_VERTICAL
+        )
+        self.yAxisOffset = wx.TextCtrl(
+            self, wx.ID_ANY, size=(60, 27), style=wx.TE_PROCESS_ENTER
+        )
+        self.yAxisOffset.SetValue("0.0")
         self.autoFitAxesButton = wx.Button(self, label="Fit axes range", size=(120, 27))
 
         hsizer = wx.BoxSizer()
@@ -144,7 +161,11 @@ class Plotter1D(wx.Panel):
         hsizer2.AddSpacer(5)
         hsizer2.Add(self.offset_multiplier_label, 0, flag=wx.ALIGN_CENTER_VERTICAL)
         hsizer2.AddSpacer(5)
-        hsizer2.Add(self.yAxisSliderOffset, 1, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL | wx.EXPAND)
+        hsizer2.Add(
+            self.yAxisSliderOffset,
+            1,
+            flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL | wx.EXPAND,
+        )
         hsizer2.AddSpacer(5)
         hsizer2.Add(self.autoFitAxesButton, 0, flag=wx.ALIGN_CENTER_VERTICAL)
 
@@ -177,22 +198,26 @@ class Plotter1D(wx.Panel):
     @property
     def fmt_Xunit(self):
         if not self.Xunit:
-            return ''
+            return ""
         else:
-            return ' (' + self.Xunit + ')'
+            return " (" + self.Xunit + ")"
 
     @property
     def fmt_Yunit(self):
         if not self.Yunit:
-            return ''
+            return ""
         else:
-            return ' (' + self.Yunit + ')'
+            return " (" + self.Yunit + ")"
 
     def binds_mpl_events(self):
-        self.menu_event_id = self.canvas.mpl_connect('button_press_event', self.on_click)
+        self.menu_event_id = self.canvas.mpl_connect(
+            "button_press_event", self.on_click
+        )
         self.pick_event_id = self.canvas.mpl_connect("pick_event", self.on_pick_line)
-        self.key_event_id = self.canvas.mpl_connect('key_press_event', self.on_key)
-        self.on_motion_id = self.canvas.mpl_connect('motion_notify_event', self.on_motion)
+        self.key_event_id = self.canvas.mpl_connect("key_press_event", self.on_key)
+        self.on_motion_id = self.canvas.mpl_connect(
+            "motion_notify_event", self.on_motion
+        )
 
     def on_click(self, event=None):
         if event.button != 3:
@@ -226,15 +251,17 @@ class Plotter1D(wx.Panel):
         if event.inaxes:
             x = event.xdata
             y = event.ydata
-            self.annotation.SetLabel('x : %g, y : %g' % (x, y))
+            self.annotation.SetLabel("x : %g, y : %g" % (x, y))
         else:
-            self.annotation.SetLabel('')
+            self.annotation.SetLabel("")
 
     def clear(self, event=None):
-        d = wx.MessageDialog(None,
-                             'Do you really want clean the plot window ?',
-                             'Question',
-                             wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+        d = wx.MessageDialog(
+            None,
+            "Do you really want clean the plot window ?",
+            "Question",
+            wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION,
+        )
         if d.ShowModal() == wx.ID_YES:
             pass
         else:
@@ -247,7 +274,7 @@ class Plotter1D(wx.Panel):
         try:
             offsetValue = float(self.yAxisOffset.GetValue())
         except:
-            offsetValue = 0.
+            offsetValue = 0.0
         offsetPercent = float(self.yAxisSliderOffset.GetValue()) / 100.0
         AddFactor = float(offsetValue * offsetPercent) - float(self.offset)
         self.offset = float(offsetValue * offsetPercent)
@@ -255,43 +282,43 @@ class Plotter1D(wx.Panel):
         self.add_offset(AddFactor)
 
     def export_data(self, event=None):
-
         first = True
 
         for v in list(self.plots.values()):
-
             line, label, varname = v
             if first:
                 try:
-                    axis = self.dataproxy[varname]['axis'][0]
-                    data = [self.dataproxy[axis]['data'] * self.Xunit_conversion_factor]
-                    labels = ['%s (%s)' % (axis, self.Xunit)]
+                    axis = self.dataproxy[varname]["axis"][0]
+                    data = [self.dataproxy[axis]["data"] * self.Xunit_conversion_factor]
+                    labels = ["%s (%s)" % (axis, self.Xunit)]
                 except:
-                    data = [np.arange(self.dataproxy[varname]['data'].shape[0])]
-                    labels = ['default_axis (au)']
+                    data = [np.arange(self.dataproxy[varname]["data"].shape[0])]
+                    labels = ["default_axis (au)"]
                 first = False
 
             try:
                 line.get_xydata()
                 data.append(line.get_ydata() * self.Yunit_conversion_factor)
-                labels.append('%s (%s)' % (label, self.Yunit))
+                labels.append("%s (%s)" % (label, self.Yunit))
             except:
-                raise Plotter1DError('encounter issue for variable %r while exporting data' % varname)
-        header = '# '
+                raise Plotter1DError(
+                    "encounter issue for variable %r while exporting data" % varname
+                )
+        header = "# "
         if labels:
             for label in labels:
-                header += '%s, ' % label
+                header += "%s, " % label
             header = header[:-2] + os.linesep
         output_fname = self.get_output_filename()
         if output_fname:
-            with open(output_fname, 'w') as f:
+            with open(output_fname, "w") as f:
                 f.write(header)
-                np.savetxt(f, np.column_stack(data), fmt='%12.4e', delimiter="  ")
+                np.savetxt(f, np.column_stack(data), fmt="%12.4e", delimiter="  ")
                 f.close()
 
     def get_output_filename(self):
-        path = ''
-        dlg = wx.FileDialog(self, "Save As", '', '', "All Files|*.*", wx.SAVE)
+        path = ""
+        dlg = wx.FileDialog(self, "Save As", "", "", "All Files|*.*", wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
         dlg.Destroy()
@@ -336,7 +363,7 @@ class Plotter1D(wx.Panel):
         self.figure.canvas.draw()
 
     def on_key(self, event=None):
-        if event.key == 'delete':
+        if event.key == "delete":
             if self.selectedLine is None:
                 return
 
@@ -345,14 +372,15 @@ class Plotter1D(wx.Panel):
             self.canvas.draw()
 
     def delete_line(self, line):
-
         self.add_offset(-self.offset)
         for k, v in list(self.plots.items()):
             if v[0] is line:
-                d = wx.MessageDialog(None,
-                                    'Do you really want delete this line ?',
-                                    'Question',
-                                    wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+                d = wx.MessageDialog(
+                    None,
+                    "Do you really want delete this line ?",
+                    "Question",
+                    wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION,
+                )
                 if d.ShowModal() == wx.ID_NO:
                     return False
                 self.plots.pop(k)
@@ -367,7 +395,6 @@ class Plotter1D(wx.Panel):
         self.canvas.draw()
 
         return True
-
 
         # self.add_offset(-self.offset)
 
@@ -390,31 +417,31 @@ class Plotter1D(wx.Panel):
 
     def scale_xAxis(self):
         scaleStr = self.Xscale
-        if scaleStr == 'linear':
-            self.figure.gca().set_xscale('linear')
-        elif scaleStr == 'symlog':
-            self.figure.gca().set_xscale('symlog')
-        elif scaleStr == 'ln':
-            self.figure.gca().set_xscale('log', basex=np.exp(1))
-        elif scaleStr == 'log 10':
-            self.figure.gca().set_xscale('log', basex=10)
-        elif scaleStr == 'log 2':
-            self.figure.gca().set_xscale('log', basex=2)
+        if scaleStr == "linear":
+            self.figure.gca().set_xscale("linear")
+        elif scaleStr == "symlog":
+            self.figure.gca().set_xscale("symlog")
+        elif scaleStr == "ln":
+            self.figure.gca().set_xscale("log", basex=np.exp(1))
+        elif scaleStr == "log 10":
+            self.figure.gca().set_xscale("log", basex=10)
+        elif scaleStr == "log 2":
+            self.figure.gca().set_xscale("log", basex=2)
         self.on_auto_fit()
         self.figure.canvas.draw()
 
     def scale_yAxis(self):
         scaleStr = self.Yscale
-        if scaleStr == 'linear':
-            self.figure.gca().set_yscale('linear')
-        elif scaleStr == 'symlog':
-            self.figure.gca().set_yscale('symlog')
-        elif scaleStr == 'ln':
-            self.figure.gca().set_yscale('log', basey=np.exp(1))
-        elif scaleStr == 'log 10':
-            self.figure.gca().set_yscale('log', basey=10)
-        elif scaleStr == 'log 2':
-            self.figure.gca().set_yscale('log', basey=2)
+        if scaleStr == "linear":
+            self.figure.gca().set_yscale("linear")
+        elif scaleStr == "symlog":
+            self.figure.gca().set_yscale("symlog")
+        elif scaleStr == "ln":
+            self.figure.gca().set_yscale("log", basey=np.exp(1))
+        elif scaleStr == "log 10":
+            self.figure.gca().set_yscale("log", basey=10)
+        elif scaleStr == "log 2":
+            self.figure.gca().set_yscale("log", basey=2)
         self.on_auto_fit()
         self.figure.canvas.draw()
 
@@ -433,20 +460,25 @@ class Plotter1D(wx.Panel):
         self.selectedLine.figure.canvas.draw()
 
     def update_legend(self):
-
         if not list(self.plots.values()):
             self.figure.gca().legend().remove()
-            return 
+            return
 
         if not self.show_legend:
             return
-            
+
         legend = [[], []]
         for v in list(self.plots.values()):
             legend[0].append(v[0])
             legend[1].append(v[1])
-        self.figure.gca().legend(tuple(legend[0]), tuple(legend[1]), loc=self.legend_location,
-                                 frameon=self.legend_frameon, shadow=self.legend_shadow, fancybox=self.legend_fancybox)
+        self.figure.gca().legend(
+            tuple(legend[0]),
+            tuple(legend[1]),
+            loc=self.legend_location,
+            frameon=self.legend_frameon,
+            shadow=self.legend_shadow,
+            fancybox=self.legend_fancybox,
+        )
 
     def plot(self, data, varname):
         if data is None:
@@ -455,12 +487,18 @@ class Plotter1D(wx.Panel):
         try:
             [float(d) for d in data]
         except ValueError:
-            raise Plotter1DError('Data containing non-numeric values cannot be plotted.')
+            raise Plotter1DError(
+                "Data containing non-numeric values cannot be plotted."
+            )
 
         self.set_axis_property(varname, data)
         self.subplot = self.figure.add_subplot(111)
         name = self.unique(varname, self.plots)
-        self.plots[name] = [self.subplot.plot(self.Xaxis, data, picker=3)[0], name, varname]
+        self.plots[name] = [
+            self.subplot.plot(self.Xaxis, data, picker=3)[0],
+            name,
+            varname,
+        ]
         self.set_ticks()
         self.Xlabel = self.Xaxis_label
         self.Ylabel = self.Yaxis_label
@@ -474,39 +512,41 @@ class Plotter1D(wx.Panel):
         oldXunit = self.Xinit_unit
         oldYunit = self.Yinit_unit
         self.Yaxis_label = varname
-        self.Yaxis = self.dataproxy[varname]['data']
+        self.Yaxis = self.dataproxy[varname]["data"]
         try:
-            self.Xaxis_label = self.dataproxy[varname]['axis'][0]
-            self.Xunit = self.Xinit_unit = self.dataproxy[self.Xaxis_label]['units']
-            self.Xaxis = self.dataproxy[self.Xaxis_label]['data']
+            self.Xaxis_label = self.dataproxy[varname]["axis"][0]
+            self.Xunit = self.Xinit_unit = self.dataproxy[self.Xaxis_label]["units"]
+            self.Xaxis = self.dataproxy[self.Xaxis_label]["data"]
         except:
-            self.Xunit = self.Xinit_unit = 'au'
+            self.Xunit = self.Xinit_unit = "au"
             self.Xaxis = np.arange(data.shape[0])
         try:
-            self.Yunit = self.Yinit_unit = self.dataproxy[varname]['units']
+            self.Yunit = self.Yinit_unit = self.dataproxy[varname]["units"]
         except:
-            self.Yunit = self.Yinit_unit = 'au'
+            self.Yunit = self.Yinit_unit = "au"
 
         if oldXunit is not None:
             if oldXunit != self.Xinit_unit:
                 raise Plotter1DError(
-                    'the x axis unit (%s) of data-set %r is inconsistent with the unit (%s) of the precedent data '
-                    'plotted ' % (self.Xinit_unit, varname, oldXunit))
+                    "the x axis unit (%s) of data-set %r is inconsistent with the unit (%s) of the precedent data "
+                    "plotted " % (self.Xinit_unit, varname, oldXunit)
+                )
         if oldYunit is not None:
             if oldYunit != self.Yinit_unit:
                 raise Plotter1DError(
-                    'the y axis unit (%s) of data-set %r is inconsistent with the unit (%s) of the precedent data '
-                    'plotted ' % (self.Yinit_unit, varname, oldYunit))
+                    "the y axis unit (%s) of data-set %r is inconsistent with the unit (%s) of the precedent data "
+                    "plotted " % (self.Yinit_unit, varname, oldYunit)
+                )
 
     def compute_conversion_factor(self):
         try:
-            m = measure(1.0,self.Xinit_unit,equivalent=True)
+            m = measure(1.0, self.Xinit_unit, equivalent=True)
             self.Xunit_conversion_factor = m.toval(self.Xunit)
         except UnitError:
             self.Xunit_conversion_factor = 1.0
 
         try:
-            m = measure(1.0, self.Yinit_unit,equivalent=True)
+            m = measure(1.0, self.Yinit_unit, equivalent=True)
             self.Yunit_conversion_factor = m.toval(self.Yunit)
         except UnitError:
             self.Yunit_conversion_factor = 1.0
@@ -514,18 +554,26 @@ class Plotter1D(wx.Panel):
     def set_ticks(self):
         self.compute_conversion_factor()
 
-        self.figure.gca().xaxis.set_major_locator(ScaledLocator(dx=self.Xunit_conversion_factor))
-        self.figure.gca().xaxis.set_major_formatter(ScaledFormatter(dx=self.Xunit_conversion_factor))
+        self.figure.gca().xaxis.set_major_locator(
+            ScaledLocator(dx=self.Xunit_conversion_factor)
+        )
+        self.figure.gca().xaxis.set_major_formatter(
+            ScaledFormatter(dx=self.Xunit_conversion_factor)
+        )
 
-        self.figure.gca().yaxis.set_major_locator(ScaledLocator(dx=self.Yunit_conversion_factor))
-        self.figure.gca().yaxis.set_major_formatter(ScaledFormatter(dx=self.Yunit_conversion_factor))
+        self.figure.gca().yaxis.set_major_locator(
+            ScaledLocator(dx=self.Yunit_conversion_factor)
+        )
+        self.figure.gca().yaxis.set_major_formatter(
+            ScaledFormatter(dx=self.Yunit_conversion_factor)
+        )
 
     @staticmethod
     def unique(key, dic):
         skey = key
         i = 0
         while key in dic:
-            key = skey + '_%d' % i
+            key = skey + "_%d" % i
             i += 1
         return key
 

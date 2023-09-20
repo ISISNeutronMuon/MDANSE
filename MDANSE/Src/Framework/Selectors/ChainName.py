@@ -17,49 +17,47 @@ from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
-class ChainName(ISelector):
 
+class ChainName(ISelector):
     section = "proteins"
 
     def __init__(self, chemicalSystem):
-        
-        ISelector.__init__(self,chemicalSystem)
-                
+        ISelector.__init__(self, chemicalSystem)
+
         for ce in self._chemicalSystem.chemical_entities:
             if isinstance(ce, (PeptideChain, Protein)):
                 self._choices.extend([c.name for c in ce.peptide_chains])
-        
 
     def select(self, names):
-        '''Returns the atoms that matches a given list of chain names.
-    
+        """Returns the atoms that matches a given list of chain names.
+
         @param names: the chain names list.
         @type names: list
-        '''
-        
+        """
+
         sel = set()
 
-        if '*' in names:
+        if "*" in names:
             for ce in self._chemicalSystem.chemical_entities:
                 try:
                     for pc in ce.peptide_chains:
                         sel.update([at for at in pc.atom_list()])
                 except AttributeError:
                     pass
-        
+
         else:
-            
             vals = set([v for v in names])
-                
+
             for ce in self._chemicalSystem.chemical_entities:
                 try:
                     for chain in ce.peptide_chains:
                         chainName = chain.name.strip()
                         if chainName in vals:
                             sel.update([at for at in chain.atom_list()])
-                except (AttributeError,TypeError):
+                except (AttributeError, TypeError):
                     continue
-                
+
         return sel
+
 
 REGISTRY["chain_name"] = ChainName

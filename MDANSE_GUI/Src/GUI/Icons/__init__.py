@@ -19,21 +19,20 @@ import wx
 
 from MDANSE.Core.Singleton import Singleton
 
-class Icons(object, metaclass=Singleton):
-    
-    def __getitem__(self,item):
 
+class Icons(object, metaclass=Singleton):
+    def __getitem__(self, item):
         name, width, height = item
 
-        icon = os.path.join(os.path.dirname(__file__),name+".png")
+        icon = os.path.join(os.path.dirname(__file__), name + ".png")
 
         image = wx.Bitmap(icon).ConvertToImage()
         image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
-        
+
         return wx.Bitmap(image)
 
-    def add_icon(self,name,path):
-        
+    def add_icon(self, name, path):
         self._icons[name] = path
-        
-ICONS = Icons()     
+
+
+ICONS = Icons()

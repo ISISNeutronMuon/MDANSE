@@ -16,6 +16,7 @@
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.RangeConfigurator import RangeConfigurator
 
+
 class FramesConfigurator(RangeConfigurator):
     """
     This configurator allows to input a frame selection for the analysis.
@@ -29,56 +30,61 @@ class FramesConfigurator(RangeConfigurator):
 
     :note: this configurator depends on 'trajectory' configurator to be configured
     """
-        
+
     def __init__(self, name, **kwargs):
-        '''
+        """
         Initializes the configurator.
-        
+
         :param name: the name of the configurator as it will appear in the configuration.
         :type name: str
-        '''
+        """
 
         RangeConfigurator.__init__(self, name, sort=True, **kwargs)
-             
+
     def configure(self, value):
-        '''
+        """
         Configure the frames range that will be used to perform an analysis.
-                
+
         :param value: the input value
         :type value: 3-tuple, 'all' or None
-        '''
-                                        
-        trajConfig = self._configurable[self._dependencies['trajectory']]
+        """
 
-        if value in ["all",None]:
-            value = (0, trajConfig['length'], 1)
-            
+        trajConfig = self._configurable[self._dependencies["trajectory"]]
+
+        if value in ["all", None]:
+            value = (0, trajConfig["length"], 1)
+
         self._mini = 0
-        self._maxi = trajConfig['length']
-        
+        self._maxi = trajConfig["length"]
+
         RangeConfigurator.configure(self, value)
-                                                                          
+
         self["n_frames"] = self["number"]
-                                                                                             
-        self['time'] = trajConfig['md_time_step']*self['value']
+
+        self["time"] = trajConfig["md_time_step"] * self["value"]
 
         # case of single frame selected
         try:
-            self['time_step'] = self['time'][1] - self['time'][0]
+            self["time_step"] = self["time"][1] - self["time"][0]
         except IndexError:
-            self['time_step'] = 1.0
-            
-        self['duration'] = self['time'] - self['time'][0]    
+            self["time_step"] = 1.0
+
+        self["duration"] = self["time"] - self["time"][0]
 
     def get_information(self):
-        '''
+        """
         Returns some informations about this configurator.
-        
+
         :return: the information about this configurator
         :rtype: str
-        '''
-        
-        return "%d frames selected (first=%.3f ; last = %.3f ; time step = %.3f)\n" % \
-            (self["n_frames"],self["time"][0],self["time"][-1],self["time_step"])
-            
-REGISTRY['frames'] = FramesConfigurator
+        """
+
+        return "%d frames selected (first=%.3f ; last = %.3f ; time step = %.3f)\n" % (
+            self["n_frames"],
+            self["time"][0],
+            self["time"][-1],
+            self["time_step"],
+        )
+
+
+REGISTRY["frames"] = FramesConfigurator

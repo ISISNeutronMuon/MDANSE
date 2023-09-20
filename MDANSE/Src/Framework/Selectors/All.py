@@ -16,12 +16,12 @@
 from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
-class All(ISelector):
 
+class All(ISelector):
     section = "miscellaneous"
-                    
+
     def select(self, *args):
         return set(self._chemicalSystem.atom_list())
 
+
 REGISTRY["all"] = All
-                    

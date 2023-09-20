@@ -53,10 +53,10 @@ def find_numeric_variables(var_dict, group):
     """
 
     for var_key, var in list(group.variables.items()):
-        if group.path == '/':
-            path = '/{}'.format(var_key)
+        if group.path == "/":
+            path = "/{}".format(var_key)
         else:
-            path = '{}/{}'.format(group.path, var_key)
+            path = "{}/{}".format(group.path, var_key)
 
         # Non-numeric variables are not supported
         if not np.issubdtype(var.dtype, np.number):
@@ -67,7 +67,7 @@ def find_numeric_variables(var_dict, group):
 
         comp = 1
         while var_key in var_dict:
-            var_key = '{:s}_{:d}'.format(var_key, comp)
+            var_key = "{:s}_{:d}".format(var_key, comp)
             comp += 1
 
         var_dict[var_key] = (path, NetCDFFileVariable(var))

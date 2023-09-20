@@ -16,7 +16,7 @@
 import copy
 from icecream import ic
 from qtpy.QtCore import Slot, QObject, QThread, QMutex, Signal, QProcess
- 
+
 from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE.__pkginfo__ import __author__, __commit__, __version__, __beta__
 from MDANSE.Core.Platform import PLATFORM
@@ -39,8 +39,8 @@ class BackEnd(QObject):
     all_converters = Signal(object)
     selected_converter = Signal(object)
     selected_action = Signal(object)
-    
-    def __init__(self, parent = None, python = ""):
+
+    def __init__(self, parent=None, python=""):
         super().__init__(parent)
 
         self.lock = QMutex()
@@ -49,7 +49,7 @@ class BackEnd(QObject):
         # ^^^^^^^^^^^^^^^
         # This dictionary will hold all the objects derived from
         # the QStandardDataModel, which can be connected to GUI components.
-        # The keys of the dictionary should match the keys of the 
+        # The keys of the dictionary should match the keys of the
         # FrontEnd's self.views dictionary.
         self.createTrajectoryHolder()
         self.createJobHolder()
@@ -64,7 +64,7 @@ class BackEnd(QObject):
 
     def createTrajectoryHolder(self):
         self.trajectory_holder = DataTreeModel(parent=self)
-        self.data_holders['trajectory'] = self.trajectory_holder
+        self.data_holders["trajectory"] = self.trajectory_holder
         self.new_trajectory.connect(self.trajectory_holder.acceptNewTrajectory)
 
     def createActionsHolder(self):
@@ -73,13 +73,13 @@ class BackEnd(QObject):
         # self.data_holders['actions'] = self.trajectory_holder
 
     def createJobHolder(self):
-        self.job_holder = JobHolder(parent=self, python = self.python_interpreter)
-        self.data_holders['jobs'] = self.job_holder
+        self.job_holder = JobHolder(parent=self, python=self.python_interpreter)
+        self.data_holders["jobs"] = self.job_holder
 
     def getActions(self):
-        callable_slots =[
-            [self.loadFile, 'Load File'],
-            [self.startJob, 'Start a Job'],
+        callable_slots = [
+            [self.loadFile, "Load File"],
+            [self.startJob, "Start a Job"],
         ]
         return callable_slots
 
@@ -104,7 +104,7 @@ class BackEnd(QObject):
         for key, conv in self.registry._converters.items():
             ic(f"key:{key}, val:{conv}")
             self._converters.append(conv)
-            self._reverse_converters[str(conv)] = REGISTRY['job'][str(key)]
+            self._reverse_converters[str(conv)] = REGISTRY["job"][str(key)]
         self.lock.unlock()
 
     def getConverters(self):
@@ -114,9 +114,9 @@ class BackEnd(QObject):
         temp = copy.deepcopy(self._converters)
         self.lock.unlock()
         return temp
-    
+
     @Slot(str)
-    def returnConverter(self, key:str):
+    def returnConverter(self, key: str):
         """This slot will make Backend emit a signal that will
         create a Dialog for a specific trajectory converter.
         The type of the converter is chosen by the 'key' input
@@ -137,7 +137,7 @@ class BackEnd(QObject):
         for key, act in self.registry._jobs.items():
             ic(f"key:{key}, val:{act}")
             self._actions.append(act)
-            self._reverse_actions[str(act)] = REGISTRY['job'][str(key)]
+            self._reverse_actions[str(act)] = REGISTRY["job"][str(key)]
         self.lock.unlock()
 
     def getActions(self):
@@ -147,9 +147,9 @@ class BackEnd(QObject):
         temp = copy.deepcopy(self._actions)
         self.lock.unlock()
         return temp
-    
+
     @Slot(str)
-    def returnActions(self, key:str):
+    def returnActions(self, key: str):
         """This slot will make Backend emit a signal that will
         create a Dialog for a specific trajectory converter.
         The type of the converter is chosen by the 'key' input
@@ -161,4 +161,3 @@ class BackEnd(QObject):
         ic("returnActions has been triggered in BackEnd")
         thing = self._reverse_actions[str(key).split()[-1]]
         self.selected_action.emit(thing)
-

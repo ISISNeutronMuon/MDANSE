@@ -16,56 +16,53 @@
 import logging
 
 from MDANSE.Core.Singleton import Singleton
-                                        
+
+
 class Logger(metaclass=Singleton):
+    levels = {
+        "debug": logging.DEBUG,
+        "info": logging.INFO,
+        "warning": logging.WARNING,
+        "error": logging.ERROR,
+        "fatal": logging.CRITICAL,
+        "critical": logging.FATAL,
+    }
 
-    levels = {"debug"    : logging.DEBUG,
-              "info"     : logging.INFO,
-              "warning"  : logging.WARNING,
-              "error"    : logging.ERROR,
-              "fatal"    : logging.CRITICAL,
-              "critical" : logging.FATAL
-              }
+    def __call__(self, message, level="info", loggers=None):
+        lvl = Logger.levels.get(level, None)
 
-    def __call__(self,message,level="info",loggers=None):
-
-        lvl = Logger.levels.get(level,None)
-        
         # If the logging level is unkwnown, skip that log
         if lvl is None:
             return
-    
+
         if loggers is None:
-            loggers=list(logging.Logger.manager.loggerDict.keys())
+            loggers = list(logging.Logger.manager.loggerDict.keys())
         else:
             loggers = [n for n in loggers if n in logging.Logger.manager.loggerDict]
 
         for n in loggers:
-            logging.getLogger(n).log(lvl,message)
+            logging.getLogger(n).log(lvl, message)
 
     def start(self, loggers=None):
-        
         if loggers is None:
-            loggers=list(logging.Logger.manager.loggerDict.keys())
+            loggers = list(logging.Logger.manager.loggerDict.keys())
         else:
             loggers = [n for n in loggers if n in logging.Logger.manager.loggerDict]
 
         for n in loggers:
-            logging.getLogger(n).disabled=False
+            logging.getLogger(n).disabled = False
 
     def stop(self, loggers=None):
-
         if loggers is None:
-            loggers=list(logging.Logger.manager.loggerDict.keys())
+            loggers = list(logging.Logger.manager.loggerDict.keys())
         else:
             loggers = [n for n in loggers if n in logging.Logger.manager.loggerDict]
 
         for n in loggers:
-            logging.getLogger(n).disabled=True
+            logging.getLogger(n).disabled = True
 
-    def set_level(self,level,loggers=None):
-        
-        lvl = Logger.levels.get(level,None)
+    def set_level(self, level, loggers=None):
+        lvl = Logger.levels.get(level, None)
         if lvl is None:
             return
 
@@ -77,15 +74,15 @@ class Logger(metaclass=Singleton):
         for loggerName in loggers:
             logging.getLogger(loggerName).setLevel(lvl)
 
-    def add_handler(self,name,handler,level="error",start=True):
-
+    def add_handler(self, name, handler, level="error", start=True):
         if name in logging.Logger.manager.loggerDict:
             return
-                        
+
         logging.getLogger(name).addHandler(handler)
-                
-        logging.getLogger(name).disabled = not start                
-        
-        self.set_level(level,loggers=[name])
-        
+
+        logging.getLogger(name).disabled = not start
+
+        self.set_level(level, loggers=[name])
+
+
 LOGGER = Logger()

@@ -3,16 +3,35 @@ import string
 
 import numpy as np
 
-from MDANSE.Chemistry.ChemicalEntity import Nucleotide, is_molecule, Atom, AtomCluster, ChemicalSystem, Molecule, Nucleotide, NucleotideChain, Residue, PeptideChain, Protein, UnknownAtomError
-from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE, NUCLEOTIDES_DATABASE, RESIDUES_DATABASE
+from MDANSE.Chemistry.ChemicalEntity import (
+    Nucleotide,
+    is_molecule,
+    Atom,
+    AtomCluster,
+    ChemicalSystem,
+    Molecule,
+    Nucleotide,
+    NucleotideChain,
+    Residue,
+    PeptideChain,
+    Protein,
+    UnknownAtomError,
+)
+from MDANSE.Chemistry import (
+    ATOMS_DATABASE,
+    MOLECULES_DATABASE,
+    NUCLEOTIDES_DATABASE,
+    RESIDUES_DATABASE,
+)
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 from MDANSE.IO.PDB import PDBMolecule, PDBNucleotideChain, PDBPeptideChain, Structure
+
 
 class PDBReaderError(Exception):
     pass
 
-class PDBReader:
 
+class PDBReader:
     def __init__(self, filename):
         """Constructor.
 
@@ -23,37 +42,42 @@ class PDBReader:
         self._chemicalEntities = []
 
         self._struct = Structure(filename)
-        
+
         self._build_chemical_entities()
 
     def _build_chemical_entities(self):
-        """Build the chemical entities stored in the PDB file.
-        """
+        """Build the chemical entities stored in the PDB file."""
 
         peptide_chains = []
         for pdb_element in self._struct.objects:
-            if isinstance(pdb_element,PDBPeptideChain):
+            if isinstance(pdb_element, PDBPeptideChain):
                 peptide_chains.append(self._process_peptide_chain(pdb_element))
             else:
-
                 if peptide_chains:
                     p = Protein()
                     p.set_peptide_chains(peptide_chains)
                     self._chemicalEntities.append(p)
                     peptide_chains = []
 
-                if isinstance(pdb_element,PDBNucleotideChain):
-                    self._chemicalEntities.append(self._process_nucleotide_chain(pdb_element))
+                if isinstance(pdb_element, PDBNucleotideChain):
+                    self._chemicalEntities.append(
+                        self._process_nucleotide_chain(pdb_element)
+                    )
 
-                elif isinstance(pdb_element,PDBMolecule):
-
+                elif isinstance(pdb_element, PDBMolecule):
                     if len(pdb_element) == 1:
-                        self._chemicalEntities.append(self._process_atom(pdb_element[0]))
-                    else:                
+                        self._chemicalEntities.append(
+                            self._process_atom(pdb_element[0])
+                        )
+                    else:
                         if is_molecule(pdb_element.name):
-                            self._chemicalEntities.append(self._process_molecule(pdb_element))            
+                            self._chemicalEntities.append(
+                                self._process_molecule(pdb_element)
+                            )
                         else:
-                            self._chemicalEntities.append(self._process_atom_cluster(pdb_element))            
+                            self._chemicalEntities.append(
+                                self._process_atom_cluster(pdb_element)
+                            )
 
         if peptide_chains:
             p = Protein()
@@ -71,8 +95,8 @@ class PDBReader:
             str: the atom symbol
         """
 
-        atom_without_digits = ''.join([at for at in atom if at not in string.digits])
-        
+        atom_without_digits = "".join([at for at in atom if at not in string.digits])
+
         comp = 1
         while True:
             if atom_without_digits[:comp] in ATOMS_DATABASE:
@@ -96,19 +120,19 @@ class PDBReader:
         atom_found = None
         for at, info in ATOMS_DATABASE.items():
             if at == atname:
-                atom_found = Atom(name=at,**info)
+                atom_found = Atom(name=at, **info)
             else:
-                for alt in info.get('alternatives',[]):
+                for alt in info.get("alternatives", []):
                     if alt == atname:
-                        copy_info = copy.deepcopy(info)                                            
-                        atom_found = Atom(name=at,**copy_info)
+                        copy_info = copy.deepcopy(info)
+                        atom_found = Atom(name=at, **copy_info)
                         atom_found.position = atom.position
                         break
                 else:
                     continue
 
         if atom_found is None:
-            raise PDBReaderError('The atom {} is unknown'.format(atname))
+            raise PDBReaderError("The atom {} is unknown".format(atname))
 
         return atom_found
 
@@ -129,9 +153,9 @@ class PDBReader:
         atoms = []
         for at in pdb_atoms:
             symbol = self._guess_atom_symbol(at)
-            atoms.append(Atom(name=at,symbol=symbol))
+            atoms.append(Atom(name=at, symbol=symbol))
 
-        new_atom_cluster = AtomCluster(ac_name,atoms)
+        new_atom_cluster = AtomCluster(ac_name, atoms)
 
         return new_atom_cluster
 
@@ -149,14 +173,13 @@ class PDBReader:
 
         pdb_atoms = [at.name for at in molecule]
 
-        atoms_found = [None]*len(pdb_atoms)
-        for at, info in MOLECULES_DATABASE[code]['atoms'].items():
-
+        atoms_found = [None] * len(pdb_atoms)
+        for at, info in MOLECULES_DATABASE[code]["atoms"].items():
             try:
                 idx = pdb_atoms.index(at)
                 atoms_found[idx] = at
             except ValueError:
-                for alt in info['alternatives']:
+                for alt in info["alternatives"]:
                     try:
                         idx = pdb_atoms.index(alt)
                         atoms_found[idx] = at
@@ -165,10 +188,10 @@ class PDBReader:
                     else:
                         break
                 else:
-                    raise PDBReaderError('Unknown atom')
+                    raise PDBReaderError("Unknown atom")
 
-        molname = '{}_{}'.format(code,molecule.number)
-        new_molecule = Molecule(code,molname)
+        molname = "{}_{}".format(code, molecule.number)
+        new_molecule = Molecule(code, molname)
         new_molecule.reorder_atoms(atoms_found)
 
         return new_molecule
@@ -187,16 +210,16 @@ class PDBReader:
 
         pdb_atoms = [at.name for at in residue]
 
-        atoms_found = [None]*len(pdb_atoms)
+        atoms_found = [None] * len(pdb_atoms)
 
         atoms_not_found = []
 
         # Loop over the PDB atoms of this residue
         for comp, pdb_atom in enumerate(pdb_atoms):
             # Loop over the atoms of this residue stored in the corresponding residue database entry
-            for at, info in RESIDUES_DATABASE[code]['atoms'].items():
+            for at, info in RESIDUES_DATABASE[code]["atoms"].items():
                 # A match was found, pass to the next PDB atom
-                if pdb_atom == at or pdb_atom in info['alternatives']:
+                if pdb_atom == at or pdb_atom in info["alternatives"]:
                     atoms_found[comp] = at
                     break
             # No match was found, the PDB atom is marked as not found
@@ -204,18 +227,22 @@ class PDBReader:
                 atoms_not_found.append(pdb_atom)
 
         # Fetch all the N ter variants from the residues database
-        nter_variants = [(name,res) for name,res in RESIDUES_DATABASE.items() if res['is_n_terminus']]
+        nter_variants = [
+            (name, res)
+            for name, res in RESIDUES_DATABASE.items()
+            if res["is_n_terminus"]
+        ]
 
         # The atoms that has not been found so far will be searched now in the N ter variants entries of the database
         if atoms_not_found:
             # Loop over the N ter variants of the residues database
-            for name,res in nter_variants:
+            for name, res in nter_variants:
                 # Loop over the atom of the current variant
-                for at, info in res['atoms'].items():
+                for at, info in res["atoms"].items():
                     # These are all the names the atoms can take (actual DB name + alternatives)
-                    allNames = [at] + info['alternatives']
-                    for aa in allNames:                        
-                        # The variant atom match one of the not found atoms, mark it as known and pass to the next variant atom     
+                    allNames = [at] + info["alternatives"]
+                    for aa in allNames:
+                        # The variant atom match one of the not found atoms, mark it as known and pass to the next variant atom
                         if aa in atoms_not_found:
                             idx = pdb_atoms.index(aa)
                             atoms_found[idx] = at
@@ -228,10 +255,10 @@ class PDBReader:
                     nter = name
                     break
             else:
-                raise PDBReaderError('The atom {} is unknown'.format(at))
+                raise PDBReaderError("The atom {} is unknown".format(at))
 
-        resname = '{}{}'.format(code,residue.number)
-        new_residue = Residue(code,resname,variant=nter)
+        resname = "{}{}".format(code, residue.number)
+        new_residue = Residue(code, resname, variant=nter)
         new_residue.set_atoms(atoms_found)
 
         return new_residue
@@ -250,25 +277,29 @@ class PDBReader:
 
         pdb_atoms = [at.name for at in residue]
 
-        atoms_found = [None]*len(pdb_atoms)
+        atoms_found = [None] * len(pdb_atoms)
 
         atoms_not_found = []
 
         for comp, pdb_atom in enumerate(pdb_atoms):
-            for at, info in NUCLEOTIDES_DATABASE[resname]['atoms'].items():
-                if pdb_atom == at or pdb_atom in info['alternatives']:
+            for at, info in NUCLEOTIDES_DATABASE[resname]["atoms"].items():
+                if pdb_atom == at or pdb_atom in info["alternatives"]:
                     atoms_found[comp] = at
                     break
             else:
                 atoms_not_found.append(pdb_atom)
 
-        ter5_variants = [(name,res) for name,res in NUCLEOTIDES_DATABASE.items() if res['is_5ter_terminus']]
+        ter5_variants = [
+            (name, res)
+            for name, res in NUCLEOTIDES_DATABASE.items()
+            if res["is_5ter_terminus"]
+        ]
 
         if atoms_not_found:
-            for name,res in ter5_variants:
-                for at, info in res['atoms'].items():
-                    allNames = [at] + info['alternatives']
-                    for aa in allNames:                        
+            for name, res in ter5_variants:
+                for at, info in res["atoms"].items():
+                    allNames = [at] + info["alternatives"]
+                    for aa in allNames:
                         if aa in atoms_not_found:
                             idx = pdb_atoms.index(aa)
                             atoms_found[idx] = at
@@ -279,9 +310,9 @@ class PDBReader:
                     nter = name
                     break
             else:
-                raise PDBReaderError('The atom {} is unknown'.format(at))
+                raise PDBReaderError("The atom {} is unknown".format(at))
 
-        new_residue = Nucleotide(resname,residue.number,variant=nter)
+        new_residue = Nucleotide(resname, residue.number, variant=nter)
         new_residue.set_atoms(atoms_found)
 
         return new_residue
@@ -300,15 +331,15 @@ class PDBReader:
 
         pdb_atoms = [at.name for at in residue]
 
-        atoms_found = [None]*len(pdb_atoms)
+        atoms_found = [None] * len(pdb_atoms)
 
         # Loop over the PDB atoms of this residue
         atoms_not_found = []
         for comp, pdb_atom in enumerate(pdb_atoms):
             # Loop over the atoms of this residue stored in the corresponding residue database entry
-            for at, info in RESIDUES_DATABASE[code]['atoms'].items():
+            for at, info in RESIDUES_DATABASE[code]["atoms"].items():
                 # A match was found, pass to the next PDB atom
-                if pdb_atom == at or pdb_atom in info['alternatives']:
+                if pdb_atom == at or pdb_atom in info["alternatives"]:
                     atoms_found[comp] = at
                     break
             # No match was found, the PDB atom is marked as not found
@@ -316,19 +347,23 @@ class PDBReader:
                 atoms_not_found.append(pdb_atom)
 
         # Fetch all the C ter variants from the residues database
-        cter_variants = [(name,res) for name,res in RESIDUES_DATABASE.items() if res['is_c_terminus']]
+        cter_variants = [
+            (name, res)
+            for name, res in RESIDUES_DATABASE.items()
+            if res["is_c_terminus"]
+        ]
 
         # The atoms that has not been found so far will be searched now in the C ter variants entries of the database
         cter = None
         if atoms_not_found:
             # Loop over the C ter variants of the residues database
-            for name,res in cter_variants:
+            for name, res in cter_variants:
                 # Loop over the atom of the current variant
-                for at, info in res['atoms'].items():
+                for at, info in res["atoms"].items():
                     # These are all the names the atoms can take (actual DB name + alternatives)
-                    allNames = [at] + info['alternatives']
+                    allNames = [at] + info["alternatives"]
                     for aa in allNames:
-                        # The variant atom match one of the not found atoms, mark it as known and pass to the next variant atom     
+                        # The variant atom match one of the not found atoms, mark it as known and pass to the next variant atom
                         if aa in atoms_not_found:
                             idx = pdb_atoms.index(aa)
                             atoms_found[idx] = at
@@ -341,13 +376,17 @@ class PDBReader:
                     cter = name
                     break
             else:
-                raise PDBReaderError('The atoms {} are unknown'.format(atoms_not_found))        
+                raise PDBReaderError("The atoms {} are unknown".format(atoms_not_found))
 
         if cter is None:
-            raise PDBReaderError('Could not find a suitable CTER variant for residue {}{}'.format(residue.name,residue.number))
+            raise PDBReaderError(
+                "Could not find a suitable CTER variant for residue {}{}".format(
+                    residue.name, residue.number
+                )
+            )
 
-        resname = '{}{}'.format(code,residue.number)
-        new_residue = Residue(code,resname,variant=cter)
+        resname = "{}{}".format(code, residue.number)
+        new_residue = Residue(code, resname, variant=cter)
         new_residue.set_atoms(atoms_found)
 
         return new_residue
@@ -366,25 +405,29 @@ class PDBReader:
 
         pdb_atoms = [at.name for at in residue]
 
-        atoms_found = [None]*len(pdb_atoms)
+        atoms_found = [None] * len(pdb_atoms)
 
         atoms_not_found = []
 
         for comp, pdb_atom in enumerate(pdb_atoms):
-            for at, info in NUCLEOTIDES_DATABASE[resname]['atoms'].items():
-                if pdb_atom == at or pdb_atom in info['alternatives']:
+            for at, info in NUCLEOTIDES_DATABASE[resname]["atoms"].items():
+                if pdb_atom == at or pdb_atom in info["alternatives"]:
                     atoms_found[comp] = at
                     break
             else:
                 atoms_not_found.append(pdb_atom)
 
-        ter3_variants = [(name,res) for name,res in NUCLEOTIDES_DATABASE.items() if res['is_3ter_terminus']]
+        ter3_variants = [
+            (name, res)
+            for name, res in NUCLEOTIDES_DATABASE.items()
+            if res["is_3ter_terminus"]
+        ]
 
         if atoms_not_found:
-            for name,res in ter3_variants:
-                for at, info in res['atoms'].items():
-                    allNames = [at] + info['alternatives']
-                    for aa in allNames:                        
+            for name, res in ter3_variants:
+                for at, info in res["atoms"].items():
+                    allNames = [at] + info["alternatives"]
+                    for aa in allNames:
                         if aa in atoms_not_found:
                             idx = pdb_atoms.index(aa)
                             atoms_found[idx] = at
@@ -395,9 +438,9 @@ class PDBReader:
                     cter = name
                     break
             else:
-                raise PDBReaderError('The atom {} is unknown'.format(at))
+                raise PDBReaderError("The atom {} is unknown".format(at))
 
-        new_residue = Nucleotide(resname,residue.number,variant=cter)
+        new_residue = Nucleotide(resname, residue.number, variant=cter)
         new_residue.set_atoms(atoms_found)
 
         return new_residue
@@ -416,18 +459,20 @@ class PDBReader:
 
         pdb_atoms = [at.name for at in residue]
 
-        atoms_found = [None]*len(pdb_atoms)
+        atoms_found = [None] * len(pdb_atoms)
 
         for comp, pdb_atom in enumerate(pdb_atoms):
-            for at, info in RESIDUES_DATABASE[code]['atoms'].items():
-                if pdb_atom == at or pdb_atom in info['alternatives']:
+            for at, info in RESIDUES_DATABASE[code]["atoms"].items():
+                if pdb_atom == at or pdb_atom in info["alternatives"]:
                     atoms_found[comp] = at
                     break
             else:
-                raise PDBReaderError('The atom {}{}:{} is unknown'.format(code,residue.number,pdb_atom))
+                raise PDBReaderError(
+                    "The atom {}{}:{} is unknown".format(code, residue.number, pdb_atom)
+                )
 
-        resname = '{}{}'.format(code,residue.number)
-        new_residue = Residue(code,resname,variant=None)
+        resname = "{}{}".format(code, residue.number)
+        new_residue = Residue(code, resname, variant=None)
         new_residue.set_atoms(atoms_found)
 
         return new_residue
@@ -446,36 +491,36 @@ class PDBReader:
 
         pdb_atoms = [at.name for at in residue]
 
-        atoms_found = [None]*len(pdb_atoms)
+        atoms_found = [None] * len(pdb_atoms)
 
         atoms_not_found = []
 
         for comp, pdb_atom in enumerate(pdb_atoms):
-            for at, info in NUCLEOTIDES_DATABASE[resname]['atoms'].items():
-                if pdb_atom == at or pdb_atom in info['alternatives']:
+            for at, info in NUCLEOTIDES_DATABASE[resname]["atoms"].items():
+                if pdb_atom == at or pdb_atom in info["alternatives"]:
                     atoms_found[comp] = at
                     break
             else:
                 atoms_not_found.append(pdb_atom)
 
         if atoms_not_found:
-            raise PDBReaderError('The atoms {} are unknown'.format(atoms_not_found))
+            raise PDBReaderError("The atoms {} are unknown".format(atoms_not_found))
 
-        new_residue = Nucleotide(resname,residue.number,variant=None)
+        new_residue = Nucleotide(resname, residue.number, variant=None)
         new_residue.set_atoms(atoms_found)
 
         return new_residue
-                    
+
     def _process_nucleotide_chain(self, pdb_element):
         """Process a PDB nucleotide chain.
 
         Args:
-            pdb_element (MDANSE.IO.PDB.PDBNucleotideChain): the PDB nucleotide chain to process 
+            pdb_element (MDANSE.IO.PDB.PDBNucleotideChain): the PDB nucleotide chain to process
 
         Returns:
             MDANSE.Chemistry.ChemicalEntity.NucleotideChain: the process nucleotide chain
         """
-        
+
         nucleotide_chain = NucleotideChain(pdb_element.chain_id)
         residues = []
         # Loop over the residues of the nucleotide chain
@@ -498,7 +543,7 @@ class PDBReader:
         """Process a PDB peptide chain.
 
         Args:
-            pdb_element (MDANSE.IO.PDB.PeptideChain): the PDB peptide chain to process 
+            pdb_element (MDANSE.IO.PDB.PeptideChain): the PDB peptide chain to process
 
         Returns:
             MDANSE.Chemistry.ChemicalEntity.PeptideChain: the process peptide chain
@@ -537,29 +582,30 @@ class PDBReader:
         coordinates = np.array(coordinates)
         coordinates *= 0.1
 
-        chemical_system.configuration = RealConfiguration(chemical_system,coordinates)
+        chemical_system.configuration = RealConfiguration(chemical_system, coordinates)
 
         return chemical_system
 
-if __name__ == '__main__':
 
-    print('Reading')
-    pdb_reader = PDBReader('/home/pellegrini/apoferritin.pdb')
-    print('Building chemical system')
+if __name__ == "__main__":
+    print("Reading")
+    pdb_reader = PDBReader("/home/pellegrini/apoferritin.pdb")
+    print("Building chemical system")
     cs = pdb_reader.build_chemical_system()
 
     from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 
     conf = RealConfiguration(
         cs,
-        np.empty((cs.number_of_atoms(),3),dtype=np.float64),
-        np.empty((3,3),dtype=np.float64),
-        **{'velocities':np.empty((cs.number_of_atoms(),3),dtype=np.float64)})
+        np.empty((cs.number_of_atoms(), 3), dtype=np.float64),
+        np.empty((3, 3), dtype=np.float64),
+        **{"velocities": np.empty((cs.number_of_atoms(), 3), dtype=np.float64)},
+    )
     cs.configuration = conf
 
     cs1 = cs.copy()
 
-    print(cs1.configuration['velocities'])
+    print(cs1.configuration["velocities"])
 
     # print('Serializing')
     # cs.serialize('test.h5')

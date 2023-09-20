@@ -16,24 +16,25 @@
 from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
-class CarbonAlpha(ISelector):
 
+class CarbonAlpha(ISelector):
     section = "proteins"
 
     def select(self, *args):
-        '''Returns the c_alpha atoms.
-        
+        """Returns the c_alpha atoms.
+
         Only for Protein and PeptideChain objects.
-        '''
-        
+        """
+
         sel = set()
-        
-        for ce in self._chemicalSystem.chemical_entities:            
-            try:            
-                sel.update([at for at in ce.atom_list() if at.name.strip() == 'CA'])
+
+        for ce in self._chemicalSystem.chemical_entities:
+            try:
+                sel.update([at for at in ce.atom_list() if at.name.strip() == "CA"])
             except AttributeError:
                 pass
 
         return sel
+
 
 REGISTRY["carbon_alpha"] = CarbonAlpha

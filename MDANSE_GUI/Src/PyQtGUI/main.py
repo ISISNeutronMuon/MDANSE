@@ -31,24 +31,25 @@ def startGUI(some_args):
     # qdarktheme.setup_theme("auto")  # OS mode
     # qdarktheme.setup_theme("light")  # light mode
     # qdarktheme.setup_theme()  # dark mode
-    # 
-    settings = QSettings("ISIS Neutron and Muon Source",
-                         "MDANSE for Python 3",
-                         parent = app)
+    #
+    settings = QSettings(
+        "ISIS Neutron and Muon Source", "MDANSE for Python 3", parent=app
+    )
     # the backend has no parent, because it runs in a separate QThread
-    backend = BackEnd(parent=None, python = sys.executable)
+    backend = BackEnd(parent=None, python=sys.executable)
     # backend_thread = QThread()
     # backend.moveToThread(backend_thread)
     # backend_thread.start()
     # Main is the main window of the GUI
     # It runs in the main thread, and has to connect to the BackEnd
     # using slots and signals.
-    root = Main(parent=None, title = "MDANSE for Python 3", settings = settings)
+    root = Main(parent=None, title="MDANSE for Python 3", settings=settings)
     # root.destroyed.connect(backend_thread.exit)
     root.setBackend(backend)
     root.show()
-    app.exec() # once this is done, the GUI has its event loop running.
+    app.exec()  # once this is done, the GUI has its event loop running.
     # no more Python scripting now, we are in the event loop.
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     startGUI(sys.argv)

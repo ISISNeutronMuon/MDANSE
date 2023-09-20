@@ -17,22 +17,26 @@ import os
 import tempfile
 
 from MDANSE import PLATFORM, REGISTRY
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ConfiguratorError
+from MDANSE.Framework.Configurators.IConfigurator import (
+    IConfigurator,
+    ConfiguratorError,
+)
+
 
 class OutputFilesConfigurator(IConfigurator):
     """
     This configurator allows to define the output directory, the basename, and the format(s) of the output file(s)
     resulting from an analysis.
-    
+
     Once configured, this configurator will provide a list of files built by joining the given output directory, the
     basename and the extensions corresponding to the input file formats.
-    
+
     For analysis, MDANSE currently supports only the HDF, NetCDF, SVG and ASCII formats. To define a new output file format
     for an analysis, you must inherit from MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
-        
-    _default = (os.path.join(tempfile.gettempdir(),"output"), ["hdf"])
-                    
+
+    _default = (os.path.join(tempfile.gettempdir(), "output"), ["hdf"])
+
     def __init__(self, name, formats=None, **kwargs):
         """
         Initializes the configurator.
@@ -42,11 +46,13 @@ class OutputFilesConfigurator(IConfigurator):
         :param formats: the list of output file formats supported.
         :type formats: list of str
         """
-                        
+
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._formats = formats if formats is not None else OutputFilesConfigurator._default[-1]
-    
+        self._formats = (
+            formats if formats is not None else OutputFilesConfigurator._default[-1]
+        )
+
     def configure(self, value):
         """
         Configure a set of output files for an analysis.
@@ -55,33 +61,40 @@ class OutputFilesConfigurator(IConfigurator):
         is the output directory, 2nd element the basename and 3rd element a list of file formats.
         :type value: 3-tuple
         """
-                
+
         root, formats = value
-                
+
         if not root:
             raise ConfiguratorError("empty root name for the output file.", self)
-                
-        dirname = os.path.dirname(root)        
-        
+
+        dirname = os.path.dirname(root)
+
         try:
             PLATFORM.create_directory(dirname)
         except:
             raise ConfiguratorError("the directory %r is not writable" % dirname)
-                    
+
         if not formats:
             raise ConfiguratorError("no output formats specified", self)
 
         for fmt in formats:
-            
             if not fmt in self._formats:
-                raise ConfiguratorError("the output file format %r is not a valid output format" % fmt, self)
-            
-            if fmt not in REGISTRY["format"]:
-                raise ConfiguratorError("the output file format %r is not registered as a valid file format." % fmt, self)
+                raise ConfiguratorError(
+                    "the output file format %r is not a valid output format" % fmt, self
+                )
 
-        self['root'] = root
+            if fmt not in REGISTRY["format"]:
+                raise ConfiguratorError(
+                    "the output file format %r is not registered as a valid file format."
+                    % fmt,
+                    self,
+                )
+
+        self["root"] = root
         self["formats"] = formats
-        self["files"] = ["%s%s" % (root,REGISTRY["format"][f].extension) for f in formats]
+        self["files"] = [
+            "%s%s" % (root, REGISTRY["format"][f].extension) for f in formats
+        ]
 
     @property
     def formats(self):
@@ -100,13 +113,13 @@ class OutputFilesConfigurator(IConfigurator):
         :return: the information about this configurator.
         :rtype: str
         """
-        
+
         info = ["Input files:\n"]
         for f in self["files"]:
             info.append(f)
             info.append("\n")
-        
+
         return "".join(info)
 
 
-REGISTRY['output_files'] = OutputFilesConfigurator
+REGISTRY["output_files"] = OutputFilesConfigurator

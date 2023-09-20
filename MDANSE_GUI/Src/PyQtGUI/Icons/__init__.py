@@ -18,16 +18,16 @@ import os
 from qtpy.QtCore import QDir
 from qtpy.QtGui import QIcon
 
-class PyQtIcons():
-            
-    def __init__(self, path):
 
+class PyQtIcons:
+    def __init__(self, path):
         self.res_dir = QDir(path)
         self._icons = {}
         self.res_dir.setNameFilters(["*.png"])
         files = self.res_dir.entryList()
         for f in files:
-            label = ".".join(str(f).split('.')[:-1])
+            label = ".".join(str(f).split(".")[:-1])
             self._icons[label] = QIcon(self.res_dir.filePath(f))
-        
-ICONS = PyQtIcons('.')     
+
+
+ICONS = PyQtIcons(".")
