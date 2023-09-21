@@ -34,6 +34,9 @@ class Connectivity:
         self._unit_cell = self._chemical_system.configuration
         self._periodic = self._chemical_system.configuration.is_periodic
         self.check_composition(self._chemical_system)
+        self._bonds = None
+        self._bond_mapping = None
+        self._unique_bonds = None
 
     def check_composition(self, chemical: ChemicalSystem):
         atom_elements = [atom.symbol for atom in chemical.atoms]
@@ -95,12 +98,20 @@ class Connectivity:
             for pair in pairs
         }
         max_distance_array = np.zeros((len(self._elements), len(self._elements)))
-        connection_array = np.zeros((len(self._elements), len(self._elements)), dtype = bool)
-        pair_array = np.array([[(x,y) for x in self._elements] for y in self._elements])
+        connection_array = np.zeros(
+            (len(self._elements), len(self._elements)), dtype=bool
+        )
+        pair_array = np.array(
+            [[(x, y) for x in self._elements] for y in self._elements]
+        )
         for pair, maxlength in maxbonds.items():
-            max_distance_array[np.where(np.logical_and(
-                pair_array[:,:,0] == pair[0],
-                pair_array[:,:,1] == pair[1]))] = maxlength
+            max_distance_array[
+                np.where(
+                    np.logical_and(
+                        pair_array[:, :, 0] == pair[0], pair_array[:, :, 1] == pair[1]
+                    )
+                )
+            ] = maxlength
         for nstep, frame_number in enumerate(samples):
             distances = [self.internal_distances(frame_number=frame_number)]
             if self._periodic:
@@ -126,6 +137,30 @@ class Connectivity:
         self._bonds = bonds
         self._bond_mapping = bond_mapping
         self._unique_bonds = np.unique(np.sort(bonds, axis=1), axis=0)
+
+    def find_molecules(self):
+        if self._bond_mapping is None:
+            self.find_bonds()
+
+        def recursive_walk(number, bond_mapping, atom_pool):
+            connected_atoms = []
+            for at_number in bond_mapping[number]:
+                if at_number in atom_pool:
+                    connected_atoms.append(at_number)
+                    atom_pool.pop(atom_pool.index(at_number))
+                    connected_atoms += recursive_walk(
+                        at_number, bond_mapping, atom_pool
+                    )
+            return connected_atoms
+
+        molecules = []
+        atom_pool = list(range(len(self._elements)))
+        while len(atom_pool):
+            new_molecule = recursive_walk(
+                atom_pool.pop(), self._bond_mapping, atom_pool
+            )
+            molecules.append(new_molecule)
+        self._molecules = molecules
 
     def add_point(self, index: int, point: np.ndarray, radius: float) -> bool:
         return True

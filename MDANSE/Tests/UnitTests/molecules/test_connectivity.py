@@ -31,3 +31,8 @@ def test_find_bonds(trajectory):
     conn = Connectivity(trajectory=trajectory)
     conn.find_bonds()
     assert len(conn._unique_bonds) == 40
+
+def test_find_molecules(trajectory):
+    conn = Connectivity(trajectory=trajectory)
+    conn.find_molecules()
+    assert len(conn._molecules) == 20
