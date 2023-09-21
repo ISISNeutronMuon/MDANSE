@@ -90,35 +90,39 @@ class Connectivity:
         bonds = []
         pairs = product(self._unique_elements, repeat=2)
         maxbonds = {
-            pair: ((self._radii[pair[0]] + self._radii[pair[1]]) * (1.0 + tolerance))**2
+            pair: ((self._radii[pair[0]] + self._radii[pair[1]]) * (1.0 + tolerance))
+            ** 2
             for pair in pairs
         }
-        connected = np.empty(
-            [len(self._elements), len(self._elements), len(samples)], dtype=bool
-        )
-        print(f"Shape of connected: {connected.shape}")
+        max_distance_array = np.zeros((len(self._elements), len(self._elements)))
+        connection_array = np.zeros((len(self._elements), len(self._elements)), dtype = bool)
+        pair_array = np.array([[(x,y) for x in self._elements] for y in self._elements])
         for pair, maxlength in maxbonds.items():
-            vertical = np.where(self._elements == pair[0])
-            horizontal = np.where(self._elements == pair[1])
-            print(f"Pair is {pair}")
-            print(f"Allowed bond length: {maxlength}")
-            for nstep, frame_number in enumerate(samples):
-                distances = [self.internal_distances(frame_number=frame_number)]
-                # if self._periodic:
-                #     for dist in self.periodic_distances(frame_number=frame_number):
-                #         distances.append(dist)
-                for dist in distances:
-                    print(f"Min. distance: {dist.min()}, mean distance: {dist.mean()}")
-                    temp = dist[vertical, horizontal] <= maxlength
-                    connected[vertical, horizontal, nstep] = np.logical_or(
-                        connected[vertical, horizontal, nstep], temp
+            max_distance_array[np.where(np.logical_and(
+                pair_array[:,:,0] == pair[0],
+                pair_array[:,:,1] == pair[1]))] = maxlength
+        for nstep, frame_number in enumerate(samples):
+            distances = [self.internal_distances(frame_number=frame_number)]
+            if self._periodic:
+                for dist in self.periodic_distances(frame_number=frame_number):
+                    distances.append(dist)
+            for ndist, dist in enumerate(distances):
+                result = dist < max_distance_array
+                if ndist == 0:
+                    # internal distances: bond with self possible, and wrong
+                    result = np.logical_and(
+                        result,
+                        dist > 1e-5,
                     )
-            print(f"Sum of connected is now {connected.sum()}")
-        result = np.sum(connected, axis=2)
-        print(f"Shape of result: {connected.shape}")
-        first, second = np.where(result > 0)
-        for x in range(len(first)):
-            bonds.append((first[x], second[x]))
+                print(f"Sum of results: {result.sum()}")
+                connection_array = np.logical_or(connection_array, result)
+        print(f"Result matrix sample: {connection_array[0:6,0:6]}")
+        print(f"Max distance sample: {max_distance_array[0:6,0:6]}")
+        first, second = np.where(connection_array)
+        bonds = np.column_stack([first, second])
+        bond_mapping = {atom_number: [] for atom_number in range(len(self._elements))}
+        for pair in bonds:
+            bond_mapping[pair[0]].append(pair[1])
         return bonds
 
     def add_point(self, index: int, point: np.ndarray, radius: float) -> bool:
