@@ -29,5 +29,5 @@ def test_create_connectivity(trajectory):
 
 def test_find_bonds(trajectory):
     conn = Connectivity(trajectory=trajectory)
-    bonds = conn.find_bonds()
-    assert len(bonds) == 40
+    conn.find_bonds()
+    assert len(conn._unique_bonds) == 40

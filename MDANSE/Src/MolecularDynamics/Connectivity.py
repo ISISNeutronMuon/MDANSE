@@ -75,7 +75,7 @@ class Connectivity:
         rhs = coordinates.reshape((1, len(coordinates), 3))
         for shift in product([-1, 0, 1], repeat=3):
             if np.allclose(shift, [0, 0, 0]):
-                pass
+                continue
             offset = shift[0] * vector_a + shift[1] * vector_b + shift[2] * vector_c
             print(offset)
             difference = lhs - rhs + offset
@@ -112,7 +112,7 @@ class Connectivity:
                     # internal distances: bond with self possible, and wrong
                     result = np.logical_and(
                         result,
-                        dist > 1e-5,
+                        dist > 1e-3,
                     )
                 print(f"Sum of results: {result.sum()}")
                 connection_array = np.logical_or(connection_array, result)
@@ -123,7 +123,9 @@ class Connectivity:
         bond_mapping = {atom_number: [] for atom_number in range(len(self._elements))}
         for pair in bonds:
             bond_mapping[pair[0]].append(pair[1])
-        return bonds
+        self._bonds = bonds
+        self._bond_mapping = bond_mapping
+        self._unique_bonds = np.unique(np.sort(bonds, axis=1), axis=0)
 
     def add_point(self, index: int, point: np.ndarray, radius: float) -> bool:
         return True
