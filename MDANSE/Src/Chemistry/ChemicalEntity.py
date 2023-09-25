@@ -357,7 +357,7 @@ class Atom(_ChemicalEntity):
         return self._bonds
 
     @bonds.setter
-    def ghost(self, bonds):
+    def bonds(self, bonds):
         self._bonds = bonds
 
     @property

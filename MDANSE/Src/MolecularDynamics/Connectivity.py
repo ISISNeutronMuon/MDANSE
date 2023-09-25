@@ -38,6 +38,7 @@ class Connectivity:
         self._bonds = None
         self._bond_mapping = None
         self._unique_bonds = None
+        self._translation_vectors = {}
 
     def check_composition(self, chemical: ChemicalSystem):
         """Takes the information about the system from an instance
@@ -118,14 +119,15 @@ class Connectivity:
             return None
         lhs = coordinates.reshape((len(coordinates), 1, 3))
         rhs = coordinates.reshape((1, len(coordinates), 3))
-        for shift in product([-1, 0, 1], repeat=3):
+        for num, shift in enumerate(product([-1, 0, 1], repeat=3)):
             if np.allclose(shift, [0, 0, 0]):
                 continue
+            self._translation_vectors[num] = shift
             offset = shift[0] * vector_a + shift[1] * vector_b + shift[2] * vector_c
             print(offset)
             difference = lhs - rhs + offset
             distance = np.sum(difference**2, axis=2)
-            yield distance
+            yield num, distance
 
     def find_bonds(self, frames: List[int] = None, tolerance: float = 0.2):
         """Checks several frames of the trajectory for the presence of atom pairs
@@ -166,11 +168,12 @@ class Connectivity:
                 )
             ] = maxlength
         for nstep, frame_number in enumerate(samples):
-            distances = [self.internal_distances(frame_number=frame_number)]
+            distances = [(None, self.internal_distances(frame_number=frame_number))]
             if self._periodic:
-                for dist in self.periodic_distances(frame_number=frame_number):
-                    distances.append(dist)
-            for ndist, dist in enumerate(distances):
+                for num, dist in self.periodic_distances(frame_number=frame_number):
+                    distances.append((num, dist))
+            for ndist, disttuple in enumerate(distances):
+                vecnum, dist = disttuple
                 result = dist < max_distance_array
                 if ndist == 0:
                     # internal distances: bond with self possible, and wrong
@@ -198,7 +201,7 @@ class Connectivity:
         if self._bond_mapping is None:
             self.find_bonds()
 
-        def recursive_walk(number: int, bond_mapping: Dict[int], atom_pool: List[int]):
+        def recursive_walk(number: int, bond_mapping: Dict[int, int], atom_pool: List[int]):
             """Returns a list of atoms connected by bonds to the input atom.
             Called recursively in order to find the entire molecule.
 
@@ -231,6 +234,16 @@ class Connectivity:
             )
             molecules.append(new_molecule)
         self._molecules = molecules
+
+    def add_bond_information(self):
+        for bond in self._unique_bonds:
+            ind1, ind2 = bond
+            at1, at2 = (
+                self._chemical_system.atoms[bond[0]],
+                self._chemical_system.atoms[bond[1]],
+            )
+            at1.bonds.append(at2)
+            at2.bonds.append(at1)
 
     def add_point(self, index: int, point: np.ndarray, radius: float) -> bool:
         return True
