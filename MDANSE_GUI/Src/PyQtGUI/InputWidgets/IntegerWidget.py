@@ -64,3 +64,6 @@ class IntegerWidget(WidgetBase):
     @Slot()
     def updateValue(self):
         self._configurator.configure(self._value)
+
+    def get_value(self):
+        return self._configurator["value"]

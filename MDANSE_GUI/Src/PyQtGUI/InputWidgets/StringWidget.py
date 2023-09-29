@@ -33,3 +33,6 @@ class StringWidget(WidgetBase):
     @Slot()
     def updateValue(self):
         self._configurator.configure(self._field.text())
+
+    def get_value(self):
+        return self._configurator["value"]

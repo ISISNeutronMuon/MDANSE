@@ -30,6 +30,7 @@ class WidgetBase(QObject):
     def __init__(self, *args, **kwargs):
         parent = kwargs.get("parent", None)
         super().__init__(*args, parent=parent)
+        self._value = None
         label_text = kwargs.get("label", "")
         tooltip_text = kwargs.get("tooltip", "")
         base_type = kwargs.get("base_type", "QGroupBox")
@@ -62,3 +63,8 @@ class WidgetBase(QObject):
         """Set the widgets to the values of the underlying configurator object.
         Should also check for dependencies of the configurator.
         """
+
+    @abstractmethod
+    def get_value(self):
+        """Collects the input(s) from the widget and returns the value."""
+        return self._value

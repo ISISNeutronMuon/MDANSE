@@ -58,7 +58,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.PyQtGUI.InputWidgets
     "string": StringWidget,
     "integer": IntegerWidget,
     "frames": FramesWidget,
-    "trajectory": HDFTrajectoryWidget,
+    "hdf_trajectory": HDFTrajectoryWidget,
 }
 
 
@@ -121,16 +121,18 @@ class ActionDialog(QDialog):
             ddict["source_object"] = self.source
             labeltext = ddict.get("label", "Mystery X the Unknown")
             if not dtype in widget_lookup.keys():
-                placeholder = QLabel(labeltext)
-                placeholder.setToolTip(
-                    "This is not implemented in the MDANSE GUI at the moment, and it MUST BE!"
-                )
-                layout.addWidget(placeholder)
+                ddict[
+                    "tooltip"
+                ] = "This is not implemented in the MDANSE GUI at the moment, and it MUST BE!"
+                placeholder = DummyWidget(parent=self, **ddict)
+                layout.addWidget(placeholder._base)
+                self._widgets.append(placeholder)
             else:
                 widget_class = widget_lookup[dtype]
                 # expected = {key: ddict[key] for key in widget_class.__init__.__code__.co_varnames}
                 input_widget = widget_class(parent=self, **ddict)
                 layout.addWidget(input_widget._base)
+                self._widgets.append(input_widget)
             # self.handlers[key] = data_handler
             configured = False
             iterations = 0
@@ -195,22 +197,17 @@ class ActionDialog(QDialog):
         self.converter_instance.save(result, pardict)
 
     def set_parameters(self):
-        if self.converter_instance is None:
-            ic("No converter instance attached to the Dialog")
-            return False
-        pardict = {}
-        ic(f"handlers: {self.handlers}")
-        for key, value in self.handlers.items():
-            pardict[key] = value.returnValue()
-        ic(f"Passing {pardict} to the converter instance {self.converter_instance}")
-        self.converter_instance.setup(pardict)
-        return pardict
+        results = {}
+        for widnum, key in enumerate(self.converter_instance.settings.keys()):
+            results[key] = self._widgets[widnum].get_value()
+        return results
 
     @Slot()
     def execute_converter(self):
         pardict = self.set_parameters()
+        print(pardict)
         # when we are ready, we can consider running it
-        self.converter_instance.run(pardict)
+        # self.converter_instance.run(pardict)
         # this would send the actual instance, which _may_ be wrong
         # self.new_thread_objects.emit([self.converter_instance, pardict])
         # self.new_thread_objects.emit([self.converter_constructor, pardict])

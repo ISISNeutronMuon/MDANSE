@@ -2561,6 +2561,9 @@ class ChemicalSystem(_ChemicalEntity):
                     literal_eval(arg.decode("utf8"))
                     for arg in h5_contents[entity_type][entity_index]
                 ]
+            # except AttributeError:
+            #     print(f"Wrong argument in entity_type: {entity_type} at index {entity_index} ")
+            #     print(f"The entry was: {h5_contents[entity_type][entity_index]}")
             except KeyError:
                 raise CorruptedFileError(
                     f"Could not find chemical entity {entity_type}, listed in chemical system "

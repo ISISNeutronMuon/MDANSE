@@ -59,3 +59,7 @@ class FramesWidget(WidgetBase):
     def updateValue(self):
         current_value = self.get_widget_value()
         self._configurator.configure(current_value)
+
+    def get_value(self):
+        self.updateValue()
+        return self._configurator["value"]

@@ -31,7 +31,11 @@ class HDFTrajectoryWidget(WidgetBase):
             filename = None
         if filename is not None:
             trajectory = HDFTrajectoryInputData(filename)
-            self._layout.addWidget(QLabel(filename), self._base)
+            self._layout.addWidget(QLabel(filename, self._base))
+            self._configurator.configure(filename)
         else:
-            self._layout.addWidget(QLabel("No Trajectory available"), self._base)
+            self._layout.addWidget(QLabel("No Trajectory available", self._base))
         self._trajectory = trajectory
+
+    def get_value(self):
+        return self._configurator["value"]

@@ -212,7 +212,7 @@ class IConfigurator(dict):
     def set_configurable(self, configurable):
         self._configurable = configurable
 
-    def check_dependencies(self, configured):
+    def check_dependencies(self, configured=None):
         """
         Check that the configurators on which this configurator depends on have already been configured.
 
@@ -222,6 +222,14 @@ class IConfigurator(dict):
         :return: True if the configurators on which this configurator depends on have already been configured. False otherwise.
         :rtype: bool
         """
+
+        if configured == None:
+            names = [str(key) for key in self._configurable._configuration.keys()]
+            configured = [
+                name
+                for name in names
+                if self._configurable._configuration[name].is_configured()
+            ]
 
         for c in list(self._dependencies.values()):
             if c not in configured:
