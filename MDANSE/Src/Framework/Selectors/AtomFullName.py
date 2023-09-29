@@ -14,19 +14,18 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
 class AtomFullName(ISelector):
     section = "atoms"
 
-    def __init__(self, chemicalSystem):
+    def __init__(self, chemicalSystem: ChemicalSystem):
         ISelector.__init__(self, chemicalSystem)
 
         self._choices.extend(
-            sorted(
-                set([at.full_name().strip() for at in self._chemicalSystem.atom_list()])
-            )
+            sorted(set([at.full_name.strip() for at in self._chemicalSystem.atom_list]))
         )
 
     def select(self, names):
@@ -39,15 +38,15 @@ class AtomFullName(ISelector):
         sel = set()
 
         if "*" in names:
-            sel.update([at for at in self._chemicalSystem.atom_list()])
+            sel.update([at for at in self._chemicalSystem.atom_list])
 
         else:
             vals = set([v for v in names])
             sel.update(
                 [
                     at
-                    for at in self._chemicalSystem.atom_list()
-                    if at.full_name().strip() in vals
+                    for at in self._chemicalSystem.atom_list
+                    if at.full_name.strip() in vals
                 ]
             )
 

@@ -30,7 +30,7 @@ class CarbonAlpha(ISelector):
 
         for ce in self._chemicalSystem.chemical_entities:
             try:
-                sel.update([at for at in ce.atom_list() if at.name.strip() == "CA"])
+                sel.update([at for at in ce.atom_list if at.name.strip() == "CA"])
             except AttributeError:
                 pass
 

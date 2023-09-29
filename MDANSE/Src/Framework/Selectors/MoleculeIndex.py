@@ -14,13 +14,14 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
 class MoleculeIndex(ISelector):
     section = "molecules"
 
-    def __init__(self, chemicalSystem):
+    def __init__(self, chemicalSystem: ChemicalSystem):
         ISelector.__init__(self, chemicalSystem)
 
         self._choices.extend(range(len(self._chemicalSystem.chemical_entities)))
@@ -35,14 +36,14 @@ class MoleculeIndex(ISelector):
         sel = set()
 
         if "*" in values:
-            sel.update([at for at in self._chemicalSystem.atom_list()])
+            sel.update([at for at in self._chemicalSystem.atom_list])
 
         else:
             vals = set([int(v) for v in values])
 
             ceList = self._chemicalSystem.chemical_entities
 
-            sel.update([at for v in vals for at in ceList[v].atom_list()])
+            sel.update([at for v in vals for at in ceList[v].atom_list])
 
         return sel
 
