@@ -13,82 +13,46 @@
 #
 # **************************************************************************
 
-import wx
-import wx.lib.intctrl as wxintctrl
+from qtpy.QtWidgets import QLineEdit, QSpinBox, QLabel
+from qtpy.QtCore import Slot, Signal
+from qtpy.QtGui import QIntValidator
 
-from MDANSE import REGISTRY
-from MDANSE.Framework.InputData.EmptyData import EmptyData
-
-from MDANSE.GUI.DataController import DATA_CONTROLLER
-from MDANSE.GUI.Widgets.IWidget import IWidget
+from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
 
 
-class FramesWidget(IWidget):
-    def add_widgets(self):
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        gbSizer = wx.GridBagSizer(5, 5)
-
-        firstLabel = wx.StaticText(self._widgetPanel, wx.ID_ANY, label="First frame")
-        self._first = wxintctrl.IntCtrl(
-            self._widgetPanel, wx.ID_ANY, limited=True, allow_none=False
-        )
-
-        labelLabel = wx.StaticText(self._widgetPanel, wx.ID_ANY, label="Last frame")
-        self._last = wxintctrl.IntCtrl(
-            self._widgetPanel, wx.ID_ANY, limited=True, allow_none=False
-        )
-
-        stepLabel = wx.StaticText(self._widgetPanel, wx.ID_ANY, label="Frame step")
-        self._step = wxintctrl.IntCtrl(
-            self._widgetPanel, wx.ID_ANY, limited=True, allow_none=False
-        )
-
-        gbSizer.Add(firstLabel, (0, 0), flag=wx.ALIGN_CENTER_VERTICAL)
-        gbSizer.Add(labelLabel, (0, 3), flag=wx.ALIGN_CENTER_VERTICAL)
-        gbSizer.Add(stepLabel, (0, 6), flag=wx.ALIGN_CENTER_VERTICAL)
-
-        gbSizer.Add(self._first, (0, 1), flag=wx.EXPAND)
-        gbSizer.Add(self._last, (0, 4), flag=wx.EXPAND)
-        gbSizer.Add(self._step, (0, 7), flag=wx.EXPAND)
-
-        gbSizer.AddGrowableCol(1)
-        gbSizer.AddGrowableCol(4)
-        gbSizer.AddGrowableCol(7)
-
-        sizer.Add(gbSizer, 1, wx.ALL | wx.EXPAND, 5)
-
-        return sizer
+class FramesWidget(WidgetBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, layout_type='QGridLayout', **kwargs)
+        source_object = kwargs.get("source_object", None)
+        labels = [QLabel("First frame", self._base),
+                  QLabel("Last frame", self._base),
+                  QLabel("in steps of", self._base),
+                  ]
+        fields = [QLineEdit("0", self._base),
+                  QLineEdit("-1", self._base),
+                  QLineEdit("1", self._base),
+                  ]
+        validators = [QIntValidator(parent_field) for parent_field in fields]
+        print(f"dict: {kwargs}")
+        self._configurator = kwargs.get("configurator", None)
+        print(f"Configurator: {self._configurator}")
+        minval, maxval = self._configurator._mini, self._configurator._maxi
+        print(f"Configurator min/max: {minval}, {maxval}")
+        for val in validators:
+            val.setBottom(-abs(maxval))
+            val.setTop(abs(maxval))
+        for field_num in range(3):
+            self._layout.addWidget(labels[field_num], 0, 2*field_num)
+            self._layout.addWidget(fields[field_num], 0, 2*field_num+1)
+            fields[field_num].setValidator(validators[field_num])
+            fields[field_num].textChanged.connect(self.updateValue)
+        self._fields = fields
 
     def get_widget_value(self):
-        val = (self._first.GetValue(), self._last.GetValue(), self._step.GetValue())
-
+        val = [int(field.text()) for field in self._fields]
         return val
 
-    def set_data(self, datakey):
-        self._trajectory = DATA_CONTROLLER[datakey]
-
-        nFrames = len(self._trajectory.data) - 1
-
-        self._first.SetMin(0)
-        self._first.SetMax(nFrames - 1)
-        self._first.SetValue(0)
-
-        self._last.SetMin(1)
-        self._last.SetMax(nFrames)
-        self._last.SetValue(nFrames)
-
-        self._step.SetMin(1)
-        self._step.SetMax(nFrames)
-        self._step.SetValue(1)
-
-    @property
-    def time(self):
-        f, l, s = self.get_value()
-
-        time = self._trajectory.data.time[f:l:s]
-
-        return time
-
-
-REGISTRY["frames"] = FramesWidget
+    @Slot()
+    def updateValue(self):
+        current_value = self.get_widget_value()
+        self._configurator.configure(current_value)

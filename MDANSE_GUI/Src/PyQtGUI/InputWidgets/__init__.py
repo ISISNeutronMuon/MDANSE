@@ -28,7 +28,8 @@ for fname in fnames:
 globdict = globals()
 
 # temporary change
-modnames = ["IntegerWidget", "BooleanWidget", "FloatWidget", "StringWidget"]
+modnames = ["IntegerWidget", "BooleanWidget", "FloatWidget", "StringWidget",
+            "FramesWidget", "HDFTrajectoryWidget"]
 
 for name in modnames:
     if name in ["__init__"]:

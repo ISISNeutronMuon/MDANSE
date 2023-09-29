@@ -22,6 +22,7 @@ from qtpy.QtWidgets import QTreeView
 
 from MDANSE import LOGGER, PLATFORM, REGISTRY
 from MDANSE_GUI.PyQtGUI.RegistryViewer import RegistryTree
+from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeItem
 
 
 class ActionsHolder(QStandardItemModel):
@@ -63,12 +64,13 @@ class ActionsSuperModel(QObject):
 
         self.viewer = viewer
         self.models = {}
+        self.currentItem = None
 
     def setViewer(self, viewer):
         self.viewer = viewer
 
-    @Slot(str)
-    def switchModel(self, ancestor: str):
+    @Slot(DataTreeItem)
+    def switchModel(self, item: DataTreeItem):
         """Changes the model behind the viewer to match
         the item selected in the DataView.
 
@@ -76,12 +78,14 @@ class ActionsSuperModel(QObject):
             ancestor -- name of the MDANSE object type
                         selected in the DataView.
         """
-        ic("received ancestor:", ancestor)
+        ic("received item:", item)
+        ancestor = item.ancestors()[-1]
         try:
             current_model = self.models[ancestor]
         except KeyError:
             current_model = ActionsHolder()
         self.viewer.setModel(current_model)
+        self.currentItem = item
 
     def buildModels(self, registry: RegistryTree):
         """Creates several subtrees out of the registry tree.

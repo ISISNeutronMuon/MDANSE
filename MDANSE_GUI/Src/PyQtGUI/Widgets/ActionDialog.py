@@ -57,6 +57,8 @@ widget_lookup = {  # these all come from MDANSE_GUI.PyQtGUI.InputWidgets
     "boolean": BooleanWidget,
     "string": StringWidget,
     "integer": IntegerWidget,
+    "frames": FramesWidget,
+    "trajectory": HDFTrajectoryWidget,
 }
 
 
@@ -67,6 +69,7 @@ class ActionDialog(QDialog):
     last_paths = {}
 
     def __init__(self, *args, converter: IJob = "Dummy", **kwargs):
+        self.source = kwargs.pop('source_object', None)
         super().__init__(*args, **kwargs)
 
         layout = QVBoxLayout(self)
@@ -107,11 +110,19 @@ class ActionDialog(QDialog):
             converter_instance.build_configuration()
             settings = converter_instance.settings
             self.converter_instance = converter_instance
+            print(f"Converter settings {settings}")
+            print(f"Converter configuration {converter_instance.configuration}")
+        for key, value in settings.items():
+            dtype = value[0]
+            ddict = value[1]
+            configurator = converter_instance.configuration[key]
+            ic(configurator._configurable, configurator._dependencies)
         for key, value in settings.items():
             dtype = value[0]
             ddict = value[1]
             configurator = converter_instance.configuration[key]
             ddict["configurator"] = configurator
+            ddict["source_object"] = self.source
             labeltext = ddict.get("label", "Mystery X the Unknown")
             if not dtype in widget_lookup.keys():
                 placeholder = QLabel(labeltext)

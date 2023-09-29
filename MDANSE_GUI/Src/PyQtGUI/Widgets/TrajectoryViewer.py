@@ -43,7 +43,8 @@ class TrajectoryViewer(QTreeView):
         ic("Emitting items ancestor. Item:", item)
         anc = item.ancestors()
         ic("ancestor:", anc[-1])
-        self.pickedAncestor.emit(anc[-1])
+        # self.pickedAncestor.emit(anc[-1])
+        self.itemPicked.emit(item)
 
     # def contextMenuEvent(self, event: QContextMenuEvent) -> None:
     #     index = self.indexAt(event.pos())

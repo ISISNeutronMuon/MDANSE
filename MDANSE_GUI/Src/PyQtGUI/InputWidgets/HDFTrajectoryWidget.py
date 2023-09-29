@@ -13,41 +13,25 @@
 #
 # **************************************************************************
 
-import wx
+from qtpy.QtWidgets import QLineEdit, QSpinBox, QLabel
+from qtpy.QtCore import Slot, Signal
+from qtpy.QtGui import QIntValidator
 
-from MDANSE import REGISTRY
-from MDANSE.Framework.Configurable import ConfigurationError
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
-
-from MDANSE.GUI.DataController import DATA_CONTROLLER
-from MDANSE.GUI.Widgets.IWidget import IWidget
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
 
 
-class HDFTrajectoryWidget(IWidget):
-    def add_widgets(self):
-        sizer = wx.BoxSizer(wx.VERTICAL)
-
-        self._trajectory = wx.StaticText(self._widgetPanel, wx.ID_ANY)
-
-        sizer.Add(self._trajectory, 1, wx.ALL | wx.EXPAND, 5)
-
-        return sizer
-
-    def set_data(self, datakey):
-        data = DATA_CONTROLLER[datakey].data
-
-        if not isinstance(data, Trajectory):
-            return
-
-        self._trajectory.SetLabel(datakey)
-
-    def get_widget_value(self):
-        filename = self._trajectory.GetLabelText()
-
-        if not filename:
-            raise ConfigurationError("No trajectory file selected", self)
-
-        return filename
-
-
-REGISTRY["hdf_trajectory"] = HDFTrajectoryWidget
+class HDFTrajectoryWidget(WidgetBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        source_object = kwargs.get("source_object", None)
+        try:
+            filename = source_object.filename
+        except AttributeError:
+            filename = None
+        if filename is not None:
+            trajectory = HDFTrajectoryInputData(filename)
+            self._layout.addWidget(QLabel(filename), self._base)
+        else:
+            self._layout.addWidget(QLabel("No Trajectory available"), self._base)
+        self._trajectory = trajectory
