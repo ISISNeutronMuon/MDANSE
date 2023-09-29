@@ -128,7 +128,7 @@ class AtomSelectionConfigurator(IConfigurator):
         trajConfig = self._configurable[self._dependencies["trajectory"]]
 
         atoms = sorted(
-            trajConfig["instance"].chemical_system.atom_list(),
+            trajConfig["instance"].chemical_system.atom_list,
             key=operator.attrgetter("index"),
         )
         selectedAtoms = [atoms[idx] for idx in self["flatten_indexes"]]

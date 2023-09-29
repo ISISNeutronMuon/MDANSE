@@ -102,7 +102,7 @@ class DynamicIncoherentStructureFactor(IJob):
         self._instrResolution = self.configuration["instrument_resolution"]
 
         self._atoms = sorted_atoms(
-            self.configuration["trajectory"]["instance"].chemical_system.atom_list()
+            self.configuration["trajectory"]["instance"].chemical_system.atom_list
         )
 
         self._nOmegas = self._instrResolution["n_omegas"]

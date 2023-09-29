@@ -14,26 +14,25 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
 class Phosphate(ISelector):
     section = "chemical groups"
 
-    def __init__(self, chemicalSystem):
+    def __init__(self, chemicalSystem: ChemicalSystem):
         ISelector.__init__(self, chemicalSystem)
 
         for ce in self._chemicalSystem.chemical_entities:
             phosphorus = [
-                at
-                for at in ce.atom_list()
-                if at.element.strip().lower() == "phosphorus"
+                at for at in ce.atom_list if at.element.strip().lower() == "phosphorus"
             ]
 
             for phos in phosphorus:
                 neighbours = phos.bonds
                 oxygens = [
-                    neigh.full_name().strip()
+                    neigh.full_name.strip()
                     for neigh in neighbours
                     if neigh.element.strip().lower() == "oxygen"
                 ]
@@ -54,8 +53,8 @@ class Phosphate(ISelector):
         sel.update(
             [
                 at
-                for at in self._chemicalSystem.atom_list()
-                if at.full_name().strip() in vals
+                for at in self._chemicalSystem.atom_list
+                if at.full_name.strip() in vals
             ]
         )
 

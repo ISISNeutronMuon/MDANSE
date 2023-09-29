@@ -14,14 +14,14 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
-from MDANSE.Chemistry.ChemicalEntity import NucleotideChain
+from MDANSE.Chemistry.ChemicalEntity import NucleotideChain, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
 class NucleotideBase(ISelector):
     section = "nucleic acids"
 
-    def __init__(self, chemicalSystem):
+    def __init__(self, chemicalSystem: ChemicalSystem):
         ISelector.__init__(self, chemicalSystem)
 
         for ce in self._chemicalSystem.chemical_entities:

@@ -66,7 +66,7 @@ class Temperature(IJob):
 
         self.numberOfSteps = self.configuration["trajectory"][
             "instance"
-        ].chemical_system.number_of_atoms()
+        ].chemical_system.number_of_atoms
 
         self._nFrames = self.configuration["frames"]["number"]
 
@@ -81,7 +81,7 @@ class Temperature(IJob):
         )
 
         self._atoms = sorted_atoms(
-            self.configuration["trajectory"]["instance"].chemical_system.atom_list()
+            self.configuration["trajectory"]["instance"].chemical_system.atom_list
         )
 
     def run_step(self, index):

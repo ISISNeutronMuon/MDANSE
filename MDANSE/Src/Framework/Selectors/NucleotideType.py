@@ -14,14 +14,14 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
-from MDANSE.Chemistry.ChemicalEntity import NucleotideChain
+from MDANSE.Chemistry.ChemicalEntity import NucleotideChain, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
 class NucleotideType(ISelector):
     section = "nucleic acids"
 
-    def __init__(self, chemicalSystem):
+    def __init__(self, chemicalSystem: ChemicalSystem):
         ISelector.__init__(self, chemicalSystem)
 
         types = set()
@@ -42,7 +42,7 @@ class NucleotideType(ISelector):
         if "*" in types:
             for ce in self._chemicalSystem.chemical_entities:
                 if isinstance(ce, NucleotideChain):
-                    sel.update([at for at in ce.atom_list()])
+                    sel.update([at for at in ce.atom_list])
 
         else:
             vals = set([v for v in types])
@@ -52,7 +52,7 @@ class NucleotideType(ISelector):
                     for nucl in ce.nucleotides:
                         nuclType = nucl.code.strip()
                         if nuclType in vals:
-                            sel.update([at for at in nucl.atom_list()])
+                            sel.update([at for at in nucl.atom_list])
 
         return sel
 

@@ -57,7 +57,7 @@ class UnfoldedTrajectory(IJob):
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         atoms = sorted_atoms(
-            self.configuration["trajectory"]["instance"].chemical_system.atom_list()
+            self.configuration["trajectory"]["instance"].chemical_system.atom_list
         )
 
         # The collection of atoms corresponding to the atoms selected for output.

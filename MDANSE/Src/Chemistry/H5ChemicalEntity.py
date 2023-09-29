@@ -88,7 +88,7 @@ class H5Molecule(_H5ChemicalEntity):
         atom_names = [at.name for at in atoms]
         mol.reorder_atoms(atom_names)
 
-        for i, at in enumerate(mol.atom_list()):
+        for i, at in enumerate(mol.atom_list):
             at.ghost = atoms[i].ghost
 
         return mol

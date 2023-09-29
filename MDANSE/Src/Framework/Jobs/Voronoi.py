@@ -82,7 +82,7 @@ class Voronoi(IJob):
 
         self.nb_init_pts = self.configuration["trajectory"][
             "instance"
-        ].chemical_system.number_of_atoms()
+        ].chemical_system.number_of_atoms
 
         # Will store neighbourhood histogram for voronoi regions.
         self.neighbourhood_hist = {}

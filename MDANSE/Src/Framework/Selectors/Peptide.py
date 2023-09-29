@@ -14,14 +14,14 @@
 # **************************************************************************
 
 from MDANSE import REGISTRY
-from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
+from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
 class Peptide(ISelector):
     section = "proteins"
 
-    def __init__(self, chemicalSystem):
+    def __init__(self, chemicalSystem: ChemicalSystem):
         ISelector.__init__(self, chemicalSystem)
 
         for ce in self._chemicalSystem.chemical_entities:
