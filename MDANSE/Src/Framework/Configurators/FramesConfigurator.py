@@ -55,7 +55,7 @@ class FramesConfigurator(RangeConfigurator):
 
         if value in ["all", None]:
             value = (0, trajConfig["length"], 1)
-        elif np.allclose(value, [0,-1,1]):
+        elif np.allclose(value, [0, -1, 1]):
             value = (0, trajConfig["length"], 1)
 
         self._mini = 0

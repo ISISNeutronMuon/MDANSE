@@ -13,6 +13,8 @@
 #
 # **************************************************************************
 
+from abc import abstractmethod
+
 from qtpy.QtCore import QObject
 from qtpy.QtWidgets import (
     QWidget,
@@ -54,3 +56,9 @@ class WidgetBase(QObject):
         self._layout = layout
         self._tooltip = tooltip_text
         self._configurator = configurator
+
+    @abstractmethod
+    def value_from_configurator(self):
+        """Set the widgets to the values of the underlying configurator object.
+        Should also check for dependencies of the configurator.
+        """

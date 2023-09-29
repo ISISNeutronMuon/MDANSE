@@ -69,12 +69,13 @@ class ActionDialog(QDialog):
     last_paths = {}
 
     def __init__(self, *args, converter: IJob = "Dummy", **kwargs):
-        self.source = kwargs.pop('source_object', None)
+        self.source = kwargs.pop("source_object", None)
         super().__init__(*args, **kwargs)
 
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         self.handlers = {}
+        self._widgets = []
         self.converter_instance = None
         self.converter_constructor = converter
         self.default_path = "."
@@ -116,11 +117,6 @@ class ActionDialog(QDialog):
             dtype = value[0]
             ddict = value[1]
             configurator = converter_instance.configuration[key]
-            ic(configurator._configurable, configurator._dependencies)
-        for key, value in settings.items():
-            dtype = value[0]
-            ddict = value[1]
-            configurator = converter_instance.configuration[key]
             ddict["configurator"] = configurator
             ddict["source_object"] = self.source
             labeltext = ddict.get("label", "Mystery X the Unknown")
@@ -136,6 +132,16 @@ class ActionDialog(QDialog):
                 input_widget = widget_class(parent=self, **ddict)
                 layout.addWidget(input_widget._base)
             # self.handlers[key] = data_handler
+            configured = False
+            iterations = 0
+            while not configured:
+                configured = True
+                for widget in self._widgets:
+                    widget.value_from_configurator()
+                    configured = configured and widget._configurator.is_configured()
+                iterations += 1
+                if iterations > 5:
+                    break
 
         buttonbase = QWidget(self)
         buttonlayout = QHBoxLayout(buttonbase)

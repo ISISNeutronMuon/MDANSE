@@ -269,7 +269,9 @@ class Main(QMainWindow):
     def runAction(self, converter=None):
         ic(f"Received action: {converter}")
         dialog = ActionDialog
-        dialog_instance = dialog(self, converter=converter, source_object=self.current_object)
+        dialog_instance = dialog(
+            self, converter=converter, source_object=self.current_object
+        )
         dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
         dialog_instance.show()
         result = dialog_instance.exec()
