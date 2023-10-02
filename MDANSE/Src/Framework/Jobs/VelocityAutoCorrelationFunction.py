@@ -139,7 +139,7 @@ class VelocityAutoCorrelationFunction(IJob):
         # get atom index
         indexes = self.configuration["atom_selection"]["indexes"][index]
 
-        if self.configuration["interpolation_order"]["value"] == "no interpolation":
+        if self.configuration["interpolation_order"]["value"] == 0:
             series = trajectory.read_configuration_variable(
                 self.configuration["trajectory"]["instance"],
                 indexes[0],

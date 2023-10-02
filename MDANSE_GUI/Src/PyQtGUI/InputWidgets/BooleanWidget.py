@@ -31,9 +31,5 @@ class BooleanWidget(WidgetBase):
         self._field = field
         self._layout.addWidget(field)
 
-    @Slot()
-    def updateValue(self):
-        self._configurator.configure(self._field.checkState() == Qt.CheckState.Checked)
-
-    def get_value(self):
-        return self._configurator["value"]
+    def get_widget_value(self):
+        return self._field.checkState() == Qt.CheckState.Checked

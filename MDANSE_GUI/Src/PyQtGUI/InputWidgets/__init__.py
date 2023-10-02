@@ -36,6 +36,7 @@ modnames = [
     "FramesWidget",
     "HDFTrajectoryWidget",
     "DummyWidget",
+    "InterpolationOrderWidget"
 ]
 
 for name in modnames:

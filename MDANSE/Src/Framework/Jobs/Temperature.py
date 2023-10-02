@@ -54,7 +54,7 @@ class Temperature(IJob):
         {
             "label": "velocities",
             "dependencies": {"trajectory": "trajectory"},
-            "default": "no interpolation",
+            "default": 1,
         },
     )
     settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
@@ -103,7 +103,7 @@ class Temperature(IJob):
 
         trajectory = self.configuration["trajectory"]["instance"]
 
-        if self.configuration["interpolation_order"]["value"] == "no interpolation":
+        if self.configuration["interpolation_order"]["value"] == 0:
             series = trajectory.read_configuration_variable(
                 self.configuration["trajectory"]["instance"],
                 index,

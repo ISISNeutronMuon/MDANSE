@@ -59,6 +59,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.PyQtGUI.InputWidgets
     "integer": IntegerWidget,
     "frames": FramesWidget,
     "hdf_trajectory": HDFTrajectoryWidget,
+    "interpolation_order": InterpolationOrderWidget
 }
 
 

@@ -15,7 +15,7 @@
 
 from abc import abstractmethod
 
-from qtpy.QtCore import QObject
+from qtpy.QtCore import QObject, Slot
 from qtpy.QtWidgets import (
     QWidget,
     QHBoxLayout,
@@ -63,8 +63,18 @@ class WidgetBase(QObject):
         """Set the widgets to the values of the underlying configurator object.
         Should also check for dependencies of the configurator.
         """
+    
+    @abstractmethod
+    def get_widget_value(self):
+        """Collect the results from the input widgets and return the value."""
+
+    @abstractmethod
+    @Slot()
+    def updateValue(self):
+        current_value = self.get_widget_value()
+        self._configurator.configure(current_value)
 
     @abstractmethod
     def get_value(self):
-        """Collects the input(s) from the widget and returns the value."""
-        return self._value
+        self.updateValue()
+        return self._configurator["value"]

@@ -70,7 +70,7 @@ class CurrentCorrelationFunction(IJob):
         {
             "label": "velocities",
             "dependencies": {"trajectory": "trajectory"},
-            "default": "no interpolation",
+            "default": 1,
         },
     )
     settings["interpolation_mode"] = (

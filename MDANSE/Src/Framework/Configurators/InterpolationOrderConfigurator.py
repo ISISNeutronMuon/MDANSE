@@ -15,12 +15,10 @@
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
-from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
-    SingleChoiceConfigurator,
-)
+from MDANSE.Framework.Configurators.IntegerConfigurator import IntegerConfigurator
 
 
-class InterpolationOrderConfigurator(SingleChoiceConfigurator):
+class InterpolationOrderConfigurator(IntegerConfigurator):
     """
     This configurator allows to input the interpolation order to be applied when deriving velocities from atomic coordinates.
 
@@ -33,9 +31,9 @@ class InterpolationOrderConfigurator(SingleChoiceConfigurator):
     :note: this configurator depends on 'trajectory' configurator to be configured.
     """
 
-    _default = "no interpolation"
+    _default = 1
 
-    def __init__(self, name, orders=None, **kwargs):
+    def __init__(self, name, **kwargs):
         """
         Initializes the configurator.
 
@@ -43,17 +41,7 @@ class InterpolationOrderConfigurator(SingleChoiceConfigurator):
         :type name: str.
         """
 
-        if orders is None:
-            orders = [
-                "no interpolation",
-                "1st order",
-                "2nd order",
-                "3rd order",
-                "4th order",
-                "5th order",
-            ]
-
-        SingleChoiceConfigurator.__init__(self, name, choices=orders, **kwargs)
+        IntegerConfigurator.__init__(self, name, **kwargs)
 
     def configure(self, value):
         """
@@ -66,9 +54,9 @@ class InterpolationOrderConfigurator(SingleChoiceConfigurator):
         if not value:
             value = self._default
 
-        SingleChoiceConfigurator.configure(self, value)
+        IntegerConfigurator.configure(self, value)
 
-        if value == "no interpolation":
+        if value == 0:
             trajConfig = self._configurable[self._dependencies["trajectory"]]
 
             if not "velocities" in trajConfig["instance"].variables():

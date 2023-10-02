@@ -54,12 +54,3 @@ class FramesWidget(WidgetBase):
     def get_widget_value(self):
         val = [int(field.text()) for field in self._fields]
         return val
-
-    @Slot()
-    def updateValue(self):
-        current_value = self.get_widget_value()
-        self._configurator.configure(current_value)
-
-    def get_value(self):
-        self.updateValue()
-        return self._configurator["value"]
