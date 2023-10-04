@@ -63,7 +63,7 @@ class WidgetBase(QObject):
         """Set the widgets to the values of the underlying configurator object.
         Should also check for dependencies of the configurator.
         """
-    
+
     @abstractmethod
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""

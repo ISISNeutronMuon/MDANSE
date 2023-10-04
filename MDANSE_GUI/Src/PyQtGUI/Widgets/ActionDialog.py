@@ -59,7 +59,8 @@ widget_lookup = {  # these all come from MDANSE_GUI.PyQtGUI.InputWidgets
     "integer": IntegerWidget,
     "frames": FramesWidget,
     "hdf_trajectory": HDFTrajectoryWidget,
-    "interpolation_order": InterpolationOrderWidget
+    "interpolation_order": InterpolationOrderWidget,
+    "output_files": OutputFilesWidget,
 }
 
 
@@ -88,26 +89,7 @@ class ActionDialog(QDialog):
             self.cname = cname
             self.last_paths[cname] = "."
 
-        if converter == "Dummy":
-            settings = OrderedDict(
-                [
-                    ("dummy int", ("int", {"default": 1.0, "label": "Time step (ps)"})),
-                    (
-                        "time_step",
-                        ("float", {"default": 1.0, "label": "Time step (ps)"}),
-                    ),
-                    (
-                        "fold",
-                        (
-                            "boolean",
-                            {"default": False, "label": "Fold coordinates in to box"},
-                        ),
-                    ),
-                    # ('dcd_file', ('input_file', {'wildcard': 'DCD files (*.dcd)|*.dcd|All files|*', 'default': '../../../Data/Trajectories/CHARMM/2vb1.dcd'})),
-                    # ('output_file', ('single_output_file', {'format': 'hdf', 'root': 'pdb_file'}))
-                ]
-            )
-        else:
+        if converter is not None:
             converter_instance = converter()
             converter_instance.build_configuration()
             settings = converter_instance.settings

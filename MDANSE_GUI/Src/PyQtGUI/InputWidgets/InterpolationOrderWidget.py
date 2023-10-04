@@ -21,13 +21,14 @@ from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
 
 
 suffix_dict = {
-    '0' : 'th order - no interpolation',
-    '1' : 'st order',
-    '2' : 'nd order',
-    '3' : 'rd order',
-    '4' : 'th order',
-    '5' : 'th order',
+    "0": "th order - no interpolation",
+    "1": "st order",
+    "2": "nd order",
+    "3": "rd order",
+    "4": "th order",
+    "5": "th order",
 }
+
 
 class InterpolationOrderWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
@@ -48,7 +49,7 @@ class InterpolationOrderWidget(WidgetBase):
     @Slot(int)
     def adjust_numerator(self, order: int):
         text_order = str(order)
-        new_numerator = suffix_dict.get(text_order[-1], ' - no interpolation')
+        new_numerator = suffix_dict.get(text_order[-1], " - no interpolation")
         self.numerator.setText(new_numerator)
 
     def get_widget_value(self):

@@ -18,18 +18,92 @@ import itertools
 import os
 import os.path
 
-import wx
-import wx.lib.filebrowsebutton as wxfile
+from qtpy.QtWidgets import QComboBox, QLabel, QLineEdit, QPushButton, QFileDialog
+from qtpy.QtCore import Qt, Slot
+from qtpy.QtGui import QStandardItemModel, QStandardItem
 
-from MDANSE import REGISTRY
-
-from MDANSE.GUI.ComboWidgets.ComboCheckbox import ComboCheckbox
-from MDANSE.GUI.Widgets.IWidget import IWidget
+from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
 
 
-class OutputFilesWidget(IWidget):
+class CheckableComboBox(QComboBox):
     def __init__(self, *args, **kwargs):
-        IWidget.__init__(self, *args, **kwargs)
+        super(CheckableComboBox, self).__init__(*args, **kwargs)
+        self.view().pressed.connect(self.handleItemPressed)
+        self.setModel(QStandardItemModel(self))
+
+    def handleItemPressed(self, index):
+        item = self.model().itemFromIndex(index)
+        if item.checkState() == Qt.Checked:
+            item.setCheckState(Qt.Unchecked)
+        else:
+            item.setCheckState(Qt.Checked)
+
+    def set_default(self, default: str):
+        model = self.model()
+        for row_number in range(model.rowCount()):
+            index = model.index(row_number, 0)
+            item = model.itemFromIndex(index)
+            text = model.data(index)
+            if text == default:
+                item.setCheckState(Qt.Checked)
+            else:
+                item.setCheckState(Qt.Unchecked)
+
+    def checked_values(self):
+        result = []
+        model = self.model()
+        for row_number in range(model.rowCount()):
+            index = model.index(row_number, 0)
+            item = model.itemFromIndex(index)
+            if item.checkState() == Qt.Checked:
+                text = model.data(index)
+                print(text)
+                result.append(text)
+        return result
+
+
+class OutputFilesWidget(WidgetBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        default_value = self._configurator.default
+        try:
+            parent = kwargs.get("parent", None)
+            self.default_path = parent.default_path
+        except KeyError:
+            self.default_path = "."
+        except AttributeError:
+            self.default_path = "."
+        else:
+            self.default_path = "."
+        self.file_association = ".*"
+        self._value = default_value
+        self.field = QLineEdit(default_value[0], self._base)
+        self.type_box = CheckableComboBox(self._base)
+        self.type_box.addItems(self._configurator.formats)
+        self.type_box.set_default("hdf")
+        # self.type_box.setCurrentText(default_value[1])
+        browse_button = QPushButton("Browse", self._base)
+        browse_button.clicked.connect(self.file_dialog)
+        self._layout.addWidget(self.field)
+        self._layout.addWidget(self.type_box)
+        self._layout.addWidget(browse_button)
+
+    @Slot()
+    def file_dialog(self):
+        """A Slot defined to allow the GUI to be updated based on
+        the new path received from a FileDialog.
+        This will start a FileDialog, take the resulting path,
+        and emit a signal to update the value show by the GUI.
+        """
+        new_value = QFileDialog.getSaveFileName(
+            self._base,  # the parent of the dialog
+            "Load a file",  # the label of the window
+            self.default_path,  # the initial search path
+            self.file_association,  # text string specifying the file name filter.
+        )
+        if new_value is not None:
+            self.field.setText(new_value[0])
+        self.updateValue()
 
     @staticmethod
     def _get_unique_filename(directory, basename):
@@ -52,40 +126,10 @@ class OutputFilesWidget(IWidget):
                 continue
             return path
 
-    def add_widgets(self):
-        sizer = wx.BoxSizer(wx.VERTICAL)
-
-        self._filename = wxfile.FileBrowseButton(
-            self._widgetPanel,
-            wx.ID_ANY,
-            fileMode=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
-            labelText="Basename",
-        )
-
-        self._formats = wx.ComboCtrl(
-            self._widgetPanel, value="output formats", style=wx.CB_READONLY
-        )
-
-        tcp = ComboCheckbox(self._configurator.formats)
-
-        self._formats.SetPopupControl(tcp)
-
-        hSizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        hSizer.Add(self._filename, 4, wx.EXPAND | wx.ALL, 5)
-        hSizer.Add(self._formats, 1, wx.EXPAND | wx.ALL, 5)
-
-        sizer.Add(hSizer, 0, wx.ALL | wx.EXPAND, 0)
-
-        if len(self._configurator.formats) == 1:
-            self._formats.Hide()
-
-        return sizer
-
     def get_widget_value(self):
-        filename = self._filename.GetValue()
+        filename = self.field.text()
 
-        formats = self._formats.GetPopupControl().GetControl().GetCheckedStrings()
+        formats = self.type_box.checked_values()
 
         return (filename, formats)
 
@@ -99,6 +143,3 @@ class OutputFilesWidget(IWidget):
         path = OutputFilesWidget._get_unique_filename(trajectoryDir, basename)
 
         self._filename.SetValue(path)
-
-
-REGISTRY["output_files"] = OutputFilesWidget
