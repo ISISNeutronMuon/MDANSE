@@ -182,7 +182,7 @@ class ActionDialog(QDialog):
     def set_parameters(self):
         results = {}
         for widnum, key in enumerate(self.converter_instance.settings.keys()):
-            results[key] = self._widgets[widnum].get_value()
+            results[key] = self._widgets[widnum].get_widget_value()
         return results
 
     @Slot()
@@ -193,4 +193,4 @@ class ActionDialog(QDialog):
         # self.converter_instance.run(pardict)
         # this would send the actual instance, which _may_ be wrong
         # self.new_thread_objects.emit([self.converter_instance, pardict])
-        # self.new_thread_objects.emit([self.converter_constructor, pardict])
+        self.new_thread_objects.emit([self.converter_constructor, pardict])

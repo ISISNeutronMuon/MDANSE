@@ -39,3 +39,6 @@ class HDFTrajectoryWidget(WidgetBase):
 
     def get_value(self):
         return self._configurator["value"]
+
+    def get_widget_value(self):
+        return self.get_value()
