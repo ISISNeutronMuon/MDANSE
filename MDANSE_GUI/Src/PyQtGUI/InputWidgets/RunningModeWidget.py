@@ -15,81 +15,59 @@
 
 import multiprocessing
 
-import wx
+from qtpy.QtWidgets import QComboBox, QSpinBox
+from qtpy.QtCore import Qt, Slot
 
-from MDANSE import REGISTRY
-
-from MDANSE.GUI.Widgets.IWidget import IWidget
+from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
 
 
-class RunningModeWidget(IWidget):
-    def initialize(self):
+class RunningModeWidget(WidgetBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._totalNumberOfProcessors = multiprocessing.cpu_count()
+        self._last_numproc = None
+        default_value = self._configurator.default
+        self._value = default_value
+        self.mode_box = QComboBox(self._base)
+        self.mode_box.addItems(self._configurator.availablesModes)
+        self.mode_box.setCurrentText(self._configurator.availablesModes[0])
+        self.field = QSpinBox(self._base)
+        self.field.setValue(1)
+        self.field.setMinimum(1)
+        self._layout.addWidget(self.mode_box)
+        self._layout.addWidget(self.field)
+        self.mode_box.currentIndexChanged.connect(self.mode_changed)
+        self.field.valueChanged.connect(self.numproc_changed)
+        self.default_labels()
+        self.update_labels()
 
-    def add_widgets(self):
-        sizer = wx.BoxSizer(wx.VERTICAL)
+    @Slot()
+    def mode_changed(self):
+        mode = self.mode_box.currentText()
+        if self._last_numproc is None:
+            nextval = self._totalNumberOfProcessors
+        else:
+            nextval = self._last_numproc
+        if mode == "monoprocessor":
+            self.field.setValue(1)
+            self.field.setEnabled(False)
+        else:
+            self.field.setEnabled(True)
+            self.field.setValue(nextval)
 
-        panel = wx.Panel(self._widgetPanel, wx.ID_ANY, style=wx.BORDER_SUNKEN)
-
-        gbSizer = wx.GridBagSizer(5, 5)
-
-        self._radiobuttons = []
-        self._radiobuttons.append(
-            wx.RadioButton(
-                panel,
-                wx.ID_ANY,
-                label="monoprocessor",
-                style=wx.RB_GROUP,
-                name="monoprocessor",
-            )
-        )
-        self._radiobuttons.append(
-            wx.RadioButton(
-                panel, wx.ID_ANY, label="multiprocessor", name="multiprocessor"
-            )
-        )
-        self._radiobuttons[0].SetValue(True)
-
-        self._processors = wx.SpinCtrl(
-            panel,
-            wx.ID_ANY,
-            initial=1,
-            min=1,
-            max=multiprocessing.cpu_count(),
-            style=wx.SP_WRAP | wx.SP_ARROW_KEYS,
-        )
-        self._processors.Enable(False)
-
-        gbSizer.Add(self._radiobuttons[0], (0, 0), flag=wx.ALIGN_CENTER_VERTICAL)
-        gbSizer.Add(self._radiobuttons[1], (1, 0), flag=wx.ALIGN_CENTER_VERTICAL)
-        gbSizer.Add(self._processors, (1, 1))
-
-        panel.SetSizer(gbSizer)
-
-        sizer.Add(panel, 1, wx.ALL | wx.EXPAND, 5)
-
-        for rb in self._radiobuttons:
-            rb.Bind(wx.EVT_RADIOBUTTON, self.on_select_running_mode)
-
-        return sizer
+    @Slot()
+    def numproc_changed(self):
+        mode = self.mode_box.currentText()
+        numproc = self.field.value()
+        if mode == "monoprocessor":
+            return
+        self._last_numproc = numproc
 
     def get_widget_value(self):
-        name = [rb for rb in self._radiobuttons if rb.GetValue()][0].GetName()
-
-        if name == "monoprocessor":
-            value = ("monoprocessor",)
-
-        elif name == "multiprocessor":
-            value = ("multiprocessor", self._processors.GetValue())
-
+        mode = self.mode_box.currentText()
+        numproc = self.field.value()
+        if mode == "monoprocessor":
+            value = (mode,)
+        else:
+            value = (mode, numproc)
         return value
-
-    def on_select_running_mode(self, event):
-        btn = event.GetEventObject()
-
-        name = btn.GetName()
-
-        self._processors.Enable(name == "multiprocessor")
-
-
-REGISTRY["running_mode"] = RunningModeWidget
