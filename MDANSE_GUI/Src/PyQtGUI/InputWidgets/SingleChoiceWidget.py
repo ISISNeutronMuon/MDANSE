@@ -36,10 +36,19 @@ class ComboWidget(WidgetBase):
         self._field = field
         self._layout.addWidget(field)
         self._configurator = configurator
+        self.default_labels()
+        self.update_labels()
+
+    def default_labels(self):
+        """Each Widget should have a default tooltip and label,
+        which will be set in this method, unless specific
+        values are provided in the settings of the job that
+        is being configured."""
+        if self._label_text == "":
+            self._label_text = "SingleChoiceWidget"
+        if self._tooltip == "":
+            self._tooltip = "You only have one option. Choose wisely."
 
     @Slot()
     def updateValue(self):
         self._configurator.configure(self._field.currentText())
-
-
-REGISTRY["single_choice"] = SingleChoiceWidget

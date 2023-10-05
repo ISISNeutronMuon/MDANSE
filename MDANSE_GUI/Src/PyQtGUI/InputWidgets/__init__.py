@@ -38,6 +38,7 @@ modnames = [
     "DummyWidget",
     "InterpolationOrderWidget",
     "OutputFilesWidget",
+    "BackupWidget",
 ]
 
 for name in modnames:

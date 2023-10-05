@@ -42,6 +42,20 @@ class FramesWidget(WidgetBase):
             fields[field_num].textChanged.connect(self.updateValue)
         self._fields = fields
         self._validators = validators
+        self.default_labels()
+        self.update_labels()
+
+    def default_labels(self):
+        """Each Widget should have a default tooltip and label,
+        which will be set in this method, unless specific
+        values are provided in the settings of the job that
+        is being configured."""
+        if self._label_text == "":
+            self._label_text = "FramesWidget"
+        if self._tooltip == "":
+            self._tooltip = (
+                "Trajectory frames to be used, given as (First, Last, StepSize)"
+            )
 
     def value_from_configurator(self):
         if self._configurator.check_dependencies():

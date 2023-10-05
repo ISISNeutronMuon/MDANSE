@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from qtpy.QtWidgets import QLineEdit, QSpinBox, QLabel
+from qtpy.QtWidgets import QLineEdit, QLabel
 from qtpy.QtCore import Slot, Signal
 from qtpy.QtGui import QIntValidator
 
@@ -21,24 +21,22 @@ from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInput
 from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
 
 
-class DummyWidget(WidgetBase):
+class BackupWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         source_object = kwargs.get("source_object", None)
-        self._layout.addWidget(QLabel("content is missing here", self._base))
-        self._configurator = {"value": "Oops!"}
-        self.default_labels()
-        self.update_labels()
+        self.field = QLineEdit(str(self._configurator.default))
+        self._layout.addWidget(self.field)
 
-    def default_labels(self):
-        """Each Widget should have a default tooltip and label,
-        which will be set in this method, unless specific
-        values are provided in the settings of the job that
-        is being configured."""
-        if self._label_text == "":
-            self._label_text = "DummyWidget"
-        if self._tooltip == "":
-            self._tooltip = "A placeholder which tells us that a real widget is missing"
+    def get_widget_value(self):
+        """Collect the results from the input widgets and return the value."""
+        return self.field.text()
+
+    @Slot()
+    def updateValue(self):
+        current_value = self.get_widget_value()
+        self._configurator.configure(current_value)
 
     def get_value(self):
+        self.updateValue()
         return self._configurator["value"]

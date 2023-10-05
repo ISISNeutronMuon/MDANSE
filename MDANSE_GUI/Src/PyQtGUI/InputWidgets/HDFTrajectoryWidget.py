@@ -36,6 +36,18 @@ class HDFTrajectoryWidget(WidgetBase):
         else:
             self._layout.addWidget(QLabel("No Trajectory available", self._base))
         self._trajectory = trajectory
+        self.default_labels()
+        self.update_labels()
+
+    def default_labels(self):
+        """Each Widget should have a default tooltip and label,
+        which will be set in this method, unless specific
+        values are provided in the settings of the job that
+        is being configured."""
+        if self._label_text == "":
+            self._label_text = "HDFTrajectoryWidget"
+        if self._tooltip == "":
+            self._tooltip = "The input trajectory to be processed"
 
     def get_value(self):
         return self._configurator["value"]

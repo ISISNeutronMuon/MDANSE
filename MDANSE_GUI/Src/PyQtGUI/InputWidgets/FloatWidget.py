@@ -53,6 +53,18 @@ class FloatWidget(WidgetBase):
         field.setToolTip(self._tooltip)
         self._field = field
         self._layout.addWidget(field)
+        self.default_labels()
+        self.update_labels()
+
+    def default_labels(self):
+        """Each Widget should have a default tooltip and label,
+        which will be set in this method, unless specific
+        values are provided in the settings of the job that
+        is being configured."""
+        if self._label_text == "":
+            self._label_text = "FloatWidget"
+        if self._tooltip == "":
+            self._tooltip = "A single floating-point number"
 
     @Slot(str)
     def newText(self, text: str):

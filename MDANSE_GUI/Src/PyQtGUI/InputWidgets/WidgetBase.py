@@ -31,32 +31,50 @@ class WidgetBase(QObject):
         parent = kwargs.get("parent", None)
         super().__init__(*args, parent=parent)
         self._value = None
-        label_text = kwargs.get("label", "")
-        tooltip_text = kwargs.get("tooltip", "")
-        base_type = kwargs.get("base_type", "QGroupBox")
-        layout_type = kwargs.get("layout_type", "QHBoxLayout")
+        self._label_text = kwargs.get("label", "")
+        self._tooltip = kwargs.get("tooltip", "")
+        self._base_type = kwargs.get("base_type", "QGroupBox")
+        self._layout_type = kwargs.get("layout_type", "QHBoxLayout")
         configurator = kwargs.get("configurator", None)
-        if layout_type == "QHBoxLayout":
+        if self._layout_type == "QHBoxLayout":
             layoutClass = QHBoxLayout
-        elif layout_type == "QVBoxLayout":
+        elif self._layout_type == "QVBoxLayout":
             layoutClass = QVBoxLayout
         else:
             layoutClass = QGridLayout
-        if base_type == "QWidget":
+        if self._base_type == "QWidget":
             base = QWidget(parent)
             layout = layoutClass(base)
             base.setLayout(layout)
-            label = QLabel(label_text, base)
-            layout.addWidget(label)
-        elif base_type == "QGroupBox":
-            base = QGroupBox(label_text)
-            base.setToolTip(tooltip_text)
+            self._label = QLabel(self._label_text, base)
+            layout.addWidget(self._label)
+        elif self._base_type == "QGroupBox":
+            base = QGroupBox(self._label_text)
+            base.setToolTip(self._tooltip)
             layout = layoutClass(base)
             base.setLayout(layout)
         self._base = base
         self._layout = layout
-        self._tooltip = tooltip_text
         self._configurator = configurator
+
+    def update_labels(self):
+        if self._base_type == "QWidget":
+            self._label.setText(self._label_text)
+        elif self._base_type == "QGroupBox":
+            self._base.setTitle(self._label_text)
+        for widget in self._layout.children():
+            if issubclass(widget, QWidget):
+                widget.setToolTip(self._tooltip)
+
+    def default_labels(self):
+        """Each Widget should have a default tooltip and label,
+        which will be set in this method, unless specific
+        values are provided in the settings of the job that
+        is being configured."""
+        if self._label_text == "":
+            self._label_text = "Base Widget"
+        if self._tooltip == "":
+            self._tooltip = "A specific tooltip for this widget SHOULD have been set"
 
     @abstractmethod
     def value_from_configurator(self):

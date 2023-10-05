@@ -30,6 +30,18 @@ class BooleanWidget(WidgetBase):
         field.setToolTip(self._tooltip)
         self._field = field
         self._layout.addWidget(field)
+        self.default_labels()
+        self.update_labels()
+
+    def default_labels(self):
+        """Each Widget should have a default tooltip and label,
+        which will be set in this method, unless specific
+        values are provided in the settings of the job that
+        is being configured."""
+        if self._label_text == "":
+            self._label_text = "BooleanWidget"
+        if self._tooltip == "":
+            self._tooltip = "A single logical value that can be True of False"
 
     def get_widget_value(self):
         return self._field.checkState() == Qt.CheckState.Checked

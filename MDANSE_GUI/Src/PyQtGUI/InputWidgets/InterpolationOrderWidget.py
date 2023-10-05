@@ -45,6 +45,18 @@ class InterpolationOrderWidget(WidgetBase):
         self._layout.addWidget(label)
         self._layout.addWidget(self.field)
         self._layout.addWidget(self.numerator)
+        self.default_labels()
+        self.update_labels()
+
+    def default_labels(self):
+        """Each Widget should have a default tooltip and label,
+        which will be set in this method, unless specific
+        values are provided in the settings of the job that
+        is being configured."""
+        if self._label_text == "":
+            self._label_text = "InterpolationOrderWidget"
+        if self._tooltip == "":
+            self._tooltip = "If non-zero, approximate velocities will be calculated from atom positions"
 
     @Slot(int)
     def adjust_numerator(self, order: int):
