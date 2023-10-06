@@ -1756,7 +1756,7 @@ class NucleotideChain(_ChemicalEntity):
         contents = h5_contents["nucleotides"]
         nucleotides = []
         for index in nucl_indexes:
-            args = [literal_eval(arg) for arg in contents[index]]
+            args = [literal_eval(arg.decode("utf8")) for arg in contents[index]]
             nucl = Nucleotide.build(h5_contents, *args)
             nucl.parent = nc
             nucleotides.append(nucl)
@@ -2059,7 +2059,7 @@ class PeptideChain(_ChemicalEntity):
         contents = h5_contents["residues"]
         residues = []
         for index in res_indexes:
-            args = [literal_eval(arg) for arg in contents[index]]
+            args = [literal_eval(arg.decode("utf8")) for arg in contents[index]]
             res = Residue.build(h5_contents, *args)
             res.parent = pc
             residues.append(res)
@@ -2283,7 +2283,7 @@ class Protein(_ChemicalEntity):
         contents = h5_contents["peptide_chains"]
         peptide_chains = []
         for index in peptide_chain_indexes:
-            args = [literal_eval(arg) for arg in contents[index]]
+            args = [literal_eval(arg.decode("utf8")) for arg in contents[index]]
             pc = PeptideChain.build(h5_contents, *args)
             pc.parent = p
             peptide_chains.append(pc)
