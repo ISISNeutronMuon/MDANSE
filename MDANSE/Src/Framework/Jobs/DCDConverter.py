@@ -284,6 +284,7 @@ class DCDConverter(Converter):
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "CHARMM", "2vb1.pdb"
             ),
+            "label": "Input PDB file",
         },
     )
     settings["dcd_file"] = (
@@ -293,16 +294,17 @@ class DCDConverter(Converter):
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "CHARMM", "2vb1.dcd"
             ),
+            "label": "Input DCD file",
         },
     )
     settings["time_step"] = ("float", {"default": 1.0, "label": "Time step (ps)"})
     settings["fold"] = (
         "boolean",
-        {"default": False, "label": "Fold coordinates in to box"},
+        {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "pdb_file"},
+        {"format": "hdf", "root": "pdb_file", "label": "Output trajectory file name"},
     )
 
     def initialize(self):

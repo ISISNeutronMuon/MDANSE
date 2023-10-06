@@ -33,7 +33,8 @@ class DFTBConverter(ForciteConverter):
         {
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "DFTB", "H2O.xtd"
-            )
+            ),
+            "label": "The XTD file",
         },
     )
     settings["trj_file"] = (
@@ -41,7 +42,8 @@ class DFTBConverter(ForciteConverter):
         {
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "DFTB", "H2O.trj"
-            )
+            ),
+            "label": "The TRJ file",
         },
     )
     settings["fold"] = (
@@ -50,7 +52,7 @@ class DFTBConverter(ForciteConverter):
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "xtd_file"},
+        {"format": "hdf", "root": "xtd_file", "label": "Output file name"},
     )
 
 

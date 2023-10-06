@@ -262,6 +262,7 @@ class DiscoverConverter(Converter):
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "Discover", "sushi.xtd"
             ),
+            "label": "Input XTD file",
         },
     )
     settings["his_file"] = (
@@ -271,15 +272,16 @@ class DiscoverConverter(Converter):
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "Discover", "sushi.his"
             ),
+            "label": "Input HIS file",
         },
     )
     settings["fold"] = (
         "boolean",
-        {"default": True, "label": "Fold coordinates in to box"},
+        {"default": True, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "xtd_file"},
+        {"format": "hdf", "root": "xtd_file", "label": "Output trajectory file name"},
     )
 
     def initialize(self):

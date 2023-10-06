@@ -182,6 +182,7 @@ class VASPConverter(Converter):
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "VASP", "XDATCAR_version5"
             ),
+            "label": "Input XDATCAR file",
         },
     )
     settings["time_step"] = (
@@ -190,11 +191,15 @@ class VASPConverter(Converter):
     )
     settings["fold"] = (
         "boolean",
-        {"default": False, "label": "Fold coordinates in to box"},
+        {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "xdatcar_file"},
+        {
+            "format": "hdf",
+            "root": "xdatcar_file",
+            "label": "Output trajectory file name",
+        },
     )
 
     def initialize(self):

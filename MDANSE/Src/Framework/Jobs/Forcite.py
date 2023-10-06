@@ -285,6 +285,7 @@ class ForciteConverter(Converter):
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "Forcite", "H2O.xtd"
             ),
+            "label": "Input XTD file",
         },
     )
     settings["trj_file"] = (
@@ -294,15 +295,16 @@ class ForciteConverter(Converter):
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "Forcite", "H2O.trj"
             ),
+            "label": "Input TRJ file",
         },
     )
     settings["fold"] = (
         "boolean",
-        {"default": False, "label": "Fold coordinates in to box"},
+        {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "xtd_file"},
+        {"format": "hdf", "root": "xtd_file", "label": "Output trajectory file name"},
     )
 
     def initialize(self):
