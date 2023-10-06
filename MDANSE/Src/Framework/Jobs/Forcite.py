@@ -323,14 +323,14 @@ class ForciteConverter(Converter):
 
         if self._trjfile["velocities_written"]:
             self._velocities = np.zeros(
-                (self._chemicalSystem.number_of_atoms(), 3), dtype=np.float64
+                (self._chemicalSystem.number_of_atoms, 3), dtype=np.float64
             )
         else:
             self._velocities = None
 
         if self._trjfile["gradients_written"]:
             self._gradients = np.zeros(
-                (self._chemicalSystem.number_of_atoms(), 3), dtype=np.float64
+                (self._chemicalSystem.number_of_atoms, 3), dtype=np.float64
             )
         else:
             self._gradients = None

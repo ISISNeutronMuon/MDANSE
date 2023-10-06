@@ -50,7 +50,7 @@ class DFTBConverter(ForciteConverter):
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "netcdf", "root": "xtd_file"},
+        {"format": "hdf", "root": "xtd_file"},
     )
 
 

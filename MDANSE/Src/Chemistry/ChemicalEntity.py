@@ -860,7 +860,7 @@ class AtomCluster(_ChemicalEntity):
         contents = h5_contents["atoms"]
         atoms = []
         for index in atom_indexes:
-            args = [literal_eval(arg) for arg in contents[index]]
+            args = [literal_eval(arg.decode("utf8")) for arg in contents[index]]
             atoms.append(Atom.build(None, *args))
 
         return cls(name, atoms)
