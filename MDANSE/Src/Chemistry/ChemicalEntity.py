@@ -2522,8 +2522,12 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._total_number_of_atoms = 0
 
+        configuration_before = self.configuration
+
         for cluster in clusters:
             self.add_chemical_entity(cluster)
+
+        self._configuration = configuration_before
 
     def load(self, h5_filename: Union[str, h5py.File]) -> None:
         """

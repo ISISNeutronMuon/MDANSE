@@ -46,3 +46,15 @@ def test_rebuild_molecules(trajectory: HDFTrajectoryInputData):
     chemical_system.rebuild(conn._molecules)
     atoms_after = int(trajectory.chemical_system.number_of_atoms)
     assert atoms_before == atoms_after
+
+def test_unwrap_molecules(trajectory: HDFTrajectoryInputData):
+    conn = Connectivity(trajectory=trajectory)
+    conn.find_molecules()
+    chemical_system = trajectory.chemical_system
+    print([atom.name for atom in chemical_system.atoms])
+    chemical_system.rebuild(conn._molecules)
+    configuration = chemical_system.configuration
+    cc = configuration.contiguous_configuration()
+    print([atom.name for atom in chemical_system.atoms])
+    print(cc.coordinates)
+    assert False
