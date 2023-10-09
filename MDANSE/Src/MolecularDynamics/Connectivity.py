@@ -218,7 +218,7 @@ class Connectivity:
             Returns:
                 List[int] -- a list of atom numbers (indices)
             """
-            connected_atoms = []
+            connected_atoms = [number]
             for at_number in bond_mapping[number]:
                 if at_number in atom_pool:
                     connected_atoms.append(at_number)
@@ -234,7 +234,7 @@ class Connectivity:
             new_molecule = recursive_walk(
                 atom_pool.pop(), self._bond_mapping, atom_pool
             )
-            molecules.append(new_molecule)
+            molecules.append(list(np.unique(new_molecule)))
         self._molecules = molecules
 
     def add_bond_information(self):

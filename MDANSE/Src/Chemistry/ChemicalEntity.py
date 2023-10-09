@@ -4,7 +4,7 @@ import abc
 from ast import literal_eval
 import collections
 import copy
-from typing import Union, TYPE_CHECKING
+from typing import Union, TYPE_CHECKING, List, Tuple
 
 import h5py
 import numpy as np
@@ -2498,6 +2498,32 @@ class ChemicalSystem(_ChemicalEntity):
             cs._configuration = conf
 
         return cs
+
+    def rebuild(self, cluster_list: List[Tuple(int)]):
+        """
+        Copies the instance of ChemicalSystem into a new, identical instance.
+
+        :return: Copy of the ChemicalSystem instance
+        :rtype: MDANSE.Chemistry.ChemicalEntity.ChemicalSystem
+        """
+
+        clusters = []
+
+        for cluster_number, index_list in enumerate(cluster_list):
+            temp = AtomCluster(
+                "cluster_" + str(cluster_number + 1),
+                [self.atom_list[index] for index in index_list],
+            )
+            clusters.append(temp)
+
+        self._chemical_entities = []
+
+        self._number_of_atoms = 0
+
+        self._total_number_of_atoms = 0
+
+        for cluster in clusters:
+            self.add_chemical_entity(cluster)
 
     def load(self, h5_filename: Union[str, h5py.File]) -> None:
         """
