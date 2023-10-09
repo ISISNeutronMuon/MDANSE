@@ -49,7 +49,7 @@ class Topology:
         positions = (
             self._trajectory.trajectory.coordinates(frame_num) * 10.0
         )  # Angstroms, not nm
-        atoms = self._chem_system.atom_list()
+        atoms = self._chem_system.atom_list
         for natom in range(self._chem_system._total_number_of_atoms):
             atom = atoms[natom]
             atom_data = {

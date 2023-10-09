@@ -201,7 +201,9 @@ class Connectivity:
         if self._bond_mapping is None:
             self.find_bonds()
 
-        def recursive_walk(number: int, bond_mapping: Dict[int, int], atom_pool: List[int]):
+        def recursive_walk(
+            number: int, bond_mapping: Dict[int, int], atom_pool: List[int]
+        ):
             """Returns a list of atoms connected by bonds to the input atom.
             Called recursively in order to find the entire molecule.
 
