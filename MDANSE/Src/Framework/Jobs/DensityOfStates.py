@@ -130,7 +130,7 @@ class DensityOfStates(IJob):
         )
 
         self._atoms = sorted_atoms(
-            self.configuration["trajectory"]["instance"].chemical_system.atom_list()
+            self.configuration["trajectory"]["instance"].chemical_system.atom_list
         )
 
     def run_step(self, index):

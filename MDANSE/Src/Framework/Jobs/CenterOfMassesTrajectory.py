@@ -109,7 +109,7 @@ class CenterOfMassesTrajectory(IJob):
         # get the Frame index
         frameIndex = self.configuration["frames"]["value"][index]
 
-        n_coms = self._output_trajectory.chemical_system.number_of_atoms()
+        n_coms = self._output_trajectory.chemical_system.number_of_atoms
 
         conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
         conf = conf.continuous_configuration()

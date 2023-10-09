@@ -250,7 +250,7 @@ class LAMMPSConverter(Converter):
         )
 
         self._nameToIndex = dict(
-            [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list()]
+            [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list]
         )
 
         self._lammps.seek(0, 0)
@@ -333,7 +333,7 @@ class LAMMPSConverter(Converter):
             self._lammps.readline()
 
         coords = np.empty(
-            (self._trajectory.chemical_system.number_of_atoms(), 3), dtype=np.float64
+            (self._trajectory.chemical_system.number_of_atoms, 3), dtype=np.float64
         )
 
         for i, _ in enumerate(

@@ -100,7 +100,7 @@ class SolventAccessibleSurface(IJob):
                 (at.index, ATOMS_DATABASE[at.symbol]["covalent_radius"])
                 for at in self.configuration["trajectory"][
                     "instance"
-                ].chemical_system.atom_list()
+                ].chemical_system.atom_list
             ]
         )
         self.vdwRadii_list = np.zeros(
