@@ -2,6 +2,7 @@ import sys
 import tempfile
 import os
 from os import path
+from functools import reduce
 
 import pytest
 from icecream import ic
@@ -13,7 +14,7 @@ from rdkit.Chem.rdmolops import GetMolFrags
 from MDANSE import REGISTRY
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
-from MDANSE.Chemistry.Structrures import Topology
+from MDANSE.Chemistry.Structrures import Topology, MoleculeTester
 
 short_traj = 'co2gas_md3.h5'
 
@@ -60,3 +61,22 @@ def test_unwrap_molecules(trajectory: HDFTrajectoryInputData):
     # print([atom.name for atom in chemical_system.atoms])
     # print(cc.coordinates)
     assert not np.allclose(original_coords, contiguous_config.coordinates)
+
+def test_identify_molecules(trajectory: HDFTrajectoryInputData):
+    conn = Connectivity(trajectory=trajectory)
+    conn.find_molecules()
+    chemical_system = trajectory.chemical_system
+    chemical_system.rebuild(conn._molecules)
+    configuration = chemical_system.configuration
+    coords = configuration.contiguous_configuration().coordinates
+    molstrings = []
+    for entity in chemical_system.chemical_entities:
+        moltester = MoleculeTester(entity, coords)
+        inchistring = moltester.identify_molecule()
+        molstrings.append(inchistring)
+    assert len(molstrings) == 20
+    result = True
+    for ms in molstrings[1:]:
+        result = result and ms == molstrings[0]
+    assert result
+

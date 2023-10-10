@@ -4,6 +4,7 @@ import numpy as np
 from rdkit.Chem.rdchem import Mol
 from rdkit.Chem.rdmolops import SanitizeMol
 from rdkit.Chem.rdmolops import GetMolFrags
+from rdkit.Chem.inchi import MolToInchi
 from rdkit.Chem.rdmolfiles import MolFromPDBBlock
 
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
@@ -17,6 +18,44 @@ class DummyStringIO(StringIO):
 
     def _close(self):
         super(DummyStringIO, self).close()
+
+
+class MoleculeTester:
+    """This is a wrapper that can be attached to an MDANSE ChemicalEntity
+    in order to convert it into a PDB string buffer and feed it into
+    a library that can identify molecules.
+    """
+
+    def __init__(self, chemical_entity, coordinates):
+        self.chemical_entity = chemical_entity
+        self.coordinates = coordinates
+        self.molecule_object = None
+        self.molecule_string = None
+
+    def identify_molecule(self, frame_num: int = 0) -> str:
+        positions = self.coordinates
+        buffer = DummyStringIO()
+        temp_pdb = PDBFile(buffer, mode="w")
+        for natom, atom in enumerate(self.chemical_entity.atom_list):
+            coords = positions[natom]
+            atom_data = {
+                "position": positions[natom],
+                "serial_number": atom.index,
+                "name": atom.name,
+                "occupancy": 1.0,
+                "element": atom.symbol,
+                "charge": "",  # putting a number here makes it fail!
+            }
+            try:
+                temp_pdb.writeLine("ATOM", atom_data)
+            except:
+                print(atom_data)
+        temp_pdb.close()
+        mol_object = MolFromPDBBlock(buffer.getvalue())
+        buffer._close()
+        self.molecule_object = mol_object
+        self.molecule_string = MolToInchi(mol_object)
+        return self.molecule_string
 
 
 class Topology:
