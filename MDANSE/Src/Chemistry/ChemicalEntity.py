@@ -2507,6 +2507,7 @@ class ChemicalSystem(_ChemicalEntity):
         :rtype: MDANSE.Chemistry.ChemicalEntity.ChemicalSystem
         """
 
+        atom_names_before = [atom.name for atom in self.atoms]
         clusters = []
 
         for cluster_number, index_list in enumerate(cluster_list):
@@ -2523,11 +2524,19 @@ class ChemicalSystem(_ChemicalEntity):
         self._total_number_of_atoms = 0
 
         configuration_before = self.configuration
+        atom_names_after = [atom.name for atom in self.atoms]
 
-        for cluster in clusters:
+        for cluster in clusters[::-1]:
             self.add_chemical_entity(cluster)
 
-        self._configuration = configuration_before
+        if atom_names_before == atom_names_after:
+            self._configuration = configuration_before
+        else:
+            print("Atoms before:", atom_names_before)
+            print("Atoms after:", atom_names_after)
+            raise RuntimeError(
+                "ChemicalSystem.rebuild() changed the order of atoms. This needs to be handled!"
+            )
 
     def load(self, h5_filename: Union[str, h5py.File]) -> None:
         """

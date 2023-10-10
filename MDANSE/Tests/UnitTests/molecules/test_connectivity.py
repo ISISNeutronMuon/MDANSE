@@ -38,6 +38,7 @@ def test_find_molecules(trajectory: HDFTrajectoryInputData):
     assert len(conn._molecules) == 20
 
 def test_rebuild_molecules(trajectory: HDFTrajectoryInputData):
+    print(trajectory.chemical_system.atom_list)
     conn = Connectivity(trajectory=trajectory)
     conn.find_molecules()
     atoms_before = int(trajectory.chemical_system.number_of_atoms)
@@ -51,10 +52,11 @@ def test_unwrap_molecules(trajectory: HDFTrajectoryInputData):
     conn = Connectivity(trajectory=trajectory)
     conn.find_molecules()
     chemical_system = trajectory.chemical_system
-    print([atom.name for atom in chemical_system.atoms])
+    original_coords = chemical_system.configuration.coordinates
+    # print([atom.name for atom in chemical_system.atoms])
     chemical_system.rebuild(conn._molecules)
     configuration = chemical_system.configuration
-    cc = configuration.contiguous_configuration()
-    print([atom.name for atom in chemical_system.atoms])
-    print(cc.coordinates)
-    assert False
+    contiguous_config = configuration.contiguous_configuration()
+    # print([atom.name for atom in chemical_system.atoms])
+    # print(cc.coordinates)
+    assert not np.allclose(original_coords, contiguous_config.coordinates)

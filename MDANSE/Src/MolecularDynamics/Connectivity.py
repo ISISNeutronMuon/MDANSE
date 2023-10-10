@@ -124,7 +124,6 @@ class Connectivity:
                 continue
             self._translation_vectors[num] = shift
             offset = shift[0] * vector_a + shift[1] * vector_b + shift[2] * vector_c
-            print(offset)
             difference = lhs - rhs + offset
             distance = np.sum(difference**2, axis=2)
             yield num, distance
@@ -181,10 +180,7 @@ class Connectivity:
                         result,
                         dist > 1e-3,
                     )
-                print(f"Sum of results: {result.sum()}")
                 connection_array = np.logical_or(connection_array, result)
-        print(f"Result matrix sample: {connection_array[0:6,0:6]}")
-        print(f"Max distance sample: {max_distance_array[0:6,0:6]}")
         first, second = np.where(connection_array)
         bonds = np.column_stack([first, second])
         bond_mapping = {atom_number: [] for atom_number in range(len(self._elements))}
