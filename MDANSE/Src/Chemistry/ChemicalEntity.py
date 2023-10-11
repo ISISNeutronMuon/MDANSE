@@ -503,9 +503,23 @@ class Atom(_ChemicalEntity):
         for k, v in self.__dict__.items():
             setattr(a, k, v)
 
-        a._bonds = [bat.copy() for bat in self._bonds]
+        a._bonds = [bat.name for bat in self._bonds]
 
         return a
+
+    def restore_bonds(self, atom_dict: dict[str, Atom]):
+        """After copying, the Atom._bonds is filled with atom NAMES.
+        This method uses a dictionary of name: Atom pairs to
+        replace the names with Atom instances.
+        Trying to copy the Atom instances directly will result
+        in infinite recursion.
+
+        Arguments:
+            atom_dict -- dictionary of str: atom pairs,
+                where the key is the name of the Atom instance
+        """
+        new_bonds = [atom_dict[name] for name in self._bonds]
+        self._bonds = new_bonds
 
     def __eq__(self, other):
         if not self._index == other._index:
@@ -860,7 +874,7 @@ class AtomCluster(_ChemicalEntity):
         contents = h5_contents["atoms"]
         atoms = []
         for index in atom_indexes:
-            args = [literal_eval(arg) for arg in contents[index]]
+            args = [literal_eval(arg.decode("utf8")) for arg in contents[index]]
             atoms.append(Atom.build(None, *args))
 
         return cls(name, atoms)
@@ -1756,7 +1770,7 @@ class NucleotideChain(_ChemicalEntity):
         contents = h5_contents["nucleotides"]
         nucleotides = []
         for index in nucl_indexes:
-            args = [literal_eval(arg) for arg in contents[index]]
+            args = [literal_eval(arg.decode("utf8")) for arg in contents[index]]
             nucl = Nucleotide.build(h5_contents, *args)
             nucl.parent = nc
             nucleotides.append(nucl)
@@ -2059,7 +2073,7 @@ class PeptideChain(_ChemicalEntity):
         contents = h5_contents["residues"]
         residues = []
         for index in res_indexes:
-            args = [literal_eval(arg) for arg in contents[index]]
+            args = [literal_eval(arg.decode("utf8")) for arg in contents[index]]
             res = Residue.build(h5_contents, *args)
             res.parent = pc
             residues.append(res)
@@ -2283,7 +2297,7 @@ class Protein(_ChemicalEntity):
         contents = h5_contents["peptide_chains"]
         peptide_chains = []
         for index in peptide_chain_indexes:
-            args = [literal_eval(arg) for arg in contents[index]]
+            args = [literal_eval(arg.decode("utf8")) for arg in contents[index]]
             pc = PeptideChain.build(h5_contents, *args)
             pc.parent = p
             peptide_chains.append(pc)
@@ -2484,6 +2498,11 @@ class ChemicalSystem(_ChemicalEntity):
         cs._parent = self._parent
 
         cs._chemical_entities = [ce.copy() for ce in self._chemical_entities]
+
+        new_atoms = {atom.name: atom for atom in cs.atoms}
+
+        for atom in cs.atoms:
+            atom.restore_bonds(new_atoms)
 
         cs._number_of_atoms = self._number_of_atoms
 

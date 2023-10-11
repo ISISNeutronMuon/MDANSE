@@ -48,6 +48,10 @@ class MoleculeFinder(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("hdf_trajectory", {})
+    settings["frames"] = (
+        "frames",
+        {"dependencies": {"trajectory": "trajectory"}, "default": (0, -1, 1)},
+    )
     settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
 
     def initialize(self):
@@ -55,7 +59,8 @@ class MoleculeFinder(IJob):
         Initialize the input parameters and analysis self variables
         """
 
-        self._input_trajectory = self.configuration["trajectory"]["instance"]
+        self.numberOfSteps = self.configuration["frames"]["number"]
+        self._input_trajectory = self.configuration["trajectory"]["hdf_trajectory"]
         chemical_system = self._input_trajectory.chemical_system
 
         conn = Connectivity(trajectory=self._input_trajectory)
@@ -65,7 +70,7 @@ class MoleculeFinder(IJob):
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_files"]["files"][0],
             chemical_system,
             self.numberOfSteps,
         )
@@ -87,23 +92,18 @@ class MoleculeFinder(IJob):
         n_coms = self._output_trajectory.chemical_system.number_of_atoms
 
         conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
-        conf = conf.continuous_configuration()
+        conf = conf.contiguous_configuration()
 
-        com_coords = np.empty((n_coms, 3), dtype=np.float64)
-        for i, group in enumerate(self._grouped_atoms):
-            com_coords[i, :] = group.center_of_mass(conf)
+        coords = conf.coordinates
 
         if conf.is_periodic:
             com_conf = PeriodicRealConfiguration(
-                self._output_trajectory.chemical_system, com_coords, conf.unit_cell
+                self._output_trajectory.chemical_system, coords, conf.unit_cell
             )
         else:
             com_conf = RealConfiguration(
-                self._output_trajectory.chemical_system, com_coords
+                self._output_trajectory.chemical_system, coords
             )
-
-        if self.configuration["fold"]["value"]:
-            com_conf.fold_coordinates()
 
         self._output_trajectory.chemical_system.configuration = com_conf
 

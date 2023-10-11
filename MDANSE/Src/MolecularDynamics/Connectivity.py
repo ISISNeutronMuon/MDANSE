@@ -29,7 +29,6 @@ class Connectivity:
     """
 
     def __init__(self, *args, trajectory: HDFTrajectoryInputData = None, **kwargs):
-        self._trajectory_file = trajectory
         self._chemical_system = trajectory.chemical_system
         self._frames = trajectory.trajectory
         self._unit_cell = self._chemical_system.configuration
