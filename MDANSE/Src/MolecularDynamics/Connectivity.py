@@ -241,6 +241,7 @@ class Connectivity:
             )
             at1.bonds.append(at2)
             at2.bonds.append(at1)
+            self._chemical_system._bonds.append((ind1, ind2))
 
     def add_point(self, index: int, point: np.ndarray, radius: float) -> bool:
         return True

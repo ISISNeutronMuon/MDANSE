@@ -471,7 +471,7 @@ class Atom(_ChemicalEntity):
 
         self._ghost = ghost
 
-        self._index = None
+        self._index = kwargs.pop("index", None)
 
         self._parent = None
 
@@ -507,7 +507,7 @@ class Atom(_ChemicalEntity):
 
         return a
 
-    def restore_bonds(self, atom_dict: dict[str, Atom]):
+    def restore_bonds(self, atom_dict: dict[str, Atom]) -> List[Tuple[int, int]]:
         """After copying, the Atom._bonds is filled with atom NAMES.
         This method uses a dictionary of name: Atom pairs to
         replace the names with Atom instances.
@@ -520,6 +520,7 @@ class Atom(_ChemicalEntity):
         """
         new_bonds = [atom_dict[name] for name in self._bonds]
         self._bonds = new_bonds
+        return [(self.index, other.index) for other in self._bonds]
 
     def __eq__(self, other):
         if not self._index == other._index:
@@ -635,6 +636,7 @@ class Atom(_ChemicalEntity):
         h5_contents: Union[None, dict[str, list[list[str]]]],
         symbol: str,
         name: str,
+        index: str,
         ghost: bool,
     ) -> Atom:
         """
@@ -649,12 +651,15 @@ class Atom(_ChemicalEntity):
         :type symbol: str
 
         :param name: The name of the Atom. If this is not provided, the symbol is used as the name as well
-        :type nameL str
+        :type name: str
+
+        :param index: The unique atom index. Since AtomCluster saves it, Atom must save it too.
+        :type index: str
 
         :param ghost:
         :type ghost: bool
         """
-        return cls(symbol=symbol, name=name, ghost=ghost)
+        return cls(symbol=symbol, name=name, index=int(index), ghost=ghost)
 
     def serialize(self, h5_contents: dict[str, list[list[str]]]) -> tuple[str, int]:
         """
@@ -668,7 +673,7 @@ class Atom(_ChemicalEntity):
         :rtype: tuple
         """
         h5_contents.setdefault("atoms", []).append(
-            [repr(self.symbol), repr(self.name), str(self.ghost)]
+            [repr(self.symbol), repr(self.name), str(self.index), str(self.ghost)]
         )
 
         return "atoms", len(h5_contents["atoms"]) - 1
@@ -2404,6 +2409,8 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._name = name
 
+        self._bonds = []
+
         self._atoms = None
 
     def __repr__(self):
@@ -2502,7 +2509,7 @@ class ChemicalSystem(_ChemicalEntity):
         new_atoms = {atom.name: atom for atom in cs.atoms}
 
         for atom in cs.atoms:
-            atom.restore_bonds(new_atoms)
+            self._bonds += atom.restore_bonds(new_atoms)
 
         cs._number_of_atoms = self._number_of_atoms
 
@@ -2522,8 +2529,8 @@ class ChemicalSystem(_ChemicalEntity):
         """
         Copies the instance of ChemicalSystem into a new, identical instance.
 
-        :return: Copy of the ChemicalSystem instance
-        :rtype: MDANSE.Chemistry.ChemicalEntity.ChemicalSystem
+        :param cluster_list: list of tuples of atom indices, one per cluster
+        :type List[Tuple(int)]: each element is a tuple of atom indices (int)
         """
 
         atom_names_before = [atom.name for atom in self.atoms]
@@ -2591,11 +2598,17 @@ class ChemicalSystem(_ChemicalEntity):
 
         skeleton = h5_file["/chemical_system/contents"][:]
 
+        try:
+            bonds = h5_file["/chemical_system/bonds"]
+        except KeyError:
+            bonds = []
+        print(f"Bonds: {bonds}")
+
         self._name = grp.attrs["name"]
 
         h5_contents = {}
         for entity_type, v in grp.items():
-            if entity_type == "contents":
+            if entity_type == "contents" or entity_type == "bonds":
                 continue
             h5_contents[entity_type] = v[:]
 
@@ -2701,6 +2714,10 @@ class ChemicalSystem(_ChemicalEntity):
 
             self.add_chemical_entity(ce)
 
+        print(f"Bonds: {bonds}")
+        print(f"list Bonds: {list(bonds)}")
+        self._bonds = list(bonds)
+
         if close_file:
             h5_file.close()
 
@@ -2742,3 +2759,6 @@ class ChemicalSystem(_ChemicalEntity):
         for k, v in h5_contents.items():
             grp.create_dataset(k, data=v, dtype=string_dt)
         grp.create_dataset("contents", data=contents, dtype=string_dt)
+
+        h5_bonds = np.array(self._bonds).astype(np.int32)
+        grp.create_dataset("bonds", data=h5_bonds, dtype=np.int32)

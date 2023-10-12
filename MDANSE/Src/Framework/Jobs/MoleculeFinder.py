@@ -96,13 +96,29 @@ class MoleculeFinder(IJob):
 
         coords = conf.coordinates
 
+        variables = {}
+        if (
+            "velocities"
+            in self.configuration["trajectory"]["instance"]
+            ._h5_file["configuration"]
+            .keys()
+        ):
+            variables = {
+                "velocities": self.configuration["trajectory"]["instance"]
+                ._h5_file["/configuration/velocities"][frameIndex, :, :]
+                .astype(np.float64)
+            }
+
         if conf.is_periodic:
             com_conf = PeriodicRealConfiguration(
-                self._output_trajectory.chemical_system, coords, conf.unit_cell
+                self._output_trajectory.chemical_system,
+                coords,
+                conf.unit_cell,
+                **variables,
             )
         else:
             com_conf = RealConfiguration(
-                self._output_trajectory.chemical_system, coords
+                self._output_trajectory.chemical_system, coords, **variables
             )
 
         self._output_trajectory.chemical_system.configuration = com_conf
