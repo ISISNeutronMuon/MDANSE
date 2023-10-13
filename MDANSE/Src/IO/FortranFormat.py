@@ -210,7 +210,12 @@ class FortranLine:
                 value = data[0]
                 data = data[1:]
                 if type == "A":
-                    self.text = self.text + (value + length * " ")[:length]
+                    try:
+                        self.text = self.text + (value + length * " ")[:length]
+                    except:
+                        print(self.text)
+                        print(value)
+                        print(length)
                 else:  # numeric fields
                     if value is None:
                         s = ""
