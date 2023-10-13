@@ -2448,6 +2448,12 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._chemical_entities.append(chemical_entity)
 
+        if hasattr(chemical_entity, "_bonds") and hasattr(chemical_entity, "index"):
+            for bond in chemical_entity._bonds:
+                number_bond = [chemical_entity.index, bond.index]
+                if not number_bond in self._bonds:
+                    self._bonds.append(number_bond)
+
         self._configuration = None
 
         self._atoms = None
@@ -2509,7 +2515,7 @@ class ChemicalSystem(_ChemicalEntity):
         new_atoms = {atom.name: atom for atom in cs.atoms}
 
         for atom in cs.atoms:
-            self._bonds += atom.restore_bonds(new_atoms)
+            cs._bonds += atom.restore_bonds(new_atoms)
 
         cs._number_of_atoms = self._number_of_atoms
 
@@ -2599,10 +2605,9 @@ class ChemicalSystem(_ChemicalEntity):
         skeleton = h5_file["/chemical_system/contents"][:]
 
         try:
-            bonds = h5_file["/chemical_system/bonds"]
+            bonds = np.unique(h5_file["/chemical_system/bonds"], axis=0)
         except KeyError:
             bonds = []
-        print(f"Bonds: {bonds}")
 
         self._name = grp.attrs["name"]
 
@@ -2714,8 +2719,6 @@ class ChemicalSystem(_ChemicalEntity):
 
             self.add_chemical_entity(ce)
 
-        print(f"Bonds: {bonds}")
-        print(f"list Bonds: {list(bonds)}")
         self._bonds = list(bonds)
 
         if close_file:

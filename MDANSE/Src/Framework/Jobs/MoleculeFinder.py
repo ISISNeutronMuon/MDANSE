@@ -63,10 +63,14 @@ class MoleculeFinder(IJob):
         self._input_trajectory = self.configuration["trajectory"]["hdf_trajectory"]
         chemical_system = self._input_trajectory.chemical_system
 
+        print(f"Molfinder: bonds before the run {chemical_system._bonds}")
+
         conn = Connectivity(trajectory=self._input_trajectory)
         conn.find_molecules()
         conn.add_bond_information()
         chemical_system.rebuild(conn._molecules)
+
+        print(f"Molfinder: bonds after connectivity {chemical_system._bonds}")
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
