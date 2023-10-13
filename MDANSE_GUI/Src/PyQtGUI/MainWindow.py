@@ -167,6 +167,7 @@ class Main(QMainWindow):
     @Slot(DataTreeItem)
     def setCurrentObject(self, data_object: DataTreeItem):
         self.current_object = data_object
+        self._visualiser._new_trajectory(data_object.text())
 
     @Slot()
     def connectViews(self):
