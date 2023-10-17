@@ -37,7 +37,7 @@ class _Configuration(metaclass=abc.ABCMeta):
 
         self._variables = {}
 
-        self['coordinates'] = np.array(coords)
+        self["coordinates"] = np.array(coords)
 
         for k, v in variables.items():
             self[k] = v
@@ -79,8 +79,10 @@ class _Configuration(metaclass=abc.ABCMeta):
 
         item = np.array(value)
         if item.shape != (self._chemical_system.number_of_atoms(), 3):
-            raise ValueError(f'Invalid item dimensions; a shape of {(self._chemical_system.number_of_atoms(), 3)} was '
-                             f'expected but data with shape of {item.shape} was provided.')
+            raise ValueError(
+                f"Invalid item dimensions; a shape of {(self._chemical_system.number_of_atoms(), 3)} was "
+                f"expected but data with shape of {item.shape} was provided."
+            )
 
         self._variables[name] = value
 
@@ -97,7 +99,12 @@ class _Configuration(metaclass=abc.ABCMeta):
 
         # The casting here must be set to 'unsafe' to allow for conversion from int to float; the vector array may be
         # of float dtype while conf, after the dot product, can be int.
-        np.add(conf, transfo.translation().vector.array[np.newaxis, :], conf, casting='unsafe')
+        np.add(
+            conf,
+            transfo.translation().vector.array[np.newaxis, :],
+            conf,
+            casting="unsafe",
+        )
 
         if "velocities" in self._variables:
             velocities = self._variables["velocities"]
@@ -156,8 +163,13 @@ class _Configuration(metaclass=abc.ABCMeta):
 
 
 class _PeriodicConfiguration(_Configuration):
-
-    def __init__(self, chemical_system: ChemicalSystem, coords: ArrayLike, unit_cell: UnitCell, **variables):
+    def __init__(
+        self,
+        chemical_system: ChemicalSystem,
+        coords: ArrayLike,
+        unit_cell: UnitCell,
+        **variables,
+    ):
         """
         Constructor.
 
@@ -173,10 +185,12 @@ class _PeriodicConfiguration(_Configuration):
         :param variables: keyword arguments for any other variables that should be saved to this configuration
         """
 
-        super(_PeriodicConfiguration, self).__init__(chemical_system, coords, **variables)
+        super(_PeriodicConfiguration, self).__init__(
+            chemical_system, coords, **variables
+        )
 
         if unit_cell.direct.shape != (3, 3):
-            raise ValueError('Invalid unit cell dimensions')
+            raise ValueError("Invalid unit cell dimensions")
         self._unit_cell = unit_cell
 
     def clone(self, chemical_system: Union[ChemicalSystem, None] = None):
@@ -190,12 +204,17 @@ class _PeriodicConfiguration(_Configuration):
         if chemical_system is None:
             chemical_system = self._chemical_system
         else:
-            if chemical_system.total_number_of_atoms() != self.chemical_system.total_number_of_atoms():
-                raise ConfigurationError('Mismatch between the chemical systems; the provided chemical system, '
-                                         f'{chemical_system.name}, has {chemical_system.total_number_of_atoms()} atoms '
-                                         f'which does not match the chemical system of this configuration, '
-                                         f'{self.chemical_system.name} which has '
-                                         f'{self.chemical_system.total_number_of_atoms()} atoms.')
+            if (
+                chemical_system.total_number_of_atoms()
+                != self.chemical_system.total_number_of_atoms()
+            ):
+                raise ConfigurationError(
+                    "Mismatch between the chemical systems; the provided chemical system, "
+                    f"{chemical_system.name}, has {chemical_system.total_number_of_atoms()} atoms "
+                    f"which does not match the chemical system of this configuration, "
+                    f"{self.chemical_system.name} which has "
+                    f"{self.chemical_system.total_number_of_atoms()} atoms."
+                )
 
         unit_cell = copy.deepcopy(self._unit_cell)
 
@@ -240,7 +259,7 @@ class _PeriodicConfiguration(_Configuration):
         :type unit_cell: :class: `MDANSE.MolecularDynamics.UnitCell.UnitCell`
         """
         if unit_cell.direct.shape != (3, 3):
-            raise ValueError('Invalid unit cell dimensions')
+            raise ValueError("Invalid unit cell dimensions")
         self._unit_cell = unit_cell
 
 
@@ -252,7 +271,7 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
 
         from MDANSE.Extensions import fold_coordinates
 
-        coords = self._variables['coordinates']
+        coords = self._variables["coordinates"]
         coords = coords[np.newaxis, :, :]
 
         unit_cell = self._unit_cell.transposed_direct
@@ -283,7 +302,7 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
         :return: the real coordinates
         :rtype: numpy.ndarray
         """
-        return np.matmul(self._variables['coordinates'], self._unit_cell.direct)
+        return np.matmul(self._variables["coordinates"], self._unit_cell.direct)
 
     def to_real_configuration(self) -> PeriodicRealConfiguration:
         """
@@ -298,11 +317,15 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
         variables = copy.deepcopy(self._variables)
         variables.pop("coordinates")
 
-        real_conf = PeriodicRealConfiguration(self._chemical_system, coords, self._unit_cell, **variables)
+        real_conf = PeriodicRealConfiguration(
+            self._chemical_system, coords, self._unit_cell, **variables
+        )
 
         return real_conf
 
-    def atoms_in_shell(self, ref: int, mini: float = 0.0, maxi: float = 10.0) -> list[Atom]:
+    def atoms_in_shell(
+        self, ref: int, mini: float = 0.0, maxi: float = 10.0
+    ) -> list[Atom]:
         """
         Returns all atoms found in a shell around a reference atom. The shell is a (hollow) sphere around the reference
         atom defined by parameters mini and maxi. All atoms within the sphere with radius maxi but not within that of
@@ -323,7 +346,9 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
         :rtype: list
         """
 
-        indexes = atoms_in_shell.atoms_in_shell_box(self._variables['coordinates'].astype(np.float64), ref, mini, maxi)
+        indexes = atoms_in_shell.atoms_in_shell_box(
+            self._variables["coordinates"].astype(np.float64), ref, mini, maxi
+        )
 
         atom_list = self._chemical_system.atom_list
 
@@ -348,10 +373,12 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
         )
 
         conf = self.clone()
-        conf._variables['coordinates'] = contiguous_coords
+        conf._variables["coordinates"] = contiguous_coords
         return conf
 
-    def contiguous_offsets(self, chemical_entities: list[_ChemicalEntity] = None) -> np.ndarray:
+    def contiguous_offsets(
+        self, chemical_entities: list[_ChemicalEntity] = None
+    ) -> np.ndarray:
         """
         Returns the contiguity offsets for a list of chemical entities.
 
@@ -369,22 +396,27 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
             for i, ce in enumerate(chemical_entities):
                 root = ce.root_chemical_system()
                 if root is not self._chemical_system:
-                    raise ConfigurationError('All the entities provided in the chemical_entities parameter must belong '
-                                             'to the chemical system registered with this configuration, which is '
-                                             f'{self._chemical_system.name}. However, the entity at index {i}, '
-                                             f'{str(ce)}, is in chemical system '
-                                             f'{root.name if root is not None else None}.\nExpected chemical system: '
-                                             f'{repr(self._chemical_system)}\nActual chemical system: {repr(root)}\n'
-                                             f'Faulty chemical entity: {repr(ce)}')
+                    raise ConfigurationError(
+                        "All the entities provided in the chemical_entities parameter must belong "
+                        "to the chemical system registered with this configuration, which is "
+                        f"{self._chemical_system.name}. However, the entity at index {i}, "
+                        f"{str(ce)}, is in chemical system "
+                        f"{root.name if root is not None else None}.\nExpected chemical system: "
+                        f"{repr(self._chemical_system)}\nActual chemical system: {repr(root)}\n"
+                        f"Faulty chemical entity: {repr(ce)}"
+                    )
 
         indexes = []
         for ce in chemical_entities:
             indexes.append([at.index for at in ce.atom_list])
 
         offsets = contiguous_coordinates.contiguous_offsets_box(
-            self._variables['coordinates'][[item for sublist in indexes for item in sublist]],
+            self._variables["coordinates"][
+                [item for sublist in indexes for item in sublist]
+            ],
             self._unit_cell.transposed_direct,
-            indexes)
+            indexes,
+        )
 
         return offsets
 
@@ -397,7 +429,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 
         from MDANSE.Extensions import fold_coordinates
 
-        coords = self._variables['coordinates']
+        coords = self._variables["coordinates"]
         coords = coords[np.newaxis, :, :]
 
         unit_cell = self._unit_cell.transposed_direct
@@ -406,10 +438,12 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         unit_cells = unit_cell[np.newaxis, :, :]
         inverse_unit_cells = inverse_unit_cell[np.newaxis, :, :]
 
-        coords = fold_coordinates.fold_coordinates(coords, unit_cells, inverse_unit_cells, False)
+        coords = fold_coordinates.fold_coordinates(
+            coords, unit_cells, inverse_unit_cells, False
+        )
         coords = np.squeeze(coords)
 
-        self._variables['coordinates'] = coords
+        self._variables["coordinates"] = coords
 
     def to_box_coordinates(self) -> np.ndarray:
         """
@@ -419,7 +453,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         :rtype: numpy.ndarray
         """
 
-        return np.matmul(self._variables['coordinates'], self._unit_cell.inverse)
+        return np.matmul(self._variables["coordinates"], self._unit_cell.inverse)
 
     def to_box_configuration(self) -> PeriodicBoxConfiguration:
         """
@@ -450,7 +484,9 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         """
         return self._variables["coordinates"]
 
-    def atoms_in_shell(self, ref: int, mini: float = 0.0, maxi: float = 10.0) -> list[Atom]:
+    def atoms_in_shell(
+        self, ref: int, mini: float = 0.0, maxi: float = 10.0
+    ) -> list[Atom]:
         """
         Returns all atoms found in a shell around a reference atom. The shell is a (hollow) sphere around the reference
         atom defined by parameters mini and maxi. All atoms within the sphere with radius maxi but not within that of
@@ -472,7 +508,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         """
 
         indexes = atoms_in_shell.atoms_in_shell_real(
-            self._variables['coordinates'].astype(np.float64),
+            self._variables["coordinates"].astype(np.float64),
             self._unit_cell.transposed_direct,
             self._unit_cell.transposed_inverse,
             ref,
@@ -506,7 +542,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         )
 
         conf = self.clone()
-        conf._variables['coordinates'] = contiguous_coords
+        conf._variables["coordinates"] = contiguous_coords
         return conf
 
     def continuous_configuration(self) -> PeriodicRealConfiguration:
@@ -525,10 +561,12 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         )
 
         conf = self.clone()
-        conf._variables['coordinates'] = contiguous_coords
+        conf._variables["coordinates"] = contiguous_coords
         return conf
 
-    def contiguous_offsets(self, chemical_entities: Union[None, list[_ChemicalEntity]] = None) -> np.ndarray:
+    def contiguous_offsets(
+        self, chemical_entities: Union[None, list[_ChemicalEntity]] = None
+    ) -> np.ndarray:
         """
         Returns the contiguity offsets for a list of chemical entities.
 
@@ -546,19 +584,23 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
             for i, ce in enumerate(chemical_entities):
                 root = ce.root_chemical_system()
                 if root is not self._chemical_system:
-                    raise ConfigurationError('All the entities provided in the chemical_entities parameter must belong '
-                                             'to the chemical system registered with this configuration, which is '
-                                             f'{self._chemical_system.name}. However, the entity at index {i}, '
-                                             f'{str(ce)}, is in chemical system '
-                                             f'{root.name if root is not None else None}.\nExpected chemical system: '
-                                             f'{repr(self._chemical_system)}\nActual chemical system: {repr(root)}\n'
-                                             f'Faulty chemical entity: {repr(ce)}')
+                    raise ConfigurationError(
+                        "All the entities provided in the chemical_entities parameter must belong "
+                        "to the chemical system registered with this configuration, which is "
+                        f"{self._chemical_system.name}. However, the entity at index {i}, "
+                        f"{str(ce)}, is in chemical system "
+                        f"{root.name if root is not None else None}.\nExpected chemical system: "
+                        f"{repr(self._chemical_system)}\nActual chemical system: {repr(root)}\n"
+                        f"Faulty chemical entity: {repr(ce)}"
+                    )
         indexes = []
         for ce in chemical_entities:
             indexes.append([at.index for at in ce.atom_list])
 
         offsets = contiguous_coordinates.contiguous_offsets_real(
-            self._variables['coordinates'][[item for sublist in indexes for item in sublist]],
+            self._variables["coordinates"][
+                [item for sublist in indexes for item in sublist]
+            ],
             self._unit_cell.transposed_direct,
             self._unit_cell.transposed_inverse,
             indexes,
@@ -570,7 +612,9 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 class RealConfiguration(_Configuration):
     is_periodic = False
 
-    def clone(self, chemical_system: Union[None, ChemicalSystem] = None) -> RealConfiguration:
+    def clone(
+        self, chemical_system: Union[None, ChemicalSystem] = None
+    ) -> RealConfiguration:
         """
         Creates a deep copy of this configuration, using the provided chemical system.
 
@@ -584,8 +628,11 @@ class RealConfiguration(_Configuration):
         if chemical_system is None:
             chemical_system = self._chemical_system
         else:
-            if chemical_system.total_number_of_atoms != self.chemical_system.total_number_of_atoms:
-                raise ConfigurationError('Mismatch between the chemical systems')
+            if (
+                chemical_system.total_number_of_atoms
+                != self.chemical_system.total_number_of_atoms
+            ):
+                raise ConfigurationError("Mismatch between the chemical systems")
 
         variables = copy.deepcopy(self.variables)
 
@@ -606,7 +653,9 @@ class RealConfiguration(_Configuration):
         """
         return self._variables["coordinates"]
 
-    def atoms_in_shell(self, ref: int, mini: float = 0.0, maxi: float = 10.0) -> list[Atom]:
+    def atoms_in_shell(
+        self, ref: int, mini: float = 0.0, maxi: float = 10.0
+    ) -> list[Atom]:
         """
         Returns all atoms found in a shell around a reference atom. The shell is a (hollow) sphere around the reference
         atom defined by parameters mini and maxi. All atoms within the sphere with radius maxi but not within that of
@@ -627,8 +676,9 @@ class RealConfiguration(_Configuration):
         :rtype: list
         """
 
-        indexes = atoms_in_shell.atoms_in_shell_nopbc(self._variables['coordinates'].astype(np.float64),
-                                                      ref, mini, maxi)
+        indexes = atoms_in_shell.atoms_in_shell_nopbc(
+            self._variables["coordinates"].astype(np.float64), ref, mini, maxi
+        )
 
         atom_list = self._chemical_system.atom_list
 
@@ -654,7 +704,9 @@ class RealConfiguration(_Configuration):
         """
         return self
 
-    def contiguous_offsets(self, chemical_entities: Union[None, list[_ChemicalEntity]] = None) -> np.ndarray:
+    def contiguous_offsets(
+        self, chemical_entities: Union[None, list[_ChemicalEntity]] = None
+    ) -> np.ndarray:
         """
         Returns the contiguity offsets for a list of chemical entities, which are always zero for every atom.
 
@@ -672,15 +724,19 @@ class RealConfiguration(_Configuration):
             for ce in chemical_entities:
                 root = ce.root_chemical_system()
                 if root is not self._chemical_system:
-                    raise ConfigurationError('All the entities provided in the chemical_entities parameter must belong '
-                                             'to the chemical system registered with this configuration, which is '
-                                             f'{self._chemical_system.name}. However, the entity at index {i}, '
-                                             f'{str(ce)}, is in chemical system '
-                                             f'{root.name if root is not None else None}.\nExpected chemical system: '
-                                             f'{repr(self._chemical_system)}\nActual chemical system: {repr(root)}\n'
-                                             f'Faulty chemical entity: {repr(ce)}')
+                    raise ConfigurationError(
+                        "All the entities provided in the chemical_entities parameter must belong "
+                        "to the chemical system registered with this configuration, which is "
+                        f"{self._chemical_system.name}. However, the entity at index {i}, "
+                        f"{str(ce)}, is in chemical system "
+                        f"{root.name if root is not None else None}.\nExpected chemical system: "
+                        f"{repr(self._chemical_system)}\nActual chemical system: {repr(root)}\n"
+                        f"Faulty chemical entity: {repr(ce)}"
+                    )
 
-        number_of_particles = sum([ce.total_number_of_atoms for ce in chemical_entities])
+        number_of_particles = sum(
+            [ce.total_number_of_atoms for ce in chemical_entities]
+        )
 
         offsets = np.zeros((number_of_particles, 3))
 
@@ -695,7 +751,7 @@ if __name__ == "__main__":
     n_atoms = 2
     cs = ChemicalSystem()
     for i in range(n_atoms):
-        cs.add_chemical_entity(Atom(symbol='H'))
+        cs.add_chemical_entity(Atom(symbol="H"))
 
     coordinates = np.empty((n_atoms, 3), dtype=float)
     coordinates[0, :] = [1, 1, 1]

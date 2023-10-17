@@ -190,9 +190,11 @@ class Rotation(RigidBodyTransformation):
             axis, angle = args
             axis = axis.normal()
             projector = axis.dyadic_product(axis)
-            self.tensor = projector - \
-                          float(np.sin(angle))*(epsilon*axis) + \
-                          float(np.cos(angle))*(delta-projector)
+            self.tensor = (
+                projector
+                - float(np.sin(angle)) * (epsilon * axis)
+                + float(np.cos(angle)) * (delta - projector)
+            )
         else:
             raise TypeError("one or two arguments required")
 
