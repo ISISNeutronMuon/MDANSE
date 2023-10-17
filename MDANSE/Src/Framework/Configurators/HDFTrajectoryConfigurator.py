@@ -49,6 +49,8 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
 
         inputTraj = REGISTRY["input_data"]["hdf_trajectory"](self["value"])
 
+        self["hdf_trajectory"] = inputTraj
+
         self["instance"] = inputTraj.trajectory
 
         self["filename"] = PLATFORM.get_path(inputTraj.filename)

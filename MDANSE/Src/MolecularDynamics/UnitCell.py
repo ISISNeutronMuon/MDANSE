@@ -119,3 +119,13 @@ class UnitCell:
                 self._unit_cell[2, :],
             )
         )
+
+    @property
+    def abc_and_angles(self):
+        a, b, c = self.a_vector, self.b_vector, self.c_vector
+        abc = [np.linalg.norm(vector) for vector in [a, b, c]]
+        alpha = np.linalg.norm(np.cross(b, c)) / (abc[1] * abc[2])
+        beta = np.linalg.norm(np.cross(c, a)) / (abc[2] * abc[0])
+        gamma = np.linalg.norm(np.cross(a, b)) / (abc[0] * abc[1])
+        angles = np.degrees(np.arcsin([alpha, beta, gamma]))
+        return *abc, *angles

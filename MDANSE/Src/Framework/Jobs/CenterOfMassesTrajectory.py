@@ -112,7 +112,7 @@ class CenterOfMassesTrajectory(IJob):
         n_coms = self._output_trajectory.chemical_system.number_of_atoms
 
         conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
-        conf = conf.continuous_configuration()
+        conf = conf.contiguous_configuration()
 
         com_coords = np.empty((n_coms, 3), dtype=np.float64)
         for i, group in enumerate(self._grouped_atoms):
