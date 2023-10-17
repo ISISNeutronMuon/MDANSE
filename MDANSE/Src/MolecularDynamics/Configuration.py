@@ -78,9 +78,9 @@ class _Configuration(metaclass=abc.ABCMeta):
         """
 
         item = np.array(value)
-        if item.shape != (self._chemical_system.number_of_atoms(), 3):
+        if item.shape != (self._chemical_system.number_of_atoms, 3):
             raise ValueError(
-                f"Invalid item dimensions; a shape of {(self._chemical_system.number_of_atoms(), 3)} was "
+                f"Invalid item dimensions; a shape of {(self._chemical_system.number_of_atoms, 3)} was "
                 f"expected but data with shape of {item.shape} was provided."
             )
 
@@ -205,15 +205,15 @@ class _PeriodicConfiguration(_Configuration):
             chemical_system = self._chemical_system
         else:
             if (
-                chemical_system.total_number_of_atoms()
-                != self.chemical_system.total_number_of_atoms()
+                chemical_system.total_number_of_atoms
+                != self.chemical_system.total_number_of_atoms
             ):
                 raise ConfigurationError(
                     "Mismatch between the chemical systems; the provided chemical system, "
-                    f"{chemical_system.name}, has {chemical_system.total_number_of_atoms()} atoms "
+                    f"{chemical_system.name}, has {chemical_system.total_number_of_atoms} atoms "
                     f"which does not match the chemical system of this configuration, "
                     f"{self.chemical_system.name} which has "
-                    f"{self.chemical_system.total_number_of_atoms()} atoms."
+                    f"{self.chemical_system.total_number_of_atoms} atoms."
                 )
 
         unit_cell = copy.deepcopy(self._unit_cell)
@@ -221,8 +221,6 @@ class _PeriodicConfiguration(_Configuration):
         variables = copy.deepcopy(self.variables)
 
         coords = variables.pop("coordinates")
-
-        return self.__class__(chemical_system, coords, unit_cell, **variables)
 
         return self.__class__(chemical_system, coords, unit_cell, **variables)
 
@@ -394,7 +392,7 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
             chemical_entities = self._chemical_system.chemical_entities
         else:
             for i, ce in enumerate(chemical_entities):
-                root = ce.root_chemical_system()
+                root = ce.root_chemical_system
                 if root is not self._chemical_system:
                     raise ConfigurationError(
                         "All the entities provided in the chemical_entities parameter must belong "
@@ -582,7 +580,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
             chemical_entities = self._chemical_system.chemical_entities
         else:
             for i, ce in enumerate(chemical_entities):
-                root = ce.root_chemical_system()
+                root = ce.root_chemical_system
                 if root is not self._chemical_system:
                     raise ConfigurationError(
                         "All the entities provided in the chemical_entities parameter must belong "
@@ -722,7 +720,7 @@ class RealConfiguration(_Configuration):
             chemical_entities = self._chemical_system.chemical_entities
         else:
             for ce in chemical_entities:
-                root = ce.root_chemical_system()
+                root = ce.root_chemical_system
                 if root is not self._chemical_system:
                     raise ConfigurationError(
                         "All the entities provided in the chemical_entities parameter must belong "
