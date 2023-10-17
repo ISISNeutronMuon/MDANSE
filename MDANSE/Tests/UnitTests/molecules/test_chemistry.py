@@ -34,11 +34,19 @@ def test_molecule_finder(trajectory: HDFTrajectoryInputData):
     coordinates = configuration._variables['coordinates']
     print(coordinates.shape)
 
-def test_molecule_finder(trajectory: HDFTrajectoryInputData):
+def test_molecule_assignment(trajectory: HDFTrajectoryInputData):
+    """As of today (17 Oct 2023) this test does not pass.
+    Topology class writes out the atom coordinates to a PDB file buffer,
+    and RDKit scans it for molecules.
+    Apparently RDKit does not apply the periodic boundary conditions,
+    and the molecules that were on the edge of the simulation box
+    end up in several pieces.
+    At the moment we use the Connectivity class instead.
+    """
     chem_system = trajectory.chemical_system
     configuration = chem_system.configuration
     topology = Topology(trajectory, chem_system)
-    mol = topology.scan_trajectory_frame(0)
+    mol = topology.scan_trajectory_frame(0) 
     SanitizeMol(mol)
     gas_bits = GetMolFrags(mol, asMols=True)
     all_lengths = np.array([mol.GetNumAtoms() for mol in gas_bits])

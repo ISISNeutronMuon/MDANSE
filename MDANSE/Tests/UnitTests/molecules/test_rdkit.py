@@ -26,7 +26,7 @@ def mol_from_rdkit():
     yield mol
 
 def test_loader(chem_from_pdb: ChemicalSystem):
-    assert chem_from_pdb.number_of_atoms() == 60
+    assert chem_from_pdb.number_of_atoms == 60
 
 def test_rdkit(mol_from_rdkit: Mol):
     SanitizeMol(mol_from_rdkit)
@@ -46,4 +46,4 @@ def test_periodic():
         cov = ptable.GetRcovalent(element)
         vdw = ptable.GetRvdw(element)
         print(element, cov, vdw)
-    assert False
+    # assert False  # this was just to trigger the printout
