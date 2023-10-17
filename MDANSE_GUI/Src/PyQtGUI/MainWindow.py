@@ -53,6 +53,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE_GUI.PyQtGUI.BackEnd import BackEnd
+from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.PyQtGUI.Widgets.Generator import WidgetGenerator
 from MDANSE_GUI.PyQtGUI.Widgets.ConvertDialog import ConverterDialog
 from MDANSE_GUI.PyQtGUI.Widgets.ActionDialog import ActionDialog
@@ -133,6 +134,7 @@ class Main(QMainWindow):
         self.setWindowTitle(title)
         self.wid_gen = WidgetGenerator()
         self.resources = Resources()
+        self.current_object = None
         self.makeBasicLayout()
         self.workdir = os.path.expanduser("~")
         self.settings = settings
@@ -162,6 +164,10 @@ class Main(QMainWindow):
         self.attachActions()
         self.backend.new_trajectory.connect(self._visualiser._new_trajectory)
 
+    @Slot(DataTreeItem)
+    def setCurrentObject(self, data_object: DataTreeItem):
+        self.current_object = data_object
+
     @Slot()
     def connectViews(self):
         for key in self.backend.data_holders.keys():
@@ -171,7 +177,8 @@ class Main(QMainWindow):
                 view.setModel(data_holder)
         # extra connections
         self.backend.actions_holder.setViewer(self.actions_view)
-        self.traj_view.pickedAncestor.connect(self.backend.actions_holder.switchModel)
+        self.traj_view.itemPicked.connect(self.backend.actions_holder.switchModel)
+        self.traj_view.itemPicked.connect(self.setCurrentObject)
         #
         self.actions_view.execute_action.connect(self.runAction)
         # self.traj_view.itemPicked.connect(self.actions_view.showValidActions)
@@ -262,7 +269,9 @@ class Main(QMainWindow):
     def runAction(self, converter=None):
         ic(f"Received action: {converter}")
         dialog = ActionDialog
-        dialog_instance = dialog(self, converter=converter)
+        dialog_instance = dialog(
+            self, converter=converter, source_object=self.current_object
+        )
         dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
         dialog_instance.show()
         result = dialog_instance.exec()

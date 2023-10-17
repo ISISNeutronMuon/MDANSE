@@ -47,6 +47,7 @@ class GromacsConverter(Converter):
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "Gromacs", "md.pdb"
             ),
+            "label": "Input PDB file",
         },
     )
     settings["xtc_file"] = (
@@ -61,11 +62,11 @@ class GromacsConverter(Converter):
     )
     settings["fold"] = (
         "boolean",
-        {"default": False, "label": "Fold coordinates in to box"},
+        {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "pdb_file"},
+        {"format": "hdf", "root": "pdb_file", "label": "Output trajectory file name"},
     )
 
     def initialize(self):

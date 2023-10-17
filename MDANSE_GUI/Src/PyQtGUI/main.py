@@ -17,7 +17,6 @@ import sys
 
 from qtpy.QtWidgets import QApplication
 from qtpy.QtCore import QSettings, QThread
-import qdarktheme
 
 from MDANSE_GUI.PyQtGUI.MainWindow import Main
 from MDANSE_GUI.PyQtGUI.BackEnd import BackEnd

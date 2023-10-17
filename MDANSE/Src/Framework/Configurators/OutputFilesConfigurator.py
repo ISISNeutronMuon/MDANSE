@@ -96,6 +96,8 @@ class OutputFilesConfigurator(IConfigurator):
             "%s%s" % (root, REGISTRY["format"][f].extension) for f in formats
         ]
 
+        self["value"] = self["files"]
+
     @property
     def formats(self):
         """

@@ -216,7 +216,11 @@ class LAMMPSConverter(Converter):
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "config_file"},
+        {
+            "format": "hdf",
+            "root": "config_file",
+            "label": "Output trajectory file name",
+        },
     )
 
     def initialize(self):

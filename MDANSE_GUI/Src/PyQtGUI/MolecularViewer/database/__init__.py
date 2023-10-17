@@ -29,8 +29,6 @@ def load_database(database_path):
     return database
 
 
-_homedir = os.path.expanduser("~")
-CHEMICAL_ELEMENTS = load_database(
-    os.path.join(_homedir, ".waterstay", "chemical_elements.yml")
-)
-STANDARD_RESIDUES = load_database(os.path.join(_homedir, ".waterstay", "residues.yml"))
+_libdir, _ = os.path.split(__file__)
+CHEMICAL_ELEMENTS = load_database(os.path.join(_libdir, "chemical_elements.yml"))
+STANDARD_RESIDUES = load_database(os.path.join(_libdir, "residues.yml"))

@@ -24,16 +24,16 @@ class SignalError(Error):
 
 INTERPOLATION_ORDER = {}
 
-INTERPOLATION_ORDER["1st order"] = np.array(
+INTERPOLATION_ORDER[1] = np.array(
     [[-3.0, 4.0, -1.0], [-1.0, 0.0, 1.0], [1.0, -4.0, 3.0]], dtype=np.float64
 )
 
 
-INTERPOLATION_ORDER["2nd order"] = np.array(
+INTERPOLATION_ORDER[2] = np.array(
     [[-3.0, 4.0, -1.0], [-1.0, 0.0, 1.0], [1.0, -4.0, 3.0]], dtype=np.float64
 )
 
-INTERPOLATION_ORDER["3rd order"] = np.array(
+INTERPOLATION_ORDER[3] = np.array(
     [
         [-11.0, 18.0, -9.0, 2.0],
         [-2.0, -3.0, 6.0, -1.0],
@@ -43,7 +43,7 @@ INTERPOLATION_ORDER["3rd order"] = np.array(
     dtype=np.float64,
 )
 
-INTERPOLATION_ORDER["4th order"] = np.array(
+INTERPOLATION_ORDER[4] = np.array(
     [
         [-50.0, 96.0, -72.0, 32.0, -6.0],
         [-6.0, -20.0, 36.0, -12.0, 2.0],
@@ -54,7 +54,7 @@ INTERPOLATION_ORDER["4th order"] = np.array(
     dtype=np.float64,
 )
 
-INTERPOLATION_ORDER["5th order"] = np.array(
+INTERPOLATION_ORDER[5] = np.array(
     [
         [-274.0, 600.0, -600.0, 400.0, -150.0, 24.0],
         [-24.0, -130.0, 240.0, -120.0, 40.0, -6.0],
@@ -140,7 +140,7 @@ def normalize(x, axis=0):
     return nx
 
 
-def differentiate(a, dt=1.0, order="1st order"):
+def differentiate(a, dt=1.0, order=1):
     if order not in INTERPOLATION_ORDER:
         raise SignalError("Invalid differentiation order")
 

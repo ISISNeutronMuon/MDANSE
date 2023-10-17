@@ -43,22 +43,29 @@ class TrajectoryViewer(QTreeView):
         ic("Emitting items ancestor. Item:", item)
         anc = item.ancestors()
         ic("ancestor:", anc[-1])
-        self.pickedAncestor.emit(anc[-1])
+        # self.pickedAncestor.emit(anc[-1])
+        self.itemPicked.emit(item)
 
-    # def contextMenuEvent(self, event: QContextMenuEvent) -> None:
-    #     index = self.indexAt(event.pos())
-    #     model = self.model()
-    #     item = model.itemData()
-    #     # item = index.data()
-    #     ic(index)
-    #     ic(item)
-    #     menu = QMenu()
-    #     self.populateMenu(menu)
-    #     picked = menu.exec(menu.)
-    #     res = menu.exec_(event.globalPos())
+    def contextMenuEvent(self, event: QContextMenuEvent) -> None:
+        index = self.indexAt(event.pos())
+        model = self.model()
+        item = model.itemData(index)
+        # item = index.data()
+        ic(index)
+        ic(item)
+        menu = QMenu()
+        self.populateMenu(menu, item)
+        # picked = menu.exec(menu.)
+        menu.exec_(event.globalPos())
+        # return super().contextMenuEvent(event)
 
-    #     return super().contextMenuEvent(event)
+    def populateMenu(self, menu: QMenu, item: DataTreeItem):
+        for action, method in [("Delete", self.deleteNode)]:
+            temp_action = menu.addAction(action)
+            temp_action.triggered.connect(method)
 
-    def populateMenu(menu: QMenu, item: DataTreeItem):
-        for action in item.possibleActions():
-            menu.addAction(action)
+    @Slot()
+    def deleteNode(self):
+        model = self.model()
+        index = self.currentIndex()
+        model.removeRow(index.row())

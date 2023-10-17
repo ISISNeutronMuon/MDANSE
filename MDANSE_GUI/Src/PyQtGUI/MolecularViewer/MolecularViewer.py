@@ -247,7 +247,7 @@ class MolecularViewer(QtWidgets.QWidget):
         line_mapper.ScalarVisibilityOn()
         line_mapper.ColorByArrayComponent("scalars", 1)
         line_actor = vtk.vtkLODActor()
-        line_actor.GetProperty().SetLineWidth(3)
+        line_actor.GetProperty().SetLineWidth(30 * self._scale_factor)
         line_actor.SetMapper(line_mapper)
         actor_list.append(line_actor)
 
@@ -547,15 +547,14 @@ class MolecularViewer(QtWidgets.QWidget):
             for at in self._reader.atom_types
         ]
         self.set_connectivity_builder(coords, covalent_radii)
-        chemical_bonds = self._connectivity_builder.find_collisions(1.0e-1)
+        chemical_bonds = self._fixed_bonds
 
         bonds = vtk.vtkCellArray()
-        for at, bonded_ats in chemical_bonds.items():
-            for bonded_at in bonded_ats:
-                line = vtk.vtkLine()
-                line.GetPointIds().SetId(0, at)
-                line.GetPointIds().SetId(1, bonded_at)
-                bonds.InsertNextCell(line)
+        for at, bonded_at in chemical_bonds:
+            line = vtk.vtkLine()
+            line.GetPointIds().SetId(0, at)
+            line.GetPointIds().SetId(1, bonded_at)
+            bonds.InsertNextCell(line)
 
         self._polydata.SetLines(bonds)
 
@@ -583,6 +582,10 @@ class MolecularViewer(QtWidgets.QWidget):
         self.new_max_frames.emit(self._n_frames)
 
         self._atoms = self._reader.atom_types
+        try:
+            self._fixed_bonds = self._reader._chemical_system._bonds
+        except AttributeError:
+            self._fixed_bonds = []
 
         # Hack for reducing objects resolution when the system is big
         self._resolution = int(np.sqrt(3000000.0 / self._n_atoms))

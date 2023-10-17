@@ -13,6 +13,8 @@
 #
 # **************************************************************************
 
+import numpy as np
+
 from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.RangeConfigurator import RangeConfigurator
 
@@ -52,6 +54,8 @@ class FramesConfigurator(RangeConfigurator):
         trajConfig = self._configurable[self._dependencies["trajectory"]]
 
         if value in ["all", None]:
+            value = (0, trajConfig["length"], 1)
+        elif np.allclose(value, [0, -1, 1]):
             value = (0, trajConfig["length"], 1)
 
         self._mini = 0

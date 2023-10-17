@@ -366,6 +366,7 @@ class DL_POLYConverter(Converter):
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "DL_Poly", "FIELD_cumen"
             ),
+            "label": "Input FIELD file",
         },
     )
     settings["history_file"] = (
@@ -375,12 +376,13 @@ class DL_POLYConverter(Converter):
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "DL_Poly", "HISTORY_cumen"
             ),
+            "label": "Input HISTORY file",
         },
     )
     settings["atom_aliases"] = ("python_object", {"default": {}})
     settings["fold"] = (
         "boolean",
-        {"default": False, "label": "Fold coordinates in to box"},
+        {"default": False, "label": "Fold coordinates into box"},
     )
     settings["version"] = (
         "single_choice",
@@ -389,7 +391,11 @@ class DL_POLYConverter(Converter):
     # settings['output_files'] = ('output_files', {'formats':["hdf"]})
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "history_file"},
+        {
+            "format": "hdf",
+            "root": "history_file",
+            "label": "Output trajectory file name",
+        },
     )
 
     def initialize(self):

@@ -231,6 +231,7 @@ class CP2KConverter(Converter):
                 "CP2K",
                 "p1-supercell-pos-ejemplo.xyz",
             ),
+            "label": "Positions file (XYZ)",
         },
     )
     settings["vel_file"] = (
@@ -247,6 +248,7 @@ class CP2KConverter(Converter):
                 "p1-supercell-vel-ejemplo.xyz",
             ),
             "optional": True,
+            "label": "Velocity file (XYZ, optional)",
         },
     )
     settings["cell_file"] = (
@@ -256,11 +258,16 @@ class CP2KConverter(Converter):
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "CP2K", "p1-supercell-1.cell"
             ),
+            "label": "CP2K unit cell file (.cell)",
         },
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "xdatcar_file"},
+        {
+            "format": "hdf",
+            "root": "xdatcar_file",
+            "label": "Output trajectory file name",
+        },
     )
 
     def initialize(self):

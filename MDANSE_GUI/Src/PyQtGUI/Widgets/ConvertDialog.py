@@ -93,6 +93,7 @@ class ConverterDialog(QDialog):
             ddict = value[1]
             defaultvalue = ddict.get("default", 0.0)
             labeltext = ddict.get("label", "Mystery X the Unknown")
+            ddict["label"] = labeltext
             base, data_handler = InputFactory.createInputField(
                 parent=self, kind=dtype, **ddict
             )

@@ -206,15 +206,20 @@ class CASTEPConverter(Converter):
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "CASTEP", "PBAnew.md"
             ),
+            "label": "Input MD file",
         },
     )
     settings["fold"] = (
         "boolean",
-        {"default": False, "label": "Fold coordinates in to box"},
+        {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "castep_file"},
+        {
+            "format": "hdf",
+            "root": "castep_file",
+            "label": "Output trajectory file name",
+        },
     )
 
     def initialize(self):
