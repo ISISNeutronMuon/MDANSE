@@ -78,6 +78,8 @@ class ActionsTree(QTreeView):
         #
         number = item.data()
         ic(f"Node number is {number}")
+        if number is None:
+            return
         action = model._nodes[number]
         self.execute_action.emit(action)
 

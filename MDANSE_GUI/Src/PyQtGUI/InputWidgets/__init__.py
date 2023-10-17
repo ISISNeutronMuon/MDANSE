@@ -40,6 +40,9 @@ modnames = [
     "OutputFilesWidget",
     "BackupWidget",
     "RunningModeWidget",
+    "ComboWidget",
+    "InputDirectoryWidget",
+    "OutputDirectoryWidget",
 ]
 
 for name in modnames:

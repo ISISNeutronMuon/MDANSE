@@ -62,6 +62,10 @@ widget_lookup = {  # these all come from MDANSE_GUI.PyQtGUI.InputWidgets
     "interpolation_order": InterpolationOrderWidget,
     "output_files": OutputFilesWidget,
     "running_mode": RunningModeWidget,
+    "weights": ComboWidget,
+    "grouping_level": ComboWidget,
+    "input_directory": InputDirectoryWidget,
+    "output_directory": OutputDirectoryWidget,
 }
 
 
