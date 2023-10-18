@@ -94,6 +94,8 @@ class ActionDialog(QDialog):
             self.cname = cname
             self.last_paths[cname] = "."
 
+        self.setWindowTitle(converter.__name__)
+
         if converter is not None:
             converter_instance = converter()
             converter_instance.build_configuration()

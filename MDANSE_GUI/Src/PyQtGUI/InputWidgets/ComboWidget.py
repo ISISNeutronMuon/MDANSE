@@ -49,6 +49,13 @@ class ComboWidget(WidgetBase):
         if self._tooltip == "":
             self._tooltip = "You only have one option. Choose wisely."
 
+    def get_widget_value(self):
+        return self._field.currentText()
+
     @Slot()
     def updateValue(self):
         self._configurator.configure(self._field.currentText())
+
+    def get_value(self):
+        self.updateValue()
+        return self._field.currentText()
