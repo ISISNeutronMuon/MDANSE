@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/InputWidgets/HDFTrajectoryWidget.py
-# @brief     Implements module/class/test HDFTrajectoryWidget
+# @file      Src/PyQtGUI/InputWidgets/BackupWidget.py
+# @brief     BackupWidget is used when a specialised widget is missing
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -13,11 +13,9 @@
 #
 # **************************************************************************
 
-from qtpy.QtWidgets import QLineEdit, QLabel
+from qtpy.QtWidgets import QLineEdit
 from qtpy.QtCore import Slot, Signal
-from qtpy.QtGui import QIntValidator
 
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
 
 

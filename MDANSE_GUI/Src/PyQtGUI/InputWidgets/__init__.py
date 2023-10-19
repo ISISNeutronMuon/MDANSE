@@ -43,6 +43,7 @@ modnames = [
     "ComboWidget",
     "InputDirectoryWidget",
     "OutputDirectoryWidget",
+    "QVectorsWidget",
 ]
 
 for name in modnames:
