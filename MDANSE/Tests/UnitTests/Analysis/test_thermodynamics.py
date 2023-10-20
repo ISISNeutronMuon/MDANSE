@@ -28,7 +28,7 @@ def trajectory():
     trajectory = REGISTRY["input_data"]["hdf_trajectory"](short_traj)
     yield trajectory
 
-@pytest.mark.parametrize('interp_order',["1st order","2nd order","3rd order"])
+@pytest.mark.parametrize('interp_order',[1,2,3])
 def test_temperature(trajectory, interp_order):
     temp_name = tempfile.mktemp()
     parameters = {}
