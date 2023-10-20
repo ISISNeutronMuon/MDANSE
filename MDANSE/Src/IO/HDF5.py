@@ -15,6 +15,7 @@
 
 import h5py
 import numpy as np
+import os 
 
 from MDANSE.IO.IOUtils import _IFileVariable
 
@@ -38,29 +39,29 @@ class HDFFileVariable(_IFileVariable):
         """
         return self._variable.attrs
 
-
 def find_numeric_variables(var_dict, group):
     """
-    Recursively retrieves all the numeric variables stored in an HDF5 file.
+    Retrieves the numeric variables stored in an HDF5 file.
 
-    :param var_dict: The dictionary into which the variables are saved.
+    :param var_dict: dict into which the variables are saved.
     :type var_dict: dict
 
     :param group: The file whose variables are to be retrieved.
     :type group: h5py.File or h5py.Group
     """
 
-    for var_key, var in list(group.items()):
+    for var_key, var in group.items():
+
         if isinstance(var, h5py.Group):
             find_numeric_variables(var_dict, var)
         else:
-            if var.parent.name == "/":
-                path = "/{}".format(var_key)
+            if var.parent.name == '/':
+                path = '/{}'.format(var_key)
             else:
-                path = "{}/{}".format(var.parent.name, var_key)
+                path = '{}/{}'.format(var.parent.name, var_key)
 
             # Non-numeric variables are not supported by the plotter
-            if not np.issubdtype(var.dtype, np.number):
+            if not numpy.issubdtype(var.dtype, numpy.number):
                 continue
 
             # Variables with dimension higher than 3 are not supported by the plotter
@@ -69,7 +70,12 @@ def find_numeric_variables(var_dict, group):
 
             comp = 1
             while var_key in var_dict:
-                var_key = "{:s}_{:d}".format(var_key, comp)
+                var_key = '{:s}_{:d}'.format(var_key, comp)
                 comp += 1
 
-            var_dict[var_key] = (path, HDFFileVariable(var))
+            if 'trajectory' in group.filename:
+                file_path = os.path.join(TRAJECTORY_DIR, var_key + '.hdf5')
+            elif 'analysis' in group.filename:
+                file_path = os.path.join(ANALYSIS_DIR, var_key + '.h5')
+
+            var_dict[var_key] = (file_path, HDFFileVariable(var))
