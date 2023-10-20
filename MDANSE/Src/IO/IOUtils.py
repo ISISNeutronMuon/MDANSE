@@ -12,16 +12,17 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
 import abc
 from collections import OrderedDict
 
 
-class _IFileVariable(metaclass=abc.ABCMeta):
+class _IFileVariable:
     """This is the abstract base class for file variable.
 
     Basically, this class allows to have a common interface for the data formats supported by MDANSE.
     """
+
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, variable):
         self._variable = variable
@@ -67,22 +68,22 @@ def load_variables(dictionary):
     :rtype: collections.OrderedDict[str, dict]
     """
     data = OrderedDict()
-    for vname, vinfo in list(dictionary.items()):
+    for vname, vinfo in dictionary.items():
         vpath, variable = vinfo
         arr = variable.get_array()
         attributes = variable.get_attributes()
 
         data[vname] = {}
-        if "axis" in attributes:
-            axis = attributes["axis"]
+        if 'axis' in attributes:
+            axis = attributes['axis']
             if axis:
-                data[vname]["axis"] = axis.split("|")
+                data[vname]['axis'] = axis.split('|')
             else:
-                data[vname]["axis"] = []
+                data[vname]['axis'] = []
         else:
-            data[vname]["axis"] = []
-        data[vname]["path"] = vpath
-        data[vname]["data"] = arr
-        data[vname]["units"] = attributes.get("units", "au")
+            data[vname]['axis'] = []
+        data[vname]['path'] = vpath
+        data[vname]['data'] = arr
+        data[vname]['units'] = attributes.get('units', 'au')
 
     return data
