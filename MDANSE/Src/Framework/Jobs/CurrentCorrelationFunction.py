@@ -21,7 +21,7 @@ from tempfile import gettempdir, tempdir
 
 import numpy as np
 
-import netCDF4
+import h5py
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -118,7 +118,7 @@ class CurrentCorrelationFunction(IJob):
             },
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
+    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
     settings["running_mode"] = ("running_mode", {})
 
     def initialize(self):
@@ -279,8 +279,8 @@ class CurrentCorrelationFunction(IJob):
             if not hasattr(self, "_name"):
                 self._name = "_".join([self._type, IJob.define_unique_name()])
 
-            with netCDF4.Dataset(
-                os.path.join(gettempdir(), "mdanse_" + self.name + ".nc"), "w"
+            with h5py.File(
+                os.path.join(gettempdir(), "mdanse_" + self.name + ".h5"), "w"
             ) as velocities:
                 velocities.createDimension("particles", nAtoms + 1)
                 velocities.createDimension("time", nFrames)
@@ -320,10 +320,10 @@ class CurrentCorrelationFunction(IJob):
                             dt=self.configuration["frames"]["time_step"],
                         )
                     velocities["velocities"][idx, :, :] = vels
-            self._netcdf = netCDF4.Dataset(
-                os.path.join(tempdir, "mdanse_" + self.name + ".nc"), "r"
+            self._data_file = h5py.File(
+                os.path.join(tempdir, "mdanse_" + self.name + ".h5"), "r"
             )
-            self._velocities = self._netcdf["velocities"]
+            self._velocities = self._data_file["velocities"]
 
     def run_step(self, index):
         """
@@ -489,7 +489,7 @@ class CurrentCorrelationFunction(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
         try:
-            self._netcdf.close()
+            self._data_file.close()
         except (AttributeError, RuntimeError):
             pass
 

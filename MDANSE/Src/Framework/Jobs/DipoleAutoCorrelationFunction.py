@@ -48,7 +48,7 @@ class DipoleAutoCorrelationFunction(IJob):
             "default": {0: 0.5, 1: 1.2, 2: -0.2},
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
+    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
     settings["running_mode"] = ("running_mode", {})
 
     def initialize(self):

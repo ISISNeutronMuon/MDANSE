@@ -92,7 +92,7 @@ class MeanSquareDisplacement(IJob):
     )
     settings["output_files"] = (
         "output_files",
-        {"formats": ["hdf", "netcdf", "ascii", "svg"]},
+        {"formats": ["hdf", "ascii", "svg"]},
     )
     settings["running_mode"] = ("running_mode", {})
 

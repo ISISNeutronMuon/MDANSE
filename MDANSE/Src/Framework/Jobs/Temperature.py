@@ -57,7 +57,7 @@ class Temperature(IJob):
             "default": 1,
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
+    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
 
     def initialize(self):
         """
