@@ -89,43 +89,32 @@ def load_variables(dictionary):
 
     return data
 
-def find_numeric_variables(var_dict, group):
-    """
-    Retrieves the numeric variables stored in an HDF5 file.
+#How do you wantb this solved specific metadata or attributes, or relevant information. ive had a ago 
 
-    :param var_dict: dict into which the variables are saved.
-    :type var_dict: dict
-
-    :param group: The file whose variables are to be retrieved.
-    :type group: h5py.File or h5py.Group
-    """
-
-    for var_key, var in group.items():
-
-        if isinstance(var, h5py.Group):
-            find_numeric_variables(var_dict, var)
+def load_variables(dictionary):
+    data = OrderedDict()
+    for vname, vinfo in dictionary.items():
+        vpath, variable = vinfo
+        if 'trajectory' in vpath:
+            processed_variable = TrajectoryFileVariable(variable)
+            processed_variable.s_method()
+        elif 'analysis' in vpath:
+            processed_variable = AnalysisFileVariable(variable)
+            processed_variable.s_method()
         else:
-            if var.parent.name == '/':
-                path = '/{}'.format(var_key)
+            raise ValueError(f"Unrecognized file type for {vpath}.")
+        arr = processed_variable.get_array()
+        attributes = processed_variable.get_attributes()
+        data[vname] = {}
+        if 'axis' in attributes:
+            axis = attributes['axis']
+            if axis:
+                data[vname]['axis'] = axis.split('|')
             else:
-                path = '{}/{}'.format(var.parent.name, var_key)
-
-            # Non-numeric variables are not supported by the plotter
-            if not numpy.issubdtype(var.dtype, numpy.number):
-                continue
-
-            # Variables with dimension higher than 3 are not supported by the plotter
-            if var.ndim > 3:
-                continue
-
-            comp = 1
-            while var_key in var_dict:
-                var_key = '{:s}_{:d}'.format(var_key, comp)
-                comp += 1
-
-            if 'trajectory' in group.filename:
-                file_path = os.path.join(TRAJECTORY_DIR, var_key + '.hdf5')
-            elif 'analysis' in group.filename:
-                file_path = os.path.join(ANALYSIS_DIR, var_key + '.h5')
-
-            var_dict[var_key] = (file_path, HDFFileVariable(var))
+                data[vname]['axis'] = []
+        else:
+            data[vname]['axis'] = []
+        data[vname]['path'] = vpath
+        data[vname]['data'] = arr
+        data[vname]['units'] = attributes.get('units', 'au')
+    return data

@@ -14,8 +14,7 @@
 # **************************************************************************
 
 import h5py
-import numpy as np
-import os 
+import numpy
 
 from MDANSE.IO.IOUtils import _IFileVariable
 
@@ -39,11 +38,12 @@ class HDFFileVariable(_IFileVariable):
         """
         return self._variable.attrs
 
+
 def find_numeric_variables(var_dict, group):
     """
-    Retrieves the numeric variables stored in an HDF5 file.
+    Recursively retrieves all the numeric variables stored in an HDF5 file.
 
-    :param var_dict: dict into which the variables are saved.
+    :param var_dict: The dictionary into which the variables are saved.
     :type var_dict: dict
 
     :param group: The file whose variables are to be retrieved.
@@ -74,8 +74,8 @@ def find_numeric_variables(var_dict, group):
                 comp += 1
 
             if 'trajectory' in group.filename:
-                file_path = os.path.join(TRAJECTORY_DIR, var_key + '.hdf5')
+                path = 'trajectory_{}'.format(path)
             elif 'analysis' in group.filename:
-                file_path = os.path.join(ANALYSIS_DIR, var_key + '.h5')
+                path = 'analysis_{}'.format(path)
 
-            var_dict[var_key] = (file_path, HDFFileVariable(var))
+            var_dict[var_key] = (path, HDFFileVariable(var))
