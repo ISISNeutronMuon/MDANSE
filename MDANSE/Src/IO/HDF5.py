@@ -14,7 +14,7 @@
 # **************************************************************************
 
 import h5py
-import numpy
+import numpy as np 
 
 from MDANSE.IO.IOUtils import _IFileVariable
 
@@ -61,7 +61,7 @@ def find_numeric_variables(var_dict, group):
                 path = '{}/{}'.format(var.parent.name, var_key)
 
             # Non-numeric variables are not supported by the plotter
-            if not numpy.issubdtype(var.dtype, numpy.number):
+            if not np.issubdtype(var.dtype, np.number):
                 continue
 
             # Variables with dimension higher than 3 are not supported by the plotter
