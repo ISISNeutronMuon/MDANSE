@@ -19,7 +19,7 @@ jobs:
 
       - uses: actions/setup-python@v3
         with:
-          python-version: [${{ matrix.python-version }}]
+          python-version: ${{ matrix.python-version }}
 
       - name: Install build packages
         run: python -m pip install build wheel setuptools
@@ -57,7 +57,7 @@ jobs:
 
       - uses: actions/setup-python@v3
         with:
-          python-version: [${{ matrix.python-version }}]
+          python-version: ${{ matrix.python-version }}
       
       - uses: actions/download-artifact@v3
         with:
