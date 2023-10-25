@@ -13,6 +13,7 @@
 #
 # **************************************************************************
 
+from icecream import ic
 from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex
 
 from MDANSE.Framework.Status import Status
@@ -26,11 +27,6 @@ class JobCommunicator(QObject):
 
 
 class JobStatusQt(Status):
-    target = Signal(int)
-    progress = Signal(int)
-    finished = Signal(bool)
-    oscillate = Signal()
-
     def __init__(self, *args, **kwargs):
         qparent = kwargs.pop("parent", None)
         super().__init__()
@@ -39,10 +35,16 @@ class JobStatusQt(Status):
         self._mutex = QMutex()
         self._communicator = JobCommunicator(parent=qparent)
 
+    @property
+    def state(self):
+        return self._state
+
     def finish_status(self):
+        ic()
         self._communicator.finished.emit(True)
 
     def start_status(self):
+        ic()
         try:
             temp = int(self._nSteps)
         except:
@@ -51,6 +53,7 @@ class JobStatusQt(Status):
             self._communicator.target.emit(temp)
 
     def stop_status(self):
+        ic()
         self._communicator.finished.emit(False)
 
     def update_status(self):

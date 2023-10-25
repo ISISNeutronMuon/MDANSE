@@ -82,19 +82,25 @@ class JobEntry(QObject):
 
     @Slot(bool)
     def on_finished(self, success: bool):
+        print("Item received on_finished!")
         self.success = success
         self.has_finished = True
         if success:
             self.percent_complete = 100
+        self.update_fields()
 
     @Slot(int)
     def on_started(self, target_steps: int):
+        print("Item received on_started!")
         self.total_steps = target_steps
         self.has_started = True
+        self.update_fields()
 
     @Slot(int)
     def on_update(self, completed_steps: int):
+        print("Item received on_update!")
         self.percent_complete = completed_steps / self.total_steps * 99
+        self.update_fields()
 
     @Slot()
     def on_oscillate(self):
@@ -107,6 +113,7 @@ class JobHolder(QStandardItemModel):
         self.python_interpreter = python
         self.lock = QMutex()
         self.existing_threads = []
+        self.existing_jobs = []
 
     @Slot(str)
     def reportError(self, err: str):
@@ -132,8 +139,12 @@ class JobHolder(QStandardItemModel):
         th_ref._status._communicator.oscillate.connect(item_th.on_oscillate)  # nothing
         ic("Thread ready to start!")
         self.appendRow(item_th._item)
+        # nrows = self.rowCount()
+        # index = self.indexFromItem(item_th._item)
+        # print(f"Index: {index}")
         th_ref.start()
         self.existing_threads.append(th_ref)
+        self.existing_jobs.append(item_th)
 
     # def on_run(self, event=None):
 
