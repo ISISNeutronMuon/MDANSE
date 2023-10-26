@@ -67,7 +67,8 @@ class JobEntry(QObject):
         self._output = None
         self.reference = None
         self.total_steps = 99
-        self._item = QStandardItem()
+        self._prog_item = QStandardItem()
+        self._stat_item = QStandardItem()
 
     @property
     def parameters(self):
@@ -78,15 +79,17 @@ class JobEntry(QObject):
         self._parameters = input
 
     def update_fields(self):
-        self._item.setText(f"{self.percent_complete} percent complete")
+        self._prog_item.setText(f"{self.percent_complete} percent complete")
 
     @Slot(bool)
     def on_finished(self, success: bool):
         print("Item received on_finished!")
         self.success = success
         self.has_finished = True
+        self._stat_item.setText("Stopped")
         if success:
             self.percent_complete = 100
+            self._stat_item.setText("Completed!")
         self.update_fields()
 
     @Slot(int)
@@ -94,12 +97,14 @@ class JobEntry(QObject):
         print("Item received on_started!")
         self.total_steps = target_steps
         self.has_started = True
+        self._stat_item.setText("Starting")
         self.update_fields()
 
     @Slot(int)
     def on_update(self, completed_steps: int):
         print("Item received on_update!")
         self.percent_complete = completed_steps / self.total_steps * 99
+        self._stat_item.setText("Running")
         self.update_fields()
 
     @Slot()
@@ -138,7 +143,13 @@ class JobHolder(QStandardItemModel):
         th_ref._status._communicator.finished.connect(item_th.on_finished)  # bool
         th_ref._status._communicator.oscillate.connect(item_th.on_oscillate)  # nothing
         ic("Thread ready to start!")
-        self.appendRow(item_th._item)
+        self.appendRow(
+            [
+                QStandardItem(str(job_vars[0].__name__)),
+                item_th._prog_item,
+                item_th._stat_item,
+            ]
+        )
         # nrows = self.rowCount()
         # index = self.indexFromItem(item_th._item)
         # print(f"Index: {index}")
