@@ -579,7 +579,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._n_atoms = self._reader.n_atoms
         self._n_frames = self._reader.n_frames
 
-        self.new_max_frames.emit(self._n_frames)
+        self.new_max_frames.emit(self._n_frames - 1)
 
         self._atoms = self._reader.atom_types
         try:

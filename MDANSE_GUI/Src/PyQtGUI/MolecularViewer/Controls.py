@@ -27,6 +27,7 @@ from qtpy.QtWidgets import (
     QTableView,
     QDoubleSpinBox,
     QColorDialog,
+    QGroupBox,
 )
 from qtpy.QtGui import (
     QDoubleValidator,
@@ -123,7 +124,7 @@ class ViewerControls(QWidget):
         self._mutex = QMutex()
         self._frame_step = 1
         self._time_per_frame = 80  # in ms
-        self._frame_factor = 10  # just a scalar multiplication factor
+        self._frame_factor = 1  # just a scalar multiplication factor
         self.createSlider()
         self.createButtons(Qt.Orientation.Horizontal)
         self.createSidePanel()
@@ -197,28 +198,42 @@ class ViewerControls(QWidget):
         layout = QVBoxLayout(base)
         base.setLayout(layout)
         # the table of chemical elements
+        wrapper1 = QGroupBox("Atom properties", base)
+        layout1 = QHBoxLayout(wrapper1)
         self._atom_details = QTableView(base)
         self._atom_details.setSizePolicy(
             QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum
         )
-        layout.addWidget(self._atom_details)
+        layout1.addWidget(self._atom_details)
+        wrapper1.setLayout(layout1)
+        layout.addWidget(wrapper1)
         # the widget selecting time per animation frame
+        wrapper2 = QGroupBox("Time per frame (ms)", base)
+        layout2 = QHBoxLayout(wrapper2)
         frame_time_selector = QSpinBox(base)
-        frame_time_selector.setToolTip("Time per frame (in ms)")
+        frame_time_selector.setToolTip("Larger number means slower animation")
         frame_time_selector.setValue(80)
         frame_time_selector.setMinimum(1)
         frame_time_selector.setMaximum(5000)
         frame_time_selector.valueChanged.connect(self.setTimeStep)
-        layout.addWidget(frame_time_selector)
+        layout2.addWidget(frame_time_selector)
+        wrapper2.setLayout(layout2)
+        layout.addWidget(wrapper2)
         # the widget for frame skipping
+        wrapper3 = QGroupBox("Show every N frames", base)
+        layout3 = QHBoxLayout(wrapper3)
         frame_skip = QSpinBox(base)
         frame_skip.setToolTip("Animate every N frames in fast forward")
-        frame_skip.setValue(10)
+        frame_skip.setValue(1)
         frame_skip.setMinimum(1)
         frame_skip.setMaximum(5000)
         frame_skip.valueChanged.connect(self.setFrameSkip)
-        layout.addWidget(frame_skip)
+        layout3.addWidget(frame_skip)
+        wrapper3.setLayout(layout3)
+        layout.addWidget(wrapper3)
         # the widget for atom size scaling
+        wrapper4 = QGroupBox("Atom size scaling", base)
+        layout4 = QHBoxLayout(wrapper4)
         size_factor = QDoubleSpinBox(base)
         size_factor.setToolTip("Scaling factor for atom size")
         size_factor.setValue(0.2)
@@ -226,7 +241,9 @@ class ViewerControls(QWidget):
         size_factor.setMaximum(50.0)
         size_factor.setSingleStep(0.05)
         size_factor.valueChanged.connect(self.setAtomSize)
-        layout.addWidget(size_factor)
+        layout4.addWidget(size_factor)
+        wrapper4.setLayout(layout4)
+        layout.addWidget(wrapper4)
         # the database of atom types
         # self._database = TrajectoryAtomData()
         self.layout().addWidget(base, 0, 2, 2, 1)  # row, column, rowSpan, columnSpan

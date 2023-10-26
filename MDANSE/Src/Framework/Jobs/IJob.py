@@ -126,6 +126,8 @@ class IJob(Configurable):
 
         self._outputData = OutputData()
 
+        self._status_constructor = JobStatus
+
         self._status = None
 
     @property
@@ -315,8 +317,8 @@ class IJob(Configurable):
         try:
             self._name = "%s_%s" % (self._type, IJob.define_unique_name())
 
-            if status:
-                self._status = JobStatus(self)
+            if status and self._status is None:
+                self._status = self._status_constructor(self)
 
             self.setup(parameters)
 

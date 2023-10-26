@@ -27,12 +27,12 @@ def trajectory():
     trajectory = REGISTRY["input_data"]["hdf_trajectory"](short_traj)
     yield trajectory
 
-@pytest.mark.parametrize('interp_order, normalise',[("1st order", True),
-                                                    ("2nd order", True),
-                                                    ("3rd order", True),
-                                                    ("1st order", False),
-                                                    ("2nd order", False),
-                                                    ("3rd order", False),])
+@pytest.mark.parametrize('interp_order, normalise',[(1, True),
+                                                    (2, True),
+                                                    (3, True),
+                                                    (1, False),
+                                                    (2, False),
+                                                    (3, False),])
 def test_vacf(trajectory, interp_order, normalise):
     temp_name = tempfile.mktemp()
     parameters = {}

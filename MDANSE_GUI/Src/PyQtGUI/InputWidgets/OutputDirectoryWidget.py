@@ -13,13 +13,13 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 
-from MDANSE.GUI.Widgets.InputDirectoryWidget import InputDirectoryWidget
+from qtpy.QtWidgets import QFileDialog
 
-
-class OutputDirectoryWidget(InputDirectoryWidget):
-    pass
+from MDANSE_GUI.PyQtGUI.InputWidgets.InputFileWidget import InputFileWidget
 
 
-REGISTRY["output_directory"] = OutputDirectoryWidget
+class OutputDirectoryWidget(InputFileWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._file_dialog = QFileDialog.getExistingDirectory
