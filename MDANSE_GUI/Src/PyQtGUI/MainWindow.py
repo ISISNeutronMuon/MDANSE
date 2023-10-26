@@ -237,17 +237,21 @@ class Main(QMainWindow):
 
     @Slot()
     def loadTrajectory(self):
-        fname = QFileDialog.getOpenFileName(
-            self,
-            "Load an MD trajectory",
-            self.workdir,
-            "HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
-        )
-        ic(fname)
-        if len(fname[0]) > 0:
-            print(f"fname[0]:{fname[0]}")
-            print(f"fname[1]:{fname[1]}")
-            self.file_name_for_loading.emit(fname[0])
+        file_types = "MDANSE Trajectories (*.hdf5)"
+        dialog = QFileDialog()
+        dialog.setNameFilter(file_types)
+        dialog.setFileMode(QFileDialog.ExistingFile)
+        dialog.setViewMode(QFileDialog.Detail)
+        if dialog.exec_():
+            file_name = dialog.selectedFiles()
+            if file_name:
+                selected_file = file_name[0]
+                print(f"Selected file: {selected_file}")
+                # Check the file extension to determine if it's a trajectory file
+                if selected_file.endswith('.hdf5'):
+                    self.file_name_for_loading.emit(selected_file)  # Emit a signal for trajectory files
+                else:
+                    print("Invalid file format. Please select a valid MDANSE trajectory file.")
 
     @Slot(object)
     def convertTrajectory(self, converter=None):

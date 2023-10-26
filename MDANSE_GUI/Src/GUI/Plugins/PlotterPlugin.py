@@ -581,8 +581,7 @@ class PlotterFrame(wx.Frame):
 
     def on_load_data(self, event=None):
         filters = (
-            "NetCDF and HDF files (*.nc;*.netcdf;*.h5;*.hdf)|*.nc;*.netcdf;*.h5;*.hdf|"
-            "NetCDF file (*.nc)|*.nc|HDF file (*.h5)|*.h5|All files (*.*)|*.*"
+            "HDF file (*.h5)|*.h5|All files (*.*)|*.*"
         )
         dialog = wx.FileDialog(
             self, message="Open file...", wildcard=filters, style=wx.FD_MULTIPLE
@@ -595,6 +594,9 @@ class PlotterFrame(wx.Frame):
 
         for basename, filename in zip(baselist, filelist):
             ext = os.path.splitext(filename)[1]
+            if ext != '.h5':
+                  continue
+            
             with PLOTTER_DATA_TYPES[ext](filename, "r") as f:
                 data = load_variables(f.variables)
 

@@ -14,7 +14,8 @@
 # **************************************************************************
 
 import h5py
-import numpy as np 
+import numpy as np
+import os 
 
 from MDANSE.IO.IOUtils import _IFileVariable
 
