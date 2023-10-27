@@ -71,6 +71,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.PyQtGUI.InputWidgets
     "projection": ProjectionWidget,
     "atom_selection": AtomSelectionWidget,
     "atom_transmutation": AtomTransmutationWidget,
+    "instrument_resolution": InstrumentResolutionWidget,
 }
 
 

@@ -47,6 +47,7 @@ modnames = [
     "ProjectionWidget",
     "AtomSelectionWidget",
     "AtomTransmutationWidget",
+    "InstrumentResolutionWidget",
 ]
 
 for name in modnames:
