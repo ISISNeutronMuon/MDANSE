@@ -44,6 +44,9 @@ modnames = [
     "InputDirectoryWidget",
     "OutputDirectoryWidget",
     "QVectorsWidget",
+    "ProjectionWidget",
+    "AtomSelectionWidget",
+    "AtomTransmutationWidget",
 ]
 
 for name in modnames:

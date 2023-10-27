@@ -35,6 +35,7 @@ from qtpy.QtWidgets import (
     QFormLayout,
     QHBoxLayout,
     QCheckBox,
+    QScrollArea,
 )
 from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel, QObject
 from qtpy.QtGui import (
@@ -67,6 +68,9 @@ widget_lookup = {  # these all come from MDANSE_GUI.PyQtGUI.InputWidgets
     "q_vectors": QVectorsWidget,
     "input_directory": InputDirectoryWidget,
     "output_directory": OutputDirectoryWidget,
+    "projection": ProjectionWidget,
+    "atom_selection": AtomSelectionWidget,
+    "atom_transmutation": AtomTransmutationWidget,
 }
 
 
@@ -87,8 +91,15 @@ class ActionDialog(QDialog):
             self.default_path, _ = os.path.split(temptext)
         super().__init__(*args, **kwargs)
 
-        layout = QVBoxLayout(self)
-        self.setLayout(layout)
+        buffer = QWidget(self)
+        scroll_area = QScrollArea()
+        scroll_area.setWidget(buffer)
+        scroll_area.setWidgetResizable(True)
+        layout = QVBoxLayout(buffer)
+        base_layout = QVBoxLayout(self)
+        buffer.setLayout(layout)
+        base_layout.addWidget(scroll_area)
+        self.setLayout(base_layout)
         self.handlers = {}
         self._widgets = []
         self.converter_instance = None
