@@ -27,9 +27,18 @@ class GridLatticeQVectors(LatticeQVectors):
     """ """
 
     settings = collections.OrderedDict()
-    settings["hrange"] = ("range", {"valueType": int, "includeLast": True})
-    settings["krange"] = ("range", {"valueType": int, "includeLast": True})
-    settings["lrange"] = ("range", {"valueType": int, "includeLast": True})
+    settings["hrange"] = (
+        "range",
+        {"valueType": int, "includeLast": True, "default": (0, 8, 1)},
+    )
+    settings["krange"] = (
+        "range",
+        {"valueType": int, "includeLast": True, "default": (0, 8, 1)},
+    )
+    settings["lrange"] = (
+        "range",
+        {"valueType": int, "includeLast": True, "default": (0, 8, 1)},
+    )
     settings["qstep"] = ("float", {"mini": 1.0e-6, "default": 0.01})
 
     def _generate(self):
