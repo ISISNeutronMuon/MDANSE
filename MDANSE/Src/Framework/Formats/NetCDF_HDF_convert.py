@@ -21,50 +21,53 @@ Proper exception handling and file management are implemented.
 For more information about the MDANSE project, visit: https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 
 """
-
 import os
 import h5py
-
-def read_netcdf_header(file_path):
-    with open(file_path, 'rb') as file:
-        magic_number = file.read(4)
-    return magic_number == b'\x43\x44\x46\x01'
-
-def remove_null_chars(s):
-    # Function to remove embedded NULL characters from a string
-    return s.replace(b'\x00', b'')
-
-def convert_netcdf_to_hdf5(input_folder, output_folder):
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-    file_list = os.listdir(input_folder)
-
-    for file_name in file_list:
-        if file_name.lower().endswith(".nc"):
-            try:
-                netcdf_file = os.path.join(input_folder, file_name)                
-                hdf5_file = os.path.splitext(file_name)[0] + '.h5'                
-                hdf5_file_path = os.path.join(output_folder, hdf5_file)
-                print(f"NetCDF file path: {netcdf_file}")
-                print(f"HDF5 file path: {hdf5_file_path}")
-                if read_netcdf_header(netcdf_file):
-                    print("Extracting data...")
-                    with open(netcdf_file, 'rb') as nc_file:
-                        data = remove_null_chars(nc_file.read())
-                    with h5py.File(hdf5_file_path, 'w') as h5_file:
-                        h5_file.create_dataset('data', data=data)
-                    print(f"Converted {netcdf_file} to {hdf5_file_path}")
-                else:
-                    print(f"Error: {file_name} is not a valid netCDF file.")
-            except Exception as e:
-                print(f"Error converting {netcdf_file}: {e}")
-
+from netCDF4 import Dataset
+from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
  
-
-if __name__ == "__main__":
-    # Define the path to the input folder containing NetCDF files
-    input_netcdf_folder = "C:/Users/ttr36747/Documents/MDANSE/MDANSE/Data/Trajectories/MMTK"
-    # Define the path to the output folder for HDF5 files
-    output_hdf5_folder = "C:/Users/ttr36747/Documents/MDANSE/MDANSE/Data/Trajectories/NEW"
-    # Call the conversion function with the specified input and output folders
-    convert_netcdf_to_hdf5(input_netcdf_folder, output_hdf5_folder)
+def convert_trajectory_to_hdf5(trajectory_filename, h5_filename):
+    try:
+        chemical_system = None
+        with Dataset(trajectory_filename, 'r') as trajectory_file:
+            chemical_entity_data = None
+            for varname in trajectory_file.variables.keys():
+                var = trajectory_file.variables[varname]
+                if 'chemical_entity' in varname:
+                    chemical_entity_data = var[:]
+ 
+            with h5py.File(h5_filename, 'w') as h5_file:
+                for dimname in trajectory_file.dimensions.keys():
+                    dim = trajectory_file.dimensions[dimname]
+                    h5_file.create_dataset(dimname, data=dim.size)
+ 
+                for varname in trajectory_file.variables.keys():
+                    var = trajectory_file.variables[varname]
+                    if varname != 'chemical_entity':
+                        h5_file.create_dataset(varname, data=var[:])
+ 
+                if chemical_entity_data is not None:
+                    atoms = []
+                    for data in chemical_entity_data:
+                        atom = Atom(*data)
+                        atoms.append(atom)
+                    chemical_system = ChemicalSystem(atoms)  # Create a ChemicalSystem object
+ 
+                    # Store chemical system information in the h5_file
+                    chemical_group = h5_file.create_group("ChemicalSystem")
+                    for i, atom in enumerate(chemical_system.get_atoms()):
+                        atom_group = chemical_group.create_group(f"Atom_{i}")
+                        atom_group.create_dataset("element", data=atom.element)
+                        atom_group.create_dataset("mass", data=atom.mass)
+                        atom_group.create_dataset("position", data=atom.position)
+ 
+                if chemical_system:
+                    print(f"Converted {trajectory_filename} to {h5_filename} and stored chemical system information.")
+                else:
+                    print(f"Converted {trajectory_filename} to {h5_filename}")
+ 
+    except Exception as e:
+        print(f"Error converting {trajectory_filename} to HDF5: {e}")
+ 
+# Example usage with the provided file paths
+convert_trajectory_to_hdf5('C:/Users/ttr36747/Documents/MDANSE/MDANSE/Data/Trajectories/traj/current_traj.nc', 'C:/Users/ttr36747/Documents/MDANSE/MDANSE/Data/Trajectories/traj/new_trajectory.h5')
