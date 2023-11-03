@@ -11,7 +11,7 @@ import numpy as np
 from MDANSE import REGISTRY
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
-from ..Data.data import short_traj
+from ..Data.data import mol_traj as short_traj
 
 sys.setrecursionlimit(100000)
 ic.disable()
