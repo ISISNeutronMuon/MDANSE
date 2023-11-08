@@ -22,52 +22,44 @@ For more information about the MDANSE project, visit: https://www.isis.stfc.ac.u
 
 """
 import os
+import netCDF4 as nc
 import h5py
-from netCDF4 import Dataset
-from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
+import sys
+import numpy as np
  
-def convert_trajectory_to_hdf5(trajectory_filename, h5_filename):
+def convert_netcdf_to_hdf5_mdanse(input_file, output_file):
     try:
-        chemical_system = None
-        with Dataset(trajectory_filename, 'r') as trajectory_file:
-            chemical_entity_data = None
-            for varname in trajectory_file.variables.keys():
-                var = trajectory_file.variables[varname]
-                if 'chemical_entity' in varname:
-                    chemical_entity_data = var[:]
+        chemical_system_vars = {'atom_clusters', 'atoms', 'contents'}
+        configuration_vars = {'coordinates', 'time'}
+        unit_cell_vars = {'unit_cell'}
  
-            with h5py.File(h5_filename, 'w') as h5_file:
-                for dimname in trajectory_file.dimensions.keys():
-                    dim = trajectory_file.dimensions[dimname]
-                    h5_file.create_dataset(dimname, data=dim.size)
+        rootgrp = nc.Dataset(input_file, "r")
+        with h5py.File(output_file, "w") as f:
+            chemical_system_grp = f.create_group('chemical_system')
+            configuration_grp = f.create_group('configuration')
+            unit_cell_grp = f.create_group('unit_cell')
  
-                for varname in trajectory_file.variables.keys():
-                    var = trajectory_file.variables[varname]
-                    if varname != 'chemical_entity':
-                        h5_file.create_dataset(varname, data=var[:])
- 
-                if chemical_entity_data is not None:
-                    atoms = []
-                    for data in chemical_entity_data:
-                        atom = Atom(*data)
-                        atoms.append(atom)
-                    chemical_system = ChemicalSystem(atoms)  # Create a ChemicalSystem object
- 
-                    # Store chemical system information in the h5_file
-                    chemical_group = h5_file.create_group("ChemicalSystem")
-                    for i, atom in enumerate(chemical_system.get_atoms()):
-                        atom_group = chemical_group.create_group(f"Atom_{i}")
-                        atom_group.create_dataset("element", data=atom.element)
-                        atom_group.create_dataset("mass", data=atom.mass)
-                        atom_group.create_dataset("position", data=atom.position)
- 
-                if chemical_system:
-                    print(f"Converted {trajectory_filename} to {h5_filename} and stored chemical system information.")
+            for name, variable in rootgrp.variables.items():
+                if variable.dtype.char == 'S':
+                    data = ''.join(variable[:]).decode('utf-8').strip()
+                    f.attrs[name] = data
                 else:
-                    print(f"Converted {trajectory_filename} to {h5_filename}")
- 
+                    if name in chemical_system_vars:
+                        group = chemical_system_grp
+                    elif name in configuration_vars:
+                        group = configuration_grp
+                    elif name in unit_cell_vars:
+                        group = unit_cell_grp
+                    else:
+                        group = f.create_group(name)
+                    dataset = group.create_dataset(name, data=variable[:])
+                    for attr_name in variable.ncattrs():
+                        dataset.attrs[attr_name] = variable.getncattr(attr_name)
+        print("Conversion successful. HDF5 file saved as: ", output_file)
     except Exception as e:
-        print(f"Error converting {trajectory_filename} to HDF5: {e}")
+        print("An error occurred during the conversion: ", str(e))
  
-# Example usage with the provided file paths
-convert_trajectory_to_hdf5('C:/Users/ttr36747/Documents/MDANSE/MDANSE/Data/Trajectories/traj/current_traj.nc', 'C:/Users/ttr36747/Documents/MDANSE/MDANSE/Data/Trajectories/traj/new_trajectory.h5')
+if __name__ == "__main__":
+    input_file = sys.argv[1] if len(sys.argv) > 1 else "current_traj.nc"
+    output_file = sys.argv[2] if len(sys.argv) > 2 else "output_file.h5"
+    convert_netcdf_to_hdf5_mdanse(input_file, output_file)
