@@ -9,7 +9,7 @@ different parameters to be configured before it can be run. However, all
 of them have the same structure (example window below), consisting of
 these parts:
 
--  **trajectory** box shows the path to the :ref:`netcdf`
+-  **trajectory** box shows the path to the :ref:`HDF5`
    trajectory that this analysis will
    be performed on.
 
@@ -130,16 +130,16 @@ buttons. It consists of these three parts:
 
 *Format:* str
 
-*Default:*
-mmtk_trajectory_directory_path\\<trajectory_filename>_<analysis_acronym>
+**Default:** 
+hdf_trajectory_directory_path/<trajectory_filename>_<analysis_acronym>
 
-Here, mmtk_trajectory_directory_path is the path to the directory where
-the NetCDF file that is being used for analysis is located. The
-<trajectory_filename> is the name of the NetCDF file.
-<trajectory_filename> is the shortened name of the analysis, e.g. disf
-for dynamic incoherent structure factor. How this translates into
-practice can be seen in the picture above.
-
+Here, hdf_trajectory_directory_path represents the
+directory path where the HDF file used for analysis
+is located. The <trajectory_filename> is the name
+of the HDF file, and <analysis_acronym> is the
+abbreviated name of the analysis, such as "disf" for
+dynamic incoherent structure factor. You can see how
+this is applied in the example image above.
 Further, if the above path already exists, (n) will be appended to the
 end of the file name, where n is the lowest number for which a file
 doesn't exist. This way, no overwriting occurs.
@@ -154,10 +154,10 @@ file browser.
 
 *Format:* drop-down
 
-*Default:* HDF5 (for analysis), NetCDF (for trajectory conversion)
+*Default:* h5 (for analysis), HDF (for trajectory conversion)
 
 *Description:* specifies the :ref:`file_formats` in
-which the analysis results are saved. :ref:`hdf5`, :ref:`netcdf`,
+which the analysis results are saved. :ref:`hdf5`, :ref:`HDF`,
 :ref:`text_output`, or cominbations of those can be selected.
 The name of these files is given in the 'Basename' string.
 
@@ -174,18 +174,20 @@ variety of ways to alter the analysis:
 -  Q Vectors (explored separately in the `next
    section <#_A3.4._Q_vectors>`__)
 
-The ones relevant to the analysis are present in its window, but some
-can also be performed from :ref:`molecular-viewer`. By
-default, there are no Selections saved in MDANSE; they all have to be
-created manually. Each selection is unique to a trajectory MMTK NetCDF
-file, but all selections are stored in the same folder, $APPDATA/mdanse.
-Therefore, if a selection is to be reuse, it is important to give
-selections unique names even when creating the same selection for
-multiple trajectories. To help with that, all existing saved selection
-can be viewed in the User Definition Viewer which can be accessed from
-the `toolbar <#_Toolbar>`__. To save a selection, type a name in the
-field next to the **Save** button, and then click on the button. This
-will save the selection without closing the window.
+The elements relevant to the analysis are displayed
+in its window, and some can also be accessed from
+the :ref:`molecular-viewer`. By default, MDANSE does not
+store any pre-defined selections; they must all be manually
+created. Each selection is specific to an HDF5 (hdf) trajectory
+file, but all selections are stored in the same directory,
+$APPDATA/mdanse. Therefore, when creating identical selections for
+multiple trajectories, it is essential to assign unique names to
+these selections. To facilitate this process, you can view all
+existing saved selections in the User Definition Viewer, which
+can be accessed from the toolbar <#_Toolbar>__. To save a selection,
+enter a name in the field next to the Save button and then click
+the button. This action will save the selection without closing
+the window.
 
 .. _param-axis-selection:
 
@@ -1197,7 +1199,7 @@ Interpolation order
 Analyses that require atomic velocity data have an option to interpolate
 this data from atomic positions. By default, no interpolation is
 performed and instead MDANSE attempts to use the velocities stored int
-the NetCDF trajectory. Of course, depending on the way your simulation
+the HDF trajectory. Of course, depending on the way your simulation
 was set up, it is possible that the atoms velocities were not even stored
 in the output. It is still possible to derive the velocities of atoms
 from their positions at known time intervals, which is the subject of this

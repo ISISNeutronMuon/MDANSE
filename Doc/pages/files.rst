@@ -1,128 +1,93 @@
-
 .. _file_formats:
 
-Input and output files
-======================
+Section 6: Supported File Formats
+==================================
 
-At the moment there are two binary file formats extensively used by MDANSE:
-Network Common Data Form (NetCDF) and Hierarchical Data Format (HDF5).
-The former is used for storing trajectories, and the latter for the
-analysis results.
+In the updated MDANSE version, there have been significant changes to the
+supported file formats for input and output. This section provides an
+overview of these changes and the file formats used by MDANSE.
 
-.. note::
-   The plan for the future releases of MDANSE is to phase out the NetCDF
-   format and focus exclusively on HDF5. This does not affect the way you
-   use MDANSE at the moment, but please be aware that you may need to convert
-   your trajectories into HDF5 when switching to MDANSE 2.0.
+6.1. HDF5 File Format and GUI Integration
+-----------------------------------------
 
-However, in certain
-circumstances MDANSE can use or produce another type of files. We will
-start this section by explaining in detail the NetCDF file format
-introducing next the other file formats used by MDANSE.
+In the new version of MDANSE, the primary file format for both trajectory
+storage and analysis results is `Hierarchical Data Format (HDF5) <https://www.hdfgroup.org/solutions/hdf5/>`_. HDF5 is
+a versatile file format designed for efficiently organizing and managing
+large data sets. It employs a hierarchical structure, akin to a file system,
+and supports n-dimensional arrays with associated metadata attributes. HDF5
+is widely adopted, and even `NetCDF version 4 <https://www.unidata.ucar.edu/software/netcdf/netcdf-4/>`_ is built on top of HDF5. Using
+HDF5 ensures platform independence, efficient data storage, and comprehensive
+self-contained information within trajectory files.
 
-.. _netcdf:
+This transition to HDF5 as the primary storage format enhances data compatibility
+and accessibility within MDANSE. Furthermore, the integration of a graphical user
+interface (GUI) provides an intuitive and user-friendly interface for performing
+analyses and managing file conversions. Users can interact with MDANSE through
+the GUI to directly convert trajectories from different formats to the required
+HDF5 format using the Trajectory Converter tool.
 
-NetCDF file format
-------------------
+6.2. DAT File Format
+---------------------
 
-NetCDF is a set of software libraries and self-describing,
-machine-independent data formats that support the creation, access, and
-sharing of array-oriented scientific data. The project homepage is
-hosted by the Unidata program at the University Corporation for
-Atmospheric Research. [Ref6]_ They are also
-the chief source of NetCDF -based software, standards development,
-updates, etc. The format is an open standard.
+During an Analysis in MDANSE, the default output format is now `DAT files <https://en.wikipedia.org/wiki/DAT_file>`_, which
+are text-based and easily readable. Each DAT file corresponds to a specific
+variable generated during the analysis. If the ASCII option is selected, a
+tarball is generated, which contains multiple files, including:
 
-The data format is self-describing. This means that there is a header
-which describes the layout of the rest of the file, in particular the
-data arrays, as well as arbitrary file metadata in the form of
-name/value attributes. The format is platform independent, with issues
-such as endianness being addressed in the software libraries. The data
-arrays are rectangular, not ragged, and stored in a simple and regular
-fashion that allows efficient sub setting.
+- ``jobinfo.txt``: A text file documenting the analysis options selected during
+  the analysis.
+- Variable DAT files: Each file is named after the variable it contains and
+  includes the following information:
+    - Variable name
+    - Type of plot (representing plot dimensions)
+    - Variable's placement on the x-axis (if plotted on the y-axis in the
+      2D/3D Plotter)
+    - Units of data
+    - Length of the trajectory (indicated as slice:[length])
+    - A list of numbers representing the variable data
 
-MDANSE expects trajectories to be in NetCDF format and follow the
-conventions of Molecular Modelling ToolKit (MMTK). Trajectories that
-have not been produced with MMTK or MMTK-based programs must be
-converted to MMTK format before they can be analysed with MDANSE. This
-conversion is necessary because no other common trajectory format
-permits efficient access both to conformations at a given time and to
-one-atom trajectories for all times. In addition to providing such an
-access, the NetCDF format has several advantages that make it
-particularly suitable for archiving trajectories:
+The DAT format simplifies data sharing and analysis, providing a clear and
+human-readable representation of analysis results.
 
--  compact files (binary storage)
--  machine-independent format
--  fully self-contained, complete information about the system is stored
-   in the trajectory file.
+6.3. MDANSE Scripts
+--------------------
 
-The conversion of the trajectories from different formats to the MMTK
-format can be made directly via the MDANSE GUI, and specifically
-the :ref:`trajectory-converters`.
+MDANSE now includes Python scripts that capture the complete analysis setup,
+including all selected options. These scripts are designed to be run using
+the Python interpreter bundled with MDANSE. Running these scripts automates
+the execution of a specific analysis with predefined settings, simplifying
+repetitive tasks and ensuring consistency in analysis procedures.
 
-MMTK NetCDF files work, however, not just as input files; they are at
-the centre of MDANSE. The result of an :ref:`analysis` is, by
-default, written into an MMTK NetCDF file, which can then be once again
-used as an input file. The :ref:`2d3dplotter`, the
-inbuilt tool for graph visualisation, only works with MMTK NetCDF files.
+This update streamlines the analysis process and facilitates the reproducibility
+of results within MDANSE.
 
-.. _hdf5:
+6.4. NetCDF to HDF5 Conversion Script
+---------------------------------------
 
-HDF5 file format
-----------------
+MDANSE now provides a versatile Python script that simplifies the process
+of converting existing NetCDF files to the HDF5 format. This script is especially
+valuable for users with legacy data stored in NetCDF files who wish to take
+advantage of the enhanced capabilities and compatibility offered by MDANSE's
+shift to HDF5.
 
-HDF is a set of file formats designed to store and organise large
-amounts of data. The project is maintained by The HDF Group
-[Ref7]_, a non-profit corporation, who ensure
-its continued development and accessibility. The associated libraries
-and tools are available under a liberal license for general use.
+To perform the conversion, follow these steps:
 
-HDF5 is the latest version, and its use is widespread; even the version
-4 of the NetCDF format is built on top of HDF5. It is organised
-hierarchically like a file system and uses POSIX-like syntax. The data
-is stored in datasets, n-dimensional arrays, which are grouped in
-groups, file-like objects. Either can then be modified with metadata by
-adding attributes.
+1. Open a terminal or command prompt.
+2. Navigate to the directory containing the NetCDF files you want to convert.
+3. Run the following command, replacing [input_file.nc] with the name of your
+   NetCDF file and [output_file.h5] with your desired name for the resulting
+   HDF5 file::
 
-It is a goal to replace NetCDF with HDF5 as the main storage format, and
-therefore MDANSE supports HDF5 output for :ref:`analysis` and
-input for plotters.
+      .. code-block:: bash
 
-.. _text_output:
+         python convert_netcdf_to_hdf5.py [input_file.nc] [output_file.h5]
 
-DAT file format
----------------
+   This command will execute the conversion script and generate an HDF5 file
+   with the specified name.
 
-When performing an :ref:`analysis`, a binary output format is selected
-by default, but it is possible to change it to ASCII, which indicates
-a text file output. If the ASCII option is selected, a tarball is
-generated. Inside are multiple files which together contain the results
-of the analysis. Firstly, there is a text file, jobinfo.txt, which
-contains the options that were selected when performing the analysis.
+4. Once the conversion is complete, you can use the newly created HDF5 file
+   seamlessly within MDANSE for advanced analysis and visualization.
 
-Secondly, there is a DAT file for each variable generated by the
-analysis. Each file is named after the variable it contains, and this
-name is identical to the name that would appear in :ref:`2d3dplotter`
-if the equivalent NetCDF file were loaded
-in. Each file begins with a couple commented line describing the
-variable:
-
--  variable name
--  type of plot (this represents the dimensions of plot)
--  which variable is on the x-axis if the variable in this DAT file were
-   to be plotted on the y-axis
--  :ref:`units` in which the data is written
--  the length of the trajectory (indicated as slice:[length])
-
-After that is a list of numbers representing the variable as described.
-
-.. _mdanse-scripts:
-
-MDANSE scripts
---------------
-
-These files are python scripts that, when run, perform a given analysis
-with all the options set the way they were when this script was created.
-It can be run like any other script, you only have to make sure you use
-the python interpreter that comes with MDANSE. For more information
-about MDANSE python, read :ref:`mdanse-cli`.
+This convenient script streamlines the migration of existing data to the HDF5
+format, ensuring that users can leverage MDANSE's enhanced features while
+preserving their valuable data.

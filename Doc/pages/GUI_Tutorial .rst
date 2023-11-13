@@ -1,7 +1,7 @@
 Tutorial 1: Using MDANSE Graphical User Interface
 ==================================================
 
-Subsection 1: Introduction to MDANSE GUI
+Introduction to MDANSE GUI
 -----------------------------------------
 
 Welcome to the tutorial on using MDANSE's Graphical User Interface (GUI).
@@ -10,7 +10,53 @@ user-friendly interface to open trajectories, configure analysis parameters,
 and initiate calculations. Additionally, we will explore other useful actions
 available within the GUI.
 
-Sub-subsection 1: Opening Trajectories
+Downloading and Setting Up MDANSE on Windows
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before we begin with the MDANSE GUI, you need to download and set up MDANSE on your Windows system. Here are the steps:
+
+1. Download the Software:
+   - Python: Download Python 3.8, 3.9, 3.10, or 3.11 for Windows from the official Python website.
+
+   - MDANSE: Obtain the MDANSE wheel from GitHub that matches your Python version.
+
+   - MDANSE_GUI: Download the MDANSE_GUI wheel suitable for your Windows operating system.
+
+2. Python Virtual Environment:
+   - Only do this the first time:
+     ```shell
+     path\to\python\python3.exe -m venv mdanse_environment
+     mdanse_environment\Scripts\activate.bat
+     ```
+   - Do this every time:
+     ```shell
+     mdanse_environment\Scripts\activate.bat
+     ```
+
+3. MDANSE Installation:
+   - Install PyQt6 using pip:
+     ```shell
+     pip install PyQt6
+     ```
+   - Install MDANSE wheel (replace the wheel name with the one you downloaded):
+     ```shell
+     pip install MDANSE-2.0.0-cp311-cp311-win_amd64.whl
+     ```
+
+   - Install MDANSE_GUI wheel (replace the wheel name with the one you downloaded):
+     ```shell
+     pip install MDANSE_GUI-0.0.1-py3-none-any.whl
+     ```
+
+   - Note: The name of the file contains `cp311` because it was built for CPython 3.11. Different Python versions will have wheels with different names.
+
+4. Running the GUI:
+   - To run the MDANSE GUI, execute the following command:
+     ```shell
+     python mdanse_environment\Scripts\mdanse_gui
+     ```
+
+Opening Trajectories
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 MDANSE allows you to work with molecular dynamics trajectories conveniently.
@@ -31,7 +77,7 @@ and click "Open."
 trajectory will appear in the "Working panel." You can now inspect and work
 with the loaded trajectory.
 
-Sub-subsection 2: Configuring Analysis Parameters
+Configuring Analysis Parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now that we have a trajectory loaded, let's configure the parameters for the
@@ -47,7 +93,7 @@ Configure these parameters according to your analysis requirements. If you're
 unsure about a specific parameter, you can usually find more information in
 the MDANSE documentation or consult with your specific analysis documentation.
 
-Sub-subsection 3: Starting Calculations
+Starting Calculations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 With your analysis parameters configured, it's time to initiate the calculation:
@@ -60,7 +106,7 @@ with the analysis. Confirm and proceed.
 panel, which displays ongoing tasks. Keep an eye on this panel for updates on
 the progress of your calculation.
 
-Subsection 2: Additional Actions in MDANSE GUI
+Additional Actions in MDANSE GUI
 ----------------------------------------------
 
 In this section, we'll explore some additional actions you can perform within
@@ -68,7 +114,7 @@ MDANSE's GUI, including plotting analysis results, performing file conversions,
 and viewing geometrical structures. We'll also touch upon creating input files
 for command-line use and auto-start analysis scripts.
 
-Sub-subsection 1: Plotting Analysis Results
+Plotting Analysis Results
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once you have completed an analysis, you may want to visualize the results.
@@ -84,7 +130,7 @@ list of available data variables.
 5. Plot Data: Click the "Plot in new window" button to generate and display the
 selected plot.
 
-Sub-subsection 2: File Conversions
+File Conversions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 MDANSE allows you to convert trajectory files into the HDF format. Here's how to
@@ -98,7 +144,7 @@ another format to HDF).
 conversion, such as input and output file paths.
 4. Initiate Conversion: Click the "Run" button to start the conversion process.
 
-Sub-subsection 3: Viewing Geometrical Structures
+Viewing Geometrical Structures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 MDANSE enables you to visualize the geometrical structures within your
@@ -112,7 +158,7 @@ toolbar.
 structures from your trajectory. You can interactively explore and analyze
 these structures.
 
-Sub-subsection 4: Creating Input Files
+Creating Input Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 MDANSE allows you to create input files for the command-line interface and
@@ -126,7 +172,7 @@ needed.
 3. Save the Input File: Click the "Save" button to generate the input file. You
 can use this file to set up and run new analyses from the command line.
 
-Sub-subsection 5: Creating Auto-Start Analysis Scripts
+Creating Auto-Start Analysis Scripts
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Alternatively, you can also create an auto-start analysis Python script using

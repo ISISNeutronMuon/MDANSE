@@ -798,7 +798,7 @@ the results using the `Axes settings <#_Axes_settings>`__ (available
 from the context menu that appears by right clicking on the plot). If
 you use the export option in the graphic after having changed the units,
 your output file will be saved with the desired units. But remember that
-the original output file (typically a netCDF4) is written using the
+the original output file (typically a HDF) is written using the
 original standard units.
 
 The list of prefixes to physical quantities is listed in Table 1.
