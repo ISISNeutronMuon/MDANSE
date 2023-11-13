@@ -30,16 +30,9 @@ The typical workflow will look as follows:
 4. Check the results with the plotter
 
 
-The most complete user documentation of MDANSE can be found on [our Read the Docs page](https://mdanse.readthedocs.io). At the same time, it is still possible to access the original **[MDANSE User Guide](https://epubs.stfc.ac.uk/work/51935555)** \
+The most complete user documentation of MDANSE can be found on [our Read the Docs page](https://mdanse.readthedocs.io/en/protos). At the same time, it is still possible to access the original **[MDANSE User Guide](https://epubs.stfc.ac.uk/work/51935555)**.
 
 Other information including example scripts can be found on the [MDANSE website](https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx) 
-
-## Installing from source
-
-Since MDANSE is currently written in Python 2.7, installing it from the source code can be challenging. There are guides
-for doing this in the [MDANSE User Guide](https://epubs.stfc.ac.uk/work/51935555), 
-[this issue](https://github.com/ISISNeutronMuon/MDANSE/issues/8), and the [Wiki](https://github.com/ISISNeutronMuon/MDANSE/wiki).
-However, if your system is not included in any of these, or you have any difficulties, please don't hesitate to contact us.
 
 ## What can MDANSE do?
 
@@ -114,8 +107,7 @@ atoms can be specified to be the only ones for which the property is computed, o
 different elements/isotopes. Finally, their results can be outputted in a NetCDF file, an HDF5 file, or a set of DAT 
 files, and those can then be plotted directly in MDANSE.
 
-More detailed information on how MDANSE works, what it can do, and the science can all be found in the 
-**[MDANSE User Guide](https://epubs.stfc.ac.uk/work/51935555)**
+More detailed information on how MDANSE works, what it can do, and the science can all be found on [our Read the Docs page](https://mdanse.readthedocs.io/en/protos).
 
 ## Citing MDANSE
 

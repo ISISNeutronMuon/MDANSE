@@ -122,7 +122,7 @@ jobs:
     strategy:
       fail-fast: false
     if: |
-      
+      contains( github.ref, 'legacy' )
     steps:
       - uses: actions/checkout@v2
 
