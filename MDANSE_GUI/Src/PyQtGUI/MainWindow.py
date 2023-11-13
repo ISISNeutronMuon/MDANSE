@@ -52,6 +52,8 @@ from qtpy.QtWidgets import (
     QTreeView,
 )
 
+from MDANSE.Framework.Session.Settings import CascadingSettings
+
 from MDANSE_GUI.PyQtGUI.BackEnd import BackEnd
 from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.PyQtGUI.Widgets.Generator import WidgetGenerator
@@ -67,6 +69,7 @@ from MDANSE_GUI.PyQtGUI.MolecularViewer.MolecularViewer import MolecularViewer
 from MDANSE_GUI.PyQtGUI.MolecularViewer.Controls import ViewerControls
 from MDANSE_GUI.PyQtGUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
 from MDANSE_GUI.PyQtGUI.pygenplot.widgets.main_window import MainWindow
+from MDANSE_GUI.PyQtGUI.SettingsEditor import SettingsEditor
 
 
 class LoaderButton(QToolButton):
@@ -131,6 +134,7 @@ class Main(QMainWindow):
         self._actions = []
         self._toolbar_buttons = []  # list of (widget, icon_key:str) pairs
         self._style_database = StyleDatabase(self)
+        self._mdanse_settings = CascadingSettings()
         self.setWindowTitle(title)
         self.wid_gen = WidgetGenerator()
         self.resources = Resources()
@@ -147,6 +151,21 @@ class Main(QMainWindow):
             if state:
                 self.restoreState(state)
             settings.endGroup()
+            settings.beginGroup("MDANSE")
+            fname = settings.value("config_file")
+            settings.endGroup()
+            if fname is None:
+                self._mdanse_settings.currentFilename = os.path.join(
+                    self.workdir, ".mdanse_gui_settings.txt"
+                )
+            else:
+                try:
+                    self._mdanse_settings.load_from_file(fname)
+                except:
+                    self._mdanse_settings._settings = {}
+                    self._mdanse_settings.currentFilename = os.path.join(
+                        self.workdir, ".mdanse_gui_settings.txt"
+                    )
         self.settings_timer = QTimer()
         self.settings_timer.timeout.connect(self.saveSettings)
         self.settings_timer.setInterval(2000)
@@ -217,6 +236,13 @@ class Main(QMainWindow):
     def launchUnitsEditor(self):
         dialog = UnitsEditor
         dialog_instance = dialog(self)
+        dialog_instance.show()
+        result = dialog_instance.exec()
+
+    @Slot()
+    def launchSettingsEditor(self):
+        dialog = SettingsEditor
+        dialog_instance = dialog(self, settings=self._mdanse_settings)
         dialog_instance.show()
         result = dialog_instance.exec()
 
@@ -294,6 +320,7 @@ class Main(QMainWindow):
             ("periodic_table", self.launchPeriodicTable),
             ("element", self.launchElementsEditor),
             ("units", self.launchUnitsEditor),
+            ("basic_gradient", self.launchSettingsEditor),
             ("user", self.launchStyleSelector),
         ]
         for key, slot in valid_keys:
@@ -355,6 +382,9 @@ class Main(QMainWindow):
         self.settings.beginGroup("MainWindow")
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("state", self.saveState())
+        self.settings.endGroup()
+        self.settings.beginGroup("MDANSE")
+        self.settings.setValue("config_file", self._mdanse_settings.currentFilename)
         self.settings.endGroup()
 
     def onMyToolBarButtonClick(self, s):
