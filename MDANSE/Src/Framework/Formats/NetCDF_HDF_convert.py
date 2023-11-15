@@ -32,12 +32,32 @@ class TrajectoryConverter(abc.ABC):
     def serialize(self, h5_file):
         """ Abstract method to serialize data into HDF5 format. """
         pass
- 
-class HDF5TrajectoryConverter(TrajectoryConverter):
+
     def __init__(self, trajectory_filename):
         self.trajectory_filename = trajectory_filename
         self.chemical_system = None
- 
+
+    def extract_entity_data(self, entity_group):
+        entity_data = []
+        for entity_varname, entity_var in entity_group.variables.items():
+            properties = {}
+            for prop_varname, prop_var in entity_var.variables.items():
+                properties[prop_varname] = prop_var[:]
+            entity_data.append(properties)
+        return entity_data
+
+    def extract_chemical_system_data(self, nc_file):
+        chemical_system_data = {}
+        if 'chemical_system' in nc_file.groups:
+            chemical_system_group = nc_file.groups['chemical_system']
+            entities_to_extract = ['atoms', 'molecules', 'peptide_chains', 'residues', 'atom_clusters']
+            for entity_name in entities_to_extract:
+                if entity_name in chemical_system_group:
+                    entity_group = chemical_system_group.groups[entity_name]
+                    entity_data = self.extract_entity_data(entity_group)
+                    chemical_system_data[entity_name] = entity_data
+
+    
     def serialize(self, h5_file, trajectory_file, chemical_entity_data):
         if chemical_entity_data is not None:
             atoms = []
