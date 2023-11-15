@@ -81,6 +81,11 @@ class MainFrame(wx.Frame):
         LOGGER.add_handler("console", consoleHandler, level="info")
         LOGGER.add_handler("dialog", REGISTRY['handler']['dialog'](), level="error")
         LOGGER.start()
+
+        # Add menu option for loading job definitions
+        loadJobAction = QAction('Load Job Definition', self)
+        loadJobAction.triggered.connect(self.loadJobDefinition)
+        self.fileMenu.addAction(loadJobAction)
         
         # Redirect all output to the console logger
         sys.stdout = consoleHandler
@@ -433,6 +438,83 @@ Authors:
             window.Show()
 
         self._mgr.Update()
+
+
+
+
+def loadJobDefinition(self):
+    options = QFileDialog.Options()
+    fileName, _ = QFileDialog.getOpenFileName(self, "Open Job Definition File", "",
+                                              "JSON Files (*.json);;All Files (*)", options=options)
+    if fileName:
+        try:
+             with open(fileName, 'r') as file:
+                    jobDefinition = json.load(file)
+                    self.populateJobParameters(jobDefinition)
+                    except json.JSONDecodeError as e:
+                    QMessageBox.warning(self, 'Error', f"Invalid JSON file: {e}")
+
+def populateJobParameters(self, jobDefinition):
+    self.jobParamsLayout.clear()  #
+    self.paramWidgets = {}  
+    for paramName, paramValue in jobDefinition.items():
+        # Create a label for the parameter
+        label = QLabel(f"{paramName}:")
+        self.jobParamsLayout.addWidget(label)
+        if isinstance(paramValue, bool):
+            widget = QCheckBox()
+            widget.setChecked(paramValue)
+        elif isinstance(paramValue, int):
+            widget = QSpinBox()
+            widget.setValue(paramValue)
+        elif isinstance(paramValue, float):
+            widget = QDoubleSpinBox()
+            widget.setValue(paramValue)
+        else:  
+            widget = QLineEdit(str(paramValue))
+
+        self.jobParamsLayout.addWidget(widget)
+        self.paramWidgets[paramName] = widget
+
+def runJob(self):
+    jobParameters = {paramName: widget.value() if isinstance(widget, QSpinBox) 
+                     else widget.text() for paramName, widget in self.paramWidgets.items()}
+    try:
+        self.runMDANSEJob(jobParameters)
+    except Exception as e:
+        print(f"Error running the job: {e}")
+
+    print("Running job with parameters:", jobParameters)
+
+def runMDANSEJob(self, jobParameters):
+    jobType = jobParameters.get('jobType')
+    if jobType is None:
+        print("Job type is not specified in the parameters.")
+        return
+    jobClass = MDANSEJobRegistry.getJob(jobType)
+    if jobClass is None:
+        print(f"No job found for type: {jobType}")
+        return
+    job = jobClass()
+    try:
+        job.setParameters(jobParameters)
+    except Exception as e:
+        print(f"Error setting parameters for job: {e}")
+        return
+    try:
+        job.run()
+        print(f"Job {jobType} executed successfully.")
+    except Exception as e:
+        print(f"Error running job: {e}")
+
+def saveJobDefinition(self):
+    for paramName, inputField in self.inputFields.items():
+            # Validate and update the job definition
+        self.jobDefinition[paramName] = inputField.text()
+        filename, _ = QFileDialog.getSaveFileName(self, "Save Job Definition", "", "JSON Files (*.json)")
+        if filename:
+            with open(filename, 'w') as file:
+                json.dump(self.jobDefinition, file, indent=4)
 
 
 if __name__ == "__main__":

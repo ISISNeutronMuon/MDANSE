@@ -10,74 +10,74 @@ Example:
 """
 import sys
 import argparse
+import h5py
 from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors import IQvectors
 from MDANSE.Framework.Selectors.ISelector import ISelector
+import json
+from pathlib import Path
+
+class JobData:
+    def __init__(self, job_file):
+        with open(job_file, 'r') as f:
+            data = json.load(f)
+            self.mdanse_type = data['mdanse_type']
+            self.trajectory = str(Path(data['trajectory']).resolve())
+
+def read_trajectory(file_path):
+    with h5py.File(file_path, 'r') as file:
+        trajectory_data = file['trajectory'][:]  # Modify to HDF5 structure
+    return trajectory_data
 
 class MDANSEAnalysisRunner:
-    def __init__(self):
+    def __init__(self, job_data):
+        self.job_data = job_data
         self.selector = None
         self.qvectors = None
+        self.requires_qvectors = False
+
     def set_selector(self, selector):
         if not isinstance(selector, ISelector):
             raise ValueError("Selector must be an instance of ISelector.")
         self.selector = selector
+
     def set_qvectors(self, qvectors):
         if not isinstance(qvectors, IQvectors):
             raise ValueError("QVectors must be an instance of IQvectors.")
         self.qvectors = qvectors
+
     def run_analysis(self):
-        if self.selector is None or self.qvectors is None:
-            raise ValueError("Both selector and qvectors must be set before running analysis.")
-        # Example:
-        # result = mdanse_analysis_function(self.selector, self.qvectors)
-        # return result
+        trajectory_data = read_trajectory(self.job_data.trajectory)
+        job_class = REGISTRY['job'][self.job_data.mdanse_type]
+        
+        job_requirements = get_job_requirements(job_class)  # Implement this function based on MDANSE framework
 
-class ExampleSelector(ISelector):
-    def __init__(self, universe):
-        super().__init__(universe)
-        self.selected_atoms = []  
-    def select(self):
-        print("Selecting atoms from the trajectory.")
-        selected_atoms = self.universe.atomList()[:10]  # Selecting first 10 atoms as an example
-        return selected_atoms
-    def get_selected_atoms(self):
-        print("Retrieving selected atoms.")
-        if not self.selected_atoms:
-            print("No atoms have been selected yet.")
-            return None
-        else:
-            return self.selected_atoms
-    def apply_filter(self, filter_criteria):
-        print(f"Applying filter based on criteria: {filter_criteria}.")
-        filtered_atoms = []
-        for atom in self.selected_atoms:
-            # Example filtering based on criteria
-            if atom['property'] == filter_criteria:
-                filtered_atoms.append(atom)
-        return filtered_atoms
+        if 'selector' in job_requirements:
+            self.set_selector(GeneralSelector(trajectory_data))  # Implement GeneralSelector or use a specific selector
+        if 'qvectors' in job_requirements:
+            self.requires_qvectors = True
+            self.set_qvectors(GeneralQVectors(trajectory_data))  # Implement GeneralQVectors or use a specific QVectors class
 
+        if 'selector' in job_requirements and self.selector is None:
+            raise ValueError("Selector component is required but not set.")
+        if 'qvectors' in job_requirements and (self.requires_qvectors and self.qvectors is None):
+            raise ValueError("QVectors component is required but not set.")
 
-class ExampleQVectors(IQvectors):
-    def __init__(self, universe, status=None):
-        super().__init__(universe, status)
-    def _generate(self):
-        generated_qvectors = []
-        for frame in self.universe:
-            qvector = calculate_qvector(frame)  
-            generated_qvectors.append(qvector)
-        return generated_qvectors
-    def apply_cutoff(self, cutoff_value):
-        filtered_qvectors = [qv for qv in qvectors_data if qv < cutoff_value]  
-        return filtered_qvectors
+        job_instance = job_class(self.job_data.parameters)
+
+        if self.selector:
+            job_instance.set_selector(self.selector)
+        if self.qvectors and self.requires_qvectors:
+            job_instance.set_qvectors(self.qvectors)
+
+        job_instance.run()
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='''This is mdanse_job: a shortcut for running MDANSE job. It opens a GUI dialog 
-    from where an analysis or a trajectory converter will be setup and eventually run.''')
-    parser.add_argument('job', nargs=1, help='Code for the job to be run. E.g. msd for Mean Square Displacement. For a complete list of available jobs please run "mdanse -r job"')
-    parser.add_argument('trajectory', nargs='*', help='Trajectory file. This is needed only for analysis job. Not required for trajectory conversion jobs.')
+    parser = argparse.ArgumentParser(description="MDANSE Analysis Script")
+    parser.add_argument('job_file', help='Path to the JSON job file')
     args = parser.parse_args()
     return args
+
 
 
 if __name__ == "__main__":
@@ -95,14 +95,6 @@ if __name__ == "__main__":
 
     # Adding MDANSEAnalysisRunner
     analysis_runner = MDANSEAnalysisRunner()
-    pdb_file = None  
-    pdb_reader = None  # Replace with the appropriate reader
-
-    selector = ExampleSelector(pdb_reader)  
-    qvectors = ExampleQVectors(pdb_reader.universe)  
-    analysis_runner.set_selector(selector)
-    analysis_runner.set_qvectors(qvectors)
-
     try:
         analysis_runner.run_analysis()
     except Exception as e:
