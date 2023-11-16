@@ -18,3 +18,30 @@ detectors. By specifying the angle coverage of detector panels,
 we can limit the range of accessible Q vectors to those that
 a specific instrument can access.
 """
+
+import glob
+import importlib
+import os
+
+current_path, _ = os.path.split(__file__)
+
+modnames = []
+fnames = glob.glob(current_path + "/*.py")
+for fname in fnames:
+    _, newname = os.path.split(fname)
+    newname = newname.split(".py")[0]
+    modnames.append(newname)
+globdict = globals()
+
+for name in modnames:
+    if name in ["__init__"]:
+        continue
+    try:
+        tempmod = importlib.import_module(
+            "." + name, "MDANSE.NeutronInstruments.Coverage"
+        )
+    except ModuleNotFoundError:
+        continue
+    tempobject = getattr(tempmod, name)
+    globdict[name] = tempobject
+    del tempmod  # optionally delete the reference to the parent module
