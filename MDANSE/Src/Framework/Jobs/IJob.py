@@ -13,6 +13,7 @@
 #
 # **************************************************************************
 
+import json
 import abc
 import glob
 import os
@@ -156,47 +157,37 @@ class IJob(Configurable):
             #. jobFile (str): The name of the output job file.\n
             #. parameters (dict): optional. If not None, the parameters with which the job file will be built.
         """
+        
+        job_data = {
+            "job_type": cls._type,
+            "parameters": parameters if parameters else cls.get_default_parameters()
+        }
+    
+        with open(jobFile, 'w') as json_file:
+            json.dump(job_data, json_file, indent=4)
 
-        f = open(jobFile, "w")
-
-        # The first line contains the call to the python executable. This is necessary for the file to
-        # be autostartable.
-        f.write("#!%s\n\n" % sys.executable)
-
-        # Writes the input file header.
-        f.write("########################################################\n")
-        f.write("# This is an automatically generated MDANSE run script #\n")
-        f.write("########################################################\n\n")
-
-        # Write the import.
-        f.write("from MDANSE import REGISTRY\n\n")
-
-        f.write("################################################################\n")
-        f.write("# Job parameters                                               #\n")
-        f.write("################################################################\n\n")
-
-        # Writes the line that will initialize the |parameters| dictionary.
-        f.write("parameters = {}\n")
-
-        if parameters is None:
-            parameters = cls.get_default_parameters()
-
-        for k, v in sorted(parameters.items()):
-            f.write("parameters[%r] = %r\n" % (k, v))
-
-        f.write("\n")
-        f.write("################################################################\n")
-        f.write("# Setup and run the analysis                                   #\n")
-        f.write("################################################################\n")
-        f.write("\n")
-
-        f.write('if __name__ == "__main__":\n')
-        f.write("    %s = REGISTRY[%r][%r]()\n" % (cls._type, "job", cls._type))
-        f.write("    %s.run(parameters,status=True)" % (cls._type))
-
-        f.close()
-
-        os.chmod(jobFile, stat.S_IRWXU)
+    @classmethod
+    def from_json(cls, filename):
+        """
+        Load a job object from a JSON file.
+    
+        Args:
+            filename (str): The name of the JSON file to load.
+    
+        Returns:
+            IJob: An instance of the job class.
+        """
+        with open(filename, 'r') as json_file:
+            job_data = json.load(json_file)
+    
+        job_type = job_data["job_type"]
+        parameters = job_data["parameters"]
+    
+        # Create an instance of the job class and set its parameters
+        job = cls()
+        job.set_parameters(parameters)
+    
+        return job
 
     def combine(self):
         if self._status is not None:

@@ -291,90 +291,103 @@ class CommandLineParser(optparse.OptionParser):
         @type parser: instance of MDANSEOptionParser
         '''
 
+    if len(parser.rargs) != 1:
+        raise CommandLineParserError("Invalid number of arguments for %r option" % opt_str)
+    
+    jobs = REGISTRY["job"]
+    
+    name = parser.rargs[0]
+                
+    try:
+        job_instance = jobs[name]
+    except KeyError:
+        raise CommandLineParserError("The job %r is not a valid MDANSE job" % name)
+
+    try:
+        # Serialize the job instance to JSON format
+        json_template = job_instance.to_json()
+
+        # Define the filename for the JSON template
+        filename = os.path.abspath('template_%s.json' % name.lower())
+
+        # Write the JSON template to the file
+        with open(filename, 'w') as json_file:
+            json_file.write(json_template)
+    
+        print("Saved template for job %r as %r" % (name, filename))
+    
+    except IOError as e:
+        raise CommandLineParserError("Could not write the job template as %r: %s" % (filename, str(e)))
+    except Exception as e:
+        raise CommandLineParserError("An error occurred while saving the job template: %s" % str(e))
+
+
+    def save_job(self, option, opt_str, value, parser):
+        """
+        Save job templates.
+
+        Args:
+            option: The option that triggered the callback.
+            opt_str: The option string seen on the command line.
+            value: The argument for the option.
+            parser: The MDANSE option parser.
+        """
+
         if len(parser.rargs) != 1:
             raise CommandLineParserError("Invalid number of arguments for %r option" % opt_str)
-        
+
         jobs = REGISTRY["job"]
-        
         name = parser.rargs[0]
-                    
-        # A name for the template is built.
-        filename = os.path.abspath('template_%s.py' % name.lower())
-        jobs[name].save(filename)    
 
-        # Try to save the template for the job.  
-        try:
-            jobs[name].save(filename)    
-        # Case where an error occured when writing the template.
-        except IOError:
-            raise CommandLineParserError("Could not write the job template as %r" % filename)
-        # If the job class has no save method, thisis not a valid MDANSE job.
-        except KeyError:
+        # Ensure the job class exists in the registry
+        if name not in jobs:
             raise CommandLineParserError("The job %r is not a valid MDANSE job" % name)
-        # Otherwise, print some information about the saved template.
-        else:
-            print("Saved template for job %r as %r" % (name, filename))
 
-    def save_job_template(self, option, opt_str, value, parser):
-        '''
-        Save job templates.
-            
-        @param option: the option that triggered the callback.
-        @type option: optparse.Option instance
+        # Create a dictionary to represent the job
+        job_dict = {
+            "job_type": name,
+            "parameters": jobs[name].get_default_parameters()  # Assuming get_default_parameters() returns a dictionary
+        }
+
+        # Specify the filename for the saved job
+        filename = f"job_{name}.json"
+
+        with open(filename, 'w') as json_file:
+            json.dump(job_dict, json_file, indent=4)
+
+        print(f"Saved template for job {name} as {filename}")  
         
-        @param opt_str: the option string seen on the command line.
-        @type opt_str: str
-    
-        @param value: the argument for the option.
-        @type value: str
-    
-        @param parser: the MDANSE option parser.
-        @type parser: instance of MDANSEOptionParser
-        '''
-
-        nargs = len(parser.rargs)
-
-        from MDANSE.Framework.Jobs.IJob import IJob        
-
-        if nargs != 2:
-            print("Two arguments required resp. the name and the shortname of the class to be templated")
-            return
-
-        classname,shortname = parser.rargs
-
-        try:
-            IJob.save_template(shortname,classname)
-        except (IOError,KeyError) as e:
-            LOGGER(str(e),'error',['console'])
-            return
-                                    
+                 
 if __name__ == "__main__":
-
     from MDANSE.__pkginfo__ import __version__, __date__
 
-    # Creates the option parser.
-    parser = CommandLineParser(formatter=IndentedHelp(), version = 'MDANSE %s (%s)' % (__version__, __date__))        
+    # Create the option parser.
+    parser = CommandLineParser(formatter=IndentedHelp(), version='MDANSE %s (%s)' % (__version__, __date__))
 
-    # Creates a first the group of general options.
-    group = optparse.OptionGroup(parser, "General options")
-    group.add_option('-d', '--database', action='callback', callback=parser.display_element_info, help='Display chemical informations about a given element.')
-    group.add_option('-r', '--registry', action='callback', callback=parser.query_classes_registry, help='Display the contents of MDANSE classes registry.')
-    group.add_option('-t', '--traj', action='callback', callback=parser.display_trajectory_contents, help='Display the chemical contents of a trajectory.')
+    # Create a group for general options.
+    general_options = optparse.OptionGroup(parser, "General options")
+    general_options.add_option('-d', '--database', action='callback', callback=parser.display_element_info,
+                               help='Display chemical information about a given element.')
+    general_options.add_option('-r', '--registry', action='callback', callback=parser.query_classes_registry,
+                               help='Display the contents of MDANSE classes registry.')
+    general_options.add_option('-t', '--traj', action='callback', callback=parser.display_trajectory_contents,
+                               help='Display the chemical contents of a trajectory.')
 
-    # Add the goup to the parser.
-    parser.add_option_group(group)
-    
-    # Creates a second group of job-specific options.
-    group = optparse.OptionGroup(parser, "Job managing options")
+    # Add the general option group to the parser.
+    parser.add_option_group(general_options)
 
-    # Add the goup to the parser.
-    parser.add_option_group(group)
+    # Create a group for job-specific options.
+    job_options = optparse.OptionGroup(parser, "Job managing options")
+    job_options.add_option('--jc', action='callback', callback=parser.check_job, help='Check the status of a given job.')
+    job_options.add_option('--jl', action='callback', callback=parser.display_jobs_list, help='Display the jobs list.')
+    job_options.add_option('--jr', action='callback', callback=parser.run_job, help='Run MDANSE job(s).')
+    job_options.add_option('--js', action='callback', callback=parser.save_job,
+                           help='Save a job script with default parameters.', metavar="MDANSE_SCRIPT")
+    job_options.add_option('--jt', action='callback', callback=parser.save_job_template, help='Save a job template.',
+                           metavar="MDANSE_SCRIPT")
 
-    group.add_option('--jc', action='callback', callback=parser.check_job, help='Check the status of a given job.')
-    group.add_option('--jl', action='callback', callback=parser.display_jobs_list, help='Display the jobs list.')
-    group.add_option('--jr', action='callback', callback=parser.run_job, help='Run MDANSE job(s).')
-    group.add_option('--js', action='callback', callback=parser.save_job, help='Save a job script with default patameters.', metavar = "MDANSE_SCRIPT")
-    group.add_option('--jt', action='callback', callback=parser.save_job_template, help='Save a job template.', metavar = "MDANSE_SCRIPT")
-    
-    # The command line is parsed.        
+    # Add the job-specific option group to the parser.
+    parser.add_option_group(job_options)
+
+    # The command line is parsed.
     options, _ = parser.parse_args()
