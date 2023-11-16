@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/NeutronInstruments/__init__.py
-# @brief     Implements __init__
+# @file      Src/NeutronInstruments/Spectrum/Spectrum.py
+# @brief     Base class for neutron instrument spectrum
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -13,14 +13,9 @@
 #
 # **************************************************************************
 
-from MDANSE.NeutronInstruments.NeutronInstrument import NeutronInstrument
-from MDANSE.NeutronInstruments.Coverage.Coverage import Coverage
-from MDANSE.NeutronInstruments.Resolution.Resolution import Resolution
 from MDANSE.NeutronInstruments.Spectrum.Spectrum import Spectrum
 
 
-class IdealInstrument(NeutronInstrument):
-    def __init__(self, *args, **kwargs):
-        self.coverage = Coverage.create("TotalCoverage")
-        self.spectrum = Spectrum.create("FlatSpectrum")
-        self.resolution = Resolution.create("IdealResolution")
+class FlatSpectrum(Spectrum):
+    def flux_at_wavelength(self, wavelength: float):
+        return 1.0

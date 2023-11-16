@@ -24,10 +24,10 @@ class NeutronInstrument:
         cls._registered_subclasses[regkey] = cls
 
     @classmethod
-    def create(cls, name: str) -> "NeutronInstrument":
+    def create(cls, name: str, *args, **kwargs) -> "NeutronInstrument":
         specific_class = cls._registered_subclasses[name]
-        return specific_class
+        return specific_class(*args, **kwargs)
 
     @classmethod
-    def converters(cls):
+    def subclasses(cls):
         return list(cls._registered_subclasses.keys())

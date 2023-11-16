@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/NeutronInstruments/Coverage/__init__.py
-# @brief     Implements __init__
+# @file      Src/NeutronInstruments/Coverage/Coverage.py
+# @brief     Base class for neutron instrument coverage
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -24,10 +24,10 @@ class Coverage:
         cls._registered_subclasses[regkey] = cls
 
     @classmethod
-    def create(cls, name: str) -> "Coverage":
+    def create(cls, name: str, *args, **kwargs) -> "Coverage":
         specific_class = cls._registered_subclasses[name]
-        return specific_class
+        return specific_class(*args, **kwargs)
 
     @classmethod
-    def converters(cls):
+    def subclasses(cls):
         return list(cls._registered_subclasses.keys())

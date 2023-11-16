@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/NeutronInstruments/__init__.py
-# @brief     Implements __init__
+# @file      Src/NeutronInstruments/Resolution/IdealResolution.py
+# @brief     Delta function resolution. No smearing, perfectly sharp.
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -13,14 +13,14 @@
 #
 # **************************************************************************
 
-from MDANSE.NeutronInstruments.NeutronInstrument import NeutronInstrument
-from MDANSE.NeutronInstruments.Coverage.Coverage import Coverage
+import numpy as np
+
 from MDANSE.NeutronInstruments.Resolution.Resolution import Resolution
-from MDANSE.NeutronInstruments.Spectrum.Spectrum import Spectrum
 
 
-class IdealInstrument(NeutronInstrument):
-    def __init__(self, *args, **kwargs):
-        self.coverage = Coverage.create("TotalCoverage")
-        self.spectrum = Spectrum.create("FlatSpectrum")
-        self.resolution = Resolution.create("IdealResolution")
+class IdealResolution(Resolution):
+    def resolution_window(self, energy_axis: np.ndarray, Ef: float, Ei: float):
+        window_axis = np.linspace(0, energy_axis.max(), len(energy_axis))
+        window_value = np.zeros_like(window_axis)
+        window_value[0] = 1.0
+        return window_value, window_axis

@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/NeutronInstruments/Resolution/__init__.py
-# @brief     Implements __init__
+# @file      Src/NeutronInstruments/Resolution/Resolution.py
+# @brief     Base class for neutron instrument resolution
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -24,10 +24,10 @@ class Resolution:
         cls._registered_subclasses[regkey] = cls
 
     @classmethod
-    def create(cls, name: str) -> "Resolution":
+    def create(cls, name: str, *args, **kwargs) -> "Resolution":
         specific_class = cls._registered_subclasses[name]
-        return specific_class
+        return specific_class(*args, **kwargs)
 
     @classmethod
-    def converters(cls):
+    def subclasses(cls):
         return list(cls._registered_subclasses.keys())
