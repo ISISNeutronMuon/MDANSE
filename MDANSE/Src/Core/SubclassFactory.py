@@ -19,17 +19,27 @@ class SubclassFactory(type):
     its subclasses, and to work as a factory.
     """
 
-    def __init__(cls, *args, **kwargs):
-        super().__init__(cls, *args, **kwargs)
-        registry = {}
-        setattr(cls, "_registered_subclasses", registry)
+    def __init__(cls, name, base, dct, **kwargs):
+        super().__init__(name, base, dct)
+        # Add the registry attribute to the each new child class.
+        # It is not needed in the terminal children though.
+        cls._registered_subclasses = {}
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        regkey = cls.__name__
-        cls._registered_subclasses[regkey] = cls
+        @classmethod
+        def __init_subclass__(cls, **kwargs):
+            regkey = cls.__name__
+            super().__init_subclass__(**kwargs)
+            cls._registered_subclasses[regkey] = cls
+
+        # Assign the nested classmethod to the "__init_subclass__" attribute
+        # of each child class.
+        # It isn't needed in the terminal children too.
+        # May be there is a way to avoid adding these needless attributes
+        # (registry, __init_subclass__) to there. I don't think about it yet.
+        cls.__init_subclass__ = __init_subclass__
 
     def create(cls, name: str, *args, **kwargs):
+        print(cls._registered_subclasses)
         specific_class = cls._registered_subclasses[name]
         return specific_class(*args, **kwargs)
 

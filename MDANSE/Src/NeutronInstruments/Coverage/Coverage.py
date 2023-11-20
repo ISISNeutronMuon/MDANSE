@@ -14,20 +14,8 @@
 # **************************************************************************
 
 
-class Coverage:
-    _registered_subclasses = {}
+from MDANSE.Core.SubclassFactory import SubclassFactory
 
-    @classmethod
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        regkey = cls.__name__
-        cls._registered_subclasses[regkey] = cls
 
-    @classmethod
-    def create(cls, name: str, *args, **kwargs) -> "Coverage":
-        specific_class = cls._registered_subclasses[name]
-        return specific_class(*args, **kwargs)
-
-    @classmethod
-    def subclasses(cls):
-        return list(cls._registered_subclasses.keys())
+class Coverage(metaclass=SubclassFactory):
+    pass
