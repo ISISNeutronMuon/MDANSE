@@ -33,6 +33,7 @@ dependencies = [
   "numpy",
   "scipy",
   "h5py",
+  "icecream"
 ]
 
 # dynamic = ["version", "description"]

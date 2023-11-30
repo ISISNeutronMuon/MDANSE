@@ -33,6 +33,7 @@ dependencies = [
   "qtpy",
   "vtk",
   "MDANSE",
+  "PyYAML",
 ]
 
 # dynamic = ["version", "description"]

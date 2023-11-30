@@ -15,7 +15,6 @@
 
 from abc import ABCMeta, abstractmethod, abstractclassmethod
 
-import netCDF4
 import h5py
 
 from MDANSE.Framework.Jobs.IJob import IJob
