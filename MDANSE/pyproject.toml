@@ -33,7 +33,6 @@ dependencies = [
   "numpy",
   "scipy",
   "h5py",
-  "PyYAML",
   "icecream"
 ]
 
