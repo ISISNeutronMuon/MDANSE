@@ -23,8 +23,14 @@ The Current Correlation Function analysis in MDANSE is a valuable tool for study
 4. **Configure Analysis Parameters:**
    - Define the appropriate parameters for frames and instrument resolution.
    - Specify the interpolation order for precise calculations.
-   - Select the interpolation mode based on the available hardware and memory resources. Choose from the available options: one-time in-memory interpolation, repeated interpolation, one-time disk interpolation, or automatic mode.
-   - Set the number of preloaded frames if the "one-time disk interpolation" mode is selected. Adjust the value to optimize memory usage and analysis speed.
+   - Select the interpolation mode based on the available hardware and memory resources.
+    Choose from the available options:
+    one-time in-memory interpolation [Default]: Fast but requires ample memory (recommended for small trajectories). 
+    repeated interpolation Slower but memory-efficient (suitable for medium trajectories).
+    one-time disk interpolation Slower, low memory usage (for large trajectories, SSD recommended).
+    automatic mode 
+   - Set the number of preloaded frames if the "one-time disk interpolation" mode is selected.[Default: 50].
+    Adjust the value to optimize memory usage and analysis speed.
 
 5. **Configure Q Vectors and Atom Selection:**
    Define the Q vectors based on the requirements of the analysis.
