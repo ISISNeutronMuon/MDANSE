@@ -33,11 +33,11 @@ class StructureFactorFromScatteringFunction(IJob):
         "Scattering",
     )
 
-    ancestor = ["netcdf_data"]
+    ancestor = ["hdf_data"]
 
     settings = collections.OrderedDict()
-    settings["netcdf_input_file"] = (
-        "netcdf_input_file",
+    settings["hdf_input_file"] = (
+        "hdf_input_file",
         {
             "variables": ["time", "f(q,t)_total"],
             "default": os.path.join("..", "..", "..", "Data", "NetCDF", "disf_prot.nc"),
@@ -45,9 +45,9 @@ class StructureFactorFromScatteringFunction(IJob):
     )
     settings["instrument_resolution"] = (
         "instrument_resolution",
-        {"dependencies": {"frames": "netcdf_input_file"}},
+        {"dependencies": {"frames": "hdf_input_file"}},
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
+    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
 
     def initialize(self):
         """
@@ -57,7 +57,7 @@ class StructureFactorFromScatteringFunction(IJob):
         # The number of steps is set to 1 as everything is performed in the finalize method
         self.numberOfSteps = 1
 
-        inputFile = self.configuration["netcdf_input_file"]["instance"]
+        inputFile = self.configuration["hdf_input_file"]["instance"]
 
         resolution = self.configuration["instrument_resolution"]
 
@@ -132,7 +132,7 @@ class StructureFactorFromScatteringFunction(IJob):
             self._info,
         )
 
-        self.configuration["netcdf_input_file"]["instance"].close()
+        self.configuration["hdf_input_file"]["instance"].close()
 
 
 REGISTRY["sffsf"] = StructureFactorFromScatteringFunction

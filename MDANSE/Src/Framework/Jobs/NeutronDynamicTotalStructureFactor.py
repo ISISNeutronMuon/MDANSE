@@ -67,7 +67,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             }
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
+    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
     settings["running_mode"] = ("running_mode", {})
 
     def initialize(self):

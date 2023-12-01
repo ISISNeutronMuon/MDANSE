@@ -73,7 +73,7 @@ class McStasVirtualInstrument(IJob):
     )
     settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
     settings["sample_coh"] = (
-        "netcdf_input_file",
+        "hdf_input_file",
         {
             "widget": "input_file",
             "label": "MDANSE Coherent Structure Factor",
@@ -82,7 +82,7 @@ class McStasVirtualInstrument(IJob):
         },
     )
     settings["sample_inc"] = (
-        "netcdf_input_file",
+        "hdf_input_file",
         {
             "widget": "input_file",
             "label": "MDANSE Incoherent Structure Factor",
@@ -116,7 +116,7 @@ class McStasVirtualInstrument(IJob):
             "exclude": ["sample_coh", "sample_inc"],
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
+    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
 
     def initialize(self):
         """
