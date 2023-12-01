@@ -4,3 +4,35 @@
 .eqno {
     float: right;
 }
+
+/* Custom CSS for Dark Blue Theme */
+body {
+    background-color: rgb(10, 56, 125);  /* Dark blue background */
+    color: #E6F1FF;  /* Light text for readability */
+}
+
+a {
+    color: #d7ebe6;  /* Bright color for links */
+}
+
+a:hover {
+    color: #72F2EB;  /* Slightly different shade for hover state */
+}
+
+/* Header and sidebar styling */
+.wy-nav-side {
+    background-color: #0c2547;  /* Darker shade of blue for the sidebar */
+}
+
+.wy-nav-top {
+    background-color: #0A192F;  /* Same as the body background */
+}
+
+/* Custom styles for math elements */
+.math {
+    text-align: left;
+}
+
+.eqno {
+    float: right;
+}

@@ -6,10 +6,6 @@
 Welcome to MDANSE's documentation!
 ==================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
 .. note::
    This is the documentation of the MDANSE 2.0 release.
    The documentation, just like the code itself, is still under development.
@@ -35,18 +31,12 @@ This project is built on the development published previously: \
 G. Goret, B. Aoun, E. Pellegrini, "MDANSE: An Interactive Analysis Environment for Molecular Dynamics Simulations", 
 J Chem Inf Model. 57(1):1-5 (2017).
 
-
 .. toctree::
-   :maxdepth: 4
-   :numbered:
-   :hidden:
-   :caption: MDANSE User Manual
+   :maxdepth: 2
+   :caption: 💡 Explanations
 
-   pages/opening
-   pages/authors
    pages/introduction
    pages/installation
-   pages/build
    pages/files
    pages/gui
    pages/cmd
@@ -57,8 +47,39 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/analysis
    pages/trajectory
    pages/plotting
-   pages/parameters
    pages/fca
+
+.. toctree::
+   :maxdepth: 2
+   :caption: ⚛️ How-To Guides
+
+   pages/H_gui
+   pages/H_cli
+   pages/H_Dynamics
+   pages/H_Scattering
+   pages/H_Structure
+   pages/H_other
+   pages/H_gloss
+   pages/H_Plotting
+   pages/H_fca
+
+.. toctree::
+   :maxdepth: 2
+   :caption: 🧪 Tutorials
+
+   pages/T_Batch
+   pages/T_sim
+   pages/T_Analysis
+
+.. toctree::
+   :maxdepth: 2
+   :caption: 📚 Technical References
+
+   pages/R_contact
+   pages/parameters
+   pages/R_traj
+   pages/R_units
+   pages/R_further
    pages/references
 
 Indices and tables
