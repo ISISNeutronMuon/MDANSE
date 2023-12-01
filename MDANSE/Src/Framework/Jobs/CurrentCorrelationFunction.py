@@ -21,7 +21,6 @@ from tempfile import gettempdir, tempdir
 
 import numpy as np
 
-import netCDF4
 
 from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
