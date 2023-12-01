@@ -151,7 +151,7 @@ def differentiate(a, dt=1.0, order=1):
 
     fact = 1.0 / dt
 
-    if order == "1st order":
+    if order == 1:
         ts[0] = np.add.reduce(coefs[0, :] * a[:3])
         ts[-1] = np.add.reduce(coefs[2, :] * a[-3:])
 
@@ -161,7 +161,7 @@ def differentiate(a, dt=1.0, order=1):
         fact /= 2.0
 
     # Case of the order 2
-    elif order == "2nd order":
+    elif order == 2:
         ts[0] = np.add.reduce(coefs[0, :] * a[:3])
         ts[-1] = np.add.reduce(coefs[2, :] * a[-3:])
 
@@ -174,7 +174,7 @@ def differentiate(a, dt=1.0, order=1):
         fact /= 2.0
 
     # Case of the order 3
-    elif order == "3rd order":
+    elif order == 3:
         # Special case for the first and last elements
         ts[0] = np.add.reduce(coefs[0, :] * a[:4])
         ts[1] = np.add.reduce(coefs[1, :] * a[:4])
@@ -191,7 +191,7 @@ def differentiate(a, dt=1.0, order=1):
         fact /= 6.0
 
     # Case of the order 4
-    elif order == "4th order":
+    elif order == 4:
         # Special case for the first and last elements
         ts[0] = np.add.reduce(coefs[0, :] * a[:5])
         ts[1] = np.add.reduce(coefs[1, :] * a[:5])
@@ -210,7 +210,7 @@ def differentiate(a, dt=1.0, order=1):
         fact /= 24.0
 
     # Case of the order 5
-    elif order == "5th order":
+    elif order == 5:
         # Special case for the first and last elements
         ts[0] = np.add.reduce(coefs[0, :] * a[:6])
         ts[1] = np.add.reduce(coefs[1, :] * a[:6])

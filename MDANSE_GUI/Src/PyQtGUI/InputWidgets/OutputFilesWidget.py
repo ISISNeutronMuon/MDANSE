@@ -71,10 +71,10 @@ class OutputFilesWidget(WidgetBase):
             self.default_path = parent.default_path
         except KeyError:
             self.default_path = "."
+            print("KeyError in OutputFilesWidget - can't get default path.")
         except AttributeError:
             self.default_path = "."
-        else:
-            self.default_path = "."
+            print("AttributeError in OutputFilesWidget - can't get default path.")
         self.file_association = ".*"
         self._value = default_value
         self.field = QLineEdit(default_value[0], self._base)
@@ -113,9 +113,9 @@ class OutputFilesWidget(WidgetBase):
             self.default_path,  # the initial search path
             self.file_association,  # text string specifying the file name filter.
         )
-        if new_value is not None:
+        if len(new_value[0]) > 0:
             self.field.setText(new_value[0])
-        self.updateValue()
+            self.updateValue()
 
     @staticmethod
     def _get_unique_filename(directory, basename):

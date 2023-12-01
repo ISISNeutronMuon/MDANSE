@@ -62,6 +62,11 @@ widget_lookup = {  # these all come from MDANSE_GUI.PyQtGUI.InputWidgets
     "interpolation_order": InterpolationOrderWidget,
     "output_files": OutputFilesWidget,
     "running_mode": RunningModeWidget,
+    "weights": ComboWidget,
+    "grouping_level": ComboWidget,
+    "q_vectors": QVectorsWidget,
+    "input_directory": InputDirectoryWidget,
+    "output_directory": OutputDirectoryWidget,
 }
 
 
@@ -73,6 +78,13 @@ class ActionDialog(QDialog):
 
     def __init__(self, *args, converter: IJob = "Dummy", **kwargs):
         self.source = kwargs.pop("source_object", None)
+        try:
+            temptext = self.source.text()
+        except AttributeError:
+            self.default_path = "."
+            print("Failed to get trajectory path! Resetting to default '.'")
+        else:
+            self.default_path, _ = os.path.split(temptext)
         super().__init__(*args, **kwargs)
 
         layout = QVBoxLayout(self)
@@ -81,7 +93,6 @@ class ActionDialog(QDialog):
         self._widgets = []
         self.converter_instance = None
         self.converter_constructor = converter
-        self.default_path = "."
         try:
             cname = converter.name
         except:
@@ -89,6 +100,8 @@ class ActionDialog(QDialog):
         else:
             self.cname = cname
             self.last_paths[cname] = "."
+
+        self.setWindowTitle(converter.__name__)
 
         if converter is not None:
             converter_instance = converter()

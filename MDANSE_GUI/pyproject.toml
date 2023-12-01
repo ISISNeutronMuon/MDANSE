@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "numpy"]
+requires = ["setuptools", "numpy", "pip", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -33,6 +33,7 @@ dependencies = [
   "qtpy",
   "vtk",
   "MDANSE",
+  "PyYAML",
 ]
 
 # dynamic = ["version", "description"]

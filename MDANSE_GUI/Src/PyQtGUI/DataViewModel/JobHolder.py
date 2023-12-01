@@ -18,6 +18,8 @@ from icecream import ic
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex
 
+from MDANSE_GUI.PyQtGUI.DataViewModel.JobStatusQt import JobStatusQt
+
 
 class JobThread(QThread):
     job_failure = Signal(str)
@@ -27,15 +29,19 @@ class JobThread(QThread):
         ic("JobThread starts init")
         self._command = command
         self._parameters = parameters
+        ic("JobThread.run will create a job instance")
+        self._job = self._command()
+        self._job.build_configuration()
+        ic(f"JobThread._parameters: {self._parameters}")
+        # here we try to create and connect a JobStatusQt
+        status = JobStatusQt(parent=self)
+        self._job._status = status
+        self._status = status
         ic("JobThread finished init")
 
     def run(self):
-        ic("JobThread.run is starting")
-        job = self._command()
-        job.build_configuration()
-        ic(f"JobThread._parameters: {self._parameters}")
         try:
-            job.run(self._parameters)
+            self._job.run(self._parameters)
         except Exception as inst:
             ic("JobThread has entered exception handling!")
             error_message = ""
@@ -49,16 +55,20 @@ class JobThread(QThread):
         self.exec()  # this starts event handling - will it help?
 
 
-class JobItem(QStandardItem):
+class JobEntry(QObject):
     def __init__(self, *args, command=None):
         super().__init__(*args)
         self._command = command
         self._parameters = {}
         self.has_started = False
         self.has_finished = False
+        self.success = None
         self.percent_complete = 0
         self._output = None
         self.reference = None
+        self.total_steps = 99
+        self._prog_item = QStandardItem()
+        self._stat_item = QStandardItem()
 
     @property
     def parameters(self):
@@ -68,6 +78,39 @@ class JobItem(QStandardItem):
     def set_parameters(self, input: dict):
         self._parameters = input
 
+    def update_fields(self):
+        self._prog_item.setText(f"{self.percent_complete} percent complete")
+
+    @Slot(bool)
+    def on_finished(self, success: bool):
+        print("Item received on_finished!")
+        self.success = success
+        self.has_finished = True
+        self._stat_item.setText("Stopped")
+        if success:
+            self.percent_complete = 100
+            self._stat_item.setText("Completed!")
+        self.update_fields()
+
+    @Slot(int)
+    def on_started(self, target_steps: int):
+        print("Item received on_started!")
+        self.total_steps = target_steps
+        self.has_started = True
+        self._stat_item.setText("Starting")
+        self.update_fields()
+
+    @Slot(int)
+    def on_update(self, completed_steps: int):
+        print("Item received on_update!")
+        self.percent_complete = completed_steps / self.total_steps * 99
+        self._stat_item.setText("Running")
+        self.update_fields()
+
+    @Slot()
+    def on_oscillate(self):
+        """For jobs with unknown duration, the progress bar will bounce."""
+
 
 class JobHolder(QStandardItemModel):
     def __init__(self, parent: QObject = None, python: str = ""):
@@ -75,6 +118,7 @@ class JobHolder(QStandardItemModel):
         self.python_interpreter = python
         self.lock = QMutex()
         self.existing_threads = []
+        self.existing_jobs = []
 
     @Slot(str)
     def reportError(self, err: str):
@@ -82,7 +126,7 @@ class JobHolder(QStandardItemModel):
 
     @Slot(object)
     def addItem(self, new_entry: QProcess):
-        traj = JobItem(new_entry.basename, trajectory=new_entry)
+        traj = JobEntry(new_entry.basename, trajectory=new_entry)
         self.appendRow([traj])
 
     @Slot(int)
@@ -93,9 +137,25 @@ class JobHolder(QStandardItemModel):
     def startThread(self, job_vars: list):
         th_ref = JobThread(command=job_vars[0], parameters=job_vars[1])
         th_ref.job_failure.connect(self.reportError)
+        item_th = JobEntry(command=job_vars[0])
+        th_ref._status._communicator.target.connect(item_th.on_started)  # int
+        th_ref._status._communicator.progress.connect(item_th.on_update)  # int
+        th_ref._status._communicator.finished.connect(item_th.on_finished)  # bool
+        th_ref._status._communicator.oscillate.connect(item_th.on_oscillate)  # nothing
         ic("Thread ready to start!")
+        self.appendRow(
+            [
+                QStandardItem(str(job_vars[0].__name__)),
+                item_th._prog_item,
+                item_th._stat_item,
+            ]
+        )
+        # nrows = self.rowCount()
+        # index = self.indexFromItem(item_th._item)
+        # print(f"Index: {index}")
         th_ref.start()
         self.existing_threads.append(th_ref)
+        self.existing_jobs.append(item_th)
 
     # def on_run(self, event=None):
 
