@@ -31,8 +31,35 @@ This project is built on the development published previously: \
 G. Goret, B. Aoun, E. Pellegrini, "MDANSE: An Interactive Analysis Environment for Molecular Dynamics Simulations", 
 J Chem Inf Model. 57(1):1-5 (2017).
 
+
+.. raw:: html
+
+   <div class="sd-grid">
+       <div class="grid-item">
+           <h3>💡 Explanations</h3>
+           <p>Learn the basics and core concepts of MDANSE.</p>
+           <a href="pages/explanations.html">Learn More</a>
+       </div>
+       <div class="grid-item">
+           <h3>⚛️ How-To Guides</h3>
+           <p>Practical step-by-step guides to help you utilize MDANSE effectively.</p>
+           <a href="pages/H_gui.html">Learn More</a>
+       </div>
+       <div class="grid-item">
+           <h3>🧪 Tutorials</h3>
+           <p>Detailed tutorials to help you get started with MDANSE.</p>
+           <a href="pages/T_Batch.html">Learn More</a>
+       </div>
+       <div class="grid-item">
+           <h3>📚 Technical References</h3>
+           <p>Deep dive into the technical details of MDANSE.</p>
+           <a href="pages/R_contact.html">Learn More</a>
+       </div>
+   </div>
+
+
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: 💡 Explanations
 
    pages/introduction
@@ -50,7 +77,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/fca
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: ⚛️ How-To Guides
 
    pages/H_gui
@@ -64,7 +91,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/H_fca
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: 🧪 Tutorials
 
    pages/T_Batch
@@ -72,7 +99,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/T_Analysis
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: 📚 Technical References
 
    pages/R_contact

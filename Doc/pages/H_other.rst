@@ -4,227 +4,256 @@ How to Guide Analysis: Other Options
 Infrared: Dipole AutoCorrelation Function
 -----------------------------------------
 
-**Load Trajectory Data**
+**Purpose**
+The Infrared: Dipole AutoCorrelation Function analysis focuses on studying
+molecular vibrations and infrared spectra using dipole auto-correlation.
 
-1. Open MDANSE on your computer.
-2. Click on the "File" menu.
-3. Select "Load Trajectory Data" and choose your trajectory file.
+1. **Load Trajectory Data:**
+   - Open MDANSE on your computer.
+   - Click on the "File" menu.
+   - Select "Load Trajectory Data" and choose your trajectory file.
 
-**Access the "Dipole AutoCorrelation Function" Analysis**
+2. **Access the "Dipole AutoCorrelation Function" Analysis:**
+   - In the MDANSE interface, navigate to the "Analysis" section.
+   - Locate and select "Dipole AutoCorrelation Function" from the available
+     analysis options.
 
-1. In the MDANSE interface, navigate to the "Analysis" section.
-2. Locate and select "Dipole AutoCorrelation Function" from the available
-analysis options.
+3. **Configure Analysis Parameters:**
+   - **Frames:** Specify the frames or time points (Default: First: 0, Last: Entire
+     trajectory, Step: 1).
+   - **Atom Selection:** Choose the atoms or particles.
+   - **Output Files (Optional):** Configure output file settings as needed.
 
-**Configure Settings**
+4. **Run the Calculation:**
+   - Click on the "Run" button.
 
-- Frames: Specify the frames or time points (Default: First:
-0, Last: Entire trajectory, Step: 1).
-- Atom Selection: Choose the atoms or particles.
-- Output Files (Optional): Configure output file settings as needed.
+5. **Review Results:**
+   - Access and interpret the dipole autocorrelation function results to study
+     molecular vibrations and infrared spectra.
 
-**Run the Calculation**
+6. **Recommended Plots:**
+   - Dipole AutoCorrelation Function Plot: Visualizes how the dipole autocorrelation
+     changes over time, providing insights into molecular vibrations.
 
-- Click on the "Run" button.
-
-**Review Results**
-
-- Access and interpret the dipole autocorrelation function results for
-studying molecular vibrations and infrared spectra.
+   - Infrared Spectra Plot: Illustrates the infrared spectra obtained from the
+     analysis, showing the vibrational modes of the system.
 
 Macromolecules: Refolded Membrane Trajectory
 --------------------------------------------
 
-**Load Trajectory Data**
+**Purpose**
+The Macromolecules: Refolded Membrane Trajectory analysis focuses on the
+manipulation and examination of membrane structures.
 
-1. Open MDANSE on your computer.
-2. Click on the "File" menu.
-3. Select "Load Trajectory Data" and choose your trajectory file.
+1. **Load Trajectory Data:**
+   - Open MDANSE on your computer.
+   - Click on the "File" menu.
+   - Select "Load Trajectory Data" and choose your trajectory file.
 
-**Access the "Refolded Membrane Trajectory" Analysis**
+2. **Access the "Refolded Membrane Trajectory" Analysis:**
+   - In the MDANSE interface, navigate to the "Analysis" section.
+   - Expand the "Macromolecules" subsection.
+   - Select "Refolded Membrane Trajectory" from the available plugins.
 
-1. Navigate to the "Analysis" section in MDANSE.
-2. Expand the "Macromolecules" subsection.
-3. Select "Refolded Membrane Trajectory" from the available plugins.
+3. **Configure Settings:**
+   - **Membrane Axis:** Choose the axis for membrane manipulation.
+   - **Name of the Lipid (Upper Leaflet):** Specify the lipid name in the upper
+     leaflet.
+   - **Name of the Lipid (Lower Leaflet):** Specify the lipid name in the lower
+     leaflet.
+   - **Output Files:** Configure output file settings as needed.
 
-**Configure Settings**
+4. **Run the Calculation:**
+   - Click on the "Run" button.
 
-- Membrane Axis: Choose the axis for membrane manipulation.
-- Name of the Lipid (Upper Leaflet): Specify the lipid
-name in the upper leaflet.
-- Name of the Lipid (Lower Leaflet): Specify the lipid
-name in the lower leaflet.
-- Output Files: Configure output file settings as needed.
+5. **Review Results:**
+   - Examine the modified membrane trajectory.
 
-**Run the Calculation**
+6. **Recommended Plot:**
+   - Membrane Structure Plot: Visualizes the modified membrane structure,
+     showing the changes resulting from the analysis.
 
-- Click on the "Run" button.
+Thermodynamics: Density
+-----------------------
 
-**Review Results**
+**Purpose**
+The Thermodynamics: Density analysis focuses on calculating the density of a molecular system.
 
-- Examine the modified membrane trajectory.
+1. **Load Trajectory Data:**
+   - Open MDANSE on your computer.
+   - Click on the "File" menu.
+   - Select "Load Trajectory Data" and choose your trajectory file.
 
-Thermodynamics: Density and Temperature
-----------------------------------------
+2. **Access the "Density" Analysis:**
+   - In the MDANSE interface, navigate to the "Analysis" section.
+   - Select "Density" from the available analysis options.
 
-**Load Trajectory Data**
+3. **Configure Analysis Parameters:**
+   - **Frames:** Specify the frames or time points (Default: First: 0, Last: Entire trajectory, Step: 1).
+   - **Atom Selection:** Choose the atoms or particles.
+   - **Output Files (Optional):** Configure output file settings as needed.
 
-1. Open MDANSE on your computer.
-2. Click on the "File" menu.
-3. Select "Load Trajectory Data" and choose your trajectory file.
+4. **Run the Calculation:**
+   - Click on the "Run" button.
 
-**Access the Desired Analysis**
+5. **Review Density Results:**
+   - Access and interpret the density results obtained from the analysis.
 
-- For "Density":
-    1. Select "Density" from the analysis options.
-    2. Configure additional settings if necessary.
-    3. Click "Run" to calculate the density.
-- For "Temperature":
-    1. Select "Temperature" from the analysis options.
-    2. Configure additional settings if necessary.
-    3. Click "Run" to calculate the temperature.
+6. **Recommended Plot:**
+   - Density Plot: Visualizes how the density changes over time, providing insights into the system's behavior.
 
-**Review Results**
+Thermodynamics: Density
+-----------------------
 
-- Access and interpret the density or temperature results, depending
-on the performed analysis.
+**Purpose**
+The Thermodynamics: Density analysis focuses on calculating the density of a
+molecular system.
 
+1. **Load Trajectory Data:**
+   - Open MDANSE on your computer.
+   - Click on the "File" menu.
+   - Select "Load Trajectory Data" and choose your trajectory file.
 
-Box Translated Trajectory
+2. **Access the "Density" Analysis:**
+   - In the MDANSE interface, navigate to the "Analysis" section.
+   - Select "Density" from the available analysis options.
+
+3. **Configure Analysis Parameters:**
+   - **Frames:** Specify the frames or time points (Default: First: 0, Last: Entire
+     trajectory, Step: 1).
+   - **Atom Selection:** Choose the atoms or particles.
+   - **Output Files (Optional):** Configure output file settings as needed.
+
+4. **Run the Calculation:**
+   - Click on the "Run" button.
+
+5. **Review Density Results:**
+   - Access and interpret the density results obtained from the analysis.
+
+6. **Recommended Plot:**
+   - Density Plot: Visualizes how the density changes over time, providing insights
+     into the system's behavior.
+
+Thermodynamics: Temperature
 ---------------------------
 
 **Purpose**
-- Useful for simulating scenarios where repositioning the entire simulation
-box is needed to study system behavior under different conditions 
-or to set up specific simulation environments.
+The Thermodynamics: Temperature analysis focuses on calculating the temperature of
+a molecular system.
 
-**Load Trajectory Data**
-   1. Open MDANSE on your computer.
-   2. Click on the "File" menu.
-   3. Select "Load Trajectory Data" and choose your trajectory file.
+1. **Load Trajectory Data:**
+   - Open MDANSE on your computer.
+   - Click on the "File" menu.
+   - Select "Load Trajectory Data" and choose your trajectory file.
 
-**Access the "Box Translated Trajectory" Analysis**
+2. **Access the "Temperature" Analysis:**
    - In the MDANSE interface, navigate to the "Analysis" section.
-   - Select "Box Translated Trajectory" from the available plugins.
+   - Select "Temperature" from the available analysis options.
 
-**Configure Settings**
-- Frames: Specify the frames or time points for box
-translation (Default: First: 0, Last: Entire trajectory, Step: 1).
-- Atom Selection: Choose the atoms or particles involved in
-the translation.
-   - Output Files: Configure output file settings as needed.
-   - Running Mode: Define the running mode (Default: 0).
+3. **Configure Analysis Parameters:**
+   - **Frames:** Specify the frames or time points (Default: First: 0, Last: Entire
+     trajectory, Step: 1).
+   - **Atom Selection:** Choose the atoms or particles.
+   - **Output Files (Optional):** Configure output file settings as needed.
 
-**Run the Calculation**
-- Click on the "Run" button to perform the box
-translation.
+4. **Run the Calculation:**
+   - Click on the "Run" button.
+
+5. **Review Temperature Results:**
+   - Access and interpret the temperature results obtained from the analysis.
+
+6. **Recommended Plot:**
+   - Temperature Plot: Visualizes how the temperature changes over time, providing
+     insights into the system's thermal behavior.
+
 
 Center Of Masses Trajectory
 ---------------------------
 
 **Purpose**
-- To reduce the complexity of a molecular dynamics simulation
-by focusing on the motion of groups of atoms, such as molecules or subunits.
+The Center Of Masses Trajectory analysis aims to reduce the complexity of a
+molecular dynamics simulation by focusing on the motion of groups of atoms, such
+as molecules or subunits.
 
-**Load Trajectory Data**
-   1. Open MDANSE on your computer.
-   2. Click on the "File" menu.
-   3. Select "Load Trajectory Data" and choose your trajectory file.
+1. **Load Trajectory Data:**
+   - Open MDANSE on your computer.
+   - Click on the "File" menu.
+   - Select "Load Trajectory Data" and choose your trajectory file.
 
-**Access the "Center Of Masses Trajectory" Analysis**
+2. **Access the "Center Of Masses Trajectory" Analysis:**
    - Navigate to the "Analysis" section in the MDANSE interface.
    - Select "Center Of Masses Trajectory" from the available plugins.
 
-**Configure Settings**
-- Frames: Specify the frames for COMT calculation (Default: First:
-0, Last: Entire trajectory, Step: 1).
-- Atom Selection: Choose atoms for the center of mass
-computation.
-   - Group Coordinates: Define groups of atoms for calculation.
-   - Output Files: Configure file settings as needed.
-   - Running Mode: Define the mode (Default: 0).
+3. **Configure Settings:**
+   - **Frames:** Specify the frames for COMT calculation (Default: First: 0, Last: Entire trajectory, Step: 1).
+   - **Atom Selection:** Choose atoms for the center of mass computation.
+   - **Group Coordinates:** Define groups of atoms for calculation.
+   - **Output Files:** Configure file settings as needed.
+   - **Running Mode:** Define the mode (Default: 0).
 
-**Run the Calculation**
+4. **Run the Calculation:**
    - Click the "Run" button for the COMT calculation.
+
+5. **Recommended Plot:**
+   - Center Of Masses Trajectory Plot: Visualizes the motion of groups of atoms'
+     centers of mass, providing insights into the system's overall dynamics.
 
 Cropped Trajectory
 ------------------
 
 **Purpose**
-   - To extract a subset of frames from your trajectory.
+The Cropped Trajectory analysis allows you to extract a subset of frames from your
+trajectory.
 
-**Load Trajectory Data**
-- Follow the same steps as in the Center Of
-Masses Trajectory.
+1. **Load Trajectory Data:**
+   - Follow the same steps as in the "Center Of Masses Trajectory" section.
 
-**Access the "Cropped Trajectory" Analysis**
+2. **Access the "Cropped Trajectory" Analysis:**
    - Navigate to the "Analysis" section in MDANSE.
    - Select "Cropped Trajectory" from the available plugins.
 
-**Configure Settings**
-- Frames: Specify the frames for the cropped trajectory (Default:
-First: 0, Last: Entire trajectory, Step: 1).
-   - Atom Selection: Choose atoms to be included.
-   - Output Files: Configure file settings as needed.
-   - Running Mode: Define the mode (Default: 0).
+3. **Configure Settings:**
+   - **Frames:** Specify the frames for the cropped trajectory (Default: First: 0,
+     Last: Entire trajectory, Step: 1).
+   - **Atom Selection:** Choose atoms to be included.
+   - **Output Files:** Configure file settings as needed.
+   - **Running Mode:** Define the mode (Default: 0).
 
-**Run the Calculation**
+4. **Run the Calculation:**
    - Click the "Run" button to create the cropped trajectory.
 
+5. **Recommended Plot:**
+   - Cropped Trajectory Plot: Visualizes the subset of frames extracted from the
+     trajectory, highlighting specific segments of interest.
+
 Global Motion Filtered Trajectory
----------------------------------
+----------------------------------
 
 **Purpose**
-- To separate global motion from internal motion within the
-trajectory, focusing on relevant internal dynamics.
+The Global Motion Filtered Trajectory analysis separates global motion from internal
+motion within the trajectory, focusing on relevant internal dynamics.
 
-**Load Trajectory Data**
-   1. Open MDANSE on your computer.
-   2. Click on the "File" menu.
-   3. Select "Load Trajectory Data" and choose your trajectory file.
+1. **Load Trajectory Data:**
+   - Open MDANSE on your computer.
+   - Click on the "File" menu.
+   - Select "Load Trajectory Data" and choose your trajectory file.
 
-**Access the "Global Motion Filtered Trajectory" Analysis**
-- In MDANSE, navigate to "Analysis" and select "Global Motion
-Filtered Trajectory".
+2. **Access the "Global Motion Filtered Trajectory" Analysis:**
+   - In MDANSE, navigate to "Analysis" and select "Global Motion Filtered Trajectory."
 
-**Configure Settings**
-- Frames: Specify frames for global motion filtering (Default: First:
-0, Last: Entire trajectory, Step: 1).
-   - Atom Selection: Choose atoms involved in the analysis.
-   - Reference Basis: Select the reference basis for filtering.
-   - Chemical Object Contiguity: Optionally make configuration contiguous (Default: False).
-   - Output Files: Configure file settings as needed.
-   - Running Mode: Define the mode (Default: 0).
+3. **Configure Settings:**
+   - **Frames:** Specify frames for rigid body analysis (Default: First: 0, Last:
+     Entire trajectory, Step: 1).
+   - **Atom Selection:** Choose atoms involved in the analysis.
+   - **Group Coordinates:** Define groups of atoms as rigid bodies.
+   - **Reference:** Specify reference frame number (Default: 0).
+   - **Remove Translation:** Optionally remove translation (Default: False).
+   - **Output Files:** Configure file settings as needed.
+   - **Running Mode:** Define the mode (Default: 0).
 
-**Run the Calculation**
-   - Click "Run" to generate the global motion filtered trajectory.
+4. **Run the Calculation:**
+   - Click "Run" to extract rigid body motions from the trajectory.
 
-Rigid Body Trajectory
----------------------
-
-**Purpose**
-- To extract rigid body motions from a molecular dynamics
-trajectory.
-
-**Load Trajectory Data**
-- Follow the same steps as in the Global Motion
-Filtered Trajectory.
-
-**Access the "Rigid Body Trajectory" Analysis**
-   - Navigate to "Analysis" and select "Rigid Body Trajectory".
-
-**Configure Settings**
-- Frames: Specify frames for rigid body analysis (Default: First:
-0, Last: Entire trajectory, Step: 1).
-   - Atom Selection: Choose atoms involved in the analysis.
-   - Group Coordinates: Define groups of atoms as rigid bodies.
-   - Reference: Specify reference frame number (Default: 0).
-   - Remove Translation: Optionally remove translation (Default: False).
-   - Output Files: Configure file settings as needed.
-   - Running Mode: Define the mode (Default: 0).
-
-**Run the Calculation**
-- Click "Run" to extract rigid body motions from the
-trajectory.
-
-
+5. **Recommended Plot:**
+   - Rigid Body Trajectory Plot: Visualizes the extracted rigid body motions,
+     providing insights into the system's rigid body dynamics.

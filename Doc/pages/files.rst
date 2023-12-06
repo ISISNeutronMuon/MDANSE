@@ -1,21 +1,24 @@
 .. _file_formats:
 
-Section 6: Supported File Formats
+How to Guide Supported File Formats
 ==================================
 
 In the updated MDANSE version, there have been significant changes to the
 supported file formats for input and output. This section provides an
 overview of these changes and the file formats used by MDANSE.
 
-6.1. HDF5 File Format and GUI Integration
------------------------------------------
+.. _hdf5:
+
+HDF5 File Format and GUI Integration
+-------------------------------------
 
 In the new version of MDANSE, the primary file format for both trajectory
-storage and analysis results is `Hierarchical Data Format (HDF5) <https://www.hdfgroup.org/solutions/hdf5/>`_. HDF5 is
-a versatile file format designed for efficiently organizing and managing
+storage and analysis results is `Hierarchical Data Format (HDF5) <https://www.hdfgroup.org/solutions/hdf5/>`_
+. HDF5 is a versatile file format designed for efficiently organizing and managing
 large data sets. It employs a hierarchical structure, akin to a file system,
 and supports n-dimensional arrays with associated metadata attributes. HDF5
-is widely adopted, and even `NetCDF version 4 <https://www.unidata.ucar.edu/software/netcdf/netcdf-4/>`_ is built on top of HDF5. Using
+is widely adopted, and even `NetCDF version 4 <https://www.unidata.ucar.edu/software/netcdf/netcdf-4/>`_ 
+is built on top of HDF5. Using
 HDF5 ensures platform independence, efficient data storage, and comprehensive
 self-contained information within trajectory files.
 
@@ -26,8 +29,10 @@ analyses and managing file conversions. Users can interact with MDANSE through
 the GUI to directly convert trajectories from different formats to the required
 HDF5 format using the Trajectory Converter tool.
 
-6.2. DAT File Format
----------------------
+.. _text_output:
+
+DAT File Format
+-----------------
 
 During an Analysis in MDANSE, the default output format is now `DAT files <https://en.wikipedia.org/wiki/DAT_file>`_, which
 are text-based and easily readable. Each DAT file corresponds to a specific
@@ -49,7 +54,9 @@ tarball is generated, which contains multiple files, including:
 The DAT format simplifies data sharing and analysis, providing a clear and
 human-readable representation of analysis results.
 
-6.3. MDANSE Scripts
+.. _mdanse-scripts:
+
+MDANSE Scripts
 --------------------
 
 MDANSE now includes Python scripts that capture the complete analysis setup,
@@ -61,7 +68,9 @@ repetitive tasks and ensuring consistency in analysis procedures.
 This update streamlines the analysis process and facilitates the reproducibility
 of results within MDANSE.
 
-6.4. NetCDF to HDF5 Conversion Script
+.. _convert_netcdf:
+
+NetCDF to HDF5 Conversion Script
 ---------------------------------------
 
 MDANSE now provides a versatile Python script that simplifies the process

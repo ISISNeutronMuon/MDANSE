@@ -1,52 +1,75 @@
-.. _mdanse-batch-jobs-tutorial:
-
-=============================================
-Running Batch Jobs in MDANSE: A Detailed Tutorial
+Running Batch Jobs in MDANSE: Tutorial
 =============================================
 
 Introduction
 ------------
-This tutorial provides a step-by-step guide on how to efficiently run batch jobs in MDANSE, a software tool used for analyzing molecular dynamics simulations. Batch processing is ideal for processing multiple datasets and conducting complex analyses.
+
+This tutorial provides a step-by-step guide on how to efficiently run batch jobs
+in MDANSE, a software tool used for analyzing molecular dynamics simulations.
+Batch processing is ideal for processing multiple datasets and conducting complex
+analyses.
 
 Prerequisites
 -------------
+
 Before you begin, make sure you have the following:
 
 - **MDANSE Installed:** The MDANSE software must be installed on your system.
-- **Basic Knowledge:** A fundamental understanding of both MDANSE's user interface and general concepts in molecular dynamics is required.
+- **Basic Knowledge:** A fundamental understanding of both MDANSE's user interface
+  and general concepts in molecular dynamics is required.
 
 Step 1: Prepare Your Analysis
 -----------------------------
-The first step involves preparing your data and setting up the parameters for your analysis.
 
-- **Select Data Files:** Choose the molecular dynamics simulation files, typically in HDF format.
-- **Set Analysis Parameters:** Define the specific analysis you wish to perform, such as Radial Distribution Function (RDF).
-- **Configure Output Options:** Decide on the output format (preferably JSON) and the destination folder for the results.
+The first step involves preparing your data and setting up the parameters for
+your analysis. In this example, we have two trajectory files, and we want to
+perform a Radial Distribution Function (RDF) analysis, with the results saved in
+JSON format to an output directory.
+
+Python snippet to define trajectory files and parameters:
 
 .. code-block:: python
 
-   # Python snippet to define simulation files and parameters
-   simulation_files = ["path/to/simulation1.hdf", "path/to/simulation2.hdf"]
+   # Define the list of trajectory files
+   trajectory_files = ["path/to/trajectory1.hdf", "path/to/trajectory2.hdf"]
+
+   # Specify the analysis type
    analysis_type = "RadialDistributionFunction"
+
+   # Specify the output format
    output_format = "json"
+
+   # Define the output directory
    output_directory = "/path/to/output/"
+
+In this snippet, you can replace `"path/to/trajectory1.hdf"` and
+`"path/to/trajectory2.hdf"` with the actual file paths of your trajectory
+files, and adjust the `output_directory` and `output_format` to your specific
+needs.
 
 Step 2: Create a Batch Job Script
 ---------------------------------
-Next, create a script that automates the execution of MDANSE using its command-line interface.
 
-- **Scripting:** The script should invoke MDANSE's command-line interface to process each file.
+Next, create a script that automates the execution of MDANSE using its
+command-line interface.
+
+- **Scripting:** The script should invoke MDANSE's command-line interface to
+  process each trajectory file.
 
 .. code-block:: bash
 
    #!/bin/bash
    # Batch script for MDANSE analysis
-   simulation_files=("path/to/simulation1.hdf" "path/to/simulation2.hdf")
+
+   # Define the list of trajectory files
+   trajectory_files=("path/to/trajectory1.hdf" "path/to/trajectory2.hdf")
+
+   # Specify the analysis type and output format
    analysis_type="RadialDistributionFunction"
    output_format="json"
    output_directory="/path/to/output/"
 
-   for file in "${simulation_files[@]}"; do
+   for file in "${trajectory_files[@]}"; do
      output_file="$output_directory/$(basename ${file%.*}).$output_format"
      echo "Processing $file"
      mdanse run -t $analysis_type -i "$file" -o "$output_file"
@@ -54,17 +77,22 @@ Next, create a script that automates the execution of MDANSE using its command-l
 
 Step 3: Customizing the Batch Script
 ------------------------------------
-Tailor the script to suit various analysis needs or handle multiple files efficiently.
 
-- **Looping and Conditional Logic:** Implement loops and conditions to process different types of analyses.
+Now that you have created the batch script, you can customize it to suit various
+analysis needs or handle multiple files efficiently. One way to customize the
+script is to implement looping and conditional logic to process different types
+of analyses or variations of the same analysis.
+
+Here's an example of a customized batch script that runs multiple types of
+analyses on a set of trajectory files:
 
 .. code-block:: bash
 
    #!/bin/bash
    # Customized batch script for MDANSE
+
    declare -A analysis_params
    analysis_params["RadialDistributionFunction"]="rdf"
-   analysis_params["AnotherAnalysisType"]="other"
 
    for file in /path/to/simulations/*.hdf; do
      for analysis in "${!analysis_params[@]}"; do
@@ -77,31 +105,45 @@ Tailor the script to suit various analysis needs or handle multiple files effici
 
 Step 4: Run the Batch Job
 --------------------------
-With the script ready, execute it to start the batch processing.
+
+With the batch script customized to your requirements, you can now execute it to
+start the batch processing. Use the following command to run the batch script:
 
 .. code-block:: bash
 
    # Command to run the batch script
    bash run_mdanse_batch.sh
 
+This command will initiate the analysis for all the trajectory files specified in
+your script.
+
 Step 5: Monitoring Progress
 ---------------------------
-It's important to monitor the progress of your batch job and troubleshoot if needed.
 
-- **Monitor Output:** Keep an eye on the terminal for real-time output that indicates the progress of the batch job.
-- **Error Handling:** Watch out for error messages and be prepared to debug if necessary.
+While the batch job is running, it's important to monitor its progress to ensure
+that everything is proceeding as expected. You can keep an eye on the terminal
+for real-time output that indicates the progress of the batch job. Additionally,
+you should watch out for error messages and be prepared to debug if necessary.
+
+Here's an example command to monitor MDANSE processes using the `watch` command:
 
 .. code-block:: bash
 
    # Example command to monitor MDANSE processes
    watch -n 1 'ps aux | grep mdanse'
 
+This command will display a list of MDANSE processes in the terminal, allowing
+you to check their status.
+
 Step 6: Reviewing Batch Job Results
 -----------------------------------
-After completion, analyze the results generated by the batch job.
 
-- **Accessing Results:** The output will be JSON files in the specified directory.
-- **Data Interpretation:** Write scripts to parse and understand the output data.
+After the batch job is completed, it's time to analyze the results generated by
+the batch job. The output will typically be JSON files stored in the specified
+output directory.
+
+You can use a scripting language like Python to read and process these JSON
+files. Here's a Python script example to read and plot results from JSON files:
 
 .. code-block:: python
 
@@ -112,12 +154,14 @@ After completion, analyze the results generated by the batch job.
    output_files = ["output/rdf_simulation1.json", "output/rdf_simulation2.json"]
 
    for file in output_files:
-       with open(file, 'r') as f:
-           data = json.load(f)
-           plt.plot(data['distance'], data['rdf'], label=file)
+      with open(file, 'r') as f:
+          data = json.load(f)
+          plt.plot(data['distance'], data['rdf'], label=file)
 
    plt.xlabel('Distance (angstrom)')
    plt.ylabel('RDF Value')
    plt.title('Radial Distribution Function Analysis')
    plt.legend()
    plt.show()
+
+

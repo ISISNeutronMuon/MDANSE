@@ -1,106 +1,94 @@
 How to Guide: Using the Command Line Interface (CLI)
 ====================================================
 
+Run a Basic MDANSE Analysis Using the CLI
+-----------------------------------------
 
-Run a Basic MAnalysis Using the CLI
-==================================================
-
-Purpose
--------
+**Purpose:**
 
 This guide explains how to perform a basic MDANSE analysis from the command line.
 
-**Open Terminal or Command Prompt**
+1. **Open Terminal or Command Prompt:**
+   - Open your computer's terminal or command prompt.
 
-1. Open your computer's terminal or command prompt.
+2. **Navigate to MDANSE Directory:**
+   - Use the ``cd`` command to go to the MDANSE installation directory. If it's not in your system's PATH, provide the full path to the MDANSE directory.
+     Example:
 
-**Navigate to MDANSE Directory**
+     .. code-block:: bash
 
-2. Use the ``cd`` command to go to the MDANSE installation directory. If it's not in your system's PATH, provide the full path to the MDANSE directory.
-   Example: 
+        cd /path/to/MDANSE
 
-   .. code-block:: bash
+3. **List Available MDANSE Jobs:**
+   - To see available analysis tasks, type:
 
-      cd /path/to/MDANSE
+     .. code-block:: bash
 
-**List Available MDANSE Jobs**
+        mdanse -r job
 
-3. To see available analysis tasks, type: 
+4. **Run a Basic Analysis:**
+   - Execute an analysis script with this command:
 
-   .. code-block:: bash
+     .. code-block:: bash
 
-      mdanse -r job
+        mdanse --jr my_basic_script.py
 
-**Run a Basic Analysis**
+     Replace ``my_basic_script.py`` with your script's filename.
 
-4. Execute an analysis script with this command:
+5. **Check Results:**
+   - After the analysis finishes, review the results in the specified output directory, typically defined in your script.
 
-   .. code-block:: bash
+Running Jobs Using the CLI
+--------------------------
 
-      mdanse --jr my_basic_script.py
-
-   Replace ``my_basic_script.py`` with your script's filename.
-
-**Check Results**
-
-5. After the analysis finishes, review the results in the specified output directory, typically defined in your script.
-
-**Running Jobs Using the CLI**
-
-**Purpose**
+**Purpose:**
 
 This guide explains how to run MDANSE jobs via the command line interface (CLI) for various analysis tasks.
 
-**Open Terminal or Command Prompt**
+1. **Open Terminal or Command Prompt:**
+   - Begin by opening your computer's terminal or command prompt.
 
-1. Begin by opening your computer's terminal or command prompt.
+2. **Navigate to MDANSE Directory:**
+   - Use the ``cd`` command to go to the MDANSE installation directory. If it's not in your system's PATH, provide the full path to the MDANSE directory.
+     Example:
 
-**Navigate to MDANSE Directory**
+     .. code-block:: bash
 
-2. Use the ``cd`` command to go to the MDANSE installation directory. If it's not in your system's PATH, provide the full path to the MDANSE directory.
-   Example: 
+        cd /path/to/MDANSE
 
-   .. code-block:: bash
+3. **List Available MDANSE Jobs:**
+   - To see available analysis tasks, type:
 
-      cd /path/to/MDANSE
+     .. code-block:: bash
 
-**List Available MDANSE Jobs**
+        mdanse -r job
 
-3. To see available analysis tasks, type: 
+4. **Run a Basic MDANSE Analysis Using the CLI:**
+   - Execute a basic MDANSE analysis using a command like this:
 
-   .. code-block:: bash
+     .. code-block:: bash
 
-      mdanse -r job
+        mdanse --jr my_basic_script.py
 
-**Run a Basic MDANSE Analysis Using the CLI**
+     Replace ``my_basic_script.py`` with your script's filename.
 
-4. Execute a basic MDANSE analysis using a command like this:
+5. **Check the Results:**
+   - After the analysis completes, check the results in the specified output directory.
 
-   .. code-block:: bash
+6. **Customize MDANSE Job Parameters Using CLI:**
+   - Generate a template script for your analysis using a command like this:
 
-      mdanse --jr my_basic_script.py
+     .. code-block:: bash
 
-   Replace ``my_basic_script.py`` with your script's filename.
+        mdanse --js job_name
 
-**Check the Results**
+     Replace ``job_name`` with the specific analysis task you want to customize.
 
-5. After the analysis completes, check the results in the specified output directory.
+7. **Open the generated script in a text editor.**
 
-**Customize MDANSE Job Parameters Using CLI**
+8. **Import the necessary MDANSE modules at the beginning of the script.**
 
-6. Generate a template script for your analysis using a command like this:
-
-   .. code-block:: bash
-
-      mdanse --js job_name
-
-   Replace ``job_name`` with the specific analysis task you want to customize.
-
-7. Open the generated script in a text editor.
-
-8. Import the necessary MDANSE modules at the beginning of the script.
-
-9. Define the job parameters as an empty dictionary.
+9. **Define the job parameters as an empty dictionary.**
 
    Example of importing modules and defining job parameters:
 
@@ -112,7 +100,7 @@ This guide explains how to run MDANSE jobs via the command line interface (CLI) 
       # Define the job parameters
       parameters = {}
 
-10. Customize the parameters within the script to tailor the analysis to your research needs.
+10. **Customize the parameters within the script to tailor the analysis to your research needs.**
 
     Example of customizing job parameters:
 
@@ -136,7 +124,7 @@ This guide explains how to run MDANSE jobs via the command line interface (CLI) 
        # Provide the path to the trajectory file in HDF format
        parameters['trajectory'] = '/path/to/custom_trajectory_file.hdf'
 
-11. Run the customized analysis script using this command:
+11. **Run the customized analysis script using this command:**
 
     .. code-block:: bash
 
@@ -144,4 +132,4 @@ This guide explains how to run MDANSE jobs via the command line interface (CLI) 
 
     Replace ``my_custom_script.py`` with your script's filename.
 
-12. After the analysis completes, examine the results in the specified output directory, typically defined within your customized script.
+12. **After the analysis completes, examine the results in the specified output directory, typically defined within your customized script.**
