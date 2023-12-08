@@ -92,7 +92,10 @@ class SingleOutputFileConfigurator(IConfigurator):
         self["root"] = root
         self["format"] = format
         self["extension"] = REGISTRY["format"][format].extension
-        self["file"] = "%s%s" % (root, REGISTRY["format"][format].extension)
+        temp_name = root
+        if not self["extension"] in temp_name[-5:]:  # capture most extension lengths
+            temp_name += self["extension"]
+        self["file"] = temp_name
 
     @property
     def format(self):
