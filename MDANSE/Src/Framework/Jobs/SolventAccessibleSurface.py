@@ -66,7 +66,7 @@ class SolventAccessibleSurface(IJob):
     )
     settings["n_sphere_points"] = ("integer", {"mini": 1, "default": 1000})
     settings["probe_radius"] = ("float", {"mini": 0.0, "default": 0.14})
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
+    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
     settings["running_mode"] = ("running_mode", {})
 
     def initialize(self):

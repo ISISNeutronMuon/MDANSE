@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "cython", "numpy"]
+requires = ["setuptools", "cython", "numpy", "pip", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -33,6 +33,7 @@ dependencies = [
   "numpy",
   "scipy",
   "h5py",
+  "icecream"
 ]
 
 # dynamic = ["version", "description"]
