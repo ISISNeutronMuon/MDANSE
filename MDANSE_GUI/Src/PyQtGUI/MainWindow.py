@@ -167,7 +167,13 @@ class Main(QMainWindow):
     @Slot(DataTreeItem)
     def setCurrentObject(self, data_object: DataTreeItem):
         self.current_object = data_object
-        self._visualiser._new_trajectory(data_object.text())
+        try:
+            filename = os.path.join(
+                data_object.file_info.absolute_path, data_object.file_info.filename
+            )
+        except AttributeError:
+            filename = data_object.file.text()
+        self._visualiser._new_trajectory(filename)
 
     @Slot()
     def connectViews(self):
