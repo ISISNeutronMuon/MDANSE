@@ -13,70 +13,45 @@
 #
 # **************************************************************************
 
-import wx
 
-from MDANSE import REGISTRY
-from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
-from MDANSE.GUI.Widgets.AtomSelectionWidget import AtomSelectionWidget
-from MDANSE.GUI.Icons import ICONS
+import glob
+import itertools
+import os
+import os.path
+
+from qtpy.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QWidget
+from qtpy.QtCore import Qt, Slot
+from qtpy.QtGui import QStandardItemModel, QStandardItem
+
+from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.PyQtGUI.InputWidgets.AtomSelectionWidget import AtomSelectionWidget
 
 
-class AtomTransmutationWidget(AtomSelectionWidget):
-    udType = "atom_selection"
+class AtomTransmutationWidget(WidgetBase):
+    def __init__(self, *args, **kwargs):
+        kwargs["layout_type"] = "QVBoxLayout"
+        super().__init__(*args, **kwargs)
+        newline_button = QPushButton("Add transmutation", self._base)
+        self._layout.addWidget(newline_button)
+        self._lines = []
 
-    def on_add_definition(self, event):
-        panel = wx.Panel(self._widgetPanel, wx.ID_ANY)
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        availableUDs = wx.Choice(panel, wx.ID_ANY, style=wx.CB_SORT)
-        uds = UD_STORE.filter(self._basename, "atom_selection")
-        availableUDs.SetItems(uds)
-
-        view = wx.Button(panel, wx.ID_ANY, label="View selected definition")
-        elements = wx.ComboBox(
-            panel, wx.ID_ANY, value="Transmutate to", choices=ATOMS_DATABASE.atoms
-        )
-        remove = wx.BitmapButton(panel, wx.ID_ANY, ICONS["minus", 16, 16])
-
-        sizer.Add(availableUDs, 1, wx.ALL | wx.EXPAND, 5)
-        sizer.Add(view, 0, wx.ALL | wx.EXPAND, 5)
-        sizer.Add(elements, 0, wx.ALL | wx.EXPAND, 5)
-        sizer.Add(remove, 0, wx.ALL | wx.EXPAND, 5)
-
-        panel.SetSizer(sizer)
-
-        self._sizer.Add(panel, 1, wx.ALL | wx.EXPAND, 5)
-
-        self._widgetPanel.GrandParent.Layout()
-        self._widgetPanel.GrandParent.Refresh()
-
-        self.Bind(wx.EVT_BUTTON, self.on_view_definition, view)
-        self.Bind(wx.EVT_BUTTON, self.on_remove_definition, remove)
+    def add_line(self):
+        line_base = QWidget(self._base)
+        line_layout = QHBoxLayout(line_base)
+        line_base.setLayout(line_layout)
+        default_value = "atom_symbol *"
+        starter = QLabel("Transmute ", line_base)
+        leftfield = QLineEdit(default_value, self._base)
+        spacer = QLabel(" to ", line_base)
+        rightfield = QLineEdit("Au", self._base)
+        for wid in [starter, leftfield, spacer, rightfield]:
+            line_layout.append(wid)
+        self._lines.append({"from": leftfield, "to": rightfield})
 
     def get_widget_value(self):
-        sizerItemList = list(self._sizer.GetChildren())
-        del sizerItemList[0]
-
-        uds = []
-        for sizerItem in sizerItemList:
-            panel = sizerItem.GetWindow()
-            children = panel.GetChildren()
-            udName = children[0].GetStringSelection()
-            element = children[2].GetStringSelection()
-
-            if not element:
-                raise ConfiguratorError(
-                    "No target element provided for %r selection." % udName
-                )
-
-            uds.append([udName, element])
-
-        if not uds:
+        result = []
+        for line in self._lines:
+            result.append((line["from"], line["to"]))
+        if len(result) == 0:
             return None
-        else:
-            return uds
-
-
-REGISTRY["atom_transmutation"] = AtomTransmutationWidget
+        return result

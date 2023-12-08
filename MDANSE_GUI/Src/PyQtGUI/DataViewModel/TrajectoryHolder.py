@@ -113,7 +113,7 @@ class TrajectoryItem(DataTreeItem):
 
         if self.filename != "NULL":
             self.file_info.setFilename(self.filename)
-        self.setText(self.filename)
+        self.setText(os.path.split(self.filename)[1])
 
 
 class AnalysisItem(DataTreeItem):

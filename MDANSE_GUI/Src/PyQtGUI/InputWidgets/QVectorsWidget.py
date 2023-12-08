@@ -13,36 +13,80 @@
 #
 # **************************************************************************
 
-from qtpy.QtWidgets import QLineEdit, QLabel
+from qtpy.QtWidgets import QLineEdit, QComboBox, QLabel, QTableView
 from qtpy.QtCore import Slot, Signal
-from qtpy.QtGui import QIntValidator
+from qtpy.QtGui import QIntValidator, QStandardItemModel, QStandardItem
 
+from MDANSE import REGISTRY
 from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
+
+
+class VectorModel(QStandardItemModel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._qvec_type = ""
+
+    @Slot(str)
+    def switch_qvector_type(self, vector_type: str):
+        self.clear()
+        generator = REGISTRY["q_vectors"][vector_type]
+        self._qvec_type = vector_type
+        settings = generator.settings
+        for kv in settings.items():
+            name = kv[0]  # dictionary key
+            value = kv[1][1]["default"]  # tuple value 1: dictionary
+            vtype = kv[1][0]  # tuple value 0: type
+            self.appendRow([QStandardItem(str(x)) for x in [name, value, vtype]])
+
+    def params_summary(self) -> dict:
+        params = {}
+        for rownum in range(self.rowCount()):
+            name = str(self.item(rownum, 0).text())
+            value = str(self.item(rownum, 1).text())
+            vtype = str(self.item(rownum, 2).text())
+            params[name] = self.parse_vtype(vtype, value, name)
+        return params
+
+    def parse_vtype(self, vtype: str, value: str, vname: str):
+        if vtype == "range":
+            inner_type = REGISTRY["q_vectors"][self._qvec_type].settings[vname][1][
+                "valueType"
+            ]
+            tempstring = value.strip("()[] ")
+            return [inner_type(x) for x in tempstring.split(",")]
+        elif vtype == "vector":
+            inner_type = REGISTRY["q_vectors"][self._qvec_type].settings[vname][1][
+                "valueType"
+            ]
+            tempstring = value.strip("()[] ")
+            return [inner_type(x) for x in tempstring.split(",")]
+        elif vtype == "float":
+            return float(value)
+        elif vtype == "integer":
+            return int(value)
+        else:
+            return value
 
 
 class QVectorsWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
+        kwargs["layout_type"] = "QVBoxLayout"
         super().__init__(*args, **kwargs)
         source_object = kwargs.get("source_object", None)
-        self.field = QLineEdit(str(self._configurator.default))
-        self._layout.addWidget(self.field)
+        self._selector = QComboBox(self._base)
+        self._selector.addItems(list(REGISTRY["q_vectors"].keys()))
+        self._model = VectorModel(self._base)
+        self._view = QTableView(self._base)
+        self._layout.addWidget(self._selector)
+        self._layout.addWidget(self._view)
+        self._view.setModel(self._model)
+        self._selector.currentTextChanged.connect(self._model.switch_qvector_type)
+        self._selector.setCurrentIndex(1)
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        oneline = self.field.text()
-        oneline = oneline.strip(" ()")
-        toks = oneline.split(",")
-        qvector_type = toks[0].strip("'\"")
-        param_dictionary = ",".join(toks[1:]).strip(" \{\}")
-        newtoks = param_dictionary.split(":")
-        keys, values = [], []
-        keys.append(newtoks[0])
-        for part in newtoks[1:]:
-            toks = part.split(",")
-            keys.append(toks[-1])
-            values.append(",".join(toks[:-1]))
-        values.append(newtoks[-1])
-        pardict = {keys[x].strip("'\""): values[x] for x in range(len(keys))}
+        qvector_type = self._selector.currentText()
+        pardict = self._model.params_summary()
         return (qvector_type, pardict)
 
     @Slot()

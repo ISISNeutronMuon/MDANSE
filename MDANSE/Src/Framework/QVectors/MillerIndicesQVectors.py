@@ -27,12 +27,17 @@ class MillerIndicesLatticeQVectors(LatticeQVectors):
     settings = collections.OrderedDict()
     settings["shells"] = (
         "range",
-        {"valueType": float, "includeLast": True, "mini": 0.0},
+        {
+            "valueType": float,
+            "includeLast": True,
+            "mini": 0.0,
+            "default": (0, 5.0, 0.5),
+        },
     )
     settings["width"] = ("float", {"mini": 1.0e-6, "default": 1.0})
-    settings["h"] = ("range", {"includeLast": True})
-    settings["k"] = ("range", {"includeLast": True})
-    settings["l"] = ("range", {"includeLast": True})
+    settings["h"] = ("range", {"includeLast": True, "default": (0, 8, 1)})
+    settings["k"] = ("range", {"includeLast": True, "default": (0, 8, 1)})
+    settings["l"] = ("range", {"includeLast": True, "default": (0, 8, 1)})
 
     def _generate(self):
         hSlice = slice(

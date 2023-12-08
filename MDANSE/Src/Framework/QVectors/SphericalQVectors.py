@@ -29,7 +29,12 @@ class SphericalQVectors(IQVectors):
     settings["seed"] = ("integer", {"mini": 0, "default": 0})
     settings["shells"] = (
         "range",
-        {"valueType": float, "includeLast": True, "mini": 0.0},
+        {
+            "valueType": float,
+            "includeLast": True,
+            "mini": 0.0,
+            "default": (0, 5.0, 0.5),
+        },
     )
     settings["n_vectors"] = ("integer", {"mini": 1, "default": 50})
     settings["width"] = ("float", {"mini": 0.0, "default": 1.0})

@@ -2,3 +2,4 @@ MDANSE
 vtk
 qtpy
 PyYAML
+PyQt6

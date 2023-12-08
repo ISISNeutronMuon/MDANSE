@@ -77,7 +77,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
 
         kernel, parameters = value
 
-        kernelCls = REGISTRY["instrument_resolution"][kernel]
+        kernelCls = REGISTRY["instrument_resolution"][kernel.lower()]
 
         resolution = kernelCls()
 

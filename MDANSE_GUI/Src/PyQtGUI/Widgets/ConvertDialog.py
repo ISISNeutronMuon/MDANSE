@@ -135,9 +135,4 @@ class ConverterDialog(QDialog):
         for key, value in self.handlers.items():
             pardict[key] = value.returnValue()
         ic(f"Passing {pardict} to the converter instance {self.converter_instance}")
-        self.converter_instance.setup(pardict)
-        # when we are ready, we can consider running it
-        self.converter_instance.run(pardict)
-        # this would send the actual instance, which _may_ be wrong
-        # self.new_thread_objects.emit([self.converter_instance, pardict])
-        # self.new_thread_objects.emit([self.converter_constructor, pardict])
+        self.new_thread_objects.emit([self.converter_constructor, pardict])
