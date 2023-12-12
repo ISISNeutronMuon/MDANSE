@@ -8,53 +8,47 @@ Analysis: Structure
 
 Area Per Molecule
 '''''''''''''''''
+The Area Per Molecule (APM) analysis in Molecular Dynamics (MD) assesses the surface
+area occupied by each molecule within a given system. This tool plays a crucial role
+in comprehending molecular arrangement and interactions. Users can specify the
+molecule they wish to analyze, such as the default DMPC (a common phospholipid),
+ensuring that the molecule's name matches the one in the data file, typically in HDF
+format. The APM analysis provides valuable insights into how molecules are
+distributed and interact with one another. This analysis is particularly vital in the
+study of complex structures like cell membranes. It aids in understanding membrane
+functionality and its response to various conditions, shedding light on essential
+biological processes. By utilizing APM analysis in MDANSE, researchers can gain a
+deeper understanding of molecular systems and their behavior, ultimately contributing
+to advancements in fields like biophysics and structural biology.
 
--  available for trajectories only
-
-.. image:: ./Pictures/100000010000032500000217C794C16C077B23E0.png
-   :width: 15.774cm
-   :height: 10.582cm
-
--  :ref:`param-frames`
--  **area vectors**
-
-*Format:* drop-down
-
-*Default:* a, b
-
-*Description:* <insert>
-
--  **molecule name**
-
-*Format:* str
-
-*Default:* DMPC
-
-*Description:* the name of the molecules for which the calculation will
-take place. The name inputted here must match a name that MMTK assigned
-to inside the NetCDF file.
-
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
-
-.. _target_CN:
 
 Coordination Number
 '''''''''''''''''''
+In chemistry, the Coordination Number (CN) is the total number of neighbors
+of a central atom in a molecule or ion. CN plays a vital role in the analysis
+of complex molecular systems in simulations, serving several key purposes:
 
-.. _theory-and-implementation-10:
+- Packing Effects: CN reveals how atoms are densely packed around central
+  groups. This helps identify stable configurations, phase transitions, and
+  aggregation patterns.
+- Molecular Interactions: It quantifies atom coordination, indicating
+  attractive or repulsive forces. High CN values suggest strong interactions
+  like bonds, while lower CN values imply weaker or repulsive forces.
+- Tracking Structural Changes: CN analysis tracks how atomic coordination
+  evolves over time. This is essential for studying dynamic processes and
+  structural transformations in simulations.
+- Detailed Molecular Organization: CN provides quantitative measures of atom
+  arrangements, aiding in the identification of specific patterns like
+  solvation shells or coordination spheres.
 
-Theory and implementation
-                         
-
-In chemistry, the Coordination Number (*CN*) is the total number of
-neighbours of a central atom in a molecule or ion. The definition used
-in *MDANSE* is somewhat different and can be seen as an extension of as
-the former definition. Indeed, in *MDANSE*, the *CN* is not defined over
-one defined central atom but around the centres of gravity of a set of
-group of atoms. So, if only one group made of only atom is selected for
-the analysis, then, the definition is the same as the original
-definition. In that context, the *CN* is defined as:
+In the context of MDANSE, CN is defined differently from the traditional
+concept. In MDANSE, CN is calculated not only around a single central atom but
+around the centers of gravity of a group of atoms. Importantly, when the
+selected group comprises only one atom, the MDANSE CN definition is
+effectively equivalent to the traditional CN definition based on a central
+atom. This extended definition allows for the analysis of coordination within
+groups of atoms rather than being limited to individual central atoms.
+In this context, the *CN* is defined as:
 
 .. math::
    :label: pfx118
@@ -95,137 +89,60 @@ averaged intra and intermolecular *CN*. Finally, the same equations
 (time-dependent and time-averaged) can be integrated over r to provide a
 cumulative *CN*. *MDANSE* computes all these variations.
 
-The concept of *CN* is useful for structure-related analysis. It can
-reveal for instance some packing effects that may have occurred during
-the simulation.
 
-.. _gui-10:
 
-GUI
-   
-
--  available for trajectories only
-
-.. image:: ./Pictures/100000010000031E000002773364C0C15571A8B0.png
-   :width: 15.921cm
-   :height: 12.589cm
-
--  :ref:`param-frames`
-
--  r values
-
-   -  **from**
-
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum distance from a central particle in
-nanometers taken into consideration. Only particles at that distance or
-further will be counted.
-
--  
-
-   -  **to**
-
-*Format:* int
-
-*Default:* 10
-
-*Description:* the maximum distance from a central particle in
-nanometers. Only particles up to and including this distance will be
-counted.
-
--  
-
-   -  **by step of**
-
-*Format:* int
-
-*Default:* 1
-
-*Description:* the size of the step in nanometers used to generate a
-range of values between the above two extremes above. Eg. using the
-default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.
-
--  :ref:`param-atom-selection`
--  :ref:`param-atom-transmutation`
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
 
 Density Profile
 '''''''''''''''
 
 -  available for trajectories only
 
-.. image:: ./Pictures/1000000100000323000002F7066E8CC898B27610.png
-   :width: 15.921cm
-   :height: 15.048cm
+The Density Profile analysis in MDANSE calculates the spatial
+distribution of particles or molecules along a specified axis within a
+simulation box. This analysis provides valuable insights into how the density of
+particles or molecules varies across the system along the chosen axis. By
+dividing the axis into segments or bins and specifying the size of each bin
+using the parameter **dr**, the Density Profile reveals how particles are
+distributed within the system. It is a useful tool for understanding the spatial
+arrangement and concentration of particles, making it valuable for identifying
+regions of interest and tracking changes over time in molecular simulations.
 
--  :ref:`param-frames`
--  :ref:`param-atom-selection`
--  :ref:`param-atom-transmutation`
--  **axis**
-
-*Format:* drop-down
-
-*Default:* c
-
-*Description:* the simulation box axis that Density Profile will be
-calculated along.
-
--  **dr**
-
-*Format:* float
-
-*Default:* 0.01
-
-*Description:* during Density Profile calculation the axis specified in
-the **axis** field is divided into a number of bins along its length.
-**dr** specifies how large each of these bins will be.
-
--  `weights <#_Weights>`__
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
 
 Eccentricity
 ''''''''''''
 
 -  available for trajectories only
 
-.. image:: ./Pictures/100000010000032200000217EAF4D97A16B24CBA.png
-   :width: 15.921cm
-   :height: 10.62cm
 
--  :ref:`param-frames`
--  :ref:`param-atom-selection`
--  :ref:`param-atom-transmutation`
--  `weights <#_Weights>`__
--  :ref:`param-output-files`
+*Description:* Eccentricity analysis in MDANSE quantifies how elongated or
+flattened molecules are, revealing valuable insights into their shape and
+structure. Researchers use it to understand molecular geometry and
+conformation, aiding the differentiation of molecules by shape. This analysis is
+vital for studying structural properties in complex molecular systems and
+characterizing molecular shape and morphology.
+
 
 Molecular Trace
 '''''''''''''''
 
--  available for trajectories only
+*Description:* Molecular Trace in MDANSE pertains to a calculation or property
+related to the analysis of molecular structures within the context of neutron
+scattering experiments or molecular dynamics simulations. The "resolution"
+parameter in this context determines the level of detail with which molecular
+structures are represented or analyzed. A higher resolution results in a more
+detailed representation of molecular behavior, allowing for the tracking of
+specific molecular entities within simulations. Conversely, a lower resolution
+simplifies the analysis for computational efficiency, providing a broader
+overview of molecular behavior. The Molecular Trace calculation is a valuable
+tool for investigating the movement and behavior of molecular components in
+complex systems.
 
-.. image:: ./Pictures/100000010000032200000221CA1B5E3FC473217D.png
-   :width: 15.921cm
-   :height: 10.82cm
+In the context of Molecular Trace analysis, molecular structures are often
+represented and analyzed in terms of grid points, where each point corresponds
+to a specific location within the molecular system. The resolution parameter
+controls the spacing and granularity of these grid points, influencing the
+detail of the analysis.
 
--  :ref:`param-frames`
--  :ref:`param-atom-selection`
--  **spatial resolution**
-
-*Format:* float
-
-*Default:* 0.1
-
-*Description:* the resolution with which Molecular Trace is calculated.
-It is used to determine how many grid points are used to represent a
-unit of length.
-
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
 
 Pair Distribution Function
 ''''''''''''''''''''''''''
@@ -333,68 +250,16 @@ that differ from those of nMOLDYN.
 
    {\mathit{TCF}_{\mathit{total}}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}_{\mathit{total}}{(r) - 1}} \right),}
 
-.. _gui-11:
-
-GUI
-   
-
--  available for trajectories only
-
-.. image:: ./Pictures/1000000100000321000002AF539D7E98B51D2ABC.png
-   :width: 15.921cm
-   :height: 13.656cm
-
--  :ref:`param-frames`
-
-r values
-
--  **from**
-
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum distance from a central particle in
-nanometers taken into consideration. Only particles at that distance or
-further will be counted.
-
--  **to**
-
-*Format:* int
-
-*Default:* 10
-
-*Description:* the maximum distance from a central particle in
-nanometers. Only particles up to and including this distance will be
-counted.
-
--  **by step of**
-
-*Format:* int
-
-*Default:* 1
-
-*Description:* the size of the step in nanometers used to generate a
-range of values between the above two extremes above. Eg. using the
-default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.
-
--  :ref:`param-atom-selection`
--  :ref:`param-atom-transmutation`
--  `weights <#_Weights>`__
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
 
 Root Mean Square Deviation
 ''''''''''''''''''''''''''
-
-.. _theory-and-implementation-12:
-
-Theory and implementation
                          
+The Root Mean-Square Deviation (*RMSD*) is perhaps the most popular estimator
+of structural similarity. It quantifies differences between two structures by
+measuring the root mean-square of atomic position differences, revealing
+insights into their structural dissimilarities. It is a numerical measure of
+the difference between two structures. It can be defined as:
 
-The Root Mean-Square Deviation (*RMSD*) is maybe the most popular
-estimator of structural similarity. It is a numerical measure of the
-difference between two structures that can be defined as:
 
 .. math::
    :label: pfx131
@@ -427,49 +292,23 @@ where Nt is the number of frames and
 
 \ is the time step.
 
-.. _gui-12:
-
-GUI
-   
-
--  available for trajectories only
-
-.. image:: ./Pictures/1000000100000320000002F9EA9ADCD8260F39E8.png
-   :width: 15.921cm
-   :height: 15.145cm
-
--  :ref:`param-frames`
--  **reference frame**
-
-*Format:* int
-
-*Default:* 0
-
-*Description:* the number of the frame which will be used as reference
-for the calculation. The deviation will be calculated as how it deviates
-from the values in this frame.
-
--  :ref:`param-atom-selection`
--  :ref:`param-group-coordinates`
--  :ref:`param-atom-transmutation`
--  `weights <#_Weights>`__
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
+.
 
 Root Mean Square Fluctuation
 ''''''''''''''''''''''''''''
 
 -  available for trajectories only
 
-.. image:: ./Pictures/100000010000031E0000021D3A0201B22A02F0F8.png
-   :width: 15.921cm
-   :height: 10.793cm
+Root Mean Square Fluctuation (RMSF) assesses how the positions of atoms or
+molecules within a system fluctuate over time. Specifically, RMSF measures the
+average magnitude of deviations or fluctuations in atomic positions from their
+mean positions during a simulation.
 
--  :ref:`param-frames`
--  :ref:`param-atom-selection`
--  :ref:`param-group-coordinates`
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
+RMSF analysis is valuable for understanding the flexibility and stability of
+molecules within a simulation, providing insights into regions where atoms or
+groups of atoms exhibit significant fluctuations. This information can be crucial
+for studying the dynamic behavior of biomolecules, protein-ligand interactions,
+or any molecular system subject to temporal variations.
 
 Radius Of Gyration
 ''''''''''''''''''
@@ -483,7 +322,17 @@ Radius Of Gyration (*ROG*) is the name of several related measures of
 the size of an object, a surface, or an ensemble of points. It is
 calculated as the Root Mean Square Distance between the system and a
 reference that can be either the centre of gravity of the system either
-a given axis. In *MDANSE*, the reference is chosen to be the centre of
+a given axis. 
+
+The *ROG* serves as a quantitative measure that characterizes the spatial distribution
+and compactness of molecular or ensemble structures. ROG is instrumental in size determination,
+providing precise insights into the dimensions of objects or systems. Moreover, it
+plays a crucial role in shape analysis, elucidating how molecular components
+are arranged concerning the center of gravity. Its ability to track
+structural fluctuations over time is essential for studying dynamic processes
+in molecular systems.
+
+In *MDANSE*, the reference is chosen to be the centre of
 gravity of the system under study. Mathematically, it can be defined as:
 
 .. math::
@@ -510,57 +359,26 @@ In *MDANSE*, *ROG* is computed using the discretized version of equation
 
 where N\ :sub:`t` is the number of frames and Δt is the time step.
 
-.. _gui-13:
 
-GUI
-   
-
--  available for trajectories only
-
-.. image:: ./Pictures/10000001000003210000021F447FD4560DD7995B.png
-   :width: 15.921cm
-   :height: 10.793cm
-
--  :ref:`param-frames`
--  :ref:`param-atom-selection`
--  `weights <#_Weights>`__
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
 
 Solvent Accessible Surface
 ''''''''''''''''''''''''''
 
 -  available for trajectories only
 
-.. image:: ./Pictures/1000000100000326000002790EB025922D724131.png
-   :width: 15.921cm
-   :height: 12.504cm
 
--  :ref:`param-frames`
--  :ref:`param-atom-selection`
--  **n sphere points**
+The Solvent Accessible Surface calculation involves defining the surface
+accessibility of molecules or atoms by creating a mesh of points. The
+number of points is determined by the field discussed, influencing the
+level of detail in the surface representation. Essentially, a higher
+density of points leads to a finer-grained representation, capturing
+smaller surface features and intricacies.
 
-*Format:* int
-
-*Default:* 1000
-
-*Description:* Solvent Accessible Surface calculation involves the
-creation of a mesh of points equidistant form each atom or molecule.
-This field determines how many of these points should be created.
-
--  **probe radius**
-
-*Format:* float
-
-*Default:* 0.14
-
-*Description:* (in nanometers) affects the observed surface area.
-Smaller probe radius detects more detail and therefore reports larger
-surface area. The default value is approximately equal to the radius of
-a water molecule.
-
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
+- **Probe Radius**: Measured in nanometers, the probe radius is a crucial
+  parameter influencing the precision of the calculation. Smaller probe
+  radii provide a more detailed and comprehensive assessment of the
+  molecular surface area, often resulting in a larger reported surface
+  area due to increased sensitivity to surface features.
 
 Spatial Density
 '''''''''''''''
@@ -674,258 +492,50 @@ following way:
      
      {n_{\mathit{tg}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) = n_{\mathit{tg}}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) + 1}}
 
-.. _gui-14:
 
-GUI
-   
-
--  available for trajectories only
-
-.. image:: ./Pictures/10000001000003200000027836715F0544BCA168.png
-   :width: 15.921cm
-   :height: 12.578cm
-
--  :ref:`param-frames`
--  **spatial resolution**
-
-*Format:* float
-
-*Default:* 0.1
-
-*Description:* the resolution with which Spatial Density is calculated.
-It is used to determine how many grid points are used to represent a
-unit of length.
-
--  **reference basis**
-
-*Format:* drop-down
-
-*Default:* None
-
-*Description:* can be used exactly like `Axis
-Selection <#_Axis_Selection_1>`__. <insert> what it does
-
--  **target molecule**
-
-*Format:* drop-down
-
-*Default:* None
-
-*Description:* can be used exactly an Atom Selection. Allows for a
-subset of particles to be selected on which the analysis will be
-performed. More information in :ref:`param-atom-selection`.
-
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
+`
 
 Static Structure Factor
 '''''''''''''''''''''''
 
-.. _theory-and-implementation-15:
 
-Theory and implementation
-                         
+The **Static Structure Factor** analysis offers a convenient method to
+calculate the static coherent structure factor, represented as S(q), where
+S(q) = F\ :sub:`coh`\ (q, t = 0). This factor is fundamental for gaining
+insights into the ordered arrangements of particles within a material.
 
-This analysis is a shortcut to obtain the static coherent structure
-factor defined as S(q) = F\ :sub:`coh`\ (q, t = 0). It uses exactly the
-same procedure as the one defined in the `Dynamic Coherent Structure
-Factor <#_Theory_and_implementation_3>`__ section.
+This analysis serves as a valuable tool, especially in trajectory-based
+simulations, for assessing the ordered structures of particles in a material.
+It provides the flexibility to control both distance and q-value ranges,
+facilitating a comprehensive exploration of the material's structural
+properties.
 
-.. _gui-15:
-
-GUI
-   
-
--  available for trajectories only
-
-.. image:: ./Pictures/1000000100000320000002FC939CE5AA59D4D2C7.png
-   :width: 15.921cm
-   :height: 15.205cm
-
--  :ref:`param-frames`
-
--  r values
-
-   -  **from**
-
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum distance from a central particle in
-nanometers taken into consideration. Only particles at that distance or
-further will be counted.
-
--  
-
-   -  **to**
-
-*Format:* int
-
-*Default:* 10
-
-*Description:* the maximum distance from a central particle in
-nanometers. Only particles up to and including this distance will be
-counted.
-
--  
-
-   -  **by step of**
-
-*Format:* int
-
-*Default:* 1
-
-*Description:* the size of the step in nanometers used to generate a
-range of values between the above two extremes above. Eg. using the
-default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.
-
--  q values
-
-   -  **from**
-
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum value used to generate the range of q values.
-
--  
-
-   -  **to**
-
-*Format:* int
-
-*Default:* 10
-
-*Description:* the maximum value used to generate the range of q values.
-
--  
-
-   -  **by step of**
-
-*Format:* int
-
-*Default:* 1
-
-*Description:* the step size value used to generate the range of q
-values.
-
--  :ref:`param-atom-selection`
--  :ref:`param-atom-transmutation`
--  `weights <#_Weights>`__
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
 
 Voronoi
-'''''''
+''''''''
 
--  available for trajectories only
+In MDANSE, Voronoi analysis plays a pivotal role in characterizing the
+spatial distribution and organization of particles or atoms within a
+molecular dynamics simulation. This analysis entails the division of the
+simulation box into Voronoi cells, with each cell centered around a
+particle. Voronoi cells provide essential insights into the local
+environment and packing of particles, allowing researchers to understand
+the arrangement and interactions of molecules in detail. Within MDANSE,
+the "apply periodic_boundary_condition" parameter is available to ensure
+accurate analysis, particularly for systems extending beyond the simulation
+box. This capability enables users to uncover valuable details about
+molecular structures and dynamics.
 
-.. image:: ./Pictures/1000000100000321000001B102EE53DCF2A6701F.png
-   :width: 15.921cm
-   :height: 8.606cm
-
--  :ref:`param-frames`
--  **apply periodic_boundary_condition**
-
-*Format:* bool
-
-*Default:* True
-
-*Description:* determines if the periodic boundary conditions is applied
-to the Voronoi cell.
-
--  **pbc border size**
-
-*Format:* float
-
-*Default:* 0.0
-
-*Description:* <insert>
-
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
 
 Xray Static Structure Factor
 ''''''''''''''''''''''''''''
 
--  available for trajectories only
-
-.. image:: ./Pictures/1000000100000321000002B4804828B2E2D13E48.png
-   :width: 15.921cm
-   :height: 13.755cm
-
--  :ref:`param-frames`
-
--  r values
-
-   -  **from**
-
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum distance from a central particle in
-nanometers taken into consideration. Only particles at that distance or
-further will be counted.
-
--  
-
-   -  **to**
-
-*Format:* int
-
-*Default:* 10
-
-*Description:* the maximum distance from a central particle in
-nanometers. Only particles up to and including this distance will be
-counted.
-
--  
-
-   -  **by step of**
-
-*Format:* int
-
-*Default:* 1
-
-*Description:* the size of the step in nanometers used to generate a
-range of values between the above two extremes above. Eg. using the
-default r-values, the range will be {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.
-
--  q values
-
-   -  **from**
-
-*Format:* int
-
-*Default:* 0
-
-*Description:* the minimum value used to generate the range of q values.
-
--  
-
-   -  **to**
-
-*Format:* int
-
-*Default:* 10
-
-*Description:* the maximum value used to generate the range of q values.
-
--  
-
-   -  **by step of**
-
-*Format:* int
-
-*Default:* 1
-
-*Description:* the step size value used to generate the range of q
-values.
-
--  :ref:`param-atom-selection`
--  :ref:`param-atom-transmutation`
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
+MDANSE's Xray Static Structure Factor analysis is tailored for neutron
+and X-ray scattering experiments in material science. It systematically
+investigates material structural properties by analyzing particle
+distribution and ordering. Researchers gain precise insights into
+fundamental aspects like atomic spacing and ordered patterns. MDANSE
+provides fine-grained control over "r values" and "q values," enabling
+customization for probing specific material structural characteristics.
+This tool is invaluable for advancing scientific and industrial research,
+especially in neutron scattering experiments.
