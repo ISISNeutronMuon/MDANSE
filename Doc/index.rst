@@ -59,7 +59,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
 
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
    :caption: 💡 Explanations
 
    pages/introduction
@@ -77,7 +77,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/fca
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
    :caption: ⚛️ How-To Guides
 
    pages/H_gui
@@ -91,7 +91,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/H_fca
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
    :caption: 🧪 Tutorials
 
    pages/T_Batch
@@ -99,7 +99,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/T_Analysis
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
    :caption: 📚 Technical References
 
    pages/R_contact

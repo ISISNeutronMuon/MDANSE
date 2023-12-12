@@ -1,5 +1,5 @@
-Section 4: Installation
-=======================
+Installation
+=============
 
 MDANSE Installation Guide
 -------------------------

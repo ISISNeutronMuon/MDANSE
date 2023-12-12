@@ -1,8 +1,6 @@
 
-.. _section-7:
-
-Section 7: Navigating the MDANSE GUI
-=====================================
+Navigating the MDANSE GUI
+==========================
 
 The MDANSE Graphical User Interface (GUI) is the central hub for
 performing various actions, including opening trajectories, configuring
