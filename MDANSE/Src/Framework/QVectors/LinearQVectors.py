@@ -39,7 +39,7 @@ class LinearQVectors(IQVectors):
     settings["width"] = ("float", {"mini": 1.0e-6, "default": 1.0})
     settings["axis"] = (
         "vector",
-        {"normalize": True, "notNull": True, "default": [1, 0, 0]},
+        {"normalize": True, "notNull": True, "default": [1, 0, 0], "valueType": float},
     )
 
     def _generate(self):
