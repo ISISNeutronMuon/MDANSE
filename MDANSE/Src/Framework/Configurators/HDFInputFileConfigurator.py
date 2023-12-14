@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/Configurators/NetCDFInputFileConfigurator.py
-# @brief     Implements module/class/test NetCDFInputFileConfigurator
+# @file      Src/Framework/Configurators/HDFInputFileConfigurator.py
+# @brief     Implements module/class/test HDFInputFileConfigurator
 #
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -34,7 +34,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
 
         :param name: the name of the configurator as it will appear in the configuration.
         :type name: str
-        :param variables: the list of NetCDF variables that must be present in the input NetCDF file or None if there is no compulsory variable.
+        :param variables: the list of HDF variables that must be present in the input HDF file or None if there is no compulsory variable.
         :type variables: list of str or None
         """
 
@@ -45,11 +45,11 @@ class HDFInputFileConfigurator(InputFileConfigurator):
 
     def configure(self, value):
         """
-        Configure a NetCDF file.
+        Configure a HDF file.
 
         :param configuration: the current configuration.
         :type configuration: a MDANSE.Framework.Configurable.Configurable object
-        :param value: the path for the NetCDF file.
+        :param value: the path for the HDF file.
         :type value: str
         """
 
@@ -60,7 +60,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
 
         except IOError:
             raise ConfiguratorError(
-                "can not open %r NetCDF file for reading" % self["value"]
+                "can not open %r HDF file for reading" % self["value"]
             )
 
         for v in self._variables:
@@ -68,16 +68,16 @@ class HDFInputFileConfigurator(InputFileConfigurator):
                 self[v] = self["instance"][v][:]
             else:
                 raise ConfiguratorError(
-                    "the variable %r was not  found in %r NetCDF file"
+                    "the variable %r was not  found in %r HDF file"
                     % (v, self["value"])
                 )
 
     @property
     def variables(self):
         """
-        Returns the list of NetCDF variables that must be present in the NetCDF file.
+        Returns the list of HDF variables that must be present in the HDF file.
 
-        :return: the list of NetCDF variables that must be present in the NetCDF file.
+        :return: the list of HDF variables that must be present in the HDF file.
         :rtype: list of str
         """
 

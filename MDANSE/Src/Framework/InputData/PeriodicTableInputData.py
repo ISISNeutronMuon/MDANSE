@@ -17,5 +17,5 @@
 from MDANSE.Framework.InputData.IInputData import IInputData
 
 
-class PeriodicTableData(IInputData):
+class PeriodicTableInputData(IInputData):
     extension = None

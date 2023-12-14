@@ -31,7 +31,7 @@ class PythonScriptConfigurator(InputFileConfigurator):
 
         :param name: the name of the configurator as it will appear in the configuration.
         :type name: str
-        :param variables: the list of NetCDF variables that must be present in the input NetCDF file or None if there is no compulsory variable.
+        :param variables: the list of HDF variables that must be present in the input HDF file or None if there is no compulsory variable.
         :type variables: list of str or None
         """
 
@@ -68,9 +68,9 @@ class PythonScriptConfigurator(InputFileConfigurator):
     @property
     def variables(self):
         """
-        Returns the list of NetCDF variables that must be present in the NetCDF file.
+        Returns the list of HDF variables that must be present in the HDF file.
 
-        :return: the list of NetCDF variables that must be present in the NetCDF file.
+        :return: the list of HDF variables that must be present in the HDF file.
         :rtype: list of str
         """
 

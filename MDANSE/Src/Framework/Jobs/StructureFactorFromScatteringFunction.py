@@ -22,7 +22,7 @@ from MDANSE.Mathematics.Signal import get_spectrum
 
 class StructureFactorFromScatteringFunction(IJob):
     """
-    Computes the structure factor from a NetCDF file containing an intermediate scattering function.
+    Computes the structure factor from a HDF file containing an intermediate scattering function.
     """
 
     label = "Structure Factor From Scattering Function"

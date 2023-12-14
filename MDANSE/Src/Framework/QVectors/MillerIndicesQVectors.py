@@ -20,7 +20,7 @@ import numpy as np
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 
-class MillerIndicesLatticeQVectors(LatticeQVectors):
+class MillerIndicesQVectors(LatticeQVectors):
     """ """
 
     settings = collections.OrderedDict()
