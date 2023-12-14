@@ -20,7 +20,6 @@ import numpy as np
 
 from MDANSE.Mathematics.LinearAlgebra import Vector
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 
@@ -121,6 +120,3 @@ class CircularLatticeQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
-
-
-REGISTRY["circular_lattice"] = CircularLatticeQVectors

@@ -18,14 +18,14 @@ import abc
 from MDANSE.Core.Error import Error
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 
+from MDANSE.Core.SubclassFactory import SubclassFactory
+
 
 class SelectorError(Error):
     pass
 
 
-class ISelector(object):
-    _registry = "selector"
-
+class ISelector(metaclass=SubclassFactory):
     def __init__(self, chemicalSystem: ChemicalSystem):
         self._chemicalSystem = chemicalSystem
 

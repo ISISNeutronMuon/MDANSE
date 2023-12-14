@@ -17,7 +17,7 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,
 )
@@ -40,6 +40,3 @@ class LorentzianInstrumentResolution(IInstrumentResolution):
         self._timeWindow = np.fft.fftshift(
             np.fft.ifft(np.fft.ifftshift(self._omegaWindow)) / dt
         )
-
-
-REGISTRY["lorentzian"] = LorentzianInstrumentResolution

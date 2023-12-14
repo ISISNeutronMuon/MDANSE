@@ -17,7 +17,7 @@ import os
 
 import h5py
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Formats.IFormat import IFormat
 
 
@@ -69,6 +69,3 @@ class HDFFormat(IFormat):
 
         # The HDF file is closed.
         outputFile.close()
-
-
-REGISTRY["hdf"] = HDFFormat

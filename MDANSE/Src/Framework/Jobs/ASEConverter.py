@@ -23,7 +23,7 @@ from ase.atoms import Atoms as ASEAtoms
 import numpy as np
 import h5py
 
-from MDANSE import REGISTRY
+
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
@@ -314,9 +314,6 @@ class ASEConverter(Converter):
                 obj = AtomCluster(name, atList)
 
             self._chemicalSystem.add_chemical_entity(obj)
-
-
-REGISTRY["ase"] = ASEConverter
 
 
 class ASEInteractiveConverter(InteractiveConverter, regkey="ase"):

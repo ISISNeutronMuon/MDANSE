@@ -15,7 +15,7 @@
 
 import collections
 
-from MDANSE import REGISTRY
+
 from MDANSE.Chemistry.ChemicalEntity import AtomGroup
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
@@ -119,6 +119,3 @@ class CroppedTrajectory(IJob):
 
         # The output trajectory is closed.
         self._output_trajectory.close()
-
-
-REGISTRY["ct"] = CroppedTrajectory

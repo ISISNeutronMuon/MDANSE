@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.DCDConverter import DCDConverter
 
 
@@ -23,6 +22,3 @@ class XPLORConverter(DCDConverter):
     """
 
     label = "XPLOR"
-
-
-REGISTRY["xplor"] = XPLORConverter

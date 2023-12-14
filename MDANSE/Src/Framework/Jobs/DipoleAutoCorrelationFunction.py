@@ -17,7 +17,7 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.Mathematics.Signal import correlation
 
@@ -140,6 +140,3 @@ class DipoleAutoCorrelationFunction(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["dacf"] = DipoleAutoCorrelationFunction

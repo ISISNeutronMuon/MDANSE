@@ -16,7 +16,6 @@
 import collections
 import os
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import get_spectrum
 
@@ -133,6 +132,3 @@ class StructureFactorFromScatteringFunction(IJob):
         )
 
         self.configuration["hdf_input_file"]["instance"].close()
-
-
-REGISTRY["sffsf"] = StructureFactorFromScatteringFunction

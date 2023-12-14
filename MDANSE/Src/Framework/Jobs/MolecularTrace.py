@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Extensions import mt_fast_calc
 
@@ -176,6 +175,3 @@ class MolecularTrace(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["mt"] = MolecularTrace

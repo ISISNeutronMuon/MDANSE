@@ -12,3 +12,27 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
+import glob
+import importlib
+import os
+
+current_path, _ = os.path.split(__file__)
+
+modnames = []
+fnames = glob.glob(current_path + "/*.py")
+for fname in fnames:
+    _, newname = os.path.split(fname)
+    newname = newname.split(".py")[0]
+    modnames.append(newname)
+globdict = globals()
+
+for name in modnames:
+    if name in ["__init__"]:
+        continue
+    try:
+        tempmod = importlib.import_module("." + name, "MDANSE.Framework.Handlers")
+    except ModuleNotFoundError:
+        continue
+    tempobject = getattr(tempmod, name)
+    globdict[name] = tempobject
+    del tempmod  # optionally delete the reference to the parent module

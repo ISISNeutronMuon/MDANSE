@@ -18,7 +18,6 @@ import os
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Extensions import xtc, trr
 from MDANSE.Framework.Jobs.Converter import Converter
@@ -198,6 +197,3 @@ class GromacsConverter(Converter):
         self._trajectory.close()
 
         super(GromacsConverter, self).finalize()
-
-
-REGISTRY["gromacs"] = GromacsConverter

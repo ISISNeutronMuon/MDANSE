@@ -17,7 +17,7 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,
 )
@@ -34,6 +34,3 @@ class IdealInstrumentResolution(IInstrumentResolution):
         self._omegaWindow[int(nOmegas / 2)] = 1.0
 
         self._timeWindow = np.ones(nOmegas, dtype=np.float64)
-
-
-REGISTRY["ideal"] = IdealInstrumentResolution

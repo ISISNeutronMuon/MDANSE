@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 
@@ -75,6 +75,3 @@ class PythonScriptConfigurator(InputFileConfigurator):
         """
 
         return self._variables
-
-
-REGISTRY["python_script"] = PythonScriptConfigurator

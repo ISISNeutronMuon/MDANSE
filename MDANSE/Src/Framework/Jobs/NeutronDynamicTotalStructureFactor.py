@@ -19,7 +19,6 @@ import os
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -487,6 +486,3 @@ class NeutronDynamicTotalStructureFactor(IJob):
             self._info,
         )
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["ndtsf"] = NeutronDynamicTotalStructureFactor

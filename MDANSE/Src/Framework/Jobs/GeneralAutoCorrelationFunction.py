@@ -15,7 +15,6 @@
 
 import collections
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation, normalize
@@ -164,6 +163,3 @@ class GeneralAutoCorrelationFunction(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["gacf"] = GeneralAutoCorrelationFunction

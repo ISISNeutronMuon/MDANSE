@@ -18,7 +18,6 @@ import os
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Core.Error import Error
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.Framework.Jobs.Converter import Converter
@@ -291,6 +290,3 @@ class VASPConverter(Converter):
         self._trajectory.close()
 
         super(VASPConverter, self).finalize()
-
-
-REGISTRY["vasp"] = VASPConverter

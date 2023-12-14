@@ -19,7 +19,7 @@ import re
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import (
     Atom,
@@ -498,6 +498,3 @@ class DL_POLYConverter(Converter):
         self._trajectory.close()
 
         super(DL_POLYConverter, self).finalize()
-
-
-REGISTRY["dl_poly"] = DL_POLYConverter

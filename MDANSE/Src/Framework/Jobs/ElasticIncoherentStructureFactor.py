@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
@@ -185,6 +184,3 @@ class ElasticIncoherentStructureFactor(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["eisf"] = ElasticIncoherentStructureFactor

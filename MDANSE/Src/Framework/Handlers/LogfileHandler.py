@@ -15,7 +15,7 @@
 
 import logging.handlers
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Handlers.IHandler import IHandler
 
 
@@ -58,6 +58,3 @@ class LogFileHandler(IHandler, logging.handlers.RotatingFileHandler):
             backupCount=backupCount,
             delay=delay,
         )
-
-
-REGISTRY["logfile"] = LogFileHandler

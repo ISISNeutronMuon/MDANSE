@@ -17,7 +17,7 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation, get_spectrum
@@ -252,6 +252,3 @@ class DynamicIncoherentStructureFactor(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["disf"] = DynamicIncoherentStructureFactor

@@ -18,7 +18,7 @@ import operator
 from pyparsing import delimitedList, oneOf, opAssoc, printables, Optional, infixNotation
 from pyparsing.core import Forward, OneOrMore, Word
 
-from MDANSE import REGISTRY
+from MDANSE.Framework.Selectors.ISelector import ISelector
 from MDANSE.Core.Error import Error
 
 
@@ -36,10 +36,7 @@ class AtomSelectionParser(object):
         return " ".join(token[0])
 
     def operator_not(self, token):
-        return 'REGISTRY[%r]["all"](chemicalSystem).select() - %s' % (
-            "selector",
-            token[0][1],
-        )
+        return f'ISelector.create("All",chemicalSystem).select() - {token[0][1]}'
 
     def operator_or(self, token):
         token[0][1] = "|"
@@ -53,16 +50,16 @@ class AtomSelectionParser(object):
         return "".join([str(t) for t in token])
 
     def parse_keyword(self, token):
-        return 'REGISTRY[%r]["%s"](chemicalSystem).select' % ("selector", token[0])
+        return f"ISelector.create({token[0]}, chemicalSystem).select"
 
     def parse_selection_expression(self, expression):
         expression = expression.replace("(", "( ")
         expression = expression.replace(")", " )")
 
         linkers = oneOf(["and", "&", "or", "|", "not", "~"], caseless=True)
-        keyword = oneOf(
-            list(REGISTRY["selector"].keys()), caseless=True
-        ).setParseAction(self.parse_keyword)
+        keyword = oneOf(list(ISelector.subclasses()), caseless=True).setParseAction(
+            self.parse_keyword
+        )
         arguments = Optional(
             ~linkers + delimitedList(Word(printables, excludeChars=","), combine=False)
         ).setParseAction(self.parse_arguments)
@@ -96,7 +93,7 @@ class AtomSelectionParser(object):
 
         try:
             parsedExpression = grammar.transformString(expression)
-            namespace = {"REGISTRY": REGISTRY, "chemicalSystem": self._chemicalSystem}
+            namespace = {"ISelector": ISelector, "chemicalSystem": self._chemicalSystem}
             selection = eval(parsedExpression, namespace)
         except:
             raise AtomSelectionParserError(

@@ -20,7 +20,6 @@ import numpy as np
 
 import h5py
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import AtomGroup
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
@@ -198,6 +197,3 @@ class GlobalMotionFilteredTrajectory(IJob):
         outputFile.create_dataset("rms", data=self._rms, dtype=np.float64)
 
         outputFile.close()
-
-
-REGISTRY["gmft"] = GlobalMotionFilteredTrajectory

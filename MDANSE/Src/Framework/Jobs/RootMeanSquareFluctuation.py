@@ -15,7 +15,6 @@
 
 import collections
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Analysis import mean_square_fluctuation
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
@@ -132,6 +131,3 @@ class RootMeanSquareFluctuation(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["rmsf"] = RootMeanSquareFluctuation

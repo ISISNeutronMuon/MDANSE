@@ -18,7 +18,7 @@ import os
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 
@@ -154,6 +154,3 @@ class AreaPerMolecule(IJob):
             self._info,
         )
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["apm"] = AreaPerMolecule

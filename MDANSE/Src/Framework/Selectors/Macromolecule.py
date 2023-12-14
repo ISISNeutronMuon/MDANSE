@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import (
     NucleotideChain,
     PeptideChain,
@@ -58,6 +57,3 @@ class Macromolecule(ISelector):
                     sel.update([at for at in ce.atom_list])
 
         return sel
-
-
-REGISTRY["macromolecule"] = Macromolecule

@@ -15,7 +15,7 @@
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -210,6 +210,3 @@ class RangeConfigurator(IConfigurator):
             info += "last value excluded"
 
         return info
-
-
-REGISTRY["range"] = RangeConfigurator

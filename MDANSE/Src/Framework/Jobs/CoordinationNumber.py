@@ -17,7 +17,7 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 
 
@@ -173,6 +173,3 @@ class CoordinationNumber(DistanceHistogram):
         self.configuration["trajectory"]["instance"].close()
 
         DistanceHistogram.finalize(self)
-
-
-REGISTRY["cn"] = CoordinationNumber

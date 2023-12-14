@@ -17,7 +17,7 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
@@ -177,6 +177,3 @@ class DensityProfile(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["dp"] = DensityProfile

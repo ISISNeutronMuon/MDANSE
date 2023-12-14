@@ -17,7 +17,7 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass
@@ -276,6 +276,3 @@ class Eccentricity(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["ecc"] = Eccentricity

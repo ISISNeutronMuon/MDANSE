@@ -15,9 +15,10 @@
 
 import os
 
-from MDANSE import PLATFORM, REGISTRY
+from MDANSE import PLATFORM
 
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
+from MDANSE.Framework.InputData.IInputData import IInputData
 
 
 class HDFTrajectoryConfigurator(InputFileConfigurator):
@@ -47,7 +48,7 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
 
         InputFileConfigurator.configure(self, value)
 
-        inputTraj = REGISTRY["input_data"]["hdf_trajectory"](self["value"])
+        inputTraj = IInputData.create("HDFTrajectoryInputData", self["value"])
 
         self["hdf_trajectory"] = inputTraj
 
@@ -88,6 +89,3 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
             info.append("The trajectory does not contain atomic velocities\n")
 
         return "".join(info)
-
-
-REGISTRY["hdf_trajectory"] = HDFTrajectoryConfigurator

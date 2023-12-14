@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 
 
@@ -75,6 +74,3 @@ class LinearQVectors(IQVectors):
                     return
                 else:
                     self._status.update()
-
-
-REGISTRY["linear"] = LinearQVectors

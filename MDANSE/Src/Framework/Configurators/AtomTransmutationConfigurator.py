@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import (
@@ -137,6 +137,3 @@ class AtomTransmutationConfigurator(IConfigurator):
             return "No atoms selected for transmutation"
 
         return "Number of transmutated atoms:%d\n" % self._nTransmutatedAtoms
-
-
-REGISTRY["atom_transmutation"] = AtomTransmutationConfigurator

@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Jobs.Discover import DiscoverConverter
 
 
@@ -23,6 +23,3 @@ class DMolConverter(DiscoverConverter):
     """
 
     label = "DMol"
-
-
-REGISTRY["dmol"] = DMolConverter

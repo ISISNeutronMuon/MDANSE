@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
@@ -197,6 +196,3 @@ class MeanSquareDisplacement(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["msd"] = MeanSquareDisplacement

@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 
 
@@ -23,6 +23,3 @@ class McStasInstrumentConfigurator(InputFileConfigurator):
     """
 
     pass
-
-
-REGISTRY["mcstas_instrument"] = McStasInstrumentConfigurator

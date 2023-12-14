@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -58,6 +57,3 @@ class HeteroHydrogen(ISelector):
         )
 
         return sel
-
-
-REGISTRY["hetero_hydrogen"] = HeteroHydrogen

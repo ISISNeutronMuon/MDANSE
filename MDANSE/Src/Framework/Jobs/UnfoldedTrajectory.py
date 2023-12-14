@@ -15,7 +15,6 @@
 
 import collections
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
@@ -124,6 +123,3 @@ class UnfoldedTrajectory(IJob):
 
         # The output trajectory is closed.
         self._outputTraj.close()
-
-
-REGISTRY["ut"] = UnfoldedTrajectory

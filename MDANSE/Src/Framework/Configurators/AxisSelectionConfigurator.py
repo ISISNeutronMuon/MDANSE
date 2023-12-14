@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.TrajectoryUtils import find_atoms_in_molecule
@@ -79,6 +79,3 @@ class AxisSelection(IConfigurator):
         """
 
         return "Axis vector:%s" % self["value"]
-
-
-REGISTRY["axis_selection"] = AxisSelection

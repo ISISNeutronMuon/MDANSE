@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.TrajectoryUtils import find_atoms_in_molecule
@@ -113,6 +113,3 @@ class AtomsListConfigurator(IConfigurator):
         )
 
         return "\n".join(info)
-
-
-REGISTRY["atoms_list"] = AtomsListConfigurator

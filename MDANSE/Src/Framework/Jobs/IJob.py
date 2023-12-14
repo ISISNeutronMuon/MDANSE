@@ -26,11 +26,13 @@ import sys
 import traceback
 from concurrent.futures import ThreadPoolExecutor as PoolExecutor
 
-from MDANSE import PLATFORM, REGISTRY
+from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Jobs.JobStatus import JobStatus
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
+
+from MDANSE.Core.SubclassFactory import SubclassFactory
 
 
 class JobError(Error):
@@ -83,12 +85,10 @@ def key_generator(keySize, chars=None, prefix=""):
     return key
 
 
-class IJob(Configurable):
+class IJob(Configurable, metaclass=SubclassFactory):
     """
     This class handles a MDANSE job. In MDANSE any task modeled by a loop can be considered as a MDANSE job.
     """
-
-    _registry = "job"
 
     section = "job"
 
@@ -171,7 +171,7 @@ class IJob(Configurable):
         f.write("########################################################\n\n")
 
         # Write the import.
-        f.write("from MDANSE import REGISTRY\n\n")
+        f.write("from MDANSE.Framework.Jobs.IJob import IJob\n\n")
 
         f.write("################################################################\n")
         f.write("# Job parameters                                               #\n")
@@ -193,7 +193,7 @@ class IJob(Configurable):
         f.write("\n")
 
         f.write('if __name__ == "__main__":\n')
-        f.write("    %s = REGISTRY[%r][%r]()\n" % (cls._type, "job", cls._type))
+        f.write("    %s = IJob.create(%r)\n" % (cls._type, cls.__name__))
         f.write("    %s.run(parameters,status=True)" % (cls._type))
 
         f.close()
@@ -352,7 +352,7 @@ class IJob(Configurable):
 
     @classmethod
     def save_template(cls, shortname, classname):
-        if shortname in REGISTRY["job"]:
+        if shortname in IJob.subclasses():
             raise KeyError(
                 "A job with %r name is already stored in the registry" % shortname
             )
@@ -364,8 +364,6 @@ class IJob(Configurable):
 
             f.write(
                 '''import collections
-
-from MDANSE import REGISTRY
 
 from MDANSE.Framework.Jobs.IJob import IJob
 
@@ -426,7 +424,6 @@ class %(classname)s(IJob):
         # The trajectory is closed
         self.configuration['trajectory']['instance'].close()        
 
-REGISTRY[%(shortname)r] = %(classname)s
 '''
                 % {
                     "classname": classname,

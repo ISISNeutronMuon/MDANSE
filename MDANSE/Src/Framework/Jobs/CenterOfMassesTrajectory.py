@@ -17,7 +17,7 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Configuration import (
@@ -158,6 +158,3 @@ class CenterOfMassesTrajectory(IJob):
 
         # The output trajectory is closed.
         self._output_trajectory.close()
-
-
-REGISTRY["comt"] = CenterOfMassesTrajectory

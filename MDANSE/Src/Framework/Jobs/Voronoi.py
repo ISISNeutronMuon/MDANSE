@@ -18,7 +18,6 @@ import math
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Extensions import mic_fast_calc, qhull
 from MDANSE.Framework.Jobs.IJob import IJob
 
@@ -226,6 +225,3 @@ class Voronoi(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["vo"] = Voronoi

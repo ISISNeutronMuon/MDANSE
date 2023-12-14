@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import get_spectrum
@@ -242,6 +241,3 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["gdisf"] = GaussianDynamicIncoherentStructureFactor

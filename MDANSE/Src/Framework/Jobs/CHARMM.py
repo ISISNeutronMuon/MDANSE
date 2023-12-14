@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Jobs.DCDConverter import DCDConverter
 
 
@@ -23,6 +23,3 @@ class CHARMMConverter(DCDConverter):
     """
 
     label = "CHARMM"
-
-
-REGISTRY["charmm"] = CHARMMConverter

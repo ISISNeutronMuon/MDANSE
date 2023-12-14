@@ -19,7 +19,7 @@ import tarfile
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Formats.IFormat import IFormat
 
 
@@ -143,6 +143,3 @@ class ASCIIFormat(IFormat):
 
             np.savetxt(fileobject, np.column_stack([xValues, data]))
             fileobject.write("\n")
-
-
-REGISTRY["ascii"] = ASCIIFormat

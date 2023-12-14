@@ -17,7 +17,7 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Mathematics.Signal import correlation
 from MDANSE.Framework.Jobs.IJob import IJob
 
@@ -174,6 +174,3 @@ class AngularCorrelation(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["ac"] = AngularCorrelation

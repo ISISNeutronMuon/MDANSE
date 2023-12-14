@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 
@@ -71,6 +70,3 @@ class DispersionLatticeQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
-
-
-REGISTRY["dispersion_lattice"] = DispersionLatticeQVectors

@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -99,6 +99,3 @@ class MultipleChoicesConfigurator(IConfigurator):
 
     def get_information(self):
         return "Selected items: %r" % self["choices"]
-
-
-REGISTRY["multiple_choices"] = MultipleChoicesConfigurator

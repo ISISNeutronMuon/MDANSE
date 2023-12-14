@@ -23,10 +23,11 @@ import io
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
@@ -375,11 +376,11 @@ class McStasVirtualInstrument(IJob):
                 self.treat_str_var(FileStruct["xlabel"]), self._outputData, x
             )
 
-            self._outputData[xlabel] = REGISTRY["outputvariable"](
-                "line", x, xlabel, units="au"
+            self._outputData[xlabel] = IOutputVariable.create(
+                "LineOutputVariable", x, xlabel, units="au"
             )
-            self._outputData[Title] = REGISTRY["outputvariable"](
-                "line", y, Title, axis="%s" % xlabel, units="au"
+            self._outputData[Title] = IOutputVariable.create(
+                "LineOutputVariable", y, Title, axis="%s" % xlabel, units="au"
             )
 
         elif typ == "array_2d":
@@ -501,6 +502,3 @@ class McStasVirtualInstrument(IJob):
         }
 
         return FSsingle
-
-
-REGISTRY["mvi"] = McStasVirtualInstrument

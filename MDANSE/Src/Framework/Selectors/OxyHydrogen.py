@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -54,6 +53,3 @@ class OxyHydrogen(ISelector):
         )
 
         return sel
-
-
-REGISTRY["oxy_hydrogen"] = OxyHydrogen

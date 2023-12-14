@@ -18,14 +18,14 @@ import abc
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Configurable import Configurable
 
+from MDANSE.Core.SubclassFactory import SubclassFactory
+
 
 class InstrumentResolutionError(Error):
     pass
 
 
-class IInstrumentResolution(Configurable):
-    _registry = "instrument_resolution"
-
+class IInstrumentResolution(Configurable, metaclass=SubclassFactory):
     def __init__(self):
         Configurable.__init__(self)
 

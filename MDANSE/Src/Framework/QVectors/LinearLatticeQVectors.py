@@ -20,7 +20,6 @@ import numpy as np
 
 from MDANSE.Mathematics.LinearAlgebra import Vector
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 
@@ -107,6 +106,3 @@ class LinearLatticeQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
-
-
-REGISTRY["linear_lattice"] = LinearLatticeQVectors

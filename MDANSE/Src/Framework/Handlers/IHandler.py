@@ -13,10 +13,10 @@
 #
 # **************************************************************************
 
+from MDANSE.Core.SubclassFactory import SubclassFactory
 
-class IHandler(object):
+
+class IHandler(metaclass=SubclassFactory):
     """
     Base class for the handlers of MDANSE logger.
     """
-
-    _registry = "handler"

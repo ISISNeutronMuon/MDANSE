@@ -20,7 +20,7 @@ import re
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.Converter import Converter
@@ -317,6 +317,3 @@ class CASTEPConverter(Converter):
         self._trajectory.close()
 
         super(CASTEPConverter, self).finalize()
-
-
-REGISTRY["castep"] = CASTEPConverter

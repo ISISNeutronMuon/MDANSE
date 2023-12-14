@@ -15,7 +15,7 @@
 
 import ast
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -61,6 +61,3 @@ class PythonObjectConfigurator(IConfigurator):
         """
 
         return "Python object: %r" % self["value"]
-
-
-REGISTRY["python_object"] = PythonObjectConfigurator

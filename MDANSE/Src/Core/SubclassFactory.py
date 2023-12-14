@@ -13,6 +13,11 @@
 #
 # **************************************************************************
 
+from typing import TypeVar
+
+
+Self = TypeVar("Self", bound="SubclassFactory")
+
 
 class SubclassFactory(type):
     """A metaclass which gives a class the ability to keep track of
@@ -38,7 +43,7 @@ class SubclassFactory(type):
         # (registry, __init_subclass__) to there. I don't think about it yet.
         cls.__init_subclass__ = __init_subclass__
 
-    def create(cls, name: str, *args, **kwargs):
+    def create(cls, name: str, *args, **kwargs) -> Self:
         print(cls._registered_subclasses)
         specific_class = cls._registered_subclasses[name]
         return specific_class(*args, **kwargs)

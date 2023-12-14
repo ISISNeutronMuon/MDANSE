@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 
@@ -99,6 +98,3 @@ class MillerIndicesLatticeQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
-
-
-REGISTRY["miller_indices_lattice"] = MillerIndicesLatticeQVectors

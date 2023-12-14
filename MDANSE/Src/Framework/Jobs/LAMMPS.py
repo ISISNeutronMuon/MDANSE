@@ -19,7 +19,6 @@ import re
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
@@ -499,6 +498,3 @@ class LAMMPSConverter(Converter):
                 self._nAtoms = int(self._lammps.readline())
                 comp += 1
                 continue
-
-
-REGISTRY["lammps"] = LAMMPSConverter

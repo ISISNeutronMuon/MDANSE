@@ -15,8 +15,11 @@
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
+    IInstrumentResolution,
+)
 
 
 class InstrumentResolutionConfigurator(IConfigurator):
@@ -77,7 +80,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
 
         kernel, parameters = value
 
-        kernelCls = REGISTRY["instrument_resolution"][kernel.lower()]
+        kernelCls = IInstrumentResolution.create(kernel.lower())
 
         resolution = kernelCls()
 
@@ -112,6 +115,3 @@ class InstrumentResolutionConfigurator(IConfigurator):
         info = "\n".join(info)
 
         return info
-
-
-REGISTRY["instrument_resolution"] = InstrumentResolutionConfigurator

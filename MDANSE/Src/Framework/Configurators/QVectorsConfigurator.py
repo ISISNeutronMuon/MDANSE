@@ -13,12 +13,13 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
 )
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
 
 
 class QVectorsConfigurator(IConfigurator):
@@ -79,8 +80,8 @@ class QVectorsConfigurator(IConfigurator):
                     raise ConfiguratorError(
                         "Invalid q vectors settings %s" % value, self
                     )
-                generator = REGISTRY["q_vectors"][generator](
-                    trajConfig["instance"].chemical_system
+                generator = IQVectors.create(
+                    generator, trajConfig["instance"].chemical_system
                 )
                 generator.setup(parameters)
                 generator.generate()
@@ -114,6 +115,3 @@ class QVectorsConfigurator(IConfigurator):
             info.append("Shell %s: %d Q vectors generated\n" % (qValue, len(qVectors)))
 
         return "".join(info)
-
-
-REGISTRY["q_vectors"] = QVectorsConfigurator

@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Mathematics.Arithmetic import weight
 
@@ -180,6 +179,3 @@ class StaticStructureFactor(DistanceHistogram):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["ssf"] = StaticStructureFactor

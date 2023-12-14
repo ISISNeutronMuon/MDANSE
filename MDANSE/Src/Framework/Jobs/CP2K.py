@@ -19,7 +19,7 @@ import re
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
@@ -398,6 +398,3 @@ class CP2KConverter(Converter):
         self._trajectory.close()
 
         super(CP2KConverter, self).finalize()
-
-
-REGISTRY["cp2k"] = CP2KConverter

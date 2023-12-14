@@ -16,7 +16,7 @@
 import os
 import multiprocessing
 
-from MDANSE import PLATFORM, REGISTRY
+from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -79,6 +79,3 @@ class RunningModeConfigurator(IConfigurator):
         """
 
         return "Run in %s mode (%d slots)" % (self["mode"], self["slots"])
-
-
-REGISTRY["running_mode"] = RunningModeConfigurator

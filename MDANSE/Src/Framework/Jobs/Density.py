@@ -15,7 +15,7 @@
 
 import collections
 
-from MDANSE import REGISTRY
+
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.Framework.Units import measure
@@ -129,6 +129,3 @@ class Density(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["den"] = Density

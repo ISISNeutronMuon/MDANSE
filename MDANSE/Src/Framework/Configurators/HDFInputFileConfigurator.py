@@ -15,7 +15,7 @@
 
 import h5py
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 from MDANSE.IO.HDF import find_numeric_variables
@@ -102,6 +102,3 @@ class HDFInputFileConfigurator(InputFileConfigurator):
                 info.append("\t-{}".format(v))
 
         return "\n".join(info)
-
-
-REGISTRY["hdf_input_file"] = HDFInputFileConfigurator

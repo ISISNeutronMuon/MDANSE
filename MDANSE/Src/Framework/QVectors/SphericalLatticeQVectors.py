@@ -18,7 +18,6 @@ import random
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 
@@ -109,6 +108,3 @@ class SphericalLatticeQVectors(LatticeQVectors):
                     return None
                 else:
                     self._status.update()
-
-
-REGISTRY["spherical_lattice"] = SphericalLatticeQVectors

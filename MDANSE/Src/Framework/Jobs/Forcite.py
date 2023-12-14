@@ -19,7 +19,6 @@ import struct
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Units import measure
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Framework.Jobs.MaterialsStudio import XTDFile
@@ -409,6 +408,3 @@ class ForciteConverter(Converter):
         self._trajectory.close()
 
         super(ForciteConverter, self).finalize()
-
-
-REGISTRY["forcite"] = ForciteConverter

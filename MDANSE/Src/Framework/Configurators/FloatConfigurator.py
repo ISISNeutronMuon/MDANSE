@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -123,6 +123,3 @@ class FloatConfigurator(IConfigurator):
         """
 
         return "Value: %r" % self["value"]
-
-
-REGISTRY["float"] = FloatConfigurator

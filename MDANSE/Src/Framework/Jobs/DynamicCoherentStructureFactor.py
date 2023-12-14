@@ -18,7 +18,7 @@ import itertools
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
@@ -268,6 +268,3 @@ class DynamicCoherentStructureFactor(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["dcsf"] = DynamicCoherentStructureFactor

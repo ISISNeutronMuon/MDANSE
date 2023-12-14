@@ -18,7 +18,6 @@ import os
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Mathematics.Signal import correlation
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.LinearAlgebra import Vector
@@ -254,6 +253,3 @@ class OrderParameter(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["op"] = OrderParameter

@@ -23,7 +23,7 @@ import numpy as np
 
 import h5py
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import (
@@ -576,6 +576,3 @@ class CurrentCorrelationFunction(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["ccf"] = CurrentCorrelationFunction

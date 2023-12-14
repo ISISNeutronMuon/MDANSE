@@ -16,7 +16,7 @@
 import collections
 
 from MDANSE.Core.Error import Error
-from MDANSE import REGISTRY
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class ConfigurationError(Error):
@@ -61,8 +61,8 @@ class Configurable(object):
 
         for name, (typ, kwds) in list(self.settings.items()):
             try:
-                self._configuration[name] = REGISTRY["configurator"][typ](
-                    name, configurable=self, **kwds
+                self._configuration[name] = IConfigurator.create(
+                    typ, name, configurable=self, **kwds
                 )
             # Any kind of error has to be caught
             except:
@@ -191,7 +191,7 @@ class Configurable(object):
         doclist = []
 
         for name, (typ, kwds) in list(settings.items()):
-            cfg = REGISTRY["configurator"][typ](name, **kwds)
+            cfg = IConfigurator.create(typ, name, **kwds)
             descr = kwds.get("description", "")
             descr += "\n" + str(cfg.__doc__)
             doclist.append(
@@ -203,13 +203,13 @@ class Configurable(object):
             )
 
         docstring = ":Example:\n\n"
-        docstring += ">>> from MDANSE import REGISTRY\n"
+        docstring += ">>> \n"
         docstring += ">>> \n"
         docstring += ">>> parameters = {}\n"
         for k, v in list(cls.get_default_parameters().items()):
             docstring += ">>> parameters[%r]=%r\n" % (k, v)
         docstring += ">>> \n"
-        docstring += ">>> job = REGISTRY['job'][%r]()\n" % cls._type
+        docstring += ">>> job = IJob.create(%r)\n" % cls.__name__
         docstring += ">>> job.setup(parameters)\n"
         docstring += ">>> job.run()\n"
 
@@ -297,7 +297,7 @@ class Configurable(object):
 
         params = collections.OrderedDict()
         for name, (typ, kwds) in list(settings.items()):
-            cfg = REGISTRY["configurator"][typ](name, **kwds)
+            cfg = IConfigurator.create(typ, name, **kwds)
             params[name] = cfg.default
 
         return params

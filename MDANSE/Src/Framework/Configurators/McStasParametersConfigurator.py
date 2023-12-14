@@ -17,7 +17,7 @@ import os
 import re
 import subprocess
 
-from MDANSE import PLATFORM, REGISTRY
+from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
@@ -119,6 +119,3 @@ class McStasParametersConfigurator(IConfigurator):
         """
 
         return "McStas command line parameters:%s" % self["value"]
-
-
-REGISTRY["mcstas_parameters"] = McStasParametersConfigurator

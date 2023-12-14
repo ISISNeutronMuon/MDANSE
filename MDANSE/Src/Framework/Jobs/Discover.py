@@ -20,7 +20,7 @@ import struct
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Jobs.Converter import Converter
 from MDANSE.Framework.Jobs.MaterialsStudio import XTDFile
 from MDANSE.Framework.Units import measure
@@ -386,6 +386,3 @@ class DiscoverConverter(Converter):
         self._trajectory.close()
 
         super(DiscoverConverter, self).finalize()
-
-
-REGISTRY["discover"] = DiscoverConverter

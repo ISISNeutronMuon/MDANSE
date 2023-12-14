@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
@@ -60,6 +59,3 @@ class Amine(ISelector):
         )
 
         return sel
-
-
-REGISTRY["amine"] = Amine

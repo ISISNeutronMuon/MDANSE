@@ -15,7 +15,6 @@
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Mathematics.Arithmetic import weight
 
@@ -164,6 +163,3 @@ class PairDistributionFunction(DistanceHistogram):
         self.configuration["trajectory"]["instance"].close()
 
         super(PairDistributionFunction, self).finalize()
-
-
-REGISTRY["pdf"] = PairDistributionFunction

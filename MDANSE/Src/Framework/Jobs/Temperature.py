@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
@@ -161,6 +160,3 @@ class Temperature(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["temp"] = Temperature

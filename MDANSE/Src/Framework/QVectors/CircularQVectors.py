@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.QVectors.IQVectors import IQVectors, QVectorsError
 from MDANSE.Mathematics.Geometry import random_points_on_circle
 
@@ -81,6 +80,3 @@ class CircularQVectors(IQVectors):
                     return
                 else:
                     self._status.update()
-
-
-REGISTRY["circular"] = CircularQVectors

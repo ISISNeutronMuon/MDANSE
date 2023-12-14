@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.InputData.InputFileData import InputFileData
 
 
@@ -25,6 +25,3 @@ class MviTraceInputData(InputFileData):
 
     def close(self):
         pass
-
-
-REGISTRY["mvi_trace"] = MviTraceInputData

@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Mathematics.Geometry import random_points_on_sphere
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 
@@ -70,6 +69,3 @@ class SphericalQVectors(IQVectors):
                     return
                 else:
                     self._status.update()
-
-
-REGISTRY["spherical"] = SphericalQVectors

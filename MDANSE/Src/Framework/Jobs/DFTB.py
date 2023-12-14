@@ -16,7 +16,7 @@
 import collections
 import os
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Jobs.Forcite import ForciteConverter
 
 
@@ -54,6 +54,3 @@ class DFTBConverter(ForciteConverter):
         "single_output_file",
         {"format": "hdf", "root": "xtd_file", "label": "Output file name"},
     )
-
-
-REGISTRY["dftb"] = DFTBConverter

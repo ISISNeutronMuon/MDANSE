@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
@@ -153,6 +152,3 @@ class MoleculeFinder(IJob):
 
         # The output trajectory is closed.
         self._output_trajectory.close()
-
-
-REGISTRY["molecule"] = MoleculeFinder

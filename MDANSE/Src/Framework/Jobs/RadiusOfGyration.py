@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Analysis import radius_of_gyration
 
@@ -130,6 +129,3 @@ class RadiusOfGyration(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["rog"] = RadiusOfGyration
