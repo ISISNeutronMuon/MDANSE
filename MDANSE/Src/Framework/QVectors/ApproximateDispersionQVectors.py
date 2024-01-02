@@ -19,7 +19,7 @@ import operator
 
 import numpy as np
 
-from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
+from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
 class ApproximateDispersionQVectors(LatticeQVectors):

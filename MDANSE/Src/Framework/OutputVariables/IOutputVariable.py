@@ -107,7 +107,7 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
         info = []
 
         info.append("# variable name: %s" % self.varname)
-        info.append("# \ttype: %s" % self._type)
+        info.append("# \ttype: %s" % self.__name__)
         info.append("# \taxis: %s" % str(self.axis))
         info.append("# \tunits: %s" % self.units)
 

@@ -315,7 +315,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         """
 
         try:
-            self._name = "%s_%s" % (self._type, IJob.define_unique_name())
+            self._name = "%s_%s" % (self.__name__, IJob.define_unique_name())
 
             if status and self._status is None:
                 self._status = self._status_constructor(self)

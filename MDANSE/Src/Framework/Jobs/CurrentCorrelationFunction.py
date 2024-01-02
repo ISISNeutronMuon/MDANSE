@@ -277,7 +277,7 @@ class CurrentCorrelationFunction(IJob):
         # An alternative interpolation method which saves the velocities to an HDF5-style .nc file to save on memory
         elif self._order != "no interpolation" and self._mode == 2:
             if not hasattr(self, "_name"):
-                self._name = "_".join([self._type, IJob.define_unique_name()])
+                self._name = "_".join([self.__name__, IJob.define_unique_name()])
 
             with h5py.File(
                 os.path.join(gettempdir(), "mdanse_" + self.name + ".h5"), "w"

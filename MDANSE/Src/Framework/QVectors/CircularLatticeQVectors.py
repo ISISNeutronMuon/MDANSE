@@ -20,7 +20,7 @@ import numpy as np
 
 from MDANSE.Mathematics.LinearAlgebra import Vector
 
-from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
+from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
 class CircularLatticeQVectors(LatticeQVectors):
