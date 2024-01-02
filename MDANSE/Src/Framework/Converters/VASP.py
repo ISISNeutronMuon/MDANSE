@@ -166,7 +166,7 @@ class XDATCARFile(dict):
         self["instance"].close()
 
 
-class VASPConverter(Converter):
+class VASP(Converter):
     """
     Converts a VASP trajectory to a HDF trajectory.
     """
@@ -289,4 +289,4 @@ class VASPConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
-        super(VASPConverter, self).finalize()
+        super(VASP, self).finalize()

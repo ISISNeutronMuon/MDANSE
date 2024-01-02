@@ -16,7 +16,7 @@
 from MDANSE.Framework.Jobs.DCDConverter import DCDConverter
 
 
-class NAMDConverter(DCDConverter):
+class NAMD(DCDConverter):
     """
     Converts a NAMD trajectory to a HDF trajectory.
     """

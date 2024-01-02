@@ -20,7 +20,7 @@ import os
 from MDANSE.Framework.Jobs.Forcite import ForciteConverter
 
 
-class DFTBConverter(ForciteConverter):
+class DFTB(ForciteConverter):
     """
     Converts a DFTB trajectory to a HDF trajectory.
     """

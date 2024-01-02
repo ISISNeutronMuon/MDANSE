@@ -271,7 +271,7 @@ class DCDFile(FortranBinaryFile, dict):
             raise StopIteration
 
 
-class DCDConverter(Converter):
+class DCD(Converter):
     """
     Converts a DCD trajectory to a HDF trajectory.
     """
@@ -384,4 +384,4 @@ class DCDConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
-        super(DCDConverter, self).finalize()
+        super(DCD, self).finalize()

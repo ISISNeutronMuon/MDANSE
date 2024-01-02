@@ -351,7 +351,7 @@ class HistoryFile(dict):
         self["instance"].close()
 
 
-class DL_POLYConverter(Converter):
+class DL_POLY(Converter):
     """
     Converts a DL_POLY trajectory to a HDF trajectory.
     """
@@ -497,4 +497,4 @@ class DL_POLYConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
-        super(DL_POLYConverter, self).finalize()
+        super(DL_POLY, self).finalize()

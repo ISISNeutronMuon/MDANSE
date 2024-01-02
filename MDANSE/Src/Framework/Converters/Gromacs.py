@@ -31,7 +31,7 @@ class GromacsConverterError(Error):
     pass
 
 
-class GromacsConverter(Converter):
+class Gromacs(Converter):
     """
     Converts a Gromacs trajectory to a HDF trajectory.
     """
@@ -196,4 +196,4 @@ class GromacsConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
-        super(GromacsConverter, self).finalize()
+        super(Gromacs, self).finalize()

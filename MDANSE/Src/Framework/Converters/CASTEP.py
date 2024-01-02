@@ -191,7 +191,7 @@ class MDFile(dict):
         self["instance"].close()
 
 
-class CASTEPConverter(Converter):
+class CASTEP(Converter):
     """
     Converts a Castep Trajectory into a HDF trajectory file.
     """
@@ -316,4 +316,4 @@ class CASTEPConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
-        super(CASTEPConverter, self).finalize()
+        super(CASTEP, self).finalize()

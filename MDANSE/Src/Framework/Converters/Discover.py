@@ -245,7 +245,7 @@ class HisFile(dict):
         self["instance"].close()
 
 
-class DiscoverConverter(Converter):
+class Discover(Converter):
     """
     Converts a Discover trajectory to a HDF trajectory.
     """
@@ -385,4 +385,4 @@ class DiscoverConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
-        super(DiscoverConverter, self).finalize()
+        super(Discover, self).finalize()

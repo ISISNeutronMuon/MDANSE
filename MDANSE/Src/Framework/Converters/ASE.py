@@ -42,7 +42,7 @@ class ASETrajectoryFileError(Error):
     pass
 
 
-class ASEConverter(Converter):
+class ASE(Converter):
     """
     Converts any trajectory to a HDF trajectory using the ASE io module.
     """
@@ -268,7 +268,7 @@ class ASEConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
-        super(ASEConverter, self).finalize()
+        super(ASE, self).finalize()
 
     def parse_first_step(self):
         self._input = iread(self.configuration["trajectory_file"]["value"], index=0)
@@ -717,7 +717,7 @@ class ASEInteractiveConverter(InteractiveConverter, regkey="ase"):
         # Close the output trajectory.
         self._trajectory.close()
 
-        super(ASEConverter, self).finalize()
+        super(ASE, self).finalize()
 
     def parse_first_step(self):
         self._input = iread(self.configuration["trajectory_file"]["value"], index=0)

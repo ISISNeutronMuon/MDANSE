@@ -150,7 +150,7 @@ class LAMMPSConfigFile(dict):
         unit.close()
 
 
-class LAMMPSConverter(Converter):
+class LAMMPS(Converter):
     """
     Converts a LAMMPS trajectory to a HDF trajectory.
     """
@@ -395,7 +395,7 @@ class LAMMPSConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
-        super(LAMMPSConverter, self).finalize()
+        super(LAMMPS, self).finalize()
 
     def parse_first_step(self):
         self._lammps = open(self.configuration["trajectory_file"]["value"], "r")

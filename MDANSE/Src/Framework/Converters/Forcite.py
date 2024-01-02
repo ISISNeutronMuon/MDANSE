@@ -267,7 +267,7 @@ class TrjFile(dict):
         self["instance"].close()
 
 
-class ForciteConverter(Converter):
+class Forcite(Converter):
     """
     Converts a Forcite trajectory to a HDF trajectory.
     """
@@ -407,4 +407,4 @@ class ForciteConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
-        super(ForciteConverter, self).finalize()
+        super(Forcite, self).finalize()

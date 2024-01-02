@@ -210,7 +210,7 @@ class CP2KConverterError(Error):
     pass
 
 
-class CP2KConverter(Converter):
+class CP2K(Converter):
     """
     Converts a CP2K trajectory to an HDF5 trajectory in the MDANSE format.
     """
@@ -397,4 +397,4 @@ class CP2KConverter(Converter):
         # Close the output trajectory.
         self._trajectory.close()
 
-        super(CP2KConverter, self).finalize()
+        super(CP2K, self).finalize()
