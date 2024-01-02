@@ -17,7 +17,7 @@
 from MDANSE.Framework.InputData.InputFileData import InputFileData
 
 
-class MviTraceInputData(InputFileData):
+class MVITraceInputData(InputFileData):
     extension = "mvi"
 
     def load(self):

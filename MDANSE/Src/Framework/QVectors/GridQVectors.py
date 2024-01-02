@@ -22,7 +22,7 @@ import numpy as np
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 
-class GridLatticeQVectors(LatticeQVectors):
+class GridQVectors(LatticeQVectors):
     """ """
 
     settings = collections.OrderedDict()

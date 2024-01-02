@@ -7,7 +7,8 @@ import pytest
 from icecream import ic
 import numpy as np
 
-from MDANSE import REGISTRY
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
 from ..Data.data import short_traj
@@ -24,7 +25,7 @@ _, just_filename = path.split(short_traj)
 
 @pytest.fixture(scope="module")
 def trajectory():
-    trajectory = REGISTRY["input_data"]["hdf_trajectory"](short_traj)
+    trajectory = HDFTrajectoryInputData(short_traj)
     yield trajectory
 
 @pytest.mark.parametrize('interp_order, normalise',[(1, True),
@@ -42,7 +43,7 @@ def test_vacf(trajectory, interp_order, normalise):
     parameters['running_mode'] = ('monoprocessor',)
     parameters['normalize'] = normalise
     parameters['trajectory'] = short_traj
-    vacf = REGISTRY['job']['vacf']()
+    vacf = IJob.create("VelocityAutoCorrelationFunction")
     vacf.run(parameters,status=True)
     assert path.exists(temp_name + '.h5')
     assert path.isfile(temp_name + '.h5')

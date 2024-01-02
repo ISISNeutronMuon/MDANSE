@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/Jobs/__init__.py
+# @file      Src/Framework/Converters/__init__.py
 # @brief     Implements module/class/test __init__
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
@@ -30,9 +30,9 @@ for name in modnames:
     if name in ["__init__"]:
         continue
     try:
-        tempmod = importlib.import_module("." + name, "MDANSE.Framework.Jobs")
+        tempmod = importlib.import_module("." + name, "MDANSE.Framework.Converters")
     except ModuleNotFoundError:
-        print(f"Could not find {name} in MDANSE.Framework.Jobs")
+        print(f"Could not find {name} in MDANSE.Framework.Converters")
     tempobject = getattr(tempmod, name)
     globdict[name] = tempobject
     del tempmod  # optionally delete the reference to the parent module

@@ -22,7 +22,7 @@ import numpy as np
 from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
 
 
-class ApproximatedDispersionQVectors(LatticeQVectors):
+class ApproximateDispersionQVectors(LatticeQVectors):
     """ """
 
     settings = collections.OrderedDict()

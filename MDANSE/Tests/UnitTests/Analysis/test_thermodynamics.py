@@ -9,7 +9,8 @@ from icecream import ic
 import numpy as np
 import h5py
 
-from MDANSE import REGISTRY
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
 from ..Data.data import short_traj
@@ -26,7 +27,7 @@ _, just_filename = path.split(short_traj)
 
 @pytest.fixture(scope="module")
 def trajectory():
-    trajectory = REGISTRY["input_data"]["hdf_trajectory"](short_traj)
+    trajectory = HDFTrajectoryInputData(short_traj)
     yield trajectory
 
 @pytest.mark.parametrize('interp_order',[1,2,3])
@@ -38,7 +39,7 @@ def test_temperature(trajectory, interp_order):
     parameters['output_files'] = (temp_name, ('hdf',))
     parameters['running_mode'] = ('monoprocessor',)
     parameters['trajectory'] = short_traj
-    temp = REGISTRY['job']['temp']()
+    temp = IJob.create('Temperature')
     temp.run(parameters,status=True)
     assert path.exists(temp_name + '.h5')
     assert path.isfile(temp_name + '.h5')
@@ -53,7 +54,7 @@ def test_temperature_nonzero(trajectory, interp_order):
     parameters['output_files'] = (temp_name, ('hdf',))
     parameters['running_mode'] = ('monoprocessor',)
     parameters['trajectory'] = short_traj
-    temp = REGISTRY['job']['temp']()
+    temp = IJob.create('Temperature')
     temp.run(parameters,status=True)
     results = h5py.File(temp_name + '.h5')
     print(results.keys())
@@ -68,7 +69,7 @@ def test_density(trajectory):
     parameters['output_files'] = (temp_name, ('hdf',))
     parameters['running_mode'] = ('monoprocessor',)
     parameters['trajectory'] = short_traj
-    den = REGISTRY['job']['den']()
+    den = IJob.create('Density')
     den.run(parameters,status=True)
     assert path.exists(temp_name + '.h5')
     assert path.isfile(temp_name + '.h5')

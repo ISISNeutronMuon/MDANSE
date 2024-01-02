@@ -18,7 +18,6 @@ import collections
 import numpy as np
 
 from MDANSE.Framework.Formats.IFormat import IFormat
-from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 from MDANSE.Core.Error import Error
 
 from MDANSE.Core.SubclassFactory import SubclassFactory

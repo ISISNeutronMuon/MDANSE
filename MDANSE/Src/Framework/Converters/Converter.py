@@ -18,9 +18,10 @@ from abc import ABCMeta, abstractmethod, abstractclassmethod
 import h5py
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Core.SubclassFactory import SubclassFactory
 
 
-class InteractiveConverter(IJob, metaclass=ABCMeta):
+class InteractiveConverter(IJob):
     _converter_registry = {}
     _next_number = 1
 
@@ -178,7 +179,7 @@ class InteractiveConverter(IJob, metaclass=ABCMeta):
             output_file.close()
 
 
-class Converter(IJob, metaclass=ABCMeta):
+class Converter(IJob, metaclass= SubclassFactory):
     category = ("Converters",)
 
     ancestor = ["empty_data"]
