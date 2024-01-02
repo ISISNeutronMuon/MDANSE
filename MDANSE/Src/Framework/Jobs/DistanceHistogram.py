@@ -21,7 +21,7 @@ import numpy as np
 from MDANSE.Core.Error import Error
 from MDANSE.Extensions import distance_histogram
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.TrajectoryUtils import atomindex_to_moleculeindex
+from MDANSE.MolecularDynamics.TrajectoryUtils import atom_index_to_molecule_index
 
 
 class DistanceHistogram(IJob):
@@ -87,7 +87,7 @@ class DistanceHistogram(IJob):
             dtype=np.int32,
         )
 
-        lut = atomindex_to_moleculeindex(
+        lut = atom_index_to_molecule_index(
             self.configuration["trajectory"]["instance"].chemical_system
         )
 

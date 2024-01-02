@@ -21,7 +21,7 @@ import numpy as np
 
 from MDANSE.Framework.Units import measure
 from MDANSE.Framework.Converters import Converter
-from MDANSE.Framework.Jobs.MaterialsStudio import XTDFile
+from MDANSE.IO.XTDFile import XTDFile
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 FORCE_FACTOR = measure(1.0, "kcal_per_mole/ang", equivalent=True).toval(

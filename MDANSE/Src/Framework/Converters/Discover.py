@@ -22,7 +22,7 @@ import numpy as np
 
 
 from MDANSE.Framework.Converters import Converter
-from MDANSE.Framework.Jobs.MaterialsStudio import XTDFile
+from MDANSE.IO.XTDFile import XTDFile
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
