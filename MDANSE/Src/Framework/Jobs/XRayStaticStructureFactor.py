@@ -60,22 +60,22 @@ class XRayStaticStructureFactor(DistanceHistogram):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
     settings["r_values"] = (
-        "range",
+        "RangeConfigurator",
         {"valueType": float, "includeLast": True, "mini": 0.0},
     )
     settings["q_values"] = (
-        "range",
+        "RangeConfigurator",
         {"valueType": float, "includeLast": True, "mini": 0.0},
     )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
-        "atom_transmutation",
+        "AtomTransmutationConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -83,8 +83,8 @@ class XRayStaticStructureFactor(DistanceHistogram):
             }
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def finalize(self):
         """
@@ -104,7 +104,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
         shellVolumes = shellSurfaces * self.configuration["r_values"]["step"]
 
         self._outputData.add(
-            "q", "line", self.configuration["q_values"]["value"], units="1/nm"
+            "q", "LineOutputVariable", self.configuration["q_values"]["value"], units="1/nm"
         )
 
         q = self._outputData["q"]
@@ -119,17 +119,17 @@ class XRayStaticStructureFactor(DistanceHistogram):
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for pair in self._elementsPairs:
             self._outputData.add(
-                "xssf_intra_%s%s" % pair, "line", (nq,), axis="q", units="au"
+                "xssf_intra_%s%s" % pair, "LineOutputVariable", (nq,), axis="q", units="au"
             )
             self._outputData.add(
                 "xssf_inter_%s%s" % pair,
-                "line",
+                "LineOutputVariable",
                 (nq,),
                 axis="q",
                 units="au",
             )
             self._outputData.add(
-                "xssf_total_%s%s" % pair, "line", (nq,), axis="q", units="au"
+                "xssf_total_%s%s" % pair, "LineOutputVariable", (nq,), axis="q", units="au"
             )
 
             ni = nAtomsPerElement[pair[0]]
@@ -161,9 +161,9 @@ class XRayStaticStructureFactor(DistanceHistogram):
                 + self._outputData["xssf_inter_%s%s" % pair][:]
             )
 
-        self._outputData.add("xssf_intra", "line", (nq,), axis="q", units="au")
-        self._outputData.add("xssf_inter", "line", (nq,), axis="q", units="au")
-        self._outputData.add("xssf_total", "line", (nq,), axis="q", units="au")
+        self._outputData.add("xssf_intra", "LineOutputVariable", (nq,), axis="q", units="au")
+        self._outputData.add("xssf_inter", "LineOutputVariable", (nq,), axis="q", units="au")
+        self._outputData.add("xssf_total", "LineOutputVariable", (nq,), axis="q", units="au")
 
         asf = dict(
             (k, atomic_scattering_factor(k, self._outputData["q"]))

@@ -37,18 +37,18 @@ class CoordinationNumber(DistanceHistogram):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
     settings["r_values"] = (
-        "range",
+        "RangeConfigurator",
         {"valueType": float, "includeLast": True, "mini": 0.0},
     )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
-        "atom_transmutation",
+        "AtomTransmutationConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -56,8 +56,8 @@ class CoordinationNumber(DistanceHistogram):
             }
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def finalize(self):
         """
@@ -67,36 +67,36 @@ class CoordinationNumber(DistanceHistogram):
         npoints = len(self.configuration["r_values"]["mid_points"])
 
         self._outputData.add(
-            "r", "line", self.configuration["r_values"]["mid_points"], units="nm"
+            "r", "LineOutputVariable", self.configuration["r_values"]["mid_points"], units="nm"
         )
 
         for pair in self._elementsPairs:
             invPair = pair[::-1]
             self._outputData.add(
-                "cn_intra_%s%s" % pair, "line", (npoints,), axis="r", units="au"
+                "cn_intra_%s%s" % pair, "LineOutputVariable", (npoints,), axis="r", units="au"
             )
             self._outputData.add(
                 "cn_inter_%s%s" % pair,
-                "line",
+                "LineOutputVariable",
                 (npoints,),
                 axis="r",
                 units="au",
             )
             self._outputData.add(
-                "cn_total_%s%s" % pair, "line", (npoints,), axis="r", units="au"
+                "cn_total_%s%s" % pair, "LineOutputVariable", (npoints,), axis="r", units="au"
             )
             self._outputData.add(
-                "cn_intra_%s%s" % invPair, "line", (npoints,), axis="r", units="au"
+                "cn_intra_%s%s" % invPair, "LineOutputVariable", (npoints,), axis="r", units="au"
             )
             self._outputData.add(
                 "cn_inter_%s%s" % invPair,
-                "line",
+                "LineOutputVariable",
                 (npoints,),
                 axis="r",
                 units="au",
             )
             self._outputData.add(
-                "cn_total_%s%s" % invPair, "line", (npoints,), axis="r", units="au"
+                "cn_total_%s%s" % invPair, "LineOutputVariable", (npoints,), axis="r", units="au"
             )
 
         nFrames = self.configuration["frames"]["number"]

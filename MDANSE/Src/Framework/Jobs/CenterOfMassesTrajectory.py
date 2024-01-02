@@ -44,21 +44,21 @@ class CenterOfMassesTrajectory(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "frames",
+        "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}, "default": (0, 1, 1)},
     )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["fold"] = (
-        "boolean",
+        "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates in to box"},
     )
     settings["grouping_level"] = (
-        "grouping_level",
+        "GroupingLevelConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -67,8 +67,8 @@ class CenterOfMassesTrajectory(IJob):
         },
     )
     settings["output_file"] = (
-        "single_output_file",
-        {"format": "hdf", "root": "trajectory"},
+        "SingleOutputFileConfigurator",
+        {"format": "HDFFormat", "root": "trajectory"},
     )
 
     def initialize(self):

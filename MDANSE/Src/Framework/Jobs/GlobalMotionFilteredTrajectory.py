@@ -57,17 +57,17 @@ class GlobalMotionFilteredTrajectory(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["reference_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["output_file"] = ("single_output_file", {"format": "hdf"})
+    settings["output_file"] = ("SingleOutputFileConfigurator", {"format": "HDFFormat"})
 
     def initialize(self):
         """

@@ -21,7 +21,7 @@ import struct
 import numpy as np
 
 
-from MDANSE.Framework.Converters import Converter
+from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.IO.XTDFile import XTDFile
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import (
@@ -276,12 +276,12 @@ class Discover(Converter):
         },
     )
     settings["fold"] = (
-        "boolean",
+        "BooleanConfigurator",
         {"default": True, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "xtd_file", "label": "Output trajectory file name"},
+        {"format": "HDFFormat", "root": "xtd_file", "label": "Output trajectory file name"},
     )
 
     def initialize(self):

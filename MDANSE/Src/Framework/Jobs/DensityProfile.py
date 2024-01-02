@@ -44,14 +44,14 @@ class DensityProfile(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
-        "atom_transmutation",
+        "AtomTransmutationConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -59,14 +59,14 @@ class DensityProfile(IJob):
             }
         },
     )
-    settings["axis"] = ("single_choice", {"choices": ["a", "b", "c"], "default": "c"})
-    settings["dr"] = ("float", {"default": 0.01, "mini": 1.0e-9})
+    settings["axis"] = ("SingleChoiceConfigurator", {"choices": ["a", "b", "c"], "default": "c"})
+    settings["dr"] = ("FloatConfigurator", {"default": 0.01, "mini": 1.0e-9})
     settings["weights"] = (
-        "weights",
+        "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -92,13 +92,13 @@ class DensityProfile(IJob):
         axis_length = np.sqrt(np.sum(axis**2))
         self._n_bins = int(axis_length / self._dr) + 1
 
-        self._outputData.add("r", "line", (self._n_bins,), units="nm")
+        self._outputData.add("r", "LineOutputVariable", (self._n_bins,), units="nm")
 
         self._indexes_per_element = self.configuration["atom_selection"].get_indexes()
 
         for element in self._indexes_per_element.keys():
             self._outputData.add(
-                "dp_%s" % element, "line", (self._n_bins,), axis="r", units="au"
+                "dp_%s" % element, "LineOutputVariable", (self._n_bins,), axis="r", units="au"
             )
 
         self._extent = 0.0
@@ -163,7 +163,7 @@ class DensityProfile(IJob):
             "dp_%s",
         )
 
-        self._outputData.add("dp_total", "line", dp_total, axis="r", units="au")
+        self._outputData.add("dp_total", "LineOutputVariable", dp_total, axis="r", units="au")
 
         self._extent /= self.numberOfSteps
 

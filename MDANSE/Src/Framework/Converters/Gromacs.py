@@ -20,7 +20,7 @@ import numpy as np
 
 from MDANSE.Core.Error import Error
 from MDANSE.Extensions import xtc, trr
-from MDANSE.Framework.Converters import Converter
+from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.IO.PDBReader import PDBReader
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
@@ -60,12 +60,12 @@ class Gromacs(Converter):
         },
     )
     settings["fold"] = (
-        "boolean",
+        "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "pdb_file", "label": "Output trajectory file name"},
+        {"format": "HDFFormat", "root": "pdb_file", "label": "Output trajectory file name"},
     )
 
     def initialize(self):

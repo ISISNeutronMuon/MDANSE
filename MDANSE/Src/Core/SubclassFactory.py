@@ -18,6 +18,22 @@ from typing import TypeVar
 
 Self = TypeVar("Self", bound="SubclassFactory")
 
+def single_search(parent_class: type, name: str):
+    if name in parent_class._registered_subclasses.keys():
+        return parent_class._registered_subclasses[name]
+    else:
+        return None
+    
+def recursive_search(parent_class: type, name: str):
+    return_type = single_search(parent_class, name)
+    if return_type is not None:
+        return return_type
+    else:
+        for child in parent_class._registered_subclasses.keys():
+            return_type = recursive_search(parent_class._registered_subclasses[child], name)
+            if return_type is not None:
+                return return_type
+
 
 class SubclassFactory(type):
     """A metaclass which gives a class the ability to keep track of
@@ -44,8 +60,10 @@ class SubclassFactory(type):
         cls.__init_subclass__ = __init_subclass__
 
     def create(cls, name: str, *args, **kwargs) -> Self:
-        print(cls._registered_subclasses)
-        specific_class = cls._registered_subclasses[name]
+        try:
+            specific_class = cls._registered_subclasses[name]
+        except KeyError:
+            specific_class = recursive_search(cls, name)
         return specific_class(*args, **kwargs)
 
     def subclasses(cls):

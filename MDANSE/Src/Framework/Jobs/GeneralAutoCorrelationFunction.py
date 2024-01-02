@@ -35,14 +35,14 @@ class GeneralAutoCorrelationFunction(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
-        "atom_transmutation",
+        "AtomTransmutationConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -51,16 +51,16 @@ class GeneralAutoCorrelationFunction(IJob):
         },
     )
     settings["trajectory_variable"] = (
-        "trajectory_variable",
+        "TrajectoryVariableConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["normalize"] = ("boolean", {"default": False})
+    settings["normalize"] = ("BooleanConfigurator", {"default": False})
     settings["weights"] = (
-        "weights",
+        "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -71,14 +71,14 @@ class GeneralAutoCorrelationFunction(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["duration"], units="ps"
+            "time", "LineOutputVariable", self.configuration["frames"]["duration"], units="ps"
         )
 
         # Will store the mean square displacement evolution.
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
                 "gacf_{}".format(element),
-                "line",
+                "LineOutputVariable",
                 (self.configuration["frames"]["number"],),
                 axis="time",
                 units="au",
@@ -86,7 +86,7 @@ class GeneralAutoCorrelationFunction(IJob):
 
         self._outputData.add(
             "gacf_total",
-            "line",
+            "LineOutputVariable",
             (self.configuration["frames"]["number"],),
             axis="time",
             units="au",

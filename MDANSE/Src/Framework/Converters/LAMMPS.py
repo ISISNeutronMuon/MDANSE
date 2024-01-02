@@ -22,7 +22,7 @@ import numpy as np
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Converters import Converter
+from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.Mathematics.Graph import Graph
 from MDANSE.MolecularDynamics.Configuration import (
@@ -194,7 +194,7 @@ class LAMMPS(Converter):
         {"label": "mass tolerance (uma)", "default": 1.0e-3, "mini": 1.0e-9},
     )
     settings["smart_mass_association"] = (
-        "boolean",
+        "BooleanConfigurator",
         {"label": "smart mass association", "default": True},
     )
     settings["time_step"] = (
@@ -210,13 +210,13 @@ class LAMMPS(Converter):
         },
     )
     settings["fold"] = (
-        "boolean",
+        "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates in to box"},
     )
     settings["output_file"] = (
         "single_output_file",
         {
-            "format": "hdf",
+            "format": "HDFFormat",
             "root": "config_file",
             "label": "Output trajectory file name",
         },

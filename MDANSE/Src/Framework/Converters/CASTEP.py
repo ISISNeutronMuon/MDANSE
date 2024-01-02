@@ -23,7 +23,7 @@ import numpy as np
 
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Converters import Converter
+from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
@@ -210,13 +210,13 @@ class CASTEP(Converter):
         },
     )
     settings["fold"] = (
-        "boolean",
+        "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
         "single_output_file",
         {
-            "format": "hdf",
+            "format": "HDFFormat",
             "root": "castep_file",
             "label": "Output trajectory file name",
         },

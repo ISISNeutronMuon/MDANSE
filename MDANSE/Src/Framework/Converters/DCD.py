@@ -20,7 +20,7 @@ import struct
 import numpy as np
 
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Converters import Converter
+from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.IO.PDBReader import PDBReader
 from MDANSE.Mathematics.Geometry import get_basis_vectors_from_cell_parameters
@@ -299,12 +299,12 @@ class DCD(Converter):
     )
     settings["time_step"] = ("float", {"default": 1.0, "label": "Time step (ps)"})
     settings["fold"] = (
-        "boolean",
+        "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "pdb_file", "label": "Output trajectory file name"},
+        {"format": "HDFFormat", "root": "pdb_file", "label": "Output trajectory file name"},
     )
 
     def initialize(self):

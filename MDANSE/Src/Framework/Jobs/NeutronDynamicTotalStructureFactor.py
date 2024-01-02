@@ -44,21 +44,21 @@ class NeutronDynamicTotalStructureFactor(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["dcsf_input_file"] = (
-        "hdf_input_file",
+        "HDFInputFileConfigurator",
         {"default": os.path.join("..", "..", "..", "Data", "HDF", "dcsf.h5")},
     )
     settings["disf_input_file"] = (
-        "hdf_input_file",
+        "HDFInputFileConfigurator",
         {"default": os.path.join("..", "..", "..", "Data", "HDF", "disf.h5")},
     )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
-        "atom_transmutation",
+        "AtomTransmutationConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -66,8 +66,8 @@ class NeutronDynamicTotalStructureFactor(IJob):
             }
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -94,7 +94,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 "Inconsistent times between dcsf and disf input files"
             )
 
-        self._outputData.add("time", "line", dcsf_time, units="ps")
+        self._outputData.add("time", "LineOutputVariable", dcsf_time, units="ps")
 
         # Check time window consistency
         if "time_window" not in self.configuration["dcsf_input_file"]["instance"]:
@@ -118,7 +118,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 "Inconsistent time windows between dcsf and disf input files"
             )
 
-        self._outputData.add("time_window", "line", dcsf_time_window, units="au")
+        self._outputData.add("time_window", "LineOutputVariable", dcsf_time_window, units="au")
 
         # Check q values consistency
         if "q" not in self.configuration["dcsf_input_file"]["instance"]:
@@ -138,7 +138,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 "Inconsistent q values between dcsf and disf input files"
             )
 
-        self._outputData.add("q", "line", dcsf_q, units="1/nm")
+        self._outputData.add("q", "LineOutputVariable", dcsf_q, units="1/nm")
 
         # Check omega consistency
         if "omega" not in self.configuration["dcsf_input_file"]["instance"]:
@@ -158,7 +158,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 "Inconsistent omegas between dcsf and disf input files"
             )
 
-        self._outputData.add("omega", "line", dcsf_omegas, units="rad/ps")
+        self._outputData.add("omega", "LineOutputVariable", dcsf_omegas, units="rad/ps")
 
         # Check omega window consistency
         if "omega_window" not in self.configuration["dcsf_input_file"]["instance"]:
@@ -182,7 +182,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 "Inconsistent omega windows between dcsf and disf input files"
             )
 
-        self._outputData.add("omega_window", "line", dcsf_omegas, units="au")
+        self._outputData.add("omega_window", "LineOutputVariable", dcsf_omegas, units="au")
 
         # Check f(q,t) and s(q,f) for dcsf
         self._elementsPairs = sorted(
@@ -230,25 +230,25 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 "s(q,f)_{}".format(element)
             ]
             self._outputData.add(
-                "f(q,t)_inc_%s" % element, "surface", fqt, axis="q|time", units="au"
+                "f(q,t)_inc_%s" % element, "SurfaceOutputVariable", fqt, axis="q|time", units="au"
             )
             self._outputData.add(
                 "s(q,f)_inc_%s" % element,
-                "surface",
+                "SurfaceOutputVariable",
                 sqf,
                 axis="q|omega",
                 units="nm2/ps",
             )
             self._outputData.add(
                 "f(q,t)_inc_weighted_%s" % element,
-                "surface",
+                "SurfaceOutputVariable",
                 fqt.shape,
                 axis="q|time",
                 units="au",
             )
             self._outputData.add(
                 "s(q,f)_inc_weighted_%s" % element,
-                "surface",
+                "SurfaceOutputVariable",
                 sqf.shape,
                 axis="q|omega",
                 units="nm2/ps",
@@ -262,21 +262,21 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 "s(q,f)_{}{}".format(*pair)
             ]
             self._outputData.add(
-                "f(q,t)_coh_%s%s" % pair, "surface", fqt, axis="q|time", units="au"
+                "f(q,t)_coh_%s%s" % pair, "SurfaceOutputVariable", fqt, axis="q|time", units="au"
             )
             self._outputData.add(
-                "s(q,f)_coh_%s%s" % pair, "surface", sqf, axis="q|omega", units="nm2/ps"
+                "s(q,f)_coh_%s%s" % pair, "SurfaceOutputVariable", sqf, axis="q|omega", units="nm2/ps"
             )
             self._outputData.add(
                 "f(q,t)_coh_weighted_%s%s" % pair,
-                "surface",
+                "SurfaceOutputVariable",
                 fqt.shape,
                 axis="q|time",
                 units="au",
             )
             self._outputData.add(
                 "s(q,f)_coh_weighted_%s%s" % pair,
-                "surface",
+                "SurfaceOutputVariable",
                 sqf.shape,
                 axis="q|omega",
                 units="nm2/ps",
@@ -287,32 +287,32 @@ class NeutronDynamicTotalStructureFactor(IJob):
         nOmegas = len(dcsf_omegas)
 
         self._outputData.add(
-            "f(q,t)_coh_total", "surface", (nQValues, nTimes), axis="q|time", units="au"
+            "f(q,t)_coh_total", "SurfaceOutputVariable", (nQValues, nTimes), axis="q|time", units="au"
         )
         self._outputData.add(
-            "f(q,t)_inc_total", "surface", (nQValues, nTimes), axis="q|time", units="au"
+            "f(q,t)_inc_total", "SurfaceOutputVariable", (nQValues, nTimes), axis="q|time", units="au"
         )
         self._outputData.add(
-            "f(q,t)_total", "surface", (nQValues, nTimes), axis="q|time", units="au"
+            "f(q,t)_total", "SurfaceOutputVariable", (nQValues, nTimes), axis="q|time", units="au"
         )
 
         self._outputData.add(
             "s(q,f)_coh_total",
-            "surface",
+            "SurfaceOutputVariable",
             (nQValues, nOmegas),
             axis="q|omega",
             units="nm2/ps",
         )
         self._outputData.add(
             "s(q,f)_inc_total",
-            "surface",
+            "SurfaceOutputVariable",
             (nQValues, nOmegas),
             axis="q|omega",
             units="nm2/ps",
         )
         self._outputData.add(
             "s(q,f)_total",
-            "surface",
+            "SurfaceOutputVariable",
             (nQValues, nOmegas),
             axis="q|omega",
             units="nm2/ps",

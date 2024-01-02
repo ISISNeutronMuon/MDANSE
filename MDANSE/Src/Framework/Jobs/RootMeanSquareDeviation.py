@@ -41,15 +41,15 @@ class RootMeanSquareDeviation(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
-    settings["reference_frame"] = ("integer", {"mini": 0, "default": 0})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["reference_frame"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["grouping_level"] = (
-        "grouping_level",
+        "GroupingLevelConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -59,7 +59,7 @@ class RootMeanSquareDeviation(IJob):
         },
     )
     settings["atom_transmutation"] = (
-        "atom_transmutation",
+        "AtomTransmutationConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -68,11 +68,11 @@ class RootMeanSquareDeviation(IJob):
         },
     )
     settings["weights"] = (
-        "weights",
+        "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
@@ -81,14 +81,14 @@ class RootMeanSquareDeviation(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["duration"], units="ps"
+            "time", "LineOutputVariable", self.configuration["frames"]["duration"], units="ps"
         )
 
         # Will store the mean square deviation
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
                 "rmsd_{}".format(element),
-                "line",
+                "LineOutputVariable",
                 (self.configuration["frames"]["number"],),
                 axis="time",
                 units="nm",
@@ -146,7 +146,7 @@ class RootMeanSquareDeviation(IJob):
         weights = self.configuration["weights"].get_weights()
         rmsdTotal = weight(weights, self._outputData, nAtomsPerElement, 1, "rmsd_%s")
         rmsdTotal = np.sqrt(rmsdTotal)
-        self._outputData.add("rmsd_total", "line", rmsdTotal, axis="time", units="nm")
+        self._outputData.add("rmsd_total", "LineOutputVariable", rmsdTotal, axis="time", units="nm")
 
         for element, number in nAtomsPerElement.items():
             self._outputData["rmsd_{}".format(element)] = np.sqrt(

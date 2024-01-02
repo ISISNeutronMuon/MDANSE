@@ -47,10 +47,10 @@ class DFTB(Forcite):
         },
     )
     settings["fold"] = (
-        "boolean",
+        "BooleanConfigurator",
         {"default": True, "label": "Fold coordinates in to box"},
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "xtd_file", "label": "Output file name"},
+        {"format": "HDFFormat", "root": "xtd_file", "label": "Output file name"},
     )

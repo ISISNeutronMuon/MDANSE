@@ -38,18 +38,18 @@ class RadiusOfGyration(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["weights"] = (
-        "weights",
+        "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -59,12 +59,12 @@ class RadiusOfGyration(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["time"], units="ps"
+            "time", "LineOutputVariable", self.configuration["frames"]["time"], units="ps"
         )
 
         self._outputData.add(
             "rog",
-            "line",
+            "LineOutputVariable",
             (self.configuration["frames"]["number"],),
             axis="time",
             units="nm",

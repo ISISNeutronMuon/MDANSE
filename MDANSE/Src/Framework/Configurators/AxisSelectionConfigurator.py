@@ -19,7 +19,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.TrajectoryUtils import find_atoms_in_molecule
 
 
-class AxisSelection(IConfigurator):
+class AxisSelectionConfigurator(IConfigurator):
     """
     This configurator allows to define a local axis per molecule.
 

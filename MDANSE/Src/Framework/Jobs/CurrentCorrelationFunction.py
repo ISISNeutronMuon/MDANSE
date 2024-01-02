@@ -59,14 +59,14 @@ class CurrentCorrelationFunction(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
     settings["instrument_resolution"] = (
-        "instrument_resolution",
+        "InstrumentResolutionConfigurator",
         {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
     )
     settings["interpolation_order"] = (
-        "interpolation_order",
+        "InterpolationOrderConfigurator",
         {
             "label": "velocities",
             "dependencies": {"trajectory": "trajectory"},
@@ -74,7 +74,7 @@ class CurrentCorrelationFunction(IJob):
         },
     )
     settings["interpolation_mode"] = (
-        "single_choice",
+        "SingleChoiceConfigurator",
         {
             "choices": [
                 "one-time in-memory interpolation",
@@ -86,20 +86,20 @@ class CurrentCorrelationFunction(IJob):
         },
     )
     settings["number_of_preloaded_fames"] = (
-        "integer",
+        "IntegerConfigurator",
         {"default": 50, "mini": -1, "exclude": (0,)},
     )
     settings["q_vectors"] = (
-        "q_vectors",
+        "QVectorsConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["normalize"] = ("boolean", {"default": False})
+    settings["normalize"] = ("BooleanConfigurator", {"default": False})
     settings["atom_transmutation"] = (
-        "atom_transmutation",
+        "AtomTransmutationConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -108,7 +108,7 @@ class CurrentCorrelationFunction(IJob):
         },
     )
     settings["weights"] = (
-        "weights",
+        "WeightsConfigurator",
         {
             "default": "b_coherent",
             "dependencies": {
@@ -118,8 +118,8 @@ class CurrentCorrelationFunction(IJob):
             },
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -138,24 +138,24 @@ class CurrentCorrelationFunction(IJob):
 
         self._outputData.add(
             "q",
-            "line",
+            "LineOutputVariable",
             np.array(self.configuration["q_vectors"]["shells"]),
             units="1/nm",
         )
 
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["duration"], units="ps"
+            "time", "LineOutputVariable", self.configuration["frames"]["duration"], units="ps"
         )
         self._outputData.add(
-            "time_window", "line", self._instrResolution["time_window"], units="au"
+            "time_window", "LineOutputVariable", self._instrResolution["time_window"], units="au"
         )
 
         self._outputData.add(
-            "omega", "line", self._instrResolution["omega"], units="rad/ps"
+            "omega", "LineOutputVariable", self._instrResolution["omega"], units="rad/ps"
         )
         self._outputData.add(
             "omega_window",
-            "line",
+            "LineOutputVariable",
             self._instrResolution["omega_window"],
             axis="omega",
             units="au",
@@ -171,28 +171,28 @@ class CurrentCorrelationFunction(IJob):
         for pair in self._elementsPairs:
             self._outputData.add(
                 "j(q,t)_long_%s%s" % pair,
-                "surface",
+                "SurfaceOutputVariable",
                 (nQShells, self._nFrames),
                 axis="q|time",
                 units="au",
             )
             self._outputData.add(
                 "j(q,t)_trans_%s%s" % pair,
-                "surface",
+                "SurfaceOutputVariable",
                 (nQShells, self._nFrames),
                 axis="q|time",
                 units="au",
             )
             self._outputData.add(
                 "J(q,f)_long_%s%s" % pair,
-                "surface",
+                "SurfaceOutputVariable",
                 (nQShells, self._nOmegas),
                 axis="q|omega",
                 units="au",
             )
             self._outputData.add(
                 "J(q,f)_trans_%s%s" % pair,
-                "surface",
+                "SurfaceOutputVariable",
                 (nQShells, self._nOmegas),
                 axis="q|omega",
                 units="au",
@@ -200,28 +200,28 @@ class CurrentCorrelationFunction(IJob):
 
         self._outputData.add(
             "j(q,t)_long_total",
-            "surface",
+            "SurfaceOutputVariable",
             (nQShells, self._nFrames),
             axis="q|time",
             units="au",
         )
         self._outputData.add(
             "J(q,f)_long_total",
-            "surface",
+            "SurfaceOutputVariable",
             (nQShells, self._nOmegas),
             axis="q|omega",
             units="au",
         )
         self._outputData.add(
             "j(q,t)_trans_total",
-            "surface",
+            "SurfaceOutputVariable",
             (nQShells, self._nFrames),
             axis="q|time",
             units="au",
         )
         self._outputData.add(
             "J(q,f)_trans_total",
-            "surface",
+            "SurfaceOutputVariable",
             (nQShells, self._nOmegas),
             axis="q|omega",
             units="au",

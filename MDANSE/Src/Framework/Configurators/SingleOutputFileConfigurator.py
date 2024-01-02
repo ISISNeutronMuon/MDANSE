@@ -36,7 +36,7 @@ class SingleOutputFileConfigurator(IConfigurator):
     conversion, you must inherit from the MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
 
-    _default = (os.path.join(tempfile.gettempdir(), "output"), "hdf")
+    _default = (os.path.join(tempfile.gettempdir(), "output"), "HDFFormat")
 
     def __init__(self, name, format=None, **kwargs):
         """

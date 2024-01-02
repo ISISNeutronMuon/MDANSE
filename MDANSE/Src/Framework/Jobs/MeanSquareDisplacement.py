@@ -59,15 +59,15 @@ class MeanSquareDisplacement(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
-    settings["projection"] = ("projection", {"label": "project coordinates"})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["projection"] = ("ProjectionConfigurator", {"label": "project coordinates"})
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["grouping_level"] = (
-        "grouping_level",
+        "GroupingLevelConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -77,7 +77,7 @@ class MeanSquareDisplacement(IJob):
         },
     )
     settings["atom_transmutation"] = (
-        "atom_transmutation",
+        "AtomTransmutationConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -86,14 +86,14 @@ class MeanSquareDisplacement(IJob):
         },
     )
     settings["weights"] = (
-        "weights",
+        "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
     settings["output_files"] = (
-        "output_files",
-        {"formats": ["hdf", "ascii", "svg"]},
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat", "svg"]},
     )
-    settings["running_mode"] = ("running_mode", {})
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -104,14 +104,14 @@ class MeanSquareDisplacement(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["duration"], units="ps"
+            "time", "LineOutputVariable", self.configuration["frames"]["duration"], units="ps"
         )
 
         # Will store the mean square displacement evolution.
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
                 "msd_%s" % element,
-                "line",
+                "LineOutputVariable",
                 (self.configuration["frames"]["number"],),
                 axis="time",
                 units="nm2",
@@ -187,7 +187,7 @@ class MeanSquareDisplacement(IJob):
         weights = self.configuration["weights"].get_weights()
         msdTotal = weight(weights, self._outputData, nAtomsPerElement, 1, "msd_%s")
 
-        self._outputData.add("msd_total", "line", msdTotal, axis="time", units="nm2")
+        self._outputData.add("msd_total", "LineOutputVariable", msdTotal, axis="time", units="nm2")
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

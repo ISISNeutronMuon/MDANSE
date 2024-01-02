@@ -21,7 +21,7 @@ import numpy as np
 
 
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Converters import Converter
+from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Units import measure
@@ -264,7 +264,7 @@ class CP2K(Converter):
     settings["output_file"] = (
         "single_output_file",
         {
-            "format": "hdf",
+            "format": "HDFFormat",
             "root": "xdatcar_file",
             "label": "Output trajectory file name",
         },

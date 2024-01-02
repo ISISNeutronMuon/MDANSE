@@ -20,7 +20,7 @@ import numpy as np
 
 from MDANSE.Core.Error import Error
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
-from MDANSE.Framework.Converters import Converter
+from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
@@ -189,13 +189,13 @@ class VASP(Converter):
         {"label": "time step", "default": 1.0, "mini": 1.0e-9},
     )
     settings["fold"] = (
-        "boolean",
+        "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
         "single_output_file",
         {
-            "format": "hdf",
+            "format": "HDFFormat",
             "root": "xdatcar_file",
             "label": "Output trajectory file name",
         },

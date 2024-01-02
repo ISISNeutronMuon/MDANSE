@@ -64,16 +64,16 @@ class OrderParameter(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = (
-        "hdf_trajectory",
+        "HDFTrajectoryConfigurator",
         {
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "HDF", "waterbox.h5"
             )
         },
     )
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
     settings["axis_selection"] = (
-        "atoms_list",
+        "AtomsListConfigurator",
         {
             "dependencies": {"trajectory": "trajectory"},
             "nAtoms": 2,
@@ -81,15 +81,15 @@ class OrderParameter(IJob):
         },
     )
     settings["reference_direction"] = (
-        "vector",
+        "VectorConfigurator",
         {"default": [0, 0, 1], "notNull": True, "normalize": True},
     )
     settings["per_axis"] = (
-        "boolean",
+        "BooleanConfigurator",
         {"label": "output contribution per axis", "default": False},
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -102,12 +102,12 @@ class OrderParameter(IJob):
         self.numberOfSteps = self._nAxis
 
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["time"], units="ps"
+            "time", "LineOutputVariable", self.configuration["frames"]["time"], units="ps"
         )
 
         self._outputData.add(
             "axis_index",
-            "line",
+            "LineOutputVariable",
             np.arange(self.configuration["axis_selection"]["n_values"]),
             units="au",
         )
@@ -125,21 +125,21 @@ class OrderParameter(IJob):
         else:
             self._doRotation = True
 
-        self._outputData.add("p1", "line", (self._nFrames,), axis="time", units="au")
-        self._outputData.add("p2", "line", (self._nFrames,), axis="time", units="au")
-        self._outputData.add("s2", "line", (self._nAxis,), axis="time", units="au")
+        self._outputData.add("p1", "LineOutputVariable", (self._nFrames,), axis="time", units="au")
+        self._outputData.add("p2", "LineOutputVariable", (self._nFrames,), axis="time", units="au")
+        self._outputData.add("s2", "LineOutputVariable", (self._nAxis,), axis="time", units="au")
 
         if self.configuration["per_axis"]["value"]:
             self._outputData.add(
                 "p1_per_axis",
-                "surface",
+                "SurfaceOutputVariable",
                 (self._nAxis, self._nFrames),
                 axis="axis_index|time",
                 units="au",
             )
             self._outputData.add(
                 "p2_per_axis",
-                "surface",
+                "SurfaceOutputVariable",
                 (self._nAxis, self._nFrames),
                 axis="axis_index|time",
                 units="au",

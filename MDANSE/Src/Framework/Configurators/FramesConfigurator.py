@@ -15,7 +15,6 @@
 
 import numpy as np
 
-
 from MDANSE.Framework.Configurators.RangeConfigurator import RangeConfigurator
 
 

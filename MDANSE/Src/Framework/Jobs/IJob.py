@@ -315,7 +315,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         """
 
         try:
-            self._name = "%s_%s" % (self.__name__, IJob.define_unique_name())
+            self._name = "%s_%s" % (self.__class__, IJob.define_unique_name())
 
             if status and self._status is None:
                 self._status = self._status_constructor(self)
@@ -385,7 +385,7 @@ class %(classname)s(IJob):
     settings = collections.OrderedDict()
     settings['trajectory']=('hdf_trajectory',{})
     settings['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
-    settings['output_files']=('output_files', {"formats":["hdf","netcdf","ascii"]})
+    settings['output_files']=('output_files', {"formats":["HDFFormat","netcdf","ASCIIFormat"]})
             
     def initialize(self):
         """
@@ -397,7 +397,7 @@ class %(classname)s(IJob):
         self.numberOfSteps = self.configuration['frames']['number']
                         
         # Create an output data for the selected frames.
-        self._outputData.add("time", "line", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("time", "LineOutputVariable", self.configuration['frames']['time'], units='ps')
 
 
     def run_step(self, index):

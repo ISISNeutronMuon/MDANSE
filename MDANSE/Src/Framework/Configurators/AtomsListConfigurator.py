@@ -67,9 +67,9 @@ class AtomsListConfigurator(IConfigurator):
             molecule, atoms = UD_STORE.get_definition(
                 trajConfig["basename"], "%d_atoms_list" % self._nAtoms, value
             )
-        elif UD_STORE.has_definition(trajConfig["basename"], "atoms_list", value):
+        elif UD_STORE.has_definition(trajConfig["basename"], "AtomsListConfigurator", value):
             tempdict = UD_STORE.get_definition(
-                trajConfig["basename"], "atoms_list", value
+                trajConfig["basename"], "AtomsListConfigurator", value
             )
             natoms = tempdict["natoms"]
             if not natoms == self._nAtoms:

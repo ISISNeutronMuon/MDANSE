@@ -30,7 +30,7 @@ from MDANSE.Chemistry.ChemicalEntity import (
     translate_atom_names,
 )
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Converters import Converter
+from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
@@ -381,18 +381,18 @@ class DL_POLY(Converter):
     )
     settings["atom_aliases"] = ("python_object", {"default": {}})
     settings["fold"] = (
-        "boolean",
+        "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["version"] = (
         "single_choice",
         {"choices": list(_HISTORY_FORMAT.keys()), "default": "2", "label": "Version"},
     )
-    # settings['output_files'] = ('output_files', {'formats':["hdf"]})
+    # settings['output_files'] = ('output_files', {'formats':["HDFFormat"]})
     settings["output_file"] = (
         "single_output_file",
         {
-            "format": "hdf",
+            "format": "HDFFormat",
             "root": "history_file",
             "label": "Output trajectory file name",
         },

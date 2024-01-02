@@ -13,6 +13,7 @@
 #
 # **************************************************************************
 
+from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Converters.DCD import DCD
 
 

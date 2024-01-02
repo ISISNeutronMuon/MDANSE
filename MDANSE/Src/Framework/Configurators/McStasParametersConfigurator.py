@@ -26,7 +26,7 @@ class McStasParametersConfigurator(IConfigurator):
     This configurator allows to input the McStas instrument parameters that will be used to run a McStas executable file.
     """
 
-    _mcStasTypes = {"double": float, "int": int, "string": str}
+    _mcStasTypes = {"double": float, "int": int, "StringConfigurator": str}
 
     _default = {
         "beam_wavelength_Angs": 2.0,

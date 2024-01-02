@@ -43,10 +43,10 @@ class Density(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         self.numberOfSteps = self.configuration["frames"]["number"]
@@ -64,15 +64,15 @@ class Density(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["time"], units="ps"
+            "time", "LineOutputVariable", self.configuration["frames"]["time"], units="ps"
         )
 
         self._outputData.add(
-            "mass_density", "line", (self._n_frames,), axis="time", units="g/cm3"
+            "mass_density", "LineOutputVariable", (self._n_frames,), axis="time", units="g/cm3"
         )
 
         self._outputData.add(
-            "atomic_density", "line", (self._n_frames,), axis="time", units="1/cm3"
+            "atomic_density", "LineOutputVariable", (self._n_frames,), axis="time", units="1/cm3"
         )
 
     def run_step(self, index):

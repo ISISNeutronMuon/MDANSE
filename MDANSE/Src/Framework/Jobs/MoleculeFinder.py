@@ -46,12 +46,12 @@ class MoleculeFinder(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "frames",
+        "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}, "default": (0, -1, 1)},
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
+    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
 
     def initialize(self):
         """

@@ -37,15 +37,15 @@ class UnfoldedTrajectory(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["output_file"] = (
-        "single_output_file",
-        {"format": "hdf", "root": "trajectory"},
+        "SingleOutputFileConfigurator",
+        {"format": "HDFFormat", "root": "trajectory"},
     )
 
     def initialize(self):

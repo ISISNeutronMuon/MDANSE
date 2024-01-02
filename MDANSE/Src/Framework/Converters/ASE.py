@@ -27,7 +27,7 @@ import h5py
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Converters import Converter, InteractiveConverter
+from MDANSE.Framework.Converters.Converter import Converter, InteractiveConverter
 from MDANSE.Framework.Units import measure
 from MDANSE.Mathematics.Graph import Graph
 from MDANSE.MolecularDynamics.Configuration import (
@@ -98,7 +98,7 @@ class ASE(Converter):
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "config_file"},
+        {"format": "HDFFormat", "root": "config_file"},
     )
 
     def initialize(self):
@@ -316,7 +316,7 @@ class ASE(Converter):
             self._chemicalSystem.add_chemical_entity(obj)
 
 
-class ASEInteractiveConverter(InteractiveConverter, regkey="ase"):
+class ASEInteractiveConverter(InteractiveConverter):
     """
     Converts any trajectory to a HDF trajectory using the ASE io module.
     """
@@ -377,7 +377,7 @@ class ASEInteractiveConverter(InteractiveConverter, regkey="ase"):
 
     output_files["output_file"] = (
         "single_output_file",
-        {"format": "hdf", "root": "config_file"},
+        {"format": "HDFFormat", "root": "config_file"},
     )
 
     def __init__(self, *args, **kwargs):
