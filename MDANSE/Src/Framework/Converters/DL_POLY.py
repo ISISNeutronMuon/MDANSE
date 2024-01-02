@@ -30,7 +30,7 @@ from MDANSE.Chemistry.ChemicalEntity import (
     translate_atom_names,
 )
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Jobs.Converter import Converter
+from MDANSE.Framework.Converters import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,

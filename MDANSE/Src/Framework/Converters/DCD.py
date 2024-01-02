@@ -20,7 +20,7 @@ import struct
 import numpy as np
 
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Jobs.Converter import Converter
+from MDANSE.Framework.Converters import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.IO.PDBReader import PDBReader
 from MDANSE.Mathematics.Geometry import get_basis_vectors_from_cell_parameters

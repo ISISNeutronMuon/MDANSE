@@ -14,10 +14,10 @@
 # **************************************************************************
 
 
-from MDANSE.Framework.Jobs.Discover import DiscoverConverter
+from MDANSE.Framework.Converters.Discover import Discover
 
 
-class DMol(DiscoverConverter):
+class DMol(Discover):
     """
     Converts a DMol trajectory to a HDF trajectory.
     """

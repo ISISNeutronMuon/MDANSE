@@ -27,7 +27,7 @@ import h5py
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Jobs.Converter import Converter, InteractiveConverter
+from MDANSE.Framework.Converters import Converter, InteractiveConverter
 from MDANSE.Framework.Units import measure
 from MDANSE.Mathematics.Graph import Graph
 from MDANSE.MolecularDynamics.Configuration import (

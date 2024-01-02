@@ -21,7 +21,7 @@ import numpy as np
 
 
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Jobs.Converter import Converter
+from MDANSE.Framework.Converters import Converter
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Units import measure

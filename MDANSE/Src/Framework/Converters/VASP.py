@@ -20,7 +20,7 @@ import numpy as np
 
 from MDANSE.Core.Error import Error
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
-from MDANSE.Framework.Jobs.Converter import Converter
+from MDANSE.Framework.Converters import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter

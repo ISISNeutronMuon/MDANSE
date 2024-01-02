@@ -20,7 +20,7 @@ import struct
 import numpy as np
 
 from MDANSE.Framework.Units import measure
-from MDANSE.Framework.Jobs.Converter import Converter
+from MDANSE.Framework.Converters import Converter
 from MDANSE.Framework.Jobs.MaterialsStudio import XTDFile
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 

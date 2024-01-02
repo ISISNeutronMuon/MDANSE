@@ -20,7 +20,7 @@ import numpy as np
 
 from MDANSE.Core.Error import Error
 from MDANSE.Extensions import xtc, trr
-from MDANSE.Framework.Jobs.Converter import Converter
+from MDANSE.Framework.Converters import Converter
 from MDANSE.IO.PDBReader import PDBReader
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter

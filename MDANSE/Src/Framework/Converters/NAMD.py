@@ -13,10 +13,10 @@
 #
 # **************************************************************************
 
-from MDANSE.Framework.Jobs.DCDConverter import DCDConverter
+from MDANSE.Framework.Converters.DCD import DCD
 
 
-class NAMD(DCDConverter):
+class NAMD(DCD):
     """
     Converts a NAMD trajectory to a HDF trajectory.
     """
