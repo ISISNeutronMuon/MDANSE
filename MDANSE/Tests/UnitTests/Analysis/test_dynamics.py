@@ -39,7 +39,7 @@ def test_vacf(trajectory, interp_order, normalise):
     parameters = {}
     parameters['frames'] = (0, 10, 1)
     parameters['interpolation_order'] = interp_order
-    parameters['output_files'] = (temp_name, ('hdf',))
+    parameters['output_files'] = (temp_name, ('HDFFormat',))
     parameters['running_mode'] = ('monoprocessor',)
     parameters['normalize'] = normalise
     parameters['trajectory'] = short_traj

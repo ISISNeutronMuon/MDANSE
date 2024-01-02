@@ -44,7 +44,7 @@ def test_basic_meansquare(trajectory):
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters['frames'] = (0, 10, 1)
-    parameters['output_files'] = (temp_name, ('hdf',))
+    parameters['output_files'] = (temp_name, ('HDFFormat',))
     parameters['running_mode'] = ('monoprocessor',)
     parameters['trajectory'] = short_traj
     msd = REGISTRY['job']['msd']()
@@ -57,7 +57,7 @@ def test_parallel_meansquare(trajectory):
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters['frames'] = (0, 10, 1)
-    parameters['output_files'] = (temp_name, ('hdf',))
+    parameters['output_files'] = (temp_name, ('HDFFormat',))
     parameters['running_mode'] = ('monoprocessor',)
     parameters['trajectory'] = short_traj
     msd = REGISTRY['job']['msd']()
@@ -65,7 +65,7 @@ def test_parallel_meansquare(trajectory):
     temp_name2 = tempfile.mktemp()
     parameters = {}
     parameters['frames'] = (0, 10, 1)
-    parameters['output_files'] = (temp_name2, ('hdf',))
+    parameters['output_files'] = (temp_name2, ('HDFFormat',))
     parameters['running_mode'] = ('threadpool',4)
     parameters['trajectory'] = short_traj
     msd_par = REGISTRY['job']['msd']()
@@ -81,7 +81,7 @@ def test_atom_selection(trajectory):
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters['frames'] = (0, 10, 1)
-    parameters['output_files'] = (temp_name, ('hdf',))
+    parameters['output_files'] = (temp_name, ('HDFFormat',))
     parameters['running_mode'] = ('monoprocessor',)
     parameters['trajectory'] = short_traj
     msd = REGISTRY['job']['msd']()
