@@ -24,9 +24,9 @@ class LinearQVectors(IQVectors):
     """ """
 
     settings = collections.OrderedDict()
-    settings["seed"] = ("integer", {"mini": 0, "default": 0})
+    settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["shells"] = (
-        "range",
+        "RangeConfigurator",
         {
             "valueType": float,
             "includeLast": True,
@@ -34,10 +34,10 @@ class LinearQVectors(IQVectors):
             "default": (0, 5.0, 0.5),
         },
     )
-    settings["n_vectors"] = ("integer", {"mini": 1, "default": 50})
-    settings["width"] = ("float", {"mini": 1.0e-6, "default": 1.0})
+    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 50})
+    settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
     settings["axis"] = (
-        "vector",
+        "VectorConfigurator",
         {"normalize": True, "notNull": True, "default": [1, 0, 0]},
     )
 

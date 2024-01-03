@@ -27,7 +27,7 @@ class ApproximateDispersionQVectors(LatticeQVectors):
 
     settings = collections.OrderedDict()
     settings["q_start"] = (
-        "vector",
+        "VectorConfigurator",
         {
             "label": "Q start (nm^-1)",
             "valueType": float,
@@ -36,7 +36,7 @@ class ApproximateDispersionQVectors(LatticeQVectors):
         },
     )
     settings["q_end"] = (
-        "vector",
+        "VectorConfigurator",
         {
             "label": "Q end (nm^-1)",
             "valueType": float,
@@ -45,7 +45,7 @@ class ApproximateDispersionQVectors(LatticeQVectors):
         },
     )
     settings["q_step"] = (
-        "float",
+        "FloatConfigurator",
         {"label": "Q step (nm^-1)", "mini": 1.0e-6, "default": 0.1},
     )
 

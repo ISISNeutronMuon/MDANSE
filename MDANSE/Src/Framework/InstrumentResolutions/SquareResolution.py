@@ -23,7 +23,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
-class SquareInstrumentResolution(IInstrumentResolution):
+class SquareResolution(IInstrumentResolution):
     """Defines an instrument resolution with a square response"""
 
     settings = collections.OrderedDict()

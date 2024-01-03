@@ -80,9 +80,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
 
         kernel, parameters = value
 
-        kernelCls = IInstrumentResolution.create(kernel.lower())
-
-        resolution = kernelCls()
+        resolution = IInstrumentResolution.create(kernel)
 
         resolution.setup(parameters)
 

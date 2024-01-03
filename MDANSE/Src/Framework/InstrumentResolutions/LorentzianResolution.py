@@ -23,7 +23,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
-class LorentzianInstrumentResolution(IInstrumentResolution):
+class LorentzianResolution(IInstrumentResolution):
     """
     Defines an instrument resolution with a lorentzian response
     """

@@ -23,7 +23,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
-class TriangularInstrumentResolution(IInstrumentResolution):
+class TriangularResolution(IInstrumentResolution):
     """Defines an instrument resolution with a triangular response"""
 
     settings = collections.OrderedDict()

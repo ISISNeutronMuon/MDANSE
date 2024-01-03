@@ -25,19 +25,19 @@ class CircularQVectors(IQVectors):
     """ """
 
     settings = collections.OrderedDict()
-    settings["seed"] = ("integer", {"mini": 0, "default": 0})
+    settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["shells"] = (
-        "range",
+        "RangeConfigurator",
         {"valueType": float, "includeLast": True, "mini": 0.0},
     )
-    settings["n_vectors"] = ("integer", {"mini": 1, "default": 50})
-    settings["width"] = ("float", {"mini": 0.0, "default": 1.0})
+    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 50})
+    settings["width"] = ("FloatConfigurator", {"mini": 0.0, "default": 1.0})
     settings["axis_1"] = (
-        "vector",
+        "VectorConfigurator",
         {"normalize": True, "notNull": True, "default": [1, 0, 0]},
     )
     settings["axis_2"] = (
-        "vector",
+        "VectorConfigurator",
         {"normalize": True, "notNull": True, "default": [0, 1, 0]},
     )
 

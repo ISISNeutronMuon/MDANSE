@@ -23,7 +23,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
-class PseudoVoigtInstrumentResolution(IInstrumentResolution):
+class PseudoVoigtResolution(IInstrumentResolution):
     """Defines an instrument resolution with a pseudo-voigt response"""
 
     settings = collections.OrderedDict()

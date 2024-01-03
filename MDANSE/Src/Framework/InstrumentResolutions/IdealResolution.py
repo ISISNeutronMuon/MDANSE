@@ -23,7 +23,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
-class IdealInstrumentResolution(IInstrumentResolution):
+class IdealResolution(IInstrumentResolution):
     """Defines an ideal instrument resolution with a Dirac response"""
 
     settings = collections.OrderedDict()

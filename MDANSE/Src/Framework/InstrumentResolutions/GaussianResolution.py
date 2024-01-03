@@ -23,7 +23,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
-class GaussianInstrumentResolution(IInstrumentResolution):
+class GaussianResolution(IInstrumentResolution):
     """Defines an instrument resolution with a gaussian response"""
 
     settings = collections.OrderedDict()
