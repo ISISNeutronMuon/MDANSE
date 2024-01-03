@@ -33,7 +33,10 @@ class DistanceHistogram(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["r_values"] = (
         "RangeConfigurator",
         {
@@ -60,7 +63,10 @@ class DistanceHistogram(IJob):
         "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):

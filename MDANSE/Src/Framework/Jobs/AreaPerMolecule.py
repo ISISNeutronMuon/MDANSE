@@ -54,7 +54,10 @@ class AreaPerMolecule(IJob):
             )
         },
     )
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["axis"] = (
         "MultipleChoicesConfigurator",
         {
@@ -64,8 +67,14 @@ class AreaPerMolecule(IJob):
             "default": ["a", "b"],
         },
     )
-    settings["name"] = ("StringConfigurator", {"label": "molecule name", "default": "DMPC"})
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["name"] = (
+        "StringConfigurator",
+        {"label": "molecule name", "default": "DMPC"},
+    )
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -95,7 +104,10 @@ class AreaPerMolecule(IJob):
             )
 
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["time"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["time"],
+            units="ps",
         )
 
         self._outputData.add(

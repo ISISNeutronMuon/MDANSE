@@ -62,14 +62,16 @@ class AtomsListConfigurator(IConfigurator):
         traj_configurator = self._configurable[self._dependencies["trajectory"]]
 
         if UD_STORE.has_definition(
-            trajConfig["basename"], "%d_atoms_list" % self._nAtoms, value
+            traj_configurator["basename"], "%d_atoms_list" % self._nAtoms, value
         ):
             molecule, atoms = UD_STORE.get_definition(
-                trajConfig["basename"], "%d_atoms_list" % self._nAtoms, value
+                traj_configurator["basename"], "%d_atoms_list" % self._nAtoms, value
             )
-        elif UD_STORE.has_definition(trajConfig["basename"], "AtomsListConfigurator", value):
+        elif UD_STORE.has_definition(
+            traj_configurator["basename"], "AtomsListConfigurator", value
+        ):
             tempdict = UD_STORE.get_definition(
-                trajConfig["basename"], "AtomsListConfigurator", value
+                traj_configurator["basename"], "AtomsListConfigurator", value
             )
             natoms = tempdict["natoms"]
             if not natoms == self._nAtoms:

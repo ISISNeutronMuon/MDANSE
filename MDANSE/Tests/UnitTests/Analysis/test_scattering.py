@@ -8,7 +8,9 @@ import pytest
 from icecream import ic
 import numpy as np
 
-from MDANSE import REGISTRY
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
 from ..Data.data import mol_traj as short_traj
@@ -25,13 +27,14 @@ _, just_filename = path.split(short_traj)
 
 @pytest.fixture(scope="module")
 def trajectory():
-    trajectory = REGISTRY["input_data"]["hdf_trajectory"](short_traj)
+    trajectory = HDFTrajectoryInputData(short_traj)
+    trajectory = (short_traj)
     yield trajectory
 
 @pytest.fixture(scope="module")
 def qvector_spherical_lattice(trajectory):
     out_name = "test_qvec"
-    generator = REGISTRY["q_vectors"]["spherical_lattice"](trajectory.chemical_system)
+    generator = IQVectors.create("SphericalLatticeQVectors", trajectory.chemical_system)
     q_parameters = {'seed' : 0,
                 'shells' : (5.0, 36, 10.0),
                 'n_vectors' : 10,
@@ -52,7 +55,7 @@ def qvector_spherical_lattice(trajectory):
 @pytest.fixture(scope="module")
 def qvector_circular_lattice(trajectory):
     out_name = "test_qvec"
-    generator = REGISTRY["q_vectors"]["spherical_lattice"](trajectory.chemical_system)
+    generator = IQVectors.create("SphericalLatticeQVectors", trajectory.chemical_system)
     q_parameters = {'seed' : 0,
                 'shells' : (5.0, 36, 10.0),
                 'n_vectors' : 10,
@@ -82,7 +85,7 @@ def test_dcsf(trajectory, qvector_spherical_lattice):
     parameters['running_mode'] = ('monoprocessor',)
     parameters['trajectory'] = short_traj
     parameters['weights'] = 'b_coherent'
-    dcsf = REGISTRY['job']['dcsf']()
+    dcsf = IJob.create("DynamicCoherentScatteringFactor")
     dcsf.run(parameters,status=True)
     assert path.exists(temp_name + '.h5')
     assert path.isfile(temp_name + '.h5')
@@ -100,7 +103,7 @@ def test_disf(trajectory, qvector_spherical_lattice):
     parameters['running_mode'] = ('monoprocessor',)
     parameters['trajectory'] = short_traj
     parameters['weights'] = 'b_incoherent2'
-    disf = REGISTRY['job']['disf']()
+    disf = IJob.create("DynamicIncoherentScatteringFactor")
     disf.run(parameters,status=True)
     assert path.exists(temp_name + '.h5')
     assert path.isfile(temp_name + '.h5')
@@ -117,7 +120,7 @@ def test_eisf(trajectory, qvector_spherical_lattice):
     parameters['running_mode'] = ('monoprocessor',)
     parameters['trajectory'] = short_traj
     parameters['weights'] = 'b_incoherent'
-    eisf = REGISTRY['job']['eisf']()
+    eisf = IJob.create("ElasticIncoherentScatteringFactor")
     eisf.run(parameters,status=True)
     assert path.exists(temp_name + '.h5')
     assert path.isfile(temp_name + '.h5')
@@ -135,7 +138,7 @@ def test_gdisf(trajectory):
     parameters['running_mode'] = ('monoprocessor',)
     parameters['trajectory'] = short_traj
     parameters['weights'] = 'b_incoherent2'
-    gdisf = REGISTRY['job']['gdisf']()
+    gdisf = IJob.create("GaussianDynamicIncoherentScatteringFactor")
     gdisf.run(parameters,status=True)
     assert path.exists(temp_name + '.h5')
     assert path.isfile(temp_name + '.h5')

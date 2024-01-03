@@ -40,7 +40,10 @@ class DensityOfStates(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["instrument_resolution"] = (
         "InstrumentResolutionConfigurator",
         {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
@@ -49,7 +52,10 @@ class DensityOfStates(IJob):
         "InterpolationOrderConfigurator",
         {"label": "velocities", "dependencies": {"trajectory": "trajectory"}},
     )
-    settings["projection"] = ("ProjectionConfigurator", {"label": "project coordinates"})
+    settings["projection"] = (
+        "ProjectionConfigurator",
+        {"label": "project coordinates"},
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -67,7 +73,10 @@ class DensityOfStates(IJob):
         "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -80,7 +89,10 @@ class DensityOfStates(IJob):
         instrResolution = self.configuration["instrument_resolution"]
 
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
         self._outputData.add(
             "time_window",
@@ -90,7 +102,9 @@ class DensityOfStates(IJob):
             units="au",
         )
 
-        self._outputData.add("omega", "LineOutputVariable", instrResolution["omega"], units="rad/ps")
+        self._outputData.add(
+            "omega", "LineOutputVariable", instrResolution["omega"], units="rad/ps"
+        )
         self._outputData.add(
             "omega_window",
             "LineOutputVariable",

@@ -37,9 +37,15 @@ class PositionAutoCorrelationFunction(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["normalize"] = ("BooleanConfigurator", {"default": False})
-    settings["projection"] = ("ProjectionConfigurator", {"label": "project coordinates"})
+    settings["projection"] = (
+        "ProjectionConfigurator",
+        {"label": "project coordinates"},
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -67,7 +73,10 @@ class PositionAutoCorrelationFunction(IJob):
         "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -78,7 +87,10 @@ class PositionAutoCorrelationFunction(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
 
         # Will store the mean square displacement evolution.
@@ -160,7 +172,9 @@ class PositionAutoCorrelationFunction(IJob):
         weights = self.configuration["weights"].get_weights()
         pacfTotal = weight(weights, self._outputData, nAtomsPerElement, 1, "pacf_%s")
 
-        self._outputData.add("pacf_total", "LineOutputVariable", pacfTotal, axis="time", units="nm2")
+        self._outputData.add(
+            "pacf_total", "LineOutputVariable", pacfTotal, axis="time", units="nm2"
+        )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

@@ -72,7 +72,10 @@ class McStasVirtualInstrument(IJob):
             )
         },
     )
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["sample_coh"] = (
         "HDFInputFileConfigurator",
         {
@@ -92,7 +95,10 @@ class McStasVirtualInstrument(IJob):
         },
     )
     settings["temperature"] = ("FloatConfigurator", {"default": 298.0})
-    settings["display"] = ("BooleanConfigurator", {"label": "trace the 3D view of the simulation"})
+    settings["display"] = (
+        "BooleanConfigurator",
+        {"label": "trace the 3D view of the simulation"},
+    )
     settings["instrument"] = (
         "McStasInstrumentConfigurator",
         {
@@ -117,7 +123,10 @@ class McStasVirtualInstrument(IJob):
             "exclude": ["sample_coh", "sample_inc"],
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
 
     def initialize(self):
         """
@@ -412,7 +421,11 @@ class McStasVirtualInstrument(IJob):
             self._outputData.add(xlabel, "LineOutputVariable", x, units="au")
             self._outputData.add(ylabel, "LineOutputVariable", y, units="au")
             self._outputData.add(
-                title, "SurfaceOutputVariable", I, axis="%s|%s" % (xlabel, ylabel), units="au"
+                title,
+                "SurfaceOutputVariable",
+                I,
+                axis="%s|%s" % (xlabel, ylabel),
+                units="au",
             )
 
         return FileStruct

@@ -304,7 +304,11 @@ class DCD(Converter):
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "HDFFormat", "root": "pdb_file", "label": "Output trajectory file name"},
+        {
+            "format": "HDFFormat",
+            "root": "pdb_file",
+            "label": "Output trajectory file name",
+        },
     )
 
     def initialize(self):

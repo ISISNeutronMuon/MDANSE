@@ -38,7 +38,10 @@ class CoordinationNumber(DistanceHistogram):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["r_values"] = (
         "RangeConfigurator",
         {"valueType": float, "includeLast": True, "mini": 0.0},
@@ -56,7 +59,10 @@ class CoordinationNumber(DistanceHistogram):
             }
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def finalize(self):
@@ -67,13 +73,20 @@ class CoordinationNumber(DistanceHistogram):
         npoints = len(self.configuration["r_values"]["mid_points"])
 
         self._outputData.add(
-            "r", "LineOutputVariable", self.configuration["r_values"]["mid_points"], units="nm"
+            "r",
+            "LineOutputVariable",
+            self.configuration["r_values"]["mid_points"],
+            units="nm",
         )
 
         for pair in self._elementsPairs:
             invPair = pair[::-1]
             self._outputData.add(
-                "cn_intra_%s%s" % pair, "LineOutputVariable", (npoints,), axis="r", units="au"
+                "cn_intra_%s%s" % pair,
+                "LineOutputVariable",
+                (npoints,),
+                axis="r",
+                units="au",
             )
             self._outputData.add(
                 "cn_inter_%s%s" % pair,
@@ -83,10 +96,18 @@ class CoordinationNumber(DistanceHistogram):
                 units="au",
             )
             self._outputData.add(
-                "cn_total_%s%s" % pair, "LineOutputVariable", (npoints,), axis="r", units="au"
+                "cn_total_%s%s" % pair,
+                "LineOutputVariable",
+                (npoints,),
+                axis="r",
+                units="au",
             )
             self._outputData.add(
-                "cn_intra_%s%s" % invPair, "LineOutputVariable", (npoints,), axis="r", units="au"
+                "cn_intra_%s%s" % invPair,
+                "LineOutputVariable",
+                (npoints,),
+                axis="r",
+                units="au",
             )
             self._outputData.add(
                 "cn_inter_%s%s" % invPair,
@@ -96,7 +117,11 @@ class CoordinationNumber(DistanceHistogram):
                 units="au",
             )
             self._outputData.add(
-                "cn_total_%s%s" % invPair, "LineOutputVariable", (npoints,), axis="r", units="au"
+                "cn_total_%s%s" % invPair,
+                "LineOutputVariable",
+                (npoints,),
+                axis="r",
+                units="au",
             )
 
         nFrames = self.configuration["frames"]["number"]

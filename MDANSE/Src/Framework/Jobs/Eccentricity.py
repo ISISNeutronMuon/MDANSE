@@ -80,7 +80,10 @@ class Eccentricity(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -93,7 +96,10 @@ class Eccentricity(IJob):
         "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
 
     def initialize(self):
         """
@@ -103,7 +109,10 @@ class Eccentricity(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["time"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["time"],
+            units="ps",
         )
 
         npoints = np.zeros((self.configuration["frames"]["number"]), dtype=np.float64)
@@ -118,7 +127,11 @@ class Eccentricity(IJob):
             )
         for axis in ["a", "b", "c"]:
             self._outputData.add(
-                "semiaxis_{}".format(axis), "LineOutputVariable", npoints, axis="time", units="nm"
+                "semiaxis_{}".format(axis),
+                "LineOutputVariable",
+                npoints,
+                axis="time",
+                units="nm",
             )
 
         self._outputData.add("eccentricity", "LineOutputVariable", npoints, axis="time")
@@ -127,7 +140,9 @@ class Eccentricity(IJob):
             "ratio_of_largest_to_smallest", "LineOutputVariable", npoints, axis="time"
         )
 
-        self._outputData.add("radius_of_gyration", "LineOutputVariable", npoints, axis="time")
+        self._outputData.add(
+            "radius_of_gyration", "LineOutputVariable", npoints, axis="time"
+        )
 
         self._indexes = self.configuration["atom_selection"].get_indexes()
 

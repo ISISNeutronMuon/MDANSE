@@ -65,7 +65,10 @@ class SolventAccessibleSurface(IJob):
     )
     settings["n_sphere_points"] = ("IntegerConfigurator", {"mini": 1, "default": 1000})
     settings["probe_radius"] = ("FloatConfigurator", {"mini": 0.0, "default": 0.14})
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -73,7 +76,10 @@ class SolventAccessibleSurface(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["time"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["time"],
+            units="ps",
         )
 
         # Will store the solvent accessible surface.

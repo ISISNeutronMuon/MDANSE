@@ -50,7 +50,7 @@ class AtomSelectionParser(object):
         return "".join([str(t) for t in token])
 
     def parse_keyword(self, token):
-        return f"ISelector.create({token[0]}, chemicalSystem).select"
+        return f"ISelector.create('{token[0]}', chemicalSystem).select"
 
     def parse_selection_expression(self, expression):
         expression = expression.replace("(", "( ")

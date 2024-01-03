@@ -40,7 +40,10 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["q_shells"] = (
         "RangeConfigurator",
         {"valueType": float, "includeLast": True, "mini": 0.0},
@@ -49,7 +52,10 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         "InstrumentResolutionConfigurator",
         {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
     )
-    settings["projection"] = ("ProjectionConfigurator", {"label": "project coordinates"})
+    settings["projection"] = (
+        "ProjectionConfigurator",
+        {"label": "project coordinates"},
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -80,7 +86,10 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             "dependencies": {"atom_selection": "atom_selection"},
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -101,16 +110,25 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         self._kSquare = self.configuration["q_shells"]["value"] ** 2
 
         self._outputData.add(
-            "q", "LineOutputVariable", self.configuration["q_shells"]["value"], units="1/nm"
+            "q",
+            "LineOutputVariable",
+            self.configuration["q_shells"]["value"],
+            units="1/nm",
         )
 
         self._outputData.add("q2", "LineOutputVariable", self._kSquare, units="1/nm2")
 
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
         self._outputData.add(
-            "time_window", "LineOutputVariable", self._instrResolution["time_window"], units="au"
+            "time_window",
+            "LineOutputVariable",
+            self._instrResolution["time_window"],
+            units="au",
         )
 
         self._outputData.add(

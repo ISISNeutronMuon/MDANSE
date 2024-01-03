@@ -51,7 +51,10 @@ class MoleculeFinder(IJob):
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}, "default": (0, -1, 1)},
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
 
     def initialize(self):
         """

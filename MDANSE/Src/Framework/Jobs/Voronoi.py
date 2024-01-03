@@ -66,14 +66,20 @@ class Voronoi(IJob):
         {"label": "apply periodic_boundary_condition", "default": True},
     )
     settings["pbc_border_size"] = ("FloatConfigurator", {"mini": 0.0, "default": 0.0})
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
 
     def initialize(self):
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         # Will store the time.
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["time"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["time"],
+            units="ps",
         )
 
         # Will store mean volume for voronoi regions.
@@ -212,10 +218,15 @@ class Voronoi(IJob):
         for k, v in self.neighbourhood_hist.items():
             self.neighbourhood[k] = v
 
-        self._outputData.add("mean_volume", "LineOutputVariable", self.mean_volume, units="nm3")
+        self._outputData.add(
+            "mean_volume", "LineOutputVariable", self.mean_volume, units="nm3"
+        )
 
         self._outputData.add(
-            "neighbourhood_histogram", "LineOutputVariable", self.neighbourhood, units="au"
+            "neighbourhood_histogram",
+            "LineOutputVariable",
+            self.neighbourhood,
+            units="au",
         )
 
         self._outputData.write(

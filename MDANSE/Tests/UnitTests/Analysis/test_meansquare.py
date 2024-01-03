@@ -9,7 +9,8 @@ from icecream import ic
 import numpy as np
 import h5py
 
-from MDANSE import REGISTRY
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
 from ..Data.data import short_traj
@@ -37,7 +38,8 @@ _, just_filename = path.split(short_traj)
 
 @pytest.fixture(scope="module")
 def trajectory():
-    trajectory = REGISTRY["input_data"]["hdf_trajectory"](short_traj)
+    trajectory = HDFTrajectoryInputData(short_traj)
+    trajectory = (short_traj)
     yield trajectory
 
 def test_basic_meansquare(trajectory):
@@ -47,7 +49,7 @@ def test_basic_meansquare(trajectory):
     parameters['output_files'] = (temp_name, ('HDFFormat',))
     parameters['running_mode'] = ('monoprocessor',)
     parameters['trajectory'] = short_traj
-    msd = REGISTRY['job']['msd']()
+    msd = IJob.create("MeanSquareDisplacement")
     msd.run(parameters,status=True)
     assert path.exists(temp_name + '.h5')
     assert path.isfile(temp_name + '.h5')
@@ -60,7 +62,7 @@ def test_parallel_meansquare(trajectory):
     parameters['output_files'] = (temp_name, ('HDFFormat',))
     parameters['running_mode'] = ('monoprocessor',)
     parameters['trajectory'] = short_traj
-    msd = REGISTRY['job']['msd']()
+    msd = IJob.create("MeanSquareDisplacement")
     msd.run(parameters,status=True)
     temp_name2 = tempfile.mktemp()
     parameters = {}
@@ -68,7 +70,7 @@ def test_parallel_meansquare(trajectory):
     parameters['output_files'] = (temp_name2, ('HDFFormat',))
     parameters['running_mode'] = ('threadpool',4)
     parameters['trajectory'] = short_traj
-    msd_par = REGISTRY['job']['msd']()
+    msd_par = IJob.create("MeanSquareDisplacement")
     msd_par.run(parameters,status=True)
     single = h5py.File(temp_name + '.h5')
     parallel = h5py.File(temp_name2 + '.h5')
@@ -84,7 +86,7 @@ def test_atom_selection(trajectory):
     parameters['output_files'] = (temp_name, ('HDFFormat',))
     parameters['running_mode'] = ('monoprocessor',)
     parameters['trajectory'] = short_traj
-    msd = REGISTRY['job']['msd']()
+    msd = IJob.create("MeanSquareDisplacement")
     msd.run(parameters,status=True)
     assert path.exists(temp_name + '.h5')
     assert path.isfile(temp_name + '.h5')

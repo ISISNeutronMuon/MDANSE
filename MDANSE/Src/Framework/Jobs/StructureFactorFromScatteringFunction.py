@@ -46,7 +46,10 @@ class StructureFactorFromScatteringFunction(IJob):
         "InstrumentResolutionConfigurator",
         {"dependencies": {"frames": "hdf_input_file"}},
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
 
     def initialize(self):
         """
@@ -60,7 +63,9 @@ class StructureFactorFromScatteringFunction(IJob):
 
         resolution = self.configuration["instrument_resolution"]
 
-        self._outputData.add("time", "LineOutputVariable", inputFile.variables["time"][:], units="ps")
+        self._outputData.add(
+            "time", "LineOutputVariable", inputFile.variables["time"][:], units="ps"
+        )
 
         self._outputData.add(
             "time_window",
@@ -70,12 +75,20 @@ class StructureFactorFromScatteringFunction(IJob):
             units="au",
         )
 
-        self._outputData.add("q", "LineOutputVariable", inputFile.variables["q"][:], units="1/nm")
-
-        self._outputData.add("omega", "LineOutputVariable", resolution["omega"], units="rad/ps")
+        self._outputData.add(
+            "q", "LineOutputVariable", inputFile.variables["q"][:], units="1/nm"
+        )
 
         self._outputData.add(
-            "omega_window", "LineOutputVariable", resolution["omega_window"], axis="omega", units="au"
+            "omega", "LineOutputVariable", resolution["omega"], units="rad/ps"
+        )
+
+        self._outputData.add(
+            "omega_window",
+            "LineOutputVariable",
+            resolution["omega_window"],
+            axis="omega",
+            units="au",
         )
 
         nQVectors = len(inputFile.variables["q"][:])
@@ -83,7 +96,9 @@ class StructureFactorFromScatteringFunction(IJob):
 
         for k, v in list(inputFile.variables.items()):
             if k.startswith("f(q,t)_"):
-                self._outputData.add(k, "SurfaceOutputVariable", v[:], axis="q|time", units="au")
+                self._outputData.add(
+                    k, "SurfaceOutputVariable", v[:], axis="q|time", units="au"
+                )
                 suffix = k[7:]
                 self._outputData.add(
                     "s(q,f)_%s" % suffix,

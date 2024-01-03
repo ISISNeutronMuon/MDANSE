@@ -68,8 +68,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
                 self[v] = self["instance"][v][:]
             else:
                 raise ConfiguratorError(
-                    "the variable %r was not  found in %r HDF file"
-                    % (v, self["value"])
+                    "the variable %r was not  found in %r HDF file" % (v, self["value"])
                 )
 
     @property

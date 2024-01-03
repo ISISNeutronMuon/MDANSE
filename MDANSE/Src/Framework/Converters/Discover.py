@@ -281,7 +281,11 @@ class Discover(Converter):
     )
     settings["output_file"] = (
         "single_output_file",
-        {"format": "HDFFormat", "root": "xtd_file", "label": "Output trajectory file name"},
+        {
+            "format": "HDFFormat",
+            "root": "xtd_file",
+            "label": "Output trajectory file name",
+        },
     )
 
     def initialize(self):

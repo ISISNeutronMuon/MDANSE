@@ -47,13 +47,22 @@ class MolecularTrace(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["spatial_resolution"] = ("FloatConfigurator", {"mini": 0.01, "default": 0.1})
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["spatial_resolution"] = (
+        "FloatConfigurator",
+        {"mini": 0.01, "default": 0.1},
+    )
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -61,7 +70,10 @@ class MolecularTrace(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["time"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["time"],
+            units="ps",
         )
 
         # Generate the grids that will be used to quantify the presence of atoms in an area.
@@ -105,7 +117,10 @@ class MolecularTrace(IJob):
         )
         spacing = self.configuration["spatial_resolution"]["value"]
         self._outputData.add(
-            "spacing", "LineOutputVariable", np.array([spacing, spacing, spacing]), units="nm"
+            "spacing",
+            "LineOutputVariable",
+            np.array([spacing, spacing, spacing]),
+            units="nm",
         )
         self.grid = np.zeros(self.gdim, dtype=np.int32)
 

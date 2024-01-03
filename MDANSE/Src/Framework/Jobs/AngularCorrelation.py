@@ -56,7 +56,10 @@ class AngularCorrelation(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["axis_selection"] = (
         "AtomsListConfigurator",
         {
@@ -69,7 +72,10 @@ class AngularCorrelation(IJob):
         "BooleanConfigurator",
         {"label": "output contribution per axis", "default": False},
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -80,7 +86,10 @@ class AngularCorrelation(IJob):
         self.numberOfSteps = self.configuration["axis_selection"]["n_values"]
 
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
 
         self._outputData.add(

@@ -60,12 +60,18 @@ class VelocityAutoCorrelationFunction(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["interpolation_order"] = (
         "InterpolationOrderConfigurator",
         {"label": "velocities", "dependencies": {"trajectory": "trajectory"}},
     )
-    settings["projection"] = ("ProjectionConfigurator", {"label": "project coordinates"})
+    settings["projection"] = (
+        "ProjectionConfigurator",
+        {"label": "project coordinates"},
+    )
     settings["normalize"] = ("BooleanConfigurator", {"default": False})
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
@@ -84,7 +90,10 @@ class VelocityAutoCorrelationFunction(IJob):
         "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -96,7 +105,10 @@ class VelocityAutoCorrelationFunction(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
 
         # Will store the mean square displacement evolution.

@@ -179,7 +179,7 @@ class InteractiveConverter(IJob):
             output_file.close()
 
 
-class Converter(IJob, metaclass= SubclassFactory):
+class Converter(IJob, metaclass=SubclassFactory):
     category = ("Converters",)
 
     ancestor = ["empty_data"]

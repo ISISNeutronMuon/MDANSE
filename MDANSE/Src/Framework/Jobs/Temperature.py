@@ -47,7 +47,10 @@ class Temperature(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["interpolation_order"] = (
         "InterpolationOrderConfigurator",
         {
@@ -56,7 +59,10 @@ class Temperature(IJob):
             "default": 1,
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
 
     def initialize(self):
         """
@@ -70,13 +76,24 @@ class Temperature(IJob):
         self._nFrames = self.configuration["frames"]["number"]
 
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["time"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["time"],
+            units="ps",
         )
         self._outputData.add(
-            "kinetic_energy", "LineOutputVariable", (self._nFrames,), axis="time", units="kJ_per_mole"
+            "kinetic_energy",
+            "LineOutputVariable",
+            (self._nFrames,),
+            axis="time",
+            units="kJ_per_mole",
         )
         self._outputData.add(
-            "temperature", "LineOutputVariable", (self._nFrames,), axis="time", units="K"
+            "temperature",
+            "LineOutputVariable",
+            (self._nFrames,),
+            axis="time",
+            units="K",
         )
 
         self._atoms = sorted_atoms(

@@ -51,7 +51,10 @@ class PairDistributionFunction(DistanceHistogram):
         npoints = len(self.configuration["r_values"]["mid_points"])
 
         self._outputData.add(
-            "r", "LineOutputVariable", self.configuration["r_values"]["mid_points"], units="nm"
+            "r",
+            "LineOutputVariable",
+            self.configuration["r_values"]["mid_points"],
+            units="nm",
         )
 
         for x, y in self._elementsPairs:
@@ -80,10 +83,18 @@ class PairDistributionFunction(DistanceHistogram):
 
         for i in ["pdf", "rdf", "tcf"]:
             self._outputData.add(
-                "%s_intra_total" % i, "LineOutputVariable", (npoints,), axis="r", units="au"
+                "%s_intra_total" % i,
+                "LineOutputVariable",
+                (npoints,),
+                axis="r",
+                units="au",
             )
             self._outputData.add(
-                "%s_inter_total" % i, "LineOutputVariable", (npoints,), axis="r", units="au"
+                "%s_inter_total" % i,
+                "LineOutputVariable",
+                (npoints,),
+                axis="r",
+                units="au",
             )
             self._outputData.add(
                 "%s_total" % i, "LineOutputVariable", (npoints,), axis="r", units="au"

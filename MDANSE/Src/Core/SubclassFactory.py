@@ -18,19 +18,24 @@ from typing import TypeVar
 
 Self = TypeVar("Self", bound="SubclassFactory")
 
+
 def single_search(parent_class: type, name: str):
-    if name in parent_class._registered_subclasses.keys():
-        return parent_class._registered_subclasses[name]
+    for skey in parent_class._registered_subclasses.keys():
+        if str(skey).lower() == name.lower():
+            return parent_class._registered_subclasses[skey]
     else:
         return None
-    
+
+
 def recursive_search(parent_class: type, name: str):
     return_type = single_search(parent_class, name)
     if return_type is not None:
         return return_type
     else:
         for child in parent_class._registered_subclasses.keys():
-            return_type = recursive_search(parent_class._registered_subclasses[child], name)
+            return_type = recursive_search(
+                parent_class._registered_subclasses[child], name
+            )
             if return_type is not None:
                 return return_type
 

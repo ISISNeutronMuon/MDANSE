@@ -60,8 +60,14 @@ class MeanSquareDisplacement(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
-    settings["projection"] = ("ProjectionConfigurator", {"label": "project coordinates"})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
+    settings["projection"] = (
+        "ProjectionConfigurator",
+        {"label": "project coordinates"},
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -104,7 +110,10 @@ class MeanSquareDisplacement(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
 
         # Will store the mean square displacement evolution.
@@ -187,7 +196,9 @@ class MeanSquareDisplacement(IJob):
         weights = self.configuration["weights"].get_weights()
         msdTotal = weight(weights, self._outputData, nAtomsPerElement, 1, "msd_%s")
 
-        self._outputData.add("msd_total", "LineOutputVariable", msdTotal, axis="time", units="nm2")
+        self._outputData.add(
+            "msd_total", "LineOutputVariable", msdTotal, axis="time", units="nm2"
+        )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

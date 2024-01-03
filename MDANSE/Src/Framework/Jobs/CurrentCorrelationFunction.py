@@ -60,7 +60,10 @@ class CurrentCorrelationFunction(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["instrument_resolution"] = (
         "InstrumentResolutionConfigurator",
         {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
@@ -118,7 +121,10 @@ class CurrentCorrelationFunction(IJob):
             },
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -144,14 +150,23 @@ class CurrentCorrelationFunction(IJob):
         )
 
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
         self._outputData.add(
-            "time_window", "LineOutputVariable", self._instrResolution["time_window"], units="au"
+            "time_window",
+            "LineOutputVariable",
+            self._instrResolution["time_window"],
+            units="au",
         )
 
         self._outputData.add(
-            "omega", "LineOutputVariable", self._instrResolution["omega"], units="rad/ps"
+            "omega",
+            "LineOutputVariable",
+            self._instrResolution["omega"],
+            units="rad/ps",
         )
         self._outputData.add(
             "omega_window",

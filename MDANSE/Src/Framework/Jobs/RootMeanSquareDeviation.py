@@ -42,7 +42,10 @@ class RootMeanSquareDeviation(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["reference_frame"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
@@ -71,7 +74,10 @@ class RootMeanSquareDeviation(IJob):
         "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -81,7 +87,10 @@ class RootMeanSquareDeviation(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
 
         # Will store the mean square deviation
@@ -146,7 +155,9 @@ class RootMeanSquareDeviation(IJob):
         weights = self.configuration["weights"].get_weights()
         rmsdTotal = weight(weights, self._outputData, nAtomsPerElement, 1, "rmsd_%s")
         rmsdTotal = np.sqrt(rmsdTotal)
-        self._outputData.add("rmsd_total", "LineOutputVariable", rmsdTotal, axis="time", units="nm")
+        self._outputData.add(
+            "rmsd_total", "LineOutputVariable", rmsdTotal, axis="time", units="nm"
+        )
 
         for element, number in nAtomsPerElement.items():
             self._outputData["rmsd_{}".format(element)] = np.sqrt(

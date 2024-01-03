@@ -71,7 +71,10 @@ class OrderParameter(IJob):
             )
         },
     )
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["axis_selection"] = (
         "AtomsListConfigurator",
         {
@@ -88,7 +91,10 @@ class OrderParameter(IJob):
         "BooleanConfigurator",
         {"label": "output contribution per axis", "default": False},
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -102,7 +108,10 @@ class OrderParameter(IJob):
         self.numberOfSteps = self._nAxis
 
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["time"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["time"],
+            units="ps",
         )
 
         self._outputData.add(
@@ -125,9 +134,15 @@ class OrderParameter(IJob):
         else:
             self._doRotation = True
 
-        self._outputData.add("p1", "LineOutputVariable", (self._nFrames,), axis="time", units="au")
-        self._outputData.add("p2", "LineOutputVariable", (self._nFrames,), axis="time", units="au")
-        self._outputData.add("s2", "LineOutputVariable", (self._nAxis,), axis="time", units="au")
+        self._outputData.add(
+            "p1", "LineOutputVariable", (self._nFrames,), axis="time", units="au"
+        )
+        self._outputData.add(
+            "p2", "LineOutputVariable", (self._nFrames,), axis="time", units="au"
+        )
+        self._outputData.add(
+            "s2", "LineOutputVariable", (self._nAxis,), axis="time", units="au"
+        )
 
         if self.configuration["per_axis"]["value"]:
             self._outputData.add(

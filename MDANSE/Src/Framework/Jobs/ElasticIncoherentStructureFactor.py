@@ -44,12 +44,18 @@ class ElasticIncoherentStructureFactor(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["q_vectors"] = (
         "QVectorsConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["projection"] = ("ProjectionConfigurator", {"label": "project coordinates"})
+    settings["projection"] = (
+        "ProjectionConfigurator",
+        {"label": "project coordinates"},
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -80,7 +86,10 @@ class ElasticIncoherentStructureFactor(IJob):
             "dependencies": {"atom_selection": "atom_selection"},
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -95,12 +104,19 @@ class ElasticIncoherentStructureFactor(IJob):
         self._nFrames = self.configuration["frames"]["number"]
 
         self._outputData.add(
-            "q", "LineOutputVariable", self.configuration["q_vectors"]["shells"], units="1/nm"
+            "q",
+            "LineOutputVariable",
+            self.configuration["q_vectors"]["shells"],
+            units="1/nm",
         )
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                "eisf_%s" % element, "LineOutputVariable", (self._nQShells,), axis="q", units="au"
+                "eisf_%s" % element,
+                "LineOutputVariable",
+                (self._nQShells,),
+                axis="q",
+                units="au",
             )
 
         self._outputData.add(

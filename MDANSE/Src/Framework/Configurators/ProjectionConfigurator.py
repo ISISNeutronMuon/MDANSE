@@ -43,7 +43,7 @@ class ProjectionConfigurator(IConfigurator):
         """
 
         if value is None:
-            value = ("null", None)
+            value = ("NullProjector", None)
 
         try:
             mode, axis = value
@@ -54,8 +54,6 @@ class ProjectionConfigurator(IConfigurator):
             raise ConfiguratorError(
                 "invalid type for projection mode: must be a string"
             )
-
-        mode = mode.lower()
 
         try:
             self["projector"] = IProjector.create(mode)

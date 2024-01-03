@@ -37,7 +37,10 @@ class StaticStructureFactor(DistanceHistogram):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["r_values"] = (
         "RangeConfigurator",
         {"valueType": float, "includeLast": True, "mini": 0.0},
@@ -69,7 +72,10 @@ class StaticStructureFactor(DistanceHistogram):
             },
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def finalize(self):
@@ -90,7 +96,10 @@ class StaticStructureFactor(DistanceHistogram):
         shellVolumes = shellSurfaces * self.configuration["r_values"]["step"]
 
         self._outputData.add(
-            "q", "LineOutputVariable", self.configuration["q_values"]["value"], units="1/nm"
+            "q",
+            "LineOutputVariable",
+            self.configuration["q_values"]["value"],
+            units="1/nm",
         )
 
         q = self._outputData["q"]
@@ -105,7 +114,11 @@ class StaticStructureFactor(DistanceHistogram):
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for pair in self._elementsPairs:
             self._outputData.add(
-                "ssf_intra_%s%s" % pair, "LineOutputVariable", (nq,), axis="q", units="au"
+                "ssf_intra_%s%s" % pair,
+                "LineOutputVariable",
+                (nq,),
+                axis="q",
+                units="au",
             )
             self._outputData.add(
                 "ssf_inter_%s%s" % pair,
@@ -115,7 +128,11 @@ class StaticStructureFactor(DistanceHistogram):
                 units="au",
             )
             self._outputData.add(
-                "ssf_total_%s%s" % pair, "LineOutputVariable", (nq,), axis="q", units="au"
+                "ssf_total_%s%s" % pair,
+                "LineOutputVariable",
+                (nq,),
+                axis="q",
+                units="au",
             )
 
             ni = nAtomsPerElement[pair[0]]
@@ -147,7 +164,9 @@ class StaticStructureFactor(DistanceHistogram):
                 + self._outputData["ssf_inter_%s%s" % pair][:]
             )
 
-        self._outputData.add("ssf_intra", "LineOutputVariable", (nq,), axis="q", units="au")
+        self._outputData.add(
+            "ssf_intra", "LineOutputVariable", (nq,), axis="q", units="au"
+        )
         self._outputData.add(
             "ssf_inter",
             "LineOutputVariable",
@@ -155,7 +174,9 @@ class StaticStructureFactor(DistanceHistogram):
             axis="q",
             units="au",
         )
-        self._outputData.add("ssf_total", "LineOutputVariable", (nq,), axis="q", units="au")
+        self._outputData.add(
+            "ssf_total", "LineOutputVariable", (nq,), axis="q", units="au"
+        )
 
         weights = self.configuration["weights"].get_weights()
 

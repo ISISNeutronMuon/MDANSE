@@ -36,7 +36,10 @@ class DipoleAutoCorrelationFunction(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = ("FramesConfigurator", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}, "default": "atom_index 0,1,2"},
@@ -48,7 +51,10 @@ class DipoleAutoCorrelationFunction(IJob):
             "default": {0: 0.5, 1: 1.2, 2: -0.2},
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat", "ASCIIFormat"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -60,7 +66,10 @@ class DipoleAutoCorrelationFunction(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "LineOutputVariable", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
 
         self._dipoleMoments = np.zeros(
@@ -68,7 +77,10 @@ class DipoleAutoCorrelationFunction(IJob):
         )
 
         self._outputData.add(
-            "dacf", "LineOutputVariable", (self.configuration["frames"]["number"],), axis="time"
+            "dacf",
+            "LineOutputVariable",
+            (self.configuration["frames"]["number"],),
+            axis="time",
         )
 
         if not isinstance(self.configuration["atom_charges"]["charges"], dict):
