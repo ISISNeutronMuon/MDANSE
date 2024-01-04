@@ -17,17 +17,52 @@ from typing import TypeVar
 
 
 Self = TypeVar("Self", bound="SubclassFactory")
+# The Self TypeVar is a typing hint indicating that
+# a method of a class A will be returning an object
+# of type A as well. Since we don't know for which class
+# the SubclassFactory metaclass will be used, the return
+# type has to be defined this way.
+# NOTE: the later versions of Python (3.11) define Self
+# as a type explicitly, but for now we have to define it
+# ourselves.
 
 
-def single_search(parent_class: type, name: str):
+def single_search(parent_class: type, name: str, case_sensitive: bool = False):
+    """Finds a subclass of a parent class in the
+    by searching the _registered_subclasses dictionary.
+
+    Arguments:
+        parent_class (type) -- a class with SubclassFactory metaclass
+        name (str) -- name of the child class to be found
+
+    Returns:
+        A class (type) or None
+    """
     for skey in parent_class._registered_subclasses.keys():
-        if str(skey).lower() == name.lower():
+        if case_sensitive:
+            lhand = skey
+            rhand = name
+        else:
+            lhand = str(skey).lower()
+            rhand = name.lower()
+        if lhand == rhand:
             return parent_class._registered_subclasses[skey]
     else:
         return None
 
 
 def recursive_search(parent_class: type, name: str):
+    """Recursively searches _registered_subclasses dictionaries,
+    allowing the parent class to find a subclass of a subclass as
+    well as direct subclasses.
+
+    Arguments:
+        parent_class (type) -- a class with SubclassFactory metaclass
+        name (str) -- name of the child class to be found
+
+    Returns:
+        A class (type) or None
+    """
     return_type = single_search(parent_class, name)
     if return_type is not None:
         return return_type
@@ -40,6 +75,55 @@ def recursive_search(parent_class: type, name: str):
                 return return_type
 
 
+def recursive_keys(parent_class: type) -> list:
+    """Returns a list of class names of all the subclasses
+    of a class created with SubclassFactory metaclass.
+    This includes subclasses of subclasses.
+
+    Arguments:
+        parent_class (type) -- a class with SubclassFactory metaclass
+
+    Returns:
+        A list of class names (str)
+    """
+    try:
+        results = parent_class.subclasses()
+    except:
+        return []
+    else:
+        for child in parent_class.subclasses():
+            results += recursive_keys(parent_class._registered_subclasses[child])
+        return results
+
+
+def recursive_dict(parent_class: type) -> dict:
+    """Returns a dictionary of {str: type}
+    of classes derived from the parent_class. The class name (str)
+    is the key, and the class itself is a value.
+    This way all the subclasses of a class built with SubclassFactory
+    can be found, even if they are not _directly_ derived from
+    the parent class.
+
+    Arguments:
+        parent_class (type) -- a class with SubclassFactory metaclass
+
+    Returns:
+        A dictionary {str: type} of class_name:class pairs
+    """
+    try:
+        results = {
+            ckey: parent_class._registered_subclasses[ckey]
+            for ckey in parent_class.subclasses()
+        }
+    except:
+        return {}
+    else:
+        for child in parent_class.subclasses():
+            newdict = recursive_dict(parent_class._registered_subclasses[child])
+            results = {**results, **newdict}
+        return results
+
+
 class SubclassFactory(type):
     """A metaclass which gives a class the ability to keep track of
     its subclasses, and to work as a factory.
@@ -48,7 +132,6 @@ class SubclassFactory(type):
     def __init__(cls, name, base, dct, **kwargs):
         super().__init__(name, base, dct)
         # Add the registry attribute to the each new child class.
-        # It is not needed in the terminal children though.
         cls._registered_subclasses = {}
 
         @classmethod
@@ -65,6 +148,18 @@ class SubclassFactory(type):
         cls.__init_subclass__ = __init_subclass__
 
     def create(cls, name: str, *args, **kwargs) -> Self:
+        """Finds the class called 'name' in the _registered_subclasses
+        dictionary of the parent class, and returns an instance
+        of that class with the *args, **kwargs passed to the constructor.
+
+        Arguments:
+            name (str) -- Name of the subclass to be created
+            *args -- arguments for the subclass constructor
+            **kwargs -- keyword arguments for the subclass constructor
+
+        Returns:
+            Self-type object - an instance of the requested class.
+        """
         try:
             specific_class = cls._registered_subclasses[name]
         except KeyError:
@@ -72,4 +167,28 @@ class SubclassFactory(type):
         return specific_class(*args, **kwargs)
 
     def subclasses(cls):
+        """Returns a list of class names that are derived
+        from this class.
+
+        Returns:
+            list(str) -- a list of the subclasses of this class
+        """
         return list(cls._registered_subclasses.keys())
+
+    def indirect_subclasses(cls):
+        """Returns an extended list of class names that are derived
+        from this class, including subclasses of subclasses
+
+        Returns:
+            list(str) -- a list of the subclasses of this class
+        """
+        return recursive_keys(cls)
+
+    def indirect_subclass_dictionary(cls):
+        """Returns a {name(str): class(type)} dictionary of classes derived
+        from this class, including subclasses of subclasses.
+
+        Returns:
+            dict(str:type) -- a dictionary of the subclasses of this class
+        """
+        return recursive_dict(cls)

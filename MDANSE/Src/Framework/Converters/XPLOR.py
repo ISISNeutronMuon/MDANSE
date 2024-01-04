@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/InputWidgets/WeightsWidget.py
-# @brief     Implements module/class/test WeightsWidget
+# @file      Src/Framework/Jobs/XPLOR.py
+# @brief     Implements module/class/test XPLOR
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -13,13 +13,13 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 
-from MDANSE.GUI.Widgets.SingleChoiceWidget import SingleChoiceWidget
-
-
-class WeightsWidget(SingleChoiceWidget):
-    pass
+from MDANSE.Framework.Converters.DCD import DCD
 
 
-REGISTRY["weights"] = WeightsWidget
+class XPLORConverter(DCD):
+    """
+    Converts an Xplor trajectory to a HDF trajectory.
+    """
+
+    label = "XPLOR"

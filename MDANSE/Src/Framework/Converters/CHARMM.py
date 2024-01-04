@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/InputWidgets/GroupingLevelWidget.py
-# @brief     Implements module/class/test GroupingLevelWidget
+# @file      Src/Framework/Jobs/CHARMM.py
+# @brief     Implements module/class/test CHARMM
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -13,12 +13,13 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
-from MDANSE.GUI.Widgets.SingleChoiceWidget import SingleChoiceWidget
+
+from MDANSE.Framework.Converters.DCD import DCD
 
 
-class GroupingLevelWidget(SingleChoiceWidget):
-    label = "Group coordinates by"
+class CHARMM(DCD):
+    """
+    Converts a CHARMM trajectory to a HDF trajectory.
+    """
 
-
-REGISTRY["grouping_level"] = GroupingLevelWidget
+    label = "CHARMM"
