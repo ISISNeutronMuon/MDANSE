@@ -159,7 +159,7 @@ class LAMMPS(Converter):
 
     settings = collections.OrderedDict()
     settings["config_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "label": "LAMMPS configuration file",
             "wildcard": "Config files (*.config)|*.config|All files|*",
@@ -175,7 +175,7 @@ class LAMMPS(Converter):
         },
     )
     settings["trajectory_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "label": "LAMMPS trajectory file",
             "default": os.path.join(
@@ -190,7 +190,7 @@ class LAMMPS(Converter):
         },
     )
     settings["mass_tolerance"] = (
-        "float",
+        "FloatConfigurator",
         {"label": "mass tolerance (uma)", "default": 1.0e-3, "mini": 1.0e-9},
     )
     settings["smart_mass_association"] = (
@@ -198,11 +198,11 @@ class LAMMPS(Converter):
         {"label": "smart mass association", "default": True},
     )
     settings["time_step"] = (
-        "float",
+        "FloatConfigurator",
         {"label": "time step (fs)", "default": 1.0, "mini": 1.0e-9},
     )
     settings["n_steps"] = (
-        "integer",
+        "IntegerConfigurator",
         {
             "label": "number of time steps (0 for automatic detection)",
             "default": 0,
@@ -214,7 +214,7 @@ class LAMMPS(Converter):
         {"default": False, "label": "Fold coordinates in to box"},
     )
     settings["output_file"] = (
-        "single_output_file",
+        "SingleOutputFileConfigurator",
         {
             "format": "HDFFormat",
             "root": "config_file",

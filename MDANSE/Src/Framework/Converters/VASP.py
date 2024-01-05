@@ -175,7 +175,7 @@ class VASP(Converter):
 
     settings = collections.OrderedDict()
     settings["xdatcar_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "XDATCAR files (XDATCAR*)|XDATCAR*|All files|*",
             "default": os.path.join(
@@ -185,7 +185,7 @@ class VASP(Converter):
         },
     )
     settings["time_step"] = (
-        "float",
+        "FloatConfigurator",
         {"label": "time step", "default": 1.0, "mini": 1.0e-9},
     )
     settings["fold"] = (
@@ -193,7 +193,7 @@ class VASP(Converter):
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
-        "single_output_file",
+        "SingleOutputFileConfigurator",
         {
             "format": "HDFFormat",
             "root": "xdatcar_file",

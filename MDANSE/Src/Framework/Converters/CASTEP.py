@@ -200,7 +200,7 @@ class CASTEP(Converter):
 
     settings = collections.OrderedDict()
     settings["castep_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "MD files (*.md)|*.md|All files|*",
             "default": os.path.join(
@@ -214,7 +214,7 @@ class CASTEP(Converter):
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
-        "single_output_file",
+        "SingleOutputFileConfigurator",
         {
             "format": "HDFFormat",
             "root": "castep_file",

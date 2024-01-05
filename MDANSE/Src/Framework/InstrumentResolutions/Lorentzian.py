@@ -29,8 +29,8 @@ class Lorentzian(IInstrumentResolution):
     """
 
     settings = collections.OrderedDict()
-    settings["mu"] = ("float", {"default": 0.0})
-    settings["sigma"] = ("float", {"default": 1.0})
+    settings["mu"] = ("FloatConfigurator", {"default": 0.0})
+    settings["sigma"] = ("FloatConfigurator", {"default": 1.0})
 
     def set_kernel(self, omegas, dt):
         mu = self._configuration["mu"]["value"]

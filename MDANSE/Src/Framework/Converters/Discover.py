@@ -256,7 +256,7 @@ class Discover(Converter):
 
     settings = collections.OrderedDict()
     settings["xtd_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "XTD files (*.xtd)|*.xtd|All files|*",
             "default": os.path.join(
@@ -266,7 +266,7 @@ class Discover(Converter):
         },
     )
     settings["his_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "HIS files (*.his)|*.his|All files|*",
             "default": os.path.join(
@@ -280,7 +280,7 @@ class Discover(Converter):
         {"default": True, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
-        "single_output_file",
+        "SingleOutputFileConfigurator",
         {
             "format": "HDFFormat",
             "root": "xtd_file",

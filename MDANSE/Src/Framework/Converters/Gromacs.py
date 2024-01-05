@@ -40,7 +40,7 @@ class Gromacs(Converter):
 
     settings = collections.OrderedDict()
     settings["pdb_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "PDB files (*.pdb)|*.pdb|All files|*",
             "default": os.path.join(
@@ -50,7 +50,7 @@ class Gromacs(Converter):
         },
     )
     settings["xtc_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "XTC files (*.xtc)|*.xtc|TRR files (*.trr)|*.trr|All files|*",
             "default": os.path.join(
@@ -64,7 +64,7 @@ class Gromacs(Converter):
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
-        "single_output_file",
+        "SingleOutputFileConfigurator",
         {
             "format": "HDFFormat",
             "root": "pdb_file",

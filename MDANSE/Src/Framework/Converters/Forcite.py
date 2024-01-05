@@ -278,7 +278,7 @@ class Forcite(Converter):
 
     settings = collections.OrderedDict()
     settings["xtd_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "XTD files (*.xtd)|*.xtd|All files|*",
             "default": os.path.join(
@@ -288,7 +288,7 @@ class Forcite(Converter):
         },
     )
     settings["trj_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "TRJ files (*.trj)|*.trj|All files|*",
             "default": os.path.join(
@@ -302,7 +302,7 @@ class Forcite(Converter):
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
-        "single_output_file",
+        "SingleOutputFileConfigurator",
         {
             "format": "HDFFormat",
             "root": "xtd_file",

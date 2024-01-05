@@ -360,7 +360,7 @@ class DL_POLY(Converter):
 
     settings = collections.OrderedDict()
     settings["field_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "FIELD files|FIELD*|All files|*",
             "default": os.path.join(
@@ -370,7 +370,7 @@ class DL_POLY(Converter):
         },
     )
     settings["history_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "HISTORY files|HISTORY*|All files|*",
             "default": os.path.join(
@@ -385,12 +385,12 @@ class DL_POLY(Converter):
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["version"] = (
-        "single_choice",
+        "SingleChoiceConfigurator",
         {"choices": list(_HISTORY_FORMAT.keys()), "default": "2", "label": "Version"},
     )
     # settings['output_files'] = ('output_files', {'formats':["HDFFormat"]})
     settings["output_file"] = (
-        "single_output_file",
+        "SingleOutputFileConfigurator",
         {
             "format": "HDFFormat",
             "root": "history_file",

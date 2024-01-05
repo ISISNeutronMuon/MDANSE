@@ -219,7 +219,7 @@ class CP2K(Converter):
 
     settings = collections.OrderedDict()
     settings["pos_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "XYZ files (*.xyz)|*.xyz|All files|*",
             "default": os.path.join(
@@ -235,7 +235,7 @@ class CP2K(Converter):
         },
     )
     settings["vel_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "XYZ files (*.xyz)|*.xyz|All files|*",
             "default": os.path.join(
@@ -252,7 +252,7 @@ class CP2K(Converter):
         },
     )
     settings["cell_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "Cell files (*.cell)|*.cell|All files|*",
             "default": os.path.join(
@@ -262,7 +262,7 @@ class CP2K(Converter):
         },
     )
     settings["output_file"] = (
-        "single_output_file",
+        "SingleOutputFileConfigurator",
         {
             "format": "HDFFormat",
             "root": "xdatcar_file",

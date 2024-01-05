@@ -29,7 +29,7 @@ class DFTB(Forcite):
 
     settings = collections.OrderedDict()
     settings["xtd_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "DFTB", "H2O.xtd"
@@ -38,7 +38,7 @@ class DFTB(Forcite):
         },
     )
     settings["trj_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "DFTB", "H2O.trj"
@@ -51,6 +51,6 @@ class DFTB(Forcite):
         {"default": True, "label": "Fold coordinates in to box"},
     )
     settings["output_file"] = (
-        "single_output_file",
+        "SingleOutputFileConfigurator",
         {"format": "HDFFormat", "root": "xtd_file", "label": "Output file name"},
     )

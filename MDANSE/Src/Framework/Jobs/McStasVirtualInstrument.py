@@ -79,7 +79,7 @@ class McStasVirtualInstrument(IJob):
     settings["sample_coh"] = (
         "HDFInputFileConfigurator",
         {
-            "widget": "input_file",
+            "widget": "InputFileConfigurator",
             "label": "MDANSE Coherent Structure Factor",
             "variables": ["q", "frequency", "s(q,f)_total"],
             "default": os.path.join("..", "..", "..", "Data", "NetCDF", "dcsf_prot.nc"),
@@ -88,7 +88,7 @@ class McStasVirtualInstrument(IJob):
     settings["sample_inc"] = (
         "HDFInputFileConfigurator",
         {
-            "widget": "input_file",
+            "widget": "InputFileConfigurator",
             "label": "MDANSE Incoherent Structure Factor",
             "variables": ["q", "frequency", "s(q,f)_total"],
             "default": os.path.join("..", "..", "..", "Data", "NetCDF", "disf_prot.nc"),

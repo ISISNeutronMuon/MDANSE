@@ -27,11 +27,11 @@ class PseudoVoigt(IInstrumentResolution):
     """Defines an instrument resolution with a pseudo-voigt response"""
 
     settings = collections.OrderedDict()
-    settings["eta"] = ("float", {"mini": 0.0, "maxi": 1.0, "default": 0.5})
-    settings["mu_lorentzian"] = ("float", {"default": 0.0})
-    settings["sigma_lorentzian"] = ("float", {"default": 1.0})
-    settings["mu_gaussian"] = ("float", {"default": 0.0})
-    settings["sigma_gaussian"] = ("float", {"default": 1.0})
+    settings["eta"] = ("FloatConfigurator", {"mini": 0.0, "maxi": 1.0, "default": 0.5})
+    settings["mu_lorentzian"] = ("FloatConfigurator", {"default": 0.0})
+    settings["sigma_lorentzian"] = ("FloatConfigurator", {"default": 1.0})
+    settings["mu_gaussian"] = ("FloatConfigurator", {"default": 0.0})
+    settings["sigma_gaussian"] = ("FloatConfigurator", {"default": 1.0})
 
     def set_kernel(self, omegas, dt):
         eta = self._configuration["eta"]["value"]

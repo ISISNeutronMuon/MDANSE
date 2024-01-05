@@ -278,7 +278,7 @@ class DCD(Converter):
 
     settings = collections.OrderedDict()
     settings["pdb_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "PDB files (*.pdb)|*.pdb|All files|*",
             "default": os.path.join(
@@ -288,7 +288,7 @@ class DCD(Converter):
         },
     )
     settings["dcd_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "wildcard": "DCD files (*.dcd)|*.dcd|All files|*",
             "default": os.path.join(
@@ -297,13 +297,16 @@ class DCD(Converter):
             "label": "Input DCD file",
         },
     )
-    settings["time_step"] = ("float", {"default": 1.0, "label": "Time step (ps)"})
+    settings["time_step"] = (
+        "FloatConfigurator",
+        {"default": 1.0, "label": "Time step (ps)"},
+    )
     settings["fold"] = (
         "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
-        "single_output_file",
+        "SingleOutputFileConfigurator",
         {
             "format": "HDFFormat",
             "root": "pdb_file",

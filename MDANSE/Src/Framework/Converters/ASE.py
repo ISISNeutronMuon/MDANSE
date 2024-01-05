@@ -51,7 +51,7 @@ class ASE(Converter):
 
     settings = collections.OrderedDict()
     settings["trajectory_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "label": "Any MD trajectory file",
             "default": os.path.join(
@@ -66,7 +66,7 @@ class ASE(Converter):
         },
     )
     settings["configuration_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "label": "An optional structure/configuration file",
             "default": os.path.join(
@@ -81,15 +81,15 @@ class ASE(Converter):
         },
     )
     settings["time_step"] = (
-        "float",
+        "FloatConfigurator",
         {"label": "time step (fs)", "default": 1.0, "mini": 1.0e-9},
     )
     settings["time_unit"] = (
-        "single_choice",
+        "SingleChoiceConfigurator",
         {"label": "time step unit", "choices": ["fs", "ps", "ns"], "default": "fs"},
     )
     settings["n_steps"] = (
-        "integer",
+        "IntegerConfigurator",
         {
             "label": "number of time steps (0 for automatic detection)",
             "default": 0,
@@ -97,7 +97,7 @@ class ASE(Converter):
         },
     )
     settings["output_file"] = (
-        "single_output_file",
+        "SingleOutputFileConfigurator",
         {"format": "HDFFormat", "root": "config_file"},
     )
 
@@ -328,7 +328,7 @@ class ASEInteractiveConverter(InteractiveConverter):
     output_files = collections.OrderedDict()
 
     input_files["trajectory_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "label": "Any MD trajectory file",
             "default": os.path.join(
@@ -343,7 +343,7 @@ class ASEInteractiveConverter(InteractiveConverter):
         },
     )
     input_files["configuration_file"] = (
-        "input_file",
+        "InputFileConfigurator",
         {
             "label": "An optional structure/configuration file",
             "default": os.path.join(
@@ -359,15 +359,15 @@ class ASEInteractiveConverter(InteractiveConverter):
     )
 
     settings["time_step"] = (
-        "float",
+        "FloatConfigurator",
         {"label": "time step (fs)", "default": 1.0, "mini": 1.0e-9},
     )
     settings["time_unit"] = (
-        "single_choice",
+        "SingleChoiceConfigurator",
         {"label": "time step unit", "choices": ["fs", "ps", "ns"], "default": "fs"},
     )
     settings["n_steps"] = (
-        "integer",
+        "IntegerConfigurator",
         {
             "label": "number of time steps (0 for automatic detection)",
             "default": 0,
@@ -376,7 +376,7 @@ class ASEInteractiveConverter(InteractiveConverter):
     )
 
     output_files["output_file"] = (
-        "single_output_file",
+        "SingleOutputFileConfigurator",
         {"format": "HDFFormat", "root": "config_file"},
     )
 
