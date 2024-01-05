@@ -162,7 +162,7 @@ class GeneralInput(QObject):
             ic(f"File Field Return Value: {self.current_value}")
         self.final_value.emit(self.current_value)
         if self.file_direction == "out":
-            return (self.current_value, "hdf")
+            return (self.current_value, "HDFFormat")
         return self.current_value
 
     @Slot()

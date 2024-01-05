@@ -17,14 +17,27 @@ import copy
 from icecream import ic
 from qtpy.QtCore import Slot, QObject, QThread, QMutex, Signal, QProcess
 
-from MDANSE import LOGGER, PLATFORM, REGISTRY
+from MDANSE import LOGGER, PLATFORM
 from MDANSE.__pkginfo__ import __author__, __commit__, __version__, __beta__
 from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Framework.Jobs.Converter import Converter
+from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
+    IInstrumentResolution,
+)
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.Framework.Formats.IFormat import IFormat
+from MDANSE.Framework.Handlers.IHandler import IHandler
+from MDANSE.Framework.InputData.IInputData import IInputData
+from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
+from MDANSE.Framework.Projectors.IProjector import IProjector
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
+from MDANSE.Framework.Selectors.ISelector import ISelector
+
+
 from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeModel
 from MDANSE_GUI.PyQtGUI.DataViewModel.JobHolder import JobHolder
 from MDANSE_GUI.PyQtGUI.DataViewModel.ActionsHolder import ActionsSuperModel
-from MDANSE_GUI.PyQtGUI.RegistryViewer import RegistryTree
 
 
 class BackEnd(QObject):
@@ -53,7 +66,6 @@ class BackEnd(QObject):
         # FrontEnd's self.views dictionary.
         self.createTrajectoryHolder()
         self.createJobHolder()
-        self.registry = RegistryTree()
         self.createActionsHolder()
         self._converters = []
         self._reverse_converters = {}  # internal dictionary for finding converters
@@ -69,7 +81,21 @@ class BackEnd(QObject):
 
     def createActionsHolder(self):
         self.actions_holder = ActionsSuperModel(parent=self)
-        self.actions_holder.buildModels(self.registry)
+        self.actions_holder.buildModels(
+            [
+                IJob,
+                Converter,
+                IInstrumentResolution,
+                IConfigurator,
+                IFormat,
+                IHandler,
+                IInputData,
+                IOutputVariable,
+                IProjector,
+                IQVectors,
+                ISelector,
+            ]
+        )
         # self.data_holders['actions'] = self.trajectory_holder
 
     def createJobHolder(self):
@@ -101,10 +127,10 @@ class BackEnd(QObject):
         self.lock.lock()
         self._converters = []
         self._reverse_converters = {}
-        for key, conv in self.registry._converters.items():
+        for key, conv in Converter.indirect_subclass_dictionary().items():
             ic(f"key:{key}, val:{conv}")
             self._converters.append(conv)
-            self._reverse_converters[str(conv)] = REGISTRY["job"][str(key)]
+            self._reverse_converters[str(conv)] = Converter.create(str(key))
         self.lock.unlock()
 
     def getConverters(self):
@@ -134,10 +160,10 @@ class BackEnd(QObject):
         self.lock.lock()
         self._actions = []
         self._reverse_actions = {}
-        for key, act in self.registry._jobs.items():
+        for key, act in IJob.indirect_subclass_dictionary().items():
             ic(f"key:{key}, val:{act}")
             self._actions.append(act)
-            self._reverse_actions[str(act)] = REGISTRY["job"][str(key)]
+            self._reverse_actions[str(act)] = IJob.create(str(key))
         self.lock.unlock()
 
     def getActions(self):

@@ -24,7 +24,8 @@ from qtpy.QtWidgets import QSizePolicy
 import vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
-from MDANSE import REGISTRY
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+
 from MDANSE_GUI.PyQtGUI.MolecularViewer.database import CHEMICAL_ELEMENTS
 from MDANSE_GUI.PyQtGUI.MolecularViewer.readers import hdf5wrapper
 from MDANSE_GUI.PyQtGUI.MolecularViewer.Dummy import PyConnectivity
@@ -134,7 +135,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
     @Slot(str)
     def _new_trajectory(self, fname: str):
-        data = REGISTRY["input_data"]["hdf_trajectory"](fname)
+        data = HDFTrajectoryInputData(fname)
         reader = hdf5wrapper.HDF5Wrapper(fname, data.trajectory, data.chemical_system)
         self.set_reader(reader)
 

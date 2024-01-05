@@ -17,21 +17,21 @@ from qtpy.QtWidgets import QLineEdit, QComboBox, QLabel, QTableView
 from qtpy.QtCore import Slot, Signal
 from qtpy.QtGui import QIntValidator, QStandardItemModel, QStandardItem
 
-from MDANSE import REGISTRY
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
+
 from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class VectorModel(QStandardItemModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._qvec_type = ""
+        self._generator = None
 
     @Slot(str)
     def switch_qvector_type(self, vector_type: str):
         self.clear()
-        generator = REGISTRY["q_vectors"][vector_type]
-        self._qvec_type = vector_type
-        settings = generator.settings
+        self._generator = IQVectors.create(vector_type)
+        settings = self._generator.settings
         for kv in settings.items():
             name = kv[0]  # dictionary key
             value = kv[1][1]["default"]  # tuple value 1: dictionary
@@ -49,15 +49,11 @@ class VectorModel(QStandardItemModel):
 
     def parse_vtype(self, vtype: str, value: str, vname: str):
         if vtype == "range":
-            inner_type = REGISTRY["q_vectors"][self._qvec_type].settings[vname][1][
-                "valueType"
-            ]
+            inner_type = self._generator.settings[vname][1]["valueType"]
             tempstring = value.strip("()[] ")
             return [inner_type(x) for x in tempstring.split(",")]
         elif vtype == "vector":
-            inner_type = REGISTRY["q_vectors"][self._qvec_type].settings[vname][1][
-                "valueType"
-            ]
+            inner_type = self._generator.settings[vname][1]["valueType"]
             tempstring = value.strip("()[] ")
             return [inner_type(x) for x in tempstring.split(",")]
         elif vtype == "float":
@@ -74,7 +70,7 @@ class QVectorsWidget(WidgetBase):
         super().__init__(*args, **kwargs)
         source_object = kwargs.get("source_object", None)
         self._selector = QComboBox(self._base)
-        self._selector.addItems(list(REGISTRY["q_vectors"].keys()))
+        self._selector.addItems(IQVectors.subclasses())
         self._model = VectorModel(self._base)
         self._view = QTableView(self._base)
         self._layout.addWidget(self._selector)

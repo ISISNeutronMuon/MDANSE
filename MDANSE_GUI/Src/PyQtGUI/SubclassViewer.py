@@ -21,9 +21,6 @@ of the classes that can be accessed from the
 MDANSE IJob interface. 
 """
 
-import os
-
-from MDANSE import PLATFORM
 from MDANSE.Framework.Jobs.IJob import IJob
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
@@ -49,7 +46,7 @@ from qtpy.QtCore import Qt
 to_be_omitted = dir(None)
 
 
-class RegistryTree(QStandardItemModel):
+class JobTree(QStandardItemModel):
     """RegistryTree creates a tree structure
     of QStandardItem objects, and stores information
     about the names and docstrings of different
@@ -68,152 +65,70 @@ class RegistryTree(QStandardItemModel):
         self._docstrings = {}  # dict of {number: str}
         self._values = {}  # dict of {number: str}
 
-        self._converters = {}
+        self._categories = {}
         self._jobs = {}
 
         self._by_ancestor = {}  # dict of list[int]
 
         self.nodecounter = 0  # each node is given a unique number
-        # the number is the key to the dictionary entries.
 
         self.populateTree()
-        # Some useful debugging here, for now
-        # print("Converters")
-        # print(self._converters)
-        # print("Jobs")
-        # print(self._jobs)
 
-    def populateTree(self):
+    def populateTree(self, parent_class=None):
         """This function starts the recursive process of scanning
         the registry tree. Only called once on startup.
         """
-        full_dict = IJob.indirect_subclass_dictionary()
-        for key in full_dict.keys():
-            self.parseNode(full_dict, key)
+        if parent_class is None:
+            parent_class = IJob
+        full_dict = parent_class.indirect_subclass_dictionary()
+        for class_name, class_object in full_dict.items():
+            self.createNode(class_name, class_object)
 
-    def addNode(self, thing, name="Registry", parent: int = -1):
-        """This function adds a new node to the tree data model.
+    def createNode(self, name: str, thing):
+        """Creates a new QStandardItem. It will store
+        the node number as user data. The 'thing' passed to this method
+        will be stored by the model in an internal dictionary, where
+        the node number is the key
 
         Arguments:
-            thing -- a Python class from MDANSE.Framework
-
-        Keyword Arguments:
-            name -- the text tag that will be shown in the tree view
-                    (default: {"Registry"})
-            parent -- number (key) of the parent node in the data model
-                    (default: {-1})
-
-        Returns:
-            the number of the new node
+            name -- the name of the new node
+            thing -- any Python object to be stored and attached to the node
         """
-        item = QStandardItem(name)
-        retval = int(self.nodecounter)
-        item.setData(retval, role=Qt.ItemDataRole.UserRole)
-        self._nodes[self.nodecounter] = item
-        self._docstrings[self.nodecounter] = thing.__doc__
+        new_node = QStandardItem(name)
+        new_number = self.nodecounter + 1
         self.nodecounter += 1
-        if parent < 0:
-            self.appendRow(item)
+        new_node.setData(new_number, role=Qt.ItemDataRole.UserRole)
+        self._nodes[new_number] = new_node
+        self._values[new_number] = thing
+        self._docstrings[new_number] = thing.__doc__
+        if hasattr(thing, "category"):
+            parent = self.parentsFromCategories(thing.category)
         else:
-            parent_node = self._nodes[parent]
-            parent_node.appendRow(item)
-        # here start the finer separation into categories
-        if hasattr(thing, "ancestor") and hasattr(thing, "section"):
-            try:
-                cat = thing.category
-            except AttributeError:
-                pass
-            else:
-                if len(thing.ancestor) > 0:
-                    for ancestor in thing.ancestor:
-                        if ancestor not in self._by_ancestor.keys():
-                            self._by_ancestor[ancestor] = []
-                        self._by_ancestor[ancestor].append(retval)
-                try:
-                    is_conv = cat[0] == "Converters"
-                except IndexError:
-                    pass
-                else:
-                    if is_conv:
-                        self._converters[name] = thing.__name__
-                    else:
-                        self._jobs[name] = thing.__name__
-        # end of the finer assignment
-        return retval
+            parent = self.invisibleRootItem()
+        parent.appendRow(new_node)
 
-    def addTerminalNodes(self, thing, parent: int = -1):
-        """A separate function for adding nodes to the
-        tree structure which are _attributes_ and not
-        _classes_.
+    def parentsFromCategories(self, category_tuple):
+        """Returns the parent node for a node that belongs to the
+        category specified by categore_tuple. Also makes sure that
+        the parent nodes exist (or creates them if they don't).
 
         Arguments:
-            thing -- the attribute of the parent node
-            class to be stored here.
-
-        Keyword Arguments:
-            parent -- the number of the parent node (default: {-1})
-        """
-        for attr in dir(thing):
-            if attr not in to_be_omitted:
-                item = QStandardItem(str(attr))
-                attr_object = getattr(thing, attr, None)
-                item.setData(self.nodecounter, role=Qt.ItemDataRole.UserRole)
-                # self._items.append(item)
-                self._nodes[self.nodecounter] = item
-                self._docstrings[self.nodecounter] = attr_object.__doc__
-                self._values[self.nodecounter] = str(attr_object)
-                self.nodecounter += 1
-                if parent < 0:
-                    self.appendRow(item)
-                else:
-                    parent_node = self._nodes[parent]
-                    parent_node.appendRow(item)
-
-    def parseNode(self, node, name="unknown", parent=-1):
-        """A recursive function which discovers information
-        about the Python object to be added to the data tree,
-        and decides where to add it.
-
-        Arguments:
-            node -- the Python object to be added to the data
-                   tree
-
-        Keyword Arguments:
-            name -- the name tag to be used for the new node
-                   (default: {"unknown"})
-            parent -- the number of the parent of the new node
-                   (default: {-1})
-        """
-        parent_number = self.addNode(node, name, parent)
-        if hasattr(node, "keys"):
-            try:
-                node.keys()
-            except TypeError:
-                self.addTerminalNodes(node, parent_number)
-            else:
-                for key in node.keys():
-                    child = node[key]
-                    self.parseNode(child, name=str(key), parent=parent_number)
-        else:
-            self.addTerminalNodes(node, parent_number)
-
-    def getAncestry(self, number: int):
-        """This function discovers the keys needed to be put
-        into the REGISTRY to get the class attached to the
-        specific node.
-
-        Arguments:
-            number -- number of the object in the data model.
+            category_tuple -- category names (str) in the sequence in which
+                they should be placed in the tree structure.
 
         Returns:
-            list[str] of all the parents of the given node.
+            QStandardItem - the node of the last item in 'category_tuple'
         """
-        parents = []
-        item = self._nodes[number]
-        while item is not None:
-            parents.append(item.text())
-            item = item.parent()
-        return parents[::-1]
+        parent = self.invisibleRootItem()
+        for cat_string in category_tuple:
+            if not cat_string in self._categories.keys():
+                current_node = QStandardItem(cat_string)
+                parent.appendRow(current_node)
+                parent = current_node
+                self._categories[cat_string] = current_node
+            else:
+                current_node = self._categories[cat_string]
+        return current_node
 
 
 class RegistryViewer(QDialog):
