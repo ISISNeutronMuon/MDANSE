@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/InstrumentResolutions/IdealResolution.py
-# @brief     Implements module/class/test IdealResolution
+# @file      Src/Framework/InstrumentResolutions/SquareResolution.py
+# @brief     Implements module/class/test SquareResolution
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -23,14 +23,23 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
-class IdealResolution(IInstrumentResolution):
-    """Defines an ideal instrument resolution with a Dirac response"""
+class Square(IInstrumentResolution):
+    """Defines an instrument resolution with a square response"""
 
     settings = collections.OrderedDict()
+    settings["mu"] = ("float", {"default": 0.0})
+    settings["sigma"] = ("float", {"default": 1.0})
 
     def set_kernel(self, omegas, dt):
-        nOmegas = len(omegas)
-        self._omegaWindow = np.zeros(nOmegas, dtype=np.float64)
-        self._omegaWindow[int(nOmegas / 2)] = 1.0
+        mu = self._configuration["mu"]["value"]
+        sigma = self._configuration["sigma"]["value"]
 
-        self._timeWindow = np.ones(nOmegas, dtype=np.float64)
+        self._omegaWindow = (
+            2.0
+            * np.pi
+            * np.where((np.abs(omegas - mu) - sigma) > 0, 0.0, 1.0 / (2.0 * sigma))
+        )
+
+        self._timeWindow = np.fft.fftshift(
+            np.fft.ifft(np.fft.ifftshift(self._omegaWindow)) / dt
+        )

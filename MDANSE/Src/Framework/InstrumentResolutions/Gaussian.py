@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/InstrumentResolutions/SquareResolution.py
-# @brief     Implements module/class/test SquareResolution
+# @file      Src/Framework/InstrumentResolutions/GaussianResolution.py
+# @brief     Implements module/class/test GaussianResolution
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -23,8 +23,8 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
-class SquareResolution(IInstrumentResolution):
-    """Defines an instrument resolution with a square response"""
+class Gaussian(IInstrumentResolution):
+    """Defines an instrument resolution with a gaussian response"""
 
     settings = collections.OrderedDict()
     settings["mu"] = ("float", {"default": 0.0})
@@ -34,12 +34,9 @@ class SquareResolution(IInstrumentResolution):
         mu = self._configuration["mu"]["value"]
         sigma = self._configuration["sigma"]["value"]
 
-        self._omegaWindow = (
-            2.0
-            * np.pi
-            * np.where((np.abs(omegas - mu) - sigma) > 0, 0.0, 1.0 / (2.0 * sigma))
+        self._omegaWindow = (np.sqrt(2.0 * np.pi) / sigma) * np.exp(
+            -0.5 * ((omegas - mu) / sigma) ** 2
         )
-
         self._timeWindow = np.fft.fftshift(
             np.fft.ifft(np.fft.ifftshift(self._omegaWindow)) / dt
         )

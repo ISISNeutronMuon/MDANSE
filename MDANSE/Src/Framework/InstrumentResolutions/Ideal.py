@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/InstrumentResolutions/LorentzianResolution.py
-# @brief     Implements module/class/test LorentzianResolution
+# @file      Src/Framework/InstrumentResolutions/IdealResolution.py
+# @brief     Implements module/class/test IdealResolution
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -23,20 +23,14 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
-class LorentzianResolution(IInstrumentResolution):
-    """
-    Defines an instrument resolution with a lorentzian response
-    """
+class Ideal(IInstrumentResolution):
+    """Defines an ideal instrument resolution with a Dirac response"""
 
     settings = collections.OrderedDict()
-    settings["mu"] = ("float", {"default": 0.0})
-    settings["sigma"] = ("float", {"default": 1.0})
 
     def set_kernel(self, omegas, dt):
-        mu = self._configuration["mu"]["value"]
-        sigma = self._configuration["sigma"]["value"]
+        nOmegas = len(omegas)
+        self._omegaWindow = np.zeros(nOmegas, dtype=np.float64)
+        self._omegaWindow[int(nOmegas / 2)] = 1.0
 
-        self._omegaWindow = (2.0 * sigma) / ((omegas - mu) ** 2 + sigma**2)
-        self._timeWindow = np.fft.fftshift(
-            np.fft.ifft(np.fft.ifftshift(self._omegaWindow)) / dt
-        )
+        self._timeWindow = np.ones(nOmegas, dtype=np.float64)

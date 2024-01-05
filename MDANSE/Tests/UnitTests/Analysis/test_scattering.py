@@ -78,7 +78,7 @@ def test_dcsf(trajectory, qvector_spherical_lattice):
     parameters['atom_selection'] = None
     parameters['atom_transmutation'] = None
     parameters['frames'] = (0, 10, 1)
-    parameters['instrument_resolution'] = ('IdealResolution', {})
+    parameters['instrument_resolution'] = ('Ideal', {})
     parameters['output_files'] = (temp_name, ('HDFFormat',))
     parameters['q_vectors'] = qvector_spherical_lattice
     parameters['running_mode'] = ('monoprocessor',)
@@ -96,7 +96,7 @@ def test_disf(trajectory, qvector_spherical_lattice):
     parameters['atom_selection'] = None
     parameters['atom_transmutation'] = None
     parameters['frames'] = (0, 10, 1)
-    parameters['instrument_resolution'] = ('IdealResolution', {})
+    parameters['instrument_resolution'] = ('Ideal', {})
     parameters['output_files'] = (temp_name, ('HDFFormat',))
     parameters['q_vectors'] = qvector_spherical_lattice
     parameters['running_mode'] = ('monoprocessor',)
@@ -131,7 +131,7 @@ def test_gdisf(trajectory):
     parameters['atom_selection'] = None
     parameters['atom_transmutation'] = None
     parameters['frames'] = (0, 10, 1)
-    parameters['instrument_resolution'] = ('IdealResolution', {})
+    parameters['instrument_resolution'] = ('Ideal', {})
     parameters['output_files'] = (temp_name, ('HDFFormat',))
     parameters['q_shells'] = (2.0,12.2,2.0)
     parameters['running_mode'] = ('monoprocessor',)

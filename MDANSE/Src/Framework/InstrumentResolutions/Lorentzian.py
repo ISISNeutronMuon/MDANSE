@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/InstrumentResolutions/GaussianResolution.py
-# @brief     Implements module/class/test GaussianResolution
+# @file      Src/Framework/InstrumentResolutions/LorentzianResolution.py
+# @brief     Implements module/class/test LorentzianResolution
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -23,8 +23,10 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
-class GaussianResolution(IInstrumentResolution):
-    """Defines an instrument resolution with a gaussian response"""
+class Lorentzian(IInstrumentResolution):
+    """
+    Defines an instrument resolution with a lorentzian response
+    """
 
     settings = collections.OrderedDict()
     settings["mu"] = ("float", {"default": 0.0})
@@ -34,9 +36,7 @@ class GaussianResolution(IInstrumentResolution):
         mu = self._configuration["mu"]["value"]
         sigma = self._configuration["sigma"]["value"]
 
-        self._omegaWindow = (np.sqrt(2.0 * np.pi) / sigma) * np.exp(
-            -0.5 * ((omegas - mu) / sigma) ** 2
-        )
+        self._omegaWindow = (2.0 * sigma) / ((omegas - mu) ** 2 + sigma**2)
         self._timeWindow = np.fft.fftshift(
             np.fft.ifft(np.fft.ifftshift(self._omegaWindow)) / dt
         )
