@@ -129,8 +129,8 @@ class BackEnd(QObject):
         self._reverse_converters = {}
         for key, conv in Converter.indirect_subclass_dictionary().items():
             ic(f"key:{key}, val:{conv}")
-            self._converters.append(conv)
-            self._reverse_converters[str(conv)] = Converter.create(str(key))
+            self._converters.append(key)
+            self._reverse_converters[str(key)] = Converter.create(str(key))
         self.lock.unlock()
 
     def getConverters(self):

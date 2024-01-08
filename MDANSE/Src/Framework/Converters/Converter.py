@@ -22,6 +22,8 @@ from MDANSE.Core.SubclassFactory import SubclassFactory
 
 
 class InteractiveConverter(IJob):
+    category = ("InteractiveConverter",)
+
     _converter_registry = {}
     _next_number = 1
 

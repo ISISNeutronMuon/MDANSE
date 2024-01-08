@@ -34,6 +34,7 @@ modnames = [
     "FloatWidget",
     "StringWidget",
     "FramesWidget",
+    "RangeWidget",
     "HDFTrajectoryWidget",
     "DummyWidget",
     "InterpolationOrderWidget",

@@ -379,7 +379,10 @@ class DL_POLY(Converter):
             "label": "Input HISTORY file",
         },
     )
-    settings["atom_aliases"] = ("python_object", {"default": {}})
+    settings["atom_aliases"] = (
+        "PythonObjectConfigurator",
+        {"default": {}, "label": "Atom aliases (Python dictionary)"},
+    )
     settings["fold"] = (
         "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},

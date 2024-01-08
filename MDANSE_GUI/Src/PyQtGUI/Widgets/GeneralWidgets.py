@@ -277,25 +277,25 @@ class InputFactory:
         Returns:
             [QWidget, GeneralInput] pair
         """
-        kind = kwargs.get("kind", "str")
+        kind = kwargs.get("kind", "String")
 
-        if kind == "str":
+        if kind == "StringConfigurator":
             result = InputFactory.createSingle(*args, **kwargs)
-        elif kind == "int" or kind == "integer":
+        elif kind == "PythonObjectConfigurator":
             result = InputFactory.createSingle(*args, **kwargs)
-        elif kind == "range" or kind == "intrange":
+        elif kind == "IntegerConfigurator":
+            result = InputFactory.createSingle(*args, **kwargs)
+        elif kind == "RangeConfigurator":
             result = InputFactory.createMultiple(*args, **kwargs)
-        elif kind == "arange" or kind == "floatrange":
-            result = InputFactory.createMultiple(*args, **kwargs)
-        elif kind == "float":
+        elif kind == "FloatConfigurator":
             result = InputFactory.createSingle(*args, **kwargs)
-        elif kind == "single_choice":
+        elif kind == "SingleChoiceConfigurator":
             result = InputFactory.createCombo(*args, **kwargs)
-        elif kind == "bool" or kind == "boolean":
+        elif kind == "BooleanConfigurator":
             result = InputFactory.createBool(*args, **kwargs)
-        elif kind == "input_file":
+        elif kind == "InputFileConfigurator":
             result = InputFactory.createFile(*args, direction="in", **kwargs)
-        elif kind == "single_output_file":
+        elif kind == "SingleOutputFileConfigurator":
             result = InputFactory.createFile(*args, direction="out", **kwargs)
         else:
             result = InputFactory.createBlank(*args, **kwargs)
@@ -326,7 +326,7 @@ class InputFactory:
         the users that the requested input field could not
         be constructed.
         """
-        kind = kwargs.get("kind", "str")
+        kind = kwargs.get("kind", "String")
         base, layout = InputFactory.createBase(
             label=f"<b>MISSING TYPE</b>:{kind}",
             tooltip="This is not handled by the MDANSE GUI correctly! Please report the problem to the authors.",
@@ -341,7 +341,7 @@ class InputFactory:
             direction -- if 'in', create a FileDialog for an exisitng file,
               if 'out', a FileDialog for creating a new file.
         """
-        kind = kwargs.get("kind", "str")
+        kind = kwargs.get("kind", "String")
         default_value = kwargs.get("default", "")
         tooltip_text = kwargs.get("tooltip", "Specify a path to an existing file.")
         file_association = kwargs.get("wildcard", "")
@@ -373,7 +373,7 @@ class InputFactory:
         """Creates an input field for a logical variable,
         which is currently implemented as a check box.
         """
-        kind = kwargs.get("kind", "bool")
+        kind = kwargs.get("kind", "Boolean")
         default_value = kwargs.get("default", False)
         tooltip_text = kwargs.get("tooltip", None)
         ic(kind)
@@ -406,13 +406,13 @@ class InputFactory:
         ic(kwargs)
         base, layout = InputFactory.createBase(*args, **kwargs)
         field = QLineEdit(base)
-        if kind == "int" or kind == "integer":
+        if "Integer" in kind:
             data_handler = GeneralInput(data_type=int, **kwargs)
             validator = QIntValidator(field)
-        elif kind == "float":
+        elif "Float" in kind:
             data_handler = GeneralInput(data_type=float, **kwargs)
             validator = QDoubleValidator(field)
-        elif kind == "str":
+        else:
             data_handler = GeneralInput(data_type=str, **kwargs)
             validator = None
         if validator is not None:
@@ -432,7 +432,7 @@ class InputFactory:
         For numerical values, it adds a QValidator instance
         to filter out invalid inputs.
         """
-        kind = kwargs.get("kind", "str")
+        kind = kwargs.get("kind", "String")
         default_value = kwargs.get("default", None)
         tooltip_text = kwargs.get("tooltip", None)
         minval = kwargs.get("mini", None)
@@ -447,13 +447,13 @@ class InputFactory:
         main_handler = InputGroup(base)
         for nfield in range(number_of_fields):
             field = QLineEdit(base)
-            if kind == "int" or kind == "integer":
+            if "Integer" in kind:
                 data_handler = GeneralInput(data_type=int, **kwargs)
                 validator = QIntValidator(field)
-            elif kind == "float":
+            elif "Float" in kind:
                 data_handler = GeneralInput(data_type=float, **kwargs)
                 validator = QDoubleValidator(field)
-            elif kind == "str":
+            else:
                 data_handler = GeneralInput(data_type=str, **kwargs)
                 validator = None
             if validator is not None:
@@ -470,7 +470,7 @@ class InputFactory:
     def createCombo(*args, **kwargs):
         """For the variable where one option has to be picked from
         a list of possible values, we create a ComboBox"""
-        kind = kwargs.get("kind", "str")
+        kind = kwargs.get("kind", "String")
         default_value = kwargs.get("default", False)
         tooltip_text = kwargs.get("tooltip", None)
         option_list = kwargs.get("choices", [])

@@ -128,6 +128,7 @@ class JobTree(QStandardItemModel):
                 self._categories[cat_string] = current_node
             else:
                 current_node = self._categories[cat_string]
+                parent = current_node
         return current_node
 
 

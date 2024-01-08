@@ -25,8 +25,9 @@ import vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.Chemistry import ATOMS_DATABASE as CHEMICAL_ELEMENTS
 
-from MDANSE_GUI.PyQtGUI.MolecularViewer.database import CHEMICAL_ELEMENTS
+# from MDANSE_GUI.PyQtGUI.MolecularViewer.database import CHEMICAL_ELEMENTS
 from MDANSE_GUI.PyQtGUI.MolecularViewer.readers import hdf5wrapper
 from MDANSE_GUI.PyQtGUI.MolecularViewer.Dummy import PyConnectivity
 from MDANSE_GUI.PyQtGUI.MolecularViewer.Contents import TrajectoryAtomData
@@ -544,8 +545,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._polydata.SetPoints(atoms)
 
         covalent_radii = [
-            CHEMICAL_ELEMENTS["atoms"][at]["covalent_radius"]
-            for at in self._reader.atom_types
+            CHEMICAL_ELEMENTS[at]["covalent_radius"] for at in self._reader.atom_types
         ]
         self.set_connectivity_builder(coords, covalent_radii)
         chemical_bonds = self._fixed_bonds
@@ -599,7 +599,7 @@ class MolecularViewer(QtWidgets.QWidget):
         # this returs a list of indices, mapping colours to atoms
 
         self._atom_scales = np.array(
-            [CHEMICAL_ELEMENTS["atoms"][at]["vdw_radius"] for at in self._atoms]
+            [CHEMICAL_ELEMENTS[at]["vdw_radius"] for at in self._atoms]
         ).astype(np.float32)
 
         scalars = ndarray_to_vtkarray(

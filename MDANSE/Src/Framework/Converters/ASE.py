@@ -321,6 +321,8 @@ class ASEInteractiveConverter(InteractiveConverter):
     Converts any trajectory to a HDF trajectory using the ASE io module.
     """
 
+    category = ("InteractiveConverter",)
+
     label = "ASE"
 
     input_files = collections.OrderedDict()
