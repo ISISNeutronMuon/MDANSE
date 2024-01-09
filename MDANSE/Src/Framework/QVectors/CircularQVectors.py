@@ -28,7 +28,12 @@ class CircularQVectors(IQVectors):
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["shells"] = (
         "RangeConfigurator",
-        {"valueType": float, "includeLast": True, "mini": 0.0},
+        {
+            "valueType": float,
+            "includeLast": True,
+            "mini": 0.0,
+            "default": (0.0, 5.0, 0.5),
+        },
     )
     settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 50})
     settings["width"] = ("FloatConfigurator", {"mini": 0.0, "default": 1.0})

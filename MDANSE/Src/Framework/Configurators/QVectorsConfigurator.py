@@ -42,7 +42,7 @@ class QVectorsConfigurator(IConfigurator):
     """
 
     _default = (
-        "spherical_lattice",
+        "SphericalLatticeQVectors",
         {"shells": (0.1, 5, 0.1), "width": 0.1, "n_vectors": 50, "seed": 0},
     )
 
@@ -90,7 +90,7 @@ class QVectorsConfigurator(IConfigurator):
                     raise ConfiguratorError("no Q vectors could be generated", self)
 
                 self["parameters"] = parameters
-                self["type"] = generator._type
+                # self["type"] = generator._type
                 self["is_lattice"] = generator.is_lattice
                 self["q_vectors"] = generator.configuration["q_vectors"]
             else:
