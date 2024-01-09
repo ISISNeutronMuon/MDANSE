@@ -164,6 +164,8 @@ class SubclassFactory(type):
             specific_class = cls._registered_subclasses[name]
         except KeyError:
             specific_class = recursive_search(cls, name)
+        if specific_class is None:
+            raise ValueError(f"Could not find {name} in {cls.__name__}")
         return specific_class(*args, **kwargs)
 
     def subclasses(cls):

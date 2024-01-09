@@ -48,17 +48,17 @@ class VectorModel(QStandardItemModel):
         return params
 
     def parse_vtype(self, vtype: str, value: str, vname: str):
-        if vtype == "range":
+        if vtype == "RangeConfigurator":
             inner_type = self._generator.settings[vname][1]["valueType"]
             tempstring = value.strip("()[] ")
             return [inner_type(x) for x in tempstring.split(",")]
-        elif vtype == "vector":
+        elif vtype == "VectorConfigurator":
             inner_type = self._generator.settings[vname][1]["valueType"]
             tempstring = value.strip("()[] ")
             return [inner_type(x) for x in tempstring.split(",")]
-        elif vtype == "float":
+        elif vtype == "FloatConfigurator":
             return float(value)
-        elif vtype == "integer":
+        elif vtype == "IntegerConfigurator":
             return int(value)
         else:
             return value
