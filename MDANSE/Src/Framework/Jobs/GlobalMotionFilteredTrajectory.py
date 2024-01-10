@@ -70,7 +70,10 @@ class GlobalMotionFilteredTrajectory(IJob):
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["output_file"] = ("SingleOutputFileConfigurator", {"format": "HDFFormat"})
+    settings["output_file"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat"]},
+    )
 
     def initialize(self):
         """
@@ -96,7 +99,7 @@ class GlobalMotionFilteredTrajectory(IJob):
         self._reference_atoms = AtomGroup(self._reference_atoms)
 
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_file"]["files"][0],
             self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
             self._selected_atoms.atom_list,
@@ -195,7 +198,7 @@ class GlobalMotionFilteredTrajectory(IJob):
         # The output trajectory is closed.
         self._output_trajectory.close()
 
-        outputFile = h5py.File(self.configuration["output_file"]["file"], "r+")
+        outputFile = h5py.File(self.configuration["output_file"]["files"][0], "r+")
 
         outputFile.create_dataset("rms", data=self._rms, dtype=np.float64)
 

@@ -67,8 +67,8 @@ class CenterOfMassesTrajectory(IJob):
         },
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
-        {"format": "HDFFormat", "root": "trajectory"},
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat"]},
     )
 
     def initialize(self):
@@ -85,7 +85,7 @@ class CenterOfMassesTrajectory(IJob):
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_file"]["files"][0],
             chemical_system,
             self.numberOfSteps,
         )

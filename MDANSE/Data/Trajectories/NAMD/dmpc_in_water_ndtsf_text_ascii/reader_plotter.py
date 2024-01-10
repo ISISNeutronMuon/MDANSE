@@ -1,18 +1,18 @@
-
 import numpy as np
 import matplotlib.pyplot as mpl
 
-def read_array_data(fname, axes_in_array = True, transpose = False):
+
+def read_array_data(fname, axes_in_array=True, transpose=False):
     x_axis = []
     y_axis = []
     data = []
     counter = 0
-    with open(fname, 'r') as source:
+    with open(fname, "r") as source:
         for line in source:
             toks = line.split()
             if len(toks) < 1:
                 continue
-            if '#' in toks[0]:
+            if "#" in toks[0]:
                 continue
             nums = np.array([float(x) for x in toks])
             if counter == 0:
@@ -32,8 +32,9 @@ def read_array_data(fname, axes_in_array = True, transpose = False):
         y_axis = np.array(y_axis)
     return data, x_axis, y_axis
 
-data1, xs1, ys1 = read_array_data('reference_sqft_total_fromplotter.txt')
-data2, xs2, ys2 = read_array_data('s(q,f)_total_sigma1.dat', transpose = True)
+
+data1, xs1, ys1 = read_array_data("reference_sqft_total_fromplotter.txt")
+data2, xs2, ys2 = read_array_data("s(q,f)_total_sigma1.dat", transpose=True)
 
 datadict1, datadict2 = {}, {}
 keys = []
@@ -48,15 +49,14 @@ for n, val in enumerate(ys2):
 
 keys = sorted(set(keys))
 
-fig = mpl.figure(figsize = [12.0, 8.0], dpi=150, frameon = False)
+fig = mpl.figure(figsize=[12.0, 8.0], dpi=150, frameon=False)
 
 for k in keys:
     fig.clear()
     axes = fig.add_subplot(111)
     axes2 = axes.twinx()
-    axes.plot(xs1, datadict1[k], 'k', label = 'Reference from plotter')
-    axes2.plot(xs2, datadict2[k], 'r', label = "From MDANSE ASCII output")
-    axes.set_title("At y="+ str(k))
+    axes.plot(xs1, datadict1[k], "k", label="Reference from plotter")
+    axes2.plot(xs2, datadict2[k], "r", label="From MDANSE ASCII output")
+    axes.set_title("At y=" + str(k))
     axes.legend(loc=0)
-    mpl.savefig('comparison_at_'+str(k)+'.png')
-
+    mpl.savefig("comparison_at_" + str(k) + ".png")

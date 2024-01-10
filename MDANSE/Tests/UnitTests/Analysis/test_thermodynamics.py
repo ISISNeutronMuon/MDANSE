@@ -1,4 +1,3 @@
-
 import sys
 import tempfile
 import os
@@ -25,52 +24,56 @@ _, just_filename = path.split(short_traj)
 # 2. just_filename (str) - filename of the trajectory
 # 3. trajectory (pytest.fixture) - returns an instance of HDFTrajectoryInputData
 
+
 @pytest.fixture(scope="module")
 def trajectory():
     trajectory = HDFTrajectoryInputData(short_traj)
     yield trajectory
 
-@pytest.mark.parametrize('interp_order',[1,2,3])
+
+@pytest.mark.parametrize("interp_order", [1, 2, 3])
 def test_temperature(trajectory, interp_order):
     temp_name = tempfile.mktemp()
     parameters = {}
-    parameters['frames'] = (0, 10, 1)
-    parameters['interpolation_order'] = interp_order
-    parameters['output_files'] = (temp_name, ('HDFFormat',))
-    parameters['running_mode'] = ('monoprocessor',)
-    parameters['trajectory'] = short_traj
-    temp = IJob.create('Temperature')
-    temp.run(parameters,status=True)
-    assert path.exists(temp_name + '.h5')
-    assert path.isfile(temp_name + '.h5')
-    os.remove(temp_name + '.h5')
+    parameters["frames"] = (0, 10, 1)
+    parameters["interpolation_order"] = interp_order
+    parameters["output_files"] = (temp_name, ("HDFFormat",))
+    parameters["running_mode"] = ("monoprocessor",)
+    parameters["trajectory"] = short_traj
+    temp = IJob.create("Temperature")
+    temp.run(parameters, status=True)
+    assert path.exists(temp_name + ".h5")
+    assert path.isfile(temp_name + ".h5")
+    os.remove(temp_name + ".h5")
 
-@pytest.mark.parametrize('interp_order',[1,2,3])
+
+@pytest.mark.parametrize("interp_order", [1, 2, 3])
 def test_temperature_nonzero(trajectory, interp_order):
     temp_name = tempfile.mktemp()
     parameters = {}
-    parameters['frames'] = (0, 10, 1)
-    parameters['interpolation_order'] = interp_order
-    parameters['output_files'] = (temp_name, ('HDFFormat',))
-    parameters['running_mode'] = ('monoprocessor',)
-    parameters['trajectory'] = short_traj
-    temp = IJob.create('Temperature')
-    temp.run(parameters,status=True)
-    results = h5py.File(temp_name + '.h5')
+    parameters["frames"] = (0, 10, 1)
+    parameters["interpolation_order"] = interp_order
+    parameters["output_files"] = (temp_name, ("HDFFormat",))
+    parameters["running_mode"] = ("monoprocessor",)
+    parameters["trajectory"] = short_traj
+    temp = IJob.create("Temperature")
+    temp.run(parameters, status=True)
+    results = h5py.File(temp_name + ".h5")
     print(results.keys())
-    temperature = np.array(results['/temperature'])
-    os.remove(temp_name + '.h5')
+    temperature = np.array(results["/temperature"])
+    os.remove(temp_name + ".h5")
     assert np.all(temperature > 0.0)
+
 
 def test_density(trajectory):
     temp_name = tempfile.mktemp()
     parameters = {}
-    parameters['frames'] = (0, 10, 1)
-    parameters['output_files'] = (temp_name, ('HDFFormat',))
-    parameters['running_mode'] = ('monoprocessor',)
-    parameters['trajectory'] = short_traj
-    den = IJob.create('Density')
-    den.run(parameters,status=True)
-    assert path.exists(temp_name + '.h5')
-    assert path.isfile(temp_name + '.h5')
-    os.remove(temp_name + '.h5')
+    parameters["frames"] = (0, 10, 1)
+    parameters["output_files"] = (temp_name, ("HDFFormat",))
+    parameters["running_mode"] = ("monoprocessor",)
+    parameters["trajectory"] = short_traj
+    den = IJob.create("Density")
+    den.run(parameters, status=True)
+    assert path.exists(temp_name + ".h5")
+    assert path.isfile(temp_name + ".h5")
+    os.remove(temp_name + ".h5")

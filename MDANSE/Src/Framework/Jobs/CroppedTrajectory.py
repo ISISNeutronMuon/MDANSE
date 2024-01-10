@@ -47,8 +47,8 @@ class CroppedTrajectory(IJob):
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
-        {"format": "HDFFormat", "root": "trajectory"},
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat"]},
     )
 
     def initialize(self):
@@ -72,7 +72,7 @@ class CroppedTrajectory(IJob):
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_file"]["files"][0],
             self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
             self._selectedAtoms,
