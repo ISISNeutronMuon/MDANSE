@@ -1,17 +1,14 @@
 import fnmatch
 import glob
 import os
-import subprocess
 import sys
 
 import numpy
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 from pip._internal.req import parse_requirements
 from pip._internal.network.session import PipSession
-from distutils.command.build import build
-#from distutils.core import setup, Extension
 from distutils.sysconfig import get_config_vars
 from distutils.util import convert_path
 
@@ -52,21 +49,10 @@ QHULL_INCLUDE_DIR = INCLUDE_DIR + [EXTENSIONS_PATH] + [os.path.join(QHULL_DIR,"e
 # Helper function
 #################################
 
+
 def is_package(path):
     return (os.path.isdir(path) and os.path.isfile(os.path.join(path, '__init__.py')))
 
-def find_packages(path, base=None, exclude=None):
-
-    packages = []
-
-    for root,dirs,files in os.walk(path):
-        if "__init__.py" in files:
-            if base is not None:
-                root = root.replace(path,base)
-            package = root.replace(os.sep,".")
-            packages.append(package)
-
-    return packages
 
 def find_package_data(where='.', package='', exclude=EXCLUDE, exclude_directories=EXCLUDE_DIRECTORIES, only_in_packages=True, show_ignored=False):
     
@@ -143,9 +129,7 @@ def find_data(where=".", exclude=EXCLUDE, exclude_directories=EXCLUDE_DIRECTORIE
 #################################
 
 PACKAGE_INFO = {}
-exec(open('Src/__pkginfo__.py','r').read(), {}, PACKAGE_INFO)
-
-PACKAGES = find_packages(path="Src",base="MDANSE_GUI")
+exec(open('Src/MDANSE_GUI/__pkginfo__.py','r').read(), {}, PACKAGE_INFO)
 
 #################################
 # Package data section
@@ -271,9 +255,9 @@ setup (name             = "MDANSE GUI",
        maintainer_email = PACKAGE_INFO["__maintainer_email__"],
        url              = PACKAGE_INFO["__url__"],
        license          = PACKAGE_INFO["__license__"],
-       packages         = PACKAGES,
+       packages=find_packages("Src"),
+       package_dir={"": "Src"},
        package_data     = PACKAGE_DATA,
-       package_dir      = {"MDANSE_GUI":"Src"},
        platforms        = ['Unix','Windows'],
        scripts          = SCRIPTS,
        cmdclass         = CMDCLASS,
