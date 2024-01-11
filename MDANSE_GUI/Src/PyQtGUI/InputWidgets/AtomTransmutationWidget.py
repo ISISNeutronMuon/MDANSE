@@ -39,7 +39,7 @@ class AtomTransmutationWidget(WidgetBase):
         line_base = QWidget(self._base)
         line_layout = QHBoxLayout(line_base)
         line_base.setLayout(line_layout)
-        default_value = "atom_symbol *"
+        default_value = "all"
         starter = QLabel("Transmute ", line_base)
         leftfield = QLineEdit(default_value, self._base)
         spacer = QLabel(" to ", line_base)

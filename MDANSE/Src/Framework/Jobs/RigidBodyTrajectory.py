@@ -19,7 +19,6 @@ import numpy as np
 
 import h5py
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import AtomCluster
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
@@ -46,14 +45,17 @@ class RigidBodyTrajectory(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["grouping_level"] = (
-        "grouping_level",
+        "GroupingLevelConfigurator",
         {
             "default": "atom",
             "dependencies": {
@@ -62,9 +64,9 @@ class RigidBodyTrajectory(IJob):
             },
         },
     )
-    settings["reference"] = ("integer", {"mini": 0})
-    settings["remove_translation"] = ("boolean", {"default": False})
-    settings["output_files"] = ("output_files", {"formats": ["hdf"]})
+    settings["reference"] = ("IntegerConfigurator", {"mini": 0})
+    settings["remove_translation"] = ("BooleanConfigurator", {"default": False})
+    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["HDFFormat"]})
 
     def initialize(self):
         """ """
@@ -255,6 +257,3 @@ class RigidBodyTrajectory(IJob):
             fits[comp, :] = self._fits[comp, :]
 
         outputFile.close()
-
-
-REGISTRY["rbt"] = RigidBodyTrajectory

@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Mathematics.Geometry import random_points_on_sphere
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 
@@ -26,9 +25,9 @@ class SphericalQVectors(IQVectors):
     """ """
 
     settings = collections.OrderedDict()
-    settings["seed"] = ("integer", {"mini": 0, "default": 0})
+    settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["shells"] = (
-        "range",
+        "RangeConfigurator",
         {
             "valueType": float,
             "includeLast": True,
@@ -36,8 +35,8 @@ class SphericalQVectors(IQVectors):
             "default": (0, 5.0, 0.5),
         },
     )
-    settings["n_vectors"] = ("integer", {"mini": 1, "default": 50})
-    settings["width"] = ("float", {"mini": 0.0, "default": 1.0})
+    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 50})
+    settings["width"] = ("FloatConfigurator", {"mini": 0.0, "default": 1.0})
 
     def _generate(self):
         if self._configuration["seed"]["value"] != 0:
@@ -70,6 +69,3 @@ class SphericalQVectors(IQVectors):
                     return
                 else:
                     self._status.update()
-
-
-REGISTRY["spherical"] = SphericalQVectors

@@ -17,7 +17,7 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Mathematics.Signal import correlation
 from MDANSE.Framework.Jobs.IJob import IJob
 
@@ -55,10 +55,13 @@ class AngularCorrelation(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["axis_selection"] = (
-        "atoms_list",
+        "AtomsListConfigurator",
         {
             "nAtoms": 2,
             "dependencies": {"trajectory": "trajectory"},
@@ -66,11 +69,14 @@ class AngularCorrelation(IJob):
         },
     )
     settings["per_axis"] = (
-        "boolean",
+        "BooleanConfigurator",
         {"label": "output contribution per axis", "default": False},
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -80,19 +86,22 @@ class AngularCorrelation(IJob):
         self.numberOfSteps = self.configuration["axis_selection"]["n_values"]
 
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
 
         self._outputData.add(
             "axis_index",
-            "line",
+            "LineOutputVariable",
             np.arange(self.configuration["axis_selection"]["n_values"]),
             units="au",
         )
 
         self._outputData.add(
             "ac",
-            "line",
+            "LineOutputVariable",
             (self.configuration["frames"]["number"],),
             axis="time",
             units="au",
@@ -101,7 +110,7 @@ class AngularCorrelation(IJob):
         if self.configuration["per_axis"]["value"]:
             self._outputData.add(
                 "ac_per_axis",
-                "surface",
+                "SurfaceOutputVariable",
                 (
                     self.configuration["axis_selection"]["n_values"],
                     self.configuration["frames"]["number"],
@@ -174,6 +183,3 @@ class AngularCorrelation(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["ac"] = AngularCorrelation

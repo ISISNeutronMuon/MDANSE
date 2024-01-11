@@ -17,16 +17,15 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
-from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
+from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
-class MillerIndicesLatticeQVectors(LatticeQVectors):
+class MillerIndicesQVectors(LatticeQVectors):
     """ """
 
     settings = collections.OrderedDict()
     settings["shells"] = (
-        "range",
+        "RangeConfigurator",
         {
             "valueType": float,
             "includeLast": True,
@@ -34,17 +33,17 @@ class MillerIndicesLatticeQVectors(LatticeQVectors):
             "default": (0, 5.0, 0.5),
         },
     )
-    settings["width"] = ("float", {"mini": 1.0e-6, "default": 1.0})
+    settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
     settings["h"] = (
-        "range",
+        "RangeConfigurator",
         {"includeLast": True, "default": (0, 8, 1), "valueType": int},
     )
     settings["k"] = (
-        "range",
+        "RangeConfigurator",
         {"includeLast": True, "default": (0, 8, 1), "valueType": int},
     )
     settings["l"] = (
-        "range",
+        "RangeConfigurator",
         {"includeLast": True, "default": (0, 8, 1), "valueType": int},
     )
 
@@ -108,6 +107,3 @@ class MillerIndicesLatticeQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
-
-
-REGISTRY["miller_indices_lattice"] = MillerIndicesLatticeQVectors

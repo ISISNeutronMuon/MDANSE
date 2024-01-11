@@ -62,12 +62,12 @@ class ProjectionWidget(WidgetBase):
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
         if self._mode == 0:
-            return ("null", [])
+            return ("NullProjector", [])
         vector = [float(x.text()) for x in self._vector_fields]
         if self._mode == 1:
-            return ("axial", vector)
+            return ("AxialProjector", vector)
         else:
-            return ("planar", vector)
+            return ("PlanarProjector", vector)
 
     @Slot()
     def updateValue(self):

@@ -15,7 +15,7 @@
 
 import os
 
-from MDANSE import PLATFORM, REGISTRY
+from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
@@ -53,6 +53,3 @@ class InputDirectoryConfigurator(IConfigurator):
         """
 
         return "Input directory: %r" % self["value"]
-
-
-REGISTRY["input_directory"] = InputDirectoryConfigurator

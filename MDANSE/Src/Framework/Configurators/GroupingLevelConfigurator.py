@@ -15,7 +15,7 @@
 
 import collections
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
     SingleChoiceConfigurator,
 )
@@ -174,6 +174,3 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         """
 
         return "Grouping level: %r\n" % self["value"]
-
-
-REGISTRY["grouping_level"] = GroupingLevelConfigurator

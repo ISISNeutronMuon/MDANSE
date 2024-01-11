@@ -17,7 +17,7 @@ import os
 import tempfile
 import time
 
-from MDANSE import PLATFORM, REGISTRY
+from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -82,6 +82,3 @@ class McStasOptionsConfigurator(IConfigurator):
         """
 
         return "McStas command line options: %s" % self["value"]
-
-
-REGISTRY["mcstas_options"] = McStasOptionsConfigurator

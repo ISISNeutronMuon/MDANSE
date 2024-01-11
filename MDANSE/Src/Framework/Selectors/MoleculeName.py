@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -49,6 +48,3 @@ class MoleculeName(ISelector):
                     sel.update([at for at in ce.atom_list])
 
         return sel
-
-
-REGISTRY["molecule_name"] = MoleculeName

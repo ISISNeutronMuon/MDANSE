@@ -4,7 +4,7 @@ import h5py
 
 
 def find_numeric_variables(variables, group):
-    """This method retrieves all the numeric variables stored in the NetCDF file.
+    """This method retrieves all the numeric variables stored in the HDF file.
 
     This is a recursive method.
     """

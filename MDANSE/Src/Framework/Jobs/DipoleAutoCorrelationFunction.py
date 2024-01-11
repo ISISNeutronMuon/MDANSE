@@ -17,7 +17,7 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.Mathematics.Signal import correlation
 
@@ -35,21 +35,27 @@ class DipoleAutoCorrelationFunction(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}, "default": "atom_index 0,1,2"},
     )
     settings["atom_charges"] = (
-        "partial_charges",
+        "PartialChargesConfigurator",
         {
             "dependencies": {"trajectory": "trajectory"},
             "default": {0: 0.5, 1: 1.2, 2: -0.2},
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -60,7 +66,10 @@ class DipoleAutoCorrelationFunction(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
 
         self._dipoleMoments = np.zeros(
@@ -68,7 +77,10 @@ class DipoleAutoCorrelationFunction(IJob):
         )
 
         self._outputData.add(
-            "dacf", "line", (self.configuration["frames"]["number"],), axis="time"
+            "dacf",
+            "LineOutputVariable",
+            (self.configuration["frames"]["number"],),
+            axis="time",
         )
 
         if not isinstance(self.configuration["atom_charges"]["charges"], dict):
@@ -140,6 +152,3 @@ class DipoleAutoCorrelationFunction(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["dacf"] = DipoleAutoCorrelationFunction

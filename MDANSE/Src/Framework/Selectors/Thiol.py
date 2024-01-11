@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -61,6 +60,3 @@ class Thiol(ISelector):
         )
 
         return sel
-
-
-REGISTRY["thiol"] = Thiol

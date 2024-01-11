@@ -20,8 +20,10 @@ from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, Qt, QMutex
 from qtpy.QtWidgets import QTreeView
 
-from MDANSE import LOGGER, PLATFORM, REGISTRY
-from MDANSE_GUI.PyQtGUI.RegistryViewer import RegistryTree
+from MDANSE import LOGGER, PLATFORM
+from MDANSE.Framework.Jobs.IJob import IJob
+
+from MDANSE_GUI.PyQtGUI.SubclassViewer import JobTree
 from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeItem
 
 
@@ -83,11 +85,11 @@ class ActionsSuperModel(QObject):
         try:
             current_model = self.models[ancestor]
         except KeyError:
-            current_model = ActionsHolder()
+            current_model = JobTree()
         self.viewer.setModel(current_model)
         self.currentItem = item
 
-    def buildModels(self, registry: RegistryTree):
+    def buildModels(self, parent_classes: list):
         """Creates several subtrees out of the registry tree.
         Each tree will only contain nodes that share the same
         ancestor.
@@ -96,20 +98,10 @@ class ActionsSuperModel(QObject):
             registry -- an existing RegistryTree instance
             which has been used to scan the MDANSE registry
         """
-        valid_ancestors = registry._by_ancestor.keys()
-        for anc in valid_ancestors:
-            model = ActionsHolder()
-            nodes_added = []
-            node_numbers = sorted(registry._by_ancestor[anc])
-            for nn in node_numbers:
-                if nn not in model._node_numbers:
-                    regkeys = registry.getAncestry(nn)
-                    registry_section = REGISTRY
-                    for rkey in regkeys:
-                        registry_section = registry_section[rkey]
-                    self.copyNodeIntoModel(registry_section, model)
-            # here the processing ends
-            self.models[anc] = model
+        for parent_class in parent_classes:
+            model = JobTree()
+            model.populateTree(parent_class=parent_class)
+            self.models[parent_class.__name__] = model
         ic("Build the following models:", self.models.keys())
 
     def copyNodeIntoModel(self, thing: typing.Any, model: ActionsHolder):

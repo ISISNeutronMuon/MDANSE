@@ -21,8 +21,7 @@
 #
 
 import unittest
-from Scientific.Signals.Models import AutoRegressiveModel, \
-                                      AveragedAutoRegressiveModel
+from Scientific.Signals.Models import AutoRegressiveModel, AveragedAutoRegressiveModel
 from Scientific import N
 
 
@@ -33,7 +32,7 @@ class ARModelTest(unittest.TestCase):
     """
 
     def setUp(self):
-        self.constant = N.zeros((5,), N.Float) + 1.
+        self.constant = N.zeros((5,), N.Float) + 1.0
 
     def testExponential(self):
         signal = N.exp(-N.arange(10))
@@ -41,13 +40,13 @@ class ARModelTest(unittest.TestCase):
         self.assertAlmostEqual(model.sigma, 0.248259203831, 10)
         self.assertAlmostEqual(model.coeff[0], 0.0134752822213, 10)
         self.assertAlmostEqual(N.sum(model.coeff), 0.589668004984, 10)
-        spectrum =  model.spectrum(N.array([0., 1., 10.])).values
+        spectrum = model.spectrum(N.array([0.0, 1.0, 10.0])).values
         self.assertAlmostEqual(spectrum[0], 0.183024806929, 10)
         self.assertAlmostEqual(spectrum[1], 0.0728546620522, 10)
         self.assertAlmostEqual(spectrum[2], 0.00741215804406, 10)
         poles = model.poles()
         self.assertAlmostEqual(N.sum(poles).real, 0.8508408685, 10)
-        self.assertEqual(N.sum(poles).imag, 0.)
+        self.assertEqual(N.sum(poles).imag, 0.0)
         correlation = model.correlation(3).values
         self.assertAlmostEqual(correlation[0], 0.115651764037, 10)
         self.assertAlmostEqual(correlation[2], 0.0307404966495, 10)
@@ -67,5 +66,5 @@ def suite():
     return s
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

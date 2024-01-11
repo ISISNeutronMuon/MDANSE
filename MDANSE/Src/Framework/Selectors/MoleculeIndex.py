@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -46,6 +45,3 @@ class MoleculeIndex(ISelector):
             sel.update([at for v in vals for at in ceList[v].atom_list])
 
         return sel
-
-
-REGISTRY["molecule_index"] = MoleculeIndex

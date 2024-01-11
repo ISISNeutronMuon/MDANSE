@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
@@ -35,6 +34,3 @@ class CarbonAlpha(ISelector):
                 pass
 
         return sel
-
-
-REGISTRY["carbon_alpha"] = CarbonAlpha

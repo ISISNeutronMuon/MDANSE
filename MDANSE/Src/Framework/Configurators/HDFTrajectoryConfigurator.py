@@ -15,16 +15,17 @@
 
 import os
 
-from MDANSE import PLATFORM, REGISTRY
+from MDANSE import PLATFORM
 
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
+from MDANSE.Framework.InputData.IInputData import IInputData
 
 
 class HDFTrajectoryConfigurator(InputFileConfigurator):
     """
     This configurator allow to input a HDF trajectory file.
 
-    HDF trajectory file is the format used in MDANSE to store Molecular Dynamics trajectories. It is a NetCDF file
+    HDF trajectory file is the format used in MDANSE to store Molecular Dynamics trajectories. It is an HDF5 file
     that store various data related to the molecular dynamics : atomic positions, velocities, energies, energy gradients etc...
 
     To use trajectories derived from MD packages different from HDF, it is compulsory to convert them before to a
@@ -47,7 +48,7 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
 
         InputFileConfigurator.configure(self, value)
 
-        inputTraj = REGISTRY["input_data"]["hdf_trajectory"](self["value"])
+        inputTraj = IInputData.create("HDFTrajectoryInputData", self["value"])
 
         self["hdf_trajectory"] = inputTraj
 
@@ -88,6 +89,3 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
             info.append("The trajectory does not contain atomic velocities\n")
 
         return "".join(info)
-
-
-REGISTRY["hdf_trajectory"] = HDFTrajectoryConfigurator

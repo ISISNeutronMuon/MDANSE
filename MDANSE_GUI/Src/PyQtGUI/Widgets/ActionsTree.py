@@ -76,11 +76,11 @@ class ActionsTree(QTreeView):
         text = item.text()
         ic(f"About to execute action {text}")
         #
-        number = item.data()
+        number = item.data(Qt.ItemDataRole.UserRole)
         ic(f"Node number is {number}")
         if number is None:
             return
-        action = model._nodes[number]
+        action = model._values[number]
         self.execute_action.emit(action)
 
     @Slot(DataTreeItem)

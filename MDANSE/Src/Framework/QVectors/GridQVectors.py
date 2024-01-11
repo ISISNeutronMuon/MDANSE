@@ -19,27 +19,26 @@ import operator
 
 import numpy as np
 
-from MDANSE import REGISTRY
-from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
+from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
-class GridLatticeQVectors(LatticeQVectors):
+class GridQVectors(LatticeQVectors):
     """ """
 
     settings = collections.OrderedDict()
     settings["hrange"] = (
-        "range",
+        "RangeConfigurator",
         {"valueType": int, "includeLast": True, "default": (0, 8, 1)},
     )
     settings["krange"] = (
-        "range",
+        "RangeConfigurator",
         {"valueType": int, "includeLast": True, "default": (0, 8, 1)},
     )
     settings["lrange"] = (
-        "range",
+        "RangeConfigurator",
         {"valueType": int, "includeLast": True, "default": (0, 8, 1)},
     )
-    settings["qstep"] = ("float", {"mini": 1.0e-6, "default": 0.01})
+    settings["qstep"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 0.01})
 
     def _generate(self):
         hrange = self._configuration["hrange"]["value"]
@@ -95,6 +94,3 @@ class GridLatticeQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
-
-
-REGISTRY["grid"] = GridLatticeQVectors

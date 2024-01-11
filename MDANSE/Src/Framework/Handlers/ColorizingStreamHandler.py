@@ -17,7 +17,7 @@ import ctypes
 import logging
 import os
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Handlers.IHandler import IHandler
 
 
@@ -225,6 +225,3 @@ class ColorizingStreamHandler(IHandler, logging.StreamHandler):
             parts = message.split("\n", 1)
             message = "\n".join([self.colorize(p, record) for p in parts])
         return message
-
-
-REGISTRY["terminal"] = ColorizingStreamHandler

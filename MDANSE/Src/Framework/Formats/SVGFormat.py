@@ -20,7 +20,7 @@ import tarfile
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Externals.svgfig.svgfig import _hacks, Frame, Poly
 from MDANSE.Framework.Formats.IFormat import IFormat
 
@@ -106,6 +106,3 @@ class SVGFormat(IFormat):
             tf.addfile(tarinfo=info, fileobj=tempStr)
 
         tf.close()
-
-
-REGISTRY["svg"] = SVGFormat

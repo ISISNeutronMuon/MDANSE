@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
@@ -47,17 +46,23 @@ class Temperature(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["interpolation_order"] = (
-        "interpolation_order",
+        "InterpolationOrderConfigurator",
         {
             "label": "velocities",
             "dependencies": {"trajectory": "trajectory"},
             "default": 1,
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
 
     def initialize(self):
         """
@@ -71,13 +76,24 @@ class Temperature(IJob):
         self._nFrames = self.configuration["frames"]["number"]
 
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["time"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["time"],
+            units="ps",
         )
         self._outputData.add(
-            "kinetic_energy", "line", (self._nFrames,), axis="time", units="kJ_per_mole"
+            "kinetic_energy",
+            "LineOutputVariable",
+            (self._nFrames,),
+            axis="time",
+            units="kJ_per_mole",
         )
         self._outputData.add(
-            "temperature", "line", (self._nFrames,), axis="time", units="K"
+            "temperature",
+            "LineOutputVariable",
+            (self._nFrames,),
+            axis="time",
+            units="K",
         )
 
         self._atoms = sorted_atoms(
@@ -161,6 +177,3 @@ class Temperature(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["temp"] = Temperature
