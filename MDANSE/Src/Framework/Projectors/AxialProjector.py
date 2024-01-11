@@ -17,7 +17,6 @@ import numpy as np
 
 from MDANSE.Mathematics.LinearAlgebra import Vector
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Projectors.IProjector import IProjector, ProjectorError
 
 
@@ -42,6 +41,3 @@ class AxialProjector(IProjector):
             return np.dot(value, self._projectionMatrix.T)
         except (TypeError, ValueError):
             raise ProjectorError("Invalid data to apply projection on")
-
-
-REGISTRY["axial"] = AxialProjector

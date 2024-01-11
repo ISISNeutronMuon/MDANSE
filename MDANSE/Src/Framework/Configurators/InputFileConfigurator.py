@@ -15,7 +15,7 @@
 
 import os
 
-from MDANSE import PLATFORM, REGISTRY
+from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -81,6 +81,3 @@ class InputFileConfigurator(IConfigurator):
         """
 
         return "Input file: %r" % self["value"]
-
-
-REGISTRY["input_file"] = InputFileConfigurator

@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -47,6 +46,3 @@ class Backbone(ISelector):
                     sel.update([at for at in ce.backbone])
 
         return sel
-
-
-REGISTRY["backbone"] = Backbone

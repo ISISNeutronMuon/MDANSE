@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -73,6 +73,3 @@ class BooleanConfigurator(IConfigurator):
         """
 
         return "Value: %r" % self["value"]
-
-
-REGISTRY["boolean"] = BooleanConfigurator

@@ -15,7 +15,6 @@
 
 import collections
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
@@ -38,15 +37,18 @@ class UnfoldedTrajectory(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["output_file"] = (
-        "single_output_file",
-        {"format": "hdf", "root": "trajectory"},
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat"]},
     )
 
     def initialize(self):
@@ -70,7 +72,7 @@ class UnfoldedTrajectory(IJob):
 
         # The output trajectory is opened for writing.
         self._outputTraj = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_file"]["files"][0],
             self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
             self._selectedAtoms,
@@ -124,6 +126,3 @@ class UnfoldedTrajectory(IJob):
 
         # The output trajectory is closed.
         self._outputTraj.close()
-
-
-REGISTRY["ut"] = UnfoldedTrajectory

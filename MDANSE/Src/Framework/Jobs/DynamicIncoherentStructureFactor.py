@@ -17,7 +17,7 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation, get_spectrum
@@ -40,22 +40,25 @@ class DynamicIncoherentStructureFactor(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["instrument_resolution"] = (
-        "instrument_resolution",
+        "InstrumentResolutionConfigurator",
         {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
     )
     settings["q_vectors"] = (
-        "q_vectors",
+        "QVectorsConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["grouping_level"] = (
-        "grouping_level",
+        "GroupingLevelConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -65,7 +68,7 @@ class DynamicIncoherentStructureFactor(IJob):
         },
     )
     settings["atom_transmutation"] = (
-        "atom_transmutation",
+        "AtomTransmutationConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -73,9 +76,12 @@ class DynamicIncoherentStructureFactor(IJob):
             }
         },
     )
-    settings["projection"] = ("projection", {"label": "project coordinates"})
+    settings["projection"] = (
+        "ProjectionConfigurator",
+        {"label": "project coordinates"},
+    )
     settings["weights"] = (
-        "weights",
+        "WeightsConfigurator",
         {
             "default": "b_incoherent2",
             "dependencies": {
@@ -85,8 +91,11 @@ class DynamicIncoherentStructureFactor(IJob):
             },
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -108,22 +117,34 @@ class DynamicIncoherentStructureFactor(IJob):
         self._nOmegas = self._instrResolution["n_omegas"]
 
         self._outputData.add(
-            "q", "line", self.configuration["q_vectors"]["shells"], units="1/nm"
+            "q",
+            "LineOutputVariable",
+            self.configuration["q_vectors"]["shells"],
+            units="1/nm",
         )
 
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
         self._outputData.add(
-            "time_window", "line", self._instrResolution["time_window"], units="au"
+            "time_window",
+            "LineOutputVariable",
+            self._instrResolution["time_window"],
+            units="au",
         )
 
         self._outputData.add(
-            "omega", "line", self._instrResolution["omega"], units="rad/ps"
+            "omega",
+            "LineOutputVariable",
+            self._instrResolution["omega"],
+            units="rad/ps",
         )
         self._outputData.add(
             "omega_window",
-            "line",
+            "LineOutputVariable",
             self._instrResolution["omega_window"],
             axis="omega",
             units="au",
@@ -132,14 +153,14 @@ class DynamicIncoherentStructureFactor(IJob):
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
                 "f(q,t)_%s" % element,
-                "surface",
+                "SurfaceOutputVariable",
                 (self._nQShells, self._nFrames),
                 axis="q|time",
                 units="au",
             )
             self._outputData.add(
                 "s(q,f)_%s" % element,
-                "surface",
+                "SurfaceOutputVariable",
                 (self._nQShells, self._nOmegas),
                 axis="q|omega",
                 units="nm2/ps",
@@ -147,14 +168,14 @@ class DynamicIncoherentStructureFactor(IJob):
 
         self._outputData.add(
             "f(q,t)_total",
-            "surface",
+            "SurfaceOutputVariable",
             (self._nQShells, self._nFrames),
             axis="q|time",
             units="au",
         )
         self._outputData.add(
             "s(q,f)_total",
-            "surface",
+            "SurfaceOutputVariable",
             (self._nQShells, self._nOmegas),
             axis="q|omega",
             units="nm2/ps",
@@ -252,6 +273,3 @@ class DynamicIncoherentStructureFactor(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["disf"] = DynamicIncoherentStructureFactor

@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -57,6 +57,3 @@ class TrajectoryVariableConfigurator(IConfigurator):
         """
 
         return "Selected variable: %r" % self["value"]
-
-
-REGISTRY["trajectory_variable"] = TrajectoryVariableConfigurator

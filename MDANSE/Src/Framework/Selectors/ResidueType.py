@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -53,6 +52,3 @@ class ResidueType(ISelector):
                             sel.update([at for at in r.atom_list])
 
         return sel
-
-
-REGISTRY["residue_type"] = ResidueType

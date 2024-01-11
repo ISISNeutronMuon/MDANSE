@@ -16,11 +16,12 @@
 import os
 import tempfile
 
-from MDANSE import PLATFORM, REGISTRY
+from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
 )
+from MDANSE.Framework.Formats.IFormat import IFormat
 
 
 class SingleOutputFileConfigurator(IConfigurator):
@@ -35,7 +36,7 @@ class SingleOutputFileConfigurator(IConfigurator):
     conversion, you must inherit from the MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
 
-    _default = (os.path.join(tempfile.gettempdir(), "output"), "hdf")
+    _default = (os.path.join(tempfile.gettempdir(), "output"), "HDFFormat")
 
     def __init__(self, name, format=None, **kwargs):
         """
@@ -82,7 +83,7 @@ class SingleOutputFileConfigurator(IConfigurator):
                 "the output file format %r is not a valid output format" % format, self
             )
 
-        if format not in REGISTRY["format"]:
+        if format not in IFormat.subclasses():
             raise ConfiguratorError(
                 "the output file format %r is not registered as a valid file format."
                 % format,
@@ -91,7 +92,7 @@ class SingleOutputFileConfigurator(IConfigurator):
 
         self["root"] = root
         self["format"] = format
-        self["extension"] = REGISTRY["format"][format].extension
+        self["extension"] = IFormat.create(format).extension
         temp_name = root
         if not self["extension"] in temp_name[-5:]:  # capture most extension lengths
             temp_name += self["extension"]
@@ -118,6 +119,3 @@ class SingleOutputFileConfigurator(IConfigurator):
         info = "Output file: %s" % self["file"]
 
         return info
-
-
-REGISTRY["single_output_file"] = SingleOutputFileConfigurator

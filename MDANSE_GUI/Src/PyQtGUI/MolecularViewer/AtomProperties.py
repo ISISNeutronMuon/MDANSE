@@ -140,16 +140,14 @@ class AtomProperties(QStandardItemModel):
         index_list = []
         for nat, atom in enumerate(atoms):
             row = []
-            rgb = [int(x) for x in element_database["atoms"][atom]["color"].split(";")]
+            rgb = [int(x) for x in element_database[atom]["color"].split(";")]
             index_list.append(self.add_colour(rgb))
             row.append(QStandardItem(str(nat + 1)))  # atom number
             row.append(
-                QStandardItem(str(element_database["atoms"][atom]["symbol"]))
+                QStandardItem(str(element_database[atom]["symbol"]))
             )  # chemical element name
             row.append(
-                QStandardItem(
-                    str(round(element_database["atoms"][atom]["atomic_radius"], 2))
-                )
+                QStandardItem(str(round(element_database[atom]["atomic_radius"], 2)))
             )
             row.append(
                 QStandardItem(

@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import get_spectrum
@@ -40,23 +39,29 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["q_shells"] = (
-        "range",
+        "RangeConfigurator",
         {"valueType": float, "includeLast": True, "mini": 0.0},
     )
     settings["instrument_resolution"] = (
-        "instrument_resolution",
+        "InstrumentResolutionConfigurator",
         {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
     )
-    settings["projection"] = ("projection", {"label": "project coordinates"})
+    settings["projection"] = (
+        "ProjectionConfigurator",
+        {"label": "project coordinates"},
+    )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["grouping_level"] = (
-        "grouping_level",
+        "GroupingLevelConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -66,7 +71,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         },
     )
     settings["atom_transmutation"] = (
-        "atom_transmutation",
+        "AtomTransmutationConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -75,14 +80,17 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         },
     )
     settings["weights"] = (
-        "weights",
+        "WeightsConfigurator",
         {
             "default": "b_incoherent2",
             "dependencies": {"atom_selection": "atom_selection"},
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -102,27 +110,36 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         self._kSquare = self.configuration["q_shells"]["value"] ** 2
 
         self._outputData.add(
-            "q", "line", self.configuration["q_shells"]["value"], units="1/nm"
+            "q",
+            "LineOutputVariable",
+            self.configuration["q_shells"]["value"],
+            units="1/nm",
         )
 
-        self._outputData.add("q2", "line", self._kSquare, units="1/nm2")
+        self._outputData.add("q2", "LineOutputVariable", self._kSquare, units="1/nm2")
 
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
         self._outputData.add(
-            "time_window", "line", self._instrResolution["time_window"], units="au"
+            "time_window",
+            "LineOutputVariable",
+            self._instrResolution["time_window"],
+            units="au",
         )
 
         self._outputData.add(
             "omega",
-            "line",
+            "LineOutputVariable",
             self.configuration["instrument_resolution"]["omega"],
             units="rad/ps",
         )
         self._outputData.add(
             "omega_window",
-            "line",
+            "LineOutputVariable",
             self._instrResolution["omega_window"],
             axis="omega",
             units="au",
@@ -131,14 +148,14 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
                 "f(q,t)_%s" % element,
-                "surface",
+                "SurfaceOutputVariable",
                 (self._nQShells, self._nFrames),
                 axis="q|time",
                 units="au",
             )
             self._outputData.add(
                 "s(q,f)_%s" % element,
-                "surface",
+                "SurfaceOutputVariable",
                 (self._nQShells, self._nOmegas),
                 axis="q|omega",
                 units="nm2/ps",
@@ -146,14 +163,14 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         self._outputData.add(
             "f(q,t)_total",
-            "surface",
+            "SurfaceOutputVariable",
             (self._nQShells, self._nFrames),
             axis="q|time",
             units="au",
         )
         self._outputData.add(
             "s(q,f)_total",
-            "surface",
+            "SurfaceOutputVariable",
             (self._nQShells, self._nOmegas),
             axis="q|omega",
             units="nm2/ps",
@@ -242,6 +259,3 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["gdisf"] = GaussianDynamicIncoherentStructureFactor

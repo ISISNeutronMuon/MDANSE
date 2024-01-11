@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/InputWidgets/RangeWidget.py
-# @brief     Implements module/class/test RangeWidget
+# @file      Src/PyQtGUI/InputWidgets/FramesWidget.py
+# @brief     Implements module/class/test FramesWidget
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -13,57 +13,67 @@
 #
 # **************************************************************************
 
-import wx
+from qtpy.QtWidgets import QLineEdit, QSpinBox, QLabel
+from qtpy.QtCore import Slot, Signal
+from qtpy.QtGui import QDoubleValidator, QIntValidator
 
-from MDANSE import REGISTRY
-from MDANSE.Framework.Configurable import ConfigurationError
-
-from MDANSE.GUI.Widgets.IWidget import IWidget
+from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
 
 
-class RangeWidget(IWidget):
-    def add_widgets(self):
-        sizer = wx.BoxSizer(wx.VERTICAL)
+class RangeWidget(WidgetBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, layout_type="QGridLayout", **kwargs)
+        source_object = kwargs.get("source_object", None)
+        num_type = kwargs.get("valueType", int)
+        if num_type is int:
+            step_val = 1
+        else:
+            step_val = 0.1
+        labels = [
+            QLabel("From", self._base),
+            QLabel("to", self._base),
+            QLabel("in steps of", self._base),
+        ]
+        fields = [
+            QLineEdit(str(num_type(0)), self._base),
+            QLineEdit(str(num_type(5)), self._base),
+            QLineEdit(str(num_type(step_val)), self._base),
+        ]
+        if num_type is int:
+            validators = [QIntValidator(parent_field) for parent_field in fields]
+        else:
+            validators = [QDoubleValidator(parent_field) for parent_field in fields]
+        for field_num in range(3):
+            self._layout.addWidget(labels[field_num], 0, 2 * field_num)
+            self._layout.addWidget(fields[field_num], 0, 2 * field_num + 1)
+            fields[field_num].setValidator(validators[field_num])
+            fields[field_num].textChanged.connect(self.updateValue)
+        self._fields = fields
+        self._validators = validators
+        self._num_type = num_type
+        self.default_labels()
+        self.update_labels()
 
-        gbSizer = wx.GridBagSizer(5, 5)
+    def default_labels(self):
+        """Each Widget should have a default tooltip and label,
+        which will be set in this method, unless specific
+        values are provided in the settings of the job that
+        is being configured."""
+        if self._label_text == "":
+            self._label_text = "RangeWidget"
+        if self._tooltip == "":
+            self._tooltip = "Values to be used, given as (First, Last, StepSize)"
 
-        firstLabel = wx.StaticText(self._widgetPanel, wx.ID_ANY, label="from")
-        labelLabel = wx.StaticText(self._widgetPanel, wx.ID_ANY, label="to")
-        stepLabel = wx.StaticText(self._widgetPanel, wx.ID_ANY, label="by step of")
-
-        self._first = wx.TextCtrl(self._widgetPanel, wx.ID_ANY)
-        self._last = wx.TextCtrl(self._widgetPanel, wx.ID_ANY)
-        self._step = wx.TextCtrl(self._widgetPanel, wx.ID_ANY)
-
-        first, last, step = self._configurator.default
-
-        self._first.SetValue(str(first))
-        self._last.SetValue(str(last))
-        self._step.SetValue(str(step))
-
-        gbSizer.Add(firstLabel, (0, 0), flag=wx.ALIGN_CENTER_VERTICAL)
-        gbSizer.Add(labelLabel, (0, 3), flag=wx.ALIGN_CENTER_VERTICAL)
-        gbSizer.Add(stepLabel, (0, 6), flag=wx.ALIGN_CENTER_VERTICAL)
-
-        gbSizer.Add(self._first, (0, 1), flag=wx.EXPAND)
-        gbSizer.Add(self._last, (0, 4), flag=wx.EXPAND)
-        gbSizer.Add(self._step, (0, 7), flag=wx.EXPAND)
-
-        sizer.Add(gbSizer, 1, wx.ALL | wx.EXPAND, 5)
-
-        return sizer
+    def value_from_configurator(self):
+        if self._configurator.check_dependencies():
+            minval, maxval = self._configurator._mini, self._configurator._maxi
+            print(f"Configurator min/max: {minval}, {maxval}")
+            if maxval is None:
+                return
+            for val in self._validators:
+                val.setBottom(-abs(maxval))
+                val.setTop(abs(maxval))
 
     def get_widget_value(self):
-        try:
-            val = (
-                self._configurator.valueType(self._first.GetValue()),
-                self._configurator.valueType(self._last.GetValue()),
-                self._configurator.valueType(self._step.GetValue()),
-            )
-        except ValueError:
-            raise ConfigurationError("Invalid value for %r entry" % self.name)
-        else:
-            return val
-
-
-REGISTRY["range"] = RangeWidget
+        val = [self._num_type(field.text()) for field in self._fields]
+        return val

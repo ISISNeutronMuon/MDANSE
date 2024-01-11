@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -58,6 +57,3 @@ class ChainName(ISelector):
                     continue
 
         return sel
-
-
-REGISTRY["chain_name"] = ChainName

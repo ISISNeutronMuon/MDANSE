@@ -16,11 +16,12 @@
 import os
 import tempfile
 
-from MDANSE import PLATFORM, REGISTRY
+from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
 )
+from MDANSE.Framework.Formats.IFormat import IFormat
 
 
 class OutputFilesConfigurator(IConfigurator):
@@ -31,11 +32,11 @@ class OutputFilesConfigurator(IConfigurator):
     Once configured, this configurator will provide a list of files built by joining the given output directory, the
     basename and the extensions corresponding to the input file formats.
 
-    For analysis, MDANSE currently supports only the HDF, NetCDF, SVG and ASCII formats. To define a new output file format
+    For analysis, MDANSE currently supports only the HDF, SVG and ASCII formats. To define a new output file format
     for an analysis, you must inherit from MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
 
-    _default = (os.path.join(tempfile.gettempdir(), "output"), ["hdf"])
+    _default = (os.path.join(tempfile.gettempdir(), "output"), ["HDFFormat"])
 
     def __init__(self, name, formats=None, **kwargs):
         """
@@ -83,7 +84,7 @@ class OutputFilesConfigurator(IConfigurator):
                     "the output file format %r is not a valid output format" % fmt, self
                 )
 
-            if fmt not in REGISTRY["format"]:
+            if fmt not in IFormat.subclasses():
                 raise ConfiguratorError(
                     "the output file format %r is not registered as a valid file format."
                     % fmt,
@@ -92,9 +93,7 @@ class OutputFilesConfigurator(IConfigurator):
 
         self["root"] = root
         self["formats"] = formats
-        self["files"] = [
-            "%s%s" % (root, REGISTRY["format"][f].extension) for f in formats
-        ]
+        self["files"] = ["%s%s" % (root, IFormat.create(f).extension) for f in formats]
 
         self["value"] = self["files"]
 
@@ -122,6 +121,3 @@ class OutputFilesConfigurator(IConfigurator):
             info.append("\n")
 
         return "".join(info)
-
-
-REGISTRY["output_files"] = OutputFilesConfigurator

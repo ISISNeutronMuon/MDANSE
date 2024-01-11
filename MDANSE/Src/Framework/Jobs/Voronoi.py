@@ -18,7 +18,6 @@ import math
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Extensions import mic_fast_calc, qhull
 from MDANSE.Framework.Jobs.IJob import IJob
 
@@ -57,24 +56,30 @@ class Voronoi(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "frames",
+        "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}, "default": (0, 5, 1)},
     )
     settings["pbc"] = (
-        "boolean",
+        "BooleanConfigurator",
         {"label": "apply periodic_boundary_condition", "default": True},
     )
-    settings["pbc_border_size"] = ("float", {"mini": 0.0, "default": 0.0})
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
+    settings["pbc_border_size"] = ("FloatConfigurator", {"mini": 0.0, "default": 0.0})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
 
     def initialize(self):
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         # Will store the time.
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["time"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["time"],
+            units="ps",
         )
 
         # Will store mean volume for voronoi regions.
@@ -213,10 +218,15 @@ class Voronoi(IJob):
         for k, v in self.neighbourhood_hist.items():
             self.neighbourhood[k] = v
 
-        self._outputData.add("mean_volume", "line", self.mean_volume, units="nm3")
+        self._outputData.add(
+            "mean_volume", "LineOutputVariable", self.mean_volume, units="nm3"
+        )
 
         self._outputData.add(
-            "neighbourhood_histogram", "line", self.neighbourhood, units="au"
+            "neighbourhood_histogram",
+            "LineOutputVariable",
+            self.neighbourhood,
+            units="au",
         )
 
         self._outputData.write(
@@ -226,6 +236,3 @@ class Voronoi(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["vo"] = Voronoi

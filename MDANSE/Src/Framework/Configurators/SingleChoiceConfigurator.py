@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -76,6 +76,3 @@ class SingleChoiceConfigurator(IConfigurator):
         """
 
         return "Selected item: %r" % self["value"]
-
-
-REGISTRY["single_choice"] = SingleChoiceConfigurator

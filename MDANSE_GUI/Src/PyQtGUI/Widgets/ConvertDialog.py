@@ -84,7 +84,7 @@ class ConverterDialog(QDialog):
                 ]
             )
         else:
-            converter_instance = converter()
+            converter_instance = converter
             converter_instance.build_configuration()
             settings = converter_instance.settings
             self.converter_instance = converter_instance

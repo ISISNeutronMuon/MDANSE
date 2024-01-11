@@ -15,14 +15,14 @@
 
 from MDANSE.Core.Error import Error
 
+from MDANSE.Core.SubclassFactory import SubclassFactory
+
 
 class ProjectorError(Error):
     pass
 
 
-class IProjector(object):
-    _registry = "projector"
-
+class IProjector(metaclass=SubclassFactory):
     def __init__(self):
         self._axis = None
 

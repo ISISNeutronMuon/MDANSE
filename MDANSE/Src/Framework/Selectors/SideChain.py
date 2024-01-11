@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import PeptideChain, Protein
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -40,6 +39,3 @@ class SideChain(ISelector):
                     sel.update(ce.sidechains)
 
         return sel
-
-
-REGISTRY["sidechain"] = SideChain

@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import NucleotideChain, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -47,6 +46,3 @@ class NucleotideSugar(ISelector):
                     sel.update([at for at in ce.sugars])
 
         return sel
-
-
-REGISTRY["nucleotide_sugar"] = NucleotideSugar

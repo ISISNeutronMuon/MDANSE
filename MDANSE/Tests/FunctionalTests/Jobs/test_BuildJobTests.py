@@ -24,16 +24,17 @@ from BuildJobTests import JobFileGenerator
 
 class JobForTest:
     """A test double used as a substitute for an actual MDANSE job class."""
+
     settings = {}
     configuration = {"output_files": {"files": ["./File.nc"]}}
-    _type = 'Test'
-    
+    _type = "Test"
+
     def set_multi_processor(self):
-        self.settings = {'running_mode': True}
-    
+        self.settings = {"running_mode": True}
+
     def set_mono_processor(self):
         self.settings = {}
-        
+
     def get_default_parameters(self):
         return {}
 
@@ -58,5 +59,5 @@ def suite():
     return s
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

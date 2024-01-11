@@ -20,7 +20,6 @@ import numpy as np
 
 import h5py
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import AtomGroup
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
@@ -58,17 +57,23 @@ class GlobalMotionFilteredTrajectory(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["reference_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["output_file"] = ("single_output_file", {"format": "hdf"})
+    settings["output_file"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat"]},
+    )
 
     def initialize(self):
         """
@@ -94,7 +99,7 @@ class GlobalMotionFilteredTrajectory(IJob):
         self._reference_atoms = AtomGroup(self._reference_atoms)
 
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_file"]["files"][0],
             self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
             self._selected_atoms.atom_list,
@@ -193,11 +198,8 @@ class GlobalMotionFilteredTrajectory(IJob):
         # The output trajectory is closed.
         self._output_trajectory.close()
 
-        outputFile = h5py.File(self.configuration["output_file"]["file"], "r+")
+        outputFile = h5py.File(self.configuration["output_file"]["files"][0], "r+")
 
         outputFile.create_dataset("rms", data=self._rms, dtype=np.float64)
 
         outputFile.close()
-
-
-REGISTRY["gmft"] = GlobalMotionFilteredTrajectory

@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import NucleotideChain, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -54,6 +53,3 @@ class NucleotideName(ISelector):
                     pass
 
         return sel
-
-
-REGISTRY["nucleotide_name"] = NucleotideName

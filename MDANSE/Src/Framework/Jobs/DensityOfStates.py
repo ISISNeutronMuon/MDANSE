@@ -15,7 +15,7 @@
 
 import collections
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation, differentiate, get_spectrum
@@ -39,23 +39,29 @@ class DensityOfStates(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["instrument_resolution"] = (
-        "instrument_resolution",
+        "InstrumentResolutionConfigurator",
         {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
     )
     settings["interpolation_order"] = (
-        "interpolation_order",
+        "InterpolationOrderConfigurator",
         {"label": "velocities", "dependencies": {"trajectory": "trajectory"}},
     )
-    settings["projection"] = ("projection", {"label": "project coordinates"})
+    settings["projection"] = (
+        "ProjectionConfigurator",
+        {"label": "project coordinates"},
+    )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
-        "atom_transmutation",
+        "AtomTransmutationConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -64,11 +70,14 @@ class DensityOfStates(IJob):
         },
     )
     settings["weights"] = (
-        "weights",
+        "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -80,20 +89,25 @@ class DensityOfStates(IJob):
         instrResolution = self.configuration["instrument_resolution"]
 
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["duration"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
         )
         self._outputData.add(
             "time_window",
-            "line",
+            "LineOutputVariable",
             instrResolution["time_window"],
             axis="time",
             units="au",
         )
 
-        self._outputData.add("omega", "line", instrResolution["omega"], units="rad/ps")
+        self._outputData.add(
+            "omega", "LineOutputVariable", instrResolution["omega"], units="rad/ps"
+        )
         self._outputData.add(
             "omega_window",
-            "line",
+            "LineOutputVariable",
             instrResolution["omega_window"],
             axis="omega",
             units="au",
@@ -102,28 +116,28 @@ class DensityOfStates(IJob):
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
                 "vacf_%s" % element,
-                "line",
+                "LineOutputVariable",
                 (self.configuration["frames"]["number"],),
                 axis="time",
                 units="nm2/ps2",
             )
             self._outputData.add(
                 "dos_%s" % element,
-                "line",
+                "LineOutputVariable",
                 (instrResolution["n_omegas"],),
                 axis="omega",
                 units="nm2/ps",
             )
         self._outputData.add(
             "vacf_total",
-            "line",
+            "LineOutputVariable",
             (self.configuration["frames"]["number"],),
             axis="time",
             units="nm2/ps2",
         )
         self._outputData.add(
             "dos_total",
-            "line",
+            "LineOutputVariable",
             (instrResolution["n_omegas"],),
             axis="omega",
             units="nm2/ps",
@@ -222,6 +236,3 @@ class DensityOfStates(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["dos"] = DensityOfStates

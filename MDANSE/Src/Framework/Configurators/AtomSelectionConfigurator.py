@@ -16,7 +16,7 @@
 import collections
 import operator
 
-from MDANSE import REGISTRY
+
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import (
@@ -177,6 +177,3 @@ class AtomSelectionConfigurator(IConfigurator):
         info.append("Selected elements:%s" % self["unique_names"])
 
         return "\n".join(info)
-
-
-REGISTRY["atom_selection"] = AtomSelectionConfigurator

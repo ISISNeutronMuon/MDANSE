@@ -17,8 +17,10 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+from MDANSE.Framework.Formats.IFormat import IFormat
 from MDANSE.Core.Error import Error
+
+from MDANSE.Core.SubclassFactory import SubclassFactory
 
 
 class OutputVariableError(Error):
@@ -30,23 +32,22 @@ class OutputData(collections.OrderedDict):
         collections.OrderedDict.__setitem__(
             self,
             dataName,
-            REGISTRY["output_variable"][dataType](data, dataName, **kwargs),
+            IOutputVariable.create(dataType, data, dataName, **kwargs),
         )
 
     def write(self, basename, formats, header=None):
         for fmt in formats:
-            REGISTRY["format"][fmt].write(basename, self, header)
+            temp_format = IFormat.create(fmt)
+            temp_format.write(basename, self, header)
 
 
-class IOutputVariable(np.ndarray):
+class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
     """
     Defines a MDANSE output variable.
 
     A MDANSE output variable is defined as s subclass of Numpy array that stores additional attributes.
     Those extra attributes will be contain information necessary for the the MDANSE plotter.
     """
-
-    _registry = "output_variable"
 
     def __new__(cls, value, varname, axis="index", units="unitless"):
         """
@@ -106,7 +107,7 @@ class IOutputVariable(np.ndarray):
         info = []
 
         info.append("# variable name: %s" % self.varname)
-        info.append("# \ttype: %s" % self._type)
+        info.append("# \ttype: %s" % self.__name__)
         info.append("# \taxis: %s" % str(self.axis))
         info.append("# \tunits: %s" % self.units)
 

@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/InputData/NetCDFInputData.py
-# @brief     Implements module/class/test NetCDFInputData
+# @file      Src/Framework/InputData/HDFInputData.py
+# @brief     Implements module/class/test HDFInputData
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)

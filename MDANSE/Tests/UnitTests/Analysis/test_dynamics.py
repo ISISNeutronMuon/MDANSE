@@ -7,7 +7,8 @@ import pytest
 from icecream import ic
 import numpy as np
 
-from MDANSE import REGISTRY
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
 from ..Data.data import short_traj
@@ -22,28 +23,35 @@ _, just_filename = path.split(short_traj)
 # 2. just_filename (str) - filename of the trajectory
 # 3. trajectory (pytest.fixture) - returns an instance of HDFTrajectoryInputData
 
+
 @pytest.fixture(scope="module")
 def trajectory():
-    trajectory = REGISTRY["input_data"]["hdf_trajectory"](short_traj)
+    trajectory = HDFTrajectoryInputData(short_traj)
     yield trajectory
 
-@pytest.mark.parametrize('interp_order, normalise',[(1, True),
-                                                    (2, True),
-                                                    (3, True),
-                                                    (1, False),
-                                                    (2, False),
-                                                    (3, False),])
+
+@pytest.mark.parametrize(
+    "interp_order, normalise",
+    [
+        (1, True),
+        (2, True),
+        (3, True),
+        (1, False),
+        (2, False),
+        (3, False),
+    ],
+)
 def test_vacf(trajectory, interp_order, normalise):
     temp_name = tempfile.mktemp()
     parameters = {}
-    parameters['frames'] = (0, 10, 1)
-    parameters['interpolation_order'] = interp_order
-    parameters['output_files'] = (temp_name, ('hdf',))
-    parameters['running_mode'] = ('monoprocessor',)
-    parameters['normalize'] = normalise
-    parameters['trajectory'] = short_traj
-    vacf = REGISTRY['job']['vacf']()
-    vacf.run(parameters,status=True)
-    assert path.exists(temp_name + '.h5')
-    assert path.isfile(temp_name + '.h5')
-    os.remove(temp_name + '.h5')
+    parameters["frames"] = (0, 10, 1)
+    parameters["interpolation_order"] = interp_order
+    parameters["output_files"] = (temp_name, ("HDFFormat",))
+    parameters["running_mode"] = ("monoprocessor",)
+    parameters["normalize"] = normalise
+    parameters["trajectory"] = short_traj
+    vacf = IJob.create("VelocityAutoCorrelationFunction")
+    vacf.run(parameters, status=True)
+    assert path.exists(temp_name + ".h5")
+    assert path.isfile(temp_name + ".h5")
+    os.remove(temp_name + ".h5")

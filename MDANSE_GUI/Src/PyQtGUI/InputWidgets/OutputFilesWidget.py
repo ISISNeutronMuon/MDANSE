@@ -80,7 +80,7 @@ class OutputFilesWidget(WidgetBase):
         self.field = QLineEdit(default_value[0], self._base)
         self.type_box = CheckableComboBox(self._base)
         self.type_box.addItems(self._configurator.formats)
-        self.type_box.set_default("hdf")
+        self.type_box.set_default("HDFFormat")
         # self.type_box.setCurrentText(default_value[1])
         browse_button = QPushButton("Browse", self._base)
         browse_button.clicked.connect(self.file_dialog)

@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.InputData.IInputData import InputDataError
 from MDANSE.Framework.InputData.InputFileData import InputFileData
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
@@ -78,6 +78,3 @@ class HDFTrajectoryInputData(InputFileData):
     @property
     def hdf(self):
         return self._data.file
-
-
-REGISTRY["hdf_trajectory"] = HDFTrajectoryInputData

@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -51,6 +50,3 @@ class AtomFullName(ISelector):
             )
 
         return sel
-
-
-REGISTRY["atom_fullname"] = AtomFullName

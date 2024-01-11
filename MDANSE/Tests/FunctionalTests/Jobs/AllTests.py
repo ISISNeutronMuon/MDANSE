@@ -21,7 +21,9 @@ import glob
 
 def suite():
     files = glob.glob("Test*.py")
-    modules = [__import__(os.path.splitext(f)[0],globals(),locals(),[],0) for f in files]
+    modules = [
+        __import__(os.path.splitext(f)[0], globals(), locals(), [], 0) for f in files
+    ]
     test_suite = unittest.TestSuite()
     for m in modules:
         print(m.__file__)
@@ -34,6 +36,6 @@ def run_test():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     run_test()

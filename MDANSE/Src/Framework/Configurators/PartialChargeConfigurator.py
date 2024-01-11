@@ -15,7 +15,7 @@
 
 import os
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -87,6 +87,3 @@ class PartialChargeConfigurator(IConfigurator):
         info = "Sum of partial charges = %8.3f" % sum(self["charges"].values())
 
         return info
-
-
-REGISTRY["partial_charges"] = PartialChargeConfigurator
