@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -61,6 +61,7 @@ class FloatConfigurator(IConfigurator):
         try:
             value = float(value)
         except (TypeError, ValueError) as e:
+            print(f"Wrong value {value} in {self}")
             raise ConfiguratorError(e, self)
 
         if self._choices:
@@ -123,6 +124,3 @@ class FloatConfigurator(IConfigurator):
         """
 
         return "Value: %r" % self["value"]
-
-
-REGISTRY["float"] = FloatConfigurator

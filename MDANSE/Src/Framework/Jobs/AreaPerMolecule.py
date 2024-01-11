@@ -18,7 +18,7 @@ import os
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 
@@ -47,16 +47,19 @@ class AreaPerMolecule(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = (
-        "hdf_trajectory",
+        "HDFTrajectoryConfigurator",
         {
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "HDF", "waterbox.h5"
             )
         },
     )
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["axis"] = (
-        "multiple_choices",
+        "MultipleChoicesConfigurator",
         {
             "label": "area vectors",
             "choices": ["a", "b", "c"],
@@ -64,9 +67,15 @@ class AreaPerMolecule(IJob):
             "default": ["a", "b"],
         },
     )
-    settings["name"] = ("string", {"label": "molecule name", "default": "DMPC"})
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["name"] = (
+        "StringConfigurator",
+        {"label": "molecule name", "default": "DMPC"},
+    )
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -95,12 +104,15 @@ class AreaPerMolecule(IJob):
             )
 
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["time"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["time"],
+            units="ps",
         )
 
         self._outputData.add(
             "area_per_molecule",
-            "line",
+            "LineOutputVariable",
             (self.configuration["frames"]["number"],),
             axis="time",
             units="1/nm2",
@@ -154,6 +166,3 @@ class AreaPerMolecule(IJob):
             self._info,
         )
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["apm"] = AreaPerMolecule

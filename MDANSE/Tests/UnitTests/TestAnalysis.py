@@ -11,7 +11,7 @@ class TestAnalysis(unittest.TestCase):
         coords2 = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
 
         msd = mean_square_deviation(coords1, coords2)
-        self.assertEqual(20/3, msd)
+        self.assertEqual(20 / 3, msd)
 
     def test_mean_square_deviation_masses(self):
         coords1 = np.array([[1, 1, 1], [2, 1, 1], [3, 1, 1]])
@@ -19,7 +19,7 @@ class TestAnalysis(unittest.TestCase):
         masses = np.array([3, 10, 1])
 
         msd = mean_square_deviation(coords1, coords2, masses)
-        self.assertEqual(80/14, msd)
+        self.assertEqual(80 / 14, msd)
 
     def test_mean_square_displacement_root(self):
         coords1 = np.array([[1, 1, 1], [2, 1, 1], [8, 1, 1]])
@@ -38,7 +38,7 @@ class TestAnalysis(unittest.TestCase):
     def test_mean_square_displacement(self):
         coords = np.array([[1, 1, 1], [2, 1, 1], [3, 1, 1]])
         msd = mean_square_displacement(coords)
-        self.assertTrue(np.allclose([0., 1., 4.], msd), f'\nactual = {msd}')
+        self.assertTrue(np.allclose([0.0, 1.0, 4.0], msd), f"\nactual = {msd}")
 
     def test_mean_square_fluctuation_no_root(self):
         coords = np.array([[1, 2, 1], [2, 1, 1], [10, 5, 5], [1, 1, 2]])
@@ -74,5 +74,5 @@ def suite():
     return s
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

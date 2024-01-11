@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
@@ -47,12 +46,15 @@ class MoleculeFinder(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "frames",
+        "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}, "default": (0, -1, 1)},
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "ascii"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat"]},
+    )
 
     def initialize(self):
         """
@@ -153,6 +155,3 @@ class MoleculeFinder(IJob):
 
         # The output trajectory is closed.
         self._output_trajectory.close()
-
-
-REGISTRY["molecule"] = MoleculeFinder

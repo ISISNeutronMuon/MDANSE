@@ -23,10 +23,11 @@ import io
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
@@ -64,36 +65,42 @@ class McStasVirtualInstrument(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = (
-        "hdf_trajectory",
+        "HDFTrajectoryConfigurator",
         {
             "default": os.path.join(
                 "..", "..", "..", "Data", "Trajectories", "HDF", "waterbox.h5"
             )
         },
     )
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["sample_coh"] = (
-        "netcdf_input_file",
+        "HDFInputFileConfigurator",
         {
-            "widget": "input_file",
+            "widget": "InputFileConfigurator",
             "label": "MDANSE Coherent Structure Factor",
             "variables": ["q", "frequency", "s(q,f)_total"],
             "default": os.path.join("..", "..", "..", "Data", "NetCDF", "dcsf_prot.nc"),
         },
     )
     settings["sample_inc"] = (
-        "netcdf_input_file",
+        "HDFInputFileConfigurator",
         {
-            "widget": "input_file",
+            "widget": "InputFileConfigurator",
             "label": "MDANSE Incoherent Structure Factor",
             "variables": ["q", "frequency", "s(q,f)_total"],
             "default": os.path.join("..", "..", "..", "Data", "NetCDF", "disf_prot.nc"),
         },
     )
-    settings["temperature"] = ("float", {"default": 298.0})
-    settings["display"] = ("boolean", {"label": "trace the 3D view of the simulation"})
+    settings["temperature"] = ("FloatConfigurator", {"default": 298.0})
+    settings["display"] = (
+        "BooleanConfigurator",
+        {"label": "trace the 3D view of the simulation"},
+    )
     settings["instrument"] = (
-        "mcstas_instrument",
+        "McStasInstrumentConfigurator",
         {
             "label": "mcstas instrument",
             "default": os.path.join(
@@ -107,16 +114,19 @@ class McStasVirtualInstrument(IJob):
             ),
         },
     )
-    settings["options"] = ("mcstas_options", {"label": "mcstas options"})
+    settings["options"] = ("McStasOptionsConfigurator", {"label": "mcstas options"})
     settings["parameters"] = (
-        "mcstas_parameters",
+        "McStasParametersConfigurator",
         {
             "label": "instrument parameters",
             "dependencies": {"instrument": "instrument"},
             "exclude": ["sample_coh", "sample_inc"],
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
 
     def initialize(self):
         """
@@ -375,11 +385,11 @@ class McStasVirtualInstrument(IJob):
                 self.treat_str_var(FileStruct["xlabel"]), self._outputData, x
             )
 
-            self._outputData[xlabel] = REGISTRY["outputvariable"](
-                "line", x, xlabel, units="au"
+            self._outputData[xlabel] = IOutputVariable.create(
+                "LineOutputVariable", x, xlabel, units="au"
             )
-            self._outputData[Title] = REGISTRY["outputvariable"](
-                "line", y, Title, axis="%s" % xlabel, units="au"
+            self._outputData[Title] = IOutputVariable.create(
+                "LineOutputVariable", y, Title, axis="%s" % xlabel, units="au"
             )
 
         elif typ == "array_2d":
@@ -408,10 +418,14 @@ class McStasVirtualInstrument(IJob):
                 self.treat_str_var(FileStruct["ylabel"]), self._outputData, y
             )
 
-            self._outputData.add(xlabel, "line", x, units="au")
-            self._outputData.add(ylabel, "line", y, units="au")
+            self._outputData.add(xlabel, "LineOutputVariable", x, units="au")
+            self._outputData.add(ylabel, "LineOutputVariable", y, units="au")
             self._outputData.add(
-                title, "surface", I, axis="%s|%s" % (xlabel, ylabel), units="au"
+                title,
+                "SurfaceOutputVariable",
+                I,
+                axis="%s|%s" % (xlabel, ylabel),
+                units="au",
             )
 
         return FileStruct
@@ -501,6 +515,3 @@ class McStasVirtualInstrument(IJob):
         }
 
         return FSsingle
-
-
-REGISTRY["mvi"] = McStasVirtualInstrument

@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Mathematics.Arithmetic import ComplexNumber
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
@@ -121,6 +121,3 @@ class ComplexNumberConfigurator(IConfigurator):
         """
 
         return "Value: %r" % self["value"]
-
-
-REGISTRY["complex_number"] = ComplexNumberConfigurator

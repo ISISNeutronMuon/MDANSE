@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import generate_sphere_points
@@ -55,32 +54,38 @@ class SolventAccessibleSurface(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "frames",
+        "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}, "default": (0, 2, 1)},
     )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["n_sphere_points"] = ("integer", {"mini": 1, "default": 1000})
-    settings["probe_radius"] = ("float", {"mini": 0.0, "default": 0.14})
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["n_sphere_points"] = ("IntegerConfigurator", {"mini": 1, "default": 1000})
+    settings["probe_radius"] = ("FloatConfigurator", {"mini": 0.0, "default": 0.14})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         # Will store the time.
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["time"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["time"],
+            units="ps",
         )
 
         # Will store the solvent accessible surface.
         self._outputData.add(
             "sas",
-            "line",
+            "LineOutputVariable",
             (self.configuration["frames"]["number"],),
             axis="time",
             units="nm2",
@@ -171,6 +176,3 @@ class SolventAccessibleSurface(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["sas"] = SolventAccessibleSurface

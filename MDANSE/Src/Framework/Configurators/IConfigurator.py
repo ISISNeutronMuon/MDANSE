@@ -17,6 +17,8 @@ import abc
 
 from MDANSE.Core.Error import Error
 
+from MDANSE.Core.SubclassFactory import SubclassFactory
+
 
 class ConfiguratorError(Error):
     """
@@ -63,7 +65,7 @@ class ConfiguratorError(Error):
         return self._configurator
 
 
-class IConfigurator(dict):
+class IConfigurator(dict, metaclass=SubclassFactory):
     """
     This class implements the base class for configurator objects. A configurator object is a dictionary-derived object that is used
     to configure one item of a given configuration. Once the input value given for that item is configured, the dictionary is updated
@@ -75,8 +77,6 @@ class IConfigurator(dict):
     Usually, configurator objects are self-consistent but for complex ones, it can happen that they depends on other configurators of the
     configuration.
     """
-
-    _registry = "configurator"
 
     _default = None
 
@@ -112,7 +112,7 @@ class IConfigurator(dict):
 
         self._label = kwargs.get("label", " ".join(name.split("_")).strip())
 
-        self._widget = kwargs.get("widget", self._type)
+        self._widget = kwargs.get("widget", self.__class__)
 
         self._optional = kwargs.get("optional", False)
 

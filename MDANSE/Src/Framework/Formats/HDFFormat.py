@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/Formats/NetCDFFormat.py
-# @brief     Implements module/class/test NetCDFFormat
+# @file      Src/Framework/Formats/HDFFormat.py
+# @brief     Implements module/class/test HDFFormat
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -17,7 +17,7 @@ import os
 
 import h5py
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Formats.IFormat import IFormat
 
 
@@ -47,11 +47,11 @@ class HDFFormat(IFormat):
 
         filename = "%s%s" % (filename, cls.extensions[0])
 
-        # The NetCDF output file is opened for writing.
+        # The HDF output file is opened for writing.
         outputFile = h5py.File(filename, "w")
 
         if header:
-            # This is to avoid any segmentation fault when writing the NetCDF header field
+            # This is to avoid any segmentation fault when writing the HDF header field
             header = str(header)
 
             outputFile.attrs["header"] = header
@@ -63,12 +63,9 @@ class HDFFormat(IFormat):
 
             dset = outputFile.create_dataset(varName, data=var, shape=var.shape)
 
-            # All the attributes stored in the OutputVariable instance are written to the NetCDF file.
+            # All the attributes stored in the OutputVariable instance are written to the HDF file.
             for k, v in list(vars(var).items()):
                 dset.attrs[k] = v
 
         # The HDF file is closed.
         outputFile.close()
-
-
-REGISTRY["hdf"] = HDFFormat

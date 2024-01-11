@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -56,6 +55,3 @@ class CarboHydrogen(ISelector):
         )
 
         return sel
-
-
-REGISTRY["carbo_hydrogen"] = CarboHydrogen

@@ -15,7 +15,7 @@
 
 import os
 
-from MDANSE import PLATFORM, REGISTRY
+from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -70,6 +70,3 @@ class OutputDirectoryConfigurator(IConfigurator):
         """
 
         return "Output directory: %r" % self["value"]
-
-
-REGISTRY["output_directory"] = OutputDirectoryConfigurator

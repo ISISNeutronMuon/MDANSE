@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Chemistry.ChemicalEntity import NucleotideChain, ChemicalSystem
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
@@ -55,6 +54,3 @@ class NucleotideType(ISelector):
                             sel.update([at for at in nucl.atom_list])
 
         return sel
-
-
-REGISTRY["nucleotide_type"] = NucleotideType

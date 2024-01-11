@@ -15,11 +15,11 @@
 
 import logging.handlers
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Handlers.IHandler import IHandler
 
 
-class LogFileHandler(IHandler, logging.handlers.RotatingFileHandler):
+class LogfileHandler(IHandler, logging.handlers.RotatingFileHandler):
     """
     This class implements a logging.Handler subclass that will log messages on a rotating file. When the size of the file will exceed a given
     amount of bytes, the file is closed and a new file is opened.
@@ -58,6 +58,3 @@ class LogFileHandler(IHandler, logging.handlers.RotatingFileHandler):
             backupCount=backupCount,
             delay=delay,
         )
-
-
-REGISTRY["logfile"] = LogFileHandler

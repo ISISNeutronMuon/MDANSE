@@ -15,6 +15,8 @@
 
 from MDANSE.Core.Error import Error
 
+from MDANSE.Core.SubclassFactory import SubclassFactory
+
 
 class InputDataError(Error):
     """
@@ -22,12 +24,10 @@ class InputDataError(Error):
     """
 
 
-class IInputData(object):
+class IInputData(metaclass=SubclassFactory):
     """
     This is the base class for handling MDANSE input data.
     """
-
-    _registry = "input_data"
 
     def __init__(self, name, *args):
         """

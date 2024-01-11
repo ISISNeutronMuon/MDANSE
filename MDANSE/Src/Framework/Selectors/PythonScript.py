@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
@@ -38,6 +37,3 @@ class PythonScript(ISelector):
                 sel.update(namespace.get("selection", []))
 
         return sel
-
-
-REGISTRY["python_script"] = PythonScript

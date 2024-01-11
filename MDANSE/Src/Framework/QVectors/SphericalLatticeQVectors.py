@@ -18,21 +18,25 @@ import random
 
 import numpy as np
 
-from MDANSE import REGISTRY
-from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
+from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
 class SphericalLatticeQVectors(LatticeQVectors):
     """ """
 
     settings = collections.OrderedDict()
-    settings["seed"] = ("integer", {"mini": 0, "default": 0})
+    settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["shells"] = (
-        "range",
-        {"valueType": float, "includeLast": True, "mini": 0.0},
+        "RangeConfigurator",
+        {
+            "valueType": float,
+            "includeLast": True,
+            "mini": 0.0,
+            "default": (0, 5.0, 0.5),
+        },
     )
-    settings["n_vectors"] = ("integer", {"mini": 1, "default": 50})
-    settings["width"] = ("float", {"mini": 1.0e-6, "default": 1.0})
+    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 50})
+    settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
 
     def _generate(self):
         if self._configuration["seed"]["value"] != 0:
@@ -104,6 +108,3 @@ class SphericalLatticeQVectors(LatticeQVectors):
                     return None
                 else:
                     self._status.update()
-
-
-REGISTRY["spherical_lattice"] = SphericalLatticeQVectors

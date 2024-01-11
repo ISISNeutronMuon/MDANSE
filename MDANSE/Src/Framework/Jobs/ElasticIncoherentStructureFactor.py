@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
@@ -44,19 +43,25 @@ class ElasticIncoherentStructureFactor(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
-    settings["q_vectors"] = (
-        "q_vectors",
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["projection"] = ("projection", {"label": "project coordinates"})
+    settings["q_vectors"] = (
+        "QVectorsConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
+    settings["projection"] = (
+        "ProjectionConfigurator",
+        {"label": "project coordinates"},
+    )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["grouping_level"] = (
-        "grouping_level",
+        "GroupingLevelConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -66,7 +71,7 @@ class ElasticIncoherentStructureFactor(IJob):
         },
     )
     settings["atom_transmutation"] = (
-        "atom_transmutation",
+        "AtomTransmutationConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -75,14 +80,17 @@ class ElasticIncoherentStructureFactor(IJob):
         },
     )
     settings["weights"] = (
-        "weights",
+        "WeightsConfigurator",
         {
             "default": "b_incoherent",
             "dependencies": {"atom_selection": "atom_selection"},
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -96,16 +104,23 @@ class ElasticIncoherentStructureFactor(IJob):
         self._nFrames = self.configuration["frames"]["number"]
 
         self._outputData.add(
-            "q", "line", self.configuration["q_vectors"]["shells"], units="1/nm"
+            "q",
+            "LineOutputVariable",
+            self.configuration["q_vectors"]["shells"],
+            units="1/nm",
         )
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                "eisf_%s" % element, "line", (self._nQShells,), axis="q", units="au"
+                "eisf_%s" % element,
+                "LineOutputVariable",
+                (self._nQShells,),
+                axis="q",
+                units="au",
             )
 
         self._outputData.add(
-            "eisf_total", "line", (self._nQShells,), axis="q", units="au"
+            "eisf_total", "LineOutputVariable", (self._nQShells,), axis="q", units="au"
         )
 
         self._atoms = sorted_atoms(
@@ -185,6 +200,3 @@ class ElasticIncoherentStructureFactor(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["eisf"] = ElasticIncoherentStructureFactor

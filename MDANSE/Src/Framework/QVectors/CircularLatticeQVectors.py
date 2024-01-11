@@ -20,27 +20,31 @@ import numpy as np
 
 from MDANSE.Mathematics.LinearAlgebra import Vector
 
-from MDANSE import REGISTRY
-from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
+from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
 class CircularLatticeQVectors(LatticeQVectors):
     """ """
 
     settings = collections.OrderedDict()
-    settings["seed"] = ("integer", {"mini": 0, "default": 0})
+    settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["shells"] = (
-        "range",
-        {"valueType": float, "includeLast": True, "mini": 0.0},
+        "RangeConfigurator",
+        {
+            "valueType": float,
+            "includeLast": True,
+            "mini": 0.0,
+            "default": (0.0, 5.0, 0.5),
+        },
     )
-    settings["n_vectors"] = ("integer", {"mini": 1, "default": 50})
-    settings["width"] = ("float", {"mini": 1.0e-6, "default": 1.0})
+    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 50})
+    settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
     settings["axis_1"] = (
-        "vector",
+        "VectorConfigurator",
         {"normalize": False, "notNull": True, "valueType": int, "default": [1, 0, 0]},
     )
     settings["axis_2"] = (
-        "vector",
+        "VectorConfigurator",
         {"normalize": False, "notNull": True, "valueType": int, "default": [0, 1, 0]},
     )
 
@@ -116,6 +120,3 @@ class CircularLatticeQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
-
-
-REGISTRY["circular_lattice"] = CircularLatticeQVectors

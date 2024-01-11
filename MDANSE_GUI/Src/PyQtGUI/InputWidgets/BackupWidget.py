@@ -13,6 +13,7 @@
 #
 # **************************************************************************
 
+from icecream import ic
 from qtpy.QtWidgets import QLineEdit
 from qtpy.QtCore import Slot, Signal
 
@@ -28,7 +29,12 @@ class BackupWidget(WidgetBase):
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        return self.field.text()
+        temp_text = self.field.text().strip()
+        if temp_text == "None" or temp_text == "":
+            result = None
+        else:
+            result = temp_text
+        return result
 
     @Slot()
     def updateValue(self):

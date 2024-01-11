@@ -34,6 +34,7 @@ modnames = [
     "FloatWidget",
     "StringWidget",
     "FramesWidget",
+    "RangeWidget",
     "HDFTrajectoryWidget",
     "DummyWidget",
     "InterpolationOrderWidget",
@@ -44,6 +45,10 @@ modnames = [
     "InputDirectoryWidget",
     "OutputDirectoryWidget",
     "QVectorsWidget",
+    "ProjectionWidget",
+    "AtomSelectionWidget",
+    "AtomTransmutationWidget",
+    "InstrumentResolutionWidget",
 ]
 
 for name in modnames:

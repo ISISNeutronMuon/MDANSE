@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.Configurators.IntegerConfigurator import IntegerConfigurator
 
@@ -69,6 +69,3 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
 
         else:
             self["variable"] = "coordinates"
-
-
-REGISTRY["interpolation_order"] = InterpolationOrderConfigurator

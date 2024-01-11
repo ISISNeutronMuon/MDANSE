@@ -15,7 +15,6 @@
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Configurators.RangeConfigurator import RangeConfigurator
 
 
@@ -89,6 +88,3 @@ class FramesConfigurator(RangeConfigurator):
             self["time"][-1],
             self["time_step"],
         )
-
-
-REGISTRY["frames"] = FramesConfigurator

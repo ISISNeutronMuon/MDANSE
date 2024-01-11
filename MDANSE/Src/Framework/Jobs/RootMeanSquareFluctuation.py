@@ -15,7 +15,6 @@
 
 import collections
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Analysis import mean_square_fluctuation
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
@@ -39,14 +38,17 @@ class RootMeanSquareFluctuation(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["grouping_level"] = (
-        "grouping_level",
+        "GroupingLevelConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -54,8 +56,11 @@ class RootMeanSquareFluctuation(IJob):
             }
         },
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -69,12 +74,12 @@ class RootMeanSquareFluctuation(IJob):
             for idxs in self.configuration["atom_selection"]["indexes"]
             for idx in idxs
         ]
-        self._outputData.add("indexes", "line", indexes)
+        self._outputData.add("indexes", "LineOutputVariable", indexes)
 
         # Will store the mean square fluctuation evolution.
         self._outputData.add(
             "rmsf",
-            "line",
+            "LineOutputVariable",
             (self.configuration["atom_selection"]["selection_length"],),
             axis="indexes",
             units="nm",
@@ -132,6 +137,3 @@ class RootMeanSquareFluctuation(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["rmsf"] = RootMeanSquareFluctuation

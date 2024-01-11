@@ -35,6 +35,7 @@ from qtpy.QtWidgets import (
     QFormLayout,
     QHBoxLayout,
     QCheckBox,
+    QScrollArea,
 )
 from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel, QObject
 from qtpy.QtGui import (
@@ -53,20 +54,25 @@ from MDANSE_GUI.PyQtGUI.InputWidgets import *
 
 
 widget_lookup = {  # these all come from MDANSE_GUI.PyQtGUI.InputWidgets
-    "float": FloatWidget,
-    "boolean": BooleanWidget,
-    "string": StringWidget,
-    "integer": IntegerWidget,
-    "frames": FramesWidget,
-    "hdf_trajectory": HDFTrajectoryWidget,
-    "interpolation_order": InterpolationOrderWidget,
-    "output_files": OutputFilesWidget,
-    "running_mode": RunningModeWidget,
-    "weights": ComboWidget,
-    "grouping_level": ComboWidget,
-    "q_vectors": QVectorsWidget,
-    "input_directory": InputDirectoryWidget,
-    "output_directory": OutputDirectoryWidget,
+    "FloatConfigurator": FloatWidget,
+    "BooleanConfigurator": BooleanWidget,
+    "StringConfigurator": StringWidget,
+    "IntegerConfigurator": IntegerWidget,
+    "FramesConfigurator": FramesWidget,
+    "RangeConfigurator": RangeWidget,
+    "HDFTrajectoryConfigurator": HDFTrajectoryWidget,
+    "InterpolationOrderConfigurator": InterpolationOrderWidget,
+    "OutputFilesConfigurator": OutputFilesWidget,
+    "RunningModeConfigurator": RunningModeWidget,
+    "WeightsConfigurator": ComboWidget,
+    "GroupingLevelConfigurator": ComboWidget,
+    "QVectorsConfigurator": QVectorsWidget,
+    "InputDirectoryConfigurator": InputDirectoryWidget,
+    "OutputDirectoryConfigurator": OutputDirectoryWidget,
+    "ProjectionConfigurator": ProjectionWidget,
+    "AtomSelectionConfigurator": AtomSelectionWidget,
+    "AtomTransmutationConfigurator": AtomTransmutationWidget,
+    "InstrumentResolutionConfigurator": InstrumentResolutionWidget,
 }
 
 
@@ -87,8 +93,15 @@ class ActionDialog(QDialog):
             self.default_path, _ = os.path.split(temptext)
         super().__init__(*args, **kwargs)
 
-        layout = QVBoxLayout(self)
-        self.setLayout(layout)
+        buffer = QWidget(self)
+        scroll_area = QScrollArea()
+        scroll_area.setWidget(buffer)
+        scroll_area.setWidgetResizable(True)
+        layout = QVBoxLayout(buffer)
+        base_layout = QVBoxLayout(self)
+        buffer.setLayout(layout)
+        base_layout.addWidget(scroll_area)
+        self.setLayout(base_layout)
         self.handlers = {}
         self._widgets = []
         self.converter_instance = None

@@ -18,14 +18,14 @@ import abc
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Configurable import Configurable
 
+from MDANSE.Core.SubclassFactory import SubclassFactory
+
 
 class QVectorsError(Error):
     pass
 
 
-class IQVectors(Configurable):
-    _registry = "q_vectors"
-
+class IQVectors(Configurable, metaclass=SubclassFactory):
     is_lattice = False
 
     def __init__(self, chemical_system, status=None):

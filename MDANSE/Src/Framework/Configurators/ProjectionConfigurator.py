@@ -13,11 +13,12 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
 )
+from MDANSE.Framework.Projectors.IProjector import IProjector
 
 
 class ProjectionConfigurator(IConfigurator):
@@ -42,7 +43,7 @@ class ProjectionConfigurator(IConfigurator):
         """
 
         if value is None:
-            value = ("null", None)
+            value = ("NullProjector", None)
 
         try:
             mode, axis = value
@@ -54,10 +55,8 @@ class ProjectionConfigurator(IConfigurator):
                 "invalid type for projection mode: must be a string"
             )
 
-        mode = mode.lower()
-
         try:
-            self["projector"] = REGISTRY["projector"][mode]()
+            self["projector"] = IProjector.create(mode)
         except KeyError:
             raise ConfiguratorError("the projector %r is unknown" % mode)
         else:
@@ -76,6 +75,3 @@ class ProjectionConfigurator(IConfigurator):
             return "No projection performed\n"
         else:
             return "Projection along %r axis\n" % self["axis"]
-
-
-REGISTRY["projection"] = ProjectionConfigurator

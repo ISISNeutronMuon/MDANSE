@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
@@ -31,6 +30,3 @@ class WithinShell(ISelector):
             )
 
         return sel
-
-
-REGISTRY["within_shell"] = WithinShell

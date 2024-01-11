@@ -17,7 +17,7 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass
@@ -79,21 +79,27 @@ class Eccentricity(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["center_of_mass"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["weights"] = (
-        "weights",
+        "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
 
     def initialize(self):
         """
@@ -103,7 +109,10 @@ class Eccentricity(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["time"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["time"],
+            units="ps",
         )
 
         npoints = np.zeros((self.configuration["frames"]["number"]), dtype=np.float64)
@@ -111,23 +120,29 @@ class Eccentricity(IJob):
         for axis in ["xx", "xy", "xz", "yy", "yz", "zz"]:
             self._outputData.add(
                 "moment_of_inertia_{}".format(axis),
-                "line",
+                "LineOutputVariable",
                 npoints,
                 axis="time",
                 units="uma*nm2",
             )
         for axis in ["a", "b", "c"]:
             self._outputData.add(
-                "semiaxis_{}".format(axis), "line", npoints, axis="time", units="nm"
+                "semiaxis_{}".format(axis),
+                "LineOutputVariable",
+                npoints,
+                axis="time",
+                units="nm",
             )
 
-        self._outputData.add("eccentricity", "line", npoints, axis="time")
+        self._outputData.add("eccentricity", "LineOutputVariable", npoints, axis="time")
 
         self._outputData.add(
-            "ratio_of_largest_to_smallest", "line", npoints, axis="time"
+            "ratio_of_largest_to_smallest", "LineOutputVariable", npoints, axis="time"
         )
 
-        self._outputData.add("radius_of_gyration", "line", npoints, axis="time")
+        self._outputData.add(
+            "radius_of_gyration", "LineOutputVariable", npoints, axis="time"
+        )
 
         self._indexes = self.configuration["atom_selection"].get_indexes()
 
@@ -276,6 +291,3 @@ class Eccentricity(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["ecc"] = Eccentricity

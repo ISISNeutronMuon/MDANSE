@@ -17,22 +17,26 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
-from MDANSE.Framework.QVectors.LatticeQvectors import LatticeQVectors
+from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
-class MillerIndicesLatticeQVectors(LatticeQVectors):
+class MillerIndicesQVectors(LatticeQVectors):
     """ """
 
     settings = collections.OrderedDict()
     settings["shells"] = (
-        "range",
-        {"valueType": float, "includeLast": True, "mini": 0.0},
+        "RangeConfigurator",
+        {
+            "valueType": float,
+            "includeLast": True,
+            "mini": 0.0,
+            "default": (0, 5.0, 0.5),
+        },
     )
-    settings["width"] = ("float", {"mini": 1.0e-6, "default": 1.0})
-    settings["h"] = ("range", {"includeLast": True})
-    settings["k"] = ("range", {"includeLast": True})
-    settings["l"] = ("range", {"includeLast": True})
+    settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
+    settings["h"] = ("RangeConfigurator", {"includeLast": True, "default": (0, 8, 1)})
+    settings["k"] = ("RangeConfigurator", {"includeLast": True, "default": (0, 8, 1)})
+    settings["l"] = ("RangeConfigurator", {"includeLast": True, "default": (0, 8, 1)})
 
     def _generate(self):
         hSlice = slice(
@@ -94,6 +98,3 @@ class MillerIndicesLatticeQVectors(LatticeQVectors):
                     return
                 else:
                     self._status.update()
-
-
-REGISTRY["miller_indices_lattice"] = MillerIndicesLatticeQVectors

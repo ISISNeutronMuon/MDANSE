@@ -21,7 +21,7 @@ import numpy as np
 from MDANSE.Core.Error import Error
 from MDANSE.Extensions import distance_histogram
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.TrajectoryUtils import atomindex_to_moleculeindex
+from MDANSE.MolecularDynamics.TrajectoryUtils import atom_index_to_molecule_index
 
 
 class DistanceHistogram(IJob):
@@ -31,11 +31,19 @@ class DistanceHistogram(IJob):
 
     type = None
 
+    category = (
+        "Analysis",
+        "Structure",
+    )
+
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["r_values"] = (
-        "range",
+        "RangeConfigurator",
         {
             "label": "r values (nm)",
             "valueType": float,
@@ -44,11 +52,11 @@ class DistanceHistogram(IJob):
         },
     )
     settings["atom_selection"] = (
-        "atom_selection",
+        "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
-        "atom_transmutation",
+        "AtomTransmutationConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
@@ -57,11 +65,14 @@ class DistanceHistogram(IJob):
         },
     )
     settings["weights"] = (
-        "weights",
+        "WeightsConfigurator",
         {"dependencies": {"atom_selection": "atom_selection"}},
     )
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
@@ -87,7 +98,7 @@ class DistanceHistogram(IJob):
             dtype=np.int32,
         )
 
-        lut = atomindex_to_moleculeindex(
+        lut = atom_index_to_molecule_index(
             self.configuration["trajectory"]["instance"].chemical_system
         )
 

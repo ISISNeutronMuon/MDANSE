@@ -20,8 +20,9 @@ from icecream import ic
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot
 
-from MDANSE import LOGGER, PLATFORM, REGISTRY
+from MDANSE import LOGGER, PLATFORM
 from MDANSE.Framework.InputData import InputFileData
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 
 # class TrajectoryItem(QStandardItem):
 
@@ -42,8 +43,6 @@ from MDANSE.Framework.InputData import InputFileData
 
 #     @Slot(object)
 #     def acceptNewTrajectory(self, new_trajectory):
-
-#         data = REGISTRY["input_data"]["hdf_trajectory"](new_trajectory)
 
 
 class FileObject:
@@ -113,7 +112,7 @@ class TrajectoryItem(DataTreeItem):
 
         if self.filename != "NULL":
             self.file_info.setFilename(self.filename)
-        self.setText(self.filename)
+        self.setText(os.path.split(self.filename)[1])
 
 
 class AnalysisItem(DataTreeItem):
@@ -134,8 +133,7 @@ class DataTreeModel(QStandardItemModel):
     @Slot(str)
     def acceptNewTrajectory(self, fname: str):
         ic(f"Received {fname}")
-        data = REGISTRY["input_data"]["hdf_trajectory"](fname)
-        # data = REGISTRY["hdf_trajectory"](fname)
+        data = HDFTrajectoryInputData(fname)
         ic()
         item = TrajectoryItem(fname=fname, trajectory=data, mdanse_tag="hdf_trajectory")
         ic("Created TrajectoryItem")

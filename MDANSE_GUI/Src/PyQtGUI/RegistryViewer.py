@@ -3,7 +3,7 @@
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
 # @file      Src/PyQtGUI/RegistryViewer.py
-# @brief     Shows the MDANSE REGISTRY. Can run standalone.
+# @brief     Shows the MDANSE jobs. Can run standalone.
 #
 # @homepage  https://mdanse.org
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -18,12 +18,13 @@
 and a RegistryViewer dialog.
 The puprose of those is to create a visualisation
 of the classes that can be accessed from the
-MDANSE REGISTRY object. 
+MDANSE IJob interface. 
 """
 
 import os
 
-from MDANSE import PLATFORM, REGISTRY
+from MDANSE import PLATFORM
+from MDANSE.Framework.Jobs.IJob import IJob
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, Signal, QSortFilterProxyModel, QModelIndex
@@ -52,7 +53,7 @@ class RegistryTree(QStandardItemModel):
     """RegistryTree creates a tree structure
     of QStandardItem objects, and stores information
     about the names and docstrings of different
-    classes contained in the REGISTRY.
+    classes contained in the IJob object.
 
     It inherits the QStandardItemModel, so it can be
     used in the Qt data/view/proxy model.
@@ -86,8 +87,9 @@ class RegistryTree(QStandardItemModel):
         """This function starts the recursive process of scanning
         the registry tree. Only called once on startup.
         """
-        for key in REGISTRY.interfaces:
-            self.parseNode(REGISTRY[key], key)
+        full_dict = IJob.indirect_subclass_dictionary()
+        for key in full_dict.keys():
+            self.parseNode(full_dict, key)
 
     def addNode(self, thing, name="Registry", parent: int = -1):
         """This function adds a new node to the tree data model.

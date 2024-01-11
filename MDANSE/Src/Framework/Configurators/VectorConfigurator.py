@@ -15,7 +15,7 @@
 
 import numpy as np
 
-from MDANSE import REGISTRY
+
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -138,6 +138,3 @@ class VectorConfigurator(IConfigurator):
         """
 
         return "Value: %r" % self["value"]
-
-
-REGISTRY["vector"] = VectorConfigurator

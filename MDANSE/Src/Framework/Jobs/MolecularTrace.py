@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-from MDANSE import REGISTRY
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Extensions import mt_fast_calc
 
@@ -47,22 +46,34 @@ class MolecularTrace(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = ("hdf_trajectory", {})
-    settings["frames"] = ("frames", {"dependencies": {"trajectory": "trajectory"}})
-    settings["atom_selection"] = (
-        "atom_selection",
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["frames"] = (
+        "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["spatial_resolution"] = ("float", {"mini": 0.01, "default": 0.1})
-    settings["output_files"] = ("output_files", {"formats": ["hdf", "netcdf", "ascii"]})
-    settings["running_mode"] = ("running_mode", {})
+    settings["atom_selection"] = (
+        "AtomSelectionConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
+    settings["spatial_resolution"] = (
+        "FloatConfigurator",
+        {"mini": 0.01, "default": 0.1},
+    )
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat", "ASCIIFormat"]},
+    )
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         # Will store the time.
         self._outputData.add(
-            "time", "line", self.configuration["frames"]["time"], units="ps"
+            "time",
+            "LineOutputVariable",
+            self.configuration["frames"]["time"],
+            units="ps",
         )
 
         # Generate the grids that will be used to quantify the presence of atoms in an area.
@@ -99,20 +110,23 @@ class MolecularTrace(IJob):
         dimz = maxz - minz
 
         self.min = np.array([minx, miny, minz], dtype=np.float64)
-        self._outputData.add("origin", "line", self.min, units="nm")
+        self._outputData.add("origin", "LineOutputVariable", self.min, units="nm")
 
         self.gdim = np.ceil(np.array([dimx, dimy, dimz]) / self.resolution).astype(
             np.int
         )
         spacing = self.configuration["spatial_resolution"]["value"]
         self._outputData.add(
-            "spacing", "line", np.array([spacing, spacing, spacing]), units="nm"
+            "spacing",
+            "LineOutputVariable",
+            np.array([spacing, spacing, spacing]),
+            units="nm",
         )
         self.grid = np.zeros(self.gdim, dtype=np.int32)
 
         self._outputData.add(
             "molecular_trace",
-            "volume",
+            "VolumeOutputVariable",
             tuple(
                 np.ceil(np.array([dimx, dimy, dimz]) / self.resolution).astype(np.int)
             ),
@@ -176,6 +190,3 @@ class MolecularTrace(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-
-REGISTRY["mt"] = MolecularTrace

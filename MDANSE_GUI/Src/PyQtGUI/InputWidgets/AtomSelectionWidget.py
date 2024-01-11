@@ -13,135 +13,47 @@
 #
 # **************************************************************************
 
+import glob
+import itertools
 import os
+import os.path
 
-import wx
+from qtpy.QtWidgets import QComboBox, QLabel, QLineEdit, QPushButton, QDialog
+from qtpy.QtCore import Qt, Slot
+from qtpy.QtGui import QStandardItemModel, QStandardItem
 
-from MDANSE import REGISTRY
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
-
-from MDANSE.GUI import PUBLISHER
-from MDANSE.GUI.Widgets.UserDefinitionWidget import (
-    UserDefinitionDialog,
-    UserDefinitionWidget,
-)
-from MDANSE.GUI.Icons import ICONS
+from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
 
 
-class AtomSelectionWidget(UserDefinitionWidget):
-    def add_widgets(self):
-        self._sizer = wx.BoxSizer(wx.VERTICAL)
+class SelectionDialog(QDialog):
+    """Generates a string that specifies the atom selection."""
 
-        panel = wx.Panel(self._widgetPanel, wx.ID_ANY)
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        new = wx.Button(panel, wx.ID_ANY, label="Set new selection")
-        new.SetToolTip(wx.ToolTip("Pop up selection dialog"))
-        add = wx.BitmapButton(panel, wx.ID_ANY, ICONS["plus", 16, 16])
-        add.SetToolTip(wx.ToolTip("Add a new line"))
+class AtomSelectionWidget(WidgetBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        default_value = "all"
+        self._value = default_value
+        self.field = QLineEdit(default_value, self._base)
+        browse_button = QPushButton("Atom selection creator", self._base)
+        browse_button.clicked.connect(self.selection_dialog)
+        self._layout.addWidget(self.field)
+        self._layout.addWidget(browse_button)
+        self.update_labels()
 
-        sizer.Add(new, 0, wx.ALL | wx.ALIGN_RIGHT, 5)
-        sizer.Add(add, 0, wx.ALL | wx.ALIGN_RIGHT, 5)
-
-        panel.SetSizer(sizer)
-
-        self._sizer.Add(panel, 1, wx.ALL | wx.ALIGN_RIGHT, 5)
-
-        self._choices = []
-
-        PUBLISHER.subscribe(self.msg_set_ud, "msg_set_ud")
-
-        self.Bind(wx.EVT_BUTTON, self.on_new_definition, new)
-        self.Bind(wx.EVT_BUTTON, self.on_add_definition, add)
-
-        return self._sizer
-
-    def on_add_definition(self, event):
-        panel = wx.Panel(self._widgetPanel, wx.ID_ANY)
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        availableUDs = wx.Choice(panel, wx.ID_ANY, style=wx.CB_SORT)
-        uds = UD_STORE.filter(self._basename, "atom_selection")
-        availableUDs.SetItems(uds)
-
-        view = wx.Button(panel, wx.ID_ANY, label="View selected definition")
-        remove = wx.BitmapButton(panel, wx.ID_ANY, ICONS["minus", 16, 16])
-
-        sizer.Add(availableUDs, 1, wx.ALL | wx.EXPAND, 5)
-        sizer.Add(view, 0, wx.ALL | wx.EXPAND, 5)
-        sizer.Add(remove, 0, wx.ALL | wx.EXPAND, 5)
-
-        panel.SetSizer(sizer)
-
-        self._sizer.Add(panel, 1, wx.ALL | wx.EXPAND, 5)
-
-        self._widgetPanel.GrandParent.Layout()
-        self._widgetPanel.GrandParent.Refresh()
-
-        self.Bind(wx.EVT_BUTTON, self.on_view_definition, view)
-        self.Bind(wx.EVT_BUTTON, self.on_remove_definition, remove)
-
-    def on_new_definition(self, event):
-        dlg = UserDefinitionDialog(None, self._trajectory, "atom_selection")
-
-        dlg.ShowModal()
-
-    def on_remove_definition(self, event):
-        self._sizer.Detach(event.GetEventObject().Parent)
-
-        event.GetEventObject().Parent.Destroy()
-
-        self._widgetPanel.GrandParent.Layout()
+    @Slot()
+    def selection_dialog(self):
+        """A Slot defined to allow the GUI to be updated based on
+        the new path received from a FileDialog.
+        This will start a FileDialog, take the resulting path,
+        and emit a signal to update the value show by the GUI.
+        """
+        new_value = SelectionDialog()
+        if len(new_value) > 0:
+            self.field.setText(new_value)
+            self.updateValue()
 
     def get_widget_value(self):
-        sizerItemList = list(self._sizer.GetChildren())
-        del sizerItemList[0]
+        selection_string = self.field.text()
 
-        uds = []
-        for sizerItem in sizerItemList:
-            panel = sizerItem.GetWindow()
-            children = panel.GetChildren()
-            udName = children[0]
-            uds.append(udName.GetStringSelection())
-
-        if not uds:
-            return None
-        else:
-            return uds
-
-    def msg_set_ud(self, message):
-        uds = UD_STORE.filter(self._basename, self._type)
-
-        sizerItemList = list(self._sizer.GetChildren())
-        del sizerItemList[0]
-
-        for sizerItem in sizerItemList:
-            panel = sizerItem.GetWindow()
-            children = panel.GetChildren()
-            udName = children[0]
-            oldSelection = udName.GetStringSelection()
-            udName.SetItems(uds)
-            udName.SetStringSelection(oldSelection)
-
-
-REGISTRY["atom_selection"] = AtomSelectionWidget
-
-if __name__ == "__main__":
-    from MDANSE import PLATFORM
-    from MDANSE.MolecularDynamics.Trajectory import Trajectory
-
-    t = Trajectory(
-        os.path.join(
-            PLATFORM.example_data_directory(), "Trajectories", "HDF", "waterbox.h5"
-        )
-    )
-
-    app = wx.App(False)
-
-    p = UserDefinitionDialog(None, t, "q_vectors")
-
-    p.SetSize((800, 800))
-
-    p.ShowModal()
-
-    app.MainLoop()
+        return selection_string
