@@ -20,7 +20,7 @@ def main():
     import sys
 
     app = QApplication(sys.argv)
-    root = MainWindow()
+    root = MainWindow(None)
     root.show()
     app.exec()
 
