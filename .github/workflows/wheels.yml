@@ -28,7 +28,7 @@ jobs:
         run: (cd MDANSE && python -m pip install -r requirements.txt)
 
       - name: Build wheels
-        run: (cd MDANSE && python setup.py bdist_wheel)
+        run: (cd MDANSE && python -m build)
         # to supply options, put them in 'env', like:
         # env:
         #   CIBW_SOME_OPTION: value
@@ -77,7 +77,7 @@ jobs:
         run: (cd MDANSE_GUI && python -m pip install -r requirements.txt)
 
       - name: Build wheels
-        run: (cd MDANSE_GUI && python setup.py bdist_wheel)
+        run: (cd MDANSE_GUI && python -m build)
         # to supply options, put them in 'env', like:
         # env:
         #   CIBW_SOME_OPTION: value
