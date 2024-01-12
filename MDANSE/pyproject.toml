@@ -45,7 +45,11 @@ documentation = "https://mdanse.readthedocs.io/en/latest/"
 repository = "https://github.com/ISISNeutronMuon/MDANSE"
 
 [tool.setuptools]
-package-dir = {"MDANSE" = "src"}
+package-dir = {"" = "src"}
+
+[project.scripts]
+mdanse = "MDANSE.Scripts.mdanse:main"
+mdanse_job = "MDANSE.Scripts.mdanse_job:main"
 
 # [tool.setuptools.packages.find]
 # where = ["src"]

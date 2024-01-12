@@ -20,7 +20,7 @@ The current version of MDANSE is currently still at the _alpha_ stage. Once the 
 
 ## Quick start
 
-The untested version of MDANSE can be downloaded from GitHub Actions as a Python wheel. There is one wheel for the main code ('MDANSE'), platform depenedent, and another for the GUI ('MDANSE_GUI'). Once downloaded, they can be installed by typing `pip install MDANSE-*.whl`. The GUI script is named *mdanse_gui*, and will be installed in the `bin/` or `Scripts/` directory of your Python virtual environment. Start it by typing `python PATH/TO/mdanse_gui`.
+The untested version of MDANSE can be downloaded from GitHub Actions as a Python wheel. There is one wheel for the main code ('MDANSE'), platform depenedent, and another for the GUI ('MDANSE_GUI'). Once downloaded, they can be installed by typing `pip install MDANSE-*.whl`. The GUI script can be run using the *mdanse_gui* command (*mdanse_gui* on windows).
 
 The typical workflow will look as follows:
 

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # **************************************************************************
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
@@ -15,10 +13,13 @@
 #
 # **************************************************************************
 
-if __name__ == "__main__":
-    
-    from MDANSE.GUI.Apps import PlotterApp
-    
-    app = PlotterApp()
+
+def main():
+    from MDANSE.GUI.Apps import UserDefinitionViewerApp
+
+    app = UserDefinitionViewerApp(None)
     app.MainLoop()
-    
+
+
+if __name__ == "__main__":
+    main()

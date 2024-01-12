@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # **************************************************************************
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
@@ -15,10 +13,14 @@
 #
 # **************************************************************************
 
-if __name__ == '__main__':
-    from MDANSE_GUI.PyQtGUI.ElementsDatabaseEditor import ElementsDatabaseEditor, QApplication
-    import sys
-    app = QApplication(sys.argv)
-    root = ElementsDatabaseEditor()
-    root.show()
-    app.exec()
+import sys
+
+
+def main():
+    from MDANSE_GUI.PyQtGUI.main import startGUI
+
+    startGUI(sys.argv)
+
+
+if __name__ == "__main__":
+    main()

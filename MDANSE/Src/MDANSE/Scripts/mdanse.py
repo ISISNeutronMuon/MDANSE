@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # **************************************************************************
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
@@ -384,7 +382,7 @@ class CommandLineParser(optparse.OptionParser):
             return
 
 
-if __name__ == "__main__":
+def main():
     from MDANSE.__pkginfo__ import __version__, __date__
 
     # Creates the option parser.
@@ -457,3 +455,7 @@ if __name__ == "__main__":
 
     # The command line is parsed.
     options, _ = parser.parse_args()
+
+
+if __name__ == "__main__":
+    main()

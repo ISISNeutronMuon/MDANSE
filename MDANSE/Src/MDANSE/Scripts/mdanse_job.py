@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # **************************************************************************
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
@@ -39,7 +37,7 @@ def parse_args():
     return args
 
 
-if __name__ == "__main__":
+def main():
     from MDANSE import REGISTRY
     from MDANSE.GUI.Apps import JobApp
 
@@ -60,3 +58,7 @@ if __name__ == "__main__":
 
     app = JobApp(job, trajectory)
     app.MainLoop()
+
+
+if __name__ == "__main__":
+    main()
