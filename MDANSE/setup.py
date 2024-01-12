@@ -164,12 +164,6 @@ def find_data(
 PACKAGE_INFO = {}
 exec(open("Src/MDANSE/__pkginfo__.py", "r").read(), {}, PACKAGE_INFO)
 
-#################################
-# Package data section
-#################################
-
-# Retrieve all the data related to the MDANSE package.
-PACKAGE_DATA = find_package_data(where="Src", package="MDANSE", show_ignored=False)
 
 #################################
 # User data section
@@ -178,12 +172,6 @@ PACKAGE_DATA = find_package_data(where="Src", package="MDANSE", show_ignored=Fal
 DATA_FILES = []
 DATA_FILES.extend(find_data("Doc", exclude=[], prefix="conf_"))
 
-#################################
-# Scripts section
-#################################
-
-SCRIPTS_PATH = "Scripts"
-SCRIPTS = glob.glob(os.path.join(SCRIPTS_PATH, "mdanse*"))
 
 #################################
 # Documentation
@@ -401,11 +389,9 @@ setup(
     license=PACKAGE_INFO["__license__"],
     packages=find_packages("Src"),
     package_dir={"": "Src"},
-    package_data=PACKAGE_DATA,
     data_files=DATA_FILES,
     platforms=["Unix", "Windows"],
     ext_modules=EXTENSIONS,
-    scripts=SCRIPTS,
     cmdclass=CMDCLASS,
     # entry_points     = {"console_scripts": []}
     install_requires=[

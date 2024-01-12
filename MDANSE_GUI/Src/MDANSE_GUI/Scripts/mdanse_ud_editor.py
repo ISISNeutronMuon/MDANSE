@@ -13,13 +13,13 @@
 #
 # **************************************************************************
 
+
 def main():
-    
     from MDANSE.GUI.Apps import UserDefinitionViewerApp
 
     app = UserDefinitionViewerApp(None)
     app.MainLoop()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

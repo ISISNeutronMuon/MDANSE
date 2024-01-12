@@ -13,12 +13,13 @@
 #
 # **************************************************************************
 
+
 def main():
     from MDANSE.GUI.Apps import PlotterApp
-    
+
     app = PlotterApp()
     app.MainLoop()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

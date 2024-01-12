@@ -13,14 +13,19 @@
 #
 # **************************************************************************
 
+
 def main():
-    from MDANSE_GUI.PyQtGUI.ElementsDatabaseEditor import ElementsDatabaseEditor, QApplication
+    from MDANSE_GUI.PyQtGUI.ElementsDatabaseEditor import (
+        ElementsDatabaseEditor,
+        QApplication,
+    )
     import sys
+
     app = QApplication(sys.argv)
     root = ElementsDatabaseEditor()
     root.show()
     app.exec()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

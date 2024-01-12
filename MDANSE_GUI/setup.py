@@ -131,19 +131,6 @@ def find_data(where=".", exclude=EXCLUDE, exclude_directories=EXCLUDE_DIRECTORIE
 PACKAGE_INFO = {}
 exec(open('Src/MDANSE_GUI/__pkginfo__.py','r').read(), {}, PACKAGE_INFO)
 
-#################################
-# Package data section
-#################################
-
-# Retrieve all the data related to the MDANSE package.
-PACKAGE_DATA = find_package_data(where='Src', package='MDANSE_GUI', show_ignored=False)
-
-#################################
-# Scripts section
-#################################
-
-SCRIPTS_PATH = "Scripts"
-SCRIPTS = glob.glob(os.path.join(SCRIPTS_PATH,'mdanse*'))
 
 #################################
 # Documentation
@@ -257,9 +244,7 @@ setup (name             = "MDANSE GUI",
        license          = PACKAGE_INFO["__license__"],
        packages=find_packages("Src"),
        package_dir={"": "Src"},
-       package_data     = PACKAGE_DATA,
        platforms        = ['Unix','Windows'],
-       scripts          = SCRIPTS,
        cmdclass         = CMDCLASS,
        # entry_points     = {"console_scripts": []}
        install_requires = [pr.requirement for pr in parse_requirements('requirements.txt', session= PipSession())],
