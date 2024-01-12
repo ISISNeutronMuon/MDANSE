@@ -34,9 +34,18 @@ class MillerIndicesQVectors(LatticeQVectors):
         },
     )
     settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
-    settings["h"] = ("RangeConfigurator", {"includeLast": True, "default": (0, 8, 1)})
-    settings["k"] = ("RangeConfigurator", {"includeLast": True, "default": (0, 8, 1)})
-    settings["l"] = ("RangeConfigurator", {"includeLast": True, "default": (0, 8, 1)})
+    settings["h"] = (
+        "RangeConfigurator",
+        {"includeLast": True, "default": (0, 8, 1), "valueType": int},
+    )
+    settings["k"] = (
+        "RangeConfigurator",
+        {"includeLast": True, "default": (0, 8, 1), "valueType": int},
+    )
+    settings["l"] = (
+        "RangeConfigurator",
+        {"includeLast": True, "default": (0, 8, 1), "valueType": int},
+    )
 
     def _generate(self):
         hSlice = slice(
