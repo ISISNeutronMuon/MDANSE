@@ -193,8 +193,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
         f.write("\n")
 
         f.write('if __name__ == "__main__":\n')
-        f.write("    %s = IJob.create(%r)\n" % (cls._type, cls.__name__))
-        f.write("    %s.run(parameters,status=True)" % (cls._type))
+        f.write("    instance = IJob.create(%r)\n" % (cls.__name__))
+        f.write("    instance.run(parameters,status=True)")
 
         f.close()
 
