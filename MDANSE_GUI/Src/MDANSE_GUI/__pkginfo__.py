@@ -25,13 +25,12 @@ __author__ = "M.Bartkowiak, R. Perenon, E.C. Pellegrini, S. Mukhopadhyay, R. Tur
 
 __author_email__ = (
     "maciej.bartkowiak@stfc.ac.uk, "
-    "perenon@ill.fr, pellegrini@ill.fr, sanghamitra.mukhopadhyay@stfc.ac.uk, "
-    "rastislav.turanyi@stfc.ac.uk"
+    "sanghamitra.mukhopadhyay@stfc.ac.uk"
 )
 
-__maintainer__ = "R. Perenon, S. Mukhopadhyay"
+__maintainer__ = "S. Mukhopadhyay"
 
-__maintainer_email__ = "perenon@ill.fr, sanghamitra.mukhopadhyay@stfc.ac.uk"
+__maintainer_email__ = "sanghamitra.mukhopadhyay@stfc.ac.uk"
 
 __former_contributors__ = "G. Goret, B. Aoun, E.C. Pellegrini"
 
@@ -41,9 +40,9 @@ __repo__ = "https://github.com/ISISNeutronMuon/MDANSE"
 
 __license__ = "GPL 3"
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 
-__date__ = "01-01-1970"
+__date__ = "01-10-2023"
 
 __commit__ = "undefined"
 

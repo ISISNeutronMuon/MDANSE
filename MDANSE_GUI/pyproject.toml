@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MDANSE_GUI"
-version = "0.0.1"
+version = "0.1.0"
 description = 'MDANSE GUI package - the graphical interface for MDANSE'
 readme = "README.md"
 requires-python = ">=3.9"
@@ -34,7 +34,8 @@ dependencies = [
   "vtk",
   "MDANSE",
   "PyYAML",
-  "PyQt6"
+  "PyQt6",
+  "netCDF4"
 ]
 
 # dynamic = ["version", "description"]

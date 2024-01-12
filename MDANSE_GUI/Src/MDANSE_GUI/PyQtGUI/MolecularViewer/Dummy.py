@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/pygenplot/__init__.py
+# @file      Src/PyQtGUI/Plotter/__init__.py
 # @brief     extension of the waterstay code
 #
 # @homepage  https://mdanse.org

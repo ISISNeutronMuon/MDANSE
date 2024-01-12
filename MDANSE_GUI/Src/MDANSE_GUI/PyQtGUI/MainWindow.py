@@ -66,7 +66,7 @@ from MDANSE_GUI.PyQtGUI.Widgets.TrajectoryViewer import TrajectoryViewer
 from MDANSE_GUI.PyQtGUI.MolecularViewer.MolecularViewer import MolecularViewer
 from MDANSE_GUI.PyQtGUI.MolecularViewer.Controls import ViewerControls
 from MDANSE_GUI.PyQtGUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
-from MDANSE_GUI.PyQtGUI.pygenplot.widgets.main_window import MainWindow
+from MDANSE_GUI.PyQtGUI.Plotter.widgets.main_window import MainWindow
 
 
 class LoaderButton(QToolButton):
