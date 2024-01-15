@@ -12,9 +12,6 @@ of vectors representing molecule extent in three orthogonal directions.
 This feature assists users in effectively utilizing the Angular Correlation
 to gain insights into the dynamics of molecular systems.
 
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
-
 2. **Load Molecular Data:**
    - Load the relevant trajectory or molecular data using the "File" menu.
 
@@ -60,9 +57,6 @@ Density Of States
 The Density Of States analysis aids in calculating the power spectrum of the
 VACF (Velocity Autocorrelation Function) to define the discrete DOS (Density Of
 States). This gives a comprehensive understanding of molecular dynamics.
-
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Molecular Data:**
    - Load the relevant trajectory or molecular data using the "File" menu.
@@ -119,8 +113,6 @@ General AutoCorrelation Function
 The General AutoCorrelation Function calculates the autocorrelation function
 for a selected variable, typically used for position autocorrelation.
 
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Molecular Data:**
    - Load the relevant trajectory or molecular data using the "File" menu.
@@ -173,9 +165,6 @@ to assist users in effectively utilizing the Mean Square Displacement feature to
 comprehend the dynamics of molecular systems and explore characteristic time scales
 of the system's behavior.
 
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
-
 2. **Load Molecular Data:**
    - Load the relevant trajectory or molecular data using the "File" menu.
 
@@ -220,9 +209,6 @@ The Order Parameter facilitates the study of conformational dynamics of proteins
 guide aims to assist users in effectively utilizing the Order Parameter feature to
 gain insights into the behavior and structural changes of proteins in molecular systems.
 
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
-
 2. **Load Molecular Data:**
    - Load the relevant trajectory or molecular data using the "File" menu.
 
@@ -266,9 +252,6 @@ Position AutoCorrelation Function
 **Purpose:**
 The Position AutoCorrelation Function analysis focuses on position autocorrelation.
 This gains insights into the positional dynamics of molecular systems.
-
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Molecular Data:**
    - Load the relevant trajectory or molecular data using the "File" menu.

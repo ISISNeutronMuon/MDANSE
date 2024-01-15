@@ -8,6 +8,7 @@ Analysis: Structure
 
 Area Per Molecule
 '''''''''''''''''
+
 The Area Per Molecule (APM) analysis in Molecular Dynamics (MD) assesses the surface
 area occupied by each molecule within a given system. This tool plays a crucial role
 in comprehending molecular arrangement and interactions. Users can specify the
@@ -24,6 +25,7 @@ to advancements in fields like biophysics and structural biology.
 
 Coordination Number
 '''''''''''''''''''
+
 In chemistry, the Coordination Number (CN) is the total number of neighbors
 of a central atom in a molecule or ion. CN plays a vital role in the analysis
 of complex molecular systems in simulations, serving several key purposes:
@@ -95,8 +97,6 @@ cumulative *CN*. *MDANSE* computes all these variations.
 Density Profile
 '''''''''''''''
 
--  available for trajectories only
-
 The Density Profile analysis in MDANSE calculates the spatial
 distribution of particles or molecules along a specified axis within a
 simulation box. This analysis provides valuable insights into how the density of
@@ -111,10 +111,7 @@ regions of interest and tracking changes over time in molecular simulations.
 Eccentricity
 ''''''''''''
 
--  available for trajectories only
-
-
-*Description:* Eccentricity analysis in MDANSE quantifies how elongated or
+Eccentricity analysis in MDANSE quantifies how elongated or
 flattened molecules are, revealing valuable insights into their shape and
 structure. Researchers use it to understand molecular geometry and
 conformation, aiding the differentiation of molecules by shape. This analysis is
@@ -125,7 +122,7 @@ characterizing molecular shape and morphology.
 Molecular Trace
 '''''''''''''''
 
-*Description:* Molecular Trace in MDANSE pertains to a calculation or property
+Molecular Trace in MDANSE pertains to a calculation or property
 related to the analysis of molecular structures within the context of neutron
 scattering experiments or molecular dynamics simulations. The "resolution"
 parameter in this context determines the level of detail with which molecular
@@ -146,11 +143,6 @@ detail of the analysis.
 
 Pair Distribution Function
 ''''''''''''''''''''''''''
-
-.. _theory-and-implementation-11:
-
-Theory and implementation
-                         
 
 The Pair Distribution Function (*PDF*) is an example of a pair
 correlation function, which describes how, on average, the atoms in a
@@ -297,8 +289,6 @@ where Nt is the number of frames and
 Root Mean Square Fluctuation
 ''''''''''''''''''''''''''''
 
--  available for trajectories only
-
 Root Mean Square Fluctuation (RMSF) assesses how the positions of atoms or
 molecules within a system fluctuate over time. Specifically, RMSF measures the
 average magnitude of deviations or fluctuations in atomic positions from their
@@ -310,14 +300,10 @@ groups of atoms exhibit significant fluctuations. This information can be crucia
 for studying the dynamic behavior of biomolecules, protein-ligand interactions,
 or any molecular system subject to temporal variations.
 
+
 Radius Of Gyration
 ''''''''''''''''''
-
-.. _theory-and-implementation-13:
-
-Theory and implementation
                          
-
 Radius Of Gyration (*ROG*) is the name of several related measures of
 the size of an object, a surface, or an ensemble of points. It is
 calculated as the Root Mean Square Distance between the system and a
@@ -364,9 +350,6 @@ where N\ :sub:`t` is the number of frames and Δt is the time step.
 Solvent Accessible Surface
 ''''''''''''''''''''''''''
 
--  available for trajectories only
-
-
 The Solvent Accessible Surface calculation involves defining the surface
 accessibility of molecules or atoms by creating a mesh of points. The
 number of points is determined by the field discussed, influencing the
@@ -382,14 +365,9 @@ smaller surface features and intricacies.
 
 Spatial Density
 '''''''''''''''
-
-.. _theory-and-implementation-14:
-
-Theory and implementation
                          
-
 The Spatial Density (*SD*) can be seen as a generalization of the pair
-distribution function. Indeed, pair distribution functions are defined
+distribution function. Pair distribution functions are defined
 as orientationally averaged distribution functions. Although these
 correlation functions reflect many key features of the short-range order
 in molecular systems, it should be realized that an average spatial
@@ -497,7 +475,6 @@ following way:
 
 Static Structure Factor
 '''''''''''''''''''''''
-
 
 The **Static Structure Factor** analysis offers a convenient method to
 calculate the static coherent structure factor, represented as S(q), where

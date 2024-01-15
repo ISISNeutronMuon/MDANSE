@@ -4,9 +4,6 @@ How to Guide: FCA algorithm
 Guide Steps
 '''''''''''
 
-1. **Launch MDANSE**
-   - Open the MDANSE software on your computer.
-
 2. **Load Molecular Data**
 - Use the software's "File" menu to import the molecular
 trajectory data.

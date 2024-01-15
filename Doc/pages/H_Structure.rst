@@ -10,8 +10,6 @@ by each molecule within a molecular system. This is essential for understanding
 the spatial distribution of molecules and their interactions with the surrounding
 environment.
 
-1. **Launch MDANSE**:
-   - Open the MDANSE software on your computer.
 
 2. **Load Molecular Data**:
    - Click on the "File" menu.
@@ -48,8 +46,6 @@ atoms or molecules that are within a specified distance of a central atom or
 molecule. This is crucial for understanding the local environment and bonding in a
 material or molecular system.
 
-1. **Launch MDANSE**:
-   - Open the MDANSE software on your computer.
 
 2. **Load Atomic or Molecular Data**:
    - Click on the "File" menu.
@@ -96,9 +92,6 @@ Index : GUI Density Profile
 particles or molecules along a specific axis within a simulation box. It provides
 insights into how the density of particles varies across the system.
 
-1. **Launch MDANSE**:
-   - Open the MDANSE software on your computer.
-
 2. **Load Atomic or Molecular Data**:
    - Click on the "File" menu.
    - Select "Load Atomic/Molecular Data" and choose your data file.
@@ -139,8 +132,6 @@ Index 4: GUI Eccentricity
 within a molecular system. Eccentricity measures how elongated or flattened a
 molecule is, providing insights into its shape and structure.
 
-1. **Launch MDANSE**:
-   - Open the MDANSE software on your computer.
 
 2. **Load Molecular Data**:
    - Click on the "File" menu.
@@ -178,8 +169,7 @@ can gain valuable insights into the movement, behavior, and interactions of thes
 molecular components, aiding in the comprehensive analysis of the system's dynamics.
 
 
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
+.
 
 2. **Load Atomic Data:**
    - Load the trajectory data or the relevant atomic information using the "File"
@@ -226,8 +216,6 @@ atom within a material or system. It provides insights into the atomic radial
 packing, helping researchers understand the spatial distribution of atoms.
 
 
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Atomic Data:**
    - Click on the "File" menu.
@@ -267,10 +255,6 @@ Index : GUI Static Structure Factor (General)
 structure factor, which characterizes the atomic arrangements in reciprocal
 space. It is particularly useful for understanding the scattering of X-rays or
 neutrons from a material, providing information about its crystalline structure.
-
-Tutorial Steps:
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Atomic Data:**
    - Click on the "File" menu.
@@ -313,9 +297,6 @@ measuring the structural similarity or deviation between different frames or
 configurations of a molecular system. It helps track how a molecular structure
 changes over time.
 
-Tutorial Steps:
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Atomic Data:**
    - Click on the "File" menu.
@@ -350,10 +331,6 @@ Index : GUI Radius Of Gyration (ROG)
 calculates how compact a molecule is. It's determined by the average distance of
 the molecule's atoms from its center of mass. This helps in understanding the
 size and spread of molecules, especially larger ones like proteins.
-
-
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Atomic Data:**
    - Click on the "File" menu.
@@ -390,9 +367,6 @@ Index : GUI Solvent Accessible Surface
 accessible to a solvent molecule within a molecular system. This analysis provides
 valuable information about the surface properties of molecules and their
 interactions with solvent molecules.
-
-1. **Launch MDANSE**:
-   - Begin by opening the MDANSE software on your computer.
 
 2. **Load Molecular Data**:
    - Access the "File" menu.
@@ -434,9 +408,6 @@ Spatial Density (SD)
 of atoms or molecules in a material, revealing density variations across different
 regions. This information is key for insights into the material's structural and
 physical properties.
-
-1. **Launch MDANSE**:
-   - Open the MDANSE software on your computer.
 
 2. **Load Atomic Data**:
    - Click on the "File" menu.
@@ -481,9 +452,6 @@ interaction of atoms or molecules. This is crucial for understanding the
 internal structure of both ordered and disordered materials, from crystals to
 glasses and liquids, at the atomic level.
 
-
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Atomic Data:**
    - Click on the "File" menu.
@@ -530,9 +498,6 @@ partitions space into cells around each atom or molecule in a system. This
 provides valuable insights into the spatial arrangement of particles.
 
 
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
-
 2. **Load Atomic or Molecular Data:**
    - Click on the "File" menu.
    - Select "Load Atomic/Molecular Data" and choose your data file.
@@ -567,9 +532,6 @@ Index 13: GUI Static Structure Factor (X-ray)
 **Purpose:** Calculate the X-ray Static Structure Factor. This analysis provides
 detailed insights into the arrangement of atoms or molecules within the material,
 helping to understand its crystalline or amorphous structure.
-
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Atomic Data:**
    - Click on the "File" menu.

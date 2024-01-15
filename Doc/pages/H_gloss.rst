@@ -12,8 +12,6 @@ structure of MDANSE Analysis windows and guides you through the process of
 customizing parameters for specific analyses.
 
 1. **Access an Analysis Tool:**
-   - Begin by launching MDANSE on your computer. Ensure you have the relevant data
-     and project loaded.
    - Access the desired analysis tool tailored to your specific research needs by
      navigating to the "Analysis" section in MDANSE.
 
@@ -51,9 +49,6 @@ customizing parameters for specific analyses.
 
 5. **Utilize the Buttons:**
    - At the bottom of the Analysis window, you'll find several buttons:
-     - **Help:** Clicking this button opens the source code documentation for the
-       relevant analysis class in an MDANSE window. This resource provides in-depth
-       guidance on parameter settings, ideal for advanced users.
      - **Save:** Use the "Save" button to preserve the current analysis, including
        your configured options, into a Python script. This script can be executed
        from the command line, promoting reproducibility and automation.
@@ -64,36 +59,6 @@ customizing parameters for specific analyses.
        not always display in the Jobs panel.
 
 
-Frames
-------
-
-**Step 1: Launch MDANSE**
-
-Begin by opening the MDANSE software on your computer.
-
-**Step 2: Load Molecular Data**
-
-Import the relevant trajectory or molecular data into MDANSE using the "File" menu.
-
-**Step 3: Access "Frames" Configuration**
-
-Navigate to the "Analysis" section within the MDANSE interface, where you'll find
-the "Frames" parameter.
-
-**Step 4: Configure "Frames" Parameters**
-
-Customize your analysis by specifying the following parameters:
-
-- **First Frame (Default: 0):** Determine the starting frame for your analysis.
-  This frame signifies the beginning of data consideration.
-- **Last Frame (Default: Last frame in the trajectory):** Set the endpoint for
-  your analysis. This frame represents the conclusion of data inclusion.
-- **Frame Step (Default: 1):** Control the frequency of frame selection. A value
-  of 1 implies that all frames are analyzed, while higher values skip frames in
-  defined intervals.
-
-Adjust these parameters to align with your specific analysis requirements,
-ensuring you select the appropriate frames for a meaningful outcome.
 
 
 Q Shells
@@ -123,13 +88,8 @@ To effectively configure Q Shells in your MDANSE analysis, follow these steps:
        spacing between Q vectors. Adjust the "Width" parameter accordingly when
        changing the step.
 
-**Step 2: Understand Units**
 
-It's essential to note that the unit for the Q-vector length in MDANSE is \text{nm}^{-1}.
-This unit represents the reciprocal length in nanometers and is a fundamental aspect
-of interpreting Q-shell parameters.
-
-**Step 3: Adjust for Specific Analysis**
+**Step 2: Adjust for Specific Analysis**
 
 Customize the Q shell parameters based on the specific requirements of your analysis:
 
@@ -148,34 +108,6 @@ how well you configure the Q Shells. Properly adjusted Q shell parameters enable
 to extract valuable insights from scattering experiments and advance your understanding
 of molecular systems.
 
-Output Files
-============
-
-**Purpose:**
-The "Output Files" parameter determines where the analysis results are stored,
-allowing you to organize and manage your data effectively.
-
-**Step 1: Access the Output Files Configuration**
-
-In your MDANSE analysis, locate the "Output Files" configuration, which is
-typically found at the bottom of the analysis window.
-
-**Step 2: Define Output File Location and Format**
-
-The "Output Files" parameter consists of two parts:
-- **Output files (Default: hdf5_output_directory_path<trajectory_filename>_<analysis_acronym>):**
-  This determines the location where the analysis results will be stored. Click
-  the "Browse" button to select a suitable storage location using the file
-  browser.
-- **Output formats (Default: HDF5):**
-  Specify the file format for input and output files. You can choose from HDF5 or
-  other supported formats, as available in MDANSE.
-
-**Step 3: Customize Output File Naming**
-
-You can customize the output file naming conventions to suit your organizational
-needs and analysis workflow. Ensure that your chosen file format aligns with your
-data analysis tools.
 
 Creating Selections
 ===================
@@ -243,7 +175,7 @@ such as Angular Correlation and Order Parameter.
 Selection/Reference Basis configuration. This section enables you to select
 reference axes for your analysis.
 
-**Step 2: Choose or Create Definitions**
+**Step 2: Create Definitions**
 
 - From the drop-down menu, select one of the existing axis definitions. These
   definitions are based on the number of selected atoms required for the
@@ -318,9 +250,6 @@ particles, enhancing the precision and relevance of your results.
 Atom Transmutation
 ------------------
 
-Creating Spherical Lattice Vectors
-------------------------------------
-
 **Purpose:** Atom Transmutation in MDANSE simulates isotopic substitution,
 allowing you to define the atomic makeup of selected particles.
 
@@ -344,6 +273,9 @@ Atom Transmutation allows you to customize the atomic composition of selected
 particles, particularly useful for simulating isotopic substitutions in your
 analysis.
 
+Creating Spherical Lattice Vectors
+------------------------------------
+
 **Purpose:**
 
 Spherical Lattice Vectors in MDANSE are used to generate a set of hkl vectors
@@ -361,18 +293,18 @@ When configuring Spherical Lattice Vectors in MDANSE, it's essential to specify
 the following parameters:
 
 **Seed:**
-- [Default: 0]
+- (Default: 0)
 - The "Seed" parameter is an integer used to initialize the random number
   generation process, ensuring reproducibility. Modify it for different vector
   sets.
 
 **Q Shells:**
-- [Default: 50]
+- (Default: 50)
 - The "Q Shells" parameter, an integer, determines the number of hkl vectors in
   each shell. More vectors increase accuracy but extend computation time.
 
 **Width:**
-- [Default: 1.0]
+- (Default: 1.0)
 - The "Width" parameter, a float, sets the tolerance for each shell. Usually, it
   matches the step value. A smaller width improves Q resolution. Adjust it as
   needed for your analysis.
@@ -407,7 +339,7 @@ vectors are now ready to be used in your analysis.
 Circular Lattice vectors 
 --------------------------
 
-Purpose
+**Purpose**
 
 The purpose of this guide is to help users generate Q vectors within the
 software interface. Q vectors are generated based on specified axis components to
@@ -464,7 +396,7 @@ configurations.
 
 
 Generate Linear Vectors
-=======================
+------------------------
 
 Linear Vectors in the software allow you to generate vectors along a specific
 direction determined by an axis. Here's how to use this feature:
@@ -515,7 +447,7 @@ direction determined by an axis. Here's how to use this feature:
 
 
 Generate Grid Vectors
-=====================
+---------------------
 
 Grid Vectors in the software allow you to generate hkl vectors within a specified
 range and group them according to a qstep. Follow these steps:
@@ -559,7 +491,7 @@ range and group them according to a qstep. Follow these steps:
 
 
 Generate Approximated Dispersion Vectors
-========================================
+-----------------------------------------
 
 The Approximated Dispersion Vectors feature allows you to generate Q vectors along
 a line connecting two input Q points. Follow these steps:
@@ -603,7 +535,7 @@ a line connecting two input Q points. Follow these steps:
    - Click the "Save" button to save the vectors. The tool will not close
 
 Group Coordinates 
-===================
+------------------
 
 1. **Accessing Group Coordinates:**
 
@@ -670,7 +602,13 @@ Group Coordinates
      vary depending on the system's nature and input data interpretation.
 
 Instrument Resolution 
-=======================
+----------------------
+**Purpose**
+
+   The instrument resolution serves the crucial purpose of smoothing the data in the
+   time domain before performing a Fourier Transform into the frequency domain. This
+   smoothing helps avoid numerical artifacts and ensures more accurate and reliable
+   results in your analysis.
 
 1. **Accessing Instrument Resolution:**
 
@@ -722,27 +660,11 @@ Instrument Resolution
    factor for Gaussian resolution is σ ≈ 0.65 ps⁻¹, corresponding to a 1 meV
    resolution.
 
-6. **Purpose of Instrument Resolution:**
-
-   The instrument resolution serves the crucial purpose of smoothing the data in the
-   time domain before performing a Fourier Transform into the frequency domain. This
-   smoothing helps avoid numerical artifacts and ensures more accurate and reliable
-   results in your analysis.
-
-7. **Analysis Compatibility:**
-
-   You can apply the "Instrument Resolution" parameter to various analyses within
-   MDANSE, including Density of States, Neutron Dynamic Total Structure Factor,
-   Current Correlation Function, and more. Depending on the analysis, the instrument
-   resolution can be customized to suit your specific needs.
-
-   For each analysis, consult the documentation to understand how to input and
-   customize the instrument resolution parameters according to your analysis goals.
 
 Setting Interpolation Order 
-================================
-
+---------------------------
 **Purpose:**
+
 The interpolation order in MDANSE allows you to control the precision and
 accuracy of velocity data interpolation. This feature is essential for
 analyses that require atomic velocity data, ensuring reliable results.
@@ -787,14 +709,10 @@ MDANSE for your specific analysis needs, ensuring precise velocity data handling
 
 
  Weights
-=========
+---------
 
 **Purpose:** Adjust how atoms or elements contribute to property
 calculations.
-
-**Step 1: Launch MDANSE**
-
-   - Open MDANSE on your computer to begin your analysis.
 
 **Step 2: Load Molecular Data**
 

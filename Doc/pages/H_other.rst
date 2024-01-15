@@ -9,7 +9,6 @@ The Infrared: Dipole AutoCorrelation Function analysis focuses on studying
 molecular vibrations and infrared spectra using dipole auto-correlation.
 
 1. **Load Trajectory Data:**
-   - Open MDANSE on your computer.
    - Click on the "File" menu.
    - Select "Load Trajectory Data" and choose your trajectory file.
 
@@ -46,7 +45,6 @@ The Macromolecules: Refolded Membrane Trajectory analysis focuses on the
 manipulation and examination of membrane structures.
 
 1. **Load Trajectory Data:**
-   - Open MDANSE on your computer.
    - Click on the "File" menu.
    - Select "Load Trajectory Data" and choose your trajectory file.
 
@@ -80,7 +78,6 @@ Thermodynamics: Density
 The Thermodynamics: Density analysis focuses on calculating the density of a molecular system.
 
 1. **Load Trajectory Data:**
-   - Open MDANSE on your computer.
    - Click on the "File" menu.
    - Select "Load Trajectory Data" and choose your trajectory file.
 
@@ -110,7 +107,6 @@ The Thermodynamics: Density analysis focuses on calculating the density of a
 molecular system.
 
 1. **Load Trajectory Data:**
-   - Open MDANSE on your computer.
    - Click on the "File" menu.
    - Select "Load Trajectory Data" and choose your trajectory file.
 
@@ -142,7 +138,6 @@ The Thermodynamics: Temperature analysis focuses on calculating the temperature 
 a molecular system.
 
 1. **Load Trajectory Data:**
-   - Open MDANSE on your computer.
    - Click on the "File" menu.
    - Select "Load Trajectory Data" and choose your trajectory file.
 
@@ -176,7 +171,6 @@ molecular dynamics simulation by focusing on the motion of groups of atoms, such
 as molecules or subunits.
 
 1. **Load Trajectory Data:**
-   - Open MDANSE on your computer.
    - Click on the "File" menu.
    - Select "Load Trajectory Data" and choose your trajectory file.
 
@@ -234,7 +228,6 @@ The Global Motion Filtered Trajectory analysis separates global motion from inte
 motion within the trajectory, focusing on relevant internal dynamics.
 
 1. **Load Trajectory Data:**
-   - Open MDANSE on your computer.
    - Click on the "File" menu.
    - Select "Load Trajectory Data" and choose your trajectory file.
 

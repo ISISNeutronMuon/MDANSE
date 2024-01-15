@@ -18,18 +18,33 @@ aspect is present in `Appendix 2 <#_Appendix_2>`__.
 
 Theory and background
 '''''''''''''''''''''
-Dynamic Structure Factor (S(q, ω)): *, S(**q**, :math:`\omega`),This is a central concept in neutron scattering experiments. It describes how the scattering intensity varies with changes in momentum (denoted as 'q') and energy (denoted as 'ω') transfer during the scattering process. This factor is crucial in understanding the atomic and molecular structure of materials
+**Dynamic Structure Factor (S(q, ω)):** S(**q**, :math:`\omega`) is a central
+concept in neutron scattering experiments. This factor characterizes how
+scattering intensity changes with alterations in momentum (q) and energy (ω)
+during scattering events. It is instrumental in unraveling the atomic and
+molecular structures of materials.
 
-Dynamic Structure Factor is closely related to the double differential cross-section Double Differential Cross-Section[7]: This term refers to a detailed measurement in neutron scattering. It quantifies the number of neutrons scattered into specific angles (solid angle interval Ω) :math:`{\left\lbrack {\Omega,{\Omega + d}\Omega} \right\rbrack}`and energy ranges (energy interval E). :math:`{d^{2}{\sigma/\mathit{d\Omega dE}}}`.This measurement is essential for analyzing how neutrons interact with the material being studied.
-
-To make meaningful comparisons and interpret these measurements, the double differential cross-section is normalized.These wave numbers are related to the corresponding neutron energies. Therefore, by normalizing the double differential cross-section using these factors, scientists can extract valuable information about the atomic and molecular properties of materials from neutron scattering experiments, while ensuring that the results are comparable across different experimental setups and conditions It is normalized to d, *dE*, and the flux of the incoming neutrons. The relationship between the double differential cross-section and the dynamic structure factor is given by:
+**Double Differential Cross-Section:** (S(q, ω) is closely related to the
+Double Differential Cross-Section[7], which is a vital measurement in neutron
+scattering. The double differential cross-section is defined as the number of
+neutrons scattered per unit time into the solid angle interval
+:math:`{\left\lbrack {\Omega,{\Omega + d}\Omega} \right\rbrack}` and into the
+energy interval (energy interval E). :math:`{d^{2}{\sigma/\mathit{d\Omega
+dE}}}`. To make meaningful comparisons, the double differential cross-section
+is normalized by d, dE, and the flux of the incoming neutrons. The relationship
+between the double differential cross-section and the dynamic structure factor
+is given by:
 
 .. math::
    :label: pfx55
 
    {{\frac{d^{2}\sigma}{d\Omega\mathit{dE}} = N}\cdot\frac{k}{k_{0}}S\left( {q,\omega} \right).}
 
-This equation relates the double differential cross-section, which represents the number of neutrons scattered per unit time into specific solid angle and energy intervals, to the dynamic structure factor, S(q, ω). It includes terms related to the number of atoms (N) and wave numbers of scattered (k) and incident (k0) neutrons.
+This equation relates the double differential cross-section, which represents
+the number of neutrons scattered per unit time into specific solid angle and
+energy intervals, to the dynamic structure factor, S(q, ω). It includes terms
+related to the number of atoms (N) and wave numbers of scattered (k) and
+incident (k0) neutrons.
 
 They are related to the corresponding neutron energies by
 
@@ -46,9 +61,14 @@ They are related to the corresponding neutron energies by
    {E_{0} = \hslash^{2}}k_{0}^{2}\text{/}2m
 
 
-These equations relate the neutron energies (E and E0) to their respective wave numbers (k and k0) using the mass of the neutron (m). They are fundamental for connecting energy and momentum in neutron scattering.
+These equations relate the neutron energies (E and E0) to their respective wave
+numbers (k and k0) using the mass of the neutron (m). They are fundamental for
+connecting energy and momentum in neutron scattering.
 
-These equations below define the dimensionless momentum (q) and energy (ω) transfer in units of the reduced Planck constant (ħ) based on the incident and scattered wave numbers and energies 
+**Dimensionless Momentum and Energy Transfer:** These equations below define the
+dimensionless momentum (q, dynamic structure factor) and energy (ω) transfer in
+units of the reduced Planck constant (ħ) based on the incident and scattered
+wave numbers and energies:
 
 .. math::
    :label: pfx58
@@ -60,25 +80,29 @@ These equations below define the dimensionless momentum (q) and energy (ω) tran
 
    {{\omega = \frac{E_{0} - E}{\hslash}}.}
 
-The modulus of the momentum transfer can be expressed in the scattering
-angle :math:`\theta` , the energy transfer, and the energy of the
-incident neutrons:
+Then, Expresses the modulus of the momentum transfer in terms of scattering
+angle, energy transfer, and incident neutron energy. See equations below:
 
 .. math::
    :label: pfx60
 
    {{q = \sqrt{{2 - \frac{\mathit{\hslash\omega}}{E_{0}} - 2}\cos{\theta\sqrt{2 - \frac{\mathit{\hslash\omega}}{E_{0}}}}}}.}
 
-This equation defines the dynamic structure factor (S(q, ω)) as a Fourier transform of the intermediate scattering function (F(q, t)) with respect to time (t). It captures information about the structure and dynamics of the scattering system.
-[Ref16]_. It can be written as
+
+
+**Intermediate Scattering Function (F(q, t)):**
+
+This equation defines the dynamic structure factor (S(q, ω)) as a Fourier
+transform of the intermediate scattering function (F(q, t)) with respect to
+time (t). It captures information about the structure and dynamics of the
+scattering system [Ref16]_. It can be written as:
 
 .. math::
    :label: pfx61
 
    {S{\left( {q,\omega} \right) = \frac{1}{2\pi}}{\int\limits_{- \infty}^{+ \infty}\mathit{dt}}\exp\left\lbrack {{- i}\omega t} \right\rbrack F\left( {q,t} \right).}
 
-F(**q**, t) is called the *intermediate scattering function* and is
-defined as
+F(**q**, t) is called the *intermediate scattering function* and is defined as
 
 .. math::
    :label: pfx62
@@ -106,6 +130,7 @@ The symbol :math:`\overline{...}` appearing in :math:`{\Gamma_{\mathit{\alpha\be
 denotes an average over isotopes and relative spin orientations of
 neutron and nucleus.
 
+**Coherent and Incoherent Scattering:**
 Usually, one splits the intermediate scattering function and the dynamic
 structure factor into their *coherent* and *incoherent* parts which
 describe collective and single particle motions, respectively. Defining
@@ -163,13 +188,15 @@ and :math:`\omega`\ :sub:`J,coh,inc` are defined in Section :ref:`target_CN`.
 The corresponding dynamic structure factors are obtained by performing
 the Fourier transformation defined in Eq. :math:numref:`pfx61`.
 
-This equation defines the static structure factor (S(q)) as an integral involving the dynamic structure factor and the coherent intermediate scattering function at zero time delay (t = 0).
+**Static Structure Factor (S(q)):**
+An important quantity describing structural properties of liquids is the static structure factor, which is defined above. (S(q)) as an integral involving the dynamic structure factor and the coherent intermediate scattering function at zero time delay (t = 0).
 
 .. math::
    :label: pfx73
 
    {\text{S}(q)\doteq{\int\limits_{- \infty}^{+ \infty}{d\omega}}\text{S}_{\mathit{coh}}\left( {q,\omega} \right)\text{F}_{\mathit{coh}}\left( {q,0} \right).}
 
+**Classical Framework and Corrections:**
 In the classical framework the intermediate scattering functions are
 interpreted as classical time correlation functions. The position
 operators are replaced by time-dependent vector functions and quantum
@@ -199,8 +226,9 @@ liquid, containing only one sort of atoms, it reads
 
    {{\left\langle \omega \right\rangle = \frac{\hslash q^{2}}{2M}},}
 
-where M is the mass of the atoms. Formula :math:numref:`pfx76`
-shows that the
+where M is the mass of the atoms. 
+
+**Recoil Moment:** Formula :math:numref:`pfx76` shows that the
 first moment is given by the average kinetic energy (in units of
 :math:`\hslash`) of a particle which receives a momentum transfer
 :math:`\hslash q`. Therefore,
@@ -224,6 +252,8 @@ methods which have suggested
 so far. For more details we refer to Ref.
 [Ref18]_.
 
+**Total Structure Factors:**
+
 MDANSE computes the partial S(Q)'s as the Fourier transform of the
 partial g(r), corresponding to the Faber-Ziman definition:
 
@@ -237,7 +267,7 @@ the total g(r). In the case of the analysis 'X-ray Static structure
 factor', the Q-dependence of the atomic form factors is taken into
 account in this weighted sum.
 
-Again, Soper has provided experimental data (table 4 in *ISRN Physical
+**X-ray Observable Normalization:** Again, Soper has provided experimental data (table 4 in *ISRN Physical
 Chemistry*, 279463 (2013), given in file soper13_fx.dat). Here a source
 of confusion is that the data can be normalized in different ways (see
 Soper's paper). Using the normalization II in that reference we have
@@ -257,8 +287,13 @@ recalculate the x-ray observable using the atomic factors.
 Current Correlation Function
 ''''''''''''''''''''''''''''
 
-The correlation function is a fundamental concept in the study of dynamical processes in various physical systems, including disordered materials. It provides insights into how fluctuations or excitations propagate through a system over time. In the context of disordered systems, understanding the correlation function can help reveal the behavior of particles or components in a disordered environment, such as a disordered solid or a supercooled liquid.
-
+The correlation function is a fundamental concept in the study of dynamical
+processes in various physical systems, including disordered materials. It
+provides insights into how fluctuations or excitations propagate through a
+system over time. In the context of disordered systems, understanding the
+correlation function can help reveal the behavior of particles or components
+in a disordered environment, such as a disordered solid or a supercooled
+liquid.
 
 In the context of MDANSE, researchers calculate two essential components
 of the correlation function:
@@ -274,22 +309,26 @@ of the correlation function:
 
 Dynamic Coherent Structure Factor
 '''''''''''''''''''''''''''''''''
+In materials science and condensed matter physics, dynamic coherent structure
+factors are crucial. They enable a comprehensive understanding of complex
+particle or atom movements and interactions over time. These factors provide
+invaluable insights into the dynamic behavior of materials, aiding researchers in
+deciphering particle evolution and characterizing properties such as diffusion
+rates, elasticity, and phase transitions. They play a pivotal role in enhancing
+our understanding of system dynamics and significantly benefit research in these
+fields.
 
-Theory and implementation
--------------------------                         
+In this analysis, MDANSE proceeds in two steps. First, it computes the partial
+and total intermediate coherent scattering function using equation
+:math:numref:`pfx69`. Then, the partial and total dynamic coherent structure
+factors are obtained by performing the Fourier Transformation, defined in Eq.
+:math:numref:`pfx61`, respectively on the total and partial intermediate
+coherent scattering functions.
 
-Dynamic coherent structure factors play a pivotal role in understanding how particles or atoms move and interact within materials over time. They provide essential insights into the dynamic behavior of a system, aiding research in fields like materials science and condensed matter physics.Please refer to `Theory and background`_ for more details about the
-theoretical background related to the dynamic coherent structure factor.
-In this analysis, *MDANSE* proceeds in two steps. First, it computes the
-partial and total intermediate coherent scattering function using
-equation :math:numref:`pfx69`. Then, the partial
-and total dynamic coherent structure factors are obtained by performing
-the Fourier Transformation, defined in Eq. :math:numref:`pfx61`, respectively on
-the total and partial intermediate coherent scattering functions.
-
+**Coherent Intermediate Scattering Function Calculation**
 *MDANSE* computes the coherent intermediate scattering function on a
 rectangular grid of equidistantly spaced points along the time-and the
-*q*-axis, respectively:
+q-axis, respectively:
 
 .. math::
    :label: pfx80
@@ -297,12 +336,14 @@ rectangular grid of equidistantly spaced points along the time-and the
    {{F}_{\text{coh}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\cdot\Delta t} \right)} \right\rangle}}^{q},} \\
    {{k = 0}\ldots{N_{t} - 1},{m = 0}\ldots{N_{q} - 1.}}
 
-where N\ :sub:`t` is the number of time steps in the coordinate time
+Equation defines the computation of the coherent intermediate scattering function in terms of particle densities, species, and time steps.
+
+**Fourier-Transformed Particle Density** where N\ :sub:`t` is the number of time steps in the coordinate time
 series, N\ :sub:`q` is a user-defined number of *q*-shells,
 N\ :sub:`species` is the number of selected species, n\ :sub:`I` the
 number of atoms of species *I*, :math:`\omega`\ :sub:`I` the weight for species *I*
 (see Section :ref:`target_CN` for more details) and :math:`{\rho_{I}\left( {q,k\cdot\Delta t} \right)}`
-is the Fourier transformed particle density for species *I* defined as
+Below defines the Fourier-transformed particle density for species I.
 
 .. math::
    :label: pfx83
@@ -312,15 +353,19 @@ is the Fourier transformed particle density for species *I* defined as
 The symbol :math:`{\overline{...}}^{q}` in Eq. :math:numref:`pfx80` denotes an average
 over *q*-vectors having *approximately* the same modulus
 
+**q-Vectors on a Reciprocal Lattice ** Below describes the selection of q-vectors on a lattice reciprocal to the MD box lattice.
+
 .. math::
    :label: pfx85
    
    {{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q}
 
-. The particle density must not change if jumps in the particle
+
+The particle density must not change if jumps in the particle
 trajectories due to periodic boundary conditions occur. In addition, the
-*average* particle density, :math:`N/V`
-, must not change. This can be achieved by choosing *q*-vectors on a
+*average* particle density, :math:`N/V` , must not change. 
+
+**Position Vector in the MD Cell** This can be achieved by choosing *q*-vectors on a
 lattice which is reciprocal to the lattice defined by the *MD* box. Let
 **b**\ :sub:`1`, **b**\ :sub:`2`, **b**\ :sub:`3` be the basis vectors
 which span the *MD* cell. Any position vector in the *MD* cell can be
@@ -331,7 +376,9 @@ written as
 
    {{R = x^{'}}{b_{1} + y^{'}}{b_{2} + z^{'}}b_{3},}
 
-with x', y', z' having values between 0 and 1. The primes indicate that
+Eq defines the position vector in the MD cell.
+
+** Dual Basis Vectors** with x', y', z' having values between 0 and 1. The primes indicate that
 the coordinates are box coordinates. A jump due to periodic boundary
 conditions causes x', y', z' to jump by :math:`\pm1`. The set of dual basis
 vectors **b**\ :sup:`1`, **b**\ :sup:`2`, **b**\ :sup:`3` is defined by
@@ -342,12 +389,16 @@ the relation
 
    {b_{i}{b^{j} = \delta_{i}^{j}}.}
 
-If the q-vectors are now chosen as
+Eq defines the dual basis vectors and their relation to the basis vectors.
+
+**Selection of q-Vectors with Phase Changes ** If the q-vectors are now chosen as
 
 .. math::
    :label: pfx88
 
    {{q = 2}\pi\left( {k{b^{1} + l}{b^{2} + m}b^{3}} \right),}
+
+Describes the selection of q-vectors with phase changes for handling jumps in particle trajectories
 
 where *k,l,m* are integer numbers, jumps in the particle trajectories
 produce phase changes of multiples of :math:`2\pi` in the Fourier transformed
@@ -359,7 +410,7 @@ deviate within the prescribed tolerance from the equidistant *q*-grid.
 From these *q*-vectors only a maximum number per grid-point (called
 generically *q*-shell also in the anisotropic case) is kept.
 
-The *q*-vectors can be generated isotropically, anisotropically or along
+**Negative Coherent Scattering Lengths** The *q*-vectors can be generated isotropically, anisotropically or along
 user-defined directions. The :math:`\sqrt{\omega_{I}}` may be negative
 if they represent normalized coherent scattering
 lengths, i.e.
@@ -368,6 +419,8 @@ lengths, i.e.
    :label: pfx89
 
    {{\sqrt{\omega_{I}} = \frac{b_{I,\text{coh}}}{\sqrt{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}b_{I,\text{coh}}^{2}}}}}.}
+
+Defines the use of negative coherent scattering lengths for hydrogenous materials.
 
 Negative coherent scattering lengths occur in hydrogenous materials
 since :math:`b_{\mathit{coh},H}` is negative [Ref20]_. The density-density
@@ -381,22 +434,16 @@ from the :ref:`analysis-ndtsf`.
 
 Dynamic Incoherent Structure Factor
 '''''''''''''''''''''''''''''''''''
-
-.. _theory-and-implementation-7:
-
-Theory and implementation
--------------------------                         
-
-Dynamic incoherent structure factors are a fundamental concept in the study of how particles or atoms move independently within a material over time. They are useful because they provide a quantitative understanding of this dynamic behavior, offering insights into processes like diffusion and mobility within materials.Please refer to `Theory and background`_
-section for more details about the theoretical background related to the
-dynamic incoherent structure factor. In this analysis, *MDANSE* proceeds
-in two steps. First, it computes the partial and total intermediate
-incoherent scattering function F\ :sub:`inc`\ (**q**, t) using equation
-:math:numref:`pfx69`. Then, the partial
-and total dynamic incoherent structure factors are obtained by
+                      
+In this analysis, *MDANSE* proceeds in two steps. First, it computes
+the partial and total intermediate incoherent scattering function
+F\ :sub:`inc`\ (**q**, t) using equation :math:numref:`pfx69`. Then, the
+partial and total dynamic incoherent structure factors are obtained by
 performing the Fourier Transformation, defined in Eq. :math:numref:`pfx61`,
-respectively on
-the total and partial intermediate incoherent scattering function.
+respectively on the total and partial intermediate incoherent
+scattering function.
+
+**Computation of Incoherent Intermediate Scattering Function**
 
 *MDANSE* computes the incoherent intermediate scattering function on a
 rectangular grid of equidistantly spaced points along the time-and the
@@ -407,6 +454,8 @@ rectangular grid of equidistantly spaced points along the time-and the
 
    {\text{F}_{\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}}}\text{F}_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right),\\
    {k = 0}\ldots{N_{t} - 1},{m = 0}\ldots{N_{q} - 1.}}
+
+Eq: Incoherent Intermediate Scattering Function Calculation
 
 where N\ :sub:`t` is the number of time steps in the coordinate time
 series, N\ :sub:`q` is a user-defined number of *q*-shells,
@@ -420,12 +469,17 @@ is defined as:
 
    {\text{F}_{I,\mathit{inc},\alpha}{\left( {q_{m},k\cdot\Delta t} \right) = \sum\limits_{\alpha = 1}^{n_{I}}}{\overline{\left\langle {\exp\left\lbrack {{-i}q\cdot R_{\alpha}(0)} \right\rbrack\exp\left\lbrack {iq\cdot R_{\alpha}(t)} \right\rbrack} \right\rangle}}^{q}.}
 
+Eq: Definition of F_{I,inc,alpha}(q_m, k * Δt)
+
 The symbol :math:`{\overline{...}}^{q}` in Eq. :math:numref:`pfx92`
 denotes an average
 over *q*-vectors having *approximately* the same modulus
 :math:`{{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q}`. The
 particle density must not change if jumps in the particle
-trajectories due to periodic boundary conditions occur. In addition, the
+trajectories due to periodic boundary conditions occur. 
+
+
+*Selection of q-Vectors on a Reciprocal Lattice* In addition, the
 *average* particle density, N/V, must not change. This can be achieved
 by choosing *q*-vectors on a lattice which is reciprocal to the lattice
 defined by the *MD* box. Let **b**\ :sub:`1`, **b**\ :sub:`2`,
@@ -436,6 +490,9 @@ position vector in the *MD* cell can be written as
    :label: pfx94
 
    {{R = x^{'}}{b_{1} + y^{'}}{b_{2} + z^{'}}b_{3},}
+
+Eq: Position Vector in the MD Cell
+
 
 with x', y', z' having values between 0 and 1. The primes indicate that
 the coordinates are box coordinates. A jump due to periodic boundary
@@ -448,12 +505,16 @@ the relation
 
    {b_{i}{b^{j} = \delta_{i}^{j}}.}
 
+Eq: Dual Basis Vectors
+
 If the q-vectors are now chosen as
 
 .. math::
    :label: pfx96
 
    {{q = 2}\pi\left( {k{b^{1} + l}{b^{2} + m}b^{3}} \right),}
+
+Eq: Selection of q-Vectors with Phase Changes   
 
 where *k,l,m* are integer numbers, jumps in the particle trajectories
 produce phase changes of multiples of 2π in the Fourier transformed
@@ -468,11 +529,10 @@ generically *q*-shell also in the anisotropic case) is kept.
 The *q*-vectors can be generated isotropically, anisotropically or along
 user-defined directions.
 
+**Computation of Correlation Functions**
 The correlation functions defined in :math:numref:`pfx92`
-are computed via
-the *FCA* technique described in the section :ref:`appendix-fca`.
-Although the efficient
-*FCA* technique is used to compute the atomic time correlation
+are computed via the *FCA* technique described in the section :ref:`appendix-fca`.
+Although the efficient *FCA* technique is used to compute the atomic time correlation
 functions, the program may consume a considerable amount of CPU-time
 since the number of time correlation functions to be computed equals the
 number of atoms times the total number of *q*-vectors. This analysis is
@@ -484,17 +544,20 @@ analysis, the result will correspond to that of the equation :math:numref:`ntdsf
 from the :ref:`analysis-ndtsf`.
 
 
-.. _analysis-eisf:
 
 Elastic Incoherent Structure Factor
 '''''''''''''''''''''''''''''''''''
 
-.. _theory-and-implementation-8:
+The *EISF* appears as the amplitude of the *elastic* line in the neutron
+scattering spectrum. Elastic scattering is only present for systems in which the
+atomic motion is confined in space, as for solids. To understand which information
+is contained in the *EISF* we consider for simplicity a system where only one
+sort of atoms is visible to the neutrons. To a very good approximation this is
+the case for all systems containing a large amount of hydrogen atoms, as biological
+systems. Incoherent scattering from hydrogen dominates by far all other
+contributions.
 
-Theory and implementation
-
--------------------------                        
-The Elastic Incoherent Structure Factor (EISF) rovides insights into the static arrangement of particles or atoms within a material when they are not moving together in a coordinated manner. EISF is often employed in neutron scattering experiments to investigate particle distributions, even in the absence of dynamic motion.
+**Van Hove Self-correlation Function**
 
 The Elastic Incoherent Structure Factor (*EISF*) is defined as the limit
 of the incoherent intermediate scattering function for infinite time,
@@ -552,6 +615,8 @@ vanishes for all systems in which the particles can access an infinite
 volume since G\ :sub:`s`\ (r, t) approaches 1/V for large times. This is
 the case for molecules in liquids and gases.
 
+**EISF Computation**
+
 For computational purposes it is convenient to use the following
 representation of the *EISF* [Ref21]_:
 
@@ -586,6 +651,8 @@ the length of the *MD* trajectory from which the *EISF* is computed
 should be long enough to allow for a representative sampling of the
 conformational space.
 
+**Grid Computation**
+
 *MDANSE* allows one to compute the elastic incoherent structure factor
 on a grid of equidistantly spaced points along the *q*-axis:
 
@@ -618,12 +685,13 @@ jumps due to periodic boundary conditions.
 
 Gaussian Dynamic Incoherent Structure Factor
 ''''''''''''''''''''''''''''''''''''''''''''
+                      
+The Gaussian Dynamic Incoherent Structure Factor is a concept used to study how
+particles or atoms move independently within materials over time, with a focus
+on their distribution. It's valuable in materials science and condensed matter
+physics for understanding dynamic behavior at the atomic level.
 
-
-
-Theory and implementation
--------------------------                         
-The Gaussian Dynamic Incoherent Structure Factor is a concept used to study how particles or atoms move independently within materials over time, with a focus on their distribution. It's valuable in materials science and condensed matter physics for understanding dynamic behavior at the atomic level.
+**MSD Calculation**
 
 The *MSD* can be related to the incoherent intermediate scattering
 function via the cumulant expansion [Ref11]_,
@@ -643,7 +711,8 @@ species *I* (see Section :ref:`target_CN` for more details) and
 
    {\text{F}_{I,\text{inc}}^{g}{\left( {q,t} \right) = \frac{1}{n_{I}}}\sum\limits_{\alpha}^{n_{I}}\exp\left\lbrack {{- q^{2}}\rho_{\alpha,1}{(t) + q^{4}}\rho_{\alpha,2}(t)\mp\ldots} \right\rbrack.}
 
-The cumulants
+
+**The cumulants**
 
 .. math::
    :label: pfx110
@@ -666,6 +735,8 @@ The cumulants
    
    {\vdots}
 
+**Gaussian Approximation**
+
 The vector nq is the unit vector in the direction of q. In the Gaussian
 approximation the above expansion is truncated after the
 q\ :sup:`2`-term. For certain model systems like the ideal gas, the
@@ -680,6 +751,8 @@ function in the *Gaussian approximation* by discretizing equation
    :label: pfx113
 
    {\text{F}_{\text{inc}}^{g}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}\text{F}_{I,\text{inc}}^{g}\left( {q_{m},k\cdot\Delta t} \right)}},{k = 0}\ldots{N_{t} - 1},{m = 0}\ldots{N_{q} - 1.}}
+
+**Intermediate Scattering Function**
 
 with for each species the following expression for the intermediate
 scattering function:
@@ -729,9 +802,14 @@ mean-square displacement per atom.
 Neutron Dynamic Total Structure Factor
 ''''''''''''''''''''''''''''''''''''''
 
--  available for trajectories only
+The Neutron Dynamic Total Structure Factor is a term used in scientific
+research, especially in neutron scattering experiments, to investigate how
+particles or atoms within a material contribute to its overall structure and
+dynamics. This factor provides valuable insights into how these components move
+and interact over time.
 
-The Neutron Dynamic Total Structure Factor is a term used in scientific research, especially in neutron scattering experiments, to investigate how particles or atoms within a material contribute to its overall structure and dynamics. This factor provides valuable insights into how these components move and interact over time.
+**Calculation of Partial Coherent Intermediate Scattering Functions and Dynamic Structure Factors**
+
 
 This is a combination of the Dynamic Coherent and the Dynamic Incoherent
 Structure Factors. It is a fully neutron-specific analysis, where the
@@ -775,6 +853,9 @@ the DISF analysis:
    
    I_{\alpha}^{inc}(Q,t) = \left| \frac{1}{N_{\alpha}}\sum_{i \in \alpha}^{N_{\alpha}}\left\langle e^{- i\mathbf{Q}\mathbf{r}_{i}(t_{0})}e^{i\mathbf{Q}\mathbf{r}_{i}(t_{0} + t)} \right\rangle \right|_{\mathbf{Q}}
 
+
+**Combination of Partial Contributions**
+
 The main difference between this analysis and the DCSF and DISF
 analyses, apart from the fact that the coherent and incoherent
 contributions are calculated simultaneously, is the way the different
@@ -803,6 +884,8 @@ for elements :math:`\alpha` and :math:`\beta`, respectively.
 
 These expressions correspond to the formalism and equations given in
 [Ref47]_, chapter 1: “An introduction to neutron scattering” .
+
+**Units Conversion**
 
 As in the MDANSE database the coherent and incoherent neutron scattering
 lengths are given in Å, the total intermediate scattering functions
@@ -835,11 +918,6 @@ Naturally, similar expressions apply to the dynamic structure factors,
 :math:`S_{\alpha\beta}^{coh}(Q,\omega)` and
 :math:`S_{\alpha}^{inc}(Q,\omega)`.
 
-
-
-
-
-.. _structure-factor-from-scattering-function:
 
 Structure Factor From Scattering Function
 '''''''''''''''''''''''''''''''''''''''''

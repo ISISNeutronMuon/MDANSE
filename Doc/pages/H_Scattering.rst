@@ -13,8 +13,6 @@ users in effectively utilizing the CCF feature to gain insights into the dynamic
 of density fluctuations and propagating shear modes within the molecular system.
 
 
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Trajectory Data:**
    - Load the relevant trajectory data using the "File" menu.
@@ -83,8 +81,6 @@ insights into intermediate incoherent scattering functions and the resulting
 dynamic structure factor within the system.
 
 
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Trajectory Data:**
    - Load the relevant trajectory data using the "File" menu.
@@ -142,10 +138,6 @@ aims to help users efficiently harness the Dynamic Incoherent Structure Factor
 feature, enabling them to acquire insights into intermediate incoherent
 scattering functions and the resulting dynamic structure factor within the
 system.
-
-
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Trajectory Data:**
    - Load the relevant trajectory data using the "File" menu.
@@ -264,8 +256,6 @@ neutron-specific studies.
 
 **Guide Steps:**
 
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Trajectory Data:**
    - Load the relevant trajectory data using the "File" menu.
@@ -321,9 +311,6 @@ comprehensive evaluation of the coherent and incoherent contributions to the
 scattering behavior in the molecular system, making it an essential tool for
 neutron-specific studies.
 
-
-1. **Launch MDANSE:**
-   - Open the MDANSE software on your computer.
 
 2. **Load Trajectory Data:**
    - Load the relevant trajectory data using the "File" menu.

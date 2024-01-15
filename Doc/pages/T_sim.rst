@@ -1,5 +1,5 @@
-Setting Up Molecular Dynamics Simulations (DCSF)
-================================================
+Tutorial: Neutron Scattering Dynamic Coherent Structure Factor (DCSF)
+======================================================================
 
 This tutorial provides a guide on performing neutron scattering analysis using
 the MDANSE software. We will cover launching MDANSE, loading trajectory data in

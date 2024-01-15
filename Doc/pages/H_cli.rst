@@ -95,7 +95,7 @@ This guide explains how to run MDANSE jobs via the command line interface (CLI) 
    .. code-block:: python
 
       # Import the necessary MDANSE modules
-      from MDANSE.Core.MDANSELIB import REGISTRY
+      from MDANSE.Core.MDANSE import REGISTRY
 
       # Define the job parameters
       parameters = {}
@@ -112,8 +112,8 @@ This guide explains how to run MDANSE jobs via the command line interface (CLI) 
        # Define atom selection if needed (e.g., select atoms by index)
        parameters['atom_selection'] = '1-100'  # Select atoms with indices from 1 to 100
 
-       # Specify the frames for analysis (e.g., from frame 100 to 500 with a step of 10)
-       parameters['frames'] = (100, 500, 10)
+       # Specify the frames for analysis (e.g., from frame 0 to 500 with a step of 1)
+       parameters['frames'] = (0, 500, 1)
 
        # Set the output directory and format (e.g., HDF)
        parameters['output_files'] = ('/path/to/custom_output_directory', ('hdf',))
