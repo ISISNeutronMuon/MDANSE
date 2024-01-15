@@ -2,16 +2,10 @@ import sys
 import tempfile
 import os
 from os import path
-
 import pytest
 from icecream import ic
-import numpy as np
-
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
-from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
-
 from ..Data.data import mol_traj as short_traj
 
 sys.setrecursionlimit(100000)
@@ -33,40 +27,10 @@ def trajectory():
 
 @pytest.fixture(scope="module")
 def qvector_spherical_lattice(trajectory):
-    out_name = "test_qvec"
-    generator = IQVectors.create("SphericalLatticeQVectors", trajectory.chemical_system)
-    q_parameters = {"seed": 0, "shells": (5.0, 36, 10.0), "n_vectors": 10, "width": 9.0}
-    generator.setup(q_parameters)
-    generator.generate()
-    UD_STORE.load()
-    if not UD_STORE.has_definition(just_filename, "q_vectors", out_name):
-        ud = {}
-        ud["parameters"] = (generator._type, generator._configuration)
-        ud["generator"] = generator._type
-        ud["q_vectors"] = generator._configuration["q_vectors"]
-        ud["is_lattice"] = generator.is_lattice
-        UD_STORE.set_definition(just_filename, "q_vectors", out_name, ud)
-        UD_STORE.save()
-    return out_name
-
-
-@pytest.fixture(scope="module")
-def qvector_circular_lattice(trajectory):
-    out_name = "test_qvec"
-    generator = IQVectors.create("SphericalLatticeQVectors", trajectory.chemical_system)
-    q_parameters = {"seed": 0, "shells": (5.0, 36, 10.0), "n_vectors": 10, "width": 9.0}
-    generator.setup(q_parameters)
-    generator.generate()
-    UD_STORE.load()
-    if not UD_STORE.has_definition(just_filename, "q_vectors", out_name):
-        ud = {}
-        ud["parameters"] = (generator._type, generator._configuration)
-        ud["generator"] = generator._type
-        ud["q_vectors"] = generator._configuration["q_vectors"]
-        ud["is_lattice"] = generator.is_lattice
-        UD_STORE.set_definition(just_filename, "q_vectors", out_name, ud)
-        UD_STORE.save()
-    return out_name
+    return (
+        "SphericalLatticeQVectors",
+        {"seed": 0, "shells": (5.0, 36, 10.0), "n_vectors": 10, "width": 9.0}
+    )
 
 
 def test_dcsf(trajectory, qvector_spherical_lattice):
