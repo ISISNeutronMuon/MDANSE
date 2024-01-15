@@ -55,5 +55,11 @@ class Macromolecule(ISelector):
                 m = Macromolecule.lookup.get(ce.__class__, None)
                 if m in macromolecules:
                     sel.update([at for at in ce.atom_list])
+                if (isinstance(ce, Protein)
+                        and "peptide_chain" in macromolecules):
+                    for ce2 in ce.peptide_chains:
+                        m = Macromolecule.lookup.get(ce2.__class__, None)
+                        if m in macromolecules:
+                            sel.update([at for at in ce.atom_list])
 
         return sel

@@ -44,12 +44,14 @@ Created on May 29, 2015
 
 @author: Eric C. Pellegrini
 """
-
+import os
 import unittest
-
 import numpy
-
 from MDANSE.IO.PDBReader import PDBReader
+
+
+pbd_2vb1 = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "data", "2vb1.pdb")
 
 
 class TestPDBReader(unittest.TestCase):
@@ -61,7 +63,7 @@ class TestPDBReader(unittest.TestCase):
         with self.assertRaises((IOError, AttributeError)):
             reader = PDBReader("xxxxx.pdb")
 
-        reader = PDBReader("../../Data/Trajectories/CHARMM/2vb1.pdb")
+        reader = PDBReader(pbd_2vb1)
 
         chemicalSystem = reader.build_chemical_system()
 
@@ -81,14 +83,3 @@ class TestPDBReader(unittest.TestCase):
         self.assertAlmostEqual(conf.variables["coordinates"][-1, 0], 2.4937)
         self.assertAlmostEqual(conf.variables["coordinates"][-1, 1], 3.9669)
         self.assertAlmostEqual(conf.variables["coordinates"][-1, 2], -0.5209)
-
-
-def suite():
-    loader = unittest.TestLoader()
-    s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(TestPDBReader))
-    return s
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

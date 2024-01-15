@@ -475,6 +475,8 @@ class Atom(_ChemicalEntity):
 
         self._parent = None
 
+        self.element = ATOMS_DATABASE[self._symbol]["element"]
+
         for k, v in kwargs.items():
             try:
                 setattr(self, k, v)
@@ -523,6 +525,8 @@ class Atom(_ChemicalEntity):
         return [(self.index, other.index) for other in self._bonds]
 
     def __eq__(self, other):
+        if not isinstance(other, _ChemicalEntity):
+            return False
         if not self._index == other._index:
             return False
         if not self._symbol == other._symbol:
@@ -1822,6 +1826,10 @@ class NucleotideChain(_ChemicalEntity):
         )
 
         return "nucleotide_chains", len(h5_contents["nucleotide_chains"]) - 1
+
+    @property
+    def nucleotides(self):
+        return self._nucleotides
 
     def set_nucleotides(self, nucleotides: list[Nucleotide]) -> None:
         """
