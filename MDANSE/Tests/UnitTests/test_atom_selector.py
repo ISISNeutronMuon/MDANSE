@@ -400,14 +400,3 @@ class TestAtomsSelector(unittest.TestCase):
 
         selection = selector.select(0, 0, 0.3)
         self.assertEqual(len(selection), 16)
-
-
-def suite():
-    loader = unittest.TestLoader()
-    s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(TestAtomsSelector))
-    return s
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
