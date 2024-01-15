@@ -2,17 +2,14 @@ import sys
 import tempfile
 import os
 from os import path
-
 import pytest
 from icecream import ic
 import numpy as np
 import h5py
-
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
-
 from ..Data.data import short_traj
+
 
 sys.setrecursionlimit(100000)
 ic.disable()
@@ -74,10 +71,10 @@ def test_parallel_meansquare(trajectory):
     parameters["trajectory"] = short_traj
     msd_par = IJob.create("MeanSquareDisplacement")
     msd_par.run(parameters, status=True)
-    single = h5py.File(temp_name + ".h5")
-    parallel = h5py.File(temp_name2 + ".h5")
-    for kk in single.keys():
-        assert np.allclose(np.array(single[kk]), np.array(parallel[kk]), 1e-5, 1e-4)
+    with (h5py.File(temp_name + ".h5") as single,
+          h5py.File(temp_name2 + ".h5") as parallel):
+        for kk in single.keys():
+            assert np.allclose(np.array(single[kk]), np.array(parallel[kk]), 1e-5, 1e-4)
     os.remove(temp_name + ".h5")
     os.remove(temp_name2 + ".h5")
 

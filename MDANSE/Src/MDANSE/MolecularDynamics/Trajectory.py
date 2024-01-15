@@ -250,7 +250,7 @@ class Trajectory:
             bonds = {}
             for e in top_lvl_chemical_entities:
                 for at in e.atom_list:
-                    bonds[at.index] = [idx for idx in at.bonds]
+                    bonds[at.index] = [other_at.index for other_at in at.bonds]
 
             com_traj = com_trajectory.com_trajectory(
                 coords,

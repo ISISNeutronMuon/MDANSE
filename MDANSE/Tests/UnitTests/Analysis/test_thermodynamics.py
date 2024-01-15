@@ -2,17 +2,14 @@ import sys
 import tempfile
 import os
 from os import path
-
 import pytest
 from icecream import ic
 import numpy as np
 import h5py
-
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
-
 from ..Data.data import short_traj
+
 
 sys.setrecursionlimit(100000)
 ic.disable()
@@ -58,9 +55,9 @@ def test_temperature_nonzero(trajectory, interp_order):
     parameters["trajectory"] = short_traj
     temp = IJob.create("Temperature")
     temp.run(parameters, status=True)
-    results = h5py.File(temp_name + ".h5")
-    print(results.keys())
-    temperature = np.array(results["/temperature"])
+    with h5py.File(temp_name + ".h5") as results:
+        print(results.keys())
+        temperature = np.array(results["/temperature"])
     os.remove(temp_name + ".h5")
     assert np.all(temperature > 0.0)
 

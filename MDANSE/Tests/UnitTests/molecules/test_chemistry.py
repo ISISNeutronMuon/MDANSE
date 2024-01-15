@@ -1,20 +1,14 @@
-import sys
-import tempfile
 import os
-from os import path
-
 import pytest
-from icecream import ic
 import numpy as np
-from rdkit.Chem import Mol
 from rdkit.Chem.rdmolops import SanitizeMol
 from rdkit.Chem.rdmolops import GetMolFrags
-
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Chemistry.Structrures import Topology
 
-short_traj = "co2gas_md3.h5"
+
+short_traj = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "co2gas_md3.h5")
 
 
 @pytest.fixture(scope="module")
@@ -37,6 +31,7 @@ def test_molecule_finder(trajectory: HDFTrajectoryInputData):
     print(coordinates.shape)
 
 
+@pytest.mark.xfail(reason="see docstring")
 def test_molecule_assignment(trajectory: HDFTrajectoryInputData):
     """As of today (17 Oct 2023) this test does not pass.
     Topology class writes out the atom coordinates to a PDB file buffer,
