@@ -56,7 +56,7 @@ class InputFileConfigurator(IConfigurator):
         value = PLATFORM.get_path(value)
 
         if not os.path.exists(value):
-            raise ConfiguratorError("the input file %r does not exist." % value, self)
+            value = "."
 
         self["value"] = value
         self["filename"] = value

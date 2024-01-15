@@ -29,7 +29,7 @@ class JobThread(QThread):
         ic("JobThread starts init")
         self._command = command
         self._parameters = parameters
-        ic("JobThread.run will create a job instance")
+        ic(f"JobThread.run commmand={command}")
         self._job = self._command()
         self._job.build_configuration()
         ic(f"JobThread._parameters: {self._parameters}")
@@ -113,9 +113,8 @@ class JobEntry(QObject):
 
 
 class JobHolder(QStandardItemModel):
-    def __init__(self, parent: QObject = None, python: str = ""):
+    def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
-        self.python_interpreter = python
         self.lock = QMutex()
         self.existing_threads = []
         self.existing_jobs = []
@@ -129,13 +128,13 @@ class JobHolder(QStandardItemModel):
         traj = JobEntry(new_entry.basename, trajectory=new_entry)
         self.appendRow([traj])
 
-    @Slot(int)
-    def startJob(self, job_id: int = -1):
-        handle = QProcess(parent=self)
-
     @Slot(list)
     def startThread(self, job_vars: list):
-        th_ref = JobThread(command=job_vars[0], parameters=job_vars[1])
+        try:
+            th_ref = JobThread(command=job_vars[0], parameters=job_vars[1])
+        except:
+            ic(f"Failed to create JobThread using {job_vars}")
+            return
         th_ref.job_failure.connect(self.reportError)
         item_th = JobEntry(command=job_vars[0])
         th_ref._status._communicator.target.connect(item_th.on_started)  # int
@@ -156,41 +155,3 @@ class JobHolder(QStandardItemModel):
         th_ref.start()
         self.existing_threads.append(th_ref)
         self.existing_jobs.append(item_th)
-
-    # def on_run(self, event=None):
-
-    #     if not self._parametersPanel.validate():
-    #         return
-
-    #     parameters = self._parametersPanel.get_value()
-
-    #     name = self._job.define_unique_name()
-
-    #     handle,filename = tempfile.mkstemp(prefix="MDANSE_%s.py" % name, text=True)
-    #     os.close(handle)
-
-    #     self._job.save(filename, parameters)
-
-    #     if PLATFORM.name == "windows":
-    #         startupinfo = subprocess.STARTUPINFO()
-    #         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    #         startupinfo.wShowWindow = subprocess.SW_HIDE
-    #     else:
-    #         startupinfo = None
-
-    #     try:
-    #         p = subprocess.Popen([sys.executable, filename], startupinfo=startupinfo, stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    #     except subprocess.CalledProcessError as e:
-    #         message = e.output
-    #     else:
-    #         message = None
-
-    #     PUBLISHER.sendMessage("msg_start_job",message=message)
-
-    #     if message is None and not self._standlone:
-    #         d = wx.MessageDialog(None, 'Your analysis is performing. Do you want to close ?', 'Question', wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
-    #         if d.ShowModal() == wx.ID_YES:
-    #             self.on_close(None)
-
-    #     if self._standlone:
-    #         p.wait()

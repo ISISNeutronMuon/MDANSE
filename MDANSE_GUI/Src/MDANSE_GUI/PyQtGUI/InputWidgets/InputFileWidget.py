@@ -28,12 +28,21 @@ class InputFileWidget(WidgetBase):
             default_value = configurator.default
         else:
             default_value = ""
-        kind = kwargs.get("kind", "str")
+        try:
+            parent = kwargs.get("parent", None)
+            self.default_path = parent.default_path
+        except KeyError:
+            self.default_path = "."
+            print("KeyError in InputFileWidget - can't get default path.")
+        except AttributeError:
+            self.default_path = "."
+            print("AttributeError in InputFileWidget - can't get default path.")
         default_value = kwargs.get("default", "")
         tooltip_text = kwargs.get("tooltip", "Specify a path to an existing file.")
         file_association = kwargs.get("wildcard", "")
         self._qt_file_association = translate_file_associations(file_association)
         field = QLineEdit(self._base)
+        self._field = field
         field.textChanged.connect(self.updateValue)
         field.setText(str(default_value))
         field.setToolTip(tooltip_text)
@@ -58,7 +67,8 @@ class InputFileWidget(WidgetBase):
             self._qt_file_association,  # text string specifying the file name filter.
         )
         if new_value is not None:
-            self.updateValue(new_value[0], emit=True)
+            self._field.setText(new_value[0])
+            self.updateValue()
 
     @Slot()
     def updateValue(self):

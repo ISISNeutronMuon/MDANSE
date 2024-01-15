@@ -63,6 +63,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.PyQtGUI.InputWidgets
     "HDFTrajectoryConfigurator": HDFTrajectoryWidget,
     "InterpolationOrderConfigurator": InterpolationOrderWidget,
     "OutputFilesConfigurator": OutputFilesWidget,
+    "InputFileConfigurator": InputFileWidget,
     "RunningModeConfigurator": RunningModeWidget,
     "WeightsConfigurator": ComboWidget,
     "GroupingLevelConfigurator": ComboWidget,

@@ -24,8 +24,7 @@ options.
 __author__ = "M.Bartkowiak, R. Perenon, E.C. Pellegrini, S. Mukhopadhyay, R. Turanyi"
 
 __author_email__ = (
-    "maciej.bartkowiak@stfc.ac.uk, "
-    "sanghamitra.mukhopadhyay@stfc.ac.uk"
+    "maciej.bartkowiak@stfc.ac.uk, " "sanghamitra.mukhopadhyay@stfc.ac.uk"
 )
 
 __maintainer__ = "S. Mukhopadhyay"

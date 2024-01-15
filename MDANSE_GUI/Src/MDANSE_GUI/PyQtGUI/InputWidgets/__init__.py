@@ -42,6 +42,7 @@ modnames = [
     "BackupWidget",
     "RunningModeWidget",
     "ComboWidget",
+    "InputFileWidget",
     "InputDirectoryWidget",
     "OutputDirectoryWidget",
     "QVectorsWidget",

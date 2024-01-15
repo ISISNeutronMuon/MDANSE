@@ -64,9 +64,9 @@ class Gromacs(Converter):
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
+        "OutputFilesConfigurator",
         {
-            "format": "HDFFormat",
+            "formats": ["HDFFormat"],
             "root": "pdb_file",
             "label": "Output trajectory file name",
         },

@@ -51,6 +51,6 @@ class DFTB(Forcite):
         {"default": True, "label": "Fold coordinates in to box"},
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
-        {"format": "HDFFormat", "root": "xtd_file", "label": "Output file name"},
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat"], "root": "xtd_file", "label": "Output file name"},
     )

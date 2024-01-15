@@ -97,8 +97,8 @@ class ASE(Converter):
         },
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
-        {"format": "HDFFormat", "root": "config_file"},
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat"], "root": "config_file"},
     )
 
     def initialize(self):
@@ -378,8 +378,8 @@ class ASEInteractiveConverter(InteractiveConverter):
     )
 
     output_files["output_file"] = (
-        "SingleOutputFileConfigurator",
-        {"format": "HDFFormat", "root": "config_file"},
+        "OutputFilesConfigurator",
+        {"formats": ["HDFFormat"], "root": "config_file"},
     )
 
     def __init__(self, *args, **kwargs):

@@ -15,11 +15,9 @@
 
 import copy
 from icecream import ic
-from qtpy.QtCore import Slot, QObject, QThread, QMutex, Signal, QProcess
+from qtpy.QtCore import Slot, QObject, QMutex, Signal
 
-from MDANSE import LOGGER, PLATFORM
 from MDANSE.__pkginfo__ import __author__, __commit__, __version__, __beta__
-from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
@@ -53,26 +51,14 @@ class BackEnd(QObject):
     selected_converter = Signal(object)
     selected_action = Signal(object)
 
-    def __init__(self, parent=None, python=""):
+    def __init__(self, parent=None):
         super().__init__(parent)
 
         self.lock = QMutex()
         self.data_holders = {}
-        self.python_interpreter = python  # we need it to call scripts
-        # ^^^^^^^^^^^^^^^
-        # This dictionary will hold all the objects derived from
-        # the QStandardDataModel, which can be connected to GUI components.
-        # The keys of the dictionary should match the keys of the
-        # FrontEnd's self.views dictionary.
         self.createTrajectoryHolder()
         self.createJobHolder()
         self.createActionsHolder()
-        self._converters = []
-        self._reverse_converters = {}  # internal dictionary for finding converters
-        self.checkConverters()
-        self._actions = []
-        self._reverse_actions = {}  # internal dictionary for finding converters
-        self.checkActions()
 
     def createTrajectoryHolder(self):
         self.trajectory_holder = DataTreeModel(parent=self)
@@ -96,18 +82,10 @@ class BackEnd(QObject):
                 ISelector,
             ]
         )
-        # self.data_holders['actions'] = self.trajectory_holder
 
     def createJobHolder(self):
-        self.job_holder = JobHolder(parent=self, python=self.python_interpreter)
+        self.job_holder = JobHolder(parent=self)
         self.data_holders["jobs"] = self.job_holder
-
-    def getActions(self):
-        callable_slots = [
-            [self.loadFile, "Load File"],
-            [self.startJob, "Start a Job"],
-        ]
-        return callable_slots
 
     @Slot(str)
     def loadFile(self, fname: str):
@@ -116,63 +94,6 @@ class BackEnd(QObject):
             ic(f"Strangely short file name - not proceeding.")
             return None
         self.new_trajectory.emit(fname)
-
-    @Slot()
-    def startJob(self):
-        ic("startJob triggered in BackEnd.")
-        pass  # whatever happens here, a QProcess will be involved at some point
-
-    def checkConverters(self):
-        ic("checkConverters triggered in BackEnd.")
-        self.lock.lock()
-        self._converters = []
-        self._reverse_converters = {}
-        for key, conv in Converter.indirect_subclass_dictionary().items():
-            ic(f"key:{key}, val:{conv}")
-            self._converters.append(key)
-            self._reverse_converters[str(key)] = Converter.create(str(key))
-        self.lock.unlock()
-
-    def getConverters(self):
-        ic("getConverters triggered in BackEnd.")
-        temp = None
-        self.lock.lock()
-        temp = copy.deepcopy(self._converters)
-        self.lock.unlock()
-        return temp
-
-    @Slot(str)
-    def returnConverter(self, key: str):
-        """This slot will make Backend emit a signal that will
-        create a Dialog for a specific trajectory converter.
-        The type of the converter is chosen by the 'key' input
-        parameter.
-
-        Arguments:
-            key -- a string specifying which converter is needed.
-        """
-        # ic("returnConverter has been triggered in BackEnd - but what for?")
-        thing = self._reverse_converters[str(key).split()[-1]]
-        self.selected_converter.emit(thing)
-
-    def checkActions(self):
-        ic("checkActions triggered in BackEnd.")
-        self.lock.lock()
-        self._actions = []
-        self._reverse_actions = {}
-        for key, act in IJob.indirect_subclass_dictionary().items():
-            ic(f"key:{key}, val:{act}")
-            self._actions.append(act)
-            self._reverse_actions[str(act)] = IJob.create(str(key))
-        self.lock.unlock()
-
-    def getActions(self):
-        ic("getActions triggered in BackEnd.")
-        temp = None
-        self.lock.lock()
-        temp = copy.deepcopy(self._actions)
-        self.lock.unlock()
-        return temp
 
     @Slot(str)
     def returnActions(self, key: str):

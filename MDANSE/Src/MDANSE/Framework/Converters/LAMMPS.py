@@ -214,9 +214,9 @@ class LAMMPS(Converter):
         {"default": False, "label": "Fold coordinates in to box"},
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
+        "OutputFilesConfigurator",
         {
-            "format": "HDFFormat",
+            "formats": ["HDFFormat"],
             "root": "config_file",
             "label": "Output trajectory file name",
         },

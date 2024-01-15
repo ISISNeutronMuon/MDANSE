@@ -67,6 +67,7 @@ class ActionsSuperModel(QObject):
         self.viewer = viewer
         self.models = {}
         self.currentItem = None
+        self.currentModel = None
 
     def setViewer(self, viewer):
         self.viewer = viewer
@@ -87,6 +88,7 @@ class ActionsSuperModel(QObject):
         except KeyError:
             current_model = JobTree()
         self.viewer.setModel(current_model)
+        self.current_model = current_model
         self.currentItem = item
 
     def buildModels(self, parent_classes: list):
@@ -103,6 +105,7 @@ class ActionsSuperModel(QObject):
             model.populateTree(parent_class=parent_class)
             self.models[parent_class.__name__] = model
         ic("Build the following models:", self.models.keys())
+        self.current_model = self.models["IJob"]
 
     def copyNodeIntoModel(self, thing: typing.Any, model: ActionsHolder):
         node_parents = thing.category
