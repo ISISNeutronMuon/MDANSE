@@ -525,7 +525,7 @@ class Atom(_ChemicalEntity):
         return [(self.index, other.index) for other in self._bonds]
 
     def __eq__(self, other):
-        if not isinstance(other, _ChemicalEntity):
+        if not isinstance(other, Atom):
             return False
         if not self._index == other._index:
             return False
