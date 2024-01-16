@@ -76,11 +76,22 @@ class _Configuration(metaclass=abc.ABCMeta):
         :param value: the value of the variable to be set
         :type value: numpy.ndarray
         """
-
         item = np.array(value)
+
+        if name == "unit_cell":
+            if item.shape != (3, 3):
+                raise ValueError(
+                    f"Invalid item dimensions for {name}; a shape of (3, 3) "
+                    f"was expected but data with shape of {item.shape} was "
+                    f"provided."
+                )
+            else:
+                self._variables[name] = value
+                return
+
         if item.shape != (self._chemical_system.number_of_atoms, 3):
             raise ValueError(
-                f"Invalid item dimensions; a shape of {(self._chemical_system.number_of_atoms, 3)} was "
+                f"Invalid item dimensions for {name}; a shape of {(self._chemical_system.number_of_atoms, 3)} was "
                 f"expected but data with shape of {item.shape} was provided."
             )
 
