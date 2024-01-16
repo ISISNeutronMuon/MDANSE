@@ -520,7 +520,7 @@ class Atom(_ChemicalEntity):
             atom_dict -- dictionary of str: atom pairs,
                 where the key is the name of the Atom instance
         """
-        new_bonds = [atom_dict[name] for name in self._bonds]
+        new_bonds = [atom_dict[atm.name] for atm in self._bonds]
         self._bonds = new_bonds
         return [(self.index, other.index) for other in self._bonds]
 
@@ -1065,12 +1065,12 @@ class Molecule(_ChemicalEntity):
         mol = cls(code, name)
         contents = h5_contents["atoms"]
 
-        names = [literal_eval(contents[index][1]) for index in atom_indexes]
+        names = [literal_eval(contents[index][1].decode("utf8")) for index in atom_indexes]
 
         mol.reorder_atoms(names)
 
         for at, index in zip(mol.atom_list, atom_indexes):
-            at.ghost = literal_eval(contents[index][2])
+            at.ghost = literal_eval(contents[index][2].decode("utf8"))
 
         return mol
 
@@ -1307,7 +1307,7 @@ class Residue(_ChemicalEntity):
         """
         res = cls(code, name, variant)
 
-        names = [literal_eval(h5_contents["atoms"][index][1]) for index in atom_indexes]
+        names = [literal_eval(h5_contents["atoms"][index][1].decode("utf8")) for index in atom_indexes]
         res.set_atoms(names)
 
         return res
@@ -1532,7 +1532,7 @@ class Nucleotide(_ChemicalEntity):
         """
         nucl = cls(code, name, variant)
 
-        names = [literal_eval(h5_contents["atoms"][index][1]) for index in atom_indexes]
+        names = [literal_eval(h5_contents["atoms"][index][1].decode("utf8")) for index in atom_indexes]
         nucl.set_atoms(names)
 
         return nucl

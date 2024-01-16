@@ -352,7 +352,7 @@ class Quaternion:
         @rtype: L{Scientific.Geometry.Transformation.Rotation}
         @raises ValueError: if the quaternion is not normalized
         """
-        from Transformation import Rotation
+        from MDANSE.Mathematics.Transformation import Rotation
 
         if np.fabs(self.norm() - 1.0) > 1.0e-5:
             raise ValueError("Quaternion not normalized")
