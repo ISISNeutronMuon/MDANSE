@@ -2413,6 +2413,25 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._atoms = None
 
+    def __eq__(self, another: ChemicalSystem) -> bool:
+        if self._number_of_atoms != another._number_of_atoms:
+            print("Different number of atoms in ChemicalSystem instances!")
+            return False
+        if self.atoms is None and another.atoms is None:
+            return True
+        if self.atoms is None:
+            print("Left (self) ChemicalSystem has no atoms!")
+            return False
+        if another.atoms is None:
+            print("Right (another) ChemicalSystem has no atoms!")
+            return False
+        left_side = [atom.__hash__() for atom in self.atom_list]
+        right_side = [atom.__hash__() for atom in another.atom_list]
+        if np.all(np.array(left_side) == np.array(right_side)):
+            return True
+        print("ChemicalSystem has the same number of atoms, but types don't match!")
+        return False
+
     def __repr__(self):
         contents = ", ".join(
             [
@@ -2511,6 +2530,8 @@ class ChemicalSystem(_ChemicalEntity):
         cs._parent = self._parent
 
         cs._chemical_entities = [ce.copy() for ce in self._chemical_entities]
+        # for ce in self._chemical_entities:
+        #     cs.add_chemical_entity(ce.copy())
 
         new_atoms = {atom.name: atom for atom in cs.atoms}
 
@@ -2528,6 +2549,8 @@ class ChemicalSystem(_ChemicalEntity):
             conf = self._configuration.clone(cs)
 
             cs._configuration = conf
+        
+        _ = cs.atoms
 
         return cs
 
