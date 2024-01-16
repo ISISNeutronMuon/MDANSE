@@ -1065,7 +1065,9 @@ class Molecule(_ChemicalEntity):
         mol = cls(code, name)
         contents = h5_contents["atoms"]
 
-        names = [literal_eval(contents[index][1].decode("utf8")) for index in atom_indexes]
+        names = [
+            literal_eval(contents[index][1].decode("utf8")) for index in atom_indexes
+        ]
 
         mol.reorder_atoms(names)
 
@@ -1307,7 +1309,10 @@ class Residue(_ChemicalEntity):
         """
         res = cls(code, name, variant)
 
-        names = [literal_eval(h5_contents["atoms"][index][1].decode("utf8")) for index in atom_indexes]
+        names = [
+            literal_eval(h5_contents["atoms"][index][1].decode("utf8"))
+            for index in atom_indexes
+        ]
         res.set_atoms(names)
 
         return res
@@ -1532,7 +1537,10 @@ class Nucleotide(_ChemicalEntity):
         """
         nucl = cls(code, name, variant)
 
-        names = [literal_eval(h5_contents["atoms"][index][1].decode("utf8")) for index in atom_indexes]
+        names = [
+            literal_eval(h5_contents["atoms"][index][1].decode("utf8"))
+            for index in atom_indexes
+        ]
         nucl.set_atoms(names)
 
         return nucl
