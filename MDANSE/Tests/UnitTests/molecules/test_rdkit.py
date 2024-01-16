@@ -10,7 +10,8 @@ from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 
 
 fname = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "CO2GAS-dump-1.pdb")
+    os.path.dirname(os.path.realpath(__file__)), "..", "Data",
+    "CO2GAS-dump-1.pdb")
 
 
 @pytest.fixture()

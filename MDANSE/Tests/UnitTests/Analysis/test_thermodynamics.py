@@ -8,18 +8,13 @@ import numpy as np
 import h5py
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
-from ..Data.data import short_traj
 
 
 sys.setrecursionlimit(100000)
 ic.disable()
-
-_, just_filename = path.split(short_traj)
-
-# now we have the following variables related to the trajectory:
-# 1. short_traj (str) - full path to the trajectory
-# 2. just_filename (str) - filename of the trajectory
-# 3. trajectory (pytest.fixture) - returns an instance of HDFTrajectoryInputData
+short_traj = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "..", "Data",
+    "short_trajectory_after_changes.h5")
 
 
 @pytest.fixture(scope="module")

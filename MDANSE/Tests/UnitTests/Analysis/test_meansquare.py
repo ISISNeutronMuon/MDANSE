@@ -2,24 +2,18 @@ import sys
 import tempfile
 import os
 from os import path
-import pytest
 from icecream import ic
 import numpy as np
 import h5py
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
-from ..Data.data import short_traj
 
 
 sys.setrecursionlimit(100000)
 ic.disable()
+short_traj = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "..", "Data",
+    "short_trajectory_after_changes.h5")
 
-_, just_filename = path.split(short_traj)
-
-# now we have the following variables related to the trajectory:
-# 1. short_traj (str) - full path to the trajectory
-# 2. just_filename (str) - filename of the trajectory
-# 3. trajectory (pytest.fixture) - returns an instance of HDFTrajectoryInputData
 
 # Mean Square Displacements can accept many parameters, most of them optional
 # settings['trajectory']=('hdf_trajectory',{})
@@ -33,14 +27,7 @@ _, just_filename = path.split(short_traj)
 # settings['running_mode']=('running_mode',{})
 
 
-@pytest.fixture(scope="module")
-def trajectory():
-    trajectory = HDFTrajectoryInputData(short_traj)
-    trajectory = short_traj
-    yield trajectory
-
-
-def test_basic_meansquare(trajectory):
+def test_basic_meansquare():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1)
@@ -54,7 +41,7 @@ def test_basic_meansquare(trajectory):
     os.remove(temp_name + ".h5")
 
 
-def test_parallel_meansquare(trajectory):
+def test_parallel_meansquare():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1)
@@ -79,7 +66,7 @@ def test_parallel_meansquare(trajectory):
     os.remove(temp_name2 + ".h5")
 
 
-def test_atom_selection(trajectory):
+def test_atom_selection():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1)
