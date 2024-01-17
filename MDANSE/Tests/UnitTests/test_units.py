@@ -212,14 +212,3 @@ class TestUnits(unittest.TestCase):
 
         m = measure(1.0, "eV", equivalent=False)
         self.assertRaises(UnitError, m.toval, "THz")
-
-
-def suite():
-    loader = unittest.TestLoader()
-    s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(TestUnits))
-    return s
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

@@ -684,17 +684,3 @@ class TestResiduesDatabase(unittest.TestCase):
             RESIDUES_DATABASE.save()
             op.assert_called_with(RESIDUES_DATABASE._USER_DATABASE, "w")
             dump.assert_called_with(self.data, ANY)
-
-
-def suite():
-    loader = unittest.TestLoader()
-    s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(TestAtomsDatabase))
-    s.addTest(loader.loadTestsFromTestCase(TestMoleculesDatabase))
-    s.addTest(loader.loadTestsFromTestCase(TestNucleotidesDatabase))
-    s.addTest(loader.loadTestsFromTestCase(TestResiduesDatabase))
-    return s
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

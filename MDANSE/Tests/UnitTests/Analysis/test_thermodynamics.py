@@ -2,27 +2,19 @@ import sys
 import tempfile
 import os
 from os import path
-
 import pytest
 from icecream import ic
 import numpy as np
 import h5py
-
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
-from ..Data.data import short_traj
 
 sys.setrecursionlimit(100000)
 ic.disable()
-
-_, just_filename = path.split(short_traj)
-
-# now we have the following variables related to the trajectory:
-# 1. short_traj (str) - full path to the trajectory
-# 2. just_filename (str) - filename of the trajectory
-# 3. trajectory (pytest.fixture) - returns an instance of HDFTrajectoryInputData
+short_traj = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "..", "Data",
+    "short_trajectory_after_changes.h5")
 
 
 @pytest.fixture(scope="module")
@@ -58,9 +50,9 @@ def test_temperature_nonzero(trajectory, interp_order):
     parameters["trajectory"] = short_traj
     temp = IJob.create("Temperature")
     temp.run(parameters, status=True)
-    results = h5py.File(temp_name + ".h5")
-    print(results.keys())
-    temperature = np.array(results["/temperature"])
+    with h5py.File(temp_name + ".h5") as results:
+        print(results.keys())
+        temperature = np.array(results["/temperature"])
     os.remove(temp_name + ".h5")
     assert np.all(temperature > 0.0)
 

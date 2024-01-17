@@ -212,7 +212,7 @@ def build_connectivity(
         elif isinstance(ce, AtomCluster):
             atom_clusters.append(ce)
         else:
-            if ce.number_of_atoms() == 1:
+            if ce.number_of_atoms == 1:
                 single_atoms_objects.extend(ce.atom_list)
 
     if single_atoms_objects:

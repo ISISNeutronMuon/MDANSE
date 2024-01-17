@@ -89,14 +89,3 @@ class TestUnitCell(unittest.TestCase):
 
     def test_volume(self):
         self.assertAlmostEqual(1, self.cell.volume)
-
-
-def suite():
-    loader = unittest.TestLoader()
-    s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(TestUnitCell))
-    return s
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

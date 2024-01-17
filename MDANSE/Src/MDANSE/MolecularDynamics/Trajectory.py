@@ -97,10 +97,13 @@ class Trajectory:
         """
 
         grp = self._h5_file["/configuration"]
-
         configuration = {}
         for k, v in grp.items():
             configuration[k] = v[frame].astype(np.float64)
+
+        for k in self._h5_file.keys():
+            if k in ("time", "unit_cell"):
+                configuration[k] = self._h5_file[k][frame].astype(np.float64)
 
         return configuration
 
@@ -229,7 +232,6 @@ class Trajectory:
 
         indexes = [at.index for at in atoms]
         masses = np.array([ATOMS_DATABASE[at.symbol]["atomic_weight"] for at in atoms])
-
         grp = self._h5_file["/configuration"]
 
         coords = grp["coordinates"][first:last:step, :, :].astype(np.float64)
@@ -250,7 +252,7 @@ class Trajectory:
             bonds = {}
             for e in top_lvl_chemical_entities:
                 for at in e.atom_list:
-                    bonds[at.index] = [idx for idx in at.bonds]
+                    bonds[at.index] = [other_at.index for other_at in at.bonds]
 
             com_traj = com_trajectory.com_trajectory(
                 coords,
@@ -444,7 +446,7 @@ class TrajectoryWriter:
 
         self._h5_file = h5py.File(self._h5_filename, "w")
 
-        self._chemical_system = chemical_system.copy()
+        self._chemical_system = chemical_system
 
         if selected_atoms is None:
             self._selected_atoms = self._chemical_system.atom_list
