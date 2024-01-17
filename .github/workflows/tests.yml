@@ -33,6 +33,4 @@ jobs:
       - name: run unit tests
         run: |
           cd MDANSE/Tests/UnitTests
-          pwd
-          ls Data
           python -m pytest
