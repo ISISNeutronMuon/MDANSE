@@ -44,6 +44,7 @@ class ColourManager:
         should be the same as the colours in self._lut
         AFTER this method has been called.
         """
+        vtk.start
         self._lut.RemoveAllPoints()
 
         for index, colour in enumerate(self._colour_list):

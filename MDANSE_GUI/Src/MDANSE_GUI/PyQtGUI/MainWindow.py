@@ -222,13 +222,17 @@ class MainWindow(QMainWindow):
         try:
             dialog_instance = dialog(self, converter=converter)
         except:
-            self.reportError(f"Failed to create the dialog: {dialog} for converter {converter}")
+            self.reportError(
+                f"Failed to create the dialog: {dialog} for converter {converter}"
+            )
         dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
         dialog_instance.show()
         try:
             result = dialog_instance.exec()
         except:
-            self.reportError(f"Dialog execution failed in dialog: {dialog} for converter {converter}")
+            self.reportError(
+                f"Dialog execution failed in dialog: {dialog} for converter {converter}"
+            )
 
     @Slot(object)
     def runAction(self, converter=None):
@@ -236,16 +240,20 @@ class MainWindow(QMainWindow):
         dialog = ActionDialog
         try:
             dialog_instance = dialog(
-            self, converter=converter, source_object=self.current_object
+                self, converter=converter, source_object=self.current_object
             )
         except:
-            self.reportError(f"Failed to create the dialog: {dialog} for action {converter}")
+            self.reportError(
+                f"Failed to create the dialog: {dialog} for action {converter}"
+            )
         dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
         dialog_instance.show()
         try:
             result = dialog_instance.exec()
         except:
-            self.reportError(f"Dialog execution failed in dialog: {dialog} for action {converter}")
+            self.reportError(
+                f"Dialog execution failed in dialog: {dialog} for action {converter}"
+            )
 
     @Slot(DataTreeItem)
     def setCurrentObject(self, data_object: DataTreeItem):

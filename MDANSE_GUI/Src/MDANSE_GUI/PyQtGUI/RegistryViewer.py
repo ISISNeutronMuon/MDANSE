@@ -23,7 +23,6 @@ MDANSE IJob interface.
 
 import os
 
-from MDANSE import PLATFORM
 from MDANSE.Framework.Jobs.IJob import IJob
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem

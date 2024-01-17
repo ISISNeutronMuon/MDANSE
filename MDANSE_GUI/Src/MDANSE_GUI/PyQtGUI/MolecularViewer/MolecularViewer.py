@@ -77,7 +77,7 @@ class MolecularViewer(QtWidgets.QWidget):
     def __init__(self, parent):
         super(MolecularViewer, self).__init__(parent)
 
-        self._scale_factor = 0.2
+        self._scale_factor = 0.6
 
         self._datamodel = None
 
@@ -249,7 +249,7 @@ class MolecularViewer(QtWidgets.QWidget):
         line_mapper.ScalarVisibilityOn()
         line_mapper.ColorByArrayComponent("scalars", 1)
         line_actor = vtk.vtkLODActor()
-        line_actor.GetProperty().SetLineWidth(30 * self._scale_factor)
+        line_actor.GetProperty().SetLineWidth(10 * self._scale_factor)
         line_actor.SetMapper(line_mapper)
         actor_list.append(line_actor)
 
@@ -265,7 +265,7 @@ class MolecularViewer(QtWidgets.QWidget):
         else:
             glyph.SetInputData(self._polydata)
 
-        temp_scale = float(0.5 * self._scale_factor)
+        temp_scale = float(0.2 * self._scale_factor)
         glyph.SetScaleModeToScaleByScalar()
         glyph.SetColorModeToColorByScalar()
         glyph.SetScaleFactor(temp_scale)
@@ -449,7 +449,7 @@ class MolecularViewer(QtWidgets.QWidget):
         )
 
         # Set its colors with the default value for atom selection and increase its size
-        self._atom_colours[picked_atom] = RGB_COLOURS["selection"][0]
+        self._atom_colours[picked_atom] = 1
         self._atom_scales[picked_atom] *= 2
 
         self._polydata.GetPointData().GetArray("scalars").SetTuple3(
