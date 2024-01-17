@@ -31,4 +31,4 @@ jobs:
         run: (cd MDANSE && python -m pip install .)
 
       - name: run unit tests
-        run: (cd MDANSE/Tests/UnitTests && pytest)
+        run: (cd MDANSE/Tests/UnitTests && python -m pytest)
