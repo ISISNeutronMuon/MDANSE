@@ -84,7 +84,7 @@ class TestAtom(unittest.TestCase):
         atom = ce.Atom(name="Hydrogen", bonds=[ce.Atom(name="H5")])
         self.assertEqual(
             "MDANSE.Chemistry.ChemicalEntity.Atom(parent=None, name='Hydrogen', symbol='H', "
-            "bonds=[Atom(H5)], groups=[], ghost=False, index=None)",
+            "bonds=[Atom(H5)], groups=[], ghost=False, index=None, element='hydrogen')",
             repr(atom),
         )
 
@@ -146,8 +146,8 @@ class TestAtom(unittest.TestCase):
             atom.symbol = "CC"
 
     def test_build(self):
-        atom = ce.Atom.build(None, "H", "H1", False)
-        self.assertEqual(repr(ce.Atom(symbol="H", name="H1", ghost=False)), repr(atom))
+        atom = ce.Atom.build(None, "H", "H1", "0", False)
+        self.assertEqual(repr(ce.Atom(symbol="H", name="H1", ghost=False, index=0)), repr(atom))
 
     def test_serialize(self):
         atom = ce.Atom()
@@ -155,7 +155,7 @@ class TestAtom(unittest.TestCase):
         result = atom.serialize(dictionary)
 
         self.assertEqual(("atoms", 0), result)
-        self.assertEqual({"atoms": [[repr("H"), repr("H"), "False"]]}, dictionary)
+        self.assertEqual({"atoms": [[repr("H"), repr("H"), "None", "False"]]}, dictionary)
 
 
 class TestAtomGroup(unittest.TestCase):
@@ -197,9 +197,9 @@ class TestAtomGroup(unittest.TestCase):
         self.assertEqual(
             "MDANSE.MolecularDynamics.ChemicalEntity.AtomGroup(parent=None, name='', atoms=[MDANSE."
             "Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.ChemicalSystem(name), "
-            "name='H1', symbol='H', bonds=[], groups=[], ghost=False, index=0), MDANSE.Chemistry."
+            "name='H1', symbol='H', bonds=[], groups=[], ghost=False, index=0, element='hydrogen'), MDANSE.Chemistry."
             "ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.ChemicalSystem(name), name='H2', "
-            "symbol='H', bonds=[], groups=[], ghost=False, index=1)], chemical_system=MDANSE.Chemistry."
+            "symbol='H', bonds=[], groups=[], ghost=False, index=1, element='hydrogen')], chemical_system=MDANSE.Chemistry."
             "ChemicalEntity.ChemicalSystem(name))",
             repr(self.group),
         )
@@ -274,8 +274,8 @@ class TestAtomCluster(unittest.TestCase):
         self.assertEqual(
             "MDANSE.MolecularDynamics.ChemicalEntity.AtomCluster(parent=None, name='Cluster1', "
             "parentless=True, atoms=[MDANSE.Chemistry.ChemicalEntity.Atom(parent=None, name='H', "
-            "symbol='H', bonds=[], groups=[], ghost=False, index=None), MDANSE.Chemistry.ChemicalEntity."
-            "Atom(parent=None, name='H', symbol='H', bonds=[], groups=[], ghost=False, index=None)])",
+            "symbol='H', bonds=[], groups=[], ghost=False, index=None, element='hydrogen'), MDANSE.Chemistry.ChemicalEntity."
+            "Atom(parent=None, name='H', symbol='H', bonds=[], groups=[], ghost=False, index=None, element='hydrogen')])",
             repr(cluster),
         )
 
@@ -325,13 +325,17 @@ class TestAtomCluster(unittest.TestCase):
 
     def test_build(self):
         h5 = {
-            "atom_clusters": [["[0, 1]", repr("Cluster1")]],
-            "atoms": [[repr("H"), repr("H"), "False"], [repr("H"), repr("H"), "False"]],
+            "atom_clusters": [[b"[0, 1]", repr("Cluster1").encode("UTF-8")]],
+            "atoms": [
+                [repr("H").encode("UTF-8"), repr("H").encode("UTF-8"), b"0", b"False"],
+                [repr("H").encode("UTF-8"), repr("H").encode("UTF-8"), b"1", b"False"]],
         }
         ac = ce.AtomCluster.build(h5, [0, 1], "Cluster1")
+        cs = ce.ChemicalSystem()
+        cs.add_chemical_entity(ac)
 
         self.assertEqual(
-            repr(ce.AtomCluster("Cluster1", [ce.Atom(), ce.Atom()])), repr(ac)
+            repr(cs.chemical_entities[0]), repr(ac)
         )
 
     def test_serialize_empty_dict(self):
@@ -344,8 +348,8 @@ class TestAtomCluster(unittest.TestCase):
             {
                 "atom_clusters": [["[0, 1]", repr("Cluster1")]],
                 "atoms": [
-                    [repr("H"), repr("H"), "False"],
-                    [repr("H"), repr("H"), "False"],
+                    [repr("H"), repr("H"), "None", "False"],
+                    [repr("H"), repr("H"), "None", "False"],
                 ],
             },
             dictionary,
@@ -364,8 +368,8 @@ class TestAtomCluster(unittest.TestCase):
                     [],
                     [],
                     [],
-                    [repr("H"), repr("H"), "False"],
-                    [repr("H"), repr("H"), "False"],
+                    [repr("H"), repr("H"), "None", "False"],
+                    [repr("H"), repr("H"), "None", "False"],
                 ],
             },
             dictionary,
@@ -448,11 +452,11 @@ class TestMolecule(unittest.TestCase):
             "MDANSE.MolecularDynamics.ChemicalEntity.Molecule(parent=None, name='water', "
             "atoms=OrderedDict([('OW', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry."
             "ChemicalEntity.Molecule(water), name='OW', symbol='O', bonds=[Atom(HW1), Atom(HW2)], "
-            "groups=[], ghost=False, index=None, alternatives=['O', 'OH2'])), ('HW2', MDANSE.Chemistry."
+            "groups=[], ghost=False, index=None, element='oxygen', alternatives=['O', 'OH2'])), ('HW2', MDANSE.Chemistry."
             "ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(water), name='HW2', "
-            "symbol='H', bonds=[Atom(OW)], groups=[], ghost=False, index=None, alternatives=['H2'])), "
+            "symbol='H', bonds=[Atom(OW)], groups=[], ghost=False, index=None, element='hydrogen', alternatives=['H2'])), "
             "('HW1', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity."
-            "Molecule(water), name='HW1', symbol='H', bonds=[Atom(OW)], groups=[], ghost=False, index=None"
+            "Molecule(water), name='HW1', symbol='H', bonds=[Atom(OW)], groups=[], ghost=False, index=None, element='hydrogen'"
             ", alternatives=['H1']))]), code='WAT')",
             repr(self.molecule),
         )
@@ -486,11 +490,11 @@ class TestMolecule(unittest.TestCase):
 
     def test_build(self):
         h5 = {
-            "molecules": [["[0, 1, 2]", repr("WAT"), repr("water")]],
+            "molecules": [[b"[0, 1, 2]", repr("WAT").encode("UTF-8"), repr("water").encode("UTF-8")]],
             "atoms": [
-                [repr("O"), repr("OW"), "False"],
-                [repr("H"), repr("HW2"), "False"],
-                [repr("H"), repr("HW1"), "False"],
+                [repr("O").encode("UTF-8"), repr("OW").encode("UTF-8"), b"False"],
+                [repr("H").encode("UTF-8"), repr("HW2").encode("UTF-8"), b"False"],
+                [repr("H").encode("UTF-8"), repr("HW1").encode("UTF-8"), b"False"],
             ],
         }
         m = ce.Molecule.build(h5, [0, 1, 2], "WAT", "water")
@@ -506,9 +510,9 @@ class TestMolecule(unittest.TestCase):
             {
                 "molecules": [["[0, 1, 2]", repr("WAT"), repr("water")]],
                 "atoms": [
-                    [repr("O"), repr("OW"), "False"],
-                    [repr("H"), repr("HW2"), "False"],
-                    [repr("H"), repr("HW1"), "False"],
+                    [repr("O"), repr("OW"), "None", "False"],
+                    [repr("H"), repr("HW2"), "None", "False"],
+                    [repr("H"), repr("HW1"), "None", "False"],
                 ],
             },
             dictionary,
@@ -524,9 +528,9 @@ class TestMolecule(unittest.TestCase):
                 "atoms": [
                     [],
                     [],
-                    [repr("O"), repr("OW"), "False"],
-                    [repr("H"), repr("HW2"), "False"],
-                    [repr("H"), repr("HW1"), "False"],
+                    [repr("O"), repr("OW"), "None", "False"],
+                    [repr("H"), repr("HW2"), "None", "False"],
+                    [repr("H"), repr("HW1"), "None", "False"],
                 ],
                 "molecules": [[], [], ["[2, 3, 4]", repr("WAT"), repr("water")]],
             },
@@ -731,22 +735,22 @@ class TestResidue(unittest.TestCase):
             "MDANSE.MolecularDynamics.ChemicalEntity.Residue(parent=None, name='glycine', code='GLY', "
             "variant=None, selected_variant=None, atoms=OrderedDict([('H', MDANSE.Chemistry.ChemicalEntity"
             ".Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name='H', symbol='H', bonds="
-            "[Atom(N)], groups=['backbone', 'peptide'], ghost=False, index=None, alternatives=['HN'])), "
+            "[Atom(N)], groups=['backbone', 'peptide'], ghost=False, index=None, element='hydrogen', alternatives=['HN'])), "
             "('HA3', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue"
             "(glycine), name='HA3', symbol='H', bonds=[Atom(CA)], groups=['sidechain'], ghost=False, "
-            "index=None, alternatives=['HA1'])), ('O', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE"
+            "index=None, element='hydrogen', alternatives=['HA1'])), ('O', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE"
             ".Chemistry.ChemicalEntity.Residue(glycine), name='O', symbol='O', bonds=[Atom(C)], groups="
-            "['backbone', 'peptide'], ghost=False, index=None, alternatives=['OT1'])), ('N', MDANSE."
+            "['backbone', 'peptide'], ghost=False, index=None, element='oxygen', alternatives=['OT1'])), ('N', MDANSE."
             "Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name="
             "'N', symbol='N', bonds=[Atom(CA), Atom(H), Atom(-R)], groups=['backbone', 'peptide'], ghost="
-            "False, index=None, alternatives=[])), ('CA', MDANSE.Chemistry.ChemicalEntity.Atom(parent="
+            "False, index=None, element='nitrogen', alternatives=[])), ('CA', MDANSE.Chemistry.ChemicalEntity.Atom(parent="
             "MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name='CA', symbol='C', bonds=[Atom(C), "
-            "Atom(HA2), Atom(HA3), Atom(N)], groups=['backbone'], ghost=False, index=None, alternatives="
+            "Atom(HA2), Atom(HA3), Atom(N)], groups=['backbone'], ghost=False, index=None, element='carbon', alternatives="
             "[])), ('HA2', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity."
             "Residue(glycine), name='HA2', symbol='H', bonds=[Atom(CA)], groups=['backbone'], ghost=False,"
-            " index=None, alternatives=['HA'])), ('C', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE"
+            " index=None, element='hydrogen', alternatives=['HA'])), ('C', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE"
             ".Chemistry.ChemicalEntity.Residue(glycine), name='C', symbol='C', bonds=[Atom(CA), Atom(O), "
-            "Atom(+R)], groups=['backbone', 'peptide'], ghost=False, index=None, alternatives=[]))]))",
+            "Atom(+R)], groups=['backbone', 'peptide'], ghost=False, index=None, element='carbon', alternatives=[]))]))",
             repr(residue),
         )
 
@@ -778,16 +782,16 @@ class TestResidue(unittest.TestCase):
     def test_build(self):
         h5 = {
             "residues": [
-                ["[0, 1, 2, 3, 4, 5, 6]", repr("GLY"), repr("glycine"), "None"]
+                [b"[0, 1, 2, 3, 4, 5, 6]", repr("GLY").encode("UTF-8"), repr("glycine").encode("UTF-8"), b"None"]
             ],
             "atoms": [
-                [repr("H"), repr("H"), "False"],
-                [repr("H"), repr("HA3"), "False"],
-                [repr("O"), repr("O"), "False"],
-                [repr("N"), repr("N"), "False"],
-                [repr("C"), repr("CA"), "False"],
-                [repr("H"), repr("HA2"), "False"],
-                [repr("C"), repr("C"), "False"],
+                [repr("H").encode("UTF-8"), repr("H").encode("UTF-8"), b"False"],
+                [repr("H").encode("UTF-8"), repr("HA3").encode("UTF-8"), b"False"],
+                [repr("O").encode("UTF-8"), repr("O").encode("UTF-8"), b"False"],
+                [repr("N").encode("UTF-8"), repr("N").encode("UTF-8"), b"False"],
+                [repr("C").encode("UTF-8"), repr("CA").encode("UTF-8"), b"False"],
+                [repr("H").encode("UTF-8"), repr("HA2").encode("UTF-8"), b"False"],
+                [repr("C").encode("UTF-8"), repr("C").encode("UTF-8"), b"False"],
             ],
         }
         r = ce.Residue.build(h5, [0, 1, 2, 3, 4, 5, 6], "GLY", "glycine", None)
@@ -811,13 +815,13 @@ class TestResidue(unittest.TestCase):
                     ["[0, 1, 2, 3, 4, 5, 6]", repr("GLY"), repr("glycine"), "None"]
                 ],
                 "atoms": [
-                    [repr("H"), repr("H"), "False"],
-                    [repr("H"), repr("HA3"), "False"],
-                    [repr("O"), repr("O"), "False"],
-                    [repr("N"), repr("N"), "False"],
-                    [repr("C"), repr("CA"), "False"],
-                    [repr("H"), repr("HA2"), "False"],
-                    [repr("C"), repr("C"), "False"],
+                    [repr("H"), repr("H"), "None", "False"],
+                    [repr("H"), repr("HA3"), "None", "False"],
+                    [repr("O"), repr("O"), "None", "False"],
+                    [repr("N"), repr("N"), "None", "False"],
+                    [repr("C"), repr("CA"), "None", "False"],
+                    [repr("H"), repr("HA2"), "None", "False"],
+                    [repr("C"), repr("C"), "None", "False"],
                 ],
             },
             dictionary,
@@ -843,13 +847,13 @@ class TestResidue(unittest.TestCase):
                     [],
                     [],
                     [],
-                    [repr("H"), repr("H"), "False"],
-                    [repr("H"), repr("HA3"), "False"],
-                    [repr("O"), repr("O"), "False"],
-                    [repr("N"), repr("N"), "False"],
-                    [repr("C"), repr("CA"), "False"],
-                    [repr("H"), repr("HA2"), "False"],
-                    [repr("C"), repr("C"), "False"],
+                    [repr("H"), repr("H"), "None", "False"],
+                    [repr("H"), repr("HA3"), "None", "False"],
+                    [repr("O"), repr("O"), "None", "False"],
+                    [repr("N"), repr("N"), "None", "False"],
+                    [repr("C"), repr("CA"), "None", "False"],
+                    [repr("H"), repr("HA2"), "None", "False"],
+                    [repr("C"), repr("C"), "None", "False"],
                 ],
             },
             dictionary,
@@ -1080,7 +1084,7 @@ class TestNucleotide(unittest.TestCase):
             "MDANSE.MolecularDynamics.ChemicalEntity.Nucleotide(parent=None, name='5T1', resname='5T1'"
             ", code='5T1', variant=None, selected_variant=None, atoms=OrderedDict([(\"HO5'\", MDANSE."
             "Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Nucleotide(5T1), name="
-            "\"HO5'\", symbol='H', bonds=[Atom(O5')], groups=[], ghost=False, index=None, replaces="
+            "\"HO5'\", symbol='H', bonds=[Atom(O5')], groups=[], ghost=False, index=None, element='hydrogen', replaces="
             "['OP1', 'OP2', 'P'], o5prime_connected=True, alternatives=[]))]))",
             repr(nucleotide),
         )
@@ -1111,8 +1115,8 @@ class TestNucleotide(unittest.TestCase):
 
     def test_build(self):
         h5 = {
-            "nucleotides": [["[0]", repr("5T1"), repr("5T1"), "None"]],
-            "atoms": [[repr("H"), repr("HO5'"), "False"]],
+            "nucleotides": [[b"[0]", repr("5T1").encode("UTF-8"), repr("5T1").encode("UTF-8"), b"None"]],
+            "atoms": [[repr("H").encode("UTF-8"), repr("HO5'").encode("UTF-8"), b"False"]],
         }
         n = ce.Nucleotide.build(h5, [0], "5T1", "5T1", None)
 
@@ -1131,7 +1135,7 @@ class TestNucleotide(unittest.TestCase):
         self.assertDictEqual(
             {
                 "nucleotides": [["[0]", repr("5T1"), repr("5T1"), "None"]],
-                "atoms": [[repr("H"), repr("HO5'"), "False"]],
+                "atoms": [[repr("H"), repr("HO5'"), "None", "False"]],
             },
             dictionary,
         )
@@ -1146,7 +1150,7 @@ class TestNucleotide(unittest.TestCase):
         self.assertDictEqual(
             {
                 "nucleotides": [[], [], [], ["[3]", repr("5T1"), repr("5T1"), "None"]],
-                "atoms": [[], [], [], [repr("H"), repr("HO5'"), "False"]],
+                "atoms": [[], [], [], [repr("H"), repr("HO5'"), "None", "False"]],
             },
             dictionary,
         )
@@ -1469,87 +1473,87 @@ class TestNucleotideChain(unittest.TestCase):
         h5 = {
             "nucleotides": [
                 [
-                    "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 2"
-                    "8, 29, 30]",
-                    "'A'",
-                    "'adenine'",
-                    "'5T1'",
+                    b"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 2"
+                    b"8, 29, 30]",
+                    b"'A'",
+                    b"'adenine'",
+                    b"'5T1'",
                 ],
                 [
-                    "[31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64]",
-                    "'A'",
-                    "'adenine'",
-                    "'3T1'",
+                    b"[31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64]",
+                    b"'A'",
+                    b"'adenine'",
+                    b"'3T1'",
                 ],
             ],
             "atoms": [
-                ["'C'", '"C3\'"', "False"],
-                ["'C'", '"C1\'"', "False"],
-                ["'C'", '"C5\'"', "False"],
-                ["'H'", '"H2\'"', "False"],
-                ["'H'", '"H5\'"', "False"],
-                ["'H'", '"H3\'"', "False"],
-                ["'O'", '"O4\'"', "False"],
-                ["'C'", "'C8'", "False"],
-                ["'C'", "'C2'", "False"],
-                ["'H'", '"H1\'"', "False"],
-                ["'C'", "'C6'", "False"],
-                ["'C'", "'C5'", "False"],
-                ["'C'", "'C4'", "False"],
-                ["'H'", "\"H5''\"", "False"],
-                ["'H'", '"HO2\'"', "False"],
-                ["'N'", "'N9'", "False"],
-                ["'C'", '"C4\'"', "False"],
-                ["'C'", '"C2\'"', "False"],
-                ["'O'", '"O2\'"', "False"],
-                ["'N'", "'N1'", "False"],
-                ["'N'", "'N3'", "False"],
-                ["'N'", "'N6'", "False"],
-                ["'N'", "'N7'", "False"],
-                ["'H'", '"H4\'"', "False"],
-                ["'H'", "'H8'", "False"],
-                ["'H'", "'H2'", "False"],
-                ["'O'", '"O5\'"', "False"],
-                ["'H'", "'H61'", "False"],
-                ["'H'", "'H62'", "False"],
-                ["'O'", '"O3\'"', "False"],
-                ["'H'", '"HO5\'"', "False"],
-                ["'C'", '"C3\'"', "False"],
-                ["'C'", '"C1\'"', "False"],
-                ["'C'", '"C5\'"', "False"],
-                ["'H'", '"H2\'"', "False"],
-                ["'H'", '"H5\'"', "False"],
-                ["'H'", '"H3\'"', "False"],
-                ["'O'", '"O4\'"', "False"],
-                ["'C'", "'C8'", "False"],
-                ["'C'", "'C2'", "False"],
-                ["'H'", '"H1\'"', "False"],
-                ["'C'", "'C6'", "False"],
-                ["'C'", "'C5'", "False"],
-                ["'C'", "'C4'", "False"],
-                ["'H'", "\"H5''\"", "False"],
-                ["'H'", '"HO2\'"', "False"],
-                ["'N'", "'N9'", "False"],
-                ["'C'", '"C4\'"', "False"],
-                ["'C'", '"C2\'"', "False"],
-                ["'O'", '"O2\'"', "False"],
-                ["'N'", "'N1'", "False"],
-                ["'N'", "'N3'", "False"],
-                ["'N'", "'N6'", "False"],
-                ["'N'", "'N7'", "False"],
-                ["'H'", '"H4\'"', "False"],
-                ["'H'", "'H8'", "False"],
-                ["'H'", "'H2'", "False"],
-                ["'O'", '"O5\'"', "False"],
-                ["'H'", "'H61'", "False"],
-                ["'H'", "'H62'", "False"],
-                ["'O'", '"O3\'"', "False"],
-                ["'H'", '"HO3\'"', "False"],
-                ["'O'", "'OP1'", "False"],
-                ["'O'", "'OP2'", "False"],
-                ["'P'", "'P'", "False"],
+                [b"'C'", b'"C3\'"', b"False"],
+                [b"'C'", b'"C1\'"', b"False"],
+                [b"'C'", b'"C5\'"', b"False"],
+                [b"'H'", b'"H2\'"', b"False"],
+                [b"'H'", b'"H5\'"', b"False"],
+                [b"'H'", b'"H3\'"', b"False"],
+                [b"'O'", b'"O4\'"', b"False"],
+                [b"'C'", b"'C8'", b"False"],
+                [b"'C'", b"'C2'", b"False"],
+                [b"'H'", b'"H1\'"', b"False"],
+                [b"'C'", b"'C6'", b"False"],
+                [b"'C'", b"'C5'", b"False"],
+                [b"'C'", b"'C4'", b"False"],
+                [b"'H'", b"\"H5''\"", b"False"],
+                [b"'H'", b'"HO2\'"', b"False"],
+                [b"'N'", b"'N9'", b"False"],
+                [b"'C'", b'"C4\'"', b"False"],
+                [b"'C'", b'"C2\'"', b"False"],
+                [b"'O'", b'"O2\'"', b"False"],
+                [b"'N'", b"'N1'", b"False"],
+                [b"'N'", b"'N3'", b"False"],
+                [b"'N'", b"'N6'", b"False"],
+                [b"'N'", b"'N7'", b"False"],
+                [b"'H'", b'"H4\'"', b"False"],
+                [b"'H'", b"'H8'", b"False"],
+                [b"'H'", b"'H2'", b"False"],
+                [b"'O'", b'"O5\'"', b"False"],
+                [b"'H'", b"'H61'", b"False"],
+                [b"'H'", b"'H62'", b"False"],
+                [b"'O'", b'"O3\'"', b"False"],
+                [b"'H'", b'"HO5\'"', b"False"],
+                [b"'C'", b'"C3\'"', b"False"],
+                [b"'C'", b'"C1\'"', b"False"],
+                [b"'C'", b'"C5\'"', b"False"],
+                [b"'H'", b'"H2\'"', b"False"],
+                [b"'H'", b'"H5\'"', b"False"],
+                [b"'H'", b'"H3\'"', b"False"],
+                [b"'O'", b'"O4\'"', b"False"],
+                [b"'C'", b"'C8'", b"False"],
+                [b"'C'", b"'C2'", b"False"],
+                [b"'H'", b'"H1\'"', b"False"],
+                [b"'C'", b"'C6'", b"False"],
+                [b"'C'", b"'C5'", b"False"],
+                [b"'C'", b"'C4'", b"False"],
+                [b"'H'", b"\"H5''\"", b"False"],
+                [b"'H'", b'"HO2\'"', b"False"],
+                [b"'N'", b"'N9'", b"False"],
+                [b"'C'", b'"C4\'"', b"False"],
+                [b"'C'", b'"C2\'"', b"False"],
+                [b"'O'", b'"O2\'"', b"False"],
+                [b"'N'", b"'N1'", b"False"],
+                [b"'N'", b"'N3'", b"False"],
+                [b"'N'", b"'N6'", b"False"],
+                [b"'N'", b"'N7'", b"False"],
+                [b"'H'", b'"H4\'"', b"False"],
+                [b"'H'", b"'H8'", b"False"],
+                [b"'H'", b"'H2'", b"False"],
+                [b"'O'", b'"O5\'"', b"False"],
+                [b"'H'", b"'H61'", b"False"],
+                [b"'H'", b"'H62'", b"False"],
+                [b"'O'", b'"O3\'"', b"False"],
+                [b"'H'", b'"HO3\'"', b"False"],
+                [b"'O'", b"'OP1'", b"False"],
+                [b"'O'", b"'OP2'", b"False"],
+                [b"'P'", b"'P'", b"False"],
             ],
-            "nucleotide_chains": [["'name'", "[0, 1]"]],
+            "nucleotide_chains": [[b"'name'", b"[0, 1]"]],
         }
 
         nc = ce.NucleotideChain.build(h5, "name", [0, 1])
@@ -1867,29 +1871,29 @@ class TestPeptideChain(unittest.TestCase):
     def test_build(self):
         h5 = {
             "residues": [
-                ["[0, 1, 2, 3, 4, 5, 6, 7, 8]", "'GLY'", "'glycine1'", "'NT1'"],
-                ["[9, 10, 11, 12, 13, 14, 15, 16]", "'GLY'", "'glycine2'", "'CT1'"],
+                [b"[0, 1, 2, 3, 4, 5, 6, 7, 8]", b"'GLY'", b"'glycine1'", b"'NT1'"],
+                [b"[9, 10, 11, 12, 13, 14, 15, 16]", b"'GLY'", b"'glycine2'", b"'CT1'"],
             ],
             "atoms": [
-                ["'H'", "'HA3'", "False"],
-                ["'O'", "'O'", "False"],
-                ["'N'", "'N'", "False"],
-                ["'C'", "'CA'", "False"],
-                ["'H'", "'HA2'", "False"],
-                ["'C'", "'C'", "False"],
-                ["'H'", "'HT1'", "False"],
-                ["'H'", "'HT2'", "False"],
-                ["'H'", "'HT3'", "False"],
-                ["'H'", "'H'", "False"],
-                ["'H'", "'HA3'", "False"],
-                ["'O'", "'O'", "False"],
-                ["'N'", "'N'", "False"],
-                ["'C'", "'CA'", "False"],
-                ["'H'", "'HA2'", "False"],
-                ["'C'", "'C'", "False"],
-                ["'O'", "'OXT'", "False"],
+                [b"'H'", b"'HA3'", b"False"],
+                [b"'O'", b"'O'", b"False"],
+                [b"'N'", b"'N'", b"False"],
+                [b"'C'", b"'CA'", b"False"],
+                [b"'H'", b"'HA2'", b"False"],
+                [b"'C'", b"'C'", b"False"],
+                [b"'H'", b"'HT1'", b"False"],
+                [b"'H'", b"'HT2'", b"False"],
+                [b"'H'", b"'HT3'", b"False"],
+                [b"'H'", b"'H'", b"False"],
+                [b"'H'", b"'HA3'", b"False"],
+                [b"'O'", b"'O'", b"False"],
+                [b"'N'", b"'N'", b"False"],
+                [b"'C'", b"'CA'", b"False"],
+                [b"'H'", b"'HA2'", b"False"],
+                [b"'C'", b"'C'", b"False"],
+                [b"'O'", b"'OXT'", b"False"],
             ],
-            "peptide_chains": [["'name'", "[0, 1]"]],
+            "peptide_chains": [[b"'name'", b"[0, 1]"]],
         }
         pc = ce.PeptideChain.build(h5, "name", [0, 1])
 
@@ -2116,29 +2120,29 @@ class TestProtein(unittest.TestCase):
         h5 = {
             "proteins": [["'name'", "[0]"]],
             "residues": [
-                ["[0, 1, 2, 3, 4, 5, 6, 7, 8]", "'GLY'", "'glycine1'", "'NT1'"],
-                ["[9, 10, 11, 12, 13, 14, 15, 16]", "'GLY'", "'glycine2'", "'CT1'"],
+                [b"[0, 1, 2, 3, 4, 5, 6, 7, 8]", b"'GLY'", b"'glycine1'", b"'NT1'"],
+                [b"[9, 10, 11, 12, 13, 14, 15, 16]", b"'GLY'", b"'glycine2'", b"'CT1'"],
             ],
             "atoms": [
-                ["'H'", "'HA3'", "False"],
-                ["'O'", "'O'", "False"],
-                ["'N'", "'N'", "False"],
-                ["'C'", "'CA'", "False"],
-                ["'H'", "'HA2'", "False"],
-                ["'C'", "'C'", "False"],
-                ["'H'", "'HT1'", "False"],
-                ["'H'", "'HT2'", "False"],
-                ["'H'", "'HT3'", "False"],
-                ["'H'", "'H'", "False"],
-                ["'H'", "'HA3'", "False"],
-                ["'O'", "'O'", "False"],
-                ["'N'", "'N'", "False"],
-                ["'C'", "'CA'", "False"],
-                ["'H'", "'HA2'", "False"],
-                ["'C'", "'C'", "False"],
-                ["'O'", "'OXT'", "False"],
+                [b"'H'", b"'HA3'", b"False"],
+                [b"'O'", b"'O'", b"False"],
+                [b"'N'", b"'N'", b"False"],
+                [b"'C'", b"'CA'", b"False"],
+                [b"'H'", b"'HA2'", b"False"],
+                [b"'C'", b"'C'", b"False"],
+                [b"'H'", b"'HT1'", b"False"],
+                [b"'H'", b"'HT2'", b"False"],
+                [b"'H'", b"'HT3'", b"False"],
+                [b"'H'", b"'H'", b"False"],
+                [b"'H'", b"'HA3'", b"False"],
+                [b"'O'", b"'O'", b"False"],
+                [b"'N'", b"'N'", b"False"],
+                [b"'C'", b"'CA'", b"False"],
+                [b"'H'", b"'HA2'", b"False"],
+                [b"'C'", b"'C'", b"False"],
+                [b"'O'", b"'OXT'", b"False"],
             ],
-            "peptide_chains": [["'name'", "[0, 1]"]],
+            "peptide_chains": [[b"'name'", b"[0, 1]"]],
         }
         p = ce.Protein.build(h5, "name", [0])
 
@@ -2255,13 +2259,13 @@ class TestChemicalSystem(unittest.TestCase):
             "chemical_entities=[MDANSE.MolecularDynamics.ChemicalEntity.Molecule(parent=MDANSE.Chemistry."
             "ChemicalEntity.ChemicalSystem(name), name='name', atoms=OrderedDict([('OW', MDANSE.Chemistry."
             "ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(name), name='OW', "
-            "symbol='O', bonds=[Atom(HW1), Atom(HW2)], groups=[], ghost=False, index=0, alternatives="
+            "symbol='O', bonds=[Atom(HW1), Atom(HW2)], groups=[], ghost=False, index=0, element='oxygen', alternatives="
             "['O', 'OH2'])), ('HW2', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry."
             "ChemicalEntity.Molecule(name), name='HW2', symbol='H', bonds=[Atom(OW)], groups=[], "
-            "ghost=False, index=1, alternatives=['H2'])), ('HW1', MDANSE.Chemistry.ChemicalEntity."
+            "ghost=False, index=1, element='hydrogen', alternatives=['H2'])), ('HW1', MDANSE.Chemistry.ChemicalEntity."
             "Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(name), name='HW1', symbol='H', bonds="
-            "[Atom(OW)], groups=[], ghost=False, index=2, alternatives=['H1']))]), code='WAT')], "
-            "configuration=None, number_of_atoms=3, total_number_of_atoms=3, atoms=None)",
+            "[Atom(OW)], groups=[], ghost=False, index=2, element='hydrogen', alternatives=['H1']))]), code='WAT')], "
+            "configuration=None, number_of_atoms=3, total_number_of_atoms=3, bonds=[], atoms=None)",
             repr(self.system),
         )
 
@@ -2318,7 +2322,7 @@ class TestChemicalSystem(unittest.TestCase):
         self.assertEqual(None, copy._configuration)
         self.assertEqual(3, copy._number_of_atoms)
         self.assertEqual(3, copy._total_number_of_atoms)
-        self.assertEqual(None, copy._atoms)
+        self.assertEqual(self.system.atoms, copy.atoms)
 
     def test_load_valid(self):
         file = StubHDFFile()
@@ -2328,7 +2332,7 @@ class TestChemicalSystem(unittest.TestCase):
         file["/chemical_system/contents"] = [
             ("atoms".encode(encoding="UTF-8", errors="strict"), 0)
         ]
-        file["/chemical_system"]["atoms"] = [[repr("H"), repr("H1"), "False"]]
+        file["/chemical_system"]["atoms"] = [[repr("H").encode("UTF-8"), repr("H1").encode("UTF-8"), b"0", b"False"]]
         self.system.load(file)
 
         self.assertEqual(None, self.system._h5_file)
@@ -2351,7 +2355,7 @@ class TestChemicalSystem(unittest.TestCase):
         file["/chemical_system/contents"] = [
             ("INVALID".encode(encoding="UTF-8", errors="strict"), 0)
         ]
-        file["/chemical_system"]["atoms"] = [["H", "H1", "False"]]
+        file["/chemical_system"]["atoms"] = [[b"H", b"H1", b"0", b"False"]]
 
         with self.assertRaises(ce.CorruptedFileError):
             self.system.load(file)
@@ -2364,7 +2368,7 @@ class TestChemicalSystem(unittest.TestCase):
         file["/chemical_system/contents"] = [
             ("atoms".encode(encoding="UTF-8", errors="strict"), 0)
         ]
-        file["/chemical_system"]["INVALID"] = [["H", "H1", "False"]]
+        file["/chemical_system"]["INVALID"] = [[b"H", b"H1", b"0", b"False"]]
 
         with self.assertRaises(ce.CorruptedFileError):
             self.system.load(file)
@@ -2377,7 +2381,7 @@ class TestChemicalSystem(unittest.TestCase):
         file["/chemical_system/contents"] = [
             ("atoms".encode(encoding="UTF-8", errors="strict"), 1)
         ]
-        file["/chemical_system"]["atoms"] = [["H", "H1", "False"]]
+        file["/chemical_system"]["atoms"] = [[b"H", b"H1", b"0", b"False"]]
 
         with self.assertRaises(ce.CorruptedFileError):
             self.system.load(file)
@@ -2390,7 +2394,7 @@ class TestChemicalSystem(unittest.TestCase):
         file["/chemical_system/contents"] = [
             ("atoms".encode(encoding="UTF-8", errors="strict"), 0)
         ]
-        file["/chemical_system"]["atoms"] = [['"', "H1", "False"]]
+        file["/chemical_system"]["atoms"] = [[b'"', b"H1", b"0", b"False"]]
 
         with self.assertRaises(ce.CorruptedFileError):
             self.system.load(file)
@@ -2404,10 +2408,10 @@ class TestChemicalSystem(unittest.TestCase):
             ("molecules".encode(encoding="UTF-8", errors="strict"), 0)
         ]
         file["/chemical_system"]["atoms"] = [
-            [repr("H"), repr("H1"), "False"] for _ in range(3)
+            [repr("H").encode("UTF-8"), repr("H1").encode("UTF-8"), str(i).encode("UTF-8"), b"False"] for i in range(3)
         ]
         file["/chemical_system"]["molecules"] = [
-            ["[0, 1, 2]", repr("WAT"), repr("water")]
+            [b"[0, 1, 2]", repr("WAT").encode("UTF-8"), repr("water").encode("UTF-8")]
         ]
 
         with self.assertRaises(ce.CorruptedFileError) as e:
@@ -2426,9 +2430,9 @@ class TestChemicalSystem(unittest.TestCase):
         file["/chemical_system/contents"] = [
             ("molecules".encode(encoding="UTF-8", errors="strict"), 0)
         ]
-        file["/chemical_system"]["atoms"] = [[repr("H"), repr("H1"), "False"]]
+        file["/chemical_system"]["atoms"] = [[repr("H").encode("UTF-8"), repr("H1").encode("UTF-8"), b"0", b"False"]]
         file["/chemical_system"]["molecules"] = [
-            ["[0, 1, 2]", repr("WAT"), repr("water")]
+            [b"[0, 1, 2]", repr("WAT").encode("UTF-8"), repr("water").encode("UTF-8")]
         ]
 
         with self.assertRaises(ce.CorruptedFileError) as e:
@@ -2448,7 +2452,7 @@ class TestChemicalSystem(unittest.TestCase):
             ("molecules".encode(encoding="UTF-8", errors="strict"), 0)
         ]
         file["/chemical_system"]["molecules"] = [
-            ["[0, 1, 2]", repr("WAT"), repr("water")]
+            [b"[0, 1, 2]", repr("WAT").encode("UTF-8"), repr("water").encode("UTF-8")]
         ]
 
         with self.assertRaises(ce.CorruptedFileError) as e:
@@ -2468,9 +2472,9 @@ class TestChemicalSystem(unittest.TestCase):
             ("proteins".encode(encoding="UTF-8", errors="strict"), 0)
         ]
         file["/chemical_system"]["peptide_chains"] = [
-            [repr("name"), "[0, 1]", repr("INVALID_ARGUMENT")],
+            [repr("name").encode("UTF-8"), b"[0, 1]", repr("INVALID_ARGUMENT").encode("UTF-8")],
         ]
-        file["/chemical_system"]["proteins"] = [[repr("protein"), "[0, 1, 2]"]]
+        file["/chemical_system"]["proteins"] = [[repr("protein").encode("UTF-8"), b"[0, 1, 2]"]]
 
         with self.assertRaises(ce.CorruptedFileError) as e:
             self.system.load(file)
@@ -2488,9 +2492,9 @@ class TestChemicalSystem(unittest.TestCase):
         file["/chemical_system/contents"] = [
             ("molecules".encode(encoding="UTF-8", errors="strict"), 0)
         ]
-        file["/chemical_system"]["atoms"] = [[repr("H"), "H1", "False"]]
+        file["/chemical_system"]["atoms"] = [[repr("H").encode("UTF-8"), b"H1", b"0", b"False"]]
         file["/chemical_system"]["molecules"] = [
-            ["[0, 1, 2]", repr("WAT"), repr("water")]
+            [b"[0, 1, 2]", repr("WAT").encode("UTF-8"), repr("water").encode("UTF-8")]
         ]
 
         with self.assertRaises(ce.CorruptedFileError) as e:
@@ -2514,9 +2518,9 @@ class TestChemicalSystem(unittest.TestCase):
         )
         self.assertEqual(
             [
-                [repr("O"), repr("OW"), "False"],
-                [repr("H"), repr("HW2"), "False"],
-                [repr("H"), repr("HW1"), "False"],
+                [repr("O"), repr("OW"), "0", "False"],
+                [repr("H"), repr("HW2"), "1", "False"],
+                [repr("H"), repr("HW1"), "2", "False"],
             ],
             file["/chemical_system"]["atoms"],
         )
@@ -2570,13 +2574,11 @@ class TestChemicalEntity(unittest.TestCase):
         system.add_chemical_entity(self.protein)
         group = ce.AtomGroup([self.r1["HT3"], self.r1["HA2"], self.r2["O"]])
 
-        configuration = {"coordinates": np.ones((50, 3))}
+        configuration = {"coordinates": np.ones((17, 3))}
         self.assertTrue(
             np.allclose(np.array([1, 1, 1]), self.protein.center_of_mass(configuration))
         )
-        self.assertTrue(
-            np.allclose(np.array([1, 1, 1]), self.protein.centre_of_mass(configuration))
-        )
+        configuration = {"coordinates": np.ones((3, 3))}
         self.assertTrue(
             np.allclose(np.array([1, 1, 1]), group.center_of_mass(configuration))
         )
@@ -2793,27 +2795,3 @@ class StubConfiguration(dict):
         self.chemical_system = chemical_system
         super().__init__(**kwargs)
 
-
-def suite():
-    loader = unittest.TestLoader()
-    s = unittest.TestSuite()
-    for test_case in [
-        TestChemicalEntity,
-        TestAtom,
-        TestAtomCluster,
-        TestAtomGroup,
-        TestMolecule,
-        TestResidue,
-        TestNucleotide,
-        TestNucleotideChain,
-        TestPeptideChain,
-        TestProtein,
-        TestTranslateAtomNames,
-        TestChemicalSystem,
-    ]:
-        s.addTest(loader.loadTestsFromTestCase(test_case))
-    return s
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

@@ -5,7 +5,7 @@
 # @file      Tests/UnitTests/TestGeometry.py
 # @brief     Implements module/class/test TestGeometry
 #
-# @homepage  https://mdanse.org
+# @homepage https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
 # @copyright Institut Laue Langevin 2013-now
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
@@ -49,46 +49,42 @@ import unittest
 
 import numpy
 
-from MDANSE.IO.PDBReader import PDBReader
+from MDANSE.Mathematics.Geometry import center_of_mass
 
 
-class TestPDBReader(unittest.TestCase):
+class TestGeometry(unittest.TestCase):
     """
     Unittest for the geometry-related functions
     """
 
-    def test_reader(self):
-        with self.assertRaises((IOError, AttributeError)):
-            reader = PDBReader("xxxxx.pdb")
+    def test_center_of_mass(self):
+        coords = numpy.array(
+            [
+                [0, 0, 0],
+                [1, 0, 0],
+                [1, 1, 0],
+                [0, 1, 0],
+                [0, 0, 1],
+                [1, 0, 1],
+                [1, 1, 1],
+                [0, 1, 1],
+            ],
+            dtype=numpy.float64,
+        )
 
-        reader = PDBReader("../../Data/Trajectories/CHARMM/2vb1.pdb")
+        self.assertTrue(
+            numpy.array_equal(
+                center_of_mass(coords),
+                numpy.array([0.5, 0.5, 0.5], dtype=numpy.float64),
+            )
+        )
 
-        chemicalSystem = reader.build_chemical_system()
-
-        atomList = chemicalSystem.atom_list
-
-        self.assertEqual(atomList[4].symbol, "C")
-        self.assertEqual(atomList[7].name, "HB2")
-        self.assertEqual(atomList[10].full_name, "...LYS1.HG2")
-        self.assertEqual(atomList[28].parent.name, "VAL2")
-
-        conf = chemicalSystem.configuration
-
-        self.assertAlmostEqual(conf.variables["coordinates"][0, 0], 4.6382)
-        self.assertAlmostEqual(conf.variables["coordinates"][0, 1], 3.0423)
-        self.assertAlmostEqual(conf.variables["coordinates"][0, 2], 2.6918)
-
-        self.assertAlmostEqual(conf.variables["coordinates"][-1, 0], 2.4937)
-        self.assertAlmostEqual(conf.variables["coordinates"][-1, 1], 3.9669)
-        self.assertAlmostEqual(conf.variables["coordinates"][-1, 2], -0.5209)
-
-
-def suite():
-    loader = unittest.TestLoader()
-    s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(TestPDBReader))
-    return s
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
+        masses = numpy.array(
+            [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], dtype=numpy.float64
+        )
+        self.assertTrue(
+            numpy.array_equal(
+                center_of_mass(coords, masses=masses),
+                numpy.array([0.5, 0.5, 0.0], dtype=numpy.float64),
+            )
+        )

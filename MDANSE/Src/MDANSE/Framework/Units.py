@@ -161,7 +161,7 @@ class _Unit(object):
         else:
             raise UnitError("Incompatible units")
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         """Divide _Unit instances.
 
         >>> print(measure(100, 'V') / measure(10, 'kohm'))

@@ -37,10 +37,13 @@ class _Configuration(metaclass=abc.ABCMeta):
 
         self._variables = {}
 
-        self["coordinates"] = np.array(coords)
+        self["coordinates"] = np.array(coords, dtype=float)
 
         for k, v in variables.items():
-            self[k] = v
+            if k == "velocities" or k == "forces":
+                self[k] = np.array(v, dtype=float)
+            else:
+                self[k] = v
 
     def __contains__(self, item: str) -> bool:
         """
@@ -76,11 +79,22 @@ class _Configuration(metaclass=abc.ABCMeta):
         :param value: the value of the variable to be set
         :type value: numpy.ndarray
         """
-
         item = np.array(value)
+
+        if name == "unit_cell":
+            if item.shape != (3, 3):
+                raise ValueError(
+                    f"Invalid item dimensions for {name}; a shape of (3, 3) "
+                    f"was expected but data with shape of {item.shape} was "
+                    f"provided."
+                )
+            else:
+                self._variables[name] = value
+                return
+
         if item.shape != (self._chemical_system.number_of_atoms, 3):
             raise ValueError(
-                f"Invalid item dimensions; a shape of {(self._chemical_system.number_of_atoms, 3)} was "
+                f"Invalid item dimensions for {name}; a shape of {(self._chemical_system.number_of_atoms, 3)} was "
                 f"expected but data with shape of {item.shape} was provided."
             )
 
@@ -719,13 +733,13 @@ class RealConfiguration(_Configuration):
         if chemical_entities is None:
             chemical_entities = self._chemical_system.chemical_entities
         else:
-            for ce in chemical_entities:
+            for j, ce in enumerate(chemical_entities):
                 root = ce.root_chemical_system
                 if root is not self._chemical_system:
                     raise ConfigurationError(
                         "All the entities provided in the chemical_entities parameter must belong "
                         "to the chemical system registered with this configuration, which is "
-                        f"{self._chemical_system.name}. However, the entity at index {i}, "
+                        f"{self._chemical_system.name}. However, the entity at index {j}, "
                         f"{str(ce)}, is in chemical system "
                         f"{root.name if root is not None else None}.\nExpected chemical system: "
                         f"{repr(self._chemical_system)}\nActual chemical system: {repr(root)}\n"

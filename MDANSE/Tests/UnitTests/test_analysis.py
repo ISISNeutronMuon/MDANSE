@@ -6,6 +6,7 @@ from MDANSE.MolecularDynamics.Analysis import *
 
 
 class TestAnalysis(unittest.TestCase):
+
     def test_mean_square_deviation_valid_no_masses_no_root(self):
         coords1 = np.array([[1, 1, 1], [2, 1, 1], [3, 1, 1]])
         coords2 = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
@@ -65,14 +66,3 @@ class TestAnalysis(unittest.TestCase):
         coords = np.array([[1, 2, 1], [2, 1, 1], [10, 5, 5], [1, 1, 2]])
         msf = mean_square_fluctuation(coords, True)
         self.assertEqual(np.sqrt(19.625), msf)
-
-
-def suite():
-    loader = unittest.TestLoader()
-    s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(TestAnalysis))
-    return s
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

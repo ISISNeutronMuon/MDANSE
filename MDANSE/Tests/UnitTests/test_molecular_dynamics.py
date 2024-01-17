@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Tests/UnitTests/TestGeometry.py
-# @brief     Implements module/class/test TestGeometry
+# @file      Tests/UnitTests/TestMolecularDynamics.py
+# @brief     Implements module/class/test TestMolecularDynamics
 #
 # @homepage https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -49,15 +49,77 @@ import unittest
 
 import numpy
 
-from MDANSE.Mathematics.Geometry import center_of_mass
+from MDANSE.MolecularDynamics.Analysis import (
+    radius_of_gyration,
+    mean_square_deviation,
+    mean_square_fluctuation,
+)
 
 
-class TestGeometry(unittest.TestCase):
+class TestMolecularDynamics(unittest.TestCase):
     """
     Unittest for the geometry-related functions
     """
 
-    def test_center_of_mass(self):
+    def test_radius_of_gyration(self):
+        coords = numpy.array(
+            [
+                [0, 0, 0],
+                [1, 0, 0],
+                [1, 1, 0],
+                [0, 1, 0],
+                [0, 0, 1],
+                [1, 0, 1],
+                [1, 1, 1],
+                [0, 1, 1],
+            ],
+            dtype=numpy.float64,
+        )
+        self.assertEqual(radius_of_gyration(coords, root=True), numpy.sqrt(0.75))
+
+        masses = numpy.array(
+            [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], dtype=numpy.float64
+        )
+        self.assertEqual(
+            radius_of_gyration(coords, masses=masses, root=True), numpy.sqrt(0.5)
+        )
+
+    def test_mean_square_deviation(self):
+        coords1 = numpy.array(
+            [
+                [0, 0, 0],
+                [1, 0, 0],
+                [1, 1, 0],
+                [0, 1, 0],
+                [0, 0, 1],
+                [1, 0, 1],
+                [1, 1, 1],
+                [0, 1, 1],
+            ],
+            dtype=numpy.float64,
+        )
+
+        coords2 = numpy.array(
+            [
+                [1, 1, 1],
+                [2, 1, 1],
+                [2, 2, 1],
+                [1, 2, 1],
+                [1, 1, 2],
+                [2, 1, 2],
+                [2, 2, 2],
+                [1, 2, 2],
+            ],
+            dtype=numpy.float64,
+        )
+
+        self.assertEqual(
+            mean_square_deviation(coords1, coords2, root=True), numpy.sqrt(3)
+        )
+
+        self.assertEqual(mean_square_deviation(coords1, coords2, root=False), 3)
+
+    def test_mean_square_fluctuation(self):
         coords = numpy.array(
             [
                 [0, 0, 0],
@@ -72,30 +134,4 @@ class TestGeometry(unittest.TestCase):
             dtype=numpy.float64,
         )
 
-        self.assertTrue(
-            numpy.array_equal(
-                center_of_mass(coords),
-                numpy.array([0.5, 0.5, 0.5], dtype=numpy.float64),
-            )
-        )
-
-        masses = numpy.array(
-            [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], dtype=numpy.float64
-        )
-        self.assertTrue(
-            numpy.array_equal(
-                center_of_mass(coords, masses=masses),
-                numpy.array([0.5, 0.5, 0.0], dtype=numpy.float64),
-            )
-        )
-
-
-def suite():
-    loader = unittest.TestLoader()
-    s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(TestGeometry))
-    return s
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
+        self.assertEqual(mean_square_fluctuation(coords, root=False), 0.75)
