@@ -1,4 +1,4 @@
-name: Build MDANSE
+name: Test MDANSE
 
 on: [push, pull_request]
 
