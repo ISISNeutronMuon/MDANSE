@@ -37,10 +37,13 @@ class _Configuration(metaclass=abc.ABCMeta):
 
         self._variables = {}
 
-        self["coordinates"] = np.array(coords)
+        self["coordinates"] = np.array(coords, dtype=float)
 
         for k, v in variables.items():
-            self[k] = v
+            if k == "velocities" or k == "forces":
+                self[k] = np.array(v, dtype=float)
+            else:
+                self[k] = v
 
     def __contains__(self, item: str) -> bool:
         """
@@ -730,13 +733,13 @@ class RealConfiguration(_Configuration):
         if chemical_entities is None:
             chemical_entities = self._chemical_system.chemical_entities
         else:
-            for ce in chemical_entities:
+            for j, ce in enumerate(chemical_entities):
                 root = ce.root_chemical_system
                 if root is not self._chemical_system:
                     raise ConfigurationError(
                         "All the entities provided in the chemical_entities parameter must belong "
                         "to the chemical system registered with this configuration, which is "
-                        f"{self._chemical_system.name}. However, the entity at index {i}, "
+                        f"{self._chemical_system.name}. However, the entity at index {j}, "
                         f"{str(ce)}, is in chemical system "
                         f"{root.name if root is not None else None}.\nExpected chemical system: "
                         f"{repr(self._chemical_system)}\nActual chemical system: {repr(root)}\n"

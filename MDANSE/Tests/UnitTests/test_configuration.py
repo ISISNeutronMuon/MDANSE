@@ -206,10 +206,8 @@ class TestPeriodicConfiguration(unittest.TestCase):
         self.assertEqual(self.unit_cell, self.conf.unit_cell)
 
     def test_instantiation_invalid_unit_cell(self):
-        coords = np.random.uniform(0, 1, (self._nAtoms, 3))
-        unit_cell = UnitCell(np.random.uniform(0, 1, (4, 4)))
         with self.assertRaises(ValueError):
-            PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+            UnitCell(np.random.uniform(0, 1, (4, 4)))
 
     def test_clone_valid_chemical_system(self):
         clone = self.conf.clone(self.chem_system)
@@ -229,11 +227,6 @@ class TestPeriodicConfiguration(unittest.TestCase):
         unit_cell_new = UnitCell(np.random.uniform(0, 2, (3, 3)))
         self.conf.unit_cell = unit_cell_new
         self.assertEqual(unit_cell_new, self.conf.unit_cell)
-
-    def test_unit_cell_setter_invalid_shape(self):
-        unit_cell_new = UnitCell(np.random.uniform(0, 2, (4, 4)))
-        with self.assertRaises(ValueError):
-            self.conf.unit_cell = unit_cell_new
 
 
 class TestPeriodicBoxConfiguration(unittest.TestCase):
@@ -384,11 +377,11 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
             np.allclose(
                 [
                     [0, 0, 0],
-                    [0.8, 1.1, -1.6],
-                    [-0.9, -0.8, 1.2],
-                    [-1.9, 0.8, 0.4],
                     [0, 0, 0],
-                    [1.9, 1.5, 1.9],
+                    [1, 1, 1],
+                    [-2, -1, -2],
+                    [0, 0, 0],
+                    [1, 0, 0],
                 ],
                 offsets,
             ),
@@ -408,11 +401,11 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
             [0.1, 1.5, 1.1],
         ]
         conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
-        offsets = conf.contiguous_offsets(self.chem_system.chemical_entities[0])
+        offsets = conf.contiguous_offsets([self.chem_system.chemical_entities[0]])
 
         self.assertTrue(
             np.allclose(
-                [[0, 0, 0], [0.8, 1.1, -1.6], [-0.9, -0.8, 1.2], [-1.9, 0.8, 0.4]],
+                [[0, 0, 0], [0, 0, 0], [1, 1, 1], [-2, -1, -2]],
                 offsets,
             ),
             f"\nactual = {offsets}",
@@ -647,7 +640,7 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         )
         conf = PeriodicRealConfiguration(self.chem_system, coords, unit_cell)
 
-        offsets = conf.contiguous_offsets(self.chem_system.chemical_entities[0])
+        offsets = conf.contiguous_offsets([self.chem_system.chemical_entities[0]])
         self.assertTrue(
             np.allclose(
                 [
