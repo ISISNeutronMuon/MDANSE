@@ -774,4 +774,3 @@ class TestRealConfiguration(unittest.TestCase):
 
         with self.assertRaises(ConfigurationError):
             conf.contiguous_offsets([Atom(parent=ChemicalSystem())])
-
