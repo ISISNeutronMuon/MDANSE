@@ -51,7 +51,7 @@ from MDANSE.IO.PDBReader import PDBReader
 
 
 pbd_2vb1 = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "data", "2vb1.pdb")
+    os.path.dirname(os.path.realpath(__file__)), "Data", "2vb1.pdb")
 
 
 class TestPDBReader(unittest.TestCase):
