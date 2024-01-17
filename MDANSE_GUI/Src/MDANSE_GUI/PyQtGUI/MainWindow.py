@@ -33,7 +33,6 @@ from qtpy.QtWidgets import (
 
 from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.PyQtGUI.Widgets.Generator import WidgetGenerator
-from MDANSE_GUI.PyQtGUI.Widgets.ConvertDialog import ConverterDialog
 from MDANSE_GUI.PyQtGUI.Widgets.ActionDialog import ActionDialog
 from MDANSE_GUI.PyQtGUI.Widgets.ActionsTree import ActionsTree
 from MDANSE_GUI.PyQtGUI.Widgets.LoaderButton import LoaderButton
@@ -219,22 +218,34 @@ class MainWindow(QMainWindow):
     @Slot(object)
     def convertTrajectory(self, converter=None):
         ic(f"Received converter: {converter}")
-        dialog = ConverterDialog
-        dialog_instance = dialog(self, converter=converter)
+        dialog = ActionDialog
+        try:
+            dialog_instance = dialog(self, converter=converter)
+        except:
+            self.reportError(f"Failed to create the dialog: {dialog} for converter {converter}")
         dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
         dialog_instance.show()
-        result = dialog_instance.exec()
+        try:
+            result = dialog_instance.exec()
+        except:
+            self.reportError(f"Dialog execution failed in dialog: {dialog} for converter {converter}")
 
     @Slot(object)
     def runAction(self, converter=None):
         ic(f"Received action: {converter}")
         dialog = ActionDialog
-        dialog_instance = dialog(
+        try:
+            dialog_instance = dialog(
             self, converter=converter, source_object=self.current_object
-        )
+            )
+        except:
+            self.reportError(f"Failed to create the dialog: {dialog} for action {converter}")
         dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
         dialog_instance.show()
-        result = dialog_instance.exec()
+        try:
+            result = dialog_instance.exec()
+        except:
+            self.reportError(f"Dialog execution failed in dialog: {dialog} for action {converter}")
 
     @Slot(DataTreeItem)
     def setCurrentObject(self, data_object: DataTreeItem):
@@ -295,3 +306,6 @@ class MainWindow(QMainWindow):
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("state", self.saveState())
         self.settings.endGroup()
+
+    def reportError(self, text: str):
+        print(text)

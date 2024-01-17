@@ -56,6 +56,7 @@ class WidgetBase(QObject):
         self._base = base
         self._layout = layout
         self._configurator = configurator
+        self._parent_dialog = parent
 
     def update_labels(self):
         if self._base_type == "QWidget":
@@ -96,3 +97,11 @@ class WidgetBase(QObject):
     def get_value(self):
         self.updateValue()
         return self._configurator["value"]
+
+    @property
+    def default_path(self):
+        return self._parent_dialog.default_path
+
+    @default_path.setter
+    def default_path(self, value: str) -> None:
+        self._parent_dialog.default_path = value

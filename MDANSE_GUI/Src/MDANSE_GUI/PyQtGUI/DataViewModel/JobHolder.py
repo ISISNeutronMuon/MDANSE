@@ -22,6 +22,9 @@ from MDANSE_GUI.PyQtGUI.DataViewModel.JobStatusQt import JobStatusQt
 
 
 class JobThread(QThread):
+    """A wrapper object for a single MDANSE analysis job.
+    It is created to run a single instance of the job,
+    and exits once the job has completed processing."""
     job_failure = Signal(str)
 
     def __init__(self, *args, command=None, parameters={}):
@@ -56,6 +59,8 @@ class JobThread(QThread):
 
 
 class JobEntry(QObject):
+    """This coordinates all the objects that make up one line on the list
+    of current jobs. It is used for reporting the task progress to the GUI."""
     def __init__(self, *args, command=None):
         super().__init__(*args)
         self._command = command
@@ -113,6 +118,8 @@ class JobEntry(QObject):
 
 
 class JobHolder(QStandardItemModel):
+    """All the job INSTANCES that are started by the GUI
+    are added to this model."""
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
         self.lock = QMutex()

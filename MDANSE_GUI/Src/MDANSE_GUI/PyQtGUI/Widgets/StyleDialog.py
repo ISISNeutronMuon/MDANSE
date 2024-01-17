@@ -52,34 +52,34 @@ from MDANSE_GUI.PyQtGUI.Widgets.GeneralWidgets import InputFactory
 
 
 sample_styles = {
+    "blank_stylesheet": "",
     "initial_stylesheet": """QWidget
-{   background-color:rgb(230,250,250);
-    border-radius: 2px;
-    border-style: inset;
+{   border-radius: 1px;
+    border-style: 1nset;
     border-width: 0px;
     border-color: rgb(30,250,250);
     font: bold 14px;
-    padding: 6px;
+    padding: 2px;
 }""",
     "dark_stylesheet": """QWidget
-{   background-color:rgb(80,10,80);
+{   background-color:rgb(40,10,80);
     border-radius: 6px;
     border-style: outset;
-    border-width: 4px;
+    border-width: 2px;
     border-color: rgb(10,20,200);
     font: bold 14px;
     color: rgb(10,200,10);
-    padding: 6px;
+    padding: 3px;
 }""",
     "hippie_stylesheet": """QWidget
-{   background-image: radial-gradient(rgb(200,160,160), rgb(0, 150,250), rgb(250,100,250));
+{   background-color: qlineargradient(x1:0,y1:0,x2:1,y2:1,stop: 0 #aa1163, stop: 1 #23bb54);
     border-radius: 10px;
     border-style: outset;
-    border-width: 4px;
+    border-width: 3px;
     border-color: rgb(10,200,50);
     font: bold 14px;
-    color: rgb(10,200,10);
-    padding: 6px;
+    color: rgb(10,200,230);
+    padding: 3px;
 }""",
 }
 

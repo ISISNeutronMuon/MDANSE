@@ -13,6 +13,8 @@
 #
 # **************************************************************************
 
+import os
+
 from qtpy.QtWidgets import QLineEdit, QSpinBox, QLabel
 from qtpy.QtCore import Slot, Signal
 from qtpy.QtGui import QIntValidator
@@ -33,6 +35,8 @@ class HDFTrajectoryWidget(WidgetBase):
             trajectory = HDFTrajectoryInputData(filename)
             self._layout.addWidget(QLabel(filename, self._base))
             self._configurator.configure(filename)
+            trajectory_path, _ = os.path.split(filename)
+            self.default_path = trajectory_path
         else:
             self._layout.addWidget(QLabel("No Trajectory available", self._base))
         self._trajectory = trajectory
