@@ -1,0 +1,34 @@
+name: Build MDANSE
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Build MDANSE and run tests on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, windows-2019, macOS-11]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        # os: [ubuntu-20.04, windows-2019, macOS-11, ubuntu-latest, windows-latest, macOS-latest]
+    if: |
+      !contains( github.ref, 'legacy' )
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install build packages
+        run: python -m pip install build wheel setuptools pytest
+
+      - name: Install dependencies
+        run: (cd MDANSE && python -m pip install -r requirements.txt)
+
+      - name: install MDANSE
+        run: (cd MDANSE && python -m pip install .)
+
+      - name: run unit tests
+        run: (cd MDANSE/Tests/UnitTests && pytest)
