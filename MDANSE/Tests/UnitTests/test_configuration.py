@@ -775,17 +775,3 @@ class TestRealConfiguration(unittest.TestCase):
         with self.assertRaises(ConfigurationError):
             conf.contiguous_offsets([Atom(parent=ChemicalSystem())])
 
-
-def suite():
-    loader = unittest.TestLoader()
-    s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(TestConfiguration))
-    s.addTest(loader.loadTestsFromTestCase(TestPeriodicConfiguration))
-    s.addTest(loader.loadTestsFromTestCase(TestPeriodicBoxConfiguration))
-    s.addTest(loader.loadTestsFromTestCase(TestPeriodicRealConfiguration))
-    s.addTest(loader.loadTestsFromTestCase(TestRealConfiguration))
-    return s
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
