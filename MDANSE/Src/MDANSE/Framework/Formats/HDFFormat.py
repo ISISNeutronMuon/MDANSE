@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/Formats/HDFFormat.py
+# @file      MDANSE/Framework/Formats/HDFFormat.py
 # @brief     Implements module/class/test HDFFormat
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
@@ -12,40 +12,47 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
 import os
-
 import h5py
-
-
 from MDANSE.Framework.Formats.IFormat import IFormat
+from MDANSE.Framework.OutputVariables import IOutputVariable
 
 
 class HDFFormat(IFormat):
     """
     This class handles the writing of output variables in HDF file format.
+
+    Attributes
+    ----------
+    extension : str
+        Extension used when writing.
+    extensions : list[str]
+        Other possible extension of this file format.
     """
 
     extension = ".h5"
-
     extensions = [".h5", ".hdf"]
 
     @classmethod
-    def write(cls, filename, data, header=""):
-        """
-        Write a set of output variables into a HDF file.
+    def write(cls, filename: str, data: dict[str, IOutputVariable],
+              header: str = "",
+              extension: str = extensions[0]) -> None:
+        """Write a set of output variables into an HDF file.
 
-        :param filename: the path to the output HDF file.
-        :type filename: str
-        :param data: the data to be written out.
-        :type data: dict of Framework.OutputVariables.IOutputVariable
-        :param header: the header to add to the output file.
-        :type header: str
+        Attributes
+        ----------
+        filename : str
+            The path to the output HDF file.
+        data : dict[str, IOutputVariable]
+            The data to be written out
+        header : str
+            The header to add to the output file.
+        extension : str
+            The extension of the file.
         """
-
         filename = os.path.splitext(filename)[0]
 
-        filename = "%s%s" % (filename, cls.extensions[0])
+        filename = "%s%s" % (filename, extension)
 
         # The HDF output file is opened for writing.
         outputFile = h5py.File(filename, "w")

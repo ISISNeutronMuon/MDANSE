@@ -48,7 +48,7 @@ class UnfoldedTrajectory(IJob):
     )
     settings["output_file"] = (
         "OutputFilesConfigurator",
-        {"formats": ["HDFFormat"]},
+        {"formats": ["MDAFormat"]},
     )
 
     def initialize(self):

@@ -304,7 +304,7 @@ class Forcite(Converter):
     settings["output_file"] = (
         "SingleOutputFileConfigurator",
         {
-            "format": "HDFFormat",
+            "format": "MDTFormat",
             "root": "xtd_file",
             "label": "Output trajectory file name",
         },

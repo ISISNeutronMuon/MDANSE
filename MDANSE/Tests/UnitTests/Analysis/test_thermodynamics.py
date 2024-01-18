@@ -14,7 +14,7 @@ sys.setrecursionlimit(100000)
 ic.disable()
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "..", "Data",
-    "short_trajectory_after_changes.h5")
+    "short_trajectory_after_changes.mdt")
 
 
 @pytest.fixture(scope="module")
@@ -29,14 +29,14 @@ def test_temperature(trajectory, interp_order):
     parameters = {}
     parameters["frames"] = (0, 10, 1)
     parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("HDFFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("monoprocessor",)
     parameters["trajectory"] = short_traj
     temp = IJob.create("Temperature")
     temp.run(parameters, status=True)
-    assert path.exists(temp_name + ".h5")
-    assert path.isfile(temp_name + ".h5")
-    os.remove(temp_name + ".h5")
+    assert path.exists(temp_name + ".mda")
+    assert path.isfile(temp_name + ".mda")
+    os.remove(temp_name + ".mda")
 
 
 @pytest.mark.parametrize("interp_order", [1, 2, 3])
@@ -45,15 +45,15 @@ def test_temperature_nonzero(trajectory, interp_order):
     parameters = {}
     parameters["frames"] = (0, 10, 1)
     parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("HDFFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("monoprocessor",)
     parameters["trajectory"] = short_traj
     temp = IJob.create("Temperature")
     temp.run(parameters, status=True)
-    with h5py.File(temp_name + ".h5") as results:
+    with h5py.File(temp_name + ".mda") as results:
         print(results.keys())
         temperature = np.array(results["/temperature"])
-    os.remove(temp_name + ".h5")
+    os.remove(temp_name + ".mda")
     assert np.all(temperature > 0.0)
 
 
@@ -61,11 +61,11 @@ def test_density(trajectory):
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1)
-    parameters["output_files"] = (temp_name, ("HDFFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("monoprocessor",)
     parameters["trajectory"] = short_traj
     den = IJob.create("Density")
     den.run(parameters, status=True)
-    assert path.exists(temp_name + ".h5")
-    assert path.isfile(temp_name + ".h5")
-    os.remove(temp_name + ".h5")
+    assert path.exists(temp_name + ".mda")
+    assert path.isfile(temp_name + ".mda")
+    os.remove(temp_name + ".mda")

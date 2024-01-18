@@ -282,7 +282,7 @@ class Discover(Converter):
     settings["output_file"] = (
         "SingleOutputFileConfigurator",
         {
-            "format": "HDFFormat",
+            "format": "MDTFormat",
             "root": "xtd_file",
             "label": "Output trajectory file name",
         },
