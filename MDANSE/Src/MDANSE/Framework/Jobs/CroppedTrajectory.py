@@ -48,7 +48,7 @@ class CroppedTrajectory(IJob):
     )
     settings["output_file"] = (
         "OutputFilesConfigurator",
-        {"formats": ["MDAFormat"]},
+        {"formats": ["MDTFormat"]},
     )
 
     def initialize(self):
