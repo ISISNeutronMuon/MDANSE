@@ -98,7 +98,7 @@ class Eccentricity(IJob):
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
-        {"formats": ["HDFFormat", "ASCIIFormat"]},
+        {"formats": ["MDAFormat", "ASCIIFormat"]},
     )
 
     def initialize(self):

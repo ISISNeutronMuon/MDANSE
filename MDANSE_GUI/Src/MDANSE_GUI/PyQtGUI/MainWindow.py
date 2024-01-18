@@ -93,7 +93,7 @@ class LoaderButton(QToolButton):
     #     return super().enterEvent(a0)
 
     def populateMenu(self, menu: QMenu):
-        hdf_action = menu.addAction("Load HDF5")
+        hdf_action = menu.addAction("Load Trajectory File")
         hdf_action.triggered.connect(self.load_hdf)
         menu.addSeparator()
         for cjob in self.converter_source.backend.getConverters():
@@ -103,14 +103,14 @@ class LoaderButton(QToolButton):
         menu = QMenu()
         self.populateMenu(menu)
         res = menu.exec_(self.mapToGlobal(QPoint(10, 10)))
-        if res is not None and not "HDF5" in res.text():
+        if res is not None and "Load Trajectory File" != res.text():
             self.start_converter.emit(res.text())
 
     def contextMenuEvent(self, event):
         menu = QMenu()
         self.populateMenu(menu)
         res = menu.exec_(event.globalPos())
-        if res is not None and not "HDF5" in res.text():
+        if res is not None and "Load Trajectory File" != res.text():
             self.start_converter.emit(res.text())
 
 
@@ -255,7 +255,7 @@ class Main(QMainWindow):
             self,
             "Load an MD trajectory",
             self.workdir,
-            "HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
+            "MDT files (*.mdt);;HDF5 files (*.h5 *.hdf);;All files(*.*)",
         )
         ic(fname)
         if len(fname[0]) > 0:

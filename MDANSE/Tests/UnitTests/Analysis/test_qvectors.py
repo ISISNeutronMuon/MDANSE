@@ -13,7 +13,7 @@ sys.setrecursionlimit(100000)
 ic.disable()
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "..", "Data",
-    "short_trajectory_after_changes.h5")
+    "short_trajectory_after_changes.mdt")
 
 
 @pytest.fixture(scope="module")
@@ -29,7 +29,7 @@ def test_disf(trajectory):
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("HDFFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("monoprocessor",)
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_incoherent2"
@@ -45,6 +45,6 @@ def test_disf(trajectory):
         parameters["q_vectors"] = (qvector_generator, qvector_defaults)
         disf = IJob.create("DynamicIncoherentStructureFactor")
         disf.run(parameters, status=True)
-        assert path.exists(temp_name + ".h5")
-        assert path.isfile(temp_name + ".h5")
-        os.remove(temp_name + ".h5")
+        assert path.exists(temp_name + ".mda")
+        assert path.isfile(temp_name + ".mda")
+        os.remove(temp_name + ".mda")

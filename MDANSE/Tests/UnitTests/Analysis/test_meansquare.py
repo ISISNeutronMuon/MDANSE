@@ -12,7 +12,7 @@ sys.setrecursionlimit(100000)
 ic.disable()
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "..", "Data",
-    "short_trajectory_after_changes.h5")
+    "short_trajectory_after_changes.mdt")
 
 
 # Mean Square Displacements can accept many parameters, most of them optional
@@ -31,21 +31,21 @@ def test_basic_meansquare():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1)
-    parameters["output_files"] = (temp_name, ("HDFFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("monoprocessor",)
     parameters["trajectory"] = short_traj
     msd = IJob.create("MeanSquareDisplacement")
     msd.run(parameters, status=True)
-    assert path.exists(temp_name + ".h5")
-    assert path.isfile(temp_name + ".h5")
-    os.remove(temp_name + ".h5")
+    assert path.exists(temp_name + ".mda")
+    assert path.isfile(temp_name + ".mda")
+    os.remove(temp_name + ".mda")
 
 
 def test_parallel_meansquare():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1)
-    parameters["output_files"] = (temp_name, ("HDFFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("monoprocessor",)
     parameters["trajectory"] = short_traj
     msd = IJob.create("MeanSquareDisplacement")
@@ -53,28 +53,28 @@ def test_parallel_meansquare():
     temp_name2 = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1)
-    parameters["output_files"] = (temp_name2, ("HDFFormat",))
+    parameters["output_files"] = (temp_name2, ("MDAFormat",))
     parameters["running_mode"] = ("threadpool", 4)
     parameters["trajectory"] = short_traj
     msd_par = IJob.create("MeanSquareDisplacement")
     msd_par.run(parameters, status=True)
-    with (h5py.File(temp_name + ".h5") as single,
-          h5py.File(temp_name2 + ".h5") as parallel):
+    with (h5py.File(temp_name + ".mda") as single,
+          h5py.File(temp_name2 + ".mda") as parallel):
         for kk in single.keys():
             assert np.allclose(np.array(single[kk]), np.array(parallel[kk]), 1e-5, 1e-4)
-    os.remove(temp_name + ".h5")
-    os.remove(temp_name2 + ".h5")
+    os.remove(temp_name + ".mda")
+    os.remove(temp_name2 + ".mda")
 
 
 def test_atom_selection():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1)
-    parameters["output_files"] = (temp_name, ("HDFFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("monoprocessor",)
     parameters["trajectory"] = short_traj
     msd = IJob.create("MeanSquareDisplacement")
     msd.run(parameters, status=True)
-    assert path.exists(temp_name + ".h5")
-    assert path.isfile(temp_name + ".h5")
-    os.remove(temp_name + ".h5")
+    assert path.exists(temp_name + ".mda")
+    assert path.isfile(temp_name + ".mda")
+    os.remove(temp_name + ".mda")

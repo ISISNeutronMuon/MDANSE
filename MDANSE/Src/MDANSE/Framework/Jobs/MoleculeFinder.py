@@ -53,7 +53,7 @@ class MoleculeFinder(IJob):
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
-        {"formats": ["HDFFormat"]},
+        {"formats": ["MDTFormat"]},
     )
 
     def initialize(self):
