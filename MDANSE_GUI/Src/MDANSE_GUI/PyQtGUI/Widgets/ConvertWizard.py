@@ -404,7 +404,7 @@ class ConverterThirdPage(QWizardPage):
 
         if len(parameter_dict) < 1:
             settings = OrderedDict(
-                [("single_output_file", {"format": "HDFFormat", "root": "config_file"})]
+                [("single_output_file", {"format": "MDTFormat", "root": "config_file"})]
             )
         else:
             settings = parameter_dict
