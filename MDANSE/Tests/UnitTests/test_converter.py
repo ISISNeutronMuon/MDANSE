@@ -13,7 +13,7 @@ lammps_lammps = os.path.join(
 )
 
 
-def test_convert_lammps_mdt_conversion_file_exists():
+def test_lammps_mdt_conversion_file_exists():
     temp_name = tempfile.mktemp()
 
     parameters = {}
@@ -33,7 +33,7 @@ def test_convert_lammps_mdt_conversion_file_exists():
     os.remove(temp_name + ".mdt")
 
 
-def test_convert_lammps_mdt_conversion_raise_exception_with_incorrect_format():
+def test_lammps_mdt_conversion_raise_exception_with_incorrect_format():
     temp_name = tempfile.mktemp()
 
     parameters = {}
