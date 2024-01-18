@@ -34,9 +34,13 @@ class HDFFormat(IFormat):
     extensions = [".h5", ".hdf"]
 
     @classmethod
-    def write(cls, filename: str, data: dict[str, IOutputVariable],
-              header: str = "",
-              extension: str = extensions[0]) -> None:
+    def write(
+        cls,
+        filename: str,
+        data: dict[str, IOutputVariable],
+        header: str = "",
+        extension: str = extensions[0],
+    ) -> None:
         """Write a set of output variables into an HDF file.
 
         Attributes

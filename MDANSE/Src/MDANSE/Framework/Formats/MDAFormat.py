@@ -19,9 +19,13 @@ class MDAFormat(IFormat):
     extensions = [".mda"]
 
     @classmethod
-    def write(cls, filename: str, data: dict[str, IOutputVariable],
-              header: str = "",
-              extension: str = extensions[0]) -> None:
+    def write(
+        cls,
+        filename: str,
+        data: dict[str, IOutputVariable],
+        header: str = "",
+        extension: str = extensions[0],
+    ) -> None:
         """Write a set of output variables into an HDF file with the
         MDANSE analysis file extension.
 
