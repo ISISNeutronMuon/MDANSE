@@ -13,19 +13,61 @@
 #
 # **************************************************************************
 
+import os
 
 from qtpy.QtCore import QObject, Slot, Signal
-from qtpy.QtWidgets import QPushButton, QTextEdit, QWidget, QTableView
+from qtpy.QtWidgets import QPushButton, QTextEdit, QWidget, QTableView, QFileDialog
+
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 
 from MDANSE_GUI.PyQtGUI.Widgets.DoublePanel import DoublePanel
-from MDANSE_GUI.PyQtGUI.DataViewModel import GeneralModel
+from MDANSE_GUI.PyQtGUI.DataViewModel.GeneralModel import GeneralModel
 
 
 class TrajectoryTab(QObject):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        trajectory_holder = GeneralModel(self)
-        trajectory_list = QTableView(self)
-        visualiser = QTextEdit
-        core = DoublePanel(self, data_side=trajectory_list, visualiser_side=visualiser)
-        core.set_model(trajectory_holder)
+        self._trajectory_holder = GeneralModel(self)
+        self._trajectory_list = QTableView()
+        self._visualiser = QTextEdit()
+        self._core = DoublePanel(
+            data_side=self._trajectory_list, visualiser_side=self._visualiser
+        )
+        self._core.set_model(self._trajectory_holder)
+        self._core.set_label_text(
+            """Here you can load the .mdt files.
+They are MD trajectories in HDF5 format,
+created by one of the MDANSE converters.
+        """
+        )
+        self._core.add_button("Load an .MTD Trajectory", self.load_trajectory)
+
+    @Slot()
+    def load_trajectory(self):
+        fname = QFileDialog.getOpenFileName(
+            self,
+            "Load an MD trajectory",
+            self.workdir,
+            "HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
+        )
+        if len(fname[0]) > 0:
+            _, short_name = os.path.split(fname[0])
+            try:
+                data = HDFTrajectoryInputData(fname[0])
+            except Exception as e:
+                self._core.fail(repr(e))
+            else:
+                self._core._model.append_object((data, short_name))
+
+
+
+if __name__ == "__main__":
+    import sys
+    from qtpy.QtWidgets import QApplication, QMainWindow, QVBoxLayout
+
+    app = QApplication(sys.argv)
+    window = QMainWindow()
+    the_tab = TrajectoryTab(window)
+    window.setCentralWidget(the_tab._core)
+    window.show()
+    app.exec()

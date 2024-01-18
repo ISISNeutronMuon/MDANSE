@@ -1,7 +1,9 @@
 
 import pytest
 import tempfile
+from importlib import reload
 
+import vtk
 import numpy as np
 
 from MDANSE_GUI.PyQtGUI.MolecularViewer.ColourManager import ColourManager, RGB_COLOURS
@@ -13,6 +15,7 @@ def colour_manager(request):
     temp = ColourManager(init_colours = request.param)
     yield temp
     temp.clear_table()
+    reload(vtk)
 
 def test_ColourList(colour_manager: ColourManager):
     lut_size = colour_manager._lut.GetSize()
