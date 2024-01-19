@@ -216,7 +216,7 @@ class LAMMPS(Converter):
     settings["output_file"] = (
         "OutputFilesConfigurator",
         {
-            "formats": ["HDFFormat"],
+            "formats": ["MDTFormat"],
             "root": "config_file",
             "label": "Output trajectory file name",
         },

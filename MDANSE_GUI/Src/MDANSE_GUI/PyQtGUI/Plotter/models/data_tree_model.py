@@ -696,6 +696,7 @@ DATA_ITEMS = {
     ".nc": NetCDFDataItem,
     ".cdf": NetCDFDataItem,
     ".netcdf": NetCDFDataItem,
+    ".mda": HDFDataItem,
     ".hdf": HDFDataItem,
     ".h5": HDFDataItem,
     ".nxs": HDFDataItem,

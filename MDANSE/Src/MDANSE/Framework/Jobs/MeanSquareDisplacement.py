@@ -97,7 +97,7 @@ class MeanSquareDisplacement(IJob):
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
-        {"formats": ["HDFFormat", "ASCIIFormat", "svg"]},
+        {"formats": ["MDAFormat", "ASCIIFormat", "svg"]},
     )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 

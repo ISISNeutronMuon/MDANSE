@@ -20,7 +20,7 @@ from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class HDFTrajectoryInputData(InputFileData):
-    extension = "h5"
+    extension = "mdt"
 
     def load(self):
         try:

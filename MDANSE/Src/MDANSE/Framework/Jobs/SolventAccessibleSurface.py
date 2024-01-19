@@ -67,7 +67,7 @@ class SolventAccessibleSurface(IJob):
     settings["probe_radius"] = ("FloatConfigurator", {"mini": 0.0, "default": 0.14})
     settings["output_files"] = (
         "OutputFilesConfigurator",
-        {"formats": ["HDFFormat", "ASCIIFormat"]},
+        {"formats": ["MDAFormat", "ASCIIFormat"]},
     )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 

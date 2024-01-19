@@ -75,7 +75,7 @@ class DensityOfStates(IJob):
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
-        {"formats": ["HDFFormat", "ASCIIFormat"]},
+        {"formats": ["MDAFormat", "ASCIIFormat"]},
     )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 

@@ -264,7 +264,7 @@ class CP2K(Converter):
     settings["output_file"] = (
         "OutputFilesConfigurator",
         {
-            "formats": ["HDFFormat"],
+            "formats": ["MDTFormat"],
             "root": "xdatcar_file",
             "label": "Output trajectory file name",
         },

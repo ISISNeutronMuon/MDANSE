@@ -308,7 +308,7 @@ class DCD(Converter):
     settings["output_file"] = (
         "OutputFilesConfigurator",
         {
-            "formats": ["HDFFormat"],
+            "formats": ["MDTFormat"],
             "root": "pdb_file",
             "label": "Output trajectory file name",
         },

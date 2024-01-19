@@ -209,7 +209,7 @@ class MainWindow(QMainWindow):
             self,
             "Load an MD trajectory",
             self.workdir,
-            "HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
+            "MDT files (*.mdt);;HDF5 files (*.h5 *.hdf);;All files(*.*)",
         )
         ic(fname)
         if len(fname[0]) > 0:

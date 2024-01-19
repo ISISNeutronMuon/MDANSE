@@ -33,8 +33,11 @@ class JobThread(QThread):
         ic("JobThread starts init")
         self._command = command
         self._parameters = parameters
-        ic(f"JobThread.run commmand={command}")
-        self._job = self._command()
+        ic("JobThread.run will create a job instance")
+        if isinstance(self._command, type):
+            self._job = self._command()
+        else:
+            self._job = self._command
         self._job.build_configuration()
         ic(f"JobThread._parameters: {self._parameters}")
         # here we try to create and connect a JobStatusQt
@@ -152,9 +155,13 @@ class JobHolder(QStandardItemModel):
         th_ref._status._communicator.finished.connect(item_th.on_finished)  # bool
         th_ref._status._communicator.oscillate.connect(item_th.on_oscillate)  # nothing
         ic("Thread ready to start!")
+        try:
+            task_name = str(job_vars[0].__name__)
+        except AttributeError:
+            task_name = str(job_vars[0].__class__.__name__)
         self.appendRow(
             [
-                QStandardItem(str(job_vars[0].__name__)),
+                QStandardItem(task_name),
                 item_th._prog_item,
                 item_th._stat_item,
             ]

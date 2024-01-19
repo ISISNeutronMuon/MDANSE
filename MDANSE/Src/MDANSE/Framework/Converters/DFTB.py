@@ -52,5 +52,5 @@ class DFTB(Forcite):
     )
     settings["output_file"] = (
         "OutputFilesConfigurator",
-        {"formats": ["HDFFormat"], "root": "xtd_file", "label": "Output file name"},
+        {"formats": ["MDTFormat"], "root": "xtd_file", "label": "Output file name"},
     )

@@ -216,7 +216,7 @@ class CASTEP(Converter):
     settings["output_file"] = (
         "OutputFilesConfigurator",
         {
-            "formats": ["HDFFormat"],
+            "formats": ["MDTFormat"],
             "root": "castep_file",
             "label": "Output trajectory file name",
         },
