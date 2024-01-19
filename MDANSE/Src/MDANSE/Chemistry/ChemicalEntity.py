@@ -2429,16 +2429,22 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._atoms = None
 
+    def __hash__(self) -> int:
+        text = self.__repr__()
+        return text.__hash__()
+
     def __eq__(self, another: ChemicalSystem) -> bool:
+        if self._name != another._name:
+            return False
         if self._number_of_atoms != another._number_of_atoms:
             print("Different number of atoms in ChemicalSystem instances!")
             return False
-        if self.atoms is None and another.atoms is None:
+        if self._atoms is None and another._atoms is None:
             return True
-        if self.atoms is None:
+        if self._atoms is None:
             print("Left (self) ChemicalSystem has no atoms!")
             return False
-        if another.atoms is None:
+        if another._atoms is None:
             print("Right (another) ChemicalSystem has no atoms!")
             return False
         left_side = [atom.__hash__() for atom in self.atom_list]
@@ -2566,7 +2572,7 @@ class ChemicalSystem(_ChemicalEntity):
 
             cs._configuration = conf
         
-        _ = cs.atoms
+        # _ = cs.atoms
 
         return cs
 

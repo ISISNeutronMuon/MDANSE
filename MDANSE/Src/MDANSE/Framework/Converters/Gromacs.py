@@ -128,7 +128,7 @@ class Gromacs(Converter):
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_file"]["files"][0],
             chemical_system,
             self.numberOfSteps,
             positions_dtype=np.float32,

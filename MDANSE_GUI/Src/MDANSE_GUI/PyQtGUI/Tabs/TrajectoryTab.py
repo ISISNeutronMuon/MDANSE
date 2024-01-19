@@ -16,19 +16,21 @@
 import os
 
 from qtpy.QtCore import QObject, Slot, Signal
-from qtpy.QtWidgets import QPushButton, QTextEdit, QWidget, QTableView, QFileDialog
+from qtpy.QtWidgets import QPushButton, QTextEdit, QWidget, QListView, QFileDialog
 
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 
 from MDANSE_GUI.PyQtGUI.Widgets.DoublePanel import DoublePanel
 from MDANSE_GUI.PyQtGUI.DataViewModel.GeneralModel import GeneralModel
+from MDANSE_GUI.PyQtGUI.Session.LocalSession import LocalSession
 
 
 class TrajectoryTab(QObject):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._session = LocalSession()
         self._trajectory_holder = GeneralModel(self)
-        self._trajectory_list = QTableView()
+        self._trajectory_list = QListView()
         self._visualiser = QTextEdit()
         self._core = DoublePanel(
             data_side=self._trajectory_list, visualiser_side=self._visualiser
@@ -45,10 +47,10 @@ created by one of the MDANSE converters.
     @Slot()
     def load_trajectory(self):
         fname = QFileDialog.getOpenFileName(
-            self,
+            self._core,
             "Load an MD trajectory",
-            self.workdir,
-            "HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
+            self._session.get_path("root_directory"),
+            "MDANSE trajectory files (*.mdt);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
         )
         if len(fname[0]) > 0:
             _, short_name = os.path.split(fname[0])

@@ -2305,7 +2305,7 @@ class TestChemicalSystem(unittest.TestCase):
         self.assertEqual(config, self.system.configuration)
 
     def test_configuration_setter_invalid(self):
-        other_system = ce.ChemicalSystem("name")
+        other_system = ce.ChemicalSystem("another_name")
         config = DummyConfiguration(self.system)
 
         with self.assertRaises(ce.InconsistentChemicalSystemError):

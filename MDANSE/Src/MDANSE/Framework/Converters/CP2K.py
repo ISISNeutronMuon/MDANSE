@@ -314,7 +314,7 @@ class CP2K(Converter):
             )
 
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_file"]["files"][0],
             self._chemical_system,
             self.numberOfSteps,
         )

@@ -342,7 +342,7 @@ class Forcite(Converter):
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_file"]["files"][0],
             self._chemicalSystem,
             self.numberOfSteps,
         )

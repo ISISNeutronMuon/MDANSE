@@ -20,7 +20,7 @@ def test_lammps_mdt_conversion_file_exists():
     parameters["config_file"] = lammps_config
     parameters["mass_tolerance"] = 0.05
     parameters["n_steps"] = 0
-    parameters["output_file"] = (temp_name, "MDTFormat")
+    parameters["output_file"] = (temp_name, ["MDTFormat"])
     parameters["smart_mass_association"] = True
     parameters["time_step"] = 1.0
     parameters["trajectory_file"] = lammps_lammps
