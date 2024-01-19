@@ -281,9 +281,7 @@ class DCD(Converter):
         "InputFileConfigurator",
         {
             "wildcard": "PDB files (*.pdb)|*.pdb|All files|*",
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "CHARMM", "2vb1.pdb"
-            ),
+            "default": "INPUT_FILENAME.pdb",
             "label": "Input PDB file",
         },
     )
@@ -291,9 +289,7 @@ class DCD(Converter):
         "InputFileConfigurator",
         {
             "wildcard": "DCD files (*.dcd)|*.dcd|All files|*",
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "CHARMM", "2vb1.dcd"
-            ),
+            "default": "INPUT_FILENAME.dcd",
             "label": "Input DCD file",
         },
     )

@@ -31,18 +31,14 @@ class DFTB(Forcite):
     settings["xtd_file"] = (
         "InputFileConfigurator",
         {
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "DFTB", "H2O.xtd"
-            ),
+            "default": "INPUT_FILENAME.xtd",
             "label": "The XTD file",
         },
     )
     settings["trj_file"] = (
         "InputFileConfigurator",
         {
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "DFTB", "H2O.trj"
-            ),
+            "default": "INPUT_FILENAME.trj",
             "label": "The TRJ file",
         },
     )

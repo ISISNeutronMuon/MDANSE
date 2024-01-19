@@ -178,9 +178,7 @@ class VASP(Converter):
         "InputFileConfigurator",
         {
             "wildcard": "XDATCAR files (XDATCAR*)|XDATCAR*|All files|*",
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "VASP", "XDATCAR_version5"
-            ),
+            "default": "INPUT_FILENAME",
             "label": "Input XDATCAR file",
         },
     )

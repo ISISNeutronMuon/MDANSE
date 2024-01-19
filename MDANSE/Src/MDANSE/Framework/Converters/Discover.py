@@ -259,9 +259,7 @@ class Discover(Converter):
         "InputFileConfigurator",
         {
             "wildcard": "XTD files (*.xtd)|*.xtd|All files|*",
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "Discover", "sushi.xtd"
-            ),
+            "default": "INPUT_FILENAME.xtd",
             "label": "Input XTD file",
         },
     )
@@ -269,9 +267,7 @@ class Discover(Converter):
         "InputFileConfigurator",
         {
             "wildcard": "HIS files (*.his)|*.his|All files|*",
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "Discover", "sushi.his"
-            ),
+            "default": "INPUT_FILENAME.his",
             "label": "Input HIS file",
         },
     )
