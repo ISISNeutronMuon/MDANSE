@@ -98,15 +98,12 @@ class DoublePanel(QWidget):
         self._lb_layout = lb_layout
         self._ub_layout = ub_layout
 
+        if self._view is not None and self._visualiser is not None:
+            self._view.item_details.connect(self._visualiser.visualise_item)
+
     def set_model(self, model: GeneralModel):
         self._model = model
         self._view.setModel(model)
-
-    @Slot(QModelIndex)
-    def visualise_item(self, index: QModelIndex):
-        number = index.data()
-        item = self._model._nodes[number]
-        self.item_picked.emit(item)
 
     @Slot(str)
     def set_label_text(self, text: str):

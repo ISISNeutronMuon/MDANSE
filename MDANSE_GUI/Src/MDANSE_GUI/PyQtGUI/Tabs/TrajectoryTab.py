@@ -16,13 +16,15 @@
 import os
 
 from qtpy.QtCore import QObject, Slot, Signal
-from qtpy.QtWidgets import QPushButton, QTextEdit, QWidget, QListView, QFileDialog
+from qtpy.QtWidgets import QPushButton, QTextEdit, QWidget, QFileDialog
 
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 
 from MDANSE_GUI.PyQtGUI.Widgets.DoublePanel import DoublePanel
 from MDANSE_GUI.PyQtGUI.DataViewModel.GeneralModel import GeneralModel
 from MDANSE_GUI.PyQtGUI.Session.LocalSession import LocalSession
+from MDANSE_GUI.PyQtGUI.Tabs.Views.TrajectoryView import TrajectoryView
+from MDANSE_GUI.PyQtGUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 
 
 class TrajectoryTab(QObject):
@@ -30,8 +32,8 @@ class TrajectoryTab(QObject):
         super().__init__(*args, **kwargs)
         self._session = LocalSession()
         self._trajectory_holder = GeneralModel(self)
-        self._trajectory_list = QListView()
-        self._visualiser = QTextEdit()
+        self._trajectory_list = TrajectoryView()
+        self._visualiser = TrajectoryInfo()
         self._core = DoublePanel(
             data_side=self._trajectory_list, visualiser_side=self._visualiser
         )
@@ -60,7 +62,6 @@ created by one of the MDANSE converters.
                 self._core.fail(repr(e))
             else:
                 self._core._model.append_object((data, short_name))
-
 
 
 if __name__ == "__main__":

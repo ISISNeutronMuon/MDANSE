@@ -1,4 +1,3 @@
-
 import os
 
 from qtpy.QtCore import QObject, Signal, Slot
@@ -27,9 +26,9 @@ class LocalSession(QObject):
     def populate_defaults(self):
         self._paths["root_directory"] = os.path.expanduser("~")
         #
-        self._units['energy'] = 'meV'
-        self._units['time'] = 'fs'
-        self._units['distance'] = 'Ang'
+        self._units["energy"] = "meV"
+        self._units["time"] = "fs"
+        self._units["distance"] = "Ang"
 
     def get_parameter(self, key: str) -> str:
         value = self._parameters.get(key, None)
@@ -42,4 +41,3 @@ class LocalSession(QObject):
     def get_unit(self, key: str) -> str:
         value = self._units.get(key, "1")
         return value
-    

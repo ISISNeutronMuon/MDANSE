@@ -24,3 +24,12 @@ def test_labels(model_instance: GeneralModel):
         std_item = model_instance.itemFromIndex(index)
         label = std_item.text()
         assert(label == textval)
+
+def test_removal(model_instance: GeneralModel):
+    model_instance.removeRow(1)
+    assert(model_instance._nodes[0] == 5)
+    assert(model_instance._nodes[2] == 'However')
+    assert(len(model_instance._node_numbers)==2)
+    assert(len(model_instance._nodes) ==2)
+
+

@@ -1,4 +1,4 @@
-from qtpy.QtCore import QObject, Slot, Signal, QMutex
+from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
 
@@ -27,3 +27,12 @@ class GeneralModel(QStandardItemModel):
         self.appendRow(item)
         self.mutex.unlock()
         return retval
+
+    def removeRow(self, row: int, parent: QModelIndex = None):
+        node_number = self.item(row).data()
+        self._nodes.pop(node_number)
+        self._node_numbers.pop(self._node_numbers.index(node_number))
+        if parent is None:
+            super().removeRow(row)
+        else:
+            super().removeRow(row, parent)
