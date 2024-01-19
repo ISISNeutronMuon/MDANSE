@@ -85,7 +85,7 @@ class ASE(Converter):
         {
             "label": "MDANSE trajectory filename",
             "format": "MDTFormat",
-            "root": "config_file"
+            "root": "config_file",
         },
     )
 
