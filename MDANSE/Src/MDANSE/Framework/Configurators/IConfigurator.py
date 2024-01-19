@@ -110,7 +110,11 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
         self._default = kwargs.get("default", self.__class__._default)
 
-        self._label = kwargs.get("label", " ".join(name.split("_")).strip())
+        self._label = kwargs.get(
+            "label",
+            self.__class__._label if hasattr(self.__class__, "_label") else
+            " ".join(name.split("_")).strip()
+        )
 
         self._widget = kwargs.get("widget", self.__class__)
 

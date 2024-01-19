@@ -393,7 +393,7 @@ class DL_POLY(Converter):
         {
             "format": "MDTFormat",
             "root": "history_file",
-            "label": "Output trajectory file name",
+            "label": "MDANSE trajectory filename",
         },
     )
 

@@ -298,6 +298,6 @@ class Configurable(object):
         params = collections.OrderedDict()
         for name, (typ, kwds) in list(settings.items()):
             cfg = IConfigurator.create(typ, name, **kwds)
-            params[name] = (cfg.default, kwds["label"])
+            params[name] = (cfg.default, cfg.label)
 
         return params

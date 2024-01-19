@@ -216,7 +216,7 @@ class CASTEP(Converter):
         {
             "format": "MDTFormat",
             "root": "castep_file",
-            "label": "Output trajectory file name",
+            "label": "MDANSE trajectory filename",
         },
     )
 

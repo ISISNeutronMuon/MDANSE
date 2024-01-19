@@ -280,7 +280,7 @@ class Discover(Converter):
         {
             "format": "MDTFormat",
             "root": "xtd_file",
-            "label": "Output trajectory file name",
+            "label": "MDANSE trajectory filename",
         },
     )
 

@@ -64,7 +64,7 @@ class Gromacs(Converter):
         {
             "format": "MDTFormat",
             "root": "pdb_file",
-            "label": "Output trajectory file name",
+            "label": "MDANSE trajectory filename",
         },
     )
 
