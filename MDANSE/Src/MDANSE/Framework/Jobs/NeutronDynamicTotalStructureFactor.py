@@ -47,17 +47,11 @@ class NeutronDynamicTotalStructureFactor(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["dcsf_input_file"] = (
         "HDFInputFileConfigurator",
-        {
-            "label": "MDANSE Coherent Structure Factor",
-            "default": "dcsf.h5"
-         },
+        {"label": "MDANSE Coherent Structure Factor", "default": "dcsf.h5"},
     )
     settings["disf_input_file"] = (
         "HDFInputFileConfigurator",
-        {
-            "label": "MDANSE Incoherent Structure Factor",
-            "default": "disf.h5"
-        },
+        {"label": "MDANSE Incoherent Structure Factor", "default": "disf.h5"},
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",

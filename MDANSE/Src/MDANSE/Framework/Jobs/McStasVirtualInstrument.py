@@ -75,7 +75,7 @@ class McStasVirtualInstrument(IJob):
             "widget": "InputFileConfigurator",
             "label": "MDANSE Coherent Structure Factor",
             "variables": ["q", "frequency", "s(q,f)_total"],
-            "default": "dcsf_prot.h"
+            "default": "dcsf_prot.h5",
         },
     )
     settings["sample_inc"] = (
@@ -84,7 +84,7 @@ class McStasVirtualInstrument(IJob):
             "widget": "InputFileConfigurator",
             "label": "MDANSE Incoherent Structure Factor",
             "variables": ["q", "frequency", "s(q,f)_total"],
-            "default": "disf_prot.h5"
+            "default": "disf_prot.h5",
         },
     )
     settings["temperature"] = ("FloatConfigurator", {"default": 298.0})
@@ -94,10 +94,7 @@ class McStasVirtualInstrument(IJob):
     )
     settings["instrument"] = (
         "McStasInstrumentConfigurator",
-        {
-            "label": "mcstas instrument",
-            "default": "OUTPUT_FILENAME.out"
-        },
+        {"label": "mcstas instrument", "default": "OUTPUT_FILENAME.out"},
     )
     settings["options"] = ("McStasOptionsConfigurator", {"label": "mcstas options"})
     settings["parameters"] = (

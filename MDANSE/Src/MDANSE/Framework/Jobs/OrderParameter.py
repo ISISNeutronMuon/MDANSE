@@ -64,7 +64,8 @@ class OrderParameter(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = (
-        "HDFTrajectoryConfigurator", {},
+        "HDFTrajectoryConfigurator",
+        {},
     )
     settings["frames"] = (
         "FramesConfigurator",

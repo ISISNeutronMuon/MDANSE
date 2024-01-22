@@ -40,7 +40,7 @@ class StructureFactorFromScatteringFunction(IJob):
         {
             "label": "MDANSE Incoherent Structure Factor",
             "variables": ["time", "f(q,t)_total"],
-            "default": "disf_prot.nc"
+            "default": "disf_prot.h5",
         },
     )
     settings["instrument_resolution"] = (
