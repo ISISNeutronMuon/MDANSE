@@ -84,12 +84,11 @@ from MDANSE.Framework.Selectors import WithinShell
 from MDANSE.IO.PDBReader import PDBReader
 
 
-pbd_2vb1 = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "Data", "2vb1.pdb")
-pbd_1gip = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "Data", "1gip.pdb")
+pbd_2vb1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Data", "2vb1.pdb")
+pbd_1gip = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Data", "1gip.pdb")
 select_atoms_script = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "select_atoms.py")
+    os.path.dirname(os.path.realpath(__file__)), "select_atoms.py"
+)
 
 
 class TestAtomsSelector(unittest.TestCase):

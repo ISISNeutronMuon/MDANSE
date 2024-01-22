@@ -222,15 +222,7 @@ class CP2K(Converter):
         "InputFileConfigurator",
         {
             "wildcard": "XYZ files (*.xyz)|*.xyz|All files|*",
-            "default": os.path.join(
-                "..",
-                "..",
-                "..",
-                "Data",
-                "Trajectories",
-                "CP2K",
-                "p1-supercell-pos-ejemplo.xyz",
-            ),
+            "default": "INPUT_FILENAME.xyz",
             "label": "Positions file (XYZ)",
         },
     )
@@ -238,15 +230,7 @@ class CP2K(Converter):
         "InputFileConfigurator",
         {
             "wildcard": "XYZ files (*.xyz)|*.xyz|All files|*",
-            "default": os.path.join(
-                "..",
-                "..",
-                "..",
-                "Data",
-                "Trajectories",
-                "CP2K",
-                "p1-supercell-vel-ejemplo.xyz",
-            ),
+            "default": "INPUT_FILENAME.xyz",
             "optional": True,
             "label": "Velocity file (XYZ, optional)",
         },
@@ -255,9 +239,7 @@ class CP2K(Converter):
         "InputFileConfigurator",
         {
             "wildcard": "Cell files (*.cell)|*.cell|All files|*",
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "CP2K", "p1-supercell-1.cell"
-            ),
+            "default": "INPUT_FILENAME.cell",
             "label": "CP2K unit cell file (.cell)",
         },
     )
@@ -266,7 +248,7 @@ class CP2K(Converter):
         {
             "format": "MDTFormat",
             "root": "xdatcar_file",
-            "label": "Output trajectory file name",
+            "label": "MDANSE trajectory (filename, format)",
         },
     )
 

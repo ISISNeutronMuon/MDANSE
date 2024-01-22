@@ -281,9 +281,7 @@ class Forcite(Converter):
         "InputFileConfigurator",
         {
             "wildcard": "XTD files (*.xtd)|*.xtd|All files|*",
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "Forcite", "H2O.xtd"
-            ),
+            "default": "INPUT_FILENAME.xtd",
             "label": "Input XTD file",
         },
     )
@@ -291,9 +289,7 @@ class Forcite(Converter):
         "InputFileConfigurator",
         {
             "wildcard": "TRJ files (*.trj)|*.trj|All files|*",
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "Forcite", "H2O.trj"
-            ),
+            "default": "INPUT_FILENAME.trj",
             "label": "Input TRJ file",
         },
     )
@@ -306,7 +302,7 @@ class Forcite(Converter):
         {
             "format": "MDTFormat",
             "root": "xtd_file",
-            "label": "Output trajectory file name",
+            "label": "MDANSE trajectory (filename, format)",
         },
     )
 

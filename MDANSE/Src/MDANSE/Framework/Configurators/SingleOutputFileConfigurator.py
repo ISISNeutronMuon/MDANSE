@@ -12,10 +12,7 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
 import os
-import tempfile
-
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
@@ -36,7 +33,7 @@ class SingleOutputFileConfigurator(IConfigurator):
     conversion, you must inherit from the MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
 
-    _default = (os.path.join(tempfile.gettempdir(), "output"), "HDFFormat")
+    _default = ("OUTPUT_FILENAME", "HDFFormat")
 
     def __init__(self, name, format=None, **kwargs):
         """
@@ -119,3 +116,14 @@ class SingleOutputFileConfigurator(IConfigurator):
         info = "Output file: %s" % self["file"]
 
         return info
+
+    @property
+    def default(self) -> tuple[str, str]:
+        """
+
+        Returns
+        -------
+        tuple[str, str]
+            A tuple of the default filename and format.
+        """
+        return self._default[0], self.format

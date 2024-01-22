@@ -64,14 +64,7 @@ class McStasVirtualInstrument(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = (
-        "HDFTrajectoryConfigurator",
-        {
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "HDF", "waterbox.h5"
-            )
-        },
-    )
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -82,7 +75,7 @@ class McStasVirtualInstrument(IJob):
             "widget": "InputFileConfigurator",
             "label": "MDANSE Coherent Structure Factor",
             "variables": ["q", "frequency", "s(q,f)_total"],
-            "default": os.path.join("..", "..", "..", "Data", "NetCDF", "dcsf_prot.nc"),
+            "default": "dcsf_prot.h5",
         },
     )
     settings["sample_inc"] = (
@@ -91,7 +84,7 @@ class McStasVirtualInstrument(IJob):
             "widget": "InputFileConfigurator",
             "label": "MDANSE Incoherent Structure Factor",
             "variables": ["q", "frequency", "s(q,f)_total"],
-            "default": os.path.join("..", "..", "..", "Data", "NetCDF", "disf_prot.nc"),
+            "default": "disf_prot.h5",
         },
     )
     settings["temperature"] = ("FloatConfigurator", {"default": 298.0})
@@ -101,18 +94,7 @@ class McStasVirtualInstrument(IJob):
     )
     settings["instrument"] = (
         "McStasInstrumentConfigurator",
-        {
-            "label": "mcstas instrument",
-            "default": os.path.join(
-                "..",
-                "..",
-                "..",
-                "Data",
-                "McStas",
-                "Instruments",
-                "Simple_ToF_Flat_Sample.out",
-            ),
-        },
+        {"label": "mcstas instrument", "default": "OUTPUT_FILENAME.out"},
     )
     settings["options"] = ("McStasOptionsConfigurator", {"label": "mcstas options"})
     settings["parameters"] = (

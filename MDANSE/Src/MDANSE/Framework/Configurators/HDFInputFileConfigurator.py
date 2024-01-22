@@ -23,10 +23,10 @@ from MDANSE.IO.HDF import find_numeric_variables
 
 class HDFInputFileConfigurator(InputFileConfigurator):
     """
-    This configurator allows to input a HDF file as input file.
+    This configurator allows to input an HDF file as input file.
     """
 
-    _default = ""
+    _default = "INPUT_FILENAME.h5"
 
     def __init__(self, name, variables=None, **kwargs):
         """

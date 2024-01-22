@@ -163,30 +163,14 @@ class LAMMPS(Converter):
         {
             "label": "LAMMPS configuration file",
             "wildcard": "Config files (*.config)|*.config|All files|*",
-            "default": os.path.join(
-                "..",
-                "..",
-                "..",
-                "Data",
-                "Trajectories",
-                "LAMMPS",
-                "glycyl_L_alanine_charmm.config",
-            ),
+            "default": "INPUT_FILENAME.config",
         },
     )
     settings["trajectory_file"] = (
         "InputFileConfigurator",
         {
             "label": "LAMMPS trajectory file",
-            "default": os.path.join(
-                "..",
-                "..",
-                "..",
-                "Data",
-                "Trajectories",
-                "LAMMPS",
-                "glycyl_L_alanine_charmm.lammps",
-            ),
+            "default": "INPUT_FILENAME.lammps",
         },
     )
     settings["mass_tolerance"] = (
@@ -218,7 +202,7 @@ class LAMMPS(Converter):
         {
             "format": "MDTFormat",
             "root": "config_file",
-            "label": "Output trajectory file name",
+            "label": "MDANSE trajectory (filename, format)",
         },
     )
 

@@ -36,7 +36,8 @@ class OutputFilesConfigurator(IConfigurator):
     for an analysis, you must inherit from MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
 
-    _default = (os.path.join(tempfile.gettempdir(), "output"), ["HDFFormat"])
+    _default = ("OUTPUT_FILENAME", ["HDFFormat"])
+    _label = "Output filename and formats (filename, [format, ...])"
 
     def __init__(self, name, formats=None, **kwargs):
         """
@@ -121,3 +122,14 @@ class OutputFilesConfigurator(IConfigurator):
             info.append("\n")
 
         return "".join(info)
+
+    @property
+    def default(self) -> tuple[str, list[str]]:
+        """
+
+        Returns
+        -------
+        tuple[str, str]
+            A tuple of the default filename and format.
+        """
+        return self._default[0], self.formats

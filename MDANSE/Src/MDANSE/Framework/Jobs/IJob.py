@@ -173,28 +173,28 @@ class IJob(Configurable, metaclass=SubclassFactory):
         # Write the import.
         f.write("from MDANSE.Framework.Jobs.IJob import IJob\n\n")
 
-        f.write("################################################################\n")
-        f.write("# Job parameters                                               #\n")
-        f.write("################################################################\n\n")
+        f.write("########################################################\n")
+        f.write("# Job parameters                                       #\n")
+        f.write("########################################################\n\n")
 
         # Writes the line that will initialize the |parameters| dictionary.
-        f.write("parameters = {}\n")
-
         if parameters is None:
             parameters = cls.get_default_parameters()
 
-        for k, v in sorted(parameters.items()):
-            f.write("parameters[%r] = %r\n" % (k, v))
+        f.write("parameters = {\n")
+        for k, (v, label) in sorted(parameters.items()):
+            f.write(f"    {repr(k) + ': ' + repr(v) + ',':<50}  # {label}\n")
+        f.write("}\n")
 
         f.write("\n")
-        f.write("################################################################\n")
-        f.write("# Setup and run the analysis                                   #\n")
-        f.write("################################################################\n")
+        f.write("########################################################\n")
+        f.write("# Setup and run the analysis                           #\n")
+        f.write("########################################################\n")
         f.write("\n")
 
         f.write('if __name__ == "__main__":\n')
-        f.write("    %s = IJob.create(%r)\n" % (cls._type, cls.__name__))
-        f.write("    %s.run(parameters,status=True)" % (cls._type))
+        f.write("    %s = IJob.create(%r)\n" % (cls.__name__.lower(), cls.__name__))
+        f.write("    %s.run(parameters, status=True)\n" % (cls.__name__.lower()))
 
         f.close()
 

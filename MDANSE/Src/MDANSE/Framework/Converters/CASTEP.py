@@ -203,9 +203,7 @@ class CASTEP(Converter):
         "InputFileConfigurator",
         {
             "wildcard": "MD files (*.md)|*.md|All files|*",
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "CASTEP", "PBAnew.md"
-            ),
+            "default": "INPUT_FILENAME.md",
             "label": "Input MD file",
         },
     )
@@ -218,7 +216,7 @@ class CASTEP(Converter):
         {
             "format": "MDTFormat",
             "root": "castep_file",
-            "label": "Output trajectory file name",
+            "label": "MDANSE trajectory (filename, format)",
         },
     )
 

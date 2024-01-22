@@ -199,8 +199,6 @@ class TestTrajectory(unittest.TestCase):
         tw.close()
 
         t = Trajectory(tf)
-        com_trajectory = t.read_com_trajectory(
-            self._chemicalSystem.atoms, 0, 1, 1
-        )
+        com_trajectory = t.read_com_trajectory(self._chemicalSystem.atoms, 0, 1, 1)
         self.assertTrue(np.allclose(com_trajectory, [[3.5, 3.5, 3.5]], rtol=1.0e-6))
         t.close()
