@@ -11,7 +11,8 @@ def test_create_template_with_the_wrong_jobname_raises_error():
 
 
 @pytest.mark.parametrize(
-    "jobname", IJob.indirect_subclasses(),
+    "jobname",
+    IJob.indirect_subclasses(),
 )
 def test_create_template_with_correct_jobname(jobname):
     temp_name = tempfile.mktemp()

@@ -12,8 +12,11 @@ from MDANSE.Framework.Jobs.IJob import IJob
 sys.setrecursionlimit(100000)
 ic.disable()
 short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "Data",
-    "short_trajectory_after_changes.mdt")
+    os.path.dirname(os.path.realpath(__file__)),
+    "..",
+    "Data",
+    "short_trajectory_after_changes.mdt",
+)
 
 
 @pytest.fixture(scope="module")

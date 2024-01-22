@@ -11,8 +11,11 @@ from MDANSE.Framework.Jobs.IJob import IJob
 sys.setrecursionlimit(100000)
 ic.disable()
 short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "Data",
-    "short_trajectory_after_changes.mdt")
+    os.path.dirname(os.path.realpath(__file__)),
+    "..",
+    "Data",
+    "short_trajectory_after_changes.mdt",
+)
 
 
 # Mean Square Displacements can accept many parameters, most of them optional
@@ -58,8 +61,10 @@ def test_parallel_meansquare():
     parameters["trajectory"] = short_traj
     msd_par = IJob.create("MeanSquareDisplacement")
     msd_par.run(parameters, status=True)
-    with (h5py.File(temp_name + ".mda") as single,
-          h5py.File(temp_name2 + ".mda") as parallel):
+    with (
+        h5py.File(temp_name + ".mda") as single,
+        h5py.File(temp_name2 + ".mda") as parallel,
+    ):
         for kk in single.keys():
             assert np.allclose(np.array(single[kk]), np.array(parallel[kk]), 1e-5, 1e-4)
     os.remove(temp_name + ".mda")
