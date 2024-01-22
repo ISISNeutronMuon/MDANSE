@@ -363,9 +363,7 @@ class DL_POLY(Converter):
         "InputFileConfigurator",
         {
             "wildcard": "FIELD files|FIELD*|All files|*",
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "DL_Poly", "FIELD_cumen"
-            ),
+            "default": "INPUT_FILENAME",
             "label": "Input FIELD file",
         },
     )
@@ -373,9 +371,7 @@ class DL_POLY(Converter):
         "InputFileConfigurator",
         {
             "wildcard": "HISTORY files|HISTORY*|All files|*",
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "DL_Poly", "HISTORY_cumen"
-            ),
+            "default": "INPUT_FILENAME",
             "label": "Input HISTORY file",
         },
     )
@@ -397,7 +393,7 @@ class DL_POLY(Converter):
         {
             "formats": ["MDTFormat"],
             "root": "history_file",
-            "label": "Output trajectory file name",
+            "label": "MDANSE trajectory (filename, format)",
         },
     )
 

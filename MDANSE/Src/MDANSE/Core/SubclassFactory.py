@@ -14,6 +14,7 @@
 # **************************************************************************
 
 from typing import TypeVar
+import difflib
 
 
 Self = TypeVar("Self", bound="SubclassFactory")
@@ -165,7 +166,11 @@ class SubclassFactory(type):
         except KeyError:
             specific_class = recursive_search(cls, name)
         if specific_class is None:
-            raise ValueError(f"Could not find {name} in {cls.__name__}")
+            subclasses = [i.lower() for i in cls.indirect_subclasses()]
+            closest = difflib.get_close_matches(name.lower(), subclasses)[0]
+            raise ValueError(
+                f"Could not find {name} in {cls.__name__}. Did you mean: {closest}?"
+            )
         return specific_class(*args, **kwargs)
 
     def subclasses(cls):

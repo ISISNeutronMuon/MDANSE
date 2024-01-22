@@ -46,14 +46,7 @@ class AreaPerMolecule(IJob):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = collections.OrderedDict()
-    settings["trajectory"] = (
-        "HDFTrajectoryConfigurator",
-        {
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "HDF", "waterbox.h5"
-            )
-        },
-    )
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},

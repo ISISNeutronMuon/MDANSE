@@ -6,7 +6,6 @@ from MDANSE.MolecularDynamics.Analysis import *
 
 
 class TestAnalysis(unittest.TestCase):
-
     def test_mean_square_deviation_valid_no_masses_no_root(self):
         coords1 = np.array([[1, 1, 1], [2, 1, 1], [3, 1, 1]])
         coords2 = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])

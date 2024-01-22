@@ -8,7 +8,8 @@ from MDANSE.Chemistry.Structrures import Topology
 
 
 short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "Data", "co2gas_md3.mdt")
+    os.path.dirname(os.path.realpath(__file__)), "..", "Data", "co2gas_md3.mdt"
+)
 
 
 @pytest.fixture(scope="module")

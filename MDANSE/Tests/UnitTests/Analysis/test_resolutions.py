@@ -14,8 +14,11 @@ from MDANSE.Framework.Jobs.IJob import IJob
 sys.setrecursionlimit(100000)
 ic.disable()
 short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "Data",
-    "short_trajectory_after_changes.mdt")
+    os.path.dirname(os.path.realpath(__file__)),
+    "..",
+    "Data",
+    "short_trajectory_after_changes.mdt",
+)
 
 
 @pytest.fixture(scope="module")
@@ -32,7 +35,7 @@ def test_disf(trajectory):
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["q_vectors"] = (
         "SphericalLatticeQVectors",
-        {"seed": 0, "shells": (5.0, 36, 10.0), "n_vectors": 10, "width": 9.0}
+        {"seed": 0, "shells": (5.0, 36, 10.0), "n_vectors": 10, "width": 9.0},
     )
     parameters["running_mode"] = ("monoprocessor",)
     parameters["trajectory"] = short_traj

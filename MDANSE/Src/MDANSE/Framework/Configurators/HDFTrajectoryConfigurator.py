@@ -34,9 +34,8 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
     :attention: once configured, the HDF trajectory file will be opened for reading.
     """
 
-    _default = os.path.join(
-        "..", "..", "..", "Data", "Trajectories", "HDF", "waterbox.h5"
-    )
+    _default = "INPUT_FILENAME.mdt"
+    _label = "MDANSE trajectory file"
 
     def configure(self, value):
         """

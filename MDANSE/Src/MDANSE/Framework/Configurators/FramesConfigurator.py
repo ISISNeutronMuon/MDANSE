@@ -32,6 +32,8 @@ class FramesConfigurator(RangeConfigurator):
     :note: this configurator depends on 'trajectory' configurator to be configured
     """
 
+    _label = "Subset of frames to be selected (first, last, step size)"
+
     def __init__(self, name, **kwargs):
         """
         Initializes the configurator.

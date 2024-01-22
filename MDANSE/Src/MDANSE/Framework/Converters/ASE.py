@@ -54,30 +54,14 @@ class ASE(Converter):
         "InputFileConfigurator",
         {
             "label": "Any MD trajectory file",
-            "default": os.path.join(
-                "..",
-                "..",
-                "..",
-                "Data",
-                "Trajectories",
-                "LAMMPS",
-                "glycyl_L_alanine_charmm.lammps",
-            ),
+            "default": "INPUT_FILENAME.lammps",
         },
     )
     settings["configuration_file"] = (
         "InputFileConfigurator",
         {
             "label": "An optional structure/configuration file",
-            "default": os.path.join(
-                "..",
-                "..",
-                "..",
-                "Data",
-                "Trajectories",
-                "LAMMPS",
-                "glycyl_L_alanine_charmm.lammps",
-            ),
+            "default": "INPUT_FILENAME.lammps",
         },
     )
     settings["time_step"] = (
@@ -98,7 +82,11 @@ class ASE(Converter):
     )
     settings["output_file"] = (
         "OutputFilesConfigurator",
-        {"formats": ["MDTFormat"], "root": "config_file"},
+        {
+            "label": "MDANSE trajectory (filename, format)",
+            "formats": ["MDTFormat"],
+            "root": "config_file",
+        },
     )
 
     def initialize(self):

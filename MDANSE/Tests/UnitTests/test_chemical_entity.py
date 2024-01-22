@@ -147,7 +147,9 @@ class TestAtom(unittest.TestCase):
 
     def test_build(self):
         atom = ce.Atom.build(None, "H", "H1", "0", False)
-        self.assertEqual(repr(ce.Atom(symbol="H", name="H1", ghost=False, index=0)), repr(atom))
+        self.assertEqual(
+            repr(ce.Atom(symbol="H", name="H1", ghost=False, index=0)), repr(atom)
+        )
 
     def test_serialize(self):
         atom = ce.Atom()
@@ -155,7 +157,9 @@ class TestAtom(unittest.TestCase):
         result = atom.serialize(dictionary)
 
         self.assertEqual(("atoms", 0), result)
-        self.assertEqual({"atoms": [[repr("H"), repr("H"), "None", "False"]]}, dictionary)
+        self.assertEqual(
+            {"atoms": [[repr("H"), repr("H"), "None", "False"]]}, dictionary
+        )
 
 
 class TestAtomGroup(unittest.TestCase):
@@ -328,15 +332,14 @@ class TestAtomCluster(unittest.TestCase):
             "atom_clusters": [[b"[0, 1]", repr("Cluster1").encode("UTF-8")]],
             "atoms": [
                 [repr("H").encode("UTF-8"), repr("H").encode("UTF-8"), b"0", b"False"],
-                [repr("H").encode("UTF-8"), repr("H").encode("UTF-8"), b"1", b"False"]],
+                [repr("H").encode("UTF-8"), repr("H").encode("UTF-8"), b"1", b"False"],
+            ],
         }
         ac = ce.AtomCluster.build(h5, [0, 1], "Cluster1")
         cs = ce.ChemicalSystem()
         cs.add_chemical_entity(ac)
 
-        self.assertEqual(
-            repr(cs.chemical_entities[0]), repr(ac)
-        )
+        self.assertEqual(repr(cs.chemical_entities[0]), repr(ac))
 
     def test_serialize_empty_dict(self):
         cluster = ce.AtomCluster("Cluster1", [ce.Atom(), ce.Atom()], parentless=True)
@@ -490,7 +493,13 @@ class TestMolecule(unittest.TestCase):
 
     def test_build(self):
         h5 = {
-            "molecules": [[b"[0, 1, 2]", repr("WAT").encode("UTF-8"), repr("water").encode("UTF-8")]],
+            "molecules": [
+                [
+                    b"[0, 1, 2]",
+                    repr("WAT").encode("UTF-8"),
+                    repr("water").encode("UTF-8"),
+                ]
+            ],
             "atoms": [
                 [repr("O").encode("UTF-8"), repr("OW").encode("UTF-8"), b"False"],
                 [repr("H").encode("UTF-8"), repr("HW2").encode("UTF-8"), b"False"],
@@ -782,7 +791,12 @@ class TestResidue(unittest.TestCase):
     def test_build(self):
         h5 = {
             "residues": [
-                [b"[0, 1, 2, 3, 4, 5, 6]", repr("GLY").encode("UTF-8"), repr("glycine").encode("UTF-8"), b"None"]
+                [
+                    b"[0, 1, 2, 3, 4, 5, 6]",
+                    repr("GLY").encode("UTF-8"),
+                    repr("glycine").encode("UTF-8"),
+                    b"None",
+                ]
             ],
             "atoms": [
                 [repr("H").encode("UTF-8"), repr("H").encode("UTF-8"), b"False"],
@@ -1115,8 +1129,17 @@ class TestNucleotide(unittest.TestCase):
 
     def test_build(self):
         h5 = {
-            "nucleotides": [[b"[0]", repr("5T1").encode("UTF-8"), repr("5T1").encode("UTF-8"), b"None"]],
-            "atoms": [[repr("H").encode("UTF-8"), repr("HO5'").encode("UTF-8"), b"False"]],
+            "nucleotides": [
+                [
+                    b"[0]",
+                    repr("5T1").encode("UTF-8"),
+                    repr("5T1").encode("UTF-8"),
+                    b"None",
+                ]
+            ],
+            "atoms": [
+                [repr("H").encode("UTF-8"), repr("HO5'").encode("UTF-8"), b"False"]
+            ],
         }
         n = ce.Nucleotide.build(h5, [0], "5T1", "5T1", None)
 
@@ -2332,7 +2355,9 @@ class TestChemicalSystem(unittest.TestCase):
         file["/chemical_system/contents"] = [
             ("atoms".encode(encoding="UTF-8", errors="strict"), 0)
         ]
-        file["/chemical_system"]["atoms"] = [[repr("H").encode("UTF-8"), repr("H1").encode("UTF-8"), b"0", b"False"]]
+        file["/chemical_system"]["atoms"] = [
+            [repr("H").encode("UTF-8"), repr("H1").encode("UTF-8"), b"0", b"False"]
+        ]
         self.system.load(file)
 
         self.assertEqual(None, self.system._h5_file)
@@ -2408,7 +2433,13 @@ class TestChemicalSystem(unittest.TestCase):
             ("molecules".encode(encoding="UTF-8", errors="strict"), 0)
         ]
         file["/chemical_system"]["atoms"] = [
-            [repr("H").encode("UTF-8"), repr("H1").encode("UTF-8"), str(i).encode("UTF-8"), b"False"] for i in range(3)
+            [
+                repr("H").encode("UTF-8"),
+                repr("H1").encode("UTF-8"),
+                str(i).encode("UTF-8"),
+                b"False",
+            ]
+            for i in range(3)
         ]
         file["/chemical_system"]["molecules"] = [
             [b"[0, 1, 2]", repr("WAT").encode("UTF-8"), repr("water").encode("UTF-8")]
@@ -2430,7 +2461,9 @@ class TestChemicalSystem(unittest.TestCase):
         file["/chemical_system/contents"] = [
             ("molecules".encode(encoding="UTF-8", errors="strict"), 0)
         ]
-        file["/chemical_system"]["atoms"] = [[repr("H").encode("UTF-8"), repr("H1").encode("UTF-8"), b"0", b"False"]]
+        file["/chemical_system"]["atoms"] = [
+            [repr("H").encode("UTF-8"), repr("H1").encode("UTF-8"), b"0", b"False"]
+        ]
         file["/chemical_system"]["molecules"] = [
             [b"[0, 1, 2]", repr("WAT").encode("UTF-8"), repr("water").encode("UTF-8")]
         ]
@@ -2472,9 +2505,15 @@ class TestChemicalSystem(unittest.TestCase):
             ("proteins".encode(encoding="UTF-8", errors="strict"), 0)
         ]
         file["/chemical_system"]["peptide_chains"] = [
-            [repr("name").encode("UTF-8"), b"[0, 1]", repr("INVALID_ARGUMENT").encode("UTF-8")],
+            [
+                repr("name").encode("UTF-8"),
+                b"[0, 1]",
+                repr("INVALID_ARGUMENT").encode("UTF-8"),
+            ],
         ]
-        file["/chemical_system"]["proteins"] = [[repr("protein").encode("UTF-8"), b"[0, 1, 2]"]]
+        file["/chemical_system"]["proteins"] = [
+            [repr("protein").encode("UTF-8"), b"[0, 1, 2]"]
+        ]
 
         with self.assertRaises(ce.CorruptedFileError) as e:
             self.system.load(file)
@@ -2492,7 +2531,9 @@ class TestChemicalSystem(unittest.TestCase):
         file["/chemical_system/contents"] = [
             ("molecules".encode(encoding="UTF-8", errors="strict"), 0)
         ]
-        file["/chemical_system"]["atoms"] = [[repr("H").encode("UTF-8"), b"H1", b"0", b"False"]]
+        file["/chemical_system"]["atoms"] = [
+            [repr("H").encode("UTF-8"), b"H1", b"0", b"False"]
+        ]
         file["/chemical_system"]["molecules"] = [
             [b"[0, 1, 2]", repr("WAT").encode("UTF-8"), repr("water").encode("UTF-8")]
         ]
@@ -2794,4 +2835,3 @@ class StubConfiguration(dict):
         self.is_periodic = is_periodic
         self.chemical_system = chemical_system
         super().__init__(**kwargs)
-

@@ -65,11 +65,7 @@ class OrderParameter(IJob):
     settings = collections.OrderedDict()
     settings["trajectory"] = (
         "HDFTrajectoryConfigurator",
-        {
-            "default": os.path.join(
-                "..", "..", "..", "Data", "Trajectories", "HDF", "waterbox.h5"
-            )
-        },
+        {},
     )
     settings["frames"] = (
         "FramesConfigurator",
