@@ -35,11 +35,12 @@ class StructureFactorFromScatteringFunction(IJob):
     ancestor = ["hdf_data"]
 
     settings = collections.OrderedDict()
-    settings["hdf_input_file"] = (
+    settings["sample_inc"] = (
         "HDFInputFileConfigurator",
         {
+            "label": "MDANSE Incoherent Structure Factor",
             "variables": ["time", "f(q,t)_total"],
-            "default": os.path.join("..", "..", "..", "Data", "NetCDF", "disf_prot.nc"),
+            "default": "disf_prot.nc"
         },
     )
     settings["instrument_resolution"] = (

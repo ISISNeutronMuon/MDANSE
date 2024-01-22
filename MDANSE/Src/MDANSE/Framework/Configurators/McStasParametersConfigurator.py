@@ -32,14 +32,10 @@ class McStasParametersConfigurator(IConfigurator):
         "beam_wavelength_Angs": 2.0,
         "environment_thickness_m": 0.002,
         "beam_resolution_meV": 0.1,
-        "container": os.path.join(
-            PLATFORM.example_data_directory(), "McStas", "Samples", "Al.laz"
-        ),
+        "container": "INPUT_FILENAME.laz",
         "container_thickness_m": 5e-05,
         "sample_height_m": 0.05,
-        "environment": os.path.join(
-            PLATFORM.example_data_directory(), "McStas", "Samples", "Al.laz"
-        ),
+        "environment": "INPUT_FILENAME.laz",
         "environment_radius_m": 0.025,
         "sample_thickness_m": 0.001,
         "sample_detector_distance_m": 4.0,

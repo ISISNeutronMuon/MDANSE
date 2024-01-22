@@ -37,6 +37,7 @@ class OutputFilesConfigurator(IConfigurator):
     """
 
     _default = ("OUTPUT_FILENAME", ["HDFFormat"])
+    _label = "Output filename and formats (filename, [format, ...])"
 
     def __init__(self, name, formats=None, **kwargs):
         """
