@@ -83,7 +83,7 @@ class ASE(Converter):
     settings["output_file"] = (
         "SingleOutputFileConfigurator",
         {
-            "label": "MDANSE trajectory filename",
+            "label": "MDANSE trajectory (filename, format)",
             "format": "MDTFormat",
             "root": "config_file",
         },

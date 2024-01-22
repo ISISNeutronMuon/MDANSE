@@ -202,7 +202,7 @@ class LAMMPS(Converter):
         {
             "format": "MDTFormat",
             "root": "config_file",
-            "label": "MDANSE trajectory filename",
+            "label": "MDANSE trajectory (filename, format)",
         },
     )
 

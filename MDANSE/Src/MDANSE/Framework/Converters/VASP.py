@@ -195,7 +195,7 @@ class VASP(Converter):
         {
             "format": "MDTFormat",
             "root": "xdatcar_file",
-            "label": "MDANSE trajectory filename",
+            "label": "MDANSE trajectory (filename, format)",
         },
     )
 

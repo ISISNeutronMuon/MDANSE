@@ -306,7 +306,7 @@ class DCD(Converter):
         {
             "format": "MDTFormat",
             "root": "pdb_file",
-            "label": "MDANSE trajectory filename",
+            "label": "MDANSE trajectory (filename, format)",
         },
     )
 
