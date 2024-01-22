@@ -34,7 +34,7 @@ from qtpy.QtWidgets import (
 from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.PyQtGUI.Widgets.Generator import WidgetGenerator
 from MDANSE_GUI.PyQtGUI.Widgets.ActionDialog import ActionDialog
-from MDANSE_GUI.PyQtGUI.Widgets.ActionsTree import ActionsTree
+from MDANSE_GUI.PyQtGUI.Tabs.Views.ActionsTree import ActionsTree
 from MDANSE_GUI.PyQtGUI.Widgets.LoaderButton import LoaderButton
 from MDANSE_GUI.PyQtGUI.Resources import Resources
 from MDANSE_GUI.PyQtGUI.UnitsEditor import UnitsEditor

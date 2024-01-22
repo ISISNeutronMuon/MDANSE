@@ -28,6 +28,7 @@ from MDANSE_GUI.PyQtGUI.Widgets.ActionDialog import ActionDialog
 class ActionsTree(QTreeView):
     action_selected = Signal(QStandardItem)
     execute_action = Signal(object)
+    item_details = Signal(object)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -38,6 +39,7 @@ class ActionsTree(QTreeView):
 
         self.clicked.connect(self.on_select_action)
         self.doubleClicked.connect(self.pop_action_dialog)
+        self.clicked.connect(self.item_picked)
 
     def mousePressEvent(self, e: QMouseEvent) -> None:
         self.click_position = e.position()
@@ -88,3 +90,10 @@ class ActionsTree(QTreeView):
         ic("Creating model from", item)
         new_model = ActionsHolder(item)
         self.setModel(new_model)
+
+    @Slot(QModelIndex)
+    def item_picked(self, index: QModelIndex):
+        model = self.model()
+        node_number = model.itemFromIndex(index).data()
+        job_description = model._docstrings[node_number]
+        self.item_details.emit(job_description)

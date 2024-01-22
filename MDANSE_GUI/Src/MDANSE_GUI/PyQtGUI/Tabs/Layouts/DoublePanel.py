@@ -29,7 +29,7 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtCore import Signal, Slot, QAbstractItemModel, QModelIndex
 
-from MDANSE_GUI.PyQtGUI.DataViewModel.GeneralModel import GeneralModel
+from MDANSE_GUI.PyQtGUI.Tabs.Models.GeneralModel import GeneralModel
 
 
 class DoublePanel(QWidget):
@@ -100,6 +100,8 @@ class DoublePanel(QWidget):
 
         if self._view is not None and self._visualiser is not None:
             self._view.item_details.connect(self._visualiser.visualise_item)
+        for thing in [self._view, self._visualiser, self._model]:
+            thing.failed.connect(self.fail)
 
     def set_model(self, model: GeneralModel):
         self._model = model
@@ -117,6 +119,15 @@ class DoublePanel(QWidget):
             self._ub_layout.addWidget(temp)
         else:
             self._lb_layout.addWidget(temp)
+
+    def current_item(self):
+        try:
+            index = self._view.currentIndex()
+            item = self._model.itemFromIndex(index)
+        except Exception as e:
+            self.fail(repr(e))
+        else:
+            return item
 
     @Slot(str)
     def fail(self, message: str):
