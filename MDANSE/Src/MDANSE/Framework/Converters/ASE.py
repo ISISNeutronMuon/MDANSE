@@ -99,7 +99,7 @@ class ASE(Converter):
         self._start = 0
 
         if self.numberOfSteps < 1:
-            self.numberOfSteps = len(self._input)
+            self.numberOfSteps = self._total_number_of_steps
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
@@ -112,7 +112,7 @@ class ASE(Converter):
             [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list]
         )
 
-        print(f"total steps: self.numberOfSteps")
+        print(f"total steps: {self.numberOfSteps}")
 
     def run_step(self, index):
         """Runs a single step of the job.
@@ -123,7 +123,10 @@ class ASE(Converter):
         @note: the argument index is the index of the loop note the index of the frame.
         """
 
-        frame = self._input[index]
+        try:
+            frame = self._input[index]
+        except TypeError:
+            frame = read(self.configuration["trajectory_file"]["value"], index=index)
         time = self._timeaxis[index]
 
         unitCell = frame.cell.array
@@ -183,9 +186,18 @@ class ASE(Converter):
             self._input = iread(
                 self.configuration["trajectory_file"]["value"], index="[:]"
             )
+            first_frame = read(self.configuration["trajectory_file"]["value"], index=0)
+            last_iterator = 0
+            generator = iread(self.configuration["trajectory_file"]["value"])
+            for _ in generator:
+                last_iterator += 1
+            generator.close()
+            self._total_number_of_steps = last_iterator
+        else:
+            first_frame = self._input[0]
+            self._total_number_of_steps = len(self._input)
 
-        first_frame = self._input[0]
-        self._timeaxis = self._timestep * np.arange(len(self._input))
+        self._timeaxis = self._timestep * np.arange(self._total_number_of_steps)
 
         self._fractionalCoordinates = np.all(first_frame.get_pbc())
 

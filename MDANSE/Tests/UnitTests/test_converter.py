@@ -134,3 +134,19 @@ def test_ase_mdt_conversion_file_exists_and_loads_up_successfully():
 
     ase_conv = Converter.create("ase")
     ase_conv.run(parameters, status=True)
+
+
+def test_xyz_mdt_conversion_file_exists_and_loads_up_successfully():
+    temp_name = tempfile.mktemp()
+
+    parameters = {
+        "trajectory_file": xyz_traj,
+        "fold": False,
+        "output_file": (temp_name, "MDTFormat"),
+        "n_steps": 0,
+        "time_step": 50.0,
+        "time_unit": "fs",
+    }
+
+    ase_conv = Converter.create("ase")
+    ase_conv.run(parameters, status=True)
