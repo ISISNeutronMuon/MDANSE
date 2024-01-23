@@ -113,7 +113,7 @@ class ASE(Converter):
 
         self._start = 0
 
-        float(self.configuration["time_step"]["value"]) * measure(
+        self._timestep = float(self.configuration["time_step"]["value"]) * measure(
             1.0, self.configuration["time_unit"]["value"]
         )
 
@@ -126,104 +126,27 @@ class ASE(Converter):
         @note: the argument index is the index of the loop note the index of the frame.
         """
 
-        self._input = iread(self.configuration["trajectory_file"]["value"])
+        time = self._timestep * np.arange(len(self._input))
 
-        for stepnum, frame in enumerate(self._input):
-            time = stepnum * self._timestep
+        frame = self._input[index]
 
-        for _ in range(self._itemsPosition["TIMESTEP"][0]):
-            line = self._lammps.readline()
-            if not line:
-                return index, None
-
-        time = (
-            float(self._lammps.readline())
-            * self.configuration["time_step"]["value"]
-            * measure(1.0, "fs").toval("ps")
-        )
-
-        for _ in range(
-            self._itemsPosition["TIMESTEP"][1], self._itemsPosition["BOX BOUNDS"][0]
-        ):
-            self._lammps.readline()
-
-        unitCell = np.zeros((9), dtype=np.float64)
-        temp = [float(v) for v in self._lammps.readline().split()]
-        if len(temp) == 2:
-            xlo, xhi = temp
-            xy = 0.0
-        elif len(temp) == 3:
-            xlo, xhi, xy = temp
-        else:
-            raise ASETrajectoryFileError("Bad format for A vector components")
-
-        temp = [float(v) for v in self._lammps.readline().split()]
-        if len(temp) == 2:
-            ylo, yhi = temp
-            xz = 0.0
-        elif len(temp) == 3:
-            ylo, yhi, xz = temp
-        else:
-            raise ASETrajectoryFileError("Bad format for B vector components")
-
-        temp = [float(v) for v in self._lammps.readline().split()]
-        if len(temp) == 2:
-            zlo, zhi = temp
-            yz = 0.0
-        elif len(temp) == 3:
-            zlo, zhi, yz = temp
-        else:
-            raise ASETrajectoryFileError("Bad format for C vector components")
-
-        # The ax component.
-        unitCell[0] = xhi - xlo
-
-        # The bx and by components.
-        unitCell[3] = xy
-        unitCell[4] = yhi - ylo
-
-        # The cx, cy and cz components.
-        unitCell[6] = xz
-        unitCell[7] = yz
-        unitCell[8] = zhi - zlo
-
-        unitCell = np.reshape(unitCell, (3, 3))
+        unitCell = frame.cell.array
 
         unitCell *= measure(1.0, "ang").toval("nm")
         unitCell = UnitCell(unitCell)
 
-        for _ in range(
-            self._itemsPosition["BOX BOUNDS"][1], self._itemsPosition["ATOMS"][0]
-        ):
-            self._lammps.readline()
-
-        coords = np.empty(
-            (self._trajectory.chemical_system.number_of_atoms, 3), dtype=np.float64
-        )
-
-        for i, _ in enumerate(
-            range(self._itemsPosition["ATOMS"][0], self._itemsPosition["ATOMS"][1])
-        ):
-            temp = self._lammps.readline().split()
-            idx = self._nameToIndex[self._rankToName[int(temp[0]) - 1]]
-            coords[idx, :] = np.array(
-                [temp[self._x], temp[self._y], temp[self._z]], dtype=np.float64
-            )
-
+        coords = frame.get_positions()
+        coords *= measure(1.0, "ang").toval("nm")
+        
         if self._fractionalCoordinates:
             conf = PeriodicBoxConfiguration(
                 self._trajectory.chemical_system, coords, unitCell
             )
             realConf = conf.to_real_configuration()
         else:
-            coords *= measure(1.0, "ang").toval("nm")
             realConf = PeriodicRealConfiguration(
                 self._trajectory.chemical_system, coords, unitCell
             )
-
-        if self.configuration["fold"]["value"]:
-            # The whole configuration is folded in to the simulation box.
-            realConf.fold_coordinates()
 
         self._trajectory.chemical_system.configuration = realConf
 
@@ -231,8 +154,6 @@ class ASE(Converter):
         self._trajectory.dump_configuration(
             time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
         )
-
-        self._start += self._last
 
         return index, None
 
@@ -260,16 +181,16 @@ class ASE(Converter):
         super(ASE, self).finalize()
 
     def parse_first_step(self):
-        self._input = iread(self.configuration["trajectory_file"]["value"], index=0)
+        self._input = ASETrajectory(self.configuration["trajectory_file"]["value"])
+        
+        first_frame = self._input[0]
 
-        for i in self._input[:1]:
-            frame = i
+        self._fractionalCoordinates = np.all(first_frame.get_pbc())
 
         g = Graph()
 
         element_count = {}
-        element_list = frame.get_chemical_symbols()
-        id_list = np.arange(len(element_list)) + 1
+        element_list = first_frame.get_chemical_symbols()
 
         self._nAtoms = len(element_list)
 
