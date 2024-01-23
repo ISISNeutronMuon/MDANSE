@@ -98,7 +98,15 @@ class ASE(Converter):
         # The number of steps of the analysis.
         self.numberOfSteps = self.configuration["n_steps"]["value"]
 
+        self._timestep = float(self.configuration["time_step"]["value"]) * measure(
+            1.0, self.configuration["time_unit"]["value"]
+        ).toval("ps")
+
         self.parse_first_step()
+        self._start = 0
+
+        if self.numberOfSteps < 1:
+            self.numberOfSteps = len(self._input)
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
@@ -111,11 +119,7 @@ class ASE(Converter):
             [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list]
         )
 
-        self._start = 0
-
-        self._timestep = float(self.configuration["time_step"]["value"]) * measure(
-            1.0, self.configuration["time_unit"]["value"]
-        )
+        print(f"total steps: self.numberOfSteps")
 
     def run_step(self, index):
         """Runs a single step of the job.
@@ -126,9 +130,8 @@ class ASE(Converter):
         @note: the argument index is the index of the loop note the index of the frame.
         """
 
-        time = self._timestep * np.arange(len(self._input))
-
         frame = self._input[index]
+        time = self._timeaxis[index]
 
         unitCell = frame.cell.array
 
@@ -137,7 +140,7 @@ class ASE(Converter):
 
         coords = frame.get_positions()
         coords *= measure(1.0, "ang").toval("nm")
-        
+
         if self._fractionalCoordinates:
             conf = PeriodicBoxConfiguration(
                 self._trajectory.chemical_system, coords, unitCell
@@ -173,7 +176,7 @@ class ASE(Converter):
         Finalize the job.
         """
 
-        self._lammps.close()
+        self._input.close()
 
         # Close the output trajectory.
         self._trajectory.close()
@@ -181,9 +184,15 @@ class ASE(Converter):
         super(ASE, self).finalize()
 
     def parse_first_step(self):
-        self._input = ASETrajectory(self.configuration["trajectory_file"]["value"])
-        
+        try:
+            self._input = ASETrajectory(self.configuration["trajectory_file"]["value"])
+        except:
+            self._input = iread(
+                self.configuration["trajectory_file"]["value"], index="[:]"
+            )
+
         first_frame = self._input[0]
+        self._timeaxis = self._timestep * np.arange(len(self._input))
 
         self._fractionalCoordinates = np.all(first_frame.get_pbc())
 

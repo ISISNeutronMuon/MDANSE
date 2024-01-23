@@ -127,7 +127,7 @@ class Trajectory:
         """
 
         if frame < 0 or frame >= len(self):
-            raise TrajectoryError("Invalid frame number")
+            raise TrajectoryError(f"Invalid frame number: {frame}")
 
         grp = self._h5_file["/configuration"]
 
@@ -144,7 +144,7 @@ class Trajectory:
         """
 
         if frame < 0 or frame >= len(self):
-            raise TrajectoryError("Invalid frame number")
+            raise TrajectoryError(f"Invalid frame number: {frame}")
 
         if self._unit_cells is not None:
             unit_cell = self._unit_cells[frame]
@@ -189,7 +189,7 @@ class Trajectory:
         """
 
         if frame < 0 or frame >= len(self):
-            raise TrajectoryError("Invalid frame number")
+            raise TrajectoryError(f"Invalid frame number: {frame}")
 
         if self._unit_cells is not None:
             return self._unit_cells[frame]
@@ -504,7 +504,7 @@ class TrajectoryWriter:
 
         if self._current_index >= self._n_steps:
             raise TrajectoryError(
-                "The current steps is greater than the actual number of steps of the trajectory"
+                f"The current index {self._current_index} is greater than the actual number of steps of the trajectory {self._n_steps}"
             )
 
         configuration = self._chemical_system.configuration
