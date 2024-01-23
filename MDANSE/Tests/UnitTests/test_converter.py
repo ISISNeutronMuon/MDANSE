@@ -48,3 +48,25 @@ def test_lammps_mdt_conversion_raise_exception_with_incorrect_format():
     lammps = Converter.create("LAMMPS")
     with pytest.raises(JobError):
         lammps.run(parameters, status=True)
+
+def test_ase_mdt_conversion_file_exists_and_loads_up_successfully():
+    temp_name = tempfile.mktemp()
+
+    parameters = {
+        "trajectory_file": hem_cam_dcd,
+        "configuration_file": hem_cam_dcd,
+        "fold": False,
+        "output_file": (temp_name, "MDTFormat"),
+        "n_steps": 0,
+        "time_step": 1.0,
+        "time_unit": "fs",
+    }
+
+    ase_conv = Converter.create("ase")
+    ase_conv.run(parameters, status=True)
+
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
+
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")

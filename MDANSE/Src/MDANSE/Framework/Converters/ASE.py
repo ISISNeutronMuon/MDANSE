@@ -20,6 +20,7 @@ from os.path import expanduser
 
 from ase.io import iread, read
 from ase.atoms import Atoms as ASEAtoms
+from ase.io.trajectory import Trajectory as ASETrajectory
 import numpy as np
 import h5py
 
@@ -54,14 +55,14 @@ class ASE(Converter):
         "InputFileConfigurator",
         {
             "label": "Any MD trajectory file",
-            "default": "INPUT_FILENAME.lammps",
+            "default": "INPUT_FILENAME.traj",
         },
     )
     settings["configuration_file"] = (
         "InputFileConfigurator",
         {
             "label": "An optional structure/configuration file",
-            "default": "INPUT_FILENAME.lammps",
+            "default": "INPUT_FILENAME",
         },
     )
     settings["time_step"] = (
@@ -287,7 +288,7 @@ class ASE(Converter):
                 try:
                     obj = Atom(node.element, name=node.atomName)
                 except TypeError:
-                    print("EXCEPTION in LAMMPS loader")
+                    print("EXCEPTION in ASE loader")
                     print(f"node.element = {node.element}")
                     print(f"node.atomName = {node.atomName}")
                     print(f"rankToName = {self._rankToName}")
