@@ -58,13 +58,6 @@ class ASE(Converter):
             "default": "INPUT_FILENAME.traj",
         },
     )
-    settings["configuration_file"] = (
-        "InputFileConfigurator",
-        {
-            "label": "An optional structure/configuration file",
-            "default": "INPUT_FILENAME",
-        },
-    )
     settings["time_step"] = (
         "FloatConfigurator",
         {"label": "time step (fs)", "default": 1.0, "mini": 1.0e-9},

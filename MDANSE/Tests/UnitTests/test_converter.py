@@ -125,7 +125,6 @@ def test_ase_mdt_conversion_file_exists_and_loads_up_successfully():
 
     parameters = {
         "trajectory_file": ase_traj,
-        "configuration_file": ase_traj,
         "fold": False,
         "output_file": (temp_name, "MDTFormat"),
         "n_steps": 0,
