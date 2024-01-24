@@ -7,6 +7,8 @@ class GeneralModel(QStandardItemModel):
     and ItemVisualiser. It stores elements and emits
     them to the ItemVisualiser."""
 
+    error = Signal(str)
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
         self.mutex = QMutex()

@@ -48,7 +48,7 @@ def test_lammps_mdt_conversion_raise_exception_with_incorrect_format():
     parameters["config_file"] = lammps_config
     parameters["mass_tolerance"] = 0.05
     parameters["n_steps"] = 0
-    parameters["output_file"] = (temp_name, "IncorrectFormat")
+    parameters["output_files"] = (temp_name, ["IncorrectFormat"])
     parameters["smart_mass_association"] = True
     parameters["time_step"] = 1.0
     parameters["trajectory_file"] = lammps_lammps
@@ -63,7 +63,7 @@ def test_vasp_mdt_conversion_file_exists_and_loads_up_successfully():
 
     parameters = {
         "fold": False,
-        "output_file": (temp_name, "MDTFormat"),
+        "output_files": (temp_name, ["MDTFormat"]),
         "time_step": 1.0,
         "xdatcar_file": vasp_xdatcar,
     }
@@ -83,7 +83,7 @@ def test_discover_mdt_conversion_file_exists_and_loads_up_successfully():
     parameters = {
         "fold": True,
         "his_file": discover_his,
-        "output_file": (temp_name, "MDTFormat"),
+        "output_files": (temp_name, ["MDTFormat"]),
         "xtd_file": discover_xtd,
     }
 
@@ -103,7 +103,7 @@ def test_charmm_mdt_conversion_file_exists_and_loads_up_successfully():
     parameters = {
         "dcd_file": hem_cam_dcd,
         "fold": False,
-        "output_file": (temp_name, "MDTFormat"),
+        "output_files": (temp_name, ["MDTFormat"]),
         "pdb_file": hem_cam_pdb,
         "time_step": 1.0,
     }

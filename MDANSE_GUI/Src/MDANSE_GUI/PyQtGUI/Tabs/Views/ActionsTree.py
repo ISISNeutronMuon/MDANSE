@@ -29,6 +29,7 @@ class ActionsTree(QTreeView):
     action_selected = Signal(QStandardItem)
     execute_action = Signal(object)
     item_details = Signal(object)
+    error = Signal(str)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -94,6 +95,9 @@ class ActionsTree(QTreeView):
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
         model = self.model()
-        node_number = model.itemFromIndex(index).data()
-        job_description = model._docstrings[node_number]
+        node_number = model.itemFromIndex(index).data(Qt.ItemDataRole.UserRole)
+        try:
+            job_description = model._docstrings[node_number]
+        except KeyError:
+            job_description = "No further information"
         self.item_details.emit(job_description)

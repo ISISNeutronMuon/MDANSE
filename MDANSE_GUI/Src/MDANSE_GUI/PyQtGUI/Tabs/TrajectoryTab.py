@@ -20,30 +20,17 @@ from qtpy.QtWidgets import QPushButton, QTextEdit, QWidget, QFileDialog
 
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 
+from MDANSE_GUI.PyQtGUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.PyQtGUI.Tabs.Layouts.DoublePanel import DoublePanel
 from MDANSE_GUI.PyQtGUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.PyQtGUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.PyQtGUI.Tabs.Views.TrajectoryView import TrajectoryView
-from MDANSE_GUI.PyQtGUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
+from MDANSE_GUI.PyQtGUI.Tabs.Visualisers.TextInfo import TextInfo
 
 
-class TrajectoryTab(QObject):
+class TrajectoryTab(GeneralTab):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._session = LocalSession()
-        self._trajectory_holder = GeneralModel(self)
-        self._trajectory_list = TrajectoryView()
-        self._visualiser = TrajectoryInfo()
-        self._core = DoublePanel(
-            data_side=self._trajectory_list, visualiser_side=self._visualiser
-        )
-        self._core.set_model(self._trajectory_holder)
-        self._core.set_label_text(
-            """Here you can load the <b>.mdt files</b>.
-They are MD trajectories in HDF5 format,
-created by one of the MDANSE converters.
-        """
-        )
         self._core.add_button("Load an .MTD Trajectory", self.load_trajectory)
 
     @Slot()
@@ -59,9 +46,47 @@ created by one of the MDANSE converters.
             try:
                 data = HDFTrajectoryInputData(fname[0])
             except Exception as e:
-                self._core.fail(repr(e))
+                self._core.error(repr(e))
             else:
                 self._core._model.append_object((data, short_name))
+
+    @classmethod
+    def standard_instance(cls):
+        the_tab = cls(
+            window,
+            name="Trajectories",
+            session=LocalSession(),
+            model=GeneralModel(),
+            view=TrajectoryView(),
+            visualiser=TextInfo(),
+            layout=DoublePanel,
+            label_text="""Here you can load the .mdt files.
+They are MD trajectories in HDF5 format,
+created by one of the MDANSE converters.
+""",
+        )
+        return the_tab
+
+    @classmethod
+    def gui_instance(
+        cls, parent: QWidget, name: str, session: LocalSession, settings, logger
+    ):
+        the_tab = cls(
+            parent,
+            name=name,
+            session=session,
+            settings=settings,
+            logger=logger,
+            model=GeneralModel(),
+            view=TrajectoryView(),
+            visualiser=TextInfo(),
+            layout=DoublePanel,
+            label_text="""Here you can load the .mdt files.
+They are MD trajectories in HDF5 format,
+created by one of the MDANSE converters.
+""",
+        )
+        return the_tab
 
 
 if __name__ == "__main__":
@@ -70,7 +95,7 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     window = QMainWindow()
-    the_tab = TrajectoryTab(window)
+    the_tab = TrajectoryTab.standard_instance()
     window.setCentralWidget(the_tab._core)
     window.show()
     app.exec()

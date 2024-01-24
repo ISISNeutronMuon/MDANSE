@@ -38,20 +38,23 @@ class DoublePanel(QWidget):
     component, and a button panel for actions.
     """
 
+    error = Signal(str)
     item_picked = Signal(object)
 
     def __init__(
         self,
         *args,
-        data_side: QWidget = None,
-        visualiser_side: QWidget = None,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
-
         self._model = None
         self._view = None
         self._visualiser = None
+
+        data_side = kwargs.pop("data_side", None)
+        visualiser_side = kwargs.pop("visualiser_side", None)
+        self._tab_reference = kwargs.pop("tab_reference", None)
+
+        super().__init__(*args, **kwargs)
 
         buffer = QWidget(self)
         scroll_area = QScrollArea()
@@ -100,8 +103,11 @@ class DoublePanel(QWidget):
 
         if self._view is not None and self._visualiser is not None:
             self._view.item_details.connect(self._visualiser.visualise_item)
+
+    def connect_logging(self):
+        self.error.connect(self._tab_reference.error)
         for thing in [self._view, self._visualiser, self._model]:
-            thing.failed.connect(self.fail)
+            thing.error.connect(self._tab_reference.error)
 
     def set_model(self, model: GeneralModel):
         self._model = model
@@ -125,19 +131,6 @@ class DoublePanel(QWidget):
             index = self._view.currentIndex()
             item = self._model.itemFromIndex(index)
         except Exception as e:
-            self.fail(repr(e))
+            self.error.emit(repr(e))
         else:
             return item
-
-    @Slot(str)
-    def fail(self, message: str):
-        """This method handles error messages in the GUI.
-        It should be universal for all the tabs, so once
-        a proper logger is added to the GUI, it can be
-        added everywhere consistently.
-
-        Parameters
-        ----------
-        message : str
-            Text of the error message to be shown
-        """

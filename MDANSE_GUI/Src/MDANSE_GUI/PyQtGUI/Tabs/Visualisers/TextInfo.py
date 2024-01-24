@@ -3,6 +3,8 @@ from qtpy.QtWidgets import QPushButton, QTextEdit, QWidget, QFileDialog
 
 
 class TextInfo(QTextEdit):
+    error = Signal(str)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

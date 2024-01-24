@@ -22,6 +22,7 @@ from qtpy.QtGui import QStandardItem, QContextMenuEvent
 
 class TrajectoryView(QListView):
     item_details = Signal(object)
+    error = Signal(str)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
