@@ -341,7 +341,7 @@ class Discover(Converter):
 
         conf = self._trajectory.chemical_system.configuration
         if conf.is_periodic:
-            conf.unit_cell = cell
+            conf.unit_cell = UnitCell(cell)
 
         movableAtoms = self._hisfile["movable_atoms"]
 

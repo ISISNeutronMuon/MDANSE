@@ -156,7 +156,7 @@ class DCDFile(FortranBinaryFile, dict):
         # Read a block
         data = self.next_record()
 
-        if data[:4] != "CORD":
+        if data[:4] != b"CORD":
             raise DCDFileError("Unrecognized DCD format")
 
         temp = struct.unpack(self.byteOrder + "20i", data[4:])
@@ -198,22 +198,22 @@ class DCDFile(FortranBinaryFile, dict):
         # Read a block
         data = self.next_record()
 
-        nLines = struct.unpack(self.byteOrder + b"I", data[0:4])[0]
+        nLines = struct.unpack(self.byteOrder.encode() + b"I", data[0:4])[0]
 
         self["title"] = []
         for i in range(nLines):
             temp = struct.unpack(
                 self.byteOrder + "80c", data[4 + 80 * i : 4 + 80 * (i + 1)]
             )
-            self["title"].append("".join(temp).strip())
+            self["title"].append(b"".join(temp).strip())
 
-        self["title"] = "\n".join(self["title"])
+        self["title"] = b"\n".join(self["title"])
 
         # Read a block
         data = self.next_record()
 
         # Read the number of atoms.
-        self["natoms"] = struct.unpack(self.byteOrder + b"I", data)[0]
+        self["natoms"] = struct.unpack(self.byteOrder.encode() + b"I", data)[0]
 
     def read_step(self):
         """

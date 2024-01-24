@@ -45,10 +45,10 @@ class XDATCARFile(dict):
         while True:
             self._headerSize = self["instance"].tell()
             line = self["instance"].readline().strip()
-            if not line or line.lower().startswith("direct"):
+            if not line or line.lower().startswith(b"direct"):
                 self._frameHeaderSize = self["instance"].tell() - self._headerSize
                 break
-            header.append(line)
+            header.append(line.decode())
 
         self["scale_factor"] = float(header[0])
 
@@ -74,7 +74,7 @@ class XDATCARFile(dict):
         while True:
             self._frameSize = self["instance"].tell()
             line = self["instance"].readline().strip()
-            if not line or line.lower().startswith("direct"):
+            if not line or line.lower().startswith(b"direct"):
                 break
             nAtoms += 1
 
@@ -207,7 +207,7 @@ class VASP(Converter):
         self._xdatcarFile = XDATCARFile(self.configuration["xdatcar_file"]["filename"])
 
         # The number of steps of the analysis.
-        self.numberOfSteps = self._xdatcarFile["n_frames"]
+        self.numberOfSteps = int(self._xdatcarFile["n_frames"])
 
         self._chemicalSystem = ChemicalSystem()
 
