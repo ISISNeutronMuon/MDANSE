@@ -2,7 +2,7 @@ from qtpy.QtCore import QObject, Slot, Signal
 from qtpy.QtWidgets import QPushButton, QTextEdit, QWidget, QFileDialog
 
 
-class TrajectoryInfo(QTextEdit):
+class TextInfo(QTextEdit):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
