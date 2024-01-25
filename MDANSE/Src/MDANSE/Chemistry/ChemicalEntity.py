@@ -2481,7 +2481,9 @@ class ChemicalSystem(_ChemicalEntity):
                 if number_bond not in self._bonds:
                     self._bonds.append(number_bond)
 
-        # add the bonds between the rdkit atoms
+        # add the bonds between the rdkit atoms, the atom index in
+        # this chemical system needs to be unique and fixed otherwise
+        # there could be issues
         bonds_added = []
         for at_i in chemical_entity.atom_list:
             i = at_i.index
@@ -2505,6 +2507,15 @@ class ChemicalSystem(_ChemicalEntity):
     @property
     def inchi(self):
         return Chem.MolToInchi(self.rdkit_mol, options="/DoNotAddH")
+
+    def get_substructure_matches(self, smarts: list[str]):
+        substruct_set = set()
+        for smart in smarts:
+            matches = self.rdkit_mol.GetSubstructMatches(
+                Chem.MolFromSmarts(smart), maxMatches=1000000)
+            for match in matches:
+                substruct_set.update(match)
+        return substruct_set
 
     @property
     def atom_list(self) -> list[Atom]:
