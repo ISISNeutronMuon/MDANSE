@@ -1,15 +1,13 @@
 from __future__ import annotations
-
 import abc
 from ast import literal_eval
 import collections
 import copy
 from typing import Union, TYPE_CHECKING, List, Tuple
-
 import h5py
 import numpy as np
+from rdkit import Chem
 from numpy.typing import NDArray
-
 from MDANSE.Chemistry import (
     ATOMS_DATABASE,
     MOLECULES_DATABASE,
@@ -2429,14 +2427,16 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._atoms = None
 
-    def __repr__(self):
-        contents = ", ".join(
-            [
-                f'{key[1:] if key[0] == "_" else key}={repr(value)}'
-                for key, value in self.__dict__.items()
-            ]
-        )
+        self.rdkit_mol = Chem.RWMol()
 
+    def __repr__(self):
+        contents = []
+        for key, value in self.__dict__.items():
+            if key == "rdkit_mol":
+                continue
+            contents.append(f'{key[1:] if key[0] == "_" else key}={repr(value)}')
+
+        contents = ", ".join(contents)
         return f"MDANSE.MolecularDynamics.ChemicalEntity.ChemicalSystem({contents})"
 
     def __str__(self):
@@ -2458,6 +2458,17 @@ class ChemicalSystem(_ChemicalEntity):
             at.index = self._number_of_atoms
             self._number_of_atoms += 1
 
+            # add the atoms to the rdkit molecule, ghost atoms are
+            # never added to the rdkit molecule object
+            atm_num = ATOMS_DATABASE[at.symbol]['atomic_number']
+            rdkit_atm = Chem.Atom(atm_num)
+
+            # makes sure that rdkit doesn't add extra hydrogens
+            rdkit_atm.SetNumExplicitHs(0)
+            rdkit_atm.SetNoImplicit(True)
+
+            self.rdkit_mol.AddAtom(rdkit_atm)
+
         self._total_number_of_atoms += chemical_entity.total_number_of_atoms
 
         chemical_entity.parent = self
@@ -2467,12 +2478,31 @@ class ChemicalSystem(_ChemicalEntity):
         if hasattr(chemical_entity, "_bonds") and hasattr(chemical_entity, "index"):
             for bond in chemical_entity._bonds:
                 number_bond = [chemical_entity.index, bond.index]
-                if not number_bond in self._bonds:
+                if number_bond not in self._bonds:
                     self._bonds.append(number_bond)
+
+        # add the bonds between the rdkit atoms
+        bonds_added = []
+        for at_i in chemical_entity.atom_list:
+            i = at_i.index
+            for at_j in at_i.bonds:
+                j = at_j.index
+                bond_idxs = sorted([i, j])
+                if bond_idxs not in bonds_added:
+                    # there is currently no bonding information in
+                    # MDANSE, we will have to default to the single
+                    # bond setting.
+                    single = Chem.rdchem.BondType.SINGLE
+                    self.rdkit_mol.AddBond(i, j, single)
+                    bonds_added.append(bond_idxs)
 
         self._configuration = None
 
         self._atoms = None
+
+    @property
+    def inchi(self):
+        return Chem.MolToInchi(self.rdkit_mol, options="/DoNotAddH")
 
     @property
     def atom_list(self) -> list[Atom]:
@@ -2547,12 +2577,12 @@ class ChemicalSystem(_ChemicalEntity):
 
         return cs
 
-    def rebuild(self, cluster_list: List[Tuple(int)]):
+    def rebuild(self, cluster_list: List[Tuple[int]]):
         """
         Copies the instance of ChemicalSystem into a new, identical instance.
 
         :param cluster_list: list of tuples of atom indices, one per cluster
-        :type List[Tuple(int)]: each element is a tuple of atom indices (int)
+        :type List[Tuple[int]]: each element is a tuple of atom indices (int)
         """
 
         atom_names_before = [atom.name for atom in self.atoms]
