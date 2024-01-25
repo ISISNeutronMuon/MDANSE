@@ -2460,7 +2460,7 @@ class ChemicalSystem(_ChemicalEntity):
 
             # add the atoms to the rdkit molecule, ghost atoms are
             # never added to the rdkit molecule object
-            atm_num = ATOMS_DATABASE[at.symbol]['atomic_number']
+            atm_num = ATOMS_DATABASE[at.symbol]["atomic_number"]
             rdkit_atm = Chem.Atom(atm_num)
 
             # makes sure that rdkit doesn't add extra hydrogens
@@ -2512,7 +2512,8 @@ class ChemicalSystem(_ChemicalEntity):
         substruct_set = set()
         for smart in smarts:
             matches = self.rdkit_mol.GetSubstructMatches(
-                Chem.MolFromSmarts(smart), maxMatches=1000000)
+                Chem.MolFromSmarts(smart), maxMatches=1000000
+            )
             for match in matches:
                 substruct_set.update(match)
         return substruct_set
