@@ -2487,6 +2487,8 @@ class ChemicalSystem(_ChemicalEntity):
             i = at_i.index
             for at_j in at_i.bonds:
                 j = at_j.index
+                if i == j:
+                    continue
                 bond_idxs = sorted([i, j])
                 if bond_idxs not in bonds_added:
                     # there is currently no bonding information in
