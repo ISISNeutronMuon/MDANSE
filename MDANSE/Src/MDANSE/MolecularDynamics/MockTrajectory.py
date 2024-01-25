@@ -13,6 +13,7 @@
 # **************************************************************************
 
 import math
+import json
 
 import numpy as np
 from icecream import ic
@@ -87,8 +88,8 @@ class MockTrajectory:
 
     def modulate_structure(
         self,
-        polarisation: np.ndarray,
-        propagation_vector: np.ndarray,
+        polarisation: np.ndarray = None,
+        propagation_vector: np.ndarray = None,
         period: int = 10,
         amplitude: float = 0.1,
     ):
@@ -104,7 +105,8 @@ class MockTrajectory:
             current_steps = len(self._coordinates)
             if current_steps % period:
                 raise ValueError(
-                    "Incommensurate vibration frequencies are not supported."
+                    f"Incommensurate vibration frequencies are not supported.\n"
+                    f"Trajectory length: {self._number_of_frames}, current_steps: {current_steps}, modulation period: {period}"
                 )
             if current_steps > period:
                 n_steps = current_steps
@@ -459,3 +461,18 @@ class MockTrajectory:
         grp = self._variables
 
         return list(grp.keys())
+
+    @classmethod
+    def from_json(cls, filename: str):
+        with open(filename, "r") as source:
+            struct = json.load(source)
+        temp = struct["parameters"]
+        temp["box_size"] = np.array(temp["box_size"])
+        instance = cls(**temp)
+        instance.set_coordinates(np.array(struct["coordinates"]))
+        for pdict in struct["modulations"]:
+            temp = pdict
+            temp["polarisation"] = np.array(temp["polarisation"])
+            temp["propagation_vector"] = np.array(temp["propagation_vector"])
+            instance.modulate_structure(**temp)
+        return instance

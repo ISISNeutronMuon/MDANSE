@@ -45,6 +45,7 @@ Created on 25.01.2024
 @author: M. Bartkowiak
 """
 
+import os
 import tempfile
 
 import pytest
@@ -52,6 +53,10 @@ import numpy as np
 
 from MDANSE.MolecularDynamics.MockTrajectory import MockTrajectory
 
+
+file_wd = os.path.dirname(os.path.realpath(__file__))
+
+mock_json = os.path.join(file_wd, "Data", "mock.json")
 
 @pytest.fixture(scope="module")
 def static_trajectory():
@@ -65,8 +70,7 @@ def static_trajectory():
     traj.set_coordinates(np.array([[1.0, 0.0, 0.0]]))
     return traj
 
-
-@pytest.fixture(scope="module")
+@pytest.fixture
 def full_trajectory():
     """Returns a trajectory containing muiltiple atoms,
     in a supercell, which move periodically.
@@ -133,16 +137,16 @@ def test_modulation_full(full_trajectory):
 
 def test_modulation_multiple(full_trajectory):
     full_trajectory.modulate_structure(
-        np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [0.0, 1.0, 0.0]]),
-        np.array([1.0, 0.0, 0.0]),
-        10,
-        0.1,
-    )
-    full_trajectory.modulate_structure(
         np.array([[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]]),
         np.array([0.0, 0.0, 0.0]),
         20,
         0.2,
+    )
+    full_trajectory.modulate_structure(
+        np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [0.0, 1.0, 0.0]]),
+        np.array([1.0, 0.0, 0.0]),
+        10,
+        0.1,
     )
     conf_init = full_trajectory[0]
     conf_between = full_trajectory[2]
@@ -151,3 +155,24 @@ def test_modulation_multiple(full_trajectory):
     assert np.allclose(conf_init["coordinates"], conf_half["coordinates"])
     assert np.allclose(conf_init["coordinates"], conf_end["coordinates"])
     assert not np.allclose(conf_init["coordinates"], conf_between["coordinates"])
+
+def test_from_json(full_trajectory):
+    full_trajectory.modulate_structure(
+        np.array([[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]]),
+        np.array([0.0, 0.0, 0.0]),
+        20,
+        0.2,
+    )
+    full_trajectory.modulate_structure(
+        np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [0.0, 1.0, 0.0]]),
+        np.array([1.0, 0.0, 0.0]),
+        10,
+        0.1,
+    )
+    instance = MockTrajectory.from_json(mock_json)
+    assert full_trajectory._atom_types == instance._atom_types
+    print(full_trajectory.coordinates(25) - instance.coordinates(25))
+    assert np.allclose(full_trajectory.coordinates(25),
+                       instance.coordinates(25))
+    assert not np.allclose(full_trajectory.coordinates(25),
+                       instance.coordinates(22))
