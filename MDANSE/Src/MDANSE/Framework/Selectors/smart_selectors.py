@@ -2,22 +2,6 @@ from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Chemistry import ATOMS_DATABASE
 
 
-def select_all(system: ChemicalSystem) -> set[int]:
-    """Selects all atoms with smarts.
-
-    Parameters
-    ----------
-    system : ChemicalSystem
-        The MDANSE chemical system.
-
-    Returns
-    -------
-    set[int]
-        The atom indices of the matched atoms.
-    """
-    return system.get_substructure_matches(["[*]"])
-
-
 def select_primary_amine(system: ChemicalSystem) -> set[int]:
     """Selects the N and H atoms of all primary amines.
 

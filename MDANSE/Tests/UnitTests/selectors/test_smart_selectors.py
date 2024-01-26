@@ -2,7 +2,6 @@ import os
 import pytest
 from MDANSE.IO.PDBReader import PDBReader
 from MDANSE.Framework.Selectors.smart_selectors import (
-    select_all,
     select_primary_amine,
     select_element,
     select_elements,
@@ -16,8 +15,8 @@ from MDANSE.Framework.Selectors.smart_selectors import (
 )
 
 
-pbd_2vb1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Data", "2vb1.pdb")
-pbd_1gip = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Data", "1gip.pdb")
+pbd_2vb1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "Data", "2vb1.pdb")
+pbd_1gip = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "Data", "1gip.pdb")
 
 
 @pytest.fixture(scope="module")
@@ -32,11 +31,6 @@ def nucleic_acid_chemical_system():
     reader = PDBReader(pbd_1gip)
     nucleic_acid_chemical_system = reader.build_chemical_system()
     return nucleic_acid_chemical_system
-
-
-def test_select_all_returns_correct_number_of_atoms_matches(protein_chemical_system):
-    selection = select_all(protein_chemical_system)
-    assert len(selection) == 30714
 
 
 def test_select_primary_amine_returns_correct_number_of_atoms_matches(
