@@ -262,17 +262,17 @@ def continuous_coordinates(
     sys.setrecursionlimit(100000)
 
     # Retrieve the top level chemical entities to which belong each of the selected atom
-    atoms = chemical_system.atom_list()
+    atoms = chemical_system.atom_list
     if selected_indexes is None:
         selected_indexes = [at.index for at in atoms]
 
-    chemical_entities = set([atoms[idx].top_level_chemical_entity() for idx in selected_indexes])
+    chemical_entities = set([atoms[idx].top_level_chemical_entity for idx in selected_indexes])
 
     # Set the bond network for these chemical entities
     bonds = {}
     chemical_entities_indexes = []
     for ce in chemical_entities:
-        for at in ce.atom_list():
+        for at in ce.atom_list:
             bonds[at.index] = [bat.index for bat in at.bonds]
             chemical_entities_indexes.append(at.index)
 

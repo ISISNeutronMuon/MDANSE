@@ -2,26 +2,20 @@ import sys
 import tempfile
 import os
 from os import path
-
 import pytest
 from icecream import ic
-import numpy as np
-
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
 
-from ..Data.data import short_traj
 
 sys.setrecursionlimit(100000)
 ic.disable()
-
-_, just_filename = path.split(short_traj)
-
-# now we have the following variables related to the trajectory:
-# 1. short_traj (str) - full path to the trajectory
-# 2. just_filename (str) - filename of the trajectory
-# 3. trajectory (pytest.fixture) - returns an instance of HDFTrajectoryInputData
+short_traj = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    "..",
+    "Data",
+    "short_trajectory_after_changes.mdt",
+)
 
 
 @pytest.fixture(scope="module")
@@ -46,12 +40,12 @@ def test_vacf(trajectory, interp_order, normalise):
     parameters = {}
     parameters["frames"] = (0, 10, 1)
     parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("HDFFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("monoprocessor",)
     parameters["normalize"] = normalise
     parameters["trajectory"] = short_traj
     vacf = IJob.create("VelocityAutoCorrelationFunction")
     vacf.run(parameters, status=True)
-    assert path.exists(temp_name + ".h5")
-    assert path.isfile(temp_name + ".h5")
-    os.remove(temp_name + ".h5")
+    assert path.exists(temp_name + ".mda")
+    assert path.isfile(temp_name + ".mda")
+    os.remove(temp_name + ".mda")

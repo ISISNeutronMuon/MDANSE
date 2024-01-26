@@ -23,7 +23,6 @@ classifiers = [
         'Topic :: Software Development :: Build Tools',
 
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3 :: Only',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Operating System :: OS Independent'
@@ -45,7 +44,11 @@ documentation = "https://mdanse.readthedocs.io/en/latest/"
 repository = "https://github.com/ISISNeutronMuon/MDANSE"
 
 [tool.setuptools]
-package-dir = {"MDANSE" = "src"}
+package-dir = {"" = "src"}
+
+[project.scripts]
+mdanse = "MDANSE.Scripts.mdanse:main"
+mdanse_job = "MDANSE.Scripts.mdanse_job:main"
 
 # [tool.setuptools.packages.find]
 # where = ["src"]

@@ -1,21 +1,14 @@
-import sys
-import tempfile
 import os
-from os import path
-from functools import reduce
-
 import pytest
-from icecream import ic
 import numpy as np
-from rdkit.Chem import Mol
-from rdkit.Chem.rdmolops import SanitizeMol
-from rdkit.Chem.rdmolops import GetMolFrags
-
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
-from MDANSE.Chemistry.Structrures import Topology, MoleculeTester
+from MDANSE.Chemistry.Structrures import MoleculeTester
 
-short_traj = "co2gas_md3.h5"
+
+short_traj = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "..", "Data", "co2gas_md3.mdt"
+)
 
 
 @pytest.fixture(scope="module")

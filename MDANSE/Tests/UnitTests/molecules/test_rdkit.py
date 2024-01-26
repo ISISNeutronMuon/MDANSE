@@ -1,17 +1,17 @@
+import os
 import numpy as np
-import rdkit
-import rdkit.Chem as Chem
-import rdkit.Chem.rdmolfiles as rdmolfiles
 from rdkit.Chem.rdmolfiles import MolFromPDBFile
 from rdkit.Chem.rdchem import Mol, GetPeriodicTable
 from rdkit.Chem.rdmolops import SanitizeMol
 from rdkit.Chem.rdmolops import GetMolFrags
 import pytest
-
 from MDANSE.IO.PDBReader import PDBReader
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 
-fname = "CO2GAS-dump-1.pdb"
+
+fname = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "..", "Data", "CO2GAS-dump-1.pdb"
+)
 
 
 @pytest.fixture()
