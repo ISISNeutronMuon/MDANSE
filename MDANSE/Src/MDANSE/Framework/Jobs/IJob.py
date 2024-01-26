@@ -275,7 +275,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
         sys.setrecursionlimit(oldrecursionlimit)
 
     def _run_remote(self):
-        raise NotImplementedError("Currently there is no replacement for the old Pyro remote runs.")
+        raise NotImplementedError(
+            "Currently there is no replacement for the old Pyro remote runs."
+        )
 
     _runner = {
         "monoprocessor": _run_monoprocessor,
