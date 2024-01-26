@@ -23,7 +23,9 @@ class MockTrajectoryConfigurator(IConfigurator):
     """
     This is a replacement for a trajectory stored in and HDF5 file.
     It is intended to be a drop-in replacement for HDFTrajectoryConfigurator,
-    even though it is NOT file-based.
+    even though it is NOT based on an HDF5 file.
+    It can use a JSON file with MockTrajectory parameters to create
+    a trajectory entirely in the RAM.
     """
 
     _default = None

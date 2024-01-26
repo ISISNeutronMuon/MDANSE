@@ -14,6 +14,7 @@
 
 import math
 import json
+from typing import TypeVar
 
 import numpy as np
 from icecream import ic
@@ -26,6 +27,7 @@ from MDANSE.Extensions import atomic_trajectory, com_trajectory, fold_coordinate
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
+    _Configuration,
 )
 from MDANSE.MolecularDynamics.TrajectoryUtils import (
     build_connectivity,
@@ -35,7 +37,16 @@ from MDANSE.MolecularDynamics.TrajectoryUtils import (
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
+Self = TypeVar("Self", bound="MockTrajectory")
+
+
 class MockTrajectory:
+    """For testing purposes, MockTrajectory can replace a trajectory.
+It acts as a trajectory of predefined composition and size,
+while taking only a necessary minimum of resources.
+The main goal is performance testing of different analysis types
+without the need to run Molecular Dynamics simulations beforehand.
+    """
     def __init__(
         self,
         number_of_frames: int = 1000,
@@ -73,6 +84,22 @@ class MockTrajectory:
             self._chemicalSystem.add_chemical_entity(Atom(symbol=atom))
 
     def set_coordinates(self, coords: np.ndarray):
+        """Sets the initial (equlibrium) positions of atoms from
+        the input array.
+
+        The array must have as many rows as there are atoms in a single box,
+        and the positions will be replicated between boxes.
+
+        Parameters
+        ----------
+        coords : np.ndarray
+            positions of atoms in a single box
+
+        Returns
+        -------
+        bool
+            False if the number of elements was wrong
+        """        
         if len(coords) != self._num_atoms_in_box:
             return False
         coords_nm = coords * measure(1.0, "ang").toval("nm")
@@ -93,6 +120,31 @@ class MockTrajectory:
         period: int = 10,
         amplitude: float = 0.1,
     ):
+        """Creates a number of frames in the trajectory which contain
+        coordinates displaced by a mechanical wave. The atom positions
+        oscillate around the equlibrium positions.
+
+        Parameters
+        ----------
+        polarisation : np.ndarray, optional
+            direction of atom displacements
+        propagation_vector : np.ndarray, optional
+            propagation vector of the wave (phonon). All zeros for standing wave
+        period : int, optional
+            Number of frames corresponding to a total 2pi period of the wave.
+        amplitude : float, optional
+            Maximum displacement along the polarisation vector (in Angstrom)
+
+        Returns
+        -------
+        bool
+            False on wrong size of the input array
+
+        Raises
+        ------
+        ValueError
+            if the period of the new modulation is incommensurate with the number of frames
+        """
         if len(polarisation) * self._multiplier == len(self._start_coordinates):
             polarisation = np.row_stack(self._multiplier * [polarisation])
         if len(polarisation) != len(self._start_coordinates):
@@ -140,17 +192,28 @@ class MockTrajectory:
         self._real_length = n_steps
 
     def close(self):
-        """Close the trajectory."""
+        """Present for compatibility with Trajectory"""
 
-    def __getitem__(self, frame):
-        """Return the configuration at a given frame
+    def __getitem__(self, frame: int):
+        """Returns the configuration of the system at the Nth frame.
 
-        :param frame: the frame
-        :type frame: int
+        Parameters
+        ----------
+        frame : int
+            number of the frame at which to get the configuration
 
-        :return: the configuration
-        :rtype: dict of ndarray
+        Returns
+        -------
+        dict
+            coordinates, time and unit cell at the specified frame
+        
+        Raises
+        ------
+        IndexError
+            if frame is outside of range
         """
+        if frame < 0 or frame >= len(self):
+            raise IndexError(f"Invalid frame number: {frame}")
 
         configuration = {}
         configuration["coordinates"] = self.coordinates(frame).astype(np.float64)
@@ -160,19 +223,32 @@ class MockTrajectory:
         return configuration
 
     def __getstate__(self):
+        """Only added for compatibility with Trajectory
+        """
         pass
 
     def __setstate__(self, state):
+        """Only added for compatibility with Trajectory
+        """
         pass
 
-    def coordinates(self, frame):
-        """Return the coordinates at a given frame.
+    def coordinates(self, frame: int) -> np.ndarray:
+        """Returns the atom coordinates at the specified frame
 
-        :param frame: the frame
-        :type frame: int
+        Parameters
+        ----------
+        frame : int
+            number of the simulation step (frame)
 
-        :return: the coordinates
-        :rtype: ndarray
+        Returns
+        -------
+        np.ndarray
+            an array (N,3) of atom coordinates. N is the numer of atoms.
+
+        Raises
+        ------
+        IndexError
+            if frame is out of range
         """
 
         if frame < 0 or frame >= len(self):
@@ -185,14 +261,23 @@ class MockTrajectory:
 
         return self._coordinates[scaled_index].astype(np.float64)
 
-    def configuration(self, frame):
-        """Build and return a configuration at a given frame.
+    def configuration(self, frame: int) -> '_Configuration':
+        """An MDANSE Configuration at the specified frame number.
 
-        :param frame: the frame
-        :type frame: int
+        Parameters
+        ----------
+        frame : int
+            number of the simulation step (frame)
 
-        :return: the configuration
-        :rtype: MDANSE.MolecularDynamics.Configuration.Configuration
+        Returns
+        -------
+        _Configuration
+            An object holding the atom positions, unit cell, etc.
+
+        Raises
+        ------
+        IndexError
+            if frame is out of range
         """
 
         if frame < 0 or frame >= len(self):
@@ -214,25 +299,31 @@ class MockTrajectory:
         return conf
 
     def _load_unit_cells(self):
-        """Load all the unit cells."""
+        """Only added for compatibility with Trajectory."""
 
-    def unit_cell(self, frame):
-        """Return the unit cell at a given frame. If no unit cell is defined, returns None.
+    def unit_cell(self, frame: int) -> UnitCell:
+        """Returns the UnitCell the size of the system.
 
-        :param frame: the frame number
-        :type frame: int
+        Parameters
+        ----------
+        frame : int
+            ignored
 
-        :return: the unit cell
-        :rtype: ndarray
+        Returns
+        -------
+        UnitCell
+            Object defining the system size
         """
 
         return UnitCell(self._full_box_size)
 
-    def __len__(self):
-        """Returns the length of the trajectory.
+    def __len__(self) -> int:
+        """Length of the mock trajectory
 
-        :return: the number of frames of the trajectory
-        :rtype: int
+        Returns
+        -------
+        int
+            number of frames that can be returned by MockTrajectory
         """
 
         return self._number_of_frames
@@ -432,8 +523,9 @@ class MockTrajectory:
         return self._chemicalSystem
 
     @property
-    def file(self):
-        """Return the trajectory file object.
+    def file(self) -> str:
+        """There is no trajectory file.
+        A string is returned instead.
 
         :return: the trajectory file object
         :rtype: HDF5 file object
@@ -442,8 +534,8 @@ class MockTrajectory:
         return "nonexistent_file.h5"
 
     @property
-    def filename(self):
-        """Return the trajectory filename.
+    def filename(self) -> str:
+        """Returns a file name, but the file does not exist.
 
         :return: the trajectory filename
         :rtype: str
@@ -452,11 +544,20 @@ class MockTrajectory:
         return "nonexistent_file.h5"
 
     @property
-    def has_velocities(self):
+    def has_velocities(self) -> bool:
+        """True if the trajectory contains atom velocities,
+        False otherwise.
+
+        Returns
+        -------
+        bool
+            True if velocities are stored in MockTrajectory
+        """
         return "velocities" in self._variables.keys()
 
     def variables(self):
         """Return the configuration variables stored in this trajectory.
+        Most likely empty for MockTrajectory, but does not have to be.
 
         :return; the configuration variable
         :rtype: list
@@ -467,7 +568,21 @@ class MockTrajectory:
         return list(grp.keys())
 
     @classmethod
-    def from_json(cls, filename: str):
+    def from_json(cls, filename: str) -> Self:
+        """Builds and returns an instance of MockTrajectory
+        using the parameters in a JSON file.
+
+        Parameters
+        ----------
+        filename : str
+            must be a valid JSON file with "parameters",
+            "coordinates" and "modulations" sections.
+
+        Returns
+        -------
+        Self
+            a MockTrajectory instance
+        """
         with open(filename, "r") as source:
             struct = json.load(source)
         temp = struct["parameters"]

@@ -19,6 +19,9 @@ from MDANSE.MolecularDynamics.MockTrajectory import MockTrajectory
 
 
 class MockTrajectoryInputData(InputFileData):
+    """Imitates the HDFTrajectoryInputData,
+    but builds a MockTrajectory out of a JSON file instead.
+    """
     extension = "json"
 
     def load(self):
@@ -41,16 +44,6 @@ class MockTrajectoryInputData(InputFileData):
         val.append("%s\n" % self._name)
         val.append("Number of steps:")
         val.append("%s\n" % len(self._data))
-        val.append("Configuration:")
-        val.append(
-            "\tIs periodic: {}\n".format(
-                "unit_cell" in self._data.file["/configuration"]
-            )
-        )
-        val.append("Variables:")
-        for k, v in self._data.file["/configuration"].items():
-            val.append("\t- {}: {}".format(k, v.shape))
-
         mol_types = {}
         val.append("\nMolecular types found:")
         for ce in self._data.chemical_system.chemical_entities:
@@ -76,4 +69,11 @@ class MockTrajectoryInputData(InputFileData):
 
     @property
     def hdf(self):
+        """There is no HDF5 file for a mock trajectory
+
+        Returns
+        -------
+        str
+            name of a nonexistent file
+        """
         return self._data.file
