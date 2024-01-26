@@ -42,11 +42,12 @@ Self = TypeVar("Self", bound="MockTrajectory")
 
 class MockTrajectory:
     """For testing purposes, MockTrajectory can replace a trajectory.
-It acts as a trajectory of predefined composition and size,
-while taking only a necessary minimum of resources.
-The main goal is performance testing of different analysis types
-without the need to run Molecular Dynamics simulations beforehand.
+    It acts as a trajectory of predefined composition and size,
+    while taking only a necessary minimum of resources.
+    The main goal is performance testing of different analysis types
+    without the need to run Molecular Dynamics simulations beforehand.
     """
+
     def __init__(
         self,
         number_of_frames: int = 1000,
@@ -99,7 +100,7 @@ without the need to run Molecular Dynamics simulations beforehand.
         -------
         bool
             False if the number of elements was wrong
-        """        
+        """
         if len(coords) != self._num_atoms_in_box:
             return False
         coords_nm = coords * measure(1.0, "ang").toval("nm")
@@ -206,7 +207,7 @@ without the need to run Molecular Dynamics simulations beforehand.
         -------
         dict
             coordinates, time and unit cell at the specified frame
-        
+
         Raises
         ------
         IndexError
@@ -223,13 +224,11 @@ without the need to run Molecular Dynamics simulations beforehand.
         return configuration
 
     def __getstate__(self):
-        """Only added for compatibility with Trajectory
-        """
+        """Only added for compatibility with Trajectory"""
         pass
 
     def __setstate__(self, state):
-        """Only added for compatibility with Trajectory
-        """
+        """Only added for compatibility with Trajectory"""
         pass
 
     def coordinates(self, frame: int) -> np.ndarray:
@@ -261,7 +260,7 @@ without the need to run Molecular Dynamics simulations beforehand.
 
         return self._coordinates[scaled_index].astype(np.float64)
 
-    def configuration(self, frame: int) -> '_Configuration':
+    def configuration(self, frame: int) -> "_Configuration":
         """An MDANSE Configuration at the specified frame number.
 
         Parameters

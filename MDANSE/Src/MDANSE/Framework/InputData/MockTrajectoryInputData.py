@@ -22,6 +22,7 @@ class MockTrajectoryInputData(InputFileData):
     """Imitates the HDFTrajectoryInputData,
     but builds a MockTrajectory out of a JSON file instead.
     """
+
     extension = "json"
 
     def load(self):
