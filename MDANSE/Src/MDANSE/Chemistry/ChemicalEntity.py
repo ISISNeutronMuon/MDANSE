@@ -2494,9 +2494,9 @@ class ChemicalSystem(_ChemicalEntity):
                 bond_idxs = sorted([i, j])
                 if bond_idxs not in bonds_added:
                     # there is currently no bonding information in
-                    # MDANSE, we will have to default to the single
-                    # bond setting.
-                    single = Chem.rdchem.BondType.SINGLE
+                    # MDANSE, we will have to default to the UNSPECIFIED
+                    # bond type.
+                    single = Chem.rdchem.BondType.UNSPECIFIED
                     self.rdkit_mol.AddBond(i, j, single)
                     bonds_added.append(bond_idxs)
 
