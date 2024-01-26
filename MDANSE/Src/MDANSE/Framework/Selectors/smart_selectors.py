@@ -98,8 +98,8 @@ def select_hs_on_elements(system: ChemicalSystem, symbols: list[str]) -> set[int
     matches = set()
     for symbol in symbols:
         num = ATOMS_DATABASE[symbol]["atomic_number"]
-        xh_matches = system.get_substructure_matches([f"[#{num};H1,H2,H3,H4]~[H]"])
-        x_matches = system.get_substructure_matches([f"[#{num};H1,H2,H3,H4]"])
+        xh_matches = system.get_substructure_matches([f"[#{num}]~[H]"])
+        x_matches = system.get_substructure_matches([f"[#{num}]"])
         matches.update(xh_matches - x_matches)
     return matches
 
@@ -118,8 +118,8 @@ def select_hs_on_heteroatom(system: ChemicalSystem) -> set[int]:
     set[int]
         The atom indices of the matched atoms.
     """
-    xh_matches = system.get_substructure_matches(["[!#6&!#1;H1,H2,H3,H4]~[H]"])
-    x_matches = system.get_substructure_matches(["[!#6&!#1;H1,H2,H3,H4]"])
+    xh_matches = system.get_substructure_matches(["[!#6&!#1]~[H]"])
+    x_matches = system.get_substructure_matches(["[!#6&!#1]"])
     return xh_matches - x_matches
 
 
