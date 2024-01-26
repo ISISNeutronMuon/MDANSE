@@ -32,7 +32,6 @@ from MDANSE.Mathematics.LinearAlgebra import (
 # Abstract base classes
 #
 class Transformation:
-
     """
     Linear coordinate transformation.
 
@@ -70,7 +69,6 @@ class Transformation:
 # Rigid body transformations
 #
 class RigidBodyTransformation(Transformation):
-
     """
     Combination of translations and rotations
     """
@@ -110,7 +108,6 @@ class RigidBodyTransformation(Transformation):
 # Pure translation
 #
 class Translation(RigidBodyTransformation):
-
     """
     Translational transformation
     """
@@ -167,7 +164,6 @@ class Translation(RigidBodyTransformation):
 # Pure rotation
 #
 class Rotation(RigidBodyTransformation):
-
     """
     Rotational transformation
     """
@@ -383,7 +379,6 @@ class Rotation(RigidBodyTransformation):
 # Combined translation and rotation
 #
 class RotationTranslation(RigidBodyTransformation):
-
     """
     Combined translational and rotational transformation.
 
@@ -448,7 +443,6 @@ class RotationTranslation(RigidBodyTransformation):
 # Scaling
 #
 class Scaling(Transformation):
-
     """
     Scaling
     """
@@ -524,7 +518,6 @@ class Shear(Transformation):
 # General linear transformation
 #
 class LinearTransformation(Transformation):
-
     """
     General linear transformation.
 

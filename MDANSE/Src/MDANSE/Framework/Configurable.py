@@ -42,7 +42,7 @@ class Configurable(object):
 
     settings = collections.OrderedDict()
 
-    def __init__(self, settings=None):
+    def __init__(self, settings=None, mdmc_input_override=False):
         """
         Constructor
         """
@@ -55,6 +55,18 @@ class Configurable(object):
 
         if settings is not None:
             self.set_settings(settings)
+
+        if mdmc_input_override:
+            self.override_trajectory_input()
+
+    def override_trajectory_input(self):
+        """Remove the hdf_trajectory (file-based) from settings,
+        and introduce an MDMC trajectory instead.
+        """
+        for key, value in self.settings.items():
+            if key == "trajectory":
+                if value[0] == "hdf_trajectory":
+                    self.settings[key] = ("mdmc_trajectory", {})
 
     def build_configuration(self):
         self._configuration.clear()

@@ -117,12 +117,12 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         return name
 
-    def __init__(self):
+    def __init__(self, mdmc_input_override=False):
         """
         The base class constructor.
         """
 
-        Configurable.__init__(self)
+        Configurable.__init__(self, mdmc_input_override=mdmc_input_override)
 
         self._outputData = OutputData()
 

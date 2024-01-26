@@ -126,10 +126,9 @@ class JobController(threading.Thread, metaclass=Singleton):
                 start = datetime.datetime.strptime(
                     self._runningJobs[job]["start"], "%d-%m-%Y %H:%M:%S"
                 )
-                self._runningJobs[job][
-                    "elapsed"
-                ] = "%02d:%02dh:%02dm:%02ds" % convert_duration(
-                    total_seconds(datetime.datetime.today() - start)
+                self._runningJobs[job]["elapsed"] = (
+                    "%02d:%02dh:%02dm:%02ds"
+                    % convert_duration(total_seconds(datetime.datetime.today() - start))
                 )
 
         # Loop over the job whose temporary files are still present
