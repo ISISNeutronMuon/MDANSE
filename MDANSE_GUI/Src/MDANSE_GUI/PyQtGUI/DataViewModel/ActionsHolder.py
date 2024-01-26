@@ -20,7 +20,6 @@ from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, Qt, QMutex
 from qtpy.QtWidgets import QTreeView
 
-from MDANSE import LOGGER, PLATFORM
 from MDANSE.Framework.Jobs.IJob import IJob
 
 from MDANSE_GUI.PyQtGUI.SubclassViewer import JobTree

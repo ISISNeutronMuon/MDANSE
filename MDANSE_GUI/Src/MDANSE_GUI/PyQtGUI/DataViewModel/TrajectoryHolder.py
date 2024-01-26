@@ -20,7 +20,6 @@ from icecream import ic
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot
 
-from MDANSE import LOGGER, PLATFORM
 from MDANSE.Framework.InputData import InputFileData
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 
