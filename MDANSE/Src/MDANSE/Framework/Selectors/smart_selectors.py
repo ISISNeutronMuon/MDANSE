@@ -53,11 +53,11 @@ def select_elements(system: ChemicalSystem, symbols: list[str]) -> set[int]:
         The atom indices of the matched atoms.
     """
     patterns = []
+    symbols = set(symbols)
+    if "*" in symbols:
+        return set([at.index for at in system.atom_list])
     for symbol in symbols:
-        if symbol == "*":
-            patterns.append(f"[*]")
-        else:
-            patterns.append(f"[#{ATOMS_DATABASE[symbol]['atomic_number']}]")
+        patterns.append(f"[#{ATOMS_DATABASE[symbol]['atomic_number']}]")
     return system.get_substructure_matches(patterns)
 
 
