@@ -132,9 +132,9 @@ class ActionDialog(QDialog):
             ddict["configurator"] = configurator
             ddict["source_object"] = self.source
             if not dtype in widget_lookup.keys():
-                ddict[
-                    "tooltip"
-                ] = "This is not implemented in the MDANSE GUI at the moment, and it MUST BE!"
+                ddict["tooltip"] = (
+                    "This is not implemented in the MDANSE GUI at the moment, and it MUST BE!"
+                )
                 placeholder = BackupWidget(parent=self, **ddict)
                 layout.addWidget(placeholder._base)
                 self._widgets.append(placeholder)

@@ -161,9 +161,10 @@ class TestAtomsDatabase(unittest.TestCase):
             ATOMS_DATABASE.add_atom("H")
 
     def test_add_atom_valid(self):
-        with patch("json.dump") as m, patch(
-            "MDANSE.Chemistry.Databases.AtomsDatabase.save"
-        ) as n:
+        with (
+            patch("json.dump") as m,
+            patch("MDANSE.Chemistry.Databases.AtomsDatabase.save") as n,
+        ):
             ATOMS_DATABASE.add_atom("new_atom")
             self.assertDictEqual({}, ATOMS_DATABASE["new_atom"])
             assert not m.called
@@ -334,9 +335,10 @@ class TestAtomsDatabase(unittest.TestCase):
         self.assertDictEqual({}, ATOMS_DATABASE._properties)
 
     def test_save(self):
-        with patch("builtins.open", new_callable=mock_open) as op, patch(
-            "json.dump"
-        ) as dump:
+        with (
+            patch("builtins.open", new_callable=mock_open) as op,
+            patch("json.dump") as dump,
+        ):
             ATOMS_DATABASE.save()
             op.assert_called_with(ATOMS_DATABASE._USER_DATABASE, "w")
             dump.assert_called_with(
@@ -383,9 +385,12 @@ class TestMoleculesDatabase(unittest.TestCase):
             self.assertDictEqual(self.data, MOLECULES_DATABASE._data)
 
     def test__load_user_database(self):
-        with patch(
-            "builtins.open", new_callable=mock_open, read_data=json.dumps(self.data)
-        ) as m, patch("os.path.exists", spec=True):
+        with (
+            patch(
+                "builtins.open", new_callable=mock_open, read_data=json.dumps(self.data)
+            ) as m,
+            patch("os.path.exists", spec=True),
+        ):
             MOLECULES_DATABASE._load("user.json", "default.json")
             m.assert_called_with("user.json", "r")
             self.assertDictEqual(self.data, MOLECULES_DATABASE._data)
@@ -410,9 +415,10 @@ class TestMoleculesDatabase(unittest.TestCase):
             MOLECULES_DATABASE.add_molecule("WAT")
 
     def test_add_molecule_valid(self):
-        with patch("json.dump") as m, patch(
-            "MDANSE.Chemistry.Databases.MoleculesDatabase.save"
-        ) as n:
+        with (
+            patch("json.dump") as m,
+            patch("MDANSE.Chemistry.Databases.MoleculesDatabase.save") as n,
+        ):
             MOLECULES_DATABASE.add_molecule("new_molecule")
             self.assertDictEqual(
                 {"alternatives": [], "atoms": {}}, MOLECULES_DATABASE["new_molecule"]
@@ -438,9 +444,10 @@ class TestMoleculesDatabase(unittest.TestCase):
         self.assertDictEqual({}, MOLECULES_DATABASE._data)
 
     def test_save(self):
-        with patch("builtins.open", new_callable=mock_open) as op, patch(
-            "json.dump"
-        ) as dump:
+        with (
+            patch("builtins.open", new_callable=mock_open) as op,
+            patch("json.dump") as dump,
+        ):
             MOLECULES_DATABASE.save()
             op.assert_called_with(MOLECULES_DATABASE._USER_DATABASE, "w")
             dump.assert_called_with(self.data, ANY)
@@ -489,9 +496,12 @@ class TestNucleotidesDatabase(unittest.TestCase):
             )
 
     def test__load_user_database(self):
-        with patch(
-            "builtins.open", new_callable=mock_open, read_data=json.dumps(self.data)
-        ) as m, patch("os.path.exists", spec=True):
+        with (
+            patch(
+                "builtins.open", new_callable=mock_open, read_data=json.dumps(self.data)
+            ) as m,
+            patch("os.path.exists", spec=True),
+        ):
             NUCLEOTIDES_DATABASE._load("user.json", "default.json")
             m.assert_called_with("user.json", "r")
             self.assertDictEqual(self.data, NUCLEOTIDES_DATABASE._data)
@@ -521,9 +531,10 @@ class TestNucleotidesDatabase(unittest.TestCase):
             NUCLEOTIDES_DATABASE.add_nucleotide("5T")
 
     def test_add_nucleotide_valid(self):
-        with patch("json.dump") as m, patch(
-            "MDANSE.Chemistry.Databases.NucleotidesDatabase.save"
-        ) as n:
+        with (
+            patch("json.dump") as m,
+            patch("MDANSE.Chemistry.Databases.NucleotidesDatabase.save") as n,
+        ):
             NUCLEOTIDES_DATABASE.add_nucleotide("new_nucleotide", True, True)
             self.assertDictEqual(
                 {
@@ -555,9 +566,10 @@ class TestNucleotidesDatabase(unittest.TestCase):
         self.assertDictEqual({}, NUCLEOTIDES_DATABASE._data)
 
     def test_save(self):
-        with patch("builtins.open", new_callable=mock_open) as op, patch(
-            "json.dump"
-        ) as dump:
+        with (
+            patch("builtins.open", new_callable=mock_open) as op,
+            patch("json.dump") as dump,
+        ):
             NUCLEOTIDES_DATABASE.save()
             op.assert_called_with(NUCLEOTIDES_DATABASE._USER_DATABASE, "w")
             dump.assert_called_with(self.data, ANY)
@@ -612,9 +624,12 @@ class TestResiduesDatabase(unittest.TestCase):
             )
 
     def test__load_user_database(self):
-        with patch(
-            "builtins.open", new_callable=mock_open, read_data=json.dumps(self.data)
-        ) as m, patch("os.path.exists", spec=True):
+        with (
+            patch(
+                "builtins.open", new_callable=mock_open, read_data=json.dumps(self.data)
+            ) as m,
+            patch("os.path.exists", spec=True),
+        ):
             RESIDUES_DATABASE._load("user.json", "default.json")
             m.assert_called_with("user.json", "r")
             self.assertDictEqual(self.data, RESIDUES_DATABASE._data)
@@ -644,9 +659,10 @@ class TestResiduesDatabase(unittest.TestCase):
             RESIDUES_DATABASE.add_residue("G")
 
     def test_add_residue_valid(self):
-        with patch("json.dump") as m, patch(
-            "MDANSE.Chemistry.Databases.ResiduesDatabase.save"
-        ) as n:
+        with (
+            patch("json.dump") as m,
+            patch("MDANSE.Chemistry.Databases.ResiduesDatabase.save") as n,
+        ):
             RESIDUES_DATABASE.add_residue("new_residues", True, True)
             self.assertDictEqual(
                 {
@@ -678,9 +694,10 @@ class TestResiduesDatabase(unittest.TestCase):
         self.assertDictEqual({}, RESIDUES_DATABASE._data)
 
     def test_save(self):
-        with patch("builtins.open", new_callable=mock_open) as op, patch(
-            "json.dump"
-        ) as dump:
+        with (
+            patch("builtins.open", new_callable=mock_open) as op,
+            patch("json.dump") as dump,
+        ):
             RESIDUES_DATABASE.save()
             op.assert_called_with(RESIDUES_DATABASE._USER_DATABASE, "w")
             dump.assert_called_with(self.data, ANY)
