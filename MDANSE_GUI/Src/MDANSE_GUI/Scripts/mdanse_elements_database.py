@@ -15,7 +15,7 @@
 
 
 def main():
-    from MDANSE_GUI.PyQtGUI.ElementsDatabaseEditor import (
+    from MDANSE_GUI.ElementsDatabaseEditor import (
         ElementsDatabaseEditor,
         QApplication,
     )
