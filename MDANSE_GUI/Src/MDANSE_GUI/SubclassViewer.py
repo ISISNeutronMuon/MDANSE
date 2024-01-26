@@ -24,17 +24,13 @@ MDANSE IJob interface.
 from MDANSE.Framework.Jobs.IJob import IJob
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
-from qtpy.QtCore import QObject, Slot, Signal, QSortFilterProxyModel, QModelIndex
+from qtpy.QtCore import Slot, Signal, QSortFilterProxyModel, QModelIndex
 from qtpy.QtWidgets import (
     QDialog,
     QTreeView,
     QGridLayout,
-    QVBoxLayout,
-    QWidget,
     QLabel,
     QApplication,
-    QSizePolicy,
-    QMenu,
     QLineEdit,
     QTextEdit,
 )

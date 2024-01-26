@@ -16,7 +16,6 @@ import numpy as np
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtWidgets import QTableView, QColorDialog
 
-from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE_GUI.MolecularViewer.readers.i_reader import IReader
 
 

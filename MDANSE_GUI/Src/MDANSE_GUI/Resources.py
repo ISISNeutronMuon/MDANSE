@@ -14,7 +14,7 @@
 # **************************************************************************
 
 from qtpy.QtCore import QDir, QSize
-from qtpy.QtGui import QIcon, QImage, QPixmap
+from qtpy.QtGui import QIcon, QPixmap
 
 
 class Resources:

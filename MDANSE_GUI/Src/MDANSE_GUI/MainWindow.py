@@ -19,40 +19,21 @@ from collections import defaultdict
 from icecream import ic
 from qtpy.QtCore import (
     Slot,
-    QSize,
-    QMetaObject,
-    QLocale,
-    QObject,
-    QThread,
-    QMutex,
-    QSortFilterProxyModel,
     Qt,
     QTimer,
     QPoint,
     Signal,
 )
-from qtpy.QtGui import QFont, QAction, QEnterEvent
+from qtpy.QtGui import QAction
 from qtpy.QtWidgets import (
-    QFrame,
-    QTabWidget,
-    QSizePolicy,
-    QApplication,
     QMainWindow,
     QToolButton,
-    QVBoxLayout,
-    QWidget,
-    QLineEdit,
-    QHBoxLayout,
-    QAbstractItemView,
     QFileDialog,
-    QLabel,
     QToolBar,
     QMenu,
-    QWidgetAction,
     QTreeView,
 )
 
-from MDANSE_GUI.BackEnd import BackEnd
 from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.Widgets.Generator import WidgetGenerator
 from MDANSE_GUI.Widgets.ConvertDialog import ConverterDialog

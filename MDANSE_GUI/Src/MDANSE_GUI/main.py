@@ -16,7 +16,7 @@
 import sys
 
 from qtpy.QtWidgets import QApplication
-from qtpy.QtCore import QSettings, QThread
+from qtpy.QtCore import QSettings
 
 from MDANSE_GUI.MainWindow import Main
 from MDANSE_GUI.BackEnd import BackEnd

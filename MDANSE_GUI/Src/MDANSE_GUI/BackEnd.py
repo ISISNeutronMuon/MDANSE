@@ -18,7 +18,6 @@ from icecream import ic
 from qtpy.QtCore import Slot, QObject, QThread, QMutex, Signal, QProcess
 
 from MDANSE.__pkginfo__ import __author__, __commit__, __version__, __beta__
-from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (

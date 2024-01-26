@@ -16,19 +16,14 @@
 from qtpy.QtWidgets import (
     QDialog,
     QPushButton,
-    QFrame,
-    QGridLayout,
     QVBoxLayout,
-    QWidget,
-    QLabel,
     QApplication,
-    QSizePolicy,
     QMenu,
     QLineEdit,
     QTableView,
 )
-from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel
-from qtpy.QtGui import QFont, QEnterEvent, QStandardItem, QStandardItemModel
+from qtpy.QtCore import Signal, Slot, Qt, QSortFilterProxyModel
+from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE_GUI.Widgets.GeneralWidgets import InputVariable, InputDialog

@@ -13,7 +13,6 @@
 #
 # **************************************************************************
 
-import collections
 import copy
 
 from qtpy.QtWidgets import (
@@ -21,27 +20,17 @@ from qtpy.QtWidgets import (
     QPushButton,
     QFrame,
     QGridLayout,
-    QVBoxLayout,
-    QWidget,
     QLabel,
     QApplication,
-    QSizePolicy,
-    QMenu,
     QLineEdit,
     QListView,
 )
 from qtpy.QtCore import (
     Signal,
     Slot,
-    Qt,
-    QPoint,
-    QSize,
-    QSortFilterProxyModel,
     QModelIndex,
 )
 from qtpy.QtGui import (
-    QFont,
-    QEnterEvent,
     QStandardItem,
     QStandardItemModel,
     QDoubleValidator,

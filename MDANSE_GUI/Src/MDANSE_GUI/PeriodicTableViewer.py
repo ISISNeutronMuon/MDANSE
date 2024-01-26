@@ -24,10 +24,9 @@ from qtpy.QtWidgets import (
     QApplication,
     QSizePolicy,
     QMenu,
-    QTextEdit,
 )
-from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize
-from qtpy.QtGui import QFont, QEnterEvent, QFontDatabase
+from qtpy.QtCore import Signal, Slot, Qt, QPoint
+from qtpy.QtGui import QEnterEvent
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 
