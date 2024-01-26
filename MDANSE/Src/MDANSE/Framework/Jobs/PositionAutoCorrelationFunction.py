@@ -14,7 +14,7 @@
 # **************************************************************************
 
 import collections
-
+import numpy as np
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import correlation, normalize
@@ -129,6 +129,7 @@ class PositionAutoCorrelationFunction(IJob):
             step=self.configuration["frames"]["step"],
         )
 
+        series = series - np.average(series, axis=0)
         series = self.configuration["projection"]["projector"](series)
 
         atomicPACF = correlation(series, axis=0, average=1)
