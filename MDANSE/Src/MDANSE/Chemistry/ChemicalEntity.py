@@ -2504,11 +2504,21 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._atoms = None
 
-    @property
-    def inchi(self):
-        return Chem.MolToInchi(self.rdkit_mol, options="/DoNotAddH")
+    def get_substructure_matches(self, smarts: list[str]) -> set[int]:
+        """Get the indexes which match any of the smarts string in
+        the inputted list. Note that the default bond type in MDANSE
+        is Chem.rdchem.BondType.UNSPECIFIED.
 
-    def get_substructure_matches(self, smarts: list[str]):
+        Parameters
+        ----------
+        smarts : list[str]
+            List of smarts strings.
+
+        Returns
+        -------
+        set[int]
+            An set of matched atom indices.
+        """
         substruct_set = set()
         for smart in smarts:
             matches = self.rdkit_mol.GetSubstructMatches(

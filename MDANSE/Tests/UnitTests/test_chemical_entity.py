@@ -2567,36 +2567,6 @@ class TestChemicalSystem(unittest.TestCase):
         )
         self.assertEqual([("molecules", "0")], file["/chemical_system"]["contents"])
 
-    def test_hydrogen_atom_chemical_entity_has_correct_inchi(self):
-        cluster = ce.AtomCluster("name", [ce.Atom(ghost=False)])
-        self.system.add_chemical_entity(cluster)
-        self.assertEqual("InChI=1S/H", self.system.inchi)
-
-    def test_two_hydrogen_atom_chemical_entity_has_correct_inchi(self):
-        cluster = ce.AtomCluster("name", [ce.Atom(ghost=False), ce.Atom(ghost=False)])
-        self.system.add_chemical_entity(cluster)
-        self.assertEqual("InChI=1S/2H", self.system.inchi)
-
-    def test_WAT_chemical_entity_has_correct_inchi(self):
-        molecule = ce.Molecule("WAT", "name")
-        self.system.add_chemical_entity(molecule)
-        self.assertEqual("InChI=1S/H2O/h1H2", self.system.inchi)
-
-    def test_hydrogen_system_load_has_correct_inchi(self):
-        file = StubHDFFile()
-        file["/chemical_system"] = StubHDFFile()
-        file["/chemical_system"].attrs["name"] = "new"
-
-        file["/chemical_system/contents"] = [
-            ("atoms".encode(encoding="UTF-8", errors="strict"), 0)
-        ]
-        file["/chemical_system"]["atoms"] = [
-            [repr("H").encode("UTF-8"), repr("H1").encode("UTF-8"), b"0", b"False"]
-        ]
-        self.system.load(file)
-
-        self.assertEqual("InChI=1S/H", self.system.inchi)
-
 
 class DummyConfiguration:
     def __init__(self, system: ce.ChemicalSystem):
