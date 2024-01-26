@@ -14,7 +14,4 @@ def select_all(system: ChemicalSystem) -> set[int]:
     set[int]
         All atom indices.
     """
-    idxs = set()
-    for at in system.atom_list:
-        idxs.add(at.index)
-    return idxs
+    return set([at.index for at in system.atom_list])
