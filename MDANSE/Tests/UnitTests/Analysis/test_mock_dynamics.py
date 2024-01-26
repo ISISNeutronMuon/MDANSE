@@ -24,14 +24,6 @@ file_wd = os.path.dirname(os.path.realpath(__file__))
 
 mock_json = os.path.join(file_wd, "..", "Data", "mock.json")
 
-@pytest.fixture(scope="module")
-def mock_trajectory():
-    """Returns a trajectory containing muiltiple atoms,
-    in a supercell, which move periodically.
-    """
-    traj = MockTrajectory.from_json(mock_json)
-    return traj
-
 
 @pytest.mark.parametrize(
     "interp_order, normalise",
@@ -44,7 +36,7 @@ def mock_trajectory():
         (3, False),
     ],
 )
-def test_vacf(mock_trajectory, interp_order, normalise):
+def test_vacf(interp_order, normalise):
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1)
@@ -52,8 +44,8 @@ def test_vacf(mock_trajectory, interp_order, normalise):
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("monoprocessor",)
     parameters["normalize"] = normalise
-    parameters["trajectory"] = mock_trajectory
-    vacf = IJob.create("VelocityAutoCorrelationFunction")
+    parameters["trajectory"] = mock_json
+    vacf = IJob.create("VelocityAutoCorrelationFunction", trajectory_input="mock")
     vacf.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")

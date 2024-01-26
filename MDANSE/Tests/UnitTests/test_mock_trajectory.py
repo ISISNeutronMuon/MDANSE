@@ -58,6 +58,7 @@ file_wd = os.path.dirname(os.path.realpath(__file__))
 
 mock_json = os.path.join(file_wd, "Data", "mock.json")
 
+
 @pytest.fixture(scope="module")
 def static_trajectory():
     """Returns a trajectory containing a single atom,
@@ -69,6 +70,7 @@ def static_trajectory():
     )
     traj.set_coordinates(np.array([[1.0, 0.0, 0.0]]))
     return traj
+
 
 @pytest.fixture
 def full_trajectory():
@@ -156,6 +158,7 @@ def test_modulation_multiple(full_trajectory):
     assert np.allclose(conf_init["coordinates"], conf_end["coordinates"])
     assert not np.allclose(conf_init["coordinates"], conf_between["coordinates"])
 
+
 def test_from_json(full_trajectory):
     full_trajectory.modulate_structure(
         np.array([[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]]),
@@ -172,7 +175,5 @@ def test_from_json(full_trajectory):
     instance = MockTrajectory.from_json(mock_json)
     assert full_trajectory._atom_types == instance._atom_types
     print(full_trajectory.coordinates(25) - instance.coordinates(25))
-    assert np.allclose(full_trajectory.coordinates(25),
-                       instance.coordinates(25))
-    assert not np.allclose(full_trajectory.coordinates(25),
-                       instance.coordinates(22))
+    assert np.allclose(full_trajectory.coordinates(25), instance.coordinates(25))
+    assert not np.allclose(full_trajectory.coordinates(25), instance.coordinates(22))

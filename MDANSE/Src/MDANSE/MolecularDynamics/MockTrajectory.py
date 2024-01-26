@@ -155,7 +155,7 @@ class MockTrajectory:
         configuration = {}
         configuration["coordinates"] = self.coordinates(frame).astype(np.float64)
         configuration["time"] = self._time_axis[frame]
-        configuration["unit_cell"] = self.unit_cell(frame).astype(np.float64)
+        configuration["unit_cell"] = self.unit_cell(frame)._unit_cell.astype(np.float64)
 
         return configuration
 
@@ -226,7 +226,7 @@ class MockTrajectory:
         :rtype: ndarray
         """
 
-        return UnitCell(self._full_box_size)._unit_cell
+        return UnitCell(self._full_box_size)
 
     def __len__(self):
         """Returns the length of the trajectory.
@@ -450,6 +450,10 @@ class MockTrajectory:
         """
 
         return "nonexistent_file.h5"
+
+    @property
+    def has_velocities(self):
+        return "velocities" in self._variables.keys()
 
     def variables(self):
         """Return the configuration variables stored in this trajectory.

@@ -15,12 +15,11 @@
 
 import os
 
-from MDANSE import PLATFORM, REGISTRY
-
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.MolecularDynamics.MockTrajectory import MockTrajectory
 
 
-class MDMCTrajectoryConfigurator(IConfigurator):
+class MockTrajectoryConfigurator(IConfigurator):
     """
     This is a replacement for a trajectory stored in and HDF5 file.
     It is intended to be a drop-in replacement for HDFTrajectoryConfigurator,
@@ -29,7 +28,7 @@ class MDMCTrajectoryConfigurator(IConfigurator):
 
     _default = None
 
-    def __init__(self, name, wildcard="All files|*", **kwargs):
+    def __init__(self, name, wildcard="JSON file|*.json", **kwargs):
         """
         Initializes the configurator object.
 
@@ -45,26 +44,26 @@ class MDMCTrajectoryConfigurator(IConfigurator):
 
         self._wildcard = wildcard
 
-    def configure(self, value):
+    def configure(self, value: str):
         """
-        Configure a HDF trajectory file.
+        Configure a mock trajectory file.
 
-        :param value: an instance of the MdanseTrajectory class
-        :type value: MdanseTrajectory from MDMC
+        :param value: a JSON file with a MockTrajectory definition
+        :type value: str
         """
 
         self["value"] = value
-        self["filename"] = "MDMC.temp"
+        self["filename"] = "Mock"
 
-        self["instance"] = value
+        self["instance"] = MockTrajectory.from_json(value)
 
-        self["basename"] = "MDMC"
+        self["basename"] = "Mock"
 
         self["length"] = len(self["instance"])
 
-        self["md_time_step"] = 1.0
+        self["md_time_step"] = self["instance"]._time_step
 
-        self["has_velocities"] = self["instance"].has_velocity
+        self["has_velocities"] = self["instance"].has_velocities
 
     def get_information(self):
         """
@@ -74,7 +73,7 @@ class MDMCTrajectoryConfigurator(IConfigurator):
         :rtype: str
         """
 
-        info = ["MDMC trajectory used as input"]
+        info = ["Mock trajectory used as input"]
         info.append("Number of steps: %d\n" % self["length"])
         info.append(
             "Size of the chemical system: %d\n"
@@ -86,6 +85,3 @@ class MDMCTrajectoryConfigurator(IConfigurator):
             info.append("The trajectory does not contain atomic velocities\n")
 
         return "".join(info)
-
-
-REGISTRY["mdmc_trajectory"] = MDMCTrajectoryConfigurator

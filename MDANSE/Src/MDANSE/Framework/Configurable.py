@@ -42,7 +42,7 @@ class Configurable(object):
 
     settings = collections.OrderedDict()
 
-    def __init__(self, settings=None, mdmc_input_override=False):
+    def __init__(self, settings=None, trajectory_input="mdasne"):
         """
         Constructor
         """
@@ -56,17 +56,28 @@ class Configurable(object):
         if settings is not None:
             self.set_settings(settings)
 
-        if mdmc_input_override:
-            self.override_trajectory_input()
+        if trajectory_input == "mdmc":
+            self.mdmc_trajectory_input()
+        elif trajectory_input == "mock":
+            self.mock_trajectory_input()
 
-    def override_trajectory_input(self):
+    def mdmc_trajectory_input(self):
         """Remove the hdf_trajectory (file-based) from settings,
         and introduce an MDMC trajectory instead.
         """
         for key, value in self.settings.items():
             if key == "trajectory":
-                if value[0] == "hdf_trajectory":
-                    self.settings[key] = ("mdmc_trajectory", {})
+                if value[0] == "HDFTrajectoryConfigurator":
+                    self.settings[key] = ("MDMCTrajectoryConfigurator", {})
+
+    def mock_trajectory_input(self):
+        """Remove the hdf_trajectory (file-based) from settings,
+        and introduce a mock trajectory instead.
+        """
+        for key, value in self.settings.items():
+            if key == "trajectory":
+                if value[0] == "HDFTrajectoryConfigurator":
+                    self.settings[key] = ("MockTrajectoryConfigurator", {})
 
     def build_configuration(self):
         self._configuration.clear()
