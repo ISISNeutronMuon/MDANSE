@@ -28,12 +28,8 @@ from MDANSE.MolecularDynamics.Configuration import (
 
 class MoleculeFinder(IJob):
     """
-    Computes the time-dependent temperature for a given trajectory.
-        The temperature is determined from the kinetic energy i.e. the atomic velocities
-        which are in turn calculated from the time-dependence of the atomic coordinates.
-        Note that if the time step between frames saved in the trajectory is long (~ps)
-        compared to the time step in the MD simulations (~fs) the
-        velocities are averaged over many configurations and will not give accurate temperatures.
+    Finds potential molecules in the trajectory, based on
+    interatomic distances.
     """
 
     label = "Molecule Finder"
@@ -47,6 +43,10 @@ class MoleculeFinder(IJob):
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["tolerance"] = (
+        "FloatConfigurator",
+        {"default": 0.2},
+    )
     settings["frames"] = (
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}, "default": (0, -1, 1)},
@@ -62,13 +62,14 @@ class MoleculeFinder(IJob):
         """
 
         self.numberOfSteps = self.configuration["frames"]["number"]
-        self._input_trajectory = self.configuration["trajectory"]["hdf_trajectory"]
+        self._input_trajectory = self.configuration["trajectory"]["instance"]
+        self._tolerance = self.configuration["tolerance"]["value"]
         chemical_system = self._input_trajectory.chemical_system
 
         print(f"Molfinder: bonds before the run {chemical_system._bonds}")
 
         conn = Connectivity(trajectory=self._input_trajectory)
-        conn.find_molecules()
+        conn.find_molecules(tolerance=self._tolerance)
         conn.add_bond_information()
         chemical_system.rebuild(conn._molecules)
 

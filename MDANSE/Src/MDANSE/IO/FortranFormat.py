@@ -61,7 +61,6 @@ import string
 # which can be accessed as text or as a list of items.
 #
 class FortranLine:
-
     """Fortran-style record in formatted files
 
     FortranLine objects represent the content of one record of a
@@ -244,7 +243,6 @@ class FortranLine:
 # little error checking.
 #
 class FortranFormat:
-
     """
     Parsed Fortran-style format string
 

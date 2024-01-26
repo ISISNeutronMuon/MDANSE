@@ -189,12 +189,12 @@ class Connectivity:
         self._bond_mapping = bond_mapping
         self._unique_bonds = np.unique(np.sort(bonds, axis=1), axis=0)
 
-    def find_molecules(self):
+    def find_molecules(self, tolerance: float = 0.2):
         """Uses the internal list of bonds to find atoms that belong to the same
         molecules. The grouping of atoms is saved internally.
         """
         if self._bond_mapping is None:
-            self.find_bonds()
+            self.find_bonds(tolerance=tolerance)
 
         def recursive_walk(
             number: int, bond_mapping: Dict[int, int], atom_pool: List[int]
