@@ -38,7 +38,7 @@ class Sulphate(ISelector):
                     if neigh.element.strip().lower() == "oxygen"
                 ]
                 if len(oxygens) == 4:
-                    self._choices.extend([sulf] + sorted(oxygens))
+                    self._choices.extend([sulf.full_name.strip()] + sorted(oxygens))
 
     def select(self, names):
         """Returns the sulphate atoms."""

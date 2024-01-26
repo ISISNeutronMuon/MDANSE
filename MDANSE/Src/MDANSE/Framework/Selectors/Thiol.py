@@ -38,7 +38,7 @@ class Thiol(ISelector):
                     if neigh.element.strip().lower() == "hydrogen"
                 ]
                 if len(hydrogens) >= 1:
-                    self._choices.extend([sulf] + sorted(hydrogens))
+                    self._choices.extend([sulf.full_name.strip()] + sorted(hydrogens))
 
     def select(self, names):
         """Returns the thiol atoms."""

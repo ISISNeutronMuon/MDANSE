@@ -36,7 +36,7 @@ class Phosphate(ISelector):
                     if neigh.element.strip().lower() == "oxygen"
                 ]
                 if len(oxygens) == 4:
-                    self._choices.extend([phos] + sorted(oxygens))
+                    self._choices.extend([phos.full_name.strip()] + sorted(oxygens))
 
     def select(self, names):
         """Returns the phosphate atoms."""

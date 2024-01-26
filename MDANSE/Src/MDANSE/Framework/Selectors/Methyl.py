@@ -36,7 +36,7 @@ class Methyl(ISelector):
                     if neigh.element.strip().lower() == "hydrogen"
                 ]
                 if len(hydrogens) >= 3:
-                    self._choices.extend([car] + sorted(hydrogens))
+                    self._choices.extend([car.full_name.strip()] + sorted(hydrogens))
 
     def select(self, names):
         """Returns the methyl atoms."""

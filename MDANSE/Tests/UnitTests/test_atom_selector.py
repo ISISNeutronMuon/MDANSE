@@ -241,7 +241,7 @@ class TestAtomsSelector(unittest.TestCase):
         self.assertEqual(len(selection), 2)
 
         selection = selector.select(["*"])
-        self.assertEqual(len(selection), 183)
+        self.assertEqual(len(selection), 244)
 
     def test_molecule_index(self):
         selector = MoleculeIndex.MoleculeIndex(self._proteinChemicalSystem)
@@ -333,7 +333,7 @@ class TestAtomsSelector(unittest.TestCase):
     def test_phosphate(self):
         selector = Phosphate.Phosphate(self._nucleicAcidChemicalSystem)
         selection = selector.select(["*"])
-        self.assertEqual(len(selection), 88)
+        self.assertEqual(len(selection), 110)
 
     def test_python_script(self):
         selector = PythonScript.PythonScript(self._nucleicAcidChemicalSystem)
