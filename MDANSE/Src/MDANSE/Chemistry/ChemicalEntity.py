@@ -2504,7 +2504,9 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._atoms = None
 
-    def get_substructure_matches(self, smarts: list[str]) -> set[int]:
+    def get_substructure_matches(
+        self, smarts: list[str], maxmatches: int = 1000000
+    ) -> set[int]:
         """Get the indexes which match any of the smarts string in
         the inputted list. Note that the default bond type in MDANSE
         is Chem.rdchem.BondType.UNSPECIFIED.
@@ -2513,6 +2515,9 @@ class ChemicalSystem(_ChemicalEntity):
         ----------
         smarts : list[str]
             List of smarts strings.
+        maxmatches : int
+            Maximum number of matches used in the GetSubstructMatches
+            rdkit method.
 
         Returns
         -------
@@ -2522,7 +2527,7 @@ class ChemicalSystem(_ChemicalEntity):
         substruct_set = set()
         for smart in smarts:
             matches = self.rdkit_mol.GetSubstructMatches(
-                Chem.MolFromSmarts(smart), maxMatches=1000000
+                Chem.MolFromSmarts(smart), maxMatches=maxmatches
             )
             for match in matches:
                 substruct_set.update(match)
