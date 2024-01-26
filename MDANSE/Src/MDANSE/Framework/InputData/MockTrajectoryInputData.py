@@ -13,18 +13,17 @@
 #
 # **************************************************************************
 
-
 from MDANSE.Framework.InputData.IInputData import InputDataError
 from MDANSE.Framework.InputData.InputFileData import InputFileData
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from MDANSE.MolecularDynamics.MockTrajectory import MockTrajectory
 
 
 class MockTrajectoryInputData(InputFileData):
-    extension = "mdt"
+    extension = "json"
 
     def load(self):
         try:
-            traj = Trajectory(self._name)
+            traj = MockTrajectory.from_json(self._name)
         except IOError as e:
             raise InputDataError(str(e))
         except ValueError as e:
