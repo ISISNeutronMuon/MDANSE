@@ -92,7 +92,23 @@ class Selector:
         return idxs
 
     def settings_to_json(self):
-        return json.dumps(self.settings)
+        minimal_dict = {}
+        for k, v in self.settings["switch"].items():
+            if self._default["switch"][k] == v:
+                continue
+            if "switch" not in minimal_dict:
+                minimal_dict["switch"] = {}
+            minimal_dict["switch"][k] = v
+            if not self.settings["args"][k]:
+                continue
+            if not self.settings["args"][k]["symbols"]:
+                continue
+            if "args" not in minimal_dict:
+                minimal_dict["args"] = {}
+            minimal_dict["args"][k] = {
+                "symbols": self.settings["args"][k]["symbols"]
+            }
+        return json.dumps(minimal_dict)
 
     def settings_from_json(self, json_string, reset_first=False):
         self.update_settings(json.loads(json_string), reset_first)
