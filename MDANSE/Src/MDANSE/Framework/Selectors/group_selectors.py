@@ -106,4 +106,4 @@ def select_thiol(system: ChemicalSystem) -> set[int]:
     set[int]
         The atom indices of the matched atoms.
     """
-    return system.get_substructure_matches(["[#16X2H]~[H]"])
+    return system.get_substructure_matches(["[#16X2;H1]~[H]"])

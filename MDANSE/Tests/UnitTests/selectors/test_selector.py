@@ -16,7 +16,7 @@ def protein_chemical_system():
     return protein_chemical_system
 
 
-def test_Selector_returns_all_atoms_idxs(protein_chemical_system):
+def test_selector_returns_all_atoms_idxs(protein_chemical_system):
     selector = Selector(protein_chemical_system)
     atm_idxs = selector.get_selection()
     assert len(atm_idxs) == 30714
