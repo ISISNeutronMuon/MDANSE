@@ -1,18 +1,18 @@
 from typing import Literal
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
-from .all_selector import select_all
-from .atom_selectors import *
-from .group_selectors import *
-from .molecule_selectors import *
+from MDANSE.Framework.Selectors.all_selector import select_all
+from MDANSE.Framework.Selectors.atom_selectors import *
+from MDANSE.Framework.Selectors.group_selectors import *
+from MDANSE.Framework.Selectors.molecule_selectors import *
 
 
-class FilterSelection:
+class Selector:
 
     def __init__(self, system: ChemicalSystem):
         self.system = system
-        self.all_idxs = select_all(system)
 
         self._idxs = {
+            "all": None,
             "elements": None,
             "hs_on_heteroatom": None,
             "hs_on_elements": None,
@@ -26,6 +26,7 @@ class FilterSelection:
         }
 
         self._funcs = {
+            "all": select_all,
             "elements": select_elements,
             "hs_on_heteroatom": select_hs_on_heteroatom,
             "hs_on_elements": select_hs_on_elements,
@@ -39,19 +40,22 @@ class FilterSelection:
         }
 
         self.settings = {
+            # -1 remove atoms, +1 selects atoms, 0 skip
             "switch": {
-                "elements": False,
-                "hs_on_heteroatom": False,
-                "hs_on_elements": False,
-                "primary_amine": False,
-                "hydroxy": False,
-                "methly": False,
-                "phosphate": False,
-                "sulphate": False,
-                "thiol": False,
-                "water": False
+                "all": 1,
+                "elements": 0,
+                "hs_on_heteroatom": 0,
+                "hs_on_elements": 0,
+                "primary_amine": 0,
+                "hydroxy": 0,
+                "methly": 0,
+                "phosphate": 0,
+                "sulphate": 0,
+                "thiol": 0,
+                "water": 0
             },
             "args": {
+                "all": {},
                 "elements": {"symbols": []},
                 "hs_on_heteroatom": {},
                 "hs_on_elements": {"symbols": []},
@@ -65,7 +69,7 @@ class FilterSelection:
             }
         }
 
-    def load_settings(self, settings: dict[Literal["switch", "args"], dict]) -> None:
+    def update_settings(self, settings: dict[Literal["switch", "args"], dict]) -> None:
         for k_0, v_0 in settings.items():
             for k_1, v_1 in v_0.items():
                 if k_0 == "switch":
@@ -74,12 +78,12 @@ class FilterSelection:
                     for k_2, v_2 in v_1.items():
                         self.settings[k_0][k_1][k_2] = v_2
 
-    def apply_filter(self) -> set[int]:
-        idxs = self.all_idxs
+    def get_selection(self) -> set[int]:
+        idxs = set()
 
         for selection, switch in self.settings["switch"].items():
 
-            if switch is False:
+            if switch == 0:
                 continue
 
             if self._idxs[selection] is None:
@@ -87,6 +91,9 @@ class FilterSelection:
                 self._idxs[selection] \
                     = self._funcs[selection](self.system, **kwargs)
 
-            idxs = idxs - self._idxs[selection]
+            if switch == -1:
+                idxs = idxs - self._idxs[selection]
+            elif switch == 1:
+                idxs = idxs | self._idxs[selection]
 
         return idxs
