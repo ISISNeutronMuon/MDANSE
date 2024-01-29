@@ -23,50 +23,7 @@ from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
 )
-from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
-
-# The granularities at which the selection will be performed
-LEVELS = collections.OrderedDict()
-LEVELS["atom"] = {
-    "atom": 0,
-    "atomcluster": 0,
-    "molecule": 0,
-    "nucleotidechain": 0,
-    "peptidechain": 0,
-    "protein": 0,
-}
-LEVELS["group"] = {
-    "atom": 0,
-    "atomcluster": 1,
-    "molecule": 1,
-    "nucleotidechain": 1,
-    "peptidechain": 1,
-    "protein": 1,
-}
-LEVELS["residue"] = {
-    "atom": 0,
-    "atomcluster": 1,
-    "molecule": 1,
-    "nucleotidechain": 2,
-    "peptidechain": 2,
-    "protein": 2,
-}
-LEVELS["chain"] = {
-    "atom": 0,
-    "atomcluster": 1,
-    "molecule": 1,
-    "nucleotidechain": 3,
-    "peptidechain": 3,
-    "protein": 3,
-}
-LEVELS["molecule"] = {
-    "atom": 0,
-    "atomcluster": 1,
-    "molecule": 1,
-    "nucleotidechain": 3,
-    "peptidechain": 3,
-    "protein": 4,
-}
+from MDANSE.Framework.Selectors.selector import Selector
 
 
 class AtomSelectionConfigurator(IConfigurator):
@@ -86,7 +43,7 @@ class AtomSelectionConfigurator(IConfigurator):
     :note: this configurator depends on :py:class:`~MDANSE.Framework.Configurators.HDFTrajectoryConfigurator.HDFTrajectoryConfigurator` and :py:class:`~MDANSE.Framework.Configurators.GroupingLevelConfigurator.GroupingLevelConfigurator` configurators to be configured
     """
 
-    _default = "all"
+    _default = "{}"
 
     def configure(self, value):
         """
@@ -101,7 +58,7 @@ class AtomSelectionConfigurator(IConfigurator):
         trajConfig = self._configurable[self._dependencies["trajectory"]]
 
         if value is None:
-            value = ["all"]
+            value = [self._default]
 
         if isinstance(value, str):
             value = [value]
@@ -113,15 +70,16 @@ class AtomSelectionConfigurator(IConfigurator):
 
         indexes = set()
 
-        for v in value:
-            if UD_STORE.has_definition(trajConfig["basename"], "atom_selection", v):
+        for json_string in value:
+            if UD_STORE.has_definition(trajConfig["basename"], "atom_selection", json_string):
                 ud = UD_STORE.get_definition(
-                    trajConfig["basename"], "atom_selection", v
+                    trajConfig["basename"], "atom_selection", json_string
                 )
                 indexes.update(ud["indexes"])
             else:
-                parser = AtomSelectionParser(trajConfig["instance"].chemical_system)
-                indexes.update(parser.parse(v))
+                selector = Selector(trajConfig["instance"].chemical_system)
+                selector.settings_from_json(json_string)
+                indexes = selector.get_selection()
 
         self["flatten_indexes"] = sorted(list(indexes))
 

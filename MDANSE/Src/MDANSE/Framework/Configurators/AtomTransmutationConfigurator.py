@@ -20,7 +20,7 @@ from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
 )
-from MDANSE.Framework.AtomSelectionParser import AtomSelectionParser
+from MDANSE.Framework.Selectors.selector import Selector
 
 
 class AtomTransmutationConfigurator(IConfigurator):
@@ -66,26 +66,26 @@ class AtomTransmutationConfigurator(IConfigurator):
 
         trajConfig = self._configurable[self._dependencies["trajectory"]]
 
-        parser = AtomSelectionParser(trajConfig["instance"])
-
         self._nTransmutatedAtoms = 0
 
-        for expression, element in value:
+        selector = Selector(trajConfig["instance"].chemical_system)
+        for json_string, element in value:
             # Otherwise, it must be a string that will be found as a user-definition keys
-            if not isinstance(expression, str):
+            if not isinstance(json_string, str):
                 raise ConfiguratorError(
                     "Wrong format for atom transmutation configurator.", self
                 )
 
             if UD_STORE.has_definition(
-                trajConfig["basename"], "atom_selection", expression
+                trajConfig["basename"], "atom_selection", json_string
             ):
                 ud = UD_STORE.get_definition(
-                    trajConfig["basename"], "atom_selection", expression
+                    trajConfig["basename"], "atom_selection", json_string
                 )
                 indexes = ud["indexes"]
             else:
-                indexes = parser.parse(expression)
+                selector.settings_from_json(json_string, reset_first=True)
+                indexes = selector.get_selection()
 
             self.transmutate(indexes, element)
 

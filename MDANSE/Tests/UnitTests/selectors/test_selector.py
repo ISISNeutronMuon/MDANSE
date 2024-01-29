@@ -98,3 +98,33 @@ def test_selector_json_dump_and_load(protein_chemical_system):
     selector.settings_from_json(json_dump)
     atm_idxs = selector.get_selection()
     assert len(atm_idxs) == 30714 - 28746 - 10
+
+
+def test_selector_returns_correct_number_of_atoms_idxs_after_setting_settings_again_with_reset_first(protein_chemical_system):
+    selector = Selector(protein_chemical_system)
+    selector.update_settings(
+        {
+            "switch": {
+                "elements": -1,
+                "water": -1
+            },
+            "args": {
+                "elements": {"symbols": ["S"]}
+            }
+        }
+    )
+    atm_idxs = selector.get_selection()
+    assert len(atm_idxs) == 30714 - 28746 - 10
+
+    selector.update_settings(
+        {
+            "switch": {
+                "elements": -1,
+            },
+            "args": {
+                "elements": {"symbols": ["S"]}
+            }
+        }, reset_first=True
+    )
+    atm_idxs = selector.get_selection()
+    assert len(atm_idxs) == 30714 - 10

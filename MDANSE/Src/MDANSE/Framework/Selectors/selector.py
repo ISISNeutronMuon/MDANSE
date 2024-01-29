@@ -1,4 +1,5 @@
 import json
+import copy
 from typing import Literal
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.all_selector import select_all
@@ -8,6 +9,37 @@ from MDANSE.Framework.Selectors.molecule_selectors import *
 
 
 class Selector:
+
+    # should not be changed
+    _default = {
+        # -1 remove atoms, +1 selects atoms, 0 skip
+        "switch": {
+            "all": 1,
+            "elements": 0,
+            "hs_on_heteroatom": 0,
+            "hs_on_elements": 0,
+            "primary_amine": 0,
+            "hydroxy": 0,
+            "methly": 0,
+            "phosphate": 0,
+            "sulphate": 0,
+            "thiol": 0,
+            "water": 0
+        },
+        "args": {
+            "all": {},
+            "elements": {"symbols": []},
+            "hs_on_heteroatom": {},
+            "hs_on_elements": {"symbols": []},
+            "primary_amine": {},
+            "hydroxy": {},
+            "methly": {},
+            "phosphate": {},
+            "sulphate": {},
+            "thiol": {},
+            "water": {},
+        }
+    }
 
     def __init__(self, system: ChemicalSystem):
         self.system = system
@@ -40,37 +72,15 @@ class Selector:
             "water": select_water
         }
 
-        self.settings = {
-            # -1 remove atoms, +1 selects atoms, 0 skip
-            "switch": {
-                "all": 1,
-                "elements": 0,
-                "hs_on_heteroatom": 0,
-                "hs_on_elements": 0,
-                "primary_amine": 0,
-                "hydroxy": 0,
-                "methly": 0,
-                "phosphate": 0,
-                "sulphate": 0,
-                "thiol": 0,
-                "water": 0
-            },
-            "args": {
-                "all": {},
-                "elements": {"symbols": []},
-                "hs_on_heteroatom": {},
-                "hs_on_elements": {"symbols": []},
-                "primary_amine": {},
-                "hydroxy": {},
-                "methly": {},
-                "phosphate": {},
-                "sulphate": {},
-                "thiol": {},
-                "water": {},
-            }
-        }
+        self.settings = copy.deepcopy(self._default)
 
-    def update_settings(self, settings: dict[Literal["switch", "args"], dict]) -> None:
+    def reset_settings(self):
+        self.settings = copy.deepcopy(self._default)
+
+    def update_settings(self, settings: dict[Literal["switch", "args"], dict], reset_first=False) -> None:
+        if reset_first:
+            self.reset_settings()
+
         for k_0, v_0 in settings.items():
             for k_1, v_1 in v_0.items():
                 if k_0 == "switch":
@@ -102,5 +112,5 @@ class Selector:
     def settings_to_json(self):
         return json.dumps(self.settings)
 
-    def settings_from_json(self, json_string):
-        self.update_settings(json.loads(json_string))
+    def settings_from_json(self, json_string, reset_first=False):
+        self.update_settings(json.loads(json_string), reset_first)
