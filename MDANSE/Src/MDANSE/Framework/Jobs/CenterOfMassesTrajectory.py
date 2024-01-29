@@ -67,8 +67,8 @@ class CenterOfMassesTrajectory(IJob):
         },
     )
     settings["output_file"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDTFormat"]},
+        "OutputTrajectoryConfigurator",
+        {"format": "MDTFormat"},
     )
 
     def initialize(self):

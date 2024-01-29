@@ -69,6 +69,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.PyQtGUI.InputWidgets
     "QVectorsConfigurator": QVectorsWidget,
     "InputDirectoryConfigurator": InputDirectoryWidget,
     "OutputDirectoryConfigurator": OutputDirectoryWidget,
+    "OutputTrajectoryConfigurator": OutputTrajectoryWidget,
     "ProjectionConfigurator": ProjectionWidget,
     "AtomSelectionConfigurator": AtomSelectionWidget,
     "AtomTransmutationConfigurator": AtomTransmutationWidget,

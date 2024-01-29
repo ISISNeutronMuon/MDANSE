@@ -389,7 +389,7 @@ class DL_POLY(Converter):
     )
     # settings['output_files'] = ('output_files', {'formats':["HDFFormat"]})
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
+        "OutputTrajectoryConfigurator",
         {
             "format": "MDTFormat",
             "root": "history_file",

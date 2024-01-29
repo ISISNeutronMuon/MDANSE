@@ -52,8 +52,8 @@ class MoleculeFinder(IJob):
         {"dependencies": {"trajectory": "trajectory"}, "default": (0, -1, 1)},
     )
     settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDTFormat"]},
+        "OutputTrajectoryConfigurator",
+        {"format": "MDTFormat"},
     )
 
     def initialize(self):

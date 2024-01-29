@@ -302,7 +302,7 @@ class DCD(Converter):
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
+        "OutputTrajectoryConfigurator",
         {
             "format": "MDTFormat",
             "root": "pdb_file",

@@ -68,7 +68,7 @@ class FloatWidget(WidgetBase):
 
     @Slot(str)
     def newText(self, text: str):
-        self._value = int(text)
+        self._value = float(text)
         self.updateValue()
 
     @Slot(float)

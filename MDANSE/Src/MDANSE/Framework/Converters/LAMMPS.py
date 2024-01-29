@@ -198,7 +198,7 @@ class LAMMPS(Converter):
         {"default": False, "label": "Fold coordinates in to box"},
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
+        "OutputTrajectoryConfigurator",
         {
             "format": "MDTFormat",
             "root": "config_file",

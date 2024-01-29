@@ -244,7 +244,7 @@ class CP2K(Converter):
         },
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
+        "OutputTrajectoryConfigurator",
         {
             "format": "MDTFormat",
             "root": "xdatcar_file",

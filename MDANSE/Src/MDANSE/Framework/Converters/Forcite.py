@@ -298,7 +298,7 @@ class Forcite(Converter):
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
+        "OutputTrajectoryConfigurator",
         {
             "format": "MDTFormat",
             "root": "xtd_file",

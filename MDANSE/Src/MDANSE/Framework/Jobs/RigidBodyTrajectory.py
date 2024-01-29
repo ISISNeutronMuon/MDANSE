@@ -66,7 +66,7 @@ class RigidBodyTrajectory(IJob):
     )
     settings["reference"] = ("IntegerConfigurator", {"mini": 0})
     settings["remove_translation"] = ("BooleanConfigurator", {"default": False})
-    settings["output_files"] = ("OutputFilesConfigurator", {"formats": ["MDTFormat"]})
+    settings["output_files"] = ("OutputTrajectoryConfigurator", {"format": "MDTFormat"})
 
     def initialize(self):
         """ """

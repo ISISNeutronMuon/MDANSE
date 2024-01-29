@@ -71,8 +71,8 @@ class GlobalMotionFilteredTrajectory(IJob):
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["output_file"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDTFormat"]},
+        "OutputTrajectoryConfigurator",
+        {"format": "MDTFormat"},
     )
 
     def initialize(self):
