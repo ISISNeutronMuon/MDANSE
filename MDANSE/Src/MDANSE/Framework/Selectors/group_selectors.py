@@ -1,6 +1,16 @@
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 
 
+__all__ = [
+    "select_primary_amine",
+    "select_hydroxy",
+    "select_methly",
+    "select_phosphate",
+    "select_sulphate",
+    "select_thiol",
+]
+
+
 def select_primary_amine(system: ChemicalSystem) -> set[int]:
     """Selects the N and H atoms of all primary amines.
 

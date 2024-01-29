@@ -1,6 +1,11 @@
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 
 
+__all__ = [
+    "select_water",
+]
+
+
 def select_water(system: ChemicalSystem) -> set[int]:
     """Selects the O and H atoms of all water molecules.
 

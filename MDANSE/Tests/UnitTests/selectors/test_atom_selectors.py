@@ -2,10 +2,9 @@ import os
 import pytest
 from MDANSE.IO.PDBReader import PDBReader
 from MDANSE.Framework.Selectors.atom_selectors import (
-    select_element,
     select_elements,
-    select_hs_on_element,
     select_hs_on_heteroatom,
+    select_hs_on_elements
 )
 
 
@@ -22,10 +21,10 @@ def protein_chemical_system():
 def test_select_element_returns_correct_number_of_atoms_matches(
     protein_chemical_system,
 ):
-    selection = select_element(protein_chemical_system, "S")
+    selection = select_elements(protein_chemical_system, ["S"])
     assert len(selection) == 10
 
-    selection = select_element(protein_chemical_system, "*")
+    selection = select_elements(protein_chemical_system, ["*"])
     assert len(selection) == 30714
 
 
@@ -42,28 +41,28 @@ def test_select_elements_returns_correct_number_of_atoms_matches(
 def test_select_hs_on_carbon_returns_correct_number_of_atoms_matches(
     protein_chemical_system,
 ):
-    selection = select_hs_on_element(protein_chemical_system, "C")
+    selection = select_hs_on_elements(protein_chemical_system, ["C"])
     assert len(selection) == 696
 
 
 def test_select_hs_on_nitrogen_returns_correct_number_of_atoms_matches(
     protein_chemical_system,
 ):
-    selection = select_hs_on_element(protein_chemical_system, "N")
+    selection = select_hs_on_elements(protein_chemical_system, ["N"])
     assert len(selection) == 243
 
 
 def test_select_hs_on_oxygen_returns_correct_number_of_atoms_matches(
     protein_chemical_system,
 ):
-    selection = select_hs_on_element(protein_chemical_system, "O")
+    selection = select_hs_on_elements(protein_chemical_system, ["O"])
     assert len(selection) == 19184
 
 
 def test_select_hs_on_sulfur_returns_correct_number_of_atoms_matches(
     protein_chemical_system,
 ):
-    selection = select_hs_on_element(protein_chemical_system, "S")
+    selection = select_hs_on_elements(protein_chemical_system, ["S"])
     assert len(selection) == 0
 
 

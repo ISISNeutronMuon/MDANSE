@@ -2,22 +2,11 @@ from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Chemistry import ATOMS_DATABASE
 
 
-def select_element(system: ChemicalSystem, symbol: str) -> set[int]:
-    """Selects all atoms for the input element.
-
-    Parameters
-    ----------
-    system : ChemicalSystem
-        The MDANSE chemical system.
-    symbol : str
-        The symbol of the element.
-
-    Returns
-    -------
-    set[int]
-        The atom indices of the matched atoms.
-    """
-    return select_elements(system, [symbol])
+__all__ = [
+    "select_elements",
+    "select_hs_on_elements",
+    "select_hs_on_heteroatom",
+]
 
 
 def select_elements(system: ChemicalSystem, symbols: list[str]) -> set[int]:
@@ -42,24 +31,6 @@ def select_elements(system: ChemicalSystem, symbols: list[str]) -> set[int]:
     for symbol in symbols:
         patterns.append(f"[#{ATOMS_DATABASE[symbol]['atomic_number']}]")
     return system.get_substructure_matches(patterns)
-
-
-def select_hs_on_element(system: ChemicalSystem, symbol: str) -> set[int]:
-    """Selects all H atoms bonded to the input element.
-
-    Parameters
-    ----------
-    system : ChemicalSystem
-        The MDANSE chemical system.
-    symbol : str
-        The symbol of the element that the H atoms are bonded to.
-
-    Returns
-    -------
-    set[int]
-        The atom indices of the matched atoms.
-    """
-    return select_hs_on_elements(system, [symbol])
 
 
 def select_hs_on_elements(system: ChemicalSystem, symbols: list[str]) -> set[int]:
