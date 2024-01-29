@@ -1,3 +1,4 @@
+import json
 from typing import Literal
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.Selectors.all_selector import select_all
@@ -97,3 +98,9 @@ class Selector:
                 idxs = idxs | self._idxs[selection]
 
         return idxs
+
+    def settings_to_json(self):
+        return json.dumps(self.settings)
+
+    def settings_from_json(self, json_string):
+        self.update_settings(json.loads(json_string))
