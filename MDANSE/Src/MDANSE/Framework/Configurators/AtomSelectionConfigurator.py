@@ -71,7 +71,9 @@ class AtomSelectionConfigurator(IConfigurator):
         indexes = set()
 
         for json_string in value:
-            if UD_STORE.has_definition(trajConfig["basename"], "atom_selection", json_string):
+            if UD_STORE.has_definition(
+                trajConfig["basename"], "atom_selection", json_string
+            ):
                 ud = UD_STORE.get_definition(
                     trajConfig["basename"], "atom_selection", json_string
                 )

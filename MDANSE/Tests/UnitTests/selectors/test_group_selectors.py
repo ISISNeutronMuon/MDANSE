@@ -11,8 +11,12 @@ from MDANSE.Framework.Selectors.group_selectors import (
 )
 
 
-pbd_2vb1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "Data", "2vb1.pdb")
-pbd_1gip = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "Data", "1gip.pdb")
+pbd_2vb1 = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "..", "Data", "2vb1.pdb"
+)
+pbd_1gip = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "..", "Data", "1gip.pdb"
+)
 
 
 @pytest.fixture(scope="module")

@@ -4,11 +4,13 @@ from MDANSE.IO.PDBReader import PDBReader
 from MDANSE.Framework.Selectors.atom_selectors import (
     select_elements,
     select_hs_on_heteroatom,
-    select_hs_on_elements
+    select_hs_on_elements,
 )
 
 
-pbd_2vb1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "Data", "2vb1.pdb")
+pbd_2vb1 = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "..", "Data", "2vb1.pdb"
+)
 
 
 @pytest.fixture(scope="module")

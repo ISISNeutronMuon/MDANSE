@@ -4,7 +4,9 @@ from MDANSE.IO.PDBReader import PDBReader
 from MDANSE.Framework.Selectors.all_selector import select_all
 
 
-pbd_2vb1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "Data", "2vb1.pdb")
+pbd_2vb1 = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "..", "Data", "2vb1.pdb"
+)
 
 
 @pytest.fixture(scope="module")

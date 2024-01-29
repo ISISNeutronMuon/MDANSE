@@ -9,7 +9,6 @@ from MDANSE.Framework.Selectors.molecule_selectors import *
 
 
 class Selector:
-
     # should not be changed
     _default = {
         # -1 remove atoms, +1 selects atoms, 0 skip
@@ -24,7 +23,7 @@ class Selector:
             "phosphate": 0,
             "sulphate": 0,
             "thiol": 0,
-            "water": 0
+            "water": 0,
         },
         "args": {
             "all": {},
@@ -38,7 +37,7 @@ class Selector:
             "sulphate": {},
             "thiol": {},
             "water": {},
-        }
+        },
     }
 
     def __init__(self, system: ChemicalSystem):
@@ -69,7 +68,7 @@ class Selector:
             "phosphate": select_phosphate,
             "sulphate": select_sulphate,
             "thiol": select_thiol,
-            "water": select_water
+            "water": select_water,
         }
 
         self.settings = copy.deepcopy(self._default)
@@ -77,7 +76,9 @@ class Selector:
     def reset_settings(self):
         self.settings = copy.deepcopy(self._default)
 
-    def update_settings(self, settings: dict[Literal["switch", "args"], dict], reset_first=False) -> None:
+    def update_settings(
+        self, settings: dict[Literal["switch", "args"], dict], reset_first=False
+    ) -> None:
         if reset_first:
             self.reset_settings()
 
@@ -93,14 +94,12 @@ class Selector:
         idxs = set()
 
         for selection, switch in self.settings["switch"].items():
-
             if switch == 0:
                 continue
 
             if self._idxs[selection] is None:
                 kwargs = self.settings["args"][selection]
-                self._idxs[selection] \
-                    = self._funcs[selection](self.system, **kwargs)
+                self._idxs[selection] = self._funcs[selection](self.system, **kwargs)
 
             if switch == -1:
                 idxs = idxs - self._idxs[selection]
