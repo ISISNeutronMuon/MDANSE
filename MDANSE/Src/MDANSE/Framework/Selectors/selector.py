@@ -43,20 +43,6 @@ class Selector:
     def __init__(self, system: ChemicalSystem):
         self.system = system
 
-        self._idxs = {
-            "all": None,
-            "elements": None,
-            "hs_on_heteroatom": None,
-            "hs_on_elements": None,
-            "primary_amine": None,
-            "hydroxy": None,
-            "methly": None,
-            "phosphate": None,
-            "sulphate": None,
-            "thiol": None,
-            "water": None,
-        }
-
         self._funcs = {
             "all": select_all,
             "elements": select_elements,
@@ -97,14 +83,11 @@ class Selector:
             if switch == 0:
                 continue
 
-            if self._idxs[selection] is None:
-                kwargs = self.settings["args"][selection]
-                self._idxs[selection] = self._funcs[selection](self.system, **kwargs)
-
+            kwargs = self.settings["args"][selection]
             if switch == -1:
-                idxs = idxs - self._idxs[selection]
+                idxs = idxs - self._funcs[selection](self.system, **kwargs)
             elif switch == 1:
-                idxs = idxs | self._idxs[selection]
+                idxs = idxs | self._funcs[selection](self.system, **kwargs)
 
         return idxs
 

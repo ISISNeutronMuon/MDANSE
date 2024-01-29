@@ -128,3 +128,26 @@ def test_selector_returns_correct_number_of_atoms_idxs_after_setting_settings_ag
     )
     atm_idxs = selector.get_selection()
     assert len(atm_idxs) == 30714 - 10
+
+
+def test_selector_returns_correct_number_of_atoms_idxs_when_sulfurs_and_then_all_atoms_are_removed(
+    protein_chemical_system,
+):
+    selector = Selector(protein_chemical_system)
+    selector.update_settings(
+        {
+            "switch": {"elements": -1},
+            "args": {"elements": {"symbols": ["S"]}},
+        }
+    )
+    atm_idxs = selector.get_selection()
+    assert len(atm_idxs) == 30714 - 10
+
+    selector.update_settings(
+        {
+            "switch": {"elements": -1},
+            "args": {"elements": {"symbols": ["S", "*"]}},
+        }
+    )
+    atm_idxs = selector.get_selection()
+    assert len(atm_idxs) == 0
