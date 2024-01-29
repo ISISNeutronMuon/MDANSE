@@ -32,7 +32,7 @@ class SelectionDialog(QDialog):
 class AtomSelectionWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        default_value = "{all: 1}"
+        default_value = "{}"
         self._value = default_value
         self.field = QLineEdit(default_value, self._base)
         browse_button = QPushButton("Atom selection creator", self._base)

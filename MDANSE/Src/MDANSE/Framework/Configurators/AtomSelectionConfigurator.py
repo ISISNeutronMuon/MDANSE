@@ -43,7 +43,7 @@ class AtomSelectionConfigurator(IConfigurator):
     :note: this configurator depends on :py:class:`~MDANSE.Framework.Configurators.HDFTrajectoryConfigurator.HDFTrajectoryConfigurator` and :py:class:`~MDANSE.Framework.Configurators.GroupingLevelConfigurator.GroupingLevelConfigurator` configurators to be configured
     """
 
-    _default = "{all: 1}"
+    _default = "{}"
 
     def configure(self, value):
         """
@@ -58,30 +58,26 @@ class AtomSelectionConfigurator(IConfigurator):
         trajConfig = self._configurable[self._dependencies["trajectory"]]
 
         if value is None:
-            value = [self._default]
+            value = self._default
 
-        if isinstance(value, str):
-            value = [value]
-
-        if not isinstance(value, (list, tuple)):
+        if not isinstance(value, str):
             raise ConfiguratorError("Invalid input value.")
 
         self["value"] = value
 
         indexes = set()
 
-        for json_string in value:
-            if UD_STORE.has_definition(
-                trajConfig["basename"], "atom_selection", json_string
-            ):
-                ud = UD_STORE.get_definition(
-                    trajConfig["basename"], "atom_selection", json_string
-                )
-                indexes.update(ud["indexes"])
-            else:
-                selector = Selector(trajConfig["instance"].chemical_system)
-                selector.settings_from_json(json_string)
-                indexes = selector.get_selection()
+        if UD_STORE.has_definition(
+            trajConfig["basename"], "atom_selection", value
+        ):
+            ud = UD_STORE.get_definition(
+                trajConfig["basename"], "atom_selection", value
+            )
+            indexes.update(ud["indexes"])
+        else:
+            selector = Selector(trajConfig["instance"].chemical_system)
+            selector.settings_from_json(value)
+            indexes = selector.get_selection()
 
         self["flatten_indexes"] = sorted(list(indexes))
 
