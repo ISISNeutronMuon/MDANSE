@@ -51,7 +51,7 @@ class MoleculeFinder(IJob):
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}, "default": (0, -1, 1)},
     )
-    settings["output_files"] = (
+    settings["output_file"] = (
         "OutputTrajectoryConfigurator",
         {"format": "MDTFormat"},
     )
@@ -77,7 +77,7 @@ class MoleculeFinder(IJob):
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_files"]["files"][0],
+            self.configuration["output_file"]["file"],
             chemical_system,
             self.numberOfSteps,
             positions_dtype=self.configuration["output_file"]["dtype"],

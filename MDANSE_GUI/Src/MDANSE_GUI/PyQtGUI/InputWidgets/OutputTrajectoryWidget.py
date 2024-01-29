@@ -18,9 +18,8 @@ import itertools
 import os
 import os.path
 
-from qtpy.QtWidgets import QComboBox, QLabel, QLineEdit, QPushButton, QFileDialog
+from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton, QFileDialog
 from qtpy.QtCore import Qt, Slot
-from qtpy.QtGui import QStandardItemModel, QStandardItem
 
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE_GUI.PyQtGUI.InputWidgets.WidgetBase import WidgetBase
@@ -47,10 +46,10 @@ class OutputTrajectoryWidget(WidgetBase):
         self.field = QLineEdit(default_value[0], self._base)
         self.dtype_box = QComboBox(self._base)
         self.dtype_box.addItems(["float16", "float32", "float64", "float128"])
-        self.dtype_box.set_default("float64")
+        self.dtype_box.setCurrentText("float64")
         self.compression_box = QComboBox(self._base)
         self.compression_box.addItems(["none"] + TrajectoryWriter.allowed_compression)
-        self.compression_box.set_default("lza")
+        self.compression_box.setCurrentText("lzf")
         # self.type_box.setCurrentText(default_value[1])
         browse_button = QPushButton("Browse", self._base)
         browse_button.clicked.connect(self.file_dialog)

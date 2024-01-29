@@ -38,7 +38,7 @@ class OutputTrajectoryConfigurator(IConfigurator):
     conversion, you must inherit from the MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
 
-    _default = ("OUTPUT_TRAJECTORY", "MDTFormat")
+    _default = ("OUTPUT_TRAJECTORY", 64, "none")
 
     def __init__(self, name, format=None, **kwargs):
         """
@@ -52,7 +52,7 @@ class OutputTrajectoryConfigurator(IConfigurator):
 
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._format = OutputTrajectoryConfigurator._default[-1]
+        self._format = "MDTFormat"
         self._dtype = np.float64
         self._compression = "none"
 

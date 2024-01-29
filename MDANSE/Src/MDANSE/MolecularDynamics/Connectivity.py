@@ -20,7 +20,7 @@ from numpy.typing import NDArray
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class Connectivity:
@@ -28,9 +28,9 @@ class Connectivity:
     and identifies potential molecules based on distances alone.
     """
 
-    def __init__(self, *args, trajectory: HDFTrajectoryInputData = None, **kwargs):
+    def __init__(self, *args, trajectory: Trajectory = None, **kwargs):
         self._chemical_system = trajectory.chemical_system
-        self._frames = trajectory.trajectory
+        self._frames = trajectory
         self._unit_cell = self._chemical_system.configuration
         self._periodic = self._chemical_system.configuration.is_periodic
         self.check_composition(self._chemical_system)

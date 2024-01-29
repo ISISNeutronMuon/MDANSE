@@ -42,9 +42,6 @@ class StringWidget(WidgetBase):
         if self._tooltip == "":
             self._tooltip = "A text string variable. Do you know what to type in?"
 
-    @Slot()
-    def updateValue(self):
-        self._configurator.configure(self._field.text())
-
-    def get_value(self):
-        return self._configurator["value"]
+    def get_widget_value(self):
+        """Collect the results from the input widgets and return the value."""
+        return self._field.text()
