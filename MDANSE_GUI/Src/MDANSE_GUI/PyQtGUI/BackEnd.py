@@ -32,7 +32,6 @@ from MDANSE.Framework.InputData.IInputData import IInputData
 from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 from MDANSE.Framework.Projectors.IProjector import IProjector
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
-from MDANSE.Framework.Selectors.ISelector import ISelector
 
 
 from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeModel
@@ -93,7 +92,6 @@ class BackEnd(QObject):
                 IOutputVariable,
                 IProjector,
                 IQVectors,
-                ISelector,
             ]
         )
         # self.data_holders['actions'] = self.trajectory_holder

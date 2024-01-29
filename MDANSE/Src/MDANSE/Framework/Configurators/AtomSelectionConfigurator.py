@@ -43,7 +43,7 @@ class AtomSelectionConfigurator(IConfigurator):
     :note: this configurator depends on :py:class:`~MDANSE.Framework.Configurators.HDFTrajectoryConfigurator.HDFTrajectoryConfigurator` and :py:class:`~MDANSE.Framework.Configurators.GroupingLevelConfigurator.GroupingLevelConfigurator` configurators to be configured
     """
 
-    _default = "{}"
+    _default = "{all: 1}"
 
     def configure(self, value):
         """
