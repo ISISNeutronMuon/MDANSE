@@ -139,6 +139,8 @@ class RigidBodyTrajectory(IJob):
             trajectory.chemical_system,
             self.configuration["frames"]["number"],
             selectedAtoms,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
         self._group_atoms = [group.atom_list for group in self._groups]

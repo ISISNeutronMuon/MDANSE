@@ -127,7 +127,8 @@ class Gromacs(Converter):
             self.configuration["output_file"]["file"],
             chemical_system,
             self.numberOfSteps,
-            positions_dtype=np.float32,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
     def run_step(self, index):

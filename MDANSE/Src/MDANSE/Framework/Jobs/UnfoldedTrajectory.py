@@ -76,6 +76,8 @@ class UnfoldedTrajectory(IJob):
             self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
             self._selectedAtoms,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
     def run_step(self, index):

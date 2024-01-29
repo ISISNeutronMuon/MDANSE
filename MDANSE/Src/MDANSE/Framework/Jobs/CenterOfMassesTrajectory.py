@@ -88,6 +88,8 @@ class CenterOfMassesTrajectory(IJob):
             self.configuration["output_file"]["files"][0],
             chemical_system,
             self.numberOfSteps,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
         self._grouped_atoms = group_atoms(

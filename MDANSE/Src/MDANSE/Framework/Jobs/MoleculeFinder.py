@@ -80,6 +80,8 @@ class MoleculeFinder(IJob):
             self.configuration["output_files"]["files"][0],
             chemical_system,
             self.numberOfSteps,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
     def run_step(self, index):

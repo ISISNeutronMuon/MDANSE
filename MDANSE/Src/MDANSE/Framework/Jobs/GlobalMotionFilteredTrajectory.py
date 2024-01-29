@@ -103,6 +103,8 @@ class GlobalMotionFilteredTrajectory(IJob):
             self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
             self._selected_atoms.atom_list,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
         # This will store the configuration used as the reference for the following step.

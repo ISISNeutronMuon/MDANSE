@@ -28,7 +28,7 @@ def test_lammps_mdt_conversion_file_exists_and_loads_up_successfully():
     parameters["config_file"] = lammps_config
     parameters["mass_tolerance"] = 0.05
     parameters["n_steps"] = 0
-    parameters["output_file"] = (temp_name, "MDTFormat")
+    parameters["output_file"] = (temp_name, 64, 'lza')
     parameters["smart_mass_association"] = True
     parameters["time_step"] = 1.0
     parameters["trajectory_file"] = lammps_lammps
@@ -65,7 +65,7 @@ def test_vasp_mdt_conversion_file_exists_and_loads_up_successfully():
 
     parameters = {
         "fold": False,
-        "output_file": (temp_name, "MDTFormat"),
+        "output_file": (temp_name, 64, 'lza'),
         "time_step": 1.0,
         "xdatcar_file": vasp_xdatcar,
     }
@@ -85,7 +85,7 @@ def test_discover_mdt_conversion_file_exists_and_loads_up_successfully():
     parameters = {
         "fold": True,
         "his_file": discover_his,
-        "output_file": (temp_name, "MDTFormat"),
+        "output_file": (temp_name, 64, 'lza'),
         "xtd_file": discover_xtd,
     }
 
@@ -105,7 +105,7 @@ def test_charmm_mdt_conversion_file_exists_and_loads_up_successfully():
     parameters = {
         "dcd_file": hem_cam_dcd,
         "fold": False,
-        "output_file": (temp_name, "MDTFormat"),
+        "output_file": (temp_name, 64, 'lza'),
         "pdb_file": hem_cam_pdb,
         "time_step": 1.0,
     }
@@ -126,7 +126,7 @@ def test_ase_mdt_conversion_file_exists_and_loads_up_successfully():
     parameters = {
         "trajectory_file": ase_traj,
         "fold": False,
-        "output_file": (temp_name, "MDTFormat"),
+        "output_file": (temp_name, 64, 'lza'),
         "n_steps": 0,
         "time_step": 50.0,
         "time_unit": "fs",
@@ -142,7 +142,7 @@ def test_xyz_mdt_conversion_file_exists_and_loads_up_successfully():
     parameters = {
         "trajectory_file": xyz_traj,
         "fold": False,
-        "output_file": (temp_name, "MDTFormat"),
+        "output_file": (temp_name, 64, 'lza'),
         "n_steps": 0,
         "time_step": 50.0,
         "time_unit": "fs",
