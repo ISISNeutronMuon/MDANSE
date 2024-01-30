@@ -1,4 +1,3 @@
-
 import pytest
 import tempfile
 
@@ -8,18 +7,19 @@ from MDANSE_GUI.PyQtGUI.MolecularViewer.ColourManager import ColourManager, RGB_
 from MDANSE_GUI.PyQtGUI.MolecularViewer.database import CHEMICAL_ELEMENTS
 
 
-@pytest.fixture(scope='function', params=[None, RGB_COLOURS])
+@pytest.fixture(scope="function", params=[None, RGB_COLOURS])
 def colour_manager(request):
-    temp = ColourManager(init_colours = request.param)
+    temp = ColourManager(init_colours=request.param)
     yield temp
     temp.clear_table()
 
+
 def test_ColourList(colour_manager: ColourManager):
     lut_size = colour_manager._lut.GetSize()
-    assert(lut_size==2)  # we initialised with 2 colours
-    indices = colour_manager.initialise_from_database(['O', 'C', 'Fe'], CHEMICAL_ELEMENTS)
-    assert(np.all(np.array(indices) == [2,3,4]))
+    assert lut_size == 2  # we initialised with 2 colours
+    indices = colour_manager.initialise_from_database(
+        ["O", "C", "Fe"], CHEMICAL_ELEMENTS
+    )
+    assert np.all(np.array(indices) == [2, 3, 4])
     lut_size = colour_manager._lut.GetSize()
-    assert(lut_size==5)  # we added 3 colours, so it should be 5 now.
-
-
+    assert lut_size == 5  # we added 3 colours, so it should be 5 now.

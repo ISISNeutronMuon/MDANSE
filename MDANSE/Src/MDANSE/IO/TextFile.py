@@ -25,7 +25,6 @@ except:
 
 
 class TextFile:
-
     """
     Text files with line iteration and transparent compression
 

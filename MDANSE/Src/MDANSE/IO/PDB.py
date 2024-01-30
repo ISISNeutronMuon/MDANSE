@@ -100,7 +100,6 @@ generic_format = FortranFormat("A6,A74")
 # for everything.
 #
 class PDBFile:
-
     """
     X{PDB} file with access at the record level
 
@@ -551,7 +550,6 @@ class PDBFile:
 # Representation of objects.
 #
 class PDBAtom:
-
     """
     Atom in a PDB structure
     """
@@ -638,7 +636,6 @@ class PDBAtom:
 
 
 class PDBHetAtom(PDBAtom):
-
     """
     HetAtom in a PDB structure
 
@@ -651,7 +648,6 @@ class PDBHetAtom(PDBAtom):
 
 
 class PDBGroup:
-
     """
     Atom group (residue or molecule) in a PDB file
 
@@ -771,7 +767,6 @@ class PDBGroup:
 
 
 class PDBMolecule(PDBGroup):
-
     """
     Molecule in a PDB file
 
@@ -789,7 +784,6 @@ class PDBResidue(PDBGroup):
 
 
 class PDBAminoAcidResidue(PDBResidue):
-
     """
     Amino acid residue in a PDB file
     """
@@ -850,7 +844,6 @@ class PDBAminoAcidResidue(PDBResidue):
 
 
 class PDBNucleotideResidue(PDBResidue):
-
     """
     Nucleotide residue in a PDB file
     """
@@ -922,7 +915,6 @@ class PDBNucleotideResidue(PDBResidue):
 
 
 class PDBChain:
-
     """Chain of PDB residues
 
     This is an abstract base class. Instances can be created using
@@ -1035,7 +1027,6 @@ class PDBChain:
 
 
 class PDBPeptideChain(PDBChain):
-
     """
     Peptide chain in a PDB file
     """
@@ -1056,7 +1047,6 @@ class PDBPeptideChain(PDBChain):
 
 
 class PDBNucleotideChain(PDBChain):
-
     """
     Nucleotide chain in a PDB file
     """
@@ -1105,7 +1095,6 @@ class PDBDummyChain(PDBChain):
 # Residue number class for dealing with insertion codes
 #
 class ResidueNumber:
-
     """
     PDB residue number
 
@@ -1145,7 +1134,6 @@ class ResidueNumber:
 # The configuration class.
 #
 class Structure:
-
     """
     A high-level representation of the contents of a PDB file
 
