@@ -17,7 +17,7 @@ import sys
 
 
 def main():
-    from MDANSE_GUI.PyQtGUI.main import startGUI
+    from MDANSE_GUI.main import startGUI
 
     startGUI(sys.argv)
 
