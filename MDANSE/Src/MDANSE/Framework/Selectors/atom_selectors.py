@@ -6,6 +6,7 @@ __all__ = [
     "select_elements",
     "select_hs_on_elements",
     "select_hs_on_heteroatom",
+    "select_index",
 ]
 
 
@@ -75,3 +76,22 @@ def select_hs_on_heteroatom(system: ChemicalSystem) -> set[int]:
     xh_matches = system.get_substructure_matches(["[!#6&!#1]~[H]"])
     x_matches = system.get_substructure_matches(["[!#6&!#1]"])
     return xh_matches - x_matches
+
+
+def select_index(system: ChemicalSystem, index: int | str) -> set[int]:
+    """Selects atom with index - just returns the set with the
+    index in it.
+
+    Parameters
+    ----------
+    system : ChemicalSystem
+        The MDANSE chemical system.
+    index : int or str
+        The index to select.
+
+    Returns
+    -------
+    set[int]
+        The index in a set.
+    """
+    return {int(index)}

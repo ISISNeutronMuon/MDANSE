@@ -31,9 +31,11 @@ class FilterSelection:
         "sulphate": False,
         "thiol": False,
         "water": False,
-        # e.g. {"S": False}
+        # e.g. {"S": True}
         "elements": {},
         "hs_on_elements": {},
+        # e.g. {"1": True} or {1: True}
+        "index": {},
     }
 
     _funcs = {
@@ -48,11 +50,13 @@ class FilterSelection:
         "water": select_water,
         "elements": select_elements,
         "hs_on_elements": select_hs_on_elements,
+        "index": select_index,
     }
 
     _kwarg_keys = {
         "elements": "symbols",
         "hs_on_elements": "symbols",
+        "index": "index",
     }
 
     def __init__(self, system: ChemicalSystem) -> None:

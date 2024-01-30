@@ -110,6 +110,13 @@ def test_filter_json_dump_3(protein_chemical_system):
     assert json_dump == '{"water": true, "elements": {"S": true, "H": true}}'
 
 
+def test_filter_json_dump_4(protein_chemical_system):
+    filter = FilterSelection(protein_chemical_system)
+    filter.update_settings({"elements": {"S": True, "H": True}, "water": True, "index": {0: True, 1: True}})
+    json_dump = filter.settings_to_json()
+    assert json_dump == '{"water": true, "elements": {"S": true, "H": true}, "index": {"0": true, "1": true}}'
+
+
 def test_filter_json_dump_with_second_update(protein_chemical_system):
     filter = FilterSelection(protein_chemical_system)
     filter.update_settings({"elements": {"S": True}, "water": True})
@@ -137,7 +144,17 @@ def test_filter_json_dump_with_fourth_update(protein_chemical_system):
     assert json_dump == '{"elements": {"O": true}}'
 
 
-def test_filter_json_dump_and_load(protein_chemical_system):
+def test_filter_json_dump_and_load_0(protein_chemical_system):
+    filter = FilterSelection(protein_chemical_system)
+    filter.update_settings({"index": {0: True, "1": True}})
+    json_dump = filter.settings_to_json()
+    assert json_dump == '{"index": {"0": true, "1": true}}'
+    filter.settings_from_json(json_dump)
+    atm_idxs = filter.get_idxs()
+    assert len(atm_idxs) == 30714 - 2
+
+
+def test_filter_json_dump_and_load_1(protein_chemical_system):
     filter = FilterSelection(protein_chemical_system)
     filter.update_settings({"elements": {"S": True}, "water": True})
     json_dump = filter.settings_to_json()
@@ -184,3 +201,16 @@ def test_filter_returns_correct_number_of_atoms_idxs_when_sulfurs_and_then_all_a
     )
     atm_idxs = filter.get_idxs()
     assert len(atm_idxs) == 0
+
+
+def test_filter_returns_correct_number_of_atoms_idxs_when_indexes_0_and_1_are_removed(
+    protein_chemical_system,
+):
+    filter = FilterSelection(protein_chemical_system)
+    filter.update_settings(
+        {
+            "index": {0: True, 1: True},
+        }
+    )
+    atm_idxs = filter.get_idxs()
+    assert len(atm_idxs) == 30714 - 2
