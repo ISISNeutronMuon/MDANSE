@@ -16,7 +16,7 @@ class FilterSelection:
         The default settings.
     _funcs : dict[str, Callable]
         A dictionary of the filter functions.
-    kwarg_keys : dict[str, str]
+    _kwarg_keys : dict[str, str]
         A dictionary of the filter function arg keys.
     """
 
@@ -50,7 +50,7 @@ class FilterSelection:
         "hs_on_elements": select_hs_on_elements,
     }
 
-    kwarg_keys = {
+    _kwarg_keys = {
         "elements": "symbols",
         "hs_on_elements": "symbols",
     }
@@ -104,7 +104,7 @@ class FilterSelection:
 
         for k, v in self.settings.items():
             if isinstance(v, dict):
-                args = [{self.kwarg_keys[k]: i} for i in v.keys()]
+                args = [{self._kwarg_keys[k]: i} for i in v.keys()]
                 switches = v.values()
             else:
                 args = [{}]
