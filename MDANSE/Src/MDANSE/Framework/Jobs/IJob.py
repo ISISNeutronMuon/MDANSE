@@ -275,32 +275,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
         sys.setrecursionlimit(oldrecursionlimit)
 
     def _run_remote(self):
-        IJob.set_pyro_server()
-
-        import MDANSE.DistributedComputing.MasterSlave as MasterSlave
-
-        tasks = MasterSlave.initializeMasterProcess(
-            self._name, slave_module="MDANSE.DistributedComputing.Slave"
+        raise NotImplementedError(
+            "Currently there is no replacement for the old Pyro remote runs."
         )
-
-        tasks.setGlobalState(job=self)
-
-        if self._status is not None:
-            self._status.start(self.numberOfSteps, rate=0.1)
-
-        for index in range(self.numberOfSteps):
-            tasks.requestTask("run_step", MasterSlave.GlobalStateValue(1, "job"), index)
-
-        for index in range(self.numberOfSteps):
-            _, _, (idx, x) = tasks.retrieveResult("run_step")
-            self.combine(idx, x)
-
-        if self._status is not None:
-            if self._status.is_stopped():
-                self._status.cleanup()
-                return
-            else:
-                self._status.update()
 
     _runner = {
         "monoprocessor": _run_monoprocessor,

@@ -3,8 +3,8 @@ import tempfile
 
 import numpy as np
 
-from MDANSE_GUI.PyQtGUI.MolecularViewer.ColourManager import ColourManager, RGB_COLOURS
-from MDANSE_GUI.PyQtGUI.MolecularViewer.database import CHEMICAL_ELEMENTS
+from MDANSE_GUI.MolecularViewer.ColourManager import ColourManager, RGB_COLOURS
+from MDANSE_GUI.MolecularViewer.database import CHEMICAL_ELEMENTS
 
 
 @pytest.fixture(scope="function", params=[None, RGB_COLOURS])

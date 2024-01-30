@@ -21,20 +21,6 @@ from functools import reduce
 import numpy as np
 
 
-def pgcd(numbers: "list[int]"):
-    """Computes the Greatest Common Denominator
-    of an iterable (e.g. list) of integer numbers.
-
-    @param n: n.
-    @type: list of integers
-
-    @return: pgcd([i1,i2,i3...]).
-    @rtype: integer
-    """
-
-    return math.gcd(*numbers)  # this is valid since Python 3.9
-
-
 def get_weights(props, contents, dim):
     normFactor = None
 
@@ -81,11 +67,3 @@ def weight(props, values, contents, dim, key, symmetric=True):
             weightedSum += w * val
 
     return weightedSum
-
-
-class ComplexNumber(complex):
-    def argument(self):
-        return cmath.phase(self)
-
-    def modulus(self):
-        return np.abs(self)

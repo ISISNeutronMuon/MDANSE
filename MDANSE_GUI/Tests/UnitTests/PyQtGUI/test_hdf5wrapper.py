@@ -56,7 +56,7 @@ from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import Trajectory, TrajectoryWriter
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 
-from MDANSE_GUI.PyQtGUI.MolecularViewer.readers.hdf5wrapper import HDF5Wrapper
+from MDANSE_GUI.MolecularViewer.readers.hdf5wrapper import HDF5Wrapper
 
 N_ATOMS = 4
 N_TIMESTEPS = 150

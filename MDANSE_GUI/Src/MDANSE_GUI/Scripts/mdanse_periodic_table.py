@@ -15,7 +15,7 @@
 
 
 def main():
-    from MDANSE_GUI.PyQtGUI.PeriodicTableViewer import PeriodicTableViewer, QApplication
+    from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer, QApplication
     import sys
 
     app = QApplication(sys.argv)

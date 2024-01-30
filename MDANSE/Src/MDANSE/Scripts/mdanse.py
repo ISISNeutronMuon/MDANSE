@@ -21,7 +21,6 @@ import subprocess
 import sys
 import textwrap
 
-from MDANSE import LOGGER
 from MDANSE.Core.Error import Error
 from MDANSE import PLATFORM, REGISTRY
 from MDANSE.Framework.Handlers.IHandler import IHandler
@@ -95,14 +94,6 @@ class CommandLineParser(optparse.OptionParser):
 
     def __init__(self, *args, **kwargs):
         optparse.OptionParser.__init__(self, *args, **kwargs)
-
-        LOGGER.add_handler(
-            "terminal",
-            IHandler.create("ColorizingStreamHandler"),
-            level="info",
-            start=True,
-        )
-        LOGGER.start()
 
     def check_job(self, option, opt_str, value, parser):
         """Display the jobs list
@@ -378,7 +369,6 @@ class CommandLineParser(optparse.OptionParser):
         try:
             IJob.save_template(shortname, classname)
         except (IOError, KeyError) as e:
-            LOGGER(str(e), "error", ["console"])
             return
 
 
