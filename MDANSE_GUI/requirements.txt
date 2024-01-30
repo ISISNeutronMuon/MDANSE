@@ -2,3 +2,5 @@ MDANSE
 vtk
 qtpy
 PyYAML
+PyQt6
+netCDF4

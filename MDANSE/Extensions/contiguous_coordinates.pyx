@@ -92,33 +92,33 @@ def contiguous_coordinates_box(ndarray[np.float64_t, ndim=2]  coords not None,
 
     cdef double sdx, sdy, sdz, newx, newy, newz
 
-    cdef ndarray[np.float64_t, ndim=2] contiguous_coords = np.empty((coords.shape[0],3),dtype=np.float64)
+    cdef ndarray[np.float64_t, ndim=2] contiguous_coords = np.empty((coords.shape[0], 3), dtype=np.float64)
 
     for idxs in indexes:
-        contiguous_coords[idxs[0],0] = coords[idxs[0],0]
-        contiguous_coords[idxs[0],1] = coords[idxs[0],1]
-        contiguous_coords[idxs[0],2] = coords[idxs[0],2]
+        contiguous_coords[idxs[0], 0] = coords[idxs[0], 0]
+        contiguous_coords[idxs[0], 1] = coords[idxs[0], 1]
+        contiguous_coords[idxs[0], 2] = coords[idxs[0], 2]
 
         if len(idxs) == 1:
             continue
 
         for idx in idxs[1:]:
 
-            sdx = coords[idx,0] - coords[idxs[0],0]
-            sdy = coords[idx,1] - coords[idxs[0],1]
-            sdz = coords[idx,2] - coords[idxs[0],2]
+            sdx = coords[idx, 0] - coords[idxs[0], 0]
+            sdy = coords[idx, 1] - coords[idxs[0], 1]
+            sdz = coords[idx, 2] - coords[idxs[0], 2]
 
             sdx -= round(sdx)
             sdy -= round(sdy)
             sdz -= round(sdz)
 
-            newx = coords[idxs[0],0] + sdx
-            newy = coords[idxs[0],1] + sdy
-            newz = coords[idxs[0],2] + sdz
+            newx = coords[idxs[0], 0] + sdx
+            newy = coords[idxs[0], 1] + sdy
+            newz = coords[idxs[0], 2] + sdz
 
-            contiguous_coords[idx,0] = newx*cell[0,0] + newy*cell[0,1] + newz*cell[0,2]
-            contiguous_coords[idx,1] = newx*cell[1,0] + newy*cell[1,1] + newz*cell[1,2]
-            contiguous_coords[idx,2] = newx*cell[2,0] + newy*cell[2,1] + newz*cell[2,2]
+            contiguous_coords[idx, 0] = newx*cell[0, 0] + newy*cell[0, 1] + newz*cell[0, 2]
+            contiguous_coords[idx, 1] = newx*cell[1, 0] + newy*cell[1, 1] + newz*cell[1, 2]
+            contiguous_coords[idx, 2] = newx*cell[2, 0] + newy*cell[2, 1] + newz*cell[2, 2]
 
     return contiguous_coords
 
@@ -167,7 +167,7 @@ def contiguous_offsets_box(ndarray[np.float64_t, ndim=2]  coords not None,
 
     cdef double sdx, sdy, sdz
 
-    cdef ndarray[np.float64_t, ndim=2] offsets = np.zeros((coords.shape[0],3),dtype=np.float64)
+    cdef ndarray[np.float64_t, ndim=2] offsets = np.zeros((coords.shape[0], 3), dtype=np.float64)
 
     for idxs in indexes:
         if len(idxs) == 1:
@@ -175,13 +175,13 @@ def contiguous_offsets_box(ndarray[np.float64_t, ndim=2]  coords not None,
         
         for idx in idxs[1:]:
 
-            sdx = coords[idx,0] - coords[idxs[0],0]
-            sdy = coords[idx,1] - coords[idxs[0],1]
-            sdz = coords[idx,2] - coords[idxs[0],2]
+            sdx = coords[idx, 0] - coords[idxs[0], 0]
+            sdy = coords[idx, 1] - coords[idxs[0], 1]
+            sdz = coords[idx, 2] - coords[idxs[0], 2]
 
-            offsets[idx,0] = -round(sdx)
-            offsets[idx,1] = -round(sdy)
-            offsets[idx,2] = -round(sdz)
+            offsets[idx, 0] = -round(sdx)
+            offsets[idx, 1] = -round(sdy)
+            offsets[idx, 2] = -round(sdz)
 
     return offsets
 
@@ -262,17 +262,17 @@ def continuous_coordinates(
     sys.setrecursionlimit(100000)
 
     # Retrieve the top level chemical entities to which belong each of the selected atom
-    atoms = chemical_system.atom_list()
+    atoms = chemical_system.atom_list
     if selected_indexes is None:
         selected_indexes = [at.index for at in atoms]
 
-    chemical_entities = set([atoms[idx].top_level_chemical_entity() for idx in selected_indexes])
+    chemical_entities = set([atoms[idx].top_level_chemical_entity for idx in selected_indexes])
 
     # Set the bond network for these chemical entities
     bonds = {}
     chemical_entities_indexes = []
     for ce in chemical_entities:
-        for at in ce.atom_list():
+        for at in ce.atom_list:
             bonds[at.index] = [bat.index for bat in at.bonds]
             chemical_entities_indexes.append(at.index)
 

@@ -1,9 +1,10 @@
 numpy
 matplotlib
 h5py
-netCDF4
 sphinx
 icecream
 cython
 railroad-diagrams
 pyparsing
+rdkit
+ase

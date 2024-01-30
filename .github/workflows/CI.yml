@@ -10,7 +10,7 @@ jobs:
       matrix:
         os: ['ubuntu-20.04', 'ubuntu-22.04']
     if: |
-      !contains( github.ref, 'protos' )
+      contains( github.ref, 'legacy' )
 
     steps:
       - uses: actions/checkout@v2
@@ -49,14 +49,7 @@ jobs:
       matrix:
         os: ['ubuntu-20.04', 'ubuntu-22.04']
     if: |
-      contains( github.ref, 'main' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) ||
-      contains( github.ref, 'cicd' )
+      contains( github.ref, 'legacy' )
     steps:
       - uses: actions/checkout@v2
 
@@ -129,7 +122,7 @@ jobs:
     strategy:
       fail-fast: false
     if: |
-      !contains( github.ref, 'protos' )
+      contains( github.ref, 'legacy' )
     steps:
       - uses: actions/checkout@v2
 
@@ -189,24 +182,14 @@ jobs:
 
       - name: Tar python
         if: |
-          contains( github.ref, 'main' ) ||
-          contains( github.ref, 'develop' ) ||
-          contains( github.ref, 'release-' ) ||
-          contains( github.ref, 'hotfix-' ) ||
-          contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' )
+          contains( github.ref, 'legacy' )
         run: |
           cd $CONDA/envs
           tar -czf python.tar.gz mdanse
 
       - name: Upload artifacts
         if: |
-          contains( github.ref, 'main' ) ||
-          contains( github.ref, 'develop' ) ||
-          contains( github.ref, 'release-' ) ||
-          contains( github.ref, 'hotfix-' ) ||
-          contains( github.ref, 'build-' ) ||
-          contains( github.ref, 'tags' )
+          contains( github.ref, 'legacy' )
         uses: actions/upload-artifact@v2
         with:
           name: ubuntu-22.04_artifacts
@@ -219,12 +202,7 @@ jobs:
     strategy:
       fail-fast: false
     if: |
-      contains( github.ref, 'main' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' )
+      contains( github.ref, 'legacy' )
     steps:
       - uses: actions/checkout@v2
 
@@ -282,7 +260,7 @@ jobs:
   ci_osx:
     runs-on: ${{ matrix.os }}
     if: |
-      !contains( github.ref, 'protos' )
+      contains( github.ref, 'legacy' )
     strategy:
       fail-fast: false
       matrix:
@@ -324,14 +302,14 @@ jobs:
           python3 AllTests.py
 
       - name: Tar python
-        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, 'cicd' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'legacy' ) ) }}
         run: |
           cd $RUNNER_TOOL_CACHE/Python/3.9.13
           mv x64 Resources
           tar -czf python.tar.gz Resources
 
       - name: Upload artifacts
-        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'main' ) || contains( github.ref, 'develop' ) || contains( github.ref, 'release-' ) || contains( github.ref, 'hotfix-' ) || contains( github.ref, 'build-' ) || contains( github.ref, 'tags' ) || contains( github.ref, 'web' ) || contains( github.ref, 'cicd' ) ) }}
+        if: ${{ (matrix.os == 'macos-12') && ( contains( github.ref, 'legacy' ) ) }}
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_artifacts
@@ -343,14 +321,7 @@ jobs:
     needs: ci_osx
     runs-on: macos-12
     if: |
-      contains( github.ref, 'main' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) || 
-      contains( github.ref, 'cicd' )
+      contains( github.ref, 'legacy' )
     steps:
       - uses: actions/checkout@v2
 
@@ -402,7 +373,7 @@ jobs:
   ci_windows:
     runs-on: windows-latest
     if: |
-      !contains( github.ref, 'protos' )
+      contains( github.ref, 'legacy' )
     steps:
       - uses: actions/checkout@v2
 
@@ -441,14 +412,7 @@ jobs:
     runs-on: windows-latest
     needs: ci_windows
     if: |
-      contains( github.ref, 'main' ) ||
-      contains( github.ref, 'develop' ) ||
-      contains( github.ref, 'release-' ) ||
-      contains( github.ref, 'hotfix-' ) ||
-      contains( github.ref, 'build-' ) ||
-      contains( github.ref, 'tags' ) ||
-      contains( github.ref, 'web' ) ||
-      contains( github.ref, 'cicd' )
+      contains( github.ref, 'legacy' )
     steps:
       - uses: actions/checkout@v2
 
