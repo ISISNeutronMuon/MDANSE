@@ -32,7 +32,7 @@ class OutputFilesConfigurator(IConfigurator):
     Once configured, this configurator will provide a list of files built by joining the given output directory, the
     basename and the extensions corresponding to the input file formats.
 
-    For analysis, MDANSE currently supports only the HDF, SVG and ASCII formats. To define a new output file format
+    For analysis, MDANSE currently supports only the HDF and ASCII formats. To define a new output file format
     for an analysis, you must inherit from MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
 
