@@ -149,7 +149,7 @@ def test_filter_json_dump_and_load_0(protein_chemical_system):
     filter.update_settings({"index": {0: True, "1": True}})
     json_dump = filter.settings_to_json()
     assert json_dump == '{"index": {"0": true, "1": true}}'
-    filter.settings_from_json(json_dump)
+    filter.update_from_json(json_dump)
     atm_idxs = filter.get_idxs()
     assert len(atm_idxs) == 30714 - 2
 
@@ -159,7 +159,7 @@ def test_filter_json_dump_and_load_1(protein_chemical_system):
     filter.update_settings({"elements": {"S": True}, "water": True})
     json_dump = filter.settings_to_json()
     assert json_dump == '{"water": true, "elements": {"S": true}}'
-    filter.settings_from_json(json_dump)
+    filter.update_from_json(json_dump)
     atm_idxs = filter.get_idxs()
     assert len(atm_idxs) == 30714 - 28746 - 10
 

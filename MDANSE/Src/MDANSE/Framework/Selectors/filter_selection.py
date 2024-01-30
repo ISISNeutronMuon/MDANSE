@@ -144,8 +144,8 @@ class FilterSelection:
                     minimal_dict[k0] = sub_dict
         return json.dumps(minimal_dict)
 
-    def settings_from_json(self, json_string: str, reset_first: bool = False) -> None:
-        """Load the filter selection setting from a json string.
+    def update_from_json(self, json_string: str, reset_first: bool = False) -> None:
+        """Update the filter selection settings from a json string.
 
         Parameters
         ----------
