@@ -20,7 +20,7 @@ from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
 )
-from MDANSE.Framework.Selectors.selector import Selector
+from MDANSE.Framework.Selectors.filter_selection import FilterSelection
 
 
 class AtomTransmutationConfigurator(IConfigurator):
@@ -68,7 +68,7 @@ class AtomTransmutationConfigurator(IConfigurator):
 
         self._nTransmutatedAtoms = 0
 
-        selector = Selector(trajConfig["instance"].chemical_system)
+        filter = FilterSelection(trajConfig["instance"].chemical_system)
         for json_string, element in value:
             # Otherwise, it must be a string that will be found as a user-definition keys
             if not isinstance(json_string, str):
@@ -84,8 +84,8 @@ class AtomTransmutationConfigurator(IConfigurator):
                 )
                 indexes = ud["indexes"]
             else:
-                selector.settings_from_json(json_string, reset_first=True)
-                indexes = selector.get_selection()
+                filter.settings_from_json(json_string, reset_first=True)
+                indexes = filter.get_idxs()
 
             self.transmutate(indexes, element)
 

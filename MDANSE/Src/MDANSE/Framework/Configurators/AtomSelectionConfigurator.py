@@ -23,7 +23,7 @@ from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
 )
-from MDANSE.Framework.Selectors.selector import Selector
+from MDANSE.Framework.Selectors.filter_selection import FilterSelection
 
 
 class AtomSelectionConfigurator(IConfigurator):
@@ -75,9 +75,9 @@ class AtomSelectionConfigurator(IConfigurator):
             )
             indexes.update(ud["indexes"])
         else:
-            selector = Selector(trajConfig["instance"].chemical_system)
-            selector.settings_from_json(value)
-            indexes = selector.get_selection()
+            filter = FilterSelection(trajConfig["instance"].chemical_system)
+            filter.settings_from_json(value)
+            indexes = filter.get_idxs()
 
         self["flatten_indexes"] = sorted(list(indexes))
 
