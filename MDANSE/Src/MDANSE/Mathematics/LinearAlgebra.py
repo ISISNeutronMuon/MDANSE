@@ -6,7 +6,6 @@ def cmp(a, b):
 
 
 class Vector:
-
     """Vector in 3D space
 
     Constructor:
@@ -228,7 +227,6 @@ class Vector:
 
 
 class Quaternion:
-
     """
     Quaternion (hypercomplex number)
 
@@ -387,7 +385,6 @@ class Quaternion:
 
 
 class Tensor:
-
     """Tensor in 3D space
 
     Tensors support the usual arithmetic operations

@@ -49,8 +49,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
         )
 
         hklMax = (
-            np.ceil([qMax / np.sqrt(np.sum(v**2)) for v in self._inverseUnitCell.T])
-            + 1
+            np.ceil([qMax / np.sqrt(np.sum(v**2)) for v in self._inverseUnitCell.T]) + 1
         )
 
         vects = np.mgrid[

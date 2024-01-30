@@ -112,9 +112,14 @@ def test_filter_json_dump_3(protein_chemical_system):
 
 def test_filter_json_dump_4(protein_chemical_system):
     filter = FilterSelection(protein_chemical_system)
-    filter.update_settings({"elements": {"S": True, "H": True}, "water": True, "index": {0: True, 1: True}})
+    filter.update_settings(
+        {"elements": {"S": True, "H": True}, "water": True, "index": {0: True, 1: True}}
+    )
     json_dump = filter.settings_to_json()
-    assert json_dump == '{"water": true, "elements": {"S": true, "H": true}, "index": {"0": true, "1": true}}'
+    assert (
+        json_dump
+        == '{"water": true, "elements": {"S": true, "H": true}, "index": {"0": true, "1": true}}'
+    )
 
 
 def test_filter_json_dump_with_second_update(protein_chemical_system):
