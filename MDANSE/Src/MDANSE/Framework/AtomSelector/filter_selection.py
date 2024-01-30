@@ -1,5 +1,6 @@
 import json
 import copy
+from typing import Union
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Framework.AtomSelector.all_selector import select_all
 from MDANSE.Framework.AtomSelector.atom_selectors import *
@@ -75,7 +76,7 @@ class FilterSelection:
         self.settings = copy.deepcopy(self._default)
 
     def update_settings(
-        self, settings: dict[str, bool | dict], reset_first: bool = False
+        self, settings: dict[str, Union[bool, dict]], reset_first: bool = False
     ) -> None:
         """Updates the filter selection settings.
 
