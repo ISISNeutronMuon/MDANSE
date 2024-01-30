@@ -24,7 +24,6 @@ from MDANSE_GUI.PyQtGUI.DataViewModel.TrajectoryHolder import DataTreeItem
 
 
 class TrajectoryViewer(QTreeView):
-
     """A modified QTreeView which enables context menus to pop
     up for different elements of the workflow.
     """

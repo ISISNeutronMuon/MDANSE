@@ -1,3 +1,4 @@
+from typing import Union
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Chemistry import ATOMS_DATABASE
 
@@ -78,7 +79,7 @@ def select_hs_on_heteroatom(system: ChemicalSystem) -> set[int]:
     return xh_matches - x_matches
 
 
-def select_index(system: ChemicalSystem, index: int | str) -> set[int]:
+def select_index(system: ChemicalSystem, index: Union[int, str]) -> set[int]:
     """Selects atom with index - just returns the set with the
     index in it.
 
