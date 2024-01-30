@@ -208,6 +208,19 @@ def test_filter_returns_correct_number_of_atoms_idxs_when_sulfurs_and_then_all_a
     assert len(atm_idxs) == 0
 
 
+def test_filter_returns_correct_number_of_atoms_idxs_when_silicon_atoms_are_removed(
+    protein_chemical_system,
+):
+    filter = FilterSelection(protein_chemical_system)
+    filter.update_settings(
+        {
+            "elements": {"Si": True},
+        }
+    )
+    atm_idxs = filter.get_idxs()
+    assert len(atm_idxs) == 30714
+
+
 def test_filter_returns_correct_number_of_atoms_idxs_when_indexes_0_and_1_are_removed(
     protein_chemical_system,
 ):

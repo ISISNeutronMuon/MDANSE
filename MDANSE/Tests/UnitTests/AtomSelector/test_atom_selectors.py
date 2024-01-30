@@ -68,6 +68,13 @@ def test_select_hs_on_sulfur_returns_correct_number_of_atoms_matches(
     assert len(selection) == 0
 
 
+def test_select_hs_on_silicon_returns_correct_number_of_atoms_matches(
+    protein_chemical_system,
+):
+    selection = select_hs_on_elements(protein_chemical_system, ["Si"])
+    assert len(selection) == 0
+
+
 def test_select_hs_on_heteroatom_returns_correct_number_of_atoms_matches(
     protein_chemical_system,
 ):
