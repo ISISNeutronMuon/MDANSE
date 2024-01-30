@@ -77,136 +77,69 @@ def test_filter_returns_correct_number_of_atoms_idxs_when_waters_and_sulfurs_are
     protein_chemical_system,
 ):
     filter = FilterSelection(protein_chemical_system)
-    filter.update_settings(
-        {
-            "elements": {"S": True},
-            "water": True
-        }
-    )
+    filter.update_settings({"elements": {"S": True}, "water": True})
     atm_idxs = filter.get_idxs()
     assert len(atm_idxs) == 30714 - 28746 - 10
 
 
 def test_filter_json_dump_0(protein_chemical_system):
     filter = FilterSelection(protein_chemical_system)
-    filter.update_settings(
-        {
-            "elements": {"S": True}
-        }
-    )
+    filter.update_settings({"elements": {"S": True}})
     json_dump = filter.settings_to_json()
     assert json_dump == '{"elements": {"S": true}}'
 
 
 def test_filter_json_dump_1(protein_chemical_system):
     filter = FilterSelection(protein_chemical_system)
-    filter.update_settings(
-        {
-            "elements": {"S": True},
-            "water": True
-        }
-    )
+    filter.update_settings({"elements": {"S": True}, "water": True})
     json_dump = filter.settings_to_json()
     assert json_dump == '{"water": true, "elements": {"S": true}}'
 
 
 def test_filter_json_dump_2(protein_chemical_system):
     filter = FilterSelection(protein_chemical_system)
-    filter.update_settings(
-        {
-            "water": True
-        }
-    )
+    filter.update_settings({"water": True})
     json_dump = filter.settings_to_json()
     assert json_dump == '{"water": true}'
 
 
 def test_filter_json_dump_3(protein_chemical_system):
     filter = FilterSelection(protein_chemical_system)
-    filter.update_settings(
-        {
-            "elements": {"S": True, "H": True},
-            "water": True
-        }
-    )
+    filter.update_settings({"elements": {"S": True, "H": True}, "water": True})
     json_dump = filter.settings_to_json()
     assert json_dump == '{"water": true, "elements": {"S": true, "H": true}}'
 
 
 def test_filter_json_dump_with_second_update(protein_chemical_system):
     filter = FilterSelection(protein_chemical_system)
-    filter.update_settings(
-        {
-            "elements": {"S": True},
-            "water": True
-        }
-    )
-    filter.update_settings(
-        {
-            "elements": {"O": True}
-        }
-    )
+    filter.update_settings({"elements": {"S": True}, "water": True})
+    filter.update_settings({"elements": {"O": True}})
     json_dump = filter.settings_to_json()
     assert json_dump == '{"water": true, "elements": {"S": true, "O": true}}'
 
 
 def test_filter_json_dump_with_third_update(protein_chemical_system):
     filter = FilterSelection(protein_chemical_system)
-    filter.update_settings(
-        {
-            "elements": {"S": True},
-            "water": True
-        }
-    )
-    filter.update_settings(
-        {
-            "elements": {"O": True}
-        }
-    )
-    filter.update_settings(
-        {
-            "elements": {"S": False}
-        }
-    )
+    filter.update_settings({"elements": {"S": True}, "water": True})
+    filter.update_settings({"elements": {"O": True}})
+    filter.update_settings({"elements": {"S": False}})
     json_dump = filter.settings_to_json()
     assert json_dump == '{"water": true, "elements": {"O": true}}'
 
 
 def test_filter_json_dump_with_fourth_update(protein_chemical_system):
     filter = FilterSelection(protein_chemical_system)
-    filter.update_settings(
-        {
-            "elements": {"S": True},
-            "water": True
-        }
-    )
-    filter.update_settings(
-        {
-            "elements": {"O": True}
-        }
-    )
-    filter.update_settings(
-        {
-            "elements": {"S": False}
-        }
-    )
-    filter.update_settings(
-        {
-            "water": False
-        }
-    )
+    filter.update_settings({"elements": {"S": True}, "water": True})
+    filter.update_settings({"elements": {"O": True}})
+    filter.update_settings({"elements": {"S": False}})
+    filter.update_settings({"water": False})
     json_dump = filter.settings_to_json()
     assert json_dump == '{"elements": {"O": true}}'
 
 
 def test_filter_json_dump_and_load(protein_chemical_system):
     filter = FilterSelection(protein_chemical_system)
-    filter.update_settings(
-        {
-            "elements": {"S": True},
-            "water": True
-        }
-    )
+    filter.update_settings({"elements": {"S": True}, "water": True})
     json_dump = filter.settings_to_json()
     assert json_dump == '{"water": true, "elements": {"S": true}}'
     filter.settings_from_json(json_dump)
@@ -218,12 +151,7 @@ def test_filter_returns_correct_number_of_atoms_idxs_after_setting_settings_agai
     protein_chemical_system,
 ):
     filter = FilterSelection(protein_chemical_system)
-    filter.update_settings(
-        {
-            "elements": {"S": True},
-            "water": True
-        }
-    )
+    filter.update_settings({"elements": {"S": True}, "water": True})
     atm_idxs = filter.get_idxs()
     assert len(atm_idxs) == 30714 - 28746 - 10
 
