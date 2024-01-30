@@ -20,7 +20,7 @@ from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
 )
-from MDANSE.Framework.Selectors.filter_selection import FilterSelection
+from MDANSE.Framework.AtomSelector.filter_selection import FilterSelection
 
 
 class AtomTransmutationConfigurator(IConfigurator):
@@ -84,7 +84,7 @@ class AtomTransmutationConfigurator(IConfigurator):
                 )
                 indexes = ud["indexes"]
             else:
-                filter.settings_from_json(json_string, reset_first=True)
+                filter.update_from_json(json_string, reset_first=True)
                 indexes = filter.get_idxs()
 
             self.transmutate(indexes, element)

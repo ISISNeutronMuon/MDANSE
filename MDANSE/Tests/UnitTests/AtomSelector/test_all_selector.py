@@ -1,7 +1,7 @@
 import os
 import pytest
 from MDANSE.IO.PDBReader import PDBReader
-from MDANSE.Framework.Selectors.all_selector import select_all
+from MDANSE.Framework.AtomSelector.all_selector import select_all
 
 
 pbd_2vb1 = os.path.join(

@@ -1,7 +1,7 @@
 import os
 import pytest
 from MDANSE.IO.PDBReader import PDBReader
-from MDANSE.Framework.Selectors.filter_selection import FilterSelection
+from MDANSE.Framework.AtomSelector.filter_selection import FilterSelection
 
 
 pbd_2vb1 = os.path.join(

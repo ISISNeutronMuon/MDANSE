@@ -1,7 +1,7 @@
 import os
 import pytest
 from MDANSE.IO.PDBReader import PDBReader
-from MDANSE.Framework.Selectors.group_selectors import (
+from MDANSE.Framework.AtomSelector.group_selectors import (
     select_primary_amine,
     select_hydroxy,
     select_methly,

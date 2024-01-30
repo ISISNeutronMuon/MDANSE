@@ -1,10 +1,10 @@
 import json
 import copy
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
-from MDANSE.Framework.Selectors.all_selector import select_all
-from MDANSE.Framework.Selectors.atom_selectors import *
-from MDANSE.Framework.Selectors.group_selectors import *
-from MDANSE.Framework.Selectors.molecule_selectors import *
+from MDANSE.Framework.AtomSelector.all_selector import select_all
+from MDANSE.Framework.AtomSelector.atom_selectors import *
+from MDANSE.Framework.AtomSelector.group_selectors import *
+from MDANSE.Framework.AtomSelector.molecule_selectors import *
 
 
 class FilterSelection:

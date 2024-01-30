@@ -1,7 +1,7 @@
 import os
 import pytest
 from MDANSE.IO.PDBReader import PDBReader
-from MDANSE.Framework.Selectors.molecule_selectors import select_water
+from MDANSE.Framework.AtomSelector.molecule_selectors import select_water
 
 
 pbd_2vb1 = os.path.join(

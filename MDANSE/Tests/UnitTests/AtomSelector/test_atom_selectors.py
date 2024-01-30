@@ -1,7 +1,7 @@
 import os
 import pytest
 from MDANSE.IO.PDBReader import PDBReader
-from MDANSE.Framework.Selectors.atom_selectors import (
+from MDANSE.Framework.AtomSelector.atom_selectors import (
     select_elements,
     select_hs_on_heteroatom,
     select_hs_on_elements,
