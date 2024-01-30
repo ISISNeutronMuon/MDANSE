@@ -21,14 +21,15 @@ ase_traj = os.path.join(file_wd, "Data", "Cu_5steps_ASEformat.traj")
 xyz_traj = os.path.join(file_wd, "Data", "traj-100K-npt-1000-res.xyz")
 
 
-def test_lammps_mdt_conversion_file_exists_and_loads_up_successfully():
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_lammps_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     temp_name = tempfile.mktemp()
 
     parameters = {}
     parameters["config_file"] = lammps_config
     parameters["mass_tolerance"] = 0.05
     parameters["n_steps"] = 0
-    parameters["output_file"] = (temp_name, 64, 'lza')
+    parameters["output_file"] = (temp_name, 64, compression)
     parameters["smart_mass_association"] = True
     parameters["time_step"] = 1.0
     parameters["trajectory_file"] = lammps_lammps
@@ -60,12 +61,13 @@ def test_lammps_mdt_conversion_raise_exception_with_incorrect_format():
         lammps.run(parameters, status=True)
 
 
-def test_vasp_mdt_conversion_file_exists_and_loads_up_successfully():
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_vasp_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     temp_name = tempfile.mktemp()
 
     parameters = {
         "fold": False,
-        "output_file": (temp_name, 64, 'lza'),
+        "output_file": (temp_name, 64, compression),
         "time_step": 1.0,
         "xdatcar_file": vasp_xdatcar,
     }
@@ -79,13 +81,14 @@ def test_vasp_mdt_conversion_file_exists_and_loads_up_successfully():
     os.remove(temp_name + ".mdt")
 
 
-def test_discover_mdt_conversion_file_exists_and_loads_up_successfully():
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_discover_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     temp_name = tempfile.mktemp()
 
     parameters = {
         "fold": True,
         "his_file": discover_his,
-        "output_file": (temp_name, 64, 'lza'),
+        "output_file": (temp_name, 64, compression),
         "xtd_file": discover_xtd,
     }
 
@@ -99,13 +102,14 @@ def test_discover_mdt_conversion_file_exists_and_loads_up_successfully():
     os.remove(temp_name + ".mdt")
 
 
-def test_charmm_mdt_conversion_file_exists_and_loads_up_successfully():
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_charmm_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     temp_name = tempfile.mktemp()
 
     parameters = {
         "dcd_file": hem_cam_dcd,
         "fold": False,
-        "output_file": (temp_name, 64, 'lza'),
+        "output_file": (temp_name, 64, compression),
         "pdb_file": hem_cam_pdb,
         "time_step": 1.0,
     }
@@ -120,13 +124,14 @@ def test_charmm_mdt_conversion_file_exists_and_loads_up_successfully():
     os.remove(temp_name + ".mdt")
 
 
-def test_ase_mdt_conversion_file_exists_and_loads_up_successfully():
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_ase_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     temp_name = tempfile.mktemp()
 
     parameters = {
         "trajectory_file": ase_traj,
         "fold": False,
-        "output_file": (temp_name, 64, 'lza'),
+        "output_file": (temp_name, 64, compression),
         "n_steps": 0,
         "time_step": 50.0,
         "time_unit": "fs",
@@ -136,13 +141,14 @@ def test_ase_mdt_conversion_file_exists_and_loads_up_successfully():
     ase_conv.run(parameters, status=True)
 
 
-def test_xyz_mdt_conversion_file_exists_and_loads_up_successfully():
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_xyz_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     temp_name = tempfile.mktemp()
 
     parameters = {
         "trajectory_file": xyz_traj,
         "fold": False,
-        "output_file": (temp_name, 64, 'lza'),
+        "output_file": (temp_name, 64, compression),
         "n_steps": 0,
         "time_step": 50.0,
         "time_unit": "fs",
