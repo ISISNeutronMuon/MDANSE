@@ -65,13 +65,11 @@ class AtomSelectionConfigurator(IConfigurator):
 
         self["value"] = value
 
-        indexes = set()
-
         if UD_STORE.has_definition(trajConfig["basename"], "atom_selection", value):
             ud = UD_STORE.get_definition(
                 trajConfig["basename"], "atom_selection", value
             )
-            indexes.update(ud["indexes"])
+            indexes = ud["indexes"]
         else:
             filter = FilterSelection(trajConfig["instance"].chemical_system)
             filter.settings_from_json(value)
