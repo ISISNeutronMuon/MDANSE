@@ -67,9 +67,7 @@ class AtomSelectionConfigurator(IConfigurator):
 
         indexes = set()
 
-        if UD_STORE.has_definition(
-            trajConfig["basename"], "atom_selection", value
-        ):
+        if UD_STORE.has_definition(trajConfig["basename"], "atom_selection", value):
             ud = UD_STORE.get_definition(
                 trajConfig["basename"], "atom_selection", value
             )

@@ -31,7 +31,7 @@ def test_filter_returns_correct_number_of_atoms_idxs_when_sulfur_atoms_are_remov
     assert len(atm_idxs) == 30714 - 10
 
 
-def test_filter_returns_correct_number_of_atoms_idxs_when_sulfur_atoms_are_removed_called_twice(
+def test_filter_returns_correct_number_of_atoms_idxs_when_sulfur_atoms_are_removed_when_get_idxs_is_called_twice(
     protein_chemical_system,
 ):
     filter = FilterSelection(protein_chemical_system)
@@ -51,7 +51,7 @@ def test_filter_returns_correct_number_of_atoms_idxs_when_waters_are_removed(
     assert len(atm_idxs) == 30714 - 28746
 
 
-def test_filter_returns_correct_number_of_atoms_idxs_when_the_selection_is_turned_on_and_off(
+def test_filter_returns_correct_number_of_atoms_idxs_when_water_filter_is_turned_on_and_off(
     protein_chemical_system,
 ):
     filter = FilterSelection(protein_chemical_system)
