@@ -5,14 +5,14 @@ MDANSE User Guide
 **MDANSE (Molecular Dynamics Analysis of Neutron Scattering
 Experiments)**
 
-User Guide for MDANSE Version 1.5.2
+User Guide for MDANSE Version 2.0.0
 
-Rastislav Turanyi [1]_, Miguel A. Gonzalez [2]_, Eric Pellegrini [2]_, Maciej Bartkowiak [1]_, Sanghamitra Mukhopadhyay [1]_
+Ashley Meigh [1]_, Rastislav Turanyi [1]_, Miguel A. Gonzalez [2]_, Eric Pellegrini [2]_, Maciej Bartkowiak [1]_, Sanghamitra Mukhopadhyay [1]_
 
 .. [1] ISIS Neutron and Muon Source, Science and Technology Facilities Council, UKRI
 .. [2] Institut Laue-Langevin, France
 
-December 2022
+January 2024
 
 .. _cite-mdanse:
 
