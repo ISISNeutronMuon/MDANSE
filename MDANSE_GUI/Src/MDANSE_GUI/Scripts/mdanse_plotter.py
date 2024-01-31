@@ -16,7 +16,7 @@
 
 def main():
     from qtpy.QtWidgets import QApplication
-    from MDANSE_GUI.PyQtGUI.Plotter.widgets.main_window import MainWindow
+    from MDANSE_GUI.Plotter.widgets.main_window import MainWindow
     import sys
 
     app = QApplication(sys.argv)

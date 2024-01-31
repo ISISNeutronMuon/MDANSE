@@ -2,7 +2,7 @@
 import pytest
 import tempfile
 
-from MDANSE_GUI.PyQtGUI.Tabs.Models.GeneralModel import GeneralModel
+from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 
 
 @pytest.fixture(scope='module')
