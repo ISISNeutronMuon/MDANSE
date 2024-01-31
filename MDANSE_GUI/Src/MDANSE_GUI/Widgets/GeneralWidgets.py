@@ -414,7 +414,7 @@ class InputFactory:
         field.setToolTip(tooltip_text)
         layout.addWidget(field)
         cbox1 = QComboBox(base)
-        cbox1.addItems(["16", "32", "64", "128"])
+        cbox1.addItems(["16", "32", "64"])
         cbox1.setCurrentText("64")
         layout.addWidget(cbox1)
         cbox2 = QComboBox(base)

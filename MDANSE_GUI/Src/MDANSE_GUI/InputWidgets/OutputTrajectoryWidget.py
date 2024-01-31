@@ -25,7 +25,7 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
-dtype_lookup = {"float16": 16, "float32": 32, "float64": 64, "float128": 128}
+dtype_lookup = {"float16": 16, "float32": 32, "float64": 64}
 
 
 class OutputTrajectoryWidget(WidgetBase):
@@ -45,7 +45,7 @@ class OutputTrajectoryWidget(WidgetBase):
         self._value = default_value
         self.field = QLineEdit(default_value[0], self._base)
         self.dtype_box = QComboBox(self._base)
-        self.dtype_box.addItems(["float16", "float32", "float64", "float128"])
+        self.dtype_box.addItems(["float16", "float32", "float64"])
         self.dtype_box.setCurrentText("float64")
         self.compression_box = QComboBox(self._base)
         self.compression_box.addItems(["none", "gzip"])

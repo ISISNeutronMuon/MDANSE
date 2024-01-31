@@ -74,10 +74,6 @@ class OutputTrajectoryConfigurator(IConfigurator):
             self._dtype = np.float16
         elif dtype < 33:
             self._dtype = np.float32
-        elif dtype < 65:
-            self._dtype = np.float64
-        elif dtype < 129:
-            self._dtype = np.float128
         else:
             self._dtype = np.float64
 
