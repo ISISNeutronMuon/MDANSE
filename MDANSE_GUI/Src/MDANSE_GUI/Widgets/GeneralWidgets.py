@@ -423,6 +423,8 @@ class InputFactory:
         layout.addWidget(cbox2)
         cbox1.currentTextChanged.connect(data_handler2.updateValue)
         cbox2.currentTextChanged.connect(data_handler3.updateValue)
+        data_handler2.updateValue("64")
+        data_handler3.updateValue("gzip")
         button = QPushButton("Browse", base)
         button.clicked.connect(data_handler1.valueFromDialog)
         layout.addWidget(button)
