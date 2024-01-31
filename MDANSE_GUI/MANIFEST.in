@@ -1,9 +1,8 @@
 include LICENSE
 include requirements.txt
 
-recursive-include Src/MDANSE_GUI/GUI/Resources/Icons *.png
-recursive-include Src/MDANSE_GUI/PyQtGUI/Icons *.png
-recursive-include Src/MDANSE_GUI/PyQtGUI/MolecularViewer/database *.yml
+recursive-include Src/MDANSE_GUI/Icons *.png
+recursive-include Src/MDANSE_GUI/MolecularViewer/database *.yml
 
 recursive-include Doc *
 
