@@ -22,8 +22,9 @@ class Selector:
     """
 
     _default = {
+        # True reverses the selection
         "reverse": False,
-        # True deselects atoms
+        # True selects atoms
         "all": True,
         "hs_on_heteroatom": False,
         "primary_amine": False,
