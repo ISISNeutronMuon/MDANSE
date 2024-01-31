@@ -8,7 +8,7 @@ from MDANSE.Framework.AtomSelector.group_selectors import *
 from MDANSE.Framework.AtomSelector.molecule_selectors import *
 
 
-class FilterSelection:
+class Selector:
     """Used to get the indexes of a subset of atoms of a chemical system.
 
     Attributes
@@ -16,14 +16,15 @@ class FilterSelection:
     _default : dict[str, bool | dict]
         The default settings.
     _funcs : dict[str, Callable]
-        A dictionary of the filter functions.
+        A dictionary of the functions.
     _kwarg_keys : dict[str, str]
-        A dictionary of the filter function arg keys.
+        A dictionary of the function arg keys.
     """
 
     _default = {
+        "reverse": False,
         # True deselects atoms
-        "all": False,
+        "all": True,
         "hs_on_heteroatom": False,
         "primary_amine": False,
         "hydroxy": False,
@@ -65,7 +66,7 @@ class FilterSelection:
         Parameters
         ----------
         system: ChemicalSystem
-            The chemical system to apply the filter to.
+            The chemical system to apply the selection to.
         """
         self.system = system
         self.all_idxs = select_all(system)
@@ -78,12 +79,12 @@ class FilterSelection:
     def update_settings(
         self, settings: dict[str, Union[bool, dict]], reset_first: bool = False
     ) -> None:
-        """Updates the filter selection settings.
+        """Updates the selection settings.
 
         Parameters
         ----------
         settings : dict[str, bool | dict]
-            The filter selection settings.
+            The selection settings.
         reset_first : bool, optional
             Resets the settings to the default before loading.
         """
@@ -98,16 +99,19 @@ class FilterSelection:
                 self.settings[k1] = v1
 
     def get_idxs(self) -> set[int]:
-        """The atom indexes after applying the filters to the system.
+        """The atom indexes after applying the selection to the system.
 
         Returns
         -------
         set[int]
             The atoms indexes.
         """
-        idxs = self.all_idxs
+        idxs = set([])
 
         for k, v in self.settings.items():
+            if k == "reverse":
+                continue
+
             if isinstance(v, dict):
                 args = [{self._kwarg_keys[k]: i} for i in v.keys()]
                 switches = v.values()
@@ -119,9 +123,12 @@ class FilterSelection:
                 if not switch:
                     continue
 
-                idxs = idxs - self._funcs[k](self.system, **args)
+                idxs = idxs | self._funcs[k](self.system, **args)
 
-        return idxs
+        if self.settings["reverse"]:
+            return self.all_idxs - idxs
+        else:
+            return idxs
 
     def settings_to_json(self) -> str:
         """Return the minimal json string required to achieve the same
@@ -134,7 +141,7 @@ class FilterSelection:
         """
         minimal_dict = {}
         for k0, v0 in self.settings.items():
-            if isinstance(v0, bool) and v0:
+            if isinstance(v0, bool) and (k0 == "all" and not v0 or k0 != "all" and v0):
                 minimal_dict[k0] = v0
             elif isinstance(v0, dict):
                 sub_dict = {}
@@ -146,7 +153,7 @@ class FilterSelection:
         return json.dumps(minimal_dict)
 
     def update_from_json(self, json_string: str, reset_first: bool = False) -> None:
-        """Update the filter selection settings from a json string.
+        """Update the selection settings from a json string.
 
         Parameters
         ----------
