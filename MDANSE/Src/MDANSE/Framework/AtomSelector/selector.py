@@ -38,7 +38,7 @@ class Selector:
         "elements": {},
         "hs_on_elements": {},
         # e.g. {"1": True} or {1: True}
-        "index": {},
+        "indexes": {},
     }
 
     _funcs = {
@@ -53,13 +53,13 @@ class Selector:
         "water": select_water,
         "elements": select_elements,
         "hs_on_elements": select_hs_on_elements,
-        "index": select_index,
+        "indexes": select_index,
     }
 
     _kwarg_keys = {
         "elements": "symbols",
         "hs_on_elements": "symbols",
-        "index": "index",
+        "indexes": "index",
     }
 
     def __init__(self, system: ChemicalSystem) -> None:
@@ -79,7 +79,7 @@ class Selector:
             "hs_on_elements": symbols,
             # we allow index keys to be str or int, this is mostly
             # done since json keys are str
-            "index": self.all_idxs | set([str(i) for i in self.all_idxs]),
+            "indexes": self.all_idxs | set([str(i) for i in self.all_idxs]),
         }
 
     def reset_settings(self) -> None:
