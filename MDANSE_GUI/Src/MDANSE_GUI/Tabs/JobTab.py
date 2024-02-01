@@ -61,7 +61,11 @@ class JobTab(GeneralTab):
             name="AvailableJobs",
             model=JobTree(),
             view=ActionsTree(),
-            visualiser=TextInfo(),
+            visualiser=TextInfo(
+                header="MDANSE Analysis",
+                footer="Look up our Read The Docs page:"
+                + "https://mdanse.readthedocs.io/en/protos/",
+            ),
             layout=DoublePanel,
             label_text="""This is the list of jobs you can run using MDANSE.
 Pick a job to see additional information.
@@ -82,7 +86,12 @@ Use the button to start a job.
             logger=logger,
             model=JobTree(),
             view=ActionsTree(),
-            visualiser=TextInfo(),
+            visualiser=TextInfo(
+                header="MDANSE Analysis",
+                footer="Look up our "
+                + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                + " page.",
+            ),
             layout=DoublePanel,
             label_text="""This is the list of jobs you can run using MDANSE.
 Pick a job to see additional information.
