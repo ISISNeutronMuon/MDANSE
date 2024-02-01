@@ -35,6 +35,7 @@ from MDANSE.MolecularDynamics.TrajectoryUtils import (
     sorted_atoms,
 )
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.MolecularDynamics.Connectivity import Connectivity
 
 
 Self = TypeVar("Self", bound="MockTrajectory")
@@ -194,6 +195,12 @@ class MockTrajectory:
 
     def close(self):
         """Present for compatibility with Trajectory"""
+
+    def find_molecules(self):
+        conn = Connectivity(trajectory=self)
+        conn.find_molecules()
+        conn.add_bond_information()
+        self._chemicalSystem.rebuild(conn._molecules)
 
     def __getitem__(self, frame: int):
         """Returns the configuration of the system at the Nth frame.
@@ -593,4 +600,10 @@ class MockTrajectory:
             temp["polarisation"] = np.array(temp["polarisation"])
             temp["propagation_vector"] = np.array(temp["propagation_vector"])
             instance.modulate_structure(**temp)
+        try:
+            fm = struct["find_molecules"]
+        except KeyError:
+            fm = False
+        if fm:
+            instance.find_molecules()
         return instance

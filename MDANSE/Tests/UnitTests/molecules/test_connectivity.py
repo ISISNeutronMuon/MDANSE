@@ -2,6 +2,7 @@ import os
 import pytest
 import numpy as np
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Chemistry.Structrures import MoleculeTester
 
@@ -12,30 +13,30 @@ short_traj = os.path.join(
 
 
 @pytest.fixture
-def trajectory() -> HDFTrajectoryInputData:
+def trajectory() -> Trajectory:
     trajectory = HDFTrajectoryInputData(short_traj)
-    yield trajectory
+    yield trajectory.trajectory
 
 
-def test_create_connectivity(trajectory: HDFTrajectoryInputData):
+def test_create_connectivity(trajectory: Trajectory):
     conn = Connectivity(trajectory=trajectory)
     print(conn._unique_elements)
     assert len(conn._unique_elements) == 2
 
 
-def test_find_bonds(trajectory: HDFTrajectoryInputData):
+def test_find_bonds(trajectory: Trajectory):
     conn = Connectivity(trajectory=trajectory)
     conn.find_bonds()
     assert len(conn._unique_bonds) == 40
 
 
-def test_find_molecules(trajectory: HDFTrajectoryInputData):
+def test_find_molecules(trajectory: Trajectory):
     conn = Connectivity(trajectory=trajectory)
     conn.find_molecules()
     assert len(conn._molecules) == 20
 
 
-def test_rebuild_molecules(trajectory: HDFTrajectoryInputData):
+def test_rebuild_molecules(trajectory: Trajectory):
     print(trajectory.chemical_system.atom_list)
     conn = Connectivity(trajectory=trajectory)
     conn.find_molecules()
@@ -47,7 +48,7 @@ def test_rebuild_molecules(trajectory: HDFTrajectoryInputData):
     assert atoms_before == atoms_after
 
 
-def test_unwrap_molecules(trajectory: HDFTrajectoryInputData):
+def test_unwrap_molecules(trajectory: Trajectory):
     conn = Connectivity(trajectory=trajectory)
     conn.find_molecules()
     chemical_system = trajectory.chemical_system
@@ -61,7 +62,7 @@ def test_unwrap_molecules(trajectory: HDFTrajectoryInputData):
     assert not np.allclose(original_coords, contiguous_config.coordinates)
 
 
-def test_identify_molecules(trajectory: HDFTrajectoryInputData):
+def test_identify_molecules(trajectory: Trajectory):
     conn = Connectivity(trajectory=trajectory)
     conn.find_molecules()
     chemical_system = trajectory.chemical_system

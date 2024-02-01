@@ -57,6 +57,7 @@ from MDANSE.MolecularDynamics.MockTrajectory import MockTrajectory
 file_wd = os.path.dirname(os.path.realpath(__file__))
 
 mock_json = os.path.join(file_wd, "Data", "mock.json")
+molecules_json = os.path.join(file_wd, "Data", "mock_molecules.json")
 
 
 @pytest.fixture(scope="module")
@@ -177,3 +178,12 @@ def test_from_json(full_trajectory):
     print(full_trajectory.coordinates(25) - instance.coordinates(25))
     assert np.allclose(full_trajectory.coordinates(25), instance.coordinates(25))
     assert not np.allclose(full_trajectory.coordinates(25), instance.coordinates(22))
+
+def test_find_molecules_after_json():
+    instance = MockTrajectory.from_json(mock_json)
+    instance.find_molecules()
+    assert len(instance._chemicalSystem._bonds) > 0
+
+def test_find_molecules_from_json():
+    instance = MockTrajectory.from_json(molecules_json)
+    assert len(instance._chemicalSystem._bonds) > 0
