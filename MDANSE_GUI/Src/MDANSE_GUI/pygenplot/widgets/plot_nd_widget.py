@@ -17,7 +17,6 @@ from qtpy import QtCore, QtWidgets
 from pylab import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/widgets/plot_nd_widget.py
 from MDANSE_GUI.Plotter.dialogs.cross_viewer_dialog import CrossViewerDialog
 from MDANSE_GUI.Plotter.dialogs.data_viewer_nd_dialog import (
     DataViewerNDDialog,
@@ -33,23 +32,6 @@ from MDANSE_GUI.Plotter.dialogs.plot_nd_image_settings_dialog import (
     PlotNDImageSettingsDialog,
 )
 from MDANSE_GUI.Plotter.models.plot_nd_model import PlotNDModel
-========
-from MDANSE_GUI.pygenplot.dialogs.cross_viewer_dialog import CrossViewerDialog
-from MDANSE_GUI.pygenplot.dialogs.data_viewer_nd_dialog import (
-    DataViewerNDDialog,
-)
-from MDANSE_GUI.pygenplot.dialogs.slice_viewer_dialog import SliceViewerDialog
-from MDANSE_GUI.pygenplot.dialogs.plot_nd_axis_settings_dialog import (
-    PlotNDAxisSettingsDialog,
-)
-from MDANSE_GUI.pygenplot.dialogs.plot_nd_general_settings_dialog import (
-    PlotNDGeneralSettingsDialog,
-)
-from MDANSE_GUI.pygenplot.dialogs.plot_nd_image_settings_dialog import (
-    PlotNDImageSettingsDialog,
-)
-from MDANSE_GUI.pygenplot.models.plot_nd_model import PlotNDModel
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/widgets/plot_nd_widget.py
 
 
 class PlotNDWidget(QtWidgets.QWidget):

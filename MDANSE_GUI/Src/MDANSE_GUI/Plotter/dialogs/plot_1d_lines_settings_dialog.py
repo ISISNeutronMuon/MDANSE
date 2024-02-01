@@ -16,11 +16,7 @@ import numpy as np
 
 from qtpy import QtCore, QtWidgets
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/dialogs/plot_1d_lines_settings_dialog.py
 from MDANSE_GUI.Plotter.models.plot_1d_model import Plot1DModel
-========
-from MDANSE_GUI.pygenplot.models.plot_1d_model import Plot1DModel
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/dialogs/plot_1d_lines_settings_dialog.py
 
 
 class Plot1DLinesSettingsDialog(QtWidgets.QDialog):

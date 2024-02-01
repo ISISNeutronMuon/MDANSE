@@ -19,7 +19,6 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from pylab import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/widgets/plot_2d_widget.py
 from MDANSE_GUI.Plotter.dialogs.plot_2d_general_settings_dialog import (
     Plot2DGeneralSettingsDialog,
 )
@@ -31,19 +30,6 @@ from MDANSE_GUI.Plotter.models.plot_2d_model import (
     Plot2DModelError,
 )
 from MDANSE_GUI.Plotter.dialogs.cross_viewer_dialog import CrossViewerDialog
-========
-from MDANSE_GUI.pygenplot.dialogs.plot_2d_general_settings_dialog import (
-    Plot2DGeneralSettingsDialog,
-)
-from MDANSE_GUI.pygenplot.dialogs.plot_2d_image_settings_dialog import (
-    Plot2DImageSettingsDialog,
-)
-from MDANSE_GUI.pygenplot.models.plot_2d_model import (
-    Plot2DModel,
-    Plot2DModelError,
-)
-from MDANSE_GUI.pygenplot.dialogs.cross_viewer_dialog import CrossViewerDialog
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/widgets/plot_2d_widget.py
 
 
 class Plot2DWidget(QtWidgets.QWidget):

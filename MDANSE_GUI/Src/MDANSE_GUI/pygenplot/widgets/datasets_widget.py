@@ -14,11 +14,7 @@
 
 from qtpy import QtCore, QtWidgets
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/widgets/datasets_widget.py
 from MDANSE_GUI.Plotter.models.data_tree_model import (
-========
-from MDANSE_GUI.pygenplot.models.data_tree_model import (
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/widgets/datasets_widget.py
     DataTreeItem,
     DataTreeModel,
 )

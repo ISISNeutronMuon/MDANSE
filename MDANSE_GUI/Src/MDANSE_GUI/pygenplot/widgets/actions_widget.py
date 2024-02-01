@@ -14,11 +14,7 @@
 
 from qtpy import QtCore, QtWidgets
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/widgets/actions_widget.py
 from MDANSE_GUI.Plotter.dialogs.units_editor_dialog import UnitsEditorDialog
-========
-from MDANSE_GUI.pygenplot.dialogs.units_editor_dialog import UnitsEditorDialog
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/widgets/actions_widget.py
 
 
 class ActionsWidget(QtWidgets.QWidget):

@@ -37,13 +37,8 @@ import warnings
 
 from itertools import chain
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/utils/sorted_dict.py
 from MDANSE_GUI.Plotter.utils.sorted_list import SortedList, recursive_repr
 from MDANSE_GUI.Plotter.utils.sorted_set import SortedSet
-========
-from MDANSE_GUI.pygenplot.utils.sorted_list import SortedList, recursive_repr
-from MDANSE_GUI.pygenplot.utils.sorted_set import SortedSet
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/utils/sorted_dict.py
 
 ###############################################################################
 # BEGIN Python 2/3 Shims

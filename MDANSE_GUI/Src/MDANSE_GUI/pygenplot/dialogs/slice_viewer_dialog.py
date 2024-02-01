@@ -14,11 +14,7 @@
 
 from qtpy import QtCore, QtWidgets
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/dialogs/slice_viewer_dialog.py
 from MDANSE_GUI.Plotter.widgets.range_slider import RangeSlider
-========
-from MDANSE_GUI.pygenplot.widgets.range_slider import RangeSlider
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/dialogs/slice_viewer_dialog.py
 
 
 class SliceViewerDialog(QtWidgets.QDialog):

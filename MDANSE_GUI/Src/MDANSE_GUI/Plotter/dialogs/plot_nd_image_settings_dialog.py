@@ -14,11 +14,7 @@
 
 from qtpy import QtWidgets
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/dialogs/plot_nd_image_settings_dialog.py
 from MDANSE_GUI.Plotter.models.plot_nd_model import PlotNDModel
-========
-from MDANSE_GUI.pygenplot.models.plot_nd_model import PlotNDModel
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/dialogs/plot_nd_image_settings_dialog.py
 
 
 class PlotNDImageSettingsDialog(QtWidgets.QDialog):

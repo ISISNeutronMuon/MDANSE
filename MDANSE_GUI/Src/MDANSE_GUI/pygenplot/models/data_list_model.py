@@ -16,11 +16,7 @@ import os
 
 from qtpy import QtCore
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/models/data_list_model.py
 from MDANSE_GUI.Plotter.models.data_tree_model import DATA_MODELS
-========
-from MDANSE_GUI.pygenplot.models.data_tree_model import DATA_MODELS
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/models/data_list_model.py
 
 
 class DataListModel(QtCore.QAbstractListModel):

@@ -17,7 +17,6 @@ import sys
 
 from qtpy import QtCore, QtWidgets
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/widgets/main_window.py
 from MDANSE_GUI.Plotter.models.data_tree_model import (
     DATA_ITEMS,
     DataTreeModelError,
@@ -28,18 +27,6 @@ from MDANSE_GUI.Plotter.widgets.actions_widget import ActionsWidget
 from MDANSE_GUI.Plotter.widgets.plot_1d_widget import Plot1DWidget
 from MDANSE_GUI.Plotter.widgets.plot_nd_widget import PlotNDWidget
 from MDANSE_GUI.Plotter.widgets.preview_widget import PreviewWidget
-========
-from MDANSE_GUI.pygenplot.models.data_tree_model import (
-    DATA_ITEMS,
-    DataTreeModelError,
-)
-from MDANSE_GUI.pygenplot.models.plot_1d_model import Plot1DModelError
-from MDANSE_GUI.pygenplot.widgets.data_widget import DataWidget
-from MDANSE_GUI.pygenplot.widgets.actions_widget import ActionsWidget
-from MDANSE_GUI.pygenplot.widgets.plot_1d_widget import Plot1DWidget
-from MDANSE_GUI.pygenplot.widgets.plot_nd_widget import PlotNDWidget
-from MDANSE_GUI.pygenplot.widgets.preview_widget import PreviewWidget
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/widgets/main_window.py
 
 
 class MainWindow(QtWidgets.QMainWindow):

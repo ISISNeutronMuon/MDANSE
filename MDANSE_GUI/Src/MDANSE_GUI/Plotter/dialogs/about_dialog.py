@@ -19,13 +19,8 @@ import netCDF4
 
 from qtpy import QtCore, QtWidgets
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/dialogs/about_dialog.py
 from MDANSE_GUI.Plotter.__pkginfo__ import __version__
 from MDANSE_GUI.Plotter.icons import ICONS
-========
-from MDANSE_GUI.pygenplot.__pkginfo__ import __version__
-from MDANSE_GUI.pygenplot.icons import ICONS
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/dialogs/about_dialog.py
 
 
 class AboutDialog(QtWidgets.QDialog):

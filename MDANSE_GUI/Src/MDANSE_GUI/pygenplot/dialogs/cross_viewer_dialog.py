@@ -14,18 +14,10 @@
 
 from qtpy import QtCore, QtGui, QtWidgets
 
-
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/dialogs/cross_viewer_dialog.py
 from MDANSE_GUI.Plotter.models.plot_1d_model import Plot1DModelError
 from MDANSE_GUI.Plotter.utils.numeric import smart_round
 from MDANSE_GUI.Plotter.widgets.plot_1d_widget import Plot1DWidget
 from MDANSE_GUI.Plotter.widgets.range_slider import RangeSlider
-========
-from MDANSE_GUI.pygenplot.models.plot_1d_model import Plot1DModelError
-from MDANSE_GUI.pygenplot.utils.numeric import smart_round
-from MDANSE_GUI.pygenplot.widgets.plot_1d_widget import Plot1DWidget
-from MDANSE_GUI.pygenplot.widgets.range_slider import RangeSlider
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/dialogs/cross_viewer_dialog.py
 
 
 class CrossViewerDialog(QtWidgets.QDialog):

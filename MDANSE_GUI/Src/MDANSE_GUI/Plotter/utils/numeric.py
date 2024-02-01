@@ -21,11 +21,7 @@ import decimal
 import numbers
 import warnings
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/utils/numeric.py
 from MDANSE_GUI.Plotter.utils.sorted_dict import SortedDict
-========
-from MDANSE_GUI.pygenplot.utils.sorted_dict import SortedDict
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/utils/numeric.py
 
 _manual_settings = {}
 _default_settings = {

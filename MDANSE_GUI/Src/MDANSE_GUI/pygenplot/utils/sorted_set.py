@@ -33,11 +33,7 @@ from itertools import chain
 from operator import eq, ne, gt, ge, lt, le
 from textwrap import dedent
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/utils/sorted_set.py
 from MDANSE_GUI.Plotter.utils.sorted_list import SortedList, recursive_repr
-========
-from MDANSE_GUI.pygenplot.utils.sorted_list import SortedList, recursive_repr
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/utils/sorted_set.py
 
 ###############################################################################
 # BEGIN Python 2/3 Shims

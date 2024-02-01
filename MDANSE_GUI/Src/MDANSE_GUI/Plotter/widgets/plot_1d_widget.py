@@ -17,7 +17,6 @@ from qtpy import QtCore, QtWidgets
 from pylab import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/widgets/plot_1d_widget.py
 from MDANSE_GUI.Plotter.dialogs.data_viewer_1d_dialog import (
     DataViewer1DDialog,
 )
@@ -31,21 +30,6 @@ from MDANSE_GUI.Plotter.dialogs.plot_1d_lines_settings_dialog import (
     Plot1DLinesSettingsDialog,
 )
 from MDANSE_GUI.Plotter.models.plot_1d_model import (
-========
-from MDANSE_GUI.pygenplot.dialogs.data_viewer_1d_dialog import (
-    DataViewer1DDialog,
-)
-from MDANSE_GUI.pygenplot.dialogs.plot_1d_axis_settings_dialog import (
-    Plot1DAxisSettingsDialog,
-)
-from MDANSE_GUI.pygenplot.dialogs.plot_1d_general_settings_dialog import (
-    Plot1DGeneralSettingsDialog,
-)
-from MDANSE_GUI.pygenplot.dialogs.plot_1d_lines_settings_dialog import (
-    Plot1DLinesSettingsDialog,
-)
-from MDANSE_GUI.pygenplot.models.plot_1d_model import (
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/widgets/plot_1d_widget.py
     Plot1DModel,
     Plot1DModelError,
 )

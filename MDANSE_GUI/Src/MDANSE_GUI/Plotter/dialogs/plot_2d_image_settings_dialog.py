@@ -15,11 +15,7 @@
 from PyQt6 import QtWidgets
 
 
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/dialogs/plot_2d_image_settings_dialog.py
 from MDANSE_GUI.Plotter.models.plot_2d_model import (
-========
-from MDANSE_GUI.pygenplot.models.plot_2d_model import (
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/dialogs/plot_2d_image_settings_dialog.py
     Plot2DModel,
     Plot2DModelError,
 )

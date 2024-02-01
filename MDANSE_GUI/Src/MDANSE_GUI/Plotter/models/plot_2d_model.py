@@ -21,11 +21,7 @@ from PyQt6 import QtCore
 
 
 from MDANSE.Framework.Units import measure, UnitError
-<<<<<<<< HEAD:MDANSE_GUI/Src/MDANSE_GUI/Plotter/models/plot_2d_model.py
 from MDANSE_GUI.Plotter.utils.numeric import smart_round
-========
-from MDANSE_GUI.pygenplot.utils.numeric import smart_round
->>>>>>>> a3e31864e3d7a47375ecf27c20e78ea49e783dc8:MDANSE_GUI/Src/MDANSE_GUI/pygenplot/models/plot_2d_model.py
 
 
 class Plot2DModelError(Exception):
