@@ -47,8 +47,8 @@ class CroppedTrajectory(IJob):
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["output_file"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDTFormat"]},
+        "OutputTrajectoryConfigurator",
+        {"format": "MDTFormat"},
     )
 
     def initialize(self):
@@ -72,10 +72,12 @@ class CroppedTrajectory(IJob):
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["files"][0],
+            self.configuration["output_file"]["file"],
             self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
             self._selectedAtoms,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
     def run_step(self, index):

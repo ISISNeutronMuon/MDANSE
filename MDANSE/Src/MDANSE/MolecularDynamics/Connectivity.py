@@ -20,7 +20,7 @@ from numpy.typing import NDArray
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class Connectivity:
@@ -28,9 +28,9 @@ class Connectivity:
     and identifies potential molecules based on distances alone.
     """
 
-    def __init__(self, *args, trajectory: HDFTrajectoryInputData = None, **kwargs):
+    def __init__(self, *args, trajectory: Trajectory = None, **kwargs):
         self._chemical_system = trajectory.chemical_system
-        self._frames = trajectory.trajectory
+        self._frames = trajectory
         self._unit_cell = self._chemical_system.configuration
         self._periodic = self._chemical_system.configuration.is_periodic
         self.check_composition(self._chemical_system)
@@ -189,12 +189,12 @@ class Connectivity:
         self._bond_mapping = bond_mapping
         self._unique_bonds = np.unique(np.sort(bonds, axis=1), axis=0)
 
-    def find_molecules(self):
+    def find_molecules(self, tolerance: float = 0.2):
         """Uses the internal list of bonds to find atoms that belong to the same
         molecules. The grouping of atoms is saved internally.
         """
         if self._bond_mapping is None:
-            self.find_bonds()
+            self.find_bonds(tolerance=tolerance)
 
         def recursive_walk(
             number: int, bond_mapping: Dict[int, int], atom_pool: List[int]
