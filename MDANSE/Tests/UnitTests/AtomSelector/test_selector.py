@@ -46,7 +46,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_sulfur_atoms_are_rem
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
-    selector.settings["reverse"] = True
+    selector.settings["invert"] = True
     selector.settings["all"] = False
     selector.settings["elements"] = {"S": True}
     atm_idxs = selector.get_idxs()
@@ -57,7 +57,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_sulfur_atoms_are_rem
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
-    selector.settings["reverse"] = True
+    selector.settings["invert"] = True
     selector.settings["all"] = False
     selector.settings["elements"] = {"S": True}
     atm_idxs = selector.get_idxs()
@@ -80,7 +80,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_waters_are_removed(
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
-    selector.settings["reverse"] = True
+    selector.settings["invert"] = True
     selector.settings["all"] = False
     selector.settings["water"] = True
     atm_idxs = selector.get_idxs()
@@ -91,7 +91,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_water_is_turned_on_a
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
-    selector.settings["reverse"] = True
+    selector.settings["invert"] = True
     selector.settings["all"] = False
     selector.settings["water"] = True
     atm_idxs = selector.get_idxs()
@@ -105,7 +105,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_waters_and_sulfurs_a
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
-    selector.settings["reverse"] = True
+    selector.settings["invert"] = True
     selector.settings["all"] = False
     selector.settings["water"] = True
     selector.settings["elements"] = {"S": True}
@@ -118,7 +118,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_waters_and_sulfurs_a
 ):
     selector = Selector(protein_chemical_system)
     selector.update_settings(
-        {"reverse": True, "all": False, "elements": {"S": True}, "water": True}
+        {"invert": True, "all": False, "elements": {"S": True}, "water": True}
     )
     atm_idxs = selector.get_idxs()
     assert len(atm_idxs) == 30714 - 28746 - 10
@@ -207,14 +207,14 @@ def test_selector_returns_correct_number_of_atoms_idxs_after_setting_settings_ag
 ):
     selector = Selector(protein_chemical_system)
     selector.update_settings(
-        {"reverse": True, "all": False, "elements": {"S": True}, "water": True}
+        {"invert": True, "all": False, "elements": {"S": True}, "water": True}
     )
     atm_idxs = selector.get_idxs()
     assert len(atm_idxs) == 30714 - 28746 - 10
 
     selector.update_settings(
         {
-            "reverse": True,
+            "invert": True,
             "all": False,
             "elements": {"S": True},
         },
@@ -227,11 +227,11 @@ def test_selector_returns_correct_number_of_atoms_idxs_after_setting_settings_ag
 def test_selector_json_dump_and_load_0(protein_chemical_system):
     selector = Selector(protein_chemical_system)
     selector.update_settings(
-        {"reverse": True, "all": False, "indexes": {0: True, "1": True}}
+        {"invert": True, "all": False, "indexes": {0: True, "1": True}}
     )
     json_dump = selector.settings_to_json()
     assert (
-        json_dump == '{"reverse": true, "all": false, "indexes": {"0": true, "1": true}}'
+        json_dump == '{"invert": true, "all": false, "indexes": {"0": true, "1": true}}'
     )
     selector.update_from_json(json_dump, reset_first=True)
     atm_idxs = selector.get_idxs()
@@ -241,12 +241,12 @@ def test_selector_json_dump_and_load_0(protein_chemical_system):
 def test_selector_json_dump_and_load_1(protein_chemical_system):
     selector = Selector(protein_chemical_system)
     selector.update_settings(
-        {"reverse": True, "all": False, "elements": {"S": True}, "water": True}
+        {"invert": True, "all": False, "elements": {"S": True}, "water": True}
     )
     json_dump = selector.settings_to_json()
     assert (
         json_dump
-        == '{"reverse": true, "all": false, "water": true, "elements": {"S": true}}'
+        == '{"invert": true, "all": false, "water": true, "elements": {"S": true}}'
     )
     selector.update_from_json(json_dump, reset_first=True)
     atm_idxs = selector.get_idxs()
@@ -259,7 +259,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_sulfurs_and_then_all
     selector = Selector(protein_chemical_system)
     selector.update_settings(
         {
-            "reverse": True,
+            "invert": True,
             "all": False,
             "elements": {"S": True},
         }
@@ -282,7 +282,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_indexes_0_and_1_are_
     selector = Selector(protein_chemical_system)
     selector.update_settings(
         {
-            "reverse": True,
+            "invert": True,
             "all": False,
             "indexes": {0: True, 1: True},
         }
@@ -295,7 +295,7 @@ def test_selector_returns_true_with_correct_setting_check(protein_chemical_syste
     selector = Selector(protein_chemical_system)
     assert selector.check_valid_setting(
         {
-            "reverse": True,
+            "invert": True,
             "all": False,
             "indexes": {0: True, 1: True},
         }
@@ -306,7 +306,7 @@ def test_selector_returns_false_with_incorrect_setting_check_0(protein_chemical_
     selector = Selector(protein_chemical_system)
     assert not selector.check_valid_setting(
         {
-            "reversee": True,
+            "inverte": True,
             "all": False,
             "indexes": {0: True, 1: True},
         }
@@ -317,7 +317,7 @@ def test_selector_returns_false_with_incorrect_setting_check_1(protein_chemical_
     selector = Selector(protein_chemical_system)
     assert not selector.check_valid_setting(
         {
-            "reverse": True,
+            "invert": True,
             "all": False,
             "indexes": {-1: True, 1: True},
         }
@@ -328,7 +328,7 @@ def test_selector_returns_false_with_incorrect_setting_check_2(protein_chemical_
     selector = Selector(protein_chemical_system)
     assert not selector.check_valid_setting(
         {
-            "reverse": True,
+            "invert": True,
             "all": False,
             "indexes": {0: True, 1: True},
             "elements": {"Ss": True},
@@ -339,33 +339,33 @@ def test_selector_returns_false_with_incorrect_setting_check_2(protein_chemical_
 def test_selector_returns_true_with_correct_json_setting_0(protein_chemical_system):
     selector = Selector(protein_chemical_system)
     assert selector.check_valid_json_settings(
-        '{"reverse": true, "all": false, "water": true, "elements": {"S": true}}'
+        '{"invert": true, "all": false, "water": true, "elements": {"S": true}}'
     )
 
 
 def test_selector_returns_true_with_correct_json_setting_1(protein_chemical_system):
     selector = Selector(protein_chemical_system)
     assert selector.check_valid_json_settings(
-        '{"reverse": true, "all": false, "indexes": {"0": true, "1": true}}'
+        '{"invert": true, "all": false, "indexes": {"0": true, "1": true}}'
     )
 
 
 def test_selector_returns_false_with_incorrect_json_setting_0(protein_chemical_system):
     selector = Selector(protein_chemical_system)
     assert not selector.check_valid_json_settings(
-        '{reverse: true, "all": false, "water": true, "elements": {"S": true}}'
+        '{invert: true, "all": false, "water": true, "elements": {"S": true}}'
     )
 
 
 def test_selector_returns_false_with_incorrect_json_setting_1(protein_chemical_system):
     selector = Selector(protein_chemical_system)
     assert not selector.check_valid_json_settings(
-        '{"reverse": true, "all": false, "indexes": {0: true, "1": true}}'
+        '{"invert": true, "all": false, "indexes": {0: true, "1": true}}'
     )
 
 
 def test_selector_returns_false_with_incorrect_json_setting_2(protein_chemical_system):
     selector = Selector(protein_chemical_system)
     assert not selector.check_valid_json_settings(
-        '{"reverse": True, "all": false, "indexes": {"0": true, "1": true}}'
+        '{"invert": True, "all": false, "indexes": {"0": true, "1": true}}'
     )

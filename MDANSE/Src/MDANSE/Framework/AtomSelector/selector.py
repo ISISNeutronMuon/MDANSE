@@ -22,8 +22,8 @@ class Selector:
     """
 
     _default = {
-        # True reverses the selection
-        "reverse": False,
+        # True inverts the selection
+        "invert": False,
         # True selects atoms
         "all": True,
         "hs_on_heteroatom": False,
@@ -127,7 +127,7 @@ class Selector:
         idxs = set([])
 
         for k, v in self.settings.items():
-            if k == "reverse":
+            if k == "invert":
                 continue
 
             if isinstance(v, dict):
@@ -143,7 +143,7 @@ class Selector:
 
                 idxs = idxs | self._funcs[k](self.system, **args)
 
-        if self.settings["reverse"]:
+        if self.settings["invert"]:
             return self.all_idxs - idxs
         else:
             return idxs
