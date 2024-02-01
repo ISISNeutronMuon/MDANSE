@@ -111,12 +111,20 @@ class Connectivity:
             NDArray -- an (N,N) array of squared distances between all the atom pairs,
                 one for each combination of the unit cell vectors.
         """
-        unit_cell = self._chemical_system.configuration.unit_cell
-        vector_a, vector_b, vector_c = (
-            unit_cell.a_vector,
-            unit_cell.b_vector,
-            unit_cell.c_vector,
-        )
+        try:
+            unit_cell = self._frames._full_box_size
+            vector_a, vector_b, vector_c = (
+                unit_cell[0, :],
+                unit_cell[1, :],
+                unit_cell[2, :],
+            )
+        except AttributeError:
+            unit_cell = self._chemical_system.configuration.unit_cell
+            vector_a, vector_b, vector_c = (
+                unit_cell.a_vector,
+                unit_cell.b_vector,
+                unit_cell.c_vector,
+            )
         coordinates = self.get_coordinates(frame_number=frame_number)
         if coordinates is None:
             return None
