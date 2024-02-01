@@ -73,6 +73,15 @@ class Selector:
         self.all_idxs = select_all(system)
         self.settings = copy.deepcopy(self._default)
 
+        symbols = set(["*"] + [at.symbol for at in system.atom_list])
+        self._kwarg_vals = {
+            "elements": symbols,
+            "hs_on_elements": symbols,
+            # we allow index keys to be str or int, this is mostly
+            # done since json keys are str
+            "index": self.all_idxs | set([str(i) for i in self.all_idxs]),
+        }
+
     def reset_settings(self) -> None:
         """Resets the settings back to the defaults."""
         self.settings = copy.deepcopy(self._default)
@@ -88,7 +97,15 @@ class Selector:
             The selection settings.
         reset_first : bool, optional
             Resets the settings to the default before loading.
+
+        Raises
+        ------
+        ValueError
+            Raises a ValueError if the inputted settings are not valid.
         """
+        if not self.check_valid_setting(settings):
+            raise ValueError("Settings are not valid for the given chemical system.")
+
         if reset_first:
             self.reset_settings()
 
@@ -164,3 +181,54 @@ class Selector:
             Resets the settings to the default before loading.
         """
         self.update_settings(json.loads(json_string), reset_first)
+
+    def check_valid_setting(self, settings: dict[str, Union[bool, dict]]) -> bool:
+        """Checks that the input settings are valid.
+
+        Parameters
+        ----------
+        settings : dict[str, bool | dict]
+            The selection settings.
+
+        Returns
+        -------
+        bool
+            True if settings are valid.
+        """
+        setting_keys = self._default.keys()
+        dict_setting_keys = self._kwarg_keys.keys()
+        for k0, v0 in settings.items():
+            if k0 not in setting_keys:
+                return False
+            if k0 not in dict_setting_keys and not isinstance(v0, bool):
+                return False
+            if k0 in dict_setting_keys:
+                if not isinstance(v0, dict):
+                    return False
+                for k1, v1 in v0.items():
+                    if k1 not in self._kwarg_vals[k0]:
+                        return False
+                    if not isinstance(v1, bool):
+                        return False
+
+        return True
+
+    def check_valid_json_settings(self, json_string: str) -> bool:
+        """Checks that the input json setting string is valid.
+
+        Parameters
+        ----------
+        json_string : str
+            The json string of settings.
+
+        Returns
+        -------
+        bool
+            True if settings are valid.
+        """
+        try:
+            settings = json.loads(json_string)
+        except ValueError:
+            return False
+
+        return self.check_valid_setting(settings)
