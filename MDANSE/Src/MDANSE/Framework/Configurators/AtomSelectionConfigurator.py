@@ -12,13 +12,8 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
-import collections
 import operator
-
-
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -43,7 +38,7 @@ class AtomSelectionConfigurator(IConfigurator):
     :note: this configurator depends on :py:class:`~MDANSE.Framework.Configurators.HDFTrajectoryConfigurator.HDFTrajectoryConfigurator` and :py:class:`~MDANSE.Framework.Configurators.GroupingLevelConfigurator.GroupingLevelConfigurator` configurators to be configured
     """
 
-    _default = "{}"
+    _default = '{"all": true}'
 
     def configure(self, value):
         """
@@ -65,15 +60,9 @@ class AtomSelectionConfigurator(IConfigurator):
 
         self["value"] = value
 
-        if UD_STORE.has_definition(trajConfig["basename"], "atom_selection", value):
-            ud = UD_STORE.get_definition(
-                trajConfig["basename"], "atom_selection", value
-            )
-            indexes = ud["indexes"]
-        else:
-            selector = Selector(trajConfig["instance"].chemical_system)
-            selector.update_from_json(value)
-            indexes = selector.get_idxs()
+        selector = Selector(trajConfig["instance"].chemical_system)
+        selector.update_from_json(value)
+        indexes = selector.get_idxs()
 
         self["flatten_indexes"] = sorted(list(indexes))
 
@@ -129,3 +118,21 @@ class AtomSelectionConfigurator(IConfigurator):
         info.append("Selected elements:%s" % self["unique_names"])
 
         return "\n".join(info)
+
+    def check_valid_settings(self, value: str) -> bool:
+        """Creates a selector and check that the input value is a valid
+        setting.
+
+        Parameters
+        ----------
+        value : str
+            The selector setting in a json string format.
+
+        Returns
+        -------
+        bool
+            True if value is a valid setting.
+        """
+        traj_config = self._configurable[self._dependencies["trajectory"]]
+        selector = Selector(traj_config["instance"].chemical_system)
+        return selector.check_valid_json_settings(value)

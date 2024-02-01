@@ -30,13 +30,15 @@ class SelectionDialog(QDialog):
 
 
 class AtomSelectionWidget(WidgetBase):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        default_value = "{}"
+        default_value = '{"all": true}'
         self._value = default_value
         self.field = QLineEdit(default_value, self._base)
         browse_button = QPushButton("Atom selection creator", self._base)
         browse_button.clicked.connect(self.selection_dialog)
+        self.field.textChanged.connect(self.check_valid_field)
         self._layout.addWidget(self.field)
         self._layout.addWidget(browse_button)
         self.update_labels()
@@ -53,7 +55,12 @@ class AtomSelectionWidget(WidgetBase):
             self.field.setText(new_value)
             self.updateValue()
 
+    def check_valid_field(self, value):
+        if self._configurator.check_valid_settings(value):
+            self.field.setStyleSheet("color: black;")
+        else:
+            self.field.setStyleSheet("color: red;")
+
     def get_widget_value(self):
         selection_string = self.field.text()
-
         return selection_string
