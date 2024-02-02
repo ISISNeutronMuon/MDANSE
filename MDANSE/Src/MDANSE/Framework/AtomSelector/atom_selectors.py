@@ -11,7 +11,9 @@ __all__ = [
 ]
 
 
-def select_element(system: ChemicalSystem, symbol: str) -> set[int]:
+def select_element(
+    system: ChemicalSystem, symbol: str, check_exists: bool = False
+) -> Union[set[int], bool]:
     """Selects all atoms for the input element.
 
     Parameters
@@ -20,21 +22,24 @@ def select_element(system: ChemicalSystem, symbol: str) -> set[int]:
         The MDANSE chemical system.
     symbol : str
         Symbol of the element.
+    check_exists : bool, optional
+        Check if a match exists.
 
     Returns
     -------
-    set[int]
+    Union[set[int], bool]
         The atom indices of the matched atoms.
     """
-    if "*" == symbol:
-        return set([at.index for at in system.atom_list])
-    return system.get_substructure_matches(
-        f"[#{ATOMS_DATABASE[symbol]['atomic_number']}]")
+    pattern = f"[#{ATOMS_DATABASE[symbol]['atomic_number']}]"
+    if check_exists:
+        return system.has_substructure_match(pattern)
+    else:
+        return system.get_substructure_matches(pattern)
 
 
 def select_hs_on_element(
-    system: ChemicalSystem, symbol: Union[list[str], str]
-) -> set[int]:
+    system: ChemicalSystem, symbol: Union[list[str], str], check_exists: bool = False
+) -> Union[set[int], bool]:
     """Selects all H atoms bonded to the input element.
 
     Parameters
@@ -43,19 +48,26 @@ def select_hs_on_element(
         The MDANSE chemical system.
     symbol : list[str] or str
         Symbol of the element that the H atoms are bonded to.
+    check_exists : bool, optional
+        Check if a match exists.
 
     Returns
     -------
-    set[int]
+    Union[set[int], bool]
         The atom indices of the matched atoms.
     """
     num = ATOMS_DATABASE[symbol]["atomic_number"]
-    xh_matches = system.get_substructure_matches(f"[#{num}]~[H]")
-    x_matches = system.get_substructure_matches(f"[#{num}]")
-    return xh_matches - x_matches
+    if check_exists:
+        return system.has_substructure_match(f"[#{num}]~[H]")
+    else:
+        xh_matches = system.get_substructure_matches(f"[#{num}]~[H]")
+        x_matches = system.get_substructure_matches(f"[#{num}]")
+        return xh_matches - x_matches
 
 
-def select_hs_on_heteroatom(system: ChemicalSystem) -> set[int]:
+def select_hs_on_heteroatom(
+    system: ChemicalSystem, check_exists: bool = False
+) -> Union[set[int], bool]:
     """Selects all H atoms bonded to any atom except carbon and
     hydrogen.
 
@@ -63,18 +75,25 @@ def select_hs_on_heteroatom(system: ChemicalSystem) -> set[int]:
     ----------
     system : ChemicalSystem
         The MDANSE chemical system.
+    check_exists : bool, optional
+        Check if a match exists.
 
     Returns
     -------
-    set[int]
+    Union[set[int], bool]
         The atom indices of the matched atoms.
     """
-    xh_matches = system.get_substructure_matches("[!#6&!#1]~[H]")
-    x_matches = system.get_substructure_matches("[!#6&!#1]")
-    return xh_matches - x_matches
+    if check_exists:
+        return system.has_substructure_match("[!#6&!#1]~[H]")
+    else:
+        xh_matches = system.get_substructure_matches("[!#6&!#1]~[H]")
+        x_matches = system.get_substructure_matches("[!#6&!#1]")
+        return xh_matches - x_matches
 
 
-def select_index(system: ChemicalSystem, index: Union[int, str]) -> set[int]:
+def select_index(
+    system: ChemicalSystem, index: Union[int, str], check_exists: bool = False
+) -> Union[set[int], bool]:
     """Selects atom with index - just returns the set with the
     index in it.
 
@@ -84,10 +103,15 @@ def select_index(system: ChemicalSystem, index: Union[int, str]) -> set[int]:
         The MDANSE chemical system.
     index : int or str
         The index to select.
+    check_exists : bool, optional
+        Check if a match exists.
 
     Returns
     -------
-    set[int]
-        The index in a set.
+    Union[set[int], bool]
+        The index in a set or a bool if checking match.
     """
-    return {int(index)}
+    if check_exists:
+        return True
+    else:
+        return {int(index)}

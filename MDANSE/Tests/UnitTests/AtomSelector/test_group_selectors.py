@@ -33,6 +33,20 @@ def nucleic_acid_chemical_system():
     return nucleic_acid_chemical_system
 
 
+def test_select_primary_amine_returns_true_as_match_exists(
+    protein_chemical_system,
+):
+    exists = select_primary_amine(protein_chemical_system, check_exists=True)
+    assert exists
+
+
+def test_select_sulphate_returns_false_as_match_does_not_exist(
+    nucleic_acid_chemical_system,
+):
+    exists = select_sulphate(nucleic_acid_chemical_system, check_exists=True)
+    assert not exists
+
+
 def test_select_primary_amine_returns_correct_number_of_atoms_matches(
     protein_chemical_system,
 ):

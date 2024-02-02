@@ -82,6 +82,19 @@ class Selector:
             "index": self.all_idxs | set([str(i) for i in self.all_idxs]),
         }
 
+        self.match_exists = self.full_settings
+        for k0, v0 in self.match_exists.items():
+            if k0 == "invert":
+                self.match_exists[k0] = True
+                continue
+            if isinstance(v0, dict):
+                for k1 in v0.keys():
+                    self.match_exists[k0][k1] = self._funcs[k0](
+                        self.system, **{self._kwarg_keys[k0]: k1}, check_exists=True
+                    )
+            else:
+                self.match_exists[k0] = self._funcs[k0](self.system, check_exists=True)
+
     def reset_settings(self) -> None:
         """Resets the settings back to the defaults."""
         self.settings = copy.deepcopy(self._default)
@@ -233,10 +246,15 @@ class Selector:
         return self.check_valid_setting(settings)
 
     @property
-    def full_settings(self):
+    def full_settings(self) -> dict[str, Union[bool, dict]]:
+        """
+        Returns
+        -------
+        dict[str, Union[bool, dict]]
+            The full settings for the initialised chemical system.
+        """
         settings = copy.deepcopy(self.settings)
         for k, vs in self._kwarg_vals.items():
-            sublist = {}
             # when the arg vals can also be int in addition to str
             if any([isinstance(i, int) for i in vs]):
                 options = sorted(list(set([int(i) for i in vs])))
@@ -244,6 +262,6 @@ class Selector:
             else:
                 options = sorted(vs)
             for v in options:
-                sublist[v] = False
-            settings[k] = sublist
+                if v not in settings[k]:
+                    settings[k][v] = False
         return settings

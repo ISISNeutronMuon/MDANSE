@@ -20,14 +20,25 @@ def protein_chemical_system():
     return protein_chemical_system
 
 
+def test_select_element_returns_true_as_match_exist(
+    protein_chemical_system,
+):
+    exists = select_element(protein_chemical_system, "S", check_exists=True)
+    assert exists
+
+
+def test_select_element_returns_false_as_match_does_not_exist(
+    protein_chemical_system,
+):
+    exists = select_element(protein_chemical_system, "Si", check_exists=True)
+    assert not exists
+
+
 def test_select_element_returns_correct_number_of_atoms_matches(
     protein_chemical_system,
 ):
     selection = select_element(protein_chemical_system, "S")
     assert len(selection) == 10
-
-    selection = select_element(protein_chemical_system, "*")
-    assert len(selection) == 30714
 
 
 def test_select_hs_on_carbon_returns_correct_number_of_atoms_matches(
