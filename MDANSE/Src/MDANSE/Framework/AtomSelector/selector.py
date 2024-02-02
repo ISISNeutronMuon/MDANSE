@@ -196,8 +196,7 @@ class Selector:
         self.update_settings(json.loads(json_string), reset_first)
 
     def check_valid_setting(self, settings: dict[str, Union[bool, dict]]) -> bool:
-        """Checks that the input settings are valid. Needs matches to
-        exist to be valid.
+        """Checks that the input settings are valid.
 
         Parameters
         ----------
