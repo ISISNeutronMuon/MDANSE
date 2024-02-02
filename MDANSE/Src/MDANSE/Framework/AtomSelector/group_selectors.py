@@ -24,8 +24,8 @@ def select_primary_amine(system: ChemicalSystem) -> set[int]:
     set[int]
         The atom indices of the matched atoms.
     """
-    patterns = ["[#7X3;H2;!$([#7][#6X3][!#6]);!$([#7][#6X2][!#6])](~[H])~[H]"]
-    return system.get_substructure_matches(patterns)
+    pattern = "[#7X3;H2;!$([#7][#6X3][!#6]);!$([#7][#6X2][!#6])](~[H])~[H]"
+    return system.get_substructure_matches(pattern)
 
 
 def select_hydroxy(system: ChemicalSystem) -> set[int]:
@@ -42,7 +42,7 @@ def select_hydroxy(system: ChemicalSystem) -> set[int]:
         The atom indices of the matched atoms.
     """
     # including -OH on water
-    return system.get_substructure_matches(["[#8;H1,H2]~[H]"])
+    return system.get_substructure_matches("[#8;H1,H2]~[H]")
 
 
 def select_methly(system: ChemicalSystem) -> set[int]:
@@ -58,7 +58,7 @@ def select_methly(system: ChemicalSystem) -> set[int]:
     set[int]
         The atom indices of the matched atoms.
     """
-    return system.get_substructure_matches(["[#6;H3](~[H])(~[H])~[H]"])
+    return system.get_substructure_matches("[#6;H3](~[H])(~[H])~[H]")
 
 
 def select_phosphate(system: ChemicalSystem) -> set[int]:
@@ -74,7 +74,7 @@ def select_phosphate(system: ChemicalSystem) -> set[int]:
     set[int]
         The atom indices of the matched atoms.
     """
-    return system.get_substructure_matches(["[#15X4](~[#8])(~[#8])(~[#8])~[#8]"])
+    return system.get_substructure_matches("[#15X4](~[#8])(~[#8])(~[#8])~[#8]")
 
 
 def select_sulphate(system: ChemicalSystem) -> set[int]:
@@ -90,7 +90,7 @@ def select_sulphate(system: ChemicalSystem) -> set[int]:
     set[int]
         The atom indices of the matched atoms.
     """
-    return system.get_substructure_matches(["[#16X4](~[#8])(~[#8])(~[#8])~[#8]"])
+    return system.get_substructure_matches("[#16X4](~[#8])(~[#8])(~[#8])~[#8]")
 
 
 def select_thiol(system: ChemicalSystem) -> set[int]:
@@ -106,4 +106,4 @@ def select_thiol(system: ChemicalSystem) -> set[int]:
     set[int]
         The atom indices of the matched atoms.
     """
-    return system.get_substructure_matches(["[#16X2;H1]~[H]"])
+    return system.get_substructure_matches("[#16X2;H1]~[H]")

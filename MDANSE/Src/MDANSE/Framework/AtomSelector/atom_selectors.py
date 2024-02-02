@@ -4,63 +4,55 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 
 
 __all__ = [
-    "select_elements",
-    "select_hs_on_elements",
+    "select_element",
+    "select_hs_on_element",
     "select_hs_on_heteroatom",
     "select_index",
 ]
 
 
-def select_elements(system: ChemicalSystem, symbols: Union[list[str], str]) -> set[int]:
-    """Selects all atoms for the input elements.
+def select_element(system: ChemicalSystem, symbol: str) -> set[int]:
+    """Selects all atoms for the input element.
 
     Parameters
     ----------
     system : ChemicalSystem
         The MDANSE chemical system.
-    symbols : list[str]
-        A symbol or list of symbols of the elements.
+    symbol : str
+        Symbol of the element.
 
     Returns
     -------
     set[int]
         The atom indices of the matched atoms.
     """
-    patterns = []
-    symbols = set(symbols if isinstance(symbols, list) else [symbols])
-    if "*" in symbols:
+    if "*" == symbol:
         return set([at.index for at in system.atom_list])
-    for symbol in symbols:
-        patterns.append(f"[#{ATOMS_DATABASE[symbol]['atomic_number']}]")
-    return system.get_substructure_matches(patterns)
+    return system.get_substructure_matches(
+        f"[#{ATOMS_DATABASE[symbol]['atomic_number']}]")
 
 
-def select_hs_on_elements(
-    system: ChemicalSystem, symbols: Union[list[str], str]
+def select_hs_on_element(
+    system: ChemicalSystem, symbol: Union[list[str], str]
 ) -> set[int]:
-    """Selects all H atoms bonded to the input elements.
+    """Selects all H atoms bonded to the input element.
 
     Parameters
     ----------
     system : ChemicalSystem
         The MDANSE chemical system.
-    symbols : list[str] or str
-        A symbols or list of symbols of the elements that the H atoms are
-        bonded to.
+    symbol : list[str] or str
+        Symbol of the element that the H atoms are bonded to.
 
     Returns
     -------
     set[int]
         The atom indices of the matched atoms.
     """
-    matches = set()
-    symbols = set(symbols if isinstance(symbols, list) else [symbols])
-    for symbol in symbols:
-        num = ATOMS_DATABASE[symbol]["atomic_number"]
-        xh_matches = system.get_substructure_matches([f"[#{num}]~[H]"])
-        x_matches = system.get_substructure_matches([f"[#{num}]"])
-        matches.update(xh_matches - x_matches)
-    return matches
+    num = ATOMS_DATABASE[symbol]["atomic_number"]
+    xh_matches = system.get_substructure_matches(f"[#{num}]~[H]")
+    x_matches = system.get_substructure_matches(f"[#{num}]")
+    return xh_matches - x_matches
 
 
 def select_hs_on_heteroatom(system: ChemicalSystem) -> set[int]:
@@ -77,8 +69,8 @@ def select_hs_on_heteroatom(system: ChemicalSystem) -> set[int]:
     set[int]
         The atom indices of the matched atoms.
     """
-    xh_matches = system.get_substructure_matches(["[!#6&!#1]~[H]"])
-    x_matches = system.get_substructure_matches(["[!#6&!#1]"])
+    xh_matches = system.get_substructure_matches("[!#6&!#1]~[H]")
+    x_matches = system.get_substructure_matches("[!#6&!#1]")
     return xh_matches - x_matches
 
 

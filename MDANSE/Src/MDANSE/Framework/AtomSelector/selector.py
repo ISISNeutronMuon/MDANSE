@@ -33,10 +33,10 @@ class Selector:
         "thiol": False,
         "water": False,
         # e.g. {"S": True}
-        "elements": {},
-        "hs_on_elements": {},
+        "element": {},
+        "hs_on_element": {},
         # e.g. {"1": True} or {1: True}
-        "indexes": {},
+        "index": {},
         # True inverts the selection
         "invert": False,
     }
@@ -51,15 +51,15 @@ class Selector:
         "sulphate": select_sulphate,
         "thiol": select_thiol,
         "water": select_water,
-        "elements": select_elements,
-        "hs_on_elements": select_hs_on_elements,
-        "indexes": select_index,
+        "element": select_element,
+        "hs_on_element": select_hs_on_element,
+        "index": select_index,
     }
 
     _kwarg_keys = {
-        "elements": "symbols",
-        "hs_on_elements": "symbols",
-        "indexes": "index",
+        "element": "symbol",
+        "hs_on_element": "symbol",
+        "index": "index",
     }
 
     def __init__(self, system: ChemicalSystem) -> None:
@@ -75,11 +75,11 @@ class Selector:
 
         symbols = set([at.symbol for at in system.atom_list])
         self._kwarg_vals = {
-            "elements": symbols,
-            "hs_on_elements": symbols,
+            "element": symbols,
+            "hs_on_element": symbols,
             # we allow index keys to be str or int, this is mostly
             # done since json keys are str
-            "indexes": self.all_idxs | set([str(i) for i in self.all_idxs]),
+            "index": self.all_idxs | set([str(i) for i in self.all_idxs]),
         }
 
     def reset_settings(self) -> None:
