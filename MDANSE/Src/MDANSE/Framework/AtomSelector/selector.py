@@ -109,12 +109,12 @@ class Selector:
         if reset_first:
             self.reset_settings()
 
-        for k1, v1 in settings.items():
-            if isinstance(self.settings[k1], dict):
-                for k2, v2 in v1.items():
-                    self.settings[k1][k2] = v2
+        for k0, v0 in settings.items():
+            if isinstance(self.settings[k0], dict):
+                for k1, v1 in v0.items():
+                    self.settings[k0][k1] = v1
             else:
-                self.settings[k1] = v1
+                self.settings[k0] = v0
 
     def get_idxs(self) -> set[int]:
         """The atom indexes after applying the selection to the system.
@@ -210,7 +210,6 @@ class Selector:
                         return False
                     if not isinstance(v1, bool):
                         return False
-
         return True
 
     def check_valid_json_settings(self, json_string: str) -> bool:
