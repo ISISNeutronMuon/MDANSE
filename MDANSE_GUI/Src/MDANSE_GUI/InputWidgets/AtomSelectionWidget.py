@@ -12,6 +12,7 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
     QComboBox,
     QLineEdit,
@@ -20,7 +21,8 @@ from qtpy.QtWidgets import (
     QCheckBox,
     QVBoxLayout,
     QHBoxLayout,
-    QGroupBox
+    QGroupBox,
+    QLabel
 )
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
@@ -30,20 +32,25 @@ class HelperDialog(QDialog):
 
     def __init__(self, selector, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
+        self.setWindowTitle("Atom selection helper")
         self.selector = selector
         full_settings = self.selector.full_settings
+        match_exists = self.selector.match_exists
 
-        checkbox_text = {
-            "all": "all atoms",
-            "hs_on_heteroatom": "hydrogen atoms on heteroatoms",
-            "primary_amine": "primary amine group atoms",
-            "hydroxy": "hydroxy group atoms",
-            "methyl": "methyl group atoms",
-            "phosphate": "phosphate group atoms",
-            "sulphate": "sulphate group atoms",
-            "thiol": "thiol group atoms",
-            "water": "water molecule atoms",
-            "invert": "invert the selection"
+        cbox_text = {
+            "all": "All atoms:",
+            "hs_on_heteroatom": "Hs on heteroatoms:",
+            "primary_amine": "Primary amine groups:",
+            "hydroxy": "Hydroxy groups:",
+            "methyl": "Methyl groups:",
+            "phosphate": "Phosphate groups:",
+            "sulphate": "Sulphate groups:",
+            "thiol": "Thiol groups:",
+            "water": "Water molecules:",
+            "element": "Elements:",
+            "hs_on_element": "Hs on element:",
+            "index": "Index:",
+            "invert": "Invert the selection:"
         }
 
         layout = QVBoxLayout()
@@ -54,19 +61,36 @@ class HelperDialog(QDialog):
         invert_layout = QVBoxLayout()
 
         for k, v in full_settings.items():
+
             if isinstance(v, bool):
+                check_layout = QHBoxLayout()
                 checkbox = QCheckBox()
-                checkbox.setText(checkbox_text[k])
                 checkbox.setChecked(v)
+                checkbox.setLayoutDirection(Qt.RightToLeft)
+                label = QLabel(cbox_text[k])
+                if not match_exists[k]:
+                    checkbox.setEnabled(False)
+                    label.setStyleSheet("color: grey;")
+                check_layout.addWidget(label)
+                check_layout.addWidget(checkbox)
                 if k == "invert":
-                    invert_layout.addWidget(checkbox)
+                    invert_layout.addLayout(check_layout)
                 else:
-                    select_layout.addWidget(checkbox)
+                    select_layout.addLayout(check_layout)
+
             elif isinstance(v, dict):
+                combo_layout = QHBoxLayout()
                 combo = QComboBox()
-                combo.addItems(v.keys())
+                items = [i for i in v.keys() if match_exists[k][i]]
+                combo.addItems(items)
                 combo.setCurrentIndex(-1)
-                select_layout.addWidget(combo)
+                label = QLabel(cbox_text[k])
+                if len(items) == 0:
+                    combo.setEnabled(False)
+                    label.setStyleSheet("color: grey;")
+                combo_layout.addWidget(label)
+                combo_layout.addWidget(combo)
+                select_layout.addLayout(combo_layout)
 
         select.setLayout(select_layout)
         invert.setLayout(invert_layout)
@@ -92,7 +116,7 @@ class AtomSelectionWidget(WidgetBase):
         self.helper = HelperDialog(self.selector, self.parent())
         self._value = default_value
         self.field = QLineEdit(default_value, self._base)
-        browse_button = QPushButton("atom selection helper", self._base)
+        browse_button = QPushButton("Atom selection helper", self._base)
         browse_button.clicked.connect(self.helper_dialog)
         self.field.textChanged.connect(self.check_valid_field)
         self._layout.addWidget(self.field)
