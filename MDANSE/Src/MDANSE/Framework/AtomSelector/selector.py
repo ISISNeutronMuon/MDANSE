@@ -22,14 +22,12 @@ class Selector:
     """
 
     _default = {
-        # True inverts the selection
-        "invert": False,
         # True selects atoms
         "all": True,
         "hs_on_heteroatom": False,
         "primary_amine": False,
         "hydroxy": False,
-        "methly": False,
+        "methyl": False,
         "phosphate": False,
         "sulphate": False,
         "thiol": False,
@@ -39,6 +37,8 @@ class Selector:
         "hs_on_elements": {},
         # e.g. {"1": True} or {1: True}
         "indexes": {},
+        # True inverts the selection
+        "invert": False,
     }
 
     _funcs = {
@@ -46,7 +46,7 @@ class Selector:
         "hs_on_heteroatom": select_hs_on_heteroatom,
         "primary_amine": select_primary_amine,
         "hydroxy": select_hydroxy,
-        "methly": select_methly,
+        "methyl": select_methly,
         "phosphate": select_phosphate,
         "sulphate": select_sulphate,
         "thiol": select_thiol,
@@ -73,7 +73,7 @@ class Selector:
         self.all_idxs = select_all(system)
         self.settings = copy.deepcopy(self._default)
 
-        symbols = set(["*"] + [at.symbol for at in system.atom_list])
+        symbols = set([at.symbol for at in system.atom_list])
         self._kwarg_vals = {
             "elements": symbols,
             "hs_on_elements": symbols,
@@ -232,3 +232,19 @@ class Selector:
             return False
 
         return self.check_valid_setting(settings)
+
+    @property
+    def full_settings(self):
+        settings = copy.deepcopy(self.settings)
+        for k, vs in self._kwarg_vals.items():
+            sublist = {}
+            # when the arg vals can also be int in addition to str
+            if any([isinstance(i, int) for i in vs]):
+                options = sorted(list(set([int(i) for i in vs])))
+                options = [str(i) for i in options]
+            else:
+                options = sorted(vs)
+            for v in options:
+                sublist[v] = False
+            settings[k] = sublist
+        return settings

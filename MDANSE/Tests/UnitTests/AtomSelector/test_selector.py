@@ -231,7 +231,7 @@ def test_selector_json_dump_and_load_0(protein_chemical_system):
     )
     json_dump = selector.settings_to_json()
     assert (
-        json_dump == '{"invert": true, "all": false, "indexes": {"0": true, "1": true}}'
+        json_dump == '{"all": false, "indexes": {"0": true, "1": true}, "invert": true}'
     )
     selector.update_from_json(json_dump, reset_first=True)
     atm_idxs = selector.get_idxs()
@@ -246,34 +246,11 @@ def test_selector_json_dump_and_load_1(protein_chemical_system):
     json_dump = selector.settings_to_json()
     assert (
         json_dump
-        == '{"invert": true, "all": false, "water": true, "elements": {"S": true}}'
+        == '{"all": false, "water": true, "elements": {"S": true}, "invert": true}'
     )
     selector.update_from_json(json_dump, reset_first=True)
     atm_idxs = selector.get_idxs()
     assert len(atm_idxs) == 30714 - 28746 - 10
-
-
-def test_selector_returns_correct_number_of_atoms_idxs_when_sulfurs_and_then_all_atoms_are_removed(
-    protein_chemical_system,
-):
-    selector = Selector(protein_chemical_system)
-    selector.update_settings(
-        {
-            "invert": True,
-            "all": False,
-            "elements": {"S": True},
-        }
-    )
-    atm_idxs = selector.get_idxs()
-    assert len(atm_idxs) == 30714 - 10
-
-    selector.update_settings(
-        {
-            "elements": {"*": True},
-        }
-    )
-    atm_idxs = selector.get_idxs()
-    assert len(atm_idxs) == 0
 
 
 def test_selector_returns_correct_number_of_atoms_idxs_when_indexes_0_and_1_are_removed(

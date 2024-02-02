@@ -119,20 +119,7 @@ class AtomSelectionConfigurator(IConfigurator):
 
         return "\n".join(info)
 
-    def check_valid_settings(self, value: str) -> bool:
-        """Creates a selector and check that the input value is a valid
-        setting.
-
-        Parameters
-        ----------
-        value : str
-            The selector setting in a json string format.
-
-        Returns
-        -------
-        bool
-            True if value is a valid setting.
-        """
+    def get_selector(self) -> Selector:
         traj_config = self._configurable[self._dependencies["trajectory"]]
         selector = Selector(traj_config["instance"].chemical_system)
-        return selector.check_valid_json_settings(value)
+        return selector
