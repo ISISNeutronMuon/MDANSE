@@ -389,7 +389,7 @@ class DL_POLY(Converter):
     )
     # settings['output_files'] = ('output_files', {'formats':["HDFFormat"]})
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
+        "OutputTrajectoryConfigurator",
         {
             "format": "MDTFormat",
             "root": "history_file",
@@ -424,6 +424,8 @@ class DL_POLY(Converter):
             self.configuration["output_files"]["files"][0],
             self._chemicalSystem,
             self.numberOfSteps,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
         self._velocities = None

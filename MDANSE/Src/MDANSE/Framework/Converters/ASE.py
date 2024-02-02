@@ -75,7 +75,7 @@ class ASE(Converter):
         },
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
+        "OutputTrajectoryConfigurator",
         {
             "label": "MDANSE trajectory (filename, format)",
             "format": "MDTFormat",
@@ -106,6 +106,8 @@ class ASE(Converter):
             self.configuration["output_file"]["file"],
             self._chemicalSystem,
             self.numberOfSteps,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
         self._nameToIndex = dict(
@@ -302,7 +304,7 @@ class ASEInteractiveConverter(InteractiveConverter):
     )
 
     output_files["output_file"] = (
-        "SingleOutputFileConfigurator",
+        "OutputTrajectoryConfigurator",
         {"format": "MDTFormat", "root": "config_file"},
     )
 
@@ -328,6 +330,8 @@ class ASEInteractiveConverter(InteractiveConverter):
             self.configuration["output_file"]["file"],
             self._chemicalSystem,
             self.numberOfSteps,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
         self._nameToIndex = dict(

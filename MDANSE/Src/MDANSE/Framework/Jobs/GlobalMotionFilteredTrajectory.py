@@ -71,8 +71,8 @@ class GlobalMotionFilteredTrajectory(IJob):
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["output_file"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDTFormat"]},
+        "OutputTrajectoryConfigurator",
+        {"format": "MDTFormat"},
     )
 
     def initialize(self):
@@ -99,10 +99,12 @@ class GlobalMotionFilteredTrajectory(IJob):
         self._reference_atoms = AtomGroup(self._reference_atoms)
 
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["files"][0],
+            self.configuration["output_file"]["file"],
             self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
             self._selected_atoms.atom_list,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
         # This will store the configuration used as the reference for the following step.

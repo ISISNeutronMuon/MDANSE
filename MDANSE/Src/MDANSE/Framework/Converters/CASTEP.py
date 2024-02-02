@@ -212,7 +212,7 @@ class CASTEP(Converter):
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
+        "OutputTrajectoryConfigurator",
         {
             "format": "MDTFormat",
             "root": "castep_file",
@@ -246,6 +246,8 @@ class CASTEP(Converter):
             self.configuration["output_file"]["file"],
             self._chemical_system,
             self.numberOfSteps,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
     def run_step(self, index):

@@ -73,9 +73,6 @@ class IntegerWidget(WidgetBase):
         self._value = num
         self.updateValue()
 
-    @Slot()
-    def updateValue(self):
-        self._configurator.configure(self._value)
-
-    def get_value(self):
-        return self._configurator["value"]
+    def get_widget_value(self):
+        """Collect the results from the input widgets and return the value."""
+        return int(self._field.text())

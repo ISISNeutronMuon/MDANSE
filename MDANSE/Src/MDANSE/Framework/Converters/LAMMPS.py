@@ -198,7 +198,7 @@ class LAMMPS(Converter):
         {"default": False, "label": "Fold coordinates in to box"},
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
+        "OutputTrajectoryConfigurator",
         {
             "format": "MDTFormat",
             "root": "config_file",
@@ -234,6 +234,8 @@ class LAMMPS(Converter):
             self.configuration["output_file"]["file"],
             self._chemicalSystem,
             self.numberOfSteps,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
         self._nameToIndex = dict(

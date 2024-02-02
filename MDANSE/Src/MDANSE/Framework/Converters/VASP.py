@@ -191,7 +191,7 @@ class VASP(Converter):
         {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
-        "SingleOutputFileConfigurator",
+        "OutputTrajectoryConfigurator",
         {
             "format": "MDTFormat",
             "root": "xdatcar_file",
@@ -222,6 +222,8 @@ class VASP(Converter):
             self.configuration["output_file"]["file"],
             self._chemicalSystem,
             self.numberOfSteps,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
     def run_step(self, index):
