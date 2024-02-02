@@ -25,10 +25,10 @@ from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Views.TrajectoryView import TrajectoryView
-from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
+from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
 
 
-class TrajectoryTab(GeneralTab):
+class MolecularViewerTab(GeneralTab):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._core.add_button("Load an .MTD Trajectory", self.load_trajectory)
@@ -58,7 +58,7 @@ class TrajectoryTab(GeneralTab):
             session=LocalSession(),
             model=GeneralModel(),
             view=TrajectoryView(),
-            visualiser=TrajectoryInfo(),
+            visualiser=View3D(),
             layout=DoublePanel,
             label_text="""Here you can load the .mdt files.
 They are MD trajectories in HDF5 format,
@@ -85,7 +85,7 @@ created by one of the MDANSE converters.
             logger=logger,
             model=kwargs.get("model", GeneralModel()),
             view=TrajectoryView(),
-            visualiser=TrajectoryInfo(),
+            visualiser=View3D(),
             layout=DoublePanel,
             label_text="""Here you can load the .mdt files.
 They are MD trajectories in HDF5 format,
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     window = QMainWindow()
-    the_tab = TrajectoryTab.standard_instance()
+    the_tab = MolecularViewerTab.standard_instance()
     window.setCentralWidget(the_tab._core)
     window.show()
     app.exec()

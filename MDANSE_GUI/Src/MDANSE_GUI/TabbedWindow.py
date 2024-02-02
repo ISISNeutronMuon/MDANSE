@@ -36,8 +36,10 @@ from MDANSE_GUI.Resources import Resources
 from MDANSE_GUI.UnitsEditor import UnitsEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
+from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.TrajectoryTab import TrajectoryTab
 from MDANSE_GUI.Tabs.JobTab import JobTab
+from MDANSE_GUI.Tabs.MolecularViewerTab import MolecularViewerTab
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
 from MDANSE_GUI.MolecularViewer.Controls import ViewerControls
 from MDANSE_GUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
@@ -72,8 +74,12 @@ class TabbedWindow(QMainWindow):
         self.resources = Resources()
         self.current_object = None
         self.startSettings(settings)
+        self.createCommonModels()
         self.makeBasicLayout()
         self.workdir = os.path.expanduser("~")
+
+    def createCommonModels(self):
+        self._trajectory_model = GeneralModel()
 
     def makeBasicLayout(self):
         self.createTrajectoryViewer()
@@ -253,19 +259,28 @@ class TabbedWindow(QMainWindow):
     def createTrajectoryViewer(self):
         name = "Trajectories"
         trajectory_tab = TrajectoryTab.gui_instance(
-            self.tabs, name, self._session, self._settings, self._logger
+            self.tabs,
+            name,
+            self._session,
+            self._settings,
+            self._logger,
+            model=self._trajectory_model,
         )
         self.tabs.addTab(trajectory_tab._core, name)
         self._tabs[name] = trajectory_tab
 
     def createMolecularViewer(self):
-        base, temp = self.wid_gen.wrapWidget(
-            cls=ViewerControls, parent=self, dockable=True, name="3D View"
+        name = "3D View"
+        molview_tab = MolecularViewerTab.gui_instance(
+            self.tabs,
+            name,
+            self._session,
+            self._settings,
+            self._logger,
+            model=self._trajectory_model,
         )
-        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, base)
-        viewer = MolecularViewer(temp)
-        temp.setViewer(viewer)
-        self._visualiser = viewer
+        self.tabs.addTab(molview_tab._core, name)
+        self._tabs[name] = molview_tab
 
     def createJobsViewer(self):
         base, temp = self.wid_gen.wrapWidget(

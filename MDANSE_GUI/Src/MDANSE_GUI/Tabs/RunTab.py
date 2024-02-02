@@ -28,8 +28,8 @@ from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
 
 
-class JobTab(GeneralTab):
-    """The tab for choosing and starting a new job."""
+class RunTab(GeneralTab):
+    """The tab for tracking the progress of running jobs."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -78,13 +78,7 @@ Use the button to start a job.
 
     @classmethod
     def gui_instance(
-        cls,
-        parent: QWidget,
-        name: str,
-        session: LocalSession,
-        settings,
-        logger,
-        **kwargs,
+        cls, parent: QWidget, name: str, session: LocalSession, settings, logger
     ):
         the_tab = cls(
             parent,
@@ -92,7 +86,7 @@ Use the button to start a job.
             session=session,
             settings=settings,
             logger=logger,
-            model=kwargs.get("model", JobTree()),
+            model=JobTree(),
             view=ActionsTree(),
             visualiser=TextInfo(
                 header="MDANSE Analysis",
@@ -115,9 +109,9 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     window = QMainWindow()
-    the_tab = JobTab(
+    the_tab = RunTab(
         window,
-        name="AvailableJobs",
+        name="RunningJobs",
         model=JobTree(),
         view=ActionsTree(),
         visualiser=TextInfo(),

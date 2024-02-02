@@ -53,4 +53,4 @@ class TrajectoryView(QListView):
         model = self.model()
         node_number = model.itemFromIndex(index).data()
         trajectory = model._nodes[node_number]
-        self.item_details.emit(trajectory.info())
+        self.item_details.emit(trajectory)

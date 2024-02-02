@@ -134,6 +134,12 @@ class MolecularViewer(QtWidgets.QWidget):
     def setDataModel(self, datamodel: TrajectoryAtomData):
         self._datamodel = datamodel
 
+    def _new_trajectory_object(self, data: HDFTrajectoryInputData):
+        reader = hdf5wrapper.HDF5Wrapper(
+            "Dummy Name", data.trajectory, data.chemical_system
+        )
+        self.set_reader(reader)
+
     @Slot(str)
     def _new_trajectory(self, fname: str):
         data = HDFTrajectoryInputData(fname)

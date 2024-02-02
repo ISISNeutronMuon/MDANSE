@@ -48,9 +48,6 @@ class IReader(abc.ABC):
             filename (str): the trajectory filename
         """
 
-        if not os.path.exists(filename):
-            raise IOError("The file {} does not exist.".format(filename))
-
         self._filename = filename
 
         self._n_frames = 0
