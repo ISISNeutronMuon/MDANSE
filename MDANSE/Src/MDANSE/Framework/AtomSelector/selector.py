@@ -196,7 +196,8 @@ class Selector:
         self.update_settings(json.loads(json_string), reset_first)
 
     def check_valid_setting(self, settings: dict[str, Union[bool, dict]]) -> bool:
-        """Checks that the input settings are valid.
+        """Checks that the input settings are valid. Needs matches to
+        exist to be valid.
 
         Parameters
         ----------
@@ -211,18 +212,27 @@ class Selector:
         setting_keys = self._default.keys()
         dict_setting_keys = self._kwarg_keys.keys()
         for k0, v0 in settings.items():
+
             if k0 not in setting_keys:
                 return False
-            if k0 not in dict_setting_keys and not isinstance(v0, bool):
-                return False
+
+            if k0 not in dict_setting_keys:
+                if not isinstance(v0, bool):
+                    return False
+                if not self.match_exists[k0]:
+                    return False
+
             if k0 in dict_setting_keys:
                 if not isinstance(v0, dict):
                     return False
                 for k1, v1 in v0.items():
-                    if k1 not in self._kwarg_vals[k0]:
+                    if str(k1) not in self._kwarg_vals[k0]:
                         return False
                     if not isinstance(v1, bool):
                         return False
+                    if not self.match_exists[k0][str(k1)]:
+                        return False
+
         return True
 
     def check_valid_json_settings(self, json_string: str) -> bool:
@@ -255,8 +265,8 @@ class Selector:
         """
         settings = copy.deepcopy(self.settings)
         for k, vs in self._kwarg_vals.items():
-            # when the arg vals can also be int in addition to str
             if any([isinstance(i, int) for i in vs]):
+                # when the arg vals can also be int in addition to str
                 options = sorted(list(set([int(i) for i in vs])))
                 options = [str(i) for i in options]
             else:
