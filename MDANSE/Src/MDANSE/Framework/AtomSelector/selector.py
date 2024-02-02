@@ -117,7 +117,7 @@ class Selector:
             Raises a ValueError if the inputted settings are not valid.
         """
         if not self.check_valid_setting(settings):
-            raise ValueError("Settings are not valid for the given chemical system.")
+            raise ValueError(f"Settings are not valid for the given chemical system - {settings}.")
 
         if reset_first:
             self.reset_settings()
@@ -172,7 +172,7 @@ class Selector:
         """
         minimal_dict = {}
         for k0, v0 in self.settings.items():
-            if isinstance(v0, bool) and (k0 == "all" and not v0 or k0 != "all" and v0):
+            if isinstance(v0, bool) and (k0 == "all" or k0 != "all" and v0):
                 minimal_dict[k0] = v0
             elif isinstance(v0, dict):
                 sub_dict = {}
@@ -219,8 +219,6 @@ class Selector:
             if k0 not in dict_setting_keys:
                 if not isinstance(v0, bool):
                     return False
-                if not self.match_exists[k0]:
-                    return False
 
             if k0 in dict_setting_keys:
                 if not isinstance(v0, dict):
@@ -229,8 +227,6 @@ class Selector:
                     if str(k1) not in self._kwarg_vals[k0]:
                         return False
                     if not isinstance(v1, bool):
-                        return False
-                    if not self.match_exists[k0][str(k1)]:
                         return False
 
         return True

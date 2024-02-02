@@ -30,11 +30,12 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class HelperDialog(QDialog):
     """Generates a string that specifies the atom selection."""
 
-    def __init__(self, selector, parent, *args, **kwargs):
+    def __init__(self, selector, field, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle("Atom selection helper")
         self.selector = selector
-        full_settings = self.selector.full_settings
+        self.field = field
+        self.full_settings = self.selector.full_settings
         match_exists = self.selector.match_exists
 
         cbox_text = {
@@ -60,7 +61,10 @@ class HelperDialog(QDialog):
         invert = QGroupBox("inversion")
         invert_layout = QVBoxLayout()
 
-        for k, v in full_settings.items():
+        self.check_boxes = []
+        self.combo_boxes = []
+
+        for k, v in self.full_settings.items():
 
             if isinstance(v, bool):
                 check_layout = QHBoxLayout()
@@ -68,9 +72,12 @@ class HelperDialog(QDialog):
                 checkbox.setChecked(v)
                 checkbox.setLayoutDirection(Qt.RightToLeft)
                 label = QLabel(cbox_text[k])
+                checkbox.setObjectName(k)
+                checkbox.stateChanged.connect(self.update_setting)
                 if not match_exists[k]:
                     checkbox.setEnabled(False)
                     label.setStyleSheet("color: grey;")
+                self.check_boxes.append(checkbox)
                 check_layout.addWidget(label)
                 check_layout.addWidget(checkbox)
                 if k == "invert":
@@ -84,10 +91,13 @@ class HelperDialog(QDialog):
                 items = [i for i in v.keys() if match_exists[k][i]]
                 combo.addItems(items)
                 combo.setCurrentIndex(-1)
+                combo.setObjectName(k)
+                combo.currentIndexChanged.connect(self.update_setting)
                 label = QLabel(cbox_text[k])
                 if len(items) == 0:
                     combo.setEnabled(False)
                     label.setStyleSheet("color: grey;")
+                self.combo_boxes.append(combo)
                 combo_layout.addWidget(label)
                 combo_layout.addWidget(combo)
                 select_layout.addLayout(combo_layout)
@@ -106,16 +116,22 @@ class HelperDialog(QDialog):
         layout.addLayout(bottom)
         self.setLayout(layout)
 
+    def update_setting(self):
+        for check_box in self.check_boxes:
+            self.full_settings[check_box.objectName()] = check_box.isChecked()
+        self.selector.update_settings(self.full_settings)
+        self.field.setText(self.selector.settings_to_json())
+
 
 class AtomSelectionWidget(WidgetBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         default_value = '{"all": true}'
-        self.selector = self._configurator.get_selector()
-        self.helper = HelperDialog(self.selector, self.parent())
         self._value = default_value
         self.field = QLineEdit(default_value, self._base)
+        self.selector = self._configurator.get_selector()
+        self.helper = HelperDialog(self.selector, self.field, self.parent())
         browse_button = QPushButton("Atom selection helper", self._base)
         browse_button.clicked.connect(self.helper_dialog)
         self.field.textChanged.connect(self.check_valid_field)
