@@ -78,7 +78,7 @@ class Selector:
             "element": symbols,
             "hs_on_element": symbols,
             # we allow index keys to be str or int, this is mostly
-            # done since json keys are str
+            # done since JSON keys are str
             "index": self.all_idxs | set([str(i) for i in self.all_idxs]),
         }
 
@@ -170,7 +170,7 @@ class Selector:
         Returns
         -------
         str
-            A json string.
+            A JSON string.
         """
         minimal_dict = {}
         for k0, v0 in self.settings.items():
@@ -186,12 +186,12 @@ class Selector:
         return json.dumps(minimal_dict)
 
     def update_from_json(self, json_string: str, reset_first: bool = False) -> None:
-        """Update the selection settings from a json string.
+        """Update the selection settings from a JSON string.
 
         Parameters
         ----------
         json_string : str
-            The json string of settings.
+            The JSON string of settings.
         reset_first : bool, optional
             Resets the settings to the default before loading.
         """
@@ -233,12 +233,12 @@ class Selector:
         return True
 
     def check_valid_json_settings(self, json_string: str) -> bool:
-        """Checks that the input json setting string is valid.
+        """Checks that the input JSON setting string is valid.
 
         Parameters
         ----------
         json_string : str
-            The json string of settings.
+            The JSON string of settings.
 
         Returns
         -------

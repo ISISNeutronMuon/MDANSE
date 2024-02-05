@@ -23,7 +23,8 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QGroupBox,
-    QLabel
+    QLabel,
+    QApplication
 )
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
@@ -89,9 +90,11 @@ class HelperDialog(QDialog):
         "invert": "Invert the selection:"
     }
 
-    def __init__(self, selector, field, parent, *args, **kwargs):
+    def __init__(self, selector, field, parent, *args, min_width=250, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle("Atom selection helper")
+        self.min_width = min_width
+        self.setMinimumWidth(self.min_width)
         self.selector = selector
         self.field = field
         self.full_settings = self.selector.full_settings
@@ -151,7 +154,7 @@ class HelperDialog(QDialog):
 
         bottom = QHBoxLayout()
         apply = QPushButton("Apply")
-        cancel = QPushButton("Close")
+        close = QPushButton("Close")
         apply.clicked.connect(self.apply)
         close.clicked.connect(self.close)
         bottom.addWidget(apply)
@@ -175,6 +178,7 @@ class HelperDialog(QDialog):
 
 
 class AtomSelectionWidget(WidgetBase):
+    """The atoms selection widget."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -183,27 +187,55 @@ class AtomSelectionWidget(WidgetBase):
         self.field = QLineEdit(default_value, self._base)
         self.selector = self._configurator.get_selector()
         self.helper = HelperDialog(self.selector, self.field, self.parent())
-        browse_button = QPushButton("Atom selection helper", self._base)
-        browse_button.clicked.connect(self.helper_dialog)
+        helper_button = QPushButton("Atom selection helper", self._base)
+        helper_button.clicked.connect(self.helper_dialog)
         self.field.textChanged.connect(self.check_valid_field)
         self._layout.addWidget(self.field)
-        self._layout.addWidget(browse_button)
+        self._layout.addWidget(helper_button)
         self.update_labels()
 
-    def helper_dialog(self):
-        """A Slot defined to allow the GUI to be updated based on
-        the new path received from a FileDialog.
-        This will start a FileDialog, take the resulting path,
-        and emit a signal to update the value show by the GUI.
+    def helper_dialog(self, offset: int = 10) -> None:
+        """Opens the helper dialog.
+
+        Parameters
+        ----------
+        offset : int
+            Number of pixels to place the helper dialog away from the
+            parent.
         """
         self.helper.show()
 
-    def check_valid_field(self, value):
+        # place the helper to the left of the parent, if there is not
+        # enough screen space put it to the right
+        total_width = sum([
+            screen.size().width() for screen in QApplication.instance().screens()])
+        right = self.parent().pos().x() + self.parent().width() + offset
+        left = self.parent().pos().x() - self.helper.min_width
+        if right + self.helper.min_width + offset < total_width:
+            self.helper.move(right, self.parent().pos().y())
+        else:
+            self.helper.move(left, self.parent().pos().y())
+
+    def check_valid_field(self, value: str) -> None:
+        """Changes the color of the field if the selector setting is
+        not valid.
+
+        Parameters
+        ----------
+        value : str
+            The atom selection JSON string.
+        """
         if self.selector.check_valid_json_settings(value):
             self.field.setStyleSheet("color: black;")
         else:
             self.field.setStyleSheet("color: red;")
 
-    def get_widget_value(self):
+    def get_widget_value(self) -> str:
+        """
+        Returns
+        -------
+        str
+            The JSON selector setting.
+        """
         selection_string = self.field.text()
         return selection_string
