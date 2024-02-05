@@ -24,7 +24,7 @@ from qtpy.QtWidgets import (
     QHBoxLayout,
     QGroupBox,
     QLabel,
-    QApplication
+    QApplication,
 )
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
@@ -40,8 +40,7 @@ class CheckableComboBox(QComboBox):
         self.model().dataChanged.connect(self.update_line_edit)
 
     def eventFilter(self, a0, a1):
-        if a0 == self.view().viewport() \
-                and a1.type() == QEvent.MouseButtonRelease:
+        if a0 == self.view().viewport() and a1.type() == QEvent.MouseButtonRelease:
             idx = self.view().indexAt(a1.pos())
             item = self.model().item(idx.row())
             if item.checkState() == Qt.Checked:
@@ -87,7 +86,7 @@ class HelperDialog(QDialog):
         "element": "Elements:",
         "hs_on_element": "Hs on elements:",
         "index": "Indexes:",
-        "invert": "Invert the selection:"
+        "invert": "Invert the selection:",
     }
 
     def __init__(self, selector, field, parent, *args, min_width=250, **kwargs):
@@ -169,8 +168,9 @@ class HelperDialog(QDialog):
         for combo_box in self.combo_boxes:
             model = combo_box.model()
             for i in range(model.rowCount()):
-                self.full_settings[combo_box.objectName()][model.item(i).text()] \
-                    = model.item(i).checkState() == Qt.Checked
+                self.full_settings[combo_box.objectName()][model.item(i).text()] = (
+                    model.item(i).checkState() == Qt.Checked
+                )
 
     def apply(self):
         self.selector.update_settings(self.full_settings)
@@ -208,8 +208,9 @@ class AtomSelectionWidget(WidgetBase):
 
         # place the helper to the left of the parent, if there is not
         # enough screen space put it to the right
-        total_width = sum([
-            screen.size().width() for screen in QApplication.instance().screens()])
+        total_width = sum(
+            [screen.size().width() for screen in QApplication.instance().screens()]
+        )
         right = self.parent().pos().x() + self.parent().width() + offset
         left = self.parent().pos().x() - self.helper.min_width - offset
         if right + self.helper.min_width + offset < total_width:
