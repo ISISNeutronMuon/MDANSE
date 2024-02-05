@@ -12,7 +12,7 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-from qtpy.QtCore import Qt, QEvent
+from qtpy.QtCore import Qt, QEvent, Slot
 from qtpy.QtGui import QStandardItem
 from qtpy.QtWidgets import (
     QComboBox,
@@ -194,6 +194,7 @@ class AtomSelectionWidget(WidgetBase):
         self._layout.addWidget(helper_button)
         self.update_labels()
 
+    @Slot()
     def helper_dialog(self, offset: int = 10) -> None:
         """Opens the helper dialog.
 
@@ -210,7 +211,7 @@ class AtomSelectionWidget(WidgetBase):
         total_width = sum([
             screen.size().width() for screen in QApplication.instance().screens()])
         right = self.parent().pos().x() + self.parent().width() + offset
-        left = self.parent().pos().x() - self.helper.min_width
+        left = self.parent().pos().x() - self.helper.min_width - offset
         if right + self.helper.min_width + offset < total_width:
             self.helper.move(right, self.parent().pos().y())
         else:
