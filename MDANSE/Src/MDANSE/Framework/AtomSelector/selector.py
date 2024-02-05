@@ -117,7 +117,9 @@ class Selector:
             Raises a ValueError if the inputted settings are not valid.
         """
         if not self.check_valid_setting(settings):
-            raise ValueError(f"Settings are not valid for the given chemical system - {settings}.")
+            raise ValueError(
+                f"Settings are not valid for the given chemical system - {settings}."
+            )
 
         if reset_first:
             self.reset_settings()

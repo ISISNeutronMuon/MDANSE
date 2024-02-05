@@ -12,7 +12,8 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, QEvent
+from qtpy.QtGui import QStandardItem
 from qtpy.QtWidgets import (
     QComboBox,
     QLineEdit,
@@ -27,8 +28,66 @@ from qtpy.QtWidgets import (
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
+class CheckableComboBox(QComboBox):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setEditable(True)
+        self.lineEdit().setReadOnly(True)
+        self.view().viewport().installEventFilter(self)
+        self.view().setAutoScroll(False)
+        self.model().dataChanged.connect(self.update_line_edit)
+
+    def eventFilter(self, a0, a1):
+        if a0 == self.view().viewport() \
+                and a1.type() == QEvent.MouseButtonRelease:
+            idx = self.view().indexAt(a1.pos())
+            item = self.model().item(idx.row())
+            if item.checkState() == Qt.Checked:
+                item.setCheckState(Qt.Unchecked)
+            else:
+                item.setCheckState(Qt.Checked)
+            return True
+        return super().eventFilter(a0, a1)
+
+    def addItems(self, texts):
+        for text in texts:
+            self.addItem(text)
+
+    def addItem(self, text):
+        item = QStandardItem()
+        item.setText(text)
+        item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
+        item.setData(Qt.Unchecked, Qt.CheckStateRole)
+        self.model().appendRow(item)
+        self.update_line_edit()
+
+    def update_line_edit(self):
+        vals = []
+        for i in range(self.model().rowCount()):
+            if self.model().item(i).checkState() == Qt.Checked:
+                vals.append(self.model().item(i).text())
+        self.lineEdit().setText(",".join(vals))
+
+
 class HelperDialog(QDialog):
     """Generates a string that specifies the atom selection."""
+
+    cbox_text = {
+        "all": "All atoms:",
+        "hs_on_heteroatom": "Hs on heteroatoms:",
+        "primary_amine": "Primary amine groups:",
+        "hydroxy": "Hydroxy groups:",
+        "methyl": "Methyl groups:",
+        "phosphate": "Phosphate groups:",
+        "sulphate": "Sulphate groups:",
+        "thiol": "Thiol groups:",
+        "water": "Water molecules:",
+        "element": "Elements:",
+        "hs_on_element": "Hs on elements:",
+        "index": "Indexes:",
+        "invert": "Invert the selection:"
+    }
 
     def __init__(self, selector, field, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
@@ -37,22 +96,6 @@ class HelperDialog(QDialog):
         self.field = field
         self.full_settings = self.selector.full_settings
         match_exists = self.selector.match_exists
-
-        cbox_text = {
-            "all": "All atoms:",
-            "hs_on_heteroatom": "Hs on heteroatoms:",
-            "primary_amine": "Primary amine groups:",
-            "hydroxy": "Hydroxy groups:",
-            "methyl": "Methyl groups:",
-            "phosphate": "Phosphate groups:",
-            "sulphate": "Sulphate groups:",
-            "thiol": "Thiol groups:",
-            "water": "Water molecules:",
-            "element": "Elements:",
-            "hs_on_element": "Hs on element:",
-            "index": "Index:",
-            "invert": "Invert the selection:"
-        }
 
         layout = QVBoxLayout()
 
@@ -71,7 +114,7 @@ class HelperDialog(QDialog):
                 checkbox = QCheckBox()
                 checkbox.setChecked(v)
                 checkbox.setLayoutDirection(Qt.RightToLeft)
-                label = QLabel(cbox_text[k])
+                label = QLabel(self.cbox_text[k])
                 checkbox.setObjectName(k)
                 checkbox.stateChanged.connect(self.update_setting)
                 if not match_exists[k]:
@@ -87,13 +130,12 @@ class HelperDialog(QDialog):
 
             elif isinstance(v, dict):
                 combo_layout = QHBoxLayout()
-                combo = QComboBox()
+                combo = CheckableComboBox()
                 items = [i for i in v.keys() if match_exists[k][i]]
                 combo.addItems(items)
-                combo.setCurrentIndex(-1)
                 combo.setObjectName(k)
-                combo.currentIndexChanged.connect(self.update_setting)
-                label = QLabel(cbox_text[k])
+                combo.model().dataChanged.connect(self.update_setting)
+                label = QLabel(self.cbox_text[k])
                 if len(items) == 0:
                     combo.setEnabled(False)
                     label.setStyleSheet("color: grey;")
@@ -109,9 +151,11 @@ class HelperDialog(QDialog):
 
         bottom = QHBoxLayout()
         apply = QPushButton("Apply")
-        cancel = QPushButton("Cancel")
+        cancel = QPushButton("Close")
+        apply.clicked.connect(self.apply)
+        close.clicked.connect(self.close)
         bottom.addWidget(apply)
-        bottom.addWidget(cancel)
+        bottom.addWidget(close)
 
         layout.addLayout(bottom)
         self.setLayout(layout)
@@ -119,6 +163,13 @@ class HelperDialog(QDialog):
     def update_setting(self):
         for check_box in self.check_boxes:
             self.full_settings[check_box.objectName()] = check_box.isChecked()
+        for combo_box in self.combo_boxes:
+            model = combo_box.model()
+            for i in range(model.rowCount()):
+                self.full_settings[combo_box.objectName()][model.item(i).text()] \
+                    = model.item(i).checkState() == Qt.Checked
+
+    def apply(self):
         self.selector.update_settings(self.full_settings)
         self.field.setText(self.selector.settings_to_json())
 
