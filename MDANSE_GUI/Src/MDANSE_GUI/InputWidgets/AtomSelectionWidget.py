@@ -38,16 +38,29 @@ class CheckableComboBox(QComboBox):
         self.view().viewport().installEventFilter(self)
         self.view().setAutoScroll(False)
         self.model().dataChanged.connect(self.update_line_edit)
+        self.addItem("select all")
 
     def eventFilter(self, a0, a1):
         if a0 == self.view().viewport() and a1.type() == QEvent.MouseButtonRelease:
             idx = self.view().indexAt(a1.pos())
             item = self.model().item(idx.row())
+
             if item.checkState() == Qt.Checked:
-                item.setCheckState(Qt.Unchecked)
+                check_uncheck = Qt.Unchecked
+                # uncheck select all since everything isn't selected
+                # anymore
+                self.model().item(0).setCheckState(check_uncheck)
             else:
-                item.setCheckState(Qt.Checked)
+                check_uncheck = Qt.Checked
+
+            if idx.row() == 0:
+                for i in range(self.model().rowCount()):
+                    self.model().item(i).setCheckState(check_uncheck)
+            else:
+                item.setCheckState(check_uncheck)
+
             return True
+
         return super().eventFilter(a0, a1)
 
     def addItems(self, texts):
@@ -62,11 +75,17 @@ class CheckableComboBox(QComboBox):
         self.model().appendRow(item)
         self.update_line_edit()
 
+    def getItems(self):
+        for i in range(self.model().rowCount()):
+            if i == 0:  # skips the select all item
+                continue
+            yield self.model().item(i)
+
     def update_line_edit(self):
         vals = []
-        for i in range(self.model().rowCount()):
-            if self.model().item(i).checkState() == Qt.Checked:
-                vals.append(self.model().item(i).text())
+        for item in self.getItems():
+            if item.checkState() == Qt.Checked:
+                vals.append(item.text())
         self.lineEdit().setText(",".join(vals))
 
 
@@ -166,10 +185,9 @@ class HelperDialog(QDialog):
         for check_box in self.check_boxes:
             self.full_settings[check_box.objectName()] = check_box.isChecked()
         for combo_box in self.combo_boxes:
-            model = combo_box.model()
-            for i in range(model.rowCount()):
-                self.full_settings[combo_box.objectName()][model.item(i).text()] = (
-                    model.item(i).checkState() == Qt.Checked
+            for item in combo_box.getItems():
+                self.full_settings[combo_box.objectName()][item.text()] = (
+                    item.checkState() == Qt.Checked
                 )
 
     def apply(self):
@@ -204,6 +222,10 @@ class AtomSelectionWidget(WidgetBase):
             Number of pixels to place the helper dialog away from the
             parent.
         """
+        if self.helper.isVisible():
+            self.helper.close()
+            return
+
         self.helper.show()
 
         # place the helper to the left of the parent, if there is not
