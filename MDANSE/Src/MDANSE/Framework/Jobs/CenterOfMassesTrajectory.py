@@ -67,8 +67,8 @@ class CenterOfMassesTrajectory(IJob):
         },
     )
     settings["output_file"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDTFormat"]},
+        "OutputTrajectoryConfigurator",
+        {"format": "MDTFormat"},
     )
 
     def initialize(self):
@@ -85,9 +85,11 @@ class CenterOfMassesTrajectory(IJob):
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["files"][0],
+            self.configuration["output_file"]["file"],
             chemical_system,
             self.numberOfSteps,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
         self._grouped_atoms = group_atoms(

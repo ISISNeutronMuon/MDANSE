@@ -276,7 +276,7 @@ class Discover(Converter):
         {"default": True, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
-        "OutputFilesConfigurator",
+        "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
             "root": "xtd_file",
@@ -326,6 +326,8 @@ class Discover(Converter):
             self.configuration["output_file"]["files"][0],
             self._chemicalSystem,
             self.numberOfSteps,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
 
     def run_step(self, index):

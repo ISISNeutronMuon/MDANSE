@@ -244,7 +244,7 @@ class CP2K(Converter):
         },
     )
     settings["output_file"] = (
-        "OutputFilesConfigurator",
+        "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
             "root": "xdatcar_file",
@@ -299,8 +299,9 @@ class CP2K(Converter):
             self.configuration["output_file"]["files"][0],
             self._chemical_system,
             self.numberOfSteps,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
         )
-        # A MMTK trajectory is opened for writing.
 
         data_to_be_written = ["configuration", "time"]
         if self.configuration["vel_file"]:

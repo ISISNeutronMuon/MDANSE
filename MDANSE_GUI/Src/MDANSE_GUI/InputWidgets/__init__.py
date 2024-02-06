@@ -45,6 +45,7 @@ modnames = [
     "InputFileWidget",
     "InputDirectoryWidget",
     "OutputDirectoryWidget",
+    "OutputTrajectoryWidget",
     "QVectorsWidget",
     "ProjectionWidget",
     "AtomSelectionWidget",

@@ -47,7 +47,7 @@ class DFTB(Forcite):
         {"default": True, "label": "Fold coordinates in to box"},
     )
     settings["output_file"] = (
-        "OutputFilesConfigurator",
+        "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
             "root": "xtd_file",

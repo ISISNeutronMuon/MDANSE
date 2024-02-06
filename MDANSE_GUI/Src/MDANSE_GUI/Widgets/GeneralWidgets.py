@@ -161,8 +161,6 @@ class GeneralInput(QObject):
         if self.file_dialog is not None:
             ic(f"File Field Return Value: {self.current_value}")
         self.final_value.emit(self.current_value)
-        if self.file_direction == "out":
-            return (self.current_value, "MDTFormat")
         return self.current_value
 
     @Slot()
@@ -228,6 +226,12 @@ class InputGroup(QObject):
         """Adds an input field to the list of fields"""
         self.fields.append(field)
         field.value_changed.connect(self.valueChanged)
+
+    def returnValue(self):
+        result = []
+        for field in self.fields:
+            result.append(field.returnValue())
+        return result
 
 
 def translate_file_associations(input_str: str):
@@ -297,6 +301,8 @@ class InputFactory:
             result = InputFactory.createFile(*args, direction="in", **kwargs)
         elif kind == "SingleOutputFileConfigurator":
             result = InputFactory.createFile(*args, direction="out", **kwargs)
+        elif kind == "OutputTrajectoryConfigurator":
+            result = InputFactory.createTrajectory(*args, direction="out", **kwargs)
         else:
             result = InputFactory.createBlank(*args, **kwargs)
 
@@ -368,6 +374,61 @@ class InputFactory:
         button.clicked.connect(data_handler.valueFromDialog)
         layout.addWidget(button)
         return [base, data_handler]
+
+    def createTrajectory(*args, direction="out", **kwargs):
+        """Creates an input field with an additional button which
+        creates a FileDialog, to allow the user to browse the file system.
+
+        Keyword Arguments:
+            direction -- if 'in', create a FileDialog for an exisitng file,
+              if 'out', a FileDialog for creating a new file.
+        """
+        kind = kwargs.get("kind", "String")
+        default_value = kwargs.get("default", "")
+        tooltip_text = kwargs.get(
+            "tooltip", "Specify the name of the output trajectory."
+        )
+        file_association = kwargs.get("wildcard", "")
+        qt_file_association = translate_file_associations(file_association)
+        base, layout = InputFactory.createBase(*args, **kwargs)
+        field = QLineEdit(base)
+        main_handler = InputGroup(base)
+        data_handler1 = GeneralInput(
+            data_type=str,
+            file_association=qt_file_association,
+            file_direction=direction,
+            **kwargs,
+        )
+        data_handler2 = GeneralInput(
+            data_type=int,
+        )
+        data_handler3 = GeneralInput(
+            data_type=str,
+        )
+        main_handler.register_value(data_handler1)
+        main_handler.register_value(data_handler2)
+        main_handler.register_value(data_handler3)
+        data_handler1.string_value.connect(field.setText)
+        field.textChanged.connect(data_handler1.updateValue)
+        field.setText(str(default_value))
+        field.setToolTip(tooltip_text)
+        layout.addWidget(field)
+        cbox1 = QComboBox(base)
+        cbox1.addItems(["16", "32", "64"])
+        cbox1.setCurrentText("64")
+        layout.addWidget(cbox1)
+        cbox2 = QComboBox(base)
+        cbox2.addItems(["no compression", "gzip"])
+        cbox2.setCurrentText("gzip")
+        layout.addWidget(cbox2)
+        cbox1.currentTextChanged.connect(data_handler2.updateValue)
+        cbox2.currentTextChanged.connect(data_handler3.updateValue)
+        data_handler2.updateValue("64")
+        data_handler3.updateValue("gzip")
+        button = QPushButton("Browse", base)
+        button.clicked.connect(data_handler1.valueFromDialog)
+        layout.addWidget(button)
+        return [base, main_handler]
 
     def createBool(*args, **kwargs):
         """Creates an input field for a logical variable,

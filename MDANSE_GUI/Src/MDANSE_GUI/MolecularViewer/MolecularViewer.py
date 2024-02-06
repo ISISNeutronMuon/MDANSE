@@ -77,7 +77,7 @@ class MolecularViewer(QtWidgets.QWidget):
     def __init__(self, parent):
         super(MolecularViewer, self).__init__(parent)
 
-        self._scale_factor = 0.6
+        self._scale_factor = 0.8
 
         self._datamodel = None
 
@@ -255,7 +255,7 @@ class MolecularViewer(QtWidgets.QWidget):
         line_mapper.ScalarVisibilityOn()
         line_mapper.ColorByArrayComponent("scalars", 1)
         line_actor = vtk.vtkLODActor()
-        line_actor.GetProperty().SetLineWidth(10 * self._scale_factor)
+        line_actor.GetProperty().SetLineWidth(3 * self._scale_factor)
         line_actor.SetMapper(line_mapper)
         actor_list.append(line_actor)
 
