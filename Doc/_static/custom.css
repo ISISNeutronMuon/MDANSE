@@ -1,6 +1,65 @@
+/* Custom CSS for Light Blue Theme */
+body {
+    background: #E6F1FF !important; /* Light blue background */
+    color: #0A192F !important; /* Dark blue text */
+}
+
+.title {
+    font-size: 24px; /* Adjust the size as needed */
+}
+
+.rst-versions {
+    border-top: solid 10px #222c32; /* Add a solid top border with the specified color */
+}
+
+a {
+    color: rgb(12, 102, 192); /* Bright color for links */
+}
+ 
+a:hover {
+    color: #8572f2; /* Slightly different shade for hover state */
+}
+ 
+/* Header and sidebar styling */
+.wy-nav-side, .wy-nav-side-search {
+    background-color: #0c2547 !important; /* Darker shade of blue for the sidebar */
+}
+ 
+/* Change background color of top navigation */
+.wy-nav-top {
+    background-color: #0c2547 !important; /* Light blue background for the top navigation */
+}
+ 
+/* Custom styles for math elements */
 .math {
     text-align: left;
 }
+ 
 .eqno {
     float: right;
+}
+
+/* Custom styles for grid items */
+.grid-item {
+    background-color: #1a3d79; /* Custom dark blue background */
+    color: #fff; /* White text color */
+    padding: 20px; /* Adjust padding as needed */
+    border-radius: 5px; /* Rounded corners */
+    text-align: center; /* Center-align content */
+    margin: 10px; /* Add spacing between grid items */
+}
+ 
+/* Custom styles for buttons */
+.button-ref {
+    background-color: #007BFF; /* Blue background for buttons */
+    color: #fff; /* White text color for buttons */
+    padding: 10px 20px; /* Adjust padding as needed */
+    border-radius: 5px; /* Rounded corners for buttons */
+    text-decoration: none; /* Remove underlines from buttons */
+    display: inline-block;
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+ 
+.button-ref:hover {
+    background-color: #0056b3; /* Slightly different shade of blue for hover state */
 }

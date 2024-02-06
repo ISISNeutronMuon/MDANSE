@@ -1,6 +1,6 @@
 
 Navigating the MDANSE GUI
-==========================
+=====================================
 
 The MDANSE Graphical User Interface (GUI) is the central hub for
 performing various actions, including opening trajectories, configuring
@@ -8,7 +8,7 @@ analysis parameters, and visualizing results. This section provides an
 overview of how to effectively utilize the MDANSE GUI.
 
 Key Actions in the MDANSE GUI
-------------------------------
+-----------------------------------
 
 Through the MDANSE GUI, you can perform a range of essential tasks:
 
@@ -29,7 +29,7 @@ Through the MDANSE GUI, you can perform a range of essential tasks:
   from the GUI.
 
 Operating the MDANSE GUI
--------------------------
+-------------------------------
 
 The MDANSE GUI offers user-friendly interaction methods, including the
 following:
@@ -56,7 +56,7 @@ user experience.
 The MDANSE GUI can be initiated on different platforms as follows:
 
 Windows
---------
+---------------
 
 - If you selected the option to create a desktop shortcut during
   installation, you can use that shortcut to start MDANSE.
@@ -67,8 +67,8 @@ Windows
   "MDANSE_launcher.bat." Ensure you use quotation marks if the path
   contains spaces.
 
-MacOS
-------
+7.3.2. MacOS
+-------------
 
 - If you installed MDANSE normally, you can find the MDANSE icon in the
   Applications folder and start it like any other app. Note that you may
@@ -81,8 +81,8 @@ MacOS
 
      /Applications/MDANSE.app/Contents/MacOS/MDANSE
 
-Linux
-------
+7.3.3. Linux
+-------------
 
 - If your Linux distribution has an applications menu, you should find
   an MDANSE icon there for launching the GUI.
@@ -173,6 +173,9 @@ Please note that all pictures come from Windows 10, so the GUI will look
 very slightly different on other platforms. However, MDANSE works
 equally well, bugs notwithstanding, on all platforms.
 
+.. image:: ./Pictures/100000000000035A00000225D9D9B30259888397.jpg
+   :width: 15.921cm
+   :height: 10.186cm
 
 1.  `File menu <#_The_File_menu>`__ handles file manipulation. It can be
     used to load NetCDF trajectories or to convert other trajectories
@@ -248,7 +251,7 @@ please refer to the next section.
 
 
 Trajectory Converter
----------------------
+---------------------------
 
 This option enables the conversion of a trajectory to the HDF trajectory format. 
 Hovering over the Trajectory Converter
@@ -273,7 +276,7 @@ Selecting this option opens a confirmation prompt. If you select "Yes," MDANSE
 will close.
 
 The View Menu
---------------
+-------------------
 
 This menu offers several options to show/hide various parts of MDANSE:
 
@@ -283,7 +286,7 @@ This menu offers several options to show/hide various parts of MDANSE:
 - Toggle Toolbar: Shows/hides the toolbar.
 
 The Help Menu
---------------
+-------------------
 
 Clicking the Help button reveals the following menu:
 
@@ -302,7 +305,7 @@ Clicking the Help button reveals the following menu:
    `traceback from job failure <#STATE>`__.
 
 Toolbar
---------
+------------
 
 The Toolbar is a set of pictographic buttons that enable you to quickly
 perform essential actions. Below is a brief overview of each button, from left

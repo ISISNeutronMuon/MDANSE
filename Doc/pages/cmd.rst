@@ -1,76 +1,138 @@
-
-.. _mdanse-cli:
-
 Using MDANSE Command Line Interface
-===================================
+====================================
 
-The MDANSE analysis tasks can exist and operate independent of
-a graphical interface. For this reason, the MDANSE command line
-interface is a valid alternative to the MDANSE GUI.
+MDANSE (Molecular Dynamics Analysis and Visualization) software offers a
+versatile and powerful command line interface (CLI) alongside its
+graphical user interface (GUI). While the GUI provides an interactive and
+user-friendly environment for analysis, the command line interface is a
+valuable alternative that offers distinct advantages. In this section of
+the user guide, we will explore why the MDANSE command line interface is
+useful and discuss its various features.
+
+Additionally, for important commands and usage instructions on the command
+line (CMD), please refer to the **Command Line Reference** section in the
+MDANSE documentation.
+
+Advantages of Using the MDANSE Command Line Interface
+-----------------------------------------------------
+
+**Automation and Scripting:** The CLI allows users to automate repetitive
+analysis tasks by creating scripts or batch files. This is particularly
+useful for users who need to perform the same analysis on multiple datasets,
+saving time and effort. For example, you have a dataset of protein
+simulations, and you want to calculate the root mean square deviation
+(RMSD) for each frame in the trajectory. Instead of manually loading each
+trajectory file into the GUI and setting up the analysis for each file, you
+can create a script that automates this process. This approach enhances
+efficiency, ensures methodological consistency, and eliminates the need for
+manual repetition.
+
+**Batch Processing:** MDANSE CLI supports batch processing, enabling users
+to analyze a series of datasets sequentially or in parallel. This feature
+is beneficial when working with large datasets or conducting extensive
+parameter sweeps. For example, imagine you have ten different molecular
+dynamics simulations, and you want to calculate the radial distribution
+function (RDF) for each of them with varying parameters. You can create a
+batch processing script that iterates through each simulation, applies
+different parameter settings, and generates RDF plots. This allows you to
+analyze all simulations efficiently without manual intervention.
+
+**Remote and Cluster Computing:** The command line interface is well-suited
+for remote and cluster computing environments. Users can execute MDANSE
+analysis tasks on remote servers or high-performance computing clusters,
+leveraging their computational resources. Suppose you have a massive dataset
+requiring substantial computational resources for analysis. In that case,
+MDANSE CLI enables you to submit analysis tasks to a remote
+high-performance computing cluster. This strategy offloads the computational
+workload to remote servers, optimally utilizing cluster resources and
+facilitating concurrent execution of multiple simulations. This is
+especially useful when rapid analysis of large datasets or computationally
+intensive calculations is necessary, exceeding the capabilities of a local
+machine.
+
+**Reproducibility:** Using scripts with the CLI ensures analysis
+reproducibility. Scripted workflows document steps and parameters, making
+it easier to recreate results or share with collaborators. By employing
+scripts with the MDANSE CLI, you create a comprehensive workflow that
+meticulously documents each step of the analysis, encompassing parameter
+settings and data processing. This practice guarantees that you can easily
+replicate the analysis, enhancing transparency and facilitating
+collaborative research efforts. For example, you have conducted an analysis
+of a complex molecular system using MDANSE, and you want to share your
+findings with a colleague. Instead of sharing a set of GUI-driven steps,
+you can provide them with a script that contains all the analysis steps
+and parameters used. This script ensures that your colleague can reproduce
+your analysis exactly, promoting transparency and collaboration.
 
 Managing jobs using the MDANSE CLI
-----------------------------------
+-----------------------------------
 
-While the full list of the CLI options is listed below, here are
-some useful examples that illustrate how the CLI should
-be used.
+The MDANSE Command Line Interface (CLI) provides robust capabilities for
+managing and monitoring various analysis jobs. Whether you're running
+molecular dynamics simulations, calculating properties, or conducting
+complex analyses, the CLI allows you to efficiently handle and keep track
+of your tasks.
 
-.. code-block:: console
+With the MDANSE CLI, you can submit, monitor, and control the execution of
+analysis jobs effortlessly. It offers features like job status checking,
+error handling, and detailed logging, ensuring that you have full visibility
+into the progress and results of your analyses. Whether you're dealing with
+single tasks or complex workflows, the MDANSE CLI simplifies job management,
+making it an indispensable tool for researchers and analysts.
 
-  mdanse -r job
+Additionally, for important commands and usage instructions related to
+managing and monitoring jobs using the MDANSE CLI, please refer to the
+**Job Management Reference** section in the MDANSE documentation.
 
-will display a list of different tasks that can be run in MDANSE.
+MDANSE Included Scripts
+------------------------
 
-.. code-block:: console
+When you install MDANSE, it comes bundled with several useful scripts. These
+scripts are located in the `Scripts\` directory on Windows and the `bin/`
+directory on Unix systems. 
 
-  mdanse --js dacf
+In the following table, which will describe some of these scripts in
+more detail.
 
-will create a template script for the Dipole AutoCorrelation Function.
-This script can then be edited to change the job parameters.
++--------------------------+-------------------------------------------------------------------+
+| Script                   | Description                                                       |
++==========================+===================================================================+
+| `mdanse`                 | The main MDANSE script that serves as the entry point for various |
+|                          | MDANSE functionalities.                                           |
++--------------------------+-------------------------------------------------------------------+
+|`mdanse_elements_database`| Provides access to the MDANSE elements database, allowing users   |
+|                          | to retrieve information about chemical elements.                  |
++--------------------------+-------------------------------------------------------------------+
+| `mdanse_gui`             | Launches the graphical user interface (GUI) for MDANSE, offering  |
+|                          | an interactive and user-friendly environment for molecular        |
+|                          | dynamics analysis and visualization.                              |
++--------------------------+-------------------------------------------------------------------+
+| `mdanse_job`             | Manages MDANSE job execution, facilitating the execution of       |
+|                          | analysis tasks, simulations, and other computational tasks within |
+|                          | MDANSE.                                                           |
++--------------------------+-------------------------------------------------------------------+
+| `mdanse_periodic_table`  | Displays the periodic table with detailed information on chemical |
+|                          | elements, including atomic numbers, symbols, atomic weights, and  |
+|                          | more.                                                             |
++--------------------------+-------------------------------------------------------------------+
+| `mdanse_plotter`         | Allows for data plotting and visualization within MDANSE, enabling|
+|                          | users to create various plots and graphs for analyzing simulation |
+|                          | results.                                                          |
++--------------------------+-------------------------------------------------------------------+
+| `mdanse_ud_editor`       | Opens the MDANSE units definition editor, providing a tool for    |
+|                          | defining and managing units used in MDANSE simulations and        |
+|                          | analyses.                                                         |
++--------------------------+-------------------------------------------------------------------+
+| `mdanse_units_editor`    | Opens the MDANSE units editor, which allows users to define and   |
+|                          | manage units used in MDANSE, ensuring consistency and accuracy in |
+|                          | simulations and analyses.                                         |
++--------------------------+-------------------------------------------------------------------+
 
-.. code-block:: console
+For more in-depth information on running and utilizing these scripts, please
+consult the **Technical References** provided in the MDANSE documentation.
 
-  mdanse --jr my_modified_script.py
-
-will run the job defined in the file 'my_modified_script.py'.
-
-.. code-block:: console
-
-  mdanse --jl
-
-will display the list of currently existing MDANSE jobs.
-
-Congratulations! Using these four lines (and a text editor) you
-just performed an analysis task on a trajectory, and confirmed
-that your task has executed correctly.
-
-Python interpreter information
-------------------------------
-
-Windows, has a dedicated command line which can be run using
-MDANSE_command_shell file, which sets some environment variables so
-that, in it, MDANSE python is the default python. On other platforms,
-you have to use a normal terminal and use MDANSE python by calling its
-full path, which should be (if MDANSE is in default installation
-location) `/Applications/MDANSE.app/Contents/MacOS/python2` on MacOS, and
-`/usr/local/bin/python` on Linux systems. Please only use the
-**python2** file on MacOS, the other python file does not have some
-environmental variables set up.
-
-These pythons (as discussed in previous paragraph) can then be used to
-run MDANSE python scripts like any other python script:
-
-`python script.py` -- Windows
-
-`path/python2 script.py` -- MacOS
-
-`path/python script.py` -- Linux
-
-The python can also be used to install other packages, run short code
-(using the -c option), or to activate python REPL.
-
-Custom scripts
---------------
+Custom Scripts
+---------------
 
 It is possible to edit MDANSE scripts or even write new ones from
 scratch. To run an analysis using the MDANSE python library, two steps
@@ -80,149 +142,8 @@ analysis (equivalent to clicking the Run button). For both of these, it
 is necessary to understand how the analysis’ class works. This can be
 done by reading MDANSE documentation, either by clicking the analysis’
 Help button or by clicking the `Open MDANSE API <#open_mdanse_api>`__
-button on the toolbar. An example script is below.
+button on the toolbar.
 
-.. code-block:: python
-
-  ################################################################
-  
-  # Job parameters #
-  
-  ################################################################
-  
-  
-  parameters = {}
-  parameters['atom_charges'] = ''
-  parameters['atom_selection'] = None
-  parameters['frames'] = (0, 2258, 1)
-  parameters['output_files'] =
-  (u'C:\\\\Users\\\\TACHYON\\\\Downloads\\\\output_NaF', (u'netcdf',))
-  parameters['running_mode'] = ('monoprocessor',)
-  parameters['trajectory'] =
-  u'C:\\\\Users\\\\TACHYON\\\\Downloads\\\\NaF.nc'
-  
-  ################################################################
-  
-  # Setup and run the analysis #
-  
-  ################################################################
-  
-  # Create an instance of the class
-  
-  dacf = REGISTRY['job']['dacf']()
-
-  # Run the analysis
-  
-  dacf.run(parameters,status=True)
-
-.. _mdanse-scripts-1:
-
-MDANSE Scripts
---------------
-
-When MDANSE is installed, multiple scripts come with it, installed into
-the Scripts\\ directory on Windows and bin/ directory on Unix systems.
-They can be run with python, for example
-
-.. code-block:: console
-
-  python mdanse_gui
-
-or by themselves (this mode might be unavailable on Windows):
-
-.. code-block:: console
-
-  mdanse_gui
-
-The following scripts come with MDANSE, each of which is described in
-the following subsections, though more information about a script can
-also be gained by calling the script with -h, e.g.,
-
-.. code-block:: console
-
-  python mdanse_gui -h
-
--  mdanse
--  mdanse_elements_database
--  mdanse_gui
--  mdanse_job
--  mdanse_periodic_table
--  mdanse_plotter
--  mdanse_ud_editor
--  mdanse_units_editor
-
-mdanse
-~~~~~~
-
-This script is used to interface with the current installation of MDANSE
-without running the GUI. It has the following options, where the
-expected arguments should be inputted after the option as
-space-separated values:
-
-:code:`--version`
-
-- *Description:* displays the version of the installed MDANSE
-- *Expected arguments:* None
-
-:code:`--add-mmtk-def`
-
-- *Description:* adds the provided definition to the MMTK database
-- *Expected arguments:* code, typ, filename
-- *code*: the MMTK code for the molecule to register (i.e., HOH for water)
-- *typ*: the molecular type; one of amino_acid, molecule, nucleic_acid
-- *filename*: the path to the file that stores the MMTK definition of the molecule being added
-
-:code:`--database` or :code:`-d`
-
-- *Description:* displays chemical information about the provided element
-- *Expected arguments:* ename
-- *ename*: the name of a registered element
-
-:code:`--registry` or :code:`-r`
-
-- *Description:* displays the contents of MDANSE classes registry
-- *Expected arguments:* None or interface
-
-  - None -> information on all classes is displayed
-  - *interface*: the name of a class -> information on only the subclasses of the provided class is displayed
-
-:code:`--traj` or :code:`-t`
-
-- *Description:* displays the chemical contents of a trajectory
-- *Expected arguments:* trajName
-- *trajName*: the name of a trajectory that has been loaded into MDANSE
-
-:code:`--jc`
-
-- *Description:* shows the status of the provided job
-- *Expected arguments:* filename
-
-  - *filename*: the name (not path!) of a file representing an MDANSE job
-
-:code:`--jl`
-
-- *Description:* displays the job list
-- *Expected arguments:* None
-
-:code:`--jr`
-
-- *Description:* runs the provided MDANSE job(s)
-- *Expected arguments:* filename
-
-  - *filename*: the path to an MDANSE python script
-
-:code:`--js`
-
-- *Description:* saves a job script for the provided job with default parameters
-- *Expected arguments:* name
-
-  - *name*: the name of a job (e.g., ccf for Current Correlation Function)
-
-:code:`--jt`
-
-- *Description:* saves a new job template
-- *Expected arguments:* classname, shortname
-
-  - *classname*: a full name for the new job (e.g., TXTConverter)
-  - *shortname*: a short name for the new job (e.g., txtc)
+For more in-depth information on running and utilizing custom scripts, please
+consult the **Technical References** provided in the MDANSE documentation.
 

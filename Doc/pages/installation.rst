@@ -1,21 +1,40 @@
+Getting Started with MDANSE
+=============================
 
-Installing MDANSE
-=================
+MDANSE (Molecular Dynamics Analysis for Neutron Scattering
+Experiments) is a powerful tool for analyzing molecular dynamics
+simulations in the context of neutron scattering experiments. To
+begin using MDANSE, here are some helpful tips:
 
-MDANSE can be downloaded from [Ref38]_. At the moment we provide
-Python wheels which, after downloading, can be installed using pip:
+MDANSE Installation 
+--------------------
 
-.. code-block:: console
+To get started with MDANSE, you can follow the MDANSE Installation Tutorial below:
 
-  pip install MDANSE-X.Y.Z-...-.whl
+- [MDANSE Installation Tutorial](T_start.rst)
 
-followed by
 
-.. code-block:: console
+Explore the Documentation
+--------------------------
 
-  pip install MDANSE_GUI-X.Y.Z-...-.whl
+MDANSE comes with extensive documentation, providing:
 
-in order to enable the graphical interface as well.
+- **Explanations:** Clear understanding of MDANSE's capabilities and background knowledge.
+- **Tutorials:** Step-by-step instructions to help you get started and become proficient.
+- **How-To Guides:** Practical solutions for common tasks.
+- **Technical References:** Detailed information about MDANSE's features and functionalities.
 
-It is our intention to add MDANSE to the PyPI, so that it can be installed
-directly from the package repository using pip.
+Sample Data
+-----------
+
+MDANSE often provides sample datasets that you can use for
+testing and learning.  You can typically find sample
+data within the MDANSE GitHub repository. 
+
+<div style="background-color: black; padding: 10px; display: inline-block; border-radius: 5px;">
+   <a href="https://github.com/ISISNeutronMuon/MDANSE" style="color: white; text-decoration: none;">
+      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Logo.png" alt="GitHub Logo" style="vertical-align: middle; height: 20px; margin-right: 5px;">
+      MDANSE GitHub Repository
+   </a>
+</div>
+

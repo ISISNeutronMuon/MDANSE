@@ -6,10 +6,6 @@
 Welcome to MDANSE's documentation!
 ==================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
 .. note::
    This is the documentation of the MDANSE 2.0 release.
    The documentation, just like the code itself, is still under development.
@@ -36,17 +32,38 @@ G. Goret, B. Aoun, E. Pellegrini, "MDANSE: An Interactive Analysis Environment f
 J Chem Inf Model. 57(1):1-5 (2017).
 
 
-.. toctree::
-   :maxdepth: 4
-   :numbered:
-   :hidden:
-   :caption: MDANSE User Manual
+.. raw:: html
 
-   pages/opening
-   pages/authors
+   <div class="sd-grid">
+       <div class="grid-item">
+           <h3>💡 Explanations</h3>
+           <p>Learn the basics and core concepts of MDANSE.</p>
+           <a href="pages/explanations.html">Learn More</a>
+       </div>
+       <div class="grid-item">
+           <h3>⚛️ How-To Guides</h3>
+           <p>Practical step-by-step guides to help you utilize MDANSE effectively.</p>
+           <a href="pages/H_gui.html">Learn More</a>
+       </div>
+       <div class="grid-item">
+           <h3>🧪 Tutorials</h3>
+           <p>Detailed tutorials to help you get started with MDANSE.</p>
+           <a href="pages/T_Batch.html">Learn More</a>
+       </div>
+       <div class="grid-item">
+           <h3>📚 Technical References</h3>
+           <p>Deep dive into the technical details of MDANSE.</p>
+           <a href="pages/R_contact.html">Learn More</a>
+       </div>
+   </div>
+
+
+.. toctree::
+   :maxdepth: 5
+   :caption: 💡 Explanations
+
    pages/introduction
    pages/installation
-   pages/build
    pages/files
    pages/gui
    pages/cmd
@@ -57,8 +74,39 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/analysis
    pages/trajectory
    pages/plotting
-   pages/parameters
    pages/fca
+
+.. toctree::
+   :maxdepth: 5
+   :caption: ⚛️ How-To Guides
+
+   pages/H_gui
+   pages/H_cli
+   pages/H_Dynamics
+   pages/H_Scattering
+   pages/H_Structure
+   pages/H_other
+   pages/H_gloss
+   pages/H_Plotting
+   pages/H_fca
+
+.. toctree::
+   :maxdepth: 5
+   :caption: 🧪 Tutorials
+
+   pages/T_Batch
+   pages/T_sim
+   pages/T_Analysis
+
+.. toctree::
+   :maxdepth: 5
+   :caption: 📚 Technical References
+
+   pages/R_contact
+   pages/parameters
+   pages/R_traj
+   pages/R_units
+   pages/R_further
    pages/references
 
 Indices and tables

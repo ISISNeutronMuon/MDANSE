@@ -59,20 +59,6 @@ And the angular correlation averaged over all triplets is:
 
 where N\ :sub:`triplets` is the number of selected triplets.
 
-GUI
-   
-
-.. image:: ./Pictures/10000001000003220000021BA346CFB73717C1BE.png
-   :width: 15.921cm
-   :height: 10.7cm
-
-Parameters:
-
--  :ref:`param-frames`
--  :ref:`param-axis-selection`
--  `output contribution per axis <#_Output_contribution_per>`__
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
 
 .. _analysis-dos:
 
@@ -117,27 +103,6 @@ velocities and atomic coordinates. In this case the velocities are
 computed by numerical differentiation of the coordinate trajectories
 correcting first for possible jumps due to periodic boundary conditions.
 
-.. _gui-1:
-
-GUI
-   
-
--  available for trajectories only
-
-|image14| |image15|
-
--  :ref:`param-frames`
--  :ref:`param-instrument-resolution`
--  :ref:`params-interpolation-order`
--  `project coordinates <#_Project_coordinates>`__
--  :ref:`param-atom-selection`
--  :ref:`param-group-coordinates`
--  :ref:`param-atom-transmutation`
--  `weights <#_Weights>`__
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
-
-.. _analysis-gacf:
 
 General AutoCorrelation Function
 ''''''''''''''''''''''''''''''''
@@ -380,24 +345,6 @@ of time correlation functions since the number of operations in step
 
 linearly with :math:`N_t`.
 
-.. _gui-2:
-
-GUI
-   
-
-|image18| |image19|
-
--  :ref:`param-frames`
--  `project coordinates <#_Project_coordinates>`__
--  :ref:`param-atom-selection`
--  :ref:`param-group-coordinates`
--  :ref:`param-atom-transmutation`
--  `weights <#_Weights>`__
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
-
-.. _analysis-op:
-
 Order Parameter
 '''''''''''''''
 
@@ -528,56 +475,6 @@ bonds defined as:
 
 where N\ :sub:`bonds` is the number of selected bonds for the analysis.
 
-.. _gui-3:
-
-GUI
-   
-
--  available for trajectories only
-
-.. image:: ./Pictures/10000001000003220000027563B8CBFF70E2089C.png
-   :width: 15.921cm
-   :height: 12.487cm
-
--  :ref:`param-frames`
-
--  :ref:`param-axis-selection`
-
--  reference direction
-
-   -  **x-component**
-
-*Format:* int or float
-
-*Default:* 0
-
-*Description:* <insert>
-
--  
-
-   -  **y-component**
-
-*Format:* int or float
-
-*Default:* 0
-
-*Description:* <insert>
-
--  
-
-   -  **z-component**
-
-*Format:* int or float
-
-*Default:* 1
-
-*Description:* <insert>
-
--  `output contribution per axis <#_Output_contribution_per>`__
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
-
-.. _analysis-pacf:
 
 Position AutoCorrelation Function
 '''''''''''''''''''''''''''''''''
@@ -691,53 +588,3 @@ is computed from the atomic velocity autocorrelation functions
 
 , where :math:`n_q` is the unit vector in the direction of q.
 
-.. _gui-4:
-
-GUI
-   
-
--  available for trajectories only
-
-|image22| |image23|
-
--  :ref:`param-frames`
--  :ref:`params-interpolation-order`
--  `project coordinates <#_Project_coordinates>`__
--  `normalize <#_Normalize>`__
--  :ref:`param-atom-selection`
--  :ref:`param-group-coordinates`
--  :ref:`param-atom-transmutation`
--  `weights <#_Weights>`__
--  :ref:`param-output-files`
--  :ref:`param-running-mode`
-
-.. |image14| image:: ./Pictures/1000000100000323000002D1329469D922AFA541.png
-   :width: 15.921cm
-   :height: 14.295cm
-.. |image15| image:: ./Pictures/100000010000031E000000F3118920C50EDE8CB0.png
-   :width: 15.921cm
-   :height: 4.847cm
-.. |image16| image:: ./Pictures/100000010000031F00000248D8781028790CCDA5.png
-   :width: 15.921cm
-   :height: 11.636cm
-.. |image17| image:: ./Pictures/100000010000031E00000105F69265329BBA5756.png
-   :width: 15.921cm
-   :height: 5.207cm
-.. |image18| image:: ./Pictures/100000010000031F00000247259172131CFA3B36.png
-   :width: 15.921cm
-   :height: 11.617cm
-.. |image19| image:: ./Pictures/100000010000031F000001000B539E0E94164B2D.png
-   :width: 15.921cm
-   :height: 5.101cm
-.. |image20| image:: ./Pictures/1000000100000320000001F34B3598CBB7D90098.png
-   :width: 15.921cm
-   :height: 9.931cm
-.. |image21| image:: ./Pictures/1000000100000322000001997BE6CF552F7A05D0.png
-   :width: 15.921cm
-   :height: 8.119cm
-.. |image22| image:: ./Pictures/100000010000031F000001F4716D097EF0177F0B.png
-   :width: 15.921cm
-   :height: 9.964cm
-.. |image23| image:: ./Pictures/100000010000031F000001BDEA9E86A41E3EBCA6.png
-   :width: 15.921cm
-   :height: 8.867cm
