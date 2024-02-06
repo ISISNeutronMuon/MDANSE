@@ -1,3 +1,10 @@
+version 2.0.0 - 2024-02-15
+--------------------------
+* CHANGED programming language to Python 3
+* CHANGED GUI library to Qt
+* REMOVED NetCDF4 support
+* ADDED ASE trajectory converter for native ASE trajectories and other formats
+* CHANGED the formula for the Position Autocorrelation Function
 
 version 1.5.2
 --------------

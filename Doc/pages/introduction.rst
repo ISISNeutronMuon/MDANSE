@@ -1,46 +1,71 @@
-
 Introduction
 ============
 
-Neutron scattering experiments are useful tools for probing atomic
-positions and molecular dynamics in materials. Computational simulations
-and modelling are essential tools to analyse and interpret such
-experiments. These interpretations help to improve existing materials
-for bespoke applications and design new ones. Atomistic simulations,
-particularly molecular dynamics (MD) simulations are being used
-increasingly for these purposes. However, predicting neutron observables
-from MD trajectories is not straightforward. A number of operations,
-such as calculations of mean square displacements, densities of states,
-velocity and position auto- and cross-correlation functions, Fourier
-transformations and convolutions with instrument parameters are required
-to calculate neutron observables that can be compared directly with
-experimental data.
+Neutron scattering experiments are valuable tools for investigating atomic
+positions and molecular dynamics in materials. Computational simulations and
+modeling play a crucial role in analyzing and interpreting such experiments,
+leading to improvements in existing materials and the design of new ones.
+Atomistic simulations, particularly molecular dynamics (MD) simulations, are
+increasingly employed for these purposes. However, predicting neutron observables
+from MD trajectories is a complex process that involves various calculations and
+transformations, such as mean square displacements, densities of states, velocity
+and position auto- and cross-correlation functions, Fourier transformations, and
+convolutions with instrument parameters, to obtain neutron observables that can
+be directly compared with experimental data.
 
-Some of these steps were implemented in the open source MDANSE
-(Molecular Dynamics Analysis of Neutron Scattering Experiments)
-[Ref1]_. This software is a Python based
-application for analysing MD simulation data. This has interface with
-more than ten MD codes including ab-initio MD codes as listed in
-:ref:`trajectory-converters`. MDANSE is shipped with a simple
-python-based graphical users interface (GUI) which allows the users
-to run analysis jobs and visualise their results.
-However, the GUI is not necessary to use MDANSE, as it can also be
-used through command line utilities and within Python scripts. In
-addition to this GUI, a well developed molecular viewer and 2D/3D
-plotter improve the users experience in analysing neutron experimental
-data.
+MDANSE: Your Gateway to Insights
+--------------------------------
 
-This users guide provides a detailed overview of the capabilities of
-MDANSE along with theoretical background and installation instructions
-on three different platforms Windows, Mac OS and Ubuntu. Authors will be
-happy to receive any suggestions, feedback and bug reports about the
-MDANSE software and this Users guide.
+Some of these essential steps have been meticulously implemented within MDANSE
+(Molecular Dynamics Analysis of Neutron Scattering Experiments) [^Ref1^]. This
+Python-based application has established connections with more than ten MD codes,
+including powerful ab initio MD packages detailed in Trajectory Converters.
 
-.. note::
-   MDANSE branch 1.5.x is still based on Python 2, which became
-   obsolete in 2020. For this reason the users of the Apple Silicon
-   family of computers may find it impossible to use the 3D
-   visualisation capabilities of MDANSE. If you do own a computer
-   which is running MacOS on an ARM-based CPU, you may have to
-   wait for the new release of MDANSE in 2023.
+Purpose and Capabilities
+------------------------
 
+MDANSE serves as a versatile toolkit designed to streamline the analysis of
+molecular dynamics simulations. Its primary objectives are to:
+
+- Facilitate the visualization and animation of trajectory data.
+- Enable the computation of various properties, including dynamics, infrared,
+  scattering, structural, and thermodynamic properties.
+
+Flexibility and Compatibility
+-----------------------------
+
+MDANSE offers:
+
+- A user-friendly Python-based graphical user interface (GUI) for effortless
+  analysis and visualization.
+- Command-line utilities that can be seamlessly integrated into Python scripts
+  for accessibility and adaptability.
+- A molecular viewer and a versatile 2D/3D plotter to enhance the user experience
+  when dissecting neutron experimental data.
+
+Your Guide to MDANSE
+---------------------
+
+This user's guide provides a detailed overview of MDANSE's capabilities, along
+with theoretical background information and installation instructions for three
+different platforms: Windows, Mac OS, and Ubuntu.
+
+Collaboration and Feedback
+--------------------------
+
+The authors welcome suggestions, feedback, and bug reports regarding the MDANSE
+software and this user's guide, we encourage you to report them. Your feedback is
+essential in helping us enhance the software and improve the user experience.
+
+GitHub Repository
+-----------------
+
+You can report issues and make suggestions on our GitHub repository. Please visit
+the following link to access the repository:
+
+<div style="background-color: black; padding: 10px; display: inline-block; border-radius: 5px;">
+   <a href="https://github.com/ISISNeutronMuon/MDANSE" style="color: white; text-decoration: none;">
+      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Logo.png" alt="GitHub Logo" style="vertical-align: middle; height: 20px; margin-right: 5px;">
+      MDANSE GitHub Repository
+   </a>
+</div>
