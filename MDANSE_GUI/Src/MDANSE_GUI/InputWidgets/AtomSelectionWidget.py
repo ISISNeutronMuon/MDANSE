@@ -136,8 +136,7 @@ class CheckableComboBox(QComboBox):
             return False
 
     def update_line_edit(self) -> None:
-        """Updates the lineEdit text of the combobox.
-        """
+        """Updates the lineEdit text of the combobox."""
         vals = []
         for item in self.getItems():
             if item.checkState() == Qt.Checked:
@@ -146,7 +145,7 @@ class CheckableComboBox(QComboBox):
             vals = [int(i) for i in vals]
             # changes for example 1,2,3,5,6,7,9,10 -> 1-3,5-7,9-10
             gr = (list(x) for _, x in groupby(vals, lambda x, c=count(): next(c) - x))
-            text = ",".join("-".join(map(str, (g[0], g[-1])[:len(g)])) for g in gr)
+            text = ",".join("-".join(map(str, (g[0], g[-1])[: len(g)])) for g in gr)
             self.lineEdit().setText(text)
         else:
             self.lineEdit().setText(",".join(vals))
