@@ -28,6 +28,14 @@ from MDANSE_GUI.Tabs.Views.TrajectoryView import TrajectoryView
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
 
 
+molview_label = """Here you can load and select trajectories.
+They will be visualised in the 3D view window.
+The animation of the MD trajectory will allow you
+to verify if the contents of the trajectory
+are what you expected.
+"""
+
+
 class MolecularViewerTab(GeneralTab):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -60,10 +68,7 @@ class MolecularViewerTab(GeneralTab):
             view=TrajectoryView(),
             visualiser=View3D(),
             layout=DoublePanel,
-            label_text="""Here you can load the .mdt files.
-They are MD trajectories in HDF5 format,
-created by one of the MDANSE converters.
-""",
+            label_text=molview_label,
         )
         return the_tab
 
@@ -87,10 +92,7 @@ created by one of the MDANSE converters.
             view=TrajectoryView(),
             visualiser=View3D(),
             layout=DoublePanel,
-            label_text="""Here you can load the .mdt files.
-They are MD trajectories in HDF5 format,
-created by one of the MDANSE converters.
-""",
+            label_text=molview_label,
         )
         return the_tab
 

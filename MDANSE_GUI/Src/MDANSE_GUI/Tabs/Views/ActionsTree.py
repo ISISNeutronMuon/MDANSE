@@ -100,4 +100,4 @@ class ActionsTree(QTreeView):
             job_description = model._docstrings[node_number]
         except KeyError:
             job_description = "No further information"
-        self.item_details.emit(job_description)
+        self.item_details.emit(job_description)  # this should emit the job name

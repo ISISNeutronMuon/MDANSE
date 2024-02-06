@@ -6,6 +6,7 @@ from MDANSE_GUI.MolecularViewer.Controls import ViewerControls
 
 
 class View3D(QWidget):
+    error = Signal(str)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,4 +24,8 @@ class View3D(QWidget):
     @Slot(object)
     def visualise_item(self, incoming: object):
         print(incoming)
-        self._viewer._new_trajectory_object(incoming)
+        try:
+            self._viewer._new_trajectory_object(incoming)
+        except AttributeError:
+            self.error.emit(f"3D View could not visualise {incoming}")
+            self._viewer.clear_trajectory()

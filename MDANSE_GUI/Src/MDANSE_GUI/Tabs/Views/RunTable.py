@@ -16,13 +16,12 @@
 import os
 
 from qtpy.QtCore import QObject, Slot, Signal, QModelIndex
-from qtpy.QtWidgets import QMenu, QListView
+from qtpy.QtWidgets import QMenu, QTableView
 from qtpy.QtGui import QStandardItem, QContextMenuEvent
 
 
-class TrajectoryView(QListView):
+class RunTable(QTableView):
     item_details = Signal(object)
-    item_name = Signal(str)
     error = Signal(str)
 
     def __init__(self, *args, **kwargs):

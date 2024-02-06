@@ -1,8 +1,12 @@
+from collections import defaultdict
+
 from qtpy.QtCore import QObject, Slot, Signal
 from qtpy.QtWidgets import QPushButton, QTextBrowser, QWidget, QFileDialog
 
+from MDANSE.Framework.Jobs.IJob import IJob
 
-class TextInfo(QTextBrowser):
+
+class AnalysisInfo(QTextBrowser):
     error = Signal(str)
 
     def __init__(self, *args, **kwargs):
@@ -16,10 +20,6 @@ class TextInfo(QTextBrowser):
         filtered = self.filter(incoming)
         self.setHtml(filtered)
 
-    @Slot(str)
-    def append_text(self, new_text: str):
-        self.append(new_text)
-
     def filter(self, some_text: str, line_break="<br />"):
         new_text = ""
         if self._header:
@@ -29,3 +29,18 @@ class TextInfo(QTextBrowser):
         if self._footer:
             new_text += line_break + self._footer
         return new_text
+
+    def summarise_chemical_system(self, job_name):
+        try:
+            temp_instance = IJob.create(job_name)
+        except:
+            return ""
+        text = "\n ==== Input Parameter summary ==== \n"
+        params = temp_instance.get_default_parameters()
+        for key, value in params.items():
+            try:
+                text += f"parameters['{key}'] = {value[0]} # {value[1]} \n"
+            except:
+                continue
+        text += " ===== \n"
+        return text

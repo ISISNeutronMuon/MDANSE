@@ -60,7 +60,8 @@ class GeneralTab(QObject):
                 "tab_reference": self,
             }
         )
-        self._core.set_model(self._model)
+        if self._model is not None:
+            self._core.set_model(self._model)
         self._core.set_label_text(label_text)
         self._core.connect_logging
 

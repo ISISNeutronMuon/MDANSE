@@ -31,7 +31,10 @@ class GeneralModel(QStandardItemModel):
         return retval
 
     def removeRow(self, row: int, parent: QModelIndex = None):
-        node_number = self.item(row).data()
+        try:
+            node_number = self.item(row).data()
+        except AttributeError:
+            return
         self._nodes.pop(node_number)
         self._node_numbers.pop(self._node_numbers.index(node_number))
         if parent is None:

@@ -28,13 +28,28 @@ from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
 
 
+job_tab_label = """This is the list of jobs you can run using MDANSE.
+Pick a job to see additional information.
+Use the button to start a job.
+"""
+
+
 class JobTab(GeneralTab):
     """The tab for choosing and starting a new job."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._model.populateTree()
+        self._current_trajectory = ""
+        self._job_starter = None
         self._core.add_button("Show the job dialog!", self.show_action_dialog)
+
+    def set_job_starter(self, job_starter):
+        self._job_starter = job_starter
+
+    @Slot(str)
+    def set_current_trajectory(self, new_name: str):
+        self._current_trajectory = new_name
 
     @Slot()
     def show_action_dialog(self):
@@ -42,14 +57,24 @@ class JobTab(GeneralTab):
         current_item = self._core.current_item()
         if current_item is None:
             return
-        converter = IJob.create(current_item.text())
+        try:
+            converter = IJob.create(current_item.text())
+        except ValueError as e:
+            print(f"Failed: {e}")
+            return
+        except IndexError as e:
+            print(f"Failed: {e}")
+            return
         try:
             dialog_instance = dialog(
-                self._core, converter=converter, source_object=self.current_object
+                self._core,
+                job_name=current_item.text(),
+                trajectory=self._current_trajectory,
             )
         except Exception as e:
             self.error(repr(e))
-        dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
+        if self._job_starter is not None:
+            dialog_instance.new_thread_objects.connect(self._job_starter.startThread)
         dialog_instance.show()
         try:
             result = dialog_instance.exec()
@@ -69,10 +94,7 @@ class JobTab(GeneralTab):
                 + "https://mdanse.readthedocs.io/en/protos/",
             ),
             layout=DoublePanel,
-            label_text="""This is the list of jobs you can run using MDANSE.
-Pick a job to see additional information.
-Use the button to start a job.
-""",
+            label_text=job_tab_label,
         )
         return the_tab
 
@@ -101,10 +123,7 @@ Use the button to start a job.
                 + " page.",
             ),
             layout=DoublePanel,
-            label_text="""This is the list of jobs you can run using MDANSE.
-Pick a job to see additional information.
-Use the button to start a job.
-""",
+            label_text=job_tab_label,
         )
         return the_tab
 
@@ -120,13 +139,16 @@ if __name__ == "__main__":
         name="AvailableJobs",
         model=JobTree(),
         view=ActionsTree(),
-        visualiser=TextInfo(),
+        visualiser=TextInfo(
+            header="MDANSE Analysis",
+            footer="Look up our "
+            + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+            + " page.",
+        ),
         layout=DoublePanel,
-        label_text="""This is the list of jobs you can run using MDANSE.
-Pick a job to see additional information.
-Use the button to start a job.
-""",
+        label_text=job_tab_label,
     )
+    the_tab._current_trajectory = "/Users/maciej.bartkowiak/an_example/BLAH.mdt"
     window.setCentralWidget(the_tab._core)
     window.show()
     app.exec()

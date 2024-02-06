@@ -31,17 +31,17 @@ from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
 from MDANSE_GUI.Widgets.Generator import WidgetGenerator
 from MDANSE_GUI.Widgets.ActionDialog import ActionDialog
-from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
 from MDANSE_GUI.Resources import Resources
 from MDANSE_GUI.UnitsEditor import UnitsEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
+from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
 from MDANSE_GUI.Tabs.TrajectoryTab import TrajectoryTab
 from MDANSE_GUI.Tabs.JobTab import JobTab
 from MDANSE_GUI.Tabs.MolecularViewerTab import MolecularViewerTab
-from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
-from MDANSE_GUI.MolecularViewer.Controls import ViewerControls
+from MDANSE_GUI.Tabs.RunTab import RunTab
+from MDANSE_GUI.Tabs.LoggingTab import LoggingTab
 from MDANSE_GUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
 from MDANSE_GUI.Plotter.widgets.main_window import MainWindow
 
@@ -80,14 +80,16 @@ class TabbedWindow(QMainWindow):
 
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()
+        self._job_holder = JobHolder()
 
     def makeBasicLayout(self):
         self.createTrajectoryViewer()
-        self.createJobsViewer()
+        self.createMolecularViewer()
         self.createActionsViewer()
+        self.createJobsViewer()
+        # self.createLogViewer()
         self.setupMenubar()
         self.setupToolbar()
-        self.createMolecularViewer()
 
     def startSettings(self, init_settings):
         self.settings = init_settings
@@ -105,25 +107,6 @@ class TabbedWindow(QMainWindow):
         self.settings_timer.setInterval(2000)
         self.settings_timer.start()
         self.destroyed.connect(self.settings_timer.stop)
-
-    @Slot()
-    def connectViews(self):
-        for key in self.backend.data_holders.keys():
-            skey = str(key)
-            data_holder = self.backend.data_holders[skey]
-            for view in self._views[skey]:
-                view.setModel(data_holder)
-        # extra connections
-        self.backend.actions_holder.setViewer(self.actions_view)
-        self.traj_view.itemPicked.connect(self.backend.actions_holder.switchModel)
-        self.traj_view.itemPicked.connect(self.setCurrentObject)
-        #
-        self.actions_view.execute_action.connect(self.runAction)
-        self.actions_view.setModel(self.backend.actions_holder.current_model)
-
-    def attachActions(self):
-        self.file_name_for_loading.connect(self.backend.loadFile)
-        self.backend.selected_converter.connect(self.convertTrajectory)
 
     def setupMenubar(self):
         self._menuBar = self.menuBar()
@@ -283,20 +266,34 @@ class TabbedWindow(QMainWindow):
         self._tabs[name] = molview_tab
 
     def createJobsViewer(self):
-        base, temp = self.wid_gen.wrapWidget(
-            cls=QTreeView, parent=self, dockable=True, name="Jobs"
+        name = "Running Jobs"
+        run_tab = RunTab.gui_instance(
+            self.tabs,
+            name,
+            self._session,
+            self._settings,
+            self._logger,
+            model=self._job_holder,
         )
-        self.job_view = temp
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, base)
-        self._views["jobs"].append(temp)
+        self.tabs.addTab(run_tab._core, name)
+        self._tabs[name] = run_tab
 
     def createActionsViewer(self):
         name = "Actions"
         job_tab = JobTab.gui_instance(
             self.tabs, name, self._session, self._settings, self._logger
         )
+        job_tab.set_job_starter(self._job_holder)
         self.tabs.addTab(job_tab._core, name)
         self._tabs[name] = job_tab
+
+    def createLogViewer(self):
+        name = "Logger"
+        log_tab = LoggingTab.gui_instance(
+            self.tabs, name, self._session, self._settings, self._logger
+        )
+        self.tabs.addTab(log_tab._core, name)
+        self._tabs[name] = log_tab
 
     @Slot()
     def saveSettings(self):
