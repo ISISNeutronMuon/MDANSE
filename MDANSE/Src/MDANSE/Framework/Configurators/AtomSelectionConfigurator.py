@@ -18,7 +18,7 @@ from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
 )
-from MDANSE.Framework.AtomSelector.selector import Selector
+from MDANSE.Framework.AtomSelector import Selector
 
 
 class AtomSelectionConfigurator(IConfigurator):

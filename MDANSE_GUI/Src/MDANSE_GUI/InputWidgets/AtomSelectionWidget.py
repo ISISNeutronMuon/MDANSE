@@ -12,8 +12,9 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
+from typing import Union
 from itertools import count, groupby
-from qtpy.QtCore import Qt, QEvent, Slot
+from qtpy.QtCore import Qt, QEvent, Slot, QObject
 from qtpy.QtGui import QStandardItem
 from qtpy.QtWidgets import (
     QComboBox,
@@ -26,11 +27,14 @@ from qtpy.QtWidgets import (
     QGroupBox,
     QLabel,
     QApplication,
+    QTextEdit,
 )
+from MDANSE.Framework.AtomSelector import Selector
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class CheckableComboBox(QComboBox):
+    """A multi-select checkable combobox"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,7 +44,16 @@ class CheckableComboBox(QComboBox):
         self.view().setAutoScroll(False)
         self.addItem("select all")
 
-    def eventFilter(self, a0, a1):
+    def eventFilter(self, a0: Union[QObject, None], a1: Union[QEvent, None]):
+        """Updates the check state of the items and the lineEdit.
+
+        Parameters
+        ----------
+        a0 : QObject or None
+            A QT object.
+        a1 : QEvent or None
+            A QT event.
+        """
         if a0 == self.view().viewport() and a1.type() == QEvent.MouseButtonRelease:
             idx = self.view().indexAt(a1.pos())
             item = self.model().item(idx.row())
@@ -72,11 +85,23 @@ class CheckableComboBox(QComboBox):
 
         return super().eventFilter(a0, a1)
 
-    def addItems(self, texts):
+    def addItems(self, texts: list[str]) -> None:
+        """
+        Parameters
+        ----------
+        texts : list[str]
+            A list of items texts to add.
+        """
         for text in texts:
             self.addItem(text)
 
-    def addItem(self, text):
+    def addItem(self, text: str) -> None:
+        """
+        Parameters
+        ----------
+        text : str
+            The text of the item to add.
+        """
         item = QStandardItem()
         item.setText(text)
         item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
@@ -84,20 +109,35 @@ class CheckableComboBox(QComboBox):
         self.model().appendRow(item)
         self.update_line_edit()
 
-    def getItems(self):
+    def getItems(self) -> QStandardItem:
+        """
+        Yields
+        ------
+        QStandardItem
+            Yields the items in the combobox except for the zeroth
+            item because that is the select all item.
+        """
         for i in range(self.model().rowCount()):
             if i == 0:  # skips the select all item
                 continue
             yield self.model().item(i)
 
-    def check_items_castable_to_int(self):
+    def check_items_castable_to_int(self) -> bool:
+        """
+        Returns
+        -------
+        bool
+            Returns true if the text of all items can be cast to int.
+        """
         try:
             [int(i.text()) for i in self.getItems()]
             return True
         except ValueError:
             return False
 
-    def update_line_edit(self):
+    def update_line_edit(self) -> None:
+        """Updates the lineEdit text of the combobox.
+        """
         vals = []
         for item in self.getItems():
             if item.checkState() == Qt.Checked:
@@ -113,7 +153,14 @@ class CheckableComboBox(QComboBox):
 
 
 class HelperDialog(QDialog):
-    """Generates a string that specifies the atom selection."""
+    """Generates a string that specifies the atom selection.
+
+    Attributes
+    ----------
+    cbox_text : dict
+        The dictionary that maps the selector settings to text used in
+        the helper dialog.
+    """
 
     cbox_text = {
         "all": "All atoms:",
@@ -131,17 +178,28 @@ class HelperDialog(QDialog):
         "invert": "Invert the selection:",
     }
 
-    def __init__(self, selector, field, parent, *args, min_width=250, **kwargs):
+    def __init__(self, selector: Selector, field: QLineEdit, parent, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        selector : Selector
+            The MDANSE selector initialized with the current chemical
+            system.
+        field : QLineEdit
+            The QLineEdit field that will need to be updated when
+            applying the setting.
+        """
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle("Atom selection helper")
-        self.min_width = min_width
+        self.min_width = kwargs.get("min_width", 450)
+        self.resize(self.min_width, self.height())
         self.setMinimumWidth(self.min_width)
         self.selector = selector
         self.field = field
         self.full_settings = self.selector.full_settings
         match_exists = self.selector.match_exists
 
-        layout = QVBoxLayout()
+        self.left = QVBoxLayout()
 
         select = QGroupBox("selection")
         select_layout = QVBoxLayout()
@@ -160,7 +218,7 @@ class HelperDialog(QDialog):
                 checkbox.setLayoutDirection(Qt.RightToLeft)
                 label = QLabel(self.cbox_text[k])
                 checkbox.setObjectName(k)
-                checkbox.stateChanged.connect(self.update_setting)
+                checkbox.stateChanged.connect(self.update)
                 if not match_exists[k]:
                     checkbox.setEnabled(False)
                     label.setStyleSheet("color: grey;")
@@ -178,7 +236,7 @@ class HelperDialog(QDialog):
                 items = [i for i in v.keys() if match_exists[k][i]]
                 combo.addItems(items)
                 combo.setObjectName(k)
-                combo.model().dataChanged.connect(self.update_setting)
+                combo.model().dataChanged.connect(self.update)
                 label = QLabel(self.cbox_text[k])
                 if len(items) == 0:
                     combo.setEnabled(False)
@@ -190,8 +248,8 @@ class HelperDialog(QDialog):
 
         select.setLayout(select_layout)
         invert.setLayout(invert_layout)
-        layout.addWidget(select)
-        layout.addWidget(invert)
+        self.left.addWidget(select)
+        self.left.addWidget(invert)
 
         bottom = QHBoxLayout()
         apply = QPushButton("Apply")
@@ -201,10 +259,22 @@ class HelperDialog(QDialog):
         bottom.addWidget(apply)
         bottom.addWidget(close)
 
-        layout.addLayout(bottom)
-        self.setLayout(layout)
+        self.left.addLayout(bottom)
+        self.right = QTextEdit()
+        self.right.setReadOnly(True)
 
-    def update_setting(self):
+        layout = QHBoxLayout()
+        layout.addLayout(self.left, 5)
+        layout.addWidget(self.right, 4)
+
+        self.setLayout(layout)
+        self.update()
+
+    def update(self) -> None:
+        """Using the checkbox and combobox widgets: update the settings,
+        get the selection and update the textedit box with details of
+        the current selection.
+        """
         for check_box in self.check_boxes:
             self.full_settings[check_box.objectName()] = check_box.isChecked()
         for combo_box in self.combo_boxes:
@@ -213,7 +283,21 @@ class HelperDialog(QDialog):
                     item.checkState() == Qt.Checked
                 )
 
-    def apply(self):
+        self.selector.update_settings(self.full_settings)
+        idxs = self.selector.get_idxs()
+        num_sel = len(idxs)
+
+        text = f"Number of atoms selected:\n{num_sel}\n\nSelected atoms:\n"
+        for at in self.selector.system.atom_list:
+            if at.index in idxs:
+                text += f"{at.index})  {at.full_name}\n"
+
+        self.right.setText(text)
+
+    def apply(self) -> None:
+        """Set the field of the AtomSelectionWidget to the currently
+        chosen setting in this widget.
+        """
         self.selector.update_settings(self.full_settings)
         self.field.setText(self.selector.settings_to_json())
 
