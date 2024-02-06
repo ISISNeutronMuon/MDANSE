@@ -1,0 +1,17 @@
+{"parameters":
+{"number_of_frames": 100,
+"atoms_in_box": ["Si", "O", "H"],
+"box_repetitions": [3, 3, 3],
+"box_size": [[4.0, 0.0, 0.0], [0.0, 4.0, 0.0], [0.0, 0.0, 4.0]],
+"pbc": true},
+"coordinates":
+[[1.0, 1.0, 1.0], [1.0, 2.0, 1.0], [1.0, 2.0, 1.9]],
+"modulations": [
+    {"polarisation": [[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]],
+    "propagation_vector": [0.0, 0.0, 0.0],
+    "period": 20,
+    "amplitude": 0.2},
+    {"polarisation": [[0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [0.0, 1.0, 0.0]],
+    "propagation_vector": [1.0, 0.0, 0.0],
+    "period": 10,
+    "amplitude": 0.1}]}

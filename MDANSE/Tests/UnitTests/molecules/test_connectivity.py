@@ -11,7 +11,7 @@ short_traj = os.path.join(
 )
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def trajectory() -> HDFTrajectoryInputData:
     trajectory = HDFTrajectoryInputData(short_traj)
     yield trajectory
