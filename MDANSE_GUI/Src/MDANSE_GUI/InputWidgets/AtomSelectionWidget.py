@@ -44,7 +44,7 @@ class CheckableComboBox(QComboBox):
         self.view().setAutoScroll(False)
         self.addItem("select all")
 
-    def eventFilter(self, a0: Union[QObject, None], a1: Union[QEvent, None]):
+    def eventFilter(self, a0: Union[QObject, None], a1: Union[QEvent, None]) -> bool:
         """Updates the check state of the items and the lineEdit.
 
         Parameters
