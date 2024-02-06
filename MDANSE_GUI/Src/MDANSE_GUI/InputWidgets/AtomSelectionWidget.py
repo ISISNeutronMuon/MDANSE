@@ -12,6 +12,7 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
+from itertools import count, groupby
 from qtpy.QtCore import Qt, QEvent, Slot
 from qtpy.QtGui import QStandardItem
 from qtpy.QtWidgets import (
@@ -37,7 +38,6 @@ class CheckableComboBox(QComboBox):
         self.lineEdit().setReadOnly(True)
         self.view().viewport().installEventFilter(self)
         self.view().setAutoScroll(False)
-        self.model().dataChanged.connect(self.update_line_edit)
         self.addItem("select all")
 
     def eventFilter(self, a0, a1):
@@ -47,18 +47,27 @@ class CheckableComboBox(QComboBox):
 
             if item.checkState() == Qt.Checked:
                 check_uncheck = Qt.Unchecked
-                # uncheck select all since everything isn't selected
-                # anymore
-                self.model().item(0).setCheckState(check_uncheck)
             else:
                 check_uncheck = Qt.Checked
 
             if idx.row() == 0:
-                for i in range(self.model().rowCount()):
-                    self.model().item(i).setCheckState(check_uncheck)
+                # need to block signals temporarily otherwise as we
+                # need to make a change on all the items which could
+                # cause alot of signals to be emitted
+                self.model().blockSignals(True)
+                for i in self.getItems():
+                    i.setCheckState(check_uncheck)
+                self.model().blockSignals(False)
+                item.setCheckState(check_uncheck)
             else:
                 item.setCheckState(check_uncheck)
+                # check/uncheck select all since everything is/isn't selected
+                if all([i.checkState() == Qt.Checked for i in self.getItems()]):
+                    self.model().item(0).setCheckState(Qt.Checked)
+                else:
+                    self.model().item(0).setCheckState(Qt.Unchecked)
 
+            self.update_line_edit()
             return True
 
         return super().eventFilter(a0, a1)
@@ -81,12 +90,26 @@ class CheckableComboBox(QComboBox):
                 continue
             yield self.model().item(i)
 
+    def check_items_castable_to_int(self):
+        try:
+            [int(i.text()) for i in self.getItems()]
+            return True
+        except ValueError:
+            return False
+
     def update_line_edit(self):
         vals = []
         for item in self.getItems():
             if item.checkState() == Qt.Checked:
                 vals.append(item.text())
-        self.lineEdit().setText(",".join(vals))
+        if self.check_items_castable_to_int():
+            vals = [int(i) for i in vals]
+            # changes for example 1,2,3,5,6,7,9,10 -> 1-3,5-7,9-10
+            gr = (list(x) for _, x in groupby(vals, lambda x, c=count(): next(c) - x))
+            text = ",".join("-".join(map(str, (g[0], g[-1])[:len(g)])) for g in gr)
+            self.lineEdit().setText(text)
+        else:
+            self.lineEdit().setText(",".join(vals))
 
 
 class HelperDialog(QDialog):
