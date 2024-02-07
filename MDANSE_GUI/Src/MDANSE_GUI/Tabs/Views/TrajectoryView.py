@@ -16,7 +16,7 @@
 import os
 
 from qtpy.QtCore import QObject, Slot, Signal, QModelIndex
-from qtpy.QtWidgets import QMenu, QListView
+from qtpy.QtWidgets import QMenu, QListView, QAbstractItemView
 from qtpy.QtGui import QStandardItem, QContextMenuEvent
 
 
@@ -27,6 +27,7 @@ class TrajectoryView(QListView):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.clicked.connect(self.item_picked)
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:

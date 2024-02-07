@@ -42,6 +42,7 @@ from MDANSE_GUI.Tabs.JobTab import JobTab
 from MDANSE_GUI.Tabs.MolecularViewerTab import MolecularViewerTab
 from MDANSE_GUI.Tabs.RunTab import RunTab
 from MDANSE_GUI.Tabs.LoggingTab import LoggingTab
+from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
 from MDANSE_GUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
 from MDANSE_GUI.Plotter.widgets.main_window import MainWindow
 
@@ -83,6 +84,7 @@ class TabbedWindow(QMainWindow):
         self._job_holder = JobHolder()
 
     def makeBasicLayout(self):
+        self.createConverterViewer()
         self.createTrajectoryViewer()
         self.createMolecularViewer()
         self.createActionsViewer()
@@ -278,10 +280,24 @@ class TabbedWindow(QMainWindow):
         self.tabs.addTab(run_tab._core, name)
         self._tabs[name] = run_tab
 
+    def createConverterViewer(self):
+        name = "Converters"
+        job_tab = ConverterTab.gui_instance(
+            self.tabs, name, self._session, self._settings, self._logger
+        )
+        job_tab.set_job_starter(self._job_holder)
+        self.tabs.addTab(job_tab._core, name)
+        self._tabs[name] = job_tab
+
     def createActionsViewer(self):
         name = "Actions"
         job_tab = JobTab.gui_instance(
-            self.tabs, name, self._session, self._settings, self._logger
+            self.tabs,
+            name,
+            self._session,
+            self._settings,
+            self._logger,
+            combo_model=self._trajectory_model,
         )
         job_tab.set_job_starter(self._job_holder)
         self.tabs.addTab(job_tab._core, name)

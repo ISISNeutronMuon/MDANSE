@@ -15,11 +15,9 @@
 
 
 from qtpy.QtCore import QObject, Slot, Signal
-from qtpy.QtGui import QStandardItem
-from qtpy.QtWidgets import QWidget, QComboBox
+from qtpy.QtWidgets import QWidget
 
-from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.Framework.Converters.Converter import Converter
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
@@ -30,26 +28,19 @@ from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
 
 
-job_tab_label = """This is the list of jobs you can run using MDANSE.
-Pick a job to see additional information.
-Use the button to start a job.
+tab_label = """Convert your trajectory to the MDANSE MDT format.
+If you cannot find the converter for your MD engine, the
+ASE converter can be tried as a backup option.
 """
 
 
-class JobTab(GeneralTab):
+class ConverterTab(GeneralTab):
     """The tab for choosing and starting a new job."""
 
     def __init__(self, *args, **kwargs):
-        cmodel = kwargs.pop("combo_model", None)
         super().__init__(*args, **kwargs)
         self._current_trajectory = ""
         self._job_starter = None
-        self._trajectory_combo = QComboBox()
-        self._trajectory_combo.setEditable(False)
-        self._trajectory_combo.currentTextChanged.connect(self.set_current_trajectory)
-        if cmodel is not None:
-            self._trajectory_combo.setModel(cmodel)
-        self._core.add_widget(self._trajectory_combo)
         self._core.add_button("Show the job dialog!", self.show_action_dialog)
 
     def set_job_starter(self, job_starter):
@@ -66,7 +57,7 @@ class JobTab(GeneralTab):
         if current_item is None:
             return
         try:
-            converter = IJob.create(current_item.text())
+            converter = Converter.create(current_item.text())
         except ValueError as e:
             print(f"Failed: {e}")
             return
@@ -94,15 +85,15 @@ class JobTab(GeneralTab):
         the_tab = cls(
             window,
             name="AvailableJobs",
-            model=JobTree(),
+            model=JobTree(parent_class=Converter),
             view=ActionsTree(),
             visualiser=TextInfo(
-                header="MDANSE Analysis",
+                header="MDANSE Converter",
                 footer="Look up our Read The Docs page:"
                 + "https://mdanse.readthedocs.io/en/protos/",
             ),
             layout=DoublePanel,
-            label_text=job_tab_label,
+            label_text=tab_label,
         )
         return the_tab
 
@@ -122,17 +113,16 @@ class JobTab(GeneralTab):
             session=session,
             settings=settings,
             logger=logger,
-            model=kwargs.get("model", JobTree()),
-            combo_model=kwargs.get("combo_model", None),
+            model=kwargs.get("model", JobTree(parent_class=Converter)),
             view=ActionsTree(),
             visualiser=TextInfo(
-                header="MDANSE Analysis",
+                header="MDANSE Converter",
                 footer="Look up our "
                 + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
                 + " page.",
             ),
             layout=DoublePanel,
-            label_text=job_tab_label,
+            label_text=tab_label,
         )
         return the_tab
 
@@ -143,21 +133,21 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     window = QMainWindow()
-    the_tab = JobTab(
+    the_tab = ConverterTab(
         window,
         name="AvailableJobs",
-        model=JobTree(),
+        model=JobTree(parent_class=Converter),
         view=ActionsTree(),
         visualiser=TextInfo(
-            header="MDANSE Analysis",
+            header="MDANSE Converters",
             footer="Look up our "
             + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
             + " page.",
         ),
         layout=DoublePanel,
-        label_text=job_tab_label,
+        label_text=tab_label,
     )
-    the_tab.update_trajectory_list(["/Users/maciej.bartkowiak/an_example/BLAH.mdt"])
+    the_tab._current_trajectory = "/Users/maciej.bartkowiak/an_example/BLAH.mdt"
     window.setCentralWidget(the_tab._core)
     window.show()
     app.exec()

@@ -117,6 +117,12 @@ class DoublePanel(QWidget):
     def set_label_text(self, text: str):
         self._tab_label.setText(text)
 
+    def add_widget(self, tempwidget: QWidget = None, upper=True):
+        if upper:
+            self._ub_layout.addWidget(tempwidget)
+        else:
+            self._lb_layout.addWidget(tempwidget)
+
     def add_button(self, label: str = "Button!", slot=None, upper=True):
         temp = QPushButton(label, self._base)
         if slot is not None:

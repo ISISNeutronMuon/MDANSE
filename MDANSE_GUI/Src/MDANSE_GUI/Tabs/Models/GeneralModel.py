@@ -8,6 +8,7 @@ class GeneralModel(QStandardItemModel):
     them to the ItemVisualiser."""
 
     error = Signal(str)
+    all_elements = Signal(object)
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
@@ -28,9 +29,21 @@ class GeneralModel(QStandardItemModel):
         item.setData(retval)
         self.appendRow(item)
         self.mutex.unlock()
+        self.summarise_items()
         return retval
 
+    def summarise_items(self):
+        result = []
+        self.mutex.lock()
+        for nrow in range(self.rowCount()):
+            index = self.index(nrow, 0)
+            item = self.itemFromIndex(index)
+            result.append([item.text(), item.data()])
+        self.mutex.unlock()
+        self.all_elements.emit(result)
+
     def removeRow(self, row: int, parent: QModelIndex = None):
+        self.mutex.lock()
         try:
             node_number = self.item(row).data()
         except AttributeError:
@@ -41,3 +54,5 @@ class GeneralModel(QStandardItemModel):
             super().removeRow(row)
         else:
             super().removeRow(row, parent)
+        self.mutex.unlock()
+        self.summarise_items()

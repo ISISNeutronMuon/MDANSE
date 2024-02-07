@@ -36,6 +36,7 @@ class ActionsTree(QTreeView):
         self.setAcceptDrops(True)
         self.setDragEnabled(True)
         self.setDragDropMode(QAbstractItemView.DragDropMode.DragDrop)
+        self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.click_position = None
 
         self.clicked.connect(self.on_select_action)

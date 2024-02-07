@@ -19,6 +19,7 @@ class JobTree(QStandardItemModel):
     error = Signal(str)
 
     def __init__(self, *args, **kwargs):
+        parent_class = kwargs.pop("parent_class", IJob)
         super().__init__(*args, **kwargs)
 
         self._nodes = {}  # dict of {number: QStandardItem}
@@ -32,7 +33,7 @@ class JobTree(QStandardItemModel):
 
         self.nodecounter = 0  # each node is given a unique number
 
-        self.populateTree()
+        self.populateTree(parent_class=parent_class)
 
     def populateTree(self, parent_class=None):
         """This function starts the recursive process of scanning
