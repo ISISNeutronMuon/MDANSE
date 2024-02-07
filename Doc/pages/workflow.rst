@@ -12,12 +12,12 @@ Input
 Trajectory
 ^^^^^^^^^^
 
-The trajectory must be in the MDANSE format, saved as a NetCDF file.
+The trajectory must be in the MDANSE format, saved as a HDF file.
 
 (Most likely
 your trajectory is in whatever format was output by your preferred Molecular Dynamics
 simulation software, and you need to convert it first. Once you have converted your
-trajectory to the MDANSE NetCDF format, you can use it as input for all kinds of
+trajectory to the MDANSE HDF format, you can use it as input for all kinds of
 analysis. See also :ref:`trajectory-converters`)
 
 Frames
