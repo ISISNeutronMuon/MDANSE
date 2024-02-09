@@ -200,7 +200,7 @@ class GlobalMotionFilteredTrajectory(IJob):
         # The output trajectory is closed.
         self._output_trajectory.close()
 
-        outputFile = h5py.File(self.configuration["output_file"]["files"][0], "r+")
+        outputFile = h5py.File(self.configuration["output_file"]["file"], "r+")
 
         outputFile.create_dataset("rms", data=self._rms, dtype=np.float64)
 

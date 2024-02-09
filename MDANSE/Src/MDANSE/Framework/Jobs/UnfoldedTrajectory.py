@@ -72,7 +72,7 @@ class UnfoldedTrajectory(IJob):
 
         # The output trajectory is opened for writing.
         self._outputTraj = TrajectoryWriter(
-            self.configuration["output_file"]["files"][0],
+            self.configuration["output_file"]["file"],
             self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
             self._selectedAtoms,

@@ -323,7 +323,7 @@ class Discover(Converter):
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["files"][0],
+            self.configuration["output_file"]["file"],
             self._chemicalSystem,
             self.numberOfSteps,
             positions_dtype=self.configuration["output_file"]["dtype"],
