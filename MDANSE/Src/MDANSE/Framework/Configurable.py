@@ -155,6 +155,11 @@ class Configurable(object):
                 if name in configured:
                     continue
 
+                if not conf.valid:
+                    print(conf.error_status)
+                    self._configured = False
+                    return
+
                 if conf.check_dependencies(configured):
                     if not conf.optional:
                         conf.configure(parameters[name])
