@@ -61,25 +61,25 @@ class FloatConfigurator(IConfigurator):
         try:
             value = float(value)
         except (TypeError, ValueError) as e:
-            print(f"Wrong value {value} in {self}")
-            raise ConfiguratorError(e, self)
+            self.error_status = f"Wrong value {value} in {self}"
+            return
 
         if self._choices:
             if not value in self._choices:
-                raise ConfiguratorError("the input value is not a valid choice.", self)
+                self.error_status = "the input value is not a valid choice."
+                return
 
         if self._mini is not None:
             if value < self._mini:
-                raise ConfiguratorError(
-                    "the input value is lower than %r." % self._mini, self
-                )
+                self.error_status = f"the input value is lower than {self._mini}"
+                return
 
         if self._maxi is not None:
             if value > self._maxi:
-                raise ConfiguratorError(
-                    "the input value is higher than %r." % self._maxi, self
-                )
+                self.error_status = f"the input value is higher than {self._maxi}"
+                return
 
+        self.error_status = "OK"
         self["value"] = value
 
     @property

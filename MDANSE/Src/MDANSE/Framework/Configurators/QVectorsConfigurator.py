@@ -66,20 +66,18 @@ class QVectorsConfigurator(IConfigurator):
                 self["is_lattice"] = ud["is_lattice"]
                 self["q_vectors"] = ud["q_vectors"]
             else:
-                raise ConfiguratorError(
-                    "Q vectors user definition %s is not stored on this machine"
-                    % value,
-                    self,
+                self.error_status = (
+                    f"Q vectors user definition {value} is not stored on this machine"
                 )
+                return
 
         else:
             if isinstance(value, tuple):
                 try:
                     generator, parameters = value
                 except ValueError:
-                    raise ConfiguratorError(
-                        "Invalid q vectors settings %s" % value, self
-                    )
+                    self.error_status = f"Invalid q vectors settings {value}"
+                    return
                 generator = IQVectors.create(
                     generator, trajConfig["instance"].chemical_system
                 )
@@ -87,20 +85,21 @@ class QVectorsConfigurator(IConfigurator):
                 generator.generate()
 
                 if not generator.configuration["q_vectors"]:
-                    raise ConfiguratorError("no Q vectors could be generated", self)
+                    self.error_status = "no Q vectors could be generated"
+                    return
 
                 self["parameters"] = parameters
                 # self["type"] = generator._type
                 self["is_lattice"] = generator.is_lattice
                 self["q_vectors"] = generator.configuration["q_vectors"]
             else:
-                raise ConfiguratorError(
-                    "Q vectors setting must be a tuple %s" % value, self
-                )
+                self.error_status = "Q vectors setting must be a tuple {value}"
+                return
 
         self["shells"] = list(self["q_vectors"].keys())
         self["n_shells"] = len(self["q_vectors"])
         self["value"] = self["q_vectors"]
+        self.error_status = "OK"
 
     def get_information(self):
         """

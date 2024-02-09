@@ -63,29 +63,30 @@ class SingleOutputFileConfigurator(IConfigurator):
         root, format = value
 
         if not root:
-            raise ConfiguratorError("empty root name for the output file.", self)
+            self.error_status = "empty root name for the output file."
+            return
 
         dirname = os.path.dirname(root)
 
         try:
             PLATFORM.create_directory(dirname)
         except:
-            raise ConfiguratorError("the directory %r is not writable" % dirname)
+            self.error_status = f"the directory {dirname} is not writable"
+            return
 
         if not format:
-            raise ConfiguratorError("no output format specified", self)
+            self.error_status = "no output format specified"
+            return
 
         if format != self._format:
-            raise ConfiguratorError(
-                "the output file format %r is not a valid output format" % format, self
+            self.error_status = (
+                f"the output file format {format} is not a valid output format"
             )
+            return
 
         if format not in IFormat.subclasses():
-            raise ConfiguratorError(
-                "the output file format %r is not registered as a valid file format."
-                % format,
-                self,
-            )
+            self.error_status = f"the output file format {format} is not registered as a valid file format."
+            return
 
         self["root"] = root
         self["format"] = format
@@ -94,6 +95,7 @@ class SingleOutputFileConfigurator(IConfigurator):
         if not self["extension"] in temp_name[-5:]:  # capture most extension lengths
             temp_name += self["extension"]
         self["file"] = temp_name
+        self.error_status = "OK"
 
     @property
     def format(self):

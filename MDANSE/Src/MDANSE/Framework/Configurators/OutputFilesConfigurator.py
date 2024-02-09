@@ -67,36 +67,38 @@ class OutputFilesConfigurator(IConfigurator):
         root, formats = value
 
         if not root:
-            raise ConfiguratorError("empty root name for the output file.", self)
+            self.error_status = "empty root name for the output file."
+            return
 
         dirname = os.path.dirname(root)
 
         try:
             PLATFORM.create_directory(dirname)
         except:
-            raise ConfiguratorError("the directory %r is not writable" % dirname)
+            self.error_status = f"the directory {dirname} is not writable"
+            return
 
         if not formats:
-            raise ConfiguratorError("no output formats specified", self)
+            self.error_status = f"no output formats specified"
+            return
 
         for fmt in formats:
             if not fmt in self._formats:
-                raise ConfiguratorError(
-                    "the output file format %r is not a valid output format" % fmt, self
+                self.error_status = (
+                    f"the output file format {fmt} is not a valid output format"
                 )
+                return
 
             if fmt not in IFormat.subclasses():
-                raise ConfiguratorError(
-                    "the output file format %r is not registered as a valid file format."
-                    % fmt,
-                    self,
-                )
+                self.error_status = f"the output file format {fmt} is not registered as a valid file format."
+                return
 
         self["root"] = root
         self["formats"] = formats
         self["files"] = ["%s%s" % (root, IFormat.create(f).extension) for f in formats]
 
         self["value"] = self["files"]
+        self.error_status = "OK"
 
     @property
     def formats(self):

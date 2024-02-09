@@ -44,13 +44,11 @@ class PythonObjectConfigurator(IConfigurator):
         try:
             value = ast.literal_eval(repr(value))
         except SyntaxError as e:
-            raise ConfiguratorError(
-                "The inputted python code could not be parsed due to the following error:\n\n"
-                "SyntaxError: %s" % e,
-                self,
-            )
+            self.error_status = f"python code SyntaxError: {e}"
+            return
 
         self["value"] = value
+        self.error_status = "OK"
 
     def get_information(self):
         """

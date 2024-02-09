@@ -59,17 +59,18 @@ class HDFInputFileConfigurator(InputFileConfigurator):
             self["instance"] = h5py.File(self["value"], "r")
 
         except IOError:
-            raise ConfiguratorError(
-                "can not open %r HDF file for reading" % self["value"]
-            )
+            self.error_status = f"can not open {value} HDF file for reading"
+            return
 
         for v in self._variables:
             if v in self["instance"]:
                 self[v] = self["instance"][v][:]
             else:
-                raise ConfiguratorError(
-                    "the variable %r was not  found in %r HDF file" % (v, self["value"])
+                self.error_status = (
+                    f"the variable {v} was not  found in {value} HDF file"
                 )
+                return
+        self.error_status = "OK"
 
     @property
     def variables(self):

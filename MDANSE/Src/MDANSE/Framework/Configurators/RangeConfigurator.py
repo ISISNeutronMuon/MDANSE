@@ -105,7 +105,8 @@ class RangeConfigurator(IConfigurator):
             value = value[value < self._maxi]
 
         if value.size == 0:
-            raise ConfiguratorError("the input range is empty.", self)
+            self.error_status = "the input range is empty."
+            return
 
         if self._sort:
             value = np.sort(value)
@@ -127,6 +128,7 @@ class RangeConfigurator(IConfigurator):
             self["step"] = self["value"][1] - self["value"][0]
         except IndexError:
             self["step"] = 1
+        self.error_status = "OK"
 
     @property
     def valueType(self):

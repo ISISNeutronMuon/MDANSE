@@ -69,9 +69,11 @@ class McStasOptionsConfigurator(IConfigurator):
         try:
             PLATFORM.create_directory(dirname)
         except:
-            raise ConfiguratorError("The directory %r is not writable" % dirname)
+            self.error_status = f"The directory {dirname} is not writable"
+            return
 
         self["value"] = tmp
+        self.error_status = "OK"
 
     def get_information(self):
         """

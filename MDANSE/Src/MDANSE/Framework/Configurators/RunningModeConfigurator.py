@@ -50,7 +50,8 @@ class RunningModeConfigurator(IConfigurator):
             mode = value[0].lower()
 
         if not mode in self.availablesModes:
-            raise ConfiguratorError("%r is not a valid running mode." % mode, self)
+            self.error_status = f"{mode} is not a valid running mode."
+            return
 
         if mode == "monoprocessor":
             slots = 1
@@ -61,14 +62,17 @@ class RunningModeConfigurator(IConfigurator):
             if mode == "multiprocessor":
                 maxSlots = multiprocessing.cpu_count()
                 if slots > maxSlots:
-                    raise ConfiguratorError("invalid number of allocated slots.", self)
+                    self.error_status = "invalid number of allocated slots."
+                    return
 
             if slots <= 0:
-                raise ConfiguratorError("invalid number of allocated slots.", self)
+                self.error_status = "invalid number of allocated slots."
+                return
 
         self["mode"] = mode
 
         self["slots"] = slots
+        self.error_status = "OK"
 
     def get_information(self):
         """

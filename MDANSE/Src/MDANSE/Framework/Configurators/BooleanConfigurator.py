@@ -58,11 +58,10 @@ class BooleanConfigurator(IConfigurator):
         """
 
         if value not in self._shortCuts:
-            raise ConfiguratorError(
-                "the input value can not be interpreted as a boolean", self
-            )
-
-        self["value"] = self._shortCuts[value]
+            self.error_status = "Input is not recognised as a true/false value"
+        else:
+            self.error_status = "OK"
+            self["value"] = self._shortCuts[value]
 
     def get_information(self):
         """

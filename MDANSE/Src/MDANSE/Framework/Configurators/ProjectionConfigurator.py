@@ -48,20 +48,22 @@ class ProjectionConfigurator(IConfigurator):
         try:
             mode, axis = value
         except (TypeError, ValueError) as e:
-            raise ConfiguratorError(e)
+            self.error_status = e
+            return
 
         if not isinstance(mode, str):
-            raise ConfiguratorError(
-                "invalid type for projection mode: must be a string"
-            )
+            self.error_status = "invalid type for projection mode: must be a string"
+            return
 
         try:
             self["projector"] = IProjector.create(mode)
         except KeyError:
-            raise ConfiguratorError("the projector %r is unknown" % mode)
+            self.error_status = f"the projector {mode} is unknown"
+            return
         else:
             self["projector"].set_axis(axis)
             self["axis"] = self["projector"].axis
+        self.error_status = "OK"
 
     def get_information(self):
         """

@@ -58,12 +58,13 @@ class PythonScriptConfigurator(InputFileConfigurator):
 
         for v in self._variables:
             if v not in namespace:
-                raise ConfiguratorError(
-                    "The variable %r is not defined in the %r python script file"
-                    % (v, self["value"])
+                self.error_status = (
+                    f"The variable {v} is not defined in the {value} python script file"
                 )
+                return
 
         self.update(namespace)
+        self.error_status = "OK"
 
     @property
     def variables(self):

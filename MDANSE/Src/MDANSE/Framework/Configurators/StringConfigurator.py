@@ -59,17 +59,19 @@ class StringConfigurator(IConfigurator):
 
         if not self._acceptNullString:
             if not value.strip():
-                raise ConfiguratorError("invalid null string", self)
+                self.error_status = "invalid null string"
+                return
 
         if self._evalType is not None:
             value = ast.literal_eval(value)
             if not isinstance(value, self._evalType):
-                raise ConfiguratorError(
-                    "the string can not be eval to %r type" % self._evalType.__name__,
-                    self,
+                self.error_status = (
+                    f"the string can not be eval to {self._evalType.__name__} type"
                 )
+                return
 
         self["value"] = value
+        self.error_status = "OK"
 
     @property
     def acceptNullString(self):
