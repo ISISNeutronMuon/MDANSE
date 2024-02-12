@@ -128,10 +128,12 @@ class ActionDialog(QDialog):
             if not "label" in ddict.keys():
                 ddict["label"] = key
             ddict["configurator"] = configurator
+            ddict["source_object"] = self._input_trajectory
             widget_class = widget_lookup[dtype]
             input_widget = widget_class(parent=self, **ddict)
             layout.addWidget(input_widget._base)
             self._widgets.append(input_widget)
+            print("Set up input trajectory")
         for key, value in settings.items():
             if key == "trajectory":
                 continue
@@ -149,12 +151,14 @@ class ActionDialog(QDialog):
                 placeholder = BackupWidget(parent=self, **ddict)
                 layout.addWidget(placeholder._base)
                 self._widgets.append(placeholder)
+                print(f"Could not find the right widget for {key}")
             else:
                 widget_class = widget_lookup[dtype]
                 # expected = {key: ddict[key] for key in widget_class.__init__.__code__.co_varnames}
                 input_widget = widget_class(parent=self, **ddict)
                 layout.addWidget(input_widget._base)
                 self._widgets.append(input_widget)
+                print(f"Set up the right widget for {key}")
             # self.handlers[key] = data_handler
             configured = False
             iterations = 0

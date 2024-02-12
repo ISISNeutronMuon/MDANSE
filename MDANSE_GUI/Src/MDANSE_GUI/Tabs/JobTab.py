@@ -63,6 +63,16 @@ class JobTab(GeneralTab):
     def show_action_dialog(self):
         dialog = ActionDialog
         current_item = self._core.current_item()
+        traj_model = self._trajectory_combo.model()
+        if traj_model.rowCount() < 1:
+            return
+        # node_number = self._trajectory_combo.currentData()
+        node_number = traj_model.item(self._trajectory_combo.currentIndex(), 0).data()
+        print(
+            f"Combo model: node_number {node_number} found in item {self._trajectory_combo.currentText()}"
+        )
+        self._current_trajectory = traj_model._nodes[node_number]
+        print(f"Current trajectory is {self._current_trajectory}")
         if current_item is None:
             return
         try:
@@ -73,14 +83,13 @@ class JobTab(GeneralTab):
         except IndexError as e:
             print(f"Failed: {e}")
             return
-        try:
-            dialog_instance = dialog(
-                self._core,
-                job_name=current_item.text(),
-                trajectory=self._current_trajectory,
-            )
-        except Exception as e:
-            self.error(repr(e))
+        dialog_instance = dialog(
+            self._core,
+            job_name=current_item.text(),
+            trajectory=self._current_trajectory,
+        )
+        # except Exception as e:
+        #     self.error(repr(e))
         if self._job_starter is not None:
             dialog_instance.new_thread_objects.connect(self._job_starter.startThread)
         dialog_instance.show()

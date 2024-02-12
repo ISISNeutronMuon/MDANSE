@@ -53,5 +53,5 @@ class RunTable(QTableView):
     def item_picked(self, index: QModelIndex):
         model = self.model()
         node_number = model.itemFromIndex(index).data()
-        trajectory = model._nodes[node_number]
-        self.item_details.emit(trajectory)
+        job_entry = model.existing_jobs[node_number]
+        self.item_details.emit(job_entry.text_summary())
