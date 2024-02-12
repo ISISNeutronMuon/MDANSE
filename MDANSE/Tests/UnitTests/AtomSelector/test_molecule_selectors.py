@@ -16,6 +16,13 @@ def protein_chemical_system():
     return protein_chemical_system
 
 
+def test_select_water_returns_true_as_match_exists(
+    protein_chemical_system,
+):
+    exists = select_water(protein_chemical_system, check_exists=True)
+    assert exists
+
+
 def test_select_water_returns_correct_number_of_atoms_matches(
     protein_chemical_system,
 ):

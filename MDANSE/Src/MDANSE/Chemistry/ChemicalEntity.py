@@ -2504,17 +2504,32 @@ class ChemicalSystem(_ChemicalEntity):
 
         self._atoms = None
 
-    def get_substructure_matches(
-        self, smarts: list[str], maxmatches: int = 1000000
-    ) -> set[int]:
-        """Get the indexes which match any of the smarts string in
-        the inputted list. Note that the default bond type in MDANSE
-        is Chem.rdchem.BondType.UNSPECIFIED.
+    def has_substructure_match(self, smarts: str) -> bool:
+        """Check if there is a substructure match.
 
         Parameters
         ----------
-        smarts : list[str]
-            List of smarts strings.
+        smarts : str
+            SMARTS string.
+
+        Returns
+        -------
+        bool
+            True if the there is a substructure match.
+        """
+        return self.rdkit_mol.HasSubstructMatch(Chem.MolFromSmarts(smarts))
+
+    def get_substructure_matches(
+        self, smarts: str, maxmatches: int = 1000000
+    ) -> set[int]:
+        """Get the indexes which match the smarts string. Note that
+        the default bond type in MDANSE is
+        Chem.rdchem.BondType.UNSPECIFIED.
+
+        Parameters
+        ----------
+        smarts : str
+            SMARTS string.
         maxmatches : int
             Maximum number of matches used in the GetSubstructMatches
             rdkit method.
@@ -2525,12 +2540,11 @@ class ChemicalSystem(_ChemicalEntity):
             An set of matched atom indices.
         """
         substruct_set = set()
-        for smart in smarts:
-            matches = self.rdkit_mol.GetSubstructMatches(
-                Chem.MolFromSmarts(smart), maxMatches=maxmatches
-            )
-            for match in matches:
-                substruct_set.update(match)
+        matches = self.rdkit_mol.GetSubstructMatches(
+            Chem.MolFromSmarts(smarts), maxMatches=maxmatches
+        )
+        for match in matches:
+            substruct_set.update(match)
         return substruct_set
 
     @property

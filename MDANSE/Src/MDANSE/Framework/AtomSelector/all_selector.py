@@ -1,17 +1,25 @@
+from typing import Union
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 
 
-def select_all(system: ChemicalSystem) -> set[int]:
+def select_all(
+    system: ChemicalSystem, check_exists: bool = False
+) -> Union[set[int], bool]:
     """Selects all atoms in the chemical system.
 
     Parameters
     ----------
     system : ChemicalSystem
         The MDANSE chemical system.
+    check_exists : bool, optional
+        Check if a match exists.
 
     Returns
     -------
-    set[int]
-        All atom indices.
+    Union[set[int], bool]
+        All atom indices or a bool if checking match.
     """
-    return set([at.index for at in system.atom_list])
+    if check_exists:
+        return True
+    else:
+        return set([at.index for at in system.atom_list])

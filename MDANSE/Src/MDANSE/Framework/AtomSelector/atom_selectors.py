@@ -4,66 +4,70 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 
 
 __all__ = [
-    "select_elements",
-    "select_hs_on_elements",
+    "select_element",
+    "select_hs_on_element",
     "select_hs_on_heteroatom",
     "select_index",
 ]
 
 
-def select_elements(system: ChemicalSystem, symbols: Union[list[str], str]) -> set[int]:
-    """Selects all atoms for the input elements.
+def select_element(
+    system: ChemicalSystem, symbol: str, check_exists: bool = False
+) -> Union[set[int], bool]:
+    """Selects all atoms for the input element.
 
     Parameters
     ----------
     system : ChemicalSystem
         The MDANSE chemical system.
-    symbols : list[str]
-        A symbol or list of symbols of the elements.
+    symbol : str
+        Symbol of the element.
+    check_exists : bool, optional
+        Check if a match exists.
 
     Returns
     -------
-    set[int]
+    Union[set[int], bool]
         The atom indices of the matched atoms.
     """
-    patterns = []
-    symbols = set(symbols if isinstance(symbols, list) else [symbols])
-    if "*" in symbols:
-        return set([at.index for at in system.atom_list])
-    for symbol in symbols:
-        patterns.append(f"[#{ATOMS_DATABASE[symbol]['atomic_number']}]")
-    return system.get_substructure_matches(patterns)
+    pattern = f"[#{ATOMS_DATABASE[symbol]['atomic_number']}]"
+    if check_exists:
+        return system.has_substructure_match(pattern)
+    else:
+        return system.get_substructure_matches(pattern)
 
 
-def select_hs_on_elements(
-    system: ChemicalSystem, symbols: Union[list[str], str]
-) -> set[int]:
-    """Selects all H atoms bonded to the input elements.
+def select_hs_on_element(
+    system: ChemicalSystem, symbol: Union[list[str], str], check_exists: bool = False
+) -> Union[set[int], bool]:
+    """Selects all H atoms bonded to the input element.
 
     Parameters
     ----------
     system : ChemicalSystem
         The MDANSE chemical system.
-    symbols : list[str] or str
-        A symbols or list of symbols of the elements that the H atoms are
-        bonded to.
+    symbol : list[str] or str
+        Symbol of the element that the H atoms are bonded to.
+    check_exists : bool, optional
+        Check if a match exists.
 
     Returns
     -------
-    set[int]
+    Union[set[int], bool]
         The atom indices of the matched atoms.
     """
-    matches = set()
-    symbols = set(symbols if isinstance(symbols, list) else [symbols])
-    for symbol in symbols:
-        num = ATOMS_DATABASE[symbol]["atomic_number"]
-        xh_matches = system.get_substructure_matches([f"[#{num}]~[H]"])
-        x_matches = system.get_substructure_matches([f"[#{num}]"])
-        matches.update(xh_matches - x_matches)
-    return matches
+    num = ATOMS_DATABASE[symbol]["atomic_number"]
+    if check_exists:
+        return system.has_substructure_match(f"[#{num}]~[H]")
+    else:
+        xh_matches = system.get_substructure_matches(f"[#{num}]~[H]")
+        x_matches = system.get_substructure_matches(f"[#{num}]")
+        return xh_matches - x_matches
 
 
-def select_hs_on_heteroatom(system: ChemicalSystem) -> set[int]:
+def select_hs_on_heteroatom(
+    system: ChemicalSystem, check_exists: bool = False
+) -> Union[set[int], bool]:
     """Selects all H atoms bonded to any atom except carbon and
     hydrogen.
 
@@ -71,18 +75,25 @@ def select_hs_on_heteroatom(system: ChemicalSystem) -> set[int]:
     ----------
     system : ChemicalSystem
         The MDANSE chemical system.
+    check_exists : bool, optional
+        Check if a match exists.
 
     Returns
     -------
-    set[int]
+    Union[set[int], bool]
         The atom indices of the matched atoms.
     """
-    xh_matches = system.get_substructure_matches(["[!#6&!#1]~[H]"])
-    x_matches = system.get_substructure_matches(["[!#6&!#1]"])
-    return xh_matches - x_matches
+    if check_exists:
+        return system.has_substructure_match("[!#6&!#1]~[H]")
+    else:
+        xh_matches = system.get_substructure_matches("[!#6&!#1]~[H]")
+        x_matches = system.get_substructure_matches("[!#6&!#1]")
+        return xh_matches - x_matches
 
 
-def select_index(system: ChemicalSystem, index: Union[int, str]) -> set[int]:
+def select_index(
+    system: ChemicalSystem, index: Union[int, str], check_exists: bool = False
+) -> Union[set[int], bool]:
     """Selects atom with index - just returns the set with the
     index in it.
 
@@ -92,10 +103,15 @@ def select_index(system: ChemicalSystem, index: Union[int, str]) -> set[int]:
         The MDANSE chemical system.
     index : int or str
         The index to select.
+    check_exists : bool, optional
+        Check if a match exists.
 
     Returns
     -------
-    set[int]
-        The index in a set.
+    Union[set[int], bool]
+        The index in a set or a bool if checking match.
     """
-    return {int(index)}
+    if check_exists:
+        return True
+    else:
+        return {int(index)}
