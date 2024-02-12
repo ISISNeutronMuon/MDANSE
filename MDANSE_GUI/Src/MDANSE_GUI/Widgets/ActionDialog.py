@@ -87,6 +87,7 @@ class ActionDialog(QDialog):
     def __init__(self, *args, job_name: IJob = "Dummy", **kwargs):
         self._default_path = kwargs.pop("path", None)
         self._input_trajectory = kwargs.pop("trajectory", None)
+        self._trajectory_configurator = None
         path = None
         if self._input_trajectory is not None:
             path, filename = os.path.split(self._input_trajectory)
@@ -133,6 +134,7 @@ class ActionDialog(QDialog):
             input_widget = widget_class(parent=self, **ddict)
             layout.addWidget(input_widget._base)
             self._widgets.append(input_widget)
+            self._trajectory_configurator = input_widget._configurator
             print("Set up input trajectory")
         for key, value in settings.items():
             if key == "trajectory":
@@ -144,6 +146,7 @@ class ActionDialog(QDialog):
                 ddict["label"] = key
             ddict["configurator"] = configurator
             ddict["source_object"] = self._input_trajectory
+            ddict["trajectory_configurator"] = self._trajectory_configurator
             if not dtype in widget_lookup.keys():
                 ddict["tooltip"] = (
                     "This is not implemented in the MDANSE GUI at the moment, and it MUST BE!"

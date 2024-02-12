@@ -23,14 +23,15 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class VectorModel(QStandardItemModel):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, chemical_system=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._generator = None
+        self._chemical_system = chemical_system
 
     @Slot(str)
     def switch_qvector_type(self, vector_type: str):
         self.clear()
-        self._generator = IQVectors.create(vector_type)
+        self._generator = IQVectors.create(vector_type, self._chemical_system)
         settings = self._generator.settings
         for kv in settings.items():
             name = kv[0]  # dictionary key
@@ -68,10 +69,13 @@ class QVectorsWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         kwargs["layout_type"] = "QVBoxLayout"
         super().__init__(*args, **kwargs)
-        source_object = kwargs.get("source_object", None)
+        trajectory_configurator = kwargs.get("trajectory_configurator", None)
+        chemical_system = None
+        if trajectory_configurator is not None:
+            chemical_system = trajectory_configurator["instance"].chemical_system
         self._selector = QComboBox(self._base)
         self._selector.addItems(IQVectors.subclasses())
-        self._model = VectorModel(self._base)
+        self._model = VectorModel(self._base, chemical_system=chemical_system)
         self._view = QTableView(self._base)
         self._layout.addWidget(self._selector)
         self._layout.addWidget(self._view)
