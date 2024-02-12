@@ -70,6 +70,6 @@ class InputFileWidget(WidgetBase):
             self._field.setText(new_value[0])
             self.updateValue()
 
-    @Slot()
-    def updateValue(self):
-        self._configurator.configure(self._field.text())
+    def get_widget_value(self):
+        """Collect the results from the input widgets and return the value."""
+        return self._field.text()

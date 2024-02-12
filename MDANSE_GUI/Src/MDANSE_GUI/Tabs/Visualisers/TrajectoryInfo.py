@@ -3,6 +3,8 @@ from collections import defaultdict
 from qtpy.QtCore import QObject, Slot, Signal
 from qtpy.QtWidgets import QPushButton, QTextBrowser, QWidget, QFileDialog
 
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+
 
 class TrajectoryInfo(QTextBrowser):
     error = Signal(str)
@@ -14,7 +16,8 @@ class TrajectoryInfo(QTextBrowser):
         self.setOpenExternalLinks(True)
 
     @Slot(object)
-    def visualise_item(self, incoming: object):
+    def visualise_item(self, fullpath: object):
+        incoming = HDFTrajectoryInputData(fullpath)
         try:
             text = incoming.info()  # this is from a trajectory object
         except AttributeError:

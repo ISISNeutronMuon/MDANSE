@@ -61,11 +61,12 @@ class IntegerConfigurator(IConfigurator):
         :param value: the integer to be configured.
         :type value: int
         """
+        self["value"] = self._default
 
         try:
             value = int(value)
         except (TypeError, ValueError) as e:
-            self.error_status = e
+            self.error_status = "Wrong input for an integer" + str(e)
             return
 
         if self._choices:

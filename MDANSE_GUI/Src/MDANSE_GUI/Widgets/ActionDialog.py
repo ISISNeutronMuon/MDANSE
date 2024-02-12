@@ -119,7 +119,22 @@ class ActionDialog(QDialog):
         self._job_instance = job_instance
         print(f"Settings {settings}")
         print(f"Configuration {job_instance.configuration}")
+        if "trajectory" in settings.keys():
+            key, value = "trajectory", settings["trajectory"]
+            dtype = value[0]
+            ddict = value[1]
+            configurator = job_instance.configuration[key]
+            configurator.configure(self._input_trajectory)
+            if not "label" in ddict.keys():
+                ddict["label"] = key
+            ddict["configurator"] = configurator
+            widget_class = widget_lookup[dtype]
+            input_widget = widget_class(parent=self, **ddict)
+            layout.addWidget(input_widget._base)
+            self._widgets.append(input_widget)
         for key, value in settings.items():
+            if key == "trajectory":
+                continue
             dtype = value[0]
             ddict = value[1]
             configurator = job_instance.configuration[key]

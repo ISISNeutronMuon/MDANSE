@@ -57,6 +57,7 @@ class FloatConfigurator(IConfigurator):
         :param value: the input value
         :type value: float
         """
+        self["value"] = self._default
 
         try:
             value = float(value)

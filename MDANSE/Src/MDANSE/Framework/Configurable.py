@@ -177,6 +177,11 @@ class Configurable(object):
 
                     progress = True
 
+                if not conf.valid:
+                    print(conf.error_status)
+                    self._configured = False
+                    return
+
             if not progress:
                 raise ConfigurationError(
                     "Circular or unsatisfiable dependencies when setting up configuration."
