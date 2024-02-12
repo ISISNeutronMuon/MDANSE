@@ -310,7 +310,7 @@ class AtomSelectionWidget(WidgetBase):
         self._value = default_value
         self.field = QLineEdit(default_value, self._base)
         self.selector = self._configurator.get_selector()
-        self.helper = HelperDialog(self.selector, self.field, self.parent())
+        self.helper = HelperDialog(self.selector, self.field, self._base)
         helper_button = QPushButton("Atom selection helper", self._base)
         helper_button.clicked.connect(self.helper_dialog)
         self.field.textChanged.connect(self.check_valid_field)

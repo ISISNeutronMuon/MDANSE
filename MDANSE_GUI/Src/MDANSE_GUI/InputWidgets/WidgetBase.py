@@ -49,7 +49,7 @@ class WidgetBase(QObject):
             self._label = QLabel(self._label_text, base)
             layout.addWidget(self._label)
         elif self._base_type == "QGroupBox":
-            base = QGroupBox(self._label_text)
+            base = QGroupBox(self._label_text, parent)
             base.setToolTip(self._tooltip)
             layout = layoutClass(base)
             base.setLayout(layout)
