@@ -215,13 +215,16 @@ class ActionDialog(QDialog):
             pass
         else:
             self.last_paths[cname] = path
-        pardict = self.set_parameters()
+        pardict = self.set_parameters(mock_labels=True)
         self._job_instance.save(result, pardict)
 
-    def set_parameters(self):
+    def set_parameters(self, mock_labels=False):
         results = {}
         for widnum, key in enumerate(self._job_instance.settings.keys()):
-            results[key] = (self._widgets[widnum].get_widget_value(), "")
+            if mock_labels:
+                results[key] = (self._widgets[widnum].get_widget_value(), "")
+            else:
+                results[key] = self._widgets[widnum].get_widget_value()
         return results
 
     @Slot()

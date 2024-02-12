@@ -18,6 +18,7 @@ from icecream import ic
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex
 
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE_GUI.DataViewModel.JobStatusQt import JobStatusQt
 
 
@@ -35,7 +36,9 @@ class JobThread(QThread):
         self._parameters = parameters
         ic("JobThread.run will create a job instance")
         ic(f"command is {command}")
-        if isinstance(self._command, type):
+        if isinstance(self._command, str):
+            self._job = IJob.create(self._command)
+        elif isinstance(self._command, type):
             self._job = self._command()
         else:
             self._job = self._command

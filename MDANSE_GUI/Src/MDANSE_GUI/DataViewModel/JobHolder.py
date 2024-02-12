@@ -33,7 +33,7 @@ class JobThread(QThread):
         ic("JobThread starts init")
         self._command = command
         self._parameters = parameters
-        ic("JobThread.run will create a job instance")
+        ic(f"JobThread.run will create a job instance of command {command}")
         if isinstance(self._command, type):
             self._job = self._command()
         else:
