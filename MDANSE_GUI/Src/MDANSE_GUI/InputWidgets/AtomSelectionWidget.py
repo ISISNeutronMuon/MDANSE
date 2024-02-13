@@ -42,7 +42,11 @@ class CheckableComboBox(QComboBox):
         self.lineEdit().setReadOnly(True)
         self.view().viewport().installEventFilter(self)
         self.view().setAutoScroll(False)
+        # it's faster to access the items through this python list than
+        # through self.model().item(idx)
+        self._items = []
         self.addItem("select all")
+        self.lineEdit().setText("")
 
     def eventFilter(self, a0: Union[QObject, None], a1: Union[QEvent, None]) -> bool:
         """Updates the check state of the items and the lineEdit.
@@ -106,8 +110,7 @@ class CheckableComboBox(QComboBox):
         item.setText(text)
         item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
         item.setData(Qt.Unchecked, Qt.CheckStateRole)
-        self.model().appendRow(item)
-        self.update_line_edit()
+        self._items.append(item)
 
     def getItems(self) -> QStandardItem:
         """
@@ -120,7 +123,7 @@ class CheckableComboBox(QComboBox):
         for i in range(self.model().rowCount()):
             if i == 0:  # skips the select all item
                 continue
-            yield self.model().item(i)
+            yield self._items[i]
 
     def check_items_castable_to_int(self) -> bool:
         """
@@ -156,12 +159,12 @@ class HelperDialog(QDialog):
 
     Attributes
     ----------
-    cbox_text : dict
+    _cbox_text : dict
         The dictionary that maps the selector settings to text used in
         the helper dialog.
     """
 
-    cbox_text = {
+    _cbox_text  = {
         "all": "All atoms:",
         "hs_on_heteroatom": "Hs on heteroatoms:",
         "primary_amine": "Primary amine groups:",
@@ -215,7 +218,7 @@ class HelperDialog(QDialog):
                 checkbox = QCheckBox()
                 checkbox.setChecked(v)
                 checkbox.setLayoutDirection(Qt.RightToLeft)
-                label = QLabel(self.cbox_text[k])
+                label = QLabel(self._cbox_text[k])
                 checkbox.setObjectName(k)
                 checkbox.stateChanged.connect(self.update)
                 if not match_exists[k]:
@@ -236,7 +239,7 @@ class HelperDialog(QDialog):
                 combo.addItems(items)
                 combo.setObjectName(k)
                 combo.model().dataChanged.connect(self.update)
-                label = QLabel(self.cbox_text[k])
+                label = QLabel(self._cbox_text[k])
                 if len(items) == 0:
                     combo.setEnabled(False)
                     label.setStyleSheet("color: grey;")
@@ -309,6 +312,7 @@ class AtomSelectionWidget(WidgetBase):
         default_value = '{"all": true}'
         self._value = default_value
         self.field = QLineEdit(default_value, self._base)
+        self.field.setMaxLength(2147483647)  # set to the largest possible
         self.selector = self._configurator.get_selector()
         self.helper = HelperDialog(self.selector, self.field, self._base)
         helper_button = QPushButton("Atom selection helper", self._base)
