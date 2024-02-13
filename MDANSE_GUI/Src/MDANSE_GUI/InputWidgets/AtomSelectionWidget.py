@@ -165,7 +165,7 @@ class HelperDialog(QDialog):
         the helper dialog.
     """
 
-    _cbox_text  = {
+    _cbox_text = {
         "all": "All atoms:",
         "hs_on_heteroatom": "Hs on heteroatoms:",
         "primary_amine": "Primary amine groups:",
