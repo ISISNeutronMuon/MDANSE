@@ -110,6 +110,7 @@ class CheckableComboBox(QComboBox):
         item.setText(text)
         item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
         item.setData(Qt.Unchecked, Qt.CheckStateRole)
+        self.model().appendRow(item)
         self._items.append(item)
 
     def getItems(self) -> QStandardItem:
