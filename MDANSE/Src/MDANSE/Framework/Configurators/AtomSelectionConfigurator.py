@@ -56,7 +56,8 @@ class AtomSelectionConfigurator(IConfigurator):
             value = self._default
 
         if not isinstance(value, str):
-            raise ConfiguratorError("Invalid input value.")
+            self.error_status = "Invalid input value."
+            return
 
         self["value"] = value
 
@@ -81,6 +82,7 @@ class AtomSelectionConfigurator(IConfigurator):
         self["names"] = [at.symbol for at in selectedAtoms]
         self["unique_names"] = sorted(set(self["names"]))
         self["masses"] = [[ATOMS_DATABASE[n]["atomic_weight"]] for n in self["names"]]
+        self.error_status = "OK"
 
     def get_natoms(self):
         nAtomsPerElement = {}

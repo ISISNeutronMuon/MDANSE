@@ -15,10 +15,14 @@
 
 
 def main():
-    from MDANSE.GUI.Apps import PlotterApp
+    from qtpy.QtWidgets import QApplication
+    from MDANSE_GUI.Plotter.widgets.main_window import MainWindow
+    import sys
 
-    app = PlotterApp()
-    app.MainLoop()
+    app = QApplication(sys.argv)
+    root = MainWindow(None)
+    root.show()
+    app.exec()
 
 
 if __name__ == "__main__":

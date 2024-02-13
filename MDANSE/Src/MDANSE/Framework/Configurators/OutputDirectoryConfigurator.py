@@ -57,9 +57,11 @@ class OutputDirectoryConfigurator(IConfigurator):
 
         if self._new:
             if os.path.exists(value):
-                raise ConfiguratorError("the output directory must not exist", self)
+                self.error_status = "the output directory must not exist"
+                return
 
         self["value"] = value
+        self.error_status = "OK"
 
     def get_information(self):
         """

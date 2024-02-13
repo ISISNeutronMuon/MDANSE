@@ -52,16 +52,19 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         """
 
         if not isinstance(value, str):
-            raise ConfiguratorError("Invalid type for weight. Must be a string.", self)
+            self.error_status = "Invalid type for weight. Must be a string."
+            return
 
         value = value.lower()
 
         if not value in ATOMS_DATABASE.numeric_properties:
-            raise ConfiguratorError(
-                "weight %r is not registered as a valid numeric property." % value, self
+            self.error_status = (
+                f"weight {value} is not registered as a valid numeric property."
             )
+            return
 
         self["property"] = value
+        self.error_status = "OK"
 
     def get_weights(self):
         ascfg = self._configurable[self._dependencies["atom_selection"]]

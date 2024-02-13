@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/pygenplot/__init__.py
+# @file      Src/PyQtGUI/Plotter/__init__.py
 # @brief     molecular viewer code from the "waterstay" project
 #
 # @homepage  https://mdanse.org
@@ -47,9 +47,6 @@ class IReader(abc.ABC):
         Args:
             filename (str): the trajectory filename
         """
-
-        if not os.path.exists(filename):
-            raise IOError("The file {} does not exist.".format(filename))
 
         self._filename = filename
 

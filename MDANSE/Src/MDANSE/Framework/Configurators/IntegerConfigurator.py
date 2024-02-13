@@ -61,37 +61,36 @@ class IntegerConfigurator(IConfigurator):
         :param value: the integer to be configured.
         :type value: int
         """
+        self["value"] = self._default
 
         try:
             value = int(value)
         except (TypeError, ValueError) as e:
-            raise ConfiguratorError(e)
+            self.error_status = "Wrong input for an integer" + str(e)
+            return
 
         if self._choices:
             if not value in self._choices:
-                raise ConfiguratorError("the input value is not a valid choice.", self)
+                self.error_status = "the input value is not a valid choice."
+                return
 
         if self._mini is not None:
             if value < self._mini:
-                raise ConfiguratorError(
-                    "the input value is lower than %r." % self._mini, self
-                )
+                self.error_status = f"the input value is lower than {self._mini}"
+                return
 
         if self._maxi is not None:
             if value > self._maxi:
-                raise ConfiguratorError(
-                    "the input value is higher than %r." % self._maxi, self
-                )
+                self.error_status = f"the input value is higher than {self._maxi}"
+                return
 
         if self._exclude:
             if value in self._exclude:
-                raise ConfiguratorError(
-                    "the input value is forbidden; forbidden values are %r."
-                    % self._exclude,
-                    self,
-                )
+                self.error_status = f"the input value is forbidden; forbidden values are {self._exclude}"
+                return
 
         self["value"] = value
+        self.error_status = "OK"
 
     @property
     def mini(self):

@@ -63,6 +63,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "HDFTrajectoryConfigurator": HDFTrajectoryWidget,
     "InterpolationOrderConfigurator": InterpolationOrderWidget,
     "OutputFilesConfigurator": OutputFilesWidget,
+    "InputFileConfigurator": InputFileWidget,
     "RunningModeConfigurator": RunningModeWidget,
     "WeightsConfigurator": ComboWidget,
     "GroupingLevelConfigurator": ComboWidget,
@@ -83,15 +84,18 @@ class ActionDialog(QDialog):
 
     last_paths = {}
 
-    def __init__(self, *args, converter: IJob = "Dummy", **kwargs):
-        self.source = kwargs.pop("source_object", None)
-        try:
-            temptext = self.source.text()
-        except AttributeError:
-            self.default_path = "."
-            print("Failed to get trajectory path! Resetting to default '.'")
-        else:
-            self.default_path, _ = os.path.split(temptext)
+    def __init__(self, *args, job_name: IJob = "Dummy", **kwargs):
+        self._default_path = kwargs.pop("path", None)
+        self._input_trajectory = kwargs.pop("trajectory", None)
+        self._trajectory_configurator = None
+        path = None
+        if self._input_trajectory is not None:
+            path, filename = os.path.split(self._input_trajectory)
+        if self._default_path is None:
+            if path is None:
+                self._default_path = "."
+            else:
+                self._default_path = path
         super().__init__(*args, **kwargs)
 
         buffer = QWidget(self)
@@ -105,33 +109,44 @@ class ActionDialog(QDialog):
         self.setLayout(base_layout)
         self.handlers = {}
         self._widgets = []
-        self.converter_instance = None
-        self.converter_constructor = converter
-        try:
-            cname = converter.name
-        except:
-            pass
-        else:
-            self.cname = cname
-            self.last_paths[cname] = "."
+        self._job_name = job_name
+        self.last_paths[job_name] = "."
 
-        self.setWindowTitle(converter.__name__)
+        self.setWindowTitle(job_name)
 
-        if converter is not None:
-            converter_instance = converter()
-            converter_instance.build_configuration()
-            settings = converter_instance.settings
-            self.converter_instance = converter_instance
-            print(f"Converter settings {settings}")
-            print(f"Converter configuration {converter_instance.configuration}")
-        for key, value in settings.items():
+        job_instance = IJob.create(job_name)
+        job_instance.build_configuration()
+        settings = job_instance.settings
+        self._job_instance = job_instance
+        print(f"Settings {settings}")
+        print(f"Configuration {job_instance.configuration}")
+        if "trajectory" in settings.keys():
+            key, value = "trajectory", settings["trajectory"]
             dtype = value[0]
             ddict = value[1]
-            configurator = converter_instance.configuration[key]
+            configurator = job_instance.configuration[key]
+            configurator.configure(self._input_trajectory)
             if not "label" in ddict.keys():
                 ddict["label"] = key
             ddict["configurator"] = configurator
-            ddict["source_object"] = self.source
+            ddict["source_object"] = self._input_trajectory
+            widget_class = widget_lookup[dtype]
+            input_widget = widget_class(parent=self, **ddict)
+            layout.addWidget(input_widget._base)
+            self._widgets.append(input_widget)
+            self._trajectory_configurator = input_widget._configurator
+            print("Set up input trajectory")
+        for key, value in settings.items():
+            if key == "trajectory":
+                continue
+            dtype = value[0]
+            ddict = value[1]
+            configurator = job_instance.configuration[key]
+            if not "label" in ddict.keys():
+                ddict["label"] = key
+            ddict["configurator"] = configurator
+            ddict["source_object"] = self._input_trajectory
+            ddict["trajectory_configurator"] = self._trajectory_configurator
             if not dtype in widget_lookup.keys():
                 ddict["tooltip"] = (
                     "This is not implemented in the MDANSE GUI at the moment, and it MUST BE!"
@@ -139,12 +154,14 @@ class ActionDialog(QDialog):
                 placeholder = BackupWidget(parent=self, **ddict)
                 layout.addWidget(placeholder._base)
                 self._widgets.append(placeholder)
+                print(f"Could not find the right widget for {key}")
             else:
                 widget_class = widget_lookup[dtype]
                 # expected = {key: ddict[key] for key in widget_class.__init__.__code__.co_varnames}
                 input_widget = widget_class(parent=self, **ddict)
                 layout.addWidget(input_widget._base)
                 self._widgets.append(input_widget)
+                print(f"Set up the right widget for {key}")
             # self.handlers[key] = data_handler
             configured = False
             iterations = 0
@@ -188,7 +205,7 @@ class ActionDialog(QDialog):
     @Slot()
     def save_dialog(self):
         try:
-            cname = self.cname
+            cname = self._job_name
         except:
             currentpath = "."
         else:
@@ -200,18 +217,21 @@ class ActionDialog(QDialog):
             return None
         path, _ = os.path.split(result)
         try:
-            cname = self.cname
+            cname = self._job_name
         except:
             pass
         else:
             self.last_paths[cname] = path
-        pardict = self.set_parameters()
-        self.converter_instance.save(result, pardict)
+        pardict = self.set_parameters(mock_labels=True)
+        self._job_instance.save(result, pardict)
 
-    def set_parameters(self):
+    def set_parameters(self, mock_labels=False):
         results = {}
-        for widnum, key in enumerate(self.converter_instance.settings.keys()):
-            results[key] = self._widgets[widnum].get_widget_value()
+        for widnum, key in enumerate(self._job_instance.settings.keys()):
+            if mock_labels:
+                results[key] = (self._widgets[widnum].get_widget_value(), "")
+            else:
+                results[key] = self._widgets[widnum].get_widget_value()
         return results
 
     @Slot()
@@ -222,4 +242,4 @@ class ActionDialog(QDialog):
         # self.converter_instance.run(pardict)
         # this would send the actual instance, which _may_ be wrong
         # self.new_thread_objects.emit([self.converter_instance, pardict])
-        self.new_thread_objects.emit([self.converter_constructor, pardict])
+        self.new_thread_objects.emit([self._job_name, pardict])

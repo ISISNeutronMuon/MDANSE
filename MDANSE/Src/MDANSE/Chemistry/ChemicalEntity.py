@@ -2600,6 +2600,8 @@ class ChemicalSystem(_ChemicalEntity):
         cs._parent = self._parent
 
         cs._chemical_entities = [ce.copy() for ce in self._chemical_entities]
+        # for ce in self._chemical_entities:
+        #     cs.add_chemical_entity(ce.copy())
 
         new_atoms = {atom.name: atom for atom in cs.atoms}
 
@@ -2617,6 +2619,9 @@ class ChemicalSystem(_ChemicalEntity):
             conf = self._configuration.clone(cs)
 
             cs._configuration = conf
+
+        if self._atoms is not None:
+            _ = cs.atoms
 
         return cs
 

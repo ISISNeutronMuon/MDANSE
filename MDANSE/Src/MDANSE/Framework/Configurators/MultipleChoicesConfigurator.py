@@ -59,21 +59,25 @@ class MultipleChoicesConfigurator(IConfigurator):
 
         if self._nChoices is not None:
             if len(value) != self._nChoices:
-                raise ConfiguratorError("invalid number of choices.", self)
+                self.error_status = f"invalid number of choices."
+                return
 
         indexes = []
         for v in value:
             try:
                 indexes.append(self._choices.index(v))
             except ValueError:
-                raise ConfiguratorError("%r item is not a valid choice" % v, self)
+                self.error_status = f"{v} item is not a valid choice"
+                return
 
         if not indexes:
-            raise ConfiguratorError("Empty choices selection.", self)
+            self.error_status = "Empty choices selection."
+            return
 
         self["indexes"] = indexes
         self["choices"] = [self._choices[i] for i in indexes]
         self["value"] = self["choices"]
+        self.error_status = "OK"
 
     @property
     def choices(self):

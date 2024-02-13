@@ -200,7 +200,7 @@ class LAMMPS(Converter):
     settings["output_file"] = (
         "OutputTrajectoryConfigurator",
         {
-            "format": "MDTFormat",
+            "formats": ["MDTFormat"],
             "root": "config_file",
             "label": "MDANSE trajectory (filename, format)",
         },

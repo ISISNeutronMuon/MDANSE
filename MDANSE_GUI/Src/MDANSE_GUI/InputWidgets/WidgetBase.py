@@ -56,6 +56,7 @@ class WidgetBase(QObject):
         self._base = base
         self._layout = layout
         self._configurator = configurator
+        self._parent_dialog = parent
 
     def update_labels(self):
         if self._base_type == "QWidget":
@@ -86,13 +87,33 @@ class WidgetBase(QObject):
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
 
+    def mark_error(self, error_text: str):
+        self._base.setStyleSheet("background-color:rgb(180,20,180); font-weight: bold")
+        self._base.setToolTip(error_text)
+
+    def clear_error(self):
+        self._base.setStyleSheet("")
+        self._base.setToolTip("")
+
     @abstractmethod
     @Slot()
     def updateValue(self):
         current_value = self.get_widget_value()
         self._configurator.configure(current_value)
+        if self._configurator.valid:
+            self.clear_error()
+        else:
+            self.mark_error(self._configurator.error_status)
 
     @abstractmethod
     def get_value(self):
         self.updateValue()
         return self._configurator["value"]
+
+    @property
+    def default_path(self):
+        return self._parent_dialog.default_path
+
+    @default_path.setter
+    def default_path(self, value: str) -> None:
+        self._parent_dialog.default_path = value

@@ -125,6 +125,10 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
         self._configured = False
 
+        self._valid = True
+
+        self._error_status = "OK"
+
     @property
     def configurable(self):
         return self._configurable
@@ -172,6 +176,44 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         """
 
         return self._name
+
+    @property
+    def valid(self):
+        """Tells if the current value stored by the configurator
+        is a valid input.
+        There is no benefit in rejecting the entire configuration
+        and killing the GUI just because a value needs to be corrected.
+        Instead the GUI should highlight the values that need correcting.
+
+        Returns
+        -------
+        bool
+            true if the current value stored by the configurator can be used
+        """
+        return self._valid
+
+    @property
+    def error_status(self):
+        return self._error_status
+
+    @error_status.setter
+    def error_status(self, error_text: str):
+        """Sets the string explaining why the current input
+        cannot be accepted.
+
+        If the string is longer than 'OK', the self._valid
+        flag is set to False.
+
+        Parameters
+        ----------
+        error_text : str
+            Text explaining why the current input is invalid
+        """
+        self._error_status = error_text
+        if len(self._error_status) > 2:
+            self._valid = False
+        else:
+            self._valid = True
 
     @property
     def optional(self):

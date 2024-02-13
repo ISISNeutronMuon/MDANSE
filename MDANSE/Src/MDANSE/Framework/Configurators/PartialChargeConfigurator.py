@@ -59,22 +59,23 @@ class PartialChargeConfigurator(IConfigurator):
                     )
 
                     if "charges" not in namespace:
-                        raise ConfiguratorError(
-                            "The variable 'charges' is not defined in the %r python script file"
-                            % (self["value"],)
+                        self.error_status = (
+                            f"The variable 'charges' is not defined in"
+                            f"the {value} python script file"
                         )
+                        return
 
                     self.update(namespace)
                 else:
-                    raise ConfiguratorError(
-                        "The python script defining partial charges %s could not be found."
-                        % value
-                    )
+                    self.error_status = f"The python script defining partial charges {value} could not be found."
+                    return
 
             elif isinstance(value, dict):
                 self["charges"] = value
             else:
-                raise ConfiguratorError("Invalid type for partial charges.")
+                self.error_status = f"Invalid type for partial charges."
+                return
+        self.error_status = "OK"
 
     def get_information(self):
         """

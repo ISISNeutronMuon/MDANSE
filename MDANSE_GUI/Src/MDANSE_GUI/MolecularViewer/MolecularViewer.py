@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/pygenplot/__init__.py
+# @file      Src/PyQtGUI/Plotter/__init__.py
 # @brief     molecular viewer code from the "waterstay" project
 #
 # @homepage  https://mdanse.org
@@ -133,6 +133,12 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def setDataModel(self, datamodel: TrajectoryAtomData):
         self._datamodel = datamodel
+
+    def _new_trajectory_object(self, data: HDFTrajectoryInputData):
+        reader = hdf5wrapper.HDF5Wrapper(
+            "Dummy Name", data.trajectory, data.chemical_system
+        )
+        self.set_reader(reader)
 
     @Slot(str)
     def _new_trajectory(self, fname: str):
@@ -265,7 +271,7 @@ class MolecularViewer(QtWidgets.QWidget):
         else:
             glyph.SetInputData(self._polydata)
 
-        temp_scale = float(0.5 * self._scale_factor)
+        temp_scale = float(0.2 * self._scale_factor)
         glyph.SetScaleModeToScaleByScalar()
         glyph.SetColorModeToColorByScalar()
         glyph.SetScaleFactor(temp_scale)
@@ -449,7 +455,7 @@ class MolecularViewer(QtWidgets.QWidget):
         )
 
         # Set its colors with the default value for atom selection and increase its size
-        self._atom_colours[picked_atom] = RGB_COLOURS["selection"][0]
+        self._atom_colours[picked_atom] = 1
         self._atom_scales[picked_atom] *= 2
 
         self._polydata.GetPointData().GetArray("scalars").SetTuple3(

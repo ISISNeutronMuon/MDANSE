@@ -5,6 +5,5 @@ sphinx
 icecream
 cython
 railroad-diagrams
-pyparsing
 rdkit
 ase

@@ -42,11 +42,11 @@ class TrajectoryVariableConfigurator(IConfigurator):
         trajConfig = self._configurable[self._dependencies["trajectory"]]
 
         if not value in trajConfig["instance"].chemical_system.configuration:
-            raise ConfiguratorError(
-                "%r is not registered as a trajectory variable." % value, self
-            )
+            self.error_status = f"{value} is not registered as a trajectory variable."
+            return
 
         self["value"] = value
+        self.error_status = "OK"
 
     def get_information(self):
         """

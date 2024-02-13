@@ -60,12 +60,11 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
             trajConfig = self._configurable[self._dependencies["trajectory"]]
 
             if not "velocities" in trajConfig["instance"].variables():
-                raise ConfiguratorError(
-                    "the trajectory does not contain any velocities. Use an interpolation order higher than 0",
-                    self,
-                )
+                self.error_status = f"the trajectory does not contain any velocities. Use an interpolation order higher than 0"
+                return
 
             self["variable"] = "velocities"
 
         else:
             self["variable"] = "coordinates"
+        self.error_status = "OK"

@@ -68,10 +68,12 @@ class VectorConfigurator(IConfigurator):
         """
 
         if not isinstance(value, (list, tuple)):
-            raise ConfiguratorError("Invalid input type", self)
+            self.error_status = "Invalid input type"
+            return
 
         if len(value) != self._dimension:
-            raise ConfiguratorError("Invalid dimension", self)
+            self.error_status = "Invalid dimension"
+            return
 
         vector = Vector(np.array(value, dtype=self._valueType))
 
@@ -80,10 +82,12 @@ class VectorConfigurator(IConfigurator):
 
         if self._notNull:
             if vector.length() == 0.0:
-                raise ConfiguratorError("The vector is null", self)
+                self.error_status = "The vector is null"
+                return
 
         self["vector"] = vector
         self["value"] = vector
+        self.error_status = "OK"
 
     @property
     def valueType(self):

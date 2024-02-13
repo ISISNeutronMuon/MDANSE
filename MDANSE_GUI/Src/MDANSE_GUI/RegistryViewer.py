@@ -21,6 +21,8 @@ of the classes that can be accessed from the
 MDANSE IJob interface. 
 """
 
+import os
+
 from MDANSE.Framework.Jobs.IJob import IJob
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem

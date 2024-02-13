@@ -61,14 +61,16 @@ class OutputTrajectoryConfigurator(IConfigurator):
         root, dtype, compression = value
 
         if not root:
-            raise ConfiguratorError("empty root name for the output file.", self)
+            self.error_status = "empty root name for the output file."
+            return
 
         dirname = os.path.dirname(root)
 
         try:
             PLATFORM.create_directory(dirname)
         except:
-            raise ConfiguratorError("the directory %r is not writable" % dirname)
+            self.error_status = f"the directory {dirname} is not writable"
+            return
 
         if dtype < 17:
             self._dtype = np.float16
@@ -91,6 +93,7 @@ class OutputTrajectoryConfigurator(IConfigurator):
         self["file"] = temp_name
         self["dtype"] = self._dtype
         self["compression"] = self._compression
+        self.error_status = "OK"
 
     @property
     def format(self):

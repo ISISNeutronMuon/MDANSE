@@ -56,10 +56,12 @@ class InputFileConfigurator(IConfigurator):
         value = PLATFORM.get_path(value)
 
         if not os.path.exists(value):
-            raise ConfiguratorError("the input file %r does not exist." % value, self)
+            self.error_status = f"The file {value} does not exist"
+            return
 
         self["value"] = value
         self["filename"] = value
+        self.error_status = "OK"
 
     @property
     def wildcard(self):

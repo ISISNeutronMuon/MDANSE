@@ -62,7 +62,8 @@ class AtomTransmutationConfigurator(IConfigurator):
             return
 
         if not isinstance(value, (list, tuple)):
-            raise ConfiguratorError("Invalid input value.")
+            self.error_status = "Invalid input value."
+            return
 
         trajConfig = self._configurable[self._dependencies["trajectory"]]
 
@@ -72,9 +73,8 @@ class AtomTransmutationConfigurator(IConfigurator):
         for json_string, element in value:
             # Otherwise, it must be a string that will be found as a user-definition keys
             if not isinstance(json_string, str):
-                raise ConfiguratorError(
-                    "Wrong format for atom transmutation configurator.", self
-                )
+                self.error_status = "Wrong format for atom transmutation configurator."
+                return
 
             if UD_STORE.has_definition(
                 trajConfig["basename"], "atom_selection", json_string
@@ -102,9 +102,10 @@ class AtomTransmutationConfigurator(IConfigurator):
         """
 
         if element not in ATOMS_DATABASE:
-            raise ConfiguratorError(
-                "the element %r is not registered in the database" % element, self
+            self.error_status = (
+                f"the element {element} is not registered in the database"
             )
+            return
 
         atomSelConfigurator = self._configurable[self._dependencies["atom_selection"]]
 
@@ -121,6 +122,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         atomSelConfigurator["masses"] = [
             [ATOMS_DATABASE[n]["atomic_weight"]] for n in atomSelConfigurator["names"]
         ]
+        self.error_status = "OK"
 
     def get_information(self):
         """

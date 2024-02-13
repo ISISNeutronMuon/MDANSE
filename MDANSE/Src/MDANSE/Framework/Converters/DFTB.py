@@ -49,7 +49,7 @@ class DFTB(Forcite):
     settings["output_file"] = (
         "OutputTrajectoryConfigurator",
         {
-            "format": "MDTFormat",
+            "formats": ["MDTFormat"],
             "root": "xtd_file",
             "label": "MDANSE trajectory (filename, format)",
         },

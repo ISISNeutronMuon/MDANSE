@@ -19,6 +19,7 @@ from MDANSE.Framework.Configurators.IConfigurator import (
     ConfiguratorError,
 )
 from MDANSE.Framework.Projectors.IProjector import IProjector
+from MDANSE.Framework.Projectors.IProjector import ProjectorError
 
 
 class ProjectionConfigurator(IConfigurator):
@@ -41,6 +42,7 @@ class ProjectionConfigurator(IConfigurator):
         or ``None`` in the case where no projection is needed.
         :type value: 2-tuple
         """
+        self["axis"] = None
 
         if value is None:
             value = ("NullProjector", None)
@@ -48,20 +50,27 @@ class ProjectionConfigurator(IConfigurator):
         try:
             mode, axis = value
         except (TypeError, ValueError) as e:
-            raise ConfiguratorError(e)
+            self.error_status = "Failed to unpack input" + str(e)
+            return
 
         if not isinstance(mode, str):
-            raise ConfiguratorError(
-                "invalid type for projection mode: must be a string"
-            )
+            self.error_status = "invalid type for projection mode: must be a string"
+            return
 
         try:
             self["projector"] = IProjector.create(mode)
         except KeyError:
-            raise ConfiguratorError("the projector %r is unknown" % mode)
+            self.error_status = f"the projector {mode} is unknown"
+            return
         else:
-            self["projector"].set_axis(axis)
-            self["axis"] = self["projector"].axis
+            try:
+                self["projector"].set_axis(axis)
+            except ProjectorError:
+                self.error_status = f"Axis {axis} is wrong for this projector"
+                return
+            else:
+                self["axis"] = self["projector"].axis
+        self.error_status = "OK"
 
     def get_information(self):
         """

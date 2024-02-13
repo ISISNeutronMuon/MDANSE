@@ -50,131 +50,78 @@ import numpy
 
 
 from MDANSE.Framework.Configurable import Configurable
-from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
-from MDANSE.Framework.Projectors.IProjector import ProjectorError
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class TestConfigurator(unittest.TestCase):
     """Unittest for the configurators used to setup an analysis in MDANSE"""
+    
+    def test_integer_configurator(self):
+        configurator = IConfigurator.create("IntegerConfigurator", "dummy_input")
+        configurator.configure(10)
+        self.assertEqual(configurator["value"], 10)
+        configurator.configure(10.1)
+        self.assertEqual(configurator["value"], 10)
+        configurator.configure('xxxx')
+        self.assertFalse(configurator.valid)
 
-    def setUp(self):
-        self._configurable = Configurable()
-        self._parameters = {}
-
-    def tearDown(self):
-        self._configurable.settings.clear()
-        self._parameters.clear()
-
-    def test_integer(self):
-        """Test the integer configurator"""
-
-        self._configurable.set_settings({"test_integer": ("IntegerConfigurator", {})})
-
-        # Case of a valid integer
-        self._parameters["test_integer"] = 20
-        self._configurable.setup(self._parameters)
-
-        # Case of a float that will casted to an integer
-        self._parameters["test_integer"] = 20.2
-        self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable["test_integer"]["value"], 20)
-
-        # Case of a string that can be casted to an integer
-        self._parameters["test_integer"] = "30"
-        self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable["test_integer"]["value"], 30)
-
-        # Case of a string that cannot be casted to an integer
-        self._parameters["test_integer"] = "xxxx"
-        self.assertRaises(ConfiguratorError, self._configurable.setup, self._parameters)
-
-        # Case of an object that cannot be casted to an integer
-        self._parameters["test_integer"] = [1, 2]
-        self.assertRaises(ConfiguratorError, self._configurable.setup, self._parameters)
-
-    def test_float(self):
+    def test_float_configurator(self):
         """Test the float configurator"""
+        configurator = IConfigurator.create("FloatConfigurator", "dummy_input")
+        configurator.configure(20.0)
+        self.assertEqual(configurator["value"], 20.0)
+        configurator.configure(20.2)
+        self.assertEqual(configurator["value"], 20.2)
+        configurator.configure("30.2")
+        self.assertEqual(configurator["value"], 30.2)
+        configurator.configure("xxxx")
+        self.assertFalse(configurator.valid)
+        configurator.configure([1, 2])
+        self.assertFalse(configurator.valid)
 
-        self._configurable.set_settings({"test_float": ("FloatConfigurator", {})})
-
-        # Case of an integer that will be casted to a float
-        self._parameters["test_float"] = 20
-        self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable["test_float"]["value"], 20.0)
-
-        # Case of a float
-        self._parameters["test_float"] = 20.2
-        self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable["test_float"]["value"], 20.2)
-
-        # Case of a string that can be casted to a float
-        self._parameters["test_float"] = "30.2"
-        self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable["test_float"]["value"], 30.2)
-
-        # Case of a string that cannot be casted to a float
-        self._parameters["test_float"] = "xxxx"
-        self.assertRaises(ConfiguratorError, self._configurable.setup, self._parameters)
-
-        # Case of an object that cannot be casted to a float
-        self._parameters["test_float"] = [1, 2]
-        self.assertRaises(ConfiguratorError, self._configurable.setup, self._parameters)
-
-    def test_projection(self):
-        self._configurable.set_settings({"projection": ("ProjectionConfigurator", {})})
-
+    def test_projection_configurator(self):
+        configurator = IConfigurator.create("ProjectionConfigurator", "dummy_input")
         data = numpy.random.uniform(0, 1, (10, 3))
-
         # Wrong parameters
-        self._parameters["projection"] = 10
-        self.assertRaises(ConfiguratorError, self._configurable.setup, self._parameters)
-
-        self._parameters["projection"] = [1, 2, 3, 4]
-        self.assertRaises(ConfiguratorError, self._configurable.setup, self._parameters)
-
+        configurator.configure(10)
+        self.assertFalse(configurator.valid)
+        configurator.configure([1, 2, 3, 4])
+        self.assertFalse(configurator.valid)
         # No projection - wrong projection type
-        self._parameters["projection"] = (30, None)
-        self.assertRaises(ConfiguratorError, self._configurable.setup, self._parameters)
+        configurator.configure((30, None))
+        self.assertFalse(configurator.valid)
 
+    def test_projection_null(self):
+        configurator = IConfigurator.create("ProjectionConfigurator", "dummy_input")
+        data = numpy.random.uniform(0, 1, (10, 3))
         # No projection
-        self._parameters["projection"] = None
-        self._configurable.setup(self._parameters)
-        proj = self._configurable["projection"]["projector"](data)
+        configurator.configure(None)
+        proj = configurator["projector"](data)
+        self.assertTrue(numpy.array_equal(data, proj))
+        configurator.configure(("NullProjector", None))
+        proj = configurator["projector"](data)
         self.assertTrue(numpy.array_equal(data, proj))
 
-        self._parameters["projection"] = ("NullProjector", None)
-        self._configurable.setup(self._parameters)
-        proj = self._configurable["projection"]["projector"](data)
-        self.assertTrue(numpy.array_equal(data, proj))
-
+    def test_projection_axial(self):
+        configurator = IConfigurator.create("ProjectionConfigurator", "dummy_input")
+        data = numpy.random.uniform(0, 1, (10, 3))
         # Axial projection - null vector
-        self._parameters["projection"] = ("AxialProjector", (0, 0, 0))
-        self.assertRaises(ProjectorError, self._configurable.setup, self._parameters)
-
+        configurator.configure(("AxialProjector", (0, 0, 0)))
+        self.assertFalse(configurator.valid)
         # Axial projection
-        self._parameters["projection"] = ("AxialProjector", (1, 0, 0))
-        self._configurable.setup(self._parameters)
-        proj = self._configurable["projection"]["projector"](data)
+        configurator.configure(("AxialProjector", (1, 0, 0)))
+        proj = configurator["projector"](data)
         self.assertTrue(numpy.array_equal(data[:, 0], proj[:, 0]))
 
-        # Axial projection - wrong data
-        self._parameters["projection"] = ("AxialProjector", (1, 0, 0))
-        self._configurable.setup(self._parameters)
-        self.assertRaises(
-            ProjectorError, self._configurable["projection"]["projector"].__call__, None
-        )
-        self.assertRaises(
-            ProjectorError, self._configurable["projection"]["projector"].__call__, [1]
-        )
-
+    def test_projection_planar(self):
+        configurator = IConfigurator.create("ProjectionConfigurator", "dummy_input")
+        data = numpy.random.uniform(0, 1, (10, 3))
         # Planar projection - null vector
-        self._parameters["projection"] = ("PlanarProjector", (0, 0, 0))
-        self.assertRaises(ProjectorError, self._configurable.setup, self._parameters)
-
+        configurator.configure(("PlanarProjector", (0, 0, 0)))
+        self.assertFalse(configurator.valid)
         # Planar projection
-        self._parameters["projection"] = ("PlanarProjector", (1, 0, 0))
-        self._configurable.setup(self._parameters)
-        proj = self._configurable["projection"]["projector"](data)
+        configurator.configure(("PlanarProjector", (1, 0, 0)))
+        proj = configurator["projector"](data)
         self.assertTrue(
             numpy.array_equal(
                 numpy.zeros((data.shape[0],), dtype=numpy.float64), proj[:, 0]
@@ -182,13 +129,3 @@ class TestConfigurator(unittest.TestCase):
         )
         self.assertTrue(numpy.array_equal(data[:, 1], proj[:, 1]))
         self.assertTrue(numpy.array_equal(data[:, 2], proj[:, 2]))
-
-        # Planar projection - wrong data
-        self._parameters["projection"] = ("PlanarProjector", (1, 0, 0))
-        self._configurable.setup(self._parameters)
-        self.assertRaises(
-            ProjectorError, self._configurable["projection"]["projector"].__call__, None
-        )
-        self.assertRaises(
-            ProjectorError, self._configurable["projection"]["projector"].__call__, [1]
-        )

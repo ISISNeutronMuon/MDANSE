@@ -64,30 +64,10 @@ class ConverterDialog(QDialog):
         self.converter_constructor = converter
         self.default_path = "."
 
-        if converter == "Dummy":
-            settings = OrderedDict(
-                [
-                    ("dummy int", ("int", {"default": 1.0, "label": "Time step (ps)"})),
-                    (
-                        "time_step",
-                        ("float", {"default": 1.0, "label": "Time step (ps)"}),
-                    ),
-                    (
-                        "fold",
-                        (
-                            "boolean",
-                            {"default": False, "label": "Fold coordinates in to box"},
-                        ),
-                    ),
-                    # ('dcd_file', ('input_file', {'wildcard': 'DCD files (*.dcd)|*.dcd|All files|*', 'default': '../../../Data/Trajectories/CHARMM/2vb1.dcd'})),
-                    # ('output_file', ('single_output_file', {'format': 'hdf', 'root': 'pdb_file'}))
-                ]
-            )
-        else:
-            converter_instance = converter
-            converter_instance.build_configuration()
-            settings = converter_instance.settings
-            self.converter_instance = converter_instance
+        converter_instance = converter
+        converter_instance.build_configuration()
+        settings = converter_instance.settings
+        self.converter_instance = converter_instance
         for key, value in settings.items():
             dtype = value[0]
             ddict = value[1]

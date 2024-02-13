@@ -62,7 +62,7 @@ class Gromacs(Converter):
     settings["output_file"] = (
         "OutputTrajectoryConfigurator",
         {
-            "format": "MDTFormat",
+            "formats": ["MDTFormat"],
             "root": "pdb_file",
             "label": "MDANSE trajectory (filename, format)",
         },
