@@ -39,7 +39,7 @@ are what you expected.
 class MolecularViewerTab(GeneralTab):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._core.add_button("Load an .MTD Trajectory", self.load_trajectory)
+        self._core.add_button("Load an .MDT Trajectory", self.load_trajectory)
 
     @Slot()
     def load_trajectory(self):
