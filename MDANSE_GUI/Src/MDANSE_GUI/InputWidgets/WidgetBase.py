@@ -98,12 +98,16 @@ class WidgetBase(QObject):
     @abstractmethod
     @Slot()
     def updateValue(self):
-        current_value = self.get_widget_value()
-        self._configurator.configure(current_value)
-        if self._configurator.valid:
-            self.clear_error()
+        try:
+            current_value = self.get_widget_value()
+        except ValueError:
+            self.mark_error("This input is not valid for this property")
         else:
-            self.mark_error(self._configurator.error_status)
+            self._configurator.configure(current_value)
+            if self._configurator.valid:
+                self.clear_error()
+            else:
+                self.mark_error(self._configurator.error_status)
 
     @abstractmethod
     def get_value(self):

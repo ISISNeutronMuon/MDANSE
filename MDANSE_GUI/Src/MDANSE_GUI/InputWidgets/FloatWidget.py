@@ -23,7 +23,6 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class FloatWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._value = 0
         try:
             default_option = float(self._configurator.default)
         except ValueError:
@@ -37,7 +36,6 @@ class FloatWidget(WidgetBase):
                     self._configurator.choices[1] - self._configurator.choices[0]
                 )
             field.setValue(default_option)
-            field.valueChanged.connect(self.newFloat)
         else:
             field = QLineEdit(self._base)
             validator = QDoubleValidator(field)
@@ -48,8 +46,6 @@ class FloatWidget(WidgetBase):
                 validator.setTop(maxval)
             field.setValidator(validator)
             field.setText(str(default_option))
-            field.textChanged.connect(self.newText)
-        self._value = default_option
         field.setToolTip(self._tooltip)
         self._field = field
         self._layout.addWidget(field)
@@ -65,16 +61,6 @@ class FloatWidget(WidgetBase):
             self._label_text = "FloatWidget"
         if self._tooltip == "":
             self._tooltip = "A single floating-point number"
-
-    @Slot(str)
-    def newText(self, text: str):
-        self._value = float(text)
-        self.updateValue()
-
-    @Slot(float)
-    def newFloat(self, num: float):
-        self._value = num
-        self.updateValue()
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
