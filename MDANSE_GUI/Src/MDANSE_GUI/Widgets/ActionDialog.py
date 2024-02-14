@@ -161,6 +161,7 @@ class ActionDialog(QDialog):
                 input_widget = widget_class(parent=self, **ddict)
                 layout.addWidget(input_widget._base)
                 self._widgets.append(input_widget)
+                input_widget.valid_changed.connect(self.allow_execution)
                 print(f"Set up the right widget for {key}")
             # self.handlers[key] = data_handler
             configured = False
@@ -197,6 +198,17 @@ class ActionDialog(QDialog):
         if "path" in new_params.keys():
             self.default_path = new_params["path"]
             self.new_path.emit(self.default_path)
+
+    @Slot()
+    def allow_execution(self):
+        allow = True
+        for widget in self._widgets:
+            if not widget._configurator.valid:
+                allow = False
+        if allow:
+            self.execute_button.setEnabled(True)
+        else:
+            self.execute_button.setEnabled(False)
 
     @Slot()
     def cancel_dialog(self):

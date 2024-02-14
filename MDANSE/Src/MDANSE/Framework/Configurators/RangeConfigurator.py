@@ -85,6 +85,10 @@ class RangeConfigurator(IConfigurator):
 
         first, last, step = value
 
+        if step == 0:
+            self.error_status = "Step of a range cannot be 0"
+            return
+
         if self._includeLast:
             last += step * 0.01  # less likely to overstep the upper limit
 

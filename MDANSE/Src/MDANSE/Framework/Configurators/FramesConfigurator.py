@@ -63,6 +63,8 @@ class FramesConfigurator(RangeConfigurator):
         self._maxi = trajConfig["length"]
 
         RangeConfigurator.configure(self, value)
+        if not self.valid:
+            return
 
         self["n_frames"] = self["number"]
 

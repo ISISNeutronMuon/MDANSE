@@ -15,7 +15,7 @@
 
 from abc import abstractmethod
 
-from qtpy.QtCore import QObject, Slot
+from qtpy.QtCore import QObject, Slot, Signal
 from qtpy.QtWidgets import (
     QWidget,
     QHBoxLayout,
@@ -27,6 +27,9 @@ from qtpy.QtWidgets import (
 
 
 class WidgetBase(QObject):
+
+    valid_changed = Signal()
+
     def __init__(self, *args, **kwargs):
         parent = kwargs.get("parent", None)
         super().__init__(*args, parent=parent)
@@ -90,24 +93,22 @@ class WidgetBase(QObject):
     def mark_error(self, error_text: str):
         self._base.setStyleSheet("background-color:rgb(180,20,180); font-weight: bold")
         self._base.setToolTip(error_text)
+        self.valid_changed.emit()
 
     def clear_error(self):
         self._base.setStyleSheet("")
         self._base.setToolTip("")
+        self.valid_changed.emit()
 
     @abstractmethod
     @Slot()
     def updateValue(self):
-        try:
-            current_value = self.get_widget_value()
-        except ValueError:
-            self.mark_error("This input is not valid for this property")
+        current_value = self.get_widget_value()
+        self._configurator.configure(current_value)
+        if self._configurator.valid:
+            self.clear_error()
         else:
-            self._configurator.configure(current_value)
-            if self._configurator.valid:
-                self.clear_error()
-            else:
-                self.mark_error(self._configurator.error_status)
+            self.mark_error(self._configurator.error_status)
 
     @abstractmethod
     def get_value(self):
