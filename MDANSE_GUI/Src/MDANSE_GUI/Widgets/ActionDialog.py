@@ -67,6 +67,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "RunningModeConfigurator": RunningModeWidget,
     "WeightsConfigurator": ComboWidget,
     "GroupingLevelConfigurator": ComboWidget,
+    "SingleChoiceConfigurator": ComboWidget,
     "QVectorsConfigurator": QVectorsWidget,
     "InputDirectoryConfigurator": InputDirectoryWidget,
     "OutputDirectoryConfigurator": OutputDirectoryWidget,

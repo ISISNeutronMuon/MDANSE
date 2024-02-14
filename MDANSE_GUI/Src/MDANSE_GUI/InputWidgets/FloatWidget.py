@@ -64,4 +64,5 @@ class FloatWidget(WidgetBase):
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        return float(self._field.text())
+        strval = self._field.text().strip()
+        return strval
