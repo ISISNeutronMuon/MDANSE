@@ -191,16 +191,86 @@ class ImprovedASE(Converter):
 
         super(ImprovedASE, self).finalize()
 
+    def extract_initial_information(self, ase_object):
+        try:
+            self._fractionalCoordinates = np.all(ase_object.get_pbc())
+        except:
+            pass
+
+        g = Graph()
+
+        element_count = {}
+        try:
+            element_list = ase_object.get_chemical_symbols()
+        except:
+            pass
+        else:
+            self._nAtoms = len(element_list)
+
+            self._chemicalSystem = ChemicalSystem()
+
+            for atnum, element in enumerate(element_list):
+                if element in element_count.keys():
+                    element_count[element] += 1
+                else:
+                    element_count[element] = 1
+                g.add_node(atnum, element=element, atomName=f"{element}_{atnum+1}")
+
+            for cluster in g.build_connected_components():
+                if len(cluster) == 1:
+                    node = cluster.pop()
+                    try:
+                        obj = Atom(node.element, name=node.atomName)
+                    except TypeError:
+                        print("EXCEPTION in ASE loader")
+                        print(f"node.element = {node.element}")
+                        print(f"node.atomName = {node.atomName}")
+                        print(f"rankToName = {self._rankToName}")
+                    obj.index = node.name
+                else:
+                    atList = []
+                    for atom in cluster:
+                        at = Atom(symbol=atom.element, name=atom.atomName)
+                        atList.append(at)
+                    c = collections.Counter([at.element for at in cluster])
+                    name = "".join(
+                        ["{:s}{:d}".format(k, v) for k, v in sorted(c.items())]
+                    )
+                    obj = AtomCluster(name, atList)
+
+                self._chemicalSystem.add_chemical_entity(obj)
+
+    def parse_optional_config(self):
+        try:
+            self._extra_input = read(
+                self.configuration["configuration_file"]["value"],
+                format=self.configuration["configuration_file"]["format"],
+            )
+        except:
+            return False
+        else:
+            self.extract_initial_information(self._extra_input)
+
     def parse_first_step(self):
+        self.parse_optional_config()
         try:
             self._input = ASETrajectory(self.configuration["trajectory_file"]["value"])
         except:
             self._input = iread(
-                self.configuration["trajectory_file"]["value"], index="[:]"
+                self.configuration["trajectory_file"]["value"],
+                index="[:]",
+                format=self.configuration["trajectory_file"]["format"],
             )
-            first_frame = read(self.configuration["trajectory_file"]["value"], index=0)
+            first_frame = read(
+                self.configuration["trajectory_file"]["value"],
+                index=0,
+                format=self.configuration["trajectory_file"]["format"],
+            )
             last_iterator = 0
-            generator = iread(self.configuration["trajectory_file"]["value"])
+            generator = iread(
+                self.configuration["trajectory_file"]["value"],
+                format=self.configuration["trajectory_file"]["format"],
+            )
             for _ in generator:
                 last_iterator += 1
             generator.close()
@@ -208,46 +278,6 @@ class ImprovedASE(Converter):
         else:
             first_frame = self._input[0]
             self._total_number_of_steps = len(self._input)
-
         self._timeaxis = self._timestep * np.arange(self._total_number_of_steps)
 
-        self._fractionalCoordinates = np.all(first_frame.get_pbc())
-
-        g = Graph()
-
-        element_count = {}
-        element_list = first_frame.get_chemical_symbols()
-
-        self._nAtoms = len(element_list)
-
-        self._chemicalSystem = ChemicalSystem()
-
-        for atnum, element in enumerate(element_list):
-            if element in element_count.keys():
-                element_count[element] += 1
-            else:
-                element_count[element] = 1
-            g.add_node(atnum, element=element, atomName=f"{element}_{atnum+1}")
-
-        for cluster in g.build_connected_components():
-            if len(cluster) == 1:
-                node = cluster.pop()
-                try:
-                    obj = Atom(node.element, name=node.atomName)
-                except TypeError:
-                    print("EXCEPTION in ASE loader")
-                    print(f"node.element = {node.element}")
-                    print(f"node.atomName = {node.atomName}")
-                    print(f"rankToName = {self._rankToName}")
-                obj.index = node.name
-            else:
-                atList = []
-                for atom in cluster:
-                    at = Atom(symbol=atom.element, name=atom.atomName)
-                    atList.append(at)
-                c = collections.Counter([at.element for at in cluster])
-                name = "".join(["{:s}{:d}".format(k, v) for k, v in sorted(c.items())])
-                obj = AtomCluster(name, atList)
-
-            self._chemicalSystem.add_chemical_entity(obj)
-
+        self.extract_initial_information(first_frame)

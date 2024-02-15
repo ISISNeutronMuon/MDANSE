@@ -15,10 +15,10 @@
 
 import os
 
+from ase.io.formats import all_formats
+
 from MDANSE import PLATFORM
-from MDANSE.Framework.Configurators.InputFileConfigurator import (
-    InputFileConfigurator
-)
+from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 
 
 class AseInputFileConfigurator(InputFileConfigurator):
@@ -43,8 +43,9 @@ class AseInputFileConfigurator(InputFileConfigurator):
         InputFileConfigurator.__init__(self, name, **kwargs)
 
         self._wildcard = wildcard
+        self["format"] = kwargs.get("format", None)
 
-    def configure(self, value):
+    def configure(self, values):
         """
         Configure an input file.
 
@@ -52,14 +53,24 @@ class AseInputFileConfigurator(InputFileConfigurator):
         :type value: str
         """
 
+        value, file_format = values
+
         value = PLATFORM.get_path(value)
 
         if not os.path.exists(value):
             self.error_status = f"The file {value} does not exist"
             return
 
+        if file_format == "guess":
+            file_format = None
+
+        if file_format is not None and file_format not in all_formats.keys():
+            self.error_status = f"The ASE file format {file_format} is not supported"
+            return
+
         self["value"] = value
         self["filename"] = value
+        self["format"] = file_format
         self.error_status = "OK"
 
     @property
