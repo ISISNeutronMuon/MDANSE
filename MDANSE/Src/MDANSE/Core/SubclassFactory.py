@@ -169,7 +169,7 @@ class SubclassFactory(type):
             subclasses = [i.lower() for i in cls.indirect_subclasses()]
             closest = difflib.get_close_matches(name.lower(), subclasses)
             err_str = f"Could not find {name} in {cls.__name__}."
-            if len(closest) == 0:
+            if len(closest) > 0:
                 err_str += f" Did you mean: {closest[0]}?"
             raise ValueError(err_str)
         return specific_class(*args, **kwargs)
