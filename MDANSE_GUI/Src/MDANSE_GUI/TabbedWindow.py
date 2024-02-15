@@ -79,6 +79,15 @@ class TabbedWindow(QMainWindow):
         self.makeBasicLayout()
         self.workdir = os.path.expanduser("~")
 
+        self.data_plotter = MainWindow(self)
+        self.periodic_table = PeriodicTableViewer(self)
+        self.element_editor = ElementsDatabaseEditor(self)
+        self.unit_editor = UnitsEditor(self)
+        self.style_selector = StyleDialog(self)
+        self.style_selector.connectStyleDatabase(self._style_database)
+        self.style_selector.new_style.connect(self.setStyleSheet)
+        self.style_selector.icon_swap.connect(self.invertToolbar)
+
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()
         self._job_holder = JobHolder()
@@ -145,40 +154,33 @@ class TabbedWindow(QMainWindow):
 
     @Slot()
     def launchPeriodicTable(self):
-        dialog = PeriodicTableViewer
-        dialog_instance = dialog(self)
-        dialog_instance.show()
-        result = dialog_instance.exec()
+        self.launch_dialog(self.periodic_table)
 
     @Slot()
     def launchUnitsEditor(self):
-        dialog = UnitsEditor
-        dialog_instance = dialog(self)
-        dialog_instance.show()
-        result = dialog_instance.exec()
+        self.launch_dialog(self.unit_editor)
 
     @Slot()
     def launchStyleSelector(self):
-        dialog = StyleDialog
-        dialog_instance = dialog(self)
-        dialog_instance.connectStyleDatabase(self._style_database)
-        dialog_instance.show()
-        dialog_instance.new_style.connect(self.setStyleSheet)
-        dialog_instance.icon_swap.connect(self.invertToolbar)
-        result = dialog_instance.exec()
+        self.launch_dialog(self.style_selector)
 
     @Slot()
     def launchElementsEditor(self):
-        dialog = ElementsDatabaseEditor
-        dialog_instance = dialog(self)
-        dialog_instance.show()
-        result = dialog_instance.exec()
+        self.launch_dialog(self.element_editor)
 
     @Slot()
     def launchDataPlotter(self):
-        dialog = MainWindow
-        dialog_instance = dialog(self)
-        dialog_instance.show()
+        self.launch_dialog(self.data_plotter)
+
+    def launch_dialog(self, dialog) -> None:
+        if dialog.isVisible():
+            if dialog.isMaximized():
+                dialog.showMaximized()
+            else:
+                dialog.showNormal()
+            dialog.activateWindow()
+        else:
+            dialog.show()
 
     @Slot()
     def loadTrajectory(self):
