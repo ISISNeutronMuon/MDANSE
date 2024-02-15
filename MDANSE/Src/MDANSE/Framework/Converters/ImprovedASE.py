@@ -97,6 +97,9 @@ class ImprovedASE(Converter):
         """
         Initialize the job.
         """
+        self._chemicalSystem = None
+        self._fractionalCoordinates = None
+        self._nAtoms = None
 
         # The number of steps of the analysis.
         self.numberOfSteps = self.configuration["n_steps"]["value"]
@@ -192,10 +195,11 @@ class ImprovedASE(Converter):
         super(ImprovedASE, self).finalize()
 
     def extract_initial_information(self, ase_object):
-        try:
-            self._fractionalCoordinates = np.all(ase_object.get_pbc())
-        except:
-            pass
+        if self._fractionalCoordinates is None:
+            try:
+                self._fractionalCoordinates = np.all(ase_object.get_pbc())
+            except:
+                pass
 
         g = Graph()
 
@@ -205,40 +209,41 @@ class ImprovedASE(Converter):
         except:
             pass
         else:
-            self._nAtoms = len(element_list)
+            if self._nAtoms is None:
+                self._nAtoms = len(element_list)
+            if self._chemicalSystem is None:
+                self._chemicalSystem = ChemicalSystem()
 
-            self._chemicalSystem = ChemicalSystem()
+                for atnum, element in enumerate(element_list):
+                    if element in element_count.keys():
+                        element_count[element] += 1
+                    else:
+                        element_count[element] = 1
+                    g.add_node(atnum, element=element, atomName=f"{element}_{atnum+1}")
 
-            for atnum, element in enumerate(element_list):
-                if element in element_count.keys():
-                    element_count[element] += 1
-                else:
-                    element_count[element] = 1
-                g.add_node(atnum, element=element, atomName=f"{element}_{atnum+1}")
+                for cluster in g.build_connected_components():
+                    if len(cluster) == 1:
+                        node = cluster.pop()
+                        try:
+                            obj = Atom(node.element, name=node.atomName)
+                        except TypeError:
+                            print("EXCEPTION in ASE loader")
+                            print(f"node.element = {node.element}")
+                            print(f"node.atomName = {node.atomName}")
+                            print(f"rankToName = {self._rankToName}")
+                        obj.index = node.name
+                    else:
+                        atList = []
+                        for atom in cluster:
+                            at = Atom(symbol=atom.element, name=atom.atomName)
+                            atList.append(at)
+                        c = collections.Counter([at.element for at in cluster])
+                        name = "".join(
+                            ["{:s}{:d}".format(k, v) for k, v in sorted(c.items())]
+                        )
+                        obj = AtomCluster(name, atList)
 
-            for cluster in g.build_connected_components():
-                if len(cluster) == 1:
-                    node = cluster.pop()
-                    try:
-                        obj = Atom(node.element, name=node.atomName)
-                    except TypeError:
-                        print("EXCEPTION in ASE loader")
-                        print(f"node.element = {node.element}")
-                        print(f"node.atomName = {node.atomName}")
-                        print(f"rankToName = {self._rankToName}")
-                    obj.index = node.name
-                else:
-                    atList = []
-                    for atom in cluster:
-                        at = Atom(symbol=atom.element, name=atom.atomName)
-                        atList.append(at)
-                    c = collections.Counter([at.element for at in cluster])
-                    name = "".join(
-                        ["{:s}{:d}".format(k, v) for k, v in sorted(c.items())]
-                    )
-                    obj = AtomCluster(name, atList)
-
-                self._chemicalSystem.add_chemical_entity(obj)
+                    self._chemicalSystem.add_chemical_entity(obj)
 
     def parse_optional_config(self):
         try:
