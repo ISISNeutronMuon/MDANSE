@@ -140,7 +140,9 @@ class XYZFile(dict):
 
         templines = []
         for _ in range(self._frame_lines):
-            templines.append([float(x) for x in self["instance"].readline().split()[1:]])
+            templines.append(
+                [float(x) for x in self["instance"].readline().split()[1:]]
+            )
             self._lastline += 1
 
         config = np.array(templines, dtype=np.float64)
