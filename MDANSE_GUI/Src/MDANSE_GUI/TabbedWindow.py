@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/MainWindow.py
+# @file      MDANSE_GUI/TabbedWindow.py
 # @brief     Base widget for the MDANSE GUI
 #
 # @homepage  https://mdanse.org
@@ -19,18 +19,16 @@ from collections import defaultdict
 from icecream import ic
 from qtpy.QtCore import (
     Slot,
-    Qt,
     QTimer,
     Signal,
     QMessageLogger,
 )
 from qtpy.QtGui import QAction
-from qtpy.QtWidgets import QMainWindow, QFileDialog, QToolBar, QTreeView, QTabWidget
+from qtpy.QtWidgets import QMainWindow, QFileDialog, QToolBar, QTabWidget
 
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
 from MDANSE_GUI.Widgets.Generator import WidgetGenerator
-from MDANSE_GUI.Widgets.ActionDialog import ActionDialog
 from MDANSE_GUI.Resources import Resources
 from MDANSE_GUI.UnitsEditor import UnitsEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
@@ -78,6 +76,15 @@ class TabbedWindow(QMainWindow):
         self.createCommonModels()
         self.makeBasicLayout()
         self.workdir = os.path.expanduser("~")
+
+        self.data_plotter = MainWindow(self)
+        self.periodic_table = PeriodicTableViewer(self)
+        self.element_editor = ElementsDatabaseEditor(self)
+        self.unit_editor = UnitsEditor(self)
+        self.style_selector = StyleDialog(self)
+        self.style_selector.connectStyleDatabase(self._style_database)
+        self.style_selector.new_style.connect(self.setStyleSheet)
+        self.style_selector.icon_swap.connect(self.invertToolbar)
 
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()
@@ -145,40 +152,33 @@ class TabbedWindow(QMainWindow):
 
     @Slot()
     def launchPeriodicTable(self):
-        dialog = PeriodicTableViewer
-        dialog_instance = dialog(self)
-        dialog_instance.show()
-        result = dialog_instance.exec()
+        self.launch_dialog(self.periodic_table)
 
     @Slot()
     def launchUnitsEditor(self):
-        dialog = UnitsEditor
-        dialog_instance = dialog(self)
-        dialog_instance.show()
-        result = dialog_instance.exec()
+        self.launch_dialog(self.unit_editor)
 
     @Slot()
     def launchStyleSelector(self):
-        dialog = StyleDialog
-        dialog_instance = dialog(self)
-        dialog_instance.connectStyleDatabase(self._style_database)
-        dialog_instance.show()
-        dialog_instance.new_style.connect(self.setStyleSheet)
-        dialog_instance.icon_swap.connect(self.invertToolbar)
-        result = dialog_instance.exec()
+        self.launch_dialog(self.style_selector)
 
     @Slot()
     def launchElementsEditor(self):
-        dialog = ElementsDatabaseEditor
-        dialog_instance = dialog(self)
-        dialog_instance.show()
-        result = dialog_instance.exec()
+        self.launch_dialog(self.element_editor)
 
     @Slot()
     def launchDataPlotter(self):
-        dialog = MainWindow
-        dialog_instance = dialog(self)
-        dialog_instance.show()
+        self.launch_dialog(self.data_plotter)
+
+    def launch_dialog(self, dialog) -> None:
+        if dialog.isVisible():
+            if dialog.isMaximized():
+                dialog.showMaximized()
+            else:
+                dialog.showNormal()
+            dialog.activateWindow()
+        else:
+            dialog.show()
 
     @Slot()
     def loadTrajectory(self):
@@ -191,46 +191,6 @@ class TabbedWindow(QMainWindow):
         ic(fname)
         if len(fname[0]) > 0:
             self.file_name_for_loading.emit(fname[0])
-
-    @Slot(object)
-    def convertTrajectory(self, converter=None):
-        ic(f"Received converter: {converter}")
-        dialog = ActionDialog
-        try:
-            dialog_instance = dialog(self, converter=converter)
-        except:
-            self.reportError(
-                f"Failed to create the dialog: {dialog} for converter {converter}"
-            )
-        dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
-        dialog_instance.show()
-        try:
-            result = dialog_instance.exec()
-        except:
-            self.reportError(
-                f"Dialog execution failed in dialog: {dialog} for converter {converter}"
-            )
-
-    @Slot(object)
-    def runAction(self, converter=None):
-        ic(f"Received action: {converter}")
-        dialog = ActionDialog
-        try:
-            dialog_instance = dialog(
-                self, converter=converter, source_object=self.current_object
-            )
-        except:
-            self.reportError(
-                f"Failed to create the dialog: {dialog} for action {converter}"
-            )
-        dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
-        dialog_instance.show()
-        try:
-            result = dialog_instance.exec()
-        except:
-            self.reportError(
-                f"Dialog execution failed in dialog: {dialog} for action {converter}"
-            )
 
     @Slot(bool)
     def invertToolbar(self, dark=False):
