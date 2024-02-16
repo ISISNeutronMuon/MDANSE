@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/MainWindow.py
+# @file      MDANSE_GUI/Tabs/Layouts/DoublePanel.py
 # @brief     Base widget for the MDANSE GUI
 #
 # @homepage  https://mdanse.org
@@ -12,13 +12,6 @@
 # @authors   Research Software Group at ISIS (see AUTHORS)
 #
 # **************************************************************************
-
-from typing import Union, Iterable
-from collections import OrderedDict
-import copy
-import os
-
-from icecream import ic
 from qtpy.QtWidgets import (
     QWidget,
     QHBoxLayout,
@@ -27,7 +20,7 @@ from qtpy.QtWidgets import (
     QLabel,
     QPushButton,
 )
-from qtpy.QtCore import Signal, Slot, QAbstractItemModel, QModelIndex
+from qtpy.QtCore import Signal, Slot
 
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 
@@ -92,17 +85,21 @@ class DoublePanel(QWidget):
             leftlayout.addWidget(data_side)
             self._view = data_side
         leftlayout.addWidget(lower_buttons)
-        if visualiser_side is not None:
-            rightlayout.addWidget(visualiser_side)
-            self._visualiser = visualiser_side
 
         self._leftlayout = leftlayout
         self._rightlayout = rightlayout
         self._lb_layout = lb_layout
         self._ub_layout = ub_layout
 
+        self.add_visualiser_side(visualiser_side)
+        self._visualiser = visualiser_side
         if self._view is not None and self._visualiser is not None:
             self._view.item_details.connect(self._visualiser.visualise_item)
+
+    def add_visualiser_side(self, visualiser_side):
+        if visualiser_side is not None:
+            self._rightlayout.addWidget(visualiser_side)
+            self._visualiser = visualiser_side
 
     def connect_logging(self):
         self.error.connect(self._tab_reference.error)

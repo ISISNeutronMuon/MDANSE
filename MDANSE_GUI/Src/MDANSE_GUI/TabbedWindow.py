@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/MainWindow.py
+# @file      MDANSE_GUI/TabbedWindow.py
 # @brief     Base widget for the MDANSE GUI
 #
 # @homepage  https://mdanse.org
@@ -19,18 +19,16 @@ from collections import defaultdict
 from icecream import ic
 from qtpy.QtCore import (
     Slot,
-    Qt,
     QTimer,
     Signal,
     QMessageLogger,
 )
 from qtpy.QtGui import QAction
-from qtpy.QtWidgets import QMainWindow, QFileDialog, QToolBar, QTreeView, QTabWidget
+from qtpy.QtWidgets import QMainWindow, QFileDialog, QToolBar, QTabWidget
 
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
 from MDANSE_GUI.Widgets.Generator import WidgetGenerator
-from MDANSE_GUI.Widgets.ActionDialog import ActionDialog
 from MDANSE_GUI.Resources import Resources
 from MDANSE_GUI.UnitsEditor import UnitsEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
@@ -193,46 +191,6 @@ class TabbedWindow(QMainWindow):
         ic(fname)
         if len(fname[0]) > 0:
             self.file_name_for_loading.emit(fname[0])
-
-    @Slot(object)
-    def convertTrajectory(self, converter=None):
-        ic(f"Received converter: {converter}")
-        dialog = ActionDialog
-        try:
-            dialog_instance = dialog(self, converter=converter)
-        except:
-            self.reportError(
-                f"Failed to create the dialog: {dialog} for converter {converter}"
-            )
-        dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
-        dialog_instance.show()
-        try:
-            result = dialog_instance.exec()
-        except:
-            self.reportError(
-                f"Dialog execution failed in dialog: {dialog} for converter {converter}"
-            )
-
-    @Slot(object)
-    def runAction(self, converter=None):
-        ic(f"Received action: {converter}")
-        dialog = ActionDialog
-        try:
-            dialog_instance = dialog(
-                self, converter=converter, source_object=self.current_object
-            )
-        except:
-            self.reportError(
-                f"Failed to create the dialog: {dialog} for action {converter}"
-            )
-        dialog_instance.new_thread_objects.connect(self.backend.job_holder.startThread)
-        dialog_instance.show()
-        try:
-            result = dialog_instance.exec()
-        except:
-            self.reportError(
-                f"Dialog execution failed in dialog: {dialog} for action {converter}"
-            )
 
     @Slot(bool)
     def invertToolbar(self, dark=False):

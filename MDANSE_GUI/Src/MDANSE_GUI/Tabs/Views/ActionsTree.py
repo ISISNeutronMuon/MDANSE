@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/Widgets/Generator.py
+# @file      MDANSE_GUI/Tabs/Views/ActionsTree.py
 # @brief     Here we can generate some Widgets
 #
 # @homepage  https://mdanse.org
@@ -12,21 +12,17 @@
 # @authors   Research Software Group at ISIS (see AUTHORS)
 #
 # **************************************************************************
-
-import typing
-
 from icecream import ic
-from qtpy.QtWidgets import QTreeView, QWidget, QMenu, QAbstractItemView, QApplication
+from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication
 from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
-from qtpy.QtGui import QContextMenuEvent, QMouseEvent, QDrag, QStandardItem
+from qtpy.QtGui import QMouseEvent, QDrag
 
 from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.DataViewModel.ActionsHolder import ActionsHolder
-from MDANSE_GUI.Widgets.ActionDialog import ActionDialog
 
 
 class ActionsTree(QTreeView):
-    action_selected = Signal(QStandardItem)
+    jobname_selected = Signal(str)
     execute_action = Signal(object)
     item_details = Signal(object)
     error = Signal(str)
@@ -71,7 +67,7 @@ class ActionsTree(QTreeView):
         item = model.itemFromIndex(index)
         text = item.text()
         print("tree: clicked on ", text)
-        self.action_selected.emit(item)
+        self.jobname_selected.emit(text)
 
     def pop_action_dialog(self, index):
         model = self.model()
