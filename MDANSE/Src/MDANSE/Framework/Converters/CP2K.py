@@ -324,10 +324,10 @@ class CP2K(Converter):
         )
 
         variables = {}
-
-        variables["velocities"] = self._velFile.read_step(index) * measure(
-            1.0, iunit="ang/fs"
-        ).toval("nm/ps")
+        if self.configuration["vel_file"]:
+            variables["velocities"] = self._velFile.read_step(index) * measure(
+                1.0, iunit="ang/fs"
+            ).toval("nm/ps")
 
         realConf = PeriodicRealConfiguration(
             self._trajectory.chemical_system, coords, unitcell, **variables

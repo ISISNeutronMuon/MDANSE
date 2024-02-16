@@ -169,6 +169,8 @@ class Configurable(object):
                             conf.configure(parameters[name])
                             if conf.valid:
                                 self._info.append(conf.get_information())
+                            else:
+                                self._configuration[name] = False
 
                     conf.set_configured(True)
 

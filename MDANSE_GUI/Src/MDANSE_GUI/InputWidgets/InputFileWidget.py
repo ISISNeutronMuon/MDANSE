@@ -72,4 +72,7 @@ class InputFileWidget(WidgetBase):
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        return self._field.text()
+        value = self._field.text()
+        if value == "":
+            value = None
+        return value

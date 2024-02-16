@@ -111,7 +111,7 @@ def test_cp2k_mdt_conversion_file_exists_and_loads_up_successfully(velocity):
     parameters = {
         "pos_file": cp2k_pos,
         "cell_file": cp2k_cell,
-        "vel_file": cp2k_vel,
+        "vel_file": velocity,
         "output_file": (temp_name, 64, "gzip"),
     }
 
