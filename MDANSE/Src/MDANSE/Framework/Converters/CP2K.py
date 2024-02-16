@@ -46,9 +46,14 @@ class XYZFile(dict):
     """
 
     def __init__(self, filename):
+
+        self._lastline = 0
+        self._header_lines = 2
+        self._frame_lines = 0
+
         self["instance"] = open(filename, "r")
 
-        self["instance"].seek(0, 0)
+        self["instance"].seek(0, 0)  # go to the beginning of file
 
         try:
             self["n_atoms"] = int(self["instance"].readline().strip())
@@ -65,13 +70,14 @@ class XYZFile(dict):
             line = self["instance"].readline()
             atom = line.split()[0].strip()
             self["atoms"].append(atom)
+            self._frame_lines += 1
 
         # The frame size define the total size of a frame (number of atoms header + time info line + coordinates block)
         self._frameSize = self["instance"].tell()
         self._coordinatesSize = self._frameSize - self._headerSize
 
         # Compute the frame number
-        self["instance"].seek(0, 2)
+        self["instance"].seek(0, 2)  # go to the end of file
         self["n_frames"] = self["instance"].tell() // self._frameSize
 
         # If the trajectory has more than one step, compute the time step as the difference between the second and the first time step
@@ -121,13 +127,23 @@ class XYZFile(dict):
             ndarray -- an (N,3) array containing the coordinates of N atoms
                at the requested simulation step.
         """
-        self["instance"].seek(step * self._frameSize + self._headerSize)
-
-        temp = np.array(self["instance"].read(self._coordinatesSize).split()).reshape(
-            (self["n_atoms"], 4)
+        starting_line = (
+            step * (self._frame_lines + self._header_lines) + self._header_lines
         )
+        lines_to_skip = starting_line - self._lastline
+        if lines_to_skip < 0:
+            self["instance"].seek(0)
+            lines_to_skip = starting_line
+        for _ in range(lines_to_skip):
+            next(self["instance"])
+            self._lastline += 1
 
-        config = np.array(temp[:, 1:], dtype=np.float64)
+        templines = []
+        for _ in range(self._frame_lines):
+            templines.append([float(x) for x in self["instance"].readline().split()[1:]])
+            self._lastline += 1
+
+        config = np.array(templines, dtype=np.float64)
 
         return config
 
