@@ -27,6 +27,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
     """
 
     _default = ""
+    _allowed_formats = ["guess"] + [str(x) for x in all_formats.keys()]
 
     def __init__(self, name, wildcard="All files|*", **kwargs):
         """
@@ -44,6 +45,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
 
         self._wildcard = wildcard
         self["format"] = kwargs.get("format", None)
+        self["value"] = ""
 
     def configure(self, values):
         """
@@ -52,19 +54,23 @@ class AseInputFileConfigurator(InputFileConfigurator):
         :param value: the input file.
         :type value: str
         """
-
-        value, file_format = values
+        try:
+            value, file_format = values
+        except ValueError:
+            value, file_format = values, None
 
         value = PLATFORM.get_path(value)
 
         if not os.path.exists(value):
+            print(f"FILE MISSING in {self._name}")
             self.error_status = f"The file {value} does not exist"
             return
 
         if file_format == "guess":
             file_format = None
 
-        if file_format is not None and file_format not in all_formats.keys():
+        if file_format is not None and not file_format in self._allowed_formats:
+            print(f"WRONG FORMAT in {self._name}")
             self.error_status = f"The ASE file format {file_format} is not supported"
             return
 
@@ -91,5 +97,9 @@ class AseInputFileConfigurator(InputFileConfigurator):
         :return: the information about this configurator
         :rtype: str
         """
+        try:
+            val = self["value"]
+        except KeyError:
+            print(f"No VALUE in {self._name}")
 
         return "Input file: %r" % self["value"]

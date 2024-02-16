@@ -177,7 +177,7 @@ class Configurable(object):
 
                     progress = True
 
-                if not conf.valid:
+                if not conf.valid and not conf.optional:
                     print(conf.error_status)
                     self._configured = False
                     return
