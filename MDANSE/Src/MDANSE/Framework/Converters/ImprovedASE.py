@@ -141,7 +141,11 @@ class ImprovedASE(Converter):
         try:
             frame = self._input[index]
         except TypeError:
-            frame = read(self.configuration["trajectory_file"]["value"], index=index)
+            frame = read(
+                self.configuration["trajectory_file"]["value"],
+                index=index,
+                format=self.configuration["trajectory_file"]["format"],
+            )
         time = self._timeaxis[index]
 
         unitCell = frame.cell.array
