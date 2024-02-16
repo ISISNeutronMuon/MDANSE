@@ -20,6 +20,7 @@ class JobTree(QStandardItemModel):
 
     def __init__(self, *args, **kwargs):
         parent_class = kwargs.pop("parent_class", IJob)
+        filter = kwargs.pop("filter", None)
         super().__init__(*args, **kwargs)
 
         self._nodes = {}  # dict of {number: QStandardItem}
@@ -33,9 +34,9 @@ class JobTree(QStandardItemModel):
 
         self.nodecounter = 0  # each node is given a unique number
 
-        self.populateTree(parent_class=parent_class)
+        self.populateTree(parent_class=parent_class, filter=filter)
 
-    def populateTree(self, parent_class=None):
+    def populateTree(self, parent_class=None, filter=None):
         """This function starts the recursive process of scanning
         the registry tree. Only called once on startup.
         """
@@ -43,9 +44,9 @@ class JobTree(QStandardItemModel):
             parent_class = IJob
         full_dict = parent_class.indirect_subclass_dictionary()
         for class_name, class_object in full_dict.items():
-            self.createNode(class_name, class_object)
+            self.createNode(class_name, class_object, filter)
 
-    def createNode(self, name: str, thing):
+    def createNode(self, name: str, thing, filter: str = ""):
         """Creates a new QStandardItem. It will store
         the node number as user data. The 'thing' passed to this method
         will be stored by the model in an internal dictionary, where
@@ -54,6 +55,7 @@ class JobTree(QStandardItemModel):
         Arguments:
             name -- the name of the new node
             thing -- any Python object to be stored and attached to the node
+            filter -- a string which must appear in the category tuple
         """
         new_node = QStandardItem(name)
         new_number = self.nodecounter + 1
@@ -63,7 +65,13 @@ class JobTree(QStandardItemModel):
         self._values[new_number] = thing
         self._docstrings[new_number] = thing.__doc__
         if hasattr(thing, "category"):
-            parent = self.parentsFromCategories(thing.category)
+            if filter:
+                if filter in thing.category:
+                    parent = self.parentsFromCategories(thing.category)
+                else:
+                    return
+            else:
+                parent = self.parentsFromCategories(thing.category)
         else:
             parent = self.invisibleRootItem()
         parent.appendRow(new_node)

@@ -112,7 +112,7 @@ class JobTab(GeneralTab):
             session=session,
             settings=settings,
             logger=logger,
-            model=kwargs.get("model", JobTree()),
+            model=kwargs.get("model", JobTree(filter="Analysis")),
             combo_model=kwargs.get("combo_model", None),
             view=ActionsTree(),
             visualiser=TextInfo(
