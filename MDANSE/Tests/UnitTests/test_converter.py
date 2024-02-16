@@ -15,6 +15,9 @@ lammps_lammps = os.path.join(file_wd, "Data", "lammps_test.lammps")
 vasp_xdatcar = os.path.join(file_wd, "Data", "XDATCAR_version5")
 discover_his = os.path.join(file_wd, "Data", "sushi.his")
 discover_xtd = os.path.join(file_wd, "Data", "sushi.xtd")
+cp2k_pos = os.path.join(file_wd, "Data", "CO2GAS-pos-1.xyz")
+cp2k_vel = os.path.join(file_wd, "Data", "CO2GAS-vel-1.xyz")
+cp2k_cell = os.path.join(file_wd, "Data", "CO2GAS-1.cell")
 hem_cam_pdb = os.path.join(file_wd, "Data", "hem-cam.pdb")
 hem_cam_dcd = os.path.join(file_wd, "Data", "hem-cam.dcd")
 ase_traj = os.path.join(file_wd, "Data", "Cu_5steps_ASEformat.traj")
@@ -93,6 +96,26 @@ def test_discover_mdt_conversion_file_exists_and_loads_up_successfully(compressi
     }
 
     vasp = Converter.create("discover")
+    vasp.run(parameters, status=True)
+
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
+
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+
+@pytest.mark.parametrize("velocity", [cp2k_vel, None])
+def test_cp2k_mdt_conversion_file_exists_and_loads_up_successfully(velocity):
+    temp_name = tempfile.mktemp()
+
+    parameters = {
+        "pos_file": cp2k_pos,
+        "cell_file": cp2k_cell,
+        "vel_file": cp2k_vel,
+        "output_file": (temp_name, 64, "gzip"),
+    }
+
+    vasp = Converter.create("cp2k")
     vasp.run(parameters, status=True)
 
     HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
