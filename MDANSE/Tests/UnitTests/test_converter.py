@@ -140,6 +140,10 @@ def test_ase_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     ase_conv = Converter.create("ase")
     ase_conv.run(parameters, status=True)
 
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+
 @pytest.mark.parametrize("trajectory", [ase_traj, xyz_traj, vasp_xdatcar])
 def test_improvedase_mdt_conversion_file_exists_and_loads_up_successfully(trajectory):
     temp_name = tempfile.mktemp()
@@ -156,12 +160,16 @@ def test_improvedase_mdt_conversion_file_exists_and_loads_up_successfully(trajec
     ase_conv = Converter.create("improvedase")
     ase_conv.run(parameters, status=True)
 
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+
 def test_improvedase_lammps_two_files():
     temp_name = tempfile.mktemp()
 
     parameters = {
-        "trajectory_file": lammps_lammps,
-        "configuration_file": lammps_config,
+        "trajectory_file": (lammps_lammps, "lammps-dump-text"),
+        "configuration_file": (lammps_config, "dlp4"),
         "fold": False,
         "output_file": (temp_name, 64, "gzip"),
         "n_steps": 0,
@@ -171,6 +179,10 @@ def test_improvedase_lammps_two_files():
 
     ase_conv = Converter.create("improvedase")
     ase_conv.run(parameters, status=True)
+
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -188,3 +200,7 @@ def test_xyz_mdt_conversion_file_exists_and_loads_up_successfully(compression):
 
     ase_conv = Converter.create("ase")
     ase_conv.run(parameters, status=True)
+
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
