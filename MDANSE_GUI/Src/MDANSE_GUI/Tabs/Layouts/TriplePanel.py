@@ -18,14 +18,14 @@ from .DoublePanel import DoublePanel
 
 class TriplePanel(DoublePanel):
     """The triple panel layout which has the data and visualiser
-    panel on the left and the action panel on the right."""
+    panel on the left and another panel on the right."""
 
     def __init__(self, *args, **kwargs):
-        action = kwargs.pop("action", None)
+        right_panel = kwargs.pop("right_panel", None)
         super().__init__(*args, **kwargs)
 
-        if action is not None:
-            self._rightlayout.addWidget(action)
+        if right_panel is not None:
+            self._rightlayout.addWidget(right_panel)
 
     def add_visualiser_side(self, visualiser_side: QWidget) -> None:
         """Overrides the double panel method so that the visualiser is

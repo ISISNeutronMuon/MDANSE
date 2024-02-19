@@ -91,7 +91,7 @@ class JobTab(GeneralTab):
                 footer="Look up our Read The Docs page:"
                 + "https://mdanse.readthedocs.io/en/protos/",
             ),
-            layout=partial(TriplePanel, action=action),
+            layout=partial(TriplePanel, right_panel=action),
             label_text=job_tab_label,
             action=action,
         )
@@ -125,7 +125,7 @@ class JobTab(GeneralTab):
                 + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
                 + " page.",
             ),
-            layout=partial(TriplePanel, action=action),
+            layout=partial(TriplePanel, right_panel=action),
             label_text=job_tab_label,
             action=action,
         )
@@ -152,7 +152,7 @@ if __name__ == "__main__":
             + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
             + " page.",
         ),
-        layout=partial(TriplePanel, action=Action()),
+        layout=partial(TriplePanel, right_panel=action),
         label_text=job_tab_label,
         action=action,
     )
