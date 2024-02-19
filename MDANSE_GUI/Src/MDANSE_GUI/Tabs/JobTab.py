@@ -60,7 +60,7 @@ class JobTab(GeneralTab):
             # the combobox changed and there are no trajectories, they
             # were probably deleted lets clear the action widgets
             self.action.set_trajectory(path=None, trajectory=None)
-            self.action.clear_widgets()
+            self.action.clear_panel()
             return
 
         node_number = traj_model.item(self._trajectory_combo.currentIndex(), 0).data()
@@ -74,7 +74,7 @@ class JobTab(GeneralTab):
         if current_item is not None:
             # we only update the widget if a job is selected from the
             # actions tree
-            self.action.set_widgets(current_item.text())
+            self.action.update_panel(current_item.text())
 
     @classmethod
     def standard_instance(cls):
@@ -84,12 +84,15 @@ class JobTab(GeneralTab):
             name="AvailableJobs",
             model=JobTree(),
             view=ActionsTree(),
-            visualiser=TextInfo(
-                header="MDANSE Analysis",
-                footer="Look up our Read The Docs page:"
-                + "https://mdanse.readthedocs.io/en/protos/",
+            visualiser=Action(),
+            layout=partial(
+                TriplePanel,
+                left_panel=TextInfo(
+                    header="MDANSE Analysis",
+                    footer="Look up our Read The Docs page:"
+                    + "https://mdanse.readthedocs.io/en/protos/",
+                ),
             ),
-            layout=partial(TriplePanel, action=action),
             label_text=job_tab_label,
             action=action,
         )
@@ -115,13 +118,16 @@ class JobTab(GeneralTab):
             model=kwargs.get("model", JobTree(filter="Analysis")),
             combo_model=kwargs.get("combo_model", None),
             view=ActionsTree(),
-            visualiser=TextInfo(
-                header="MDANSE Analysis",
-                footer="Look up our "
-                + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-                + " page.",
+            visualiser=action,
+            layout=partial(
+                TriplePanel,
+                left_panel=TextInfo(
+                    header="MDANSE Analysis",
+                    footer="Look up our "
+                    + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                    + " page.",
+                ),
             ),
-            layout=partial(TriplePanel, action=action),
             label_text=job_tab_label,
             action=action,
         )
@@ -140,13 +146,16 @@ if __name__ == "__main__":
         name="AvailableJobs",
         model=JobTree(),
         view=ActionsTree(),
-        visualiser=TextInfo(
-            header="MDANSE Analysis",
-            footer="Look up our "
-            + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-            + " page.",
+        visualiser=action,
+        layout=partial(
+            TriplePanel,
+            left_panel=TextInfo(
+                header="MDANSE Analysis",
+                footer="Look up our "
+                + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                + " page.",
+            ),
         ),
-        layout=partial(TriplePanel, action=Action()),
         label_text=job_tab_label,
         action=action,
     )

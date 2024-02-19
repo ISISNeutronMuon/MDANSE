@@ -312,6 +312,27 @@ class MolecularViewer(QtWidgets.QWidget):
 
         del self._actors
 
+    def clear_panel(self) -> None:
+        """Clears the Molecular Viewer panel"""
+        self.clear_trajectory()
+
+        self._reader = None
+
+        # set everything to some empty/zero value
+        self._n_atoms = 0
+        self._n_frames = 0
+        self.new_max_frames.emit(0)
+        self._atoms = []
+        self._fixed_bonds = []
+        self._atom_colours = []
+        self._polydata = vtk.vtkPolyData()
+        self._current_frame = 0
+
+        self.update_renderer()
+
+        # clear the atom properties table
+        self._colour_manager.removeRows(0, self._colour_manager.rowCount())
+
     def get_atom_index(self, pid):
         """Return the atom index from the vtk data point index.
 
@@ -599,7 +620,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._resolution = 10 if self._resolution > 10 else self._resolution
         self._resolution = 4 if self._resolution < 4 else self._resolution
 
-        self._atom_colours = self._colour_manager.initialise_from_database(
+        self._atom_colours = self._colour_manager.reinitialise_from_database(
             self._atoms, CHEMICAL_ELEMENTS
         )
         # this returs a list of indices, mapping colours to atoms

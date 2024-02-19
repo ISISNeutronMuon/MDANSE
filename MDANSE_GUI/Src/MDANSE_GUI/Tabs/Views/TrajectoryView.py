@@ -12,12 +12,14 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
+from typing import Union
 
-import os
-
-from qtpy.QtCore import QObject, Slot, Signal, QModelIndex
+from qtpy.QtCore import Slot, Signal, QModelIndex
 from qtpy.QtWidgets import QMenu, QListView, QAbstractItemView
 from qtpy.QtGui import QStandardItem, QContextMenuEvent
+
+from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
+from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 
 
 class TrajectoryView(QListView):
@@ -56,3 +58,19 @@ class TrajectoryView(QListView):
         node_number = model.itemFromIndex(index).data()
         trajectory = model._nodes[node_number]
         self.item_details.emit(trajectory)
+
+    def connect_to_visualiser(self, visualiser: Union[View3D, TrajectoryInfo]) -> None:
+        """Connect to a visualiser.
+
+        Parameters
+        ----------
+        visualiser : View3D or TrajectoryInfo
+            A visualiser to connect to this view.
+        """
+        if isinstance(visualiser, View3D) or isinstance(visualiser, TrajectoryInfo):
+            self.item_details.connect(visualiser.update_panel)
+        else:
+            raise NotImplementedError(
+                f"Unable to connect view {type(self)} to visualiser "
+                f"{type(visualiser)}"
+            )

@@ -16,7 +16,7 @@ class TrajectoryInfo(QTextBrowser):
         self.setOpenExternalLinks(True)
 
     @Slot(object)
-    def visualise_item(self, fullpath: object):
+    def update_panel(self, fullpath: object):
         if len(fullpath) > 0:
             try:
                 incoming = HDFTrajectoryInputData(fullpath)
