@@ -48,10 +48,15 @@ class AtomTransmutationWidget(WidgetBase):
             line_layout.append(wid)
         self._lines.append({"from": leftfield, "to": rightfield})
 
+    def configure_using_default(self):
+        """This is too complex to have a default value"""
+
     def get_widget_value(self):
         result = []
         for line in self._lines:
             result.append((line["from"], line["to"]))
         if len(result) == 0:
+            self._empty = True
             return None
+        self._empty = False
         return result

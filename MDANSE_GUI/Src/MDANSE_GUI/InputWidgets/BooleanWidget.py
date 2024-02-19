@@ -43,5 +43,8 @@ class BooleanWidget(WidgetBase):
         if self._tooltip == "":
             self._tooltip = "A single logical value that can be True of False"
 
+    def configure_using_default(self):
+        """No need to anything for Boolean"""
+
     def get_widget_value(self):
         return self._field.checkState() == Qt.CheckState.Checked

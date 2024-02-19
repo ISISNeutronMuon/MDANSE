@@ -89,11 +89,5 @@ class QVectorsWidget(WidgetBase):
         pardict = self._model.params_summary()
         return (qvector_type, pardict)
 
-    @Slot()
-    def updateValue(self):
-        current_value = self.get_widget_value()
-        self._configurator.configure(current_value)
-
-    def get_value(self):
-        self.updateValue()
-        return self._configurator["value"]
+    def configure_using_default(self):
+        """This is too complex to have a default value"""

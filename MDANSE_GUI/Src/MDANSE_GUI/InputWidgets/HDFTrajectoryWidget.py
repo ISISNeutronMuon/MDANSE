@@ -43,6 +43,9 @@ class HDFTrajectoryWidget(WidgetBase):
         self.default_labels()
         self.update_labels()
 
+    def configure_using_default(self):
+        """This is too static to have a default value"""
+
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
         which will be set in this method, unless specific

@@ -41,12 +41,14 @@ class FramesWidget(WidgetBase):
             QLineEdit(str(self._last_frame), self._base),
             QLineEdit("1", self._base),
         ]
+        placeholders = ["0", str(self._last_frame), "1"]
         validators = [QIntValidator(parent_field) for parent_field in fields]
         for field_num in range(3):
             self._layout.addWidget(labels[field_num], 0, 2 * field_num)
             self._layout.addWidget(fields[field_num], 0, 2 * field_num + 1)
             fields[field_num].setValidator(validators[field_num])
             fields[field_num].textChanged.connect(self.updateValue)
+            fields[field_num].setPlaceholderText(placeholders[field_num])
         self._fields = fields
         self._validators = validators
         self.default_labels()

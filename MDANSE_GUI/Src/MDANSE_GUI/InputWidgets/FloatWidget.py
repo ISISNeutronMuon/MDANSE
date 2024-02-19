@@ -47,8 +47,8 @@ class FloatWidget(WidgetBase):
             field.setValidator(validator)
             field.setText(str(default_option))
         field.setToolTip(self._tooltip)
-        self._field = field
         self._layout.addWidget(field)
+        self._field = field
         self.default_labels()
         self.update_labels()
 
@@ -65,4 +65,8 @@ class FloatWidget(WidgetBase):
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
         strval = self._field.text().strip()
+        if len(strval) < 1:
+            self._empty = True
+        else:
+            self._empty = False
         return strval

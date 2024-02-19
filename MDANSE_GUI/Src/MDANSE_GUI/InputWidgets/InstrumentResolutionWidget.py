@@ -82,6 +82,9 @@ class InstrumentResolutionWidget(WidgetBase):
         self._type_combo.setEditable(False)
         self._type_combo.currentTextChanged.connect(self.change_function)
 
+    def configure_using_default(self):
+        """This is too complex to have a default value"""
+
     @Slot(str)
     def change_function(self, function: str):
         new_params = init_parameters[function]

@@ -60,6 +60,7 @@ class WidgetBase(QObject):
         self._layout = layout
         self._configurator = configurator
         self._parent_dialog = parent
+        self._empty = False
 
     def update_labels(self):
         if self._base_type == "QWidget":
@@ -90,6 +91,15 @@ class WidgetBase(QObject):
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
 
+    @abstractmethod
+    def configure_using_default(self):
+        """Makes the configurator use its default value, and highlights it
+        in the GUI"""
+        default = self._configurator.default
+        print(f"Setting {default} as placeholder text")
+        self._field.setPlaceholderText(str(default))
+        self._configurator.configure(default)
+
     def mark_error(self, error_text: str):
         self._base.setStyleSheet("background-color:rgb(180,20,180); font-weight: bold")
         self._base.setToolTip(error_text)
@@ -103,7 +113,11 @@ class WidgetBase(QObject):
     @abstractmethod
     @Slot()
     def updateValue(self):
+        self.configure_using_default()
+        print("updateValue: just ran configure_using_default")
         current_value = self.get_widget_value()
+        if self._empty:
+            self.configure_using_default()
         self._configurator.configure(current_value)
         if self._configurator.valid:
             self.clear_error()

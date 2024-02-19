@@ -206,7 +206,7 @@ class Action(QWidget):
 
         buttonlayout.addWidget(self.save_button)
         buttonlayout.addWidget(self.execute_button)
-    
+
         self.layout.addWidget(buttonbase)
         self._widgets_in_layout.append(buttonbase)
 

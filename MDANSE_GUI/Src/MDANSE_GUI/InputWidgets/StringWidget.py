@@ -44,4 +44,14 @@ class StringWidget(WidgetBase):
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        return self._field.text()
+        strval = self._field.text().strip()
+        if len(strval) < 1:
+            self._empty = True
+        else:
+            self._empty = False
+        return strval
+
+    def configure_using_default(self):
+        default = self._configurator.default
+        self._field.setPlaceholderText(default)
+        self._configurator.configure(default)
