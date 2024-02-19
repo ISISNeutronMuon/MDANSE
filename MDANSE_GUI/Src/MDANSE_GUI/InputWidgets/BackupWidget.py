@@ -32,7 +32,7 @@ class BackupWidget(WidgetBase):
         """Collect the results from the input widgets and return the value."""
         temp_text = self._field.text().strip()
         if temp_text == "None" or temp_text == "":
-            result = None
+            result = str(self._configurator.default)
             self._empty = True
         else:
             result = temp_text

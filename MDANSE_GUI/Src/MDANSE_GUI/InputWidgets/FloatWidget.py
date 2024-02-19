@@ -46,9 +46,11 @@ class FloatWidget(WidgetBase):
                 validator.setTop(maxval)
             field.setValidator(validator)
             field.setText(str(default_option))
+            field.setPlaceholderText(str(default_option))
         field.setToolTip(self._tooltip)
         self._layout.addWidget(field)
         self._field = field
+        self._default_value = default_option
         self.default_labels()
         self.update_labels()
 
@@ -67,6 +69,7 @@ class FloatWidget(WidgetBase):
         strval = self._field.text().strip()
         if len(strval) < 1:
             self._empty = True
+            return self._default_value
         else:
             self._empty = False
         return strval
