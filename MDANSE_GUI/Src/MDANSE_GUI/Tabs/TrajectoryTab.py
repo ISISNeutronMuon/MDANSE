@@ -12,20 +12,21 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
 import os
+from functools import partial
 
-from qtpy.QtCore import QObject, Slot, Signal
-from qtpy.QtWidgets import QPushButton, QTextEdit, QWidget, QFileDialog
+from qtpy.QtCore import Slot
+from qtpy.QtWidgets import QWidget, QFileDialog
 
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
-from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
+from MDANSE_GUI.Tabs.Layouts.TriplePanel import TriplePanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Views.TrajectoryView import TrajectoryView
 from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
+from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
 
 
 class TrajectoryTab(GeneralTab):
@@ -52,6 +53,9 @@ class TrajectoryTab(GeneralTab):
 
     @classmethod
     def standard_instance(cls):
+        view3d = View3D()
+        view = TrajectoryView()
+        view.item_details.connect(view3d.update_panel)
         the_tab = cls(
             window,
             name="Trajectories",
@@ -59,7 +63,7 @@ class TrajectoryTab(GeneralTab):
             model=GeneralModel(),
             view=TrajectoryView(),
             visualiser=TrajectoryInfo(),
-            layout=DoublePanel,
+            layout=partial(TriplePanel, right_panel=view3d),
             label_text="""Here you can load the .mdt files.
 They are MD trajectories in HDF5 format,
 created by one of the MDANSE converters.
@@ -77,6 +81,9 @@ created by one of the MDANSE converters.
         logger,
         **kwargs,
     ):
+        view3d = View3D()
+        view = TrajectoryView()
+        view.item_details.connect(view3d.update_panel)
         the_tab = cls(
             parent,
             name=name,
@@ -84,9 +91,9 @@ created by one of the MDANSE converters.
             settings=settings,
             logger=logger,
             model=kwargs.get("model", GeneralModel()),
-            view=TrajectoryView(),
+            view=view,
             visualiser=TrajectoryInfo(),
-            layout=DoublePanel,
+            layout=partial(TriplePanel, right_panel=view3d),
             label_text="""Here you can load the .mdt files.
 They are MD trajectories in HDF5 format,
 created by one of the MDANSE converters.
@@ -97,7 +104,7 @@ created by one of the MDANSE converters.
 
 if __name__ == "__main__":
     import sys
-    from qtpy.QtWidgets import QApplication, QMainWindow, QVBoxLayout
+    from qtpy.QtWidgets import QApplication, QMainWindow
 
     app = QApplication(sys.argv)
     window = QMainWindow()

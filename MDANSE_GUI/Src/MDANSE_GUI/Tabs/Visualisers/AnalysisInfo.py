@@ -16,7 +16,7 @@ class AnalysisInfo(QTextBrowser):
         self.setOpenExternalLinks(True)
 
     @Slot(object)
-    def visualise_item(self, incoming: object):
+    def update_panel(self, incoming: object):
         filtered = self.filter(incoming)
         self.setHtml(filtered)
 

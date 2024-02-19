@@ -22,10 +22,10 @@ class View3D(QWidget):
         self._controls = controls
 
     @Slot(object)
-    def visualise_item(self, incoming: object):
-        print(incoming)
+    def update_panel(self, fullpath: object):
+        print(fullpath)
         try:
-            self._viewer._new_trajectory_object(incoming)
+            self._viewer._new_trajectory(fullpath)
         except AttributeError:
-            self.error.emit(f"3D View could not visualise {incoming}")
+            self.error.emit(f"3D View could not visualise {fullpath}")
             self._viewer.clear_trajectory()

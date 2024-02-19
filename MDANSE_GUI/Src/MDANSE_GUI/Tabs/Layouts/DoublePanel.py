@@ -94,7 +94,7 @@ class DoublePanel(QWidget):
         self.add_visualiser_side(visualiser_side)
         self._visualiser = visualiser_side
         if self._view is not None and self._visualiser is not None:
-            self._view.item_details.connect(self._visualiser.visualise_item)
+            self._view.item_details.connect(self._visualiser.update_panel)
 
     def add_visualiser_side(self, visualiser_side):
         if visualiser_side is not None:
