@@ -53,17 +53,14 @@ class TrajectoryTab(GeneralTab):
 
     @classmethod
     def standard_instance(cls):
-        view3d = View3D()
-        view = TrajectoryView()
-        view.item_details.connect(view3d.update_panel)
         the_tab = cls(
             window,
             name="Trajectories",
             session=LocalSession(),
             model=GeneralModel(),
             view=TrajectoryView(),
-            visualiser=TrajectoryInfo(),
-            layout=partial(TriplePanel, right_panel=view3d),
+            visualiser=View3D(),
+            layout=partial(TriplePanel, left_panel=TrajectoryInfo()),
             label_text="""Here you can load the .mdt files.
 They are MD trajectories in HDF5 format,
 created by one of the MDANSE converters.
@@ -81,9 +78,6 @@ created by one of the MDANSE converters.
         logger,
         **kwargs,
     ):
-        view3d = View3D()
-        view = TrajectoryView()
-        view.item_details.connect(view3d.update_panel)
         the_tab = cls(
             parent,
             name=name,
@@ -91,9 +85,9 @@ created by one of the MDANSE converters.
             settings=settings,
             logger=logger,
             model=kwargs.get("model", GeneralModel()),
-            view=view,
-            visualiser=TrajectoryInfo(),
-            layout=partial(TriplePanel, right_panel=view3d),
+            view=TrajectoryView(),
+            visualiser=View3D(),
+            layout=partial(TriplePanel, left_panel=TrajectoryInfo()),
             label_text="""Here you can load the .mdt files.
 They are MD trajectories in HDF5 format,
 created by one of the MDANSE converters.

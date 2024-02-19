@@ -12,12 +12,11 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
-import os
-
-from qtpy.QtCore import QObject, Slot, Signal, QModelIndex
+from qtpy.QtCore import Slot, Signal, QModelIndex
 from qtpy.QtWidgets import QMenu, QTableView, QAbstractItemView
 from qtpy.QtGui import QStandardItem, QContextMenuEvent
+
+from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 
 class RunTable(QTableView):
@@ -55,3 +54,19 @@ class RunTable(QTableView):
         node_number = model.itemFromIndex(index).data()
         job_entry = model.existing_jobs[node_number]
         self.item_details.emit(job_entry.text_summary())
+
+    def connect_to_visualiser(self, visualiser: TextInfo) -> None:
+        """Connect to a visualiser.
+
+        Parameters
+        ----------
+        visualiser : TextInfo
+            A visualiser to connect to this view.
+        """
+        if isinstance(visualiser, TextInfo):
+            self.item_details.connect(visualiser.update_panel)
+        else:
+            raise NotImplementedError(
+                f"Unable to connect view {type(self)} to visualiser "
+                f"{type(visualiser)}"
+            )

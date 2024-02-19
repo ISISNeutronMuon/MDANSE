@@ -53,19 +53,17 @@ class ConverterTab(GeneralTab):
     @classmethod
     def standard_instance(cls):
         action = Action()
-        view = ActionsTree()
-        view.jobname_selected.connect(action.update_panel)
         the_tab = cls(
             window,
             name="AvailableJobs",
             model=JobTree(parent_class=Converter),
-            view=view,
-            visualiser=TextInfo(
+            view=ActionsTree(),
+            visualiser=action,
+            layout=partial(TriplePanel, left_panel=TextInfo(
                 header="MDANSE Converter",
                 footer="Look up our Read The Docs page:"
                 + "https://mdanse.readthedocs.io/en/protos/",
-            ),
-            layout=partial(TriplePanel, right_panel=action),
+            )),
             label_text=tab_label,
             action=action,
         )
@@ -82,8 +80,6 @@ class ConverterTab(GeneralTab):
         **kwargs,
     ):
         action = Action()
-        view = ActionsTree()
-        view.jobname_selected.connect(action.update_panel)
         the_tab = cls(
             parent,
             name=name,
@@ -91,14 +87,14 @@ class ConverterTab(GeneralTab):
             settings=settings,
             logger=logger,
             model=kwargs.get("model", JobTree(parent_class=Converter)),
-            view=view,
-            visualiser=TextInfo(
+            view=ActionsTree(),
+            visualiser=action,
+            layout=partial(TriplePanel, left_panel=TextInfo(
                 header="MDANSE Converter",
                 footer="Look up our "
                 + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
                 + " page.",
-            ),
-            layout=partial(TriplePanel, right_panel=action),
+            )),
             label_text=tab_label,
             action=action,
         )
@@ -112,20 +108,18 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = QMainWindow()
     action = Action()
-    view = ActionsTree()
-    view.jobname_selected.connect(action.update_panel)
     the_tab = ConverterTab(
         window,
         name="AvailableJobs",
         model=JobTree(parent_class=Converter),
-        view=view,
-        visualiser=TextInfo(
+        view=ActionsTree(),
+        visualiser=action,
+        layout=partial(TriplePanel, left_panel=TextInfo(
             header="MDANSE Converters",
             footer="Look up our "
             + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
             + " page.",
-        ),
-        layout=partial(TriplePanel, right_panel=action),
+        )),
         label_text=tab_label,
         action=action,
     )
