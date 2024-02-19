@@ -79,11 +79,13 @@ class JobTab(GeneralTab):
     @classmethod
     def standard_instance(cls):
         action = Action()
+        view = ActionsTree()
+        view.jobname_selected.connect(action.update_panel)
         the_tab = cls(
             window,
             name="AvailableJobs",
             model=JobTree(),
-            view=ActionsTree(),
+            view=view,
             visualiser=TextInfo(
                 header="MDANSE Analysis",
                 footer="Look up our Read The Docs page:"
@@ -106,6 +108,8 @@ class JobTab(GeneralTab):
         **kwargs,
     ):
         action = Action()
+        view = ActionsTree()
+        view.jobname_selected.connect(action.update_panel)
         the_tab = cls(
             parent,
             name=name,
@@ -114,7 +118,7 @@ class JobTab(GeneralTab):
             logger=logger,
             model=kwargs.get("model", JobTree(filter="Analysis")),
             combo_model=kwargs.get("combo_model", None),
-            view=ActionsTree(),
+            view=view,
             visualiser=TextInfo(
                 header="MDANSE Analysis",
                 footer="Look up our "
@@ -135,11 +139,13 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = QMainWindow()
     action = Action()
+    view = ActionsTree()
+    view.jobname_selected.connect(action.update_panel)
     the_tab = JobTab(
         window,
         name="AvailableJobs",
         model=JobTree(),
-        view=ActionsTree(),
+        view=view,
         visualiser=TextInfo(
             header="MDANSE Analysis",
             footer="Look up our "

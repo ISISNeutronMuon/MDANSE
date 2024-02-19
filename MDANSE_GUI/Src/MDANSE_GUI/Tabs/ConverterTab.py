@@ -53,11 +53,13 @@ class ConverterTab(GeneralTab):
     @classmethod
     def standard_instance(cls):
         action = Action()
+        view = ActionsTree()
+        view.jobname_selected.connect(action.update_panel)
         the_tab = cls(
             window,
             name="AvailableJobs",
             model=JobTree(parent_class=Converter),
-            view=ActionsTree(),
+            view=view,
             visualiser=TextInfo(
                 header="MDANSE Converter",
                 footer="Look up our Read The Docs page:"
@@ -80,6 +82,8 @@ class ConverterTab(GeneralTab):
         **kwargs,
     ):
         action = Action()
+        view = ActionsTree()
+        view.jobname_selected.connect(action.update_panel)
         the_tab = cls(
             parent,
             name=name,
@@ -87,7 +91,7 @@ class ConverterTab(GeneralTab):
             settings=settings,
             logger=logger,
             model=kwargs.get("model", JobTree(parent_class=Converter)),
-            view=ActionsTree(),
+            view=view,
             visualiser=TextInfo(
                 header="MDANSE Converter",
                 footer="Look up our "
@@ -108,11 +112,13 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = QMainWindow()
     action = Action()
+    view = ActionsTree()
+    view.jobname_selected.connect(action.update_panel)
     the_tab = ConverterTab(
         window,
         name="AvailableJobs",
         model=JobTree(parent_class=Converter),
-        view=ActionsTree(),
+        view=view,
         visualiser=TextInfo(
             header="MDANSE Converters",
             footer="Look up our "

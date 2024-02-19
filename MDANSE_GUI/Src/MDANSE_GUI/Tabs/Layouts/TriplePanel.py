@@ -27,9 +27,6 @@ class TriplePanel(DoublePanel):
         if action is not None:
             self._rightlayout.addWidget(action)
 
-        if action is not None:
-            self._view.jobname_selected.connect(action.set_widgets)
-
     def add_visualiser_side(self, visualiser_side: QWidget) -> None:
         """Overrides the double panel method so that the visualiser is
         placed on the left.

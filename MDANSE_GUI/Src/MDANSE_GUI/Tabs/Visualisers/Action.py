@@ -108,7 +108,7 @@ class Action(QWidget):
         self._widgets = []
         self._widgets_in_layout = []
 
-    def set_widgets(self, job_name: str) -> None:
+    def update_panel(self, job_name: str) -> None:
         """Sets all the widgets for the selected job.
 
         Parameters
