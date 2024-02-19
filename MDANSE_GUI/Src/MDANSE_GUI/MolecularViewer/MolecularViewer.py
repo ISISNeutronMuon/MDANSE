@@ -313,7 +313,7 @@ class MolecularViewer(QtWidgets.QWidget):
         del self._actors
 
     def clear_panel(self) -> None:
-        """Clears the 3D View panel"""
+        """Clears the Molecular Viewer panel"""
         self.clear_trajectory()
 
         self._reader = None
