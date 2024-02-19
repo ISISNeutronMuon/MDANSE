@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/RegistryViewer.py
+# @file      MDANSE_GUI/Tabs/ConverterTab.py
 # @brief     Shows the MDANSE jobs. Can run standalone.
 #
 # @homepage  https://mdanse.org
@@ -12,18 +12,17 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
-
-from qtpy.QtCore import QObject, Slot, Signal
+from functools import partial
+from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget
 
 from MDANSE.Framework.Converters.Converter import Converter
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
-from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
+from MDANSE_GUI.Tabs.Layouts.TriplePanel import TriplePanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
-from MDANSE_GUI.Widgets.ActionDialog import ActionDialog
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+from MDANSE_GUI.Tabs.Visualisers.Action import Action
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
 
@@ -38,50 +37,22 @@ class ConverterTab(GeneralTab):
     """The tab for choosing and starting a new job."""
 
     def __init__(self, *args, **kwargs):
+        self.action = kwargs.pop("action")
         super().__init__(*args, **kwargs)
         self._current_trajectory = ""
         self._job_starter = None
-        self._core.add_button("Show the job dialog!", self.show_action_dialog)
 
     def set_job_starter(self, job_starter):
         self._job_starter = job_starter
+        self.action.new_thread_objects.connect(self._job_starter.startThread)
 
     @Slot(str)
     def set_current_trajectory(self, new_name: str):
         self._current_trajectory = new_name
 
-    @Slot()
-    def show_action_dialog(self):
-        dialog = ActionDialog
-        current_item = self._core.current_item()
-        if current_item is None:
-            return
-        try:
-            converter = Converter.create(current_item.text())
-        except ValueError as e:
-            print(f"Failed: {e}")
-            return
-        except IndexError as e:
-            print(f"Failed: {e}")
-            return
-        try:
-            dialog_instance = dialog(
-                self._core,
-                job_name=current_item.text(),
-                trajectory=self._current_trajectory,
-            )
-        except Exception as e:
-            self.error(repr(e))
-        if self._job_starter is not None:
-            dialog_instance.new_thread_objects.connect(self._job_starter.startThread)
-        dialog_instance.show()
-        try:
-            result = dialog_instance.exec()
-        except Exception as e:
-            self.error(repr(e))
-
     @classmethod
     def standard_instance(cls):
+        action = Action()
         the_tab = cls(
             window,
             name="AvailableJobs",
@@ -92,8 +63,9 @@ class ConverterTab(GeneralTab):
                 footer="Look up our Read The Docs page:"
                 + "https://mdanse.readthedocs.io/en/protos/",
             ),
-            layout=DoublePanel,
+            layout=partial(TriplePanel, action=action),
             label_text=tab_label,
+            action=action,
         )
         return the_tab
 
@@ -107,6 +79,7 @@ class ConverterTab(GeneralTab):
         logger,
         **kwargs,
     ):
+        action = Action()
         the_tab = cls(
             parent,
             name=name,
@@ -121,18 +94,20 @@ class ConverterTab(GeneralTab):
                 + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
                 + " page.",
             ),
-            layout=DoublePanel,
+            layout=partial(TriplePanel, action=action),
             label_text=tab_label,
+            action=action,
         )
         return the_tab
 
 
 if __name__ == "__main__":
     import sys
-    from qtpy.QtWidgets import QApplication, QMainWindow, QVBoxLayout
+    from qtpy.QtWidgets import QApplication, QMainWindow
 
     app = QApplication(sys.argv)
     window = QMainWindow()
+    action = Action()
     the_tab = ConverterTab(
         window,
         name="AvailableJobs",
@@ -144,8 +119,9 @@ if __name__ == "__main__":
             + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
             + " page.",
         ),
-        layout=DoublePanel,
+        layout=partial(TriplePanel, action=action),
         label_text=tab_label,
+        action=action,
     )
     the_tab._current_trajectory = "/Users/maciej.bartkowiak/an_example/BLAH.mdt"
     window.setCentralWidget(the_tab._core)

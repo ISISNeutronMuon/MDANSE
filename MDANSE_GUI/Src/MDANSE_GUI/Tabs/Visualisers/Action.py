@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/MainWindow.py
+# @file      MDANSE_GUI/Tabs/Visualisers/Action.py
 # @brief     Base widget for the MDANSE GUI
 #
 # @homepage  https://mdanse.org
@@ -11,45 +11,18 @@
 # @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # @authors   Research Software Group at ISIS (see AUTHORS)
 #
-# **************************************************************************
-
-from typing import Union, Iterable
-from collections import OrderedDict
-import copy
-import os
-
-from icecream import ic
+# *************************************************************************
+from typing import Optional
 from qtpy.QtWidgets import (
-    QDialog,
     QPushButton,
     QFileDialog,
-    QGridLayout,
     QVBoxLayout,
     QWidget,
-    QLabel,
-    QApplication,
-    QComboBox,
-    QMenu,
-    QLineEdit,
-    QTableView,
-    QFormLayout,
     QHBoxLayout,
-    QCheckBox,
     QScrollArea,
 )
-from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel, QObject
-from qtpy.QtGui import (
-    QFont,
-    QEnterEvent,
-    QStandardItem,
-    QStandardItemModel,
-    QIntValidator,
-    QDoubleValidator,
-    QValidator,
-)
-
+from qtpy.QtCore import Signal, Slot
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE_GUI.Widgets.GeneralWidgets import InputFactory
 from MDANSE_GUI.InputWidgets import *
 
 
@@ -79,16 +52,46 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
 }
 
 
-class ActionDialog(QDialog):
+class Action(QWidget):
     new_thread_objects = Signal(list)
     new_path = Signal(str)
 
     last_paths = {}
 
-    def __init__(self, *args, job_name: IJob = "Dummy", **kwargs):
-        self._default_path = kwargs.pop("path", None)
-        self._input_trajectory = kwargs.pop("trajectory", None)
+    def __init__(self, *args, **kwargs):
+        self._default_path = None
+        self._input_trajectory = None
         self._trajectory_configurator = None
+        default_path = kwargs.pop("path", None)
+        input_trajectory = kwargs.pop("trajectory", None)
+        self.set_trajectory(default_path, input_trajectory)
+        super().__init__(*args, **kwargs)
+
+        buffer = QWidget(self)
+        scroll_area = QScrollArea()
+        scroll_area.setWidget(buffer)
+        scroll_area.setWidgetResizable(True)
+        self.layout = QVBoxLayout(buffer)
+        base_layout = QVBoxLayout(self)
+        buffer.setLayout(self.layout)
+        base_layout.addWidget(scroll_area)
+        self.setLayout(base_layout)
+        self.handlers = {}
+        self._widgets = []
+        self._widgets_in_layout = []
+
+    def set_trajectory(self, path: Optional[str], trajectory: Optional[str]) -> None:
+        """Set the trajectory path and filename.
+
+        Parameters
+        ----------
+        path : str or None
+            The path of the trajectory
+        trajectory : str or None
+            The path and filename of the trajectory
+        """
+        self._default_path = path
+        self._input_trajectory = trajectory
         path = None
         if self._input_trajectory is not None:
             path, filename = os.path.split(self._input_trajectory)
@@ -97,31 +100,40 @@ class ActionDialog(QDialog):
                 self._default_path = "."
             else:
                 self._default_path = path
-        super().__init__(*args, **kwargs)
 
-        buffer = QWidget(self)
-        scroll_area = QScrollArea()
-        scroll_area.setWidget(buffer)
-        scroll_area.setWidgetResizable(True)
-        layout = QVBoxLayout(buffer)
-        base_layout = QVBoxLayout(self)
-        buffer.setLayout(layout)
-        base_layout.addWidget(scroll_area)
-        self.setLayout(base_layout)
-        self.handlers = {}
+    def clear_widgets(self) -> None:
+        """Clear the widgets so that it leaves an empty layout"""
+        for widget in self._widgets_in_layout:
+            widget.setParent(None)
+            self.layout.removeWidget(widget)
         self._widgets = []
+        self._widgets_in_layout = []
+
+    def set_widgets(self, job_name: str) -> None:
+        """Sets all the widgets for the selected job.
+
+        Parameters
+        ----------
+        job_name : str
+            The job name.
+        """
+        self.clear_widgets()
+
         self._job_name = job_name
         self.last_paths[job_name] = "."
-
-        self.setWindowTitle(job_name)
-
-        job_instance = IJob.create(job_name)
+        try:
+            job_instance = IJob.create(job_name)
+        except ValueError as e:
+            print(f"Failed to create IJob {job_name}")
+            return
         job_instance.build_configuration()
         settings = job_instance.settings
         self._job_instance = job_instance
         print(f"Settings {settings}")
         print(f"Configuration {job_instance.configuration}")
         if "trajectory" in settings.keys():
+            if self._input_trajectory is None:
+                return
             key, value = "trajectory", settings["trajectory"]
             dtype = value[0]
             ddict = value[1]
@@ -133,7 +145,9 @@ class ActionDialog(QDialog):
             ddict["source_object"] = self._input_trajectory
             widget_class = widget_lookup[dtype]
             input_widget = widget_class(parent=self, **ddict)
-            layout.addWidget(input_widget._base)
+            widget = input_widget._base
+            self.layout.addWidget(widget)
+            self._widgets_in_layout.append(widget)
             self._widgets.append(input_widget)
             self._trajectory_configurator = input_widget._configurator
             print("Set up input trajectory")
@@ -153,14 +167,18 @@ class ActionDialog(QDialog):
                     "This is not implemented in the MDANSE GUI at the moment, and it MUST BE!"
                 )
                 placeholder = BackupWidget(parent=self, **ddict)
-                layout.addWidget(placeholder._base)
+                widget = placeholder._base
+                self.layout.addWidget(widget)
+                self._widgets_in_layout.append(widget)
                 self._widgets.append(placeholder)
                 print(f"Could not find the right widget for {key}")
             else:
                 widget_class = widget_lookup[dtype]
                 # expected = {key: ddict[key] for key in widget_class.__init__.__code__.co_varnames}
                 input_widget = widget_class(parent=self, **ddict)
-                layout.addWidget(input_widget._base)
+                widget = input_widget._base
+                self.layout.addWidget(widget)
+                self._widgets_in_layout.append(widget)
                 self._widgets.append(input_widget)
                 input_widget.valid_changed.connect(self.allow_execution)
                 print(f"Set up the right widget for {key}")
@@ -179,20 +197,18 @@ class ActionDialog(QDialog):
         buttonbase = QWidget(self)
         buttonlayout = QHBoxLayout(buttonbase)
         buttonbase.setLayout(buttonlayout)
-        self.cancel_button = QPushButton("Cancel", buttonbase)
         self.save_button = QPushButton("Save as script", buttonbase)
         self.execute_button = QPushButton("RUN!", buttonbase)
         self.execute_button.setStyleSheet("font-weight: bold")
 
-        self.cancel_button.clicked.connect(self.cancel_dialog)
         self.save_button.clicked.connect(self.save_dialog)
         self.execute_button.clicked.connect(self.execute_converter)
 
-        buttonlayout.addWidget(self.cancel_button)
         buttonlayout.addWidget(self.save_button)
         buttonlayout.addWidget(self.execute_button)
-
-        layout.addWidget(buttonbase)
+    
+        self.layout.addWidget(buttonbase)
+        self._widgets_in_layout.append(buttonbase)
 
     @Slot(dict)
     def parse_updated_params(self, new_params: dict):

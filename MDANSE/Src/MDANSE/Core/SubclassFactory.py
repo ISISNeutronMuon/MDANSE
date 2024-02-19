@@ -167,10 +167,11 @@ class SubclassFactory(type):
             specific_class = recursive_search(cls, name)
         if specific_class is None:
             subclasses = [i.lower() for i in cls.indirect_subclasses()]
-            closest = difflib.get_close_matches(name.lower(), subclasses)[0]
-            raise ValueError(
-                f"Could not find {name} in {cls.__name__}. Did you mean: {closest}?"
-            )
+            closest = difflib.get_close_matches(name.lower(), subclasses)
+            err_str = f"Could not find {name} in {cls.__name__}."
+            if len(closest) > 0:
+                err_str += f" Did you mean: {closest[0]}?"
+            raise ValueError(err_str)
         return specific_class(*args, **kwargs)
 
     def subclasses(cls):
