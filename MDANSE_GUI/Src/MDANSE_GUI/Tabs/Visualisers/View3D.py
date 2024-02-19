@@ -24,6 +24,12 @@ class View3D(QWidget):
     @Slot(object)
     def update_panel(self, fullpath: object):
         print(fullpath)
+        if fullpath == "":
+            # a trajectory was deleted and the view emitted an empty
+            # string we need to clear the panel
+            self._viewer.clear_panel()
+            return
+
         try:
             self._viewer._new_trajectory(fullpath)
         except AttributeError:
