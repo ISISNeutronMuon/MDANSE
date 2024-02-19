@@ -91,15 +91,11 @@ class DoublePanel(QWidget):
         self._lb_layout = lb_layout
         self._ub_layout = ub_layout
 
-        self.add_visualiser_side(visualiser_side)
-        self._visualiser = visualiser_side
-        if self._view is not None and self._visualiser is not None:
-            self._view.item_details.connect(self._visualiser.visualise_item)
-
-    def add_visualiser_side(self, visualiser_side):
         if visualiser_side is not None:
-            self._rightlayout.addWidget(visualiser_side)
             self._visualiser = visualiser_side
+            self._rightlayout.addWidget(visualiser_side)
+            if self._view is not None:
+                self._view.connect_to_visualiser(visualiser_side)
 
     def connect_logging(self):
         self.error.connect(self._tab_reference.error)

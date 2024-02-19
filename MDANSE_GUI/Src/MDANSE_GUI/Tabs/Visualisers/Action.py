@@ -101,7 +101,7 @@ class Action(QWidget):
             else:
                 self._default_path = path
 
-    def clear_widgets(self) -> None:
+    def clear_panel(self) -> None:
         """Clear the widgets so that it leaves an empty layout"""
         for widget in self._widgets_in_layout:
             widget.setParent(None)
@@ -109,7 +109,7 @@ class Action(QWidget):
         self._widgets = []
         self._widgets_in_layout = []
 
-    def set_widgets(self, job_name: str) -> None:
+    def update_panel(self, job_name: str) -> None:
         """Sets all the widgets for the selected job.
 
         Parameters
@@ -117,7 +117,7 @@ class Action(QWidget):
         job_name : str
             The job name.
         """
-        self.clear_widgets()
+        self.clear_panel()
 
         self._job_name = job_name
         self.last_paths[job_name] = "."

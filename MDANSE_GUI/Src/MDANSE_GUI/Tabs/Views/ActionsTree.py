@@ -12,6 +12,8 @@
 # @authors   Research Software Group at ISIS (see AUTHORS)
 #
 # **************************************************************************
+from typing import Union
+
 from icecream import ic
 from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication
 from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
@@ -19,6 +21,8 @@ from qtpy.QtGui import QMouseEvent, QDrag
 
 from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.DataViewModel.ActionsHolder import ActionsHolder
+from MDANSE_GUI.Tabs.Visualisers.Action import Action
+from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 
 class ActionsTree(QTreeView):
@@ -98,3 +102,21 @@ class ActionsTree(QTreeView):
         except KeyError:
             job_description = "No further information"
         self.item_details.emit(job_description)  # this should emit the job name
+
+    def connect_to_visualiser(self, visualiser: Union[Action, TextInfo]) -> None:
+        """Connect to a visualiser.
+
+        Parameters
+        ----------
+        visualiser : Action or TextInfo
+            A visualiser to connect to this view.
+        """
+        if isinstance(visualiser, Action):
+            self.jobname_selected.connect(visualiser.update_panel)
+        elif isinstance(visualiser, TextInfo):
+            self.item_details.connect(visualiser.update_panel)
+        else:
+            raise NotImplementedError(
+                f"Unable to connect view {type(self)} to visualiser "
+                f"{type(visualiser)}"
+            )

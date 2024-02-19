@@ -121,7 +121,7 @@ class AtomProperties(QStandardItemModel):
         self.rebuild_colours()
         return new_index
 
-    def initialise_from_database(
+    def reinitialise_from_database(
         self, atoms: list[str], element_database=None
     ) -> list[int]:
         """Puts colours into the list based on chemical elements list
@@ -137,6 +137,8 @@ class AtomProperties(QStandardItemModel):
         Returns:
             list[int] -- a list of indices of colours, with one numbed per atom.
         """
+        self.removeRows(0, self.rowCount())
+
         index_list = []
         for nat, atom in enumerate(atoms):
             row = []
