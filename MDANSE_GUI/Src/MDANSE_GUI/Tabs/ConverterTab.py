@@ -59,11 +59,14 @@ class ConverterTab(GeneralTab):
             model=JobTree(parent_class=Converter),
             view=ActionsTree(),
             visualiser=action,
-            layout=partial(TriplePanel, left_panel=TextInfo(
-                header="MDANSE Converter",
-                footer="Look up our Read The Docs page:"
-                + "https://mdanse.readthedocs.io/en/protos/",
-            )),
+            layout=partial(
+                TriplePanel,
+                left_panel=TextInfo(
+                    header="MDANSE Converter",
+                    footer="Look up our Read The Docs page:"
+                    + "https://mdanse.readthedocs.io/en/protos/",
+                ),
+            ),
             label_text=tab_label,
             action=action,
         )
@@ -89,12 +92,15 @@ class ConverterTab(GeneralTab):
             model=kwargs.get("model", JobTree(parent_class=Converter)),
             view=ActionsTree(),
             visualiser=action,
-            layout=partial(TriplePanel, left_panel=TextInfo(
-                header="MDANSE Converter",
-                footer="Look up our "
-                + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-                + " page.",
-            )),
+            layout=partial(
+                TriplePanel,
+                left_panel=TextInfo(
+                    header="MDANSE Converter",
+                    footer="Look up our "
+                    + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                    + " page.",
+                ),
+            ),
             label_text=tab_label,
             action=action,
         )
@@ -114,12 +120,15 @@ if __name__ == "__main__":
         model=JobTree(parent_class=Converter),
         view=ActionsTree(),
         visualiser=action,
-        layout=partial(TriplePanel, left_panel=TextInfo(
-            header="MDANSE Converters",
-            footer="Look up our "
-            + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-            + " page.",
-        )),
+        layout=partial(
+            TriplePanel,
+            left_panel=TextInfo(
+                header="MDANSE Converters",
+                footer="Look up our "
+                + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                + " page.",
+            ),
+        ),
         label_text=tab_label,
         action=action,
     )

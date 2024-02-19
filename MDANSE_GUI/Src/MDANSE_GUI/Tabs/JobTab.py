@@ -85,11 +85,14 @@ class JobTab(GeneralTab):
             model=JobTree(),
             view=ActionsTree(),
             visualiser=Action(),
-            layout=partial(TriplePanel, left_panel=TextInfo(
-                header="MDANSE Analysis",
-                footer="Look up our Read The Docs page:"
-                + "https://mdanse.readthedocs.io/en/protos/",
-            )),
+            layout=partial(
+                TriplePanel,
+                left_panel=TextInfo(
+                    header="MDANSE Analysis",
+                    footer="Look up our Read The Docs page:"
+                    + "https://mdanse.readthedocs.io/en/protos/",
+                ),
+            ),
             label_text=job_tab_label,
             action=action,
         )
@@ -116,12 +119,15 @@ class JobTab(GeneralTab):
             combo_model=kwargs.get("combo_model", None),
             view=ActionsTree(),
             visualiser=action,
-            layout=partial(TriplePanel, left_panel=TextInfo(
-                header="MDANSE Analysis",
-                footer="Look up our "
-                + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-                + " page.",
-            )),
+            layout=partial(
+                TriplePanel,
+                left_panel=TextInfo(
+                    header="MDANSE Analysis",
+                    footer="Look up our "
+                    + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                    + " page.",
+                ),
+            ),
             label_text=job_tab_label,
             action=action,
         )
@@ -141,12 +147,15 @@ if __name__ == "__main__":
         model=JobTree(),
         view=ActionsTree(),
         visualiser=action,
-        layout=partial(TriplePanel, left_panel=TextInfo(
-            header="MDANSE Analysis",
-            footer="Look up our "
-            + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-            + " page.",
-        )),
+        layout=partial(
+            TriplePanel,
+            left_panel=TextInfo(
+                header="MDANSE Analysis",
+                footer="Look up our "
+                + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                + " page.",
+            ),
+        ),
         label_text=job_tab_label,
         action=action,
     )
