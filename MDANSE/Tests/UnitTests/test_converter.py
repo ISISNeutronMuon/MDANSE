@@ -200,10 +200,11 @@ def test_improvedase_lammps_two_files():
 
     parameters = {
         "trajectory_file": (lammps_lammps, "lammps-dump-text"),
-        "configuration_file": (lammps_config, "dlp4"),
+        "configuration_file": (lammps_config, "lammps-data"),
         "fold": False,
         "output_file": (temp_name, 64, "gzip"),
         "n_steps": 0,
+        "elements_from_mass": True,
         "time_step": 50.0,
         "time_unit": "fs",
     }

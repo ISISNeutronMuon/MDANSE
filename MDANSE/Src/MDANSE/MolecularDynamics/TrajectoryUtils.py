@@ -13,7 +13,7 @@
 # **************************************************************************
 
 import operator
-from typing import Union
+from typing import Union, Iterable
 
 import numpy as np
 
@@ -35,6 +35,20 @@ class MolecularDynamicsError(Error):
 
 class UniverseAdapterError(Error):
     pass
+
+
+def elements_from_masses(masses: Iterable[float], tolerance: float = 0.01):
+    result = ["X"] * len(masses)
+    upper_limit = np.round(masses).astype(int).max()
+    all_masses = ATOMS_DATABASE.get_property("atomic_weight")
+    for n, mass in enumerate(masses):
+        for protons in range(upper_limit):
+            possible_matches = ATOMS_DATABASE._atoms_by_atomic_number[protons]
+            for match in possible_matches:
+                reference_mass = all_masses[match]
+                if abs(mass - reference_mass) <= tolerance:
+                    result[n] = match
+    return result
 
 
 def atom_index_to_molecule_index(chemical_system: ChemicalSystem) -> dict[int, int]:

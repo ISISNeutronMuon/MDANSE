@@ -22,19 +22,18 @@ from ase.io import iread, read
 from ase.atoms import Atoms as ASEAtoms
 from ase.io.trajectory import Trajectory as ASETrajectory
 import numpy as np
-import h5py
-
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Converters.Converter import Converter, InteractiveConverter
+from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.Mathematics.Graph import Graph
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicBoxConfiguration,
     PeriodicRealConfiguration,
 )
+from MDANSE.MolecularDynamics.TrajectoryUtils import elements_from_masses
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -84,6 +83,21 @@ class ImprovedASE(Converter):
             "mini": 0,
         },
     )
+    settings["elements_from_mass"] = (
+        "BooleanConfigurator",
+        {
+            "label": "Try to determine chemical elements based on atom mass",
+            "default": False,
+        },
+    )
+    settings["mass_tolerance"] = (
+        "FloatConfigurator",
+        {
+            "label": "allowed difference from database mass (in a.u.)",
+            "default": 0.01,
+            "mini": 1.0e-9,
+        },
+    )
     settings["output_file"] = (
         "OutputTrajectoryConfigurator",
         {
@@ -100,6 +114,7 @@ class ImprovedASE(Converter):
         self._chemicalSystem = None
         self._fractionalCoordinates = None
         self._nAtoms = None
+        self._masses = None
 
         # The number of steps of the analysis.
         self.numberOfSteps = self.configuration["n_steps"]["value"]
@@ -192,26 +207,46 @@ class ImprovedASE(Converter):
         """
 
         self._input.close()
-
+        try:
+            self._extra_input.close()
+        except:
+            pass
         # Close the output trajectory.
         self._trajectory.close()
 
         super(ImprovedASE, self).finalize()
 
     def extract_initial_information(self, ase_object):
+        element_list = None
+
         if self._fractionalCoordinates is None:
             try:
                 self._fractionalCoordinates = np.all(ase_object.get_pbc())
             except:
                 pass
 
+        if self._masses is None:
+            try:
+                self._masses = ase_object.get_masses()
+            except:
+                pass
+
         g = Graph()
 
         element_count = {}
-        try:
-            element_list = ase_object.get_chemical_symbols()
-        except:
-            pass
+        if self.configuration["elements_from_mass"]["value"]:
+            tolerance = self.configuration["mass_tolerance"]["value"]
+            if self._masses is None:
+                return
+            else:
+                element_list = elements_from_masses(self._masses, tolerance=tolerance)
+        else:
+            try:
+                element_list = ase_object.get_chemical_symbols()
+            except:
+                pass
+        if element_list is None:
+            return
         else:
             if self._nAtoms is None:
                 self._nAtoms = len(element_list)
@@ -255,8 +290,21 @@ class ImprovedASE(Converter):
                 self.configuration["configuration_file"]["value"],
                 format=self.configuration["configuration_file"]["format"],
             )
+        except FileNotFoundError:
+            return
         except:
-            return False
+            for file_format in self.configuration[
+                "configuration_file"
+            ]._allowed_formats:
+                try:
+                    self._extra_input = read(
+                        self.configuration["configuration_file"]["value"],
+                        format=file_format,
+                    )
+                except:
+                    continue
+                else:
+                    break
         else:
             self.extract_initial_information(self._extra_input)
 
