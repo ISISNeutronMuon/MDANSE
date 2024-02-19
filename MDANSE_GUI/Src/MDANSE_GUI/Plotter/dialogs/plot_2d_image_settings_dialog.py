@@ -12,7 +12,7 @@
 #
 # **************************************************************************
 
-from PyQt6 import QtWidgets
+from qtpy import QtWidgets
 
 
 from MDANSE_GUI.Plotter.models.plot_2d_model import (

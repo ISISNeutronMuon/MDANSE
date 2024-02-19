@@ -12,7 +12,7 @@
 #
 # **************************************************************************
 
-from PyQt6 import QtCore, QtWidgets
+from qtpy import QtCore, QtWidgets
 
 
 class PlotActionsWidget(QtWidgets.QWidget):
