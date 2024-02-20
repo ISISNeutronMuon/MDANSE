@@ -44,7 +44,7 @@ class ConverterTab(GeneralTab):
 
     def set_job_starter(self, job_starter):
         self._job_starter = job_starter
-        self.action.new_thread_objects.connect(self._job_starter.startThread)
+        self.action.new_thread_objects.connect(self._job_starter.startProcess)
 
     @Slot(str)
     def set_current_trajectory(self, new_name: str):

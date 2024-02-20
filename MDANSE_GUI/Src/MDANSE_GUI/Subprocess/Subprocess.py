@@ -31,13 +31,13 @@ class Subprocess(Process):
         sending_pipe = kwargs.get("pipe")
         receiving_queue = kwargs.get("queue")
         self.construct_job(job_name, sending_pipe, receiving_queue)
-    
+
     def construct_job(self, job: str, pipe: Connection, queue: "Queue"):
         job_instance = IJob.create(job)
         job_instance.build_configuration()
         status = JobStatusProcess(pipe, queue)
         job_instance._status = status
         self._job_instance = job_instance
-    
+
     def run(self):
         self._job_instance.run(self._job_parameters)

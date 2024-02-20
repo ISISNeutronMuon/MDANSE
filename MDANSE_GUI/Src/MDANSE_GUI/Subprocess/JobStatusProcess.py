@@ -13,7 +13,9 @@
 #
 # **************************************************************************
 
+from typing import Tuple
 from multiprocessing import Pipe, Queue, Process
+from multiprocessing.connection import Connection
 
 from icecream import ic
 from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex
@@ -27,15 +29,29 @@ class JobCommunicator(QObject):
     finished = Signal(bool)
     oscillate = Signal()
 
+    def status_update(self, input: Tuple):
+        key, value = input
+        if key == "FINISHED":
+            self.finished.emit(value)
+        elif key == "STEP":
+            self.progress.emit(value)
+        elif key == "STARTED":
+            if value is not None:
+                self.target.emit(value)
+            else:
+                self.oscillate.emit()
+        elif key == "COMMUNICATION":
+            print(f"Communication with the subprocess is now {value}")
+            self.finished.emit(value)
+
 
 class JobStatusProcess(Status):
-    def __init__(self, *args, **kwargs):
-        qparent = kwargs.pop("parent", None)
+    def __init__(self, pipe: "Connection", queue: Queue, **kwargs):
         super().__init__()
+        self._pipe = pipe
+        self._queue = queue
         self._state = {}  # for compatibility with JobStatus
         self._progress_meter = 0
-        self._mutex = QMutex()
-        self._communicator = JobCommunicator(parent=qparent)
 
     @property
     def state(self):
@@ -43,24 +59,22 @@ class JobStatusProcess(Status):
 
     def finish_status(self):
         ic()
-        self._communicator.finished.emit(True)
+        self._pipe.send(("FINISHED", True))
 
     def start_status(self):
         ic()
         try:
             temp = int(self._nSteps)
         except:
-            self._communicator.oscillate.emit()
+            self._pipe.send(("STARTED", None))
         else:
-            self._communicator.target.emit(temp)
+            self._pipe.send(("STARTED", temp))
 
     def stop_status(self):
         ic()
-        self._communicator.finished.emit(False)
+        self._pipe.send(("FINISHED", False))
 
     def update_status(self):
-        self._mutex.lock()
         self._progress_meter += 1
         temp = int(self._progress_meter)
-        self._mutex.unlock()
-        self._communicator.progress.emit(temp)
+        self._pipe.send(("STEP", temp))

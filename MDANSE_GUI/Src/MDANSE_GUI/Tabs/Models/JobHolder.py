@@ -13,57 +13,35 @@
 #
 # **************************************************************************
 
+from multiprocessing import Pipe, Queue
+
 from icecream import ic
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE_GUI.DataViewModel.JobStatusQt import JobStatusQt
+from MDANSE_GUI.Subprocess.Subprocess import Subprocess, Connection
+from MDANSE_GUI.Subprocess.JobStatusProcess import JobStatusProcess, JobCommunicator
 
 
 class JobThread(QThread):
-    """A wrapper object for a single MDANSE analysis job.
-    It is created to run a single instance of the job,
-    and exits once the job has completed processing."""
 
-    job_failure = Signal(str)
-
-    def __init__(self, *args, command=None, parameters={}):
-        super().__init__(*args)
-        ic("JobThread starts init")
-        self._command = command
-        self._parameters = parameters
-        ic("JobThread.run will create a job instance")
-        ic(f"command is {command}")
-        if isinstance(self._command, str):
-            self._job = IJob.create(self._command)
-        elif isinstance(self._command, type):
-            self._job = self._command()
-        else:
-            self._job = self._command
-        self._job.build_configuration()
-        ic(f"JobThread._parameters: {self._parameters}")
-        # here we try to create and connect a JobStatusQt
-        status = JobStatusQt(parent=self)
-        self._job._status = status
-        self._status = status
-        ic("JobThread finished init")
+    def __init__(self, job_comm: "JobCommunicator", receiving_end: "Connection"):
+        super().__init__()
+        self._job_comm = job_comm
+        self._pipe_end = receiving_end
+        self._keep_running = True
 
     def run(self):
-        try:
-            self._job.run(self._parameters)
-        except Exception as inst:
-            ic("JobThread has entered exception handling!")
-            error_message = ""
-            error_message += str(type(inst))
-            error_message += str(inst.args)  # arguments stored in .args
-            error_message += str(inst)  # __str__ allows args to be printed directly,
-            ic("JobThread is about to emit the failure message")
-            self.job_failure.emit(error_message)
-        else:
-            ic("JobThread.run did not raise an exception. JobThread.run will exit now")
-        self.exec()  # this starts event handling - will it help?
+        while self._keep_running:
+            try:
+                status_update = self._pipe_end.recv()
+            except:
+                self._job_comm.status_update(("COMMUNICATION", False))
+                self._keep_running = False
+            else:
+                self._job_comm.status_update(status_update)
 
 
 class JobEntry(QObject):
@@ -147,7 +125,8 @@ class JobHolder(QStandardItemModel):
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
         self.lock = QMutex()
-        self.existing_threads = []
+        self.existing_threads = {}
+        self.existing_processes = {}
         self.existing_jobs = {}
         self._next_number = 0
 
@@ -167,21 +146,31 @@ class JobHolder(QStandardItemModel):
         self.appendRow([traj])
 
     @Slot(list)
-    def startThread(self, job_vars: list):
+    def startProcess(self, job_vars: list):
+        main_pipe, child_pipe = Pipe()
+        main_queue = Queue()
         try:
-            th_ref = JobThread(command=job_vars[0], parameters=job_vars[1])
+            subprocess_ref = Subprocess(
+                job_name=job_vars[0],
+                job_parameters=job_vars[1],
+                pipe=child_pipe,
+                queue=main_queue,
+            )
         except:
-            ic(f"Failed to create JobThread using {job_vars}")
+            ic(f"Failed to create Subprocess using {job_vars}")
             return
-        th_ref.job_failure.connect(self.reportError)
+        communicator = JobCommunicator()
+        watcher_thread = JobThread(communicator, main_pipe)
+        communicator.moveToThread(watcher_thread)
         entry_number = self.next_number
         item_th = JobEntry(command=job_vars[0], entry_number=entry_number)
         item_th.parameters = job_vars[1]
-        th_ref._status._communicator.target.connect(item_th.on_started)  # int
-        th_ref._status._communicator.progress.connect(item_th.on_update)  # int
-        th_ref._status._communicator.finished.connect(item_th.on_finished)  # bool
-        th_ref._status._communicator.oscillate.connect(item_th.on_oscillate)  # nothing
-        ic("Thread ready to start!")
+        communicator.target.connect(item_th.on_started)  # int
+        communicator.progress.connect(item_th.on_update)  # int
+        communicator.finished.connect(item_th.on_finished)  # bool
+        communicator.oscillate.connect(item_th.on_oscillate)  # nothing
+        ic("Watcher thread ready to start!")
+        watcher_thread.start()
         try:
             task_name = str(job_vars[0])
         except:
@@ -198,6 +187,8 @@ class JobHolder(QStandardItemModel):
         # nrows = self.rowCount()
         # index = self.indexFromItem(item_th._item)
         # print(f"Index: {index}")
-        th_ref.start()
-        self.existing_threads.append(th_ref)
+        ic("Subprocess ready to start!")
+        subprocess_ref.start()
+        self.existing_processes[entry_number] = subprocess_ref
+        self.existing_threads[entry_number] = watcher_thread
         self.existing_jobs[entry_number] = item_th
