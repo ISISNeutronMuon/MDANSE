@@ -13,14 +13,19 @@
 #
 # **************************************************************************
 
-from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog
+from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog, QComboBox
 from qtpy.QtCore import Slot
+from ase.io.formats import filetype
+
+from MDANSE.Framework.Configurators.AseInputFileConfigurator import (
+    AseInputFileConfigurator,
+)
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.Widgets.GeneralWidgets import translate_file_associations
 
 
-class InputFileWidget(WidgetBase):
+class AseInputFileWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         configurator = kwargs.get("configurator", None)
@@ -41,12 +46,17 @@ class InputFileWidget(WidgetBase):
         tooltip_text = kwargs.get("tooltip", "Specify a path to an existing file.")
         file_association = kwargs.get("wildcard", "")
         self._qt_file_association = translate_file_associations(file_association)
+        combo = QComboBox(self._base)
+        combo.addItems(AseInputFileConfigurator._allowed_formats)
+        combo.setEditable(False)
+        self._type_combo = combo
         field = QLineEdit(self._base)
         self._field = field
         field.textChanged.connect(self.updateValue)
         field.setText(str(default_value))
         field.setToolTip(tooltip_text)
         self._layout.addWidget(field)
+        self._layout.addWidget(combo)
         button = QPushButton("Browse", self._base)
         button.clicked.connect(self.valueFromDialog)
         self._layout.addWidget(button)
@@ -69,10 +79,12 @@ class InputFileWidget(WidgetBase):
         if new_value is not None:
             self._field.setText(new_value[0])
             self.updateValue()
+            try:
+                type_guess = filetype(new_value[0])
+            except:
+                type_guess = "guess"
+            self._type_combo.setCurrentText(type_guess)
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        value = self._field.text()
-        if value == "":
-            value = None
-        return value
+        return self._field.text(), self._type_combo.currentText()
