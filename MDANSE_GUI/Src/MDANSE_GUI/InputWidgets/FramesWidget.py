@@ -51,6 +51,7 @@ class FramesWidget(WidgetBase):
             fields[field_num].setPlaceholderText(placeholders[field_num])
         self._fields = fields
         self._validators = validators
+        self._default_values = placeholders
         self.default_labels()
         self.update_labels()
 
@@ -80,11 +81,11 @@ class FramesWidget(WidgetBase):
 
     def get_widget_value(self):
         result = []
-        for field in self._fields:
+        for n, field in enumerate(self._fields):
             strval = field.text()
             try:
                 val = int(strval)
             except:
-                val = 0
+                val = int(self._default_values[n])
             result.append(val)
         return result

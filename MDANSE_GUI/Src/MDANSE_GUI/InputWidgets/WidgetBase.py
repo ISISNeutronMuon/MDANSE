@@ -113,8 +113,6 @@ class WidgetBase(QObject):
     @abstractmethod
     @Slot()
     def updateValue(self):
-        self.configure_using_default()
-        print("updateValue: just ran configure_using_default")
         current_value = self.get_widget_value()
         if self._empty:
             self.configure_using_default()

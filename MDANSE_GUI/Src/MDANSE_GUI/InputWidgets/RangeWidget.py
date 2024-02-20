@@ -53,6 +53,7 @@ class RangeWidget(WidgetBase):
         self._fields = fields
         self._validators = validators
         self._num_type = num_type
+        self._default_values = placeholders
         self.default_labels()
         self.update_labels()
 
@@ -81,11 +82,11 @@ class RangeWidget(WidgetBase):
 
     def get_widget_value(self):
         result = []
-        for field in self._fields:
+        for n, field in enumerate(self._fields):
             strval = field.text()
             try:
-                val = int(strval)
+                val = self._num_type(strval)
             except:
-                val = 0
+                val = self._num_type(self._default_values[n])
             result.append(val)
         return result
