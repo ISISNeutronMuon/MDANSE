@@ -43,6 +43,7 @@ modnames = [
     "RunningModeWidget",
     "ComboWidget",
     "InputFileWidget",
+    "AseInputFileWidget",
     "InputDirectoryWidget",
     "OutputDirectoryWidget",
     "OutputTrajectoryWidget",

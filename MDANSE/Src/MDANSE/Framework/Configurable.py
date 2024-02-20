@@ -167,7 +167,10 @@ class Configurable(object):
                     else:
                         if parameters[name]:
                             conf.configure(parameters[name])
-                            self._info.append(conf.get_information())
+                            if conf.valid:
+                                self._info.append(conf.get_information())
+                            else:
+                                self._configuration[name] = False
 
                     conf.set_configured(True)
 
@@ -177,7 +180,7 @@ class Configurable(object):
 
                     progress = True
 
-                if not conf.valid:
+                if not conf.valid and not conf.optional:
                     print(conf.error_status)
                     self._configured = False
                     return
