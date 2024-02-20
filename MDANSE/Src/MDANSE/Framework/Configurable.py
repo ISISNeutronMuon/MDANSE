@@ -40,6 +40,8 @@ class Configurable(object):
             #.. 2-value is the dictionary of the keywords used when initializing the configurator.  
     """
 
+    enabled = True
+
     settings = collections.OrderedDict()
 
     def __init__(self, settings=None, trajectory_input="mdasne"):
