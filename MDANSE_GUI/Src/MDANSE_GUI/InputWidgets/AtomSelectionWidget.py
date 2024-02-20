@@ -316,12 +316,14 @@ class AtomSelectionWidget(WidgetBase):
         default_value = '{"all": true}'
         self._value = default_value
         self._field = QLineEdit(default_value, self._base)
+        self._field.setPlaceholderText(default_value)
         self._field.setMaxLength(2147483647)  # set to the largest possible
         self.selector = self._configurator.get_selector()
         self.helper = HelperDialog(self.selector, self._field, self._base)
         helper_button = QPushButton("Atom selection helper", self._base)
         helper_button.clicked.connect(self.helper_dialog)
         self._field.textChanged.connect(self.check_valid_field)
+        self._default_value = default_value
         self._layout.addWidget(self._field)
         self._layout.addWidget(helper_button)
         self.update_labels()
@@ -378,6 +380,7 @@ class AtomSelectionWidget(WidgetBase):
         selection_string = self._field.text()
         if len(selection_string) < 1:
             self._empty = True
+            return self._default_value
         else:
             self._empty = False
         return selection_string

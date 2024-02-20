@@ -50,6 +50,7 @@ class InputFileWidget(WidgetBase):
         self._layout.addWidget(field)
         button = QPushButton("Browse", self._base)
         button.clicked.connect(self.valueFromDialog)
+        self._default_value = default_value
         self._layout.addWidget(button)
         self._configurator = configurator
         self._file_dialog = QFileDialog.getOpenFileName
@@ -79,6 +80,7 @@ class InputFileWidget(WidgetBase):
         strval = self._field.text()
         if len(strval) < 1:
             self._empty = True
+            return self._default_value
         else:
             self._empty = False
         return strval

@@ -58,6 +58,7 @@ class OutputTrajectoryWidget(WidgetBase):
         self._layout.addWidget(self.dtype_box)
         self._layout.addWidget(self.compression_box)
         self._layout.addWidget(browse_button)
+        self._default_value = default_value
         self.default_labels()
         self.update_labels()
 
@@ -115,6 +116,8 @@ class OutputTrajectoryWidget(WidgetBase):
 
     def get_widget_value(self):
         filename = self._field.text()
+        if len(filename) < 1:
+            filename = self._default_value[0]
         dtype = dtype_lookup[self.dtype_box.currentText()]
         compression = self.compression_box.currentText()
         return (filename, dtype, compression)
