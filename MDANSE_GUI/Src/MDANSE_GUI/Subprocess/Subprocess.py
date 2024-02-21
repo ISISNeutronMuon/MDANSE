@@ -13,7 +13,7 @@
 #
 # **************************************************************************
 
-from multiprocessing import Pipe, Queue, Process
+from multiprocessing import Pipe, Queue, Process, Event
 from multiprocessing.connection import Connection
 
 from icecream import ic
@@ -30,12 +30,15 @@ class Subprocess(Process):
         self._job_parameters = kwargs.get("job_parameters")
         sending_pipe = kwargs.get("pipe")
         receiving_queue = kwargs.get("queue")
-        self.construct_job(job_name, sending_pipe, receiving_queue)
+        pause_event = kwargs.get("pause_event")
+        self.construct_job(job_name, sending_pipe, receiving_queue, pause_event)
 
-    def construct_job(self, job: str, pipe: Connection, queue: "Queue"):
+    def construct_job(
+        self, job: str, pipe: Connection, queue: "Queue", pause_event: "Event"
+    ):
         job_instance = IJob.create(job)
         job_instance.build_configuration()
-        status = JobStatusProcess(pipe, queue)
+        status = JobStatusProcess(pipe, queue, pause_event)
         job_instance._status = status
         self._job_instance = job_instance
 

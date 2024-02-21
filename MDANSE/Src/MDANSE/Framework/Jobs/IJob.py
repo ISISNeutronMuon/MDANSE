@@ -210,6 +210,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
     def _run_monoprocessor(self):
         print(f"Monoprocessor run: expects {self.numberOfSteps} steps")
         for index in range(self.numberOfSteps):
+            if self._status is not None:
+                if hasattr(self._status, "_pause_event"):
+                    self._status._pause_event.wait()
             idx, result = self.run_step(index)
             if self._status is not None:
                 self._status.update()
@@ -217,6 +220,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
     def _run_threadpool(self):
         def helper(self, index):
+            if self._status is not None:
+                if hasattr(self._status, "_pause_event"):
+                    self._status._pause_event.wait()
             idx, result = self.run_step(index)
             if self._status is not None:
                 self._status.update()

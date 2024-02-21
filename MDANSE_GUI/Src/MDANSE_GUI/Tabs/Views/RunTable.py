@@ -12,7 +12,7 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-from qtpy.QtCore import Slot, Signal, QModelIndex
+from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
 from qtpy.QtWidgets import QMenu, QTableView, QAbstractItemView
 from qtpy.QtGui import QStandardItem, QContextMenuEvent
 
@@ -37,6 +37,7 @@ class RunTable(QTableView):
         menu.exec_(event.globalPos())
 
     def populateMenu(self, menu: QMenu, item: QStandardItem):
+        entry, watcher, process = self.getJobObjects()
         for action, method in [
             ("Delete", self.deleteNode),
             ("Pause", self.pauseJob),
@@ -46,29 +47,55 @@ class RunTable(QTableView):
             temp_action = menu.addAction(action)
             temp_action.triggered.connect(method)
 
-    @Slot()
-    def deleteNode(self):
+    def getJobObjects(self):
         model = self.model()
         index = self.currentIndex()
-        model.removeRow(index.row())
-        self.item_details.emit("")
+        item_row = index.row()
+        entry_number = model.index(item_row, 0).data(role=Qt.ItemDataRole.UserRole)
+        try:
+            entry_number = int(entry_number)
+        except ValueError:
+            print(f"Could not use {entry_number} as int")
+            return
+        job_entry, job_watcher_thread, job_process = (
+            model.existing_jobs[entry_number],
+            model.existing_threads[entry_number],
+            model.existing_processes[entry_number],
+        )
+        return job_entry, job_watcher_thread, job_process
+
+    @Slot()
+    def deleteNode(self):
+        entry, watcher, process = self.getJobObjects()
+        try:
+            process.close()
+        except ValueError:
+            print("The process is still running!")
+        else:
+            model = self.model()
+            index = self.currentIndex()
+            model.removeRow(index.row())
+            self.item_details.emit("")
 
     @Slot()
     def pauseJob(self):
-        pass
+        entry, _, _ = self.getJobObjects()
+        entry.pause_job()
 
     @Slot()
-    def resumeJob(self):
-        pass
+    def unpauseJob(self):
+        entry, _, _ = self.getJobObjects()
+        entry.unpause_job()
 
     @Slot()
     def killJob(self):
-        pass
+        _, _, process = self.getJobObjects()
+        process.terminate()
 
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
         model = self.model()
-        node_number = model.itemFromIndex(index).data()
+        node_number = model.itemFromIndex(index).data(role=Qt.ItemDataRole.UserRole)
         job_entry = model.existing_jobs[node_number]
         self.item_details.emit(job_entry.text_summary())
 

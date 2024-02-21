@@ -13,12 +13,12 @@
 #
 # **************************************************************************
 
-from multiprocessing import Pipe, Queue
+from multiprocessing import Pipe, Queue, Event
 
 from icecream import ic
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
-from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex
+from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex, Qt
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE_GUI.Subprocess.Subprocess import Subprocess, Connection
@@ -48,10 +48,11 @@ class JobEntry(QObject):
     """This coordinates all the objects that make up one line on the list
     of current jobs. It is used for reporting the task progress to the GUI."""
 
-    def __init__(self, *args, command=None, entry_number=0):
+    def __init__(self, *args, command=None, entry_number=0, pause_event=None):
         super().__init__(*args)
         self._command = command
         self._parameters = {}
+        self._pause_event = pause_event
         self.has_started = False
         self.has_finished = False
         self.success = None
@@ -117,6 +118,12 @@ class JobEntry(QObject):
     def on_oscillate(self):
         """For jobs with unknown duration, the progress bar will bounce."""
 
+    def pause_job(self):
+        self._pause_event.clear()
+
+    def unpause_job(self):
+        self._pause_event.set()
+
 
 class JobHolder(QStandardItemModel):
     """All the job INSTANCES that are started by the GUI
@@ -140,21 +147,18 @@ class JobHolder(QStandardItemModel):
         self._next_number += 1
         return retval
 
-    @Slot(object)
-    def addItem(self, new_entry: QProcess):
-        traj = JobEntry(new_entry.basename, trajectory=new_entry)
-        self.appendRow([traj])
-
     @Slot(list)
     def startProcess(self, job_vars: list):
         main_pipe, child_pipe = Pipe()
         main_queue = Queue()
+        pause_event = Event()
         try:
             subprocess_ref = Subprocess(
                 job_name=job_vars[0],
                 job_parameters=job_vars[1],
                 pipe=child_pipe,
                 queue=main_queue,
+                pause_event=pause_event,
             )
         except:
             ic(f"Failed to create Subprocess using {job_vars}")
@@ -163,7 +167,9 @@ class JobHolder(QStandardItemModel):
         watcher_thread = JobThread(communicator, main_pipe)
         communicator.moveToThread(watcher_thread)
         entry_number = self.next_number
-        item_th = JobEntry(command=job_vars[0], entry_number=entry_number)
+        item_th = JobEntry(
+            command=job_vars[0], entry_number=entry_number, pause_event=pause_event
+        )
         item_th.parameters = job_vars[1]
         communicator.target.connect(item_th.on_started)  # int
         communicator.progress.connect(item_th.on_update)  # int
@@ -176,7 +182,7 @@ class JobHolder(QStandardItemModel):
         except:
             task_name = str("This should have been a job name")
         name_item = QStandardItem(task_name)
-        name_item.setData(entry_number)
+        name_item.setData(entry_number, role=Qt.ItemDataRole.UserRole)
         self.appendRow(
             [
                 name_item,
@@ -187,8 +193,8 @@ class JobHolder(QStandardItemModel):
         # nrows = self.rowCount()
         # index = self.indexFromItem(item_th._item)
         # print(f"Index: {index}")
-        ic("Subprocess ready to start!")
-        subprocess_ref.start()
         self.existing_processes[entry_number] = subprocess_ref
         self.existing_threads[entry_number] = watcher_thread
         self.existing_jobs[entry_number] = item_th
+        ic("Subprocess ready to start!")
+        subprocess_ref.start()
