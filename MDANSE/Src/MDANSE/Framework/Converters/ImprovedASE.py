@@ -49,6 +49,8 @@ class ImprovedASE(Converter):
 
     label = "ImprovedASE"
 
+    enabled = False
+
     settings = collections.OrderedDict()
     settings["trajectory_file"] = (
         "AseInputFileConfigurator",
