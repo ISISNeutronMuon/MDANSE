@@ -22,6 +22,14 @@ from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex, Qt
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE_GUI.Subprocess.Subprocess import Subprocess, Connection
+from MDANSE_GUI.Subprocess.JobState import (
+    Starting,
+    Finished,
+    Running,
+    Failed,
+    Paused,
+    Aborted,
+)
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobStatusProcess, JobCommunicator
 
 
@@ -53,13 +61,17 @@ class JobEntry(QObject):
         self._command = command
         self._parameters = {}
         self._pause_event = pause_event
-        self.has_started = False
-        self.has_finished = False
-        self.success = None
+        # state pattern
+        self._current_state = Starting(self)
+        self._Starting = Starting(self)
+        self._Finished = Finished(self)
+        self._Aborted = Aborted(self)
+        self._Running = Running(self)
+        self._Failed = Failed(self)
+        self._Paused = Paused(self)
+        # other variables
         self.percent_complete = 0
         self._entry_number = entry_number
-        self._output = None
-        self.reference = None
         self.total_steps = 99
         self._prog_item = QStandardItem()
         self._stat_item = QStandardItem()
@@ -73,7 +85,7 @@ class JobEntry(QObject):
         for key, value in self._parameters.items():
             result += f" - {key} = {value}\n"
         result += "Status:\n"
-        result += f"Success: {self.success}\n"
+        result += f"Current state: {self._current_state._label}\n"
         result += f"Percent complete: {self.percent_complete}\n"
         return result
 
@@ -87,31 +99,27 @@ class JobEntry(QObject):
 
     def update_fields(self):
         self._prog_item.setText(f"{self.percent_complete} percent complete")
+        self._stat_item.setText(self._current_state._label)
 
     @Slot(bool)
     def on_finished(self, success: bool):
-        print(f"Item received on_finished. Success: {success}")
-        self.success = success
-        self.has_finished = True
-        self._stat_item.setText("Stopped")
         if success:
-            self.percent_complete = 100
-            self._stat_item.setText("Completed!")
+            self._current_state.finish()
+        else:
+            self._current_state.fail()
         self.update_fields()
 
     @Slot(int)
     def on_started(self, target_steps: int):
         print(f"Item received on_started: {target_steps} total steps")
         self.total_steps = target_steps
-        self.has_started = True
-        self._stat_item.setText("Starting")
+        self._current_state.start()
         self.update_fields()
 
     @Slot(int)
     def on_update(self, completed_steps: int):
         print(f"completed {completed_steps} out of {self.total_steps} steps")
         self.percent_complete = round(99 * completed_steps / self.total_steps, 1)
-        self._stat_item.setText("Running")
         self.update_fields()
 
     @Slot()
@@ -119,10 +127,20 @@ class JobEntry(QObject):
         """For jobs with unknown duration, the progress bar will bounce."""
 
     def pause_job(self):
-        self._pause_event.clear()
+        self._current_state.pause()
+        self.update_fields()
 
     def unpause_job(self):
-        self._pause_event.set()
+        self._current_state.unpause()
+        self.update_fields()
+
+    def terminate_job(self):
+        self._current_state.terminate()
+        self.update_fields()
+
+    def kill_job(self):
+        self._current_state.kill()
+        self.update_fields()
 
 
 class JobHolder(QStandardItemModel):
