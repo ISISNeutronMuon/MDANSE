@@ -10,6 +10,7 @@ class TextInfo(QTextBrowser):
         self._footer = kwargs.pop("footer", "")
         super().__init__(*args, **kwargs)
         self.setOpenExternalLinks(True)
+        self.setHtml(self.filter(""))
 
     @Slot(object)
     def update_panel(self, incoming: object):
