@@ -39,6 +39,7 @@ class FloatWidget(WidgetBase):
         else:
             field = QLineEdit(self._base)
             validator = QDoubleValidator(field)
+            validator.setNotation(QDoubleValidator.Notation.StandardNotation)
             minval, maxval = self._configurator.mini, self._configurator.maxi
             if minval is not None:
                 validator.setBottom(minval)
