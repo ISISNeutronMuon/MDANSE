@@ -37,7 +37,12 @@ class RunTable(QTableView):
         menu.exec_(event.globalPos())
 
     def populateMenu(self, menu: QMenu, item: QStandardItem):
-        for action, method in [("Delete", self.deleteNode)]:
+        for action, method in [
+            ("Delete", self.deleteNode),
+            ("Pause", self.pauseJob),
+            ("Resume", self.unpauseJob),
+            ("Kill", self.killJob),
+        ]:
             temp_action = menu.addAction(action)
             temp_action.triggered.connect(method)
 
@@ -47,6 +52,18 @@ class RunTable(QTableView):
         index = self.currentIndex()
         model.removeRow(index.row())
         self.item_details.emit("")
+
+    @Slot()
+    def pauseJob(self):
+        pass
+
+    @Slot()
+    def resumeJob(self):
+        pass
+
+    @Slot()
+    def killJob(self):
+        pass
 
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):

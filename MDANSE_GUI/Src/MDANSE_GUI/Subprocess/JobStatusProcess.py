@@ -69,6 +69,7 @@ class JobStatusProcess(Status):
             self._pipe.send(("STARTED", None))
         else:
             self._pipe.send(("STARTED", temp))
+        # self._updateStep = 1
 
     def stop_status(self):
         ic()
@@ -76,5 +77,5 @@ class JobStatusProcess(Status):
 
     def update_status(self):
         self._progress_meter += 1
-        temp = int(self._progress_meter)
+        temp = int(self._progress_meter) * self._updateStep
         self._pipe.send(("STEP", temp))

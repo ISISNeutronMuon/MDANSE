@@ -89,7 +89,7 @@ class JobEntry(QObject):
 
     @Slot(bool)
     def on_finished(self, success: bool):
-        print("Item received on_finished!")
+        print(f"Item received on_finished. Success: {success}")
         self.success = success
         self.has_finished = True
         self._stat_item.setText("Stopped")
@@ -100,7 +100,7 @@ class JobEntry(QObject):
 
     @Slot(int)
     def on_started(self, target_steps: int):
-        print("Item received on_started!")
+        print(f"Item received on_started: {target_steps} total steps")
         self.total_steps = target_steps
         self.has_started = True
         self._stat_item.setText("Starting")
@@ -108,8 +108,8 @@ class JobEntry(QObject):
 
     @Slot(int)
     def on_update(self, completed_steps: int):
-        print("Item received on_update!")
-        self.percent_complete = completed_steps / self.total_steps * 99
+        print(f"completed {completed_steps} out of {self.total_steps} steps")
+        self.percent_complete = round(99 * completed_steps / self.total_steps, 1)
         self._stat_item.setText("Running")
         self.update_fields()
 

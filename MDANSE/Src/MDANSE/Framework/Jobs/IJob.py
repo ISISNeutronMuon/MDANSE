@@ -208,13 +208,18 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 self._status.update()
 
     def _run_monoprocessor(self):
+        print(f"Monoprocessor run: expects {self.numberOfSteps} steps")
         for index in range(self.numberOfSteps):
             idx, result = self.run_step(index)
+            if self._status is not None:
+                self._status.update()
             self.combine(idx, result)
 
     def _run_threadpool(self):
         def helper(self, index):
             idx, result = self.run_step(index)
+            if self._status is not None:
+                self._status.update()
             self.combine(idx, result)
 
         pool = PoolExecutor(max_workers=self.configuration["running_mode"]["slots"])
