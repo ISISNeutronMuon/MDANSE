@@ -176,6 +176,7 @@ class AtomsDatabase(_Database):
         Constructor
         """
         self._properties = {}
+        self._atoms_by_atomic_number = {num: [] for num in range(140)}
 
         super().__init__()
 
@@ -222,6 +223,15 @@ class AtomsDatabase(_Database):
 
         self._properties = self._data["properties"]
         self._data = self._data["atoms"]
+
+        try:
+            number_of_protons = self.get_property("proton")
+        except AtomsDatabaseError:
+            pass
+        else:
+            for atom in self.atoms:
+                protons = int(number_of_protons[atom])
+                self._atoms_by_atomic_number[protons].append(atom)
 
     def add_atom(self, atom: str) -> None:
         """

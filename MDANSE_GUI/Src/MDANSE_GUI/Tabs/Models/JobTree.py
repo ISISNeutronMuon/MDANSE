@@ -44,7 +44,8 @@ class JobTree(QStandardItemModel):
             parent_class = IJob
         full_dict = parent_class.indirect_subclass_dictionary()
         for class_name, class_object in full_dict.items():
-            self.createNode(class_name, class_object, filter)
+            if class_object.enabled:
+                self.createNode(class_name, class_object, filter)
 
     def createNode(self, name: str, thing, filter: str = ""):
         """Creates a new QStandardItem. It will store
