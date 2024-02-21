@@ -49,7 +49,7 @@ class RunTab(GeneralTab):
             model=JobHolder(),
             view=RunTable(),
             visualiser=TextInfo(
-                header="MDANSE Analysis Output",
+                header="MDANSE Jobs",
                 footer="Look up our Read The Docs page:"
                 + "https://mdanse.readthedocs.io/en/protos/",
             ),
@@ -77,7 +77,7 @@ class RunTab(GeneralTab):
             model=kwargs.get("model", JobHolder()),
             view=RunTable(),
             visualiser=TextInfo(
-                header="MDANSE Analysis",
+                header="MDANSE Jobs",
                 footer="Look up our "
                 + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
                 + " page.",
