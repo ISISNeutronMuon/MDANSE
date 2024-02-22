@@ -14,8 +14,8 @@
 # **************************************************************************
 
 from qtpy.QtWidgets import QLineEdit, QComboBox, QLabel, QTableView
-from qtpy.QtCore import Slot, Signal
-from qtpy.QtGui import QIntValidator, QStandardItemModel, QStandardItem
+from qtpy.QtCore import Slot, Signal, Qt
+from qtpy.QtGui import QIntValidator, QStandardItemModel, QStandardItem, QBrush
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 
@@ -26,16 +26,19 @@ class VectorModel(QStandardItemModel):
     def __init__(self, *args, chemical_system=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._generator = None
+        self._defaults = []
         self._chemical_system = chemical_system
 
     @Slot(str)
     def switch_qvector_type(self, vector_type: str):
         self.clear()
+        self._defaults = []
         self._generator = IQVectors.create(vector_type, self._chemical_system)
         settings = self._generator.settings
         for kv in settings.items():
             name = kv[0]  # dictionary key
             value = kv[1][1]["default"]  # tuple value 1: dictionary
+            self._defaults.append(value)
             vtype = kv[1][0]  # tuple value 0: type
             self.appendRow([QStandardItem(str(x)) for x in [name, value, vtype]])
 
@@ -45,7 +48,17 @@ class VectorModel(QStandardItemModel):
             name = str(self.item(rownum, 0).text())
             value = str(self.item(rownum, 1).text())
             vtype = str(self.item(rownum, 2).text())
-            params[name] = self.parse_vtype(vtype, value, name)
+            try:
+                params[name] = self.parse_vtype(vtype, value, name)
+            except ValueError:
+                params[name] = self._defaults[rownum]
+                self.item(rownum, 1).setData(
+                    QBrush(Qt.GlobalColor.red), role=Qt.ItemDataRole.BackgroundRole
+                )
+            else:
+                self.item(rownum, 1).setData(
+                    QBrush(Qt.GlobalColor.white), role=Qt.ItemDataRole.BackgroundRole
+                )
         return params
 
     def parse_vtype(self, vtype: str, value: str, vname: str):
