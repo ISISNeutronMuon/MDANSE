@@ -39,7 +39,6 @@ class FloatWidget(WidgetBase):
         else:
             field = QLineEdit(self._base)
             validator = QDoubleValidator(field)
-            validator.setNotation(QDoubleValidator.Notation.StandardNotation)
             minval, maxval = self._configurator.mini, self._configurator.maxi
             if minval is not None:
                 validator.setBottom(minval)
@@ -47,6 +46,7 @@ class FloatWidget(WidgetBase):
                 validator.setTop(maxval)
             field.setValidator(validator)
             field.setText(str(default_option))
+            field.textChanged.connect(self.updateValue)
             field.setPlaceholderText(str(default_option))
         field.setToolTip(self._tooltip)
         self._layout.addWidget(field)
@@ -54,6 +54,7 @@ class FloatWidget(WidgetBase):
         self._default_value = default_option
         self.default_labels()
         self.update_labels()
+        self.updateValue()
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,

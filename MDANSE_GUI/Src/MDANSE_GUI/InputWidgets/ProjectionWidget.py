@@ -41,6 +41,7 @@ class ProjectionWidget(WidgetBase):
         self._vector_fields = vfields
         self._mode = 0
         self._button_group.idClicked.connect(self.button_switched)
+        self.updateValue()
 
     def configure_using_default(self):
         """This is too complex to have a default value"""

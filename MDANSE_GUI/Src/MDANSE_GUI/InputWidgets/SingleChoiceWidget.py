@@ -38,6 +38,7 @@ class ComboWidget(WidgetBase):
         self._configurator = configurator
         self.default_labels()
         self.update_labels()
+        self.updateValue()
 
     def configure_using_default(self):
         """This is too complex to have a default value"""

@@ -327,6 +327,7 @@ class AtomSelectionWidget(WidgetBase):
         self._layout.addWidget(self._field)
         self._layout.addWidget(helper_button)
         self.update_labels()
+        self.updateValue()
 
     @Slot()
     def helper_dialog(self, offset: int = 10) -> None:

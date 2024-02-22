@@ -34,6 +34,7 @@ class AtomTransmutationWidget(WidgetBase):
         newline_button = QPushButton("Add transmutation", self._base)
         self._layout.addWidget(newline_button)
         self._lines = []
+        self.updateValue()
 
     def add_line(self):
         line_base = QWidget(self._base)

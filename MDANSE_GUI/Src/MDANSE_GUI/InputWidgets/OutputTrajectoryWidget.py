@@ -59,8 +59,10 @@ class OutputTrajectoryWidget(WidgetBase):
         self._layout.addWidget(self.compression_box)
         self._layout.addWidget(browse_button)
         self._default_value = default_value
+        self._field.textChanged.connect(self.updateValue)
         self.default_labels()
         self.update_labels()
+        self.updateValue()
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,

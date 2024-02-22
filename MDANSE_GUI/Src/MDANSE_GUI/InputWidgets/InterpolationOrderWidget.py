@@ -47,6 +47,7 @@ class InterpolationOrderWidget(WidgetBase):
         self._layout.addWidget(self.numerator)
         self.default_labels()
         self.update_labels()
+        self.updateValue()
 
     def configure_using_default(self):
         """This is too simple to have a default value"""

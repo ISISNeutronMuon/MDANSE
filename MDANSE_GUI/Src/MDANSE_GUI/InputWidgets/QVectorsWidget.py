@@ -82,6 +82,8 @@ class QVectorsWidget(WidgetBase):
         self._view.setModel(self._model)
         self._selector.currentTextChanged.connect(self._model.switch_qvector_type)
         self._selector.setCurrentIndex(1)
+        self._model.itemChanged.connect(self.updateValue)
+        self.updateValue()
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""

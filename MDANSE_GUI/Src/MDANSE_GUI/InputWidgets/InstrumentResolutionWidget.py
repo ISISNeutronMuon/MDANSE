@@ -81,6 +81,9 @@ class InstrumentResolutionWidget(WidgetBase):
         self._type_combo.addItems([str(x) for x in init_parameters.keys()])
         self._type_combo.setEditable(False)
         self._type_combo.currentTextChanged.connect(self.change_function)
+        for field in self._fields:
+            field.textChanged.connect(self.updateValue)
+        self.updateValue()
 
     def configure_using_default(self):
         """This is too complex to have a default value"""

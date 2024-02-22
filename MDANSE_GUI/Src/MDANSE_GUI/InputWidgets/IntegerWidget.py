@@ -44,12 +44,14 @@ class IntegerWidget(WidgetBase):
             field.setValidator(validator)
             field.setText(str(default_option))
             field.setPlaceholderText(str(default_option))
+            field.textChanged.connect(self.updateValue)
         field.setToolTip(self._tooltip)
         self._field = field
         self._default_value = default_option
         self._layout.addWidget(field)
         self.default_labels()
         self.update_labels()
+        self.updateValue()
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,

@@ -40,6 +40,7 @@ class RunningModeWidget(WidgetBase):
         self._field.valueChanged.connect(self.numproc_changed)
         self.default_labels()
         self.update_labels()
+        self.updateValue()
 
     def configure_using_default(self):
         """This is too complex to have a default value"""

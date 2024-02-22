@@ -27,6 +27,8 @@ class BackupWidget(WidgetBase):
         self._field = QLineEdit(str(self._configurator.default))
         self._field.setPlaceholderText(str(self._configurator.default))
         self._layout.addWidget(self._field)
+        self._field.textChanged.connect(self.updateValue)
+        self.updateValue()
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""

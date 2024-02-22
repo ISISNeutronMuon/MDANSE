@@ -42,6 +42,7 @@ class HDFTrajectoryWidget(WidgetBase):
         self._trajectory = trajectory
         self.default_labels()
         self.update_labels()
+        self.updateValue()
 
     def configure_using_default(self):
         """This is too static to have a default value"""

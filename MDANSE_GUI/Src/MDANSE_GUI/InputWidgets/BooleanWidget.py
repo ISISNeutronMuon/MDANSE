@@ -32,6 +32,7 @@ class BooleanWidget(WidgetBase):
         self._layout.addWidget(field)
         self.default_labels()
         self.update_labels()
+        self.updateValue()
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,

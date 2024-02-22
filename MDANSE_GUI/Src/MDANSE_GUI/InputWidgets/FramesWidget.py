@@ -54,6 +54,7 @@ class FramesWidget(WidgetBase):
         self._default_values = placeholders
         self.default_labels()
         self.update_labels()
+        self.updateValue()
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,

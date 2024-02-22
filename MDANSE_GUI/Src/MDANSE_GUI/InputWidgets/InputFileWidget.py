@@ -54,6 +54,7 @@ class InputFileWidget(WidgetBase):
         self._layout.addWidget(button)
         self._configurator = configurator
         self._file_dialog = QFileDialog.getOpenFileName
+        self.updateValue()
 
     def configure_using_default(self):
         """This is too specific to have a default value"""
