@@ -40,7 +40,12 @@ class VectorModel(QStandardItemModel):
             value = kv[1][1]["default"]  # tuple value 1: dictionary
             self._defaults.append(value)
             vtype = kv[1][0]  # tuple value 0: type
-            self.appendRow([QStandardItem(str(x)) for x in [name, value, vtype]])
+            items = [QStandardItem(str(x)) for x in [name, value, vtype]]
+            for it in items[0::2]:
+                it.setEditable(False)
+            for it in items[1::2]:
+                it.setData(value, role=Qt.ItemDataRole.ToolTipRole)
+            self.appendRow(items)
 
     def params_summary(self) -> dict:
         params = {}
