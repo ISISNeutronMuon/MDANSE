@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 class JobState(ABC):
 
     _label = "JobState"
+    _allowed_actions = []
 
     def __init__(self, parent):
         self._parent = parent
@@ -40,6 +41,11 @@ class JobState(ABC):
 class Running(JobState):
 
     _label = "Running"
+    _allowed_actions = [
+        "Pause",
+        "Terminate",
+        "Kill",
+    ]
 
     def pause(self):
         """Pauses the process"""
@@ -73,6 +79,7 @@ class Running(JobState):
 class Aborted(JobState):
 
     _label = "Aborted"
+    _allowed_actions = ["Delete"]
 
     def pause(self):
         """Pauses the process"""
@@ -99,6 +106,7 @@ class Aborted(JobState):
 class Failed(JobState):
 
     _label = "Failed"
+    _allowed_actions = ["Delete"]
 
     def pause(self):
         """Pauses the process"""
@@ -125,6 +133,7 @@ class Failed(JobState):
 class Finished(JobState):
 
     _label = "Finished"
+    _allowed_actions = ["Delete"]
 
     def pause(self):
         """Pauses the process"""
@@ -151,6 +160,11 @@ class Finished(JobState):
 class Starting(JobState):
 
     _label = "Starting"
+    _allowed_actions = [
+        "Pause",
+        "Terminate",
+        "Kill",
+    ]
 
     def pause(self):
         """Pauses the process"""
@@ -179,6 +193,11 @@ class Starting(JobState):
 class Paused(JobState):
 
     _label = "Paused"
+    _allowed_actions = [
+        "Resume",
+        "Terminate",
+        "Kill",
+    ]
 
     def pause(self):
         """Pauses the process"""

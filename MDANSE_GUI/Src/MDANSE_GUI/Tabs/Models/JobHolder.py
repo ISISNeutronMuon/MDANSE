@@ -75,8 +75,10 @@ class JobEntry(QObject):
         self.total_steps = 99
         self._prog_item = QStandardItem()
         self._stat_item = QStandardItem()
-        for item in [self._prog_item, self._stat_item]:
+        for item in [self._stat_item]:
             item.setData(entry_number)
+        self._prog_item.setData(0, role=Qt.ItemDataRole.UserRole)
+        self._prog_item.setData("progress", role=Qt.ItemDataRole.DisplayRole)
 
     def text_summary(self) -> str:
         result = ""
@@ -99,6 +101,7 @@ class JobEntry(QObject):
 
     def update_fields(self):
         self._prog_item.setText(f"{self.percent_complete} percent complete")
+        self._prog_item.setData(self.percent_complete, role=Qt.ItemDataRole.UserRole)
         self._stat_item.setText(self._current_state._label)
 
     @Slot(bool)
@@ -121,6 +124,7 @@ class JobEntry(QObject):
         print(f"completed {completed_steps} out of {self.total_steps} steps")
         self.percent_complete = round(99 * completed_steps / self.total_steps, 1)
         self.update_fields()
+        self._prog_item.emitDataChanged()
 
     @Slot()
     def on_oscillate(self):

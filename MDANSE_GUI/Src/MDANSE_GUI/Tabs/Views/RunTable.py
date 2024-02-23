@@ -12,11 +12,52 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
+import time
+
+from PyQt6.QtCore import QAbstractItemModel, QObject
 from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
-from qtpy.QtWidgets import QMenu, QTableView, QAbstractItemView
+from qtpy.QtWidgets import (
+    QApplication,
+    QMenu,
+    QTableView,
+    QAbstractItemView,
+    QStyle,
+    QStyledItemDelegate,
+    QStyleOptionProgressBar,
+    QProgressBar,
+)
 from qtpy.QtGui import QStandardItem, QContextMenuEvent
 
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+
+
+class JobProgress(QStyledItemDelegate):
+    def __init__(self, parent: QObject | None = ...) -> None:
+        super().__init__(parent)
+        self.progress_option = QStyleOptionProgressBar()
+        self.progress_option.minimum = 0
+        self.progress_option.maximum = 100
+        self.progress_option.textVisible = True
+
+    def paint(self, painter, option, index):
+        text = index.data(role=Qt.ItemDataRole.DisplayRole)
+        try:
+            progress = int(index.data(role=Qt.ItemDataRole.UserRole))
+        except TypeError:
+            progress = None
+        if text is None:
+            super().paint(painter, option, index)
+            return
+        if "percent" in text and progress is not None:
+            rectangle = option.rect
+            self.progress_option.rect = rectangle
+            self.progress_option.progress = progress
+            self.progress_option.text = text
+            QApplication.style().drawControl(
+                QStyle.CE_ProgressBar, self.progress_option, painter
+            )
+            return
+        super().paint(painter, option, index)
 
 
 class RunTable(QTableView):
@@ -27,6 +68,15 @@ class RunTable(QTableView):
         super().__init__(*args, **kwargs)
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.clicked.connect(self.item_picked)
+        delegate = JobProgress(self)
+        self.setItemDelegate(delegate)
+        vh = self.verticalHeader()
+        vh.setVisible(False)
+
+    def setModel(self, model: QAbstractItemModel) -> None:
+        result = super().setModel(model)
+        self.model().dataChanged.connect(self.resizeColumnsToContents)
+        return result
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         index = self.indexAt(event.pos())
@@ -51,6 +101,8 @@ class RunTable(QTableView):
         ]:
             temp_action = menu.addAction(action)
             temp_action.triggered.connect(method)
+            if action not in job_state._allowed_actions:
+                temp_action.setEnabled(False)
 
     def getJobObjects(self):
         model = self.model()
@@ -110,9 +162,10 @@ class RunTable(QTableView):
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
         model = self.model()
-        node_number = model.itemFromIndex(index).data(role=Qt.ItemDataRole.UserRole)
-        job_entry = model.existing_jobs[node_number]
-        self.item_details.emit(job_entry.text_summary())
+        if index.column() == 0:
+            node_number = model.itemFromIndex(index).data(role=Qt.ItemDataRole.UserRole)
+            job_entry = model.existing_jobs[node_number]
+            self.item_details.emit(job_entry.text_summary())
 
     def connect_to_visualiser(self, visualiser: TextInfo) -> None:
         """Connect to a visualiser.
