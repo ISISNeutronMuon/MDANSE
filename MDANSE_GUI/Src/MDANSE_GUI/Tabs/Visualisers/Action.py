@@ -210,6 +210,7 @@ class Action(QWidget):
 
         self.layout.addWidget(buttonbase)
         self._widgets_in_layout.append(buttonbase)
+        self.allow_execution()
 
     @Slot(dict)
     def parse_updated_params(self, new_params: dict):
