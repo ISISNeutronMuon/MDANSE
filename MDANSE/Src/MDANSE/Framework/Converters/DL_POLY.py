@@ -313,7 +313,7 @@ class HistoryFile(dict):
 
         timeStep = (currentStep - self._firstStep) * self._timeStep
         if self["imcon"] > 0:
-            cell = " ".join(data[1:]).split()
+            cell = " ".join([i.decode("UTF-8") for i in data[1:]]).split()
             cell = np.array(cell, dtype=np.float64)
             cell = np.reshape(cell, (3, 3)).T
             cell *= measure(1.0, "ang").toval("nm")
@@ -322,7 +322,7 @@ class HistoryFile(dict):
 
         data = np.array(self["instance"].read(self._configSize).split())
 
-        mask = np.ones((len(data),), dtype=np.bool)
+        mask = np.ones((len(data),), dtype=bool)
         mask[0 :: self._maskStep] = False
         mask[1 :: self._maskStep] = False
         mask[2 :: self._maskStep] = False
@@ -414,14 +414,14 @@ class DL_POLY(Converter):
         )
 
         # The number of steps of the analysis.
-        self.numberOfSteps = self._historyFile["n_frames"]
+        self.numberOfSteps = int(self._historyFile["n_frames"])
 
         self._chemicalSystem = ChemicalSystem()
 
         self._fieldFile.build_chemical_system(self._chemicalSystem)
 
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_files"]["files"][0],
+            self.configuration["output_file"]["file"],
             self._chemicalSystem,
             self.numberOfSteps,
             positions_dtype=self.configuration["output_file"]["dtype"],
