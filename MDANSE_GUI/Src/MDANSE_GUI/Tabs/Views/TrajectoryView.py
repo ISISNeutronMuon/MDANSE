@@ -34,6 +34,9 @@ class TrajectoryView(QListView):
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         index = self.indexAt(event.pos())
+        if index.row() == -1:
+            # block right click when it's not on a trajectory
+            return
         model = self.model()
         item = model.itemData(index)
         menu = QMenu()

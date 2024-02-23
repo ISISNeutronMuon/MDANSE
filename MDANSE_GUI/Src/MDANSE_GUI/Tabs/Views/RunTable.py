@@ -30,6 +30,9 @@ class RunTable(QTableView):
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         index = self.indexAt(event.pos())
+        if index.row() == -1:
+            # block right click when it's not on a job
+            return
         model = self.model()
         item = model.itemData(index)
         menu = QMenu()
@@ -77,6 +80,9 @@ class RunTable(QTableView):
             model = self.model()
             index = self.currentIndex()
             model.removeRow(index.row())
+            if model.rowCount() == 0:
+                for i in reversed(range(model.columnCount())):
+                    model.removeColumn(i)
             self.item_details.emit("")
 
     @Slot()
