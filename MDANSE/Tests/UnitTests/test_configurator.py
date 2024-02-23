@@ -76,6 +76,8 @@ class TestConfigurator(unittest.TestCase):
         self.assertEqual(configurator["value"], 30.2)
         configurator.configure("xxxx")
         self.assertFalse(configurator.valid)
+        configurator.configure("")
+        self.assertFalse(configurator.valid)
         configurator.configure([1, 2])
         self.assertFalse(configurator.valid)
 

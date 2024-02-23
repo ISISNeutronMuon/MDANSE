@@ -27,32 +27,6 @@ for fname in fnames:
     modnames.append(newname)
 globdict = globals()
 
-# temporary change
-modnames = [
-    "IntegerWidget",
-    "BooleanWidget",
-    "FloatWidget",
-    "StringWidget",
-    "FramesWidget",
-    "RangeWidget",
-    "HDFTrajectoryWidget",
-    "DummyWidget",
-    "InterpolationOrderWidget",
-    "OutputFilesWidget",
-    "BackupWidget",
-    "RunningModeWidget",
-    "ComboWidget",
-    "InputFileWidget",
-    "AseInputFileWidget",
-    "InputDirectoryWidget",
-    "OutputDirectoryWidget",
-    "OutputTrajectoryWidget",
-    "QVectorsWidget",
-    "ProjectionWidget",
-    "AtomSelectionWidget",
-    "AtomTransmutationWidget",
-    "InstrumentResolutionWidget",
-]
 
 for name in modnames:
     if name in ["__init__"]:

@@ -29,6 +29,10 @@ class DummyWidget(WidgetBase):
         self._configurator = {"value": "Oops!"}
         self.default_labels()
         self.update_labels()
+        self.updateValue()
+
+    def configure_using_default(self):
+        """This is too simple to have a default value"""
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,

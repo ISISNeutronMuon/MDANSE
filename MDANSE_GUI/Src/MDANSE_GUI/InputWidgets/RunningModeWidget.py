@@ -31,15 +31,19 @@ class RunningModeWidget(WidgetBase):
         self.mode_box = QComboBox(self._base)
         self.mode_box.addItems(self._configurator.availablesModes)
         self.mode_box.setCurrentText(self._configurator.availablesModes[0])
-        self.field = QSpinBox(self._base)
-        self.field.setValue(1)
-        self.field.setMinimum(1)
+        self._field = QSpinBox(self._base)
+        self._field.setValue(1)
+        self._field.setMinimum(1)
         self._layout.addWidget(self.mode_box)
-        self._layout.addWidget(self.field)
+        self._layout.addWidget(self._field)
         self.mode_box.currentIndexChanged.connect(self.mode_changed)
-        self.field.valueChanged.connect(self.numproc_changed)
+        self._field.valueChanged.connect(self.numproc_changed)
         self.default_labels()
         self.update_labels()
+        self.updateValue()
+
+    def configure_using_default(self):
+        """This is too complex to have a default value"""
 
     @Slot()
     def mode_changed(self):
@@ -49,23 +53,23 @@ class RunningModeWidget(WidgetBase):
         else:
             nextval = self._last_numproc
         if mode == "monoprocessor":
-            self.field.setValue(1)
-            self.field.setEnabled(False)
+            self._field.setValue(1)
+            self._field.setEnabled(False)
         else:
-            self.field.setEnabled(True)
-            self.field.setValue(nextval)
+            self._field.setEnabled(True)
+            self._field.setValue(nextval)
 
     @Slot()
     def numproc_changed(self):
         mode = self.mode_box.currentText()
-        numproc = self.field.value()
+        numproc = self._field.value()
         if mode == "monoprocessor":
             return
         self._last_numproc = numproc
 
     def get_widget_value(self):
         mode = self.mode_box.currentText()
-        numproc = self.field.value()
+        numproc = self._field.value()
         if mode == "monoprocessor":
             value = (mode,)
         else:

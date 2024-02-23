@@ -99,6 +99,9 @@ class CheckableComboBox(QComboBox):
         for text in texts:
             self.addItem(text)
 
+    def configure_using_default(self):
+        """This is too complex to have a default value"""
+
     def addItem(self, text: str) -> None:
         """
         Parameters
@@ -198,7 +201,7 @@ class HelperDialog(QDialog):
         self.resize(self.min_width, self.height())
         self.setMinimumWidth(self.min_width)
         self.selector = selector
-        self.field = field
+        self._field = field
         self.full_settings = self.selector.full_settings
         match_exists = self.selector.match_exists
 
@@ -302,7 +305,7 @@ class HelperDialog(QDialog):
         chosen setting in this widget.
         """
         self.selector.update_settings(self.full_settings)
-        self.field.setText(self.selector.settings_to_json())
+        self._field.setText(self.selector.settings_to_json())
 
 
 class AtomSelectionWidget(WidgetBase):
@@ -312,16 +315,19 @@ class AtomSelectionWidget(WidgetBase):
         super().__init__(*args, **kwargs)
         default_value = '{"all": true}'
         self._value = default_value
-        self.field = QLineEdit(default_value, self._base)
-        self.field.setMaxLength(2147483647)  # set to the largest possible
+        self._field = QLineEdit(default_value, self._base)
+        self._field.setPlaceholderText(default_value)
+        self._field.setMaxLength(2147483647)  # set to the largest possible
         self.selector = self._configurator.get_selector()
-        self.helper = HelperDialog(self.selector, self.field, self._base)
+        self.helper = HelperDialog(self.selector, self._field, self._base)
         helper_button = QPushButton("Atom selection helper", self._base)
         helper_button.clicked.connect(self.helper_dialog)
-        self.field.textChanged.connect(self.check_valid_field)
-        self._layout.addWidget(self.field)
+        self._field.textChanged.connect(self.check_valid_field)
+        self._default_value = default_value
+        self._layout.addWidget(self._field)
         self._layout.addWidget(helper_button)
         self.update_labels()
+        self.updateValue()
 
     @Slot()
     def helper_dialog(self, offset: int = 10) -> None:
@@ -360,10 +366,10 @@ class AtomSelectionWidget(WidgetBase):
         value : str
             The atom selection JSON string.
         """
-        if self.selector.check_valid_json_settings(value):
-            self.field.setStyleSheet("color: black;")
+        if self.selector.check_valid_json_settings(value) or value == "":
+            self._field.setStyleSheet("color: black;")
         else:
-            self.field.setStyleSheet("color: red;")
+            self._field.setStyleSheet("color: red;")
 
     def get_widget_value(self) -> str:
         """
@@ -372,5 +378,10 @@ class AtomSelectionWidget(WidgetBase):
         str
             The JSON selector setting.
         """
-        selection_string = self.field.text()
+        selection_string = self._field.text()
+        if len(selection_string) < 1:
+            self._empty = True
+            return self._default_value
+        else:
+            self._empty = False
         return selection_string

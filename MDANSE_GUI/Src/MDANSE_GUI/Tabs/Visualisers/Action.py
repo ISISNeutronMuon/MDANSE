@@ -41,6 +41,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "RunningModeConfigurator": RunningModeWidget,
     "WeightsConfigurator": ComboWidget,
     "GroupingLevelConfigurator": ComboWidget,
+    "SingleChoiceConfigurator": ComboWidget,
     "QVectorsConfigurator": QVectorsWidget,
     "InputDirectoryConfigurator": InputDirectoryWidget,
     "OutputDirectoryConfigurator": OutputDirectoryWidget,
@@ -180,6 +181,7 @@ class Action(QWidget):
                 self.layout.addWidget(widget)
                 self._widgets_in_layout.append(widget)
                 self._widgets.append(input_widget)
+                input_widget.valid_changed.connect(self.allow_execution)
                 print(f"Set up the right widget for {key}")
             # self.handlers[key] = data_handler
             configured = False
@@ -208,6 +210,28 @@ class Action(QWidget):
 
         self.layout.addWidget(buttonbase)
         self._widgets_in_layout.append(buttonbase)
+        self.allow_execution()
+
+    @Slot(dict)
+    def parse_updated_params(self, new_params: dict):
+        if "path" in new_params.keys():
+            self.default_path = new_params["path"]
+            self.new_path.emit(self.default_path)
+
+    @Slot()
+    def allow_execution(self):
+        allow = True
+        for widget in self._widgets:
+            if not widget._configurator.valid:
+                allow = False
+        if allow:
+            self.execute_button.setEnabled(True)
+        else:
+            self.execute_button.setEnabled(False)
+
+    @Slot()
+    def cancel_dialog(self):
+        self.destroy()
 
     @Slot()
     def save_dialog(self):

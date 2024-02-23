@@ -54,6 +54,8 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         """
 
         InputFileConfigurator.configure(self, value)
+        if not self._valid:
+            return
 
         try:
             self["instance"] = h5py.File(self["value"], "r")

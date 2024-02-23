@@ -62,6 +62,7 @@ class AseInputFileWidget(WidgetBase):
         self._layout.addWidget(button)
         self._configurator = configurator
         self._file_dialog = QFileDialog.getOpenFileName
+        self.updateValue()
 
     @Slot()
     def valueFromDialog(self):

@@ -14,7 +14,7 @@
 
 import logging
 
-from PyQt6 import QtWidgets
+from qtpy import QtWidgets
 
 
 class LoggerWidget(QtWidgets.QPlainTextEdit, logging.Handler):
