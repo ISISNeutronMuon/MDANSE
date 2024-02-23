@@ -92,7 +92,7 @@ class QVectorsWidget(WidgetBase):
         if trajectory_configurator is not None:
             chemical_system = trajectory_configurator["instance"].chemical_system
         self._selector = QComboBox(self._base)
-        self._selector.addItems(IQVectors.subclasses())
+        self._selector.addItems(IQVectors.indirect_subclasses())
         self._model = VectorModel(self._base, chemical_system=chemical_system)
         self._view = QTableView(self._base)
         self._layout.addWidget(self._selector)
