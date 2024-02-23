@@ -366,7 +366,7 @@ class AtomSelectionWidget(WidgetBase):
         value : str
             The atom selection JSON string.
         """
-        if self.selector.check_valid_json_settings(value):
+        if self.selector.check_valid_json_settings(value) or value == "":
             self._field.setStyleSheet("color: black;")
         else:
             self._field.setStyleSheet("color: red;")
