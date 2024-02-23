@@ -43,7 +43,8 @@ class OutputTrajectoryWidget(WidgetBase):
             print("AttributeError in OutputTrajectoryWidget - can't get default path.")
         self.file_association = ".*"
         self._value = default_value
-        self.field = QLineEdit(default_value[0], self._base)
+        self._field = QLineEdit(default_value[0], self._base)
+        self._field.setPlaceholderText(default_value[0])
         self.dtype_box = QComboBox(self._base)
         self.dtype_box.addItems(["float16", "float32", "float64"])
         self.dtype_box.setCurrentText("float64")
@@ -53,12 +54,15 @@ class OutputTrajectoryWidget(WidgetBase):
         # self.type_box.setCurrentText(default_value[1])
         browse_button = QPushButton("Browse", self._base)
         browse_button.clicked.connect(self.file_dialog)
-        self._layout.addWidget(self.field)
+        self._layout.addWidget(self._field)
         self._layout.addWidget(self.dtype_box)
         self._layout.addWidget(self.compression_box)
         self._layout.addWidget(browse_button)
+        self._default_value = default_value
+        self._field.textChanged.connect(self.updateValue)
         self.default_labels()
         self.update_labels()
+        self.updateValue()
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
@@ -88,7 +92,7 @@ class OutputTrajectoryWidget(WidgetBase):
             self.file_association,  # text string specifying the file name filter.
         )
         if len(new_value[0]) > 0:
-            self.field.setText(new_value[0])
+            self._field.setText(new_value[0])
             self.updateValue()
 
     @staticmethod
@@ -113,7 +117,9 @@ class OutputTrajectoryWidget(WidgetBase):
             return path
 
     def get_widget_value(self):
-        filename = self.field.text()
+        filename = self._field.text()
+        if len(filename) < 1:
+            filename = self._default_value[0]
         dtype = dtype_lookup[self.dtype_box.currentText()]
         compression = self.compression_box.currentText()
         return (filename, dtype, compression)

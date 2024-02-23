@@ -125,7 +125,7 @@ class OutputTrajectoryConfigurator(IConfigurator):
 
         Returns
         -------
-        tuple[str, type, str]
+        tuple[str, int, str]
             filename, float format, compression (string)
         """
-        return self._default[0], np.float64, "none"
+        return self._default[0], self._default[1], "none"

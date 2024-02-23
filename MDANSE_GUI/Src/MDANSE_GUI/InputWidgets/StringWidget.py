@@ -25,12 +25,15 @@ class StringWidget(WidgetBase):
         default_option = self._configurator.default
         field = QLineEdit(self._base)
         field.setText(default_option)
+        field.setPlaceholderText(default_option)
         field.textChanged.connect(self.updateValue)
         field.setToolTip(self._tooltip)
         self._field = field
+        self._default_value = default_option
         self._layout.addWidget(field)
         self.default_labels()
         self.update_labels()
+        self.updateValue()
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
@@ -44,4 +47,15 @@ class StringWidget(WidgetBase):
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        return self._field.text()
+        strval = self._field.text().strip()
+        if len(strval) < 1:
+            self._empty = True
+            return self._default_value
+        else:
+            self._empty = False
+        return strval
+
+    def configure_using_default(self):
+        default = self._configurator.default
+        self._field.setPlaceholderText(default)
+        self._configurator.configure(default)

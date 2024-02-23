@@ -39,6 +39,7 @@ class RangeWidget(WidgetBase):
             QLineEdit(str(num_type(5)), self._base),
             QLineEdit(str(num_type(step_val)), self._base),
         ]
+        placeholders = [str(num_type(0)), str(num_type(5)), str(num_type(step_val))]
         if num_type is int:
             validators = [QIntValidator(parent_field) for parent_field in fields]
         else:
@@ -48,11 +49,17 @@ class RangeWidget(WidgetBase):
             self._layout.addWidget(fields[field_num], 0, 2 * field_num + 1)
             fields[field_num].setValidator(validators[field_num])
             fields[field_num].textChanged.connect(self.updateValue)
+            fields[field_num].setPlaceholderText(placeholders[field_num])
         self._fields = fields
         self._validators = validators
         self._num_type = num_type
+        self._default_values = placeholders
         self.default_labels()
         self.update_labels()
+        self.updateValue()
+
+    def configure_using_default(self):
+        """This is too complex to have a default value"""
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
@@ -75,5 +82,12 @@ class RangeWidget(WidgetBase):
                 val.setTop(abs(maxval))
 
     def get_widget_value(self):
-        val = [self._num_type(field.text()) for field in self._fields]
-        return val
+        result = []
+        for n, field in enumerate(self._fields):
+            strval = field.text()
+            try:
+                val = self._num_type(strval)
+            except:
+                val = self._num_type(self._default_values[n])
+            result.append(val)
+        return result

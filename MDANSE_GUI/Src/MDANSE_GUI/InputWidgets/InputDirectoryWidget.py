@@ -22,3 +22,6 @@ class InputDirectoryWidget(InputFileWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._file_dialog = QFileDialog.getExistingDirectory
+
+    def configure_using_default(self):
+        """This is too specific to have a default value"""

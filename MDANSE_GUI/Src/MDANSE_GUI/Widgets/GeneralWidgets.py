@@ -17,7 +17,7 @@ from typing import Union, Iterable
 from collections import OrderedDict
 import copy
 import abc
-from PyQt6.QtCore import QObject
+from qtpy.QtCore import QObject
 
 from icecream import ic
 import numpy as np
@@ -206,7 +206,7 @@ class InputGroup(QObject):
     final_value = Signal(object)
     string_value = Signal(str)
 
-    def __init__(self, parent: QObject | None = ...) -> None:
+    def __init__(self, parent: Union[QObject, None] = ...) -> None:
         super().__init__(parent)
         self.fields = []
         self.values = []

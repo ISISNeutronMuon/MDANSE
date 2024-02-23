@@ -32,6 +32,7 @@ class BooleanWidget(WidgetBase):
         self._layout.addWidget(field)
         self.default_labels()
         self.update_labels()
+        self.updateValue()
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
@@ -42,6 +43,9 @@ class BooleanWidget(WidgetBase):
             self._label_text = "BooleanWidget"
         if self._tooltip == "":
             self._tooltip = "A single logical value that can be True of False"
+
+    def configure_using_default(self):
+        """No need to anything for Boolean"""
 
     def get_widget_value(self):
         return self._field.checkState() == Qt.CheckState.Checked

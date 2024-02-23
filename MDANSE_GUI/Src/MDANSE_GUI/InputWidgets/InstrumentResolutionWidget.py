@@ -53,6 +53,7 @@ class InstrumentResolutionWidget(WidgetBase):
         self._layout.addWidget(self._type_combo, 0, 1)
         self._labels = []
         self._fields = []
+        self._defaults = []
         # first row
         for num in range(1, 3):
             label = QLabel("", parent=self._base)
@@ -64,6 +65,7 @@ class InstrumentResolutionWidget(WidgetBase):
             self._fields.append(field)
             val = QDoubleValidator(field)
             field.setValidator(val)
+            self._defaults.append(0.0)
         # first row
         for num in range(0, 3):
             label = QLabel("", parent=self._base)
@@ -78,9 +80,16 @@ class InstrumentResolutionWidget(WidgetBase):
                 val.setBottom(0.0)
                 val.setTop(1.0)
             field.setValidator(val)
+            self._defaults.append(0.0)
         self._type_combo.addItems([str(x) for x in init_parameters.keys()])
         self._type_combo.setEditable(False)
         self._type_combo.currentTextChanged.connect(self.change_function)
+        for field in self._fields:
+            field.textChanged.connect(self.updateValue)
+        self.updateValue()
+
+    def configure_using_default(self):
+        """This is too complex to have a default value"""
 
     @Slot(str)
     def change_function(self, function: str):
@@ -92,10 +101,14 @@ class InstrumentResolutionWidget(WidgetBase):
                 self._fields[index].setEnabled(True)
                 self._labels[index].setText(str(kv[0]))
                 self._fields[index].setText(str(kv[1]))
+                self._fields[index].setPlaceholderText(str(kv[1]))
+                self._defaults[index] = float(kv[1])
             except IndexError:
                 self._labels[index].setText("")
                 self._fields[index].setText("")
+                self._fields[index].setPlaceholderText("N/A")
                 self._fields[index].setEnabled(False)
+                self._defaults[index] = 0.0
 
     def get_widget_value(self):
         function = self._type_combo.currentText()
@@ -103,6 +116,14 @@ class InstrumentResolutionWidget(WidgetBase):
         for index in range(5):
             key = self._labels[index].text()
             if len(key) > 0:
-                value = float(self._fields[index].text())
+                try:
+                    value = float(self._fields[index].text())
+                except ValueError:
+                    value = self._defaults[index]
+                    self._fields[index].setStyleSheet(
+                        "background-color:rgb(180,20,180); font-weight: bold"
+                    )
+                else:
+                    self._fields[index].setStyleSheet("")
                 params[key] = value
         return (function, params)

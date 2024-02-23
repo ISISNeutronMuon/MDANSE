@@ -38,6 +38,10 @@ class ComboWidget(WidgetBase):
         self._configurator = configurator
         self.default_labels()
         self.update_labels()
+        self.updateValue()
+
+    def configure_using_default(self):
+        """This is too complex to have a default value"""
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
@@ -50,12 +54,4 @@ class ComboWidget(WidgetBase):
             self._tooltip = "You only have one option. Choose wisely."
 
     def get_widget_value(self):
-        return self._field.currentText()
-
-    @Slot()
-    def updateValue(self):
-        self._configurator.configure(self._field.currentText())
-
-    def get_value(self):
-        self.updateValue()
         return self._field.currentText()
