@@ -12,7 +12,6 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-import time
 
 from PyQt6.QtCore import QAbstractItemModel, QObject
 from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
@@ -32,6 +31,10 @@ from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 
 class JobProgress(QStyledItemDelegate):
+    """This is a delegate widget which is meant to
+    draw a progress bar in the second column of the Run Table.
+    """
+
     def __init__(self, parent: QObject | None = ...) -> None:
         super().__init__(parent)
         self.progress_option = QStyleOptionProgressBar()
@@ -68,8 +71,8 @@ class RunTable(QTableView):
         super().__init__(*args, **kwargs)
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.clicked.connect(self.item_picked)
-        delegate = JobProgress(self)
-        self.setItemDelegate(delegate)
+        # delegate = JobProgress(self)
+        # self.setItemDelegate(delegate)
         vh = self.verticalHeader()
         vh.setVisible(False)
 
@@ -162,10 +165,11 @@ class RunTable(QTableView):
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
         model = self.model()
-        if index.column() == 0:
-            node_number = model.itemFromIndex(index).data(role=Qt.ItemDataRole.UserRole)
-            job_entry = model.existing_jobs[node_number]
-            self.item_details.emit(job_entry.text_summary())
+        index = self.currentIndex()
+        item_row = index.row()
+        node_number = model.index(item_row, 0).data(role=Qt.ItemDataRole.UserRole)
+        job_entry = model.existing_jobs[node_number]
+        self.item_details.emit(job_entry.text_summary())
 
     def connect_to_visualiser(self, visualiser: TextInfo) -> None:
         """Connect to a visualiser.
