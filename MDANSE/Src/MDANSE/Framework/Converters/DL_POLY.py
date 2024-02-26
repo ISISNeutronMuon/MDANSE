@@ -225,19 +225,17 @@ class FieldFile(dict):
 
 
 class HistoryFile(dict):
-    def __init__(self, filename, version="2"):
+
+    def __init__(self, filename):
+        super().__init__()
         self["instance"] = open(filename, "rb")
 
-        testLine = self["instance"].readline()
+        version = self.determine_version()
+        self["version"] = version
 
-        lenTestLine = len(testLine)
-
-        if lenTestLine not in [73, 74, 81, 82]:
-            raise HistoryFileError("Invalid DLPOLY history file")
+        lenTestLine = len(self["instance"].readline())
 
         self["instance"].seek(0, 0)
-
-        self["version"] = version
 
         offset = lenTestLine - _HISTORY_FORMAT[self["version"]]["rec1"]
 
@@ -350,6 +348,34 @@ class HistoryFile(dict):
     def close(self):
         self["instance"].close()
 
+    def determine_version(self):
+        """Determine the DL_POLY version from the history file based
+        on record 1 and 2. See the DL_POLY 2, 3 and 4 manuals.
+
+        Returns
+        -------
+        str
+            The DL_POLY version.
+
+        Raises
+        ------
+        HistoryFileError
+            When the history file does not appear valid.
+        """
+        lines = self["instance"].readlines()
+        self["instance"].seek(0, 0)
+        record_1 = lines[0]
+        record_2 = lines[1]
+        if len(record_1) in [73, 74]:
+            if len(record_2.split()) == 5:
+                return "4"
+            elif len(record_2.split()) == 3:
+                return "3"
+        elif len(record_1) in [81, 82]:
+            return "2"
+
+        raise HistoryFileError("Invalid DLPOLY history file")
+
 
 class DL_POLY(Converter):
     """
@@ -383,10 +409,6 @@ class DL_POLY(Converter):
         "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
     )
-    settings["version"] = (
-        "SingleChoiceConfigurator",
-        {"choices": list(_HISTORY_FORMAT.keys()), "default": "2", "label": "Version"},
-    )
     # settings['output_files'] = ('output_files', {'formats':["HDFFormat"]})
     settings["output_file"] = (
         "OutputTrajectoryConfigurator",
@@ -408,10 +430,7 @@ class DL_POLY(Converter):
             self.configuration["field_file"]["filename"], aliases=self._atomicAliases
         )
 
-        self._historyFile = HistoryFile(
-            self.configuration["history_file"]["filename"],
-            self.configuration["version"]["value"],
-        )
+        self._historyFile = HistoryFile(self.configuration["history_file"]["filename"])
 
         # The number of steps of the analysis.
         self.numberOfSteps = int(self._historyFile["n_frames"])

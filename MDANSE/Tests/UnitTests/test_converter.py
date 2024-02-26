@@ -22,8 +22,10 @@ hem_cam_pdb = os.path.join(file_wd, "Data", "hem-cam.pdb")
 hem_cam_dcd = os.path.join(file_wd, "Data", "hem-cam.dcd")
 ase_traj = os.path.join(file_wd, "Data", "Cu_5steps_ASEformat.traj")
 xyz_traj = os.path.join(file_wd, "Data", "traj-100K-npt-1000-res.xyz")
-dlp_field = os.path.join(file_wd, "Data", "FIELD_Water")
-dlp_history = os.path.join(file_wd, "Data", "HISTORY_Water")
+dlp_field_v2 = os.path.join(file_wd, "Data", "FIELD_Water")
+dlp_history_v2 = os.path.join(file_wd, "Data", "HISTORY_Water")
+dlp_field_v4 = os.path.join(file_wd, "Data", "FIELD4")
+dlp_history_v4 = os.path.join(file_wd, "Data", "HISTORY4")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -253,16 +255,36 @@ def test_xyz_mdt_conversion_file_exists_and_loads_up_successfully(compression):
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
-def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully(compression):
+def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_version_2(compression):
     temp_name = tempfile.mktemp()
 
     parameters = {
         'atom_aliases': {},
-        'field_file': dlp_field,
+        'field_file': dlp_field_v2,
         'fold': False,
-        'history_file': dlp_history,
+        'history_file': dlp_history_v2,
         'output_file': (temp_name, 64, compression),
-        'version': '2',
+    }
+    dl_poly = Converter.create("DL_POLY")
+    dl_poly.run(parameters, status=True)
+
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
+
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+
+
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_version_4(compression):
+    temp_name = tempfile.mktemp()
+
+    parameters = {
+        'atom_aliases': {},
+        'field_file': dlp_field_v4,
+        'fold': False,
+        'history_file': dlp_history_v4,
+        'output_file': (temp_name, 64, compression),
     }
     dl_poly = Converter.create("DL_POLY")
     dl_poly.run(parameters, status=True)
