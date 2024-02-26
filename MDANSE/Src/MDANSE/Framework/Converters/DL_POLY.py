@@ -388,7 +388,7 @@ class DL_POLY(Converter):
     settings["field_file"] = (
         "InputFileConfigurator",
         {
-            "wildcard": "FIELD files|FIELD*|All files|*",
+            "wildcard": "FIELD files (FIELD*)|FIELD*|All files|*",
             "default": "INPUT_FILENAME",
             "label": "Input FIELD file",
         },
@@ -396,7 +396,7 @@ class DL_POLY(Converter):
     settings["history_file"] = (
         "InputFileConfigurator",
         {
-            "wildcard": "HISTORY files|HISTORY*|All files|*",
+            "wildcard": "HISTORY files (HISTORY*)|HISTORY*|All files|*",
             "default": "INPUT_FILENAME",
             "label": "Input HISTORY file",
         },
