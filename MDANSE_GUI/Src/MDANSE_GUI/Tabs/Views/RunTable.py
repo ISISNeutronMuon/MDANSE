@@ -30,39 +30,6 @@ from qtpy.QtGui import QStandardItem, QContextMenuEvent
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 
-class JobProgress(QStyledItemDelegate):
-    """This is a delegate widget which is meant to
-    draw a progress bar in the second column of the Run Table.
-    """
-
-    def __init__(self, parent: QObject | None = ...) -> None:
-        super().__init__(parent)
-        self.progress_option = QStyleOptionProgressBar()
-        self.progress_option.minimum = 0
-        self.progress_option.maximum = 100
-        self.progress_option.textVisible = True
-
-    def paint(self, painter, option, index):
-        text = index.data(role=Qt.ItemDataRole.DisplayRole)
-        try:
-            progress = int(index.data(role=Qt.ItemDataRole.UserRole))
-        except TypeError:
-            progress = None
-        if text is None:
-            super().paint(painter, option, index)
-            return
-        if "percent" in text and progress is not None:
-            rectangle = option.rect
-            self.progress_option.rect = rectangle
-            self.progress_option.progress = progress
-            self.progress_option.text = text
-            QApplication.style().drawControl(
-                QStyle.CE_ProgressBar, self.progress_option, painter
-            )
-            return
-        super().paint(painter, option, index)
-
-
 class RunTable(QTableView):
     item_details = Signal(object)
     error = Signal(str)
@@ -71,8 +38,6 @@ class RunTable(QTableView):
         super().__init__(*args, **kwargs)
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.clicked.connect(self.item_picked)
-        # delegate = JobProgress(self)
-        # self.setItemDelegate(delegate)
         vh = self.verticalHeader()
         vh.setVisible(False)
 
