@@ -17,7 +17,7 @@ import numpy as np
 from matplotlib.colors import CenteredNorm, LogNorm, Normalize, SymLogNorm
 from matplotlib import pyplot
 
-from PyQt6 import QtCore
+from qtpy import QtCore
 
 
 from MDANSE.Framework.Units import measure, UnitError

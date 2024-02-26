@@ -12,7 +12,7 @@
 #
 # **************************************************************************
 
-from PyQt6 import QtWidgets
+from qtpy import QtWidgets
 
 
 class Plot2DGeneralSettingsDialog(QtWidgets.QDialog):

@@ -35,18 +35,22 @@ class InterpolationOrderWidget(WidgetBase):
         super().__init__(*args, layout_type="QHBoxLayout", **kwargs)
         source_object = kwargs.get("source_object", None)
 
-        self.field = QSpinBox(self._base)
-        self.field.setValue(1)
+        self._field = QSpinBox(self._base)
+        self._field.setValue(1)
         label = QLabel("Interpolation order", self._base)
         self.numerator = QLabel("st order")
 
-        self.field.valueChanged.connect(self.adjust_numerator)
+        self._field.valueChanged.connect(self.adjust_numerator)
 
         self._layout.addWidget(label)
-        self._layout.addWidget(self.field)
+        self._layout.addWidget(self._field)
         self._layout.addWidget(self.numerator)
         self.default_labels()
         self.update_labels()
+        self.updateValue()
+
+    def configure_using_default(self):
+        """This is too simple to have a default value"""
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
@@ -65,6 +69,6 @@ class InterpolationOrderWidget(WidgetBase):
         self.numerator.setText(new_numerator)
 
     def get_widget_value(self):
-        value = self.field.value()
+        value = self._field.value()
 
         return value

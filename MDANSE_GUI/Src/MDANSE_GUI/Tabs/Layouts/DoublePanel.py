@@ -19,6 +19,7 @@ from qtpy.QtWidgets import (
     QScrollArea,
     QLabel,
     QPushButton,
+    QSplitter,
 )
 from qtpy.QtCore import Signal, Slot
 
@@ -50,26 +51,30 @@ class DoublePanel(QWidget):
         super().__init__(*args, **kwargs)
 
         buffer = QWidget(self)
-        scroll_area = QScrollArea()
-        scroll_area.setWidget(buffer)
-        scroll_area.setWidgetResizable(True)
         layout = QHBoxLayout(buffer)
         base_layout = QHBoxLayout(self)
         buffer.setLayout(layout)
-        base_layout.addWidget(scroll_area)
         self.setLayout(base_layout)
         self._base = buffer
+        self._splitter = QSplitter(self._base)
+        base_layout.addWidget(self._splitter)
 
         leftside = QWidget(self._base)
+        scroll_area_left = QScrollArea()
+        scroll_area_left.setWidget(leftside)
+        scroll_area_left.setWidgetResizable(True)
         leftlayout = QVBoxLayout(leftside)
         leftside.setLayout(leftlayout)
 
         rightside = QWidget(self._base)
+        scroll_area_right = QScrollArea()
+        scroll_area_right.setWidget(rightside)
+        scroll_area_right.setWidgetResizable(True)
         rightlayout = QVBoxLayout(rightside)
         rightside.setLayout(rightlayout)
 
-        layout.addWidget(leftside)
-        layout.addWidget(rightside)
+        self._splitter.addWidget(scroll_area_left)
+        self._splitter.addWidget(scroll_area_right)
 
         upper_buttons = QWidget(leftside)
         ub_layout = QHBoxLayout(upper_buttons)

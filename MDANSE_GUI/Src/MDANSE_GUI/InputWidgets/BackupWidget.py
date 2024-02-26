@@ -24,23 +24,19 @@ class BackupWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         source_object = kwargs.get("source_object", None)
-        self.field = QLineEdit(str(self._configurator.default))
-        self._layout.addWidget(self.field)
+        self._field = QLineEdit(str(self._configurator.default))
+        self._field.setPlaceholderText(str(self._configurator.default))
+        self._layout.addWidget(self._field)
+        self._field.textChanged.connect(self.updateValue)
+        self.updateValue()
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        temp_text = self.field.text().strip()
+        temp_text = self._field.text().strip()
         if temp_text == "None" or temp_text == "":
-            result = None
+            result = str(self._configurator.default)
+            self._empty = True
         else:
             result = temp_text
+            self._empty = False
         return result
-
-    @Slot()
-    def updateValue(self):
-        current_value = self.get_widget_value()
-        self._configurator.configure(current_value)
-
-    def get_value(self):
-        self.updateValue()
-        return self._configurator["value"]

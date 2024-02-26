@@ -41,6 +41,10 @@ class ProjectionWidget(WidgetBase):
         self._vector_fields = vfields
         self._mode = 0
         self._button_group.idClicked.connect(self.button_switched)
+        self.updateValue()
+
+    def configure_using_default(self):
+        """This is too complex to have a default value"""
 
     @Slot(int)
     def button_switched(self, button_number: int):
@@ -68,12 +72,3 @@ class ProjectionWidget(WidgetBase):
             return ("AxialProjector", vector)
         else:
             return ("PlanarProjector", vector)
-
-    @Slot()
-    def updateValue(self):
-        current_value = self.get_widget_value()
-        self._configurator.configure(current_value)
-
-    def get_value(self):
-        self.updateValue()
-        return self._configurator["value"]

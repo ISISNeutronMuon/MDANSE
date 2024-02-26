@@ -23,7 +23,6 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class FloatWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._value = 0
         try:
             default_option = float(self._configurator.default)
         except ValueError:
@@ -37,7 +36,6 @@ class FloatWidget(WidgetBase):
                     self._configurator.choices[1] - self._configurator.choices[0]
                 )
             field.setValue(default_option)
-            field.valueChanged.connect(self.newFloat)
         else:
             field = QLineEdit(self._base)
             validator = QDoubleValidator(field)
@@ -48,13 +46,15 @@ class FloatWidget(WidgetBase):
                 validator.setTop(maxval)
             field.setValidator(validator)
             field.setText(str(default_option))
-            field.textChanged.connect(self.newText)
-        self._value = default_option
+            field.textChanged.connect(self.updateValue)
+            field.setPlaceholderText(str(default_option))
         field.setToolTip(self._tooltip)
-        self._field = field
         self._layout.addWidget(field)
+        self._field = field
+        self._default_value = default_option
         self.default_labels()
         self.update_labels()
+        self.updateValue()
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
@@ -66,16 +66,12 @@ class FloatWidget(WidgetBase):
         if self._tooltip == "":
             self._tooltip = "A single floating-point number"
 
-    @Slot(str)
-    def newText(self, text: str):
-        self._value = float(text)
-        self.updateValue()
-
-    @Slot(float)
-    def newFloat(self, num: float):
-        self._value = num
-        self.updateValue()
-
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        return float(self._field.text())
+        strval = self._field.text().strip()
+        if len(strval) < 1:
+            self._empty = True
+            return self._default_value
+        else:
+            self._empty = False
+        return strval

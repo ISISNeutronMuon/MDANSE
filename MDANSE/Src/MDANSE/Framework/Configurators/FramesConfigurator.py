@@ -54,15 +54,31 @@ class FramesConfigurator(RangeConfigurator):
 
         trajConfig = self._configurable[self._dependencies["trajectory"]]
 
+        input_is_num = True
+        try:
+            num_values = [int(x) for x in value[0:3]]
+        except:
+            input_is_num = False
+        else:
+            step_size = num_values[-1]
+
         if value in ["all", None]:
             value = (0, trajConfig["length"], 1)
-        elif np.allclose(value, [0, -1, 1]):
+        elif input_is_num and step_size == 0:
+            self.error_status = "Cannot create a range with a step=0"
+            return
+        elif not input_is_num:
+            self.error_status = "Input values must be numbers"
+            return
+        elif np.allclose(num_values, [0, -1, 1]):
             value = (0, trajConfig["length"], 1)
 
         self._mini = 0
         self._maxi = trajConfig["length"]
 
         RangeConfigurator.configure(self, value)
+        if not self.valid:
+            return
 
         self["n_frames"] = self["number"]
 

@@ -45,13 +45,19 @@ class InputFileWidget(WidgetBase):
         self._field = field
         field.textChanged.connect(self.updateValue)
         field.setText(str(default_value))
+        field.setPlaceholderText(str(default_value))
         field.setToolTip(tooltip_text)
         self._layout.addWidget(field)
         button = QPushButton("Browse", self._base)
         button.clicked.connect(self.valueFromDialog)
+        self._default_value = default_value
         self._layout.addWidget(button)
         self._configurator = configurator
         self._file_dialog = QFileDialog.getOpenFileName
+        self.updateValue()
+
+    def configure_using_default(self):
+        """This is too specific to have a default value"""
 
     @Slot()
     def valueFromDialog(self):
@@ -72,7 +78,10 @@ class InputFileWidget(WidgetBase):
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        value = self._field.text()
-        if value == "":
-            value = None
-        return value
+        strval = self._field.text()
+        if len(strval) < 1:
+            self._empty = True
+            return self._default_value
+        else:
+            self._empty = False
+        return strval

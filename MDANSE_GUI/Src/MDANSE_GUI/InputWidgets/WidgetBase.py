@@ -15,7 +15,7 @@
 
 from abc import abstractmethod
 
-from qtpy.QtCore import QObject, Slot
+from qtpy.QtCore import QObject, Slot, Signal
 from qtpy.QtWidgets import (
     QWidget,
     QHBoxLayout,
@@ -27,6 +27,9 @@ from qtpy.QtWidgets import (
 
 
 class WidgetBase(QObject):
+
+    valid_changed = Signal()
+
     def __init__(self, *args, **kwargs):
         parent = kwargs.get("parent", None)
         super().__init__(*args, parent=parent)
@@ -57,6 +60,7 @@ class WidgetBase(QObject):
         self._layout = layout
         self._configurator = configurator
         self._parent_dialog = parent
+        self._empty = False
 
     def update_labels(self):
         if self._base_type == "QWidget":
@@ -87,19 +91,37 @@ class WidgetBase(QObject):
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
 
+    @abstractmethod
+    def configure_using_default(self):
+        """Makes the configurator use its default value, and highlights it
+        in the GUI"""
+        default = self._configurator.default
+        print(f"Setting {default} as placeholder text")
+        self._field.setPlaceholderText(str(default))
+        self._configurator.configure(default)
+
     def mark_error(self, error_text: str):
         self._base.setStyleSheet("background-color:rgb(180,20,180); font-weight: bold")
         self._base.setToolTip(error_text)
+        self.valid_changed.emit()
 
     def clear_error(self):
         self._base.setStyleSheet("")
         self._base.setToolTip("")
+        self.valid_changed.emit()
 
     @abstractmethod
     @Slot()
     def updateValue(self):
         current_value = self.get_widget_value()
-        self._configurator.configure(current_value)
+        if self._empty:
+            self.configure_using_default()
+        try:
+            self._configurator.configure(current_value)
+        except:
+            self.mark_error(
+                "COULD NOT SET THIS VALUE - you may need to change the values in other widgets"
+            )
         if self._configurator.valid:
             self.clear_error()
         else:
