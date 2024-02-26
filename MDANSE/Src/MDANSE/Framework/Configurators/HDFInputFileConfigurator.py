@@ -26,7 +26,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
     This configurator allows to input an HDF file as input file.
     """
 
-    _default = "INPUT_FILENAME.h5"
+    _default = "INPUT_FILENAME.mda"
 
     def __init__(self, name, variables=None, **kwargs):
         """

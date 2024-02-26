@@ -112,9 +112,7 @@ class MolecularTrace(IJob):
         self.min = np.array([minx, miny, minz], dtype=np.float64)
         self._outputData.add("origin", "LineOutputVariable", self.min, units="nm")
 
-        self.gdim = np.ceil(np.array([dimx, dimy, dimz]) / self.resolution).astype(
-            np.int
-        )
+        self.gdim = np.ceil(np.array([dimx, dimy, dimz]) / self.resolution).astype(int)
         spacing = self.configuration["spatial_resolution"]["value"]
         self._outputData.add(
             "spacing",
@@ -127,9 +125,7 @@ class MolecularTrace(IJob):
         self._outputData.add(
             "molecular_trace",
             "VolumeOutputVariable",
-            tuple(
-                np.ceil(np.array([dimx, dimy, dimz]) / self.resolution).astype(np.int)
-            ),
+            tuple(np.ceil(np.array([dimx, dimy, dimz]) / self.resolution).astype(int)),
         )
 
         self._indexes = [
