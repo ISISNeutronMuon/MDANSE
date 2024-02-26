@@ -225,19 +225,17 @@ class FieldFile(dict):
 
 
 class HistoryFile(dict):
-    def __init__(self, filename, version="2"):
+
+    def __init__(self, filename):
+        super().__init__()
         self["instance"] = open(filename, "rb")
 
-        testLine = self["instance"].readline()
+        version = self.determine_version()
+        self["version"] = version
 
-        lenTestLine = len(testLine)
-
-        if lenTestLine not in [73, 74, 81, 82]:
-            raise HistoryFileError("Invalid DLPOLY history file")
+        lenTestLine = len(self["instance"].readline())
 
         self["instance"].seek(0, 0)
-
-        self["version"] = version
 
         offset = lenTestLine - _HISTORY_FORMAT[self["version"]]["rec1"]
 
@@ -313,7 +311,7 @@ class HistoryFile(dict):
 
         timeStep = (currentStep - self._firstStep) * self._timeStep
         if self["imcon"] > 0:
-            cell = " ".join(data[1:]).split()
+            cell = " ".join([i.decode("UTF-8") for i in data[1:]]).split()
             cell = np.array(cell, dtype=np.float64)
             cell = np.reshape(cell, (3, 3)).T
             cell *= measure(1.0, "ang").toval("nm")
@@ -322,7 +320,7 @@ class HistoryFile(dict):
 
         data = np.array(self["instance"].read(self._configSize).split())
 
-        mask = np.ones((len(data),), dtype=np.bool)
+        mask = np.ones((len(data),), dtype=bool)
         mask[0 :: self._maskStep] = False
         mask[1 :: self._maskStep] = False
         mask[2 :: self._maskStep] = False
@@ -350,6 +348,34 @@ class HistoryFile(dict):
     def close(self):
         self["instance"].close()
 
+    def determine_version(self):
+        """Determine the DL_POLY version from the history file based
+        on record 1 and 2. See the DL_POLY 2, 3 and 4 manuals.
+
+        Returns
+        -------
+        str
+            The DL_POLY version.
+
+        Raises
+        ------
+        HistoryFileError
+            When the history file does not appear valid.
+        """
+        lines = self["instance"].readlines()
+        self["instance"].seek(0, 0)
+        record_1 = lines[0]
+        record_2 = lines[1]
+        if len(record_1) in [73, 74]:
+            if len(record_2.split()) == 5:
+                return "4"
+            elif len(record_2.split()) == 3:
+                return "3"
+        elif len(record_1) in [81, 82]:
+            return "2"
+
+        raise HistoryFileError("Invalid DLPOLY history file")
+
 
 class DL_POLY(Converter):
     """
@@ -362,7 +388,7 @@ class DL_POLY(Converter):
     settings["field_file"] = (
         "InputFileConfigurator",
         {
-            "wildcard": "FIELD files|FIELD*|All files|*",
+            "wildcard": "FIELD files (FIELD*)|FIELD*|All files|*",
             "default": "INPUT_FILENAME",
             "label": "Input FIELD file",
         },
@@ -370,7 +396,7 @@ class DL_POLY(Converter):
     settings["history_file"] = (
         "InputFileConfigurator",
         {
-            "wildcard": "HISTORY files|HISTORY*|All files|*",
+            "wildcard": "HISTORY files (HISTORY*)|HISTORY*|All files|*",
             "default": "INPUT_FILENAME",
             "label": "Input HISTORY file",
         },
@@ -382,10 +408,6 @@ class DL_POLY(Converter):
     settings["fold"] = (
         "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
-    )
-    settings["version"] = (
-        "SingleChoiceConfigurator",
-        {"choices": list(_HISTORY_FORMAT.keys()), "default": "2", "label": "Version"},
     )
     # settings['output_files'] = ('output_files', {'formats':["HDFFormat"]})
     settings["output_file"] = (
@@ -408,20 +430,17 @@ class DL_POLY(Converter):
             self.configuration["field_file"]["filename"], aliases=self._atomicAliases
         )
 
-        self._historyFile = HistoryFile(
-            self.configuration["history_file"]["filename"],
-            self.configuration["version"]["value"],
-        )
+        self._historyFile = HistoryFile(self.configuration["history_file"]["filename"])
 
         # The number of steps of the analysis.
-        self.numberOfSteps = self._historyFile["n_frames"]
+        self.numberOfSteps = int(self._historyFile["n_frames"])
 
         self._chemicalSystem = ChemicalSystem()
 
         self._fieldFile.build_chemical_system(self._chemicalSystem)
 
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_files"]["files"][0],
+            self.configuration["output_file"]["file"],
             self._chemicalSystem,
             self.numberOfSteps,
             positions_dtype=self.configuration["output_file"]["dtype"],
