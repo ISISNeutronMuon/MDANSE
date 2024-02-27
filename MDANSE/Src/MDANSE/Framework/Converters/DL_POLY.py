@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/Jobs/DL_POLY.py
+# @file      MDANSE/Framework/Jobs/DL_POLY.py
 # @brief     Implements module/class/test DL_POLY
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
@@ -12,23 +12,10 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
 import collections
-import os
-import re
-
 import numpy as np
 
-
-from MDANSE.Chemistry import ATOMS_DATABASE, MOLECULES_DATABASE
-from MDANSE.Chemistry.ChemicalEntity import (
-    Atom,
-    AtomCluster,
-    ChemicalSystem,
-    Molecule,
-    is_molecule,
-    translate_atom_names,
-)
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
@@ -38,6 +25,7 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
 
 _HISTORY_FORMAT = {}
 _HISTORY_FORMAT["2"] = {
@@ -78,150 +66,12 @@ _HISTORY_FORMAT["4"] = {
 }
 
 
-class FieldFileError(Error):
-    pass
-
-
 class HistoryFileError(Error):
     pass
 
 
 class DL_POLYConverterError(Error):
     pass
-
-
-class FieldFile(dict):
-    def __init__(self, filename, aliases):
-        self._filename = filename
-
-        self._aliases = aliases
-
-        self.parse()
-
-    def parse(self):
-        # The FIELD file is opened for reading, its contents stored into |lines| and then closed.
-        unit = open(self._filename, "r")
-
-        # Read and remove the empty and comments lines from the contents of the FIELD file.
-        lines = [
-            line.strip()
-            for line in unit.readlines()
-            if line.strip() and not re.match("#", line)
-        ]
-
-        # Close the FIELD file.
-        unit.close()
-
-        self["title"] = lines.pop(0)
-
-        self["units"] = lines.pop(0)
-
-        # Extract the number of molecular types
-        _, self["n_molecular_types"] = re.match(
-            "(molecules|molecular types)\s+(\d+)", lines.pop(0), re.IGNORECASE
-        ).groups()
-
-        self["n_molecular_types"] = int(self["n_molecular_types"])
-
-        molBlocks = [
-            i for i, line in enumerate(lines) if re.match("finish", line, re.IGNORECASE)
-        ]
-
-        if self["n_molecular_types"] != len(molBlocks):
-            raise FieldFileError("Error in the definition of the molecular types")
-
-        self["molecules"] = []
-
-        first = 0
-
-        for last in molBlocks:
-            moleculeName = lines[first]
-
-            # Extract the number of molecular types
-            nMolecules = re.match(
-                "nummols\s+(\d+)", lines[first + 1], re.IGNORECASE
-            ).groups()[0]
-            nMolecules = int(nMolecules)
-
-            for i in range(first + 2, last):
-                match = re.match("atoms\s+(\d+)", lines[i], re.IGNORECASE)
-                if match:
-                    nAtoms = int(match.groups()[0])
-
-                    sumAtoms = 0
-
-                    comp = i + 1
-
-                    atoms = []
-
-                    while sumAtoms < nAtoms:
-                        sitnam = lines[comp][:8].strip()
-
-                        vals = lines[comp][8:].split()
-
-                        if sitnam in self._aliases:
-                            element = self._aliases[sitnam]
-                        else:
-                            element = sitnam
-                            while 1:
-                                if element in ATOMS_DATABASE:
-                                    break
-                                element = element[:-1]
-                                if not element:
-                                    raise FieldFileError(
-                                        "Could not define any element from %r" % sitnam
-                                    )
-
-                        try:
-                            nrept = int(vals[2])
-                        except IndexError:
-                            nrept = 1
-
-                        atoms.extend([(sitnam, element)] * nrept)
-
-                        sumAtoms += nrept
-
-                        comp += 1
-
-                    self["molecules"].append([moleculeName, nMolecules, atoms])
-
-                    break
-
-            first = last + 1
-
-    def build_chemical_system(self, chemicalSystem):
-        chemicalEntities = []
-
-        for db_name, nMolecules, atomic_contents in self["molecules"]:
-            # Loops over the number of molecules of the current type.
-            for i in range(nMolecules):
-                if is_molecule(db_name):
-                    mol_name = "{:s}".format(db_name)
-                    mol = Molecule(db_name, mol_name)
-                    renamedAtoms = translate_atom_names(
-                        MOLECULES_DATABASE,
-                        db_name,
-                        [name for name, _ in atomic_contents],
-                    )
-                    mol.reorder_atoms(renamedAtoms)
-                    chemicalEntities.append(mol)
-                else:
-                    # This list will contains the instances of the atoms of the molecule.
-                    atoms = []
-                    # Loops over the atom of the molecule.
-                    for j, (name, element) in enumerate(atomic_contents):
-                        # The atom is created.
-                        a = Atom(symbol=element, name="%s_%s" % (name, j))
-                        atoms.append(a)
-
-                    if len(atoms) > 1:
-                        ac = AtomCluster("{:s}".format(db_name), atoms)
-                        chemicalEntities.append(ac)
-                    else:
-                        chemicalEntities.append(atoms[0])
-
-        for ce in chemicalEntities:
-            chemicalSystem.add_chemical_entity(ce)
 
 
 class HistoryFile(dict):
@@ -386,7 +236,7 @@ class DL_POLY(Converter):
 
     settings = collections.OrderedDict()
     settings["field_file"] = (
-        "InputFileConfigurator",
+        "FieldFileConfigurator",
         {
             "wildcard": "FIELD files (FIELD*)|FIELD*|All files|*",
             "default": "INPUT_FILENAME",
@@ -402,8 +252,8 @@ class DL_POLY(Converter):
         },
     )
     settings["atom_aliases"] = (
-        "PythonObjectConfigurator",
-        {"default": {}, "label": "Atom aliases (Python dictionary)"},
+        "AtomMappingConfigurator",
+        {"default": "{}", "label": "Atom mapping"},
     )
     settings["fold"] = (
         "BooleanConfigurator",
@@ -426,9 +276,7 @@ class DL_POLY(Converter):
 
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
-        self._fieldFile = FieldFile(
-            self.configuration["field_file"]["filename"], aliases=self._atomicAliases
-        )
+        self._fieldFile = self.configuration["field_file"]
 
         self._historyFile = HistoryFile(self.configuration["history_file"]["filename"])
 
@@ -437,7 +285,7 @@ class DL_POLY(Converter):
 
         self._chemicalSystem = ChemicalSystem()
 
-        self._fieldFile.build_chemical_system(self._chemicalSystem)
+        self._fieldFile.build_chemical_system(self._chemicalSystem, self._atomicAliases)
 
         self._trajectory = TrajectoryWriter(
             self.configuration["output_file"]["file"],

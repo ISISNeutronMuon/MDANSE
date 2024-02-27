@@ -37,6 +37,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "InterpolationOrderConfigurator": InterpolationOrderWidget,
     "OutputFilesConfigurator": OutputFilesWidget,
     "InputFileConfigurator": InputFileWidget,
+    "FieldFileConfigurator": InputFileWidget,
     "AseInputFileConfigurator": AseInputFileWidget,
     "RunningModeConfigurator": RunningModeWidget,
     "WeightsConfigurator": ComboWidget,
@@ -48,6 +49,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "OutputTrajectoryConfigurator": OutputTrajectoryWidget,
     "ProjectionConfigurator": ProjectionWidget,
     "AtomSelectionConfigurator": AtomSelectionWidget,
+    "AtomMappingConfigurator": AtomMappingWidget,
     "AtomTransmutationConfigurator": AtomTransmutationWidget,
     "InstrumentResolutionConfigurator": InstrumentResolutionWidget,
 }
