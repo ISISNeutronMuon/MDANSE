@@ -330,32 +330,12 @@ class AtomSelectionWidget(WidgetBase):
         self.updateValue()
 
     @Slot()
-    def helper_dialog(self, offset: int = 10) -> None:
-        """Opens the helper dialog.
-
-        Parameters
-        ----------
-        offset : int
-            Number of pixels to place the helper dialog away from the
-            parent.
-        """
+    def helper_dialog(self) -> None:
+        """Opens the helper dialog."""
         if self.helper.isVisible():
             self.helper.close()
-            return
-
-        self.helper.show()
-
-        # place the helper to the left of the parent, if there is not
-        # enough screen space put it to the right
-        total_width = sum(
-            [screen.size().width() for screen in QApplication.instance().screens()]
-        )
-        right = self.parent().pos().x() + self.parent().width() + offset
-        left = self.parent().pos().x() - self.helper.min_width - offset
-        if right + self.helper.min_width + offset < total_width:
-            self.helper.move(right, self.parent().pos().y())
         else:
-            self.helper.move(left, self.parent().pos().y())
+            self.helper.show()
 
     def check_valid_field(self, value: str) -> None:
         """Changes the color of the field if the selector setting is
