@@ -72,7 +72,7 @@ def parameters():
     parameters['per_axis'] = False
     parameters['reference_direction'] = (0, 0, 1)
     parameters['instrument_resolution'] = ('Gaussian', {'sigma' : 1.0, 'mu': 0.0})
-    parameters['interpolation_order'] = '3rd order'
+    parameters['interpolation_order'] = 3
     parameters['projection'] = None
     parameters['normalize'] = True
     parameters['grouping_level'] = 'atom'

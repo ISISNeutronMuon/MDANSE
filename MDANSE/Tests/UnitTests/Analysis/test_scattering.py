@@ -162,3 +162,36 @@ def test_ndtsf(disf, dcsf, qvector_spherical_lattice):
     assert path.exists(temp_name + '.mda')
     assert path.isfile(temp_name + '.mda')
     os.remove(temp_name + '.mda')
+
+def test_ssfsf(disf):
+    temp_name = tempfile.mktemp()
+    parameters = {}
+    parameters['sample_inc'] = disf
+    parameters['running_mode'] = ('monoprocessor',)
+    parameters["instrument_resolution"] = ("Ideal", {})
+    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    ndtsf = IJob.create("StructureFactorFromScatteringFunction")
+    ndtsf.run(parameters,status=True)
+    assert path.exists(temp_name + '.mda')
+    assert path.isfile(temp_name + '.mda')
+    os.remove(temp_name + '.mda')
+
+def test_ccf(qvector_spherical_lattice):
+    temp_name = tempfile.mktemp()
+    parameters = {}
+    parameters["atom_selection"] = None
+    parameters["atom_transmutation"] = None
+    parameters["frames"] = (0, 10, 1)
+    parameters["instrument_resolution"] = ("Ideal", {})
+    parameters['interpolation_order'] = 3
+    parameters['interpolation_mode'] = 'automatic'
+    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["q_vectors"] = qvector_spherical_lattice
+    parameters["running_mode"] = ("monoprocessor",)
+    parameters["trajectory"] = short_traj
+    parameters["weights"] = "b_coherent"
+    ndtsf = IJob.create("CurrentCorrelationFunction")
+    ndtsf.run(parameters,status=True)
+    assert path.exists(temp_name + '.mda')
+    assert path.isfile(temp_name + '.mda')
+    os.remove(temp_name + '.mda')
