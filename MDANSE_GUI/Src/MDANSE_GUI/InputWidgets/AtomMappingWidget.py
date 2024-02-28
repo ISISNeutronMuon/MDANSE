@@ -189,9 +189,9 @@ class AtomMappingWidget(WidgetBase):
         """
         if self._file_widget._configurator.valid:
             self.helper_button.setEnabled(True)
-            self.helper.apply()
         else:
             self.helper_button.setEnabled(False)
+        self.helper.apply()
 
     @Slot()
     def helper_dialog(self) -> None:
