@@ -19,6 +19,7 @@ from MDANSE.Chemistry.ChemicalEntity import (
     AtomCluster,
 )
 from MDANSE.Core.Error import Error
+from MDANSE.Framework.AtomMapping import get_element_from_mapping
 
 from .InputFileConfigurator import InputFileConfigurator
 
@@ -144,7 +145,7 @@ class FieldFileConfigurator(InputFileConfigurator):
                 # Loops over the atom of the molecule.
                 for j, name in enumerate(atomic_contents):
                     # The atom is created.
-                    element = aliases[db_name][name]
+                    element = get_element_from_mapping(db_name, name, aliases)
                     a = Atom(symbol=element, name="%s_%s_%s" % (db_name, name, j))
                     atoms.append(a)
 

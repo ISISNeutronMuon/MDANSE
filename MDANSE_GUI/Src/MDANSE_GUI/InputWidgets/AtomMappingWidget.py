@@ -27,6 +27,7 @@ from qtpy.QtWidgets import (
     QGridLayout,
 )
 
+from MDANSE.Framework.AtomMapping import guess_element
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Configurators.FieldFileConfigurator import FieldFileConfigurator
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
@@ -123,12 +124,11 @@ class AtomMappingHelperDialog(QDialog):
     def auto_fill(self) -> None:
         """Autofill the comboboxes using a simple guess."""
         for _, w1, w2 in self.mapping_widgets:
-            # for the guess we just remove all numbers and symbols
-            guess = "".join([i for i in w1.text() if i.isalpha()])
-            if guess in ATOMS_DATABASE:
+            try:
+                guess = guess_element(w1.text())
                 idx = self.all_symbols.index(guess)
                 w2.setCurrentIndex(idx)
-            else:
+            except AttributeError:
                 w2.setCurrentIndex(-1)
 
     def apply(self) -> None:

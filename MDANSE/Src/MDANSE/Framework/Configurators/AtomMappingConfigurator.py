@@ -14,7 +14,7 @@
 # **************************************************************************
 import json
 
-from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Framework.AtomMapping import fill_remaining_labels, check_mapping_valid
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
@@ -49,18 +49,20 @@ class AtomMappingConfigurator(IConfigurator):
             self.error_status = "Unable to load JSON string."
             return
 
-        if not value:
-            self.error_status = "Empty map."
+        file_configurator = self._configurable[self._dependencies["input_file"]]
+        if not file_configurator._valid:
+            self.error_status = "Input file not selected."
             return
 
-        valid = True
-        for k0, v0 in value.items():
-            for k1, atm_label in v0.items():
-                if atm_label not in ATOMS_DATABASE:
-                    valid = False
+        labels = file_configurator.get_atom_labels()
+        try:
+            fill_remaining_labels(labels, value)
+        except AttributeError:
+            self.error_status = "Unable to map all atoms."
+            return
 
-        if not valid:
-            self.error_status = "Unable to map atoms."
+        if not check_mapping_valid(labels, value):
+            self.error_status = "Atom mapping is not valid."
             return
 
         self.error_status = "OK"
