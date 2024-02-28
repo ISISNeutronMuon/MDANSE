@@ -57,6 +57,7 @@ class WidgetBase(QObject):
             layout = layoutClass(base)
             base.setLayout(layout)
         self._base = base
+        self._base.setObjectName("InputWidget")
         self._layout = layout
         self._configurator = configurator
         self._parent_dialog = parent
@@ -101,7 +102,9 @@ class WidgetBase(QObject):
         self._configurator.configure(default)
 
     def mark_error(self, error_text: str):
-        self._base.setStyleSheet("background-color:rgb(180,20,180); font-weight: bold")
+        self._base.setStyleSheet(
+            "QWidget#InputWidget { background-color:rgb(180,20,180); font-weight: bold }"
+        )
         self._base.setToolTip(error_text)
         self.valid_changed.emit()
 

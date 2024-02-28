@@ -318,11 +318,11 @@ class AtomSelectionWidget(WidgetBase):
         self._field = QLineEdit(default_value, self._base)
         self._field.setPlaceholderText(default_value)
         self._field.setMaxLength(2147483647)  # set to the largest possible
+        self._field.textChanged.connect(self.updateValue)
         self.selector = self._configurator.get_selector()
         self.helper = HelperDialog(self.selector, self._field, self._base)
         helper_button = QPushButton("Atom selection helper", self._base)
         helper_button.clicked.connect(self.helper_dialog)
-        self._field.textChanged.connect(self.check_valid_field)
         self._default_value = default_value
         self._layout.addWidget(self._field)
         self._layout.addWidget(helper_button)
@@ -336,20 +336,6 @@ class AtomSelectionWidget(WidgetBase):
             self.helper.close()
         else:
             self.helper.show()
-
-    def check_valid_field(self, value: str) -> None:
-        """Changes the color of the field if the selector setting is
-        not valid.
-
-        Parameters
-        ----------
-        value : str
-            The atom selection JSON string.
-        """
-        if self.selector.check_valid_json_settings(value) or value == "":
-            self._field.setStyleSheet("color: black;")
-        else:
-            self._field.setStyleSheet("color: red;")
 
     def get_widget_value(self) -> str:
         """
