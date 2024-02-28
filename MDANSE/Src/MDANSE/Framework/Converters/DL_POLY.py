@@ -253,8 +253,11 @@ class DL_POLY(Converter):
     )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
-        {"default": "{}", "label": "Atom mapping",
-         "dependencies": {"input_file": "field_file"}},
+        {
+            "default": "{}",
+            "label": "Atom mapping",
+            "dependencies": {"input_file": "field_file"},
+        },
     )
     settings["fold"] = (
         "BooleanConfigurator",

@@ -26,7 +26,9 @@ def guess_element(atm_label: str) -> str:
     raise AttributeError(f"Unable to guess: {atm_label}")
 
 
-def get_element_from_mapping(grp_label: str, atm_label: str, mapping: dict[str, dict[str, str]]) -> str:
+def get_element_from_mapping(
+    grp_label: str, atm_label: str, mapping: dict[str, dict[str, str]]
+) -> str:
     """Get the symbol of the element from group and atom labels.
 
     Parameters
@@ -51,7 +53,9 @@ def get_element_from_mapping(grp_label: str, atm_label: str, mapping: dict[str, 
     return element
 
 
-def fill_remaining_labels(labels: list[tuple[str, str]], mapping: dict[str, dict[str, str]]) -> None:
+def fill_remaining_labels(
+    labels: list[tuple[str, str]], mapping: dict[str, dict[str, str]]
+) -> None:
     """Given a list of labels fill the remaining labels in the mapping
     dictionary.
 
@@ -69,7 +73,9 @@ def fill_remaining_labels(labels: list[tuple[str, str]], mapping: dict[str, dict
             mapping[grp_label][atm_label] = guess_element(atm_label)
 
 
-def check_mapping_valid(labels: list[tuple[str, str]], mapping: dict[str, dict[str, str]]):
+def check_mapping_valid(
+    labels: list[tuple[str, str]], mapping: dict[str, dict[str, str]]
+):
     """Given a list of labels check that the mapping is valid.
 
     Parameters
