@@ -121,7 +121,7 @@ class JobEntry(QObject):
 
     @Slot(int)
     def on_update(self, completed_steps: int):
-        print(f"completed {completed_steps} out of {self.total_steps} steps")
+        # print(f"completed {completed_steps} out of {self.total_steps} steps")
         self.percent_complete = round(99 * completed_steps / self.total_steps, 1)
         self.update_fields()
         self._prog_item.emitDataChanged()

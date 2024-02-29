@@ -313,7 +313,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
             self.initialize()
 
             if self._status is not None:
-                self._status.start(self.numberOfSteps, rate=0.1)
+                self._status.start(self.numberOfSteps)
                 self._status.state["info"] = str(self)
 
             if getattr(self, "numberOfSteps", 0) <= 0:

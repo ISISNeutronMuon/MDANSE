@@ -15,16 +15,7 @@
 
 from PyQt6.QtCore import QAbstractItemModel, QObject
 from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
-from qtpy.QtWidgets import (
-    QApplication,
-    QMenu,
-    QTableView,
-    QAbstractItemView,
-    QStyle,
-    QStyledItemDelegate,
-    QStyleOptionProgressBar,
-    QProgressBar,
-)
+from qtpy.QtWidgets import QMenu, QTableView, QAbstractItemView, QMessageBox
 from qtpy.QtGui import QStandardItem, QContextMenuEvent
 
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
@@ -65,7 +56,7 @@ class RunTable(QTableView):
             ("Pause", self.pauseJob),
             ("Resume", self.unpauseJob),
             ("Terminate", self.terminateJob),
-            ("Kill", self.killJob),
+            # ("Kill", self.killJob),
         ]:
             temp_action = menu.addAction(action)
             temp_action.triggered.connect(method)
@@ -123,9 +114,19 @@ class RunTable(QTableView):
 
     @Slot()
     def terminateJob(self):
-        entry, _, process = self.getJobObjects()
-        process.terminate()
-        entry.terminate_job()
+        confirmation_box = QMessageBox(
+            QMessageBox.Icon.Question,
+            "You are about to terminate a job",
+            "All progress will be lost if you terminate your job. Do you really want to teminate?",
+            buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            parent=self,
+        )
+        result = confirmation_box.exec()
+        print(f"QMessageBox result = {result}")
+        if result == 0:
+            entry, _, process = self.getJobObjects()
+            process.terminate()
+            entry.terminate_job()
 
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
