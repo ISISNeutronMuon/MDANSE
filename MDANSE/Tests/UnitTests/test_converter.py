@@ -22,6 +22,10 @@ hem_cam_pdb = os.path.join(file_wd, "Data", "hem-cam.pdb")
 hem_cam_dcd = os.path.join(file_wd, "Data", "hem-cam.dcd")
 ase_traj = os.path.join(file_wd, "Data", "Cu_5steps_ASEformat.traj")
 xyz_traj = os.path.join(file_wd, "Data", "traj-100K-npt-1000-res.xyz")
+dlp_field_v2 = os.path.join(file_wd, "Data", "FIELD_Water")
+dlp_history_v2 = os.path.join(file_wd, "Data", "HISTORY_Water")
+dlp_field_v4 = os.path.join(file_wd, "Data", "FIELD4")
+dlp_history_v4 = os.path.join(file_wd, "Data", "HISTORY4")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -104,6 +108,7 @@ def test_discover_mdt_conversion_file_exists_and_loads_up_successfully(compressi
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
 
+
 def test_XYZfile_from_cp2k():
     from MDANSE.Framework.Converters.CP2K import XYZFile
     xyz_file = XYZFile(cp2k_pos)
@@ -111,6 +116,7 @@ def test_XYZfile_from_cp2k():
     assert xyz_file["n_frames"] == 100
     coords = xyz_file.read_step(0)
     assert len(coords) == 60
+
 
 @pytest.mark.parametrize("velocity", [cp2k_vel, None])
 def test_cp2k_mdt_conversion_file_exists_and_loads_up_successfully(velocity):
@@ -171,9 +177,12 @@ def test_ase_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     ase_conv = Converter.create("ase")
     ase_conv.run(parameters, status=True)
 
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
+
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+
 
 @pytest.mark.parametrize("trajectory", [ase_traj, xyz_traj, vasp_xdatcar])
 def test_improvedase_mdt_conversion_file_exists_and_loads_up_successfully(trajectory):
@@ -191,9 +200,12 @@ def test_improvedase_mdt_conversion_file_exists_and_loads_up_successfully(trajec
     ase_conv = Converter.create("improvedase")
     ase_conv.run(parameters, status=True)
 
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
+
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+
 
 def test_improvedase_lammps_two_files():
     temp_name = tempfile.mktemp()
@@ -211,6 +223,8 @@ def test_improvedase_lammps_two_files():
 
     ase_conv = Converter.create("improvedase")
     ase_conv.run(parameters, status=True)
+
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
 
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
@@ -232,6 +246,50 @@ def test_xyz_mdt_conversion_file_exists_and_loads_up_successfully(compression):
 
     ase_conv = Converter.create("ase")
     ase_conv.run(parameters, status=True)
+
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
+
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+
+
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_version_2(compression):
+    temp_name = tempfile.mktemp()
+
+    parameters = {
+        'atom_aliases': {},
+        'field_file': dlp_field_v2,
+        'fold': False,
+        'history_file': dlp_history_v2,
+        'output_file': (temp_name, 64, compression),
+    }
+    dl_poly = Converter.create("DL_POLY")
+    dl_poly.run(parameters, status=True)
+
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
+
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+
+
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_version_4(compression):
+    temp_name = tempfile.mktemp()
+
+    parameters = {
+        'atom_aliases': {},
+        'field_file': dlp_field_v4,
+        'fold': False,
+        'history_file': dlp_history_v4,
+        'output_file': (temp_name, 64, compression),
+    }
+    dl_poly = Converter.create("DL_POLY")
+    dl_poly.run(parameters, status=True)
+
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
 
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
