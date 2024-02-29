@@ -18,7 +18,7 @@ from multiprocessing import Pipe, Queue, Event
 from icecream import ic
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
-from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex, Qt
+from qtpy.QtCore import QObject, Slot, Signal, QTimer, QThread, QMutex, Qt
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE_GUI.Subprocess.Subprocess import Subprocess, Connection
@@ -35,19 +35,43 @@ from MDANSE_GUI.Subprocess.JobStatusProcess import JobStatusProcess, JobCommunic
 
 class JobThread(QThread):
 
-    def __init__(self, job_comm: "JobCommunicator", receiving_end: "Connection"):
+    def __init__(
+        self,
+        job_comm: "JobCommunicator",
+        receiving_end: "Connection",
+        subprocess_reference: "Subprocess",
+    ):
         super().__init__()
         self._job_comm = job_comm
         self._pipe_end = receiving_end
+        self._subprocess = subprocess_reference
         self._keep_running = True
+        self._timer = QTimer()
+        self._timer.timeout.connect(self.check_if_alive)
+        self._timer.setInterval(2000)
+
+    def start(self, *args, **kwargs) -> None:
+        retval = super().start(*args, **kwargs)
+        self._timer.start()
+        return retval
+
+    def fail(self):
+        self._job_comm.status_update(("COMMUNICATION", False))
+        self._keep_running = False
+        self._timer.stop()
+        self.terminate()
+
+    @Slot()
+    def check_if_alive(self):
+        if not self._subprocess.is_alive():
+            self.fail()
 
     def run(self):
         while self._keep_running:
             try:
                 status_update = self._pipe_end.recv()
             except:
-                self._job_comm.status_update(("COMMUNICATION", False))
-                self._keep_running = False
+                self.fail()
             else:
                 self._job_comm.status_update(status_update)
 
@@ -186,7 +210,7 @@ class JobHolder(QStandardItemModel):
             ic(f"Failed to create Subprocess using {job_vars}")
             return
         communicator = JobCommunicator()
-        watcher_thread = JobThread(communicator, main_pipe)
+        watcher_thread = JobThread(communicator, main_pipe, subprocess_ref)
         communicator.moveToThread(watcher_thread)
         entry_number = self.next_number
         item_th = JobEntry(

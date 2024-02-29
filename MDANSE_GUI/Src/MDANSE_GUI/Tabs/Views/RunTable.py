@@ -123,7 +123,7 @@ class RunTable(QTableView):
         )
         result = confirmation_box.exec()
         print(f"QMessageBox result = {result}")
-        if result == 0:
+        if result == QMessageBox.StandardButton.Yes.value:
             entry, _, process = self.getJobObjects()
             process.terminate()
             entry.terminate_job()
