@@ -30,6 +30,7 @@ from qtpy.QtWidgets import (
 from MDANSE.Framework.AtomMapping import guess_element
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Configurators.FieldFileConfigurator import FieldFileConfigurator
+from MDANSE.Framework.Configurators.MDFileConfigurator import MDFileConfigurator
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.InputWidgets.InputFileWidget import InputFileWidget
@@ -151,7 +152,10 @@ class AtomMappingWidget(WidgetBase):
         label information.
     """
 
-    _configurators = [FieldFileConfigurator]
+    _configurators = [
+        FieldFileConfigurator,
+        MDFileConfigurator
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
