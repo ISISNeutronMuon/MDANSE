@@ -115,7 +115,12 @@ class MDFileConfigurator(InputFileConfigurator):
 
         # Read the whole ionic data block (positions, velocities, and forces) of the first frame
         self["instance"].seek(self._headerSize + self._frameInfo["data"][0])
-        frame = self["instance"].read(self._frameInfo["data"][1]).decode("UTF-8").splitlines()
+        frame = (
+            self["instance"]
+            .read(self._frameInfo["data"][1])
+            .decode("UTF-8")
+            .splitlines()
+        )
         self["n_atoms"] = (
             len(frame) // 3
         )  # Save the number of atoms (length of positional data)
@@ -154,7 +159,9 @@ class MDFileConfigurator(InputFileConfigurator):
         self["instance"].seek(start + self._frameInfo["time_step"][0])
 
         # Read the time stored in the line and convert its units
-        timeStep = float(self["instance"].read(self._frameInfo["time_step"][1]).decode("UTF-8"))
+        timeStep = float(
+            self["instance"].read(self._frameInfo["time_step"][1]).decode("UTF-8")
+        )
         timeStep *= HBAR / HARTREE
 
         # Read and process the cell data
@@ -162,7 +169,10 @@ class MDFileConfigurator(InputFileConfigurator):
             start + self._frameInfo["cell_data"][0]
         )  # Move to the start of cell data
         unitCell = (
-            self["instance"].read(self._frameInfo["cell_data"][1]).decode("UTF-8").splitlines()
+            self["instance"]
+            .read(self._frameInfo["cell_data"][1])
+            .decode("UTF-8")
+            .splitlines()
         )  # Read the cell data by line
         # Generate an array of three vectors where each vector is constructed from its components stored in each line
         unitCell = np.array(
@@ -176,7 +186,8 @@ class MDFileConfigurator(InputFileConfigurator):
         )  # Move to the start of positional data
         # Create an array composed of the data points in each line of the positional data
         config = np.array(
-            self["instance"].read(self._frameInfo["data"][1]).decode("UTF-8").split(), dtype=str
+            self["instance"].read(self._frameInfo["data"][1]).decode("UTF-8").split(),
+            dtype=str,
         )
         config = np.reshape(
             config, (3 * self["n_atoms"], 7)

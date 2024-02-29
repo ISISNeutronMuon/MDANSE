@@ -152,10 +152,7 @@ class AtomMappingWidget(WidgetBase):
         label information.
     """
 
-    _configurators = [
-        FieldFileConfigurator,
-        MDFileConfigurator
-    ]
+    _configurators = [FieldFileConfigurator, MDFileConfigurator]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
