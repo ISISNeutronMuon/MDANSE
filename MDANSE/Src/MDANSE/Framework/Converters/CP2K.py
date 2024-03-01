@@ -12,146 +12,17 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
 import collections
-import os
-import re
-
 import numpy as np
 
-
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
-from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
+from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Units import measure
-from MDANSE.Mathematics.Graph import Graph
-from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicBoxConfiguration,
-    PeriodicRealConfiguration,
-)
+from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-
-
-class XYZFileError(Error):
-    pass
-
-
-class XYZFile(dict):
-    """This class loads the contents of an XYZ file,
-    which in the case of CP2K may contain either the
-    positions of atoms, or velocities. In either case
-    there will be 3 components per atom.
-    """
-
-    def __init__(self, filename):
-
-        self._lastline = 0
-        self._header_lines = 2
-        self._frame_lines = 0
-
-        self["instance"] = open(filename, "r")
-
-        self["instance"].seek(0, 0)  # go to the beginning of file
-
-        try:
-            self["n_atoms"] = int(self["instance"].readline().strip())
-        except ValueError:
-            raise XYZFileError(
-                "Could not read the number of atoms in %s file" % filename
-            )
-
-        self._nAtomsLineSize = self["instance"].tell()
-        self["instance"].readline()
-        self._headerSize = self["instance"].tell()
-        self["atoms"] = []
-        for _ in range(self["n_atoms"]):
-            line = self["instance"].readline()
-            atom = line.split()[0].strip()
-            self["atoms"].append(atom)
-            self._frame_lines += 1
-
-        # The frame size define the total size of a frame (number of atoms header + time info line + coordinates block)
-        self._frameSize = self["instance"].tell()
-        self._coordinatesSize = self._frameSize - self._headerSize
-
-        # Compute the frame number
-        self["instance"].seek(0, 2)  # go to the end of file
-        self["n_frames"] = self["instance"].tell() // self._frameSize
-
-        # If the trajectory has more than one step, compute the time step as the difference between the second and the first time step
-        if self["n_frames"] > 1:
-            firstTimeStep = self.fetch_time_step(0)
-            secondTimeStep = self.fetch_time_step(1)
-            self["time_step"] = secondTimeStep - firstTimeStep
-        else:
-            self["time_step"] = self.fetch_time_step(0)
-
-        # Go back to top
-        self["instance"].seek(0)
-
-    def fetch_time_step(self, step: int):
-        """Finds the value of simulation time at the
-        nth simulation step.
-
-        Arguments:
-            step -- number of the simulation frame to check
-
-        Raises:
-            XYZFileError: If a valid time stamp could not be find
-
-        Returns:
-            float -- the time stamp of the frame
-        """
-        self["instance"].seek(step * self._frameSize + self._nAtomsLineSize)
-        timeLine = self["instance"].readline().strip()
-        matches = re.findall("^i =.*, time =(.*), E =.*$", timeLine)
-        if len(matches) != 1:
-            raise XYZFileError("Could not fetch the time step from XYZ file")
-        try:
-            timeStep = float(matches[0])
-        except ValueError:
-            raise XYZFileError("Could not cast the timestep to a floating")
-        else:
-            return timeStep
-
-    def read_step(self, step: int):
-        """Reads and returns an array of atom coordinates the nth
-        simulation frame.
-
-        Arguments:
-            step -- the number of the simulation step (frame) to be returned.
-
-        Returns:
-            ndarray -- an (N,3) array containing the coordinates of N atoms
-               at the requested simulation step.
-        """
-        starting_line = (
-            step * (self._frame_lines + self._header_lines) + self._header_lines
-        )
-        lines_to_skip = starting_line - self._lastline
-        if lines_to_skip < 0:
-            self["instance"].seek(0)
-            lines_to_skip = starting_line
-        for _ in range(lines_to_skip):
-            next(self["instance"])
-            self._lastline += 1
-
-        templines = []
-        for _ in range(self._frame_lines):
-            templines.append(
-                [float(x) for x in self["instance"].readline().split()[1:]]
-            )
-            self._lastline += 1
-
-        config = np.array(templines, dtype=np.float64)
-
-        return config
-
-    def close(self):
-        """Closes the file that was, until now, open for reading."""
-        self["instance"].close()
+from MDANSE.Framework.AtomMapping import get_element_from_mapping
 
 
 class CellFileError(Error):
@@ -237,7 +108,7 @@ class CP2K(Converter):
 
     settings = collections.OrderedDict()
     settings["pos_file"] = (
-        "InputFileConfigurator",
+        "XYZFileConfigurator",
         {
             "wildcard": "XYZ files (*.xyz)|*.xyz|All files|*",
             "default": "INPUT_FILENAME.xyz",
@@ -245,7 +116,7 @@ class CP2K(Converter):
         },
     )
     settings["vel_file"] = (
-        "InputFileConfigurator",
+        "XYZFileConfigurator",
         {
             "wildcard": "XYZ files (*.xyz)|*.xyz|All files|*",
             "default": "INPUT_FILENAME.xyz",
@@ -259,6 +130,14 @@ class CP2K(Converter):
             "wildcard": "Cell files (*.cell)|*.cell|All files|*",
             "default": "INPUT_FILENAME.cell",
             "label": "CP2K unit cell file (.cell)",
+        },
+    )
+    settings["atom_aliases"] = (
+        "AtomMappingConfigurator",
+        {
+            "default": "{}",
+            "label": "Atom mapping",
+            "dependencies": {"input_file": "pos_file"},
         },
     )
     settings["output_file"] = (
@@ -276,10 +155,11 @@ class CP2K(Converter):
         Opens the input files and checks them for consistency.
         """
 
-        self._xyzFile = XYZFile(self.configuration["pos_file"]["filename"])
+        self._atomicAliases = self.configuration["atom_aliases"]["value"]
+        self._xyzFile = self.configuration["pos_file"]
 
         if self.configuration["vel_file"]:
-            self._velFile = XYZFile(self.configuration["vel_file"]["filename"])
+            self._velFile = self.configuration["vel_file"]
             if abs(self._xyzFile["time_step"] - self._velFile["time_step"]) > 1.0e-09:
                 raise CP2KConverterError(
                     "Inconsistent time step between pos and vel files"
@@ -309,8 +189,9 @@ class CP2K(Converter):
         self._chemical_system = ChemicalSystem()
 
         for i, symbol in enumerate(self._xyzFile["atoms"]):
+            element = get_element_from_mapping("", symbol, self._atomicAliases)
             self._chemical_system.add_chemical_entity(
-                Atom(symbol=symbol, name="%s_%d" % (symbol, i + 1))
+                Atom(symbol=element, name="%s_%d" % (symbol, i + 1))
             )
 
         self._trajectory = TrajectoryWriter(

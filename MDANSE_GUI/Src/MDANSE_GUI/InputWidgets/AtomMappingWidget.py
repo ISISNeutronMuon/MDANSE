@@ -29,7 +29,9 @@ from qtpy.QtWidgets import (
 
 from MDANSE.Framework.AtomMapping import guess_element
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Framework.Configurators.FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
+from MDANSE.Framework.Configurators.FileWithAtomDataConfigurator import (
+    FileWithAtomDataConfigurator,
+)
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.InputWidgets.InputFileWidget import InputFileWidget
 
@@ -154,7 +156,12 @@ class AtomMappingWidget(WidgetBase):
         # file input widgets should be loaded into the _widgets list
         # before this one
         for widget in self.parent()._widgets:
-            if isinstance(widget._configurator, FileWithAtomDataConfigurator):
+            if (
+                widget._configurator
+                is self._configurator._configurable[
+                    self._configurator._dependencies["input_file"]
+                ]
+            ):
                 self._file_widget = widget
                 break
 
