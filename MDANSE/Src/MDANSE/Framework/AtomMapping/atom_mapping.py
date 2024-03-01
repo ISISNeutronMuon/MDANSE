@@ -52,6 +52,8 @@ def guess_element(atm_label: str, mass: Union[float, int, None] = None) -> str:
 
     guesses = [atm_label[:2].capitalize(), atm_label[0].upper()]
 
+    # using the guess match to the atom and then match to the mass
+    # if available
     best_match = None
     best_diff = np.inf
     for guess in guesses:
@@ -67,6 +69,19 @@ def guess_element(atm_label: str, mass: Union[float, int, None] = None) -> str:
                     best_match = atm
                     best_diff = diff
     if best_match is not None:
+        return best_match
+
+    # try to match based on mass if available and guesses failed
+    best_diff = np.inf
+    if mass is not None:
+        for atm, properties in ATOMS_DATABASE._data["atoms"].items():
+            atm_mass = properties.get("atomic_weight", None)
+            if atm_mass is None:
+                continue
+            diff = abs(mass - atm_mass)
+            if diff < best_diff:
+                best_match = atm
+                best_diff = diff
         return best_match
 
     raise AttributeError(f"Unable to guess: {atm_label}")
