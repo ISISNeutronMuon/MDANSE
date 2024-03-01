@@ -16,6 +16,8 @@ class AtomLabel:
                 self.grp_label += f"{k}={v};"
             self.grp_label = self.grp_label[:-1]
         self.mass = kwargs.get("mass", None)
+        if self.mass is not None:
+            self.mass = float(self.mass)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, AtomLabel):
@@ -45,22 +47,27 @@ def guess_element(atm_label: str, mass: Union[float, int, None] = None) -> str:
     AttributeError
         Error if unable to match to an element.
     """
-    guess = "".join([i for i in atm_label if i.isalpha()])
-    if guess in ATOMS_DATABASE:
-        if mass is None:
-            return guess
-        else:
+    if mass is not None and mass == 0.0:
+        return "Du"
+
+    guesses = [atm_label[:2].capitalize(), atm_label[0].upper()]
+
+    best_match = None
+    best_diff = np.inf
+    for guess in guesses:
+        if guess in ATOMS_DATABASE:
+            if mass is None:
+                return guess
             num = ATOMS_DATABASE[guess]["proton"]
             atms = ATOMS_DATABASE.match_numeric_property("proton", num)
-            best_match = None
-            best_diff = np.inf
             for atm in atms:
                 atm_mass = ATOMS_DATABASE[atm]["atomic_weight"]
                 diff = abs(mass - atm_mass)
                 if diff < best_diff:
                     best_match = atm
                     best_diff = diff
-            return best_match
+    if best_match is not None:
+        return best_match
 
     raise AttributeError(f"Unable to guess: {atm_label}")
 
@@ -115,7 +122,7 @@ def fill_remaining_labels(
         if grp_label not in mapping:
             mapping[grp_label] = {}
         if atm_label not in mapping[grp_label]:
-            mapping[grp_label][atm_label] = guess_element(atm_label)
+            mapping[grp_label][atm_label] = guess_element(atm_label, label.mass)
 
 
 def check_mapping_valid(mapping: dict[str, dict[str, str]], labels: list[AtomLabel]):

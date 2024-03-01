@@ -66,7 +66,7 @@ class AtomMappingHelperDialog(QDialog):
 
         self.layout = QVBoxLayout()
         header_layout = QHBoxLayout()
-        header_layout.addWidget(QLabel("Group Label"))
+        header_layout.addWidget(QLabel("Group"))
         header_layout.addWidget(QLabel("Atom Label"))
         header_layout.addWidget(QLabel("Element"))
 
@@ -90,6 +90,7 @@ class AtomMappingHelperDialog(QDialog):
         self.setLayout(self.layout)
 
         self.all_symbols = ATOMS_DATABASE.atoms
+        self.labels = None
 
     def update_helper(self) -> None:
         """Get the atoms labels from the file widget and add mapping
@@ -99,9 +100,9 @@ class AtomMappingHelperDialog(QDialog):
         if not self._file_widget._configurator.valid:
             return
 
-        labels = self._file_widget._configurator.get_atom_labels()
-        for i, label in enumerate(labels):
-            w0 = QLabel(label.grp_label)
+        self.labels = self._file_widget._configurator.get_atom_labels()
+        for i, label in enumerate(self.labels):
+            w0 = QLabel(label.grp_label.replace(";", "\n"))
             w1 = QLabel(label.atm_label)
             w2 = QComboBox()
             w2.addItems(self.all_symbols)
@@ -124,9 +125,10 @@ class AtomMappingHelperDialog(QDialog):
 
     def auto_fill(self) -> None:
         """Autofill the comboboxes using a simple guess."""
-        for _, w1, w2 in self.mapping_widgets:
+        for i, (_, w1, w2) in enumerate(self.mapping_widgets):
             try:
-                guess = guess_element(w1.text())
+                label = self.labels[i]
+                guess = guess_element(label.atm_label, mass=label.mass)
                 idx = self.all_symbols.index(guess)
                 w2.setCurrentIndex(idx)
             except AttributeError:
@@ -138,7 +140,7 @@ class AtomMappingHelperDialog(QDialog):
         """
         settings = defaultdict(lambda: dict())
         for w0, w1, w2 in self.mapping_widgets:
-            settings[w0.text()][w1.text()] = w2.currentText()
+            settings[w0.text().replace("\n", ";")][w1.text()] = w2.currentText()
         self._field.setText(json.dumps(settings))
 
 

@@ -37,6 +37,11 @@ def test_guess_element_carbon_symbol_to_carbon():
     assert c == "C"
 
 
+def test_guess_element_carbon_symbol_to_deuterium():
+    h2 = guess_element("H", mass=2)
+    assert h2 == "H2"
+
+
 def test_get_element_from_mapping_with_entry_but_no_kwargs():
     mapping = {"": {"label1": "C"}}
     element = get_element_from_mapping(mapping, "label1")

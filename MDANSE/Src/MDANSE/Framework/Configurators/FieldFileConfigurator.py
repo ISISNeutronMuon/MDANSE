@@ -82,6 +82,7 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
                     comp = i + 1
 
                     atoms = []
+                    masses = []
 
                     while sumAtoms < nAtoms:
                         sitnam = lines[comp][:8].strip()
@@ -93,13 +94,14 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
                         except IndexError:
                             nrept = 1
 
+                        masses.extend([float(vals[0])] * nrept)
                         atoms.extend([sitnam] * nrept)
 
                         sumAtoms += nrept
 
                         comp += 1
 
-                    self["molecules"].append([moleculeName, nMolecules, atoms])
+                    self["molecules"].append([moleculeName, nMolecules, atoms, masses])
 
                     break
 
@@ -113,9 +115,9 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
             An ordered list of atom labels.
         """
         labels = []
-        for mol_name, _, atomic_contents in self["molecules"]:
-            for atm_label in atomic_contents:
-                label = AtomLabel(atm_label, molecule=mol_name)
+        for mol_name, _, atomic_contents, masses in self["molecules"]:
+            for atm_label, mass in zip(atomic_contents, masses):
+                label = AtomLabel(atm_label, molecule=mol_name, mass=mass)
                 if label not in labels:
                     labels.append(label)
         return labels
@@ -123,15 +125,15 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
     def build_chemical_system(self, chemicalSystem, aliases):
         chemicalEntities = []
 
-        for db_name, nMolecules, atomic_contents in self["molecules"]:
+        for db_name, nMolecules, atomic_contents, masses in self["molecules"]:
             # Loops over the number of molecules of the current type.
             for i in range(nMolecules):
                 # This list will contains the instances of the atoms of the molecule.
                 atoms = []
                 # Loops over the atom of the molecule.
-                for j, name in enumerate(atomic_contents):
+                for j, (name, mass) in enumerate(zip(atomic_contents, masses)):
                     # The atom is created.
-                    element = get_element_from_mapping(aliases, name, molecule=db_name)
+                    element = get_element_from_mapping(aliases, name, molecule=db_name, mass=mass)
                     a = Atom(symbol=element, name="%s_%s_%s" % (db_name, name, j))
                     atoms.append(a)
 
