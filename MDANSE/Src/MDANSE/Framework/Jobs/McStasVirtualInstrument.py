@@ -30,9 +30,10 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 MCSTAS_UNITS_LUT = {
-    "THz": measure(1, "THz", equivalent=True).toval("meV"),
+    "rad/ps": measure(1, "rad/ps", equivalent=True).toval("meV"),
     "nm2": measure(1, "nm2").toval("b"),
     "1/nm": measure(1, "1/nm").toval("1/ang"),
 }
@@ -74,7 +75,7 @@ class McStasVirtualInstrument(IJob):
         {
             "widget": "InputFileConfigurator",
             "label": "MDANSE Coherent Structure Factor",
-            "variables": ["q", "frequency", "s(q,f)_total"],
+            "variables": ["q", "omega", "s(q,f)_total"],
             "default": "dcsf_prot.h5",
         },
     )
@@ -83,11 +84,17 @@ class McStasVirtualInstrument(IJob):
         {
             "widget": "InputFileConfigurator",
             "label": "MDANSE Incoherent Structure Factor",
-            "variables": ["q", "frequency", "s(q,f)_total"],
+            "variables": ["q", "omega", "s(q,f)_total"],
             "default": "disf_prot.h5",
         },
     )
-    settings["temperature"] = ("FloatConfigurator", {"default": 298.0})
+    settings["temperature"] = (
+        "FloatConfigurator",
+        {
+            "default": 298.0,
+            "label": "The sample temperature to be used in the simulation.",
+        },
+    )
     settings["display"] = (
         "BooleanConfigurator",
         {"label": "trace the 3D view of the simulation"},
@@ -119,7 +126,8 @@ class McStasVirtualInstrument(IJob):
         self.numberOfSteps = 1
 
         symbols = sorted_atoms(
-            self.configuration["trajectory"]["instance"].universe, "symbol"
+            self.configuration["trajectory"]["instance"]._chemical_system.atom_list,
+            "symbol",
         )
 
         # Compute some parameters used for a proper McStas run
@@ -140,12 +148,10 @@ class McStasVirtualInstrument(IJob):
             * MCSTAS_UNITS_LUT["nm2"]
         )
         for frameIndex in self.configuration["frames"]["value"]:
-            self.configuration["trajectory"]["instance"].universe.setFromTrajectory(
-                self.configuration["trajectory"]["instance"], frameIndex
+            configuration = self.configuration["trajectory"]["instance"].configuration(
+                frameIndex
             )
-            cellVolume = self.configuration["trajectory"][
-                "instance"
-            ].universe.cellVolume()
+            cellVolume = configuration._unit_cell.volume
             self._mcStasPhysicalParameters["density"] += (
                 self._mcStasPhysicalParameters["weight"] / cellVolume
             )
@@ -186,8 +192,9 @@ class McStasVirtualInstrument(IJob):
                 fout.write("# %s\n" % var)
 
                 data = self.configuration[typ][var][:]
+                data_unit = self.configuration[typ]._units[var]
                 try:
-                    data *= MCSTAS_UNITS_LUT[self.configuration[typ][var].units]
+                    data *= MCSTAS_UNITS_LUT[data_unit]
                 except KeyError:
                     pass
 
@@ -220,7 +227,7 @@ class McStasVirtualInstrument(IJob):
         out, _ = s.communicate()
 
         for line in out.splitlines():
-            if "ERROR" in line:
+            if "ERROR" in line.decode(encoding="utf-8"):
                 raise McStasError("An error occured during McStas run: %s" % out)
 
         with open(
@@ -230,7 +237,7 @@ class McStasVirtualInstrument(IJob):
             ),
             "w",
         ) as f:
-            f.write(out)
+            f.write(out.decode(encoding="utf-8"))
 
         return index, None
 
@@ -439,7 +446,7 @@ class McStasVirtualInstrument(IJob):
             Line = Line.split(":")
             Field = Line[0]
             Value = ""
-            Value = string.join(string.join(Line[1 : len(Line)], ":").split("'"), "")
+            Value = "".join(":".join(Line[1 : len(Line)]).split("'"))
             strStruct = strStruct + "'" + Field + "':'" + Value + "'"
             if j < len(Header) - 1:
                 strStruct += ","

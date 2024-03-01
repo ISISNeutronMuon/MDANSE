@@ -16,12 +16,33 @@
 import os
 import tempfile
 import time
+from typing import Dict, Any
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
 )
+
+
+def parse_dictionary(input: str) -> Dict[str, Any]:
+    big_line = input.strip("\{\}[] \n")
+    tokens = big_line.split(",")
+    result = {}
+    for entry in tokens:
+        temp = entry.split(":")
+        key, value = temp[0], ":".join(temp[1:])
+        key = key.strip("' ")
+        value = value.strip(" '")
+        try:
+            value = int(value)
+        except:
+            try:
+                value = float(value)
+            except:
+                pass
+        result[key] = value
+    return result
 
 
 class McStasOptionsConfigurator(IConfigurator):
@@ -50,7 +71,9 @@ class McStasOptionsConfigurator(IConfigurator):
 
         options = self._default.copy()
 
-        for k, v in list(value.items()):
+        parsed = parse_dictionary(value)
+
+        for k, v in list(parsed.items()):
             if k not in options:
                 continue
             options[k] = v

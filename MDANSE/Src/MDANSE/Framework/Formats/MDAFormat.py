@@ -1,5 +1,5 @@
 from MDANSE.Framework.Formats.IFormat import IFormat
-from MDANSE.Framework.OutputVariables import IOutputVariable
+from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 from .HDFFormat import HDFFormat
 
 
