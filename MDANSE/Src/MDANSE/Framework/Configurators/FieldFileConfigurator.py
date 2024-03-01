@@ -133,7 +133,9 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
                 # Loops over the atom of the molecule.
                 for j, (name, mass) in enumerate(zip(atomic_contents, masses)):
                     # The atom is created.
-                    element = get_element_from_mapping(aliases, name, molecule=db_name, mass=mass)
+                    element = get_element_from_mapping(
+                        aliases, name, molecule=db_name, mass=mass
+                    )
                     a = Atom(symbol=element, name="%s_%s_%s" % (db_name, name, j))
                     atoms.append(a)
 

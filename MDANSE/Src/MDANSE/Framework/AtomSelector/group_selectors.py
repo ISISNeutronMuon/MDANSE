@@ -85,7 +85,9 @@ def select_methly(
         return system.get_substructure_matches(pattern)
 
 
-def select_phosphate(system: ChemicalSystem, check_exists: bool = False) -> Union[set[int], bool]:
+def select_phosphate(
+    system: ChemicalSystem, check_exists: bool = False
+) -> Union[set[int], bool]:
     """Selects the P and O atoms of all phosphate groups.
 
     Parameters
