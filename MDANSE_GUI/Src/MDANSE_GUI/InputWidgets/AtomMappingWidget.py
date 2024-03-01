@@ -66,8 +66,8 @@ class AtomMappingHelperDialog(QDialog):
 
         self.layout = QVBoxLayout()
         header_layout = QHBoxLayout()
-        header_layout.addWidget(QLabel("Group label"))
-        header_layout.addWidget(QLabel("Atom label"))
+        header_layout.addWidget(QLabel("Group Label"))
+        header_layout.addWidget(QLabel("Atom Label"))
         header_layout.addWidget(QLabel("Element"))
 
         self.mapping_widgets = []
@@ -100,9 +100,9 @@ class AtomMappingHelperDialog(QDialog):
             return
 
         labels = self._file_widget._configurator.get_atom_labels()
-        for i, (grp_label, atm_label) in enumerate(labels):
-            w0 = QLabel(grp_label)
-            w1 = QLabel(atm_label)
+        for i, label in enumerate(labels):
+            w0 = QLabel(label.grp_label)
+            w1 = QLabel(label.atm_label)
             w2 = QComboBox()
             w2.addItems(self.all_symbols)
             self.mapping_widgets.append((w0, w1, w2))

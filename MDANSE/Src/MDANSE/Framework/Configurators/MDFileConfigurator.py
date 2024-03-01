@@ -19,6 +19,7 @@ import numpy as np
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.Framework.AtomMapping import AtomLabel
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 
@@ -189,15 +190,16 @@ class MDFileConfigurator(FileWithAtomDataConfigurator):
         """Closes the file."""
         self["instance"].close()
 
-    def get_atom_labels(self) -> list[tuple[str, str]]:
+    def get_atom_labels(self) -> list[AtomLabel]:
         """
         Returns
         -------
-        list[tuple[str, str]]
-            An ordered list of the group and atom labels.
+        list[AtomLabel]
+            An ordered list of atom labels.
         """
         labels = []
-        for label, _ in self["atoms"]:
-            if ("", label) not in labels:
-                labels.append(("", label))
+        for atm_label, _ in self["atoms"]:
+            label = AtomLabel(atm_label)
+            if label not in labels:
+                labels.append(label)
         return labels

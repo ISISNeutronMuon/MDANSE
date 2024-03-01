@@ -87,7 +87,7 @@ class CASTEP(Converter):
         # Populate the universe with atoms based on how many of each atom is in the read trajectory
         for symbol, number in self._castepFile["atoms"]:
             for i in range(number):
-                element = get_element_from_mapping("", symbol, self._atomicAliases)
+                element = get_element_from_mapping(self._atomicAliases, symbol)
                 self._chemical_system.add_chemical_entity(
                     Atom(symbol=element, name="%s_%d" % (symbol, i))
                 )

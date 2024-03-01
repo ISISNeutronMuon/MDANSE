@@ -19,7 +19,7 @@ from MDANSE.Chemistry.ChemicalEntity import (
     AtomCluster,
 )
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.AtomMapping import get_element_from_mapping
+from MDANSE.Framework.AtomMapping import get_element_from_mapping, AtomLabel
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
@@ -105,18 +105,19 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
 
             first = last + 1
 
-    def get_atom_labels(self) -> list[tuple[str, str]]:
+    def get_atom_labels(self) -> list[AtomLabel]:
         """
         Returns
         -------
-        list[tuple[str, str]]
-            An ordered list of the group and atom labels.
+        list[AtomLabel]
+            An ordered list of atom labels.
         """
         labels = []
         for mol_name, _, atomic_contents in self["molecules"]:
-            for label in atomic_contents:
-                if (mol_name, label) not in labels:
-                    labels.append((mol_name, label))
+            for atm_label in atomic_contents:
+                label = AtomLabel(atm_label, molecule=mol_name)
+                if label not in labels:
+                    labels.append(label)
         return labels
 
     def build_chemical_system(self, chemicalSystem, aliases):
@@ -130,7 +131,7 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
                 # Loops over the atom of the molecule.
                 for j, name in enumerate(atomic_contents):
                     # The atom is created.
-                    element = get_element_from_mapping(db_name, name, aliases)
+                    element = get_element_from_mapping(aliases, name, molecule=db_name)
                     a = Atom(symbol=element, name="%s_%s_%s" % (db_name, name, j))
                     atoms.append(a)
 

@@ -250,7 +250,7 @@ def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_versi
     temp_name = tempfile.mktemp()
 
     parameters = {
-        'atom_aliases': '{"spce water": {"OW": "O", "HW": "H"}}',
+        'atom_aliases': '{"molecule=spce water": {"OW": "O", "HW": "H"}}',
         'field_file': dlp_field_v2,
         'fold': False,
         'history_file': dlp_history_v2,

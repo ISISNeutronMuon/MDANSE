@@ -28,7 +28,7 @@ from MDANSE.Mathematics.Graph import Graph
 from MDANSE.Framework.Configurators.FileWithAtomDataConfigurator import (
     FileWithAtomDataConfigurator,
 )
-from MDANSE.Framework.AtomMapping import get_element_from_mapping
+from MDANSE.Framework.AtomMapping import AtomLabel, get_element_from_mapping
 
 
 class XTDFileConfigurator(FileWithAtomDataConfigurator):
@@ -159,7 +159,7 @@ class XTDFileConfigurator(FileWithAtomDataConfigurator):
             for node in cluster:
                 symbol = node.element
                 name = node.atom_name
-                element = get_element_from_mapping(name, symbol, aliases)
+                element = get_element_from_mapping(aliases, symbol, type=name)
                 at = Atom(symbol=element, name=name, xtdIndex=node.xtd_index)
                 at.index = node.index
                 coordinates[at.index] = node.xyz
@@ -181,15 +181,16 @@ class XTDFileConfigurator(FileWithAtomDataConfigurator):
         realConf.fold_coordinates()
         self._chemicalSystem.configuration = realConf
 
-    def get_atom_labels(self) -> list[tuple[str, str]]:
+    def get_atom_labels(self) -> list[AtomLabel]:
         """
         Returns
         -------
-        list[tuple[str, str]]
-            An ordered list of the group and atom labels.
+        list[AtomLabel]
+            An ordered list of atom labels.
         """
         labels = []
         for info in self._atoms.values():
-            if (info["atom_name"], info["element"]) not in labels:
-                labels.append((info["atom_name"], info["element"]))
+            label = AtomLabel(info["element"], type=info["atom_name"])
+            if label not in labels:
+                labels.append(label)
         return labels

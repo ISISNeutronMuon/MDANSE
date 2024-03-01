@@ -1,4 +1,6 @@
 from abc import abstractmethod
+
+from MDANSE.Framework.AtomMapping import AtomLabel
 from .InputFileConfigurator import InputFileConfigurator
 
 
@@ -25,6 +27,6 @@ class FileWithAtomDataConfigurator(InputFileConfigurator):
         pass
 
     @abstractmethod
-    def get_atom_labels(self) -> list[tuple[str, str]]:
+    def get_atom_labels(self) -> list[AtomLabel]:
         """Return the atoms labels in the file."""
         pass

@@ -56,12 +56,12 @@ class AtomMappingConfigurator(IConfigurator):
 
         labels = file_configurator.get_atom_labels()
         try:
-            fill_remaining_labels(labels, value)
+            fill_remaining_labels(value, labels)
         except AttributeError:
             self.error_status = "Unable to map all atoms."
             return
 
-        if not check_mapping_valid(labels, value):
+        if not check_mapping_valid(value, labels):
             self.error_status = "Atom mapping is not valid."
             return
 

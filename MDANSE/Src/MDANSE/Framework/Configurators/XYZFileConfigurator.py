@@ -16,6 +16,7 @@ import re
 import numpy as np
 
 from MDANSE.Core.Error import Error
+from MDANSE.Framework.AtomMapping import AtomLabel
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 
@@ -138,15 +139,16 @@ class XYZFileConfigurator(FileWithAtomDataConfigurator):
         """Closes the file that was, until now, open for reading."""
         self["instance"].close()
 
-    def get_atom_labels(self) -> list[tuple[str, str]]:
+    def get_atom_labels(self) -> list[AtomLabel]:
         """
         Returns
         -------
-        list[tuple[str, str]]
-            An ordered list of the group and atom labels.
+        list[AtomLabel]
+            An ordered list of atom labels.
         """
         labels = []
-        for label in self["atoms"]:
-            if ("", label) not in labels:
-                labels.append(("", label))
+        for atm_label in self["atoms"]:
+            label = AtomLabel(atm_label)
+            if label not in labels:
+                labels.append(label)
         return labels

@@ -189,7 +189,7 @@ class CP2K(Converter):
         self._chemical_system = ChemicalSystem()
 
         for i, symbol in enumerate(self._xyzFile["atoms"]):
-            element = get_element_from_mapping("", symbol, self._atomicAliases)
+            element = get_element_from_mapping(self._atomicAliases, symbol)
             self._chemical_system.add_chemical_entity(
                 Atom(symbol=element, name="%s_%d" % (symbol, i + 1))
             )
