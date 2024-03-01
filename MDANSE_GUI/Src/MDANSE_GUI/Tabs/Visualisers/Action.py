@@ -36,6 +36,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "HDFTrajectoryConfigurator": HDFTrajectoryWidget,
     "InterpolationOrderConfigurator": InterpolationOrderWidget,
     "OutputFilesConfigurator": OutputFilesWidget,
+    "ConfigFileConfigurator": InputFileWidget,
     "InputFileConfigurator": InputFileWidget,
     "MDFileConfigurator": InputFileWidget,
     "FieldFileConfigurator": InputFileWidget,
