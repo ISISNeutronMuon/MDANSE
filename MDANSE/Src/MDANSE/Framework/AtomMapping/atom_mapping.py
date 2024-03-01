@@ -8,10 +8,8 @@ class AtomLabel:
 
     def __init__(self, atm_label, **kwargs):
         self.atm_label = atm_label
-        if not kwargs:
-            self.grp_label = f""
-        else:
-            self.grp_label = f""
+        self.grp_label = f""
+        if kwargs:
             for k, v in kwargs.items():
                 self.grp_label += f"{k}={v};"
             self.grp_label = self.grp_label[:-1]
