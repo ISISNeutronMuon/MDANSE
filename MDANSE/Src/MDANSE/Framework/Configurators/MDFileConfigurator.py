@@ -19,7 +19,7 @@ import numpy as np
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-from .InputFileConfigurator import InputFileConfigurator
+from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 
 HBAR = measure(1.05457182e-34, "kg m2 / s").toval("uma nm2 / ps")
@@ -31,28 +31,12 @@ class CASTEPError(Error):
     pass
 
 
-class MDFileConfigurator(InputFileConfigurator):
+class MDFileConfigurator(FileWithAtomDataConfigurator):
     """
     Class representing a .md file format (documentation can be found at
     https://www.tcm.phy.cam.ac.uk/castep/MD/node13.html). It is used to determine the structure of the file (eg. the
     length of each section) and to read the information stored in one frame of the trajectory.
     """
-
-    def configure(self, filepath: str) -> None:
-        """
-        Parameters
-        ----------
-        filepath : str
-            The file path.
-        """
-        super().configure(filepath)
-        if self.error_status != "OK":
-            return
-        try:
-            self.parse()
-        except Exception as e:
-            print(e)
-            self.error_status = "MD file parsing error"
 
     def parse(self):
         self["instance"] = open(self["filename"], "rb")  # Open the provided file.

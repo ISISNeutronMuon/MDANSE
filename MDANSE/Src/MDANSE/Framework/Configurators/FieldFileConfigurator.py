@@ -21,30 +21,15 @@ from MDANSE.Chemistry.ChemicalEntity import (
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 
-from .InputFileConfigurator import InputFileConfigurator
+from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 
 class FieldFileError(Error):
     pass
 
 
-class FieldFileConfigurator(InputFileConfigurator):
+class FieldFileConfigurator(FileWithAtomDataConfigurator):
     """The DL_POLY field file configurator."""
-
-    def configure(self, filepath: str) -> None:
-        """
-        Parameters
-        ----------
-        filepath : str
-            The file path.
-        """
-        super().configure(filepath)
-        if self.error_status != "OK":
-            return
-        try:
-            self.parse()
-        except Exception:
-            self.error_status = "Field file parsing error"
 
     def parse(self):
         # The FIELD file is opened for reading, its contents stored into |lines| and then closed.
