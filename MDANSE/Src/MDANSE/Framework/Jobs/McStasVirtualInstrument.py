@@ -18,7 +18,7 @@ import os
 import shutil
 import subprocess
 import tempfile
-import string
+import sys
 import io
 
 import numpy as np
@@ -34,6 +34,7 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 MCSTAS_UNITS_LUT = {
     "rad/ps": measure(1, "rad/ps", equivalent=True).toval("meV"),
+    "nm2/ps": measure(1, "nm2/ps", equivalent=True).toval("b/ps"),
     "nm2": measure(1, "nm2").toval("b"),
     "1/nm": measure(1, "1/nm").toval("1/ang"),
 }
@@ -132,19 +133,20 @@ class McStasVirtualInstrument(IJob):
 
         # Compute some parameters used for a proper McStas run
         self._mcStasPhysicalParameters = {"density": 0.0}
+        self._mcStasPhysicalParameters["V_rho"] = 0.0
         self._mcStasPhysicalParameters["weight"] = sum(
             [ATOMS_DATABASE[s]["atomic_weight"] for s in symbols]
         )
         self._mcStasPhysicalParameters["sigma_abs"] = (
-            sum([ATOMS_DATABASE[s]["xs_absorption"] for s in symbols])
+            np.mean([ATOMS_DATABASE[s]["xs_absorption"] for s in symbols])
             * MCSTAS_UNITS_LUT["nm2"]
         )
         self._mcStasPhysicalParameters["sigma_coh"] = (
-            sum([ATOMS_DATABASE[s]["xs_coherent"] for s in symbols])
+            np.mean([ATOMS_DATABASE[s]["xs_coherent"] for s in symbols])
             * MCSTAS_UNITS_LUT["nm2"]
         )
         self._mcStasPhysicalParameters["sigma_inc"] = (
-            sum([ATOMS_DATABASE[s]["xs_incoherent"] for s in symbols])
+            np.mean([ATOMS_DATABASE[s]["xs_incoherent"] for s in symbols])
             * MCSTAS_UNITS_LUT["nm2"]
         )
         for frameIndex in self.configuration["frames"]["value"]:
@@ -155,13 +157,20 @@ class McStasVirtualInstrument(IJob):
             self._mcStasPhysicalParameters["density"] += (
                 self._mcStasPhysicalParameters["weight"] / cellVolume
             )
+            self._mcStasPhysicalParameters["V_rho"] += (
+                configuration._chemical_system.number_of_atoms / cellVolume
+            )
         self._mcStasPhysicalParameters["density"] /= self.configuration["frames"][
+            "n_frames"
+        ]
+        self._mcStasPhysicalParameters["V_rho"] /= self.configuration["frames"][
             "n_frames"
         ]
         # The density is converty in g/cm3
         self._mcStasPhysicalParameters["density"] /= NAVOGADRO / measure(
             1.0, "cm3"
         ).toval("nm3")
+        self._mcStasPhysicalParameters["V_rho"] *= measure(1.0, "1/nm3").toval("1/ang3")
 
     def run_step(self, index):
         """
@@ -178,6 +187,13 @@ class McStasVirtualInstrument(IJob):
         self.outFile = {}
         for typ in sqw:
             fout = tempfile.NamedTemporaryFile(mode="w", delete=False)
+            # for debugging, we use a real file here:
+            # fout = open(
+            #     "/Users/maciej.bartkowiak/an_example/mcstas/Persistent_file_for_"
+            #     + typ
+            #     + ".sqw",
+            #     "w",
+            # )
 
             fout.write("# Physical parameters:\n")
             for k, v in list(self._mcStasPhysicalParameters.items()):
@@ -186,24 +202,34 @@ class McStasVirtualInstrument(IJob):
             fout.write(
                 "# Temperature %s \n" % self.configuration["temperature"]["value"]
             )
-            fout.write("# classical 1 \n\n")
+            fout.write("#\n")
 
             for var in self.configuration[typ].variables:
                 fout.write("# %s\n" % var)
 
                 data = self.configuration[typ][var][:]
+                print(f"In {typ} the variable {var} has shape {data.shape}")
+                print(f"Values of {var}: min={data.min()}, max = {data.max()}")
                 data_unit = self.configuration[typ]._units[var]
                 try:
                     data *= MCSTAS_UNITS_LUT[data_unit]
                 except KeyError:
-                    pass
+                    print(
+                        f"Could not find the physical unit {data_unit} in the lookup table."
+                    )
 
-                np.savetxt(fout, data)
-                fout.write("\n")
+                np.savetxt(fout, np.atleast_2d(data), delimiter=" ", newline="\n")
 
             fout.close()
             self.outFile[typ] = fout.name
+            # self.outFile[typ] = (
+            #     "/Users/maciej.bartkowiak/an_example/mcstas/Persistent_file_for_"
+            #     + typ
+            #     + ".sqw"
+            # )
             sqwInput += "%s=%s " % (typ, fout.name)
+
+        # sys.exit(0)
 
         trace = ""
         if self.configuration["display"]["value"]:
@@ -217,6 +243,8 @@ class McStasVirtualInstrument(IJob):
         cmdLine.append(sqwInput)
         cmdLine.append(trace)
         cmdLine.extend(parameters)
+
+        print(" ".join(cmdLine))
 
         s = subprocess.Popen(
             " ".join(cmdLine),
