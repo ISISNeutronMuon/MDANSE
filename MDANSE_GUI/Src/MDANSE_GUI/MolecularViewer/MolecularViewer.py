@@ -23,6 +23,7 @@ from qtpy.QtWidgets import QSizePolicy
 
 import vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
 
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Chemistry import ATOMS_DATABASE as CHEMICAL_ELEMENTS
@@ -94,6 +95,16 @@ class MolecularViewer(QtWidgets.QWidget):
         self._iren.Enable()
 
         self._iren.GetRenderWindow()
+
+        self.axes_actor = vtkAxesActor()
+        self.axes_actor.AxisLabelsOn()
+        self.axes_actor.SetShaftTypeToCylinder()
+        self.axes_widget = vtk.vtkOrientationMarkerWidget()
+        self.axes_widget.SetOrientationMarker(self.axes_actor)
+        self.axes_widget.SetInteractor(self._iren.GetRenderWindow().GetInteractor())
+        self.axes_widget.SetViewport(0.0, 0.0, 0.25, 0.25)
+        self.axes_widget.SetEnabled(True)
+        self.axes_widget.InteractiveOff()
 
         layout = QtWidgets.QStackedLayout(self)
         layout.addWidget(self._iren)
