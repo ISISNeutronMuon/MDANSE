@@ -12,11 +12,7 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
 import collections
-import os
-
-import numpy as np
 
 from MDANSE.Core.Error import Error
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
@@ -25,145 +21,11 @@ from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-
-
-class XDATCARFileError(Error):
-    pass
+from MDANSE.Framework.AtomMapping import get_element_from_mapping
 
 
 class VASPConverterError(Error):
     pass
-
-
-class XDATCARFile(dict):
-    def __init__(self, filename):
-        self["instance"] = open(filename, "rb")
-
-        # Read header
-        self["instance"].readline()
-        header = []
-        while True:
-            self._headerSize = self["instance"].tell()
-            line = self["instance"].readline().strip()
-            if not line or line.lower().startswith(b"direct"):
-                self._frameHeaderSize = self["instance"].tell() - self._headerSize
-                break
-            header.append(line.decode())
-
-        self["scale_factor"] = float(header[0])
-
-        cell = " ".join(header[1:4]).split()
-
-        cell = np.array(cell, dtype=np.float64)
-
-        self["cell_shape"] = (
-            np.reshape(cell, (3, 3))
-            * self["scale_factor"]
-            * measure(1.0, "ang").toval("nm")
-        )
-
-        self["atoms"] = list(
-            zip(header[4].split(), [int(v) for v in header[5].split()])
-        )
-
-        self["n_atoms"] = sum([v[1] for v in self["atoms"]])
-
-        # The point here is to determine if the trajectory is NVT or NPT. If traj is NPT, the box will change at each iteration and the "header" will appear betwwen every frame
-        # We try to read the two first frames to figure it out
-        nAtoms = 0
-        while True:
-            self._frameSize = self["instance"].tell()
-            line = self["instance"].readline().strip()
-            if not line or line.lower().startswith(b"direct"):
-                break
-            nAtoms += 1
-
-        if nAtoms == self["n_atoms"]:
-            # Traj is NVT
-            # Structure is
-            # Header
-            # FrameHeader
-            # Frame 1
-            # FrameHeader
-            # Frame 2
-            # ...
-            # With frameHeader being "dummy"
-            self._npt = False
-            self._frameSize -= self._headerSize
-            self._actualFrameSize = self._frameSize - self._frameHeaderSize
-        else:
-            # Traj is NPT
-            # Structure is
-            # FrameHeader
-            # Frame 1
-            # FrameHeader
-            # Frame 2
-            # ...
-            # With FrameHeader containing box size
-            self._npt = True
-            self._actualFrameSize = self._frameSize
-            self._frameSize -= self._headerSize
-            self._frameHeaderSize += self._headerSize
-            self._headerSize = 0
-            self._actualFrameSize = self._frameSize - self._frameHeaderSize
-            # Retry to read the first frame
-            self["instance"].seek(self._frameHeaderSize)
-            nAtoms = 0
-            while True:
-                self._frameSize = self["instance"].tell()
-                line = self["instance"].readline().strip()
-                if len(line.split("  ")) != 3:
-                    break
-                nAtoms += 1
-
-            if nAtoms != self["n_atoms"]:
-                # Something went wrong
-                raise XDATCARFileError(
-                    "The number of atoms (%d) does not match the size of a frame (%d)."
-                    % (nAtoms, self["n_atoms"])
-                )
-
-        # Read frame number
-        self["instance"].seek(0, 2)
-        self["n_frames"] = (
-            self["instance"].tell() - self._headerSize
-        ) / self._frameSize
-
-        # Go back to top
-        self["instance"].seek(0)
-
-    def read_step(self, step):
-        self["instance"].seek(self._headerSize + step * self._frameSize)
-
-        if self._npt:
-            # Read box size
-            self["instance"].readline()
-            header = []
-            while True:
-                line = self["instance"].readline().strip()
-                if not line or line.lower().startswith("direct"):
-                    break
-                header.append(line)
-            cell = " ".join(header[1:4]).split()
-            cell = np.array(cell, dtype=np.float64)
-            self["cell_shape"] = (
-                np.reshape(cell, (3, 3))
-                * self["scale_factor"]
-                * measure(1.0, "ang").toval("nm")
-            )
-        else:
-            self["instance"].read(self._frameHeaderSize)
-
-        data = np.array(
-            self["instance"].read(self._actualFrameSize).split(), dtype=np.float64
-        )
-
-        config = np.reshape(data, (self["n_atoms"], 3))
-
-        return config
-
-    def close(self):
-        self["instance"].close()
 
 
 class VASP(Converter):
@@ -175,11 +37,19 @@ class VASP(Converter):
 
     settings = collections.OrderedDict()
     settings["xdatcar_file"] = (
-        "InputFileConfigurator",
+        "XDATCARFileConfigurator",
         {
             "wildcard": "XDATCAR files (XDATCAR*)|XDATCAR*|All files|*",
             "default": "INPUT_FILENAME",
             "label": "Input XDATCAR file",
+        },
+    )
+    settings["atom_aliases"] = (
+        "AtomMappingConfigurator",
+        {
+            "default": "{}",
+            "label": "Atom mapping",
+            "dependencies": {"input_file": "xdatcar_file"},
         },
     )
     settings["time_step"] = (
@@ -203,8 +73,9 @@ class VASP(Converter):
         """
         Initialize the job.
         """
+        self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
-        self._xdatcarFile = XDATCARFile(self.configuration["xdatcar_file"]["filename"])
+        self._xdatcarFile = self.configuration["xdatcar_file"]
 
         # The number of steps of the analysis.
         self.numberOfSteps = int(self._xdatcarFile["n_frames"])
@@ -213,8 +84,9 @@ class VASP(Converter):
 
         for symbol, number in self._xdatcarFile["atoms"]:
             for i in range(number):
+                element = get_element_from_mapping(self._atomicAliases, symbol)
                 self._chemicalSystem.add_chemical_entity(
-                    Atom(symbol=symbol, name="{:s}_{:d}".format(symbol, i))
+                    Atom(symbol=element, name="{:s}_{:d}".format(symbol, i))
                 )
 
         # A trajectory is opened for writing.
