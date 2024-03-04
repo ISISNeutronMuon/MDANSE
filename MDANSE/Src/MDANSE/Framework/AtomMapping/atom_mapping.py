@@ -48,7 +48,12 @@ def guess_element(atm_label: str, mass: Union[float, int, None] = None) -> str:
     if mass is not None and mass == 0.0:
         return "Du"
 
-    guesses = [atm_label[:2].capitalize(), atm_label[0].upper()]
+    guesses = []
+    guess_0 = atm_label[:2].capitalize()
+    if guess_0[0].isalpha() and guess_0[1].isalpha():
+        guesses.append(guess_0)
+    if guess_0[0].isalpha():
+        guesses.append(guess_0[0])
 
     # using the guess match to the atom and then match to the mass
     # if available
