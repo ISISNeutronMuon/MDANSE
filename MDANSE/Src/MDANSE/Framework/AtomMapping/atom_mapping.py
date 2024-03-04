@@ -1,4 +1,5 @@
 from typing import Union
+import re
 import numpy as np
 
 from MDANSE.Chemistry import ATOMS_DATABASE
@@ -49,11 +50,12 @@ def guess_element(atm_label: str, mass: Union[float, int, None] = None) -> str:
         return "Du"
 
     guesses = []
-    guess_0 = atm_label[:2].capitalize()
-    if len(guess_0) == 2 and guess_0.isalpha():
-        guesses.append(guess_0)
-    if guess_0[0].isalpha():
-        guesses.append(guess_0[0])
+    guess_0 = re.findall("([A-Za-z][a-z]?)", atm_label)
+    if len(guess_0) != 0:
+        guess = guess_0[0].capitalize()
+        guesses.append(guess)
+        if len(guess) == 2:
+            guesses.append(guess[0])
 
     # using the guess match to the atom and then match to the mass
     # if available

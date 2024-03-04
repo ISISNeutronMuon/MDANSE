@@ -7,6 +7,16 @@ from MDANSE.Framework.AtomMapping.atom_mapping import check_mapping_valid
 from MDANSE.Framework.AtomMapping.atom_mapping import AtomLabel
 
 
+def test_guess_element_hydrogen_to_hydrogen_0():
+    h = guess_element("1H")
+    assert h == "H"
+
+
+def test_guess_element_hydrogen_to_hydrogen_1():
+    h = guess_element("h")
+    assert h == "H"
+
+
 def test_guess_element_carbon_double_bond_symbol_to_carbon():
     c = guess_element("C=")
     assert c == "C"
