@@ -50,7 +50,7 @@ def guess_element(atm_label: str, mass: Union[float, int, None] = None) -> str:
 
     guesses = []
     guess_0 = atm_label[:2].capitalize()
-    if guess_0[0].isalpha() and guess_0[1].isalpha():
+    if len(guess_0) == 2 and guess_0.isalpha():
         guesses.append(guess_0)
     if guess_0[0].isalpha():
         guesses.append(guess_0[0])
