@@ -35,30 +35,3 @@ def parse_args():
     args = parser.parse_args()
 
     return args
-
-
-def main():
-    from MDANSE import REGISTRY
-    from MDANSE.GUI.Apps import JobApp
-
-    args = parse_args()
-    trajectory = args.trajectory
-    job = args.job[0]
-
-    if job not in REGISTRY["job"]:
-        print("Unknown job: %s" % job)
-        sys.exit(1)
-
-    for v in REGISTRY["job"][job].settings.values():
-        if v[0] == "hdf_trajectory" and not trajectory:
-            print("A trajectory is needed")
-            sys.exit(1)
-
-    trajectory = trajectory[0] if trajectory else None
-
-    app = JobApp(job, trajectory)
-    app.MainLoop()
-
-
-if __name__ == "__main__":
-    main()

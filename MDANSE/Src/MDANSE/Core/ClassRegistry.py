@@ -14,7 +14,6 @@
 # **************************************************************************
 
 import glob
-import imp
 import inspect
 import os
 
@@ -164,6 +163,3 @@ class ClassRegistry(object, metaclass=Singleton):
         """
 
         return sorted(self._registry.keys())
-
-
-REGISTRY = ClassRegistry()
