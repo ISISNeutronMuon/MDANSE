@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/Jobs/DFTB.py
+# @file      MDANSE/Framework/Jobs/DFTB.py
 # @brief     Implements module/class/test DFTB
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
@@ -29,7 +29,7 @@ class DFTB(Forcite):
 
     settings = collections.OrderedDict()
     settings["xtd_file"] = (
-        "InputFileConfigurator",
+        "XTDFileConfigurator",
         {
             "default": "INPUT_FILENAME.xtd",
             "label": "The XTD file",
@@ -40,6 +40,14 @@ class DFTB(Forcite):
         {
             "default": "INPUT_FILENAME.trj",
             "label": "The TRJ file",
+        },
+    )
+    settings["atom_aliases"] = (
+        "AtomMappingConfigurator",
+        {
+            "default": "{}",
+            "label": "Atom mapping",
+            "dependencies": {"input_file": "xtd_file"},
         },
     )
     settings["fold"] = (

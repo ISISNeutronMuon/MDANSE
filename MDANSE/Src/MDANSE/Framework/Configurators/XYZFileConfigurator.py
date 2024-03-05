@@ -1,0 +1,154 @@
+# **************************************************************************
+#
+# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#
+# @file      MDANSE/Framework/Configurators/XYZFileConfigurator.py
+# @brief     Implements module/class/test XYZFileConfigurator
+#
+# @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
+# @license   GNU General Public License v3 or higher (see LICENSE)
+# @copyright Institut Laue Langevin 2013-now
+# @copyright ISIS Neutron and Muon Source, STFC, UKRI 2021-now
+# @authors   Scientific Computing Group at ILL (see AUTHORS)
+#
+# **************************************************************************
+import re
+import numpy as np
+
+from MDANSE.Core.Error import Error
+from MDANSE.Framework.AtomMapping import AtomLabel
+from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
+
+
+class XYZFileError(Error):
+    pass
+
+
+class XYZFileConfigurator(FileWithAtomDataConfigurator):
+    """This class loads the contents of an XYZ file,
+    which in the case of CP2K may contain either the
+    positions of atoms, or velocities. In either case
+    there will be 3 components per atom.
+    """
+
+    def parse(self):
+        self._lastline = 0
+        self._header_lines = 2
+        self._frame_lines = 0
+        filename = self["filename"]
+
+        self["instance"] = open(filename, "r")
+
+        self["instance"].seek(0, 0)  # go to the beginning of file
+
+        try:
+            self["n_atoms"] = int(self["instance"].readline().strip())
+        except ValueError:
+            raise XYZFileError(
+                "Could not read the number of atoms in %s file" % filename
+            )
+
+        self._nAtomsLineSize = self["instance"].tell()
+        self["instance"].readline()
+        self._headerSize = self["instance"].tell()
+        self["atoms"] = []
+        for _ in range(self["n_atoms"]):
+            line = self["instance"].readline()
+            atom = line.split()[0].strip()
+            self["atoms"].append(atom)
+            self._frame_lines += 1
+
+        # The frame size define the total size of a frame (number of atoms header + time info line + coordinates block)
+        self._frameSize = self["instance"].tell()
+        self._coordinatesSize = self._frameSize - self._headerSize
+
+        # Compute the frame number
+        self["instance"].seek(0, 2)  # go to the end of file
+        self["n_frames"] = self["instance"].tell() // self._frameSize
+
+        # If the trajectory has more than one step, compute the time step as the difference between the second and the first time step
+        if self["n_frames"] > 1:
+            firstTimeStep = self.fetch_time_step(0)
+            secondTimeStep = self.fetch_time_step(1)
+            self["time_step"] = secondTimeStep - firstTimeStep
+        else:
+            self["time_step"] = self.fetch_time_step(0)
+
+        # Go back to top
+        self["instance"].seek(0)
+
+    def fetch_time_step(self, step: int):
+        """Finds the value of simulation time at the
+        nth simulation step.
+
+        Arguments:
+            step -- number of the simulation frame to check
+
+        Raises:
+            XYZFileError: If a valid time stamp could not be find
+
+        Returns:
+            float -- the time stamp of the frame
+        """
+        self["instance"].seek(step * self._frameSize + self._nAtomsLineSize)
+        timeLine = self["instance"].readline().strip()
+        matches = re.findall("^i =.*, time =(.*), E =.*$", timeLine)
+        if len(matches) != 1:
+            raise XYZFileError("Could not fetch the time step from XYZ file")
+        try:
+            timeStep = float(matches[0])
+        except ValueError:
+            raise XYZFileError("Could not cast the timestep to a floating")
+        else:
+            return timeStep
+
+    def read_step(self, step: int):
+        """Reads and returns an array of atom coordinates the nth
+        simulation frame.
+
+        Arguments:
+            step -- the number of the simulation step (frame) to be returned.
+
+        Returns:
+            ndarray -- an (N,3) array containing the coordinates of N atoms
+               at the requested simulation step.
+        """
+        starting_line = (
+            step * (self._frame_lines + self._header_lines) + self._header_lines
+        )
+        lines_to_skip = starting_line - self._lastline
+        if lines_to_skip < 0:
+            self["instance"].seek(0)
+            lines_to_skip = starting_line
+        for _ in range(lines_to_skip):
+            next(self["instance"])
+            self._lastline += 1
+
+        templines = []
+        for _ in range(self._frame_lines):
+            templines.append(
+                [float(x) for x in self["instance"].readline().split()[1:]]
+            )
+            self._lastline += 1
+
+        config = np.array(templines, dtype=np.float64)
+
+        return config
+
+    def close(self):
+        """Closes the file that was, until now, open for reading."""
+        self["instance"].close()
+
+    def get_atom_labels(self) -> list[AtomLabel]:
+        """
+        Returns
+        -------
+        list[AtomLabel]
+            An ordered list of atom labels.
+        """
+        labels = []
+        for atm_label in self["atoms"]:
+            label = AtomLabel(atm_label)
+            if label not in labels:
+                labels.append(label)
+        return labels

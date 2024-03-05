@@ -318,11 +318,11 @@ class AtomSelectionWidget(WidgetBase):
         self._field = QLineEdit(default_value, self._base)
         self._field.setPlaceholderText(default_value)
         self._field.setMaxLength(2147483647)  # set to the largest possible
+        self._field.textChanged.connect(self.updateValue)
         self.selector = self._configurator.get_selector()
         self.helper = HelperDialog(self.selector, self._field, self._base)
         helper_button = QPushButton("Atom selection helper", self._base)
         helper_button.clicked.connect(self.helper_dialog)
-        self._field.textChanged.connect(self.check_valid_field)
         self._default_value = default_value
         self._layout.addWidget(self._field)
         self._layout.addWidget(helper_button)
@@ -330,46 +330,12 @@ class AtomSelectionWidget(WidgetBase):
         self.updateValue()
 
     @Slot()
-    def helper_dialog(self, offset: int = 10) -> None:
-        """Opens the helper dialog.
-
-        Parameters
-        ----------
-        offset : int
-            Number of pixels to place the helper dialog away from the
-            parent.
-        """
+    def helper_dialog(self) -> None:
+        """Opens the helper dialog."""
         if self.helper.isVisible():
             self.helper.close()
-            return
-
-        self.helper.show()
-
-        # place the helper to the left of the parent, if there is not
-        # enough screen space put it to the right
-        total_width = sum(
-            [screen.size().width() for screen in QApplication.instance().screens()]
-        )
-        right = self.parent().pos().x() + self.parent().width() + offset
-        left = self.parent().pos().x() - self.helper.min_width - offset
-        if right + self.helper.min_width + offset < total_width:
-            self.helper.move(right, self.parent().pos().y())
         else:
-            self.helper.move(left, self.parent().pos().y())
-
-    def check_valid_field(self, value: str) -> None:
-        """Changes the color of the field if the selector setting is
-        not valid.
-
-        Parameters
-        ----------
-        value : str
-            The atom selection JSON string.
-        """
-        if self.selector.check_valid_json_settings(value) or value == "":
-            self._field.setStyleSheet("color: black;")
-        else:
-            self._field.setStyleSheet("color: red;")
+            self.helper.show()
 
     def get_widget_value(self) -> str:
         """

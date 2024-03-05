@@ -59,9 +59,13 @@ class AtomSelectionConfigurator(IConfigurator):
             self.error_status = "Invalid input value."
             return
 
+        selector = Selector(trajConfig["instance"].chemical_system)
+        if not selector.check_valid_json_settings(value):
+            self.error_status = "Invalid JSON string."
+            return
+
         self["value"] = value
 
-        selector = Selector(trajConfig["instance"].chemical_system)
         selector.update_from_json(value)
         indexes = selector.get_idxs()
 

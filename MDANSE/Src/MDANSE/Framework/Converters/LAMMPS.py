@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/Jobs/LAMMPS.py
+# @file      MDANSE/Framework/Converters/LAMMPS.py
 # @brief     Implements module/class/test LAMMPS
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
@@ -12,14 +12,9 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
 import collections
-import os
-import re
-
 import numpy as np
 
-from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
@@ -31,123 +26,11 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-
-
-class LAMMPSConfigFileError(Error):
-    pass
+from MDANSE.Framework.AtomMapping import get_element_from_mapping
 
 
 class LAMMPSTrajectoryFileError(Error):
     pass
-
-
-class LAMMPSConfigFile(dict):
-    def __init__(self, filename, tolerance, smart_association):
-        self._filename = filename
-
-        self._tolerance = tolerance
-
-        self["n_bonds"] = None
-
-        self["bonds"] = []
-
-        self["n_atoms"] = None
-
-        self["n_atom_types"] = None
-
-        self["elements"] = {}
-
-        unit = open(self._filename, "r")
-        lines = []
-        for l in unit.readlines():
-            l = l.strip()
-            if l:
-                lines.append(l)
-        unit.close()
-
-        for i, line in enumerate(lines):
-            if self["n_atoms"] is None:
-                m = re.match("^\s*(\d+)\s*atoms\s*$", line, re.I)
-                if m:
-                    self["n_atoms"] = int(m.groups()[0])
-
-            if self["n_atom_types"] is None:
-                m = re.match("^\s*(\d+)\s*atom types\s*$", line, re.I)
-                if m:
-                    self["n_atom_types"] = int(m.groups()[0])
-
-            if self["n_bonds"] is None:
-                m = re.match("^\s*(\d+)\s*bonds\s*$", line, re.I)
-                if m:
-                    self["n_bonds"] = int(m.groups()[0])
-
-            if re.match("^\s*masses\s*$", line, re.I):
-                if self["n_atom_types"] is None:
-                    raise LAMMPSConfigFileError(
-                        "Did not find the number of atom types."
-                    )
-
-                for j in range(1, self["n_atom_types"] + 1):
-                    data_line = (
-                        lines[i + j].strip().split("#")[0]
-                    )  # Remove commentary if any
-                    idx, mass = data_line.split()[0:2]
-                    idx = int(idx)
-                    mass = float(mass)
-                    el = ATOMS_DATABASE.match_numeric_property(
-                        "atomic_weight", mass, tolerance=self._tolerance
-                    )
-                    nElements = len(el)
-                    if nElements == 0:
-                        # No element is matching
-                        raise LAMMPSConfigFileError(
-                            "The atom %d with defined mass %f could not be assigned with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database"
-                            % (idx, mass, self._tolerance)
-                        )
-                    elif nElements == 1:
-                        # One element is matching => continue
-                        self["elements"][idx] = el[0]
-                    elif (
-                        nElements == 2
-                        and el[0][: min((len(el[0]), len(el[1])))]
-                        == el[1][: min((len(el[0]), len(el[1])))]
-                    ):
-                        # If two elements are matching, these can be the same appearing twice (example 'Al' and 'Al27')
-                        self["elements"][idx] = el[0]
-                    else:
-                        # Two or more elements are matching
-                        if smart_association:
-                            # Take the nearest match
-                            matched_element = None
-                            for element in el:
-                                if matched_element is None:
-                                    matched_element = element
-                                else:
-                                    if np.abs(
-                                        ATOMS_DATABASE[element]["atomic_weight"] - mass
-                                    ) < np.abs(
-                                        ATOMS_DATABASE[matched_element]["atomic_weight"]
-                                        - mass
-                                    ):
-                                        matched_element = element
-                            self["elements"][idx] = matched_element
-                        else:
-                            # More than two elements are matching => error
-                            raise LAMMPSConfigFileError(
-                                "The atoms %s of MDANSE database matches the mass %f with a tolerance of %f. Please modify the mass in the config file to comply with MDANSE internal database"
-                                % (el, mass, self._tolerance)
-                            )
-
-            m = re.match("^\s*bonds\s*$", line, re.I)
-            if m:
-                for j in range(1, self["n_bonds"] + 1):
-                    _, _, at1, at2 = lines[i + j].split()
-                    at1 = int(at1) - 1
-                    at2 = int(at2) - 1
-                    self["bonds"].append([at1, at2])
-                self["bonds"] = np.array(self["bonds"], dtype=np.int32)
-
-        unit.close()
 
 
 class LAMMPS(Converter):
@@ -159,7 +42,7 @@ class LAMMPS(Converter):
 
     settings = collections.OrderedDict()
     settings["config_file"] = (
-        "InputFileConfigurator",
+        "ConfigFileConfigurator",
         {
             "label": "LAMMPS configuration file",
             "wildcard": "Config files (*.config)|*.config|All files|*",
@@ -173,13 +56,13 @@ class LAMMPS(Converter):
             "default": "INPUT_FILENAME.lammps",
         },
     )
-    settings["mass_tolerance"] = (
-        "FloatConfigurator",
-        {"label": "mass tolerance (uma)", "default": 1.0e-3, "mini": 1.0e-9},
-    )
-    settings["smart_mass_association"] = (
-        "BooleanConfigurator",
-        {"label": "smart mass association", "default": True},
+    settings["atom_aliases"] = (
+        "AtomMappingConfigurator",
+        {
+            "default": "{}",
+            "label": "Atom mapping",
+            "dependencies": {"input_file": "config_file"},
+        },
     )
     settings["time_step"] = (
         "FloatConfigurator",
@@ -210,17 +93,14 @@ class LAMMPS(Converter):
         """
         Initialize the job.
         """
+        self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
         # The number of steps of the analysis.
         self.numberOfSteps = self.configuration["n_steps"]["value"]
 
-        self._lammpsConfig = LAMMPSConfigFile(
-            self.configuration["config_file"]["value"],
-            self.configuration["mass_tolerance"]["value"],
-            self.configuration["smart_mass_association"]["value"],
-        )
+        self._lammpsConfig = self.configuration["config_file"]
 
-        self.parse_first_step()
+        self.parse_first_step(self._atomicAliases)
 
         # Estimate number of steps if needed
         if self.numberOfSteps == 0:
@@ -383,7 +263,7 @@ class LAMMPS(Converter):
 
         super(LAMMPS, self).finalize()
 
-    def parse_first_step(self):
+    def parse_first_step(self, aliases):
         self._lammps = open(self.configuration["trajectory_file"]["value"], "r")
 
         self._itemsPosition = collections.OrderedDict()
@@ -440,12 +320,14 @@ class LAMMPS(Converter):
                 for i in range(self._nAtoms):
                     temp = self._lammps.readline().split()
                     idx = int(temp[self._id]) - 1
-                    ty = int(temp[self._type])
-                    name = "{:s}_{:d}".format(self._lammpsConfig["elements"][ty], idx)
-                    self._rankToName[int(temp[0]) - 1] = name
-                    g.add_node(
-                        idx, element=self._lammpsConfig["elements"][ty], atomName=name
+                    ty = int(temp[self._type]) - 1
+                    label = str(self._lammpsConfig["elements"][ty][0])
+                    mass = str(self._lammpsConfig["elements"][ty][1])
+                    name = "{:s}_{:d}".format(
+                        str(self._lammpsConfig["elements"][ty][0]), idx
                     )
+                    self._rankToName[int(temp[0]) - 1] = name
+                    g.add_node(idx, label=label, mass=mass, atomName=name)
 
                 if self._lammpsConfig["n_bonds"] is not None:
                     for idx1, idx2 in self._lammpsConfig["bonds"]:
@@ -457,7 +339,10 @@ class LAMMPS(Converter):
                     if len(cluster) == 1:
                         node = cluster.pop()
                         try:
-                            obj = Atom(symbol=node.element, name=node.atomName)
+                            element = get_element_from_mapping(
+                                aliases, node.label, mass=node.mass
+                            )
+                            obj = Atom(symbol=element, name=node.atomName)
                         except TypeError:
                             print("EXCEPTION in LAMMPS loader")
                             print(f"node.element = {node.element}")
@@ -467,9 +352,12 @@ class LAMMPS(Converter):
                     else:
                         atList = []
                         for atom in cluster:
-                            at = Atom(symbol=atom.element, name=atom.atomName)
+                            element = get_element_from_mapping(
+                                aliases, atom.label, mass=atom.mass
+                            )
+                            at = Atom(symbol=element, name=atom.atomName)
                             atList.append(at)
-                        c = collections.Counter([at.element for at in cluster])
+                        c = collections.Counter([at.label for at in cluster])
                         name = "".join(
                             ["{:s}{:d}".format(k, v) for k, v in sorted(c.items())]
                         )

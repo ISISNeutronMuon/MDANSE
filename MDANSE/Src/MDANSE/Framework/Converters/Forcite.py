@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/Jobs/Forcite.py
+# @file      MDANSE/Framework/Jobs/Forcite.py
 # @brief     Implements module/class/test Forcite
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
@@ -12,17 +12,15 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
 import collections
-import os
 import struct
 
 import numpy as np
 
 from MDANSE.Framework.Units import measure
 from MDANSE.Framework.Converters.Converter import Converter
-from MDANSE.IO.XTDFile import XTDFile
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+
 
 FORCE_FACTOR = measure(1.0, "kcal_per_mole/ang", equivalent=True).toval(
     "uma nm/ps2 mol"
@@ -278,7 +276,7 @@ class Forcite(Converter):
 
     settings = collections.OrderedDict()
     settings["xtd_file"] = (
-        "InputFileConfigurator",
+        "XTDFileConfigurator",
         {
             "wildcard": "XTD files (*.xtd)|*.xtd|All files|*",
             "default": "INPUT_FILENAME.xtd",
@@ -291,6 +289,14 @@ class Forcite(Converter):
             "wildcard": "TRJ files (*.trj)|*.trj|All files|*",
             "default": "INPUT_FILENAME.trj",
             "label": "Input TRJ file",
+        },
+    )
+    settings["atom_aliases"] = (
+        "AtomMappingConfigurator",
+        {
+            "default": "{}",
+            "label": "Atom mapping",
+            "dependencies": {"input_file": "xtd_file"},
         },
     )
     settings["fold"] = (
@@ -310,10 +316,11 @@ class Forcite(Converter):
         """
         Initialize the job.
         """
+        self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
-        self._xtdfile = XTDFile(self.configuration["xtd_file"]["filename"])
+        self._xtdfile = self.configuration["xtd_file"]
 
-        self._xtdfile.build_chemical_system()
+        self._xtdfile.build_chemical_system(self._atomicAliases)
 
         self._chemicalSystem = self._xtdfile.chemicalSystem
 
