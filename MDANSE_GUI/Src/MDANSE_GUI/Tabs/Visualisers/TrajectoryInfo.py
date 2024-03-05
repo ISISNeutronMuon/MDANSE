@@ -49,9 +49,9 @@ class TrajectoryInfo(QTextBrowser):
         text = "\n ==== Chemical System summary ==== \n"
         counter = defaultdict(int)
         for atom in cs.atom_list:
-            counter[atom] += 1
+            counter[(atom.full_name, atom.symbol)] += 1
         for key, value in counter.items():
-            text += f"{value} {key} atoms\n"
+            text += f"Full Name: {key[0]}; Element: {key[1]}; Count: {value}\n"
         text += " ===== \n"
         return text
 
