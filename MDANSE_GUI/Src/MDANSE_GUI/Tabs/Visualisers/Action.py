@@ -37,6 +37,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "InterpolationOrderConfigurator": InterpolationOrderWidget,
     "OutputFilesConfigurator": OutputFilesWidget,
     "ASEFileConfigurator": InputFileWidget,
+    "AseInputFileConfigurator": AseInputFileWidget,
     "ConfigFileConfigurator": InputFileWidget,
     "InputFileConfigurator": InputFileWidget,
     "MDFileConfigurator": InputFileWidget,
