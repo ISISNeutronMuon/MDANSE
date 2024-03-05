@@ -29,6 +29,8 @@ class CoordinationNumber(DistanceHistogram):
 
     label = "Coordination Number"
 
+    enabled = True
+
     category = (
         "Analysis",
         "Structure",
