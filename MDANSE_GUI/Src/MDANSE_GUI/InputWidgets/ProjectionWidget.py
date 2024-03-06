@@ -48,7 +48,8 @@ class ProjectionWidget(WidgetBase):
             tooltip_text = "The spatial properties in the analysis can be projected on a plane or on an axis, as chosen here."
         for wid in vfields:
             wid.setToolTip(tooltip_text)
-        self._button_group.setToolTip(tooltip_text)
+        for wid in self._button_group.buttons():
+            wid.setToolTip(tooltip_text)
 
     def configure_using_default(self):
         """This is too complex to have a default value"""

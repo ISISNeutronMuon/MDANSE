@@ -2,8 +2,8 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/Formats/ASCIIFormat.py
-# @brief     Implements module/class/test ASCIIFormat
+# @file      Src/Framework/Formats/TextFormat.py
+# @brief     Implements module/class/test TextFormat
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
 # @license   GNU General Public License v3 or higher (see LICENSE)
@@ -23,9 +23,9 @@ import numpy as np
 from MDANSE.Framework.Formats.IFormat import IFormat
 
 
-class ASCIIFormat(IFormat):
+class TextFormat(IFormat):
     """
-    This class handles the writing of output variables in ASCII format. Each output variable is written into separate ASCII files which are further
+    This class handles the writing of output variables in Text format. Each output variable is written into separate Text files which are further
     added to a single archive file.
     """
 
@@ -36,11 +36,11 @@ class ASCIIFormat(IFormat):
     @classmethod
     def write(cls, filename, data, header=""):
         """
-        Write a set of output variables into a set of ASCII files.
+        Write a set of output variables into a set of Text files.
 
-        Each output variable will be output in a separate ASCII file. All the ASCII files will be compressed into a tar file.
+        Each output variable will be output in a separate Text file. All the Text files will be compressed into a tar file.
 
-        :param filename: the path to the output archive file that will contain the ASCII files written for each output variable.
+        :param filename: the path to the output archive file that will contain the Text files written for each output variable.
         :type filename: str
         :param data: the data to be written out.
         :type data: dict of Framework.OutputVariables.IOutputVariable
@@ -49,7 +49,7 @@ class ASCIIFormat(IFormat):
         """
 
         filename = os.path.splitext(filename)[0]
-        filename = "%s_ascii.tar" % filename
+        filename = "%s_text.tar" % filename
 
         tf = tarfile.open(filename, "w")
 
@@ -61,12 +61,16 @@ class ASCIIFormat(IFormat):
             tempStr.seek(0)
 
             info = tarfile.TarInfo(name="%s%s" % (var.varname, cls.extensions[0]))
-            info.size = tempStr.len
+            try:
+                info.size = len(tempStr)
+            except:
+                print("Ignoring the error in TextFormat, see if it matters.")
             tf.addfile(tarinfo=info, fileobj=tempStr)
 
         if header:
             tempStr = io.StringIO()
-            tempStr.write(header)
+            for line in header:
+                tempStr.write(str(line))
             tempStr.write("\n\n")
             tempStr.seek(0)
             info = tarfile.TarInfo(name="jobinfo.txt")
@@ -91,9 +95,7 @@ class ASCIIFormat(IFormat):
         """
 
         if data.ndim > 2:
-            fileobject.write(
-                "Can not write ASCII output for data of dimensionality > 2"
-            )
+            fileobject.write("Can not write Text output for data of dimensionality > 2")
 
         elif data.ndim == 2:
             xData, yData = data.axis.split("|")

@@ -39,9 +39,9 @@ class RigidBodyTrajectory(IJob):
     Here 'fit' means the optimal superposition of the structures in a least-squares sense.
     Global translations and rotations of molecules or subunits of complex molecules
     can be extracted from a MD trajectory.
-    
+
     A more detailed presentation is given in
-    G. R. Kneller, 'Superposition of Molecular Structures using Quaternions,' 
+    G. R. Kneller, 'Superposition of Molecular Structures using Quaternions,'
     Mol. Simul., vol. 7, no. 1-2, pp. 113-119, May 1991,
     doi: 10.1080/08927029108022453.
     """

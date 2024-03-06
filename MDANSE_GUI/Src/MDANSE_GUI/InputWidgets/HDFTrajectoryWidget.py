@@ -44,7 +44,7 @@ class HDFTrajectoryWidget(WidgetBase):
         self._trajectory = trajectory
         self.default_labels()
         self.update_labels()
-        self.updateValue()        
+        self.updateValue()
         if self._tooltip:
             tooltip_text = self._tooltip
         else:

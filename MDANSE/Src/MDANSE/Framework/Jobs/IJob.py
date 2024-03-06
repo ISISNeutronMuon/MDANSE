@@ -369,11 +369,11 @@ class %(classname)s(IJob):
     ancestor = ["hdf_trajectory"]
 
     # You should enter the configuration of your job here
-    # Here a basic example of a job that will use a HDF trajectory, a frame selection and an output file in HDF5 and ASCII file formats
+    # Here a basic example of a job that will use a HDF trajectory, a frame selection and an output file in HDF5 and Text file formats
     settings = collections.OrderedDict()
     settings['trajectory']=('hdf_trajectory',{})
     settings['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
-    settings['output_files']=('output_files', {"formats":["HDFFormat","netcdf","ASCIIFormat"]})
+    settings['output_files']=('output_files', {"formats":["HDFFormat","netcdf","TextFormat"]})
             
     def initialize(self):
         """

@@ -66,9 +66,11 @@ class OutputTrajectoryWidget(WidgetBase):
         if self._tooltip:
             tooltip_text = self._tooltip
         else:
-            tooltip_text = ("The output trajectory will be saved under this name,"
-                "with the selected floating point number precision"
-                "and compression type")
+            tooltip_text = (
+                "The output trajectory will be saved under this name, "
+                "with the selected floating point number precision "
+                "and compression type"
+            )
         self._field.setToolTip(tooltip_text)
 
     def default_labels(self):

@@ -35,7 +35,9 @@ class ComboWidget(WidgetBase):
         if self._tooltip:
             tooltip_text = self._tooltip
         else:
-            tooltip_text = "A single option can be picked out of all the options listed."
+            tooltip_text = (
+                "A single option can be picked out of all the options listed."
+            )
         field.setToolTip(tooltip_text)
         self._field = field
         self._layout.addWidget(field)

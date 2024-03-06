@@ -48,7 +48,6 @@ class BooleanWidget(WidgetBase):
         if self._tooltip == "":
             self._tooltip = "A single logical value that can be True of False"
         self._field.setToolTip(self._tooltip)
-        self._label.setText(self._label_text)
 
     def configure_using_default(self):
         """No need to anything for Boolean"""
