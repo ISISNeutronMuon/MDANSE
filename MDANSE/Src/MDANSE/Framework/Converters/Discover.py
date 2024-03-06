@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/Framework/Jobs/Discover.py
+# @file      MDANSE/Framework/Jobs/Discover.py
 # @brief     Implements module/class/test Discover
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
@@ -12,17 +12,11 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
-import os
 import collections
-
 import struct
-
 import numpy as np
 
-
 from MDANSE.Framework.Converters.Converter import Converter
-from MDANSE.IO.XTDFile import XTDFile
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
@@ -256,7 +250,7 @@ class Discover(Converter):
 
     settings = collections.OrderedDict()
     settings["xtd_file"] = (
-        "InputFileConfigurator",
+        "XTDFileConfigurator",
         {
             "wildcard": "XTD files (*.xtd)|*.xtd|All files|*",
             "default": "INPUT_FILENAME.xtd",
@@ -269,6 +263,14 @@ class Discover(Converter):
             "wildcard": "HIS files (*.his)|*.his|All files|*",
             "default": "INPUT_FILENAME.his",
             "label": "Input HIS file",
+        },
+    )
+    settings["atom_aliases"] = (
+        "AtomMappingConfigurator",
+        {
+            "default": "{}",
+            "label": "Atom mapping",
+            "dependencies": {"input_file": "xtd_file"},
         },
     )
     settings["fold"] = (
@@ -288,10 +290,11 @@ class Discover(Converter):
         """
         Initialize the job.
         """
+        self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
-        self._xtdfile = XTDFile(self.configuration["xtd_file"]["filename"])
+        self._xtdfile = self.configuration["xtd_file"]
 
-        self._xtdfile.build_chemical_system()
+        self._xtdfile.build_chemical_system(self._atomicAliases)
 
         self._chemicalSystem = self._xtdfile.chemicalSystem
 

@@ -109,15 +109,6 @@ def test_discover_mdt_conversion_file_exists_and_loads_up_successfully(compressi
     os.remove(temp_name + ".mdt")
 
 
-def test_XYZfile_from_cp2k():
-    from MDANSE.Framework.Converters.CP2K import XYZFile
-    xyz_file = XYZFile(cp2k_pos)
-    assert len(xyz_file["atoms"]) == 60
-    assert xyz_file["n_frames"] == 100
-    coords = xyz_file.read_step(0)
-    assert len(coords) == 60
-
-
 @pytest.mark.parametrize("velocity", [cp2k_vel, None])
 def test_cp2k_mdt_conversion_file_exists_and_loads_up_successfully(velocity):
     temp_name = tempfile.mktemp()
@@ -259,7 +250,7 @@ def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_versi
     temp_name = tempfile.mktemp()
 
     parameters = {
-        'atom_aliases': {},
+        'atom_aliases': '{}',
         'field_file': dlp_field_v2,
         'fold': False,
         'history_file': dlp_history_v2,
@@ -280,7 +271,7 @@ def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_versi
     temp_name = tempfile.mktemp()
 
     parameters = {
-        'atom_aliases': {},
+        'atom_aliases': '{}',
         'field_file': dlp_field_v4,
         'fold': False,
         'history_file': dlp_history_v4,

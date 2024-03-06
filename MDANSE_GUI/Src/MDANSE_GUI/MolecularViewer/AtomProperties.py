@@ -145,9 +145,7 @@ class AtomProperties(QStandardItemModel):
             rgb = [int(x) for x in element_database[atom]["color"].split(";")]
             index_list.append(self.add_colour(rgb))
             row.append(QStandardItem(str(nat + 1)))  # atom number
-            row.append(
-                QStandardItem(str(element_database[atom]["symbol"]))
-            )  # chemical element name
+            row.append(QStandardItem(atom))  # chemical element name
             row.append(
                 QStandardItem(str(round(element_database[atom]["atomic_radius"], 2)))
             )

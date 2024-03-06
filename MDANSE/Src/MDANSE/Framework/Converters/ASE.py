@@ -12,11 +12,8 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
 import collections
 import os
-import re
-from os.path import expanduser
 
 from ase.io import iread, read
 from ase.atoms import Atoms as ASEAtoms
@@ -24,8 +21,7 @@ from ase.io.trajectory import Trajectory as ASETrajectory
 import numpy as np
 import h5py
 
-
-from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter, InteractiveConverter
@@ -52,10 +48,18 @@ class ASE(Converter):
 
     settings = collections.OrderedDict()
     settings["trajectory_file"] = (
-        "InputFileConfigurator",
+        "ASEFileConfigurator",
         {
             "label": "Any MD trajectory file",
             "default": "INPUT_FILENAME.traj",
+        },
+    )
+    settings["atom_aliases"] = (
+        "AtomMappingConfigurator",
+        {
+            "default": "{}",
+            "label": "Atom mapping",
+            "dependencies": {"input_file": "trajectory_file"},
         },
     )
     settings["time_step"] = (
@@ -87,6 +91,7 @@ class ASE(Converter):
         """
         Initialize the job.
         """
+        self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
         # The number of steps of the analysis.
         self.numberOfSteps = self.configuration["n_steps"]["value"]
@@ -95,7 +100,7 @@ class ASE(Converter):
             1.0, self.configuration["time_unit"]["value"]
         ).toval("ps")
 
-        self.parse_first_step()
+        self.parse_first_step(self._atomicAliases)
         self._start = 0
 
         if self.numberOfSteps < 1:
@@ -181,7 +186,7 @@ class ASE(Converter):
 
         super(ASE, self).finalize()
 
-    def parse_first_step(self):
+    def parse_first_step(self, mapping):
         try:
             self._input = ASETrajectory(self.configuration["trajectory_file"]["value"])
         except:
@@ -223,7 +228,8 @@ class ASE(Converter):
             if len(cluster) == 1:
                 node = cluster.pop()
                 try:
-                    obj = Atom(node.element, name=node.atomName)
+                    element = get_element_from_mapping(mapping, node.element)
+                    obj = Atom(element, name=node.atomName)
                 except TypeError:
                     print("EXCEPTION in ASE loader")
                     print(f"node.element = {node.element}")
@@ -233,7 +239,8 @@ class ASE(Converter):
             else:
                 atList = []
                 for atom in cluster:
-                    at = Atom(symbol=atom.element, name=atom.atomName)
+                    element = get_element_from_mapping(mapping, atom.element)
+                    at = Atom(symbol=element, name=atom.atomName)
                     atList.append(at)
                 c = collections.Counter([at.element for at in cluster])
                 name = "".join(["{:s}{:d}".format(k, v) for k, v in sorted(c.items())])
