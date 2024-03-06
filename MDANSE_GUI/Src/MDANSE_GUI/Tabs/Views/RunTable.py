@@ -12,8 +12,10 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-from qtpy.QtCore import Slot, Signal, QModelIndex
-from qtpy.QtWidgets import QMenu, QTableView, QAbstractItemView
+
+from PyQt6.QtCore import QAbstractItemModel, QObject
+from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
+from qtpy.QtWidgets import QMenu, QTableView, QAbstractItemView, QMessageBox
 from qtpy.QtGui import QStandardItem, QContextMenuEvent
 
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
@@ -27,6 +29,13 @@ class RunTable(QTableView):
         super().__init__(*args, **kwargs)
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.clicked.connect(self.item_picked)
+        vh = self.verticalHeader()
+        vh.setVisible(False)
+
+    def setModel(self, model: QAbstractItemModel) -> None:
+        result = super().setModel(model)
+        self.model().dataChanged.connect(self.resizeColumnsToContents)
+        return result
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         index = self.indexAt(event.pos())
@@ -40,24 +49,91 @@ class RunTable(QTableView):
         menu.exec_(event.globalPos())
 
     def populateMenu(self, menu: QMenu, item: QStandardItem):
-        for action, method in [("Delete", self.deleteNode)]:
+        entry, _, _ = self.getJobObjects()
+        job_state = entry._current_state
+        for action, method in [
+            ("Delete", self.deleteNode),
+            ("Pause", self.pauseJob),
+            ("Resume", self.unpauseJob),
+            ("Terminate", self.terminateJob),
+            # ("Kill", self.killJob),
+        ]:
             temp_action = menu.addAction(action)
             temp_action.triggered.connect(method)
+            if action not in job_state._allowed_actions:
+                temp_action.setEnabled(False)
+
+    def getJobObjects(self):
+        model = self.model()
+        index = self.currentIndex()
+        item_row = index.row()
+        entry_number = model.index(item_row, 0).data(role=Qt.ItemDataRole.UserRole)
+        try:
+            entry_number = int(entry_number)
+        except ValueError:
+            print(f"Could not use {entry_number} as int")
+            return
+        job_entry, job_watcher_thread, job_process = (
+            model.existing_jobs[entry_number],
+            model.existing_threads[entry_number],
+            model.existing_processes[entry_number],
+        )
+        return job_entry, job_watcher_thread, job_process
 
     @Slot()
     def deleteNode(self):
-        model = self.model()
-        index = self.currentIndex()
-        model.removeRow(index.row())
-        if model.rowCount() == 0:
-            for i in reversed(range(model.columnCount())):
-                model.removeColumn(i)
-        self.item_details.emit("")
+        entry, watcher, process = self.getJobObjects()
+        try:
+            process.close()
+        except ValueError:
+            print("The process is still running!")
+        else:
+            model = self.model()
+            index = self.currentIndex()
+            model.removeRow(index.row())
+            if model.rowCount() == 0:
+                for i in reversed(range(model.columnCount())):
+                    model.removeColumn(i)
+            self.item_details.emit("")
+
+    @Slot()
+    def pauseJob(self):
+        entry, _, _ = self.getJobObjects()
+        entry.pause_job()
+
+    @Slot()
+    def unpauseJob(self):
+        entry, _, _ = self.getJobObjects()
+        entry.unpause_job()
+
+    @Slot()
+    def killJob(self):
+        entry, _, process = self.getJobObjects()
+        process.kill()
+        entry.kill_job()
+
+    @Slot()
+    def terminateJob(self):
+        confirmation_box = QMessageBox(
+            QMessageBox.Icon.Question,
+            "You are about to terminate a job",
+            "All progress will be lost if you terminate your job. Do you really want to teminate?",
+            buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            parent=self,
+        )
+        result = confirmation_box.exec()
+        print(f"QMessageBox result = {result}")
+        if result == QMessageBox.StandardButton.Yes.value:
+            entry, _, process = self.getJobObjects()
+            process.terminate()
+            entry.terminate_job()
 
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
         model = self.model()
-        node_number = model.itemFromIndex(index).data()
+        index = self.currentIndex()
+        item_row = index.row()
+        node_number = model.index(item_row, 0).data(role=Qt.ItemDataRole.UserRole)
         job_entry = model.existing_jobs[node_number]
         self.item_details.emit(job_entry.text_summary())
 

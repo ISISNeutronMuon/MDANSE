@@ -134,11 +134,7 @@ class Status(object, metaclass=abc.ABCMeta):
 
         self._deltas.append(lastUpdate)
 
-        if (
-            force
-            or (not self._currentStep % self._updateStep)
-            or (total_seconds(lastUpdate - self._lastRefresh) > 10)
-        ):
+        if force or (total_seconds(lastUpdate - self._lastRefresh) > 5):
             self._lastRefresh = lastUpdate
 
             if self._nSteps is not None:
@@ -153,4 +149,5 @@ class Status(object, metaclass=abc.ABCMeta):
                 duration = datetime.timedelta(seconds=round(duration))
                 duration = convert_duration(total_seconds(duration))
                 self._eta = "%02dd:%02dh:%02dm:%02ds" % duration
-            self.update_status()
+
+        self.update_status()
