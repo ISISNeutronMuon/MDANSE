@@ -33,7 +33,7 @@ def test_disf(trajectory):
     parameters["frames"] = (0, 10, 1)
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["output_files"] = (temp_name, ("MDAFormat",))
-    parameters["running_mode"] = ("monoprocessor",)
+    parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_incoherent2"
     for qvector_generator in IQVectors.subclasses():

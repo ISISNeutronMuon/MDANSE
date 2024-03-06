@@ -207,8 +207,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
             else:
                 self._status.update()
 
-    def _run_monoprocessor(self):
-        print(f"Monoprocessor run: expects {self.numberOfSteps} steps")
+    def _run_singlecore(self):
+        print(f"Single-core run: expects {self.numberOfSteps} steps")
         for index in range(self.numberOfSteps):
             if self._status is not None:
                 if hasattr(self._status, "_pause_event"):
@@ -249,7 +249,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         return True
 
-    def _run_multiprocessor(self):
+    def _run_multicore(self):
         oldrecursionlimit = sys.getrecursionlimit()
         sys.setrecursionlimit(100000)
 
@@ -291,9 +291,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
         )
 
     _runner = {
-        "monoprocessor": _run_monoprocessor,
+        "single-core": _run_singlecore,
         "threadpool": _run_threadpool,
-        "multiprocessor": _run_multiprocessor,
+        "multicore": _run_multicore,
         "remote": _run_remote,
     }
 
@@ -322,7 +322,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
             if "running_mode" in self.configuration:
                 mode = self.configuration["running_mode"]["mode"]
             else:
-                mode = "monoprocessor"
+                mode = "single-core"
 
             IJob._runner[mode](self)
 

@@ -52,7 +52,7 @@ class RunningModeWidget(WidgetBase):
             nextval = self._totalNumberOfProcessors
         else:
             nextval = self._last_numproc
-        if mode == "monoprocessor":
+        if mode == "single-core":
             self._field.setValue(1)
             self._field.setEnabled(False)
         else:
@@ -63,14 +63,14 @@ class RunningModeWidget(WidgetBase):
     def numproc_changed(self):
         mode = self.mode_box.currentText()
         numproc = self._field.value()
-        if mode == "monoprocessor":
+        if mode == "single-core":
             return
         self._last_numproc = numproc
 
     def get_widget_value(self):
         mode = self.mode_box.currentText()
         numproc = self._field.value()
-        if mode == "monoprocessor":
+        if mode == "single-core":
             value = (mode,)
         else:
             value = (mode, numproc)

@@ -41,7 +41,7 @@ def test_vacf(trajectory, interp_order, normalise):
     parameters["frames"] = (0, 10, 1)
     parameters["interpolation_order"] = interp_order
     parameters["output_files"] = (temp_name, ("MDAFormat",))
-    parameters["running_mode"] = ("monoprocessor",)
+    parameters["running_mode"] = ("single-core",)
     parameters["normalize"] = normalise
     parameters["trajectory"] = short_traj
     vacf = IJob.create("VelocityAutoCorrelationFunction")
