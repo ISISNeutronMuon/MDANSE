@@ -30,6 +30,11 @@ class DummyWidget(WidgetBase):
         self.default_labels()
         self.update_labels()
         self.updateValue()
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "The real widget that should have been here is missing! Let the authors know about it."
+        self._base.setToolTip(tooltip_text)
 
     def configure_using_default(self):
         """This is too simple to have a default value"""

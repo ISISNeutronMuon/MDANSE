@@ -38,9 +38,14 @@ class RunningModeWidget(WidgetBase):
         self._layout.addWidget(self._field)
         self.mode_box.currentIndexChanged.connect(self.mode_changed)
         self._field.valueChanged.connect(self.numproc_changed)
-        self.default_labels()
         self.update_labels()
         self.updateValue()
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "Choose if the job should run on one or more cores."
+        for wid in [self._field, self.mode_box]:
+            wid.setToolTip(tooltip_text)
 
     def configure_using_default(self):
         """This is too complex to have a default value"""

@@ -96,6 +96,12 @@ class OutputFilesWidget(WidgetBase):
         self.default_labels()
         self.update_labels()
         self.updateValue()
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "Analysis output will be saved under this name, and using the selected file types"
+        self._field.setToolTip(tooltip_text)
+        self.type_box.setToolTip(tooltip_text)
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,

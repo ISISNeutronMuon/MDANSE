@@ -32,7 +32,11 @@ class ComboWidget(WidgetBase):
         field.addItems(option_list)
         field.setCurrentText(default_option)
         field.currentTextChanged.connect(self.updateValue)
-        field.setToolTip(self._tooltip)
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "A single option can be picked out of all the options listed."
+        field.setToolTip(tooltip_text)
         self._field = field
         self._layout.addWidget(field)
         self._configurator = configurator

@@ -33,16 +33,23 @@ class HDFTrajectoryWidget(WidgetBase):
             filename = None
         if filename is not None:
             trajectory = HDFTrajectoryInputData(filename)
-            self._layout.addWidget(QLabel(filename, self._base))
+            label = QLabel(filename, self._base)
+            self._layout.addWidget(label)
             self._configurator.configure(filename)
             trajectory_path, _ = os.path.split(filename)
             self.default_path = trajectory_path
         else:
-            self._layout.addWidget(QLabel("No Trajectory available", self._base))
+            label = QLabel("No Trajectory available", self._base)
+            self._layout.addWidget(label)
         self._trajectory = trajectory
         self.default_labels()
         self.update_labels()
-        self.updateValue()
+        self.updateValue()        
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "A single logical value that can be True of False"
+        label.setToolTip(tooltip_text)
 
     def configure_using_default(self):
         """This is too static to have a default value"""

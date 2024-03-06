@@ -55,6 +55,11 @@ class FloatWidget(WidgetBase):
         self.default_labels()
         self.update_labels()
         self.updateValue()
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "A single floating-point number"
+        field.setToolTip(tooltip_text)
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
