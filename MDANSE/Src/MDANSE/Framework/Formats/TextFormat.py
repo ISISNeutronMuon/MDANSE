@@ -16,11 +16,17 @@
 import os
 import io
 import tarfile
+import codecs
 
 import numpy as np
 
 
 from MDANSE.Framework.Formats.IFormat import IFormat
+
+
+def length_stringio(input: "io.BytesIO") -> int:
+    result = input.getbuffer().nbytes
+    return result
 
 
 class TextFormat(IFormat):
@@ -53,29 +59,28 @@ class TextFormat(IFormat):
 
         tf = tarfile.open(filename, "w")
 
-        for var in list(data.values()):
-            tempStr = io.StringIO()
-            tempStr.write(var.info())
-            tempStr.write("\n\n")
-            cls.write_data(tempStr, var, data)
-            tempStr.seek(0)
-
-            info = tarfile.TarInfo(name="%s%s" % (var.varname, cls.extensions[0]))
-            try:
-                info.size = len(tempStr)
-            except:
-                print("Ignoring the error in TextFormat, see if it matters.")
-            tf.addfile(tarinfo=info, fileobj=tempStr)
-
         if header:
-            tempStr = io.StringIO()
+            real_buffer = io.BytesIO()
+            tempStr = codecs.getwriter("utf-8")(real_buffer)
             for line in header:
                 tempStr.write(str(line))
             tempStr.write("\n\n")
-            tempStr.seek(0)
+            real_buffer.seek(0)
             info = tarfile.TarInfo(name="jobinfo.txt")
-            info.size = tempStr.len
-            tf.addfile(tarinfo=info, fileobj=tempStr)
+            info.size = length_stringio(real_buffer)
+            tf.addfile(tarinfo=info, fileobj=real_buffer)
+
+        for var in list(data.values()):
+            real_buffer = io.BytesIO()
+            tempStr = codecs.getwriter("utf-8")(real_buffer)
+            tempStr.write(var.info())
+            tempStr.write("\n\n")
+            cls.write_data(tempStr, var, data)
+            real_buffer.seek(0)
+
+            info = tarfile.TarInfo(name="%s%s" % (var.varname, cls.extensions[0]))
+            info.size = length_stringio(real_buffer)
+            tf.addfile(tarinfo=info, fileobj=real_buffer)
 
         tf.close()
 
