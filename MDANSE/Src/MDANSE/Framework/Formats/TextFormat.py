@@ -17,6 +17,7 @@ import os
 import io
 import tarfile
 import codecs
+import time
 
 import numpy as np
 
@@ -68,6 +69,7 @@ class TextFormat(IFormat):
             real_buffer.seek(0)
             info = tarfile.TarInfo(name="jobinfo.txt")
             info.size = length_stringio(real_buffer)
+            info.mtime = time.time()
             tf.addfile(tarinfo=info, fileobj=real_buffer)
 
         for var in list(data.values()):
@@ -80,6 +82,7 @@ class TextFormat(IFormat):
 
             info = tarfile.TarInfo(name="%s%s" % (var.varname, cls.extensions[0]))
             info.size = length_stringio(real_buffer)
+            info.mtime = time.time()
             tf.addfile(tarinfo=info, fileobj=real_buffer)
 
         tf.close()
