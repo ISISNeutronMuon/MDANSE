@@ -120,7 +120,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._resolution = 0
 
         self._atoms_visible = True
-        self._bonds_visible = False
+        self._bonds_visible = True
         self._axes_visible = True
         self._cell_visible = True
 
