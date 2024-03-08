@@ -16,20 +16,8 @@ class TrajectoryInfo(QTextBrowser):
         self.setOpenExternalLinks(True)
 
     @Slot(object)
-    def update_panel(self, fullpath: object):
-        if len(fullpath) > 0:
-            try:
-                incoming = HDFTrajectoryInputData(fullpath)
-            except:
-                text = f"Could not load trajectory: {fullpath}"
-                filtered = self.filter(text)
-                self.setHtml(filtered)
-                return
-        else:
-            text = ""
-            filtered = self.filter(text)
-            self.setHtml(filtered)
-            return
+    def update_panel(self, data: tuple):
+        fullpath, incoming = data
         try:
             text = incoming.info()  # this is from a trajectory object
         except AttributeError:

@@ -182,7 +182,10 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         :rtype: numpy.ndarray
         """
         coords = configuration["coordinates"]
-        masses = [ATOMS_DATABASE[at.symbol]["atomic_weight"] for at in self.atom_list]
+        masses = [
+            ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight")
+            for at in self.atom_list
+        ]
 
         return center_of_mass(coords, masses)
 
@@ -198,7 +201,10 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
     @property
     def masses(self) -> list[float]:
         """A list of masses of all non-ghost atoms within this chemical entity."""
-        return [ATOMS_DATABASE[at.symbol]["atomic_weight"] for at in self.atom_list]
+        return [
+            ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight")
+            for at in self.atom_list
+        ]
 
     def find_transformation_as_quaternion(
         self, conf1: _Configuration, conf2: Union[_Configuration, None] = None
@@ -320,7 +326,7 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         mr = Vector(0.0, 0.0, 0.0)
         t = Tensor(3 * [3 * [0.0]])
         for atom in self.atom_list:
-            ma = ATOMS_DATABASE[atom.symbol]["atomic_weight"]
+            ma = ATOMS_DATABASE.get_atom_property(atom.symbol, "atomic_weight")
             r = Vector(configuration["coordinates"][atom.index, :])
             m += ma
             mr += ma * r
@@ -473,7 +479,7 @@ class Atom(_ChemicalEntity):
 
         self._parent = None
 
-        self.element = ATOMS_DATABASE[self._symbol]["element"]
+        self.element = ATOMS_DATABASE.get_atom_property(self._symbol, "element")
 
         for k, v in kwargs.items():
             try:
@@ -2460,7 +2466,7 @@ class ChemicalSystem(_ChemicalEntity):
 
             # add the atoms to the rdkit molecule, ghost atoms are
             # never added to the rdkit molecule object
-            atm_num = ATOMS_DATABASE[at.symbol]["atomic_number"]
+            atm_num = ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_number")
             rdkit_atm = Chem.Atom(atm_num)
 
             # makes sure that rdkit doesn't add extra hydrogens

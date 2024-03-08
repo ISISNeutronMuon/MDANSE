@@ -115,7 +115,7 @@ class Temperature(IJob):
 
         symbol = atom.symbol
 
-        mass = ATOMS_DATABASE[symbol]["atomic_weight"]
+        mass = ATOMS_DATABASE.get_atom_property(symbol, "atomic_weight")
 
         trajectory = self.configuration["trajectory"]["instance"]
 

@@ -30,7 +30,7 @@ def select_element(
     Union[set[int], bool]
         The atom indices of the matched atoms.
     """
-    pattern = f"[#{ATOMS_DATABASE[symbol]['atomic_number']}]"
+    pattern = f"[#{ATOMS_DATABASE.get_atom_property(symbol, 'atomic_number')}]"
     if check_exists:
         return system.has_substructure_match(pattern)
     else:
@@ -56,7 +56,7 @@ def select_hs_on_element(
     Union[set[int], bool]
         The atom indices of the matched atoms.
     """
-    num = ATOMS_DATABASE[symbol]["atomic_number"]
+    num = ATOMS_DATABASE.get_atom_property(symbol, "atomic_number")
     if check_exists:
         return system.has_substructure_match(f"[#{num}]~[H]")
     else:

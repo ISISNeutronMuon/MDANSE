@@ -23,7 +23,7 @@ from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 
 
 class TrajectoryView(QListView):
-    item_details = Signal(object)
+    item_details = Signal(tuple)
     item_name = Signal(str)
     error = Signal(str)
 
@@ -53,7 +53,7 @@ class TrajectoryView(QListView):
         model = self.model()
         index = self.currentIndex()
         model.removeRow(index.row())
-        self.item_details.emit("")
+        self.item_details.emit(("", None))
 
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
