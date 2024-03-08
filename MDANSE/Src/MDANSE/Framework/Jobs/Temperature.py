@@ -61,7 +61,7 @@ class Temperature(IJob):
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "ASCIIFormat"]},
+        {"formats": ["MDAFormat", "TextFormat"]},
     )
 
     def initialize(self):

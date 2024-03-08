@@ -102,6 +102,14 @@ class QVectorsWidget(WidgetBase):
         self._selector.setCurrentIndex(1)
         self._model.itemChanged.connect(self.updateValue)
         self.updateValue()
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "The parameters needed by the specific q-vector generator can be input here"
+        self._view.setToolTip(tooltip_text)
+        self._selector.setToolTip(
+            "The q vectors will be generated using the method chosen here."
+        )
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""

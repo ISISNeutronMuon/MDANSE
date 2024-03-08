@@ -38,7 +38,10 @@ class InputFileWidget(WidgetBase):
             self.default_path = "."
             print("AttributeError in InputFileWidget - can't get default path.")
         default_value = kwargs.get("default", "")
-        tooltip_text = kwargs.get("tooltip", "Specify a path to an existing file.")
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "Specify a path to an existing file."
         file_association = kwargs.get("wildcard", "")
         self._qt_file_association = translate_file_associations(file_association)
         field = QLineEdit(self._base)

@@ -57,6 +57,12 @@ class RangeWidget(WidgetBase):
         self.default_labels()
         self.update_labels()
         self.updateValue()
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "Values to be used, given as (First, Last, StepSize)"
+        for wid in fields + labels:
+            wid.setToolTip(tooltip_text)
 
     def configure_using_default(self):
         """This is too complex to have a default value"""

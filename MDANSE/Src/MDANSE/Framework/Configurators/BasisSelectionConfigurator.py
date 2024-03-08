@@ -81,4 +81,4 @@ class BasisSelectionConfigurator(IConfigurator):
         :rtype: str
         """
 
-        return "Basis vector:%s" % self["value"]
+        return "Basis vector:%s\n" % self["value"]

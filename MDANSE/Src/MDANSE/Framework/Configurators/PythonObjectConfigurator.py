@@ -58,4 +58,4 @@ class PythonObjectConfigurator(IConfigurator):
         :rtype: str
         """
 
-        return "Python object: %r" % self["value"]
+        return "Python object: %r\n" % self["value"]

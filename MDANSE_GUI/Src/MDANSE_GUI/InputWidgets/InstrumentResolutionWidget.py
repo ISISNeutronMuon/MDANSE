@@ -54,6 +54,10 @@ class InstrumentResolutionWidget(WidgetBase):
         self._labels = []
         self._fields = []
         self._defaults = []
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "The peak function used for smearing/smooting the results. Pick 'ideal' for no smearing."
         # first row
         for num in range(1, 3):
             label = QLabel("", parent=self._base)
@@ -86,6 +90,7 @@ class InstrumentResolutionWidget(WidgetBase):
         self._type_combo.currentTextChanged.connect(self.change_function)
         for field in self._fields:
             field.textChanged.connect(self.updateValue)
+            field.setToolTip(tooltip_text)
         self.updateValue()
 
     def configure_using_default(self):

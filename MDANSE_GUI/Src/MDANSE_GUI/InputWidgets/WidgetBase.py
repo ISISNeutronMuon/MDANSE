@@ -35,7 +35,7 @@ class WidgetBase(QObject):
         super().__init__(*args, parent=parent)
         self._value = None
         self._label_text = kwargs.get("label", "")
-        self._tooltip = kwargs.get("tooltip", "")
+        self._tooltip = kwargs.pop("tooltip", "")
         self._base_type = kwargs.get("base_type", "QGroupBox")
         self._layout_type = kwargs.get("layout_type", "QHBoxLayout")
         configurator = kwargs.get("configurator", None)

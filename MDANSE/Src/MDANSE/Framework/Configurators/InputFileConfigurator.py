@@ -82,4 +82,4 @@ class InputFileConfigurator(IConfigurator):
         :rtype: str
         """
 
-        return "Input file: %r" % self["value"]
+        return "Input file: %r\n" % self["value"]

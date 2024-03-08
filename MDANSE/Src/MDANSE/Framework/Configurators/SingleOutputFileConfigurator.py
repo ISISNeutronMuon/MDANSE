@@ -115,7 +115,7 @@ class SingleOutputFileConfigurator(IConfigurator):
         :rtype: str
         """
 
-        info = "Output file: %s" % self["file"]
+        info = "Output file: %s\n" % self["file"]
 
         return info
 

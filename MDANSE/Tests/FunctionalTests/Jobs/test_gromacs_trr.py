@@ -44,11 +44,11 @@ class TestGromacsADK(unittest.TestCase):
         parameters["pdb_file"] = "../../../Data/Trajectories/Gromacs/adk_oplsaa.pdb"
         parameters["output_file"] = ("_".join([cls.output_path, "trr"]), "netcdf")
         parameters["xtc_file"] = "../../../Data/Trajectories/Gromacs/adk_oplsaa.trr"
-        print("Launching job in monoprocessor mode for trr")
-        parameters["running_mode"] = ("monoprocessor", 1)
+        print("Launching job in single-core mode for trr")
+        parameters["running_mode"] = ("single-core", 1)
         job.run(parameters, status=False)
         copy("_".join([cls.output_path, "trr.nc"]), cls.trr_copy)
-        print("Monoprocessor execution completed for trr")
+        print("Single-core execution completed for trr")
 
     def test_core(self):
         job = job = Converter.create("Gromacs")
@@ -58,12 +58,12 @@ class TestGromacsADK(unittest.TestCase):
         parameters["pdb_file"] = "../../../Data/Trajectories/Gromacs/adk_oplsaa.pdb"
         parameters["output_file"] = ("_".join([self.output_path, "xtc"]), "netcdf")
         parameters["xtc_file"] = "../../../Data/Trajectories/Gromacs/adk_oplsaa.xtc"
-        print("Launching job in monoprocessor mode for xtc")
-        parameters["running_mode"] = ("monoprocessor", 1)
+        print("Launching job in single-core mode for xtc")
+        parameters["running_mode"] = ("single-core", 1)
         job.run(parameters, status=False)
-        print("Monoprocessor execution completed for xtc")
+        print("Single-core execution completed for xtc")
 
-        print("Comparing monoprocessor output with reference output")
+        print("Comparing single-core output with reference output")
         self.assertTrue(
             compare(
                 "_".join([self.output_path, "xtc.nc"]),
@@ -112,11 +112,11 @@ class TestGromacsCobrotoxin(unittest.TestCase):
         parameters["pdb_file"] = "../../../Data/Trajectories/Gromacs/cobrotoxin.pdb"
         parameters["output_file"] = ("_".join([cls.output_path, "trr"]), "netcdf")
         parameters["xtc_file"] = "../../../Data/Trajectories/Gromacs/cobrotoxin.trr"
-        print("Launching job in monoprocessor mode for trr")
-        parameters["running_mode"] = ("monoprocessor", 1)
+        print("Launching job in single-core mode for trr")
+        parameters["running_mode"] = ("single-core", 1)
         job.run(parameters, status=False)
         copy("_".join([cls.output_path, "trr.nc"]), cls.trr_copy)
-        print("Monoprocessor execution completed for trr")
+        print("Single-core execution completed for trr")
 
     def test_core(self):
         """Run an analysis of the XTC trajectory and compare it with the TRR results."""
@@ -127,12 +127,12 @@ class TestGromacsCobrotoxin(unittest.TestCase):
         parameters["pdb_file"] = "../../../Data/Trajectories/Gromacs/cobrotoxin.pdb"
         parameters["output_file"] = ("_".join([self.output_path, "xtc"]), "netcdf")
         parameters["xtc_file"] = "../../../Data/Trajectories/Gromacs/cobrotoxin.xtc"
-        print("Launching job in monoprocessor mode for xtc")
-        parameters["running_mode"] = ("monoprocessor", 1)
+        print("Launching job in single-core mode for xtc")
+        parameters["running_mode"] = ("single-core", 1)
         job.run(parameters, status=False)
-        print("Monoprocessor execution completed for xtc")
+        print("Single-core execution completed for xtc")
 
-        print("Comparing monoprocessor output with reference output")
+        print("Comparing single-core output with reference output")
         self.assertTrue(
             compare(
                 "_".join([self.output_path, "xtc.nc"]),

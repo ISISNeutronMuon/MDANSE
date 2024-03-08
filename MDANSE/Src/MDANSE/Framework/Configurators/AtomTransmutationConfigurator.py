@@ -137,6 +137,6 @@ class AtomTransmutationConfigurator(IConfigurator):
             return "Not configured yet"
 
         if self["value"] is None:
-            return "No atoms selected for transmutation"
+            return "No atoms selected for transmutation\n"
 
         return "Number of transmutated atoms:%d\n" % self._nTransmutatedAtoms

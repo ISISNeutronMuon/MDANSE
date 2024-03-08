@@ -85,6 +85,6 @@ class PartialChargeConfigurator(IConfigurator):
         :rtype: str
         """
 
-        info = "Sum of partial charges = %8.3f" % sum(self["charges"].values())
+        info = "Sum of partial charges = %8.3f\n" % sum(self["charges"].values())
 
         return info
