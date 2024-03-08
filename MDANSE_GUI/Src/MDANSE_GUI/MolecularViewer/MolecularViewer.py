@@ -636,18 +636,9 @@ class MolecularViewer(QtWidgets.QWidget):
         )
         # this returs a list of indices, mapping colours to atoms
 
-        self._atom_scales = np.array(
-            [CHEMICAL_ELEMENTS[at]["vdw_radius"] for at in self._atoms]
-        ).astype(np.float32)
+        self._current_frame = frame
 
-        scalars = ndarray_to_vtkarray(
-            self._atom_colours, self._atom_scales, self._n_atoms
-        )
-
-        self._polydata = vtk.vtkPolyData()
-        self._polydata.GetPointData().SetScalars(scalars)
-
-        self.set_coordinates(frame)
+        self._colour_manager.onNewValues()
 
     @Slot(object)
     def take_atom_properties(self, scalars):

@@ -24,7 +24,7 @@ from qtpy.QtWidgets import (
     QPushButton,
     QStyle,
     QSizePolicy,
-    QTableView,
+    QTreeView,
     QDoubleSpinBox,
     QColorDialog,
     QGroupBox,
@@ -200,7 +200,7 @@ class ViewerControls(QWidget):
         # the table of chemical elements
         wrapper1 = QGroupBox("Atom properties", base)
         layout1 = QHBoxLayout(wrapper1)
-        self._atom_details = QTableView(base)
+        self._atom_details = QTreeView(base)
         self._atom_details.setSizePolicy(
             QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum
         )
