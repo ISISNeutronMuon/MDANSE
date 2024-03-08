@@ -65,10 +65,10 @@ def guess_element(atm_label: str, mass: Union[float, int, None] = None) -> str:
         if guess in ATOMS_DATABASE:
             if mass is None:
                 return guess
-            num = ATOMS_DATABASE[guess]["proton"]
+            num = ATOMS_DATABASE.get_atom_property(guess, "proton")
             atms = ATOMS_DATABASE.match_numeric_property("proton", num)
             for atm in atms:
-                atm_mass = ATOMS_DATABASE[atm]["atomic_weight"]
+                atm_mass = ATOMS_DATABASE.get_atom_property(atm, "atomic_weight")
                 diff = abs(mass - atm_mass)
                 if diff < best_diff:
                     best_match = atm

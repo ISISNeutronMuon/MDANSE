@@ -58,7 +58,7 @@ class TrajectoryTab(GeneralTab):
             except Exception as e:
                 self._core.error(repr(e))
             else:
-                self._core._model.append_object((fname[0], short_name))
+                self._core._model.append_object(((fname[0], data), short_name))
 
     @classmethod
     def standard_instance(cls):

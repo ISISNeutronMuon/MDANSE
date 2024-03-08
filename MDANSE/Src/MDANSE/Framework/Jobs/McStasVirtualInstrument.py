@@ -125,18 +125,18 @@ class McStasVirtualInstrument(IJob):
         # Compute some parameters used for a proper McStas run
         self._mcStasPhysicalParameters = {"density": 0.0}
         self._mcStasPhysicalParameters["weight"] = sum(
-            [ATOMS_DATABASE[s]["atomic_weight"] for s in symbols]
+            [ATOMS_DATABASE.get_atom_property(s, "atomic_weight") for s in symbols]
         )
         self._mcStasPhysicalParameters["sigma_abs"] = (
-            sum([ATOMS_DATABASE[s]["xs_absorption"] for s in symbols])
+            sum([ATOMS_DATABASE.get_atom_property(s, "xs_absorption") for s in symbols])
             * MCSTAS_UNITS_LUT["nm2"]
         )
         self._mcStasPhysicalParameters["sigma_coh"] = (
-            sum([ATOMS_DATABASE[s]["xs_coherent"] for s in symbols])
+            sum([ATOMS_DATABASE.get_atom_property(s, "xs_coherent") for s in symbols])
             * MCSTAS_UNITS_LUT["nm2"]
         )
         self._mcStasPhysicalParameters["sigma_inc"] = (
-            sum([ATOMS_DATABASE[s]["xs_incoherent"] for s in symbols])
+            sum([ATOMS_DATABASE.get_atom_property(s, "xs_incoherent") for s in symbols])
             * MCSTAS_UNITS_LUT["nm2"]
         )
         for frameIndex in self.configuration["frames"]["value"]:

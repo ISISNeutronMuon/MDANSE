@@ -15,10 +15,10 @@
 import logging
 
 import numpy as np
-from icecream import ic
+from scipy.spatial import cKDTree as KDTree
 
-from qtpy import QtCore, QtWidgets
-from qtpy.QtCore import Signal, Slot, Qt
+from qtpy import QtWidgets
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QSizePolicy
 
 import vtk
@@ -28,19 +28,13 @@ from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Chemistry import ATOMS_DATABASE as CHEMICAL_ELEMENTS
 
-# from MDANSE_GUI.MolecularViewer.database import CHEMICAL_ELEMENTS
 from MDANSE_GUI.MolecularViewer.readers import hdf5wrapper
 from MDANSE_GUI.MolecularViewer.Dummy import PyConnectivity
 from MDANSE_GUI.MolecularViewer.Contents import TrajectoryAtomData
-
-# from MDANSE_GUI.MolecularViewer.ColourManager import ColourManager
 from MDANSE_GUI.MolecularViewer.AtomProperties import (
     AtomProperties,
     ndarray_to_vtkarray,
 )
-
-# from waterstay.extensions.histogram_3d import histogram_3d
-# from waterstay.gui.atomic_trace_settings_dialog import AtomicTraceSettingsDialog
 
 
 def array_to_3d_imagedata(data, spacing):
@@ -129,6 +123,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._atoms = []
 
         self._polydata = None
+        self._uc_polydata = None
 
         self._surface = None
 
@@ -140,15 +135,13 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._colour_manager = AtomProperties()
 
-        self.build_events()
+        # self.build_events()
 
     def setDataModel(self, datamodel: TrajectoryAtomData):
         self._datamodel = datamodel
 
-    def _new_trajectory_object(self, data: HDFTrajectoryInputData):
-        reader = hdf5wrapper.HDF5Wrapper(
-            "Dummy Name", data.trajectory, data.chemical_system
-        )
+    def _new_trajectory_object(self, fname: str, data: HDFTrajectoryInputData):
+        reader = hdf5wrapper.HDF5Wrapper(fname, data.trajectory, data.chemical_system)
         self.set_reader(reader)
 
     @Slot(str)
@@ -257,10 +250,13 @@ class MolecularViewer(QtWidgets.QWidget):
         actor_list = []
 
         line_mapper = vtk.vtkPolyDataMapper()
+        uc_line_mapper = vtk.vtkPolyDataMapper()
         if vtk.vtkVersion.GetVTKMajorVersion() < 6:
             line_mapper.SetInput(self._polydata)
+            uc_line_mapper.SetInput(self._uc_polydata)
         else:
             line_mapper.SetInputData(self._polydata)
+            uc_line_mapper.SetInputData(self._uc_polydata)
 
         line_mapper.SetLookupTable(self._colour_manager._lut)
         line_mapper.ScalarVisibilityOn()
@@ -268,7 +264,12 @@ class MolecularViewer(QtWidgets.QWidget):
         line_actor = vtk.vtkLODActor()
         line_actor.GetProperty().SetLineWidth(3 * self._scale_factor)
         line_actor.SetMapper(line_mapper)
+        uc_line_mapper.ScalarVisibilityOn()
+        uc_line_actor = vtk.vtkLODActor()
+        uc_line_actor.GetProperty().SetLineWidth(3 * self._scale_factor)
+        uc_line_actor.SetMapper(uc_line_mapper)
         actor_list.append(line_actor)
+        actor_list.append(uc_line_actor)
 
         temp_radius = float(1.0 * self._scale_factor)
         sphere = vtk.vtkSphereSource()
@@ -334,9 +335,9 @@ class MolecularViewer(QtWidgets.QWidget):
         self._n_frames = 0
         self.new_max_frames.emit(0)
         self._atoms = []
-        self._fixed_bonds = []
         self._atom_colours = []
         self._polydata = vtk.vtkPolyData()
+        self._uc_polydata = vtk.vtkPolyData()
         self._current_frame = 0
 
         self.update_renderer()
@@ -560,7 +561,7 @@ class MolecularViewer(QtWidgets.QWidget):
             self._connectivity_builder.add_point(index, xyz, radius)
 
     @Slot(int)
-    def set_coordinates(self, frame: int):
+    def set_coordinates(self, frame: int, tolerance=0.04):
         """Sets a new configuration.
 
         @param frame: the configuration number
@@ -572,7 +573,14 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._current_frame = frame % self._reader.n_frames
 
+        # update the atoms
         coords = self._reader.read_frame(self._current_frame)
+        cov_radii = np.array(
+            [
+                CHEMICAL_ELEMENTS.get_atom_property(at, "covalent_radius")
+                for at in self._reader.atom_types
+            ]
+        )
 
         atoms = vtk.vtkPoints()
         atoms.SetNumberOfPoints(self._n_atoms)
@@ -582,20 +590,57 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._polydata.SetPoints(atoms)
 
-        covalent_radii = [
-            CHEMICAL_ELEMENTS[at]["covalent_radius"] for at in self._reader.atom_types
-        ]
-        self.set_connectivity_builder(coords, covalent_radii)
-        chemical_bonds = self._fixed_bonds
-
+        # determine and set bonds without PBC applied
+        tree = KDTree(coords)
         bonds = vtk.vtkCellArray()
-        for at, bonded_at in chemical_bonds:
-            line = vtk.vtkLine()
-            line.GetPointIds().SetId(0, at)
-            line.GetPointIds().SetId(1, bonded_at)
-            bonds.InsertNextCell(line)
+        contacts = tree.query_ball_tree(tree, 2 * np.max(cov_radii) + tolerance)
+        for i, idxs in enumerate(contacts):
+            if len(idxs) == 0:
+                continue
+            diff = coords[i] - coords[idxs]
+            dist = np.sum(diff * diff, axis=1)
+            sum_radii = (cov_radii[i] + cov_radii[idxs] + tolerance) ** 2
+            js = np.array(idxs)[(0 < dist) & (dist < sum_radii)]
+            for j in js[i < js]:
+                line = vtk.vtkLine()
+                line.GetPointIds().SetId(0, i)
+                line.GetPointIds().SetId(1, j)
+                bonds.InsertNextCell(line)
 
         self._polydata.SetLines(bonds)
+
+        # update the unit cell
+        uc = self._reader.read_pbc(self._current_frame)
+        a = uc.a_vector
+        b = uc.b_vector
+        c = uc.c_vector
+        uc_points = vtk.vtkPoints()
+        uc_points.SetNumberOfPoints(8)
+        for i, v in enumerate([[0, 0, 0], a, b, c, a + b, a + c, b + c, a + b + c]):
+            x, y, z = v
+            uc_points.SetPoint(i, x, y, z)
+        self._uc_polydata.SetPoints(uc_points)
+
+        uc_lines = vtk.vtkCellArray()
+        for i, j in [
+            (0, 1),
+            (0, 2),
+            (0, 3),
+            (1, 4),
+            (1, 5),
+            (4, 7),
+            (2, 4),
+            (2, 6),
+            (5, 7),
+            (3, 5),
+            (3, 6),
+            (6, 7),
+        ]:
+            line = vtk.vtkLine()
+            line.GetPointIds().SetId(0, i)
+            line.GetPointIds().SetId(1, j)
+            uc_lines.InsertNextCell(line)
+        self._uc_polydata.SetLines(uc_lines)
 
         # Update the view.
         self.update_renderer()
@@ -621,10 +666,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self.new_max_frames.emit(self._n_frames - 1)
 
         self._atoms = self._reader.atom_types
-        try:
-            self._fixed_bonds = self._reader._chemical_system._bonds
-        except AttributeError:
-            self._fixed_bonds = []
 
         # Hack for reducing objects resolution when the system is big
         self._resolution = int(np.sqrt(3000000.0 / self._n_atoms))
@@ -636,8 +677,22 @@ class MolecularViewer(QtWidgets.QWidget):
         )
         # this returs a list of indices, mapping colours to atoms
 
-        self._current_frame = frame
+        self._atom_scales = np.array(
+            [
+                CHEMICAL_ELEMENTS.get_atom_property(at, "vdw_radius")
+                for at in self._atoms
+            ]
+        ).astype(np.float32)
 
+        scalars = ndarray_to_vtkarray(
+            self._atom_colours, self._atom_scales, self._n_atoms
+        )
+
+        self._polydata = vtk.vtkPolyData()
+        self._uc_polydata = vtk.vtkPolyData()
+        self._polydata.GetPointData().SetScalars(scalars)
+
+        self._current_frame = frame
         self._colour_manager.onNewValues()
 
     @Slot(object)

@@ -56,11 +56,12 @@ class Graph(object):
 
         # Make a copy of the set, so we can modify it.
         nodes = [self._nodes[k] for k in sorted(self._nodes.keys())]
+        nodes.reverse()
 
         # Iterate while we still have nodes to process.
         while nodes:
             # Get a random node and remove it from the global set.
-            n = nodes.pop(0)
+            n = nodes.pop()
 
             # This set will contain the next group of nodes connected to each other.
             group = set([n])

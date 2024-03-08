@@ -447,8 +447,8 @@ class NeutronDynamicTotalStructureFactor(IJob):
 
         # Compute coherent functions and structure factor
         for pair in self._elementsPairs:
-            bi = ATOMS_DATABASE[pair[0]]["b_coherent"]
-            bj = ATOMS_DATABASE[pair[1]]["b_coherent"]
+            bi = ATOMS_DATABASE.get_atom_property(pair[0], "b_coherent")
+            bj = ATOMS_DATABASE.get_atom_property(pair[1], "b_coherent")
             ni = nAtomsPerElement[pair[0]]
             nj = nAtomsPerElement[pair[1]]
             ci = ni / nTotalAtoms
@@ -483,7 +483,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
 
         # Compute incoherent functions and structure factor
         for element, ni in nAtomsPerElement.items():
-            bi = ATOMS_DATABASE[element]["b_incoherent2"]
+            bi = ATOMS_DATABASE.get_atom_property(element, "b_incoherent2")
             ni = nAtomsPerElement[element]
             ci = ni / nTotalAtoms
 

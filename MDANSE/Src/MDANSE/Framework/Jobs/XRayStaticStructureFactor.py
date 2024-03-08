@@ -24,18 +24,18 @@ from MDANSE.Mathematics.Arithmetic import weight
 
 def atomic_scattering_factor(element, qvalues):
     a = np.empty((4,), dtype=np.float64)
-    a[0] = ATOMS_DATABASE[element]["xray_asf_a1"]
-    a[1] = ATOMS_DATABASE[element]["xray_asf_a2"]
-    a[2] = ATOMS_DATABASE[element]["xray_asf_a3"]
-    a[3] = ATOMS_DATABASE[element]["xray_asf_a4"]
+    a[0] = ATOMS_DATABASE.get_atom_property(element, "xray_asf_a1")
+    a[1] = ATOMS_DATABASE.get_atom_property(element, "xray_asf_a2")
+    a[2] = ATOMS_DATABASE.get_atom_property(element, "xray_asf_a3")
+    a[3] = ATOMS_DATABASE.get_atom_property(element, "xray_asf_a4")
 
     b = np.empty((4,), dtype=np.float64)
-    b[0] = ATOMS_DATABASE[element]["xray_asf_b1"]
-    b[1] = ATOMS_DATABASE[element]["xray_asf_b2"]
-    b[2] = ATOMS_DATABASE[element]["xray_asf_b3"]
-    b[3] = ATOMS_DATABASE[element]["xray_asf_b4"]
+    b[0] = ATOMS_DATABASE.get_atom_property(element, "xray_asf_b1")
+    b[1] = ATOMS_DATABASE.get_atom_property(element, "xray_asf_b2")
+    b[2] = ATOMS_DATABASE.get_atom_property(element, "xray_asf_b3")
+    b[3] = ATOMS_DATABASE.get_atom_property(element, "xray_asf_b4")
 
-    c = ATOMS_DATABASE[element]["xray_asf_c"]
+    c = ATOMS_DATABASE.get_atom_property(element, "xray_asf_c")
 
     return c + np.sum(
         a[:, np.newaxis]

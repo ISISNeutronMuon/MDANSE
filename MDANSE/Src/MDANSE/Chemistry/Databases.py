@@ -589,6 +589,24 @@ class AtomsDatabase(_Database):
         with open(AtomsDatabase._USER_DATABASE, "w") as fout:
             json.dump(d, fout)
 
+    def get_atom_property(self, symbol: str, property: str) -> Union[int, float, str]:
+        """Faster access to the atom property as it avoids the deepcopy
+        in __getitem__.
+
+        Parameters
+        ----------
+        symbol : str
+            Symbol of the atom.
+        property : str
+            Property of the atoms to get.
+
+        Returns
+        -------
+        Union[int, float, str]
+            The atom property.
+        """
+        return self._data[symbol][property]
+
 
 class MoleculesDatabaseError(Error):
     """This class handles the exceptions related to MoleculesDatabase"""
