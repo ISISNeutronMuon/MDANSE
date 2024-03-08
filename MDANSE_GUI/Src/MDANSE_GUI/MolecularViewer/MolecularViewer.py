@@ -123,6 +123,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._atoms = []
 
         self._polydata = None
+        self._uc_polydata = None
 
         self._surface = None
 
@@ -251,10 +252,13 @@ class MolecularViewer(QtWidgets.QWidget):
         actor_list = []
 
         line_mapper = vtk.vtkPolyDataMapper()
+        uc_line_mapper = vtk.vtkPolyDataMapper()
         if vtk.vtkVersion.GetVTKMajorVersion() < 6:
             line_mapper.SetInput(self._polydata)
+            uc_line_mapper.SetInput(self._uc_polydata)
         else:
             line_mapper.SetInputData(self._polydata)
+            uc_line_mapper.SetInputData(self._uc_polydata)
 
         line_mapper.SetLookupTable(self._colour_manager._lut)
         line_mapper.ScalarVisibilityOn()
@@ -262,7 +266,12 @@ class MolecularViewer(QtWidgets.QWidget):
         line_actor = vtk.vtkLODActor()
         line_actor.GetProperty().SetLineWidth(3 * self._scale_factor)
         line_actor.SetMapper(line_mapper)
+        uc_line_mapper.ScalarVisibilityOn()
+        uc_line_actor = vtk.vtkLODActor()
+        uc_line_actor.GetProperty().SetLineWidth(3 * self._scale_factor)
+        uc_line_actor.SetMapper(uc_line_mapper)
         actor_list.append(line_actor)
+        actor_list.append(uc_line_actor)
 
         temp_radius = float(1.0 * self._scale_factor)
         sphere = vtk.vtkSphereSource()
@@ -330,6 +339,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._atoms = []
         self._atom_colours = []
         self._polydata = vtk.vtkPolyData()
+        self._uc_polydata = vtk.vtkPolyData()
         self._current_frame = 0
 
         self.update_renderer()
@@ -565,6 +575,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._current_frame = frame % self._reader.n_frames
 
+        # update the atoms
         coords = self._reader.read_frame(self._current_frame)
 
         atoms = vtk.vtkPoints()
@@ -593,6 +604,26 @@ class MolecularViewer(QtWidgets.QWidget):
                 bonds.InsertNextCell(line)
 
         self._polydata.SetLines(bonds)
+
+        # update the unit cell
+        uc = self._reader.read_pbc(self._current_frame)
+        a = uc.a_vector
+        b = uc.b_vector
+        c = uc.c_vector
+        uc_points = vtk.vtkPoints()
+        uc_points.SetNumberOfPoints(8)
+        for i, v in enumerate([[0, 0, 0], a, b, c, a + b, a + c, b + c, a + b + c]):
+            x, y, z = v
+            uc_points.SetPoint(i, x, y, z)
+        self._uc_polydata.SetPoints(uc_points)
+
+        uc_lines = vtk.vtkCellArray()
+        for i, j in [(0, 1), (0, 2), (0, 3), (1, 4), (1, 5), (4, 7), (2, 4), (2, 6), (5, 7), (3, 5), (3, 6), (6, 7)]:
+            line = vtk.vtkLine()
+            line.GetPointIds().SetId(0, i)
+            line.GetPointIds().SetId(1, j)
+            uc_lines.InsertNextCell(line)
+        self._uc_polydata.SetLines(uc_lines)
 
         # Update the view.
         self.update_renderer()
@@ -641,6 +672,7 @@ class MolecularViewer(QtWidgets.QWidget):
         )
 
         self._polydata = vtk.vtkPolyData()
+        self._uc_polydata = vtk.vtkPolyData()
         self._polydata.GetPointData().SetScalars(scalars)
 
         self.set_coordinates(frame)
