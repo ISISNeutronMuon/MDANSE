@@ -138,7 +138,6 @@ class Action(QWidget):
         job_instance.build_configuration()
         settings = job_instance.settings
         self._job_instance = job_instance
-        print(f"Settings {settings}")
         print(f"Configuration {job_instance.configuration}")
         if "trajectory" in settings.keys():
             if self._input_trajectory is None:
