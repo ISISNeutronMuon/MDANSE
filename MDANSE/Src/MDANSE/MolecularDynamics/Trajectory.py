@@ -229,7 +229,12 @@ class Trajectory:
             last = len(self)
 
         indexes = [at.index for at in atoms]
-        masses = np.array([ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight") for at in atoms])
+        masses = np.array(
+            [
+                ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight")
+                for at in atoms
+            ]
+        )
         grp = self._h5_file["/configuration"]
 
         coords = grp["coordinates"][first:last:step, :, :].astype(np.float64)
@@ -613,7 +618,9 @@ class RigidBodyTrajectoryGenerator:
 
         atoms = chemical_entity.atom_list
 
-        masses = [ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight") for at in atoms]
+        masses = [
+            ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight") for at in atoms
+        ]
 
         mass = sum(masses)
 

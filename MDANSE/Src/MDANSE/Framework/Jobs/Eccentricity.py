@@ -196,7 +196,9 @@ class Eccentricity(IJob):
             atomsCoordinates = series[idxs, :]
             difference = atomsCoordinates - com
 
-            w = ATOMS_DATABASE.get_atom_property(name, self.configuration["weights"]["property"])
+            w = ATOMS_DATABASE.get_atom_property(
+                name, self.configuration["weights"]["property"]
+            )
 
             xx += np.add.reduce(
                 w

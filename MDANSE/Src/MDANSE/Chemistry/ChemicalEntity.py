@@ -182,7 +182,10 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
         :rtype: numpy.ndarray
         """
         coords = configuration["coordinates"]
-        masses = [ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight") for at in self.atom_list]
+        masses = [
+            ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight")
+            for at in self.atom_list
+        ]
 
         return center_of_mass(coords, masses)
 
@@ -198,7 +201,10 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
     @property
     def masses(self) -> list[float]:
         """A list of masses of all non-ghost atoms within this chemical entity."""
-        return [ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight") for at in self.atom_list]
+        return [
+            ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight")
+            for at in self.atom_list
+        ]
 
     def find_transformation_as_quaternion(
         self, conf1: _Configuration, conf2: Union[_Configuration, None] = None

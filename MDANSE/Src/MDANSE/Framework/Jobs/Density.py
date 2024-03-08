@@ -114,7 +114,12 @@ class Density(IJob):
         atomic_density = self._n_atoms / cell_volume
 
         mass_density = (
-            sum([ATOMS_DATABASE.get_atom_property(s, "atomic_weight") for s in self._symbols])
+            sum(
+                [
+                    ATOMS_DATABASE.get_atom_property(s, "atomic_weight")
+                    for s in self._symbols
+                ]
+            )
             / NAVOGADRO
             / cell_volume
         )

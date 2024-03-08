@@ -141,9 +141,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._datamodel = datamodel
 
     def _new_trajectory_object(self, fname: str, data: HDFTrajectoryInputData):
-        reader = hdf5wrapper.HDF5Wrapper(
-            fname, data.trajectory, data.chemical_system
-        )
+        reader = hdf5wrapper.HDF5Wrapper(fname, data.trajectory, data.chemical_system)
         self.set_reader(reader)
 
     @Slot(str)
@@ -577,9 +575,12 @@ class MolecularViewer(QtWidgets.QWidget):
 
         # update the atoms
         coords = self._reader.read_frame(self._current_frame)
-        cov_radii = np.array([
-            CHEMICAL_ELEMENTS.get_atom_property(at, "covalent_radius") for at in self._reader.atom_types
-        ])
+        cov_radii = np.array(
+            [
+                CHEMICAL_ELEMENTS.get_atom_property(at, "covalent_radius")
+                for at in self._reader.atom_types
+            ]
+        )
 
         atoms = vtk.vtkPoints()
         atoms.SetNumberOfPoints(self._n_atoms)
@@ -598,7 +599,7 @@ class MolecularViewer(QtWidgets.QWidget):
                 continue
             diff = coords[i] - coords[idxs]
             dist = np.sum(diff * diff, axis=1)
-            sum_radii = (cov_radii[i] + cov_radii[idxs] + tolerance)**2
+            sum_radii = (cov_radii[i] + cov_radii[idxs] + tolerance) ** 2
             js = np.array(idxs)[(0 < dist) & (dist < sum_radii)]
             for j in js[i < js]:
                 line = vtk.vtkLine()
@@ -621,7 +622,20 @@ class MolecularViewer(QtWidgets.QWidget):
         self._uc_polydata.SetPoints(uc_points)
 
         uc_lines = vtk.vtkCellArray()
-        for i, j in [(0, 1), (0, 2), (0, 3), (1, 4), (1, 5), (4, 7), (2, 4), (2, 6), (5, 7), (3, 5), (3, 6), (6, 7)]:
+        for i, j in [
+            (0, 1),
+            (0, 2),
+            (0, 3),
+            (1, 4),
+            (1, 5),
+            (4, 7),
+            (2, 4),
+            (2, 6),
+            (5, 7),
+            (3, 5),
+            (3, 6),
+            (6, 7),
+        ]:
             line = vtk.vtkLine()
             line.GetPointIds().SetId(0, i)
             line.GetPointIds().SetId(1, j)
@@ -664,7 +678,10 @@ class MolecularViewer(QtWidgets.QWidget):
         # this returs a list of indices, mapping colours to atoms
 
         self._atom_scales = np.array(
-            [CHEMICAL_ELEMENTS.get_atom_property(at, "vdw_radius") for at in self._atoms]
+            [
+                CHEMICAL_ELEMENTS.get_atom_property(at, "vdw_radius")
+                for at in self._atoms
+            ]
         ).astype(np.float32)
 
         scalars = ndarray_to_vtkarray(
