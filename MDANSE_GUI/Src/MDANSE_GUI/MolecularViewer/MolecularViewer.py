@@ -15,10 +15,10 @@
 import logging
 
 import numpy as np
-from icecream import ic
+from scipy.spatial import cKDTree as KDTree
 
-from qtpy import QtCore, QtWidgets
-from qtpy.QtCore import Signal, Slot, Qt
+from qtpy import QtWidgets
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QSizePolicy
 
 import vtk
@@ -28,19 +28,13 @@ from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Chemistry import ATOMS_DATABASE as CHEMICAL_ELEMENTS
 
-# from MDANSE_GUI.MolecularViewer.database import CHEMICAL_ELEMENTS
 from MDANSE_GUI.MolecularViewer.readers import hdf5wrapper
 from MDANSE_GUI.MolecularViewer.Dummy import PyConnectivity
 from MDANSE_GUI.MolecularViewer.Contents import TrajectoryAtomData
-
-# from MDANSE_GUI.MolecularViewer.ColourManager import ColourManager
 from MDANSE_GUI.MolecularViewer.AtomProperties import (
     AtomProperties,
     ndarray_to_vtkarray,
 )
-
-# from waterstay.extensions.histogram_3d import histogram_3d
-# from waterstay.gui.atomic_trace_settings_dialog import AtomicTraceSettingsDialog
 
 
 def array_to_3d_imagedata(data, spacing):
@@ -248,7 +242,7 @@ class MolecularViewer(QtWidgets.QWidget):
     def build_events(self):
         """Build the events."""
 
-        self._iren.AddObserver("LeftButtonPressEvent", self.on_pick)
+        # self._iren.AddObserver("LeftButtonPressEvent", self.on_pick)
         self._iren.AddObserver("RightButtonPressEvent", self.on_show_atom_info)
 
     def build_scene(self):
@@ -334,7 +328,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self._n_frames = 0
         self.new_max_frames.emit(0)
         self._atoms = []
-        self._fixed_bonds = []
         self._atom_colours = []
         self._polydata = vtk.vtkPolyData()
         self._current_frame = 0
@@ -560,7 +553,7 @@ class MolecularViewer(QtWidgets.QWidget):
             self._connectivity_builder.add_point(index, xyz, radius)
 
     @Slot(int)
-    def set_coordinates(self, frame: int):
+    def set_coordinates(self, frame: int, tolerance=0.04):
         """Sets a new configuration.
 
         @param frame: the configuration number
@@ -582,18 +575,22 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._polydata.SetPoints(atoms)
 
-        covalent_radii = [
-            CHEMICAL_ELEMENTS[at]["covalent_radius"] for at in self._reader.atom_types
-        ]
-        self.set_connectivity_builder(coords, covalent_radii)
-        chemical_bonds = self._fixed_bonds
-
+        # determine and set bonds without PBC applied
+        tree = KDTree(coords)
         bonds = vtk.vtkCellArray()
-        for at, bonded_at in chemical_bonds:
-            line = vtk.vtkLine()
-            line.GetPointIds().SetId(0, at)
-            line.GetPointIds().SetId(1, bonded_at)
-            bonds.InsertNextCell(line)
+        contacts = tree.query_ball_tree(tree, 2 * np.max(self._cov_radii) + tolerance)
+        for i, idxs in enumerate(contacts):
+            if len(idxs) == 0:
+                continue
+            diff = coords[i] - coords[idxs]
+            dist = np.sum(diff * diff, axis=1)
+            sum_radii = (self._cov_radii[i] + self._cov_radii[idxs] + tolerance)**2
+            js = np.array(idxs)[(0 < dist) & (dist < sum_radii)]
+            for j in js[i < js]:
+                line = vtk.vtkLine()
+                line.GetPointIds().SetId(0, i)
+                line.GetPointIds().SetId(1, j)
+                bonds.InsertNextCell(line)
 
         self._polydata.SetLines(bonds)
 
@@ -621,10 +618,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self.new_max_frames.emit(self._n_frames - 1)
 
         self._atoms = self._reader.atom_types
-        try:
-            self._fixed_bonds = self._reader._chemical_system._bonds
-        except AttributeError:
-            self._fixed_bonds = []
 
         # Hack for reducing objects resolution when the system is big
         self._resolution = int(np.sqrt(3000000.0 / self._n_atoms))
@@ -637,8 +630,11 @@ class MolecularViewer(QtWidgets.QWidget):
         # this returs a list of indices, mapping colours to atoms
 
         self._atom_scales = np.array(
-            [CHEMICAL_ELEMENTS[at]["vdw_radius"] for at in self._atoms]
+            [CHEMICAL_ELEMENTS.get_atom_property(at, "vdw_radius") for at in self._atoms]
         ).astype(np.float32)
+        self._cov_radii = np.array([
+            CHEMICAL_ELEMENTS.get_atom_property(at, "covalent_radius") for at in self._reader.atom_types
+        ])
 
         scalars = ndarray_to_vtkarray(
             self._atom_colours, self._atom_scales, self._n_atoms

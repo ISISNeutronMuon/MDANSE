@@ -85,7 +85,7 @@ class AtomSelectionConfigurator(IConfigurator):
         self["elements"] = [[at.symbol] for at in selectedAtoms]
         self["names"] = [at.symbol for at in selectedAtoms]
         self["unique_names"] = sorted(set(self["names"]))
-        self["masses"] = [[ATOMS_DATABASE[n]["atomic_weight"]] for n in self["names"]]
+        self["masses"] = [[ATOMS_DATABASE.get_atom_property(n, "atomic_weight")] for n in self["names"]]
         self.error_status = "OK"
 
     def get_natoms(self):

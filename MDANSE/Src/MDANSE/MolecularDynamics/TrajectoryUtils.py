@@ -240,7 +240,7 @@ def build_connectivity(
         coords = conf.to_real_coordinates()[indexes, :]
         cov_radii = np.zeros((n_atoms,), dtype=np.float64)
         for i, at in enumerate(atoms):
-            cov_radii[i] = ATOMS_DATABASE[at.symbol.capitalize()]["covalent_radius"]
+            cov_radii[i] = ATOMS_DATABASE.get_atom_property(at.symbol.capitalize(), "covalent_radius")
 
         bonds = fast_calculation.cpt_cluster_connectivity_nopbc(
             coords, cov_radii, tolerance

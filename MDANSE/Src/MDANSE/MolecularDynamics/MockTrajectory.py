@@ -351,7 +351,7 @@ class MockTrajectory:
             last = len(self)
 
         indexes = [at.index for at in atoms]
-        masses = np.array([ATOMS_DATABASE[at.symbol]["atomic_weight"] for at in atoms])
+        masses = np.array([ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight") for at in atoms])
 
         frames = np.array([self.coordinates(fnum) for fnum in range(first, last, step)])
         coords = frames[:, indexes, :].astype(np.float64)

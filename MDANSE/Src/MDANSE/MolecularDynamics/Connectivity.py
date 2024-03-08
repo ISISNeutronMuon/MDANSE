@@ -49,7 +49,7 @@ class Connectivity:
         atom_elements = [atom.symbol for atom in chemical.atoms]
         unique_elements = np.unique(atom_elements)
         radii = {
-            element: ATOMS_DATABASE[element]["covalent_radius"]
+            element: ATOMS_DATABASE.get_atom_property(element, "covalent_radius")
             for element in unique_elements
         }
         self._elements = atom_elements

@@ -77,8 +77,6 @@ class Trajectory:
         # Define a default name for all chemical entities which have no name
         resolve_undefined_molecules_name(self._chemical_system)
 
-        # Retrieve the connectivity
-        build_connectivity(self._chemical_system)
         ic("Trajectory.__init__ ended")
 
     def close(self):
@@ -231,7 +229,7 @@ class Trajectory:
             last = len(self)
 
         indexes = [at.index for at in atoms]
-        masses = np.array([ATOMS_DATABASE[at.symbol]["atomic_weight"] for at in atoms])
+        masses = np.array([ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight") for at in atoms])
         grp = self._h5_file["/configuration"]
 
         coords = grp["coordinates"][first:last:step, :, :].astype(np.float64)
@@ -615,7 +613,7 @@ class RigidBodyTrajectoryGenerator:
 
         atoms = chemical_entity.atom_list
 
-        masses = [ATOMS_DATABASE[at.symbol]["atomic_weight"] for at in atoms]
+        masses = [ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight") for at in atoms]
 
         mass = sum(masses)
 
