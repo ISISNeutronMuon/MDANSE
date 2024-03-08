@@ -577,6 +577,9 @@ class MolecularViewer(QtWidgets.QWidget):
 
         # update the atoms
         coords = self._reader.read_frame(self._current_frame)
+        cov_radii = np.array([
+            CHEMICAL_ELEMENTS.get_atom_property(at, "covalent_radius") for at in self._reader.atom_types
+        ])
 
         atoms = vtk.vtkPoints()
         atoms.SetNumberOfPoints(self._n_atoms)
@@ -589,13 +592,13 @@ class MolecularViewer(QtWidgets.QWidget):
         # determine and set bonds without PBC applied
         tree = KDTree(coords)
         bonds = vtk.vtkCellArray()
-        contacts = tree.query_ball_tree(tree, 2 * np.max(self._cov_radii) + tolerance)
+        contacts = tree.query_ball_tree(tree, 2 * np.max(cov_radii) + tolerance)
         for i, idxs in enumerate(contacts):
             if len(idxs) == 0:
                 continue
             diff = coords[i] - coords[idxs]
             dist = np.sum(diff * diff, axis=1)
-            sum_radii = (self._cov_radii[i] + self._cov_radii[idxs] + tolerance)**2
+            sum_radii = (cov_radii[i] + cov_radii[idxs] + tolerance)**2
             js = np.array(idxs)[(0 < dist) & (dist < sum_radii)]
             for j in js[i < js]:
                 line = vtk.vtkLine()
@@ -663,9 +666,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self._atom_scales = np.array(
             [CHEMICAL_ELEMENTS.get_atom_property(at, "vdw_radius") for at in self._atoms]
         ).astype(np.float32)
-        self._cov_radii = np.array([
-            CHEMICAL_ELEMENTS.get_atom_property(at, "covalent_radius") for at in self._reader.atom_types
-        ])
 
         scalars = ndarray_to_vtkarray(
             self._atom_colours, self._atom_scales, self._n_atoms
