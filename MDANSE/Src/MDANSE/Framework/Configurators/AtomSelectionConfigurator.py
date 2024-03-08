@@ -123,7 +123,7 @@ class AtomSelectionConfigurator(IConfigurator):
         info.append("Number of selected atoms:%d" % self["selection_length"])
         info.append("Selected elements:%s" % self["unique_names"])
 
-        return "\n".join(info)
+        return "\n".join(info) + "\n"
 
     def get_selector(self) -> Selector:
         traj_config = self._configurable[self._dependencies["trajectory"]]

@@ -211,8 +211,8 @@ class RangeConfigurator(IConfigurator):
         info = "%d values from %s to %s" % (self["number"], self["first"], self["last"])
 
         if self._includeLast:
-            info += "last value included"
+            info += " last value included"
         else:
-            info += "last value excluded"
+            info += " last value excluded"
 
-        return info
+        return info + "\n"

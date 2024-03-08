@@ -79,4 +79,4 @@ class AtomMappingConfigurator(IConfigurator):
         if "value" not in self:
             return "Not configured yet\n"
 
-        return str(self["value"])
+        return str(self["value"]) + "\n"

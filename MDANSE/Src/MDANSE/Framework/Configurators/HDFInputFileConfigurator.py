@@ -103,4 +103,4 @@ class HDFInputFileConfigurator(InputFileConfigurator):
             for v in variables:
                 info.append("\t-{}".format(v))
 
-        return "\n".join(info)
+        return "\n".join(info) + "\n"

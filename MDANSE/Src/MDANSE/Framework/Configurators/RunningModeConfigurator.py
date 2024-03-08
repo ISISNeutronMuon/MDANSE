@@ -82,4 +82,4 @@ class RunningModeConfigurator(IConfigurator):
         :rtype: str
         """
 
-        return "Run in %s mode (%d slots)" % (self["mode"], self["slots"])
+        return "Run in %s mode (%d slots)\n" % (self["mode"], self["slots"])

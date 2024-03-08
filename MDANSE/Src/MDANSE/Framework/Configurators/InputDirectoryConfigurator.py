@@ -52,4 +52,4 @@ class InputDirectoryConfigurator(IConfigurator):
         :rtype: str
         """
 
-        return "Input directory: %r" % self["value"]
+        return "Input directory: %r\n" % self["value"]
