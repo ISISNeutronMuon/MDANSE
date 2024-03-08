@@ -13,6 +13,7 @@
 # **************************************************************************
 
 import logging
+from typing import List
 
 import numpy as np
 from scipy.spatial import cKDTree as KDTree
@@ -118,6 +119,11 @@ class MolecularViewer(QtWidgets.QWidget):
         self._n_frames = 0
         self._resolution = 0
 
+        self._atoms_visible = True
+        self._bonds_visible = False
+        self._axes_visible = True
+        self._cell_visible = True
+
         self._iren.Initialize()
 
         self._atoms = []
@@ -155,13 +161,21 @@ class MolecularViewer(QtWidgets.QWidget):
         self._scale_factor = scale_factor
         self.update_renderer()
 
+    def _new_visibility(self, flags: List[bool]):
+        self._atoms_visible = flags[0]
+        self._bonds_visible = flags[1]
+        self._axes_visible = flags[2]
+        self._cell_visible = flags[3]
+        self.axes_widget.SetEnabled(self._axes_visible)
+        result = self.set_coordinates(self._current_frame)
+        if result is False:
+            self.update_renderer()
+
     @Slot()
     def _new_atom_parameters(self):
         if self._polydata is None or self._datamodel is None:
             return
 
-        colours = self._datamodel.colours()
-        radii = self._datamodel.radii()
         # we need to add the new colours to LUT
         # then assign new colour NUMBERS to _atom_colours
 
@@ -246,6 +260,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def build_scene(self):
         """Build the scene."""
+        if self._polydata is None:
+            return
 
         actor_list = []
 
@@ -272,39 +288,40 @@ class MolecularViewer(QtWidgets.QWidget):
         actor_list.append(uc_line_actor)
 
         temp_radius = float(1.0 * self._scale_factor)
-        sphere = vtk.vtkSphereSource()
-        sphere.SetCenter(0, 0, 0)
-        sphere.SetRadius(temp_radius)
-        sphere.SetThetaResolution(self._resolution)
-        sphere.SetPhiResolution(self._resolution)
-        glyph = vtk.vtkGlyph3D()
-        if vtk.vtkVersion.GetVTKMajorVersion() < 6:
-            glyph.SetInput(self._polydata)
-        else:
-            glyph.SetInputData(self._polydata)
+        if self._atoms_visible:
+            sphere = vtk.vtkSphereSource()
+            sphere.SetCenter(0, 0, 0)
+            sphere.SetRadius(temp_radius)
+            sphere.SetThetaResolution(self._resolution)
+            sphere.SetPhiResolution(self._resolution)
+            glyph = vtk.vtkGlyph3D()
+            if vtk.vtkVersion.GetVTKMajorVersion() < 6:
+                glyph.SetInput(self._polydata)
+            else:
+                glyph.SetInputData(self._polydata)
 
-        temp_scale = float(0.2 * self._scale_factor)
-        glyph.SetScaleModeToScaleByScalar()
-        glyph.SetColorModeToColorByScalar()
-        glyph.SetScaleFactor(temp_scale)
-        glyph.SetSourceConnection(sphere.GetOutputPort())
-        glyph.SetIndexModeToScalar()
-        sphere_mapper = vtk.vtkPolyDataMapper()
-        sphere_mapper.SetLookupTable(self._colour_manager._lut)
-        sphere_mapper.SetScalarRange(self._polydata.GetScalarRange())
-        sphere_mapper.SetInputConnection(glyph.GetOutputPort())
-        sphere_mapper.ScalarVisibilityOn()
-        sphere_mapper.ColorByArrayComponent("scalars", 1)
-        ball_actor = vtk.vtkLODActor()
-        ball_actor.SetMapper(sphere_mapper)
-        ball_actor.GetProperty().SetAmbient(0.2)
-        ball_actor.GetProperty().SetDiffuse(0.5)
-        ball_actor.GetProperty().SetSpecular(0.3)
-        ball_actor.SetNumberOfCloudPoints(30000)
-        actor_list.append(ball_actor)
-        self.glyph = glyph
+            temp_scale = float(0.2 * self._scale_factor)
+            glyph.SetScaleModeToScaleByScalar()
+            glyph.SetColorModeToColorByScalar()
+            glyph.SetScaleFactor(temp_scale)
+            glyph.SetSourceConnection(sphere.GetOutputPort())
+            glyph.SetIndexModeToScalar()
+            sphere_mapper = vtk.vtkPolyDataMapper()
+            sphere_mapper.SetLookupTable(self._colour_manager._lut)
+            sphere_mapper.SetScalarRange(self._polydata.GetScalarRange())
+            sphere_mapper.SetInputConnection(glyph.GetOutputPort())
+            sphere_mapper.ScalarVisibilityOn()
+            sphere_mapper.ColorByArrayComponent("scalars", 1)
+            ball_actor = vtk.vtkLODActor()
+            ball_actor.SetMapper(sphere_mapper)
+            ball_actor.GetProperty().SetAmbient(0.2)
+            ball_actor.GetProperty().SetDiffuse(0.5)
+            ball_actor.GetProperty().SetSpecular(0.3)
+            ball_actor.SetNumberOfCloudPoints(30000)
+            actor_list.append(ball_actor)
+            self.glyph = glyph
 
-        self._picking_domain = ball_actor
+            self._picking_domain = ball_actor
 
         assembly = vtk.vtkAssembly()
         for actor in actor_list:
@@ -316,6 +333,8 @@ class MolecularViewer(QtWidgets.QWidget):
         """Clear the vtk scene from atoms and bonds actors."""
 
         if not hasattr(self, "_actors"):
+            return
+        if self._actors is None:
             return
 
         self._actors.VisibilityOff()
@@ -569,7 +588,7 @@ class MolecularViewer(QtWidgets.QWidget):
         """
 
         if self._reader is None:
-            return
+            return False
 
         self._current_frame = frame % self._reader.n_frames
 
@@ -590,57 +609,65 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._polydata.SetPoints(atoms)
 
-        # determine and set bonds without PBC applied
-        tree = KDTree(coords)
-        bonds = vtk.vtkCellArray()
-        contacts = tree.query_ball_tree(tree, 2 * np.max(cov_radii) + tolerance)
-        for i, idxs in enumerate(contacts):
-            if len(idxs) == 0:
-                continue
-            diff = coords[i] - coords[idxs]
-            dist = np.sum(diff * diff, axis=1)
-            sum_radii = (cov_radii[i] + cov_radii[idxs] + tolerance) ** 2
-            js = np.array(idxs)[(0 < dist) & (dist < sum_radii)]
-            for j in js[i < js]:
+        if self._bonds_visible:
+            # determine and set bonds without PBC applied
+            tree = KDTree(coords)
+            bonds = vtk.vtkCellArray()
+            contacts = tree.query_ball_tree(tree, 2 * np.max(cov_radii) + tolerance)
+            for i, idxs in enumerate(contacts):
+                if len(idxs) == 0:
+                    continue
+                diff = coords[i] - coords[idxs]
+                dist = np.sum(diff * diff, axis=1)
+                sum_radii = (cov_radii[i] + cov_radii[idxs] + tolerance) ** 2
+                js = np.array(idxs)[(0 < dist) & (dist < sum_radii)]
+                for j in js[i < js]:
+                    line = vtk.vtkLine()
+                    line.GetPointIds().SetId(0, i)
+                    line.GetPointIds().SetId(1, j)
+                    bonds.InsertNextCell(line)
+
+            self._polydata.SetLines(bonds)
+        else:
+            bonds = vtk.vtkCellArray()
+            self._polydata.SetLines(bonds)
+
+        if self._cell_visible:
+            # update the unit cell
+            uc = self._reader.read_pbc(self._current_frame)
+            a = uc.a_vector
+            b = uc.b_vector
+            c = uc.c_vector
+            uc_points = vtk.vtkPoints()
+            uc_points.SetNumberOfPoints(8)
+            for i, v in enumerate([[0, 0, 0], a, b, c, a + b, a + c, b + c, a + b + c]):
+                x, y, z = v
+                uc_points.SetPoint(i, x, y, z)
+            self._uc_polydata.SetPoints(uc_points)
+
+            uc_lines = vtk.vtkCellArray()
+            for i, j in [
+                (0, 1),
+                (0, 2),
+                (0, 3),
+                (1, 4),
+                (1, 5),
+                (4, 7),
+                (2, 4),
+                (2, 6),
+                (5, 7),
+                (3, 5),
+                (3, 6),
+                (6, 7),
+            ]:
                 line = vtk.vtkLine()
                 line.GetPointIds().SetId(0, i)
                 line.GetPointIds().SetId(1, j)
-                bonds.InsertNextCell(line)
-
-        self._polydata.SetLines(bonds)
-
-        # update the unit cell
-        uc = self._reader.read_pbc(self._current_frame)
-        a = uc.a_vector
-        b = uc.b_vector
-        c = uc.c_vector
-        uc_points = vtk.vtkPoints()
-        uc_points.SetNumberOfPoints(8)
-        for i, v in enumerate([[0, 0, 0], a, b, c, a + b, a + c, b + c, a + b + c]):
-            x, y, z = v
-            uc_points.SetPoint(i, x, y, z)
-        self._uc_polydata.SetPoints(uc_points)
-
-        uc_lines = vtk.vtkCellArray()
-        for i, j in [
-            (0, 1),
-            (0, 2),
-            (0, 3),
-            (1, 4),
-            (1, 5),
-            (4, 7),
-            (2, 4),
-            (2, 6),
-            (5, 7),
-            (3, 5),
-            (3, 6),
-            (6, 7),
-        ]:
-            line = vtk.vtkLine()
-            line.GetPointIds().SetId(0, i)
-            line.GetPointIds().SetId(1, j)
-            uc_lines.InsertNextCell(line)
-        self._uc_polydata.SetLines(uc_lines)
+                uc_lines.InsertNextCell(line)
+            self._uc_polydata.SetLines(uc_lines)
+        else:
+            uc_lines = vtk.vtkCellArray()
+            self._uc_polydata.SetLines(uc_lines)
 
         # Update the view.
         self.update_renderer()
