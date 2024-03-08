@@ -134,7 +134,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._colour_manager = AtomProperties()
 
-        self.build_events()
+        # self.build_events()
 
     def setDataModel(self, datamodel: TrajectoryAtomData):
         self._datamodel = datamodel
@@ -242,7 +242,7 @@ class MolecularViewer(QtWidgets.QWidget):
     def build_events(self):
         """Build the events."""
 
-        # self._iren.AddObserver("LeftButtonPressEvent", self.on_pick)
+        self._iren.AddObserver("LeftButtonPressEvent", self.on_pick)
         self._iren.AddObserver("RightButtonPressEvent", self.on_show_atom_info)
 
     def build_scene(self):
