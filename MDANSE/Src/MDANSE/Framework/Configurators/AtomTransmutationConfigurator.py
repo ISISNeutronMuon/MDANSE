@@ -120,7 +120,8 @@ class AtomTransmutationConfigurator(IConfigurator):
 
         atomSelConfigurator["unique_names"] = sorted(set(atomSelConfigurator["names"]))
         atomSelConfigurator["masses"] = [
-            [ATOMS_DATABASE[n]["atomic_weight"]] for n in atomSelConfigurator["names"]
+            [ATOMS_DATABASE.get_atom_property(n, "atomic_weight")]
+            for n in atomSelConfigurator["names"]
         ]
         self.error_status = "OK"
 
@@ -136,6 +137,6 @@ class AtomTransmutationConfigurator(IConfigurator):
             return "Not configured yet"
 
         if self["value"] is None:
-            return "No atoms selected for transmutation"
+            return "No atoms selected for transmutation\n"
 
         return "Number of transmutated atoms:%d\n" % self._nTransmutatedAtoms

@@ -37,7 +37,7 @@ def test_disf(trajectory):
         "SphericalLatticeQVectors",
         {"seed": 0, "shells": (5.0, 36, 10.0), "n_vectors": 10, "width": 9.0},
     )
-    parameters["running_mode"] = ("monoprocessor",)
+    parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_incoherent2"
     for resolution_generator in IInstrumentResolution.subclasses():

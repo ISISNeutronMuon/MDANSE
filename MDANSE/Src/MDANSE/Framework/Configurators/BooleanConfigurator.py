@@ -71,4 +71,4 @@ class BooleanConfigurator(IConfigurator):
         :rtype: str
         """
 
-        return "Value: %r" % self["value"]
+        return "Value: %r\n" % self["value"]

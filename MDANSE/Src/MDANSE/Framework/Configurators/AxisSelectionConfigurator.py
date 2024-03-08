@@ -84,4 +84,4 @@ class AxisSelectionConfigurator(IConfigurator):
         :rtype: str
         """
 
-        return "Axis vector:%s" % self["value"]
+        return "Axis vector:%s\n" % self["value"]

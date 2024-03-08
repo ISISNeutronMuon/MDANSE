@@ -50,7 +50,7 @@ class Density(IJob):
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "ASCIIFormat"]},
+        {"formats": ["MDAFormat", "TextFormat"]},
     )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
@@ -114,7 +114,12 @@ class Density(IJob):
         atomic_density = self._n_atoms / cell_volume
 
         mass_density = (
-            sum([ATOMS_DATABASE[s]["atomic_weight"] for s in self._symbols])
+            sum(
+                [
+                    ATOMS_DATABASE.get_atom_property(s, "atomic_weight")
+                    for s in self._symbols
+                ]
+            )
             / NAVOGADRO
             / cell_volume
         )

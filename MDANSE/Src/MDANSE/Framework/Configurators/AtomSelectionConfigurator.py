@@ -85,7 +85,10 @@ class AtomSelectionConfigurator(IConfigurator):
         self["elements"] = [[at.symbol] for at in selectedAtoms]
         self["names"] = [at.symbol for at in selectedAtoms]
         self["unique_names"] = sorted(set(self["names"]))
-        self["masses"] = [[ATOMS_DATABASE[n]["atomic_weight"]] for n in self["names"]]
+        self["masses"] = [
+            [ATOMS_DATABASE.get_atom_property(n, "atomic_weight")]
+            for n in self["names"]
+        ]
         self.error_status = "OK"
 
     def get_natoms(self):
@@ -123,7 +126,7 @@ class AtomSelectionConfigurator(IConfigurator):
         info.append("Number of selected atoms:%d" % self["selection_length"])
         info.append("Selected elements:%s" % self["unique_names"])
 
-        return "\n".join(info)
+        return "\n".join(info) + "\n"
 
     def get_selector(self) -> Selector:
         traj_config = self._configurable[self._dependencies["trajectory"]]

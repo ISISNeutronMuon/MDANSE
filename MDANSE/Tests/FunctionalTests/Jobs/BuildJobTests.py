@@ -48,12 +48,12 @@ class JobFileGenerator:
             print(r"/!\ Reference data file is not present for job " + str(job))
             self.reference_data_file = None
 
-        # Check if job can be launched on multiprocessor
+        # Check if job can be launched on multicore
         if job.settings.has_key("running_mode"):
-            self.multiprocessor = True
+            self.multicore = True
         else:
-            print("/!\ Job " + str(job) + " cannot be launched on multiprocessor")
-            self.multiprocessor = False
+            print("/!\ Job " + str(job) + " cannot be launched on multicore")
+            self.multicore = False
 
         # Create the job file
         self.job_file_name = "Test_%s.py" % job._type
@@ -162,49 +162,49 @@ class JobFileGenerator:
         )
         test_string += "        job = IJob.create(%r)\n\n" % (self.job._type)
 
-        # Launch the job in monoprocessor mode and copy output file
+        # Launch the job in single-core mode and copy output file
         test_string += (
-            '        print "Launching job in monoprocessor mode"\n'
-            '        parameters["running_mode"] = ("monoprocessor",1)\n'
+            '        print "Launching job in single-core mode"\n'
+            '        parameters["running_mode"] = ("single-core",1)\n'
             "        job.run(parameters, status=False)\n"
-            '        print "Monoprocessor execution completed"\n\n'
+            '        print "Single-core execution completed"\n\n'
         )
 
-        # Launch the job in multiprocessor mode if avalaible
-        if self.multiprocessor:
+        # Launch the job in multicore mode if avalaible
+        if self.multicore:
             test_string += (
-                '        print "Launching job in multiprocessor mode"\n'
-                '        parameters["running_mode"] = ("multiprocessor",2)\n'
+                '        print "Launching job in multicore mode"\n'
+                '        parameters["running_mode"] = ("multicore",2)\n'
                 '        parameters["%s"] = (reference_data_path + "_multi", ["netcdf"])\n'
                 % key
             )
             test_string += (
                 "        job.run(parameters, status=False)\n"
-                '        print "Multiprocessor execution completed"\n\n'
+                '        print "Multicore execution completed"\n\n'
             )
 
         test_string += "        try:\n"
 
-        # Compare reference data with monoprocessor if reference data exists
+        # Compare reference data with single-core if reference data exists
         if self.reference_data_file:
             test_string += (
-                '            print "Comparing monoprocessor output with reference output"\n'
+                '            print "Comparing single-core output with reference output"\n'
                 '            self.assertTrue(compare("'
                 + self.reference_data_file.replace("\\", "/")
                 + '", reference_data_path + "_mono" + ".nc"))\n\n'
             )
-        # Compare reference data with multiprocessor if reference data exists
-        if self.reference_data_file and self.multiprocessor:
+        # Compare reference data with multicore if reference data exists
+        if self.reference_data_file and self.multicore:
             test_string += (
-                '            print "Comparing multiprocessor output with reference output"\n'
+                '            print "Comparing multicore output with reference output"\n'
                 '            self.assertTrue(compare("'
                 + self.reference_data_file.replace("\\", "/")
                 + '", reference_data_path + "_multi" + ".nc"))\n\n'
             )
-        # If no reference data but multiprocessor, compare mono and multiprocessor
-        elif self.multiprocessor:
+        # If no reference data but multicore, compare mono and multicore
+        elif self.multicore:
             test_string += (
-                '            print "Comparing monoprocessor output with multiprocessor output"\n'
+                '            print "Comparing single-core output with multicore output"\n'
                 '            self.assertTrue(compare(reference_data_path + "_mono" + ".nc", '
                 'reference_data_path + "_multi" + ".nc"))\n\n'
             )
@@ -215,7 +215,7 @@ class JobFileGenerator:
             '                os.remove(reference_data_path + "_mono" + ".nc")\n'
         )
 
-        if self.multiprocessor:
+        if self.multicore:
             test_string += (
                 '                os.remove(reference_data_path + "_multi" + ".nc")\n'
             )

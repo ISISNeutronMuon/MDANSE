@@ -78,7 +78,7 @@ def test_dcsf(trajectory, qvector_spherical_lattice):
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["q_vectors"] = qvector_spherical_lattice
-    parameters["running_mode"] = ("monoprocessor",)
+    parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_coherent"
     dcsf = IJob.create("DynamicCoherentStructureFactor")
@@ -97,7 +97,7 @@ def test_disf(trajectory, qvector_spherical_lattice):
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["q_vectors"] = qvector_spherical_lattice
-    parameters["running_mode"] = ("monoprocessor",)
+    parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_incoherent2"
     disf = IJob.create("DynamicIncoherentStructureFactor")
@@ -115,7 +115,7 @@ def test_eisf(trajectory, qvector_spherical_lattice):
     parameters["frames"] = (0, 10, 1)
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["q_vectors"] = qvector_spherical_lattice
-    parameters["running_mode"] = ("monoprocessor",)
+    parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_incoherent"
     eisf = IJob.create("ElasticIncoherentStructureFactor")
@@ -134,7 +134,7 @@ def test_gdisf(trajectory):
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["q_shells"] = (2.0, 12.2, 2.0)
-    parameters["running_mode"] = ("monoprocessor",)
+    parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_incoherent2"
     gdisf = IJob.create("GaussianDynamicIncoherentStructureFactor")
@@ -142,7 +142,6 @@ def test_gdisf(trajectory):
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")
     os.remove(temp_name + ".mda")
-
 
 def test_ndtsf(disf, dcsf, qvector_spherical_lattice):
     temp_name = tempfile.mktemp()

@@ -49,7 +49,7 @@ class JobTab(GeneralTab):
 
     def set_job_starter(self, job_starter):
         self._job_starter = job_starter
-        self.action.new_thread_objects.connect(self._job_starter.startThread)
+        self.action.new_thread_objects.connect(self._job_starter.startProcess)
 
     @Slot(str)
     def set_current_trajectory(self, new_name: str) -> None:
@@ -69,7 +69,9 @@ class JobTab(GeneralTab):
         )
         # The combobox was changed we need to update the action
         # widgets with the new trajectory
-        self.action.set_trajectory(path=None, trajectory=traj_model._nodes[node_number])
+        self.action.set_trajectory(
+            path=None, trajectory=traj_model._nodes[node_number][0]
+        )
         current_item = self._core.current_item()
         if current_item is not None:
             # we only update the widget if a job is selected from the

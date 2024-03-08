@@ -98,7 +98,7 @@ class Eccentricity(IJob):
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "ASCIIFormat"]},
+        {"formats": ["MDAFormat", "TextFormat"]},
     )
 
     def initialize(self):
@@ -160,7 +160,7 @@ class Eccentricity(IJob):
         self._selectionTotalMass = np.sum(self._selectionMasses)
 
         self._comMasses = [
-            ATOMS_DATABASE[self._atoms[idx].symbol]["atomic_weight"]
+            ATOMS_DATABASE.get_atom_property(self._atoms[idx].symbol, "atomic_weight")
             for idx in self._comIndexes
         ]
 
@@ -196,7 +196,9 @@ class Eccentricity(IJob):
             atomsCoordinates = series[idxs, :]
             difference = atomsCoordinates - com
 
-            w = ATOMS_DATABASE[name][self.configuration["weights"]["property"]]
+            w = ATOMS_DATABASE.get_atom_property(
+                name, self.configuration["weights"]["property"]
+            )
 
             xx += np.add.reduce(
                 w

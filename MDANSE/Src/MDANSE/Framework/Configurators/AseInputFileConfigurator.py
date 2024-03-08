@@ -102,4 +102,4 @@ class AseInputFileConfigurator(InputFileConfigurator):
         except KeyError:
             print(f"No VALUE in {self._name}")
 
-        return "Input file: %r" % self["value"]
+        return "Input file: %r\n" % self["value"]

@@ -102,4 +102,4 @@ class MultipleChoicesConfigurator(IConfigurator):
         return self._nChoices
 
     def get_information(self):
-        return "Selected items: %r" % self["choices"]
+        return "Selected items: %r\n" % self["choices"]

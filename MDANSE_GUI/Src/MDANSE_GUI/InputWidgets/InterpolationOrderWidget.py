@@ -48,6 +48,12 @@ class InterpolationOrderWidget(WidgetBase):
         self.default_labels()
         self.update_labels()
         self.updateValue()
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "The order of the polynomial function used for interpolating velocity values from atom positions. If zero, velocity values present in the trajectory will be used."
+        self._field.setToolTip(tooltip_text)
+        self.numerator.setToolTip(tooltip_text)
 
     def configure_using_default(self):
         """This is too simple to have a default value"""
@@ -60,7 +66,7 @@ class InterpolationOrderWidget(WidgetBase):
         if self._label_text == "":
             self._label_text = "InterpolationOrderWidget"
         if self._tooltip == "":
-            self._tooltip = "If non-zero, approximate velocities will be calculated from atom positions"
+            self._tooltip = "The order of the polynomial function used for interpolating velocity values from atom positions. If zero, velocity values present in the trajectory will be used."
 
     @Slot(int)
     def adjust_numerator(self, order: int):

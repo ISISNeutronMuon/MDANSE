@@ -73,7 +73,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         for i in range(ascfg["selection_length"]):
             name = ascfg["names"][i]
             for el in ascfg["elements"][i]:
-                p = ATOMS_DATABASE[el][self["property"]]
+                p = ATOMS_DATABASE.get_atom_property(el, self["property"])
                 if name in weights:
                     weights[name] += p
                 else:
@@ -92,4 +92,4 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         :rtype: str
         """
 
-        return "selected weight: %s" % self["property"]
+        return "selected weight: %s\n" % self["property"]

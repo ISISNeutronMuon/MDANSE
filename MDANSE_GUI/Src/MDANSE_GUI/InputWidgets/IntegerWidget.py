@@ -45,13 +45,17 @@ class IntegerWidget(WidgetBase):
             field.setText(str(default_option))
             field.setPlaceholderText(str(default_option))
             field.textChanged.connect(self.updateValue)
-        field.setToolTip(self._tooltip)
         self._field = field
         self._default_value = default_option
         self._layout.addWidget(field)
         self.default_labels()
         self.update_labels()
         self.updateValue()
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "A single integer number"
+        field.setToolTip(tooltip_text)
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,

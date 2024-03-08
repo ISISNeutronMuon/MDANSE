@@ -115,7 +115,7 @@ class McStasVirtualInstrument(IJob):
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "ASCIIFormat"]},
+        {"formats": ["MDAFormat", "TextFormat"]},
     )
 
     def initialize(self):
@@ -135,18 +135,18 @@ class McStasVirtualInstrument(IJob):
         self._mcStasPhysicalParameters = {"density": 0.0}
         self._mcStasPhysicalParameters["V_rho"] = 0.0
         self._mcStasPhysicalParameters["weight"] = sum(
-            [ATOMS_DATABASE[s]["atomic_weight"] for s in symbols]
+            [ATOMS_DATABASE.get_atom_property(s, "atomic_weight") for s in symbols]
         )
         self._mcStasPhysicalParameters["sigma_abs"] = (
-            np.mean([ATOMS_DATABASE[s]["xs_absorption"] for s in symbols])
+            np.mean([ATOMS_DATABASE.get_atom_property(s, "xs_absorption") for s in symbols])
             * MCSTAS_UNITS_LUT["nm2"]
         )
         self._mcStasPhysicalParameters["sigma_coh"] = (
-            np.mean([ATOMS_DATABASE[s]["xs_coherent"] for s in symbols])
+            np.mean([ATOMS_DATABASE.get_atom_property(s, "xs_coherent") for s in symbols])
             * MCSTAS_UNITS_LUT["nm2"]
         )
         self._mcStasPhysicalParameters["sigma_inc"] = (
-            np.mean([ATOMS_DATABASE[s]["xs_incoherent"] for s in symbols])
+            np.mean([ATOMS_DATABASE.get_atom_property(s, "xs_incoherent") for s in symbols])
             * MCSTAS_UNITS_LUT["nm2"]
         )
         for frameIndex in self.configuration["frames"]["value"]:

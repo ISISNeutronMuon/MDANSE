@@ -71,4 +71,4 @@ class OutputDirectoryConfigurator(IConfigurator):
         :rtype: str
         """
 
-        return "Output directory: %r" % self["value"]
+        return "Output directory: %r\n" % self["value"]

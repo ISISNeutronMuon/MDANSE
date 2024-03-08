@@ -24,6 +24,7 @@ from MDANSE.Mathematics.Arithmetic import weight
 class StaticStructureFactor(DistanceHistogram):
     """
     Computes the static structure factor from the pair distribution function for a set of atoms.
+    The result is defined as S(q) = F_coh(q, t = 0).
     """
 
     label = "Static Structure Factor"
@@ -76,7 +77,7 @@ class StaticStructureFactor(DistanceHistogram):
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "ASCIIFormat"]},
+        {"formats": ["MDAFormat", "TextFormat"]},
     )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 

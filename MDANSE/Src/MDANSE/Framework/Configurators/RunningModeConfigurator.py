@@ -27,21 +27,21 @@ class RunningModeConfigurator(IConfigurator):
     """
     This configurator allows to choose the mode used to run the calculation.
 
-    MDANSE currently support monoprocessor or multiprocessor (SMP) running modes. In the laster case, you have to
+    MDANSE currently support single-core or multicore (SMP) running modes. In the laster case, you have to
     specify the number of slots used for running the analysis.
     """
 
-    availablesModes = ["monoprocessor", "threadpool", "multiprocessor"]
+    availablesModes = ["single-core", "threadpool", "multicore"]
 
-    _default = ("monoprocessor", 1)
+    _default = ("single-core", 1)
 
     def configure(self, value):
         """
         Configure the running mode.
      
-        :param value: the running mode specification. It can be *'monoprocessor'* or a 2-tuple whose first element \
-        must be *'multiprocessor'* and 2nd element the number of slots allocated for running the analysis.
-        :type value: *'monoprocessor'* or 2-tuple
+        :param value: the running mode specification. It can be *'single-core'* or a 2-tuple whose first element \
+        must be *'multicore'* and 2nd element the number of slots allocated for running the analysis.
+        :type value: *'single-core'* or 2-tuple
         """
 
         if isinstance(value, str):
@@ -53,13 +53,13 @@ class RunningModeConfigurator(IConfigurator):
             self.error_status = f"{mode} is not a valid running mode."
             return
 
-        if mode == "monoprocessor":
+        if mode == "single-core":
             slots = 1
 
         else:
             slots = int(value[1])
 
-            if mode == "multiprocessor":
+            if mode == "multicore":
                 maxSlots = multiprocessing.cpu_count()
                 if slots > maxSlots:
                     self.error_status = "invalid number of allocated slots."
@@ -82,4 +82,4 @@ class RunningModeConfigurator(IConfigurator):
         :rtype: str
         """
 
-        return "Run in %s mode (%d slots)" % (self["mode"], self["slots"])
+        return "Run in %s mode (%d slots)\n" % (self["mode"], self["slots"])

@@ -56,4 +56,4 @@ class TrajectoryVariableConfigurator(IConfigurator):
         :rtype: str
         """
 
-        return "Selected variable: %r" % self["value"]
+        return "Selected variable: %r\n" % self["value"]

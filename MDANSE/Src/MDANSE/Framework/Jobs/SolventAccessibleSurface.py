@@ -67,7 +67,7 @@ class SolventAccessibleSurface(IJob):
     settings["probe_radius"] = ("FloatConfigurator", {"mini": 0.0, "default": 0.14})
     settings["output_files"] = (
         "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "ASCIIFormat"]},
+        {"formats": ["MDAFormat", "TextFormat"]},
     )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
@@ -102,7 +102,10 @@ class SolventAccessibleSurface(IJob):
         # A mapping between the atom indexes and covalent_radius radius for the whole universe.
         self.vdwRadii = dict(
             [
-                (at.index, ATOMS_DATABASE[at.symbol]["covalent_radius"])
+                (
+                    at.index,
+                    ATOMS_DATABASE.get_atom_property(at.symbol, "covalent_radius"),
+                )
                 for at in self.configuration["trajectory"][
                     "instance"
                 ].chemical_system.atom_list

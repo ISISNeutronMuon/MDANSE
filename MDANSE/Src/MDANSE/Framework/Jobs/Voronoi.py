@@ -68,7 +68,7 @@ class Voronoi(IJob):
     settings["pbc_border_size"] = ("FloatConfigurator", {"mini": 0.0, "default": 0.0})
     settings["output_files"] = (
         "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "ASCIIFormat"]},
+        {"formats": ["MDAFormat", "TextFormat"]},
     )
 
     def initialize(self):

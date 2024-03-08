@@ -27,7 +27,11 @@ class BooleanWidget(WidgetBase):
         field.setTristate(False)
         field.setChecked(default_option)
         field.stateChanged.connect(self.updateValue)
-        field.setToolTip(self._tooltip)
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "A single logical value that can be True of False"
+        field.setToolTip(tooltip_text)
         self._field = field
         self._layout.addWidget(field)
         self.default_labels()
@@ -43,6 +47,7 @@ class BooleanWidget(WidgetBase):
             self._label_text = "BooleanWidget"
         if self._tooltip == "":
             self._tooltip = "A single logical value that can be True of False"
+        self._field.setToolTip(self._tooltip)
 
     def configure_using_default(self):
         """No need to anything for Boolean"""
