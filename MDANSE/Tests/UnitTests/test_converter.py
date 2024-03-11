@@ -26,6 +26,8 @@ dlp_field_v2 = os.path.join(file_wd, "Data", "FIELD_Water")
 dlp_history_v2 = os.path.join(file_wd, "Data", "HISTORY_Water")
 dlp_field_v4 = os.path.join(file_wd, "Data", "FIELD4")
 dlp_history_v4 = os.path.join(file_wd, "Data", "HISTORY4")
+apoferritin_dcd = os.path.join(file_wd, "Data", "apoferritin.dcd")
+apoferritin_pdb = os.path.join(file_wd, "Data", "apoferritin.pdb")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -284,4 +286,28 @@ def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_versi
 
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+
+
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_namd_mdt_conversion_file_exists_and_loads_up_successfully_and_chemical_system_has_correct_number_of_atoms(compression):
+    temp_name = tempfile.mktemp()
+
+    parameters = {
+        'dcd_file': apoferritin_dcd,
+        'fold': False,
+        'output_file': (temp_name, 64, compression),
+        'pdb_file': apoferritin_pdb,
+        'time_step': '1.0',
+    }
+    namd = Converter.create("NAMD")
+    namd.run(parameters, status=True)
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+
+    hdftradj = HDFTrajectoryConfigurator("trajectory")
+    hdftradj.configure(temp_name + ".mdt")
+    assert hdftradj["instance"].chemical_system.number_of_atoms == 12397
+
+    hdftradj["instance"].close()
     os.remove(temp_name + ".mdt")

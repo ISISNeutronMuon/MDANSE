@@ -14053,7 +14053,7 @@
             "b_incoherent2": 1.28881e-09,
             "xray_asf_b4": 1.29424,
             "alternatives": [
-                "SOD"
+                "SOD", "Sod"
             ],
             "period": 3,
             "proton": 11,

@@ -1076,7 +1076,7 @@ class Molecule(_ChemicalEntity):
         mol.reorder_atoms(names)
 
         for at, index in zip(mol.atom_list, atom_indexes):
-            at.ghost = literal_eval(contents[index][2].decode("utf8"))
+            at.ghost = literal_eval(contents[index][3].decode("utf8"))
 
         return mol
 
