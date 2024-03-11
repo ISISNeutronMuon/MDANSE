@@ -501,9 +501,9 @@ class TestMolecule(unittest.TestCase):
                 ]
             ],
             "atoms": [
-                [repr("O").encode("UTF-8"), repr("OW").encode("UTF-8"), b"False"],
-                [repr("H").encode("UTF-8"), repr("HW2").encode("UTF-8"), b"False"],
-                [repr("H").encode("UTF-8"), repr("HW1").encode("UTF-8"), b"False"],
+                [repr("O").encode("UTF-8"), repr("OW").encode("UTF-8"), "None", b"False"],
+                [repr("H").encode("UTF-8"), repr("HW2").encode("UTF-8"), "None", b"False"],
+                [repr("H").encode("UTF-8"), repr("HW1").encode("UTF-8"), "None", b"False"],
             ],
         }
         m = ce.Molecule.build(h5, [0, 1, 2], "WAT", "water")
