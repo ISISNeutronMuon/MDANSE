@@ -112,4 +112,4 @@ class InstrumentResolutionConfigurator(IConfigurator):
 
         info = "\n".join(info)
 
-        return info
+        return info + "\n"

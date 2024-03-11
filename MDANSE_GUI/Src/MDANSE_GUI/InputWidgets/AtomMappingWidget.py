@@ -154,6 +154,11 @@ class AtomMappingWidget(WidgetBase):
         self._field = QLineEdit(default_value, self._base)
         self._field.setPlaceholderText(default_value)
         self._field.setMaxLength(2147483647)  # set to the largest possible
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "Replace the chemical elements in the system. The order of symbols is <current>:<new>"
+        self._field.setToolTip(tooltip_text)
 
         # file input widgets should be loaded into the _widgets list
         # before this one

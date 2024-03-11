@@ -27,7 +27,12 @@ class BackupWidget(WidgetBase):
         self._field = QLineEdit(str(self._configurator.default))
         self._field.setPlaceholderText(str(self._configurator.default))
         self._layout.addWidget(self._field)
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "There should have been a specialised widget for this parameter, but there isn't."
         self._field.textChanged.connect(self.updateValue)
+        self._field.setToolTip(tooltip_text)
         self.updateValue()
 
     def get_widget_value(self):

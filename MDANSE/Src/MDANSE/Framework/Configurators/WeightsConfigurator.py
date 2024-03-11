@@ -92,4 +92,4 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         :rtype: str
         """
 
-        return "selected weight: %s" % self["property"]
+        return "selected weight: %s\n" % self["property"]

@@ -319,6 +319,10 @@ class AtomSelectionWidget(WidgetBase):
         self._field.setPlaceholderText(default_value)
         self._field.setMaxLength(2147483647)  # set to the largest possible
         self._field.textChanged.connect(self.updateValue)
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "Specify which atoms will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
         self.selector = self._configurator.get_selector()
         self.helper = HelperDialog(self.selector, self._field, self._base)
         helper_button = QPushButton("Atom selection helper", self._base)
@@ -328,6 +332,7 @@ class AtomSelectionWidget(WidgetBase):
         self._layout.addWidget(helper_button)
         self.update_labels()
         self.updateValue()
+        self._field.setToolTip(tooltip_text)
 
     @Slot()
     def helper_dialog(self) -> None:

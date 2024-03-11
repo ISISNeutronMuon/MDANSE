@@ -77,4 +77,4 @@ class SingleChoiceConfigurator(IConfigurator):
         :rtype: str
         """
 
-        return "Selected item: %r" % self["value"]
+        return "Selected item: %r\n" % self["value"]

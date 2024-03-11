@@ -114,4 +114,4 @@ class McStasParametersConfigurator(IConfigurator):
         :rtype: str
         """
 
-        return "McStas command line parameters:%s" % self["value"]
+        return "McStas command line parameters:%s\n" % self["value"]

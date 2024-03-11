@@ -123,7 +123,7 @@ class CurrentCorrelationFunction(IJob):
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "ASCIIFormat"]},
+        {"formats": ["MDAFormat", "TextFormat"]},
     )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 

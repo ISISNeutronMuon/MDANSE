@@ -34,6 +34,11 @@ class StringWidget(WidgetBase):
         self.default_labels()
         self.update_labels()
         self.updateValue()
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "A text string variable. When in doubt, erase the text to see the example (placeholder) text"
+        field.setToolTip(tooltip_text)
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
@@ -43,7 +48,7 @@ class StringWidget(WidgetBase):
         if self._label_text == "":
             self._label_text = "StringWidget"
         if self._tooltip == "":
-            self._tooltip = "A text string variable. Do you know what to type in?"
+            self._tooltip = "A text string variable. When in doubt, erase the text to see the example (placeholder) text"
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""

@@ -114,4 +114,4 @@ class AtomsListConfigurator(IConfigurator):
             "Number of selected %d-tuplets:%d" % (self._nAtoms, self["n_values"])
         )
 
-        return "\n".join(info)
+        return "\n".join(info) + "\n"
