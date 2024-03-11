@@ -24,10 +24,11 @@ from qtpy.QtWidgets import (
     QPushButton,
     QStyle,
     QSizePolicy,
-    QTableView,
+    QTreeView,
     QDoubleSpinBox,
     QColorDialog,
     QGroupBox,
+    QCheckBox,
 )
 from qtpy.QtGui import (
     QDoubleValidator,
@@ -39,7 +40,6 @@ from qtpy.QtGui import (
 )
 
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
-from MDANSE_GUI.MolecularViewer.Contents import TrajectoryAtomData
 
 button_lookup = {
     "start": QStyle.StandardPixmap.SP_MediaSkipBackward,
@@ -125,6 +125,7 @@ class ViewerControls(QWidget):
         self._frame_step = 1
         self._time_per_frame = 80  # in ms
         self._frame_factor = 1  # just a scalar multiplication factor
+        self._visibility = [True, True, True, True]
         self.createSlider()
         self.createButtons(Qt.Orientation.Horizontal)
         self.createSidePanel()
@@ -200,7 +201,7 @@ class ViewerControls(QWidget):
         # the table of chemical elements
         wrapper1 = QGroupBox("Atom properties", base)
         layout1 = QHBoxLayout(wrapper1)
-        self._atom_details = QTableView(base)
+        self._atom_details = QTreeView(base)
         self._atom_details.setSizePolicy(
             QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum
         )
@@ -244,9 +245,33 @@ class ViewerControls(QWidget):
         layout4.addWidget(size_factor)
         wrapper4.setLayout(layout4)
         layout.addWidget(wrapper4)
+        wrapper5 = QGroupBox("Visible Objects", base)
+        layout5 = QHBoxLayout(wrapper5)
+        atoms_visible = QCheckBox("atoms", wrapper5)
+        bonds_visible = QCheckBox("bonds", wrapper5)
+        axes_visible = QCheckBox("axes", wrapper5)
+        cell_visible = QCheckBox("cell", wrapper5)
+        self._visibility_checkboxes = [
+            atoms_visible,
+            bonds_visible,
+            axes_visible,
+            cell_visible,
+        ]
+        for nw, box in enumerate(self._visibility_checkboxes):
+            box.setTristate(False)
+            box.setChecked(self._visibility[nw])
+            box.stateChanged.connect(self.setVisibility)
+            layout5.addWidget(box)
+        layout.addWidget(wrapper5)
         # the database of atom types
         # self._database = TrajectoryAtomData()
         self.layout().addWidget(base, 0, 2, 2, 1)  # row, column, rowSpan, columnSpan
+
+    @Slot()
+    def setVisibility(self):
+        for nw, box in enumerate(self._visibility_checkboxes):
+            self._visibility[nw] = box.isChecked()
+        self._viewer._new_visibility(self._visibility)
 
     @Slot(int)
     def setTimeStep(self, new_value: int):
