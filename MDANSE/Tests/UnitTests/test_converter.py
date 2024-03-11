@@ -248,15 +248,17 @@ def test_xyz_mdt_conversion_file_exists_and_loads_up_successfully(compression):
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
-def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_version_2(compression):
+def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_version_2(
+    compression,
+):
     temp_name = tempfile.mktemp()
 
     parameters = {
-        'atom_aliases': '{}',
-        'field_file': dlp_field_v2,
-        'fold': False,
-        'history_file': dlp_history_v2,
-        'output_file': (temp_name, 64, compression),
+        "atom_aliases": "{}",
+        "field_file": dlp_field_v2,
+        "fold": False,
+        "history_file": dlp_history_v2,
+        "output_file": (temp_name, 64, compression),
     }
     dl_poly = Converter.create("DL_POLY")
     dl_poly.run(parameters, status=True)
@@ -269,15 +271,17 @@ def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_versi
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
-def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_version_4(compression):
+def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_version_4(
+    compression,
+):
     temp_name = tempfile.mktemp()
 
     parameters = {
-        'atom_aliases': '{}',
-        'field_file': dlp_field_v4,
-        'fold': False,
-        'history_file': dlp_history_v4,
-        'output_file': (temp_name, 64, compression),
+        "atom_aliases": "{}",
+        "field_file": dlp_field_v4,
+        "fold": False,
+        "history_file": dlp_history_v4,
+        "output_file": (temp_name, 64, compression),
     }
     dl_poly = Converter.create("DL_POLY")
     dl_poly.run(parameters, status=True)
@@ -290,15 +294,17 @@ def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_versi
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
-def test_namd_mdt_conversion_file_exists_and_loads_up_successfully_and_chemical_system_has_correct_number_of_atoms(compression):
+def test_namd_mdt_conversion_file_exists_and_loads_up_successfully_and_chemical_system_has_correct_number_of_atoms(
+    compression,
+):
     temp_name = tempfile.mktemp()
 
     parameters = {
-        'dcd_file': apoferritin_dcd,
-        'fold': False,
-        'output_file': (temp_name, 64, compression),
-        'pdb_file': apoferritin_pdb,
-        'time_step': '1.0',
+        "dcd_file": apoferritin_dcd,
+        "fold": False,
+        "output_file": (temp_name, 64, compression),
+        "pdb_file": apoferritin_pdb,
+        "time_step": "1.0",
     }
     namd = Converter.create("NAMD")
     namd.run(parameters, status=True)

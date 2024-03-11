@@ -64,7 +64,7 @@ class TestConfigurator(unittest.TestCase):
         self.assertEqual(configurator["value"], 10)
         configurator.configure(10.1)
         self.assertEqual(configurator["value"], 10)
-        configurator.configure('xxxx')
+        configurator.configure("xxxx")
         self.assertFalse(configurator.valid)
 
     def test_float_configurator(self):
@@ -137,6 +137,7 @@ class TestConfigurator(unittest.TestCase):
 
 def test_XYZFileConfigurator_with_cp2k_pos():
     from MDANSE.Framework.Configurators.XYZFileConfigurator import XYZFileConfigurator
+
     xyz_file = XYZFileConfigurator("test")
     xyz_file["filename"] = cp2k_pos
     xyz_file.parse()
