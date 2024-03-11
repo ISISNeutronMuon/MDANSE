@@ -67,6 +67,7 @@ class AtomEntry(QObject):
     ) -> List[QStandardItem]:
         self._indices = indices
         name_item = QStandardItem(str(name))
+        name_item.setEditable(False)
         colour_item = QStandardItem(str(colour))
         size_item = QStandardItem(str(size))
         self._items = [name_item, colour_item, size_item]
