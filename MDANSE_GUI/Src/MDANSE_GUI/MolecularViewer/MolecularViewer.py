@@ -594,12 +594,6 @@ class MolecularViewer(QtWidgets.QWidget):
 
         # update the atoms
         coords = self._reader.read_frame(self._current_frame)
-        cov_radii = np.array(
-            [
-                CHEMICAL_ELEMENTS.get_atom_property(at, "covalent_radius")
-                for at in self._reader.atom_types
-            ]
-        )
 
         atoms = vtk.vtkPoints()
         atoms.SetNumberOfPoints(self._n_atoms)
@@ -610,20 +604,37 @@ class MolecularViewer(QtWidgets.QWidget):
         self._polydata.SetPoints(atoms)
 
         if self._bonds_visible:
+
+            # do not bond atoms to dummy atoms
+            not_du = np.array(
+                [
+                    i
+                    for i, at in enumerate(self._reader.atom_types)
+                    if CHEMICAL_ELEMENTS.get_atom_property(at, "element") != "dummy"
+                ]
+            )
+            rs = coords[not_du]
+            covs = np.array(
+                [
+                    CHEMICAL_ELEMENTS.get_atom_property(at, "covalent_radius")
+                    for at in self._reader.atom_types
+                ]
+            )[not_du]
+
             # determine and set bonds without PBC applied
-            tree = KDTree(coords)
+            tree = KDTree(rs)
             bonds = vtk.vtkCellArray()
-            contacts = tree.query_ball_tree(tree, 2 * np.max(cov_radii) + tolerance)
+            contacts = tree.query_ball_tree(tree, 2 * np.max(covs) + tolerance)
             for i, idxs in enumerate(contacts):
                 if len(idxs) == 0:
                     continue
-                diff = coords[i] - coords[idxs]
+                diff = rs[i] - rs[idxs]
                 dist = np.sum(diff * diff, axis=1)
-                sum_radii = (cov_radii[i] + cov_radii[idxs] + tolerance) ** 2
+                sum_radii = (covs[i] + covs[idxs] + tolerance) ** 2
                 js = np.array(idxs)[(0 < dist) & (dist < sum_radii)]
-                for j in js[i < js]:
+                for j in not_du[js[i < js]]:
                     line = vtk.vtkLine()
-                    line.GetPointIds().SetId(0, i)
+                    line.GetPointIds().SetId(0, not_du[i])
                     line.GetPointIds().SetId(1, j)
                     bonds.InsertNextCell(line)
 
