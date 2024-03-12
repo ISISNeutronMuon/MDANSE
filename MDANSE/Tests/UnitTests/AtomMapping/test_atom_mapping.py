@@ -81,14 +81,20 @@ def test_get_element_from_mapping_with_no_entry_raises_error_with_bad_label():
 
 
 def test_fill_remaining_labels_fill_mapping_correctly_already_filled_1():
-    labels = [AtomLabel("label1", molecule="mol1"), AtomLabel("label2", molecule="mol1")]
+    labels = [
+        AtomLabel("label1", molecule="mol1"),
+        AtomLabel("label2", molecule="mol1"),
+    ]
     mapping = {"molecule=mol1": {"label1": "C", "label2": "C"}}
     fill_remaining_labels(mapping, labels)
     assert mapping == {"molecule=mol1": {"label1": "C", "label2": "C"}}
 
 
 def test_fill_remaining_labels_fill_mapping_correctly_already_filled_2():
-    labels = [AtomLabel("label1", molecule="mol1"), AtomLabel("label1", molecule="mol1")]
+    labels = [
+        AtomLabel("label1", molecule="mol1"),
+        AtomLabel("label1", molecule="mol1"),
+    ]
     mapping = {"molecule=mol1": {"label1": "C"}}
     fill_remaining_labels(mapping, labels)
     assert mapping == {"molecule=mol1": {"label1": "C"}}
@@ -108,12 +114,18 @@ def test_check_mapping_valid_as_elements_are_correct():
 
 
 def test_check_mapping_not_valid_as_elements_not_correct():
-    labels = [AtomLabel("label1", molecule="mol1"), AtomLabel("label2", molecule="mol1")]
+    labels = [
+        AtomLabel("label1", molecule="mol1"),
+        AtomLabel("label2", molecule="mol1"),
+    ]
     mapping = {"molecule=mol1": {"label1": "C", "label2": "aaa"}}
     assert not check_mapping_valid(mapping, labels)
 
 
 def test_check_mapping_not_valid_due_to_missing_mappings():
-    labels = [AtomLabel("label1", molecule="mol1"), AtomLabel("label2", molecule="mol1")]
+    labels = [
+        AtomLabel("label1", molecule="mol1"),
+        AtomLabel("label2", molecule="mol1"),
+    ]
     mapping = {"molecule=mol1": {"label1": "C"}}
     assert not check_mapping_valid(mapping, labels)

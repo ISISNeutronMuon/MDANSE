@@ -24,6 +24,7 @@ def trajectory():
     trajectory = HDFTrajectoryInputData(short_traj)
     yield trajectory
 
+
 def test_temperature(trajectory):
     temp_name = tempfile.mktemp()
     parameters = {}
