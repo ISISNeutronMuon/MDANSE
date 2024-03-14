@@ -5,6 +5,7 @@ from MDANSE.Framework.AtomSelector.atom_selectors import (
     select_element,
     select_hs_on_heteroatom,
     select_hs_on_element,
+    select_dummy
 )
 
 
@@ -34,50 +35,57 @@ def test_select_element_returns_false_as_match_does_not_exist(
     assert not exists
 
 
-def test_select_element_returns_correct_number_of_atoms_matches(
+def test_select_element_returns_correct_number_of_atom_matches(
     protein_chemical_system,
 ):
     selection = select_element(protein_chemical_system, "S")
     assert len(selection) == 10
 
 
-def test_select_hs_on_carbon_returns_correct_number_of_atoms_matches(
+def test_select_hs_on_carbon_returns_correct_number_of_atom_matches(
     protein_chemical_system,
 ):
     selection = select_hs_on_element(protein_chemical_system, "C")
     assert len(selection) == 696
 
 
-def test_select_hs_on_nitrogen_returns_correct_number_of_atoms_matches(
+def test_select_hs_on_nitrogen_returns_correct_number_of_atom_matches(
     protein_chemical_system,
 ):
     selection = select_hs_on_element(protein_chemical_system, "N")
     assert len(selection) == 243
 
 
-def test_select_hs_on_oxygen_returns_correct_number_of_atoms_matches(
+def test_select_hs_on_oxygen_returns_correct_number_of_atom_matches(
     protein_chemical_system,
 ):
     selection = select_hs_on_element(protein_chemical_system, "O")
     assert len(selection) == 19184
 
 
-def test_select_hs_on_sulfur_returns_correct_number_of_atoms_matches(
+def test_select_hs_on_sulfur_returns_correct_number_of_atom_matches(
     protein_chemical_system,
 ):
     selection = select_hs_on_element(protein_chemical_system, "S")
     assert len(selection) == 0
 
 
-def test_select_hs_on_silicon_returns_correct_number_of_atoms_matches(
+def test_select_hs_on_silicon_returns_correct_number_of_atom_matches(
     protein_chemical_system,
 ):
     selection = select_hs_on_element(protein_chemical_system, "Si")
     assert len(selection) == 0
 
 
-def test_select_hs_on_heteroatom_returns_correct_number_of_atoms_matches(
+def test_select_hs_on_heteroatom_returns_correct_number_of_atom_matches(
     protein_chemical_system,
 ):
     selection = select_hs_on_heteroatom(protein_chemical_system)
     assert len(selection) == 19427
+
+
+def test_select_dummy_returns_correct_number_of_atom_matches(
+    protein_chemical_system,
+):
+    selection = select_dummy(protein_chemical_system)
+    assert len(selection) == 0
