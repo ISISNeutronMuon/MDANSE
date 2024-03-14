@@ -82,7 +82,6 @@ class TestAtom(unittest.TestCase):
         self.assertEqual("Hydrogen", str(atom))
 
     def test_dunder_repr(self):
-        self.maxDiff = None
         atom = ce.Atom(name="Hydrogen", bonds=[ce.Atom(name="H5")])
         self.assertEqual(
             "MDANSE.Chemistry.ChemicalEntity.Atom(parent=None, name='Hydrogen', symbol='H', "
