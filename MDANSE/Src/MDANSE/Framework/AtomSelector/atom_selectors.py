@@ -38,7 +38,9 @@ def select_element(
         return system.get_substructure_matches(pattern)
 
 
-def select_dummy(system: ChemicalSystem, check_exists: bool = False) -> Union[set[int], bool]:
+def select_dummy(
+    system: ChemicalSystem, check_exists: bool = False
+) -> Union[set[int], bool]:
     """Selects all dummy atoms in the chemical system.
 
     Parameters
