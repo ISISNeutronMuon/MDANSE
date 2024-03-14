@@ -29,6 +29,7 @@ class HDFTrajectoryWidget(WidgetBase):
         except AttributeError:
             filename = None
         if filename is not None:
+            self._configurator.configure(filename)
             label = QLabel(filename, self._base)
             self._layout.addWidget(label)
             trajectory_path, _ = os.path.split(filename)
@@ -58,7 +59,7 @@ class HDFTrajectoryWidget(WidgetBase):
             self._tooltip = "The input trajectory to be processed"
 
     def get_value(self):
-        return self.default_path
+        return self._configurator["value"]
 
     def get_widget_value(self):
         return self.get_value()
