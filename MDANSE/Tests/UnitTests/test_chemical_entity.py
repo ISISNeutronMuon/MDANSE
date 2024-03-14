@@ -16,6 +16,7 @@ import collections
 import pickle
 from typing import Union
 import unittest
+import sys
 
 import numpy as np
 
@@ -81,6 +82,7 @@ class TestAtom(unittest.TestCase):
         self.assertEqual("Hydrogen", str(atom))
 
     def test_dunder_repr(self):
+        self.maxDiff = None
         atom = ce.Atom(name="Hydrogen", bonds=[ce.Atom(name="H5")])
         self.assertEqual(
             "MDANSE.Chemistry.ChemicalEntity.Atom(parent=None, name='Hydrogen', symbol='H', "
@@ -451,18 +453,32 @@ class TestMolecule(unittest.TestCase):
         self.compare_two_molecules(unpickled)
 
     def test_dunder_repr(self):
-        self.assertEqual(
-            "MDANSE.MolecularDynamics.ChemicalEntity.Molecule(parent=None, name='water', "
-            "atoms=OrderedDict([('OW', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry."
-            "ChemicalEntity.Molecule(water), name='OW', symbol='O', bonds=[Atom(HW1), Atom(HW2)], "
-            "groups=[], ghost=False, index=None, element='oxygen', alternatives=['O', 'OH2'])), ('HW2', MDANSE.Chemistry."
-            "ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(water), name='HW2', "
-            "symbol='H', bonds=[Atom(OW)], groups=[], ghost=False, index=None, element='hydrogen', alternatives=['H2'])), "
-            "('HW1', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity."
-            "Molecule(water), name='HW1', symbol='H', bonds=[Atom(OW)], groups=[], ghost=False, index=None, element='hydrogen'"
-            ", alternatives=['H1']))]), code='WAT')",
-            repr(self.molecule),
-        )
+        if sys.version_info.minor < 12:
+            self.assertEqual(
+                "MDANSE.MolecularDynamics.ChemicalEntity.Molecule(parent=None, name='water', "
+                "atoms=OrderedDict([('OW', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry."
+                "ChemicalEntity.Molecule(water), name='OW', symbol='O', bonds=[Atom(HW1), Atom(HW2)], "
+                "groups=[], ghost=False, index=None, element='oxygen', alternatives=['O', 'OH2'])), ('HW2', MDANSE.Chemistry."
+                "ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(water), name='HW2', "
+                "symbol='H', bonds=[Atom(OW)], groups=[], ghost=False, index=None, element='hydrogen', alternatives=['H2'])), "
+                "('HW1', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity."
+                "Molecule(water), name='HW1', symbol='H', bonds=[Atom(OW)], groups=[], ghost=False, index=None, element='hydrogen'"
+                ", alternatives=['H1']))]), code='WAT')",
+                repr(self.molecule),
+            )
+        else:
+            self.assertEqual(
+                "MDANSE.MolecularDynamics.ChemicalEntity.Molecule(parent=None, name='water', "
+                "atoms=OrderedDict({'OW': MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry."
+                "ChemicalEntity.Molecule(water), name='OW', symbol='O', bonds=[Atom(HW1), Atom(HW2)], "
+                "groups=[], ghost=False, index=None, element='oxygen', alternatives=['O', 'OH2']), 'HW2': MDANSE.Chemistry."
+                "ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(water), name='HW2', "
+                "symbol='H', bonds=[Atom(OW)], groups=[], ghost=False, index=None, element='hydrogen', alternatives=['H2']), "
+                "'HW1': MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity."
+                "Molecule(water), name='HW1', symbol='H', bonds=[Atom(OW)], groups=[], ghost=False, index=None, element='hydrogen'"
+                ", alternatives=['H1'])}), code='WAT')",
+                repr(self.molecule),
+            )
 
     def test_dunder_str(self):
         self.assertEqual('Molecule of water (database code "WAT")', str(self.molecule))
@@ -740,28 +756,52 @@ class TestResidue(unittest.TestCase):
     def test_dunder_repr(self):
         residue = ce.Residue("GLY", "glycine", None)
         residue.set_atoms(["H", "HA3", "O", "N", "CA", "HA2", "C"])
-        self.assertEqual(
-            "MDANSE.MolecularDynamics.ChemicalEntity.Residue(parent=None, name='glycine', code='GLY', "
-            "variant=None, selected_variant=None, atoms=OrderedDict([('H', MDANSE.Chemistry.ChemicalEntity"
-            ".Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name='H', symbol='H', bonds="
-            "[Atom(N)], groups=['backbone', 'peptide'], ghost=False, index=None, element='hydrogen', alternatives=['HN'])), "
-            "('HA3', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue"
-            "(glycine), name='HA3', symbol='H', bonds=[Atom(CA)], groups=['sidechain'], ghost=False, "
-            "index=None, element='hydrogen', alternatives=['HA1'])), ('O', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE"
-            ".Chemistry.ChemicalEntity.Residue(glycine), name='O', symbol='O', bonds=[Atom(C)], groups="
-            "['backbone', 'peptide'], ghost=False, index=None, element='oxygen', alternatives=['OT1'])), ('N', MDANSE."
-            "Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name="
-            "'N', symbol='N', bonds=[Atom(CA), Atom(H), Atom(-R)], groups=['backbone', 'peptide'], ghost="
-            "False, index=None, element='nitrogen', alternatives=[])), ('CA', MDANSE.Chemistry.ChemicalEntity.Atom(parent="
-            "MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name='CA', symbol='C', bonds=[Atom(C), "
-            "Atom(HA2), Atom(HA3), Atom(N)], groups=['backbone'], ghost=False, index=None, element='carbon', alternatives="
-            "[])), ('HA2', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity."
-            "Residue(glycine), name='HA2', symbol='H', bonds=[Atom(CA)], groups=['backbone'], ghost=False,"
-            " index=None, element='hydrogen', alternatives=['HA'])), ('C', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE"
-            ".Chemistry.ChemicalEntity.Residue(glycine), name='C', symbol='C', bonds=[Atom(CA), Atom(O), "
-            "Atom(+R)], groups=['backbone', 'peptide'], ghost=False, index=None, element='carbon', alternatives=[]))]))",
-            repr(residue),
-        )
+        if sys.version_info.minor < 12:
+            self.assertEqual(
+                "MDANSE.MolecularDynamics.ChemicalEntity.Residue(parent=None, name='glycine', code='GLY', "
+                "variant=None, selected_variant=None, atoms=OrderedDict([('H', MDANSE.Chemistry.ChemicalEntity"
+                ".Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name='H', symbol='H', bonds="
+                "[Atom(N)], groups=['backbone', 'peptide'], ghost=False, index=None, element='hydrogen', alternatives=['HN'])), "
+                "('HA3', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue"
+                "(glycine), name='HA3', symbol='H', bonds=[Atom(CA)], groups=['sidechain'], ghost=False, "
+                "index=None, element='hydrogen', alternatives=['HA1'])), ('O', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE"
+                ".Chemistry.ChemicalEntity.Residue(glycine), name='O', symbol='O', bonds=[Atom(C)], groups="
+                "['backbone', 'peptide'], ghost=False, index=None, element='oxygen', alternatives=['OT1'])), ('N', MDANSE."
+                "Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name="
+                "'N', symbol='N', bonds=[Atom(CA), Atom(H), Atom(-R)], groups=['backbone', 'peptide'], ghost="
+                "False, index=None, element='nitrogen', alternatives=[])), ('CA', MDANSE.Chemistry.ChemicalEntity.Atom(parent="
+                "MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name='CA', symbol='C', bonds=[Atom(C), "
+                "Atom(HA2), Atom(HA3), Atom(N)], groups=['backbone'], ghost=False, index=None, element='carbon', alternatives="
+                "[])), ('HA2', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity."
+                "Residue(glycine), name='HA2', symbol='H', bonds=[Atom(CA)], groups=['backbone'], ghost=False,"
+                " index=None, element='hydrogen', alternatives=['HA'])), ('C', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE"
+                ".Chemistry.ChemicalEntity.Residue(glycine), name='C', symbol='C', bonds=[Atom(CA), Atom(O), "
+                "Atom(+R)], groups=['backbone', 'peptide'], ghost=False, index=None, element='carbon', alternatives=[]))]))",
+                repr(residue),
+            )
+        else:
+            self.assertEqual(
+                "MDANSE.MolecularDynamics.ChemicalEntity.Residue(parent=None, name='glycine', code='GLY', "
+                "variant=None, selected_variant=None, atoms=OrderedDict({'H': MDANSE.Chemistry.ChemicalEntity"
+                ".Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name='H', symbol='H', bonds="
+                "[Atom(N)], groups=['backbone', 'peptide'], ghost=False, index=None, element='hydrogen', alternatives=['HN']), "
+                "'HA3': MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue"
+                "(glycine), name='HA3', symbol='H', bonds=[Atom(CA)], groups=['sidechain'], ghost=False, "
+                "index=None, element='hydrogen', alternatives=['HA1']), 'O': MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE"
+                ".Chemistry.ChemicalEntity.Residue(glycine), name='O', symbol='O', bonds=[Atom(C)], groups="
+                "['backbone', 'peptide'], ghost=False, index=None, element='oxygen', alternatives=['OT1']), 'N': MDANSE."
+                "Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name="
+                "'N', symbol='N', bonds=[Atom(CA), Atom(H), Atom(-R)], groups=['backbone', 'peptide'], ghost="
+                "False, index=None, element='nitrogen', alternatives=[]), 'CA': MDANSE.Chemistry.ChemicalEntity.Atom(parent="
+                "MDANSE.Chemistry.ChemicalEntity.Residue(glycine), name='CA', symbol='C', bonds=[Atom(C), "
+                "Atom(HA2), Atom(HA3), Atom(N)], groups=['backbone'], ghost=False, index=None, element='carbon', alternatives="
+                "[]), 'HA2': MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity."
+                "Residue(glycine), name='HA2', symbol='H', bonds=[Atom(CA)], groups=['backbone'], ghost=False,"
+                " index=None, element='hydrogen', alternatives=['HA']), 'C': MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE"
+                ".Chemistry.ChemicalEntity.Residue(glycine), name='C', symbol='C', bonds=[Atom(CA), Atom(O), "
+                "Atom(+R)], groups=['backbone', 'peptide'], ghost=False, index=None, element='carbon', alternatives=[])}))",
+                repr(residue),
+            )
 
     def test_dunder_str(self):
         residue = ce.Residue("GLY", "glycine", None)
@@ -1094,14 +1134,24 @@ class TestNucleotide(unittest.TestCase):
         nucleotide = ce.Nucleotide("5T1", "5T1", None)
         nucleotide.set_atoms(["HO5'"])
 
-        self.assertEqual(
-            "MDANSE.MolecularDynamics.ChemicalEntity.Nucleotide(parent=None, name='5T1', resname='5T1'"
-            ", code='5T1', variant=None, selected_variant=None, atoms=OrderedDict([(\"HO5'\", MDANSE."
-            "Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Nucleotide(5T1), name="
-            "\"HO5'\", symbol='H', bonds=[Atom(O5')], groups=[], ghost=False, index=None, element='hydrogen', replaces="
-            "['OP1', 'OP2', 'P'], o5prime_connected=True, alternatives=[]))]))",
-            repr(nucleotide),
-        )
+        if sys.version_info.minor < 12:
+            self.assertEqual(
+                "MDANSE.MolecularDynamics.ChemicalEntity.Nucleotide(parent=None, name='5T1', resname='5T1'"
+                ", code='5T1', variant=None, selected_variant=None, atoms=OrderedDict([(\"HO5'\", MDANSE."
+                "Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Nucleotide(5T1), name="
+                "\"HO5'\", symbol='H', bonds=[Atom(O5')], groups=[], ghost=False, index=None, element='hydrogen', replaces="
+                "['OP1', 'OP2', 'P'], o5prime_connected=True, alternatives=[]))]))",
+                repr(nucleotide),
+            )
+        else:
+            self.assertEqual(
+                "MDANSE.MolecularDynamics.ChemicalEntity.Nucleotide(parent=None, name='5T1', resname='5T1'"
+                ", code='5T1', variant=None, selected_variant=None, atoms=OrderedDict({\"HO5'\": MDANSE."
+                "Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Nucleotide(5T1), name="
+                "\"HO5'\", symbol='H', bonds=[Atom(O5')], groups=[], ghost=False, index=None, element='hydrogen', replaces="
+                "['OP1', 'OP2', 'P'], o5prime_connected=True, alternatives=[])}))",
+                repr(nucleotide),
+            )
 
     def test_dunder_str(self):
         nucleotide = ce.Nucleotide("5T1", "5T1", None)
@@ -2277,20 +2327,36 @@ class TestChemicalSystem(unittest.TestCase):
         self.system.add_chemical_entity(molecule)
 
         self.maxDiff = None
-        self.assertEqual(
-            "MDANSE.MolecularDynamics.ChemicalEntity.ChemicalSystem(parent=None, name='name', "
-            "chemical_entities=[MDANSE.MolecularDynamics.ChemicalEntity.Molecule(parent=MDANSE.Chemistry."
-            "ChemicalEntity.ChemicalSystem(name), name='name', atoms=OrderedDict([('OW', MDANSE.Chemistry."
-            "ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(name), name='OW', "
-            "symbol='O', bonds=[Atom(HW1), Atom(HW2)], groups=[], ghost=False, index=0, element='oxygen', alternatives="
-            "['O', 'OH2'])), ('HW2', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry."
-            "ChemicalEntity.Molecule(name), name='HW2', symbol='H', bonds=[Atom(OW)], groups=[], "
-            "ghost=False, index=1, element='hydrogen', alternatives=['H2'])), ('HW1', MDANSE.Chemistry.ChemicalEntity."
-            "Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(name), name='HW1', symbol='H', bonds="
-            "[Atom(OW)], groups=[], ghost=False, index=2, element='hydrogen', alternatives=['H1']))]), code='WAT')], "
-            "configuration=None, number_of_atoms=3, total_number_of_atoms=3, bonds=[], atoms=None)",
-            repr(self.system),
-        )
+        if sys.version_info.minor < 12:
+            self.assertEqual(
+                "MDANSE.MolecularDynamics.ChemicalEntity.ChemicalSystem(parent=None, name='name', "
+                "chemical_entities=[MDANSE.MolecularDynamics.ChemicalEntity.Molecule(parent=MDANSE.Chemistry."
+                "ChemicalEntity.ChemicalSystem(name), name='name', atoms=OrderedDict([('OW', MDANSE.Chemistry."
+                "ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(name), name='OW', "
+                "symbol='O', bonds=[Atom(HW1), Atom(HW2)], groups=[], ghost=False, index=0, element='oxygen', alternatives="
+                "['O', 'OH2'])), ('HW2', MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry."
+                "ChemicalEntity.Molecule(name), name='HW2', symbol='H', bonds=[Atom(OW)], groups=[], "
+                "ghost=False, index=1, element='hydrogen', alternatives=['H2'])), ('HW1', MDANSE.Chemistry.ChemicalEntity."
+                "Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(name), name='HW1', symbol='H', bonds="
+                "[Atom(OW)], groups=[], ghost=False, index=2, element='hydrogen', alternatives=['H1']))]), code='WAT')], "
+                "configuration=None, number_of_atoms=3, total_number_of_atoms=3, bonds=[], atoms=None)",
+                repr(self.system),
+            )
+        else:
+            self.assertEqual(
+                "MDANSE.MolecularDynamics.ChemicalEntity.ChemicalSystem(parent=None, name='name', "
+                "chemical_entities=[MDANSE.MolecularDynamics.ChemicalEntity.Molecule(parent=MDANSE.Chemistry."
+                "ChemicalEntity.ChemicalSystem(name), name='name', atoms=OrderedDict({'OW': MDANSE.Chemistry."
+                "ChemicalEntity.Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(name), name='OW', "
+                "symbol='O', bonds=[Atom(HW1), Atom(HW2)], groups=[], ghost=False, index=0, element='oxygen', alternatives="
+                "['O', 'OH2']), 'HW2': MDANSE.Chemistry.ChemicalEntity.Atom(parent=MDANSE.Chemistry."
+                "ChemicalEntity.Molecule(name), name='HW2', symbol='H', bonds=[Atom(OW)], groups=[], "
+                "ghost=False, index=1, element='hydrogen', alternatives=['H2']), 'HW1': MDANSE.Chemistry.ChemicalEntity."
+                "Atom(parent=MDANSE.Chemistry.ChemicalEntity.Molecule(name), name='HW1', symbol='H', bonds="
+                "[Atom(OW)], groups=[], ghost=False, index=2, element='hydrogen', alternatives=['H1'])}), code='WAT')], "
+                "configuration=None, number_of_atoms=3, total_number_of_atoms=3, bonds=[], atoms=None)",
+                repr(self.system),
+            )
 
     def test_dunder_str(self):
         atom1 = ce.Atom(ghost=False)
