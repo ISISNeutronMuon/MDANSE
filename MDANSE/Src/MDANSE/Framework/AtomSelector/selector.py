@@ -158,7 +158,7 @@ class Selector:
                 if not switch:
                     continue
 
-                idxs = idxs | self._funcs[k](self.system, **args)
+                idxs.update(self._funcs[k](self.system, **args))
 
         if self.settings["invert"]:
             return self.all_idxs - idxs

@@ -146,7 +146,6 @@ class Action(QWidget):
             dtype = value[0]
             ddict = value[1]
             configurator = job_instance.configuration[key]
-            configurator.configure(self._input_trajectory)
             if not "label" in ddict.keys():
                 ddict["label"] = key
             ddict["configurator"] = configurator
