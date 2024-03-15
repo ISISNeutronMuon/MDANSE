@@ -169,7 +169,8 @@ class HelperDialog(QDialog):
     """
 
     _cbox_text = {
-        "all": "All atoms:",
+        "all": "All atoms (excl. dummy atoms):",
+        "dummy": "All dummy atoms:",
         "hs_on_heteroatom": "Hs on heteroatoms:",
         "primary_amine": "Primary amine groups:",
         "hydroxy": "Hydroxy groups:",

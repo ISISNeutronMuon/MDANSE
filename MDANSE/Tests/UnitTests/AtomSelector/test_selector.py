@@ -16,13 +16,13 @@ def protein_chemical_system():
     return protein_chemical_system
 
 
-def test_selector_returns_all_atoms_idxs(protein_chemical_system):
+def test_selector_returns_all_atom_idxs(protein_chemical_system):
     selector = Selector(protein_chemical_system)
     atm_idxs = selector.get_idxs()
     assert len(atm_idxs) == 30714
 
 
-def test_selector_returns_all_atoms_idxs_with_all_and_sulfurs_selected(
+def test_selector_returns_all_atom_idxs_with_all_and_sulfurs_selected(
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
@@ -32,7 +32,7 @@ def test_selector_returns_all_atoms_idxs_with_all_and_sulfurs_selected(
     assert len(atm_idxs) == 30714
 
 
-def test_selector_returns_correct_number_of_atoms_idxs_when_sulfur_atoms_are_selected(
+def test_selector_returns_correct_number_of_atom_idxs_when_sulfur_atoms_are_selected(
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
@@ -42,7 +42,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_sulfur_atoms_are_sel
     assert len(atm_idxs) == 10
 
 
-def test_selector_returns_correct_number_of_atoms_idxs_when_sulfur_atoms_are_removed(
+def test_selector_returns_correct_number_of_atom_idxs_when_sulfur_atoms_are_removed(
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
@@ -53,7 +53,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_sulfur_atoms_are_rem
     assert len(atm_idxs) == 30714 - 10
 
 
-def test_selector_returns_correct_number_of_atoms_idxs_when_sulfur_atoms_are_removed_when_get_idxs_is_called_twice(
+def test_selector_returns_correct_number_of_atom_idxs_when_sulfur_atoms_are_removed_when_get_idxs_is_called_twice(
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
@@ -66,7 +66,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_sulfur_atoms_are_rem
     assert len(atm_idxs) == 30714 - 10
 
 
-def test_selector_returns_correct_number_of_atoms_idxs_when_waters_are_selected(
+def test_selector_returns_correct_number_of_atom_idxs_when_waters_are_selected(
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
@@ -76,7 +76,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_waters_are_selected(
     assert len(atm_idxs) == 28746
 
 
-def test_selector_returns_correct_number_of_atoms_idxs_when_waters_are_removed(
+def test_selector_returns_correct_number_of_atom_idxs_when_waters_are_removed(
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
@@ -87,7 +87,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_waters_are_removed(
     assert len(atm_idxs) == 30714 - 28746
 
 
-def test_selector_returns_correct_number_of_atoms_idxs_when_water_is_turned_on_and_off(
+def test_selector_returns_correct_number_of_atom_idxs_when_water_is_turned_on_and_off(
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
@@ -101,7 +101,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_water_is_turned_on_a
     assert len(atm_idxs) == 30714
 
 
-def test_selector_returns_correct_number_of_atoms_idxs_when_waters_and_sulfurs_are_removed(
+def test_selector_returns_correct_number_of_atom_idxs_when_waters_and_sulfurs_are_removed(
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
@@ -113,7 +113,7 @@ def test_selector_returns_correct_number_of_atoms_idxs_when_waters_and_sulfurs_a
     assert len(atm_idxs) == 30714 - 28746 - 10
 
 
-def test_selector_returns_correct_number_of_atoms_idxs_when_waters_and_sulfurs_are_removed_with_settings_loaded_as_a_dict(
+def test_selector_returns_correct_number_of_atom_idxs_when_waters_and_sulfurs_are_removed_with_settings_loaded_as_a_dict(
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
@@ -202,7 +202,7 @@ def test_selector_json_dump_with_fourth_update(protein_chemical_system):
     assert json_dump == '{"all": false, "element": {"O": true}}'
 
 
-def test_selector_returns_correct_number_of_atoms_idxs_after_setting_settings_again_with_reset_first(
+def test_selector_returns_correct_number_of_atom_idxs_after_setting_settings_again_with_reset_first(
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
@@ -253,7 +253,7 @@ def test_selector_json_dump_and_load_1(protein_chemical_system):
     assert len(atm_idxs) == 30714 - 28746 - 10
 
 
-def test_selector_returns_correct_number_of_atoms_idxs_when_indexes_0_and_1_are_removed(
+def test_selector_returns_correct_number_of_atom_idxs_when_indexes_0_and_1_are_removed(
     protein_chemical_system,
 ):
     selector = Selector(protein_chemical_system)
