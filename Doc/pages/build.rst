@@ -64,7 +64,7 @@ as other dependencies can be installed into it.
 
     conda create --name envname python=2.7
     conda activate envname
-    conda install h5py netCDF4
+    conda install h5py
     pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro
     wxPython_common‑3.0.2.0‑py2‑none‑any.whl
     wxPython‑3.0.2.0‑cp27‑none‑win_amd64.whl
@@ -149,7 +149,7 @@ First, create a conda virtual environment and install dependencies
 
     conda create --name envname python=2.7
     conda activate envname
-    conda install h5py netCDF4
+    conda install h5py
     pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro pyyaml
     sudo conda install -y -c daf wxpython
     sudo conda install -y -c ccordoba12 vtk
@@ -208,7 +208,7 @@ follow are such:
 
     conda create --name envname python=2.7
     conda activate envname
-    conda install h5py netCDF4
+    conda install h5py
     pip install numpy==1.16.6 matplotlib==2.2.5 Cython==0.29.24 Pyro pyyaml
     sudo conda install -y -c daf wxpython
     sudo conda install -y -c ccordoba12 vtk
