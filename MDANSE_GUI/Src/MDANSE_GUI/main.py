@@ -12,14 +12,15 @@
 # @authors   Research Software Group at ISIS (see AUTHORS)
 #
 # **************************************************************************
-
 import sys
+import os
+import time
 
-from qtpy.QtWidgets import QApplication
+from qtpy.QtWidgets import QApplication, QSplashScreen
 from qtpy.QtCore import QSettings
+from qtpy.QtGui import QPixmap
 
 from MDANSE_GUI.TabbedWindow import TabbedWindow
-from MDANSE_GUI.BackEnd import BackEnd
 
 
 def startGUI(some_args):
@@ -28,8 +29,19 @@ def startGUI(some_args):
     settings = QSettings(
         "ISIS Neutron and Muon Source", "MDANSE for Python 3", parent=app
     )
+
+    path = os.path.dirname(os.path.abspath(__file__))
+    splash_img = QPixmap(os.path.join(path, "splash.png"))
+    splash = QSplashScreen(splash_img)
+    splash.show()
+    # show the splash screen for at least 1 sec
+    time.sleep(1)
+
     root = TabbedWindow(parent=None, title="MDANSE for Python 3", settings=settings)
     root.show()
+
+    splash.finish(root)
+
     app.exec()  # once this is done, the GUI has its event loop running.
     # no more Python scripting now, we are in the event loop.
 
