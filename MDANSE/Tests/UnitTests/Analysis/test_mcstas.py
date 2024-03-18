@@ -46,7 +46,11 @@ def parameters():
     parameters['weights'] = 'equal'
     return parameters
 
+@pytest.mark.xfail(reason="see docstring")
 def test_mcstas(parameters):
+    """This test will be difficult to run:
+    On each platform we need a McStas instrument
+    compiled for that specific platform."""
     temp_name = tempfile.mktemp()
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     job = IJob.create("McStasVirtualInstrument")

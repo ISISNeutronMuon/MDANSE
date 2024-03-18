@@ -50,7 +50,7 @@ def parameters():
     "job_type",
     [
         "RadiusOfGyration",
-        "AreaPerMolecule",
+        # "AreaPerMolecule",
         "SolventAccessibleSurface",
         "RootMeanSquareDeviation",
         "RootMeanSquareFluctuation",

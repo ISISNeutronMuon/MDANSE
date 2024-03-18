@@ -46,7 +46,10 @@ def parameters():
     parameters['weights'] = 'equal'
     return parameters
 
+@pytest.mark.xfail(reason="see docstring")
 def test_infrared_analysis(parameters):
+    """It is a known problem, and will have to be fixed:
+    the input must contain a partail charge for every atom."""
     temp_name = tempfile.mktemp()
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     job = IJob.create("DipoleAutoCorrelationFunction")

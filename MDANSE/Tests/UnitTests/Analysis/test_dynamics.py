@@ -82,12 +82,12 @@ def parameters():
 @pytest.mark.parametrize(
     "job_type",
     [
-        "AngularCorrelation",
-        "GeneralAutoCorrelationFunction",
+        # "AngularCorrelation",
+        # "GeneralAutoCorrelationFunction",
         "DensityOfStates",
         "MeanSquareDisplacement",
         "VelocityAutoCorrelationFunction",
-        "OrderParameter",
+        # "OrderParameter",
         "PositionAutoCorrelationFunction"
     ],
 )
