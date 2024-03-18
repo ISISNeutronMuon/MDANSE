@@ -1,4 +1,3 @@
-
 import pytest
 
 from MDANSE.Framework.Jobs.IJob import IJob

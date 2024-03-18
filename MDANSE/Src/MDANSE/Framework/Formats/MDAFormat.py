@@ -26,7 +26,7 @@ class MDAFormat(IFormat):
     def write(
         cls,
         filename: str,
-        data: dict[str, 'IOutputVariable'],
+        data: dict[str, "IOutputVariable"],
         header: str = "",
         extension: str = extensions[0],
     ) -> None:
