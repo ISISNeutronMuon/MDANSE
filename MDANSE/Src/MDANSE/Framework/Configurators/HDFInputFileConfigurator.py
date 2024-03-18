@@ -26,7 +26,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
     This configurator allows to input an HDF file as input file.
     """
 
-    _default = "INPUT_FILENAME.h5"
+    _default = "INPUT_FILENAME.mda"
 
     def __init__(self, name, variables=None, **kwargs):
         """
@@ -42,6 +42,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         InputFileConfigurator.__init__(self, name, **kwargs)
 
         self._variables = variables if variables is not None else []
+        self._units = {}
 
     def configure(self, value):
         """
@@ -67,6 +68,10 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         for v in self._variables:
             if v in self["instance"]:
                 self[v] = self["instance"][v][:]
+                try:
+                    self._units[v] = self["instance"][v].attrs["units"]
+                except:
+                    self._units[v] = "unitless"
             else:
                 self.error_status = (
                     f"the variable {v} was not  found in {value} HDF file"
@@ -87,7 +92,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
 
     def get_information(self):
         """
-        Returns some basic informations about the contents of theHDF file.
+        Returns some basic informations about the contents of the HDF file.
 
         :return: the informations about the contents of the HDF file.
         :rtype: str

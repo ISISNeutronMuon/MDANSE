@@ -45,7 +45,7 @@ class StructureFactorFromScatteringFunction(IJob):
     )
     settings["instrument_resolution"] = (
         "InstrumentResolutionConfigurator",
-        {"dependencies": {"frames": "hdf_input_file"}},
+        {"dependencies": {"frames": "sample_inc"}},
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
@@ -60,25 +60,23 @@ class StructureFactorFromScatteringFunction(IJob):
         # The number of steps is set to 1 as everything is performed in the finalize method
         self.numberOfSteps = 1
 
-        inputFile = self.configuration["hdf_input_file"]["instance"]
+        inputFile = self.configuration["sample_inc"]["instance"]
 
         resolution = self.configuration["instrument_resolution"]
 
         self._outputData.add(
-            "time", "LineOutputVariable", inputFile.variables["time"][:], units="ps"
+            "time", "LineOutputVariable", inputFile["time"][:], units="ps"
         )
 
         self._outputData.add(
             "time_window",
             "LineOutputVariable",
-            inputFile.variables["time_window"][:],
+            inputFile["time_window"][:],
             axis="time",
             units="au",
         )
 
-        self._outputData.add(
-            "q", "LineOutputVariable", inputFile.variables["q"][:], units="1/nm"
-        )
+        self._outputData.add("q", "LineOutputVariable", inputFile["q"][:], units="1/nm")
 
         self._outputData.add(
             "omega", "LineOutputVariable", resolution["omega"], units="rad/ps"
@@ -92,10 +90,10 @@ class StructureFactorFromScatteringFunction(IJob):
             units="au",
         )
 
-        nQVectors = len(inputFile.variables["q"][:])
+        nQVectors = len(inputFile["q"][:])
         nOmegas = resolution["n_omegas"]
 
-        for k, v in list(inputFile.variables.items()):
+        for k, v in list(inputFile.items()):
             if k.startswith("f(q,t)_"):
                 self._outputData.add(
                     k, "SurfaceOutputVariable", v[:], axis="q|time", units="au"
@@ -147,4 +145,4 @@ class StructureFactorFromScatteringFunction(IJob):
             self._info,
         )
 
-        self.configuration["hdf_input_file"]["instance"].close()
+        self.configuration["sample_inc"]["instance"].close()

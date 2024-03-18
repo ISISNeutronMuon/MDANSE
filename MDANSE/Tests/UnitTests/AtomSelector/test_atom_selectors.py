@@ -5,7 +5,7 @@ from MDANSE.Framework.AtomSelector.atom_selectors import (
     select_element,
     select_hs_on_heteroatom,
     select_hs_on_element,
-    select_dummy
+    select_dummy,
 )
 
 
