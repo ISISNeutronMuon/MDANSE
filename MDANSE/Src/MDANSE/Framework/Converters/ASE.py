@@ -136,6 +136,9 @@ class ASE(Converter):
         try:
             frame = self._input[index]
         except TypeError:
+            frame = next(self._input)
+        else:
+            print("ASE using the slower way")
             frame = read(self.configuration["trajectory_file"]["value"], index=index)
         time = self._timeaxis[index]
 
@@ -195,15 +198,15 @@ class ASE(Converter):
         try:
             self._input = ASETrajectory(self.configuration["trajectory_file"]["value"])
         except:
-            self._input = iread(
-                self.configuration["trajectory_file"]["value"], index="[:]"
-            )
             first_frame = read(self.configuration["trajectory_file"]["value"], index=0)
             last_iterator = 0
             generator = iread(self.configuration["trajectory_file"]["value"])
             for _ in generator:
                 last_iterator += 1
             generator.close()
+            self._input = iread(
+                self.configuration["trajectory_file"]["value"]  # , index="[:]"
+            )
             self._total_number_of_steps = last_iterator
         else:
             first_frame = self._input[0]
