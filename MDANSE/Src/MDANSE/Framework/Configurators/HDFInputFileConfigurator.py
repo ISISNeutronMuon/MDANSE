@@ -28,7 +28,13 @@ class HDFInputFileConfigurator(InputFileConfigurator):
 
     _default = "INPUT_FILENAME.mda"
 
-    def __init__(self, name, variables=None, **kwargs):
+    def __init__(
+        self,
+        name,
+        variables=None,
+        wildcard="MDA analysis results (*.mda)|*.mda|HDF5 files (*.h5)|*.h5|All files|*",
+        **kwargs,
+    ):
         """
         Initializes the configurator.
 
@@ -43,6 +49,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
 
         self._variables = variables if variables is not None else []
         self._units = {}
+        self._wildcard = wildcard
 
     def configure(self, value):
         """
@@ -78,6 +85,17 @@ class HDFInputFileConfigurator(InputFileConfigurator):
                 )
                 return
         self.error_status = "OK"
+
+    @property
+    def wildcard(self):
+        """
+        Returns the wildcard used to filter the input file.
+
+        :return: the wildcard used to filter the input file.
+        :rtype: str
+        """
+
+        return self._wildcard
 
     @property
     def variables(self):
