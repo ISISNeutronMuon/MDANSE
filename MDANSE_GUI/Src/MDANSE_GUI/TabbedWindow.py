@@ -27,6 +27,7 @@ from qtpy.QtWidgets import (
     QTabWidget,
     QMenuBar,
     QMessageBox,
+    QApplication,
 )
 
 import MDANSE
@@ -128,12 +129,16 @@ class TabbedWindow(QMainWindow):
         file_group = menubar.addMenu("File")
         help_group = menubar.addMenu("Help")
         self.exitAct = QAction("Exit", parent=menubar)
-        self.exitAct.triggered.connect(self.destroy)
+        self.exitAct.triggered.connect(self.shut_down)
         file_group.addAction(self.exitAct)
-        self.aboutAct = QAction("About", parent=menubar)
+        self.aboutAct = QAction("About MDANSE", parent=menubar)
         self.aboutAct.triggered.connect(self.version_information)
         help_group.addAction(self.aboutAct)
         self.setMenuBar(menubar)
+
+    def shut_down(self):
+        QApplication.quit()
+        self.destroy(True, True)
 
     def version_information(self):
         version = ""
