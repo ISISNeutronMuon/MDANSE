@@ -20,6 +20,7 @@ import numpy as np
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
+from MDANSE.Chemistry.Structrures import MoleculeTester
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
@@ -72,6 +73,13 @@ class MoleculeFinder(IJob):
         conn.find_molecules(tolerance=self._tolerance)
         conn.add_bond_information()
         chemical_system.rebuild(conn._molecules)
+        configuration = chemical_system.configuration
+        coords = configuration.contiguous_configuration().coordinates
+        for entity in chemical_system.chemical_entities:
+            if entity.number_of_atoms > 1:
+                moltester = MoleculeTester(entity, coords)
+                inchistring = moltester.identify_molecule()
+                entity.name = inchistring
 
         print(f"Molfinder: bonds after connectivity {chemical_system._bonds}")
 

@@ -37,9 +37,9 @@ class MoleculeTester:
         buffer = DummyStringIO()
         temp_pdb = PDBFile(buffer, mode="w")
         for natom, atom in enumerate(self.chemical_entity.atom_list):
-            coords = positions[natom]
+            coords = positions[natom] * 10.0
             atom_data = {
-                "position": positions[natom],
+                "position": coords,
                 "serial_number": atom.index,
                 "name": atom.name,
                 "occupancy": 1.0,
@@ -53,6 +53,9 @@ class MoleculeTester:
         temp_pdb.close()
         mol_object = MolFromPDBBlock(buffer.getvalue())
         buffer._close()
+        from rdkit.Chem import rdDetermineBonds
+
+        rdDetermineBonds.DetermineBonds(mol_object, charge=0)
         self.molecule_object = mol_object
         self.molecule_string = MolToInchi(mol_object)
         return self.molecule_string

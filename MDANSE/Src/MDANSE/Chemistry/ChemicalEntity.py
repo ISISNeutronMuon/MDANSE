@@ -2670,6 +2670,13 @@ class ChemicalSystem(_ChemicalEntity):
                 "ChemicalSystem.rebuild() changed the order of atoms. This needs to be handled!"
             )
 
+    def unique_molecules(self) -> List[str]:
+        """Returns the list of unique names in the chemical system"""
+        result = np.unique(
+            [ce.name for ce in self.chemical_entities if ce.number_of_atoms > 1]
+        )
+        return list(result)
+
     def load(self, h5_filename: Union[str, h5py.File]) -> None:
         """
         Loads a ChemicalSystem from an HDF5 file. The HDF5 file must be organised in such a way that it can parsed by
