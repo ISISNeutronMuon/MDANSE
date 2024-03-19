@@ -31,11 +31,11 @@ def startGUI(some_args):
     )
 
     path = os.path.dirname(os.path.abspath(__file__))
-    splash_img = QPixmap(os.path.join(path, "splash.png"))
+    splash_img = QPixmap(os.path.join(path, "splash-alpha.png"))
     splash = QSplashScreen(splash_img)
     splash.show()
     # show the splash screen for at least 1 sec
-    time.sleep(1)
+    time.sleep(3)
 
     root = TabbedWindow(parent=None, title="MDANSE for Python 3", settings=settings)
     root.show()
