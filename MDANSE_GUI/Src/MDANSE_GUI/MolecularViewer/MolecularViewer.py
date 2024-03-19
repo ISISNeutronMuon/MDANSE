@@ -646,36 +646,42 @@ class MolecularViewer(QtWidgets.QWidget):
         if self._cell_visible:
             # update the unit cell
             uc = self._reader.read_pbc(self._current_frame)
-            a = uc.a_vector
-            b = uc.b_vector
-            c = uc.c_vector
-            uc_points = vtk.vtkPoints()
-            uc_points.SetNumberOfPoints(8)
-            for i, v in enumerate([[0, 0, 0], a, b, c, a + b, a + c, b + c, a + b + c]):
-                x, y, z = v
-                uc_points.SetPoint(i, x, y, z)
-            self._uc_polydata.SetPoints(uc_points)
+            if uc is not None:
+                a = uc.a_vector
+                b = uc.b_vector
+                c = uc.c_vector
+                uc_points = vtk.vtkPoints()
+                uc_points.SetNumberOfPoints(8)
+                for i, v in enumerate(
+                    [[0, 0, 0], a, b, c, a + b, a + c, b + c, a + b + c]
+                ):
+                    x, y, z = v
+                    uc_points.SetPoint(i, x, y, z)
+                self._uc_polydata.SetPoints(uc_points)
 
-            uc_lines = vtk.vtkCellArray()
-            for i, j in [
-                (0, 1),
-                (0, 2),
-                (0, 3),
-                (1, 4),
-                (1, 5),
-                (4, 7),
-                (2, 4),
-                (2, 6),
-                (5, 7),
-                (3, 5),
-                (3, 6),
-                (6, 7),
-            ]:
-                line = vtk.vtkLine()
-                line.GetPointIds().SetId(0, i)
-                line.GetPointIds().SetId(1, j)
-                uc_lines.InsertNextCell(line)
-            self._uc_polydata.SetLines(uc_lines)
+                uc_lines = vtk.vtkCellArray()
+                for i, j in [
+                    (0, 1),
+                    (0, 2),
+                    (0, 3),
+                    (1, 4),
+                    (1, 5),
+                    (4, 7),
+                    (2, 4),
+                    (2, 6),
+                    (5, 7),
+                    (3, 5),
+                    (3, 6),
+                    (6, 7),
+                ]:
+                    line = vtk.vtkLine()
+                    line.GetPointIds().SetId(0, i)
+                    line.GetPointIds().SetId(1, j)
+                    uc_lines.InsertNextCell(line)
+                self._uc_polydata.SetLines(uc_lines)
+            else:
+                uc_lines = vtk.vtkCellArray()
+                self._uc_polydata.SetLines(uc_lines)
         else:
             uc_lines = vtk.vtkCellArray()
             self._uc_polydata.SetLines(uc_lines)

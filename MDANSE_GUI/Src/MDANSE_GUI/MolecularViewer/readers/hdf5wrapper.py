@@ -37,5 +37,8 @@ class HDF5Wrapper(IReader):
         return np.array(coords)
 
     def read_pbc(self, frame: int) -> "np.array":
-        unit_cell = self._chemical_system.configuration.unit_cell
+        try:
+            unit_cell = self._chemical_system.configuration.unit_cell
+        except AttributeError:
+            unit_cell = None
         return unit_cell

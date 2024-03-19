@@ -30,6 +30,7 @@ from MDANSE.Mathematics.Graph import Graph
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicBoxConfiguration,
     PeriodicRealConfiguration,
+    RealConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -91,6 +92,7 @@ class ASE(Converter):
         """
         Initialize the job.
         """
+        self._isPeriodic = None
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
         # The number of steps of the analysis.
@@ -101,6 +103,7 @@ class ASE(Converter):
         ).toval("ps")
 
         self.parse_first_step(self._atomicAliases)
+        print(f"isPeriodic after parse_first_step: {self._isPeriodic}")
         self._start = 0
 
         if self.numberOfSteps < 1:
@@ -133,25 +136,30 @@ class ASE(Converter):
         try:
             frame = self._input[index]
         except TypeError:
+            frame = next(self._input)
+        else:
+            print("ASE using the slower way")
             frame = read(self.configuration["trajectory_file"]["value"], index=index)
         time = self._timeaxis[index]
 
-        unitCell = frame.cell.array
+        if self._isPeriodic:
+            unitCell = frame.cell.array
+            print(f"Unit cell from frame: {unitCell}")
 
-        unitCell *= measure(1.0, "ang").toval("nm")
-        unitCell = UnitCell(unitCell)
+            unitCell *= measure(1.0, "ang").toval("nm")
+            unitCell = UnitCell(unitCell)
 
         coords = frame.get_positions()
         coords *= measure(1.0, "ang").toval("nm")
 
-        if self._fractionalCoordinates:
-            conf = PeriodicBoxConfiguration(
-                self._trajectory.chemical_system, coords, unitCell
-            )
-            realConf = conf.to_real_configuration()
-        else:
+        if self._isPeriodic:
             realConf = PeriodicRealConfiguration(
                 self._trajectory.chemical_system, coords, unitCell
+            )
+        else:
+            realConf = RealConfiguration(
+                self._trajectory.chemical_system,
+                coords,
             )
 
         self._trajectory.chemical_system.configuration = realConf
@@ -190,15 +198,15 @@ class ASE(Converter):
         try:
             self._input = ASETrajectory(self.configuration["trajectory_file"]["value"])
         except:
-            self._input = iread(
-                self.configuration["trajectory_file"]["value"], index="[:]"
-            )
             first_frame = read(self.configuration["trajectory_file"]["value"], index=0)
             last_iterator = 0
             generator = iread(self.configuration["trajectory_file"]["value"])
             for _ in generator:
                 last_iterator += 1
             generator.close()
+            self._input = iread(
+                self.configuration["trajectory_file"]["value"]  # , index="[:]"
+            )
             self._total_number_of_steps = last_iterator
         else:
             first_frame = self._input[0]
@@ -206,7 +214,9 @@ class ASE(Converter):
 
         self._timeaxis = self._timestep * np.arange(self._total_number_of_steps)
 
-        self._fractionalCoordinates = np.all(first_frame.get_pbc())
+        if self._isPeriodic is None:
+            self._isPeriodic = np.all(first_frame.get_pbc())
+        print(f"PBC in first frame = {first_frame.get_pbc()}")
 
         g = Graph()
 
