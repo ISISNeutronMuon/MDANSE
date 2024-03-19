@@ -19,6 +19,7 @@ import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.TrajectoryUtils import brute_formula
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
 from MDANSE.Chemistry.Structrures import MoleculeTester
 from MDANSE.MolecularDynamics.Configuration import (
@@ -79,7 +80,10 @@ class MoleculeFinder(IJob):
             if entity.number_of_atoms > 1:
                 moltester = MoleculeTester(entity, coords)
                 inchistring = moltester.identify_molecule()
-                entity.name = inchistring
+                if len(inchistring) > 0:
+                    entity.name = inchistring
+                else:
+                    entity.name = brute_formula(entity)
 
         print(f"Molfinder: bonds after connectivity {chemical_system._bonds}")
 

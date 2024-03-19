@@ -61,8 +61,8 @@ class AreaPerMolecule(IJob):
         },
     )
     settings["name"] = (
-        "StringConfigurator",
-        {"label": "molecule name", "default": "DMPC"},
+        "MoleculeSelectionConfigurator",
+        {"label": "molecule name", "default": "","dependencies": {"trajectory": "trajectory"}},
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
@@ -133,7 +133,7 @@ class AreaPerMolecule(IJob):
             raise AreaPerMoleculeError("The configuration must be periodic")
 
         # Compute the area and then the area per molecule
-        unit_cell = configuration.unit_cell
+        unit_cell = configuration.unit_cell._unit_cell
         normalVect = np.cross(
             unit_cell[self._axisIndexes[0]], unit_cell[self._axisIndexes[1]]
         )

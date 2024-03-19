@@ -1,11 +1,9 @@
 from io import StringIO
 
-import numpy as np
-from rdkit.Chem.rdchem import Mol
-from rdkit.Chem.rdmolops import SanitizeMol
-from rdkit.Chem.rdmolops import GetMolFrags
 from rdkit.Chem.inchi import MolToInchi
 from rdkit.Chem.rdmolfiles import MolFromPDBBlock
+from rdkit.Chem import rdDetermineBonds
+
 
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
@@ -53,11 +51,13 @@ class MoleculeTester:
         temp_pdb.close()
         mol_object = MolFromPDBBlock(buffer.getvalue())
         buffer._close()
-        from rdkit.Chem import rdDetermineBonds
-
-        rdDetermineBonds.DetermineBonds(mol_object, charge=0)
+        try:
+            rdDetermineBonds.DetermineBonds(mol_object, charge=0)
+        except ValueError:
+            self.molecule_string = ""
+        else:
+            self.molecule_string = MolToInchi(mol_object)
         self.molecule_object = mol_object
-        self.molecule_string = MolToInchi(mol_object)
         return self.molecule_string
 
 
