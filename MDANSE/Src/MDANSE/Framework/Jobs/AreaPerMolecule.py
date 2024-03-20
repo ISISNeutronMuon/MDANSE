@@ -60,7 +60,7 @@ class AreaPerMolecule(IJob):
             "default": ["a", "b"],
         },
     )
-    settings["name"] = (
+    settings["molecule_name"] = (
         "MoleculeSelectionConfigurator",
         {
             "label": "molecule name",
@@ -92,12 +92,13 @@ class AreaPerMolecule(IJob):
                 for ce in self.configuration["trajectory"][
                     "instance"
                 ].chemical_system.chemical_entities
-                if ce.name == self.configuration["name"]["value"]
+                if ce.name == self.configuration["molecule_name"]["value"]
             ]
         )
         if self._nMolecules == 0:
             raise AreaPerMoleculeError(
-                "No molecule matches %r name." % self.configuration["name"]["value"]
+                "No molecule matches %r name."
+                % self.configuration["molecule_name"]["value"]
             )
 
         self._outputData.add(

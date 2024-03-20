@@ -60,12 +60,12 @@ class AngularCorrelation(IJob):
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["axis_selection"] = (
-        "AtomsListConfigurator",
+    settings["molecule_name"] = (
+        "MoleculeSelectionConfigurator",
         {
-            "nAtoms": 2,
+            "label": "molecule name",
+            "default": "",
             "dependencies": {"trajectory": "trajectory"},
-            "default": ("Water", ("OW", "HW")),
         },
     )
     settings["per_axis"] = (
@@ -83,7 +83,16 @@ class AngularCorrelation(IJob):
         Initialize the input parameters and analysis self variables
         """
 
-        self.numberOfSteps = self.configuration["axis_selection"]["n_values"]
+        ce_list = self.configuration["trajectory"][
+            "instance"
+        ].chemical_system.chemical_entities
+        self.molecules = [
+            ce
+            for ce in ce_list
+            if ce.name == self.configuration["molecule_name"]["value"]
+        ]
+
+        self.numberOfSteps = len(self.molecules)
 
         self._outputData.add(
             "time",
@@ -95,7 +104,13 @@ class AngularCorrelation(IJob):
         self._outputData.add(
             "axis_index",
             "LineOutputVariable",
-            np.arange(self.configuration["axis_selection"]["n_values"]),
+            np.arange(
+                self.configuration["trajectory"][
+                    "instance"
+                ].chemical_system.number_of_molecules(
+                    self.configuration["molecule_name"]["value"]
+                )
+            ),
             units="au",
         )
 
@@ -112,7 +127,11 @@ class AngularCorrelation(IJob):
                 "ac_per_axis",
                 "SurfaceOutputVariable",
                 (
-                    self.configuration["axis_selection"]["n_values"],
+                    self.configuration["trajectory"][
+                        "instance"
+                    ].chemical_system.number_of_molecules(
+                        self.configuration["molecule_name"]["value"]
+                    ),
                     self.configuration["frames"]["number"],
                 ),
                 axis="axis_index|time",
@@ -130,17 +149,18 @@ class AngularCorrelation(IJob):
             #. vectors (np.array): The calculated vectors
         """
 
-        e1, e2 = self.configuration["axis_selection"]["atoms"][index]
+        molecule = self.molecules[index]
+        reference_atom_index = molecule.atom_list[0].index
 
-        at1_traj = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
-            e1,
+        at1_traj = self.configuration["trajectory"]["instance"].read_com_trajectory(
+            molecule,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
         )
 
         at2_traj = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
-            e2,
+            reference_atom_index,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
@@ -174,7 +194,11 @@ class AngularCorrelation(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
 
-        self._outputData["ac"] /= self.configuration["axis_selection"]["n_values"]
+        self._outputData["ac"] /= self.configuration["trajectory"][
+            "instance"
+        ].chemical_system.number_of_molecules(
+            self.configuration["molecule_name"]["value"]
+        )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

@@ -2677,6 +2677,11 @@ class ChemicalSystem(_ChemicalEntity):
         )
         return list(result)
 
+    def number_of_molecules(self, molecule_name: str) -> int:
+        """Returns the number of molecules with the given name in the system"""
+        result = [1 for ce in self.chemical_entities if ce.name == molecule_name]
+        return len(result)
+
     def load(self, h5_filename: Union[str, h5py.File]) -> None:
         """
         Loads a ChemicalSystem from an HDF5 file. The HDF5 file must be organised in such a way that it can parsed by
