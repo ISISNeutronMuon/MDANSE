@@ -44,6 +44,16 @@ init_parameters = {
 }
 
 
+widget_text_map = {
+    "ideal": "ideal",
+    "Gaussian": "gaussian",
+    "Lorentzian": "lorentzian",
+    "triangular": "triangular",
+    "square": "square",
+    "pseudo-Voigt": "pseudovoigt",
+}
+
+
 class InstrumentResolutionWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         kwargs["layout_type"] = "QGridLayout"
@@ -116,7 +126,7 @@ class InstrumentResolutionWidget(WidgetBase):
                 self._defaults[index] = 0.0
 
     def get_widget_value(self):
-        function = self._type_combo.currentText()
+        function = widget_text_map[self._type_combo.currentText()]
         params = {}
         for index in range(5):
             key = self._labels[index].text()
