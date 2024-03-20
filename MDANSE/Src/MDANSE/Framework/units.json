@@ -96,7 +96,21 @@
             0
         ], 
         "factor": 1.0
-    }, 
+    },
+    "unitless": {
+        "dimension": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "factor": 1.0
+    },
     "au": {
         "dimension": [
             0, 
