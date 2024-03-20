@@ -14,6 +14,8 @@
 
 import numpy as np
 
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
 from MDANSE_GUI.MolecularViewer.readers.i_reader import IReader
 
 
@@ -36,9 +38,9 @@ class HDF5Wrapper(IReader):
         coords = self._trajectory[frame]["coordinates"]
         return np.array(coords)
 
-    def read_pbc(self, frame: int) -> "np.array":
+    def read_pbc(self, frame: int) -> UnitCell:
         try:
-            unit_cell = self._chemical_system.configuration.unit_cell
+            unit_cell = self._trajectory.unit_cell(frame)
         except AttributeError:
             unit_cell = None
         return unit_cell
