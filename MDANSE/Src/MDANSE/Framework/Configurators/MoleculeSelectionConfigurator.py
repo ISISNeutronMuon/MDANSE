@@ -41,16 +41,6 @@ class MoleculeSelectionConfigurator(IConfigurator):
 
         self._choices = []
 
-        trajectory_configurator = self._configurable[self._dependencies["trajectory"]]
-        if not trajectory_configurator._valid:
-            self.error_status = "Input file not selected."
-            return
-
-        if trajectory_configurator._configured:
-            self._choices = trajectory_configurator[
-                "instance"
-            ].chemical_system.unique_molecules()
-
     @property
     def choices(self):
         return self._choices

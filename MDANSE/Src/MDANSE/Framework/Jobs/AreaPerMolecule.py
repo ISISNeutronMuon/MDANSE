@@ -62,7 +62,11 @@ class AreaPerMolecule(IJob):
     )
     settings["name"] = (
         "MoleculeSelectionConfigurator",
-        {"label": "molecule name", "default": "","dependencies": {"trajectory": "trajectory"}},
+        {
+            "label": "molecule name",
+            "default": "",
+            "dependencies": {"trajectory": "trajectory"},
+        },
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
