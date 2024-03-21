@@ -18,19 +18,20 @@ import time
 
 from qtpy.QtWidgets import QApplication, QSplashScreen
 from qtpy.QtCore import QSettings, Qt, QTimer
-from qtpy.QtGui import QPixmap
+from qtpy.QtGui import QPixmap, QIcon
 
 from MDANSE_GUI.TabbedWindow import TabbedWindow
 
 
 def startGUI(some_args):
     app = QApplication(some_args)
-    #
+    path = os.path.dirname(os.path.abspath(__file__))
+    app.setWindowIcon(QIcon(os.path.join(path, "MDANSE.ico")))
+
     settings = QSettings(
         "ISIS Neutron and Muon Source", "MDANSE for Python 3", parent=app
     )
 
-    path = os.path.dirname(os.path.abspath(__file__))
     splash_img = QPixmap(os.path.join(path, "splash.png"))
     splash = QSplashScreen(splash_img, Qt.WindowStaysOnTopHint)
     splash.show()
