@@ -49,6 +49,10 @@ class MoleculeFinder(IJob):
         "FloatConfigurator",
         {"default": 0.2},
     )
+    settings["atom_selection"] = (
+        "AtomSelectionConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["frames"] = (
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}, "default": (0, -1, 1)},
@@ -66,6 +70,7 @@ class MoleculeFinder(IJob):
         self.numberOfSteps = self.configuration["frames"]["number"]
         self._input_trajectory = self.configuration["trajectory"]["instance"]
         self._tolerance = self.configuration["tolerance"]["value"]
+        self._indices = self.configuration["atom_selecion"]["indexes"]
         chemical_system = self._input_trajectory.chemical_system
 
         print(f"Molfinder: bonds before the run {chemical_system._bonds}")
