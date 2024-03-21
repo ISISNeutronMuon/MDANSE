@@ -53,6 +53,7 @@ class LAMMPS(Converter):
         "InputFileConfigurator",
         {
             "label": "LAMMPS trajectory file",
+            "wildcard": "lammps files (*.lammps)|*.lammps|All files|*",
             "default": "INPUT_FILENAME.lammps",
         },
     )
