@@ -56,6 +56,8 @@ class McStasVirtualInstrument(IJob):
         instrument resolution, self-shielding and multiple scattering.
     """
 
+    enabled = False
+
     label = "McStas Virtual Instrument"
 
     category = (

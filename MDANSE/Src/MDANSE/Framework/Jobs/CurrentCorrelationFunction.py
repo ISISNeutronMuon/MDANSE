@@ -49,6 +49,8 @@ class CurrentCorrelationFunction(IJob):
     in space and time)'
     """
 
+    enabled = False
+
     label = "Current Correlation Function"
 
     category = (

@@ -27,6 +27,8 @@ class CroppedTrajectory(IJob):
     Crop a trajectory in terms of the contents of the simulation box (selected atoms or molecules) and the trajectory length.
     """
 
+    enabled = False
+
     label = "Cropped Trajectory"
 
     category = (
