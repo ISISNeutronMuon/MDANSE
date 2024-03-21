@@ -140,6 +140,10 @@ class CP2K(Converter):
             "dependencies": {"input_file": "pos_file"},
         },
     )
+    settings["fold"] = (
+        "BooleanConfigurator",
+        {"default": False, "label": "Fold coordinates into box"},
+    )
     settings["output_file"] = (
         "OutputTrajectoryConfigurator",
         {
@@ -232,7 +236,8 @@ class CP2K(Converter):
             self._trajectory.chemical_system, coords, unitcell, **variables
         )
 
-        realConf.fold_coordinates()
+        if self._configuration["fold"]["value"]:
+            realConf.fold_coordinates()
 
         self._trajectory.chemical_system.configuration = realConf
 
