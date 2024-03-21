@@ -43,11 +43,7 @@ class HDFTrajectoryInputData(InputFileData):
         val.append("Number of steps:")
         val.append("%s\n" % len(self._data))
         val.append("Configuration:")
-        val.append(
-            "\tIs periodic: {}\n".format(
-                "unit_cell" in self._data.file["/configuration"]
-            )
-        )
+        val.append("\tIs periodic: {}\n".format("unit_cell" in self._data.file))
         val.append("Variables:")
         for k, v in self._data.file["/configuration"].items():
             val.append("\t- {}: {}".format(k, v.shape))

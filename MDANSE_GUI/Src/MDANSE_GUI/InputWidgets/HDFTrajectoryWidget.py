@@ -2,7 +2,7 @@
 #
 # MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
 #
-# @file      Src/PyQtGUI/InputWidgets/HDFTrajectoryWidget.py
+# @file      MDANSE_GUI/InputWidgets/HDFTrajectoryWidget.py
 # @brief     Implements module/class/test HDFTrajectoryWidget
 #
 # @homepage  https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
@@ -12,18 +12,15 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-
 import os
 
-from qtpy.QtWidgets import QLineEdit, QSpinBox, QLabel
-from qtpy.QtCore import Slot, Signal
-from qtpy.QtGui import QIntValidator
+from qtpy.QtWidgets import QLabel
 
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class HDFTrajectoryWidget(WidgetBase):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         source_object = kwargs.get("source_object", None)
@@ -32,19 +29,16 @@ class HDFTrajectoryWidget(WidgetBase):
         except AttributeError:
             filename = None
         if filename is not None:
-            trajectory = HDFTrajectoryInputData(filename)
+            self._configurator.configure(filename)
             label = QLabel(filename, self._base)
             self._layout.addWidget(label)
-            self._configurator.configure(filename)
             trajectory_path, _ = os.path.split(filename)
             self.default_path = trajectory_path
         else:
             label = QLabel("No Trajectory available", self._base)
             self._layout.addWidget(label)
-        self._trajectory = trajectory
         self.default_labels()
         self.update_labels()
-        self.updateValue()
         if self._tooltip:
             tooltip_text = self._tooltip
         else:

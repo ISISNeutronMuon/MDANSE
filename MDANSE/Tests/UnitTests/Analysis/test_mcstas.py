@@ -18,39 +18,6 @@ short_traj = os.path.join(
 )
 
 
-@pytest.fixture(scope="module")
-def trajectory():
-    trajectory = HDFTrajectoryInputData(short_traj)
-    yield trajectory
-
-
-@pytest.mark.parametrize(
-    "interp_order, normalise",
-    [
-        (1, True),
-        (2, True),
-        (3, True),
-        (1, False),
-        (2, False),
-        (3, False),
-    ],
-)
-def test_vacf(trajectory, interp_order, normalise):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["frames"] = (0, 10, 1)
-    parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("MDAFormat",))
-    parameters["running_mode"] = ("single-core",)
-    parameters["normalize"] = normalise
-    parameters["trajectory"] = short_traj
-    vacf = IJob.create("VelocityAutoCorrelationFunction")
-    vacf.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    os.remove(temp_name + ".mda")
-
-
 ################################################################
 # Job parameters                                               #
 ################################################################
@@ -76,7 +43,7 @@ def parameters():
     parameters["per_axis"] = False
     parameters["reference_direction"] = (0, 0, 1)
     parameters["instrument_resolution"] = ("Gaussian", {"sigma": 1.0, "mu": 0.0})
-    parameters["interpolation_order"] = 3
+    parameters["interpolation_order"] = "3rd order"
     parameters["projection"] = None
     parameters["normalize"] = True
     parameters["grouping_level"] = "atom"
@@ -84,22 +51,14 @@ def parameters():
     return parameters
 
 
-@pytest.mark.parametrize(
-    "job_type",
-    [
-        # "AngularCorrelation",
-        # "GeneralAutoCorrelationFunction",
-        "DensityOfStates",
-        "MeanSquareDisplacement",
-        "VelocityAutoCorrelationFunction",
-        # "OrderParameter",
-        "PositionAutoCorrelationFunction",
-    ],
-)
-def test_dynamics_analysis(parameters, job_type):
+@pytest.mark.xfail(reason="see docstring")
+def test_mcstas(parameters):
+    """This test will be difficult to run:
+    On each platform we need a McStas instrument
+    compiled for that specific platform."""
     temp_name = tempfile.mktemp()
     parameters["output_files"] = (temp_name, ("MDAFormat",))
-    job = IJob.create(job_type)
+    job = IJob.create("McStasVirtualInstrument")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")

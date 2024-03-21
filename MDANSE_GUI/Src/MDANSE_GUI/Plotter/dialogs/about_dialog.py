@@ -15,7 +15,6 @@
 import platform
 
 import h5py
-import netCDF4
 
 from qtpy import QtCore, QtWidgets
 
@@ -67,7 +66,6 @@ class AboutDialog(QtWidgets.QDialog):
             "Plotter_version": __version__,
             "h5py_version": h5py.version.version,
             "hdf5_version": h5py.version.hdf5_version,
-            "netcdf_version": netCDF4.__netcdf4libversion__,
             "qt_version": QtCore.qVersion(),
             "pyqt_version": QtCore.PYQT_VERSION_STR,
             "python_version": platform.python_version(),

@@ -692,12 +692,13 @@ class UnitsManager(metaclass=Singleton):
         UnitsManager._UNITS.clear()
 
         d = {}
+        with open(UnitsManager._DEFAULT_DATABASE, "r") as fin:
+            d.update(json.load(fin))
         try:
             with open(UnitsManager._USER_DATABASE, "r") as fin:
                 d.update(json.load(fin))
         except:
-            with open(UnitsManager._DEFAULT_DATABASE, "r") as fin:
-                d.update(json.load(fin))
+            self.save()
         finally:
             for uname, udict in list(d.items()):
                 factor = udict.get("factor", 1.0)

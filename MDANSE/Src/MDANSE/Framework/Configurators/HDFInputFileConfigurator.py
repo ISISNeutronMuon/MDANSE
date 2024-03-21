@@ -26,9 +26,15 @@ class HDFInputFileConfigurator(InputFileConfigurator):
     This configurator allows to input an HDF file as input file.
     """
 
-    _default = "INPUT_FILENAME.h5"
+    _default = "INPUT_FILENAME.mda"
 
-    def __init__(self, name, variables=None, **kwargs):
+    def __init__(
+        self,
+        name,
+        variables=None,
+        wildcard="MDA analysis results (*.mda)|*.mda|HDF5 files (*.h5)|*.h5|All files|*",
+        **kwargs,
+    ):
         """
         Initializes the configurator.
 
@@ -42,6 +48,8 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         InputFileConfigurator.__init__(self, name, **kwargs)
 
         self._variables = variables if variables is not None else []
+        self._units = {}
+        self._wildcard = wildcard
 
     def configure(self, value):
         """
@@ -67,12 +75,27 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         for v in self._variables:
             if v in self["instance"]:
                 self[v] = self["instance"][v][:]
+                try:
+                    self._units[v] = self["instance"][v].attrs["units"]
+                except:
+                    self._units[v] = "unitless"
             else:
                 self.error_status = (
                     f"the variable {v} was not  found in {value} HDF file"
                 )
                 return
         self.error_status = "OK"
+
+    @property
+    def wildcard(self):
+        """
+        Returns the wildcard used to filter the input file.
+
+        :return: the wildcard used to filter the input file.
+        :rtype: str
+        """
+
+        return self._wildcard
 
     @property
     def variables(self):
@@ -87,7 +110,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
 
     def get_information(self):
         """
-        Returns some basic informations about the contents of theHDF file.
+        Returns some basic informations about the contents of the HDF file.
 
         :return: the informations about the contents of the HDF file.
         :rtype: str

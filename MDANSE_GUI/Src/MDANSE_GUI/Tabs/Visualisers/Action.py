@@ -33,6 +33,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "IntegerConfigurator": IntegerWidget,
     "FramesConfigurator": FramesWidget,
     "RangeConfigurator": RangeWidget,
+    "HDFInputFileConfigurator": InputFileWidget,
     "HDFTrajectoryConfigurator": HDFTrajectoryWidget,
     "InterpolationOrderConfigurator": InterpolationOrderWidget,
     "OutputFilesConfigurator": OutputFilesWidget,
@@ -146,7 +147,6 @@ class Action(QWidget):
             dtype = value[0]
             ddict = value[1]
             configurator = job_instance.configuration[key]
-            configurator.configure(self._input_trajectory)
             if not "label" in ddict.keys():
                 ddict["label"] = key
             ddict["configurator"] = configurator

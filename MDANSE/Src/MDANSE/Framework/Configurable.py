@@ -16,7 +16,6 @@
 import collections
 
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class ConfigurationError(Error):
@@ -82,6 +81,8 @@ class Configurable(object):
                     self.settings[key] = ("MockTrajectoryConfigurator", {})
 
     def build_configuration(self):
+        from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+
         self._configuration.clear()
 
         for name, (typ, kwds) in list(self.settings.items()):
@@ -218,6 +219,7 @@ class Configurable(object):
         :return: the documentation about the configurable class
         :rtype: str
         """
+        from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
         settings = getattr(cls, "settings", {})
 
@@ -325,6 +327,7 @@ class Configurable(object):
         :return: a dictionary of the default parameters of the configurable class
         :rtype: dict
         """
+        from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
         settings = getattr(cls, "settings", {})
 

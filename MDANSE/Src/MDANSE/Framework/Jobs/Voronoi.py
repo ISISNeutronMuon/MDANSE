@@ -194,7 +194,7 @@ class Voronoi(IJob):
             global_volumes[vrid] = sum(regions_volumes)
 
         # Mean volume of Voronoi regions
-        mean = np.array(global_volumes.values()).mean()
+        mean = np.array(list(global_volumes.values())).mean()
         self.mean_volume[index] = mean
 
         return index, None

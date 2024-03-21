@@ -123,7 +123,7 @@ class Eccentricity(IJob):
                 "LineOutputVariable",
                 npoints,
                 axis="time",
-                units="uma*nm2",
+                units="uma nm2",
             )
         for axis in ["a", "b", "c"]:
             self._outputData.add(

@@ -36,6 +36,8 @@ class PairDistributionFunction(DistanceHistogram):
 
     label = "Pair Distribution Function"
 
+    enabled = True
+
     category = (
         "Analysis",
         "Structure",

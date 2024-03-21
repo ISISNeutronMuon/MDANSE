@@ -5,6 +5,7 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 
 __all__ = [
     "select_element",
+    "select_dummy",
     "select_hs_on_element",
     "select_hs_on_heteroatom",
     "select_index",
@@ -35,6 +36,32 @@ def select_element(
         return system.has_substructure_match(pattern)
     else:
         return system.get_substructure_matches(pattern)
+
+
+def select_dummy(
+    system: ChemicalSystem, check_exists: bool = False
+) -> Union[set[int], bool]:
+    """Selects all dummy atoms in the chemical system.
+
+    Parameters
+    ----------
+    system : ChemicalSystem
+        The MDANSE chemical system.
+    check_exists : bool, optional
+        Check if a match exists.
+
+    Returns
+    -------
+    Union[set[int], bool]
+        All dummy atom indices or a bool if checking match.
+    """
+    if check_exists:
+        for atm in system.atom_list:
+            if atm.element == "dummy":
+                return True
+        return False
+    else:
+        return set([at.index for at in system.atom_list if at.element == "dummy"])
 
 
 def select_hs_on_element(

@@ -12,7 +12,7 @@
 # @authors   Scientific Computing Group at ILL (see AUTHORS)
 #
 # **************************************************************************
-from typing import Union
+from typing import Union, Iterator
 from itertools import count, groupby
 from qtpy.QtCore import Qt, QEvent, Slot, QObject
 from qtpy.QtGui import QStandardItem
@@ -26,7 +26,6 @@ from qtpy.QtWidgets import (
     QHBoxLayout,
     QGroupBox,
     QLabel,
-    QApplication,
     QTextEdit,
 )
 from MDANSE.Framework.AtomSelector import Selector
@@ -111,12 +110,12 @@ class CheckableComboBox(QComboBox):
         """
         item = QStandardItem()
         item.setText(text)
-        item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
-        item.setData(Qt.Unchecked, Qt.CheckStateRole)
+        item.setEnabled(True)
+        item.setCheckable(True)
         self.model().appendRow(item)
         self._items.append(item)
 
-    def getItems(self) -> QStandardItem:
+    def getItems(self) -> Iterator[QStandardItem]:
         """
         Yields
         ------
@@ -169,7 +168,8 @@ class HelperDialog(QDialog):
     """
 
     _cbox_text = {
-        "all": "All atoms:",
+        "all": "All atoms (excl. dummy atoms):",
+        "dummy": "All dummy atoms:",
         "hs_on_heteroatom": "Hs on heteroatoms:",
         "primary_amine": "Primary amine groups:",
         "hydroxy": "Hydroxy groups:",
@@ -240,7 +240,11 @@ class HelperDialog(QDialog):
                 combo_layout = QHBoxLayout()
                 combo = CheckableComboBox()
                 items = [i for i in v.keys() if match_exists[k][i]]
+                # we blocksignals here as there can be some
+                # performance issues with a large number of items
+                combo.model().blockSignals(True)
                 combo.addItems(items)
+                combo.model().blockSignals(False)
                 combo.setObjectName(k)
                 combo.model().dataChanged.connect(self.update)
                 label = QLabel(self._cbox_text[k])
@@ -293,12 +297,12 @@ class HelperDialog(QDialog):
         idxs = self.selector.get_idxs()
         num_sel = len(idxs)
 
-        text = f"Number of atoms selected:\n{num_sel}\n\nSelected atoms:\n"
-        for at in self.selector.system.atom_list:
-            if at.index in idxs:
-                text += f"{at.index})  {at.full_name}\n"
+        text = [f"Number of atoms selected:\n{num_sel}\n\nSelected atoms:\n"]
+        atoms = self.selector.system.atom_list
+        for idx in idxs:
+            text.append(f"{idx})  {atoms[idx].full_name}\n")
 
-        self.right.setText(text)
+        self.right.setText("".join(text))
 
     def apply(self) -> None:
         """Set the field of the AtomSelectionWidget to the currently

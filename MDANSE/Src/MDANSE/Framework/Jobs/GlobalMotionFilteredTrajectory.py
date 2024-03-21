@@ -133,7 +133,7 @@ class GlobalMotionFilteredTrajectory(IJob):
         variables = copy.deepcopy(current_configuration.variables)
         coords = variables.pop("coordinates")
         current_configuration = RealConfiguration(
-            trajectory.chemical_system, coords, None, **variables
+            trajectory.chemical_system, coords, **variables
         )
 
         trajectory.chemical_system.configuration = current_configuration

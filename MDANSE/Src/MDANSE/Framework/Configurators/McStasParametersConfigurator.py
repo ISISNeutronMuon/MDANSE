@@ -19,6 +19,7 @@ import subprocess
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.Framework.Configurators.McStasOptionsConfigurator import parse_dictionary
 
 
 class McStasParametersConfigurator(IConfigurator):
@@ -26,7 +27,7 @@ class McStasParametersConfigurator(IConfigurator):
     This configurator allows to input the McStas instrument parameters that will be used to run a McStas executable file.
     """
 
-    _mcStasTypes = {"double": float, "int": int, "StringConfigurator": str}
+    _mcStasTypes = {"double": float, "int": int, "string": str}
 
     _default = {
         "beam_wavelength_Angs": 2.0,
@@ -77,20 +78,27 @@ class McStasParametersConfigurator(IConfigurator):
             [exePath, "-h"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
 
+        parameters_bytes = s.communicate()[0]
+        parameters_string = parameters_bytes.decode(encoding="utf-8")
+
         instrParameters = dict(
             [
                 (v[0], [v[1], v[2]])
                 for v in re.findall(
-                    "\s*(\w+)\s*\((\w+)\)\s*\[default='(\S+)'\]", s.communicate()[0]
+                    "\s*(\w+)\s*\((\w+)\)\s*\[default='(\S+)'\]", parameters_string
                 )
                 if v[0] not in self._exclude
             ]
         )
 
         val = {}
-        for k, v in list(value.items()):
+        parsed = parse_dictionary(value)
+        print(f"Parsed input: {parsed}")
+        print(f"Received from McStas: {instrParameters}")
+        for k, v in list(parsed.items()):
             if k not in instrParameters:
-                instrParameters.pop(k)
+                # instrParameters.pop(k)  # how was that supposed to work?
+                continue
             val[k] = self._mcStasTypes[instrParameters[k][0]](v)
 
         self["value"] = ["%s=%s" % (k, v) for k, v in list(val.items())]

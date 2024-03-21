@@ -23,7 +23,7 @@ def test_select_water_returns_true_as_match_exists(
     assert exists
 
 
-def test_select_water_returns_correct_number_of_atoms_matches(
+def test_select_water_returns_correct_number_of_atom_matches(
     protein_chemical_system,
 ):
     selection = select_water(protein_chemical_system)
