@@ -36,3 +36,6 @@ for name in modnames:
     tempobject = getattr(tempmod, name)
     globdict[name] = tempobject
     del tempmod  # optionally delete the reference to the parent module
+
+# now to ensure that job in other places get registered
+import MDANSE.Framework.Converters
