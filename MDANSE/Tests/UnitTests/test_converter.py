@@ -379,8 +379,8 @@ def test_forcite_conversion_file_exists_and_loads_up_successfully(compression):
         "xtd_file": h2o_xtd,
     }
 
-    dftb = Converter.create("Forcite")
-    dftb.run(parameters, status=True)
+    forcite = Converter.create("Forcite")
+    forcite.run(parameters, status=True)
 
     HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
 
@@ -400,8 +400,8 @@ def test_gromacs_conversion_file_exists_and_loads_up_successfully(compression):
         "xtc_file": md_xtc,
     }
 
-    dftb = Converter.create("Gromacs")
-    dftb.run(parameters, status=True)
+    gromacs = Converter.create("Gromacs")
+    gromacs.run(parameters, status=True)
 
     HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
 
