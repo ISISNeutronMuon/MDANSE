@@ -252,16 +252,14 @@ class Action(QWidget):
             pass
         else:
             self.last_paths[cname] = path
-        pardict = self.set_parameters(mock_labels=True)
+        pardict = self.set_parameters()
         self._job_instance.save(result, pardict)
 
-    def set_parameters(self, mock_labels=False):
+    def set_parameters(self):
         results = {}
         for widnum, key in enumerate(self._job_instance.settings.keys()):
-            if mock_labels:
-                results[key] = (self._widgets[widnum].get_widget_value(), "")
-            else:
-                results[key] = self._widgets[widnum].get_widget_value()
+            label = self._job_instance.settings[key][1]["label"]
+            results[key] = (self._widgets[widnum].get_widget_value(), label)
         return results
 
     @Slot()
