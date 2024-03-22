@@ -47,10 +47,6 @@ class RadiusOfGyration(IJob):
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["weights"] = (
-        "WeightsConfigurator",
-        {"dependencies": {"atom_selection": "atom_selection"}},
-    )
     settings["output_files"] = (
         "OutputFilesConfigurator",
         {"formats": ["MDAFormat", "TextFormat"]},
