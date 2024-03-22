@@ -77,13 +77,10 @@ class Action(QWidget):
         self.set_trajectory(default_path, input_trajectory)
         super().__init__(*args, **kwargs)
 
-        buffer = QWidget(self)
         scroll_area = QScrollArea()
-        scroll_area.setWidget(buffer)
         scroll_area.setWidgetResizable(True)
-        self.layout = QVBoxLayout(buffer)
+        self.layout = QVBoxLayout(self)
         base_layout = QVBoxLayout(self)
-        buffer.setLayout(self.layout)
         base_layout.addWidget(scroll_area)
         self.setLayout(base_layout)
         self.handlers = {}
