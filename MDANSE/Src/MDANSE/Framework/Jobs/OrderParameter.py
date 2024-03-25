@@ -53,6 +53,8 @@ class OrderParameter(IJob):
     AOUN Bachir, PELLEGRINI Eric
     """
 
+    enabled = False
+
     label = "Order parameter"
 
     category = (

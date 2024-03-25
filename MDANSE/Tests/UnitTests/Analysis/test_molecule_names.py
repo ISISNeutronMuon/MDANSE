@@ -42,7 +42,7 @@ def parameters():
     parameters["r_values"] = (0.0, 10.0, 0.1)
     parameters["per_axis"] = False
     parameters["molecule_name"] = "InChI=1S/CO2/c2-1-3"
-    parameters["axis"] = ["a", "b"]
+    parameters["axis"] = "ab"
     parameters["reference_direction"] = (0, 0, 1)
     parameters["instrument_resolution"] = ("Gaussian", {"sigma": 1.0, "mu": 0.0})
     parameters["interpolation_order"] = "3rd order"

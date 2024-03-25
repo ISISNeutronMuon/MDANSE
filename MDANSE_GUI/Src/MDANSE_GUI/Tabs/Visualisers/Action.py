@@ -49,6 +49,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "XYZFileConfigurator": InputFileWidget,
     "RunningModeConfigurator": RunningModeWidget,
     "WeightsConfigurator": ComboWidget,
+    "MultipleChoicesConfigurator": MultipleCombosWidget,
     "MoleculeSelectionConfigurator": MoleculeWidget,
     "GroupingLevelConfigurator": ComboWidget,
     "SingleChoiceConfigurator": ComboWidget,

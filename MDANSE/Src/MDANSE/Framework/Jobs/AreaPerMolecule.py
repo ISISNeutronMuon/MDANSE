@@ -52,12 +52,11 @@ class AreaPerMolecule(IJob):
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["axis"] = (
-        "MultipleChoicesConfigurator",
+        "SingleChoiceConfigurator",
         {
             "label": "area vectors",
-            "choices": ["a", "b", "c"],
-            "nChoices": 2,
-            "default": ["a", "b"],
+            "choices": ["ab", "bc", "ac"],
+            "default": "ab",
         },
     )
     settings["molecule_name"] = (
@@ -83,7 +82,13 @@ class AreaPerMolecule(IJob):
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         # Extract the indexes corresponding to the axis selection (a=0,b=1,c=2).
-        self._axisIndexes = self.configuration["axis"]["indexes"]
+        axis_labels = self.configuration["axis"]["value"]
+        if axis_labels == "ab":
+            self._axisIndexes = [0, 1]
+        elif axis_labels == "bc":
+            self._axisIndexes = [1, 2]
+        else:
+            self._axisIndexes = [0, 2]
 
         # The number of molecules that match the input name. Must be > 0.
         self._nMolecules = len(
