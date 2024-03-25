@@ -32,7 +32,7 @@ def qvector_spherical_lattice(trajectory):
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def dcsf():
     temp_name = tempfile.mktemp()
     parameters = {}
@@ -54,7 +54,7 @@ def dcsf():
     os.remove(temp_name + ".mda")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def disf():
     temp_name = tempfile.mktemp()
     parameters = {}
