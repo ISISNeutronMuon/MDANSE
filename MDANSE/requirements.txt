@@ -1,9 +1,0 @@
-numpy
-matplotlib
-h5py
-sphinx
-icecream
-cython
-railroad-diagrams
-rdkit
-ase

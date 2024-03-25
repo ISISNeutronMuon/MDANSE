@@ -1,5 +1,4 @@
 include LICENCE
-include requirements.txt
 
 recursive-include Extensions/qhull_lib *.h *c *.pxd
 recursive-include Extensions/xtc *.h *c *.pxd

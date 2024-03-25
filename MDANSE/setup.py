@@ -8,8 +8,6 @@ import numpy
 from setuptools import setup, Extension, find_packages
 from Cython.Distutils import build_ext as cython_build_ext
 
-from pip._internal.req import parse_requirements
-from pip._internal.network.session import PipSession
 from distutils.sysconfig import get_config_vars
 from distutils.util import convert_path
 
@@ -23,13 +21,6 @@ try:
 except ImportError:
     stdeb = None
 
-requirements = []
-
-with open("requirements.txt", "r") as source:
-    for line in source:
-        toks = line.split()
-        if len(toks[0]) > 0:
-            requirements.append(toks[0])
 
 #################################
 # Modules variables
@@ -170,7 +161,6 @@ exec(open("Src/MDANSE/__pkginfo__.py", "r").read(), {}, PACKAGE_INFO)
 #################################
 
 DATA_FILES = []
-DATA_FILES.extend(find_data("Doc", exclude=[], prefix="conf_"))
 
 
 #################################
@@ -393,9 +383,4 @@ setup(
     platforms=["Unix", "Windows"],
     ext_modules=EXTENSIONS,
     cmdclass=CMDCLASS,
-    # entry_points     = {"console_scripts": []}
-    install_requires=[
-        pr.requirement
-        for pr in parse_requirements("requirements.txt", session=PipSession())
-    ],
 )

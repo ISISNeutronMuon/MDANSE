@@ -28,13 +28,13 @@ classifiers = [
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Operating System :: OS Independent'
 ]
-
 dependencies = [
-  "qtpy",
-  "vtk",
-  "MDANSE",
-  "PyYAML",
-  "PyQt6"
+    "MDANSE",
+    "matplotlib",
+    "qtpy",
+    "vtk",
+    "PyQt6",
+    "PyYAML",
 ]
 
 # dynamic = ["version", "description"]

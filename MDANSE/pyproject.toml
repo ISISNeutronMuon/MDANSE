@@ -17,7 +17,7 @@ maintainers = [
   {name = "Sanghamitra Mukhopadhyay", email = "sanghamitra.mukhopadhyay@stfc.ac.uk"}
 ]
 classifiers = [
-        'Development Status :: 4 - Beta',
+        'Development Status :: 3 - Alpha',
 
         'Intended Audience :: Science/Research',
         'Topic :: Software Development :: Build Tools',
@@ -27,15 +27,13 @@ classifiers = [
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Operating System :: OS Independent'
 ]
-
 dependencies = [
-  "numpy",
-  "scipy",
-  "h5py",
-  "icecream",
-  "ase",
-  "railroad-diagrams",
-  "rdkit"
+    "numpy",
+    "scipy",
+    "h5py",
+    "icecream",
+    "ase",
+    "rdkit"
 ]
 
 # dynamic = ["version", "description"]
